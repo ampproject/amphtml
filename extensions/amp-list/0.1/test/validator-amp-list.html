@@ -39,10 +39,19 @@
             [src]="foo.bar">
     <div></div>
   </amp-list>
+  <!-- Valid: amp-list with only data-amp-bind-src attribute -->
+  <amp-list width=10 height=10
+            data-amp-bind-src="foo.bar">
+    <div></div>
+  </amp-list>
   <!-- Valid: amp-list with both src and [src] attributes -->
   <amp-list width=10 height=10
             src="https://data.com/articles.json?ref=CANONICAL_URL"
             [src]="foo.bar" [state]="baz.qux">
+    <div></div>
+  </amp-list>
+  <!-- Valid: amp-list with "amp-state" src -->
+  <amp-list width=10 height=10 src="amp-state:example">
     <div></div>
   </amp-list>
   <!-- Valid: amp-list with src and reset-on-refresh attributes -->
@@ -142,13 +151,17 @@
             wdith=10 height=10>
     <div></div>
   </amp-list>
-  <!-- Invalid: missing at least src or [src]. -->
+  <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
   <amp-list width=10 height=10>
     <div></div>
   </amp-list>
   <!-- Invalid: width/height missing, so it's container layout
        which isn't supported. -->
   <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
+    <div></div>
+  </amp-list>
+   <!-- Invalid: container layout -->
+  <amp-list layout="container" src="https://data.com/articles.json?ref=CANONICAL_URL">
     <div></div>
   </amp-list>
   <!-- Invalid amp-list with load-more attribute -->
@@ -192,5 +205,11 @@
     <div></div>
   </amp-list>
   <template id="found"></template>
+  <!-- Valid: amp-list with src and xssi-prefix attribute -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            xssi-prefix="while(1)">
+    <div></div>
+  </amp-list>
 </body>
 </html>

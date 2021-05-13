@@ -171,12 +171,16 @@ attr_lists: {
     value: ""
   }
   attrs: {
+    name: "hide-keyboard-shortcuts-panel"
+    value: ""
+  }
+  attrs: {
     name: "src"
     value_url: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "week-day-format" }
   # amp-bind

@@ -16,9 +16,9 @@
 
 import * as st from './style';
 import {assertNotDisplay, setStyle} from './style';
-import {getCurve} from './curve';
+import {getCurve} from './core/data-structures/curve';
 
-export const NOOP = function(unusedTime) {
+export const NOOP = function (unusedTime) {
   return null;
 };
 
@@ -62,12 +62,12 @@ export function concat(transitions, opt_delimiter = ' ') {
  * Returns the specified transition with the time curved via specified curve
  * function.
  * @param {!TransitionDef<RESULT>} transition
- * @param {!./curve.CurveDef|string} curve
+ * @param {!./core/data-structures/curve.CurveDef|string} curve
  * @return {!TransitionDef<RESULT>}
  * @template RESULT
  */
 export function withCurve(transition, curve) {
-  /** @const {?./curve.CurveDef} */
+  /** @const {?./core/data-structures/curve.CurveDef} */
   const curveFn = getCurve(curve);
   return (time, complete) => {
     return transition(complete ? 1 : curveFn(time), complete);
@@ -97,7 +97,7 @@ export function setStyles(element, styles) {
  * @return {!TransitionDef<number>}
  */
 export function numeric(start, end) {
-  return time => {
+  return (time) => {
     return start + (end - start) * time;
   };
 }
@@ -112,11 +112,11 @@ export function numeric(start, end) {
  */
 export function spring(start, end, extended, threshold) {
   if (end == extended) {
-    return time => {
+    return (time) => {
       return numeric(start, end)(time);
     };
   }
-  return time => {
+  return (time) => {
     if (time < threshold) {
       return start + (extended - start) * (time / threshold);
     }
@@ -130,7 +130,7 @@ export function spring(start, end, extended, threshold) {
  * @return {!TransitionDef<string>}
  */
 export function px(transition) {
-  return time => {
+  return (time) => {
     return transition(time) + 'px';
   };
 }
@@ -141,7 +141,7 @@ export function px(transition) {
  * @return {!TransitionDef<string>}
  */
 export function translateX(transition) {
-  return time => {
+  return (time) => {
     const res = transition(time);
     if (typeof res == 'string') {
       return `translateX(${res})`;
@@ -156,7 +156,7 @@ export function translateX(transition) {
  * @return {!TransitionDef<string>}
  */
 export function translateY(transition) {
-  return time => {
+  return (time) => {
     const res = transition(time);
     if (typeof res == 'string') {
       return `translateY(${res})`;
@@ -172,7 +172,7 @@ export function translateY(transition) {
  * @return {!TransitionDef<string>}
  */
 export function translate(transitionX, opt_transitionY) {
-  return time => {
+  return (time) => {
     let x = transitionX(time);
     if (typeof x == 'number') {
       x = st.px(x);
@@ -195,7 +195,7 @@ export function translate(transitionX, opt_transitionY) {
  * @return {!TransitionDef<string>}
  */
 export function scale(transition) {
-  return time => {
+  return (time) => {
     return `scale(${transition(time)})`;
   };
 }

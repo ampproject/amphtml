@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const doctrine = require('doctrine');
+const doctrine = require('@jridgewell/doctrine');
 const traverse = require('traverse');
 
 /** @typedef {!Object} */
@@ -32,18 +32,20 @@ let EslintNodeDef;
  */
 let ClosureCommentDef;
 
-module.exports = function(context) {
+module.exports = function (context) {
   const sourceCode = context.getSourceCode();
 
   return {
     meta: {
       fixable: 'code',
     },
-    Program: function() {
-      const comments = /** @type {!Array<!EslintNodeDef>} */ (sourceCode.getAllComments());
+    Program: function () {
+      const comments = /** @type {!Array<!EslintNodeDef>} */ (
+        sourceCode.getAllComments()
+      );
       comments
-        .map(node => parseClosureComments(context, node))
-        .forEach(comment => checkClosureComments(context, comment));
+        .map((node) => parseClosureComments(context, node))
+        .forEach((comment) => checkClosureComments(context, comment));
     },
   };
 };
@@ -91,7 +93,7 @@ function checkClosureComments(context, closureComment) {
   }
 
   const {parsed, node} = closureComment;
-  traverse(parsed).forEach(astNode => {
+  traverse(parsed).forEach((astNode) => {
     if (!astNode) {
       return;
     }

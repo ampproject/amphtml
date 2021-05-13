@@ -15,8 +15,8 @@
  */
 
 import {TransportSerializers} from '../transport-serializer';
-import {dict} from '../../../../src/utils/object';
-import {isArray} from '../../../../src/types';
+import {dict} from '../../../../src/core/types/object';
+import {isArray} from '../../../../src/core/types';
 
 /**
  * Please add your custom test data here in alphabetic order.
@@ -110,7 +110,7 @@ const SerializerTests = {
 /**
  * Real test. Plugin vendors don't need to modify
  */
-describe('Transport serializers', () => {
+describes.sandboxed('Transport serializers', {}, () => {
   it('TransportSerializers sort in alphabetic order', () => {
     const keys = Object.keys(TransportSerializers);
     const sorted = Object.keys(TransportSerializers).sort();

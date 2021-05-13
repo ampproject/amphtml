@@ -27,7 +27,7 @@ describes.fakeWin(
       extensions: ['amp-skimlinks'],
     },
   },
-  env => {
+  (env) => {
     let helpers;
     let trackingService;
     let waypoint;
@@ -36,16 +36,13 @@ describes.fakeWin(
     });
 
     function getFakeTrackingInfo(data) {
-      return Object.assign(
-        {
-          pubcode,
-          // https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
-          pageImpressionId: 'page_impression_id',
-          customTrackingId: null,
-          guid: 'user_guid',
-        },
-        data
-      );
+      return {
+        pubcode,
+        pageImpressionId: 'page_impression_id',
+        customTrackingId: null,
+        guid: 'user_guid',
+        ...data,
+      };
     }
 
     beforeEach(() => {

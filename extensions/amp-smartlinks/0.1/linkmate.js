@@ -15,7 +15,7 @@
  */
 
 import {deepEquals} from '../../../src/json';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 import {ENDPOINTS} from './constants';
 import {TwoStepsResponse} from '../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
@@ -26,11 +26,9 @@ export class Linkmate {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
    * @param {!../../../src/service/xhr-impl.Xhr} xhr
    * @param {!Object} linkmateOptions
+   * @param {!Object} win
    */
-  constructor(ampDoc, xhr, linkmateOptions) {
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampDoc_ = ampDoc;
-
+  constructor(ampDoc, xhr, linkmateOptions, win) {
     /** @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = xhr;
 
@@ -43,14 +41,14 @@ export class Linkmate {
     /** @private {string} */
     this.linkAttribute_ = linkmateOptions.linkAttribute;
 
-    /** @private {!Document|!ShadowRoot} */
-    this.rootNode_ = this.ampDoc_.getRootNode();
-
     /** @private {?Array<!HTMLElement>} */
     this.anchorList_ = null;
 
     /** @private {?Array<JsonObject>}*/
     this.linkmateResponse_ = null;
+
+    /** @private {?Array<JsonObject>}*/
+    this.win_ = win;
   }
 
   /**
@@ -75,7 +73,7 @@ export class Linkmate {
     // If we don't have an API response or the anchor list has changed since
     // last API call then build a new payload and post to API
     if (!this.linkmateResponse_ || anchorListChanged) {
-      const asyncMappedLinks = this.postToLinkmate_(anchorList).then(res => {
+      const asyncMappedLinks = this.postToLinkmate_(anchorList).then((res) => {
         this.linkmateResponse_ = getData(res)[0]['smart_links'];
         this.anchorList_ = anchorList;
         return this.mapLinks_();
@@ -115,7 +113,7 @@ export class Linkmate {
       body: payload,
     };
 
-    return this.xhr_.fetchJson(fetchUrl, postOptions).then(res => res.json());
+    return this.xhr_.fetchJson(fetchUrl, postOptions).then((res) => res.json());
   }
 
   /**
@@ -129,7 +127,7 @@ export class Linkmate {
     // raw links needs to be stored as a global somewhere
     // for later association with the response
     const postLinks = [];
-    anchorList.forEach(anchor => {
+    anchorList.forEach((anchor) => {
       const link = anchor.getAttribute(this.linkAttribute_);
       // If a link is already a Narrativ link.
       if (/shop-links.co/.test(link)) {
@@ -148,6 +146,7 @@ export class Linkmate {
         const linkObj = {
           'raw_url': link,
           'exclusive_match_requested': exclusive,
+          'link_source': 'linkmate',
         };
 
         postLinks.push(linkObj);
@@ -164,9 +163,31 @@ export class Linkmate {
    */
   getEditInfo_() {
     return dict({
-      'name': this.rootNode_.title || null,
-      'url': this.ampDoc_.getUrl(),
+      'name': this.getEditName_(),
+      'url': this.getLocationHref_(),
     });
+  }
+
+  /**
+   * Retrieve edit name.
+   * @return {string}
+   * @private
+   */
+  getEditName_() {
+    let editName = null;
+    if (this.win_.document.getElementsByTagName('title').length > 0) {
+      editName = this.win_.document.getElementsByTagName('title')[0].text;
+    }
+    return editName;
+  }
+
+  /**
+   * Retrieve url of the current doc.
+   * @return {string}
+   * @private
+   */
+  getLocationHref_() {
+    return this.win_.location.href;
   }
 
   /**
@@ -177,17 +198,15 @@ export class Linkmate {
    */
   mapLinks_() {
     const mappings = [];
-    this.anchorList_.forEach(anchor => {
-      this.linkmateResponse_.forEach(smartLink => {
+    this.anchorList_.forEach((anchor) => {
+      this.linkmateResponse_.forEach((smartLink) => {
         if (
           anchor.getAttribute(this.linkAttribute_) === smartLink['url'] &&
           smartLink['auction_id']
         ) {
           mappings.push({
             anchor,
-            replacementUrl: `https://shop-links.co/${
-              smartLink['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${smartLink['auction_id']}/?amp=true`,
           });
         }
       });

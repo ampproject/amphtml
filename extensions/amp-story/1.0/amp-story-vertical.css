@@ -55,8 +55,15 @@ amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element
 [i-amphtml-vertical] amp-story-page-attachment {
   display: block !important;
   position: relative !important;
-  height: 178vw !important;
   transform: none !important;
+}
+
+[i-amphtml-vertical] .i-amphtml-story-page-attachment-remote-title {
+  overflow: visible !important;
+}
+
+[i-amphtml-vertical] .amp-story-draggable-drawer-root {
+  visibility: visible !important;
 }
 
 [i-amphtml-vertical].i-amphtml-story-bookend-active amp-story-page[active]::after {
@@ -65,10 +72,19 @@ amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element
 
 [i-amphtml-vertical] .i-amphtml-story-page-description {
   background: white !important;
-  color: black !important;
   display: block !important;
-  font-size: 0.8rem !important;
   padding: 32px !important;
-  width: 100% !important;
+  width: auto !important;
   z-index: 9999999 !important;
+}
+
+[i-amphtml-vertical] .i-amphtml-story-page-description > * {
+  background: white !important;
+  color: black !important;
+  font-size: 1rem !important;
+}
+
+
+[i-amphtml-vertical] .i-amphtml-story-page-description > h2 {
+  font-size: 1.5rem !important;
 }

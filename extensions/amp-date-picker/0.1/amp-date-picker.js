@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
 import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
 import {DatesList} from './dates-list';
-import {Deferred} from '../../../src/utils/promise';
-import {FiniteStateMachine} from '../../../src/finite-state-machine';
-import {Keys} from '../../../src/utils/key-codes';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {FiniteStateMachine} from '../../../src/core/data-structures/finite-state-machine';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
@@ -37,11 +37,11 @@ import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
-import {dashToCamelCase} from '../../../src/string';
+import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {once} from '../../../src/utils/function';
+import {dict, map} from '../../../src/core/types/object';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {once} from '../../../src/core/types/function';
 import {requireExternal} from '../../../src/module';
 
 /**
@@ -92,6 +92,7 @@ const attributesToForward = [
   'number-of-months',
   'minimum-nights',
   'maximum-nights',
+  'hide-keyboard-shortcuts-panel',
 ];
 
 /** @enum {string} */
@@ -215,24 +216,24 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.reactRender_ = requireExternal('react-dom').render;
 
     /** @private @const */
-    this.ReactDates_ = /** @type {!JsonObject} */ (requireExternal(
-      'react-dates'
-    ));
+    this.ReactDates_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates')
+    );
 
     /**
      * @private
      * @const
      * @dict
      */
-    this.ReactDatesConstants_ = /** @type {!JsonObject} */ (requireExternal(
-      'react-dates/constants'
-    ));
+    this.ReactDatesConstants_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates/constants')
+    );
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private @const */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /** @private @const */
     this.input_ = Services.inputFor(this.win);
@@ -276,7 +277,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     /** @private */
     this.type_ = DatePickerType.SINGLE;
 
-    /** @private {?function(new:React.Component, !Object)} */
+    /** @private {?typeof React.Component} */
     this.pickerClass_ = null;
 
     /** @private {!DatePickerMode} */
@@ -372,6 +373,8 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
+
     const format = this.element.getAttribute('format');
     if (format) {
       this.format_ = format;
@@ -481,10 +484,10 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     this.props_ = this.getProps_();
 
-    this.registerAction('setDate', invocation =>
+    this.registerAction('setDate', (invocation) =>
       this.handleSetDateFromString_(invocation.args['date'])
     );
-    this.registerAction('setDates', invocation =>
+    this.registerAction('setDates', (invocation) =>
       this.handleSetDatesFromString_(
         invocation.args['startDate'],
         invocation.args['endDate']
@@ -493,15 +496,15 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.registerAction('clear', () => this.handleClear_());
     this.registerAction(
       'today',
-      this.todayAction_.bind(this, d => this.handleSetDate_(d))
+      this.todayAction_.bind(this, (d) => this.handleSetDate_(d))
     );
     this.registerAction(
       'startToday',
-      this.todayAction_.bind(this, d => this.handleSetDates_(d, null))
+      this.todayAction_.bind(this, (d) => this.handleSetDates_(d, null))
     );
     this.registerAction(
       'endToday',
-      this.todayAction_.bind(this, d => this.handleSetDates_(null, d))
+      this.todayAction_.bind(this, (d) => this.handleSetDates_(null, d))
     );
 
     return this.mutateElement(() => {
@@ -571,7 +574,7 @@ export class AmpDatePicker extends AMP.BaseElement {
             const height = this.element./*OK*/ offsetHeight;
             if (scrollHeight > height) {
               // Add 1px to allow the bottom border to show
-              this./*OK*/ changeHeight(scrollHeight + 1);
+              this.forceChangeHeight(scrollHeight + 1);
             }
           });
         }
@@ -592,12 +595,8 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setupStateMachine_(initialState) {
     const sm = new FiniteStateMachine(initialState);
-    const {
-      OVERLAY_OPEN_INPUT,
-      OVERLAY_CLOSED,
-      OVERLAY_OPEN_PICKER,
-      STATIC,
-    } = DatePickerState;
+    const {OVERLAY_OPEN_INPUT, OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, STATIC} =
+      DatePickerState;
     const noop = () => {};
     sm.addTransition(STATIC, STATIC, noop);
 
@@ -876,10 +875,9 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setState_(newState) {
     return this.render(
-      /** @type {!JsonObject} */ (Object.assign(
-        /** @type {!Object} */ (this.state_),
-        newState
-      ))
+      /** @type {!JsonObject} */ (
+        Object.assign(/** @type {!Object} */ (this.state_), newState)
+      )
     );
   }
 
@@ -1209,7 +1207,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @private
    */
   cleanupListeners_() {
-    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
   }
 
@@ -1220,8 +1218,8 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setupTemplates_() {
     return this.fetchSrc_()
-      .then(json => this.parseSrcTemplates_(json))
-      .then(parsedTemplates => {
+      .then((json) => this.parseSrcTemplates_(json))
+      .then((parsedTemplates) => {
         if (parsedTemplates) {
           const {srcTemplates, srcDefaultTemplate} = parsedTemplates;
           this.srcTemplates_ = srcTemplates;
@@ -1230,7 +1228,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
         this.templatesReadyResolver_();
       })
-      .catch(error => {
+      .catch((error) => {
         user().error(TAG, 'Failed fetching date src data', error);
       });
   }
@@ -1241,7 +1239,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @private
    */
   setupSrcAttributes_() {
-    return this.fetchSrc_().then(json => {
+    return this.fetchSrc_().then((json) => {
       if (!json) {
         return;
       }
@@ -1299,8 +1297,8 @@ export class AmpDatePicker extends AMP.BaseElement {
     }
     const ampdoc = this.getAmpDoc();
     const srcTemplates = templates
-      .filter(t => t.dates)
-      .map(t => ({
+      .filter((t) => t.dates)
+      .map((t) => ({
         dates: new DatesList(t.dates),
         template: ampdoc
           .getRootNode()
@@ -1308,8 +1306,8 @@ export class AmpDatePicker extends AMP.BaseElement {
       }));
 
     const srcDefaultTemplate = templates
-      .filter(t => t.dates == null)
-      .map(t => ampdoc.getElementById(t.id))[0];
+      .filter((t) => t.dates == null)
+      .map((t) => ampdoc.getElementById(t.id))[0];
 
     return {
       srcTemplates,
@@ -1344,7 +1342,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   parseElementTemplates_(templates) {
     const parsed = [];
-    iterateCursor(templates, template =>
+    iterateCursor(templates, (template) =>
       parsed.push(this.parseElementTemplate_(template))
     );
     return parsed;
@@ -1445,7 +1443,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     const isSameDay = this.ReactDates_['isSameDay'];
     let blockedCount = 0;
     if (!this.allowBlockedRanges_) {
-      this.iterateDateRange_(startDate, endDate, index => {
+      this.iterateDateRange_(startDate, endDate, (index) => {
         if (this.blocked_.contains(index)) {
           blockedCount++;
         }
@@ -1632,7 +1630,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   getBindDates_(startDate, endDate) {
     const dates = [];
-    this.iterateDateRange_(startDate, endDate, index => {
+    this.iterateDateRange_(startDate, endDate, (index) => {
       dates.push(this.getBindDate_(index));
     });
     return new BindDatesDetails(dates);
@@ -1681,10 +1679,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     const locale = isUnixTimestamp
       ? DEFAULT_LOCALE
       : opt_locale || this.locale_;
-    return date
-      .clone()
-      .locale(locale)
-      .format(format);
+    return date.clone().locale(locale).format(format);
   }
 
   /**
@@ -1781,7 +1776,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   renderInfoTemplate_() {
     const template = this.element.querySelector('[info-template]');
     if (template) {
-      return this.renderTemplateElement_(template).then(element => {
+      return this.renderTemplateElement_(template).then((element) => {
         element.classList.add(INFO_TEMPLATE_AREA_CSS);
         return this.getRenderedTemplateString_(element);
       });
@@ -1815,7 +1810,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   renderTemplate_(template, opt_data, opt_fallback = '') {
     if (template) {
-      return this.renderTemplateElement_(template, opt_data).then(rendered =>
+      return this.renderTemplateElement_(template, opt_data).then((rendered) =>
         this.getRenderedTemplateString_(rendered)
       );
     } else {
@@ -1864,7 +1859,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   renderPromiseIntoReact_(promise, opt_initial) {
     if (!this.templateThen_) {
-      this.templateThen_ = html =>
+      this.templateThen_ = (html) =>
         this.react_.createElement('div', {
           // This should be safe because this HTML is rendered through
           // amp-mustache and is sanitized.
@@ -1886,7 +1881,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     if (this.mode_ == DatePickerMode.OVERLAY) {
       // REVIEW: this should be ok, since opening the overlay requires a
       // user interaction, and this won't run until then.
-      Services.bindForDocOrNull(this.element).then(bind => {
+      Services.bindForDocOrNull(this.element).then((bind) => {
         if (bind) {
           return bind.rescan([this.element], [this.element], {'apply': true});
         }
@@ -1936,11 +1931,10 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @return {!Promise}
    */
   render(opt_additionalProps) {
-    const props = /** @type {!JsonObject} */ (Object.assign(
-      {},
-      this.props_,
-      opt_additionalProps
-    ));
+    const props = /** @type {!JsonObject} */ ({
+      ...this.props_,
+      ...opt_additionalProps,
+    });
     const shouldBeOpen = props['isOpen'] || this.mode_ == DatePickerMode.STATIC;
     const Picker = shouldBeOpen ? this.pickerClass_ : null;
 
@@ -1952,34 +1946,30 @@ export class AmpDatePicker extends AMP.BaseElement {
         // the picker expands 1 behind where it should for the number of weeks
         // in the month.
         this.reactRender_(
-          this.react_.createElement(
-            Picker,
-            Object.assign(
-              {},
-              dict({
-                'allowBlockedEndDate': this.allowBlockedEndDate_,
-                'min': props['min'],
-                'max': props['max'],
-                'date': props['date'],
-                'startDate': props['startDate'],
-                'endDate': props['endDate'],
-                'isRTL': this.isRTL_,
-                'onDateChange': this.onDateChange,
-                'onDatesChange': this.onDatesChange,
-                'onFocusChange': this.onFocusChange,
-                'onMount': this.onMount,
-                'renderDay': this.renderDay,
-                'blocked': this.blocked_,
-                'highlighted': this.highlighted_,
-                'firstDayOfWeek': this.firstDayOfWeek_,
-                'daySize': this.daySize_,
-                'weekDayFormat': this.weekDayFormat_,
-                'isFocused': props['isFocused'], // should automatically focus
-                'focused': props['focused'],
-              }),
-              props
-            )
-          ),
+          this.react_.createElement(Picker, {
+            ...dict({
+              'allowBlockedEndDate': this.allowBlockedEndDate_,
+              'min': props['min'],
+              'max': props['max'],
+              'date': props['date'],
+              'startDate': props['startDate'],
+              'endDate': props['endDate'],
+              'isRTL': this.isRTL_,
+              'onDateChange': this.onDateChange,
+              'onDatesChange': this.onDatesChange,
+              'onFocusChange': this.onFocusChange,
+              'onMount': this.onMount,
+              'renderDay': this.renderDay,
+              'blocked': this.blocked_,
+              'highlighted': this.highlighted_,
+              'firstDayOfWeek': this.firstDayOfWeek_,
+              'daySize': this.daySize_,
+              'weekDayFormat': this.weekDayFormat_,
+              'isFocused': props['isFocused'], // should automatically focus
+              'focused': props['focused'],
+            }),
+            ...props,
+          }),
           this.container_
         );
       } else {
@@ -2000,7 +1990,7 @@ export class AmpDatePicker extends AMP.BaseElement {
           const height = this.element./*OK*/ offsetHeight;
           if (scrollHeight > height) {
             // Add 1px to allow the bottom border to show
-            this./*OK*/ changeHeight(scrollHeight + 1);
+            this.forceChangeHeight(scrollHeight + 1);
           }
         }
       });
@@ -2033,6 +2023,6 @@ function isTouchNonValidationReadonly(element) {
   return Boolean(element.dataset[AMP_READONLY_DATA_ATTR]);
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpDatePicker, CSS);
 });

@@ -38,7 +38,7 @@ describes.realWin(
       extensions: ['amp-vk'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -62,7 +62,7 @@ describes.realWin(
 
       doc.body.appendChild(element);
 
-      await element.build();
+      await element.buildInternal();
       const resource = Resource.forElement(element);
       resource.measure();
       await element.layoutCallback();
@@ -70,7 +70,7 @@ describes.realWin(
     }
 
     it('requires data-embedtype', () => {
-      const params = Object.assign({}, POST_PARAMS);
+      const params = {...POST_PARAMS};
       delete params['embedtype'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -83,7 +83,7 @@ describes.realWin(
       const vkPost = await createAmpVkElement(POST_PARAMS);
       const iframe = vkPost.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      const obj = vkPost.implementation_;
+      const obj = await vkPost.getImpl(false);
       obj.unlayoutCallback();
       expect(vkPost.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
@@ -93,7 +93,7 @@ describes.realWin(
     // Post tests
 
     it('post::requires data-hash', () => {
-      const params = Object.assign({}, POST_PARAMS);
+      const params = {...POST_PARAMS};
       delete params['hash'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -103,7 +103,7 @@ describes.realWin(
     });
 
     it('post::requires data-owner-id', () => {
-      const params = Object.assign({}, POST_PARAMS);
+      const params = {...POST_PARAMS};
       delete params['owner-id'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -113,7 +113,7 @@ describes.realWin(
     });
 
     it('post::requires data-post-id', () => {
-      const params = Object.assign({}, POST_PARAMS);
+      const params = {...POST_PARAMS};
       delete params['post-id'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -137,14 +137,14 @@ describes.realWin(
 
     it('post::sets correct src url to the vk iFrame', async () => {
       const vkPost = await createAmpVkElement(POST_PARAMS, Layout.RESPONSIVE);
-      const impl = vkPost.implementation_;
+      const impl = await vkPost.getImpl(false);
       const iframe = vkPost.querySelector('iframe');
       const referrer = encodeURIComponent(vkPost.ownerDocument.referrer);
       const url = encodeURIComponent(
         vkPost.ownerDocument.location.href.replace(/#.*$/, '')
       );
       impl.onLayoutMeasure();
-      const startWidth = impl.getLayoutWidth();
+      const startWidth = vkPost.getLayoutSize().width;
       const correctIFrameSrc = `https://vk.com/widget_post.php?app=0&width=100%25&_ver=1&owner_id=1&post_id=45616&hash=Yc8_Z9pnpg8aKMZbVcD-jK45eAk&amp=1&startWidth=${startWidth}&url=${url}&referrer=${referrer}&title=AMP%20Post`;
       expect(iframe).to.not.be.null;
       const timeArgPosition = iframe.src.lastIndexOf('&');
@@ -155,7 +155,7 @@ describes.realWin(
     // Poll tests
 
     it('poll::requires data-api-id', () => {
-      const params = Object.assign({}, POLL_PARAMS);
+      const params = {...POLL_PARAMS};
       delete params['api-id'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -165,7 +165,7 @@ describes.realWin(
     });
 
     it('poll::requires data-poll-id', () => {
-      const params = Object.assign({}, POLL_PARAMS);
+      const params = {...POLL_PARAMS};
       delete params['poll-id'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -203,18 +203,19 @@ describes.realWin(
 
     it('both::resizes amp-vk element in response to postmessages', async () => {
       const vkPoll = await createAmpVkElement(POLL_PARAMS);
-      const impl = vkPoll.implementation_;
+      const impl = await vkPoll.getImpl(false);
       const iframe = vkPoll.querySelector('iframe');
-      const changeHeight = sandbox.spy(impl, 'changeHeight');
+      const forceChangeHeight = env.sandbox.spy(impl, 'forceChangeHeight');
       const fakeHeight = 555;
       expect(iframe).to.not.be.null;
-      generatePostMessage(vkPoll, iframe, fakeHeight);
-      expect(changeHeight).to.be.calledOnce;
-      expect(changeHeight.firstCall.args[0]).to.equal(fakeHeight);
+      await generatePostMessage(vkPoll, iframe, fakeHeight);
+      expect(forceChangeHeight).to.be.calledOnce;
+      expect(forceChangeHeight.firstCall.args[0]).to.equal(fakeHeight);
     });
 
-    function generatePostMessage(ins, iframe, height) {
-      ins.implementation_.handleVkIframeMessage_({
+    async function generatePostMessage(ins, iframe, height) {
+      const impl = await ins.getImpl(false);
+      impl.handleVkIframeMessage_({
         origin: 'https://vk.com',
         source: iframe.contentWindow,
         data: JSON.stringify(['resize', [height]]),

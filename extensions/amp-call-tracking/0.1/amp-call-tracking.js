@@ -37,7 +37,7 @@ function fetch_(win, url) {
   if (!(url in cachedResponsePromises_)) {
     cachedResponsePromises_[url] = Services.xhrFor(win)
       .fetchJson(url, {credentials: 'include'})
-      .then(res => res.json());
+      .then((res) => res.json());
   }
   return cachedResponsePromises_[url];
 }
@@ -82,8 +82,8 @@ export class AmpCallTracking extends AMP.BaseElement {
   layoutCallback() {
     return Services.urlReplacementsForDoc(this.element)
       .expandUrlAsync(user().assertString(this.configUrl_))
-      .then(url => fetch_(this.win, url))
-      .then(data => {
+      .then((url) => fetch_(this.win, url))
+      .then((data) => {
         if (data['phoneNumber']) {
           this.hyperlink_.setAttribute('href', `tel:${data['phoneNumber']}`);
           this.hyperlink_.textContent =
@@ -99,6 +99,6 @@ export class AmpCallTracking extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-call-tracking', '0.1', AMP => {
+AMP.extension('amp-call-tracking', '0.1', (AMP) => {
   AMP.registerElement('amp-call-tracking', AmpCallTracking);
 });

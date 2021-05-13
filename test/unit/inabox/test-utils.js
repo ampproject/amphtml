@@ -15,12 +15,12 @@
  */
 
 import * as IniLoad from '../../../src/ini-load';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom.js';
 import {getA4AId, registerIniLoadListener} from '../../../src/inabox/utils';
 
-describes.realWin('inabox-utils', {}, env => {
+describes.realWin('inabox-utils', {}, (env) => {
   let dispatchEventStub;
   let parentPostMessageStub;
   let initCustomEventStub;
@@ -40,16 +40,16 @@ describes.realWin('inabox-utils', {}, env => {
     ampdoc = {win: env.win, getRootNode: () => ({})};
     iniLoadDeferred = new Deferred();
 
-    sandbox
+    env.sandbox
       .stub(IniLoad, 'whenContentIniLoad')
       .returns(iniLoadDeferred.promise);
-    sandbox
+    env.sandbox
       .stub(Services, 'viewportForDoc')
       .withArgs(ampdoc)
       .returns({getLayoutRect: () => ({})});
-    parentPostMessageStub = sandbox.stub();
-    dispatchEventStub = sandbox.stub();
-    initCustomEventStub = sandbox.stub();
+    parentPostMessageStub = env.sandbox.stub();
+    dispatchEventStub = env.sandbox.stub();
+    initCustomEventStub = env.sandbox.stub();
     env.win.parent = {postMessage: parentPostMessageStub};
     env.win.CustomEvent = (type, eventInit) => {
       initCustomEventStub(type, eventInit);

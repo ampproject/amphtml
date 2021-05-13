@@ -17,15 +17,13 @@
 import {Pass} from '../../src/pass';
 import {Services} from '../../src/services';
 
-describe('Pass', () => {
-  let sandbox;
+describes.sandboxed('Pass', {}, (env) => {
   let pass;
   let timerMock;
   let handlerCalled;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    timerMock = sandbox.mock(Services.timerFor(window));
+    timerMock = env.sandbox.mock(Services.timerFor(window));
     handlerCalled = 0;
     pass = new Pass(window, () => {
       handlerCalled++;
@@ -35,7 +33,6 @@ describe('Pass', () => {
   afterEach(() => {
     expect(handlerCalled).to.equal(0);
     timerMock.verify();
-    sandbox.restore();
   });
 
   it('handler called', () => {
@@ -43,7 +40,7 @@ describe('Pass', () => {
     timerMock
       .expects('delay')
       .withExactArgs(
-        sinon.match(value => {
+        env.sandbox.match((value) => {
           delayedFunc = value;
           return true;
         }),
@@ -65,7 +62,7 @@ describe('Pass', () => {
   it('schedule no delay', () => {
     timerMock
       .expects('delay')
-      .withExactArgs(sinon.match.func, 0)
+      .withExactArgs(env.sandbox.match.func, 0)
       .returns(1)
       .once();
     timerMock.expects('cancel').never();
@@ -75,7 +72,7 @@ describe('Pass', () => {
   it('schedule with delay', () => {
     timerMock
       .expects('delay')
-      .withExactArgs(sinon.match.func, 111)
+      .withExactArgs(env.sandbox.match.func, 111)
       .returns(1)
       .once();
     timerMock.expects('cancel').never();
@@ -85,7 +82,7 @@ describe('Pass', () => {
   it('schedule later', () => {
     timerMock
       .expects('delay')
-      .withExactArgs(sinon.match.func, 111)
+      .withExactArgs(env.sandbox.match.func, 111)
       .returns(1)
       .once();
     timerMock.expects('cancel').never();
@@ -98,18 +95,15 @@ describe('Pass', () => {
   it('schedule earlier', () => {
     timerMock
       .expects('delay')
-      .withExactArgs(sinon.match.func, 222)
+      .withExactArgs(env.sandbox.match.func, 222)
       .returns(1)
       .once();
     timerMock
       .expects('delay')
-      .withExactArgs(sinon.match.func, 111)
+      .withExactArgs(env.sandbox.match.func, 111)
       .returns(2)
       .once();
-    timerMock
-      .expects('cancel')
-      .withExactArgs(1)
-      .once();
+    timerMock.expects('cancel').withExactArgs(1).once();
     pass.schedule(222);
     // Will re-schedule b/c the existing pass is later.
     const isScheduled = pass.schedule(111);
@@ -128,7 +122,7 @@ describe('Pass', () => {
     timerMock
       .expects('delay')
       .withExactArgs(
-        sinon.match(value => {
+        env.sandbox.match((value) => {
           delayedFunc0 = value;
           return true;
         }),
@@ -139,7 +133,7 @@ describe('Pass', () => {
     timerMock
       .expects('delay')
       .withExactArgs(
-        sinon.match(value => {
+        env.sandbox.match((value) => {
           delayedFunc1 = value;
           return true;
         }),

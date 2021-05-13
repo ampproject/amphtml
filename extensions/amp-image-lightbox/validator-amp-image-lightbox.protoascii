@@ -15,13 +15,12 @@
 #
 tags: {  # amp-image-lightbox
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-image-lightbox"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -51,4 +50,3 @@ tags: {  # <amp-image-lightbox>
     supported_layouts: NODISPLAY
   }
 }
-

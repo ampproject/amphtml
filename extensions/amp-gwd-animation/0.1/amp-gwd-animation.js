@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {
   AmpGwdRuntimeService,
   GWD_SERVICE_NAME,
@@ -22,11 +22,11 @@ import {
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
 import {Services} from '../../../src/services';
 import {getDetail} from '../../../src/event-helper';
-import {
-  getExistingServiceForDocInEmbedScope,
-  getParentWindowFrameElement,
-} from '../../../src/service';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {
+  getParentWindowFrameElement,
+  getServiceForDocOrNull,
+} from '../../../src/service';
 import {userAssert} from '../../../src/log';
 
 /**
@@ -217,12 +217,12 @@ export class GwdAnimation extends AMP.BaseElement {
    */
   executeInvocation_(invocation) {
     const service = userAssert(
-      getExistingServiceForDocInEmbedScope(this.element, GWD_SERVICE_NAME),
+      getServiceForDocOrNull(this.element, GWD_SERVICE_NAME),
       'Cannot execute action because the GWD service is not registered.'
     );
 
     const argPaths = ACTION_IMPL_ARGS[invocation.method];
-    const actionArgs = argPaths.map(argPath =>
+    const actionArgs = argPaths.map((argPath) =>
       getValueForExpr(invocation, argPath)
     );
 
@@ -241,6 +241,7 @@ export class GwdAnimation extends AMP.BaseElement {
     const eventName = getDetail(event)['eventName'];
     const timelineEventName = `${this.timelineEventPrefix_}${eventName}`;
 
+    // TODO(wg-components): Should animation timeline events be low trust?
     actionService.trigger(
       this.element,
       timelineEventName,
@@ -301,7 +302,7 @@ export function addAction(context, target, event, actionStr) {
   actionService.setActions(target, newActionsStr);
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc(GWD_SERVICE_NAME, AmpGwdRuntimeService);
   AMP.registerElement(TAG, GwdAnimation, CSS);
 });

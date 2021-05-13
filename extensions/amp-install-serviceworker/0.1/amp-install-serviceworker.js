@@ -20,11 +20,10 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeFragment} from '../../../src/url';
-import {startsWith} from '../../../src/string';
 import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
@@ -345,7 +344,7 @@ function install(win, src, element) {
     options.scope = element.getAttribute('data-scope');
   }
   return win.navigator.serviceWorker.register(src, options).then(
-    function(registration) {
+    function (registration) {
       if (getMode().development) {
         user().info(
           TAG,
@@ -357,7 +356,7 @@ function install(win, src, element) {
       const installingSw = registration.installing;
       if (installingSw) {
         // if not already active, wait till it becomes active
-        installingSw.addEventListener('statechange', evt => {
+        installingSw.addEventListener('statechange', (evt) => {
           if (evt.target.state === 'activated') {
             performServiceWorkerOptimizations(registration, win, element);
           }
@@ -368,7 +367,7 @@ function install(win, src, element) {
 
       return registration;
     },
-    function(e) {
+    function (e) {
       user().error(TAG, 'ServiceWorker registration failed:', e);
     }
   );
@@ -400,10 +399,10 @@ function sendAmpScriptToSwOnFirstVisit(win, registration) {
     const ampScriptsUsed = win.performance
       .getEntriesByType('resource')
       .filter(
-        item =>
-          item.initiatorType === 'script' && startsWith(item.name, urls.cdn)
+        (item) =>
+          item.initiatorType === 'script' && item.name.startsWith(urls.cdn)
       )
-      .map(script => script.name);
+      .map((script) => script.name);
     const activeSW = registration.active;
     // using convention from https://github.com/redux-utilities/flux-standard-action.
     if (activeSW.postMessage) {
@@ -429,10 +428,10 @@ function prefetchOutgoingLinks(registration, win) {
   const {document} = win;
   const links = [].map.call(
     document.querySelectorAll('a[data-rel=prefetch]'),
-    link => link.href
+    (link) => link.href
   );
   if (supportsPrefetch(document)) {
-    links.forEach(link => {
+    links.forEach((link) => {
       const linkTag = document.createElement('link');
       linkTag.setAttribute('rel', 'prefetch');
       linkTag.setAttribute('href', link);
@@ -466,6 +465,6 @@ function supportsPrefetch(doc) {
   return false;
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpInstallServiceWorker);
 });

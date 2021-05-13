@@ -21,7 +21,7 @@ import {
 
 const XHR_BUFFER_SIZE = 2;
 
-describes.fakeWin('LiveListManager', {amp: true}, env => {
+describes.fakeWin('LiveListManager', {amp: true}, (env) => {
   const jitterOffset = 1000;
   let win, doc;
   let ampdoc;
@@ -30,26 +30,26 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   let xhrs;
   let clock;
   let ready;
-  let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
 
-    clock = sandbox.useFakeTimers();
-    xhrs = setUpMockXhrs(sandbox);
+    clock = env.sandbox.useFakeTimers();
+    xhrs = setUpMockXhrs(env.sandbox);
 
     manager = new LiveListManager(ampdoc);
-    const docReadyPromise = new Promise(resolve => {
+    const docReadyPromise = new Promise((resolve) => {
       ready = resolve;
     });
-    sandbox.stub(manager, 'whenDocReady_').returns(docReadyPromise);
-    sandbox.stub(LiveListManager, 'forDoc').returns(Promise.resolve(manager));
+    env.sandbox.stub(manager, 'whenDocReady_').returns(docReadyPromise);
+    env.sandbox
+      .stub(LiveListManager, 'forDoc')
+      .returns(Promise.resolve(manager));
 
     liveList = getLiveList({'data-sort-time': '1111'});
-    sandbox.stub(liveList, 'getInterval').callsFake(() => 5000);
+    env.sandbox.stub(liveList, 'getInterval').callsFake(() => 5000);
   });
 
   function setUpMockXhrs(sandbox) {
@@ -57,18 +57,14 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     const xhrs = [];
     const xhrResolvers = [];
     for (let i = 0; i < XHR_BUFFER_SIZE; i++) {
-      xhrs[i] = new Promise(resolve => (xhrResolvers[i] = resolve));
+      xhrs[i] = new Promise((resolve) => (xhrResolvers[i] = resolve));
     }
     let xhrCount = 0;
-    mockXhr.onCreate = function(xhr) {
+    mockXhr.onCreate = function (xhr) {
       xhrResolvers[xhrCount++](xhr);
     };
     return xhrs;
   }
-
-  afterEach(() => {
-    sandbox.restore();
-  });
 
   /** @implements {!LiveListInterface} */
   class AmpLiveListMock {
@@ -135,7 +131,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should start poller when doc is ready', () => {
-    sandbox.stub(ampdoc, 'isVisible').returns(true);
+    env.sandbox.stub(ampdoc, 'isVisible').returns(true);
     expect(manager.poller_).to.be.null;
     liveList.buildCallback();
     ready();
@@ -145,7 +141,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should not start poller when no live-list is registered', () => {
-    sandbox.stub(ampdoc, 'isVisible').returns(true);
+    env.sandbox.stub(ampdoc, 'isVisible').returns(true);
     expect(manager.poller_).to.be.null;
     ready();
     return manager.whenDocReady_().then(() => {
@@ -174,7 +170,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       const fromServer = doc.createElement('div');
       fromServer.appendChild(customSlot);
       fromServer.getElementById = () => {};
-      sandbox.stub(fromServer, 'getElementById').callsFake(id => {
+      env.sandbox.stub(fromServer, 'getElementById').callsFake((id) => {
         return fromServer.querySelector(`#${id}`);
       });
 
@@ -199,7 +195,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   );
 
   it('should get the amp_latest_update_time on doc ready', () => {
-    sandbox.stub(Math, 'random').callsFake(() => 1);
+    env.sandbox.stub(Math, 'random').callsFake(() => 1);
     ready();
     const liveList2 = getLiveList({'data-sort-time': '2222'}, 'id-2');
     liveList.buildCallback();
@@ -209,7 +205,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       const tick = interval - jitterOffset;
       expect(manager.poller_.isRunning()).to.be.true;
       clock.tick(tick);
-      return xhrs[0].then(xhr =>
+      return xhrs[0].then((xhr) =>
         expect(xhr.url).to.match(/amp_latest_update_time=2222/)
       );
     });
@@ -422,8 +418,8 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     liveList.buildCallback();
     liveList2.buildCallback();
     liveList2.toggle(false);
-    const updateSpy1 = sandbox.spy(liveList, 'update');
-    const updateSpy2 = sandbox.spy(liveList2, 'update');
+    const updateSpy1 = env.sandbox.spy(liveList, 'update');
+    const updateSpy2 = env.sandbox.spy(liveList2, 'update');
 
     expect(liveList.isEnabled()).to.be.true;
     expect(liveList2.isEnabled()).to.be.false;
@@ -466,9 +462,9 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should back off on transient 415 response', () => {
-    sandbox.stub(Math, 'random').callsFake(() => 1);
+    env.sandbox.stub(Math, 'random').callsFake(() => 1);
     ready();
-    const fetchSpy = sandbox.spy(manager, 'work_');
+    const fetchSpy = env.sandbox.spy(manager, 'work_');
     liveList.buildCallback();
     return manager.whenDocReady_().then(() => {
       const interval = liveList.getInterval();
@@ -477,7 +473,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      xhrs[0].then(xhr =>
+      xhrs[0].then((xhr) =>
         xhr.respond(
           200,
           {
@@ -490,7 +486,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       return manager.poller_.lastWorkPromise_.then(() => {
         expect(manager.poller_.isRunning()).to.be.true;
         clock.tick(tick);
-        xhrs[1].then(xhr =>
+        xhrs[1].then((xhr) =>
           xhr.respond(
             415,
             {
@@ -510,9 +506,9 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should back off on transient 500 response', () => {
-    sandbox.stub(Math, 'random').callsFake(() => 1);
+    env.sandbox.stub(Math, 'random').callsFake(() => 1);
     ready();
-    const fetchSpy = sandbox.spy(manager, 'work_');
+    const fetchSpy = env.sandbox.spy(manager, 'work_');
     liveList.buildCallback();
     return manager.whenDocReady_().then(() => {
       const interval = liveList.getInterval();
@@ -521,7 +517,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      xhrs[0].then(xhr =>
+      xhrs[0].then((xhr) =>
         xhr.respond(
           200,
           {
@@ -534,7 +530,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       return manager.poller_.lastWorkPromise_.then(() => {
         expect(manager.poller_.isRunning()).to.be.true;
         clock.tick(tick);
-        xhrs[1].then(xhr =>
+        xhrs[1].then((xhr) =>
           xhr.respond(
             500,
             {
@@ -554,10 +550,10 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should recover after transient 415 response', () => {
-    sandbox.stub(Math, 'random').callsFake(() => 1);
-    sandbox.stub(ampdoc, 'isVisible').returns(true);
+    env.sandbox.stub(Math, 'random').callsFake(() => 1);
+    env.sandbox.stub(ampdoc, 'isVisible').returns(true);
     ready();
-    const fetchSpy = sandbox.spy(manager, 'work_');
+    const fetchSpy = env.sandbox.spy(manager, 'work_');
     liveList.buildCallback();
     return manager.whenDocReady_().then(() => {
       const interval = liveList.getInterval();
@@ -567,7 +563,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
       expect(manager.poller_.backoffClock_).to.be.null;
-      xhrs[0].then(xhr =>
+      xhrs[0].then((xhr) =>
         xhr.respond(
           415,
           {
@@ -582,7 +578,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
         // tick 1 max initial backoff with random = 1
         clock.tick(700);
         expect(fetchSpy).to.have.callCount(2);
-        xhrs[1].then(xhr =>
+        xhrs[1].then((xhr) =>
           xhr.respond(
             200,
             {
@@ -604,7 +600,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       'and immediately fetch when visible',
     () => {
       ready();
-      const fetchSpy = sandbox.spy(manager, 'work_');
+      const fetchSpy = env.sandbox.spy(manager, 'work_');
       expect(fetchSpy).to.have.not.been.called;
       liveList.buildCallback();
       return manager.whenDocReady_().then(() => {
@@ -631,12 +627,45 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     }
   );
 
+  it("should not poll if all amp-live-list's are disabled on visible", () => {
+    const fetchSpy = env.sandbox.spy(manager, 'work_');
+    const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
+
+    liveList.toggle(false);
+    liveList2.toggle(false);
+    ready();
+    // Important that we set this before build since then is when they register
+    liveList.buildCallback();
+    liveList2.buildCallback();
+    expect(liveList.isEnabled()).to.be.false;
+    expect(liveList2.isEnabled()).to.be.false;
+    return manager.whenDocReady_().then(() => {
+      expect(ampdoc.isVisible()).to.be.true;
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('hidden');
+      expect(fetchSpy).to.have.not.been.called;
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('visible');
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('inactive');
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('visible');
+      expect(fetchSpy).to.have.not.been.called;
+      expect(manager.poller_.isRunning()).to.be.false;
+      ampdoc.overrideVisibilityState('prerender');
+      expect(fetchSpy).to.have.not.been.called;
+      expect(manager.poller_.isRunning()).to.be.false;
+      clock.tick(20000);
+      expect(fetchSpy).to.have.not.been.called;
+    });
+  });
+
   it('should fetch with url', () => {
-    sandbox.stub(Math, 'random').callsFake(() => 1);
-    sandbox.stub(ampdoc, 'isVisible').returns(true);
+    env.sandbox.stub(Math, 'random').callsFake(() => 1);
+    env.sandbox.stub(ampdoc, 'isVisible').returns(true);
     manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
     ready();
-    const fetchSpy = sandbox.spy(manager, 'work_');
+    const fetchSpy = env.sandbox.spy(manager, 'work_');
     liveList.buildCallback();
     return manager.whenDocReady_().then(() => {
       const interval = liveList.getInterval();
@@ -645,7 +674,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      return xhrs[0].then(xhr => {
+      return xhrs[0].then((xhr) => {
         expect(xhr.url).to.match(/^www\.example\.com\/foo\/bar\?hello=world/);
         expect(xhr.url).to.match(/#dev=1/);
         expect(xhr.url).to.match(/amp_latest_update_time/);
@@ -657,12 +686,12 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     'should fetch with url from the cache if on publisher origin ' +
       'and is transformed',
     () => {
-      sandbox.stub(Math, 'random').callsFake(() => 1);
-      sandbox.stub(ampdoc, 'isVisible').returns(true);
+      env.sandbox.stub(Math, 'random').callsFake(() => 1);
+      env.sandbox.stub(ampdoc, 'isVisible').returns(true);
       manager.url_ = 'https://www.example.com/foo/bar?hello=world#dev=1';
       manager.isTransformed_ = true;
       ready();
-      const fetchSpy = sandbox.spy(manager, 'work_');
+      const fetchSpy = env.sandbox.spy(manager, 'work_');
       liveList.buildCallback();
       return manager.whenDocReady_().then(() => {
         const interval = liveList.getInterval();
@@ -671,7 +700,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
         expect(fetchSpy).to.have.not.been.called;
         clock.tick(tick);
         expect(fetchSpy).to.be.calledOnce;
-        return xhrs[0].then(xhr => {
+        return xhrs[0].then((xhr) => {
           expect(xhr.url).to.match(
             /^https:\/\/cdn\.ampproject\.org\/c\/www\.example\.com\/foo\/bar\?hello=world/
           );
@@ -686,15 +715,15 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     'should not fetch with url from the cache if on cache origin ' +
       'and is not transformed',
     () => {
-      sandbox.stub(Math, 'random').callsFake(() => 1);
-      sandbox.stub(ampdoc, 'isVisible').returns(true);
+      env.sandbox.stub(Math, 'random').callsFake(() => 1);
+      env.sandbox.stub(ampdoc, 'isVisible').returns(true);
       manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
       manager.isTransformed_ = false;
       manager.location_ =
         'https://cdn.ampproject.org' +
         '/c/s/www.example.com/foo/bar?hello=world#dev=1';
       ready();
-      const fetchSpy = sandbox.spy(manager, 'work_');
+      const fetchSpy = env.sandbox.spy(manager, 'work_');
       liveList.buildCallback();
       return manager.whenDocReady_().then(() => {
         const interval = liveList.getInterval();
@@ -703,7 +732,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
         expect(fetchSpy).to.have.not.been.called;
         clock.tick(tick);
         expect(fetchSpy).to.be.calledOnce;
-        return xhrs[0].then(xhr => {
+        return xhrs[0].then((xhr) => {
           expect(xhr.url).to.match(/^www\.example\.com\/foo\/bar\?hello=world/);
           expect(xhr.url).to.match(/#dev=1/);
           expect(xhr.url).to.match(/amp_latest_update_time/);
@@ -713,15 +742,15 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   );
 
   it('should find highest "update time" from amp-live-list elements', () => {
-    const doc = [];
+    const doc = {};
     const list1 = getLiveList(undefined, 'id1');
     const list2 = getLiveList(undefined, 'id2');
-    sandbox.stub(list1, 'update').returns(1000);
-    sandbox.stub(list2, 'update').returns(2000);
+    env.sandbox.stub(list1, 'update').returns(1000);
+    env.sandbox.stub(list2, 'update').returns(2000);
     doc.getElementsByTagName = () => {
       return [list1.element, list2.element];
     };
-    doc.querySelectorAll = function() {};
+    doc.querySelectorAll = () => [];
     list1.buildCallback();
     list2.buildCallback();
     expect(manager.latestUpdateTime_).to.equal(0);
@@ -730,13 +759,13 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should add amp_latest_update_time on requests', () => {
-    sandbox.stub(Math, 'random').callsFake(() => 1);
-    sandbox.stub(ampdoc, 'isVisible').returns(true);
+    env.sandbox.stub(Math, 'random').callsFake(() => 1);
+    env.sandbox.stub(ampdoc, 'isVisible').returns(true);
     manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
-    sandbox.stub(liveList, 'update').returns(2500);
+    env.sandbox.stub(liveList, 'update').returns(2500);
     ready();
     liveList.buildCallback();
-    const fetchSpy = sandbox.spy(manager, 'work_');
+    const fetchSpy = env.sandbox.spy(manager, 'work_');
     return manager.whenDocReady_().then(() => {
       const interval = liveList.getInterval();
       const tick = interval - jitterOffset;
@@ -744,7 +773,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      xhrs[0].then(xhr => {
+      xhrs[0].then((xhr) => {
         expect(xhr.url).to.match(/amp_latest_update_time=1111/);
         xhr.respond(
           200,
@@ -757,7 +786,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       return manager.poller_.lastWorkPromise_.then(() => {
         clock.tick(tick);
         expect(fetchSpy).to.have.callCount(2);
-        return xhrs[1].then(xhr =>
+        return xhrs[1].then((xhr) =>
           expect(xhr.url).to.match(/amp_latest_update_time=2500/)
         );
       });
@@ -771,20 +800,22 @@ describes.realWin(
     amp: true,
     fakeRegisterElement: true,
   },
-  env => {
+  (env) => {
     let manager;
     let ampdoc;
     let win;
     let doc;
     let extensions;
 
-    beforeEach(function() {
+    beforeEach(function () {
       win = env.win;
       doc = win.document;
       ampdoc = env.ampdoc;
       extensions = env.extensions;
       manager = new LiveListManager(ampdoc);
-      sandbox.stub(LiveListManager, 'forDoc').returns(Promise.resolve(manager));
+      env.sandbox
+        .stub(LiveListManager, 'forDoc')
+        .returns(Promise.resolve(manager));
     });
 
     it('should install newly discovered script tags on xhr doc', () => {
@@ -793,31 +824,40 @@ describes.realWin(
       const script1 = document.createElement('script');
       const script2 = document.createElement('script');
       script1.setAttribute('custom-element', 'amp-test');
+      env.sandbox
+        .stub(script1, 'src')
+        .value('https://cdn.ampproject.org/v0/amp-test-0.2.js');
       script2.setAttribute('custom-template', 'amp-template');
+      env.sandbox
+        .stub(script2, 'src')
+        .value('https://cdn.ampproject.org/v0/amp-template-0.2.js');
       div.appendChild(script1);
       div.appendChild(script2);
 
       expect(
         doc.head.querySelectorAll('[custom-element="amp-test"]')
       ).to.have.length(0);
-      expect(extensions.extensions_['amp-test']).to.be.undefined;
+      expect(extensions.extensions_['amp-test:0.2']).to.be.undefined;
 
       expect(
         doc.head.querySelectorAll('[custom-template="amp-template"]')
       ).to.have.length(0);
-      expect(extensions.extensions_['amp-template']).to.be.undefined;
+      expect(extensions.extensions_['amp-template:0.2']).to.be.undefined;
 
       manager.installExtensionsForDoc_(div);
 
       expect(
-        doc.head.querySelectorAll('[custom-element="amp-test"]')
+        doc.head.querySelectorAll('[custom-element="amp-test"][src*="-0.2"]')
       ).to.have.length(1);
-      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+      expect(extensions.extensions_['amp-test:0.2'].scriptPresent).to.be.true;
 
       expect(
-        doc.head.querySelectorAll('[custom-element="amp-template"]')
+        doc.head.querySelectorAll(
+          '[custom-element="amp-template"][src*="-0.2"]'
+        )
       ).to.have.length(1);
-      expect(extensions.extensions_['amp-template'].scriptPresent).to.be.true;
+      expect(extensions.extensions_['amp-template:0.2'].scriptPresent).to.be
+        .true;
     });
   }
 );

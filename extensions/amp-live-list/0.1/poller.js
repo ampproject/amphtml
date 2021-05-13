@@ -18,7 +18,7 @@ import {Services} from '../../../src/services';
 import {
   exponentialBackoffClock,
   getJitter,
-} from '../../../src/exponential-backoff';
+} from '../../../src/core/types/function/exponential-backoff';
 
 /**
  * Poller with backoff functionality.
@@ -132,7 +132,7 @@ export class Poller {
           }
           this.poll_();
         })
-        .catch(err => {
+        .catch((err) => {
           if (err.retriable) {
             if (!this.backoffClock_) {
               this.backoffClock_ = exponentialBackoffClock();

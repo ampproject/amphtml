@@ -4,8 +4,9 @@ formats:
   - websites
   - stories
 teaser:
-  text: Displays a Twitter tweet.
+  text: Displays a Twitter Tweet or Moment.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,39 +25,24 @@ limitations under the License.
 
 # amp-twitter
 
-Displays a Twitter Tweet or Moment.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-twitter/">Annotated code example for amp-twitter</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
-The `amp-twitter` component allows you to embed a Tweet or Moment for the specified Twitter ID.  
+The `amp-twitter` component allows you to embed a Tweet or Moment for the specified Twitter ID.
 
 Here's an example of a basic embedded Tweet:
 
 [example preview="inline" playground="true" imports="amp-twitter" imports="amp-twitter"]
+
 ```html
-<amp-twitter width="375"
+<amp-twitter
+  width="375"
   height="472"
   layout="responsive"
-  data-tweetid="885634330868850689">
+  data-tweetid="885634330868850689"
+>
 </amp-twitter>
 ```
+
 [/example]
 
 ## Appearance
@@ -65,48 +51,65 @@ Twitter does not currently provide an API that yields fixed aspect ratio for emb
 
 ## Placeholders & fallbacks
 
-An element marked with a `placeholder` attribute displays while the content for the Tweet or Moment is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-twitter` isn't supported by the browser or if the Tweet or Moment doesn't exist or has been deleted.
+An element marked with a `placeholder` attribute displays while the content for the Tweet or Moment is loading or initializing. Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-twitter` isn't supported by the browser or if the Tweet or Moment doesn't exist or has been deleted.
 
 Visit the [Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-twitter` component.
 
-*Example: Specifying a placeholder*
+_Example: Specifying a placeholder_
 
 [example preview="inline" playground="true" imports="amp-twitter" imports="amp-twitter"]
+
 ```html
-<amp-twitter width="375"
+<amp-twitter
+  width="375"
   height="472"
   layout="responsive"
-  data-tweetid="638793490521001985">
+  data-tweetid="638793490521001985"
+>
   <blockquote placeholder>
-    <p>I only needed to change some CSS.
+    <p>
+      I only needed to change some CSS.
       <a href="http://t.co/LvjLbjgY9F">pic.twitter.com/LvjLbjgY9F</a>
-    </p>&mdash; Malte Ubl (@cramforce)
-    <a href="https://twitter.com/cramforce/status/638793490521001985">September 1, 2015</a>
+    </p>
+    &mdash; Malte Ubl (@cramforce)
+    <a href="https://twitter.com/cramforce/status/638793490521001985"
+      >September 1, 2015</a
+    >
   </blockquote>
 </amp-twitter>
 ```
+
 [/example]
 
-*Example: Specifying a placeholder and a fallback*
+_Example: Specifying a placeholder and a fallback_
 
 [example preview="inline" playground="true" imports="amp-twitter" imports="amp-twitter"]
+
 ```html
-<amp-twitter width="390"
+<amp-twitter
+  width="390"
   height="330"
   layout="responsive"
-  data-tweetid="855178606556856320">
+  data-tweetid="855178606556856320"
+>
   <blockquote placeholder>
-    <p>What are 5 common misconceptions people often have about AMP? Find out on today&#39;s installment of Amplify:
+    <p>
+      What are 5 common misconceptions people often have about AMP? Find out on
+      today&#39;s installment of Amplify:
       <a href="https://t.co/kaSvV8SQtI">https://t.co/kaSvV8SQtI</a>
       <a href="https://t.co/Cu9VYOmiKV">pic.twitter.com/Cu9VYOmiKV</a>
-    </p>&mdash; AMP Project (@AMPhtml)
-    <a href="https://twitter.com/AMPhtml/status/855178606556856320">April 20, 2017</a>
+    </p>
+    &mdash; AMP Project (@AMPhtml)
+    <a href="https://twitter.com/AMPhtml/status/855178606556856320"
+      >April 20, 2017</a
+    >
   </blockquote>
   <div fallback>
     An error occurred while retrieving the Tweet. It might have been deleted.
   </div>
 </amp-twitter>
 ```
+
 [/example]
 
 ## Attributes
@@ -129,6 +132,10 @@ For details on the available arguments, see the "Timelines" section in <a href="
     <td>You can specify options for the Tweet, Moment, or Timeline appearance by setting <code>data-</code> attributes. For example, <code>data-cards="hidden"</code> deactivates Twitter cards.
 For details on the available options, see Twitter's docs <a href="https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference">for tweets</a>, <a href="https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0">for moments</a> and <a href="https://developer.twitter.com/en/docs/twitter-for-websites/timelines/guides/parameter-reference">for timelines</a>.</td>
   </tr>
+   <tr>
+    <td width="40%"><strong>title (optional)</strong></td>
+    <td>Define a <code>title</code> attribute for the component. The default is <code>Twitter</code>.</td>
+  </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
@@ -137,4 +144,4 @@ For details on the available options, see Twitter's docs <a href="https://develo
 
 ## Validation
 
-See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/validator-amp-twitter.protoascii) in the AMP validator specification.
+See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-twitter/validator-amp-twitter.protoascii) in the AMP validator specification.

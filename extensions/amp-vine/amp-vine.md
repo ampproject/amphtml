@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Vine simple embed.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,33 +24,12 @@ limitations under the License.
 
 # amp-vine
 
-Displays a Vine simple embed.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-vine/">Annotated code example for amp-vine</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 A Vine simple embed has equal width and height:
 
 ```html
-<amp-vine width="400" height="400"
-  data-vineid="MdKjXez002d">
-</amp-vine>
+<amp-vine width="400" height="400" data-vineid="MdKjXez002d"> </amp-vine>
 ```
 
 ## Attributes
@@ -61,10 +41,10 @@ A Vine simple embed has equal width and height:
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>See <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/validator-amp-vine.protoascii">amp-vine rules</a> in the AMP validator specification.</td>
+    <td>See <a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-vine/validator-amp-vine.protoascii">amp-vine rules</a> in the AMP validator specification.</td>
   </tr>
 </table>
 
 ## Validation
 
-See [amp-vine rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/validator-amp-vine.protoascii) in the AMP validator specification.
+See [amp-vine rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-vine/validator-amp-vine.protoascii) in the AMP validator specification.

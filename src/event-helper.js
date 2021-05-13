@@ -37,7 +37,7 @@ export function createCustomEvent(win, type, detail, opt_eventInit) {
   Object.assign(eventInit, opt_eventInit);
   // win.CustomEvent is a function on Edge, Chrome, FF, Safari but
   // is an object on IE 11.
-  if (typeof win.CustomEvent == 'function') {
+  if (IS_ESM || typeof win.CustomEvent == 'function') {
     return new win.CustomEvent(type, eventInit);
   } else {
     // Deprecated fallback for IE.
@@ -101,7 +101,7 @@ export function listenOnce(element, eventType, listener, opt_evtListenerOpts) {
   const unlisten = internalListenImplementation(
     element,
     eventType,
-    event => {
+    (event) => {
       try {
         localListener(event);
       } finally {
@@ -133,7 +133,7 @@ export function listenOncePromise(
   opt_cancel
 ) {
   let unlisten;
-  const eventPromise = new Promise(resolve => {
+  const eventPromise = new Promise((resolve) => {
     unlisten = listenOnce(element, eventType, resolve, opt_evtListenerOpts);
   });
   eventPromise.then(unlisten, unlisten);
@@ -203,7 +203,7 @@ export function loadPromise(eleOrWindow) {
     if (isMediaElement && !eleOrWindow.hasAttribute('src')) {
       errorTarget = lastChildElement(
         eleOrWindow,
-        child => child.tagName === 'SOURCE'
+        (child) => child.tagName === 'SOURCE'
       );
       if (!errorTarget) {
         return reject(new Error('Media has no source.'));

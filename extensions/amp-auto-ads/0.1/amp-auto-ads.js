@@ -23,9 +23,10 @@ import {
 import {AnchorAdStrategy} from './anchor-ad-strategy';
 import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {Services} from '../../../src/services';
+import {dict} from '../../../src/core/types/object';
 import {getAdNetworkConfig} from './ad-network-config';
 import {getPlacementsFromConfigObj} from './placement';
-import {randomlySelectUnsetExperiments} from '../../../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const */
@@ -34,24 +35,17 @@ const TAG = 'amp-auto-ads';
 /** @const */
 const AD_TAG = 'amp-ad';
 
-/** @const {!{branch: string, control: string, experiment: string}}
- */
-export const RESPONSIVE_SIZING_EXP = {
-  branch: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
-  control: '368226530',
-  experiment: '368226531',
-};
-
 export class AmpAutoAds extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const type = this.element.getAttribute('type');
     userAssert(type, 'Missing type attribute');
 
-    const adNetwork = getAdNetworkConfig(type, this.element);
-    userAssert(adNetwork, 'No AdNetworkConfig for type: ' + type);
+    /** @private {?./ad-network-config.AdNetworkConfigDef} */
+    this.adNetwork_ = getAdNetworkConfig(type, this.element);
+    userAssert(this.adNetwork_, 'No AdNetworkConfig for type: ' + type);
 
-    if (!adNetwork.isEnabled(this.win)) {
+    if (!this.adNetwork_.isEnabled(this.win)) {
       return;
     }
 
@@ -61,78 +55,29 @@ export class AmpAutoAds extends AMP.BaseElement {
       AD_TAG
     );
 
-    const whenVisible = this.getAmpDoc().whenFirstVisible();
-    const responsiveSizingBranch = this.getUseResponsiveForResponsiveExperimentBranch(
-      adNetwork.isResponsiveEnabled()
-    );
-
-    whenVisible
+    /** @private {!Promise<!JsonObject>} */
+    this.configPromise_ = this.getAmpDoc()
+      .whenFirstVisible()
       .then(() => {
-        return this.getConfig_(adNetwork.getConfigUrl());
-      })
-      .then(configObj => {
-        if (!configObj) {
-          return;
-        }
-        const noConfigReason = configObj['noConfigReason'];
-        if (noConfigReason) {
-          this.user().warn(TAG, noConfigReason);
-          return;
-        }
-
-        const placements = getPlacementsFromConfigObj(
-          ampdoc,
-          configObj,
-          responsiveSizingBranch
-        );
-        const attributes = /** @type {!JsonObject} */ (Object.assign(
-          adNetwork.getAttributes(),
-          getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
-        ));
-        const sizing = adNetwork.getSizing();
-        const adConstraints =
-          getAdConstraintsFromConfigObj(ampdoc, configObj) ||
-          adNetwork.getDefaultAdConstraints();
-        const adTracker = new AdTracker(getExistingAds(ampdoc), adConstraints);
-        new AdStrategy(
-          placements,
-          attributes,
-          sizing,
-          adTracker,
-          adNetwork.isResponsiveEnabled()
-        ).run();
-        const stickyAdAttributes = /** @type {!JsonObject} */ (Object.assign(
-          attributes,
-          getAttributesFromConfigObj(configObj, Attributes.STICKY_AD_ATTRIBUTES)
-        ));
-        new AnchorAdStrategy(ampdoc, stickyAdAttributes, configObj).run();
+        return this.getConfig_(this.adNetwork_.getConfigUrl());
       });
-  }
 
-  /**
-   * Selects into the use responsive ads for sizing in auto ads experiment branch.
-   * @param {boolean} isResponsiveEnabled
-   * @return {?string} id of selected branch, if any.
-   */
-  getUseResponsiveForResponsiveExperimentBranch(isResponsiveEnabled) {
-    const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-      [[RESPONSIVE_SIZING_EXP.branch]]: {
-        isTrafficEligible: () => isResponsiveEnabled,
-        branches: [
-          [RESPONSIVE_SIZING_EXP.control],
-          [RESPONSIVE_SIZING_EXP.experiment],
-        ],
-      },
-    });
-    return randomlySelectUnsetExperiments(this.win, experimentInfoMap)[
-      RESPONSIVE_SIZING_EXP.branch
-    ];
+    if (!this.isAutoAdsLayoutCallbackExperimentOn_()) {
+      this.placeAds_();
+    }
   }
 
   /** @override */
   isLayoutSupported() {
     return true;
+  }
+
+  /** @override */
+  layoutCallback() {
+    if (this.isAutoAdsLayoutCallbackExperimentOn_()) {
+      return this.placeAds_();
+    }
+    return Promise.resolve();
   }
 
   /**
@@ -151,14 +96,68 @@ export class AmpAutoAds extends AMP.BaseElement {
     };
     return Services.xhrFor(this.win)
       .fetchJson(configUrl, xhrInit)
-      .then(res => res.json())
-      .catch(reason => {
+      .then((res) => res.json())
+      .catch((reason) => {
         this.user().error(TAG, 'amp-auto-ads config xhr failed: ' + reason);
         return null;
       });
   }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isAutoAdsLayoutCallbackExperimentOn_() {
+    return isExperimentOn(this.win, 'auto-ads-layout-callback');
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  placeAds_() {
+    const ampdoc = this.getAmpDoc();
+    return this.configPromise_.then((configObj) => {
+      if (!configObj) {
+        return;
+      }
+      const noConfigReason = configObj['noConfigReason'];
+      if (noConfigReason) {
+        this.user().warn(TAG, noConfigReason);
+      }
+
+      const placements = getPlacementsFromConfigObj(ampdoc, configObj);
+      const attributes = /** @type {!JsonObject} */ (
+        Object.assign(
+          dict({}),
+          this.adNetwork_.getAttributes(),
+          getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
+        )
+      );
+      const sizing = this.adNetwork_.getSizing();
+      const adConstraints =
+        getAdConstraintsFromConfigObj(ampdoc, configObj) ||
+        this.adNetwork_.getDefaultAdConstraints();
+      const adTracker = new AdTracker(getExistingAds(ampdoc), adConstraints);
+      new AdStrategy(
+        placements,
+        attributes,
+        sizing,
+        adTracker,
+        this.adNetwork_.isResponsiveEnabled()
+      ).run();
+      const stickyAdAttributes = /** @type {!JsonObject} */ (
+        Object.assign(
+          dict({}),
+          attributes,
+          getAttributesFromConfigObj(configObj, Attributes.STICKY_AD_ATTRIBUTES)
+        )
+      );
+      new AnchorAdStrategy(ampdoc, stickyAdAttributes, configObj).run();
+    });
+  }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAutoAds);
 });

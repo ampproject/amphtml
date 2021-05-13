@@ -16,8 +16,9 @@
 
 import {ModeDef, getMode} from '../mode';
 import {Services} from '../services';
-import {calculateEntryPointScriptUrl} from '../service/extension-location';
-import {dev, devAssert} from '../log';
+import {calculateEntryPointScriptUrl} from '../service/extension-script';
+import {dev} from '../log';
+import {devAssert} from '../core/assert';
 import {getService, registerServiceBuilder} from '../service';
 
 const TAG = 'web-worker';
@@ -101,8 +102,15 @@ class AmpWorker {
         ampCors: false,
         bypassInterceptorForDev: getMode().localDev,
       })
-      .then(res => res.text())
-      .then(text => {
+      .then((res) => res.text())
+      .then((text) => {
+        // Replace sourceMappingUrl with the absolute URL
+        const sourceMappingUrl = `${url}.map`;
+        text = text.replace(
+          /^\/\/# sourceMappingURL=.*/,
+          `//# sourceMappingURL=${sourceMappingUrl}`
+        );
+
         // Workaround since Worker constructor only accepts same origin URLs.
         const blob = new win.Blob([text + '\n//# sourceurl=' + url], {
           type: 'text/javascript',
@@ -168,11 +176,9 @@ class AmpWorker {
    * @private
    */
   receiveMessage_(event) {
-    const {
-      method,
-      returnValue,
-      id,
-    } = /** @type {FromWorkerMessageDef} */ (event.data);
+    const {method, returnValue, id} = /** @type {FromWorkerMessageDef} */ (
+      event.data
+    );
 
     const message = this.messages_[id];
     if (!message) {

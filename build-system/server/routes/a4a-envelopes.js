@@ -14,83 +14,93 @@
  * limitations under the License.
  */
 
-const app = require('express').Router();
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
-const log = require('fancy-log');
-const request = require('request');
+const express = require('express');
+const fetch = require('node-fetch');
+const fs = require('fs');
 const {getServeMode, replaceUrls} = require('../app-utils');
-const {red} = require('ansi-colors');
+const {log} = require('../../common/logging');
+const {red} = require('../../common/colors');
+
+const app = express.Router();
 
 // In-a-box envelope.
 // Examples:
 // http://localhost:8000/inabox/examples/animations.amp.html
 // http://localhost:8000/inabox/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/inabox/', (req, res) => {
+app.use(['/inabox', '/inabox-mraid'], async (req, res) => {
   const templatePath =
     process.cwd() + '/build-system/server/server-inabox-template.html';
-  fs.readFileAsync(templatePath, 'utf8').then(template => {
-    template = template.replace(/SOURCE/g, 'AD_URL');
-    const url = getInaboxUrl(req);
-    res.end(fillTemplate(template, url.href, req.query));
-  });
+  let template = await fs.promises.readFile(templatePath, 'utf8');
+  template = template.replace(/SOURCE/g, 'AD_URL');
+  if (req.baseUrl == '/inabox-mraid') {
+    // MRAID does not load amp4ads-host-v0.js
+    template = template.replace('INABOX_ADS_TAG_INTEGRATION', '');
+  }
+  const url = getInaboxUrl(req);
+  res.end(fillTemplate(template, url.href, req.query));
 });
 
 // In-a-box friendly iframe and safeframe envelope.
 // Examples:
 // http://localhost:8000/inabox-friendly/examples/animations.amp.html
 // http://localhost:8000/inabox-friendly/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/inabox-(friendly|safeframe)', (req, res) => {
+app.use('/inabox-(friendly|safeframe)', async (req, res) => {
   const templatePath = '/build-system/server/server-inabox-template.html';
-  fs.readFileAsync(process.cwd() + templatePath, 'utf8')
-    .then(template => {
-      let url;
-      if (req.baseUrl == '/inabox-friendly') {
-        url = getInaboxUrl(req, 'inabox-viewport-friendly');
-        template = template.replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"');
-      } else {
-        url = getInaboxUrl(req);
-        template = template
-          .replace(
-            /NAME/g,
-            '1-0-31;LENGTH;BODY{&quot;uid&quot;:&quot;test&quot;}'
-          )
-          .replace(
-            /SOURCE/g,
-            url.origin + '/test/fixtures/served/iframe-safeframe.html'
-          );
-      }
-      return requestFromUrl(template, url.href, req.query);
-    })
-    .then(result => {
-      res.end(result);
-    })
-    .catch(err => {
-      log(red('Error:'), err);
-      res.status(500);
-      res.end();
-    });
+  try {
+    let template = await fs.promises.readFile(
+      process.cwd() + templatePath,
+      'utf8'
+    );
+
+    const url = getInaboxUrl(req);
+    if (req.baseUrl == '/inabox-friendly') {
+      template = template
+        .replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"')
+        .replace('INABOX_ADS_TAG_INTEGRATION', '');
+    } else {
+      template = template
+        .replace(
+          /NAME/g,
+          '1-0-31;LENGTH;BODY{&quot;uid&quot;:&quot;test&quot;}'
+        )
+        .replace(
+          /SOURCE/g,
+          url.origin + '/test/fixtures/served/iframe-safeframe.html'
+        );
+    }
+    const result = await requestFromUrl(template, url.href, req.query);
+    res.end(result);
+  } catch (err) {
+    log(red('Error:'), err);
+    res.status(500);
+    res.end();
+  }
 });
 
 // A4A envelope.
 // Examples:
 // http://localhost:8000/a4a[-3p]/examples/animations.amp.html
 // http://localhost:8000/a4a[-3p]/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/a4a(|-3p)/', (req, res) => {
+app.use('/a4a(|-3p)/', async (req, res) => {
   const force3p = req.baseUrl.startsWith('/a4a-3p');
   const templatePath = '/build-system/server/server-a4a-template.html';
   const url = getInaboxUrl(req);
-  fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
-    const content = fillTemplate(template, url.href, req.query)
-      .replace(/CHECKSIG/g, force3p || '')
-      .replace(/DISABLE3PFALLBACK/g, !force3p);
-    res.end(replaceUrls(getServeMode(), content));
-  });
+  const template = await fs.promises.readFile(
+    process.cwd() + templatePath,
+    'utf8'
+  );
+  const branchLevelExperiments = req.query.eid;
+
+  const content = fillTemplate(template, url.href, req.query)
+    .replace(/CHECKSIG/g, force3p || '')
+    .replace(/DATAEXPERIMENTIDS/, branchLevelExperiments || '')
+    .replace(/DISABLE3PFALLBACK/g, (!force3p).toString());
+  res.end(replaceUrls(getServeMode(), content));
 });
 
 /**
- * @param {Request} req
- * @param {string|undefined} extraExperiment
+ * @param {express.Request} req
+ * @param {string=} extraExperiment
  * @return {!URL}
  */
 function getInaboxUrl(req, extraExperiment) {
@@ -102,6 +112,9 @@ function getInaboxUrl(req, extraExperiment) {
   }
   // this tells local server to convert the AMP document to AMP4ADS spec
   url.searchParams.set('inabox', '1');
+  if (req.baseUrl == '/inabox-mraid') {
+    url.searchParams.set('mraid', '1');
+  }
   // turn on more logs if requested
   const logLevel = url.searchParams.get('log');
   if (logLevel) {
@@ -128,23 +141,15 @@ function getInaboxUrl(req, extraExperiment) {
  * @param {Object} query
  * @return {!Promise<?string>}
  */
-function requestFromUrl(template, url, query) {
-  return new Promise((resolve, reject) => {
-    request(url, (error, response, body) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      if (
-        !response.headers['content-type'] ||
-        response.headers['content-type'].startsWith('text/html')
-      ) {
-        resolve(fillTemplate(template, url, query, body));
-      } else {
-        resolve(null);
-      }
-    });
-  });
+async function requestFromUrl(template, url, query) {
+  const response = await fetch(url);
+  if (
+    !response.headers.has('Content-Type') ||
+    response.headers.get('Content-Type').startsWith('text/html')
+  ) {
+    return fillTemplate(template, url, query, await response.text());
+  }
+  return null;
 }
 
 /**
@@ -152,7 +157,7 @@ function requestFromUrl(template, url, query) {
  * @param {string} template
  * @param {string} url
  * @param {Object} query
- * @param {string|undefined} body
+ * @param {string=} body
  * @return {string}
  */
 function fillTemplate(template, url, query, body) {
@@ -169,12 +174,16 @@ function fillTemplate(template, url, query, body) {
   }
   return (
     template
-      .replace(/BODY/g, newBody)
-      .replace(/LENGTH/g, length)
+      .replace(/BODY/g, newBody ?? '')
+      .replace(/LENGTH/g, length.toString())
       .replace(/AD_URL/g, url)
       .replace(/OFFSET/g, query.offset || '0px')
       .replace(/AD_WIDTH/g, query.width || '300')
       .replace(/AD_HEIGHT/g, query.height || '250')
+      .replace(
+        'INABOX_ADS_TAG_INTEGRATION',
+        '<script src="/examples/amphtml-ads/ads-tag-integration.js"></script>'
+      )
       // Clear out variables that are not already replaced beforehand.
       .replace(/NAME/g, 'inabox')
       .replace(/SOURCE/g, '')

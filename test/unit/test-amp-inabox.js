@@ -18,32 +18,29 @@ import * as Service from '../../src/service';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {installAmpdocServices} from '../../src/service/core-services';
 import {installAmpdocServicesForInabox} from '../../src/inabox/inabox-services';
+import {removeItem} from '../../src/core/types/array';
 
-describe('amp-inabox', () => {
-  describes.realWin('installAmpdocServicesForInabox', {amp: false}, env => {
-    let sandbox;
-    beforeEach(() => {
-      sandbox = env.sandbox;
-    });
-
+describes.sandboxed('amp-inabox', {}, () => {
+  describes.realWin('installAmpdocServicesForInabox', {amp: false}, (env) => {
     it('should install same services for inabox', () => {
       let installedServices = [];
       const ampdoc = new AmpDocSingle(env.win);
-      sandbox
+      env.sandbox
         .stub(Service, 'registerServiceBuilderForDoc')
         .callsFake((ampdoc, id) => {
           installedServices.push(id);
         });
-      sandbox
+      env.sandbox
         .stub(Service, 'rejectServicePromiseForDoc')
         .callsFake((ampdoc, id) => {
           installedServices.push(id);
         });
-      sandbox.stub(Service, 'getServiceForDoc').returns({});
+      env.sandbox.stub(Service, 'getServiceForDoc').returns({});
       installAmpdocServices(ampdoc);
 
       const installedServicesByRegularAmp = installedServices.slice(0);
-
+      // The inabox mode does not need the loading indicator.
+      removeItem(installedServicesByRegularAmp, 'loadingIndicator');
       installedServices = [];
       installAmpdocServicesForInabox(ampdoc);
       expect(installedServices).to.deep.equal(installedServicesByRegularAmp);

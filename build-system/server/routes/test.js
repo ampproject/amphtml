@@ -16,7 +16,7 @@
 
 const router = require('express').Router();
 
-router.use('/form/post/success', function(req, res) {
+router.use('/form/post/success', function (req, res) {
   delete req.query.__amp_source_origin;
   res.json({
     name: 'John Miller',
@@ -24,7 +24,11 @@ router.use('/form/post/success', function(req, res) {
   });
 });
 
-router.use('/date-picker/config.json', (req, res) => {
+router.use('/date-picker/config.json', (_req, res) => {
+  /**
+   * @param {Date} date
+   * @return {string}
+   */
   function getISO8601Date(date) {
     const year = date.toLocaleString('en-US', {year: 'numeric'});
     const month = date.toLocaleString('en-US', {month: '2-digit'});

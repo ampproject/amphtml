@@ -19,37 +19,51 @@
  * and getMode().localDev to true.
  * @param {Object} babelTypes
  */
-const {resolve, dirname} = require('path');
-module.exports = function({types: t}) {
+const {resolve, dirname, join, relative} = require('path').posix;
+
+let shouldResolveDevelopmentMode = true;
+
+// This plugin is not executed when AMP is building resources in isForTesting mode.
+module.exports = function ({types: t}) {
   let getModeFound = false;
   return {
+    pre() {
+      const {isEsmBuild = true} = this.opts;
+      // Only apply the development resolution when building module output.
+      // This is due to the module output only applying to AMP Caches.
+      shouldResolveDevelopmentMode = isEsmBuild;
+    },
     visitor: {
       ImportDeclaration({node}, state) {
         const {specifiers, source} = node;
         if (!source.value.endsWith('/mode')) {
           return;
         }
-        specifiers.forEach(specifier => {
+        specifiers.forEach((specifier) => {
           if (specifier.imported && specifier.imported.name === 'getMode') {
-            const filepath = resolve(
-              dirname(state.file.opts.filename),
-              source.value
+            const filepath = relative(
+              join(__dirname, '../../../'),
+              resolve(dirname(state.file.opts.filename), source.value)
             );
-            if (filepath.endsWith('/amphtml/src/mode')) {
+            if (filepath.endsWith('src/mode')) {
               getModeFound = true;
             }
           }
         });
       },
       MemberExpression(path) {
-        const {node} = path;
-        const {object: obj, property} = node;
-        const {callee} = obj;
         if (!getModeFound) {
           return;
         }
+
+        const {node} = path;
+        const {object: obj, property} = node;
+        const {callee} = obj;
         if (callee && callee.name === 'getMode') {
           if (property.name === 'test' || property.name === 'localDev') {
+            path.replaceWith(t.booleanLiteral(false));
+          }
+          if (shouldResolveDevelopmentMode && property.name === 'development') {
             path.replaceWith(t.booleanLiteral(false));
           }
           if (property.name === 'minified') {

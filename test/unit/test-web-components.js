@@ -21,7 +21,7 @@ import {
   setShadowDomSupportedVersionForTesting,
 } from '../../src/web-components';
 
-describe('web components', () => {
+describes.sandboxed('web components', {}, () => {
   beforeEach(() => {
     setShadowDomSupportedVersionForTesting(undefined);
   });
@@ -33,7 +33,7 @@ describe('web components', () => {
   });
 });
 
-describes.realWin('Web Components spec', {}, env => {
+describes.realWin('Web Components spec', {}, (env) => {
   let win;
 
   beforeEach(() => {

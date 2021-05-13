@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {PlayingStates} from '../../../../src/video-interface';
+import {PlayingStates, VideoEvents} from '../../../../src/video-interface';
 import {Services} from '../../../../src/services';
+import {listenOncePromise} from '../../../../src/event-helper';
 import AmpViqeoPlayer from '../amp-viqeo-player';
 
 describes.realWin(
@@ -26,7 +27,7 @@ describes.realWin(
     },
     allowExternalResources: true,
   },
-  function(env) {
+  function (env) {
     this.timeout(4000);
     let win, doc;
 
@@ -35,8 +36,16 @@ describes.realWin(
       doc = win.document;
     });
 
+    async function fakePostMessage(viqeoElement, info) {
+      const impl = await viqeoElement.getImpl(false);
+      impl.handleViqeoMessages_({
+        source: viqeoElement.querySelector('iframe').contentWindow,
+        data: {source: 'ViqeoPlayer', ...info},
+      });
+    }
+
     it.skip('test-get-data', () => {
-      return getViqeo().then(p => {
+      return getViqeo().then((p) => {
         const {viqeoElement, entry, viqeo} = p;
         expect(entry.video.element).to.equal(viqeoElement);
         expect(entry.video instanceof AmpViqeoPlayer).to.equal(true);
@@ -65,7 +74,7 @@ describes.realWin(
 
     describe.skip('test-playing-actions', () => {
       it('renders responsively', () => {
-        return getViqeo().then(p => {
+        return getViqeo().then((p) => {
           const iframe = p.viqeoElement.querySelector('iframe');
           expect(iframe).to.not.be.null;
           expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -73,7 +82,7 @@ describes.realWin(
       });
 
       it('should propagate autoplay to ad iframe', () => {
-        return getViqeo({opt_params: {autoplay: ''}}).then(p => {
+        return getViqeo({opt_params: {autoplay: ''}}).then((p) => {
           const iframe = p.viqeoElement.querySelector('iframe');
           const data = JSON.parse(iframe.name).attributes;
           expect(data).to.be.ok;
@@ -86,7 +95,7 @@ describes.realWin(
         'should propagate autoplay=false ' +
           'if element has not autoplay attribute to ad iframe',
         () => {
-          return getViqeo().then(p => {
+          return getViqeo().then((p) => {
             const iframe = p.viqeoElement.querySelector('iframe');
             const data = JSON.parse(iframe.name).attributes;
             expect(data).to.be.ok;
@@ -97,7 +106,7 @@ describes.realWin(
       );
 
       it('should paused without autoplay', () => {
-        return getViqeo().then(p => {
+        return getViqeo().then((p) => {
           const curState = p.videoManager.getPlayingState(p.viqeo);
           return expect(curState).to.equal(PlayingStates.PAUSED);
         });
@@ -106,7 +115,7 @@ describes.realWin(
 
     describe('createPlaceholderCallback', () => {
       it('should create a placeholder image', () => {
-        return getViqeo().then(p => {
+        return getViqeo().then((p) => {
           const img = p.viqeoElement.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
@@ -120,25 +129,62 @@ describes.realWin(
       });
     });
 
+    it('should forward events', () => {
+      return getViqeo().then(({viqeoElement}) => {
+        return Promise.resolve()
+          .then(async () => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.LOAD);
+            await fakePostMessage(viqeoElement, {action: 'ready'});
+            return p;
+          })
+          .then(async () => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.PLAYING);
+            await fakePostMessage(viqeoElement, {action: 'play'});
+            return p;
+          })
+          .then(async () => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.PAUSE);
+            await fakePostMessage(viqeoElement, {action: 'pause'});
+            return p;
+          })
+          .then(async () => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.MUTED);
+            await fakePostMessage(viqeoElement, {action: 'mute'});
+            return p;
+          })
+          .then(async () => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.UNMUTED);
+            await fakePostMessage(viqeoElement, {action: 'unmute'});
+            return p;
+          })
+          .then(async () => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.ENDED);
+            await fakePostMessage(viqeoElement, {action: 'end'});
+            return p;
+          })
+          .then(async () => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.AD_START);
+            await fakePostMessage(viqeoElement, {action: 'startAdvert'});
+            return p;
+          })
+          .then(async () => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.AD_END);
+            await fakePostMessage(viqeoElement, {action: 'endAdvert'});
+            return p;
+          });
+      });
+    });
+
     function getViqeo(params) {
-      const {
-        id,
-        viqeoProfileId,
-        viqeoId,
-        width,
-        height,
-        opt_params,
-      } = Object.assign(
-        {
-          id: 'myVideo',
-          viqeoProfileId: 184,
-          viqeoId: '922d04f30b66f1a32eb2',
-          width: 320,
-          height: 180,
-          opt_params: {},
-        },
-        params
-      );
+      const {id, viqeoProfileId, viqeoId, width, height, opt_params} = {
+        id: 'myVideo',
+        viqeoProfileId: 184,
+        viqeoId: '922d04f30b66f1a32eb2',
+        width: 320,
+        height: 180,
+        opt_params: {},
+        ...params,
+      };
 
       const viqeoElement = doc.createElement('amp-viqeo-player');
 
@@ -152,19 +198,17 @@ describes.realWin(
       height && viqeoElement.setAttribute('height', height);
 
       opt_params &&
-        Object.keys(opt_params).forEach(key => {
+        Object.keys(opt_params).forEach((key) => {
           viqeoElement.setAttribute(key, opt_params[key]);
         });
 
       doc.body.appendChild(viqeoElement);
       return viqeoElement
-        .build()
-        .then(() => {
-          viqeoElement.layoutCallback.bind(viqeoElement);
-        })
+        .buildInternal()
+        .then(() => viqeoElement.layoutCallback())
         .then(() => {
           const videoManager = Services.videoManagerForDoc(doc);
-          const entry = videoManager.getEntryForElement_(viqeoElement);
+          const entry = videoManager.getEntry_(viqeoElement);
           return Promise.resolve({
             viqeoElement,
             videoManager,

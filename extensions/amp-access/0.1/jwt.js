@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
-import {pemToBytes} from '../../../src/utils/pem';
-import {stringToBytes, utf8Decode} from '../../../src/utils/bytes';
+import {
+  base64DecodeToBytes,
+  base64UrlDecodeToBytes,
+} from '../../../src/core/types/string/base64';
+import {stringToBytes, utf8Decode} from '../../../src/core/types/string/bytes';
 import {tryParseJson} from '../../../src/json';
 
 /**
@@ -28,6 +30,26 @@ import {tryParseJson} from '../../../src/json';
  * }}
  */
 let JwtTokenInternalDef;
+
+/**
+ * Converts a text in PEM format into a binary array buffer.
+ * @param {string} pem
+ * @return {!Uint8Array}
+ * @visibleForTesting
+ */
+export function pemToBytes(pem) {
+  const key = pem
+    .trim()
+    // Remove pem prefix, e.g. "----BEGIN PUBLIC KEY----".
+    .replace(/^-+BEGIN[^-]*-+/, '')
+    // Remove pem suffix, e.g. "----END PUBLIC KEY----".
+    .replace(/-+END[^-]*-+$/, '')
+    // Remove line breaks.
+    .replace(/[\r\n]/g, '')
+    // Remove surrounding whitespace.
+    .trim();
+  return base64DecodeToBytes(key);
+}
 
 /**
  * Provides helper methods to decode and verify JWT tokens.
@@ -75,17 +97,17 @@ export class JwtHelper {
     if (!this.subtle_) {
       throw new Error('Crypto is not supported on this platform');
     }
-    const decodedPromise = new Promise(resolve =>
+    const decodedPromise = new Promise((resolve) =>
       resolve(this.decodeInternal_(encodedToken))
     );
-    return decodedPromise.then(decoded => {
+    return decodedPromise.then((decoded) => {
       const alg = decoded.header['alg'];
       if (!alg || alg != 'RS256') {
         // TODO(dvoytenko@): Support other RS* algos.
         throw new Error('Only alg=RS256 is supported');
       }
       return this.importKey_(pemPromise)
-        .then(key => {
+        .then((key) => {
           const sig = base64UrlDecodeToBytes(decoded.sig);
           return this.subtle_.verify(
             /* options */ {name: 'RSASSA-PKCS1-v1_5'},
@@ -94,7 +116,7 @@ export class JwtHelper {
             stringToBytes(decoded.verifiable)
           );
         })
-        .then(isValid => {
+        .then((isValid) => {
           if (isValid) {
             return decoded.payload;
           }
@@ -138,7 +160,7 @@ export class JwtHelper {
    * @return {!Promise<!webCrypto.CryptoKey>}
    */
   importKey_(pemPromise) {
-    return pemPromise.then(pem => {
+    return pemPromise.then((pem) => {
       return this.subtle_.importKey(
         /* format */ 'spki',
         pemToBytes(pem),

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+//
 import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller';
 
 describes.endtoend(
   'amp-sidebar',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-sidebar/amp-sidebar.html',
+    version: '1.0',
+    fixture: 'amp-sidebar/amp-sidebar.html',
+    experiments: ['bento-sidebar'],
     environments: ['single', 'viewer-demo'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(() => {
@@ -48,14 +49,25 @@ describes.endtoend(
       await expect(controller.getElementProperty(sidebar, 'hidden')).to.be
         .false;
 
+      // Wait for the button to become visible
+      await controller.switchToShadowRoot(sidebar);
+      const backdrop = await controller.findElement('[part=backdrop]');
+
+      // After open animation completed backdrop's
+      // inline opacity style is cleared
+      await expect(
+        controller.getElementProperty(backdrop, 'style')
+      ).to.have.length(0);
+
       await expect(controller.getElementRect(sidebar)).to.include({
         width: 300,
         left: 0,
       });
 
-      const backingImage = await controller.findElement('#image img');
+      await controller.switchToLight();
+      const checkWidth = await controller.findElement('#checkWidth');
       await expect(
-        controller.getElementProperty(backingImage, 'clientWidth')
+        controller.getElementProperty(checkWidth, 'clientWidth')
       ).to.equal(300);
     });
 
@@ -68,11 +80,21 @@ describes.endtoend(
         .false;
 
       // Wait for the button to become visible
+      await controller.switchToShadowRoot(sidebar);
+      const backdrop = await controller.findElement('[part=backdrop]');
+
+      // After open animation completed backdrop's
+      // inline opacity style is cleared
+      await expect(
+        controller.getElementProperty(backdrop, 'style')
+      ).to.have.length(0);
+
       await expect(controller.getElementRect(sidebar)).to.include({
         width: 300,
         right: 300,
       });
 
+      await controller.switchToLight();
       const close = await controller.findElement('#close');
       await controller.click(close);
       await expect(controller.getElementProperty(sidebar, 'hidden')).to.be.true;
@@ -99,8 +121,9 @@ describes.endtoend(
       await expect(controller.getElementProperty(sidebar, 'hidden')).to.be
         .false;
 
-      const mask = await controller.findElement('.i-amphtml-sidebar-mask');
-      await controller.click(mask);
+      await controller.switchToShadowRoot(sidebar);
+      const backdrop = await controller.findElement('[part=backdrop]');
+      await controller.click(backdrop);
 
       await expect(controller.getElementProperty(sidebar, 'hidden')).to.be.true;
     });

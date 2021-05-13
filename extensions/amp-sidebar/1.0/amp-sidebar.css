@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,149 +14,62 @@
  * limitations under the License.
  */
 
+/* Pre-upgrade: not displayed */
+amp-sidebar[hidden] {
+  display: none !important;
+}
+
 amp-sidebar {
-  --story-page-vh: 1vh;
-  position: fixed !important;
+  color: black;
+  background-color: #efefef;
+  height: 100vh;
   top: 0;
   max-height: 100vh !important;
-  height: 100vh;
+  /**
+   * Max width allowed to be configurable by user.  If user wants width to be
+   * controlled by content size and max-width, then this property needs to be
+   * configurable.
+   */
   max-width: 80vw;
-  background-color: #efefef;
   min-width: 45px !important;
   outline: none;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
   z-index: 2147483647;
-  -webkit-overflow-scrolling: touch;
-  will-change: transform;
 }
 
-amp-sidebar[side="left"] {
-  left: 0 !important;
-  transform: translateX(-100%);
-  animation-name: i-amphtml-sidebar-slide-out-left;
+amp-sidebar::part(c),
+amp-sidebar::part(wrapper),
+amp-sidebar::part(sidebar) {
+  /* Inherit values specified on amp-sidebar */
+  color: inherit;
+  background-color: inherit;
+  height: inherit;
+  top: inherit;
+  max-height: inherit;
+  max-width: inherit;
+  min-width: inherit;
+  outline: inherit;
+  z-index: inherit;
+
+  /* Use unspecified default values from amp-sidebar element */
+  width: inherit;
+  padding: inherit;
+  border: inherit;
 }
 
-amp-sidebar[side="left"][open] {
-  animation-name: i-amphtml-sidebar-slide-in-left;
-}
-
-amp-sidebar[side="right"] {
-  right: 0 !important;
-  transform: translateX(100%);
-  animation-name: i-amphtml-sidebar-slide-out-right;
-}
-
-amp-sidebar[side="right"][open] {
-  animation-name: i-amphtml-sidebar-slide-in-right;
-}
-
-amp-sidebar[side][i-amphtml-sidebar-opened] {
-  transform: none;
-  animation: none;
-}
-
-amp-sidebar[side], .i-amphtml-sidebar-mask {
-  /*
-   * Note: This uses animations (instead of transitions) to make sure the
-   * animation always plays correctly. Previously, the display was toggled in a
-   * separate step from applying the attribute for the transition, However,
-   * runtime seems to now modify the element in a way that prevents transitions
-   * from working correctly.
-   */
-  /* Use same transition as PWA App-Shell https://goo.gl/AGFioO */
-  animation-duration: 233ms;
-  animation-timing-function: cubic-bezier(0,0,.21,1);
-  animation-fill-mode: forwards;
-}
-
-.i-amphtml-toolbar > ul, .i-amphtml-toolbar > ol {
-  display: flex;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  overflow: auto;
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.i-amphtml-sidebar-mask {
+/**
+ * Hide the amp-sidebar and remove from the flow of the page so user applied
+ * styling is not shown directly on amp-sidebar element.
+ */
+amp-sidebar {
+  visibility: hidden !important;
   position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  /* Prevent someone from making this a full-sceen image */
-  background-image: none !important;
-  background-color: rgba(0, 0, 0, 0.5);
-  animation-name: i-amphtml-sidebar-mask-fade-out;
-  z-index: 2147483646;
 }
 
-.i-amphtml-sidebar-mask[open] {
-  animation-name: i-amphtml-sidebar-mask-fade-in;
-}
-
-.i-amphtml-sidebar-mask[i-amphtml-sidebar-opened] {
-  animation: none;
-}
-
-@keyframes i-amphtml-sidebar-slide-in-left {
-  from {
-    transform: translateX(-100%);
-  }
-
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes i-amphtml-sidebar-slide-out-left {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-@keyframes i-amphtml-sidebar-slide-in-right {
-  from {
-    transform: translateX(100%);
-  }
-
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes i-amphtml-sidebar-slide-out-right {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes i-amphtml-sidebar-mask-fade-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes i-amphtml-sidebar-mask-fade-out {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
+/**
+ * The host element, amp-sidebar, is not visible to allow direct styling to be
+ * inherited by its children.  Its children should be visible so the styling
+ * is displayed.
+ */
+amp-sidebar::part(c) {
+  visibility: visible !important;
 }

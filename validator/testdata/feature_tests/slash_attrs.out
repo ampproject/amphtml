@@ -33,16 +33,16 @@ FAIL
 |    <p data-this-is-fine="">
 |    <p data-\this-is-not="">
 >>   ^~~~~~~~~
-feature_tests/slash_attrs.html:33:2 The attribute 'data-\this-is-not' may not appear in tag 'p'. [DISALLOWED_HTML]
+feature_tests/slash_attrs.html:33:2 The attribute 'data-\this-is-not' may not appear in tag 'p'.
 |    <p data-/this-is-not="">
 >>   ^~~~~~~~~
-feature_tests/slash_attrs.html:34:2 The attribute 'data-/this-is-not' may not appear in tag 'p'. [DISALLOWED_HTML]
+feature_tests/slash_attrs.html:34:2 The attribute 'data-/this-is-not' may not appear in tag 'p'.
 |    <p data-\this-is-not>
 >>   ^~~~~~~~~
-feature_tests/slash_attrs.html:35:2 The attribute 'data-\this-is-not' may not appear in tag 'p'. [DISALLOWED_HTML]
+feature_tests/slash_attrs.html:35:2 The attribute 'data-\this-is-not' may not appear in tag 'p'.
 |    <p data-/this-is-not>
 >>   ^~~~~~~~~
-feature_tests/slash_attrs.html:36:2 The attribute 'data-/this-is-not' may not appear in tag 'p'. [DISALLOWED_HTML]
+feature_tests/slash_attrs.html:36:2 The attribute 'data-/this-is-not' may not appear in tag 'p'.
 |
 |  </body>
 |  </html>

@@ -64,7 +64,7 @@ export function installScrollToggledFx(ampdoc, element, type) {
   registerServiceBuilderForDoc(ampdoc, fxScrollDispatch, ScrollToggleDispatch);
   const dispatch = getServiceForDoc(ampdoc, fxScrollDispatch);
 
-  const resources = Services.resourcesForDoc(element);
+  const mutator = Services.mutatorForDoc(element);
 
   let shouldMutate = true;
 
@@ -78,7 +78,7 @@ export function installScrollToggledFx(ampdoc, element, type) {
       return;
     }
 
-    dispatch.observe(isShown => {
+    dispatch.observe((isShown) => {
       scrollToggle(
         element,
         isShown,
@@ -94,7 +94,7 @@ export function installScrollToggledFx(ampdoc, element, type) {
     installScrollToggleStyles(element);
   };
 
-  resources.measureMutateElement(element, measure, mutate);
+  mutator.measureMutateElement(element, measure, mutate);
 }
 
 /**
@@ -113,7 +113,7 @@ function scrollToggle(element, isShown, position) {
     scrollToggleFloatIn(element, offset);
   };
 
-  Services.resourcesForDoc(element).measureMutateElement(
+  Services.mutatorForDoc(element).measureMutateElement(
     element,
     measure,
     mutate
@@ -150,8 +150,8 @@ export class FxElement {
     /** @private @const {!../../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(element);
 
-    /** @const @private {!../../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(element);
+    /** @const @private {!../../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(element);
 
     /** @type {?number} */
     this.viewportHeight = null;
@@ -215,7 +215,7 @@ export class FxElement {
     /** @public {boolean} */
     this.initialTrigger = false;
 
-    this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
+    this.getAdjustedViewportHeight_().then((adjustedViewportHeight) => {
       this.adjustedViewportHeight = adjustedViewportHeight;
 
       // start observing position of the element.
@@ -237,7 +237,7 @@ export class FxElement {
 
     this.viewport_.onResize(() => {
       this.updateViewportHeight_();
-      this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
+      this.getAdjustedViewportHeight_().then((adjustedViewportHeight) => {
         this.adjustedViewportHeight = adjustedViewportHeight;
       });
     });
@@ -245,7 +245,7 @@ export class FxElement {
 
   /** @private	*/
   updateViewportHeight_() {
-    this.resources_.measureElement(() => {
+    this.mutator_.measureElement(() => {
       this.viewportHeight = this.viewport_.getHeight();
     });
   }
@@ -261,7 +261,7 @@ export class FxElement {
    * @private
    */
   getAdjustedViewportHeight_() {
-    return this.resources_.measureElement(() => {
+    return this.mutator_.measureElement(() => {
       const viewportHeight = this.viewport_.getHeight();
 
       let offsetTop = 0;

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {KeyCodes, Keys} from '../../../../src/utils/key-codes';
+import {KeyCodes, Keys} from '../../../../src/core/constants/key-codes';
 import {KeyboardHandler} from '../keyboard-handler';
 import {Messaging} from '../messaging/messaging';
 
-describes.realWin('KeyboardHandler', {}, env => {
+describes.realWin('KeyboardHandler', {}, (env) => {
   let messages;
 
   class WindowPortEmulator {
@@ -52,7 +52,7 @@ describes.realWin('KeyboardHandler', {}, env => {
     );
   });
 
-  ['keydown', 'keypress', 'keydown'].forEach(eventType => {
+  ['keydown', 'keypress', 'keydown'].forEach((eventType) => {
     describe(`for ${eventType} events`, () => {
       describe('when event targeted on window', () => {
         it('forwards ESC events', () => {
@@ -354,7 +354,7 @@ describes.realWin('KeyboardHandler', {}, env => {
         });
       });
 
-      ['TEXTAREA', 'BUTTON', 'SELECT', 'OPTION'].forEach(nodeName => {
+      ['TEXTAREA', 'BUTTON', 'SELECT', 'OPTION'].forEach((nodeName) => {
         describe(`when event targeted on ${nodeName}`, () => {
           let node;
 
@@ -567,21 +567,19 @@ function createKeyboardEventInitWithKeyCode(key, keyCode) {
  * @return {!JsonObject}
  */
 function createKeyboardEventInit(overrideKeyboardEventInit) {
-  return Object.assign(
-    {
-      key: '',
-      code: '',
-      location: 0,
-      ctrlKey: false,
-      shiftKey: false,
-      altKey: false,
-      metaKey: false,
-      repeat: false,
-      isComposing: false,
-      charCode: 0,
-      keyCode: 0,
-      which: 0,
-    },
-    overrideKeyboardEventInit
-  );
+  return {
+    key: '',
+    code: '',
+    location: 0,
+    ctrlKey: false,
+    shiftKey: false,
+    altKey: false,
+    metaKey: false,
+    repeat: false,
+    isComposing: false,
+    charCode: 0,
+    keyCode: 0,
+    which: 0,
+    ...overrideKeyboardEventInit,
+  };
 }

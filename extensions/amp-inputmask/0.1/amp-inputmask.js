@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {TextMask} from './text-mask';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
@@ -44,8 +44,10 @@ export class AmpInputmaskService {
    * Install the inputmask service and controllers.
    */
   install() {
-    const maskElements = this.ampdoc.getRootNode().querySelectorAll('[mask]');
-    iterateCursor(maskElements, element => {
+    const maskElements = this.ampdoc
+      .getRootNode()
+      .querySelectorAll('input[mask]');
+    iterateCursor(maskElements, (element) => {
       if (TextMask.isMasked(element)) {
         return;
       }
@@ -59,13 +61,13 @@ export class AmpInputmaskService {
    */
   uninstall() {
     this.domUpdateUnlistener_();
-    this.masks_.forEach(m => m.dispose());
+    this.masks_.forEach((m) => m.dispose());
     this.masks_ = [];
   }
 }
 
-AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc(SERVICE, function(ampdoc) {
+AMP.extension(TAG, '0.1', function (AMP) {
+  AMP.registerServiceForDoc(SERVICE, function (ampdoc) {
     return new AmpInputmaskService(ampdoc);
   });
 });

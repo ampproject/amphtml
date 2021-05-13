@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {isEnumValue} from '../../../src/types';
+import {isEnumValue} from '../../../src/core/types';
 import {parseQueryString} from '../../../src/url';
 
 /**
@@ -44,12 +44,34 @@ export const EmbedMode = {
    * redundant.
    *
    * This differs from the NOT_EMBEDDED embed mode in the following ways:
-   * - Removes "share" pill from desktop UI
-   * - Removes "share" icon from mobile UI
+   * - Removes share icon from system layer
    * - Removes sharing section from bookend
    * - TODO(#14923): Removes the link information from embedded UIs.
    */
   NO_SHARING: 2,
+
+  /**
+   * This mode is intended for a preview of the story.
+   *
+   * This differs from the NOT_EMBEDDED embed mode in the following ways:
+   * - Auto-advances pages by a given duration.
+   * - Hides bookend
+   * - Hides all system layer buttons
+   * - Disables swipe-based user education
+   * - Disallows ads
+   */
+  PREVIEW: 3,
+
+  /**
+   * This mode is intended for embedders that natively handle the audio and
+   * sharing experiences, through native controls and viewer communication.
+   *
+   * This differs from the NOT_EMBEDDED embed mode in the following ways:
+   * - Removes share icon from system layer
+   * - Removes sharing section from bookend
+   * - Removes audio icon from system layer
+   */
+  NO_SHARING_NOR_AUDIO_UI: 4,
 };
 
 /**
@@ -61,7 +83,7 @@ export const EmbedModeParam = 'embedMode';
 /**
  * @param {string} str
  * @return {!EmbedMode}
- * @private
+ * @package
  */
 export function parseEmbedMode(str) {
   const params = parseQueryString(str);

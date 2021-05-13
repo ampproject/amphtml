@@ -22,7 +22,7 @@ describes.realWin(
       extensions: ['amp-riddle-quiz'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
 
@@ -33,7 +33,7 @@ describes.realWin(
     });
 
     it('should have iframe when built', () => {
-      element.build().then(() => {
+      element.buildInternal().then(() => {
         const iframe = element.querySelector('iframe');
         expect(iframe).to.not.be.null;
       });

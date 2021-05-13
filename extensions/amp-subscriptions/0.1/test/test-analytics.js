@@ -22,16 +22,16 @@ import {
 } from '../analytics';
 import {user} from '../../../../src/log';
 
-//--> sandbox.stub(ServiceUrl, 'adsUrl', url => serverUrl + url);
+//--> env.sandbox.stub(ServiceUrl, 'adsUrl', url => serverUrl + url);
 
 const TAG = 'amp-subscriptions';
-const OPT_VARS = {'serviceId': 'service1'};
+const OPT_VARS = {'serviceId': 'platform1'};
 const INT_VARS = {
   'action': 'action1',
   'status': ActionStatus.SUCCESS,
 };
 
-describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
+describes.realWin('SubscriptionAnalytics', {amp: true}, (env) => {
   let analytics;
   let ampdoc;
 
@@ -43,23 +43,23 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
   it('should not fail', () => {
     analytics.event('event1');
     analytics.serviceEvent('event1', 'serviceId');
-    analytics.actionEvent('service1', 'action1', ActionStatus.SUCCESS);
+    analytics.actionEvent('platform1', 'action1', ActionStatus.SUCCESS);
   });
 
   describe('internal routing', () => {
     let eventStub;
 
     beforeEach(() => {
-      eventStub = sandbox.stub(analytics, 'event');
+      eventStub = env.sandbox.stub(analytics, 'event');
     });
 
     it('should trigger a service event', () => {
-      analytics.serviceEvent('event1', 'service1');
+      analytics.serviceEvent('event1', 'platform1');
       expect(eventStub).to.be.calledOnce.calledWith('event1', OPT_VARS);
     });
 
     it('should trigger an action event', () => {
-      analytics.actionEvent('service1', 'action1', ActionStatus.SUCCESS);
+      analytics.actionEvent('platform1', 'action1', ActionStatus.SUCCESS);
       expect(eventStub).to.be.calledOnce.calledWith(
         SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
         OPT_VARS,
@@ -73,8 +73,8 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
     let ampLogStub;
 
     beforeEach(() => {
-      userLogStub = sandbox.stub(user(), 'info');
-      ampLogStub = sandbox.stub(AmpAnalytics, 'triggerAnalyticsEvent');
+      userLogStub = env.sandbox.stub(user(), 'info');
+      ampLogStub = env.sandbox.stub(AmpAnalytics, 'triggerAnalyticsEvent');
     });
 
     it('should log an event', () => {
@@ -92,7 +92,7 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
     });
 
     it('should log an action event', () => {
-      analytics.actionEvent('service1', 'action1', ActionStatus.SUCCESS);
+      analytics.actionEvent('platform1', 'action1', ActionStatus.SUCCESS);
       expect(userLogStub).to.be.calledOnce.calledWith(
         TAG,
         'subscriptions-action-action1-success',
@@ -108,7 +108,7 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
     it('should log a service event', () => {
       analytics.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
-        'service1'
+        'platform1'
       );
       expect(userLogStub).to.be.calledOnce.calledWith(
         TAG,
@@ -144,14 +144,14 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
     });
 
     it('should notify about service events', () => {
-      analytics.serviceEvent('servEvent', 'service1');
+      analytics.serviceEvent('servEvent', 'platform1');
       expect(eventStr).to.equal('servEvent');
       expect(optParams).to.deep.equal(OPT_VARS);
       expect(intParams).to.deep.equal({});
     });
 
     it('should notify about action events', () => {
-      analytics.actionEvent('service1', 'action1', ActionStatus.SUCCESS);
+      analytics.actionEvent('platform1', 'action1', ActionStatus.SUCCESS);
       expect(eventStr).to.equal(
         SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION
       );

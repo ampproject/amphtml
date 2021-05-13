@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-springboard-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -41,7 +41,7 @@ describes.realWin(
       sp.setAttribute('layout', 'responsive');
       doc.body.appendChild(sp);
       return sp
-        .build()
+        .buildInternal()
         .then(() => {
           sp.layoutCallback();
         })
@@ -56,7 +56,7 @@ describes.realWin(
         'data-player-id': 'test401',
         'data-domain': 'test.com',
         'data-items': '10',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -75,7 +75,7 @@ describes.realWin(
         'data-player-id': 'test401',
         'data-domain': 'test.com',
         'data-items': '10',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -142,6 +142,25 @@ describes.realWin(
       );
     });
 
+    it('unlayout and relayout', async () => {
+      const bc = await getSpringboardPlayer({
+        'data-site-id': '261',
+        'data-mode': 'video',
+        'data-content-id': '1578473',
+        'data-player-id': 'test401',
+        'data-domain': 'test.com',
+        'data-items': '10',
+      });
+      expect(bc.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = bc.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(bc.querySelector('iframe')).to.not.exist;
+
+      await bc.layoutCallback();
+      expect(bc.querySelector('iframe')).to.exist;
+    });
+
     describe('createPlaceholderCallback', () => {
       it('should create a placeholder image', () => {
         return getSpringboardPlayer({
@@ -151,7 +170,7 @@ describes.realWin(
           'data-player-id': 'test401',
           'data-domain': 'test.com',
           'data-items': '10',
-        }).then(kp => {
+        }).then((kp) => {
           const img = kp.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
@@ -173,7 +192,7 @@ describes.realWin(
           'data-domain': 'test.com',
           'data-items': '10',
           'aria-label': 'sporty video',
-        }).then(kp => {
+        }).then((kp) => {
           const img = kp.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
@@ -198,7 +217,7 @@ describes.realWin(
           'data-player-id': 'test401',
           'data-domain': 'test.com',
           'data-items': '10',
-        }).then(kp => {
+        }).then((kp) => {
           const img = kp.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(

@@ -36,9 +36,9 @@
 
 import {CSS} from '../../../build/amp-pinterest-0.1.css';
 import {FollowButton} from './follow-button';
-import {SaveButton} from './save-button';
-
 import {PinWidget} from './pin-widget';
+import {SaveButton} from './save-button';
+import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user, userAssert} from '../../../src/log';
@@ -50,66 +50,14 @@ import {user, userAssert} from '../../../src/log';
  *    - buttonFollow: User follow button
  */
 class AmpPinterest extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {string} */
-    this.type_ = '';
-  }
-  /**
-   * @param {boolean=} onLayout
-   * @override
-   */
-  preconnectCallback(onLayout) {
-    // preconnect to widget APIpinMedia
-    this.preconnect.url('https://widgets.pinterest.com', onLayout);
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  buildCallback() {
-    this.type_ = userAssert(
-      this.element.getAttribute('data-do'),
-      'The data-do attribute is required for <amp-pinterest> %s',
-      this.element
-    );
-  }
-
-  /** @override */
-  layoutCallback() {
-    return this.render().then(node => {
-      return this.element.appendChild(node);
-    });
-  }
-
-  /**
-   * Renders the component
-   * @return {*} TODO(#23582): Specify return type
-   */
-  render() {
-    switch (this.type_) {
-      case 'embedPin':
-        return new PinWidget(this.element).render();
-      case 'buttonPin':
-        return new SaveButton(this.element).render();
-      case 'buttonFollow':
-        return new FollowButton(this.element).render();
-    }
-    return Promise.reject(user().createError('Invalid type: %s', this.type_));
-  }
-
-  /** @override */
-  createLoaderLogoCallback() {
-    if (this.type_ != 'embedPin') {
+  /** @override @nocollapse */
+  static createLoaderLogoCallback(element) {
+    const type = element.getAttribute('data-do');
+    if (type != 'embedPin') {
       return {};
     }
 
-    const html = htmlFor(this.element);
+    const html = htmlFor(element);
     return {
       color: '#E60019',
       content: html`
@@ -128,8 +76,77 @@ class AmpPinterest extends AMP.BaseElement {
       `,
     };
   }
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {string} */
+    this.type_ = '';
+
+    /** @private {*} */
+    this.renderClass_ = null;
+  }
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
+  preconnectCallback(onLayout) {
+    // preconnect to widget APIpinMedia
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://widgets.pinterest.com',
+      onLayout
+    );
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  buildCallback() {
+    this.type_ = userAssert(
+      this.element.getAttribute('data-do'),
+      'The data-do attribute is required for <amp-pinterest> %s',
+      this.element
+    );
+
+    switch (this.type_) {
+      case 'embedPin':
+        this.renderClass_ = new PinWidget(this.element);
+        break;
+      case 'buttonPin':
+        this.renderClass_ = new SaveButton(this.element);
+        break;
+      case 'buttonFollow':
+        this.renderClass_ = new FollowButton(this.element);
+        break;
+      default:
+        return Promise.reject(
+          user().createError('Invalid type: %s', this.type_)
+        );
+    }
+  }
+
+  /** @override */
+  layoutCallback() {
+    return this.renderClass_
+      .render()
+      .then((node) => this.element.appendChild(node));
+  }
+
+  /** @override */
+  firstLayoutCompleted() {
+    this.renderClass_.height().then((renderedHeight) => {
+      if (renderedHeight !== null) {
+        this.attemptChangeHeight(renderedHeight);
+      }
+    });
+  }
 }
 
-AMP.extension('amp-pinterest', '0.1', AMP => {
+AMP.extension('amp-pinterest', '0.1', (AMP) => {
   AMP.registerElement('amp-pinterest', AmpPinterest, CSS);
 });

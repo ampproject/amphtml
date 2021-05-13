@@ -16,8 +16,7 @@
 
 import {AMP_STORY_BOOKEND_COMPONENT_DATA} from './components/bookend-component-interface';
 import {Action, StateProperty, UIType} from '../amp-story-store-service';
-import {ActionTrust} from '../../../../src/action-constants';
-import {AnalyticsEvent, getAnalyticsService} from '../story-analytics';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
@@ -28,22 +27,20 @@ import {
 } from '../amp-story-share';
 import {DraggableDrawer} from '../amp-story-draggable-drawer';
 import {EventType, dispatch} from '../events';
-import {
-  HistoryState,
-  createShadowRootWithStyle,
-  getHistoryState,
-  setHistoryState,
-} from '../utils';
-import {Keys} from '../../../../src/utils/key-codes';
+import {HistoryState, getHistoryState, setHistoryState} from '../history';
+import {Keys} from '../../../../src/core/constants/key-codes';
 import {LocalizedStringId} from '../../../../src/localized-strings';
 import {Services} from '../../../../src/services';
+import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
+import {createShadowRootWithStyle} from '../utils';
 import {dev, devAssert, user, userAssert} from '../../../../src/log';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
+import {getLocalizationService} from '../amp-story-localization-service';
 import {getRequestService} from '../amp-story-request-service';
-import {isArray} from '../../../../src/types';
+import {isArray} from '../../../../src/core/types';
 import {renderAsElement} from '../simple-template';
 import {toggle} from '../../../../src/style';
 
@@ -142,7 +139,7 @@ const buildReplayButtonTemplate = (title, domainName, imageUrl = undefined) => {
  * @param {?string} consentId
  * @return {!../simple-template.ElementDef}
  */
-const buildPromptConsentTemplate = consentId => {
+const buildPromptConsentTemplate = (consentId) => {
   return /** @type {!../simple-template.ElementDef} */ ({
     tag: 'div',
     attrs: dict({
@@ -297,19 +294,19 @@ export class AmpStoryBookend extends DraggableDrawer {
   initializeListeners_() {
     super.initializeListeners_();
 
-    this.element.addEventListener('click', event =>
+    this.element.addEventListener('click', (event) =>
       this.onOuterShadowClick_(event)
     );
 
-    this.getShadowRoot().addEventListener('click', event => {
+    this.getShadowRoot().addEventListener('click', (event) => {
       this.onInnerShadowClick_(event);
     });
 
-    this.replayButton_.addEventListener('click', event =>
+    this.replayButton_.addEventListener('click', (event) =>
       this.onReplayButtonClick_(event)
     );
 
-    this.win.addEventListener('keyup', event => {
+    this.win.addEventListener('keyup', (event) => {
       if (!this.isActive_()) {
         return;
       }
@@ -319,13 +316,13 @@ export class AmpStoryBookend extends DraggableDrawer {
       }
     });
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.onBookendStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SHARING_UIS,
-      show => {
+      (show) => {
         this.onCanShowSharingUisUpdate_(show);
       },
       true /** callToInitialize */
@@ -333,7 +330,7 @@ export class AmpStoryBookend extends DraggableDrawer {
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => {
+      (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
       true /** callToInitialize */
@@ -382,6 +379,10 @@ export class AmpStoryBookend extends DraggableDrawer {
       HistoryState.BOOKEND_ACTIVE
     );
     isActive ? this.open(shouldAnimate) : this.closeInternal_();
+    this.analyticsService_.triggerEvent(
+      isActive ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      this.element
+    );
     setHistoryState(this.win, HistoryState.BOOKEND_ACTIVE, isActive);
   }
 
@@ -465,7 +466,7 @@ export class AmpStoryBookend extends DraggableDrawer {
 
     return requestService
       .loadBookendConfig()
-      .then(response => {
+      .then((response) => {
         if (!response) {
           return null;
         }
@@ -491,7 +492,7 @@ export class AmpStoryBookend extends DraggableDrawer {
         }
         return this.config_;
       })
-      .catch(e => {
+      .catch((e) => {
         user().error(TAG, 'Error fetching bookend configuration', e.message);
         return null;
       });
@@ -508,9 +509,9 @@ export class AmpStoryBookend extends DraggableDrawer {
    * @return {!Promise<?./bookend-component.BookendDataDef>}
    */
   loadConfigAndMaybeRenderBookend(renderBookend = true) {
-    return this.loadConfig().then(config => {
+    return this.loadConfig().then((config) => {
       if (renderBookend && !this.isBookendRendered_ && config) {
-        return this.renderBookend_(config).then(() => config);
+        this.renderBookend_(config);
       }
       return config;
     });
@@ -575,7 +576,7 @@ export class AmpStoryBookend extends DraggableDrawer {
       componentData.position
     );
 
-    this.analyticsService_.triggerEvent(AnalyticsEvent.BOOKEND_CLICK);
+    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.BOOKEND_CLICK);
   }
 
   /**
@@ -585,7 +586,7 @@ export class AmpStoryBookend extends DraggableDrawer {
    * @private
    */
   elementOutsideBookend_(el) {
-    return !closest(el, el => el === this.shadowHost_);
+    return !closest(el, (el) => el === this.shadowHost_);
   }
 
   /**
@@ -602,14 +603,13 @@ export class AmpStoryBookend extends DraggableDrawer {
 
   /**
    * @param {!./bookend-component.BookendDataDef} bookendConfig
-   * @return {!Promise}
    * @private
    */
   renderBookend_(bookendConfig) {
     this.assertBuilt_();
     this.isBookendRendered_ = true;
 
-    return this.renderComponents_(bookendConfig.components);
+    this.renderComponents_(bookendConfig.components);
   }
 
   /**
@@ -617,35 +617,30 @@ export class AmpStoryBookend extends DraggableDrawer {
    * a promise to ensure loadConfigAndMaybeRenderBookend renders the components
    * first before proceeding. This is needed for our unit tests.
    * @param {!Array<!../bookend/bookend-component.BookendComponentDef>} components
-   * @return {!Promise}
    * @private
    */
   renderComponents_(components) {
     dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
 
     if (!components.length) {
-      return Promise.resolve();
+      return;
     }
 
-    return Services.localizationServiceForOrNull(this.win)
-      .then(localizationService => {
-        const bookendEls = BookendComponent.buildElements(
-          components,
-          this.win.document,
-          localizationService
-        );
-        const container = dev().assertElement(
-          BookendComponent.buildContainer(
-            this.getShadowRoot(),
-            this.win.document
-          )
-        );
-        this.mutateElement(() => container.appendChild(bookendEls));
-      })
-      .catch(e => {
-        user().error(TAG, 'Unable to fetch localization service.', e.message);
-        return null;
-      });
+    const localizationService = getLocalizationService(this.element);
+    if (!localizationService) {
+      user().error(TAG, 'Unable to fetch localization service.');
+      return;
+    }
+
+    const bookendEls = BookendComponent.buildElements(
+      components,
+      this.win,
+      localizationService
+    );
+    const container = dev().assertElement(
+      BookendComponent.buildContainer(this.getShadowRoot(), this.win.document)
+    );
+    this.mutateElement(() => container.appendChild(bookendEls));
   }
 
   /** @return {!Element} */

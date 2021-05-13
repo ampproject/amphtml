@@ -20,34 +20,56 @@
  * for both the babel and closure sources to be as close as possible.
  */
 
-const tempy = require('tempy');
-
-const SRC_TEMP_DIR = tempy.directory();
-
 const COMMON_GLOBS = [
   'third_party/amp-toolbox-cache-url/**/*.js',
   'third_party/caja/html-sanitizer.js',
   'third_party/closure-library/sha384-generated.js',
+  'third_party/closure-responding-channel/closure-bundle.js',
   'third_party/css-escape/css-escape.js',
   'third_party/d3/**/*.js',
   'third_party/fuzzysearch/index.js',
   'third_party/inputmask/**/*.js',
   'third_party/mustache/**/*.js',
   'third_party/react-dates/bundle.js',
+  'third_party/resize-observer-polyfill/ResizeObserver.install.js',
   'third_party/set-dom/set-dom.js',
   'third_party/subscriptions-project/*.js',
   'third_party/timeagojs/**/*.js',
   'third_party/vega/**/*.js',
   'third_party/webcomponentsjs/ShadowCSS.js',
+  'third_party/zuho/**/*.js',
+  'node_modules/dompurify/package.json',
   'node_modules/dompurify/dist/purify.es.js',
+  'node_modules/intersection-observer/package.json',
+  'node_modules/intersection-observer/intersection-observer.install.js',
+  'node_modules/resize-observer-polyfill/package.json',
+  'node_modules/resize-observer-polyfill/ResizeObserver.install.js',
+  'node_modules/obj-str/package.json',
+  'node_modules/obj-str/dist/obj-str.mjs',
+  'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
-  'node_modules/rrule/dist/esm/src/index.js',
+  'node_modules/rrule/dist/es5/rrule.js',
+  'node_modules/timeago.js/package.json',
+  'node_modules/timeago.js/**/*.js',
+  'node_modules/web-animations-js/package.json',
   'node_modules/web-animations-js/web-animations.install.js',
+  'node_modules/web-activities/package.json',
   'node_modules/web-activities/activity-ports.js',
+  'node_modules/@ampproject/animations/package.json',
   'node_modules/@ampproject/animations/dist/animations.mjs',
-  'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
-  'node_modules/document-register-element/build/' +
-    'document-register-element.patched.js',
+  'node_modules/@ampproject/toolbox-cache-url/package.json',
+  'node_modules/@ampproject/toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
+  'node_modules/@ampproject/viewer-messaging/package.json',
+  'node_modules/@ampproject/viewer-messaging/messaging.js',
+  'node_modules/@ampproject/worker-dom/package.json',
+  'node_modules/@ampproject/worker-dom/dist/amp-production/main.mjs',
+  'node_modules/preact/package.json',
+  'node_modules/preact/dist/*.js',
+  'node_modules/preact/dom/*.js',
+  'node_modules/preact/hooks/package.json',
+  'node_modules/preact/hooks/dist/*.js',
+  'node_modules/preact/compat/package.json',
+  'node_modules/preact/compat/dist/*.js',
 ];
 
 /**
@@ -92,6 +114,10 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-animation/**/*.js',
   // Needed for amp-carousel 0.2, amp-inline-gallery, amp-stream-gallery
   'extensions/amp-base-carousel/**/*.js',
+  // Needed for carousel autolightbox
+  'extensions/amp-lightbox-gallery/1.0/*.js',
+  // Needed for amp-lightbox-gallery using amp-lightbox
+  'extensions/amp-lightbox/1.0/*.js',
   // For amp-bind in the web worker (ww.js).
   'extensions/amp-bind/**/*.js',
   // Needed to access to Variant interface from other extensions
@@ -106,20 +132,22 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-access/**/*.js',
   // Needed for AmpStoryVariableService
   'extensions/amp-story/**/*.js',
+  // Needed for story ad inabox
+  'extensions/amp-story-auto-ads/**/*.js',
   // Needed for SubscriptionsService
   'extensions/amp-subscriptions/**/*.js',
   // Needed to access UserNotificationManager from other extensions
   'extensions/amp-user-notification/**/*.js',
-  // Needed for VideoService
-  'extensions/amp-video-service/**/*.js',
+  // Needed for video components in Bento.
+  'extensions/amp-video/1.0/**/*.js',
+  // amp-video-iframe 0.1 and 1.0 share this file.
+  'extensions/amp-video-iframe/amp-video-iframe-api.js',
+  // amp-vimeo 0.1 and 1.0 share this file.
+  'extensions/amp-vimeo/vimeo-api.js',
   // Needed to access ConsentPolicyManager from other extensions
   'extensions/amp-consent/**/*.js',
   // Needed to access AmpGeo type for service locator
   'extensions/amp-geo/**/*.js',
-  // Needed for AmpViewerAssistanceService
-  'extensions/amp-viewer-assistance/**/*.js',
-  // Needed for AmpViewerIntegrationVariableService
-  'extensions/amp-viewer-integration/**/*.js',
   // Needed for amp-smartlinks dep on amp-skimlinks
   'extensions/amp-skimlinks/0.1/**/*.js',
   'src/*.js',
@@ -127,15 +155,15 @@ const CLOSURE_SRC_GLOBS = [
   '!third_party/babel/custom-babel-helpers.js',
   // Exclude since it's not part of the runtime/extension binaries.
   '!extensions/amp-access/0.1/amp-login-done.js',
-  'builtins/**.js',
+  'builtins/**/*.js',
   // 'node_modules/core-js/modules/**.js',
   // Not sure what these files are, but they seem to duplicate code
   // one level below and confuse the compiler.
   '!node_modules/core-js/modules/library/**.js',
+  '!extensions/**/dist/**/*.js',
 ].concat(COMMON_GLOBS);
 
 module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
-  SRC_TEMP_DIR,
 };

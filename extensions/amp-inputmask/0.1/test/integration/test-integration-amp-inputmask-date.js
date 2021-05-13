@@ -16,11 +16,8 @@
 
 import {simulateKeyboardInteraction} from './utils';
 
-const config = describe
-  .configure()
-  .retryOnSaucelabs()
-  .ifChrome();
-config.skip('amp-inputmask', () => {
+const config = describes.sandboxed.configure().ifChrome();
+config.skip('amp-inputmask', {}, () => {
   const {testServerPort} = window.ampTestRuntimeConfig;
 
   describes.integration(
@@ -33,7 +30,7 @@ config.skip('amp-inputmask', () => {
   `,
       extensions: ['amp-form', 'amp-inputmask'],
     },
-    env => {
+    (env) => {
       let win, doc;
 
       beforeEach(() => {

@@ -16,9 +16,10 @@
 
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {Services} from '../../../src/services';
-import {dev, rethrowAsync, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dev, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/core/types/object';
 import {openWindowDialog, removeElement} from '../../../src/dom';
+import {rethrowAsync} from '../../../src/core/error';
 
 const TAG = 'amp-app-banner';
 const OPEN_LINK_TIMEOUT = 1500;
@@ -119,10 +120,10 @@ export class AbstractAppBanner extends AMP.BaseElement {
    */
   isDismissed() {
     return Services.storageForDoc(this.getAmpDoc())
-      .then(storage => storage.get(this.getStorageKey_()))
+      .then((storage) => storage.get(this.getStorageKey_()))
       .then(
-        persistedValue => !!persistedValue,
-        reason => {
+        (persistedValue) => !!persistedValue,
+        (reason) => {
           dev().error(TAG, 'Failed to read storage', reason);
           return false;
         }
@@ -131,7 +132,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /** @protected */
   checkIfDismissed_() {
-    this.isDismissed().then(isDismissed => {
+    this.isDismissed().then((isDismissed) => {
       if (isDismissed) {
         this.hide_();
       } else {
@@ -212,8 +213,8 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
-    /** @private {?Element} */
-    this.metaTag_ = null;
+    /** @private {?string} */
+    this.metaContent_ = null;
   }
 
   /**
@@ -225,7 +226,11 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     if (!this.element.parentNode) {
       return;
     }
-    this.preconnect.url('https://itunes.apple.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://itunes.apple.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -253,10 +258,8 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return;
     }
 
-    this.metaTag_ = this.win.document.head.querySelector(
-      'meta[name=apple-itunes-app]'
-    );
-    if (!this.metaTag_) {
+    this.metaContent_ = this.getAmpDoc().getMetaByName('apple-itunes-app');
+    if (this.metaContent_ === null) {
       this.hide_();
       return;
     }
@@ -268,13 +271,13 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       this.element
     );
 
-    this.parseIosMetaContent_(this.metaTag_.getAttribute('content'));
+    this.parseIosMetaContent_(this.metaContent_);
     this.checkIfDismissed_();
   }
 
   /** @override */
   layoutCallback() {
-    if (!this.metaTag_) {
+    if (!this.metaContent_) {
       return Promise.resolve();
     }
 
@@ -307,7 +310,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
   parseIosMetaContent_(metaContent) {
     const parts = metaContent.replace(/\s/, '').split(',');
     const config = {};
-    parts.forEach(part => {
+    parts.forEach((part) => {
       const keyValuePair = part.split('=');
       config[keyValuePair[0]] = keyValuePair[1];
     });
@@ -367,9 +370,16 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     if (!this.element.parentNode) {
       return;
     }
-    this.preconnect.url('https://play.google.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://play.google.com',
+      opt_onLayout
+    );
     if (this.manifestHref_) {
-      this.preconnect.preload(this.manifestHref_);
+      Services.preconnectFor(this.win).preload(
+        this.getAmpDoc(),
+        this.manifestHref_
+      );
     }
   }
 
@@ -377,9 +387,11 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
   buildCallback() {
     const {win, element} = this;
     const viewer = Services.viewerForDoc(this.getAmpDoc());
-    this.manifestLink_ = /** @type {?HTMLLinkElement} */ (win.document.head.querySelector(
-      'link[rel=manifest],link[rel=origin-manifest]'
-    ));
+    this.manifestLink_ = /** @type {?HTMLLinkElement} */ (
+      win.document.head.querySelector(
+        'link[rel=manifest],link[rel=origin-manifest]'
+      )
+    );
 
     const platform = Services.platformFor(win);
     const url = Services.urlForDoc(element);
@@ -433,9 +445,9 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
     return Services.xhrFor(this.win)
       .fetchJson(this.manifestHref_, {})
-      .then(res => res.json())
-      .then(json => this.parseManifest_(json))
-      .catch(error => {
+      .then((res) => res.json())
+      .then((json) => this.parseManifest_(json))
+      .catch((error) => {
         this.hide_();
         rethrowAsync(error);
       });
@@ -475,9 +487,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     for (let i = 0; i < apps.length; i++) {
       const app = apps[i];
       if (app['platform'] == 'play') {
-        const installAppUrl = `https://play.google.com/store/apps/details?id=${
-          app['id']
-        }`;
+        const installAppUrl = `https://play.google.com/store/apps/details?id=${app['id']}`;
         const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
         this.setupOpenButton_(
           dev().assertElement(this.openButton_),
@@ -516,7 +526,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
  */
 function handleDismiss(state) {
   hideBanner(state);
-  state.storagePromise.then(storage => {
+  state.storagePromise.then((storage) => {
     storage.set(state.storageKey, true);
   });
 }
@@ -548,6 +558,6 @@ function updateViewportPadding(state) {
   state.viewport.addToFixedLayer(state.element);
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAppBanner, CSS);
 });

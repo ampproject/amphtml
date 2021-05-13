@@ -19,10 +19,9 @@ import {
   metaJsonCreativeGrouper,
 } from '../line-delimited-response-handler';
 
-describe('#line-delimited-response-handler', () => {
+describes.sandboxed('#line-delimited-response-handler', {}, (env) => {
   let chunkHandlerStub;
   let slotData;
-  let sandbox;
   let win;
   let response;
 
@@ -31,7 +30,7 @@ describe('#line-delimited-response-handler', () => {
    */
   function generateResponseFormat() {
     let slotDataString = '';
-    slotData.forEach(slot => {
+    slotData.forEach((slot) => {
       // TODO: escape creative returns
       const creative = slot.creative
         .replace(/\\/g, '\\\\')
@@ -46,7 +45,7 @@ describe('#line-delimited-response-handler', () => {
     // Streamed response calls chunk handlers after returning so need to
     // wait on chunks.
     let chunkResolver;
-    const chunkPromise = new Promise(resolver => (chunkResolver = resolver));
+    const chunkPromise = new Promise((resolver) => (chunkResolver = resolver));
     const chunkHandlerWrapper = (creative, metaData) => {
       chunkHandlerStub(creative, metaData);
       if (chunkHandlerStub.callCount == slotData.length) {
@@ -68,20 +67,20 @@ describe('#line-delimited-response-handler', () => {
       // Could have duplicate responses so need to iterate and get counts.
       // TODO: can't use objects as keys :(
       const calls = {};
-      slotData.forEach(slot => {
-        const normalizedHeaderNames = Object.keys(slot.headers).map(s => [
+      slotData.forEach((slot) => {
+        const normalizedHeaderNames = Object.keys(slot.headers).map((s) => [
           s.toLowerCase(),
           s,
         ]);
         slot.normalizedHeaders = {};
         normalizedHeaderNames.forEach(
-          namePair =>
+          (namePair) =>
             (slot.normalizedHeaders[namePair[0]] = slot.headers[namePair[1]])
         );
         const key = slot.creative + JSON.stringify(slot.normalizedHeaders);
         calls[key] ? calls[key]++ : (calls[key] = 1);
       });
-      slotData.forEach(slot => {
+      slotData.forEach((slot) => {
         expect(
           chunkHandlerStub.withArgs(slot.creative, slot.normalizedHeaders)
             .callCount
@@ -93,12 +92,7 @@ describe('#line-delimited-response-handler', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    chunkHandlerStub = sandbox.stub();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    chunkHandlerStub = env.sandbox.stub();
   });
 
   describe('stream not supported', () => {
@@ -143,7 +137,6 @@ describe('#line-delimited-response-handler', () => {
 
   describe('streaming', () => {
     let readStub;
-    let sandbox;
 
     function setup() {
       const responseString = generateResponseFormat();
@@ -161,8 +154,7 @@ describe('#line-delimited-response-handler', () => {
     }
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      readStub = sandbox.stub();
+      readStub = env.sandbox.stub();
       response = {
         text: () => Promise.resolve(),
         body: {
@@ -176,10 +168,6 @@ describe('#line-delimited-response-handler', () => {
       win = {
         TextDecoder,
       };
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     // TODO(lannka, #15748): Fails on Safari 11.1.0.
@@ -203,7 +191,10 @@ describe('#line-delimited-response-handler', () => {
     it.configure().skipSafari(
       'should handle multiple no fill responses properly',
       () => {
-        slotData = [{headers: {}, creative: ''}, {headers: {}, creative: ''}];
+        slotData = [
+          {headers: {}, creative: ''},
+          {headers: {}, creative: ''},
+        ];
         setup();
         return executeAndVerifyResponse();
       }

@@ -20,50 +20,43 @@
  */
 
 const childProcess = require('child_process');
+const {log} = require('./logging');
+const {spawnProcess} = require('./process');
+const {yellow} = require('./colors');
 
-const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/sh';
-const shellFlag = process.platform == 'win32' ? '/C' : '-c';
-
-/**
- * Spawns the given command in a child process with the given options.
- *
- * @param {string} cmd
- * @param {?Object} options
- * @return {!Object}
- */
-function spawnProcess(cmd, options) {
-  return childProcess.spawnSync(shellCmd, [shellFlag, cmd], options);
-}
+const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
 
 /**
  * Executes the provided command with the given options, returning the process
  * object.
  *
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  * @return {!Object}
  */
-function exec(cmd, options) {
-  options = options || {'stdio': 'inherit'};
+function exec(cmd, options = {'stdio': 'inherit'}) {
   return spawnProcess(cmd, options);
 }
 
 /**
- * Executes the provided shell script in an asynchronous process.
+ * Executes the provided shell script in an asynchronous process. Special-cases
+ * the AMP task runner so that it is correctly spawned on all platforms (node
+ * shebangs do not work on Windows).
  *
  * @param {string} script
  * @param {?Object} options
- * @return {!Object}
+ * @return {!childProcess.ChildProcessWithoutNullStreams}
  */
 function execScriptAsync(script, options) {
-  return childProcess.spawn(shellCmd, [shellFlag, script], options);
+  const scriptToSpawn = script.startsWith('amp ') ? `node ${script}` : script;
+  return childProcess.spawn(scriptToSpawn, {shell: shellCmd, ...options});
 }
 
 /**
  * Executes the provided command, and terminates the program in case of failure.
  *
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  */
 function execOrDie(cmd, options) {
   const p = exec(cmd, options);
@@ -87,39 +80,22 @@ function execWithError(cmd) {
 }
 
 /**
- * Executes the provided command, returning the process object.
+ * Executes the provided command, piping the parent process' stderr, throwing
+ * an error with the provided message the command fails, and returns the
+ * process object.
  * @param {string} cmd
- * @param {?Object} options
+ * @param {string} msg
  * @return {!Object}
  */
-function getOutput(cmd, options = {}) {
-  const p = spawnProcess(cmd, {
-    'cwd': options.cwd || process.cwd(),
-    'env': options.env || process.env,
-    'stdio': options.stdio || 'pipe',
-    'encoding': options.encoding || 'utf-8',
-  });
+function execOrThrow(cmd, msg) {
+  const p = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
+  if (p.status && p.status != 0) {
+    log(yellow('ERROR:'), msg);
+    const error = new Error(p.stderr);
+    error.status = p.status;
+    throw error;
+  }
   return p;
-}
-
-/**
- * Executes the provided command, returning its stdout.
- * @param {string} cmd
- * @param {?Object} options
- * @return {string}
- */
-function getStdout(cmd, options) {
-  return getOutput(cmd, options).stdout;
-}
-
-/**
- * Executes the provided command, returning its stderr.
- * @param {string} cmd
- * @param {?Object} options
- * @return {string}
- */
-function getStderr(cmd, options) {
-  return getOutput(cmd, options).stderr;
 }
 
 module.exports = {
@@ -127,7 +103,5 @@ module.exports = {
   execOrDie,
   execScriptAsync,
   execWithError,
-  getOutput,
-  getStderr,
-  getStdout,
+  execOrThrow,
 };

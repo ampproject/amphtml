@@ -15,11 +15,11 @@
  */
 
 import * as DocumentFetcher from '../../../../src/document-fetcher';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
 
-describes.realWin('AccessServerAdapter', {amp: true}, env => {
+describes.realWin('AccessServerAdapter', {amp: true}, (env) => {
   let win;
   let document;
   let ampdoc;
@@ -33,7 +33,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
     win = env.win;
     document = win.document;
     ampdoc = env.ampdoc;
-    clock = lolex.install({target: win});
+    clock = fakeTimers.withGlobal(win).install();
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',
@@ -49,7 +49,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
       buildUrl: () => {},
       collectUrlVars: () => {},
     };
-    contextMock = sandbox.mock(context);
+    contextMock = env.sandbox.mock(context);
   });
 
   afterEach(() => {
@@ -99,8 +99,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
 
     beforeEach(() => {
       adapter = new AccessServerAdapter(ampdoc, validConfig, context);
-      xhrMock = sandbox.mock(adapter.xhr_);
-      docFetcherMock = sandbox.mock(DocumentFetcher);
+      xhrMock = env.sandbox.mock(adapter.xhr_);
+      docFetcherMock = env.sandbox.mock(DocumentFetcher);
       clientAdapter = {
         getAuthorizationUrl: () => validConfig['authorization'],
         getAuthorizationTimeout: () => 3000,
@@ -109,7 +109,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         authorize: () => Promise.resolve({}),
         pingback: () => Promise.resolve(),
       };
-      clientAdapterMock = sandbox.mock(clientAdapter);
+      clientAdapterMock = env.sandbox.mock(clientAdapter);
       adapter.clientAdapter_ = clientAdapter;
 
       adapter.isProxyOrigin_ = true;
@@ -140,10 +140,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
       it('should fallback to client auth when not on proxy', () => {
         adapter.isProxyOrigin_ = false;
         const p = Promise.resolve();
-        clientAdapterMock
-          .expects('authorize')
-          .returns(p)
-          .once();
+        clientAdapterMock.expects('authorize').returns(p).once();
         docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
@@ -152,10 +149,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
       it('should fallback to client auth w/o server state', () => {
         adapter.serverState_ = null;
         const p = Promise.resolve();
-        clientAdapterMock
-          .expects('authorize')
-          .returns(p)
-          .once();
+        clientAdapterMock.expects('authorize').returns(p).once();
         docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
@@ -186,7 +180,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         };
         docFetcherMock
           .expects('fetchDocument')
-          .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
+          .withExactArgs(env.sandbox.match.any, 'http://localhost:8000/af', {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
             headers: {
@@ -195,12 +189,12 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
           })
           .returns(Promise.resolve(responseDoc))
           .once();
-        const replaceSectionsStub = sandbox
+        const replaceSectionsStub = env.sandbox
           .stub(adapter, 'replaceSections_')
           .callsFake(() => {
             return Promise.resolve();
           });
-        return adapter.authorize().then(response => {
+        return adapter.authorize().then((response) => {
           expect(response).to.exist;
           expect(response.access).to.equal('A');
           expect(replaceSectionsStub).to.be.calledOnce;
@@ -232,7 +226,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         };
         docFetcherMock
           .expects('fetchDocument')
-          .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
+          .withExactArgs(env.sandbox.match.any, 'http://localhost:8000/af', {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
             headers: {
@@ -245,7 +239,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
           () => {
             throw new Error('must never happen');
           },
-          error => {
+          (error) => {
             expect(error).to.match(/intentional/);
           }
         );
@@ -276,7 +270,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         };
         docFetcherMock
           .expects('fetchDocument')
-          .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
+          .withExactArgs(env.sandbox.match.any, 'http://localhost:8000/af', {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
             headers: {
@@ -295,7 +289,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
             () => {
               throw new Error('must never happen');
             },
-            error => {
+            (error) => {
               expect(error).to.match(/timeout/);
             }
           );
@@ -331,10 +325,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
 
     describe('pingback', () => {
       it('should always send client pingback', () => {
-        clientAdapterMock
-          .expects('pingback')
-          .returns(Promise.resolve())
-          .once();
+        clientAdapterMock.expects('pingback').returns(Promise.resolve()).once();
         adapter.pingback();
       });
     });

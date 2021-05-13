@@ -13,15 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-tags: {
+tags: {  # amp-selector 1.0
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
+  satisfies: "amp-selector 1.0"
+  excludes: "amp-selector 0.1"
   extension_spec: {
     name: "amp-selector"
+    version_name: "v1.0"
+    version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-selector 0.1 and latest
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  satisfies: "amp-selector 0.1"
+  excludes: "amp-selector 1.0"
+  extension_spec: {
+    name: "amp-selector"
+    version_name: "v0.1"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }
@@ -32,16 +47,17 @@ tags: {
   spec_name: "SCRIPT[custom-element=amp-selector] (AMP4EMAIL)"
   extension_spec: {
     name: "amp-selector"
+    # AMP4EMAIL doesn't allow version: "latest".
+    version_name: "v0.1"
     version: "0.1"
-    version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   html_format: AMP
+  html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "AMP-SELECTOR"
   disallowed_ancestor: "AMP-SELECTOR"
   requires_extension: "amp-selector"
@@ -93,8 +109,8 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
 # always match, we want to prefer 'option' when both of them match.
 tags: {
   html_format: AMP
+  html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR option"
   attrs: {
@@ -109,12 +125,12 @@ tags: {
     name: "selected"
     value: ""
   }
-  spec_url: "https://amp.dev/documentation/components/amp-selector"
+  spec_url: "https://amp.dev/documentation/components/amp-selector/"
 }
 tags: {
   html_format: AMP
+  html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR child"
   reference_points: {

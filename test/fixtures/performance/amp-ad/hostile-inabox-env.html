@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greedy Page With Inabox</title>
+
+</head>
+
+<body>
+    <h1>Greedy Page With Inabox</h1>
+
+    This page tries to measure inabox's performance in an uncooperative
+    environment like a publisher page. It fetches
+    a simple AMPHTML ad, writes it to an iframe, and measures how long it takes
+    to get the <tt>amp-ini-load</tt> event and then two post messages fired
+    by <tt>amp-analytics</tt>, one on visible and one on viewable. At
+    the same time, it runs a very greedy busywait that tries to hold
+    onto the thread as much as possible, simulating the case where when
+    you yield the thread you generally don't get it back anytime soon.
+    <br>
+
+    <script>
+        const startTime = Date.now();
+
+        function renderAd(creative) {
+            window.addEventListener("message", (event) => {
+                var event_time = Date.now();
+                var data = event.data;
+                if (data === "amp-ini-load" ||
+                    data === "impression-visible" ||
+                    data === "impression-viewable") {
+                    fetch(`https://cats.com?requestName=parent-${data}&expectedRequests=5&intercept=true`)
+                }
+            });
+
+            var start = Date.now();
+            var iframe = document.createElement("iframe");
+            iframe.width = 300;
+            iframe.height = 250;
+            iframe.srcdoc = creative;
+            document.body.appendChild(iframe);
+            startBusywork();
+        }
+
+        function startBusywork() {
+            for (var i = 0; i < 1000000000; i++);
+            // Puppeteer will often hang if we dont kill this work.
+            if (Date.now() - startTime < 5000) {
+                window.setTimeout(startBusywork, 100);
+            }
+        }
+
+        async function loadAd() {
+            const response = await fetch('https://securepubads.g.doubleclick.net');
+            const creative = await response.text();
+            renderAd(creative);
+        }
+
+        loadAd();
+    </script>
+</body>
+
+</html>

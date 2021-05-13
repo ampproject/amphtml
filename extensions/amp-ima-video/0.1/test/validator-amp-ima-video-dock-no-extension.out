@@ -32,7 +32,7 @@ FAIL
 |    <!-- Invalid: dock without `amp-video-docking` extension -->
 |    <amp-ima-video
 >>   ^~~~~~~~~
-amp-ima-video/0.1/test/validator-amp-ima-video-dock-no-extension.html:32:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-ima-video/0.1/test/validator-amp-ima-video-dock-no-extension.html:32:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript.
 |        dock
 |        width=640 height=360 layout="responsive"
 |        data-src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4"

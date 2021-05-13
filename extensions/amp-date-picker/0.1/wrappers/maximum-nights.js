@@ -18,8 +18,8 @@ import {requireExternal} from '../../../../src/module';
 
 /**
  * Implements the `maximum-nights` attribute on the date range picker.
- * @param {function(new:React.Component, !JsonObject)} WrappedComponent A date-picker component to wrap
- * @return {function(new:React.Component, !JsonObject)}
+ * @param {typeof React.Component} WrappedComponent A date-picker component to wrap
+ * @return {typeof React.Component}
  */
 export function wrap(WrappedComponent) {
   const react = requireExternal('react');
@@ -49,7 +49,7 @@ export function wrap(WrappedComponent) {
   MaximumNights.prototype.constructor = MaximumNights;
 
   /** @override */
-  MaximumNights.prototype.componentWillReceiveProps = function(nextProps) {
+  MaximumNights.prototype.componentWillReceiveProps = function (nextProps) {
     const {props} = this;
     const shouldUpdate =
       props['isOutsideRange'] != nextProps['isOutsideRange'] ||
@@ -63,8 +63,8 @@ export function wrap(WrappedComponent) {
   };
 
   /** @override */
-  MaximumNights.prototype.render = function() {
-    const props = Object.assign({}, this.props);
+  MaximumNights.prototype.render = function () {
+    const props = {...this.props};
     props['isOutsideRange'] = this.isOutsideRange_;
     return react.createElement(WrappedComponent, props);
   };
@@ -94,7 +94,7 @@ export function wrap(WrappedComponent) {
       const firstIneligibleDay = startDate
         .clone()
         .add(maximumNights + 1, 'days');
-      return date => {
+      return (date) => {
         return (
           isOutsideRange(date) ||
           isInclusivelyAfterDay(date, firstIneligibleDay)
@@ -106,7 +106,7 @@ export function wrap(WrappedComponent) {
       const lastIneligibleDay = endDate
         .clone()
         .add(-1 * (maximumNights + 1), 'days');
-      return date => {
+      return (date) => {
         return (
           isOutsideRange(date) ||
           isInclusivelyBeforeDay(date, lastIneligibleDay)

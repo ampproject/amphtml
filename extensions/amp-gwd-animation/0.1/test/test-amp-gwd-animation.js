@@ -25,9 +25,9 @@ import {
 import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
 import {Services} from '../../../../src/services';
 import {createCustomEvent} from '../../../../src/event-helper';
-import {getExistingServiceForDocInEmbedScope} from '../../../../src/service';
+import {getServiceForDocOrNull} from '../../../../src/service';
 
-describes.sandboxed('AMP GWD Animation', {}, () => {
+describes.sandboxed('AMP GWD Animation', {}, (env) => {
   /**
    * Creates a test amp-gwd-animation element in the given document.
    * @param {!Document} root
@@ -40,7 +40,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       element.setAttribute(attr, attrs[attr]);
     }
     root.body.appendChild(element);
-    return element.build().then(() => element);
+    return element.buildInternal().then(() => element);
   }
 
   /**
@@ -78,26 +78,19 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
             extensions: ['amp-gwd-animation'],
           },
         },
-        env => {
-          let sandbox;
+        (env) => {
           let ampdoc;
           let element;
           let impl;
           let page1Elem;
-          let embed;
           let win;
           let doc;
           let runtime;
 
           beforeEach(() => {
-            sandbox = sinon.sandbox;
             ampdoc = env.ampdoc;
-            embed = env.embed;
-            win = variant.ampdoc == 'fie' ? embed.win : ampdoc.win;
-            doc =
-              variant.ampdoc == 'fie'
-                ? embed.win.document
-                : ampdoc.getRootNode();
+            win = ampdoc.win;
+            doc = ampdoc.getRootNode();
 
             // Create a test amp-carousel GWD page deck.
             doc.body.innerHTML = `<amp-carousel id="pagedeck"
@@ -119,15 +112,16 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
               'timeline-event-prefix': 'tl_',
               'layout': 'nodisplay',
             };
-            return createGwdAnimationElement(doc, config).then(el => {
-              element = el;
-              impl = element.implementation_;
-              runtime = getExistingServiceForDocInEmbedScope(
-                element,
-                GWD_SERVICE_NAME
-              );
-              page1Elem = doc.getElementById('page1');
-            });
+            return createGwdAnimationElement(doc, config)
+              .then((el) => {
+                element = el;
+                runtime = getServiceForDocOrNull(element, GWD_SERVICE_NAME);
+                page1Elem = doc.getElementById('page1');
+                return element.getImpl(false);
+              })
+              .then((aImpl) => {
+                impl = aImpl;
+              });
           });
 
           afterEach(() => {
@@ -374,7 +368,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
             // this time to pass makes the test flaky. Stub setTimeout to
             // execute the callback synchronously.
             const origSetTimeout = win.setTimeout;
-            win.setTimeout = func => func();
+            win.setTimeout = (func) => func();
 
             // Test a valid gotoAndPause invocation. Verify animation was
             // switched to the label and has been paused.
@@ -465,7 +459,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
             const triggeredEvents = [];
 
             const actionService = Services.actionServiceForDoc(element);
-            sandbox
+            env.sandbox
               .stub(actionService, 'trigger')
               .callsFake((target, name, event) => {
                 triggeredAmpEventNames.push(name);
@@ -487,7 +481,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
               'tl_event-2',
             ]);
             expect(
-              triggeredEvents.map(event => event.detail.eventName)
+              triggeredEvents.map((event) => event.detail.eventName)
             ).to.deep.equal(['event-1', 'event-2']);
           });
 
@@ -509,9 +503,9 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
     let actionService;
 
     beforeEach(() => {
-      actionService = {setActions: sandbox.stub()};
+      actionService = {setActions: env.sandbox.stub()};
       element = document.createElement('div');
-      sandbox
+      env.sandbox
         .stub(Services, 'actionServiceForDoc')
         .withArgs(element)
         .returns(actionService);
@@ -547,7 +541,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       const target = document.createElement('div');
       target.setAttribute('on', 'event2:node2.hide');
       // FIE should have its own ActionService.
-      const fieActionService = {setActions: sandbox.stub()};
+      const fieActionService = {setActions: env.sandbox.stub()};
       Services.actionServiceForDoc.withArgs(target).returns(fieActionService);
       // Provide `target` as the service context to simulate FIE case.
       addAction(target, target, 'event1', 'node1.foo()');

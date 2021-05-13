@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-brid-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let timer;
 
@@ -49,18 +49,21 @@ describes.realWin(
       }
 
       // see yt test implementation
-      timer.promise(50).then(() => {
-        const bridTimerIframe = bc.querySelector('iframe');
+      timer
+        .promise(50)
+        .then(() => bc.getImpl())
+        .then((impl) => {
+          const bridTimerIframe = bc.querySelector('iframe');
 
-        bc.implementation_.handleBridMessage_({
-          origin: 'https://services.brid.tv',
-          source: bridTimerIframe.contentWindow,
-          data: 'Brid|0|trigger|ready',
+          impl.handleBridMessage_({
+            origin: 'https://services.brid.tv',
+            source: bridTimerIframe.contentWindow,
+            data: 'Brid|0|trigger|ready',
+          });
         });
-      });
       doc.body.appendChild(bc);
       return bc
-        .build()
+        .buildInternal()
         .then(() => {
           bc.layoutCallback();
         })
@@ -72,7 +75,7 @@ describes.realWin(
         'data-partner': '264',
         'data-player': '4144',
         'data-video': '13663',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -90,7 +93,7 @@ describes.realWin(
           'data-video': '5204',
         },
         true
-      ).then(bc => {
+      ).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -119,43 +122,87 @@ describes.realWin(
       });
     });
 
-    it('should forward events from brid-player to the amp element', () => {
-      return getBridPlayer(
+    it('requires data-partner for playlists', () => {
+      return allowConsoleError(() => {
+        return getBridPlayer({
+          'data-player': '4144',
+          'data-playlist': '13663',
+        }).should.eventually.be.rejectedWith(
+          /The data-partner attribute is required for/
+        );
+      });
+    });
+
+    it('requires data-player for playlists', () => {
+      return allowConsoleError(() => {
+        return getBridPlayer({
+          'data-partner': '264',
+          'data-playlist': '13663',
+        }).should.eventually.be.rejectedWith(
+          /The data-player attribute is required for/
+        );
+      });
+    });
+
+    it('requires data-partner for carousels', () => {
+      return allowConsoleError(() => {
+        return getBridPlayer({
+          'data-player': '4144',
+          'data-carousel': '459',
+        }).should.eventually.be.rejectedWith(
+          /The data-partner attribute is required for/
+        );
+      });
+    });
+
+    it('requires data-player for carousels', () => {
+      return allowConsoleError(() => {
+        return getBridPlayer({
+          'data-partner': '264',
+          'data-carousel': '459',
+        }).should.eventually.be.rejectedWith(
+          /The data-player attribute is required for/
+        );
+      });
+    });
+
+    it('should forward events from brid-player to the amp element', async () => {
+      const bc = await getBridPlayer(
         {
           'data-partner': '1177',
           'data-player': '979',
           'data-video': '5204',
         },
         true
-      ).then(bc => {
-        const iframe = bc.querySelector('iframe');
+      );
+      const impl = await bc.getImpl();
 
-        return Promise.resolve()
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PLAYING);
-            sendFakeMessage(bc, iframe, 'trigger|play');
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.MUTED);
-            sendFakeMessage(bc, iframe, 'volume|0');
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PAUSE);
-            sendFakeMessage(bc, iframe, 'trigger|pause');
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.UNMUTED);
-            sendFakeMessage(bc, iframe, 'volume|1');
-            return p;
-          });
-      });
+      const iframe = bc.querySelector('iframe');
+      return Promise.resolve()
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.PLAYING);
+          sendFakeMessage(impl, iframe, 'trigger|play');
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.MUTED);
+          sendFakeMessage(impl, iframe, 'volume|0');
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.PAUSE);
+          sendFakeMessage(impl, iframe, 'trigger|pause');
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.UNMUTED);
+          sendFakeMessage(impl, iframe, 'volume|1');
+          return p;
+        });
     });
 
-    function sendFakeMessage(bc, iframe, command) {
-      bc.implementation_.handleBridMessage_({
+    function sendFakeMessage(impl, iframe, command) {
+      impl.handleBridMessage_({
         origin: 'https://services.brid.tv',
         source: iframe.contentWindow,
         data: 'Brid|0|' + command,
@@ -168,7 +215,7 @@ describes.realWin(
           'data-partner': '264',
           'data-player': '979',
           'data-video': '13663',
-        }).then(brid => {
+        }).then((brid) => {
           const img = brid.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
@@ -186,7 +233,7 @@ describes.realWin(
           'data-player': '979',
           'data-video': '13663',
           'aria-label': 'great video',
-        }).then(brid => {
+        }).then((brid) => {
           const img = brid.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('alt')).to.equal(
@@ -199,7 +246,7 @@ describes.realWin(
           'data-partner': '264',
           'data-player': '979',
           'data-video': '13663',
-        }).then(brid => {
+        }).then((brid) => {
           const img = brid.querySelector('amp-img');
           const fallbackImg = img.querySelector('amp-img');
           expect(fallbackImg).to.not.be.null;

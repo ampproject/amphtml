@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-apester-media'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let xhrMock;
     let changeSizeSpy;
@@ -40,7 +40,7 @@ describes.realWin(
       }
     });
 
-    function getApester(attributes, opt_responsive) {
+    async function getApester(attributes, opt_responsive) {
       const media = doc.createElement('amp-apester-media');
       const regularResponse = {
         status: 200,
@@ -81,12 +81,7 @@ describes.realWin(
           ? playlistResponse
           : regularResponse;
 
-      changeSizeSpy = sandbox.spy(media.implementation_, 'changeHeight');
-      attemptChangeSizeSpy = sandbox.spy(
-        media.implementation_,
-        'attemptChangeHeight'
-      );
-      xhrMock = sandbox.mock(Services.xhrFor(win));
+      xhrMock = env.sandbox.mock(Services.xhrFor(win));
       if (attributes) {
         xhrMock.expects('fetchJson').returns(
           Promise.resolve({
@@ -109,18 +104,20 @@ describes.realWin(
         media.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(media);
-      return media
-        .build()
-        .then(() => {
-          return media.layoutCallback();
-        })
-        .then(() => media);
+      await media.buildInternal();
+
+      const impl = await media.getImpl();
+      changeSizeSpy = env.sandbox.spy(impl, 'forceChangeHeight');
+      attemptChangeSizeSpy = env.sandbox.spy(impl, 'attemptChangeHeight');
+
+      await media.layoutCallback();
+      return media;
     }
 
     it('renders', () => {
       return getApester({
         'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
-      }).then(ape => {
+      }).then((ape) => {
         const iframe = ape.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).not.to.be.null;
@@ -143,7 +140,7 @@ describes.realWin(
       return getApester({
         'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
         'aria-label': 'scintilating video',
-      }).then(ape => {
+      }).then((ape) => {
         const placeholder = ape.querySelector('div[placeholder]');
         expect(placeholder).to.not.be.null;
         expect(placeholder.getAttribute('aria-label')).to.equal(
@@ -154,7 +151,7 @@ describes.realWin(
     it('render playlist', () => {
       return getApester({
         'data-apester-channel-token': '57a36e1e96cd505a7f01ed12',
-      }).then(ape => {
+      }).then((ape) => {
         const iframe = ape.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).not.to.be.null;
@@ -177,27 +174,26 @@ describes.realWin(
           width: '500',
         },
         true
-      ).then(ape => {
+      ).then((ape) => {
         const iframe = ape.querySelector('iframe');
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
     });
 
-    it('removes iframe after unlayoutCallback', () => {
-      return getApester({
+    it('removes iframe after unlayoutCallback', async () => {
+      const ape = await getApester({
         'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
-      }).then(ape => {
-        const iframe = ape.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.src).not.to.be.null;
-        const url = new URL(iframe.src);
-        expect(url.hostname).to.equal('renderer.apester.com');
-        expect(url.pathname).to.equal('/interaction/5aaa70c79aaf0c5443078d31');
-        const tag = ape.implementation_;
-        tag.unlayoutCallback();
-        expect(ape.querySelector('iframe')).to.be.null;
-        expect(tag.iframe_).to.be.null;
       });
+      const tag = await ape.getImpl();
+      const iframe = ape.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).not.to.be.null;
+      const url = new URL(iframe.src);
+      expect(url.hostname).to.equal('renderer.apester.com');
+      expect(url.pathname).to.equal('/interaction/5aaa70c79aaf0c5443078d31');
+      tag.unlayoutCallback();
+      expect(ape.querySelector('iframe')).to.be.null;
+      expect(tag.iframe_).to.be.null;
     });
 
     it('requires media-id or channel-token', () => {

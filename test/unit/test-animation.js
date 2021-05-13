@@ -16,8 +16,7 @@
 
 import {Animation} from '../../src/animation';
 
-describe('Animation', () => {
-  let sandbox;
+describes.sandboxed('Animation', {}, (env) => {
   let vsync;
   let vsyncTasks;
   let anim;
@@ -25,8 +24,7 @@ describe('Animation', () => {
   let contextNode;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {
       canAnimate: () => true,
@@ -42,13 +40,12 @@ describe('Animation', () => {
 
   afterEach(() => {
     expect(vsyncTasks.length).to.equal(0);
-    sandbox.restore();
   });
 
   function runVsync() {
     const tasks = vsyncTasks.slice(0);
     vsyncTasks = [];
-    tasks.forEach(function(task) {
+    tasks.forEach(function (task) {
       const state = {};
       if (task.measure) {
         task.measure(state);
@@ -62,14 +59,14 @@ describe('Animation', () => {
     let tr2 = -1;
     anim.add(
       0,
-      time => {
+      (time) => {
         tr1 = time;
       },
       0.8
     );
     anim.add(
       0.2,
-      time => {
+      (time) => {
         tr2 = time;
       },
       0.8
@@ -146,12 +143,12 @@ describe('Animation', () => {
   it('should animate out-of-bounds time', () => {
     let tr1 = -1;
     // Linear curve between -0.5 and 1.5
-    const curve = time => {
+    const curve = (time) => {
       return time * 2 - 0.5;
     };
     anim.add(
       0,
-      time => {
+      (time) => {
         tr1 = time;
       },
       1,
@@ -184,14 +181,14 @@ describe('Animation', () => {
     let tr2 = -1;
     anim.add(
       0,
-      time => {
+      (time) => {
         tr1 = time;
       },
       0.8
     );
     anim.add(
       0.2,
-      time => {
+      (time) => {
         tr2 = time;
       },
       0.8
@@ -222,14 +219,14 @@ describe('Animation', () => {
     let tr2 = -1;
     anim.add(
       0,
-      time => {
+      (time) => {
         tr1 = time;
       },
       0.8
     );
     anim.add(
       0.2,
-      time => {
+      (time) => {
         tr2 = time;
       },
       0.8
@@ -260,14 +257,14 @@ describe('Animation', () => {
     let tr2 = -1;
     anim.add(
       0,
-      time => {
+      (time) => {
         tr1 = time;
       },
       0.8
     );
     anim.add(
       0.2,
-      time => {
+      (time) => {
         tr2 = time;
       },
       0.8
@@ -298,14 +295,14 @@ describe('Animation', () => {
     let tr2 = -1;
     anim.add(
       0,
-      time => {
+      (time) => {
         tr1 = time;
       },
       0.8
     );
     anim.add(
       0.2,
-      time => {
+      (time) => {
         tr2 = time;
       },
       0.8
@@ -324,7 +321,7 @@ describe('Animation', () => {
           return 'ERROR';
         }
       )
-      .then(response => {
+      .then((response) => {
         expect(tr1).to.equal(-1);
         expect(tr2).to.equal(-1);
         expect(response).to.equal('ERROR');

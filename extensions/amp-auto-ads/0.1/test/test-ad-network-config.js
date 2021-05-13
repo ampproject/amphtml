@@ -25,7 +25,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let ampAutoAdsElem;
     let document;
 

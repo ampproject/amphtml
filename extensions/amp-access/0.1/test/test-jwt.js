@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {JwtHelper} from '../jwt';
-import {pemToBytes} from '../../../../src/utils/pem';
+import {JwtHelper, pemToBytes} from '../jwt';
 
-describe('JwtHelper', () => {
+describes.sandboxed('JwtHelper', {}, (env) => {
   // Generated from https://jwt.io/#debugger
   // Name deliberately changed from "John Doe" to "John ௵Z加䅌ਇ☎Èʘغޝ" to test
   // correct unicode handling on our part.
@@ -28,16 +27,10 @@ describe('JwtHelper', () => {
   const TOKEN_SIG = 'TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ';
   const TOKEN = `${TOKEN_HEADER}.${TOKEN_PAYLOAD}.${TOKEN_SIG}`;
 
-  let sandbox;
   let helper;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     helper = new JwtHelper(window);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   describe('decode', () => {
@@ -110,10 +103,6 @@ describe('JwtHelper', () => {
       'o2kQ+X5xK9cipRgEKwIDAQAB\n' +
       '-----END PUBLIC KEY-----';
 
-    beforeEach(() => {});
-
-    afterEach(() => {});
-
     // TODO(aghassemi, 6292): Unskip for Safari after #6292
     it.configure()
       .skipSafari()
@@ -122,9 +111,11 @@ describe('JwtHelper', () => {
         if (!helper.isVerificationSupported()) {
           return;
         }
-        return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {
-          expect(tok['name']).to.equal('John Do');
-        });
+        return helper
+          .decodeAndVerify(TOKEN, Promise.resolve(PEM))
+          .then((tok) => {
+            expect(tok['name']).to.equal('John Do');
+          });
       });
 
     it.configure()
@@ -145,7 +136,7 @@ describe('JwtHelper', () => {
           () => {
             throw new Error('must have failed');
           },
-          error => {
+          (error) => {
             // Expected.
             expect(error.message).to.match(/Signature verification failed/);
           }
@@ -180,7 +171,7 @@ describe('JwtHelper', () => {
         importKey: () => {},
         verify: () => {},
       };
-      subtleMock = sandbox.mock(subtle);
+      subtleMock = env.sandbox.mock(subtle);
 
       windowApi = {
         crypto: {subtle},
@@ -197,7 +188,7 @@ describe('JwtHelper', () => {
         () => {
           throw new Error('Must have failed');
         },
-        error => {
+        (error) => {
           expect(error.message).to.match(/Invalid token/);
         }
       );
@@ -209,7 +200,7 @@ describe('JwtHelper', () => {
         () => {
           throw new Error('Must have failed');
         },
-        error => {
+        (error) => {
           expect(error.message).to.match(/Only alg=RS256 is supported/);
         }
       );
@@ -222,7 +213,7 @@ describe('JwtHelper', () => {
         () => {
           throw new Error('Must have failed');
         },
-        error => {
+        (error) => {
           expect(error.message).to.match(/Only alg=RS256 is supported/);
         }
       );
@@ -246,14 +237,90 @@ describe('JwtHelper', () => {
         .withExactArgs(
           {name: 'RSASSA-PKCS1-v1_5'},
           key,
-          /* sig */ sinon.match(() => true),
-          /* verifiable */ sinon.match(() => true)
+          /* sig */ env.sandbox.match(() => true),
+          /* verifiable */ env.sandbox.match(() => true)
         )
         .returns(Promise.resolve(true))
         .once();
-      return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {
+      return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then((tok) => {
         expect(tok['name']).to.equal('John Do');
       });
     });
   });
 });
+
+// TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
+describes.sandboxed
+  .configure()
+  .skipSafari()
+  .run('pemToBytes', {}, () => {
+    const PLAIN_TEXT =
+      'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd' +
+      'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs' +
+      'HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D' +
+      'o2kQ+X5xK9cipRgEKwIDAQAB';
+    const PEM =
+      '-----BEGIN PUBLIC KEY-----\n' +
+      'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd\n' +
+      'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs\n' +
+      'HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D\n' +
+      'o2kQ+X5xK9cipRgEKwIDAQAB\n' +
+      '-----END PUBLIC KEY-----';
+
+    it('should convert a valid key', () => {
+      const binary = pemToBytes(PEM);
+      const plain = atob(PLAIN_TEXT);
+      const len = plain.length;
+      expect(binary.byteLength).to.equal(len);
+      expect(binary[0]).to.equal(plain.charCodeAt(0));
+      expect(binary[1]).to.equal(plain.charCodeAt(1));
+      expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
+      expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
+    });
+
+    it('should convert without headers, footers, line breaks', () => {
+      const binary = pemToBytes(PLAIN_TEXT);
+      const plain = atob(PLAIN_TEXT);
+      const len = plain.length;
+      expect(binary.byteLength).to.equal(len);
+      expect(binary[0]).to.equal(plain.charCodeAt(0));
+      expect(binary[1]).to.equal(plain.charCodeAt(1));
+      expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
+      expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
+    });
+
+    it('should convert without line breaks', () => {
+      const binary = pemToBytes(
+        '-----BEGIN PUBLIC KEY-----' + PLAIN_TEXT + '-----END PUBLIC KEY-----'
+      );
+      const plain = atob(PLAIN_TEXT);
+      const len = plain.length;
+      expect(binary.byteLength).to.equal(len);
+      expect(binary[0]).to.equal(plain.charCodeAt(0));
+      expect(binary[1]).to.equal(plain.charCodeAt(1));
+      expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
+      expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
+    });
+
+    it('should convert without header', () => {
+      const binary = pemToBytes(PLAIN_TEXT + '-----END PUBLIC KEY-----');
+      const plain = atob(PLAIN_TEXT);
+      const len = plain.length;
+      expect(binary.byteLength).to.equal(len);
+      expect(binary[0]).to.equal(plain.charCodeAt(0));
+      expect(binary[1]).to.equal(plain.charCodeAt(1));
+      expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
+      expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
+    });
+
+    it('should convert without footer', () => {
+      const binary = pemToBytes('-----BEGIN PUBLIC KEY-----' + PLAIN_TEXT);
+      const plain = atob(PLAIN_TEXT);
+      const len = plain.length;
+      expect(binary.byteLength).to.equal(len);
+      expect(binary[0]).to.equal(plain.charCodeAt(0));
+      expect(binary[1]).to.equal(plain.charCodeAt(1));
+      expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
+      expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
+    });
+  });

@@ -20,7 +20,7 @@ import {requireExternal} from '../../../src/module';
  * Create a React component that can render Promises.
  * Note: The nested class cannot be named Deferred, since src/promise.js already
  * exports a class with that name.
- * @return {function(new:React.Component, !Object)}
+ * @return {typeof React.Component}
  */
 function createDeferred_() {
   const react = requireExternal('react');
@@ -42,15 +42,15 @@ function createDeferred_() {
   DeferredType.prototype.constructor = DeferredType;
 
   /** @override */
-  DeferredType.prototype.componentWillReceiveProps = function(nextProps) {
+  DeferredType.prototype.componentWillReceiveProps = function (nextProps) {
     const promise = nextProps['promise'];
     if (promise) {
-      promise.then(value => this.setState({value}));
+      promise.then((value) => this.setState({value}));
     }
   };
 
   /** @override */
-  DeferredType.prototype.shouldComponentUpdate = function(props, state) {
+  DeferredType.prototype.shouldComponentUpdate = function (props, state) {
     const self = /** @type {!React.Component} */ (this);
     return Boolean(
       shallowDiffers(this.props, props) || shallowDiffers(self.state, state)
@@ -58,12 +58,12 @@ function createDeferred_() {
   };
 
   /** @override */
-  DeferredType.prototype.componentDidMount = function() {
-    this.props.promise.then(value => this.setState({value}));
+  DeferredType.prototype.componentDidMount = function () {
+    this.props.promise.then((value) => this.setState({value}));
   };
 
   /** @override */
-  DeferredType.prototype.render = function() {
+  DeferredType.prototype.render = function () {
     const self = /** @type {!React.Component} */ (this);
     return this.props.then(self.state.value);
   };
@@ -97,12 +97,12 @@ function shallowDiffers(a, b) {
   return false;
 }
 
-/** @private {?function(new:React.Component, !Object)} */
+/** @private {?typeof React.Component} */
 let DeferredType_ = null;
 
 /**
  * Creates a single date picker.
- * @return {function(new:React.Component, !Object)} A date picker class
+ * @return {typeof React.Component} A date picker class
  */
 export function createDeferred() {
   if (!DeferredType_) {

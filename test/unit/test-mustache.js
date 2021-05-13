@@ -16,12 +16,12 @@
 
 import mustache from '../../third_party/mustache/mustache';
 
-describe('Mustache', () => {
+describes.sandboxed('Mustache', {}, () => {
   let savedSanitizer;
 
   beforeEach(() => {
     savedSanitizer = mustache.sanitizeUnescaped;
-    mustache.setUnescapedSanitizer(function(value) {
+    mustache.setUnescapedSanitizer(function (value) {
       return value.toUpperCase();
     });
   });

@@ -152,12 +152,12 @@ export class BookendComponent {
    * Builds the bookend components elements by choosing the appropriate builder
    * class and appending the elements to the container.
    * @param {!Array<BookendComponentDef>} components
-   * @param {!Document} doc
+   * @param {!Window} win
    * @param {?../../../../src/service/localization.LocalizationService} localizationService
    * @return {!DocumentFragment}
    */
-  static buildElements(components, doc, localizationService) {
-    const fragment = doc.createDocumentFragment();
+  static buildElements(components, win, localizationService) {
+    const fragment = win.document.createDocumentFragment();
 
     components = prependTitle(components, localizationService);
     components.forEach((component, index) => {
@@ -165,7 +165,7 @@ export class BookendComponent {
       if (type && componentBuilderInstanceFor(type)) {
         const el = componentBuilderInstanceFor(type).buildElement(
           component,
-          doc,
+          win,
           {position: index}
         );
         fragment.appendChild(el);

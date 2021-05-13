@@ -48,14 +48,8 @@ let DimensionDef;
  * @return {!DimensionDef} The dimension for the Element along the given Axis.
  */
 export function getDimension(axis, el) {
-  const {
-    top,
-    bottom,
-    height,
-    left,
-    right,
-    width,
-  } = el./*OK*/ getBoundingClientRect();
+  const {top, bottom, height, left, right, width} =
+    el./*OK*/ getBoundingClientRect();
 
   return {
     start: axis == Axis.X ? left : top,
@@ -82,6 +76,19 @@ export function getCenter(axis, el) {
 export function getStart(axis, el) {
   const {start} = getDimension(axis, el);
   return start;
+}
+
+/**
+ * @param {!Axis} axis The Axis to get the position for.
+ * @param {!Alignment} alignment The Alignment to get the position for.
+ * @param {!Element} el The Element to get the position for.
+ * @return {number} The position for the given Element along the given axis for
+ *    the given alignment.
+ */
+export function getPosition(axis, alignment, el) {
+  return alignment == Alignment.START
+    ? getStart(axis, el)
+    : getCenter(axis, el);
 }
 
 /**
@@ -122,7 +129,27 @@ export function setTransformTranslateStyle(axis, el, delta) {
  */
 export function overlaps(axis, el, position) {
   const {start, end} = getDimension(axis, el);
-  return start <= position && position <= end;
+  // Ignore the end point, since that is shared with the adjacent Element.
+  return start <= position && position < end;
+}
+
+/**
+ * @param {!Axis} axis The axis to align on.
+ * @param {!Alignment} alignment The desired alignment.
+ * @param {!Element} container The container to align against.
+ * @param {!Element} el The Element get the offset for.
+ * @return {number} How far el is from alignment, as a percentage of its length.
+ */
+export function getPercentageOffsetFromAlignment(
+  axis,
+  alignment,
+  container,
+  el
+) {
+  const elPos = getPosition(axis, alignment, el);
+  const containerPos = getPosition(axis, alignment, container);
+  const {length: elLength} = getDimension(axis, el);
+  return (elPos - containerPos) / elLength;
 }
 
 /**
@@ -144,10 +171,7 @@ export function findOverlappingIndex(
   children,
   startIndex
 ) {
-  const pos =
-    alignment == Alignment.START
-      ? getStart(axis, container) + 1
-      : getCenter(axis, container);
+  const pos = getPosition(axis, alignment, container);
 
   // First look at the start index, since is the most likely to overlap.
   if (overlaps(axis, children[startIndex], pos)) {
@@ -155,7 +179,7 @@ export function findOverlappingIndex(
   }
 
   // Move outwards, since the closer indicies are more likely to overlap.
-  for (let i = 1; i < children.length / 2; i++) {
+  for (let i = 1; i <= children.length / 2; i++) {
     const nextIndex = mod(startIndex + i, children.length);
     const prevIndex = mod(startIndex - i, children.length);
 
@@ -211,18 +235,26 @@ export function updateScrollPosition(axis, el, delta) {
  * Scrolls the position within a scrolling container to an Element. Unlike
  * `scrollIntoView`, this function does not scroll the container itself into
  * view.
- * @param {!Element} el The Element to scroll to.
- * @param {!Element} container The scrolling container.
  * @param {!Axis} axis The axis to scroll along.
  * @param {!Alignment} alignment How to align the element within the container.
+ * @param {!Element} container The scrolling container.
+ * @param {!Element} el The Element to scroll to.
+ * @param {number} offset A percentage offset within the element to scroll to.
  */
-export function scrollContainerToElement(el, container, axis, alignment) {
+export function scrollContainerToElement(
+  axis,
+  alignment,
+  container,
+  el,
+  offset = 0
+) {
   const startAligned = alignment == Alignment.START;
+  const {length} = getDimension(axis, el);
   const snapOffset = startAligned ? getStart(axis, el) : getCenter(axis, el);
   const scrollOffset = startAligned
     ? getStart(axis, container)
     : getCenter(axis, container);
-  const delta = snapOffset - scrollOffset;
+  const delta = snapOffset - scrollOffset - offset * length;
 
   updateScrollPosition(axis, container, delta);
 }

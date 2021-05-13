@@ -20,8 +20,13 @@ import {
   BookendComponentInterface,
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
-import {dict} from '../../../../../src/utils/object';
-import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
+import {dict} from '../../../../../src/core/types/object';
+import {
+  getSourceOriginForElement,
+  resolveImgSrc,
+  userAssertValidProtocol,
+} from '../../utils';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -31,6 +36,7 @@ import {userAssert} from '../../../../../src/log';
  *   title: string,
  *   url: string,
  *   image: (string|undefined),
+ *   alt: string,
  *   domainName: string,
  * }}
  */
@@ -45,12 +51,12 @@ export class ArticleComponent {
   assertValidity(articleJson, element) {
     const requiredFields = ['title', 'url'];
     const hasAllRequiredFields = !requiredFields.some(
-      field => !(field in articleJson)
+      (field) => !(field in articleJson)
     );
     userAssert(
       hasAllRequiredFields,
       'Small article component must contain ' +
-        requiredFields.map(field => '`' + field + '`').join(', ') +
+        requiredFields.map((field) => '`' + field + '`').join(', ') +
         ' fields, skipping invalid.'
     );
 
@@ -72,6 +78,7 @@ export class ArticleComponent {
       domainName,
       type: articleJson['type'],
       title: articleJson['title'],
+      alt: articleJson['alt'],
     };
 
     if (articleJson['image']) {
@@ -86,8 +93,8 @@ export class ArticleComponent {
   }
 
   /** @override */
-  buildElement(articleData, doc, data) {
-    const html = htmlFor(doc);
+  buildElement(articleData, win, data) {
+    const html = htmlFor(win.document);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
     const el = html`
       <a
@@ -103,7 +110,14 @@ export class ArticleComponent {
         </div>
       </a>
     `;
-    addAttributesToElement(el, dict({'href': articleData.url}));
+
+    addAttributesToElement(
+      el,
+      dict({
+        'href': resolveRelativeUrl(articleData.url, getSourceUrl(win.location)),
+      })
+    );
+
     el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
       position: data.position,
       type: BOOKEND_COMPONENT_TYPES.SMALL,
@@ -121,7 +135,16 @@ export class ArticleComponent {
           </div>`;
 
       const {image} = htmlRefs(imgEl);
-      addAttributesToElement(image, dict({'src': articleData.image}));
+
+      addAttributesToElement(
+        image,
+        dict({'src': resolveImgSrc(win, articleData.image)})
+      );
+
+      addAttributesToElement(image, {
+        'alt': articleData.alt ? articleData.alt : '',
+      });
+
       el.appendChild(imgEl);
     }
 

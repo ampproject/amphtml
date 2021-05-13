@@ -16,7 +16,7 @@
 
 import {assertAttributeMutationFormat} from './mutation';
 import {assertHttpsUrl} from '../../../../src/url';
-import {map} from '../../../../src/utils/object';
+import {map} from '../../../../src/core/types/object';
 import {user} from '../../../../src/log';
 
 const TAG = 'amp-experiment attribute-mutation-default-url';
@@ -65,7 +65,7 @@ export class AttributeMutationDefaultUrl {
 
   /** @override */
   mutate() {
-    this.elements_.forEach(element => {
+    this.elements_.forEach((element) => {
       // name can be href or src
       const name = this.mutationRecord_['attributeName'];
       const value = this.mutationRecord_['value'];

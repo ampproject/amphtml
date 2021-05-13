@@ -24,7 +24,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document, ampdoc;
     let accessSource;
     let accessService;
@@ -58,7 +58,7 @@ describes.fakeWin(
         getSource: () => accessSource,
       };
 
-      accessSourceMock = sandbox.mock(accessSource);
+      accessSourceMock = env.sandbox.mock(accessSource);
 
       articleTitle = document.createElement('h1');
       articleTitle.id = 'laterpay-test-title';
@@ -66,7 +66,7 @@ describes.fakeWin(
       document.body.appendChild(articleTitle);
 
       vendor = new LaterpayVendor(accessService, accessSource);
-      xhrMock = sandbox.mock(vendor.xhr_);
+      xhrMock = env.sandbox.mock(vendor.xhr_);
     });
 
     afterEach(() => {
@@ -78,8 +78,8 @@ describes.fakeWin(
     describe('authorize', () => {
       let emptyContainerStub;
       beforeEach(() => {
-        emptyContainerStub = sandbox.stub(vendor, 'emptyContainer_');
-        sandbox.stub(vendor, 'renderPurchaseOverlay_');
+        emptyContainerStub = env.sandbox.stub(vendor, 'emptyContainer_');
+        env.sandbox.stub(vendor, 'renderPurchaseOverlay_');
       });
 
       it('uses a non default region', () => {
@@ -131,7 +131,7 @@ describes.fakeWin(
             })
           )
           .once();
-        return vendor.authorize().then(resp => {
+        return vendor.authorize().then((resp) => {
           expect(resp.access).to.be.true;
           expect(emptyContainerStub.called).to.be.true;
         });
@@ -153,7 +153,7 @@ describes.fakeWin(
           })
           .returns(Promise.resolve({status: 204}))
           .once();
-        return vendor.authorize().catch(err => {
+        return vendor.authorize().catch((err) => {
           expect(err.message).to.exist;
         });
       });
@@ -184,7 +184,7 @@ describes.fakeWin(
           )
           .once();
         emptyContainerStub.returns(Promise.resolve());
-        return vendor.authorize().then(err => {
+        return vendor.authorize().then((err) => {
           expect(err.access).to.be.false;
         });
       });
@@ -273,7 +273,7 @@ describes.fakeWin(
         container.parentNode.removeChild(container);
       });
 
-      it('sends request for purchase', done => {
+      it('sends request for purchase', (done) => {
         const changeEv = new Event('change');
         container.querySelector('input').dispatchEvent(changeEv);
         accessSourceMock
@@ -288,7 +288,7 @@ describes.fakeWin(
         }, 500);
       });
 
-      it('sends request for already purchased', done => {
+      it('sends request for already purchased', (done) => {
         accessSourceMock
           .expects('buildUrl')
           .returns(Promise.resolve('https://apllink'))

@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-recaptcha-input'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     beforeEach(() => {
@@ -51,7 +51,7 @@ describes.realWin(
       doc.body.appendChild(ampRecaptchaInput);
 
       return ampRecaptchaInput
-        .build()
+        .buildInternal()
         .then(() => {
           return ampRecaptchaInput.layoutCallback();
         })
@@ -62,10 +62,7 @@ describes.realWin(
 
     describe('amp-recaptcha-input', () => {
       it('Rejects because data-name is missing', () => {
-        const ampRecaptchaInputConfig = Object.assign(
-          {},
-          ampRecaptchaInputAttributes
-        );
+        const ampRecaptchaInputConfig = {...ampRecaptchaInputAttributes};
         delete ampRecaptchaInputConfig['name'];
 
         return allowConsoleError(() => {
@@ -78,10 +75,7 @@ describes.realWin(
       });
 
       it('Rejects because data-sitekey is missing', () => {
-        const ampRecaptchaInputConfig = Object.assign(
-          {},
-          ampRecaptchaInputAttributes
-        );
+        const ampRecaptchaInputConfig = {...ampRecaptchaInputAttributes};
         delete ampRecaptchaInputConfig['data-sitekey'];
 
         return allowConsoleError(() => {
@@ -94,10 +88,7 @@ describes.realWin(
       });
 
       it('Rejects because data-action is missing', () => {
-        const ampRecaptchaInputConfig = Object.assign(
-          {},
-          ampRecaptchaInputAttributes
-        );
+        const ampRecaptchaInputConfig = {...ampRecaptchaInputAttributes};
         delete ampRecaptchaInputConfig['data-action'];
 
         return allowConsoleError(() => {
@@ -110,13 +101,13 @@ describes.realWin(
       });
 
       it('Should be visible after built', () => {
-        return getRecaptchaInput().then(ampRecaptchaInput => {
+        return getRecaptchaInput().then((ampRecaptchaInput) => {
           expect(ampRecaptchaInput).to.not.have.display('none');
         });
       });
 
-      it('Should apply styles aftyer build', () => {
-        return getRecaptchaInput().then(ampRecaptchaInput => {
+      it('Should apply styles after build', () => {
+        return getRecaptchaInput().then((ampRecaptchaInput) => {
           expect(win.getComputedStyle(ampRecaptchaInput).position).to.equal(
             'absolute'
           );
@@ -126,74 +117,49 @@ describes.realWin(
         });
       });
 
-      it('Should register with the recaptcha service after layout', () => {
-        return getRecaptchaInput().then(ampRecaptchaInput => {
-          expect(ampRecaptchaInput.implementation_.registerPromise_).to.be.ok;
-          expect(
-            ampRecaptchaInput.implementation_.recaptchaService_
-              .registeredElementCount_
-          ).to.equal(1);
-        });
+      it('Should register with the recaptcha service after layout', async () => {
+        const ampRecaptchaInput = await getRecaptchaInput();
+        const impl = await ampRecaptchaInput.getImpl(false);
+        expect(impl.registerPromise_).to.be.ok;
+        expect(impl.recaptchaService_.registeredElementCount_).to.equal(1);
       });
 
-      it('Should unregister with the recaptcha service after unlayout', () => {
-        return getRecaptchaInput().then(ampRecaptchaInput => {
-          expect(ampRecaptchaInput.implementation_.registerPromise_).to.be.ok;
-          expect(
-            ampRecaptchaInput.implementation_.recaptchaService_
-              .registeredElementCount_
-          ).to.equal(1);
+      it('Should unregister with the recaptcha service after unlayout', async () => {
+        const ampRecaptchaInput = await getRecaptchaInput();
+        const impl = await ampRecaptchaInput.getImpl(false);
+        expect(impl.registerPromise_).to.be.ok;
+        expect(impl.recaptchaService_.registeredElementCount_).to.equal(1);
 
-          ampRecaptchaInput.unlayoutCallback();
-          expect(
-            ampRecaptchaInput.implementation_.recaptchaService_
-              .registeredElementCount_
-          ).to.equal(0);
-        });
+        ampRecaptchaInput.unlayoutCallback();
+        expect(impl.recaptchaService_.registeredElementCount_).to.equal(0);
       });
 
       it(
         'Should not register with the recaptcha service' +
           ' if already registered',
-        () => {
-          return getRecaptchaInput().then(ampRecaptchaInput => {
-            expect(ampRecaptchaInput.implementation_.registerPromise_).to.be.ok;
-            expect(
-              ampRecaptchaInput.implementation_.recaptchaService_
-                .registeredElementCount_
-            ).to.equal(1);
-            ampRecaptchaInput.implementation_.layoutCallback();
-            expect(
-              ampRecaptchaInput.implementation_.recaptchaService_
-                .registeredElementCount_
-            ).to.equal(1);
-          });
+        async () => {
+          const ampRecaptchaInput = await getRecaptchaInput();
+          const impl = await ampRecaptchaInput.getImpl(false);
+          expect(impl.registerPromise_).to.be.ok;
+          expect(impl.recaptchaService_.registeredElementCount_).to.equal(1);
+          impl.layoutCallback();
+          expect(impl.recaptchaService_.registeredElementCount_).to.equal(1);
         }
       );
 
       it(
         'Should not unregister with the recaptcha service' +
           ' if not already registered',
-        () => {
-          return getRecaptchaInput().then(ampRecaptchaInput => {
-            expect(ampRecaptchaInput.implementation_.registerPromise_).to.be.ok;
-            expect(
-              ampRecaptchaInput.implementation_.recaptchaService_
-                .registeredElementCount_
-            ).to.equal(1);
-            ampRecaptchaInput.unlayoutCallback();
-            expect(ampRecaptchaInput.implementation_.registerPromise_).to.not.be
-              .ok;
-            expect(
-              ampRecaptchaInput.implementation_.recaptchaService_
-                .registeredElementCount_
-            ).to.equal(0);
-            ampRecaptchaInput.unlayoutCallback();
-            expect(
-              ampRecaptchaInput.implementation_.recaptchaService_
-                .registeredElementCount_
-            ).to.equal(0);
-          });
+        async () => {
+          const ampRecaptchaInput = await getRecaptchaInput();
+          const impl = await ampRecaptchaInput.getImpl(false);
+          expect(impl.registerPromise_).to.be.ok;
+          expect(impl.recaptchaService_.registeredElementCount_).to.equal(1);
+          ampRecaptchaInput.unlayoutCallback();
+          expect(impl.registerPromise_).to.not.be.ok;
+          expect(impl.recaptchaService_.registeredElementCount_).to.equal(0);
+          ampRecaptchaInput.unlayoutCallback();
+          expect(impl.recaptchaService_.registeredElementCount_).to.equal(0);
         }
       );
     });

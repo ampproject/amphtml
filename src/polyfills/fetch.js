@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, devAssert, user} from '../log';
-import {hasOwn, map} from '../utils/object';
-import {isArray, isObject} from '../types';
+import {dev, user} from '../log';
+import {devAssert} from '../core/assert';
+import {hasOwn, map} from '../core/types/object';
+import {isArray, isObject} from '../core/types';
 import {parseJson} from '../json';
-import {utf8Encode} from '../utils/bytes';
+import {utf8Encode} from '../core/types/string/bytes';
 
 /** @enum {number} Allowed fetch responses. */
 const allowedFetchTypes = {
@@ -54,7 +55,7 @@ let XMLHttpRequestDef;
  * @return {!Promise<!FetchResponse>}
  */
 export function fetchPolyfill(input, init = {}) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     const requestMethod = normalizeMethod(init.method || 'GET');
     const xhr = createXhrRequest(requestMethod, input);
 
@@ -67,7 +68,7 @@ export function fetchPolyfill(input, init = {}) {
     }
 
     if (init.headers) {
-      Object.keys(init.headers).forEach(function(header) {
+      Object.keys(init.headers).forEach(function (header) {
         xhr.setRequestHeader(header, init.headers[header]);
       });
     }
@@ -150,7 +151,7 @@ class FetchResponse {
     /** @type {?ReadableStream} */
     this.body = null;
 
-    /** @type {string|null} */
+    /** @type {?string} */
     this.url = xhr.responseURL;
   }
 
@@ -188,9 +189,9 @@ class FetchResponse {
    * @return {!Promise<!JsonObject>}
    */
   json() {
-    return /** @type {!Promise<!JsonObject>} */ (this.drainText_().then(
-      parseJson
-    ));
+    return /** @type {!Promise<!JsonObject>} */ (
+      this.drainText_().then(parseJson)
+    );
   }
 
   /**
@@ -199,9 +200,9 @@ class FetchResponse {
    * @return {!Promise<!ArrayBuffer>}
    */
   arrayBuffer() {
-    return /** @type {!Promise<!ArrayBuffer>} */ (this.drainText_().then(
-      utf8Encode
-    ));
+    return /** @type {!Promise<!ArrayBuffer>} */ (
+      this.drainText_().then(utf8Encode)
+    );
   }
 }
 
@@ -263,34 +264,27 @@ export class Response extends FetchResponse {
    */
   constructor(body, init = {}) {
     const lowercasedHeaders = map();
-    const data = Object.assign(
-      {
-        status: 200,
-        statusText: 'OK',
-        responseText: body ? String(body) : '',
-        /**
-         * @param {string} name
-         * @return {string}
-         */
-        getResponseHeader(name) {
-          const headerName = String(name).toLowerCase();
-          return hasOwn(lowercasedHeaders, headerName)
-            ? lowercasedHeaders[headerName]
-            : null;
-        },
+    const data = {
+      status: 200,
+      statusText: 'OK',
+      responseText: body ? String(body) : '',
+      getResponseHeader(name) {
+        const headerName = String(name).toLowerCase();
+        return hasOwn(lowercasedHeaders, headerName)
+          ? lowercasedHeaders[headerName]
+          : null;
       },
-      init
-    );
+      ...init,
+    };
 
     data.status = init.status === undefined ? 200 : parseInt(init.status, 10);
 
     if (isArray(init.headers)) {
-      init.headers.forEach(entry => {
+      /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
-        lowercasedHeaders[String(headerName).toLowerCase()] = String(
-          headerValue
-        );
+        lowercasedHeaders[String(headerName).toLowerCase()] =
+          String(headerValue);
       });
     } else if (isObject(init.headers)) {
       for (const key in init.headers) {
@@ -310,8 +304,6 @@ export class Response extends FetchResponse {
 
 /**
  * Installs fetch and Response polyfill
- *
- * @export
  * @param {Window} win
  */
 export function install(win) {

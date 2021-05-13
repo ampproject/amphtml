@@ -18,23 +18,23 @@
 // Most coverage through test-3p-frame
 
 import {
-  draw3p,
+  draw3pInternal,
   ensureFramed,
   parseFragment,
   validateAllowedEmbeddingOrigins,
   validateAllowedTypes,
   validateParentOrigin,
-} from '../../3p/integration';
+} from '../../3p/integration-lib';
 import {getRegistrations, register} from '../../3p/3p';
 
-describe('3p integration.js', () => {
+describes.sandboxed('3p integration.js', {}, () => {
   const registrations = getRegistrations();
   afterEach(() => {
     delete registrations.testAction;
   });
 
   it('should register integrations', () => {
-    window.ampTestRuntimeConfig.adTypes.forEach(adType => {
+    window.ampTestRuntimeConfig.adTypes.forEach((adType) => {
       expect(
         registrations,
         `Missing registration for [${adType}]`
@@ -148,17 +148,17 @@ describe('3p integration.js', () => {
       },
     };
     let called = false;
-    register('testAction', function(myWin, myData) {
+    register('testAction', function (myWin, myData) {
       called = true;
       expect(myWin).to.equal(win);
       expect(myData).to.equal(myData);
     });
     expect(called).to.be.false;
-    draw3p(win, data);
+    draw3pInternal(win, data);
     expect(called).to.be.true;
   });
 
-  it('should support config processing in draw3p', () => {
+  it('should support config processing in draw3pInternal', () => {
     const data = {
       type: 'testAction2',
     };
@@ -171,7 +171,7 @@ describe('3p integration.js', () => {
       },
     };
     let called = false;
-    register('testAction2', function(myWin, myData) {
+    register('testAction2', function (myWin, myData) {
       expect(called).to.be.false;
       called = true;
       expect(myWin).to.equal(win);
@@ -180,7 +180,7 @@ describe('3p integration.js', () => {
     });
     expect(called).to.be.false;
     let finish;
-    draw3p(win, data, (_config, done) => {
+    draw3pInternal(win, data, (_config, done) => {
       finish = () => {
         done({
           custom: true,
@@ -207,7 +207,7 @@ describe('3p integration.js', () => {
     };
     allowConsoleError(() => {
       expect(() => {
-        draw3p(win, data);
+        draw3pInternal(win, data);
       }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/);
     });
   });
@@ -250,7 +250,7 @@ describe('3p integration.js', () => {
     allowConsoleError(() => {
       expect(() => {
         validateAllowedTypes(get('d-124.ampproject.net.com'), 'not present');
-      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+      }).to.throw(/3p type for custom iframe not allowed/);
     });
   });
 
@@ -266,12 +266,12 @@ describe('3p integration.js', () => {
     allowConsoleError(() => {
       expect(() => {
         validateAllowedTypes(defaultHost, 'not present');
-      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+      }).to.throw(/3p type for custom iframe not allowed/);
     });
     allowConsoleError(() => {
       expect(() => {
         validateAllowedTypes(defaultHost, 'adtech');
-      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+      }).to.throw(/3p type for custom iframe not allowed/);
     });
     validateAllowedTypes(defaultHost, 'adtech', ['adtech']);
   });

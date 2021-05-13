@@ -178,14 +178,13 @@
       text-decoration: underline;
     }
 
-    viewer[data-show-container="dynamic"] #container-dynamic {
+    viewer[data-show-container="9"] #container9 {
       visibility: visible;
       -webkit-transform: none;
       -ms-transform: none;
       transform: none;
     }
-
-    viewer[data-show-container="dynamic"] #show-container-dynamic-anchor {
+    viewer[data-show-container="9"] #show-container9-anchor {
       text-decoration: underline;
     }
 
@@ -214,14 +213,12 @@
       this.url = url;
       this.alreadyLoaded_ = false;
       this.stackIndex_ = 0;
-      this.viewportType_ = 'natural';
       this.visibilityState_ = visible ? 'visible' : 'hidden';
-      this.prerenderSize_ = 1;
       this.csi_ = 1;
       this.startResolve_ = null;
       this.startPromise_ = null;
-      this.caps_ = opt_caps || 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate';
-      this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
+      this.caps_ = opt_caps || 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate,iframeScroll';
+      this.receivedMessages = []
 
       this.viewer = document.querySelector('viewer');
       this.header = document.querySelector('header');
@@ -231,6 +228,10 @@
       this.iframe.setAttribute('sandbox',
           'allow-popups allow-scripts allow-forms allow-pointer-lock' +
           ' allow-popups-to-escape-sandbox allow-same-origin');
+      this.iframe.setAttribute('scrolling', 'yes');
+      this.iframe.setAttribute('height', '800');
+      this.iframe.setAttribute('width', '1200');
+      this.viewer.classList.add('natural');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
       this.visibilityToggle_.addEventListener('click', function() {
@@ -239,13 +240,6 @@
           this.toggleVisibility(this.visibilityState_ != 'visible', true);
         }
       }.bind(this));
-      this.viewer.classList.add(this.viewportType_);
-
-      if (this.viewportType_ == 'natural' && !this.isIos_) {
-        this.iframe.setAttribute('scrolling', 'yes');
-      } else {
-        this.iframe.setAttribute('scrolling', 'no');
-      }
 
       window.addEventListener('resize', this.onResize_.bind(this));
       window.addEventListener('popstate', this.onPopState_.bind(this));
@@ -257,12 +251,10 @@
 
       var params = {
         history: 1,
-        viewportType: this.viewportType_,
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
         paddingTop: this.header./*OK*/offsetHeight,
         visibilityState: this.visibilityState_,
-        prerenderSize: this.prerenderSize_,
         origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
         cap: this.caps_,
@@ -301,7 +293,6 @@
         this.visibilityState_ = visible ? 'visible' : 'hidden';
         this.ampViewerHost_.sendRequest('visibilitychange', {
           state: this.visibilityState_,
-          prerenderSize: this.prerenderSize
         }, true);
         if (updateToggle) {
           this.updateVisibilityToggle_();
@@ -434,6 +425,7 @@
 
     Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
       log(this.id + ': Viewer.prototype.processRequest_', name);
+      this.receivedMessages.push({name, data});
       switch(name) {
         case 'bindReady':
           return Promise.resolve();
@@ -475,6 +467,8 @@
           return this.ssrRenderAmpListTemplate_(data);
         } else if (ampComponentType == 'amp-form') {
           return this.ssrRenderAmpFormTemplate_(data);
+        } else if (ampComponentType == 'amp-autocomplete') {
+          return this.ssrRenderAmpAutocompleteTemplate_(data);
         } else {
           return Promise.reject({error: 'source amp component is not valid'})
         }
@@ -502,6 +496,27 @@
           },
           "type": 'application/json',
         },
+      });
+    };
+
+    // TODO: We mock the template but don't verify the data
+    // that should be used to construct it. The data should be used
+    // and verified to an extent.
+    Viewer.prototype.ssrRenderAmpAutocompleteTemplate_ = function(data) {
+      // Mocked response.
+      return Promise.resolve({
+        "html":
+          "<div class='product' role='option' data-value='Apple'>Apple</div>"
+            + "<div class='product' role='option' data-value='Orange'>Orange</div>"
+            + "<div class='product' role='option' data-value='Pear'>Pear</div>"
+            + "<div class='product' role='option' data-value='Banana'>Banana</div>"
+            + "<div class='product' role='option' data-value='Watermelon'>Watermelon</div>",
+        "body" : "",
+        "init" : {
+          "headers": {
+            "Content-Type": "application/json",
+          }
+        }
       });
     };
 
@@ -603,7 +618,7 @@
       if (!queryString) {
         return params;
       }
-      if (startsWith(queryString, '?') || startsWith(queryString, '#')) {
+      if (queryString.startsWith('?') || queryString.startsWith('#')) {
         queryString = queryString.substr(1);
       }
       const pairs = queryString.split('&');
@@ -710,19 +725,14 @@
           'xhrInterceptor').start();
       addShowContainer('8');
 
-      if (href) {
-        new Viewer(
-            'container-dynamic',
-            'dynamic',
-            addQueryParam(href, 'amp_js_v', '0.1'),
-            true,
-            caps).start();
-        document.getElementById('show-containerdynamic-anchor').hidden = false;
-        addShowContainer('dynamic');
-        showContainer('dynamic');
-      } else {
-        showContainer('1');
-      }
+      new Viewer(
+          'container9',
+          '9',
+          './amp-autocomplete.ssr.html?amp_js_v=0.1',
+          false).start();
+      addShowContainer('9');
+
+      showContainer('1');
     }
 
     function addShowContainer(id) {
@@ -767,7 +777,7 @@
       <a class="show-container-anchor" id="show-container6-anchor">Six</a>
       <a class="show-container-anchor" id="show-container7-anchor">Seven</a>
       <a class="show-container-anchor" id="show-container8-anchor">Eight</a>
-      <a class="show-container-anchor" id="show-containerdynamic-anchor" hidden>Dynamic</a>
+      <a class="show-container-anchor" id="show-container9-anchor">Nine</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -797,21 +807,21 @@
       </div>
     </container>
     <container id="container6">
-        <div class="wait">
-          Please wait, the AMP doc will appear here...
-        </div>
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
     </container>
     <container id="container7">
-    <div class="wait">
-      Please wait, the AMP doc will appear here...
-    </div>
-    </container>
-    <container id="container-dynamic">
-    <div class="wait">
-      Please wait, the AMP doc will appear here...
-    </div>
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
     </container>
     <container id="container8">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container9">
       <div class="wait">
         Please wait, the AMP doc will appear here...
       </div>

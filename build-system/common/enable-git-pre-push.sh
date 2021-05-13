@@ -13,11 +13,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the license.
-#
+
 # This script adds a pre-push hook to .git/hooks/, which runs some basic tests
 # before running "git push".
-#
-# To enable it, run this script: "./build-system/enable-git-pre-push.sh"
+# To enable it, run this script: "./build-system/common/enable-git-pre-push.sh"
 
 
 SCRIPT=${BASH_SOURCE[0]}

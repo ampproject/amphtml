@@ -20,11 +20,15 @@
  * validation on its input.
  */
 
-module.exports = function(context) {
+module.exports = function (context) {
   const configurationCalls = ['jsonConfiguration', 'jsonLiteral'].map(
-    name => `CallExpression[callee.name=${name}]`
+    (name) => `CallExpression[callee.name=${name}]`
   );
 
+  /**
+   * @param {*} node
+   * @return {Object}
+   */
   function verifyPath(node) {
     for (let n = node; n; n = n.parent) {
       const {parent} = n;
@@ -53,7 +57,7 @@ module.exports = function(context) {
   }
 
   return {
-    'CallExpression[callee.name=jsonConfiguration]': function(node) {
+    'CallExpression[callee.name=jsonConfiguration]': function (node) {
       const args = node.arguments;
 
       if (
@@ -71,7 +75,7 @@ module.exports = function(context) {
       });
     },
 
-    [`:matches(${configurationCalls}) * Identifier`]: function(node) {
+    [`:matches(${configurationCalls}) * Identifier`]: function (node) {
       const {name, parent} = node;
       if (name === 'undefined') {
         return;
@@ -115,7 +119,7 @@ module.exports = function(context) {
       });
     },
 
-    'CallExpression[callee.name=jsonLiteral]': function(node) {
+    'CallExpression[callee.name=jsonLiteral]': function (node) {
       const args = node.arguments;
 
       if (args.length === 1 && args[0].type !== 'Identifier') {
@@ -129,7 +133,7 @@ module.exports = function(context) {
       });
     },
 
-    'CallExpression[callee.name=includeJsonLiteral]': function(node) {
+    'CallExpression[callee.name=includeJsonLiteral]': function (node) {
       const args = node.arguments;
 
       if (args.length !== 1 || args[0].type !== 'Identifier') {

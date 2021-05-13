@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
+import {CommonSignals} from './core/constants/common-signals';
 import {Services} from './services';
 import {createElementWithAttributes, removeElement} from './dom';
 import {devAssert} from './log';
-import {dict} from './utils/object';
-import {isArray, toWin} from './types';
+import {dict} from './core/types/object';
+import {isArray} from './core/types';
+import {toWin} from './types';
 import {triggerAnalyticsEvent} from './analytics';
 
 /**
@@ -66,7 +67,7 @@ export function insertAnalyticsElement(
     const ampdoc = Services.ampdoc(parentElement);
     extensions./*OK*/ installExtensionForDoc(ampdoc, 'amp-analytics');
   } else {
-    Services.analyticsForDocOrNull(parentElement).then(analytics => {
+    Services.analyticsForDocOrNull(parentElement).then((analytics) => {
       devAssert(analytics);
     });
   }
@@ -126,7 +127,8 @@ class CustomEventReporter {
     triggerAnalyticsEvent(
       this.parent_,
       this.getEventTypeInSandbox_(eventType),
-      opt_vars
+      opt_vars,
+      /** enableDataVars */ false
     );
   }
   /**
@@ -234,7 +236,7 @@ export function useAnalyticsInSandbox(element, promise) {
       if (analyticsElement || !configPromise) {
         return;
       }
-      configPromise.then(config => {
+      configPromise.then((config) => {
         if (!configPromise) {
           // If config promise resolve after unload, do nothing.
           return;

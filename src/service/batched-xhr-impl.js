@@ -16,8 +16,8 @@
 
 import {Xhr} from './xhr-impl';
 import {getService, registerServiceBuilder} from '../service';
-import {map} from '../utils/object';
-import {removeFragment} from '../url';
+import {getSourceOrigin, removeFragment, resolveRelativeUrl} from '../url';
+import {map} from '../core/types/object';
 
 /**
  * A wrapper around the Xhr service which batches the result of GET requests
@@ -53,18 +53,18 @@ export class BatchedXhr extends Xhr {
     const isBatched = !!this.fetchPromises_[key];
 
     if (isBatchable && isBatched) {
-      return this.fetchPromises_[key].then(response => response.clone());
+      return this.fetchPromises_[key].then((response) => response.clone());
     }
 
     const fetchPromise = super.fetch(input, opt_init);
 
     if (isBatchable) {
       this.fetchPromises_[key] = fetchPromise.then(
-        response => {
+        (response) => {
           delete this.fetchPromises_[key];
           return response.clone();
         },
-        err => {
+        (err) => {
           delete this.fetchPromises_[key];
           throw err;
         }
@@ -83,7 +83,11 @@ export class BatchedXhr extends Xhr {
    * @private
    */
   getMapKey_(input, responseType) {
-    return removeFragment(input) + responseType;
+    const absoluteUrl = resolveRelativeUrl(
+      input,
+      getSourceOrigin(this.win.location)
+    );
+    return removeFragment(absoluteUrl) + responseType;
   }
 }
 

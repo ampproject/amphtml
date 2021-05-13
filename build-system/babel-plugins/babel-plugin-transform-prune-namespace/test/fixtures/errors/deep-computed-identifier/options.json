@@ -1,4 +1,4 @@
 {
-  "plugins": ["../../../../../babel-plugin-transform-prune-namespace"],
+  "plugins": ["../../../.."],
   "throws": "can't handle computed namespace"
 }

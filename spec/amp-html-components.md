@@ -21,10 +21,10 @@ limitations under the License.
 The AMP runtime defines a small set of custom elements that can be used in any
 AMP file. These custom elements serve two primary purposes:
 
-* Enable the AMP runtime to manage the loading of external resources, which may
-slow down the initial render or cause jank.
-* Allow AMP authors to include functionality above and beyond standard HTML,
-while maintaining the security- and performance-minded requirement that no author-written JavaScript is executed.
+-   Enable the AMP runtime to manage the loading of external resources, which may
+    slow down the initial render or cause jank.
+-   Allow AMP authors to include functionality above and beyond standard HTML,
+    while maintaining the security- and performance-minded requirement that no author-written JavaScript is executed.
 
 The initial set of elements included in the AMP spec is purposefully minimal,
 to keep the payload small. The AMP runtime also allows dynamic loading of additional
@@ -44,7 +44,7 @@ Add any styles to an AMP page using a single `<style amp-custom>` tag in the hea
 For example:
 
 ```html
-<!doctype html>
+<!DOCTYPE html>
 <html ⚡>
   <head>
     <style amp-custom>
@@ -59,14 +59,15 @@ For example:
   </head>
 
   <body>
-    <amp-img src="https://placekitten.com/g/200/300" width=200 height=300>
+    <amp-img src="https://placekitten.com/g/200/300" width="200" height="300">
     </amp-img>
 
     <amp-img
       class="grey-placeholder"
       src="https://placekitten.com/g/500/300"
-      width=500
-      height=300>
+      width="500"
+      height="300"
+    >
     </amp-img>
   </body>
 </html>
@@ -79,7 +80,7 @@ attribute names such as `placeholder` or `overflow` or AMP class names. For
 example:
 
 ```html
-<!doctype html>
+<!DOCTYPE html>
 <html ⚡>
   <head>
     <style amp-custom>
@@ -91,11 +92,15 @@ example:
   </head>
 
   <body>
-    <amp-iframe class="my-frame" width=300 height=300
-        layout="responsive"
-        sandbox="allow-scripts"
-        resizable
-        src="https://foo.com/iframe">
+    <amp-iframe
+      class="my-frame"
+      width="300"
+      height="300"
+      layout="responsive"
+      sandbox="allow-scripts"
+      resizable
+      src="https://foo.com/iframe"
+    >
       <div overflow>Read more!</div>
     </amp-iframe>
   </body>
@@ -103,11 +108,10 @@ example:
 ```
 
 Inline `style` attributes are also allowed. For example:
+
 ```html
-  <p style="color:blue;font-weight:bold;">AMPlify!</p>
-
+<p style="color:blue;font-weight:bold;">AMPlify!</p>
 ```
-
 
 ### Width, Height, and Layout
 
@@ -125,31 +129,29 @@ The height of the component. `width` and `height` attributes imply the aspect ra
 
 Defines the way the container is laid out. `layout="responsive"` will let the container scale with the width of the parent container. `layout="nodisplay"` indicates that the component should not be initially displayed by the runtime - for example, for an image that will appear in a lightbox when a trigger is tapped.
 
-
-
 ### Extended Components
 
 The AMP runtime itself will only build-in the most commonly-used components - additional components must be explicitly included into a AMP document.
 
 The collection of official AMP components is open-source and open to contributions. To be considered for inclusion into the official AMP components, a contributed component must:
 
-* Use only the API surface area publicly specified by the AMP runtime to work.
-* Be open-sourceable with an Apache 2 license and not minified or obfuscated.
-* Have its behavior completely controllable by the runtime - e.g. not attempt to load resources outside of a timeframe allowed by the AMP runtime.
-* Have a fixed, known aspect ratio at initial page load, except if placed at the bottom of the page.
-* Not attempt to access or manipulate objects outside of the component's immediate ownership - e.g. elements that are not specified by or children of the component.
-* Not cause an AMP file to become invalid as per the AMP specification
-* The author of the component must sign the [Contributor License Agreement](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#contributor-license-agreement).
+-   Use only the API surface area publicly specified by the AMP runtime to work.
+-   Be open-sourceable with an Apache 2 license and not minified or obfuscated.
+-   Have its behavior completely controllable by the runtime - e.g. not attempt to load resources outside of a timeframe allowed by the AMP runtime.
+-   Have a fixed, known aspect ratio at initial page load, except if placed at the bottom of the page.
+-   Not attempt to access or manipulate objects outside of the component's immediate ownership - e.g. elements that are not specified by or children of the component.
+-   Not cause an AMP file to become invalid as per the AMP specification
+-   The author of the component must sign the [Contributor License Agreement](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#contributor-license-agreement).
 
 In the near-term, implementation will focus on the core components, before prioritizing extensibility. The long-term goal of the runtime though is to support this extensibility.
 
 #### Contributing Components
 
-Components may be contributed using the [process for significant changes to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes).
+Components may be contributed using the [process for significant changes to AMP](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md#process-for-significant-changes).
 
 #### Service-specific Components
 
-A number of AMP components supporting features like ads, analytics, and embeds, may rely on third-party JavaScript provided by a specific service. For example: an analytics component from Google Analytics might need to run logic specific to the GA service, or a Twitter embed may need to run Twitter-specific code.  There are three ways these service-specific components can work:
+A number of AMP components supporting features like ads, analytics, and embeds, may rely on third-party JavaScript provided by a specific service. For example: an analytics component from Google Analytics might need to run logic specific to the GA service, or a Twitter embed may need to run Twitter-specific code. There are three ways these service-specific components can work:
 
 **Arbitrary 3rd Party JavaScript loaded at runtime**
 
@@ -167,9 +169,8 @@ The AMP component set may provide components that can load data from an arbitrar
 
 In these cases, services may set up endpoints that produce data that conforms to how the component expects data to be returned. That component may then reference the endpoint with a `url` parameter for example, and the service will be effectively incorporated into the page.
 
-
 ## Components
 
-Built-in components include [amp-img](../builtins/amp-img.md), [amp-layout](../builtins/amp-layout.md) and [amp-pixel](../builtins/amp-pixel.md).
+Built-in components include [amp-img](../builtins/amp-img/amp-img.md), [amp-layout](../builtins/amp-layout/amp-layout.md) and [amp-pixel](../builtins/amp-pixel/amp-pixel.md).
 
 AMP HTML extensions include [extended components](../extensions) and extended templates.

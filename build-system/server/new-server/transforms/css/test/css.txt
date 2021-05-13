@@ -1,0 +1,1 @@
+.i-amp-internal{background-color:red}

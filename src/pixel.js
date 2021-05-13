@@ -16,7 +16,7 @@
 
 import {WindowInterface} from '../src/window-interface';
 import {createElementWithAttributes} from '../src/dom';
-import {dict} from '../src/utils/object';
+import {dict} from '../src/core/types/object';
 import {user} from '../src/log';
 
 /** @const {string} */
@@ -29,6 +29,7 @@ const TAG = 'pixel';
  * @return {!Element}
  */
 export function createPixel(win, src, referrerPolicy) {
+  // Caller need to verify window is not destroyed when creating pixel
   if (referrerPolicy && referrerPolicy !== 'no-referrer') {
     user().error(TAG, 'Unsupported referrerPolicy: %s', referrerPolicy);
   }
@@ -57,8 +58,10 @@ function createNoReferrerPixel(win, src) {
         'style': 'display:none',
       })
     );
+    iframe.onload = () => {
+      createImagePixel(iframe.contentWindow, src);
+    };
     win.document.body.appendChild(iframe);
-    createImagePixel(iframe.contentWindow, src);
     return iframe;
   }
 }

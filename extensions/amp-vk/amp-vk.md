@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Embeds a VK post or poll widget.
 ---
+
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,45 +24,36 @@ limitations under the License.
 
 # amp-vk
 
-Embeds a <a href="https://vk.com/">VK</a> post or poll widget.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-vk" src="https://cdn.ampproject.org/v0/amp-vk-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed, responsive, flex-item</td>
-  </tr>
-</table>
-
 ## Behavior
 
 You can use the `amp-vk` component to embed a [VK](https://vk.com/) post or poll widget.
 
 Example of a post widget:
+
 ```html
 <amp-vk
-    width="500"
-    height="300"
-    data-embedtype="post"
-    layout="responsive"
-    data-owner-id="1"
-    data-post-id="45616"
-    data-hash="Yc8_Z9pnpg8aKMZbVcD-jK45eAk">
+  width="500"
+  height="300"
+  data-embedtype="post"
+  layout="responsive"
+  data-owner-id="1"
+  data-post-id="45616"
+  data-hash="Yc8_Z9pnpg8aKMZbVcD-jK45eAk"
+>
 </amp-vk>
 ```
 
 Example of a poll widget:
+
 ```html
 <amp-vk
-    width="400"
-    height="300"
-    layout="responsive"
-    data-embedtype="poll"
-    data-api-id="6183531"
-    data-poll-id="274086843_1a2a465f60fff4699f">
+  width="400"
+  height="300"
+  layout="responsive"
+  data-embedtype="poll"
+  data-api-id="6183531"
+  data-poll-id="274086843_1a2a465f60fff4699f"
+>
 </amp-vk>
 ```
 
@@ -101,4 +93,5 @@ For additional information about widgets attributes, please see [VK post widget 
 </table>
 
 ## Validation
-See [amp-vk rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vk/validator-amp-vk.protoascii) in the AMP validator specification.
+
+See [amp-vk rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-vk/validator-amp-vk.protoascii) in the AMP validator specification.

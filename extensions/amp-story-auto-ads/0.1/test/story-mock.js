@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 
 /**
  * Fake story implementation mocking public methods.
@@ -34,7 +34,7 @@ export class MockStoryImpl extends AMP.BaseElement {
   }
 
   getPageById(pageId) {
-    return this.pages_.find(page => page.element.id === pageId);
+    return this.pages_.find((page) => page.element.id === pageId);
   }
 
   // This is not very close to the real implementation as it ignores any
@@ -106,7 +106,7 @@ export function addStoryPages(doc, storyImpl, numPages = 3) {
     page.signals().signal(CommonSignals.BUILT);
     const implPromise = page
       .getImpl()
-      .then(pageImpl => storyImpl.addPage(pageImpl));
+      .then((pageImpl) => storyImpl.addPage(pageImpl));
     promises.push(implPromise);
   }
   return Promise.all(promises);
@@ -121,32 +121,9 @@ export function addStoryPages(doc, storyImpl, numPages = 3) {
 export function fireBuildSignals(doc, additonalSelectors = []) {
   const defaultSelectors = ['amp-ad', 'amp-story', 'amp-story-page'];
   const selectors = defaultSelectors.concat(additonalSelectors).join(',');
-  doc.querySelectorAll(selectors).forEach(element => {
+  doc.querySelectorAll(selectors).forEach((element) => {
     const signals = element.signals();
     signals.signal(CommonSignals.BUILT);
     signals.signal(CommonSignals.INI_LOAD);
   });
-}
-
-/**
- * Add specified CTA values to most recently created ad.
- * @param {!../amp-story-auto-autoAds.AmpStoryAutoAds} autoAdsImpl
- * @param {string} ctaType
- * @param {string} ctaUrl
- */
-export function addCtaValues(autoAdsImpl, ctaType, ctaUrl) {
-  autoAdsImpl.lastCreatedAdElement_.setAttribute('data-vars-ctatype', ctaType);
-  autoAdsImpl.lastCreatedAdElement_.setAttribute('data-vars-ctaurl', ctaUrl);
-}
-
-/**
- * Mock creation of iframe that is normally handled by amp-ad.
- * @param {!../amp-story-auto-autoAds.AmpStoryAutoAds} autoAdsImpl
- * @param {string} content
- */
-export function insertAdContent(autoAdsImpl, content) {
-  const iframe = autoAdsImpl.doc_.createElement('iframe');
-  iframe.srcdoc = content;
-  autoAdsImpl.lastCreatedAdElement_.appendChild(iframe);
-  return autoAdsImpl.loadPromise(iframe);
 }

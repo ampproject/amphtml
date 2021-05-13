@@ -15,7 +15,7 @@
  */
 
 import {TwoStepsResponse} from './link-rewriter/two-steps-response';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getNormalizedHostnameFromAnchor, isExcludedDomain} from './utils';
 
 /**
@@ -105,7 +105,9 @@ export class AffiliateLinkResolver {
       credentials: 'include',
     };
 
-    return this.xhr_.fetchJson(beaconUrl, fetchOptions).then(res => res.json());
+    return this.xhr_
+      .fetchJson(beaconUrl, fetchOptions)
+      .then((res) => res.json());
   }
 
   /**
@@ -126,9 +128,8 @@ export class AffiliateLinkResolver {
    * @public
    */
   resolveUnknownAnchors(anchorList) {
-    const alreadyResolvedResponse = this.associateWithReplacementUrl_(
-      anchorList
-    );
+    const alreadyResolvedResponse =
+      this.associateWithReplacementUrl_(anchorList);
     let willBeResolvedPromise = null;
 
     const domainsToAsk = this.getNewDomains_(anchorList);
@@ -168,7 +169,7 @@ export class AffiliateLinkResolver {
    * @private
    */
   associateWithReplacementUrl_(anchorList) {
-    return anchorList.map(anchor => {
+    return anchorList.map((anchor) => {
       let replacementUrl = null;
       const status = this.getDomainAffiliateStatus_(
         this.getAnchorDomain_(anchor)
@@ -234,7 +235,7 @@ export class AffiliateLinkResolver {
    * @private
    */
   markDomainsAsUnknown_(domains) {
-    domains.forEach(domain => {
+    domains.forEach((domain) => {
       if (this.domains_[domain]) {
         return;
       }
@@ -256,7 +257,7 @@ export class AffiliateLinkResolver {
    * @private
    */
   getUnknownAnchors_(anchorList, unknownDomains) {
-    return anchorList.filter(anchor => {
+    return anchorList.filter((anchor) => {
       const anchorDomain = this.getAnchorDomain_(anchor);
 
       return unknownDomains.indexOf(anchorDomain) !== -1;
@@ -279,7 +280,7 @@ export class AffiliateLinkResolver {
       this.firstRequest = promise;
     }
 
-    return promise.then(data => {
+    return promise.then((data) => {
       const merchantDomains = data['merchant_domains'] || [];
       this.updateDomainsStatusMap_(domainsToAsk, merchantDomains);
 
@@ -294,7 +295,7 @@ export class AffiliateLinkResolver {
    * @private
    */
   updateDomainsStatusMap_(allDomains, affiliateDomains) {
-    allDomains.forEach(domain => {
+    allDomains.forEach((domain) => {
       const isAffiliateDomain = affiliateDomains.indexOf(domain) !== -1;
       this.domains_[domain] = isAffiliateDomain
         ? AFFILIATE_STATUS.AFFILIATE

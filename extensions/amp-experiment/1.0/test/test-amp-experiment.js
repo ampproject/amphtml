@@ -27,7 +27,7 @@ describes.realWin(
       extensions: ['amp-experiment:1.0'],
     },
   },
-  env => {
+  (env) => {
     // Config has empty mutations
     // As mutation parser tests will handle this
     const config = {
@@ -91,7 +91,7 @@ describes.realWin(
 
     function stubAllocateVariant(sandbox, config) {
       const viewer = Services.viewerForDoc(ampdoc);
-      const stub = sandbox.stub(variant, 'allocateVariant');
+      const stub = env.sandbox.stub(variant, 'allocateVariant');
       stub
         .withArgs(ampdoc, viewer, 'experiment-1', config['experiment-1'])
         .returns(Promise.resolve('variant-a'));
@@ -103,17 +103,6 @@ describes.realWin(
         .returns(Promise.resolve(null));
       return stub;
     }
-
-    it('Rejects because experiment is not enabled', () => {
-      toggleExperiment(win, 'amp-experiment-1.0', false);
-
-      expectAsyncConsoleError(/Experiment/);
-      addConfigElement('script');
-      doc.body.appendChild(el);
-      return experiment
-        .buildCallback()
-        .should.eventually.be.rejectedWith(/Experiment/);
-    });
 
     it('should not throw on valid config', () => {
       expect(() => {
@@ -163,8 +152,8 @@ describes.realWin(
         },
         () => {
           return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-            .then(service => service.getVariants())
-            .then(variants => {
+            .then((service) => service.getVariants())
+            .then((variants) => {
               expect(variants).to.deep.equal({});
             });
         }
@@ -174,15 +163,15 @@ describes.realWin(
     it('should match the variant to the experiment', () => {
       addConfigElement('script');
 
-      stubAllocateVariant(sandbox, config);
-      const applyStub = sandbox
+      stubAllocateVariant(env.sandbox, config);
+      const applyStub = env.sandbox
         .stub(applyExperiment, 'applyExperimentToVariant')
         .returns(Promise.resolve());
 
       experiment.buildCallback();
       return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-        .then(variantsService => variantsService.getVariants())
-        .then(variants => {
+        .then((variantsService) => variantsService.getVariants())
+        .then((variants) => {
           expect(applyStub).to.be.calledOnce;
           expect(variants).to.jsonEqual({
             'experiment-1': 'variant-a',
@@ -198,17 +187,17 @@ describes.realWin(
       () => {
         addConfigElement('script');
 
-        stubAllocateVariant(sandbox, config);
-        const applyStub = sandbox
+        stubAllocateVariant(env.sandbox, config);
+        const applyStub = env.sandbox
           .stub(applyExperiment, 'applyExperimentToVariant')
           .returns(Promise.resolve());
 
-        sandbox.stub(ampdoc, 'getParam').returns('true');
+        env.sandbox.stub(ampdoc, 'getParam').returns('true');
 
         experiment.buildCallback();
         return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-          .then(variantsService => variantsService.getVariants())
-          .then(variants => {
+          .then((variantsService) => variantsService.getVariants())
+          .then((variants) => {
             expect(variants).to.jsonEqual({
               'experiment-1': null,
               'experiment-2': null,

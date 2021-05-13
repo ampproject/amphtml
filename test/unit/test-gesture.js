@@ -16,7 +16,7 @@
 
 import {GestureRecognizer, Gestures} from '../../src/gesture';
 
-describe('Gestures', () => {
+describes.sandboxed('Gestures', {}, (env) => {
   class TestRecognizer extends GestureRecognizer {
     constructor(manager) {
       super('test', manager);
@@ -29,7 +29,6 @@ describe('Gestures', () => {
     }
   }
 
-  let sandbox;
   let element;
   let clock;
   let recognizer;
@@ -39,15 +38,14 @@ describe('Gestures', () => {
   let onGesture;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     eventListeners = {};
     element = {
       addEventListener: (eventType, handler) => {
         eventListeners[eventType] = handler;
       },
-      removeEventListener: eventType => {
+      removeEventListener: (eventType) => {
         delete eventListeners[eventType];
       },
       ownerDocument: {
@@ -55,18 +53,17 @@ describe('Gestures', () => {
       },
     };
 
-    onGesture = sandbox.spy();
+    onGesture = env.sandbox.spy();
 
     gestures = Gestures.get(element);
     gestures.onGesture(TestRecognizer, onGesture);
     expect(gestures.recognizers_.length).to.equal(1);
     recognizer = gestures.recognizers_[0];
-    recognizerMock = sandbox.mock(recognizer);
+    recognizerMock = env.sandbox.mock(recognizer);
   });
 
   afterEach(() => {
     recognizerMock.verify();
-    sandbox.restore();
   });
 
   function sendEvent(event) {
@@ -76,21 +73,15 @@ describe('Gestures', () => {
   }
 
   it('onPointerDown should be called', () => {
-    const handler = sandbox.spy();
+    const handler = env.sandbox.spy();
     gestures.onPointerDown(handler);
     sendEvent({type: 'touchstart'});
     expect(handler).to.be.calledOnce;
   });
 
   it('should proceed with series if touchstart returns true', () => {
-    recognizerMock
-      .expects('onTouchStart')
-      .returns(true)
-      .once();
-    recognizerMock
-      .expects('onTouchMove')
-      .returns(true)
-      .once();
+    recognizerMock.expects('onTouchStart').returns(true).once();
+    recognizerMock.expects('onTouchMove').returns(true).once();
     recognizerMock.expects('onTouchEnd').once();
     sendEvent({type: 'touchstart'});
     sendEvent({type: 'touchmove'});
@@ -98,10 +89,7 @@ describe('Gestures', () => {
   });
 
   it('should cancel series if touchstart returns false', () => {
-    recognizerMock
-      .expects('onTouchStart')
-      .returns(false)
-      .once();
+    recognizerMock.expects('onTouchStart').returns(false).once();
     recognizerMock.expects('onTouchMove').never();
     recognizerMock.expects('onTouchEnd').never();
     sendEvent({type: 'touchstart'});
@@ -110,14 +98,8 @@ describe('Gestures', () => {
   });
 
   it('should cancel series if touchmove returns false', () => {
-    recognizerMock
-      .expects('onTouchStart')
-      .returns(true)
-      .once();
-    recognizerMock
-      .expects('onTouchMove')
-      .returns(false)
-      .once();
+    recognizerMock.expects('onTouchStart').returns(true).once();
+    recognizerMock.expects('onTouchMove').returns(false).once();
     recognizerMock.expects('onTouchEnd').never();
     sendEvent({type: 'touchstart'});
     sendEvent({type: 'touchmove'});
@@ -125,30 +107,21 @@ describe('Gestures', () => {
   });
 
   it('should enter tracking mode on touchstart true', () => {
-    recognizerMock
-      .expects('onTouchStart')
-      .returns(true)
-      .once();
+    recognizerMock.expects('onTouchStart').returns(true).once();
     sendEvent({type: 'touchstart'});
     expect(gestures.tracking_[0]).to.equal(true);
   });
 
   it('should stay in tracking mode on touchmove true', () => {
     gestures.tracking_[0] = true;
-    recognizerMock
-      .expects('onTouchMove')
-      .returns(true)
-      .once();
+    recognizerMock.expects('onTouchMove').returns(true).once();
     sendEvent({type: 'touchmove'});
     expect(gestures.tracking_[0]).to.equal(true);
   });
 
   it('should exit tracking mode on touchmove false', () => {
     gestures.tracking_[0] = true;
-    recognizerMock
-      .expects('onTouchMove')
-      .returns(false)
-      .once();
+    recognizerMock.expects('onTouchMove').returns(false).once();
     sendEvent({type: 'touchmove'});
     expect(gestures.tracking_[0]).to.equal(false);
   });
@@ -284,7 +257,7 @@ describe('Gestures', () => {
 
   it('should allow youngest to start', () => {
     gestures.onGesture(Test2Recognizer, () => {});
-    const recognizer2Mock = sandbox.mock(gestures.recognizers_[1]);
+    const recognizer2Mock = env.sandbox.mock(gestures.recognizers_[1]);
 
     gestures.ready_[0] = 10;
     gestures.ready_[1] = 9;
@@ -299,8 +272,8 @@ describe('Gestures', () => {
   it('should allow event to propagate when nothing happening', () => {
     const event = {
       type: 'touchend',
-      preventDefault: sandbox.spy(),
-      stopPropagation: sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
+      stopPropagation: env.sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault).to.have.not.been.called;
@@ -311,8 +284,8 @@ describe('Gestures', () => {
     gestures.eventing_ = recognizer;
     const event = {
       type: 'touchend',
-      preventDefault: sandbox.spy(),
-      stopPropagation: sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
+      stopPropagation: env.sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault).to.be.calledOnce;
@@ -327,8 +300,8 @@ describe('Gestures', () => {
 
     const event = {
       type: 'touchend',
-      preventDefault: sandbox.spy(),
-      stopPropagation: sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
+      stopPropagation: env.sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault).to.be.calledOnce;
@@ -340,8 +313,8 @@ describe('Gestures', () => {
     gestures.ready_[0] = 1;
     const event = {
       type: 'touchend',
-      preventDefault: sandbox.spy(),
-      stopPropagation: sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
+      stopPropagation: env.sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault).to.be.calledOnce;
@@ -352,8 +325,8 @@ describe('Gestures', () => {
     gestures.pending_[0] = 1;
     let event = {
       type: 'touchend',
-      preventDefault: sandbox.spy(),
-      stopPropagation: sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
+      stopPropagation: env.sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault).to.be.calledOnce;
@@ -362,8 +335,8 @@ describe('Gestures', () => {
     clock.tick(10);
     event = {
       type: 'touchend',
-      preventDefault: sandbox.spy(),
-      stopPropagation: sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
+      stopPropagation: env.sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault).to.have.not.been.called;
@@ -383,20 +356,19 @@ describe('Gestures', () => {
   it('should remove listeners and shared cache instance on cleanup', () => {
     const eventNames = ['touchstart', 'touchend', 'touchmove', 'touchcancel'];
     const prop = '__AMP_Gestures';
-    const removeSpy = sandbox.spy(element, 'removeEventListener');
+    const removeSpy = env.sandbox.spy(element, 'removeEventListener');
 
     expect(element[prop]).to.exist;
 
     gestures.cleanup();
 
-    eventNames.forEach(eventName => {
+    eventNames.forEach((eventName) => {
       expect(removeSpy.withArgs(eventName)).to.be.calledOnce;
     });
     expect(element[prop]).to.not.exist;
   });
 
   describe('Gestures - with shouldNotPreventdefault', () => {
-    let sandbox;
     let element;
     let clock;
     let recognizer;
@@ -406,8 +378,7 @@ describe('Gestures', () => {
     let onGesture;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
 
       eventListeners = {};
       element = {
@@ -419,26 +390,25 @@ describe('Gestures', () => {
         },
       };
 
-      onGesture = sandbox.spy();
+      onGesture = env.sandbox.spy();
 
       gestures = Gestures.get(element, /* shouldNotPreventDefault */ true);
       gestures.onGesture(TestRecognizer, onGesture);
       expect(gestures.recognizers_.length).to.equal(1);
       recognizer = gestures.recognizers_[0];
-      recognizerMock = sandbox.mock(recognizer);
+      recognizerMock = env.sandbox.mock(recognizer);
     });
 
     afterEach(() => {
       recognizerMock.verify();
-      sandbox.restore();
     });
 
     it('should cancel event when eventing', () => {
       gestures.eventing_ = recognizer;
       const event = {
         type: 'touchend',
-        preventDefault: sandbox.spy(),
-        stopPropagation: sandbox.spy(),
+        preventDefault: env.sandbox.spy(),
+        stopPropagation: env.sandbox.spy(),
       };
       eventListeners[event.type](event);
       expect(event.preventDefault).to.have.not.been.called;
@@ -453,8 +423,8 @@ describe('Gestures', () => {
 
       const event = {
         type: 'touchend',
-        preventDefault: sandbox.spy(),
-        stopPropagation: sandbox.spy(),
+        preventDefault: env.sandbox.spy(),
+        stopPropagation: env.sandbox.spy(),
       };
       eventListeners[event.type](event);
       expect(event.preventDefault).to.have.not.been.called;
@@ -466,8 +436,8 @@ describe('Gestures', () => {
       gestures.ready_[0] = 1;
       const event = {
         type: 'touchend',
-        preventDefault: sandbox.spy(),
-        stopPropagation: sandbox.spy(),
+        preventDefault: env.sandbox.spy(),
+        stopPropagation: env.sandbox.spy(),
       };
       eventListeners[event.type](event);
       expect(event.preventDefault).to.have.not.been.called;
@@ -478,8 +448,8 @@ describe('Gestures', () => {
       gestures.pending_[0] = 1;
       let event = {
         type: 'touchend',
-        preventDefault: sandbox.spy(),
-        stopPropagation: sandbox.spy(),
+        preventDefault: env.sandbox.spy(),
+        stopPropagation: env.sandbox.spy(),
       };
       eventListeners[event.type](event);
       expect(event.preventDefault).to.have.not.been.called;
@@ -488,8 +458,8 @@ describe('Gestures', () => {
       clock.tick(10);
       event = {
         type: 'touchend',
-        preventDefault: sandbox.spy(),
-        stopPropagation: sandbox.spy(),
+        preventDefault: env.sandbox.spy(),
+        stopPropagation: env.sandbox.spy(),
       };
       eventListeners[event.type](event);
       expect(event.preventDefault).to.have.not.been.called;
@@ -498,7 +468,6 @@ describe('Gestures', () => {
   });
 
   describe('Gestures - with shouldStopPropagation', () => {
-    let sandbox;
     let element;
     let recognizer;
     let recognizerMock;
@@ -507,8 +476,6 @@ describe('Gestures', () => {
     let onGesture;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-
       eventListeners = {};
       element = {
         addEventListener: (eventType, handler) => {
@@ -519,7 +486,7 @@ describe('Gestures', () => {
         },
       };
 
-      onGesture = sandbox.spy();
+      onGesture = env.sandbox.spy();
 
       gestures = Gestures.get(
         element,
@@ -529,18 +496,17 @@ describe('Gestures', () => {
       gestures.onGesture(TestRecognizer, onGesture);
       expect(gestures.recognizers_.length).to.equal(1);
       recognizer = gestures.recognizers_[0];
-      recognizerMock = sandbox.mock(recognizer);
+      recognizerMock = env.sandbox.mock(recognizer);
     });
 
     afterEach(() => {
       recognizerMock.verify();
-      sandbox.restore();
     });
 
     it('should stop event from propagating', () => {
       const event = {
         type: 'touchend',
-        stopPropagation: sandbox.spy(),
+        stopPropagation: env.sandbox.spy(),
       };
       eventListeners[event.type](event);
       expect(event.stopPropagation).to.have.be.calledOnce;

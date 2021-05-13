@@ -75,9 +75,9 @@ const LOAD_TIMEOUT = 3000;
  *     as the detected render delaying services
  */
 export function waitForServices(win) {
-  const promises = includedServices(win).map(serviceId => {
+  const promises = includedServices(win).map((serviceId) => {
     const serviceReadyPromise = getServicePromise(win, serviceId).then(
-      service => {
+      (service) => {
         if (service && isRenderDelayingService(service)) {
           return service.whenReady().then(() => {
             return service;
@@ -112,7 +112,9 @@ export function hasRenderDelayingServices(win) {
  * @return {boolean}
  */
 export function isRenderDelayingService(service) {
-  const maybeRenderDelayingService = /** @type {!RenderDelayingService}*/ (service);
+  const maybeRenderDelayingService = /** @type {!RenderDelayingService}*/ (
+    service
+  );
   return typeof maybeRenderDelayingService.whenReady == 'function';
 }
 
@@ -126,7 +128,7 @@ export function includedServices(win) {
   const doc = win.document;
   devAssert(doc.body);
 
-  return Object.keys(SERVICES).filter(service => {
+  return Object.keys(SERVICES).filter((service) => {
     return doc.querySelector(SERVICES[service]);
   });
 }

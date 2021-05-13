@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {DEFAULT_ACTION} from '../../src/action-constants';
+import {DEFAULT_ACTION} from '../../src/core/constants/action-constants';
 import {LayoutPriority} from '../../src/layout';
 import {Resource} from '../../src/service/resource';
 import {Services} from '../../src/services';
@@ -23,7 +23,7 @@ import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
 
-describes.realWin('BaseElement', {amp: true}, env => {
+describes.realWin('BaseElement', {amp: true}, (env) => {
   let win, doc;
   let customElement;
   let element;
@@ -33,7 +33,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
     doc = win.document;
     win.customElements.define(
       'amp-test-element',
-      createAmpElementForTesting(win, 'amp-test-element', BaseElement)
+      createAmpElementForTesting(win, BaseElement)
     );
     customElement = doc.createElement('amp-test-element');
     element = new BaseElement(customElement);
@@ -42,7 +42,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
   it('should delegate update priority to resources', () => {
     const resources = win.__AMP_SERVICES.resources.obj;
     customElement.getResources = () => resources;
-    const updateLayoutPriorityStub = sandbox.stub(
+    const updateLayoutPriorityStub = env.sandbox.stub(
       resources,
       'updateLayoutPriority'
     );
@@ -106,7 +106,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
   });
 
   it('should execute registered action', () => {
-    const handler = sandbox.spy();
+    const handler = env.sandbox.spy();
     element.registerAction('method1', handler);
     const invocation = {method: 'method1', satisfiesTrust: () => true};
     element.executeAction(invocation, null, false);
@@ -114,7 +114,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
   });
 
   it('should execute default method by "activate"', () => {
-    const handler = sandbox.spy();
+    const handler = env.sandbox.spy();
     element.registerDefaultAction(handler);
     const invocation = {method: DEFAULT_ACTION, satisfiesTrust: () => true};
     element.executeAction(invocation, null, false);
@@ -122,8 +122,8 @@ describes.realWin('BaseElement', {amp: true}, env => {
   });
 
   it('should not allow two default actions', () => {
-    const handler = sandbox.spy();
-    const anotherHandler = sandbox.spy();
+    const handler = env.sandbox.spy();
+    const anotherHandler = env.sandbox.spy();
     element.registerDefaultAction(handler);
     return allowConsoleError(() => {
       expect(() => {
@@ -133,7 +133,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
   });
 
   it('should check trust before invocation', () => {
-    const handler = sandbox.spy();
+    const handler = env.sandbox.spy();
     const minTrust = 100;
     element.foo = () => {};
     element.registerDefaultAction(handler, 'foo', minTrust);
@@ -151,7 +151,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
     element.executeAction(
       {
         method: 'foo',
-        satisfiesTrust: t => t == minTrust,
+        satisfiesTrust: (t) => t == minTrust,
       },
       null,
       false
@@ -174,18 +174,14 @@ describes.realWin('BaseElement', {amp: true}, env => {
     const resources = win.__AMP_SERVICES.resources.obj;
     customElement.getResources = () => resources;
     const resource = new Resource(1, customElement, resources);
-    sandbox
+    env.sandbox
       .stub(resources, 'getResourceForElement')
       .withArgs(customElement)
       .returns(resource);
     const layoutBox = layoutRectLtwh(0, 50, 100, 200);
-    const pageLayoutBox = layoutRectLtwh(0, 0, 100, 200);
-    sandbox.stub(resource, 'getLayoutBox').callsFake(() => layoutBox);
-    sandbox.stub(resource, 'getPageLayoutBox').callsFake(() => pageLayoutBox);
+    env.sandbox.stub(resource, 'getLayoutBox').callsFake(() => layoutBox);
     expect(element.getLayoutBox()).to.eql(layoutBox);
     expect(customElement.getLayoutBox()).to.eql(layoutBox);
-    expect(element.getPageLayoutBox()).to.eql(pageLayoutBox);
-    expect(customElement.getPageLayoutBox()).to.eql(pageLayoutBox);
   });
 
   it('should return true for inabox experiment renderOutsideViewport', () => {

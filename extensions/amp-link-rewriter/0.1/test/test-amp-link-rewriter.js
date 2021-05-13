@@ -29,13 +29,13 @@ describes.fakeWin(
       extensions: ['amp-link-rewriter'],
     },
   },
-  env => {
+  (env) => {
     let config, helpers, mockedHtml, win;
 
     beforeEach(() => {
       win = env.win;
 
-      helpers = helpersMaker(env);
+      helpers = helpersMaker();
 
       config = {
         'output':

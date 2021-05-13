@@ -15,8 +15,9 @@
  */
 
 import '../amp-social-share';
-import {Keys} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
+import {tryFocus} from '../../../../src/dom';
 
 const STRINGS = {
   'text': 'Hello world',
@@ -36,7 +37,7 @@ describes.realWin(
       canonicalUrl: 'https://canonicalexample.com/',
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let platform;
     let isIos = false;
@@ -49,14 +50,14 @@ describes.realWin(
       isIos = false;
       isSafari = false;
       platform = Services.platformFor(win);
-      sandbox.stub(platform, 'isIos').callsFake(() => isIos);
-      sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
-      sandbox./*OK*/ stub(win, 'open').returns(true);
+      env.sandbox.stub(platform, 'isIos').callsFake(() => isIos);
+      env.sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
+      env.sandbox./*OK*/ stub(win, 'open').returns(true);
     });
 
     function getShare(type, opt_endpoint, opt_params, opt_target) {
       const share = doc.createElement('amp-social-share');
-      share.addEventListener = sandbox.spy();
+      share.addEventListener = env.sandbox.spy();
       if (opt_endpoint) {
         share.setAttribute('data-share-endpoint', opt_endpoint);
       }
@@ -78,7 +79,7 @@ describes.realWin(
 
     function loaded(element) {
       return element
-        .build()
+        .buildInternal()
         .then(() => element.layoutCallback())
         .then(() => element);
     }
@@ -115,7 +116,7 @@ describes.realWin(
       });
     });
 
-    it('renders unconfigured providers if share endpoint provided', () => {
+    it('renders unconfigured providers if share endpoint provided', async () => {
       const share = doc.createElement('amp-social-share');
 
       share.setAttribute('type', 'unknown-provider');
@@ -125,51 +126,46 @@ describes.realWin(
       );
       share.setAttribute('data-param-text', 'check out: CANONICAL_URL');
       doc.body.appendChild(share);
-      return loaded(share).then(el => {
-        expect(el.implementation_.params_.text).to.be.equal(
-          'check out: CANONICAL_URL'
-        );
-        expect(el.implementation_.href_).to.not.contain(
-          encodeURIComponent('CANONICAL_URL')
-        );
-        expect(el.implementation_.href_).to.contain(
-          encodeURIComponent('https://canonicalexample.com/')
-        );
-        expect(el.implementation_.shareEndpoint_).to.be.equal(
-          'https://exampleprovider.com/share/'
-        );
-      });
+      const el = await loaded(share);
+      const impl = await el.getImpl(false);
+      expect(impl.params_.text).to.be.equal('check out: CANONICAL_URL');
+      expect(impl.href_).to.not.contain(encodeURIComponent('CANONICAL_URL'));
+      expect(impl.href_).to.contain(
+        encodeURIComponent('https://canonicalexample.com/')
+      );
+      expect(impl.shareEndpoint_).to.be.equal(
+        'https://exampleprovider.com/share/'
+      );
     });
 
     it('does not render obsolete provider', () => {
-      getShare('gplus', /* endpoint */ undefined, {}).then(el => {
+      getShare('gplus', /* endpoint */ undefined, {}).then((el) => {
         expect(el.style.display).to.be.equal('none');
       });
     });
 
-    it('renders twitter', () => {
+    it('renders twitter', async () => {
       const params = {
         'url': STRINGS['url'],
         'via': STRINGS['attribution'],
       };
-      return getShare('twitter', /* endpoint */ undefined, params).then(el => {
-        expect(el.implementation_.params_.text).to.be.equal('TITLE');
-        expect(el.implementation_.params_.url).to.be.equal(
-          'https://example.com/'
-        );
-        expect(el.implementation_.params_.via).to.be.equal('AMPhtml');
-        expect(el.implementation_.shareEndpoint_).to.be.equal(
-          'https://twitter.com/intent/tweet'
-        );
+      const el = await getShare('twitter', /* endpoint */ undefined, params);
+      const impl = await el.getImpl(false);
 
-        expect(el.implementation_.href_).to.not.contain('TITLE');
-        expect(el.addEventListener).to.be.calledTwice;
-        expect(el.addEventListener).to.be.calledWith('click');
-        expect(el.addEventListener).to.be.calledWith('keydown');
-      });
+      expect(impl.params_.text).to.be.equal('TITLE');
+      expect(impl.params_.url).to.be.equal('https://example.com/');
+      expect(impl.params_.via).to.be.equal('AMPhtml');
+      expect(impl.shareEndpoint_).to.be.equal(
+        'https://twitter.com/intent/tweet'
+      );
+
+      expect(impl.href_).to.not.contain('TITLE');
+      expect(el.addEventListener).to.be.calledTwice;
+      expect(el.addEventListener).to.be.calledWith('click');
+      expect(el.addEventListener).to.be.calledWith('keydown');
     });
 
-    it('adds a default value for url', () => {
+    it('adds a default value for url', async () => {
       const share = doc.createElement('amp-social-share');
 
       share.setAttribute('type', 'twitter');
@@ -177,147 +173,249 @@ describes.realWin(
       share.setAttribute('height', 44);
 
       doc.body.appendChild(share);
-      return loaded(share).then(el => {
-        expect(el.implementation_.params_.url).to.be.equal('CANONICAL_URL');
-        expect(el.implementation_.href_).to.not.contain(
-          encodeURIComponent('CANONICAL_URL')
-        );
-        expect(el.implementation_.href_).to.contain(
-          encodeURIComponent('https://canonicalexample.com/')
-        );
-        expect(el.implementation_.shareEndpoint_).to.be.equal(
-          'https://twitter.com/intent/tweet'
-        );
-      });
+      const el = await loaded(share);
+      const impl = await el.getImpl(false);
+      expect(impl.params_.url).to.be.equal('CANONICAL_URL');
+      expect(impl.href_).to.not.contain(encodeURIComponent('CANONICAL_URL'));
+      expect(impl.href_).to.contain(
+        encodeURIComponent('https://canonicalexample.com/')
+      );
+      expect(impl.shareEndpoint_).to.be.equal(
+        'https://twitter.com/intent/tweet'
+      );
     });
 
-    it('opens share window in _blank', () => {
-      return getShare('twitter').then(el => {
-        el.implementation_.handleClick_();
-        expect(el.implementation_.win.open).to.be.calledOnce;
-        expect(el.implementation_.win.open).to.be.calledWith(
-          'https://twitter.com/intent/tweet?text=doc%20title&' +
-            'url=https%3A%2F%2Fcanonicalexample.com%2F',
-          '_blank',
-          'resizable,scrollbars,width=640,height=480'
-        );
-      });
+    it('adds a default value for aria-label', async () => {
+      const share = doc.createElement('amp-social-share');
+
+      share.setAttribute('type', 'twitter');
+      share.setAttribute('width', 60);
+      share.setAttribute('height', 44);
+
+      doc.body.appendChild(share);
+      const el = await loaded(share);
+      expect(el.getAttribute('aria-label')).to.be.equal('Share by twitter');
     });
 
-    it('opens mailto: window in _self', () => {
+    it('overwrites default aria-label value when a non-empty value is provided', async () => {
+      const share = doc.createElement('amp-social-share');
+
+      share.setAttribute('type', 'twitter');
+      share.setAttribute('width', 60);
+      share.setAttribute('height', 44);
+      share.setAttribute('aria-label', 'test value');
+
+      doc.body.appendChild(share);
+      const el = await loaded(share);
+      expect(el.getAttribute('aria-label')).to.be.equal('test value');
+    });
+
+    it('opens share window in _blank', async () => {
+      const el = await getShare('twitter');
+      const impl = await el.getImpl(false);
+
+      impl.handleClick_();
+      expect(impl.win.open).to.be.calledOnce;
+      expect(impl.win.open).to.be.calledWith(
+        'https://twitter.com/intent/tweet?text=doc%20title&' +
+          'url=https%3A%2F%2Fcanonicalexample.com%2F',
+        '_blank',
+        'resizable,scrollbars,width=640,height=480'
+      );
+    });
+
+    it('opens mailto: window in _self', async () => {
       const params = {
         'recipient': 'sample@xyz.com',
       };
-      return getShare('email', undefined, params, '_self').then(el => {
-        el.implementation_.handleClick_();
-        expect(el.implementation_.win.open).to.be.calledOnce;
-        expect(el.implementation_.win.open).to.be.calledWith(
-          'mailto:sample%40xyz.com?subject=doc%20title&' +
-            'body=https%3A%2F%2Fcanonicalexample.com%2F' +
-            '&recipient=sample%40xyz.com',
-          '_self',
-          'resizable,scrollbars,width=640,height=480'
-        );
-      });
+      const el = await getShare('email', undefined, params, '_self');
+      const impl = await el.getImpl(false);
+
+      impl.handleClick_();
+      expect(impl.win.open).to.be.calledOnce;
+      expect(impl.win.open).to.be.calledWith(
+        'mailto:sample%40xyz.com?subject=doc%20title&' +
+          'body=https%3A%2F%2Fcanonicalexample.com%2F' +
+          '&recipient=sample%40xyz.com',
+        '_self',
+        'resizable,scrollbars,width=640,height=480'
+      );
     });
 
-    it('opens mailto: window in _top on iOS Safari with recipient', () => {
+    it('opens mailto: window in _top on iOS Safari with recipient', async () => {
       const params = {
         'recipient': 'sample@xyz.com',
       };
       isIos = true;
       isSafari = true;
-      return getShare('email', undefined, params, '_top').then(el => {
-        el.implementation_.handleClick_();
-        expect(el.implementation_.win.open).to.be.calledOnce;
-        expect(el.implementation_.win.open).to.be.calledWith(
-          'mailto:sample%40xyz.com?subject=doc%20title&' +
-            'body=https%3A%2F%2Fcanonicalexample.com%2F' +
-            '&recipient=sample%40xyz.com',
-          '_top',
-          'resizable,scrollbars,width=640,height=480'
-        );
-      });
+      const el = await getShare('email', undefined, params, '_top');
+      const impl = await el.getImpl(false);
+
+      impl.handleClick_();
+      expect(impl.win.open).to.be.calledOnce;
+      expect(impl.win.open).to.be.calledWith(
+        'mailto:sample%40xyz.com?subject=doc%20title&' +
+          'body=https%3A%2F%2Fcanonicalexample.com%2F' +
+          '&recipient=sample%40xyz.com',
+        '_top',
+        'resizable,scrollbars,width=640,height=480'
+      );
     });
 
     it(
       'opens mailto: window in _top on iOS Safari with recipient even if user ' +
         'attempts to override with `data-target`',
-      () => {
+      async () => {
         const params = {
           'recipient': 'sample@xyz.com',
         };
         isIos = true;
         isSafari = true;
-        return getShare('email', undefined, params, '_self').then(el => {
-          el.implementation_.handleClick_();
-          expect(el.implementation_.win.open).to.be.calledOnce;
-          expect(el.implementation_.win.open).to.be.calledWith(
-            'mailto:sample%40xyz.com?subject=doc%20title&' +
-              'body=https%3A%2F%2Fcanonicalexample.com%2F' +
-              '&recipient=sample%40xyz.com',
-            '_top',
-            'resizable,scrollbars,width=640,height=480'
-          );
-        });
+        const el = await getShare('email', undefined, params, '_self');
+        const impl = await el.getImpl(false);
+
+        impl.handleClick_();
+        expect(impl.win.open).to.be.calledOnce;
+        expect(impl.win.open).to.be.calledWith(
+          'mailto:sample%40xyz.com?subject=doc%20title&' +
+            'body=https%3A%2F%2Fcanonicalexample.com%2F' +
+            '&recipient=sample%40xyz.com',
+          '_top',
+          'resizable,scrollbars,width=640,height=480'
+        );
       }
     );
 
-    it('opens mailto: window in _top on iOS Safari without recipient', () => {
+    it('opens mailto: window in _top on iOS Safari without recipient', async () => {
       isIos = true;
       isSafari = true;
-      return getShare('email').then(el => {
-        el.implementation_.handleClick_();
-        expect(el.implementation_.win.open).to.be.calledOnce;
-        expect(el.implementation_.win.open).to.be.calledWith(
-          'mailto:?subject=doc%20title&' +
-            'body=https%3A%2F%2Fcanonicalexample.com%2F&recipient=',
-          '_top',
-          'resizable,scrollbars,width=640,height=480'
-        );
-      });
+      const el = await getShare('email');
+      const impl = await el.getImpl(false);
+
+      impl.handleClick_();
+      expect(impl.win.open).to.be.calledOnce;
+      expect(impl.win.open).to.be.calledWith(
+        'mailto:?subject=doc%20title&' +
+          'body=https%3A%2F%2Fcanonicalexample.com%2F&recipient=',
+        '_top',
+        'resizable,scrollbars,width=640,height=480'
+      );
     });
 
-    it('opens sms: window in _top on iOS Safari', () => {
+    it('opens mailto: window in _top on iOS Webview with recipient', async () => {
+      const params = {
+        'recipient': 'sample@xyz.com',
+      };
+      isIos = true;
+      isSafari = false;
+      const el = await getShare('email', undefined, params, '_top');
+      const impl = await el.getImpl(false);
+
+      impl.handleClick_();
+      expect(impl.win.open).to.be.calledOnce;
+      expect(impl.win.open).to.be.calledWith(
+        'mailto:sample%40xyz.com?subject=doc%20title&' +
+          'body=https%3A%2F%2Fcanonicalexample.com%2F' +
+          '&recipient=sample%40xyz.com',
+        '_top',
+        'resizable,scrollbars,width=640,height=480'
+      );
+    });
+
+    it('opens sms: window in _top on iOS Safari', async () => {
       isIos = true;
       isSafari = true;
-      return getShare('sms').then(el => {
-        el.implementation_.handleClick_();
-        expect(el.implementation_.win.open).to.be.calledOnce;
-        expect(el.implementation_.win.open).to.be.calledWith(
-          'sms:?&body=doc%20title%20-%20https%3A%2F%2Fcanonicalexample.com%2F',
-          '_top',
-          'resizable,scrollbars,width=640,height=480'
-        );
-      });
+      const el = await getShare('sms');
+      const impl = await el.getImpl(false);
+
+      impl.handleClick_();
+      expect(impl.win.open).to.be.calledOnce;
+      expect(impl.win.open).to.be.calledWith(
+        'sms:?&body=doc%20title%20-%20https%3A%2F%2Fcanonicalexample.com%2F',
+        '_top',
+        'resizable,scrollbars,width=640,height=480'
+      );
     });
 
-    it('should handle key presses', () => {
-      return getShare('twitter').then(el => {
-        const nonActivationEvent = {
-          preventDefault: () => {},
-          key: Keys.RIGHT_ARROW,
-        };
-        const activationEvent = {
-          preventDefault: () => {},
-          key: Keys.SPACE,
-        };
-        el.implementation_.handleKeyPress_(nonActivationEvent);
-        expect(el.implementation_.win.open).to.not.have.been.called;
-        el.implementation_.handleKeyPress_(activationEvent);
-        expect(el.implementation_.win.open).to.be.calledOnce;
-        expect(el.implementation_.win.open).to.be.calledWith(
-          'https://twitter.com/intent/tweet?text=doc%20title&' +
-            'url=https%3A%2F%2Fcanonicalexample.com%2F',
-          '_blank',
-          'resizable,scrollbars,width=640,height=480'
-        );
-      });
+    it('opens sms: window in _top on iOS Webview', async () => {
+      isIos = true;
+      isSafari = false;
+      const el = await getShare('sms');
+      const impl = await el.getImpl(false);
+
+      impl.handleClick_();
+      expect(impl.win.open).to.be.calledOnce;
+      expect(impl.win.open).to.be.calledWith(
+        'sms:?&body=doc%20title%20-%20https%3A%2F%2Fcanonicalexample.com%2F',
+        '_top',
+        'resizable,scrollbars,width=640,height=480'
+      );
+    });
+
+    it('should handle key presses', async () => {
+      const el = await getShare('twitter');
+      const impl = await el.getImpl(false);
+
+      const nonActivationEvent = {
+        preventDefault: () => {},
+        key: Keys.RIGHT_ARROW,
+      };
+      const activationEvent = {
+        preventDefault: () => {},
+        key: Keys.SPACE,
+      };
+      impl.handleKeyPress_(nonActivationEvent);
+      expect(impl.win.open).to.not.have.been.called;
+      impl.handleKeyPress_(activationEvent);
+      expect(impl.win.open).to.be.calledOnce;
+      expect(impl.win.open).to.be.calledWith(
+        'https://twitter.com/intent/tweet?text=doc%20title&' +
+          'url=https%3A%2F%2Fcanonicalexample.com%2F',
+        '_blank',
+        'resizable,scrollbars,width=640,height=480'
+      );
     });
 
     it('has tabindex set to 0 by default', () => {
-      return getShare('twitter').then(el => {
+      return getShare('twitter').then((el) => {
         expect(el.getAttribute('tabindex')).to.equal('0');
+      });
+    });
+
+    it('uses custom CSS when element is focused', async () => {
+      const share = doc.createElement('amp-social-share');
+
+      share.setAttribute('type', 'twitter');
+      share.setAttribute('width', 60);
+      share.setAttribute('height', 44);
+
+      doc.body.appendChild(share);
+
+      const el = await loaded(share);
+      expect(win.getComputedStyle(el)['outline']).to.equal(
+        'rgb(0, 0, 0) none 0px'
+      );
+      expect(win.getComputedStyle(el)['outline-offset']).to.equal('0px');
+
+      tryFocus(el);
+      expect(doc.activeElement).to.equal(el);
+
+      // updated styles after focusing on element
+      expect(win.getComputedStyle(el)['outline']).to.equal(
+        'rgb(3, 137, 255) solid 2px'
+      );
+      expect(win.getComputedStyle(el)['outline-offset']).to.equal('2px');
+    });
+
+    describe('[type=system]', () => {
+      it('should not throw if navigator.share fails', async () => {
+        Object.defineProperty(env.win, 'navigator', {
+          value: {share: env.sandbox.spy(() => Promise.reject())},
+        });
+        const element = await getShare('system');
+        const implementation = await element.getImpl();
+        expect(() => implementation.handleActivation_()).to.not.throw();
+        expect(env.win.navigator.share).to.have.been.calledOnce;
       });
     });
   }

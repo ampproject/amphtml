@@ -11,17 +11,16 @@ requires additional information to enable proper content negotation on a URL.
 
 This format should be sent in two cases:
 
-  * delivery from origin server to intermediary
-  * delivery from intermediary to user
+-   delivery from origin server to intermediary
+-   delivery from intermediary to user
 
-Ideally, it would *not* be sent in direct delivery from origin server to user,
+Ideally, it would _not_ be sent in direct delivery from origin server to user,
 as that would best be served by a traditional HTTP exchange (e.g. requiring less
 computational overhead, and able to modify state).
 
 Therefore, the need arises for the origin to distinguish requests from users and
 requests from SXG intermediaries. That is, there is a difference between "I can
-understand the SXG format" and "I prefer an SXG if available". `Accept:
-application/signed-exchange` indicates the former. No currently-defined header
+understand the SXG format" and "I prefer an SXG if available". `Accept: application/signed-exchange` indicates the former. No currently-defined header
 indicates the latter.
 
 ### Target-specific constraints
@@ -31,7 +30,7 @@ prefetch](https://wicg.github.io/webpackage/draft-yasskin-webpackage-use-cases.h
 from a referring page (such as a Google Search results page) to a coordinating
 AMP cache (such as the Google AMP Cache). If the referrer wishes to prefetch
 subresources as well, they must also be served from a coordinating AMP cache, in
-order to preserve privacy. In order for those subresources to be *useful*, they
+order to preserve privacy. In order for those subresources to be _useful_, they
 must be referenced by the signed HTML page.
 
 Therefore, the requestor of an SXG may require the origin to produce an SXG
@@ -42,15 +41,15 @@ AMP caches may may require the origin to apply [AMP
 transforms](amp-cache-modifications.md), and may only accept specific versions
 of those transforms. This allows the AMP cache to:
 
-  1. Make continuous improvements to the AMP transforms and the transformed AMP
-     validation code.
-  2. Try to satisfy [AMP's design principles](https://www.ampproject.org/about/amp-design-principles/),
-     especially as deficiencies in the transforms are found, by guaranteeing
-     that its cache of SXGs don't contain those deficiencies.
-  3. Keep its validation code of bounded complexity, by not needing to validate
-     all possible versions of the transforms.
-  4. Guarantee that all responses it fetches from publishers are useful, and
-     don't require a second fetch for unsigned content.
+1. Make continuous improvements to the AMP transforms and the transformed AMP
+   validation code.
+2. Try to satisfy [AMP's design principles](https://www.ampproject.org/about/amp-design-principles/),
+   especially as deficiencies in the transforms are found, by guaranteeing
+   that its cache of SXGs don't contain those deficiencies.
+3. Keep its validation code of bounded complexity, by not needing to validate
+   all possible versions of the transforms.
+4. Guarantee that all responses it fetches from publishers are useful, and
+   don't require a second fetch for unsigned content.
 
 ## Solution
 
@@ -68,7 +67,7 @@ respond with non-SXG (unsigned) AMP, as the AMP Cache will need to apply those
 transforms itself, and thus be unable to use the provided signature.
 
 If the server responds with an SXG, it should include an `AMP-Cache-Transform`
-*outer* response header, specifying which of the alternatives it chose to
+_outer_ response header, specifying which of the alternatives it chose to
 satisfy. This allows intermediary caching proxies to cache responses with
 minimal understanding of the underlying format.
 
@@ -87,21 +86,21 @@ content.
 
 For each identifier:
 
- 1. If the identifier contains a `v` parameter, then its value represents a set
+1.  If the identifier contains a `v` parameter, then its value represents a set
     of AMP transform versions. The server should respond with an SXG only if it
     can produce one of the versions in that set (see [Version negotation](#version-negotiation)).
- 2. If the identifier contains any parameters besides those mentioned above,
+2.  If the identifier contains any parameters besides those mentioned above,
     then this identifier cannot be satisfied. The server should attempt to match
     the next one. (This reserves the parameter space for future additional
     constraints to be defined.)
- 3. If the identifier is `any`, then the SXG is not intended for a particular
+3.  If the identifier is `any`, then the SXG is not intended for a particular
     prefetching intermediary, and therefore its subresource URLs needn't be (but
     may be) rewritten.
- 4. Otherwise, if the identifier is an `id` from the list in
+4.  Otherwise, if the identifier is an `id` from the list in
     [caches.json](../build-system/global-configs/caches.json), then the SXG should have its subresource URLs
     rewritten. That `id`'s corresponding `cacheDomain` indicates the
     fully-qualified domain name that forms the basis for the URL rewrites.
- 5. Otherwise, the identifier is invalid and cannot be satisfied. The server
+5.  Otherwise, the identifier is invalid and cannot be satisfied. The server
     should attempt to match the next one.
 
 The server should ensure its copy of `caches.json` is no more than 60 days
@@ -118,7 +117,7 @@ and the "sh-" rules in [header-structure-07](https://tools.ietf.org/html/draft-i
 The `v` parameter value must be a string. Its value (after parsing as a string)
 must conform to the following ABNF:
 
-```
+```text
 v_spec = #v_range
 v_range = sh-integer / sh-integer OWS ".." OWS sh-integer
 ```
@@ -128,18 +127,19 @@ server should fail to satisfy this parameterised identifier, but should not
 immediately fail the entire parameterised list.
 
 There are additional semantic constraints on the spec:
- * Each `sh-integer` must be non-negative.
- * Two integers in a pair `X..Y` must satisfy `X<=Y`.
- * No two ranges in a spec should intersect. (`A..B` and `C..D` intersect if
-   `B >= C && A <= D`.)
+
+-   Each `sh-integer` must be non-negative.
+-   Two integers in a pair `X..Y` must satisfy `X<=Y`.
+-   No two ranges in a spec should intersect. (`A..B` and `C..D` intersect if
+    `B >= C && A <= D`.)
 
 If the parameter fails to meet these criteria, then the server may choose not to
 satisfy the parameterised identifier. Otherwise, the server can satisfy the
 identifier if any of the following is true for any `v_range` in the list:
 
- 1. The `v_range` is a single integer, and the server can produce exactly that
+1.  The `v_range` is a single integer, and the server can produce exactly that
     version.
- 2. The `v_range` is a pair of integers `x..y`, and the server can produce a
+2.  The `v_range` is a pair of integers `x..y`, and the server can produce a
     version in the closed interval _[x, y]_.
 
 If the server can respond with multiple versions in the set, it should respond
@@ -155,10 +155,10 @@ If the server responds with an SXG, it should include an `AMP-Cache-Transform`
 outer response header, with a value equal to the most specific constraint that
 it can satisfy -- that is, a list of size 1. For now, that means:
 
- 1. If it rewrote subresource URLs for a particular cache, the identifier should
+1.  If it rewrote subresource URLs for a particular cache, the identifier should
     be the id of the cache.
- 2. Otherwise, the identifier should be `any`.
- 3. It should have a `v` parameter whose value is the AMP transform version it
+2.  Otherwise, the identifier should be `any`.
+3.  It should have a `v` parameter whose value is the AMP transform version it
     responded with.
 
 ### `Vary` header
@@ -205,7 +205,7 @@ selected a resource of content type `application/signed-exchange`. In theory,
 there may be an interaction with content negotation. For instance, assume the
 request is:
 
-```
+```http
 Accept-Language: en, de
 AMP-Cache-Transform: google
 ```
@@ -235,16 +235,16 @@ header of the new request. The response matches the request if there exists a
 parameterised identifier `spec` in the request list for which all of the
 following is true:
 
- 1. Any of:
+1.  Any of:
     1. `spec`'s identifier is `any`.
     2. `spec`'s identifier is identical to the response's identifier.
- 2. Any of:
+2.  Any of:
     1. `spec` does not include a `v` parameter.
     2. `spec`'s `v` parameter is a valid `v_spec`, the response has a `v`
        parameter (specifying a single version as per
        [above](#response-header)), and the response's `v` is an element of the
        request's `v`.
- 3. `spec` does not include any parameter other than those mentioned above.
+3.  `spec` does not include any parameter other than those mentioned above.
 
 The above is merely informational; a cache may choose any strategy that doesn't
 serve mismatched responses (i.e. obeys the "Server behavior" specification
@@ -275,7 +275,7 @@ feel free to get involved.
 A requestor wishing to receive an SXG, without any constraints on its
 subresource URLs, would send:
 
-```
+```http
 AMP-Cache-Transform: any
 ```
 
@@ -286,7 +286,7 @@ A requestor wishing to receive an SXG to be served from and prefetched from the
 Google AMP Cache (e.g. [Googlebot](https://support.google.com/webmasters/answer/182072))
 would send:
 
-```
+```http
 AMP-Cache-Transform: google
 ```
 
@@ -296,7 +296,7 @@ Google AMP Cache, or a non-SXG response.
 A requestor wishing to receive transformed AMP of a specific version may send a
 request like:
 
-```
+```http
 AMP-Cache-Transform: google;v="1..3,5"
 ```
 

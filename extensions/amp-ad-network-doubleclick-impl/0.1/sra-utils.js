@@ -17,10 +17,11 @@
 import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 import {dev, devAssert} from '../../../src/log';
 import {getEnclosingContainerTypes} from '../../../ads/google/a4a/utils';
+import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {isInManualExperiment} from '../../../ads/google/a4a/traffic-experiments';
-import {isObject} from '../../../src/types';
-import {tryResolve} from '../../../src/utils/promise';
-import {utf8Encode} from '../../../src/utils/bytes';
+import {isObject} from '../../../src/core/types';
+import {tryResolve} from '../../../src/core/data-structures/promise';
+import {utf8Encode} from '../../../src/core/types/string/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -54,7 +55,7 @@ const SRA_JOINERS = [
  */
 export function constructSRABlockParameters(impls) {
   const parameters = {'output': 'ldjh', 'impl': 'fifs'};
-  SRA_JOINERS.forEach(joiner => Object.assign(parameters, joiner(impls)));
+  SRA_JOINERS.forEach((joiner) => Object.assign(parameters, joiner(impls)));
   return parameters;
 }
 
@@ -93,7 +94,7 @@ export function combineInventoryUnits(impls) {
   const iuNamesOutput = [];
   let uniqueIuNamesCount = 0;
   const prevIusEncoded = [];
-  impls.forEach(instance => {
+  impls.forEach((instance) => {
     const iu = devAssert(instance.element.getAttribute('data-slot'));
     const componentNames = iu.split('/');
     const encodedNames = [];
@@ -124,7 +125,7 @@ export function combineInventoryUnits(impls) {
  * @visibleForTesting
  */
 export function getCookieOptOut(impls) {
-  return getFirstInstanceValue_(impls, impl =>
+  return getFirstInstanceValue_(impls, (impl) =>
     impl.jsonTargeting && impl.jsonTargeting['cookieOptOut']
       ? {'co': '1'}
       : null
@@ -138,7 +139,7 @@ export function getCookieOptOut(impls) {
  * @visibleForTesting
  */
 export function getAdks(impls) {
-  return {'adks': impls.map(impl => devAssert(impl.adKey)).join()};
+  return {'adks': impls.map((impl) => devAssert(impl.adKey)).join()};
 }
 
 /**
@@ -149,7 +150,7 @@ export function getAdks(impls) {
  */
 export function getSizes(impls) {
   return {
-    'prev_iu_szs': impls.map(impl => devAssert(impl.parameterSize)).join(),
+    'prev_iu_szs': impls.map((impl) => devAssert(impl.parameterSize)).join(),
   };
 }
 
@@ -161,7 +162,7 @@ export function getSizes(impls) {
  * @visibleForTesting
  */
 export function getTfcd(impls) {
-  return getFirstInstanceValue_(impls, impl =>
+  return getFirstInstanceValue_(impls, (impl) =>
     impl.jsonTargeting && impl.jsonTargeting[TFCD]
       ? {'tfcd': impl.jsonTargeting[TFCD]}
       : null
@@ -176,7 +177,7 @@ export function getTfcd(impls) {
  * @visibleForTesting
  */
 export function isAdTest(impls) {
-  return getFirstInstanceValue_(impls, impl =>
+  return getFirstInstanceValue_(impls, (impl) =>
     isInManualExperiment(impl.element) ? {'adtest': 'on'} : null
   );
 }
@@ -199,7 +200,7 @@ export function getTargetingAndExclusions(impls) {
       break;
     }
     if (commonKVs) {
-      Object.keys(commonKVs).map(key => {
+      Object.keys(commonKVs).map((key) => {
         if (commonKVs[key] != impl.jsonTargeting['targeting'][key]) {
           delete commonKVs[key];
         }
@@ -207,16 +208,16 @@ export function getTargetingAndExclusions(impls) {
     } else {
       // Need to create a copy otherwise later delete operations will modify
       // first slot's targeting.
-      commonKVs = Object.assign({}, impl.jsonTargeting['targeting']);
+      commonKVs = {...impl.jsonTargeting['targeting']};
     }
   }
   let hasScp = false;
   const scps = [];
-  const hasTargeting = impl =>
+  const hasTargeting = (impl) =>
     impl.jsonTargeting &&
     (impl.jsonTargeting['targeting'] ||
       impl.jsonTargeting['categoryExclusions']);
-  impls.forEach(impl => {
+  impls.forEach((impl) => {
     if (hasTargeting(impl)) {
       hasScp = true;
       scps.push(
@@ -258,8 +259,10 @@ export function getExperimentIds(impls) {
     (impls.length &&
       /(?:#|,)deid=([\d,]+)/i.exec(impls[0].win.location.hash)) ||
     [];
-  (deid[1] || '').split(',').forEach(eid => eid && (eids[eid] = 1));
-  impls.forEach(impl => impl.experimentIds.forEach(eid => (eids[eid] = 1)));
+  /** @type {!Array} */ ((deid[1] || '').split(',')).forEach(
+    (eid) => eid && (eids[eid] = 1)
+  );
+  impls.forEach((impl) => impl.experimentIds.forEach((eid) => (eids[eid] = 1)));
   const eidKeys = Object.keys(eids).join();
   return eidKeys ? {'eid': eidKeys} : null;
 }
@@ -272,7 +275,7 @@ export function getExperimentIds(impls) {
  * @visibleForTesting
  */
 export function getIdentity(impls) {
-  return getFirstInstanceValue_(impls, impl => impl.buildIdentityParams());
+  return getFirstInstanceValue_(impls, (impl) => impl.buildIdentityParams());
 }
 
 /**
@@ -286,7 +289,7 @@ export function getIdentity(impls) {
 export function getForceSafeframe(impls) {
   let safeframeForced = false;
   const forceSafeframes = [];
-  impls.forEach(impl => {
+  impls.forEach((impl) => {
     safeframeForced = safeframeForced || impl.forceSafeframe;
     forceSafeframes.push(Number(impl.forceSafeframe));
   });
@@ -303,8 +306,8 @@ export function getForceSafeframe(impls) {
 export function getPageOffsets(impls) {
   const adxs = [];
   const adys = [];
-  impls.forEach(impl => {
-    const layoutBox = impl.getPageLayoutBox();
+  impls.forEach((impl) => {
+    const layoutBox = getPageLayoutBoxBlocking(impl.element);
     adxs.push(layoutBox.left);
     adys.push(layoutBox.top);
   });
@@ -322,7 +325,7 @@ export function getPageOffsets(impls) {
 export function getContainers(impls) {
   let hasAmpContainer = false;
   const result = [];
-  impls.forEach(impl => {
+  impls.forEach((impl) => {
     const containers = getEnclosingContainerTypes(impl.element);
     result.push(containers.join());
     hasAmpContainer = hasAmpContainer || !!containers.length;
@@ -339,7 +342,7 @@ export function getContainers(impls) {
 export function getIsFluid(impls) {
   let hasFluid = false;
   const result = [];
-  impls.forEach(impl => {
+  impls.forEach((impl) => {
     if (impl.isFluidRequest()) {
       hasFluid = true;
       result.push('height');
@@ -363,8 +366,8 @@ export function serializeTargeting(
 ) {
   const serialized = targeting
     ? Object.keys(targeting)
-        .filter(key => !commonTargeting || commonTargeting[key] === undefined)
-        .map(key => serializeItem_(key, targeting[key]))
+        .filter((key) => !commonTargeting || commonTargeting[key] === undefined)
+        .map((key) => serializeItem_(key, targeting[key]))
     : [];
   if (categoryExclusions) {
     serialized.push(serializeItem_('excl_cat', categoryExclusions));
@@ -397,13 +400,15 @@ function serializeItem_(key, value) {
  * @param {boolean} done
  * @param {!Array<function(?Response)>} sraRequestAdUrlResolvers
  * @param {string} sraUrl url of SRA request for error reporting
+ * @param {boolean=} isNoSigning
  */
 export function sraBlockCallbackHandler(
   creative,
   headersObj,
   done,
   sraRequestAdUrlResolvers,
-  sraUrl
+  sraUrl,
+  isNoSigning
 ) {
   const headerNames = Object.keys(headersObj);
   if (headerNames.length == 1 && isObject(headersObj[headerNames[0]])) {
@@ -422,7 +427,7 @@ export function sraBlockCallbackHandler(
   const headers =
     /** @type {?Headers} */
     ({
-      get: name => {
+      get: (name) => {
         // TODO(keithwrightbos) - fix upstream so response writes
         // all metadata values as strings.
         let header = headersObj[name.toLowerCase()];
@@ -431,14 +436,22 @@ export function sraBlockCallbackHandler(
         }
         return header;
       },
-      has: name => !!headersObj[name.toLowerCase()],
+      has: (name) => !!headersObj[name.toLowerCase()],
     });
-  const fetchResponse =
-    /** @type {?Response} */
-    ({
-      headers,
-      arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
-    });
+
+  let fetchResponse;
+  if (isNoSigning) {
+    const stringifiedHeaders = stringifyHeaderValues(headersObj);
+    fetchResponse = new Response(creative, {headers: stringifiedHeaders});
+  } else {
+    fetchResponse =
+      /** @type {?Response} */
+      ({
+        headers,
+        arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
+      });
+  }
+
   // Pop head off of the array of resolvers as the response
   // should match the order of blocks declared in the ad url.
   // This allows the block to start rendering while the SRA
@@ -454,4 +467,22 @@ export function sraBlockCallbackHandler(
       sraUrl
     );
   }
+}
+
+/**
+ * Takes any parsed header values from the object that are not strings and
+ * converts them back to the orginal stringified version.
+ * TODO above indicates this might get fixed upstream at some point.
+ * @param {!Object} headersObj
+ * @return {!Object<string, string>}
+ */
+function stringifyHeaderValues(headersObj) {
+  return Object.keys(headersObj).reduce((stringifiedHeaders, headerName) => {
+    let headerValue = headersObj[headerName];
+    if (headerValue && typeof headerValue != 'string') {
+      headerValue = JSON.stringify(headerValue);
+    }
+    stringifiedHeaders[headerName] = headerValue;
+    return stringifiedHeaders;
+  }, {});
 }

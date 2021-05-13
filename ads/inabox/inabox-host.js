@@ -22,7 +22,7 @@
 import {InaboxMessagingHost} from './inabox-messaging-host';
 import {dev, initLogConstructor, setReportError, user} from '../../src/log';
 import {getData} from '../../src/event-helper';
-import {reportError} from '../../src/error';
+import {reportError} from '../../src/error-reporting';
 
 /** @const {string} */
 const TAG = 'inabox-host';
@@ -69,16 +69,18 @@ export class InaboxHost {
       win.AMP[INABOX_UNREGISTER_IFRAME] = host.unregisterIframe.bind(host);
     }
     const queuedMsgs = win[PENDING_MESSAGES];
-    const processMessageFn = /** @type {function(Event)} */ (evt => {
-      try {
-        host.processMessage(evt);
-      } catch (err) {
-        dev().error(TAG, 'Error processing inabox message', evt, err);
+    const processMessageFn = /** @type {function(Event)} */ (
+      (evt) => {
+        try {
+          host.processMessage(evt);
+        } catch (err) {
+          dev().error(TAG, 'Error processing inabox message', evt, err);
+        }
       }
-    });
+    );
     if (queuedMsgs) {
       if (Array.isArray(queuedMsgs)) {
-        queuedMsgs.forEach(message => {
+        /** @type {!Array} */ (queuedMsgs).forEach((message) => {
           // Pending messages are added by external scripts.
           // Validate their data types to avoid client errors.
           if (!validateMessage(message)) {
@@ -107,9 +109,10 @@ export class InaboxHost {
 function validateMessage(message) {
   const valid = !!(message.source && message.source.postMessage);
   if (!valid) {
-    user().error(
+    user().warn(
       TAG,
-      'Missing message.source. message.data=' + JSON.stringify(getData(message))
+      'Ignoring an inabox message. Likely the requester iframe has been removed. message.data=' +
+        JSON.stringify(getData(message))
     );
   }
   return valid;

@@ -17,7 +17,7 @@
 import {AmpStoryMediaQueryService} from '../amp-story-media-query-service';
 import {poll} from '../../../../testing/iframe';
 
-describes.realWin('amp-story-media-query-service', {amp: true}, env => {
+describes.realWin('amp-story-media-query-service', {amp: true}, (env) => {
   let mediaQueryService;
   let storyEl;
   let styleEl;
@@ -55,7 +55,7 @@ describes.realWin('amp-story-media-query-service', {amp: true}, env => {
     setMatcherSize(200, 100);
     storyEl.appendChild(styleEl);
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       requestAnimationFrame(() => {
         mediaQueryService = new AmpStoryMediaQueryService(win);
         resolve();
@@ -69,24 +69,24 @@ describes.realWin('amp-story-media-query-service', {amp: true}, env => {
   });
 
   it('should add the attribute if the media query matches', async () => {
-    const spy = sandbox.spy();
+    const spy = env.sandbox.spy();
     await mediaQueryService.onMediaQueryMatch('(orientation: landscape)', spy);
     expect(spy).to.have.been.calledOnceWith(true);
   });
 
   it('should not add the attribute if the media query does not match', async () => {
-    const spy = sandbox.spy();
+    const spy = env.sandbox.spy();
     await mediaQueryService.onMediaQueryMatch('(orientation: portrait)', spy);
     expect(spy).to.have.been.calledOnceWith(false);
   });
 
   it('should handle multiple media queries', async () => {
-    const spy1 = sandbox.spy();
+    const spy1 = env.sandbox.spy();
     const p1 = mediaQueryService.onMediaQueryMatch(
       '(orientation: landscape)',
       spy1
     );
-    const spy2 = sandbox.spy();
+    const spy2 = env.sandbox.spy();
     const p2 = mediaQueryService.onMediaQueryMatch('(min-width: 600px)', spy2);
     await Promise.all([p1, p2]);
     expect(spy1).to.have.been.calledOnceWith(true);
@@ -96,7 +96,7 @@ describes.realWin('amp-story-media-query-service', {amp: true}, env => {
   it('should add the className if the media query matches on resize', async () => {
     await mediaQueryService.onMediaQueryMatch(
       '(orientation: portrait)',
-      matches => {
+      (matches) => {
         storyEl.classList.toggle('portrait', matches);
       }
     );

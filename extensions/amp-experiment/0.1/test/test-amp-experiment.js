@@ -17,7 +17,7 @@
 import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
-import {hasOwn} from '../../../../src/utils/object';
+import {hasOwn} from '../../../../src/core/types/object';
 
 describes.realWin(
   'amp-experiment',
@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-experiment'],
     },
   },
-  env => {
+  (env) => {
     const config = {
       'experiment-1': {
         variants: {
@@ -125,8 +125,8 @@ describes.realWin(
         },
         () => {
           return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-            .then(service => service.getVariants())
-            .then(variants => {
+            .then((service) => service.getVariants())
+            .then((variants) => {
               expect(variants).to.deep.equal({});
             });
         }
@@ -135,7 +135,7 @@ describes.realWin(
 
     it('should add attributes to body element for the allocated variants', () => {
       addConfigElement('script');
-      const stub = sandbox.stub(variant, 'allocateVariant');
+      const stub = env.sandbox.stub(variant, 'allocateVariant');
       stub
         .withArgs(ampdoc, 'experiment-1', config['experiment-1'])
         .returns(Promise.resolve('variant-a'));
@@ -148,8 +148,8 @@ describes.realWin(
 
       experiment.buildCallback();
       return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-        .then(variantsService => variantsService.getVariants())
-        .then(variants => {
+        .then((variantsService) => variantsService.getVariants())
+        .then((variants) => {
           expect(variants).to.jsonEqual({
             'experiment-1': 'variant-a',
             'experiment-2': 'variant-d',

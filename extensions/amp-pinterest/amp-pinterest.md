@@ -3,8 +3,9 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Displays a Pinterest widget or Save button.
+  text: Displays a Pinterest widget, Save button, or Follow button.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors.
 
@@ -23,25 +24,6 @@ limitations under the License.
 
 # amp-pinterest
 
-Displays a Pinterest widget, Save button, or Follow button.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-pinterest" src="https://cdn.ampproject.org/v0/amp-pinterest-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-pinterest/">Annotated code example for amp-pinterest</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Examples
 
 Use the `amp-pinterest` component to display a Save button, Pin widget, or Follow button.
@@ -50,12 +32,13 @@ Use the `amp-pinterest` component to display a Save button, Pin widget, or Follo
 
 ```html
 <amp-pinterest
-  height=20
-  width=40
+  height="20"
+  width="40"
   data-do="buttonPin"
   data-url="http://www.flickr.com/photos/kentbrew/6851755809/"
   data-media="http://farm8.staticflickr.com/7027/6851755809_df5b2051c9_z.jpg"
-  data-description="Next stop: Pinterest">
+  data-description="Next stop: Pinterest"
+>
 </amp-pinterest>
 ```
 
@@ -63,10 +46,11 @@ Use the `amp-pinterest` component to display a Save button, Pin widget, or Follo
 
 ```html
 <amp-pinterest
-  width=245
-  height=330
+  width="245"
+  height="330"
   data-do="embedPin"
-  data-url="https://www.pinterest.com/pin/99360735500167749/">
+  data-url="https://www.pinterest.com/pin/99360735500167749/"
+>
 </amp-pinterest>
 ```
 
@@ -74,11 +58,12 @@ Use the `amp-pinterest` component to display a Save button, Pin widget, or Follo
 
 ```html
 <amp-pinterest
-    height=20
-    width=94
-    data-do="buttonFollow"
-    data-href="https://www.pinterest.com/kentbrew/"
-    data-label="Kent Brewster">
+  height="20"
+  width="94"
+  data-do="buttonFollow"
+  data-href="https://www.pinterest.com/kentbrew/"
+  data-label="Kent Brewster"
+>
 </amp-pinterest>
 ```
 
@@ -184,4 +169,4 @@ This property like the the `alt` attribute on an `<img>` tag specifies the alter
 
 ## Validation
 
-See [amp-pinterest rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/validator-amp-pinterest.protoascii) in the AMP validator specification.
+See [amp-pinterest rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-pinterest/validator-amp-pinterest.protoascii) in the AMP validator specification.

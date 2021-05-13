@@ -26,13 +26,11 @@ export function getModeObject(opt_win) {
   return {
     localDev: getMode(opt_win).localDev,
     development: getMode(opt_win).development,
-    filter: getMode(opt_win).filter,
+    esm: IS_ESM,
     minified: getMode(opt_win).minified,
-    lite: getMode(opt_win).lite,
     test: getMode(opt_win).test,
     log: getMode(opt_win).log,
     version: getMode(opt_win).version,
     rtvVersion: getMode(opt_win).rtvVersion,
-    singlePassType: getMode(opt_win).singlePassType,
   };
 }

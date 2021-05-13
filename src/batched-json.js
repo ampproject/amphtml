@@ -20,6 +20,24 @@ import {getValueForExpr} from './json';
 import {user} from './log';
 
 /**
+ * Detail of each `options` property:
+ * expr - Dot-syntax reference to subdata of JSON result to return. If not specified,
+ *     entire JSON result is returned.
+ * urlReplacement - If ALL, replaces all URL vars. If OPT_IN, replaces allowlisted
+ *     URL vars. Otherwise, don't expand.
+ * refresh - Forces refresh of browser cache.
+ * xssiPrefix - Prefix to optionally strip from the response before calling parseJson.
+ *
+ * @typedef {{
+ *  expr:(string|undefined),
+ *  urlReplacement: (UrlReplacementPolicy|undefined),
+ *  refresh: (boolean|undefined),
+ *  xssiPrefix: (string|undefined),
+ * }}
+ */
+export let BatchFetchOptionsDef;
+
+/**
  * @enum {number}
  */
 export const UrlReplacementPolicy = {
@@ -35,44 +53,32 @@ export const UrlReplacementPolicy = {
  *
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element
- * @param {string=} opt_expr Dot-syntax reference to subdata of JSON result
- *     to return. If not specified, entire JSON result is returned.
- * @param {UrlReplacementPolicy=} opt_urlReplacement If ALL, replaces all URL
- *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand..
- * @param {boolean=} opt_refresh Forces refresh of browser cache.
- * @param {string=} opt_token Auth token that forces a POST request.
+ * @param {!BatchFetchOptionsDef} options options bag for modifying the request.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
-export function batchFetchJsonFor(
-  ampdoc,
-  element,
-  opt_expr = '.',
-  opt_urlReplacement = UrlReplacementPolicy.NONE,
-  opt_refresh = false,
-  opt_token = undefined
-) {
+export function batchFetchJsonFor(ampdoc, element, options = {}) {
+  const {
+    expr = '.',
+    urlReplacement = UrlReplacementPolicy.NONE,
+    refresh = false,
+    xssiPrefix = undefined,
+  } = options;
   assertHttpsUrl(element.getAttribute('src'), element);
   const xhr = Services.batchedXhrFor(ampdoc.win);
-  return requestForBatchFetch(element, opt_urlReplacement, opt_refresh)
-    .then(data => {
-      if (opt_token !== undefined) {
-        data.fetchOpt['method'] = 'POST';
-        data.fetchOpt['headers'] = {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        };
-        data.fetchOpt['body'] = {
-          'ampViewerAuthToken': opt_token,
-        };
-      }
+  return requestForBatchFetch(element, urlReplacement, refresh)
+    .then((data) => {
       return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
     })
-    .then(res => res.json())
-    .then(data => {
+    .then((res) => Services.xhrFor(ampdoc.win).xssiJson(res, xssiPrefix))
+    .then((data) => {
       if (data == null) {
         throw new Error('Response is undefined.');
       }
-      return getValueForExpr(data, opt_expr || '.');
+      return getValueForExpr(data, expr || '.');
+    })
+    .catch((err) => {
+      throw user().createError('failed fetching JSON data', err);
     });
 }
 
@@ -81,7 +87,7 @@ export function batchFetchJsonFor(
  * fetch.
  * @param {!Element} element
  * @param {!UrlReplacementPolicy} replacement If ALL, replaces all URL
- *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
+ *     vars. If OPT_IN, replaces allowlisted URL vars. Otherwise, don't expand.
  * @param {boolean} refresh Forces refresh of browser cache.
  * @return {!Promise<!FetchRequestDef>}
  */
@@ -95,11 +101,11 @@ export function requestForBatchFetch(element, replacement, refresh) {
       ? urlReplacements.expandUrlAsync(url)
       : Promise.resolve(url);
 
-  return promise.then(xhrUrl => {
+  return promise.then((xhrUrl) => {
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).
     if (replacement == UrlReplacementPolicy.OPT_IN) {
-      const invalid = urlReplacements.collectUnwhitelistedVarsSync(element);
+      const invalid = urlReplacements.collectDisallowedVarsSync(element);
       if (invalid.length > 0) {
         throw user().createError(
           'URL variable substitutions in CORS ' +

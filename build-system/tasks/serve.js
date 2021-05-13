@@ -15,46 +15,50 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
 const connect = require('gulp-connect');
-const deglob = require('globs-to-files');
+const debounce = require('debounce');
+const globby = require('globby');
 const header = require('connect-header');
-const log = require('fancy-log');
+const minimist = require('minimist');
 const morgan = require('morgan');
-const watch = require('gulp-watch');
+const open = require('open');
+const os = require('os');
+const path = require('path');
+const {
+  buildNewServer,
+  SERVER_TRANSFORM_PATH,
+} = require('../server/typescript-compile');
 const {
   lazyBuildExtensions,
   lazyBuildJs,
-  preBuildCoreRuntime,
-  preBuildSomeExtensions,
+  lazyBuild3pVendor,
+  preBuildRuntimeFiles,
+  preBuildExtensions,
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green} = require('ansi-colors');
-const {getServeMode} = require('../server/app-utils');
+const {cyan, green, red} = require('../common/colors');
+const {logServeMode, setServeMode} = require('../server/app-utils');
+const {log} = require('../common/logging');
+const {watchDebounceDelay} = require('./helpers');
+const {watch} = require('chokidar');
 
-// Used for logging during server start / stop.
-let url = '';
+const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
-const serverFiles = deglob.sync(['build-system/server/**']);
+const HOST = argv.host || '0.0.0.0';
+const PORT = argv.port || 8000;
 
-/**
- * Logs the server's mode (based on command line arguments).
- */
-function logServeMode() {
-  switch (getServeMode()) {
-    case 'compiled':
-      log(green('Serving'), cyan('minified'), green('JS'));
-      break;
-    case 'cdn':
-      log(green('Serving'), cyan('current prod'), green('JS'));
-      break;
-    case 'rtv':
-      log(green('Serving JS from RTV'), cyan(`${argv.rtv}`));
-      break;
-    default:
-      log(green('Serving'), cyan('unminified'), green('JS'));
-  }
-}
+// Used for logging.
+let url = null;
+let quiet = !!argv.quiet;
+
+// Used for live reload.
+const serverFiles = globby.sync([
+  'build-system/server/**',
+  `!${SERVER_TRANSFORM_PATH}/dist/**`,
+]);
+
+// Used to enable / disable lazy building.
+let lazyBuild = false;
 
 /**
  * Returns a list of middleware handler functions to use while serving
@@ -62,45 +66,83 @@ function logServeMode() {
  */
 function getMiddleware() {
   const middleware = [require('../server/app')]; // Lazy-required to enable live-reload
-  if (!argv.quiet) {
+  if (!quiet) {
     middleware.push(morgan('dev'));
   }
   if (argv.cache) {
     middleware.push(header({'cache-control': 'max-age=600'}));
   }
-  if (!argv._.includes('serve') && !argv.eager_build) {
+  if (lazyBuild) {
     middleware.push(lazyBuildExtensions);
     middleware.push(lazyBuildJs);
+    middleware.push(lazyBuild3pVendor);
   }
   return middleware;
 }
 
 /**
  * Launches a server and waits for it to fully start up
- * @param {?Object} extraOptions
+ *
+ * @param {?Object} connectOptions
+ * @param {?Object} serverOptions
+ * @param {?Object} modeOptions
  */
-async function startServer(extraOptions = {}) {
+async function startServer(
+  connectOptions = {},
+  serverOptions = {},
+  modeOptions = {}
+) {
+  await buildNewServer();
+  if (serverOptions.lazyBuild) {
+    lazyBuild = serverOptions.lazyBuild;
+  }
+  if (serverOptions.quiet) {
+    quiet = serverOptions.quiet;
+  }
+
   let started;
-  const startedPromise = new Promise(resolve => {
+  const startedPromise = new Promise((resolve) => {
     started = resolve;
   });
-  const options = Object.assign(
-    {
-      name: 'AMP Dev Server',
-      root: process.cwd(),
-      host: argv.host || 'localhost',
-      port: argv.port || 8000,
-      https: argv.https,
-      preferHttp1: true,
-      silent: true,
-      middleware: getMiddleware,
-    },
-    extraOptions
-  );
+  setServeMode(modeOptions);
+  const options = {
+    name: 'AMP Dev Server',
+    root: process.cwd(),
+    host: HOST,
+    port: PORT,
+    https: argv.https,
+    preferHttp1: true,
+    silent: true,
+    middleware: getMiddleware,
+    ...connectOptions,
+  };
   connect.server(options, started);
   await startedPromise;
-  url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
-  log(green('Started'), cyan(options.name), green('at'), cyan(url));
+
+  /**
+   * @param {string} host
+   * @return {string}
+   */
+  function makeUrl(host) {
+    return `http${options.https ? 's' : ''}://${host}:${options.port}`;
+  }
+
+  url = makeUrl(options.host);
+  log(green('Started'), cyan(options.name), green('at:'));
+  log('\t', cyan(url));
+  for (const device of Object.entries(os.networkInterfaces())) {
+    for (const detail of device[1] ?? []) {
+      if (detail.family === 'IPv4') {
+        log('\t', cyan(makeUrl(detail.address)));
+      }
+    }
+  }
+  if (argv.coverage == 'live') {
+    const covUrl = `${url}/coverage`;
+    log(green('Collecting live code coverage at'), cyan(covUrl));
+    await Promise.all([open(covUrl), open(url)]);
+  }
+  logServeMode();
 }
 
 /**
@@ -108,66 +150,92 @@ async function startServer(extraOptions = {}) {
  * live-reload.
  */
 function resetServerFiles() {
-  for (const serverFile in serverFiles) {
-    delete require.cache[serverFiles[serverFile]];
+  for (const serverFile of serverFiles) {
+    delete require.cache[path.resolve(serverFile)];
   }
 }
 
 /**
  * Stops the currently running server
  */
-function stopServer() {
-  connect.serverClose();
-  log(green('Stopped server at'), cyan(url));
+async function stopServer() {
+  if (url) {
+    connect.serverClose();
+    log(green('Stopped server at'), cyan(url));
+    url = null;
+  }
 }
 
 /**
  * Closes the existing server and restarts it
  */
-function restartServer() {
+async function restartServer() {
   stopServer();
+  try {
+    await buildNewServer();
+  } catch {
+    log(red('ERROR:'), 'Could not rebuild', cyan('AMP Server'));
+    return;
+  }
   resetServerFiles();
   startServer();
 }
 
 /**
- * Initiates pre-build steps requested via command line args.
+ * Performs pre-build steps requested via command line args.
  */
-function initiatePreBuildSteps() {
-  if (!argv._.includes('serve') && !argv.eager_build) {
-    preBuildCoreRuntime();
-    if (argv.extensions || argv.extensions_from) {
-      preBuildSomeExtensions();
-    }
-  }
+async function performPreBuildSteps() {
+  await preBuildRuntimeFiles();
+  await preBuildExtensions();
+}
+
+/**
+ * Entry point of the `amp serve` task.
+ */
+async function serve() {
+  await doServe();
 }
 
 /**
  * Starts a webserver at the repository root to serve built files.
+ * @param {boolean=} lazyBuild
  */
-async function serve() {
+async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
-  logServeMode();
-  watch(serverFiles, restartServer);
-  await startServer();
-  initiatePreBuildSteps();
+  const watchFunc = async () => {
+    await restartServer();
+  };
+  watch(serverFiles).on('change', debounce(watchFunc, watchDebounceDelay));
+  await startServer({}, {lazyBuild}, {});
+  if (lazyBuild) {
+    await performPreBuildSteps();
+  }
 }
 
 module.exports = {
   serve,
+  doServe,
   startServer,
   stopServer,
+  HOST,
+  PORT,
 };
+
+/* eslint "google-camelcase/google-camelcase": 0 */
 
 serve.description = 'Starts a webserver at the project root directory';
 serve.flags = {
-  'host': '  Hostname or IP address to bind to (default: localhost)',
-  'port': '  Specifies alternative port (default: 8000)',
-  'https': '  Use HTTPS server',
-  'quiet': "  Run in quiet mode and don't log HTTP requests",
-  'cache': '  Make local resources cacheable by the browser',
-  'no_caching_extensions': '  Disable caching for extensions',
-  'compiled': '  Serve minified JS',
-  'cdn': '  Serve current prod JS',
-  'rtv': '  Serve JS from the RTV provided',
+  host: 'Hostname or IP address to bind to (default: localhost)',
+  port: 'Specifies alternative port (default: 8000)',
+  https: 'Use HTTPS server',
+  quiet: "Run in quiet mode and don't log HTTP requests",
+  cache: 'Make local resources cacheable by the browser',
+  no_caching_extensions: 'Disable caching for extensions',
+  compiled: 'Serve minified JS',
+  esm: 'Serve ESM JS (uses the new typescript server transforms)',
+  cdn: 'Serve current prod JS',
+  rtv: 'Serve JS from the RTV provided',
+  coverage:
+    'Serve instrumented code to collect coverage info; use ' +
+    '--coverage=live to auto-report coverage on page unload',
 };

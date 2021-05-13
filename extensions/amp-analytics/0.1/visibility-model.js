@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * This class implements visibility calculations based on the
@@ -207,7 +207,7 @@ export class VisibilityModel {
       clearTimeout(this.scheduleRepeatId_);
       this.scheduleRepeatId_ = null;
     }
-    this.unsubscribe_.forEach(unsubscribe => {
+    this.unsubscribe_.forEach((unsubscribe) => {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
@@ -437,6 +437,7 @@ export class VisibilityModel {
         this.minVisiblePercentage_ > 0
           ? Math.min(this.minVisiblePercentage_, visibility)
           : visibility;
+
       this.maxVisiblePercentage_ = Math.max(
         this.maxVisiblePercentage_,
         visibility

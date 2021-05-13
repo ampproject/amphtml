@@ -16,7 +16,7 @@
 
 import {NameFrameRenderer} from '../name-frame-renderer';
 import {parseJson} from '../../../../src/json';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Encode} from '../../../../src/core/types/string/bytes';
 
 const realWinConfig = {
   amp: {},
@@ -24,14 +24,14 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('NameFrameRenderer', realWinConfig, env => {
+describes.realWin('NameFrameRenderer', realWinConfig, (env) => {
   const minifiedCreative = '<p>Hello, World!</p>';
 
   let containerElement;
   let context;
   let creativeData;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     context = {
       size: {width: '320', height: '50'},
       requestUrl: 'http://www.google.com',
@@ -45,23 +45,22 @@ describes.realWin('NameFrameRenderer', realWinConfig, env => {
       additionalContextMetadata: {},
     };
 
-    containerElement = document.createElement('div');
+    containerElement = env.win.document.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
-    containerElement.getPageLayoutBox = () => ({
-      left: 0,
-      top: 0,
-      width: 0,
-      height: 0,
+    containerElement.getIntersectionChangeEntry = () => ({
+      time: null,
+      boundingClientRect: {},
+      rootBounds: {},
+      intersectionRect: {},
     });
-    containerElement.getIntersectionChangeEntry = () => ({});
-    document.body.appendChild(containerElement);
+    env.win.document.body.appendChild(containerElement);
 
-    new NameFrameRenderer().render(context, containerElement, creativeData);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(containerElement);
+    await new NameFrameRenderer().render(
+      context,
+      containerElement,
+      creativeData
+    );
   });
 
   it('should append iframe child', () => {

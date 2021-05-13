@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {
-  preconnectForElement,
+  installPreconnectService,
   preconnectToOrigin,
   setPreconnectFeaturesForTesting,
 } from '../../src/preconnect';
 
-describe('preconnect', () => {
-  let sandbox;
+describes.sandboxed('preconnect', {}, (env) => {
+  let ampdoc;
   let iframeClock;
   let clock;
   let preconnect;
   let preloadSupported;
   let preconnectSupported;
   let isSafari;
+  let sandbox;
   let visiblePromise;
 
   // Factored out to make our linter happy since we don't allow
@@ -38,8 +39,8 @@ describe('preconnect', () => {
   const javascriptUrlPrefix = 'javascript';
 
   function getPreconnectIframe(detectFeatures = false) {
-    return createIframePromise().then(iframe => {
-      iframeClock = lolex.install({target: iframe.win});
+    return createIframePromise().then((iframe) => {
+      iframeClock = fakeTimers.withGlobal(iframe.win).install();
       if (detectFeatures) {
         setPreconnectFeaturesForTesting(null);
       } else {
@@ -52,42 +53,42 @@ describe('preconnect', () => {
       const platform = {
         isSafari: () => !!isSafari,
       };
-      iframe.win.__AMP_SERVICES['platform'] = {obj: platform};
+      iframe.win.__AMP_SERVICES['platform'] = {obj: platform, ctor: Object};
+      sandbox.stub(Services, 'platformFor').returns(platform);
 
-      const element = document.createElement('div');
-      iframe.win.document.body.appendChild(element);
-      preconnect = preconnectForElement(element);
-      sandbox.stub(preconnect, 'getAmpdoc_').returns({
+      installPreconnectService(iframe.win);
+      preconnect = Services.preconnectFor(iframe.win);
+
+      ampdoc = {
         whenFirstVisible: () => visiblePromise,
-      });
+      };
       return iframe;
     });
   }
 
   beforeEach(() => {
+    sandbox = env.sandbox;
     visiblePromise = Promise.resolve();
     isSafari = undefined;
     // Default mock to not support preload/preconnect - override in cases
     // to test for preload/preconnect support.
     preloadSupported = false;
     preconnectSupported = false;
-    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
   });
 
   afterEach(() => {
     clock.tick(200000);
-    sandbox.restore();
     setPreconnectFeaturesForTesting(null);
   });
 
   it('should preconnect', () => {
     isSafari = false;
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe().then((iframe) => {
       const open = sandbox.spy(XMLHttpRequest.prototype, 'open');
-      preconnect.url('https://a.preconnect.com/foo/bar');
-      preconnect.url('https://a.preconnect.com/other');
-      preconnect.url(javascriptUrlPrefix + ':alert()');
+      preconnect.url(ampdoc, 'https://a.preconnect.com/foo/bar');
+      preconnect.url(ampdoc, 'https://a.preconnect.com/other');
+      preconnect.url(ampdoc, javascriptUrlPrefix + ':alert()');
       expect(
         iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
       ).to.have.length(0);
@@ -117,7 +118,7 @@ describe('preconnect', () => {
     });
   });
 
-  it('should preconnect to origins', async function() {
+  it('should preconnect to origins', async function () {
     isSafari = false;
     const iframe = await getPreconnectIframe();
     sandbox.stub(Services, 'documentInfoForDoc').returns({
@@ -135,11 +136,11 @@ describe('preconnect', () => {
   it('should preconnect with known support', () => {
     isSafari = false;
     preconnectSupported = true;
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe().then((iframe) => {
       const open = sandbox.spy(XMLHttpRequest.prototype, 'open');
-      preconnect.url('https://a.preconnect.com/foo/bar');
-      preconnect.url('https://a.preconnect.com/other');
-      preconnect.url(javascriptUrlPrefix + ':alert()');
+      preconnect.url(ampdoc, 'https://a.preconnect.com/foo/bar');
+      preconnect.url(ampdoc, 'https://a.preconnect.com/other');
+      preconnect.url(ampdoc, javascriptUrlPrefix + ':alert()');
       expect(
         iframe.doc.querySelectorAll('link[rel=preconnect]')
       ).to.have.length(0);
@@ -168,13 +169,13 @@ describe('preconnect', () => {
 
   it('should preconnect with polyfill', () => {
     isSafari = true;
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe().then((iframe) => {
       clock.tick(1485531293690);
       const open = sandbox.spy(XMLHttpRequest.prototype, 'open');
       const send = sandbox.spy(XMLHttpRequest.prototype, 'send');
-      preconnect.url('https://s.preconnect.com/foo/bar');
-      preconnect.url('https://s.preconnect.com/other');
-      preconnect.url(javascriptUrlPrefix + ':alert()');
+      preconnect.url(ampdoc, 'https://s.preconnect.com/foo/bar');
+      preconnect.url(ampdoc, 'https://s.preconnect.com/other');
+      preconnect.url(ampdoc, javascriptUrlPrefix + ':alert()');
       expect(
         iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
       ).to.have.length(0);
@@ -206,8 +207,8 @@ describe('preconnect', () => {
   });
 
   it('should cleanup', () => {
-    return getPreconnectIframe().then(iframe => {
-      preconnect.url('https://c.preconnect.com/foo/bar');
+    return getPreconnectIframe().then((iframe) => {
+      preconnect.url(ampdoc, 'https://c.preconnect.com/foo/bar');
       return visiblePromise.then(() => {
         expect(
           iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
@@ -234,10 +235,10 @@ describe('preconnect', () => {
   });
 
   it('should preconnect to 2 different origins', () => {
-    return getPreconnectIframe().then(iframe => {
-      preconnect.url('https://d.preconnect.com/foo/bar');
+    return getPreconnectIframe().then((iframe) => {
+      preconnect.url(ampdoc, 'https://d.preconnect.com/foo/bar');
       // Different origin
-      preconnect.url('https://e.preconnect.com/other');
+      preconnect.url(ampdoc, 'https://e.preconnect.com/other');
       return visiblePromise.then(() => {
         expect(
           iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
@@ -256,14 +257,14 @@ describe('preconnect', () => {
   });
 
   it('should timeout preconnects', () => {
-    return getPreconnectIframe().then(iframe => {
-      preconnect.url('https://x.preconnect.com/foo/bar');
+    return getPreconnectIframe().then((iframe) => {
+      preconnect.url(ampdoc, 'https://x.preconnect.com/foo/bar');
       return visiblePromise.then(() => {
         expect(
           iframe.doc.querySelectorAll('link[rel=preconnect]')
         ).to.have.length(1);
         iframeClock.tick(9000);
-        preconnect.url('https://x.preconnect.com/foo/bar');
+        preconnect.url(ampdoc, 'https://x.preconnect.com/foo/bar');
         return visiblePromise.then(() => {
           expect(
             iframe.doc.querySelectorAll('link[rel=preconnect]')
@@ -274,7 +275,7 @@ describe('preconnect', () => {
           ).to.have.length(0);
           // After timeout preconnect creates a new tag.
           clock.tick(10000);
-          preconnect.url('https://x.preconnect.com/foo/bar');
+          preconnect.url(ampdoc, 'https://x.preconnect.com/foo/bar');
           return visiblePromise.then(() => {
             expect(
               iframe.doc.querySelectorAll('link[rel=preconnect]')
@@ -286,8 +287,9 @@ describe('preconnect', () => {
   });
 
   it('should timeout preconnects longer with active connect', () => {
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe().then((iframe) => {
       preconnect.url(
+        ampdoc,
         'https://y.preconnect.com/foo/bar',
         /* opt_alsoConnecting */ true
       );
@@ -301,13 +303,13 @@ describe('preconnect', () => {
         ).to.have.length(0);
         clock.tick(10000);
         return visiblePromise.then(() => {
-          preconnect.url('https://y.preconnect.com/foo/bar');
+          preconnect.url(ampdoc, 'https://y.preconnect.com/foo/bar');
           expect(
             iframe.doc.querySelectorAll('link[rel=preconnect]')
           ).to.have.length(0);
           clock.tick(180 * 1000);
           return visiblePromise.then(() => {
-            preconnect.url('https://y.preconnect.com/foo/bar');
+            preconnect.url(ampdoc, 'https://y.preconnect.com/foo/bar');
             expect(
               iframe.doc.querySelectorAll('link[rel=preconnect]')
             ).to.have.length(1);
@@ -324,11 +326,11 @@ describe('preconnect', () => {
     .run('should add links if feature if detected', () => {
       // Don't stub preload support allow the test to run through the browser
       // default regardless of support or not.
-      return getPreconnectIframe(/* detectFeatures */ true).then(iframe => {
-        preconnect.preload('https://a.prefetch.com/foo/bar', 'script');
-        preconnect.preload('https://a.prefetch.com/foo/bar');
-        preconnect.preload('https://a.prefetch.com/other', 'style');
-        preconnect.preload(javascriptUrlPrefix + ':alert()');
+      return getPreconnectIframe(/* detectFeatures */ true).then((iframe) => {
+        preconnect.preload(ampdoc, 'https://a.prefetch.com/foo/bar', 'script');
+        preconnect.preload(ampdoc, 'https://a.prefetch.com/foo/bar');
+        preconnect.preload(ampdoc, 'https://a.prefetch.com/other', 'style');
+        preconnect.preload(ampdoc, javascriptUrlPrefix + ':alert()');
         const fetches = iframe.doc.querySelectorAll('link[rel=preload]');
         expect(fetches).to.have.length(0);
         return visiblePromise.then(() => {
@@ -349,11 +351,11 @@ describe('preconnect', () => {
 
   it('should preload', () => {
     preloadSupported = true;
-    return getPreconnectIframe().then(iframe => {
-      preconnect.preload('https://a.prefetch.com/foo/bar', 'script');
-      preconnect.preload('https://a.prefetch.com/foo/bar');
-      preconnect.preload('https://a.prefetch.com/other', 'style');
-      preconnect.preload(javascriptUrlPrefix + ':alert()');
+    return getPreconnectIframe().then((iframe) => {
+      preconnect.preload(ampdoc, 'https://a.prefetch.com/foo/bar', 'script');
+      preconnect.preload(ampdoc, 'https://a.prefetch.com/foo/bar');
+      preconnect.preload(ampdoc, 'https://a.prefetch.com/other', 'style');
+      preconnect.preload(ampdoc, javascriptUrlPrefix + ':alert()');
       return visiblePromise.then(() => {
         // Also preconnects.
         expect(

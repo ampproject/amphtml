@@ -32,13 +32,11 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let doc;
-    let sandbox;
     beforeEach(() => {
       doc = env.ampdoc.getRootNode();
       installStylesForDoc(env.ampdoc, CSS, () => {}, false, 'amp-form');
-      sandbox = env.sandbox;
     });
 
     describe('handleInitialOverflowElements', () => {
@@ -89,13 +87,13 @@ describes.realWin(
         textarea.innerHTML = 'small text';
         doc.body.appendChild(textarea);
 
-        const fakeResources = {
+        const fakeMutator = {
           measureMutateElement(unusedElement, measurer, mutator) {
             measurer();
             return mutator() || Promise.resolve();
           },
         };
-        sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
 
         const initialHeight = textarea.clientHeight;
         return maybeResizeTextarea(textarea).then(() => {
@@ -111,13 +109,13 @@ describes.realWin(
         textarea.innerHTML = 'big text'.repeat(100);
         doc.body.appendChild(textarea);
 
-        const fakeResources = {
+        const fakeMutator = {
           measureMutateElement(unusedElement, measurer, mutator) {
             measurer();
             return mutator() || Promise.resolve();
           },
         };
-        sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
 
         const initialHeight = textarea.clientHeight;
         return maybeResizeTextarea(textarea).then(() => {
@@ -133,13 +131,13 @@ describes.realWin(
         textarea.innerHTML = 'big text'.repeat(100);
         doc.body.appendChild(textarea);
 
-        const fakeResources = {
+        const fakeMutator = {
           measureMutateElement(unusedElement, measurer, mutator) {
             measurer();
             return mutator() || Promise.resolve();
           },
         };
-        sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
 
         const initialHeight = textarea.clientHeight;
         let increasedHeight;
@@ -159,7 +157,7 @@ describes.realWin(
     });
 
     describe('handleTextareaDrag', () => {
-      it('should handle text area drag', done => {
+      it('should handle text area drag', (done) => {
         const textarea = doc.createElement('textarea');
         textarea.setAttribute('autoexpand', '');
         textarea.setAttribute('rows', '4');
@@ -178,8 +176,8 @@ describes.realWin(
             return mutator() || Promise.resolve();
           },
         };
-        sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
-        sandbox
+        env.sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        env.sandbox
           .stub(eventHelper, 'listenOncePromise')
           .returns(Promise.resolve());
 
@@ -190,7 +188,9 @@ describes.realWin(
           mouseDownEvent = doc.createEventObject();
           mouseDownEvent.type = 'mousedown';
         }
-        sandbox.defineProperty(mouseDownEvent, 'target', {value: textarea});
+        env.sandbox.defineProperty(mouseDownEvent, 'target', {
+          value: textarea,
+        });
         // Given 2 mousedown events on the textarea.
         doc.dispatchEvent(mouseDownEvent);
         doc.dispatchEvent(mouseDownEvent);

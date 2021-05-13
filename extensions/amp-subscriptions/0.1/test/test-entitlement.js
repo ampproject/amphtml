@@ -110,8 +110,38 @@ describes.realWin('EntitlementClass', {}, () => {
       dataObject,
     });
     const pingbackData = entitlement.jsonForPingback();
-    expect(pingbackData).to.deep.equal(
-      Object.assign({raw}, entitlement.json())
-    );
+    expect(pingbackData).to.deep.equal({raw, ...entitlement.json()});
+  });
+
+  it('should identify subscriber entitlements', () => {
+    const raw = 'raw';
+    const granted = true;
+    const grantReason = GrantReason.SUBSCRIBER;
+    const entitlement = new Entitlement({
+      source,
+      raw,
+      service,
+      granted,
+      grantReason,
+      dataObject,
+    });
+    expect(entitlement.isFree()).to.be.false;
+    expect(entitlement.isSubscriber()).to.be.true;
+  });
+
+  it('should identify free entitlements', () => {
+    const raw = 'raw';
+    const granted = true;
+    const grantReason = GrantReason.FREE;
+    const entitlement = new Entitlement({
+      source,
+      raw,
+      service,
+      granted,
+      grantReason,
+      dataObject,
+    });
+    expect(entitlement.isFree()).to.be.true;
+    expect(entitlement.isSubscriber()).to.be.false;
   });
 });

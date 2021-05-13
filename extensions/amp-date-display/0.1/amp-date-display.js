@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
@@ -95,8 +95,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
     /** @private {string} */
     this.locale_ = '';
 
-    /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /** @private {?Element} */
     this.container_ = null;
@@ -104,6 +104,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
+
     this.container_ = this.element.ownerDocument.createElement('div');
     this.element.appendChild(devAssert(this.container_));
 
@@ -252,7 +254,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
     const hour12 = data.hour % 12 || 12;
 
     // Override type since Object.assign is not understood
-    return /** @type {!EnhancedVariablesDef} */ (Object.assign({}, data, {
+    return /** @type {!EnhancedVariablesDef} */ ({
+      ...data,
       yearTwoDigit: this.padStart_(data.year % 100),
       monthTwoDigit: this.padStart_(data.month),
       dayTwoDigit: this.padStart_(data.day),
@@ -262,7 +265,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
       minuteTwoDigit: this.padStart_(data.minute),
       secondTwoDigit: this.padStart_(data.second),
       dayPeriod: data.hour < 12 ? 'am' : 'pm',
-    }));
+    });
   }
 
   /**
@@ -298,6 +301,6 @@ export class AmpDateDisplay extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpDateDisplay);
 });

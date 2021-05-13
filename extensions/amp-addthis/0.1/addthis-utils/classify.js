@@ -16,7 +16,6 @@
 import {RE_NONALPHA, RE_WHITESPACE} from '../constants';
 import {getDetailsForMeta} from './meta';
 import {rot13Array} from './rot13';
-import {startsWith} from '../../../../src/string';
 
 const MAX_KEYWORD_LENGTH = 200;
 const PORN_BIT = 0x1;
@@ -26,8 +25,8 @@ const REFERRER_BITS = {
   ON_DOMAIN: 0x2,
   OFF_DOMAIN: 0x4,
 };
-// eslint-disable-next-line max-len
-const RE_SEARCH_TERMS = /^(?:q|search|bs|wd|p|kw|keyword|query|qry|querytext|text|searchcriteria|searchstring|searchtext|sp_q)=(.*)/i;
+const RE_SEARCH_TERMS =
+  /^(?:q|search|bs|wd|p|kw|keyword|query|qry|querytext|text|searchcriteria|searchstring|searchtext|sp_q)=(.*)/i;
 const RE_SEARCH_REFERRER = /ws\/results\/(web|images|video|news)/;
 const RE_SEARCH_GOOGLE = /google.*\/(search|url|aclk|m\?)/;
 const RE_SEARCH_AOL = /aol.*\/aol/;
@@ -105,7 +104,7 @@ const classifyRating = (rating = '') => {
  * @private
  * @return {Array<string>}
  */
-const extractKeywordsFromContent = content => {
+const extractKeywordsFromContent = (content) => {
   const keywords = [];
   const contentSplit = content.split(',');
   let keywordsSize = 0;
@@ -133,12 +132,8 @@ const extractKeywordsFromContent = content => {
  * @param {string} url
  * @return {string|undefined}
  */
-const getSearchString = url => {
-  const terms = url
-    .split('?')
-    .pop()
-    .toLowerCase()
-    .split('&');
+const getSearchString = (url) => {
+  const terms = url.split('?').pop().toLowerCase().split('&');
   let matches;
 
   for (let i = 0; i < terms.length; i++) {
@@ -172,24 +167,25 @@ const isSearchUrl = (url = '') => {
   return (
     lowerUrl.indexOf('addthis') === -1 &&
     (RE_SEARCH_GOOGLE.test(lowerUrl) ||
-    RE_SEARCH_AOL.test(lowerUrl) /* search.aol.* /aol/search?q=*/ ||
-    lowerUrl.indexOf('/pagead/aclk?') > -1 /*googleadservices*/ ||
-    lowerUrl.indexOf(com + 'url') > -1 /*bing*/ ||
-    lowerUrl.indexOf(com + 'l.php') > -1 /*facebook graph search*/ ||
-    lowerUrl.indexOf('/search?') > -1 /* many */ ||
-    lowerUrl.indexOf('/search/?') > -1 /* a few */ ||
-    lowerUrl.indexOf('search?') > -1 /*yandex.ru, and presumably others*/ ||
-    lowerUrl.indexOf('yandex.ru/clck/jsredir?') > -1 /*yandex, no one else */ ||
-    lowerUrl.indexOf(com + 'search') >
-      -1 /* yahoo (including yahoo int'l), many others */ ||
-    lowerUrl.indexOf(org + 'search') > -1 /*many .org searches*/ ||
-    lowerUrl.indexOf('/search.html?') > -1 /* a few */ ||
-    lowerUrl.indexOf('search/results.') > -1 /*cars.com, gmc.com*/ ||
-    lowerUrl.indexOf(com + 's?bs') > -1 /*baidu*/ ||
-    lowerUrl.indexOf(com + 's?wd') > -1 /*baidu*/ ||
-    lowerUrl.indexOf(com + 'mb?search') > -1 /*manta*/ ||
-    lowerUrl.indexOf(com + 'mvc/search') > -1 /*eonline*/ ||
-    lowerUrl.indexOf(com + 'web') > -1 /*ask.com (same in .ca), altavista*/ ||
+      RE_SEARCH_AOL.test(lowerUrl) /* search.aol.* /aol/search?q=*/ ||
+      lowerUrl.indexOf('/pagead/aclk?') > -1 /*googleadservices*/ ||
+      lowerUrl.indexOf(com + 'url') > -1 /*bing*/ ||
+      lowerUrl.indexOf(com + 'l.php') > -1 /*facebook graph search*/ ||
+      lowerUrl.indexOf('/search?') > -1 /* many */ ||
+      lowerUrl.indexOf('/search/?') > -1 /* a few */ ||
+      lowerUrl.indexOf('search?') > -1 /*yandex.ru, and presumably others*/ ||
+      lowerUrl.indexOf('yandex.ru/clck/jsredir?') >
+        -1 /*yandex, no one else */ ||
+      lowerUrl.indexOf(com + 'search') >
+        -1 /* yahoo (including yahoo int'l), many others */ ||
+      lowerUrl.indexOf(org + 'search') > -1 /*many .org searches*/ ||
+      lowerUrl.indexOf('/search.html?') > -1 /* a few */ ||
+      lowerUrl.indexOf('search/results.') > -1 /*cars.com, gmc.com*/ ||
+      lowerUrl.indexOf(com + 's?bs') > -1 /*baidu*/ ||
+      lowerUrl.indexOf(com + 's?wd') > -1 /*baidu*/ ||
+      lowerUrl.indexOf(com + 'mb?search') > -1 /*manta*/ ||
+      lowerUrl.indexOf(com + 'mvc/search') > -1 /*eonline*/ ||
+      lowerUrl.indexOf(com + 'web') > -1 /*ask.com (same in .ca), altavista*/ ||
       lowerUrl.indexOf('hotbot' + com) > -1) /*hotbot*/
   );
 };
@@ -205,7 +201,7 @@ export const classifyPage = (pageInfo, metaElements) => {
   let bitmask =
     classifyString(pageInfo.title) | classifyString(pageInfo.hostname, true);
 
-  metaElements.forEach(metaElement => {
+  metaElements.forEach((metaElement) => {
     const {name, content} = getDetailsForMeta(metaElement);
 
     if (name === 'description' || name === 'keywords') {
@@ -276,7 +272,7 @@ export const isProductPage = (doc, metaElements) => {
   const ogTags = metaElements.reduce((tags, metaElement) => {
     const {name, content} = getDetailsForMeta(metaElement);
 
-    if (startsWith(name, 'og:')) {
+    if (name.startsWith('og:')) {
       const ogProperty = name.split(':').pop();
       tags[ogProperty] = content;
     }
@@ -292,10 +288,10 @@ export const isProductPage = (doc, metaElements) => {
  * @param {Array} metaElements
  * @return {string} csv containing keywords
  */
-export const getKeywordsString = metaElements => {
+export const getKeywordsString = (metaElements) => {
   const keywords = metaElements
-    .filter(meta => getDetailsForMeta(meta).name.toLowerCase() === 'keywords')
-    .map(meta => extractKeywordsFromContent(getDetailsForMeta(meta).content))
+    .filter((meta) => getDetailsForMeta(meta).name.toLowerCase() === 'keywords')
+    .map((meta) => extractKeywordsFromContent(getDetailsForMeta(meta).content))
     .reduce((kws, subKeywords) => kws.concat(subKeywords), []);
 
   return keywords.join(',');

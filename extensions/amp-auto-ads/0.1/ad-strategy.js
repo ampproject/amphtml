@@ -16,7 +16,7 @@
 
 import {PlacementState} from './placement';
 import {SizeInfoDef} from './ad-network-config';
-import {tryResolve} from '../../../src/utils/promise';
+import {tryResolve} from '../../../src/core/data-structures/promise';
 import {user} from '../../../src/log';
 
 /** @const */
@@ -72,7 +72,7 @@ export class AdStrategy {
     if (this.adTracker_.isMaxAdCountReached()) {
       return tryResolve(() => this.getStrategyResult_());
     }
-    return this.placeNextAd_().then(success => {
+    return this.placeNextAd_().then((success) => {
       if (success) {
         return this.run();
       }
@@ -111,7 +111,7 @@ export class AdStrategy {
         this.adTracker_,
         this.isResponsiveEnabled_
       )
-      .then(state => {
+      .then((state) => {
         if (state == PlacementState.PLACED) {
           this.adTracker_.addAd(nextPlacement.getAdElement());
           this.adsPlaced_++;

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import * as rrule from '../../../node_modules/rrule/dist/es5/rrule.js';
 import {requireExternal} from '../../../src/module';
-import {rrulestr} from 'rrule/dist/esm/src/index.js';
+
+const rrulestr = rrule.default.rrulestr || rrule.rrulestr; // closure imports into .default, esbuild flattens a layer.
 
 /** @enum {string} */
 const DateType = {
@@ -25,7 +27,7 @@ const DateType = {
 };
 
 /**
- * A class which wraps a list of moment or RRULE dates.
+ * A class which wraps a list of moment dates or RRULE dates.
  */
 export class DatesList {
   /**
@@ -33,28 +35,28 @@ export class DatesList {
    */
   constructor(dates) {
     /** @private @const */
-    this.ReactDates_ = /** @type {!JsonObject} */ (requireExternal(
-      'react-dates'
-    ));
+    this.ReactDates_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates')
+    );
 
     /** @private @const */
     this.moment_ = requireExternal('moment');
 
     /** @private @const */
     this.rrulestrs_ = dates
-      .filter(d => this.getDateType_(d) === DateType.RRULE)
-      .map(d => tryParseRrulestr(d));
+      .filter((d) => this.getDateType_(d) === DateType.RRULE)
+      .map((d) => tryParseRrulestr(d));
 
     /** @private @const */
     this.dates_ = dates
-      .filter(d => this.getDateType_(d) == DateType.DATE)
-      .map(d => this.moment_(d))
+      .filter((d) => this.getDateType_(d) == DateType.DATE)
+      .map((d) => this.moment_(d))
       .sort((a, b) => a.toDate() - b.toDate());
   }
 
   /**
-   * Determines if the given date is contained within the RRULEs or moment
-   * dates contained in the date list.
+   * Determines if the given date is contained within the RRULEs or moment dates
+   * contained in the date list.
    * @param {!moment|string} date
    * @return {boolean}
    */
@@ -79,13 +81,18 @@ export class DatesList {
         break;
       }
     }
+
     const rruleDates = this.rrulestrs_
-      .map((/** {RRule} */ rrule) => rrule.after(date))
+      .map((rrule) => /** @type {RRule} */ (rrule).after(date))
       .filter(Boolean)
       .map(normalizeRruleReturn);
-    firstDatesAfter.concat(rruleDates);
 
-    return firstDatesAfter.sort((a, b) => a.toDate() - b.toDate())[0];
+    return firstDatesAfter.concat(rruleDates).sort((a, b) => {
+      // toDate method does not exist for RRule dates.
+      a = a.toDate ? a.toDate() : a;
+      b = b.toDate ? b.toDate() : b;
+      return a - b;
+    })[0];
   }
 
   /**
@@ -95,7 +102,7 @@ export class DatesList {
    * @private
    */
   matchesDate_(date) {
-    return this.dates_.some(d => this.ReactDates_['isSameDay'](d, date));
+    return this.dates_.some((d) => this.ReactDates_['isSameDay'](d, date));
   }
 
   /**
@@ -105,13 +112,9 @@ export class DatesList {
    * @private
    */
   matchesRrule_(date) {
-    const nextDate = date
-      .clone()
-      .startOf('day')
-      .add(1, 'day')
-      .toDate();
-    return this.rrulestrs_.some((/** {RRule} */ rrule) => {
-      const rruleUTCDate = rrule.before(nextDate);
+    const nextDate = date.clone().startOf('day').add(1, 'day').toDate();
+    return this.rrulestrs_.some((rrule) => {
+      const rruleUTCDate = /** @type {RRule} */ (rrule).before(nextDate);
       if (!rruleUTCDate) {
         return false;
       }
@@ -162,11 +165,11 @@ function normalizeRruleReturn(rruleDate) {
 /**
  * Tries to parse a string into an RRULE object.
  * @param {string} str A string which represents a repeating date RRULE spec.
- * @return {?JsonObject}
+ * @return {?RRule}
  */
 function tryParseRrulestr(str) {
   try {
-    return rrulestr(str);
+    return rrulestr(str, {});
   } catch (e) {
     return null;
   }

@@ -52,8 +52,7 @@ export class IframeTransportClient {
     );
 
     /** @protected {!IframeMessagingClient} */
-    this.iframeMessagingClient_ = new IframeMessagingClient(win);
-    this.iframeMessagingClient_.setHostWindow(this.win_.parent);
+    this.iframeMessagingClient_ = new IframeMessagingClient(win, win.parent);
     this.iframeMessagingClient_.setSentinel(
       dev().assertString(
         parsedFrameName['sentinel'],
@@ -63,7 +62,7 @@ export class IframeTransportClient {
     this.iframeMessagingClient_.makeRequest(
       MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
       MessageType.IFRAME_TRANSPORT_EVENTS,
-      eventData => {
+      (eventData) => {
         const events =
           /**
            * @type
@@ -78,7 +77,7 @@ export class IframeTransportClient {
           events.length,
           'Received empty events list in ' + this.win_.location.href
         );
-        events.forEach(event => {
+        events.forEach((event) => {
           try {
             devAssert(
               event.creativeId,
@@ -183,7 +182,7 @@ export class IframeTransportContext {
     this.iframeMessagingClient_./*OK*/ sendMessage(
       MessageType.IFRAME_TRANSPORT_RESPONSE,
       /** @type {!JsonObject} */
-      (Object.assign({message: data}, this.baseMessage_))
+      ({message: data, ...this.baseMessage_})
     );
   }
 }

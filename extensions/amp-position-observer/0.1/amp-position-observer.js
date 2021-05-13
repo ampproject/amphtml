@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {
   RelativePositions,
@@ -30,7 +30,7 @@ import {
 } from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
 
 const TAG = 'amp-position-observer';
@@ -112,9 +112,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // Since this is a functional component and not visual,
     // layoutCallback is meaningless. We delay the heavy work until
     // we become visible.
-    this.getAmpDoc()
-      .whenFirstVisible()
-      .then(this.init_.bind(this));
+    this.getAmpDoc().whenFirstVisible().then(this.init_.bind(this));
 
     this.runOnce_ = this.element.hasAttribute('once');
   }
@@ -134,9 +132,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
         this.positionObserver_.observe(
           scene,
           PositionObserverFidelity.HIGH,
-          /** @type {function(?PositionInViewportEntryDef)} */ (this.positionChanged_.bind(
-            this
-          ))
+          /** @type {function(?PositionInViewportEntryDef)} */ (
+            this.positionChanged_.bind(this)
+          )
         );
       });
   }
@@ -353,14 +351,17 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     let scene;
     if (this.targetId_) {
       scene = user().assertElement(
-        this.getAmpDoc().getElementById(this.targetId_),
+        // TODO(#22733): Change back to this.getAmpDoc once ampdoc-fie
+        // experiment is launched.
+        this.win.document.getElementById(this.targetId_),
         'No element found with id:' + this.targetId_
       );
     } else {
       scene = this.element.parentNode;
     }
-    // Hoist body to documentElement.
-    if (this.getAmpDoc().getBody() == scene) {
+    // Hoist body to documentElement, expected to work for both ampdoc and
+    // amp4ads in friendly iframe.
+    if (this.win.document.body === scene) {
       scene = this.win.document.documentElement;
     }
 
@@ -493,6 +494,6 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpVisibilityObserver);
 });

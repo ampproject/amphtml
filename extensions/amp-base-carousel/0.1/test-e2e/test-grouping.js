@@ -20,15 +20,14 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel grouping',
+  'amp-base-carousel - grouping',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/' +
-      'grouping-move-by-2.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/grouping-move-by-2.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async env => {
+  async (env) => {
     const slideWidth = pageWidth / 2;
     let controller;
 
@@ -36,7 +35,7 @@ describes.endtoend(
       return controller.getElementRect(el);
     }
 
-    beforeEach(function() {
+    beforeEach(function () {
       controller = env.controller;
       this.timeout(3 * 1000);
     });

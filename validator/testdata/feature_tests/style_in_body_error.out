@@ -31,7 +31,7 @@ FAIL
 |  <body>
 |    <style amp-keyframes></style> <!-- this should error because it isn't the last child of body -->
 >>   ^~~~~~~~~
-feature_tests/style_in_body_error.html:31:2 Tag 'style[amp-keyframes]', if present, must be the last child of tag 'body'. [AMP_TAG_PROBLEM]
+feature_tests/style_in_body_error.html:31:2 Tag 'style[amp-keyframes]', if present, must be the last child of tag 'body'.
 |    <div></div>
 |  </body>
 |  </html>

@@ -1,0 +1,18 @@
+{
+  "requests": {
+    "beaconHost": "https://beacon.krxd.net",
+    "timing": "t_navigation_type=0&t_dns=${domainLookupTime}&t_tcp=${tcpConnectTime}&t_http_request=${serverResponseTime}&t_http_response=${pageDownloadTime}&t_content_ready=${contentLoadTime}&t_window_load=${pageLoadTime}&t_redirect=${redirectTime}",
+    "common": "source=amp&confid=${confid}&_kpid=${pubid}&_kcp_s=${site}&_kcp_sc=${section}&_kcp_ssc=${subsection}&_kcp_d=${canonicalHost}&_kpref_=${documentReferrer}&_kua_kx_amp_client_id=${clientId(_kuid_)}&_kua_kx_lang=${browserLanguage}&_kua_kx_tech_browser_language=${browserLanguage}&_kua_kx_tz=${timezone}",
+    "pageview": "${beaconHost}/pixel.gif?${common}&${timing}",
+    "event": "${beaconHost}/event.gif?${common}&${timing}&pageview=false"
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  },
+  "extraUrlParamsReplaceMap": {
+    "user.": "_kua_",
+    "page.": "_kpa_"
+  }
+}

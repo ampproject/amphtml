@@ -14,11 +14,26 @@
  * limitations under the License.
  */
 
-/** @typedef {!Array<!Object<string, *>>} */
-export let KeyframesDef;
+import {
+  WebAnimationBuilderOptionsDef,
+  WebAnimationDef,
+  WebAnimationPlayState,
+  WebAnimationSelectorDef,
+  WebAnimationTimingDef,
+  WebKeyframesDef,
+} from '../../amp-animation/0.1/web-animation-types';
 
-/** @typedef {(function(StoryAnimationDimsDef):!KeyframesDef)|!KeyframesDef} */
-export let KeyframesOrFilterFnDef;
+export {
+  WebAnimationBuilderOptionsDef,
+  WebAnimationDef,
+  WebAnimationPlayState,
+  WebKeyframesDef,
+  WebAnimationSelectorDef,
+  WebAnimationTimingDef,
+};
+
+/** @typedef {function(StoryAnimationDimsDef, Object<string, *>):!WebKeyframesDef} */
+export let WebKeyframesCreateFnDef;
 
 /**
  * @typedef {{
@@ -36,18 +51,34 @@ export let StoryAnimationDimsDef;
  * @typedef {{
  *   duration: number,
  *   easing: (string|undefined),
- *   keyframes: !KeyframesOrFilterFnDef,
+ *   keyframes: (!WebKeyframesCreateFnDef|!WebKeyframesDef),
  * }}
  */
 export let StoryAnimationPresetDef;
 
 /**
  * @typedef {{
- *  target: !Element,
- *  startAfterId: (string|undefined),
- *  preset: !StoryAnimationPresetDef,
- *  duration: (number|undefined),
- *  delay: (number|undefined),
+ *   source: !Element,
+ *   startAfterId: (?string),
+ *   preset: (!StoryAnimationPresetDef|undefined),
+ *   keyframeOptions: (!Object<string, *>|undefined),
+ *   spec: !WebAnimationDef,
  * }}
+ *
+ * - source: Element that defines this animation. This is either an
+ *   <amp-story-animation> element with a JSON spec, or an animated element with
+ *   a preset that is the same as the target ([animate-in] elements).
+ *
+ * - startAfterId: This animation is sequenced after the animation defined by
+ *   the element with this id.
+ *
+ * - preset: Optional, when using [animate-in]
+ *
+ * - keyframeOptions: These are taken from element attributes and passed to a
+ *   preset keyframes() function.
+ *
+ * - spec: An effect spec defined like in <amp-animation>. If a preset is also
+ *   provided, the spec's keyframes property will be resolved with the preset
+ *   configuration.
  */
-export let StoryAnimationDef;
+export let StoryAnimationConfigDef;

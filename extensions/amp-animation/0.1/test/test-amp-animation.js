@@ -15,12 +15,42 @@
  */
 
 import {AmpAnimation} from '../amp-animation';
-import {DEFAULT_ACTION} from '../../../../src/action-constants';
+import {DEFAULT_ACTION} from '../../../../src/core/constants/action-constants';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
 import {WebAnimationPlayState} from '../web-animation-types';
 
-describes.sandboxed('AmpAnimation', {}, () => {
+describes.sandboxed('AmpAnimation', {}, (env) => {
+  let ioCallbacks;
+
+  beforeEach(() => {
+    ioCallbacks = [];
+  });
+
   function createAnimInWindow(win, attrs, config) {
+    let ioCallback;
+    class IoStub {
+      constructor(callback) {
+        ioCallback = callback;
+        ioCallbacks.push(callback);
+      }
+      observe(target) {
+        const isIntersecting = (config && config.isIntersecting) ?? true;
+        const intersectionRatio =
+          (config && config.intersectionRatio) ?? (isIntersecting ? 1 : 0);
+        ioCallback([
+          {
+            target,
+            isIntersecting,
+            intersectionRatio,
+            boundingClientRect: target.getBoundingClientRect(),
+          },
+        ]);
+      }
+      unobserve() {}
+      disconnect() {}
+    }
+    env.sandbox.stub(win, 'IntersectionObserver').value(IoStub);
+
     const element = win.document.createElement('amp-animation');
     element.setAttribute('id', 'anim1');
     element.setAttribute('layout', 'nodisplay');
@@ -40,7 +70,20 @@ describes.sandboxed('AmpAnimation', {}, () => {
     }
 
     win.document.body.appendChild(element);
-    return element.build().then(() => element.implementation_);
+    return element.buildInternal().then(() => element.getImpl());
+  }
+
+  function updateIntersection(target, intersectionRatio) {
+    ioCallbacks.forEach((callback) => {
+      callback([
+        {
+          target,
+          isIntersecting: intersectionRatio > 0,
+          intersectionRatio,
+          boundingClientRect: target.getBoundingClientRect(),
+        },
+      ]);
+    });
   }
 
   describes.realWin(
@@ -51,7 +94,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         extensions: ['amp-animation'],
       },
     },
-    env => {
+    (env) => {
       let win;
       let viewer;
       let createRunnerStub;
@@ -63,8 +106,8 @@ describes.sandboxed('AmpAnimation', {}, () => {
         viewer = win.__AMP_SERVICES.viewer.obj;
         viewer.setVisibilityState_('hidden');
         runner = new NativeWebAnimationRunner([]);
-        runnerMock = sandbox.mock(runner);
-        createRunnerStub = sandbox
+        runnerMock = env.sandbox.mock(runner);
+        createRunnerStub = env.sandbox
           .stub(AmpAnimation.prototype, 'createRunner_')
           .callsFake(() => Promise.resolve(runner));
       });
@@ -77,41 +120,25 @@ describes.sandboxed('AmpAnimation', {}, () => {
         return createAnimInWindow(win, attrs, config);
       }
 
-      it('should load and parse config', function*() {
+      it('should load and parse config', function* () {
         const anim = yield createAnim({}, {duration: 1001});
         expect(anim.configJson_).to.deep.equal({duration: 1001});
       });
 
-      it('should fail without config', () => {
-        return createAnim({}, null).then(
-          () => {
-            throw new Error('must have failed');
-          },
-          reason => {
-            expect(reason.message).to.match(
-              /\"<script type=application\/json>\" must be present/
-            );
-          }
-        );
+      it('should fail without config', async () => {
+        await expect(createAnim({}, null)).to.be.eventually.be.rejected;
       });
 
-      it('should fail with malformed config', () => {
-        return createAnim({}, 'broken').then(
-          () => {
-            throw new Error('must have failed');
-          },
-          reason => {
-            expect(reason.message).to.match(/failed to parse animation script/);
-          }
-        );
+      it('should fail with malformed config', async () => {
+        await expect(createAnim({}, 'borked')).to.be.eventually.be.rejected;
       });
 
-      it('should default trigger to none', function*() {
+      it('should default trigger to none', function* () {
         const anim = yield createAnim({}, {duration: 1001});
         expect(anim.triggerOnVisibility_).to.be.false;
       });
 
-      it('should parse visibility trigger', function*() {
+      it('should parse visibility trigger', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001}
@@ -138,7 +165,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
           () => {
             throw new Error('must have failed');
           },
-          reason => {
+          (reason) => {
             expect(reason.message).to.match(
               /Only allowed value for \"trigger\" is \"visibility\"/
             );
@@ -146,15 +173,29 @@ describes.sandboxed('AmpAnimation', {}, () => {
         );
       });
 
-      it('should update visibility from viewer', function*() {
-        const anim = yield createAnim({}, {duration: 1001});
+      it('should update visibility from viewer', async () => {
+        const anim = await createAnim({}, {duration: 1001});
         expect(anim.visible_).to.be.false;
 
         viewer.setVisibilityState_('visible');
         expect(anim.visible_).to.be.true;
       });
 
-      it('should update visibility when paused', function*() {
+      it('should update visibility from intersection observer', function* () {
+        const anim = yield createAnim(
+          {},
+          {duration: 1001, isIntersecting: false}
+        );
+        expect(anim.visible_).to.be.false;
+
+        viewer.setVisibilityState_('visible');
+        expect(anim.visible_).to.be.false;
+
+        updateIntersection(anim.element.parentElement, 1);
+        expect(anim.visible_).to.be.true;
+      });
+
+      it('should update visibility when paused', function* () {
         const anim = yield createAnim({}, {duration: 1001});
         viewer.setVisibilityState_('visible');
         expect(anim.visible_).to.be.true;
@@ -163,55 +204,55 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(anim.visible_).to.be.false;
       });
 
-      it('should not activate w/o visibility trigger', function*() {
+      it('should not activate w/o visibility trigger', function* () {
         const anim = yield createAnim({}, {duration: 1001});
-        const activateStub = sandbox.stub(anim, 'startAction_');
+        const activateStub = env.sandbox.stub(anim, 'startAction_');
         viewer.setVisibilityState_('visible');
         yield anim.layoutCallback();
         expect(activateStub).to.not.be.called;
       });
 
-      it('should activate with visibility trigger', function*() {
+      it('should activate with visibility trigger', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001}
         );
-        const activateStub = sandbox.stub(anim, 'startAction_');
+        const activateStub = env.sandbox.stub(anim, 'startAction_');
         viewer.setVisibilityState_('visible');
         yield anim.layoutCallback();
         expect(activateStub).to.be.calledOnce;
       });
 
-      it('should trigger animation, but not start when invisible', function*() {
+      it('should trigger animation, but not start when invisible', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001}
         );
-        const startStub = sandbox.stub(anim, 'startOrResume_');
+        const startStub = env.sandbox.stub(anim, 'startOrResume_');
         anim.startAction_();
         expect(anim.triggered_).to.be.true;
         expect(startStub).to.not.be.called;
       });
 
-      it('should trigger animation and start when visible', function*() {
+      it('should trigger animation and start when visible', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001}
         );
-        const startStub = sandbox.stub(anim, 'startOrResume_');
+        const startStub = env.sandbox.stub(anim, 'startOrResume_');
         viewer.setVisibilityState_('visible');
         anim.startAction_();
         expect(anim.triggered_).to.be.true;
         expect(startStub).to.be.calledOnce;
       });
 
-      it('should resume/pause when visibility changes', function*() {
+      it('should resume/pause when visibility changes', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001}
         );
-        const startStub = sandbox.stub(anim, 'startOrResume_');
-        const pauseStub = sandbox.stub(anim, 'pause_');
+        const startStub = env.sandbox.stub(anim, 'startOrResume_');
+        const pauseStub = env.sandbox.stub(anim, 'pause_');
         anim.startAction_();
         expect(anim.triggered_).to.be.true;
 
@@ -226,13 +267,13 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(startStub).to.be.calledOnce; // Doesn't change.
       });
 
-      it('should NOT resume/pause when visible, but not triggered', function*() {
+      it('should NOT resume/pause when visible, but not triggered', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001}
         );
-        const startStub = sandbox.stub(anim, 'startOrResume_');
-        const pauseStub = sandbox.stub(anim, 'pause_');
+        const startStub = env.sandbox.stub(anim, 'startOrResume_');
+        const pauseStub = env.sandbox.stub(anim, 'pause_');
         expect(anim.triggered_).to.be.false;
 
         // Go to visible state.
@@ -246,13 +287,13 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(startStub).to.not.be.called;
       });
 
-      it('should NOT resume when visible if paused by an action', function*() {
+      it('should NOT resume when visible if paused by an action', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001}
         );
-        const startStub = sandbox.stub(anim, 'startOrResume_');
-        const pauseStub = sandbox.stub(anim, 'pause_');
+        const startStub = env.sandbox.stub(anim, 'startOrResume_');
+        const pauseStub = env.sandbox.stub(anim, 'pause_');
         anim.startAction_();
         anim.pausedByAction_ = true;
         expect(anim.triggered_).to.be.true;
@@ -263,7 +304,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(pauseStub).to.not.be.called;
       });
 
-      it('should create runner', function*() {
+      it('should create runner', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001, animations: []}
@@ -277,7 +318,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(anim.runner_).to.exist;
       });
 
-      it('should finish animation and runner', function*() {
+      it('should finish animation and runner', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001, animations: []}
@@ -292,7 +333,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(anim.runner_).to.be.null;
       });
 
-      it('should pause/resume animation and runner', function*() {
+      it('should pause/resume animation and runner', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001, animations: []}
@@ -310,7 +351,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(anim.triggered_).to.be.true;
       });
 
-      it('should finish when animation is complete', function*() {
+      it('should finish when animation is complete', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001, animations: []}
@@ -326,21 +367,16 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(anim.runner_).to.be.null;
       });
 
-      it('should resize from ampdoc viewport', function*() {
+      it('should resize from ampdoc viewport', function* () {
         const anim = yield createAnim({}, {duration: 1001});
-        const stub = sandbox.stub(anim, 'onResize_');
-        const viewport = win.__AMP_SERVICES.viewport.obj;
-
-        // No size changes.
-        viewport.resizeObservable_.fire({relayoutAll: false});
-        expect(stub).to.not.be.called;
+        const stub = env.sandbox.stub(anim, 'onResize_');
 
         // Size has changed.
-        viewport.resizeObservable_.fire({relayoutAll: true});
+        win.eventListeners.fire({type: 'resize'});
         expect(stub).to.be.calledOnce;
       });
 
-      it('should cancel running animation on resize and schedule restart', function*() {
+      it('should cancel running animation on resize and schedule restart', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001, animations: []}
@@ -358,7 +394,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         anim.restartPass_.cancel();
       });
 
-      it('should ignore not-triggered animation on resize', function*() {
+      it('should ignore not-triggered animation on resize', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001, animations: []}
@@ -372,7 +408,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(anim.restartPass_.isPending()).to.be.false;
       });
 
-      it('should cancel and NOT restart hidden animation on resize', function*() {
+      it('should cancel and NOT restart hidden animation on resize', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001, animations: []}
@@ -390,7 +426,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(anim.restartPass_.isPending()).to.be.false;
       });
 
-      it('should ignore start when not triggered', function*() {
+      it('should ignore start when not triggered', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001, animations: []}
@@ -399,7 +435,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(anim.startOrResume_()).to.be.null;
       });
 
-      it('should ignore start when not triggered', function*() {
+      it('should ignore start when not triggered', function* () {
         const anim = yield createAnim(
           {trigger: 'visibility'},
           {duration: 1001, animations: []}
@@ -413,7 +449,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         let anim;
 
         beforeEach(() => {
-          return createAnim({}, {duration: 1001}).then(a => {
+          return createAnim({}, {duration: 1001}).then((a) => {
             anim = a;
             anim.visible_ = true;
           });
@@ -488,7 +524,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         });
 
         it('should trigger restart', () => {
-          const cancelStub = sandbox.stub(anim, 'cancel_');
+          const cancelStub = env.sandbox.stub(anim, 'cancel_');
           const args = {};
           const invocation = {
             method: 'restart',
@@ -621,10 +657,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
             satisfiesTrust: () => true,
           };
 
-          runnerMock
-            .expects('seekTo')
-            .withExactArgs(100)
-            .once();
+          runnerMock.expects('seekTo').withExactArgs(100).once();
           return anim.executeAction(invocation).then(() => {
             expect(anim.triggered_).to.be.true;
           });
@@ -637,10 +670,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
             satisfiesTrust: () => true,
           };
 
-          runnerMock
-            .expects('seekToPercent')
-            .withExactArgs(0.5)
-            .once();
+          runnerMock.expects('seekToPercent').withExactArgs(0.5).once();
           return anim.executeAction(invocation).then(() => {
             expect(anim.triggered_).to.be.true;
           });
@@ -653,10 +683,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
             satisfiesTrust: () => true,
           };
 
-          runnerMock
-            .expects('seekToPercent')
-            .withExactArgs(1)
-            .once();
+          runnerMock.expects('seekToPercent').withExactArgs(1).once();
           return anim.executeAction(invocation).then(() => {
             expect(anim.triggered_).to.be.true;
           });
@@ -669,10 +696,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
             satisfiesTrust: () => true,
           };
 
-          runnerMock
-            .expects('seekToPercent')
-            .withExactArgs(0)
-            .once();
+          runnerMock.expects('seekToPercent').withExactArgs(0).once();
           return anim.executeAction(invocation).then(() => {
             expect(anim.triggered_).to.be.true;
           });
@@ -804,28 +828,19 @@ describes.sandboxed('AmpAnimation', {}, () => {
         extensions: ['amp-animation'],
       },
     },
-    env => {
+    (env) => {
       let embed;
 
       beforeEach(() => {
         embed = env.embed;
-        embed.setVisible_(false);
       });
 
       function createAnim(attrs, config) {
         return createAnimInWindow(embed.win, attrs, config);
       }
 
-      it('should update visibility from embed', function*() {
-        const anim = yield createAnim({}, {duration: 1001});
-        expect(anim.visible_).to.be.false;
-
-        embed.setVisible_(true);
-        expect(anim.visible_).to.be.true;
-      });
-
-      it('should find target in the embed only via selector', function*() {
-        const parentWin = env.ampdoc.win;
+      it('should find target in the embed only via selector', function* () {
+        const {parentWin} = env;
         const embedWin = embed.win;
         const anim = yield createAnim(
           {},
@@ -837,15 +852,15 @@ describes.sandboxed('AmpAnimation', {}, () => {
         const targetInEmbed = embedWin.document.createElement('div');
         targetInEmbed.setAttribute('id', 'target1');
         embedWin.document.body.appendChild(targetInEmbed);
-        return anim.createRunner_().then(runner => {
+        return anim.createRunner_().then((runner) => {
           const requests = runner.requests_;
           expect(requests).to.have.length(1);
           expect(requests[0].target).to.equal(targetInEmbed);
         });
       });
 
-      it('should find target in the embed only via target', function*() {
-        const parentWin = env.ampdoc.win;
+      it('should find target in the embed only via target', function* () {
+        const {parentWin} = env;
         const embedWin = embed.win;
         const anim = yield createAnim(
           {},
@@ -857,16 +872,16 @@ describes.sandboxed('AmpAnimation', {}, () => {
         const targetInEmbed = embedWin.document.createElement('div');
         targetInEmbed.setAttribute('id', 'target1');
         embedWin.document.body.appendChild(targetInEmbed);
-        return anim.createRunner_().then(runner => {
+        return anim.createRunner_().then((runner) => {
           const requests = runner.requests_;
           expect(requests).to.have.length(1);
           expect(requests[0].target).to.equal(targetInEmbed);
         });
       });
 
-      it("should take resize from embed's window", function*() {
+      it("should take resize from embed's window", function* () {
         const anim = yield createAnim({}, {duration: 1001});
-        const stub = sandbox.stub(anim, 'onResize_');
+        const stub = env.sandbox.stub(anim, 'onResize_');
         embed.win.eventListeners.fire({type: 'resize'});
         expect(stub).to.be.calledOnce;
       });

@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
-import {
-  assertIsName,
-  isScopeSelectorSupported,
-  prependSelectorsWith,
-} from './css';
+import {Deferred} from './core/data-structures/promise';
 import {dev, devAssert} from './log';
-import {dict} from './utils/object';
-import {includes, startsWith} from './string';
+import {dict} from './core/types/object';
+import {includes} from './core/types/string';
+import {isScopeSelectorSupported, prependSelectorsWith} from './core/dom/css';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
@@ -42,11 +38,33 @@ export const UPGRADE_TO_CUSTOMELEMENT_PROMISE = '__AMP_UPG_PRM';
 export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER = '__AMP_UPG_RES';
 
 /**
+ * @typedef {{
+ *   bubbles: (boolean|undefined),
+ *   cancelable: (boolean|undefined),
+ * }}
+ */
+export let CustomEventOptionsDef;
+
+/** @const {!CustomEventOptionsDef} */
+const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
+
+/**
+ * Asserts that name is just an alphanumeric word, and does not contain
+ * advanced CSS selector features like attributes, psuedo-classes, class names,
+ * nor ids.
+ * @param {string} name
+ */
+function assertIsName(name) {
+  devAssert(/^[\w-]+$/.test(name));
+}
+
+/**
  * Waits until the child element is constructed. Once the child is found, the
  * callback is executed.
  * @param {!Element} parent
  * @param {function(!Element):boolean} checkFunc
  * @param {function()} callback
+ * @suppress {suspiciousCode}
  */
 export function waitForChild(parent, checkFunc, callback) {
   if (checkFunc(parent)) {
@@ -55,7 +73,7 @@ export function waitForChild(parent, checkFunc, callback) {
   }
   /** @const {!Window} */
   const win = toWin(parent.ownerDocument.defaultView);
-  if (win.MutationObserver) {
+  if (IS_ESM || win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
@@ -83,7 +101,7 @@ export function waitForChild(parent, checkFunc, callback) {
  * @return {!Promise}
  */
 export function waitForChildPromise(parent, checkFunc) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     waitForChild(parent, checkFunc, resolve);
   });
 }
@@ -103,7 +121,7 @@ export function waitForBodyOpen(doc, callback) {
  * @return {!Promise}
  */
 export function waitForBodyOpenPromise(doc) {
-  return new Promise(resolve => waitForBodyOpen(doc, resolve));
+  return new Promise((resolve) => waitForBodyOpen(doc, resolve));
 }
 
 /**
@@ -118,7 +136,7 @@ export function removeElement(element) {
 
 /**
  * Removes all child nodes of the specified element.
- * @param {!Element} parent
+ * @param {!Element|!DocumentFragment} parent
  */
 export function removeChildren(parent) {
   while (parent.firstChild) {
@@ -146,11 +164,25 @@ export function copyChildren(from, to) {
  * if that is null at the beginning.
  * @param {!Element|!ShadowRoot} root
  * @param {!Element} element
- * @param {?Node} after
+ * @param {?Node=} after
  */
-export function insertAfterOrAtStart(root, element, after) {
-  const before = after ? after.nextSibling : root.firstChild;
+export function insertAfterOrAtStart(root, element, after = null) {
+  if (!after) {
+    insertAtStart(root, element);
+    return;
+  }
+  const before = after.nextSibling;
   root.insertBefore(element, before);
+}
+
+/**
+ * Insert the element in the root after the element named after or
+ * if that is null at the beginning.
+ * @param {!Element|!ShadowRoot} root
+ * @param {!Element} element
+ */
+export function insertAtStart(root, element) {
+  root.insertBefore(element, root.firstChild);
 }
 
 /**
@@ -215,17 +247,20 @@ export function rootNodeFor(node) {
   }
   let n;
   // Check isShadowRoot() is only needed for the polyfill case.
-  for (n = node; !!n.parentNode && !isShadowRoot(n); n = n.parentNode) {}
+  for (
+    n = node;
+    !!n.parentNode && !isShadowRoot(/** @type {HTMLElement} */ (n));
+    n = n.parentNode
+  ) {}
   return n;
 }
 
 /**
  * Determines if value is actually a `ShadowRoot` node.
- * @param {*} value
+ * @param {HTMLElement} value
  * @return {boolean}
  */
 export function isShadowRoot(value) {
-  // TODO(#22733): remove in preference to dom's `rootNodeFor`.
   if (!value) {
     return false;
   }
@@ -285,7 +320,7 @@ export function closestAncestorElementBySelector(element, selector) {
     return element.closest(selector);
   }
 
-  return closest(element, el => {
+  return closest(element, (el) => {
     return matches(el, selector);
   });
 }
@@ -319,7 +354,7 @@ export function ancestorElements(child, predicate) {
 export function ancestorElementsByTag(child, tagName) {
   assertIsName(tagName);
   tagName = tagName.toUpperCase();
-  return ancestorElements(child, el => {
+  return ancestorElements(child, (el) => {
     return el.tagName == tagName;
   });
 }
@@ -401,7 +436,7 @@ export function childNodes(parent, callback) {
 
 /**
  * Finds the first child element that has the specified attribute.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} attr
  * @return {?Element}
  */
@@ -418,14 +453,14 @@ export function childElementByAttr(parent, attr) {
  */
 export function lastChildElementByAttr(parent, attr) {
   assertIsName(attr);
-  return lastChildElement(parent, el => {
+  return lastChildElement(parent, (el) => {
     return el.hasAttribute(attr);
   });
 }
 
 /**
  * Finds all child elements that has the specified attribute.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} attr
  * @return {!NodeList<!Element>}
  */
@@ -436,7 +471,7 @@ export function childElementsByAttr(parent, attr) {
 
 /**
  * Finds the first child element that has the specified tag name.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} tagName
  * @return {?Element}
  */
@@ -447,7 +482,7 @@ export function childElementByTag(parent, tagName) {
 
 /**
  * Finds all child elements with the specified tag name.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} tagName
  * @return {!NodeList<!Element>}
  */
@@ -492,7 +527,7 @@ export function elementByTag(element, tagName) {
  *
  * This method isn't required for modern builds, can be removed.
  *
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {!NodeList<!Element>}
  */
@@ -508,12 +543,14 @@ function scopedQuerySelectionFallback(root, selector) {
 /**
  * Finds the first element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {?Element}
+ *
+ * @suppress {suspiciousCode}
  */
 export function scopedQuerySelector(root, selector) {
-  if (isScopeSelectorSupported(root)) {
+  if (IS_ESM || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelector(prependSelectorsWith(selector, ':scope'));
   }
 
@@ -525,12 +562,14 @@ export function scopedQuerySelector(root, selector) {
 /**
  * Finds every element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {!NodeList<!Element>}
+ *
+ * @suppress {suspiciousCode}
  */
 export function scopedQuerySelectorAll(root, selector) {
-  if (isScopeSelectorSupported(root)) {
+  if (IS_ESM || isScopeSelectorSupported(root)) {
     return root./*OK*/ querySelectorAll(
       prependSelectorsWith(selector, ':scope')
     );
@@ -543,7 +582,7 @@ export function scopedQuerySelectorAll(root, selector) {
 /**
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
- * @param {!Element} element
+ * @param {!HTMLElement} element
  * @param {function(string):string=} opt_computeParamNameFunc to compute the
  *    parameter name, get passed the camel-case parameter name.
  * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
@@ -554,7 +593,7 @@ export function getDataParamsFromAttributes(
   opt_computeParamNameFunc,
   opt_paramPattern
 ) {
-  const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
+  const computeParamNameFunc = opt_computeParamNameFunc || ((key) => key);
   const {dataset} = element;
   const params = dict();
   const paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
@@ -744,7 +783,7 @@ export function isAmpElement(element) {
   // Use prefix to recognize AMP element. This is necessary because stub
   // may not be attached yet.
   return (
-    startsWith(tag, 'AMP-') &&
+    tag.startsWith('AMP-') &&
     // Some "amp-*" elements are not really AMP elements. :smh:
     !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY')
   );
@@ -753,14 +792,14 @@ export function isAmpElement(element) {
 /**
  * Return a promise that resolve when an AMP element upgrade from HTMLElement
  * to CustomElement
- * @param {!Element} element
- * @return {!Promise<!Element>}
+ * @param {!HTMLElement} element
+ * @return {!Promise<!AmpElement>}
  */
 export function whenUpgradedToCustomElement(element) {
   devAssert(isAmpElement(element), 'element is not AmpElement');
   if (element.createdCallback) {
     // Element already is CustomElement;
-    return Promise.resolve(element);
+    return Promise.resolve(/**@type {!AmpElement} */ (element));
   }
   // If Element is still HTMLElement, wait for it to upgrade to customElement
   // Note: use pure string to avoid obfuscation between versions.
@@ -814,10 +853,10 @@ export function fullscreenExit(element) {
   }
   const docBoundExit =
     ownerDocument.cancelFullScreen ||
-    ownerDocument.exitFullscreencancelFullScreen ||
-    ownerDocument.webkitExitFullscreencancelFullScreen ||
-    ownerDocument.webkitCancelFullScreencancelFullScreen ||
-    ownerDocument.mozCancelFullScreencancelFullScreen ||
+    ownerDocument.exitFullscreen ||
+    ownerDocument.webkitExitFullscreen ||
+    ownerDocument.webkitCancelFullScreen ||
+    ownerDocument.mozCancelFullScreen ||
     ownerDocument.msExitFullscreen;
   if (docBoundExit) {
     docBoundExit.call(ownerDocument);
@@ -851,7 +890,7 @@ export function isFullscreenElement(element) {
  * Returns true if node is not disabled.
  *
  * IE8 can return false positives, see {@link matches}.
- * @param {!Element} element
+ * @param {!HTMLInputElement} element
  * @return {boolean}
  * @see https://www.w3.org/TR/html5/forms.html#concept-fe-disabled
  */
@@ -914,6 +953,21 @@ export function toggleAttribute(element, name, forced) {
 }
 
 /**
+ * Parses a string as a boolean value using the expanded rules for DOM boolean
+ * attributes:
+ * - a `null` or `undefined` returns `null`;
+ * - an empty string returns `true`;
+ * - a "false" string returns `false`;
+ * - otherwise, `true` is returned.
+ *
+ * @param {?string|undefined} s
+ * @return {boolean|undefined}
+ */
+export function parseBooleanAttribute(s) {
+  return s == null ? undefined : s !== 'false';
+}
+
+/**
  * @param {!Window} win
  * @return {number} The width of the vertical scrollbar, in pixels.
  */
@@ -922,4 +976,36 @@ export function getVerticalScrollbarWidth(win) {
   const windowWidth = win./*OK*/ innerWidth;
   const documentWidth = documentElement./*OK*/ clientWidth;
   return windowWidth - documentWidth;
+}
+
+/**
+ * Dispatches a custom event.
+ *
+ * @param {!Node} node
+ * @param {string} name
+ * @param {!Object=} opt_data Event data.
+ * @param {!CustomEventOptionsDef=} opt_options
+ */
+export function dispatchCustomEvent(node, name, opt_data, opt_options) {
+  const data = opt_data || {};
+  // Constructors of events need to come from the correct window. Sigh.
+  const event = node.ownerDocument.createEvent('Event');
+
+  // Technically .data is not a property of Event.
+  /**@type {?}*/ (event).data = data;
+
+  const {bubbles, cancelable} = opt_options || DEFAULT_CUSTOM_EVENT_OPTIONS;
+  event.initEvent(name, bubbles, cancelable);
+  node.dispatchEvent(event);
+}
+
+/**
+ * Ensures the child is contained by the parent, but not the parent itself.
+ *
+ * @param {!Node} parent
+ * @param {!Node} child
+ * @return {boolean}
+ */
+export function containsNotSelf(parent, child) {
+  return child !== parent && parent.contains(child);
 }

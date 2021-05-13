@@ -17,14 +17,13 @@
 tags: {  # amp-carousel
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-carousel"
     version: "0.1"
     version: "0.2"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -35,6 +34,7 @@ tags: {  # amp-carousel for AMP4EMAIL
   spec_name: "SCRIPT[custom-element=amp-carousel] (AMP4EMAIL)"
   extension_spec: {
     name: "amp-carousel"
+    # AMP4EMAIL doesn't allow version: "latest".
     version: "0.1"
   }
   attr_lists: "common-extension-attrs"
@@ -85,13 +85,12 @@ tags: {  # <amp-carousel>
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "AMP-CAROUSEL"
   spec_name: "AMP-CAROUSEL"
   requires_extension: "amp-carousel"
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -114,7 +113,7 @@ tags: {  # <amp-carousel lightbox>
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

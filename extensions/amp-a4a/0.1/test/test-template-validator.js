@@ -18,11 +18,11 @@ import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   TemplateValidator,
-  getAmpAdTemplateHelper,
 } from '../template-validator';
 import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {getAmpAdTemplateHelper} from '../amp-ad-template-helper';
+import {utf8Encode} from '../../../../src/core/types/string/bytes';
 
 const realWinConfig = {
   amp: {},
@@ -30,34 +30,40 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('TemplateValidator', realWinConfig, env => {
+describes.realWin('TemplateValidator', realWinConfig, (env) => {
   const templateUrl = 'https://adnetwork.com/amp-template.html';
   const headers = {
-    get: name => {
+    get: (name) => {
       if (name == AMP_TEMPLATED_CREATIVE_HEADER_NAME) {
         return 'amp-mustache';
       }
     },
   };
+
   let validator;
+  let containerElement;
 
   beforeEach(() => {
     validator = new TemplateValidator();
+
+    containerElement = env.win.document.createElement('div');
+    env.win.document.body.appendChild(containerElement);
   });
 
   describe('AMP Result', () => {
-    let sandbox;
     let validatorPromise;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      sandbox.stub(getAmpAdTemplateHelper(env.win), 'fetch').callsFake(url => {
-        expect(url).to.equal(templateUrl);
-        return Promise.resolve(data.adTemplate);
-      });
+      env.sandbox
+        .stub(getAmpAdTemplateHelper(env.ampdoc), 'fetch')
+        .callsFake((url) => {
+          expect(url).to.equal(templateUrl);
+          return Promise.resolve(data.adTemplate);
+        });
 
       validatorPromise = validator.validate(
         {win: env.win},
+        containerElement,
         utf8Encode(
           JSON.stringify({
             templateUrl,
@@ -69,10 +75,10 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       );
     });
 
-    afterEach(() => sandbox.restore());
+    afterEach(() => env.sandbox.restore());
 
     it('should have AMP validator result', () => {
-      return validatorPromise.then(validatorOutput => {
+      return validatorPromise.then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
       });
@@ -82,6 +88,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       validator
         .validate(
           {win: env.win},
+          containerElement,
           utf8Encode(
             JSON.stringify({
               templateUrl,
@@ -90,21 +97,21 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
             })
           ),
           {
-            get: name => {
+            get: (name) => {
               if (name == DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME) {
                 return 'amp-mustache';
               }
             },
           }
         )
-        .then(validatorOutput => {
+        .then((validatorOutput) => {
           expect(validatorOutput).to.be.ok;
           expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
         });
     });
 
     it('should have TEMPLATE ad response type', () => {
-      return validatorPromise.then(validatorOutput => {
+      return validatorPromise.then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.adResponseType).to.equal(
           AdResponseType.TEMPLATE
@@ -113,7 +120,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
     });
 
     it('should have creativeData with minified creative in metadata', () => {
-      return validatorPromise.then(validatorOutput => {
+      return validatorPromise.then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.creativeData).to.be.ok;
         const {creativeMetadata} = validatorOutput.creativeData;
@@ -123,16 +130,46 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       });
     });
 
-    it('should have amp-analytics and mustache in customElementExtensions', () => {
-      return validatorPromise.then(validatorOutput => {
+    it('should have amp-analytics and mustache in extensions', () => {
+      return validatorPromise.then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.creativeData).to.be.ok;
         const {creativeMetadata} = validatorOutput.creativeData;
-        expect(creativeMetadata.customElementExtensions).to.deep.equal([
-          'amp-analytics',
-          'amp-mustache',
-        ]);
+        expect(creativeMetadata.extensions).to.deep.include({
+          'custom-element': 'amp-analytics',
+          'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+        });
+        expect(creativeMetadata.extensions).to.deep.include({
+          'custom-element': 'amp-mustache',
+          'src': 'https://cdn.ampproject.org/v0/amp-mustache-latest.js',
+        });
       });
+    });
+  });
+
+  it('should add elements in creativeMetaData to extensions if not present', async () => {
+    const templateHelper = getAmpAdTemplateHelper(env.ampdoc);
+    const response = data.adTemplate.replace(
+      /"customElementExtensions" : \[\]/,
+      '"customElementExtensions" : ["amp-cats"]'
+    );
+    env.sandbox.stub(templateHelper, 'fetch').resolves(response);
+    const validatorOutput = await validator.validate(
+      {win: env.win},
+      containerElement,
+      utf8Encode(
+        JSON.stringify({
+          templateUrl,
+          data: {url: 'https://buy.com/buy-1'},
+          analytics: {foo: 'bar'},
+        })
+      ),
+      headers
+    );
+    const {creativeMetadata} = validatorOutput.creativeData;
+    expect(creativeMetadata.extensions).to.deep.include({
+      'custom-element': 'amp-cats',
+      'src': 'https://cdn.ampproject.org/v0/amp-cats-0.1.js',
     });
   });
 
@@ -141,6 +178,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       return validator
         .validate(
           {win: env.win},
+          containerElement,
           utf8Encode(
             JSON.stringify({
               templateUrl,
@@ -149,7 +187,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
             })
           )
         )
-        .then(validatorOutput => {
+        .then((validatorOutput) => {
           expect(validatorOutput).to.be.ok;
           expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
         });
@@ -159,6 +197,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       return validator
         .validate(
           {win: env.win},
+          containerElement,
           utf8Encode(
             JSON.stringify({
               templateUrl,
@@ -170,7 +209,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
             get: () => null,
           }
         )
-        .then(validatorOutput => {
+        .then((validatorOutput) => {
           expect(validatorOutput).to.be.ok;
           expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
         });
@@ -180,6 +219,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       return validator
         .validate(
           {win: env.win},
+          containerElement,
           utf8Encode(
             JSON.stringify({
               templateUrl,
@@ -188,7 +228,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
             })
           )
         )
-        .then(validatorOutput => {
+        .then((validatorOutput) => {
           expect(validatorOutput).to.be.ok;
           expect(validatorOutput.adResponseType).to.equal(
             AdResponseType.TEMPLATE
@@ -198,10 +238,15 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
 
     it('should have the response body as the creative in creativeData', () => {
       return validator
-        .validate({win: env.win}, utf8Encode(JSON.stringify({templateUrl})), {
-          get: () => null,
-        })
-        .then(validatorOutput => {
+        .validate(
+          {win: env.win},
+          containerElement,
+          utf8Encode(JSON.stringify({templateUrl})),
+          {
+            get: () => null,
+          }
+        )
+        .then((validatorOutput) => {
           expect(validatorOutput).to.be.ok;
           expect(validatorOutput.creativeData).to.be.ok;
           const {creativeData} = validatorOutput;

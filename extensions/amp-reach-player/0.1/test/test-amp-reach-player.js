@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-reach-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -43,7 +43,7 @@ describes.realWin(
       }
       doc.body.appendChild(reach);
       return reach
-        .build()
+        .buildInternal()
         .then(() => {
           reach.layoutCallback();
         })
@@ -53,7 +53,7 @@ describes.realWin(
     it('renders', () => {
       return getReach({
         'data-embed-id': 'default',
-      }).then(reach => {
+      }).then((reach) => {
         const iframe = reach.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -69,11 +69,25 @@ describes.realWin(
           'data-embed-id': 'default',
         },
         true
-      ).then(reach => {
+      ).then((reach) => {
         const iframe = reach.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
+    });
+
+    it('unlayout and relayout', async () => {
+      const reach = await getReach({
+        'data-embed-id': 'default',
+      });
+      expect(reach.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = reach.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(reach.querySelector('iframe')).to.not.exist;
+
+      await reach.layoutCallback();
+      expect(reach.querySelector('iframe')).to.exist;
     });
   }
 );

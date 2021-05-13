@@ -15,9 +15,8 @@
  */
 
 import {isJsonScriptTag} from '../../../src/dom';
-import {isObject} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
 import {parseJson} from '../../../src/json';
-import {startsWith} from '../../../src/string';
 import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -32,9 +31,11 @@ const DisallowedAdAttributes = {
 
 /** @enum {boolean} */
 const AllowedAdTypes = {
+  'adsense': true,
   'custom': true,
   'doubleclick': true,
   'fake': true,
+  'nws': true,
 };
 
 export class StoryAdConfig {
@@ -86,11 +87,7 @@ export class StoryAdConfig {
       }
     }
 
-    return /** @type {!JsonObject} */ (Object.assign(
-      {},
-      adAttributes,
-      requiredAttrs
-    ));
+    return /** @type {!JsonObject} */ ({...adAttributes, ...requiredAttrs});
   }
 
   /**
@@ -106,7 +103,7 @@ export class StoryAdConfig {
     if (type === 'fake') {
       const {id} = this.element_;
       userAssert(
-        id && startsWith(id, 'i-amphtml-demo-'),
+        id && id.startsWith('i-amphtml-demo-'),
         `${TAG} id must start with i-amphtml-demo- to use fake ads`
       );
     }

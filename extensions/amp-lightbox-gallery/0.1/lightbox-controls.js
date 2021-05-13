@@ -17,9 +17,9 @@
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {htmlFor} from '../../../src/static-template';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /**
  * @enum {string}
@@ -88,8 +88,8 @@ export class LightboxControls {
     const actionStrings = Object.values(LightboxControlsAction);
     devAssert(
       toArray(el.querySelectorAll('[data-action]'))
-        .map(div => div.getAttribute('data-action'))
-        .every(action => actionStrings.includes(action)),
+        .map((div) => div.getAttribute('data-action'))
+        .every((action) => actionStrings.includes(action)),
       'Action for a button does not map to enum.'
     );
 
@@ -111,7 +111,7 @@ export class LightboxControls {
     /** @protected @const */
     this.measureMutateElement_ = measureMutateElement;
 
-    this.element_.addEventListener('click', event => {
+    this.element_.addEventListener('click', (event) => {
       this.handleClick_(event);
     });
   }

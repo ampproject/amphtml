@@ -1,30 +1,57 @@
 # Video in AMP
 
-Most video player components in AMP implement the [`VideoInterface`](https://github.com/ampproject/amphtml/blob/master/src/video-interface.js) API. This means
+Most video player components in AMP implement the [`VideoInterface`](https://github.com/ampproject/amphtml/blob/main/src/video-interface.js) API. This means
 that a set of features is available in all of these components, either completely
 or partially.
 
 This document describes all the features (**work in progress, incomplete**) that
 these players implement.
 
-These players include:
+## Players
 
-- [amp-3q-player](https://amp.dev/documentation/components/amp-3q-player)
-- [amp-brid-player](https://amp.dev/documentation/components/amp-brid-player)
-- [amp-dailymotion](https://amp.dev/documentation/components/amp-dailymotion)
-- [amp-gfycat](https://amp.dev/documentation/components/amp-gfycat)
-- [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video)
-- [amp-nexxtv-player](https://amp.dev/documentation/components/amp-nexxtv-player)
-- [amp-ooyala-player](https://amp.dev/documentation/components/amp-ooyala-player)
-- [amp-video](https://amp.dev/documentation/components/amp-video)
-- [amp-wistia-player](https://amp.dev/documentation/components/amp-wistia-player)
-- [amp-youtube](https://amp.dev/documentation/components/amp-youtube)
+### Generic
+
+-   [amp-video](https://amp.dev/documentation/components/amp-video)
+-   [amp-video-iframe](https://amp.dev/documentation/components/amp-video-iframe)
+
+### For 3rd party services
+
+<!--
+  The following list is generated automatically:
+
+    amp check-video-interface-list --fix
+
+  Link check disabled to allow new extensions added in a pull request.
+-->
+
+<!-- markdown-link-check-disable -->
+
+-   [amp-3q-player](https://amp.dev/documentation/components/amp-3q-player)
+-   [amp-brid-player](https://amp.dev/documentation/components/amp-brid-player)
+-   [amp-brightcove](https://amp.dev/documentation/components/amp-brightcove)
+-   [amp-dailymotion](https://amp.dev/documentation/components/amp-dailymotion)
+-   [amp-delight-player](https://amp.dev/documentation/components/amp-delight-player)
+-   [amp-gfycat](https://amp.dev/documentation/components/amp-gfycat)
+-   [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video)
+-   [amp-jwplayer](https://amp.dev/documentation/components/amp-jwplayer)
+-   [amp-minute-media-player](https://amp.dev/documentation/components/amp-minute-media-player)
+-   [amp-mowplayer](https://amp.dev/documentation/components/amp-mowplayer)
+-   [amp-nexxtv-player](https://amp.dev/documentation/components/amp-nexxtv-player)
+-   [amp-ooyala-player](https://amp.dev/documentation/components/amp-ooyala-player)
+-   [amp-powr-player](https://amp.dev/documentation/components/amp-powr-player)
+-   [amp-redbull-player](https://amp.dev/documentation/components/amp-redbull-player)
+-   [amp-vimeo](https://amp.dev/documentation/components/amp-vimeo)
+-   [amp-viqeo-player](https://amp.dev/documentation/components/amp-viqeo-player)
+-   [amp-wistia-player](https://amp.dev/documentation/components/amp-wistia-player)
+-   [amp-youtube](https://amp.dev/documentation/components/amp-youtube)
+
+<!-- markdown-link-check-enable -->
 
 <a id="analytics"></a>
 
 ## Analytics
 
-See [video analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md).
+See [video analytics](https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/amp-video-analytics.md).
 
 <a id="autoplay"></a>
 
@@ -34,11 +61,11 @@ attribute: **`autoplay`**
 
 If this attribute is present, and the browser supports autoplay:
 
-- the video is automatically muted before autoplay starts
-- when the video is scrolled out of view, the video is paused
-- when the video is scrolled into view, the video resumes playback
-- when the user taps the video, the video is unmuted
-- if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+-   the video is automatically muted before autoplay starts
+-   when the video is scrolled out of view, the video is paused
+-   when the video is scrolled into view, the video resumes playback
+-   when the user taps the video, the video is unmuted
+-   if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
 
 For an example, visit [AMP By Example](https://amp.dev/documentation/examples/components/amp-video/#autoplay).
 
@@ -54,14 +81,18 @@ If this attribute is present and the video is playing manually, the video will
 be "minimized" and fixed to a corner when the user scrolls out of the video
 component's visual area.
 
-- The video can be dragged and repositioned by the user on a different corner.
-- Multiple videos on the same page can be docked.
+-   The video can be dragged and repositioned by the user on a different corner.
+-   Multiple videos on the same page can be docked.
 
 In order to use this attribute, the [`amp-video-docking`](https://amp.dev/documentation/components/amp-video-docking)
 extension script must be present:
 
-```
-<script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
+```html
+<script
+  async
+  custom-element="amp-video-docking"
+  src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"
+></script>
 ```
 
 For more details, see [documentation on the docking extension itself.](https://amp.dev/documentation/components/amp-video-docking)
@@ -84,4 +115,4 @@ fullscreen. These heuristics are applied as follows, in descending priority:
 2. If the visible percentage of the video is higher.
 3. If a video is closer to the center of the viewport.
 4. Everything else failing, select the video that is closest to the top of the
-viewport.
+   viewport.

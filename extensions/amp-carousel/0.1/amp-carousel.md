@@ -7,6 +7,7 @@ formats:
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -27,28 +28,6 @@ limitations under the License.
 
 A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be highly flexible and performant.
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>
-      <ul>
-        <li>carousel: fixed, fixed-height, and nodisplay.</li>
-        <li>slides: fill, fixed, fixed-height, flex-item, nodisplay, and responsive.</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>AMP By Example's:<ul>
-      <li><a href="https://amp.dev/documentation/examples/components/amp-carousel/">amp-carousel example</a></li>
-      <li><a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/">Image galleries with amp-carousel</a></td>
-  </tr>
-</table>
-
 ## Behavior
 
 Each of the `amp-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.
@@ -58,76 +37,116 @@ The carousel consists of an arbitrary number of items, as well as optional navig
 The carousel advances between items if the user swipes or clicks an optional navigation arrow.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
+
 ```html
-<amp-carousel width="450"
-  height="300">
-  <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+<amp-carousel
+  width="450"
+  height="300"
+  layout="responsive"
+  type="slides"
+  role="region"
+  aria-label="Basic carousel"
+>
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
     width="450"
-    height="300"></amp-img>
-  <amp-img src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+    height="300"
+  ></amp-img>
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
     width="450"
-    height="300"></amp-img>
-  <amp-img src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+    height="300"
+  ></amp-img>
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
     width="450"
-    height="300"></amp-img>
+    height="300"
+  ></amp-img>
 </amp-carousel>
 ```
-[/example]
 
+[/example]
 
 ### Advancing to a specific slide
 
-Setting a method for the `on` attribute on an element to `tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a carousel with the "carousel-id" ID  to the slide at index=N (the first slide is at index=0, the second slide is at index=1, and so on).
+Setting a method for the `on` attribute on an element to `tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a carousel with the "carousel-id" ID to the slide at index=N (the first slide is at index=0, the second slide is at index=1, and so on).
 
 In the following example, we have a carousel of three images with preview buttons below the carousel. When a user clicks one of the buttons, the corresponding carousel item displays.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
+
 ```html
-<amp-carousel id="carousel-with-preview"
+<amp-carousel
+  id="carousel-with-preview"
+  width="450"
+  height="300"
+  layout="responsive"
+  type="slides"
+  role="region"
+  aria-label="Carousel with slide previews"
+>
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
     width="450"
     height="300"
     layout="responsive"
-    type="slides">
-    <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
-      width="450"
-      height="300"
-      layout="responsive"
-      alt="apples"></amp-img>
-    <amp-img src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
-      width="450"
-      height="300"
-      layout="responsive"
-      alt="lemons"></amp-img>
-    <amp-img src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
-      width="450"
-      height="300"
-      layout="responsive"
-      alt="blueberries"></amp-img>
-  </amp-carousel>
-  <div class="carousel-preview">
-    <button on="tap:carousel-with-preview.goToSlide(index=0)">
-      <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
-        width="60"
-        height="40"
-        alt="apples"></amp-img>
-    </button>
-    <button on="tap:carousel-with-preview.goToSlide(index=1)">
-      <amp-img src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
-        width="60"
-        height="40"
-        alt="lemons"></amp-img>
-    </button>
-    <button on="tap:carousel-with-preview.goToSlide(index=2)">
-      <amp-img src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
-        width="60"
-        height="40"
-        alt="blueberries"></amp-img>
-    </button>
-  </div>
+    alt="apples"
+  ></amp-img>
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+    width="450"
+    height="300"
+    layout="responsive"
+    alt="lemons"
+  ></amp-img>
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+    width="450"
+    height="300"
+    layout="responsive"
+    alt="blueberries"
+  ></amp-img>
+</amp-carousel>
+<div class="carousel-preview">
+  <button on="tap:carousel-with-preview.goToSlide(index=0)">
+    <amp-img
+      src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+      width="60"
+      height="40"
+      alt="apples"
+    ></amp-img>
+  </button>
+  <button on="tap:carousel-with-preview.goToSlide(index=1)">
+    <amp-img
+      src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+      width="60"
+      height="40"
+      alt="lemons"
+    ></amp-img>
+  </button>
+  <button on="tap:carousel-with-preview.goToSlide(index=2)">
+    <amp-img
+      src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+      width="60"
+      height="40"
+      alt="blueberries"
+    ></amp-img>
+  </button>
+</div>
 ```
+
 [/example]
 
+### Accessibility considerations for `amp-carousel`
+
+Autoplaying, and particularly infinitely looping, carousels can be very distracting and confusing for users - especially for users with cognitive impairments. In general, we recommend avoiding autoplaying carousels. While autoplaying carousels stop once the user has interacted with the carousel, consider also adding an explicit "Play/Pause" control.
+
+By default, the `<amp-carousel>` is programmatically identified as a list when rendered (using `role="list"` on the container element, and `role="listitem"` on each item). However, for `<amp-carousel type="slides">`, no specific `role` is currently provided. As a result, it will not be obvious for assistive technology users reading/navigating through a page when they reach a carousel. We recommend including an explicit `role="region"` and a descriptive `aria-label` (either a generic `aria-label="Carousel"` or a more descriptive label such as `aria-label="Latest news items"`) to `<amp-carousel>`.
+
+Currently, an `<amp-carousel type="slides">` carousel is declared as an ARIA live region (using `aria-live="polite"`), meaning that every time a new slide is shown, the entire content of the slide is announced by assistive technologies (such as screen readers). Due to the way carousels are initially rendered, this can also result in the carousel's content being announced in its entirety when a page is loaded. This also means that pages that contain an `autoplay` carousel will continuously announce whenever a slide auto-advances. There is currently no work-around for this issue.
+
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>type</strong></td>
@@ -177,7 +196,7 @@ The visibility of arrows can also be controlled via styling, and a media query c
   </tr>
   <tr>
     <td width="40%"><strong>delay (optional)</strong></td>
-    <td>Specifies the duration (in milliseconds) to delay advancing to the next slide when <code>autoplay</code> is enabled. The <code>delay</code> attribute is only applicable to carousels with <code>type=slides</code>.</td>
+    <td>Specifies the duration (in milliseconds) to delay advancing to the next slide when <code>autoplay</code> is enabled.  Note that the minimum allowed value for <code>delay</code> is 1000 milliseconds.The <code>delay</code> attribute is only applicable to carousels with <code>type=slides</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>loop (optional)</strong></td>
@@ -185,6 +204,7 @@ The visibility of arrows can also be controlled via styling, and a media query c
 <p><em>Example: Displays a slides carousel with controls, looping, and delayed autoplay</em></p>
 
 [example preview="inline" playground="true" imports="amp-carousel"]
+
 ```html
 <amp-carousel type="slides"
   width="450"
@@ -194,7 +214,9 @@ The visibility of arrows can also be controlled via styling, and a media query c
   {% if not format=='email'%}  autoplay
   delay="3000"{% endif %}
   data-next-button-aria-label="Go to next slide"
-  data-previous-button-aria-label="Go to previous slide">
+  data-previous-button-aria-label="Go to previous slide"
+  role="region"
+  aria-label="Looping carousel">
   <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
     width="450"
     height="300"></amp-img>
@@ -206,7 +228,9 @@ The visibility of arrows can also be controlled via styling, and a media query c
     height="300"></amp-img>
 </amp-carousel>
 ```
+
 [/example]</td>
+
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
@@ -215,13 +239,13 @@ The visibility of arrows can also be controlled via styling, and a media query c
 </table>
 
 ## Styling
-- You may use the `amp-carousel` element selector to style it freely.
-- You may use the `.amp-carousel-slide` class selector to target carousel items.
-- The visual state of an `amp-carousel` button when it's disabled is hidden.
-- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
 
+-   You may use the `amp-carousel` element selector to style it freely.
+-   You may use the `.amp-carousel-slide` class selector to target carousel items.
+-   The visual state of an `amp-carousel` button when it's disabled is hidden.
+-   By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
 
-*Example: Default `.amp-carousel-button` inlined SVG*
+_Example: Default `.amp-carousel-button` inlined SVG_
 
 ```css
 .amp-carousel-button-prev {
@@ -230,7 +254,7 @@ The visibility of arrows can also be controlled via styling, and a media query c
 }
 ```
 
-*Example: Overriding the default `.amp-carousel-button` inlined SVG*
+_Example: Overriding the default `.amp-carousel-button` inlined SVG_
 
 ```css
 .amp-carousel-button-prev {
@@ -241,6 +265,14 @@ The visibility of arrows can also be controlled via styling, and a media query c
 
 Note that the SVG content needs to have certain characters, including `<`, `>` and `#` encoded. This can be done using a tool like [SVGO](https://github.com/svg/svgo) or using [`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
 
+## Supported Layouts for Slides
+
+As noted above, the `type="slides"` designation on `amp-carousel 0.1` supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.
+
+Publishers should be aware that while this mode explicitly supports `fixed` layout sizes, it also employs `display: flex;` in its styling. In other words nested elements can have `layout=fixed` sizing, though via styling it only respects absolute width up to 100%. One way to workaround this limitation is by using `flex-shrink: 0` on any fixed layout slides.
+
+For an accessible and smooth user experience, it is generally good practice when using `type="slides"` that all children of that carousel and the carousel itself share the same dimensional ratios as well as the same layout type.
+
 ## Validation
 
-See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/validator-amp-carousel.protoascii) in the AMP validator specification.
+See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-carousel/validator-amp-carousel.protoascii) in the AMP validator specification.

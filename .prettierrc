@@ -2,5 +2,39 @@
   "bracketSpacing": false,
   "singleQuote": true,
   "trailingComma": "es5",
-  "quoteProps": "preserve"
+  "quoteProps": "preserve",
+  "overrides": [
+    {
+      "files": "OWNERS",
+      "options": {"parser": "json5"}
+    },
+    {
+      "files": "build-system/tasks/make-extension/template/**",
+      "options": {
+        "requirePragma": true
+      }
+    },
+    {
+      "files": "*.md",
+      "options": {
+        "parser": "markdown",
+        "embeddedLanguageFormatting": "off",
+        "tabWidth": 4
+      }
+    },
+    {
+      "files": [".prettierrc", ".renovaterc.json", "*.json"],
+      "options": {"parser": "json"}
+    },
+    {
+      "files": [
+        ".circleci/config.yml",
+        ".codecov.yml",
+        ".github/workflows/continuous-integration-workflow.yml",
+        ".lando.yml",
+        ".lgtm.yml"
+      ],
+      "options": {"parser": "yaml"}
+    }
+  ]
 }

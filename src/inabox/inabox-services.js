@@ -22,16 +22,15 @@ import {installHiddenObserverForDoc} from '../service/hidden-observer-impl';
 import {installHistoryServiceForDoc} from '../service/history-impl';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
 import {installInaboxCidService} from './inabox-cid';
+import {installInaboxMutatorServiceForDoc} from './inabox-mutator';
 import {installInaboxResourcesServiceForDoc} from './inabox-resources';
 import {installInaboxViewerServiceForDoc} from './inabox-viewer';
 import {installInaboxViewportService} from './inabox-viewport';
 import {installOwnersServiceForDoc} from '../service/owners-impl';
-import {installResourcesServiceForDoc} from '../service/resources-impl';
 import {installStandardActionsForDoc} from '../service/standard-actions-impl';
+import {installTemplatesServiceForDoc} from '../service/template-impl';
 import {installUrlForDoc} from '../service/url-impl';
 import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
-import {installViewerServiceForDoc} from '../service/viewer-impl';
-import {isExperimentOn} from '../experiments';
 import {rejectServicePromiseForDoc} from '../service';
 
 /**
@@ -42,30 +41,16 @@ export function installAmpdocServicesForInabox(ampdoc) {
   // Order is important!
   installIframeMessagingClient(ampdoc.win); // this is an inabox-only service
   installUrlForDoc(ampdoc);
+  installTemplatesServiceForDoc(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installInaboxCidService(ampdoc);
-  if (
-    // eslint-disable-next-line no-undef
-    _RTVEXP_INABOX_LITE ||
-    isExperimentOn(ampdoc.win, 'inabox-viewer-lite')
-  ) {
-    installInaboxViewerServiceForDoc(ampdoc);
-  } else {
-    installViewerServiceForDoc(ampdoc);
-  }
+  installInaboxViewerServiceForDoc(ampdoc);
   installInaboxViewportService(ampdoc);
   installHiddenObserverForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
-  if (
-    // eslint-disable-next-line no-undef
-    _RTVEXP_INABOX_LITE ||
-    isExperimentOn(ampdoc.win, 'inabox-resources-lite')
-  ) {
-    installInaboxResourcesServiceForDoc(ampdoc);
-  } else {
-    installResourcesServiceForDoc(ampdoc);
-  }
+  installInaboxResourcesServiceForDoc(ampdoc);
   installOwnersServiceForDoc(ampdoc);
+  installInaboxMutatorServiceForDoc(ampdoc);
   installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);

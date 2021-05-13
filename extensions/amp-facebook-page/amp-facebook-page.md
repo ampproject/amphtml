@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Embeds the Facebook page plugin.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,77 +24,67 @@ limitations under the License.
 
 # amp-facebook-page
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Embeds the <a href="https://developers.facebook.com/docs/plugins/page-plugin">Facebook page plugin</a>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-facebook-page" src="https://cdn.ampproject.org/v0/amp-facebook-page-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-facebook-page/">amp-facebook-page example</a>.</td>
-  </tr>
-</table>
+## Usage
 
-[TOC]
-
-## Overview
-
-You can use the `amp-facebook-page` component to embed the [Facebook page plugin](https://developers.facebook.com/docs/plugins/page-plugin).
-
-**Example**
+Use the `amp-facebook-page` component to embed the [Facebook page plugin](https://developers.facebook.com/docs/plugins/page-plugin).
 
 ```html
-<amp-facebook-page width="340" height="130"
-    layout="fixed"
-    data-hide-cover="true"
-    data-href="https://www.facebook.com/imdb/">
+<amp-facebook-page
+  width="340"
+  height="130"
+  layout="fixed"
+  data-hide-cover="true"
+  data-href="https://www.facebook.com/imdb/"
+>
 </amp-facebook-page>
 ```
-## Attributes
-<table>
-  <tr>
-    <td width="40%"><strong>data-href (required)</strong></td>
-    <td>The absolute URL of the Facebook page. For example, <code>https://www.facebook.com/imdb/</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-locale (optional)</strong></td>
-    <td>By default, the locale is set to the user's system language; however, you can specify a locale as well. For details, visit the <a href="https://developers.facebook.com/docs/internationalization">Facebook API Localization page</a>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-tabs (optional)</strong></td>
-    <td>Specifies the tabs to render (i.e., <code>timeline</code>, <code>events</code>, <code>messages</code>). Use a comma-separated list to add multiple tabs (e.g., <code>timeline, events</code>). By default, the Facebook page plugin shows the timeline activity.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-hide-cover (optional)</strong></td>
-    <td>Hides the cover photo in the header. Default value is <code>false</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-show-facepile (optional)</strong></td>
-    <td>Shows profile photos of friends who like the page. Default value is <code>true</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-hide-cta (optional)</strong></td>
-    <td>Hides the custom call to action button (if available). Default value is <code>false</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-small-header (optional)</strong></td>
-    <td>Uses the small header instead. Default value is <code>false</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
 
+## Attributes
+
+## Attributes
+
+### `data-href`
+
+The absolute URL of the Facebook page. For example,
+`https://www.facebook.com/imdb/`.
+
+### `data-locale` (optional)
+
+By default, the locale is set to the user's system language; however, you can
+specify a locale as well. For details, visit the
+[Facebook API Localization page](https://developers.facebook.com/docs/internationalization).
+
+### `data-tabs` (optional)
+
+Specifies the tabs to render (i.e., `timeline`, `events`, `messages`). Use a
+comma-separated list to add multiple tabs (e.g., `timeline, events`). By
+default, the Facebook page plugin shows the timeline activity.
+
+### `data-hide-cover` (optional)
+
+Hides the cover photo in the header. Default value is `false`.
+
+### `data-show-facepile` (optional)
+
+Shows profile photos of friends who like the page. Default value is `true`.
+
+### `data-hide-cta` (optional)
+
+Hides the custom call to action button (if available). Default value is `false`.
+
+### `data-small-header` (optional)
+
+Uses the small header instead. Default value is `false`.
+
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Facebook page"`.
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 ## Validation
 
-See [amp-facebook-page rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook-page/validator-amp-facebook-page.protoascii) in the AMP validator specification.
+See [amp-facebook-page rules](validator-amp-facebook-page.protoascii) in the AMP validator specification.

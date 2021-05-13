@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
+import {CommonSignals} from './core/constants/common-signals';
 import {Services} from './services';
-import {dev, devAssert, rethrowAsync} from './log';
+import {TickLabel} from './core/constants/enums';
+import {dev, devAssert} from './log';
 import {getAmpdoc} from './service';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
-import {map} from './utils/object';
+import {map} from './core/types/object';
+import {rethrowAsync} from './core/error';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
 
@@ -82,57 +84,6 @@ export function installStylesForDoc(
 }
 
 /**
- * Adds the given css text to the given document.
- * TODO(dvoytenko, #22733): Remove this method once FIE/ampdoc migration is
- * done.
- *
- * @param {!Document} doc The document that should get the new styles.
- * @param {string} cssText
- * @param {?function(!Element)|undefined} cb Called when the new styles are
- *     available. Not using a promise, because this is synchronous when
- *     possible. for better performance.
- * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
- *     as the first element in head and all style elements will be positioned
- *     after.
- * @param {string=} opt_ext
- * @return {!Element}
- */
-export function installStylesLegacy(
-  doc,
-  cssText,
-  cb,
-  opt_isRuntimeCss,
-  opt_ext
-) {
-  const style = insertStyleElement(
-    dev().assertElement(doc.head),
-    cssText,
-    opt_isRuntimeCss || false,
-    opt_ext || null
-  );
-
-  if (cb) {
-    // Styles aren't always available synchronously. E.g. if there is a
-    // pending style download, it will have to finish before the new
-    // style is visible.
-    // For this reason we poll until the style becomes available.
-    // Sync case.
-    if (styleLoaded(doc, style)) {
-      cb(style);
-      return style;
-    }
-    // Poll until styles are available.
-    const interval = setInterval(() => {
-      if (styleLoaded(doc, style)) {
-        clearInterval(interval);
-        cb(style);
-      }
-    }, 4);
-  }
-  return style;
-}
-
-/**
  * Creates the properly configured style element.
  * @param {!Element|!ShadowRoot} cssRoot
  * @param {string} cssText
@@ -147,7 +98,7 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
   }
 
   const isExtCss =
-    !isRuntimeCss && (ext && ext != 'amp-custom' && ext != 'amp-keyframes');
+    !isRuntimeCss && ext && ext != 'amp-custom' && ext != 'amp-keyframes';
   const key = isRuntimeCss
     ? 'amp-runtime'
     : isExtCss
@@ -257,12 +208,18 @@ export function makeBodyVisible(doc) {
     .then(() => {
       return waitForServices(win);
     })
-    .catch(reason => {
+    .catch((reason) => {
       rethrowAsync(reason);
       return [];
     })
-    .then(services => {
+    .then((services) => {
       bodyMadeVisible = true;
+      if (INI_LOAD_INOB) {
+        // Force sync measurement to ensure that style recalc is complete
+        // before showing body, which would trigger FCP. This should reduce
+        // make it less likely that a CLS would be triggered after FCP.
+        doc.body./*OK*/ getBoundingClientRect();
+      }
       setBodyVisibleStyles(doc);
       const ampdoc = getAmpdoc(doc);
       ampdoc.signals().signal(CommonSignals.RENDER_START);
@@ -272,7 +229,7 @@ export function makeBodyVisible(doc) {
       }
       try {
         const perf = Services.performanceFor(win);
-        perf.tick('mbv');
+        perf.tick(TickLabel.MAKE_BODY_VISIBLE);
         perf.flush();
       } catch (e) {}
     });

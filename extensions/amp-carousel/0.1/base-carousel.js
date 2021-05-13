@@ -13,13 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
+import {isAmp4Email} from '../../../src/format';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
+import {toggleAttribute} from '../../../src/dom';
 
+const _CONTROL_HIDE_ATTRIBUTE = 'i-amphtml-carousel-hide-buttons';
+const _HAS_CONTROL_CLASS = 'i-amphtml-carousel-has-controls';
 /**
  * @abstract
  */
 export class BaseCarousel extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -37,32 +50,43 @@ export class BaseCarousel extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const input = Services.inputFor(this.win);
-    this.showControls_ =
-      input.isMouseDetected() || this.element.hasAttribute('controls');
+    const doc = /** @type {!Document} */ (this.element.ownerDocument);
 
-    if (this.showControls_) {
-      this.element.classList.add('i-amphtml-carousel-has-controls');
+    if (isAmp4Email(doc) || this.element.hasAttribute('controls')) {
+      this.showControls_ = true;
+      this.element.classList.add(_HAS_CONTROL_CLASS);
+    } else {
+      input.onMouseDetected((mouseDetected) => {
+        if (mouseDetected) {
+          this.showControls_ = true;
+          toggleAttribute(
+            this.element,
+            _CONTROL_HIDE_ATTRIBUTE,
+            !this.showControls_
+          );
+          this.element.classList.add(_HAS_CONTROL_CLASS);
+        }
+      }, true);
     }
+
     this.buildCarousel();
     this.buildButtons();
     this.setupGestures();
     this.setControlsState();
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
-    this.onViewportCallback(inViewport);
+  // TODO(samouri): rename to viewportCallback once
+  // BaseElement.viewportCallback is deleted
+
+  /**
+   * @param {boolean} inViewport
+   * @protected
+   */
+  viewportCallbackTemp(inViewport) {
     if (inViewport) {
       this.hintControls();
     }
   }
-
-  /**
-   * Handles element specific viewport based events.
-   * @param {boolean} unusedInViewport
-   * @protected
-   */
-  onViewportCallback(unusedInViewport) {}
 
   /**
    * Builds a carousel button for next/prev.
@@ -76,7 +100,7 @@ export class BaseCarousel extends AMP.BaseElement {
     button.classList.add('amp-carousel-button');
     button.classList.add(className);
     button.setAttribute('role', this.buttonsAriaRole());
-    button.onkeydown = event => {
+    button.onkeydown = (event) => {
       if (event.key == Keys.ENTER || event.key == Keys.SPACE) {
         if (!event.defaultPrevented) {
           event.preventDefault();
@@ -114,11 +138,6 @@ export class BaseCarousel extends AMP.BaseElement {
     });
     this.updateButtonTitles();
     this.element.appendChild(this.nextButton_);
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */
@@ -170,29 +189,25 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.setAttribute('aria-disabled', !this.hasPrev());
     this.nextButton_.classList.toggle('amp-disabled', !this.hasNext());
     this.nextButton_.setAttribute('aria-disabled', !this.hasNext());
+    this.prevButton_.tabIndex = this.hasPrev() ? 0 : -1;
+    this.nextButton_.tabIndex = this.hasNext() ? 0 : -1;
   }
 
   /**
    * Shows the controls and then fades them away.
    */
   hintControls() {
-    if (this.showControls_ || !this.isInViewport()) {
+    if (this.showControls_) {
       return;
     }
     this.getVsync().mutate(() => {
       const className = 'i-amphtml-carousel-button-start-hint';
+      const hideAttribute = 'i-amphtml-carousel-hide-buttons';
       this.element.classList.add(className);
       Services.timerFor(this.win).delay(() => {
         this.mutateElement(() => {
           this.element.classList.remove(className);
-          this.prevButton_.classList.toggle(
-            'i-amphtml-screen-reader',
-            !this.showControls_
-          );
-          this.nextButton_.classList.toggle(
-            'i-amphtml-screen-reader',
-            !this.showControls_
-          );
+          toggleAttribute(this.element, hideAttribute, !this.showControls_);
         });
       }, 4000);
     });
@@ -233,7 +248,15 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /** @override */
+  layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallbackTemp(inViewport)
+    );
+    return Promise.resolve();
+  }
+  /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
     return true;
   }
 

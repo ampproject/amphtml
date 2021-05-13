@@ -15,42 +15,42 @@
  */
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
+import {DomWriterBulk, DomWriterStreamer} from '../../src/utils/dom-writer';
 import {
   ShadowDomVersion,
   setShadowCssSupportedForTesting,
   setShadowDomSupportedVersionForTesting,
 } from '../../src/web-components';
 import {
-  ShadowDomWriterBulk,
-  ShadowDomWriterStreamer,
   createShadowDomWriter,
   createShadowRoot,
-  getShadowRootNode,
   importShadowBody,
+  installShadowStyle,
+  resetShadowStyleCacheForTesting,
   scopeShadowCss,
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
 import {installStylesForDoc} from '../../src/style-installer';
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 
-describes.sandboxed('shadow-embed', {}, () => {
+describes.sandboxed('shadow-embed', {}, (env) => {
   afterEach(() => {
     setShadowDomSupportedVersionForTesting(undefined);
   });
 
   [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1].forEach(
-    scenario => {
+    (scenario) => {
       describe('shadow APIs', () => {
         let hostElement;
 
-        beforeEach(function() {
+        beforeEach(function () {
           hostElement = document.createElement('div');
           setShadowDomSupportedVersionForTesting(scenario);
           setShadowCssSupportedForTesting(undefined);
         });
 
-        describe(scenario, function() {
-          before(function() {
+        describe(scenario, function () {
+          before(function () {
             if (
               scenario == ShadowDomVersion.V0 &&
               !Element.prototype.createShadowRoot
@@ -140,8 +140,6 @@ describes.sandboxed('shadow-embed', {}, () => {
               setShadowCssSupportedForTesting(false);
               const shadowRoot = createShadowRoot(hostElement);
               expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
-              // Browserify does not support arrow functions with params.
-              // Using Old School for
               const shadowRootClassListArray = toArray(
                 shadowRoot.host.classList
               );
@@ -198,8 +196,7 @@ describes.sandboxed('shadow-embed', {}, () => {
             });
           });
 
-          // TODO(aghassemi, #12499): Make this work with latest mocha / karma
-          describe.skip('importShadowBody', () => {
+          describe('importShadowBody', () => {
             let shadowRoot, source, child1, child2;
 
             beforeEach(() => {
@@ -244,35 +241,24 @@ describes.sandboxed('shadow-embed', {}, () => {
               expect(shadowRoot.contains(body)).to.be.true;
               expect(body.children).to.have.length(0);
             });
+
+            it('should allow reusing same body', () => {
+              const firstBody = importShadowBody(shadowRoot, source, true);
+              const newSource = document.createElement('body');
+              newSource.appendChild(document.createElement('span'));
+              const secondBody = importShadowBody(shadowRoot, newSource, true);
+
+              expect(shadowRoot.body).to.equal(secondBody);
+              expect(shadowRoot.children).to.have.length(1);
+              expect(firstBody).not.to.equal(secondBody);
+              expect(secondBody.children).to.have.length(1);
+              expect(secondBody.firstChild.tagName).to.equal('SPAN');
+            });
           });
         });
       });
     }
   );
-
-  describe('getShadowRootNode', () => {
-    let content, host, shadowRoot;
-
-    beforeEach(() => {
-      host = document.createElement('div');
-      shadowRoot = createShadowRoot(host);
-      content = document.createElement('span');
-      shadowRoot.appendChild(content);
-    });
-
-    it('should find itself as the root node', () => {
-      expect(getShadowRootNode(shadowRoot)).to.equal(shadowRoot);
-    });
-
-    it('should find the root node from ancestors', () => {
-      expect(getShadowRootNode(content)).to.equal(shadowRoot);
-    });
-
-    it('should find the root node via polyfill', () => {
-      setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
-      expect(getShadowRootNode(content)).to.equal(shadowRoot);
-    });
-  });
 
   describe('scopeShadowCss', () => {
     let shadowRoot;
@@ -305,14 +291,70 @@ describes.sandboxed('shadow-embed', {}, () => {
     });
   });
 
+  describe('installShadowStyle', () => {
+    let shadowRoot, shadowRoot2;
+
+    beforeEach(() => {
+      shadowRoot = document.createElement('div');
+      shadowRoot2 = document.createElement('div');
+    });
+
+    afterEach(() => {
+      resetShadowStyleCacheForTesting(window);
+    });
+
+    describe('adopted stylesheets supported', () => {
+      before(function () {
+        if (!document.adoptedStyleSheets) {
+          this.skipTest();
+        }
+      });
+
+      it('should re-use constructable stylesheet when supported', function () {
+        shadowRoot.adoptedStyleSheets = [];
+        installShadowStyle(shadowRoot, 'A', '* {color: red}');
+
+        expect(shadowRoot.adoptedStyleSheets).to.have.length(1);
+        const styleSheet1 = shadowRoot.adoptedStyleSheets[0];
+        expect(styleSheet1.rules).to.have.length(1);
+        expect(styleSheet1.rules[0].cssText.replace(/(\s|;)/g, '')).to.equal(
+          '*{color:red}'
+        );
+        expect(shadowRoot.querySelector('style')).to.be.null;
+
+        // A different stylesheet.
+        installShadowStyle(shadowRoot, 'B', '* {color: blue}');
+        expect(shadowRoot.adoptedStyleSheets).to.have.length(2);
+
+        // Repeated call uses the cache.
+        shadowRoot2.adoptedStyleSheets = [];
+        installShadowStyle(shadowRoot2, 'A', 'not even CSS');
+        expect(shadowRoot2.adoptedStyleSheets).to.have.length(1);
+        expect(shadowRoot2.adoptedStyleSheets[0]).to.equal(styleSheet1);
+
+        // A different stylesheet in a different root.
+        shadowRoot2.adoptedStyleSheets = [];
+        installShadowStyle(shadowRoot2, 'B', '* {color: blue}');
+        expect(shadowRoot2.adoptedStyleSheets).to.have.length(1);
+        expect(shadowRoot2.adoptedStyleSheets[0]).to.not.equal(styleSheet1);
+      });
+    });
+
+    it('should create a legacy stylesheet when constructable not supported', () => {
+      installShadowStyle(shadowRoot, 'A', '* {color: red}');
+
+      const styleEl = shadowRoot.querySelector('style');
+      expect(styleEl.textContent).to.equal('* {color: red}');
+    });
+  });
+
   describe('createShadowDomWriter', () => {
     let createHTMLDocumentSpy;
     let win;
     let isFirefox;
 
     beforeEach(() => {
-      setShadowDomStreamingSupportedForTesting(undefined);
-      createHTMLDocumentSpy = sandbox.spy();
+      createHTMLDocumentSpy = env.sandbox.spy();
       isFirefox = false;
       const platform = {
         isFirefox: () => isFirefox,
@@ -323,7 +365,7 @@ describes.sandboxed('shadow-embed', {}, () => {
         },
         document: {
           implementation: {
-            createHTMLDocument: type => {
+            createHTMLDocument: (type) => {
               createHTMLDocumentSpy(type);
               return {
                 open: () => {},
@@ -332,258 +374,34 @@ describes.sandboxed('shadow-embed', {}, () => {
           },
         },
         __AMP_SERVICES: {
-          'platform': {obj: platform},
-          'vsync': {obj: {}},
+          'platform': {obj: platform, ctor: Object},
+          'vsync': {obj: {}, ctor: Object},
         },
       };
     });
 
+    afterEach(() => {
+      setShadowDomStreamingSupportedForTesting(undefined);
+    });
+
     it('should resolve to streamer', () => {
-      expect(createShadowDomWriter(win)).to.be.instanceOf(
-        ShadowDomWriterStreamer
-      );
+      expect(createShadowDomWriter(win)).to.be.instanceOf(DomWriterStreamer);
       expect(createHTMLDocumentSpy).to.be.calledOnce;
       expect(createHTMLDocumentSpy).to.be.calledWith('');
     });
 
     it('should resolve to bulk without API', () => {
       delete win.document.implementation.createHTMLDocument;
-      expect(createShadowDomWriter(win)).to.be.instanceOf(ShadowDomWriterBulk);
+      expect(createShadowDomWriter(win)).to.be.instanceOf(DomWriterBulk);
       delete win.document.implementation;
-      expect(createShadowDomWriter(win)).to.be.instanceOf(ShadowDomWriterBulk);
+      expect(createShadowDomWriter(win)).to.be.instanceOf(DomWriterBulk);
       expect(createHTMLDocumentSpy).to.not.be.called;
     });
 
     it('should resolve to bulk on firefox', () => {
       isFirefox = true;
-      expect(createShadowDomWriter(win)).to.be.instanceOf(ShadowDomWriterBulk);
+      expect(createShadowDomWriter(win)).to.be.instanceOf(DomWriterBulk);
       expect(createHTMLDocumentSpy).to.not.be.called;
-    });
-  });
-
-  describes.fakeWin('ShadowDomWriterStreamer', {amp: true}, env => {
-    describe
-      .configure()
-      .skipFirefox()
-      .run('ShadowDomWriterStreamer', () => {
-        let win;
-        let writer;
-        let onBodySpy, onBodyChunkSpy;
-        let onBodyPromise, onBodyChunkPromiseResolver, onEndPromise;
-
-        beforeEach(() => {
-          win = env.win;
-          writer = new ShadowDomWriterStreamer(win);
-          onBodySpy = sandbox.spy();
-          onBodyChunkSpy = sandbox.spy();
-          onBodyPromise = new Promise(resolve => {
-            writer.onBody(parsedDoc => {
-              resolve(parsedDoc.body);
-              onBodySpy();
-              return win.document.body;
-            });
-          });
-          writer.onBodyChunk(() => {
-            if (onBodyChunkPromiseResolver) {
-              onBodyChunkPromiseResolver();
-              onBodyChunkPromiseResolver = null;
-            }
-            onBodyChunkSpy();
-          });
-          onEndPromise = new Promise(resolve => {
-            writer.onEnd(resolve);
-          });
-        });
-
-        function waitForNextBodyChunk() {
-          return new Promise(resolve => {
-            onBodyChunkPromiseResolver = resolve;
-          });
-        }
-
-        it('should complete when writer has been closed', () => {
-          writer.close();
-          return onEndPromise.then(() => {
-            expect(onBodySpy).to.be.calledOnce;
-            env.flushVsync();
-            expect(onBodyChunkSpy).to.not.be.called;
-          });
-        });
-
-        it('should resolve body as soon as available', () => {
-          writer.write('<body class="b">');
-          expect(onBodySpy).to.not.be.called;
-          return onBodyPromise.then(body => {
-            expect(body.getAttribute('class')).to.equal('b');
-            expect(onBodySpy).to.be.calledOnce;
-          });
-        });
-
-        it('should schedule body chunk', () => {
-          writer.write('<body>');
-          return onBodyPromise.then(() => {
-            expect(onBodySpy).to.be.calledOnce;
-            writer.write('<child>');
-            expect(onBodyChunkSpy).to.not.be.called;
-            return waitForNextBodyChunk().then(() => {
-              env.flushVsync();
-              expect(onBodySpy).to.be.calledOnce;
-              expect(onBodyChunkSpy).to.be.calledOnce;
-              expect(win.document.body.querySelector('child')).to.exist;
-
-              writer.write('</child><child2>');
-              return waitForNextBodyChunk().then(() => {
-                env.flushVsync();
-                expect(win.document.body.querySelector('child2')).to.exist;
-              });
-            });
-          });
-        });
-
-        it('should schedule several body chunks together', () => {
-          writer.write('<body>');
-          return onBodyPromise.then(() => {
-            expect(onBodySpy).to.be.calledOnce;
-            writer.write('<child></child>');
-            expect(onBodyChunkSpy).to.not.be.called;
-            const promise = waitForNextBodyChunk();
-            writer.write('<child2></child2>');
-            return promise.then(() => {
-              expect(onBodyChunkSpy).to.be.calledOnce;
-              expect(win.document.body.querySelector('child')).to.exist;
-              expect(win.document.body.querySelector('child2')).to.exist;
-            });
-          });
-        });
-
-        it('should not parse noscript as markup', () => {
-          writer.write(
-            '<body><child1></child1><noscript><child2></child2></noscript>'
-          );
-          return waitForNextBodyChunk().then(() => {
-            expect(win.document.body.querySelector('child1')).to.exist;
-            expect(win.document.body.querySelector('child2')).not.to.exist;
-            writer.write('<noscript><child3></child3></noscript>');
-            writer.write('<child4></child4>');
-            writer.close();
-            env.flushVsync();
-
-            return onEndPromise.then(() => {
-              expect(win.document.body.querySelector('child3')).not.to.exist;
-              expect(win.document.body.querySelector('child4')).to.exist;
-            });
-          });
-        });
-
-        it('should not parse noscript as markup across writes', () => {
-          writer.write('<body><child1></child1><noscript><child2>');
-          return waitForNextBodyChunk().then(() => {
-            expect(win.document.body.querySelector('child1')).to.exist;
-            writer.write('</child2></noscript>');
-            writer.write('<child3></child3>');
-            writer.close();
-            env.flushVsync();
-
-            return onEndPromise.then(() => {
-              expect(win.document.body.querySelector('child1')).to.exist;
-              expect(win.document.body.querySelector('child2')).not.to.exist;
-              expect(win.document.body.querySelector('child3')).to.exist;
-            });
-          });
-        });
-      });
-  });
-
-  describes.fakeWin('ShadowDomWriterBulk', {amp: true}, env => {
-    let win;
-    let writer;
-    let onBodySpy, onBodyChunkSpy;
-    let onBodyPromise, onBodyChunkPromiseResolver, onEndPromise;
-
-    beforeEach(() => {
-      win = env.win;
-      writer = new ShadowDomWriterBulk(win);
-      onBodySpy = sandbox.spy();
-      onBodyChunkSpy = sandbox.spy();
-      onBodyPromise = new Promise(resolve => {
-        writer.onBody(parsedDoc => {
-          resolve(parsedDoc.body);
-          onBodySpy(parsedDoc);
-          return win.document.body;
-        });
-      });
-      writer.onBodyChunk(() => {
-        if (onBodyChunkPromiseResolver) {
-          onBodyChunkPromiseResolver();
-          onBodyChunkPromiseResolver = null;
-        }
-        onBodyChunkSpy();
-      });
-      onEndPromise = new Promise(resolve => {
-        writer.onEnd(resolve);
-      });
-    });
-
-    it('should complete when writer has been closed', () => {
-      writer.close();
-      return onEndPromise.then(() => {
-        expect(onBodySpy).to.be.calledOnce;
-        env.flushVsync();
-        expect(onBodyChunkSpy).to.not.be.called;
-      });
-    });
-
-    it('should wait for body until stream is closed', () => {
-      writer.write('<body class="b">');
-      env.flushVsync();
-      expect(onBodySpy).to.not.be.called;
-      expect(writer.eof_).to.be.false;
-
-      writer.write('abc');
-      env.flushVsync();
-      expect(onBodySpy).to.not.be.called;
-      expect(writer.eof_).to.be.false;
-
-      writer.close();
-      env.flushVsync();
-      expect(onBodySpy).to.be.calledOnce;
-      expect(win.document.body.textContent).to.equal('abc');
-      expect(writer.eof_).to.be.true;
-      return Promise.all([onBodyPromise, onEndPromise]);
-    });
-
-    it('should process for body chunks together', () => {
-      writer.write('<body class="b">');
-      env.flushVsync();
-      expect(onBodySpy).to.not.be.called;
-
-      writer.write('<child></child>');
-      env.flushVsync();
-      expect(onBodySpy).to.not.be.called;
-
-      writer.write('<child2></child2>');
-      env.flushVsync();
-      expect(onBodySpy).to.not.be.called;
-
-      writer.close();
-      env.flushVsync();
-      expect(onBodySpy).to.be.calledOnce;
-      expect(win.document.body.querySelector('child')).to.exist;
-      expect(win.document.body.querySelector('child2')).to.exist;
-      expect(writer.eof_).to.be.true;
-      return Promise.all([onBodyPromise, onEndPromise]);
-    });
-
-    it('should not parse noscript as markup', () => {
-      writer.write('<body>');
-      writer.write('<child1></child1><noscript><child2></child2></noscript>');
-      writer.write('<child3></child3>');
-      writer.close();
-      env.flushVsync();
-      expect(win.document.body.querySelector('child1')).to.exist;
-      expect(win.document.body.querySelector('child2')).not.to.exist;
-      expect(win.document.body.querySelector('child3')).to.exist;
-      return Promise.all([onBodyPromise, onEndPromise]);
     });
   });
 });

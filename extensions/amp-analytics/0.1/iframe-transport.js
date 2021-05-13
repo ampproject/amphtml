@@ -18,9 +18,8 @@ import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
 import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
@@ -39,13 +38,26 @@ const LONG_TASK_REPORTING_THRESHOLD = 5;
 export let FrameData;
 
 /**
+ * @param {!Window} ampWin
+ * @param {boolean=} opt_forceProdUrl
+ * @return {string}
+ * @visibleForTesting
+ */
+export function getIframeTransportScriptUrlForTesting(
+  ampWin,
+  opt_forceProdUrl
+) {
+  return getIframeTransportScriptUrl(ampWin, opt_forceProdUrl);
+}
+
+/**
  * Get the URL of the client lib
  * @param {!Window} ampWin The window object of the AMP document
  * @param {boolean=} opt_forceProdUrl If true, prod URL will be returned even
  *     in local/test modes.
  * @return {string}
  */
-export function getIframeTransportScriptUrl(ampWin, opt_forceProdUrl) {
+function getIframeTransportScriptUrl(ampWin, opt_forceProdUrl) {
   if (
     (getMode().localDev || getMode().test) &&
     !opt_forceProdUrl &&
@@ -187,31 +199,29 @@ export class IframeTransport {
     if (!isLongTaskApiSupported(this.ampWin_)) {
       return;
     }
-    // TODO(jonkeller): Consider merging with jank-meter.js
-    IframeTransport.performanceObservers_[
-      this.type_
-    ] = new this.ampWin_.PerformanceObserver(entryList => {
-      if (!entryList) {
-        return;
-      }
-      entryList.getEntries().forEach(entry => {
-        if (
-          entry &&
-          entry['entryType'] == 'longtask' &&
-          entry['name'] == 'cross-origin-descendant' &&
-          entry.attribution
-        ) {
-          entry.attribution.forEach(attrib => {
-            if (
-              this.frameUrl_ == attrib['containerSrc'] &&
-              ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0
-            ) {
-              user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
-            }
-          });
+    IframeTransport.performanceObservers_[this.type_] =
+      new this.ampWin_.PerformanceObserver((entryList) => {
+        if (!entryList) {
+          return;
         }
+        entryList.getEntries().forEach((entry) => {
+          if (
+            entry &&
+            entry['entryType'] == 'longtask' &&
+            entry['name'] == 'cross-origin-descendant' &&
+            entry.attribution
+          ) {
+            /** @type {!Array} */ (entry.attribution).forEach((attrib) => {
+              if (
+                this.frameUrl_ == attrib['containerSrc'] &&
+                ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0
+              ) {
+                user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
+              }
+            });
+          }
+        });
       });
-    });
     IframeTransport.performanceObservers_[this.type_].observe({
       entryTypes: ['longtask'],
     });
@@ -324,6 +334,18 @@ export class IframeTransport {
   getType() {
     return this.type_;
   }
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isLongTaskApiSupported(win) {
+  return (
+    !!win.PerformanceObserver &&
+    !!win['TaskAttributionTiming'] &&
+    'containerName' in win['TaskAttributionTiming'].prototype
+  );
 }
 
 /** @private {Object<string, FrameData>} */

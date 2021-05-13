@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
+import {Deferred, tryResolve} from '../core/data-structures/promise';
 import {Services} from '../services';
 import {dev, devAssert} from '../log';
-import {dict, map} from '../utils/object';
+import {dict, map} from '../core/types/object';
 import {getMode} from '../mode';
 import {
   getService,
@@ -96,7 +96,7 @@ export class History {
    */
   push(opt_onPop, opt_stateUpdate) {
     return this.enque_(() => {
-      return this.binding_.push(opt_stateUpdate).then(historyState => {
+      return this.binding_.push(opt_stateUpdate).then((historyState) => {
         this.onStateUpdated_(historyState);
         if (opt_onPop) {
           this.stackOnPop_[historyState.stackIndex] = opt_onPop;
@@ -117,7 +117,7 @@ export class History {
    */
   pop(stateId) {
     return this.enque_(() => {
-      return this.binding_.pop(stateId).then(historyState => {
+      return this.binding_.pop(stateId).then((historyState) => {
         this.onStateUpdated_(historyState);
       });
     }, 'pop');
@@ -143,20 +143,21 @@ export class History {
   }
 
   /**
-   * Requests navigation one step back. This request is only satisifed
-   * when the history has at least one step to go back in the context
-   * of this document.
+   * Requests navigation one step back. This first attempts to go back within
+   * the context of this document.
+   *
+   * @param {boolean=} navigate
    * @return {!Promise}
    */
-  goBack() {
+  goBack(navigate) {
     return this.enque_(() => {
-      if (this.stackIndex_ <= 0) {
-        // Nothing left to pop.
+      if (this.stackIndex_ <= 0 && !navigate) {
         return Promise.resolve();
       }
+
       // Pop the current state. The binding will ignore the request if
       // it cannot satisfy it.
-      return this.binding_.pop(this.stackIndex_).then(historyState => {
+      return this.binding_.pop(this.stackIndex_).then((historyState) => {
         this.onStateUpdated_(historyState);
       });
     }, 'goBack');
@@ -275,10 +276,10 @@ export class History {
 
     promise
       .then(
-        result => {
+        (result) => {
           task.resolve(result);
         },
-        reason => {
+        (reason) => {
           dev().error(TAG_, 'failed to execute a task:', reason);
           // TODO(dvoytenko, #8785): cleanup after tracing.
           if (task.trace) {
@@ -475,7 +476,7 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
-    this.popstateHandler_ = e => {
+    this.popstateHandler_ = (e) => {
       const event = /** @type {!PopStateEvent} */ (e);
       const state = /** @type {!JsonObject} */ (event.state);
       dev().fine(
@@ -542,7 +543,7 @@ export class HistoryBindingNatural_ {
     stackIndex = Math.max(stackIndex, this.startIndex_);
     return this.whenReady_(() => {
       return this.back_(this.stackIndex_ - stackIndex + 1);
-    }).then(newStackIndex => {
+    }).then((newStackIndex) => {
       return this.mergeStateUpdate_(this.getState_(), {
         stackIndex: newStackIndex,
       });
@@ -829,17 +830,15 @@ export class HistoryBindingNatural_ {
    * @return {!HistoryStateDef}
    */
   mergeStateUpdate_(state, update) {
-    const mergedData = /** @type {!JsonObject} */ (Object.assign(
-      {},
-      (state && state.data) || {},
-      update.data || {}
-    ));
-    return /** @type {!HistoryStateDef} */ (Object.assign(
-      {},
-      state || {},
-      update,
-      {data: mergedData}
-    ));
+    const mergedData = /** @type {!JsonObject} */ ({
+      ...((state && state.data) || {}),
+      ...(update.data || {}),
+    });
+    return /** @type {!HistoryStateDef} */ ({
+      ...(state || {}),
+      ...update,
+      data: mergedData,
+    });
   }
 }
 
@@ -873,7 +872,7 @@ export class HistoryBindingVirtual_ {
     /** @private {!UnlistenDef} */
     this.unlistenOnHistoryPopped_ = this.viewer_.onMessage(
       'historyPopped',
-      data => this.onHistoryPopped_(data)
+      (data) => this.onHistoryPopped_(data)
     );
   }
 
@@ -934,14 +933,14 @@ export class HistoryBindingVirtual_ {
    * @override
    */
   push(opt_stateUpdate) {
-    const message = /** @type {!JsonObject} */ (Object.assign(
-      {'stackIndex': this.stackIndex_ + 1},
-      opt_stateUpdate || {}
-    ));
+    const message = /** @type {!JsonObject} */ ({
+      'stackIndex': this.stackIndex_ + 1,
+      ...(opt_stateUpdate || {}),
+    });
     const push = 'pushHistory';
     return this.viewer_
       .sendMessageAwaitResponse(push, message)
-      .then(response => {
+      .then((response) => {
         const fallbackState = /** @type {!HistoryStateDef} */ (message);
         const newState = this.toHistoryState_(response, fallbackState, push);
         this.updateHistoryState_(newState);
@@ -965,10 +964,12 @@ export class HistoryBindingVirtual_ {
     const pop = 'popHistory';
     return this.viewer_
       .sendMessageAwaitResponse(pop, message)
-      .then(response => {
-        const fallbackState = /** @type {!HistoryStateDef} */ (dict({
-          'stackIndex': this.stackIndex_ - 1,
-        }));
+      .then((response) => {
+        const fallbackState = /** @type {!HistoryStateDef} */ (
+          dict({
+            'stackIndex': this.stackIndex_ - 1,
+          })
+        );
         const newState = this.toHistoryState_(response, fallbackState, pop);
         this.updateHistoryState_(newState);
         return newState;
@@ -988,9 +989,11 @@ export class HistoryBindingVirtual_ {
       if (!this.viewer_.hasCapability('fullReplaceHistory')) {
         // Full URL replacement requested, but not supported by the viewer.
         // Don't update, and return the current state.
-        const curState = /** @type {!HistoryStateDef} */ (dict({
-          'stackIndex': this.stackIndex_,
-        }));
+        const curState = /** @type {!HistoryStateDef} */ (
+          dict({
+            'stackIndex': this.stackIndex_,
+          })
+        );
         return Promise.resolve(curState);
       }
 
@@ -999,14 +1002,14 @@ export class HistoryBindingVirtual_ {
       opt_stateUpdate.url = url;
     }
 
-    const message = /** @type {!JsonObject} */ (Object.assign(
-      {'stackIndex': this.stackIndex_},
-      opt_stateUpdate || {}
-    ));
+    const message = /** @type {!JsonObject} */ ({
+      'stackIndex': this.stackIndex_,
+      ...(opt_stateUpdate || {}),
+    });
     const replace = 'replaceHistory';
     return this.viewer_
       .sendMessageAwaitResponse(replace, message, /* cancelUnsent */ true)
-      .then(response => {
+      .then((response) => {
         const fallbackState = /** @type {!HistoryStateDef} */ (message);
         const newState = this.toHistoryState_(response, fallbackState, replace);
         this.updateHistoryState_(newState);
@@ -1083,7 +1086,7 @@ export class HistoryBindingVirtual_ {
         undefined,
         /* cancelUnsent */ true
       )
-      .then(data => {
+      .then((data) => {
         if (!data) {
           return '';
         }
@@ -1108,11 +1111,13 @@ export class HistoryBindingVirtual_ {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve();
     }
-    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-      'replaceHistory',
-      dict({'fragment': fragment}),
-      /* cancelUnsent */ true
-    ));
+    return /** @type {!Promise} */ (
+      this.viewer_.sendMessageAwaitResponse(
+        'replaceHistory',
+        dict({'fragment': fragment}),
+        /* cancelUnsent */ true
+      )
+    );
   }
 }
 

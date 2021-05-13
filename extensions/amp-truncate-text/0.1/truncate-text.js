@@ -19,7 +19,7 @@ import {
   BinarySearchStop,
   binarySearch,
 } from './binary-search';
-import {trimEnd} from '../../../src/string';
+import {trimEnd} from '../../../src/core/types/string';
 
 /** The class to add to the container when it has overflow. */
 const CONTAINER_OVERFLOW_ATTRIBUTE = 'i-amphtml-truncate-overflow';
@@ -123,7 +123,7 @@ function removeTruncation(node) {
     node.removeAttribute(ELEMENT_OVERFLOW_ATTRIBUTE);
   }
 
-  forEachChild(node, child => removeTruncation(child));
+  forEachChild(node, (child) => removeTruncation(child));
 }
 
 /**
@@ -175,7 +175,7 @@ function getOverflowY(element) {
  *   overflowNodes: !Array<!Node>,
  * }} config
  */
-export function truncateText({container, overflowNodes} = {}) {
+export function truncateText({container, overflowNodes}) {
   clearTruncated(container);
 
   // If everything fits while the overflow button is hidden, we are done.
@@ -206,7 +206,7 @@ function getAllNodes(root, filter, nodes = []) {
   }
 
   nodes.push(root);
-  forEachChild(root, child => getAllNodes(child, filter, nodes));
+  forEachChild(root, (child) => getAllNodes(child, filter, nodes));
   return nodes;
 }
 
@@ -219,7 +219,7 @@ function getAllNodes(root, filter, nodes = []) {
  *    when there is overflow.
  */
 function runTruncation(container, containerRect, overflowNodes) {
-  const nodes = getAllNodes(container, node => {
+  const nodes = getAllNodes(container, (node) => {
     return !overflowNodes.includes(node);
   });
 
@@ -304,7 +304,7 @@ function maybeEllipsizeNode(node, container, containerRect) {
   const searchIndex = binarySearch(
     0,
     text.length,
-    offset => {
+    (offset) => {
       // Treat whitespace as being the same as the the previous non-whitespace
       // character in terms of truncation. This is necessary as we will strip
       // trailing whitespace, so we do not to include its width when considering

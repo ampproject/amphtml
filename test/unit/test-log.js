@@ -20,50 +20,43 @@ import {
   USER_ERROR_SENTINEL,
   dev,
   devAssert,
-  duplicateErrorIfNecessary,
   isUserErrorEmbed,
   isUserErrorMessage,
-  rethrowAsync,
   setReportError,
   user,
   userAssert,
 } from '../../src/log';
 
-describe('Logging', () => {
+describes.sandboxed('Logging', {}, (env) => {
   const RETURNS_FINE = () => LogLevel.FINE;
   const RETURNS_INFO = () => LogLevel.INFO;
   const RETURNS_WARN = () => LogLevel.WARN;
   const RETURNS_ERROR = () => LogLevel.ERROR;
   const RETURNS_OFF = () => LogLevel.OFF;
 
-  let sandbox;
   let mode;
   let win;
   let logSpy;
   let timeoutSpy;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-
     mode = {};
     window.__AMP_MODE = mode;
 
-    logSpy = sandbox.spy();
-    timeoutSpy = sandbox.spy();
+    logSpy = env.sandbox.spy();
+    timeoutSpy = env.sandbox.spy();
     win = {
       console: {
         log: logSpy,
       },
       location: {hash: ''},
       setTimeout: timeoutSpy,
-      __AMP_REPORT_ERROR: error => error,
+      __AMP_REPORT_ERROR: (error) => error,
     };
-    sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake(error => error);
+    env.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake((error) => error);
   });
 
   afterEach(() => {
-    sandbox.restore();
-    sandbox = null;
     window.__AMP_MODE = undefined;
   });
 
@@ -168,7 +161,7 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
       let reportedError;
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
 
@@ -184,7 +177,7 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
       let reportedError;
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
 
@@ -199,7 +192,7 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
       let reportedError;
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
 
@@ -214,7 +207,7 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
       let reportedError;
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
 
@@ -228,28 +221,28 @@ describe('Logging', () => {
 
   describe('UserLog', () => {
     it('should be WARN by default', () => {
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.WARN);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.WARN);
     });
 
     it('should be enabled in development mode', () => {
       mode.development = true;
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
     it('should be enabled with log=1', () => {
       mode.log = '1';
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
     it('should be enabled with log>1', () => {
       mode.log = '2';
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
 
       mode.log = '3';
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
 
       mode.log = '4';
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
     it('should be configured with USER suffix', () => {
@@ -259,27 +252,27 @@ describe('Logging', () => {
 
   describe('DevLog', () => {
     it('should be disabled by default', () => {
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
     });
 
     it('should NOT be enabled in development mode', () => {
       mode.development = true;
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
     });
 
     it('should NOT be enabled with log=1', () => {
       mode.log = '1';
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
     });
 
     it('should be enabled as INFO with log=2', () => {
       mode.log = '2';
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.INFO);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.INFO);
     });
 
     it('should be enabled as FINE with log=3', () => {
       mode.log = '3';
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
     it('should be configured with no suffix', () => {
@@ -295,7 +288,7 @@ describe('Logging', () => {
     });
 
     it('should fail', () => {
-      expect(function() {
+      expect(function () {
         log.assert(false, 'xyz');
       }).to.throw(/xyz/);
       try {
@@ -327,7 +320,7 @@ describe('Logging', () => {
     });
 
     it('should fail direct dev', () => {
-      expect(function() {
+      expect(function () {
         devAssert(false, 'xyz');
       }).to.throw(/xyz/);
       try {
@@ -341,7 +334,7 @@ describe('Logging', () => {
     });
 
     it('should fail direct user', () => {
-      expect(function() {
+      expect(function () {
         userAssert(false, 'xyz');
       }).to.throw(/xyz/);
       try {
@@ -355,16 +348,16 @@ describe('Logging', () => {
     });
 
     it('should substitute', () => {
-      expect(function() {
+      expect(function () {
         log.assert(false, 'should fail %s', 'XYZ');
       }).to.throw(/should fail XYZ/);
-      expect(function() {
+      expect(function () {
         log.assert(false, 'should fail %s %s', 'XYZ', 'YYY');
       }).to.throw(/should fail XYZ YYY/);
       const div = document.createElement('div');
       div.id = 'abc';
       div.textContent = 'foo';
-      expect(function() {
+      expect(function () {
         log.assert(false, 'should fail %s', div);
       }).to.throw(/should fail div#abc/);
 
@@ -376,7 +369,14 @@ describe('Logging', () => {
       }
       expect(error).to.be.instanceof(Error);
       expect(error.message).to.equal('1 a 2 b 3' + USER_ERROR_SENTINEL);
-      expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
+      expect(error.messageArray).to.deep.equal([
+        1,
+        'a',
+        2,
+        'b',
+        3,
+        USER_ERROR_SENTINEL,
+      ]);
     });
 
     it('should add element and assert info', () => {
@@ -388,8 +388,7 @@ describe('Logging', () => {
         error = e;
       }
       expect(error).to.be.instanceof(Error);
-      expect(error.associatedElement).to.equal(div);
-      expect(error.fromAssert).to.equal(true);
+      expect(error.messageArray[0]).to.equal(div);
     });
 
     it('should recognize asserts', () => {
@@ -588,9 +587,9 @@ describe('Logging', () => {
     let log;
     let reportedError;
 
-    beforeEach(function() {
+    beforeEach(function () {
       log = new Log(win, RETURNS_OFF);
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
     });
@@ -624,128 +623,18 @@ describe('Logging', () => {
     });
   });
 
-  describe('rethrowAsync', () => {
-    let clock;
-
-    beforeEach(() => {
-      clock = sandbox.useFakeTimers();
-      restoreAsyncErrorThrows();
-    });
-
-    afterEach(() => {
-      stubAsyncErrorThrows();
-    });
-
-    it('should rethrow error with single message', () => {
-      rethrowAsync('intended');
-      expect(() => {
-        clock.tick(1);
-      }).to.throw(Error, /^intended/);
-    });
-
-    it('should rethrow a single error', () => {
-      const orig = new Error('intended');
-      rethrowAsync(orig);
-      let error;
-      try {
-        clock.tick(1);
-      } catch (e) {
-        error = e;
-      }
-      expect(error).to.equal(orig);
-      expect(error.message).to.match(/^intended/);
-    });
-
-    it('should rethrow error with many messages', () => {
-      rethrowAsync('first', 'second', 'third');
-      let error;
-      try {
-        clock.tick(1);
-      } catch (e) {
-        error = e;
-      }
-      expect(error.message).to.match(/^first second third/);
-    });
-
-    it('should rethrow error with original error and messages', () => {
-      const orig = new Error('intended');
-      rethrowAsync('first', orig, 'second', 'third');
-      let error;
-      try {
-        clock.tick(1);
-      } catch (e) {
-        error = e;
-      }
-      expect(error).to.equal(orig);
-      expect(error.message).to.match(/^first second third: intended/);
-    });
-
-    it('should preserve error suffix', () => {
-      const orig = user().createError('intended');
-      expect(isUserErrorMessage(orig.message)).to.be.true;
-      rethrowAsync('first', orig, 'second');
-      let error;
-      try {
-        clock.tick(1);
-      } catch (e) {
-        error = e;
-      }
-      expect(error).to.equal(orig);
-      expect(isUserErrorMessage(error.message)).to.be.true;
-    });
-  });
-
-  describe('duplicateErrorIfNecessary', () => {
-    it('should not duplicate if message is writeable', () => {
-      const error = {message: 'test'};
-
-      expect(duplicateErrorIfNecessary(error)).to.equal(error);
-    });
-
-    it('should duplicate if message is non-writable', () => {
-      const error = {};
-      Object.defineProperty(error, 'message', {
-        value: 'test',
-        writable: false,
-      });
-
-      expect(duplicateErrorIfNecessary(error)).to.not.equal(error);
-    });
-
-    it('copies all the tidbits', () => {
-      const error = {
-        stack: 'stack',
-        args: [1, 2, 3],
-        associatedElement: error,
-      };
-
-      Object.defineProperty(error, 'message', {
-        value: 'test',
-        writable: false,
-      });
-
-      const duplicate = duplicateErrorIfNecessary(error);
-      expect(duplicate.stack).to.equal(error.stack);
-      expect(duplicate.args).to.equal(error.args);
-      expect(duplicate.associatedElement).to.equal(error.associatedElement);
-    });
-  });
-
   describe('embed error', () => {
-    let sandbox;
     let iframe;
     let element;
     let element1;
     let element2;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
       iframe = document.createElement('iframe');
       document.body.appendChild(iframe);
     });
 
     afterEach(() => {
-      sandbox.restore();
       document.body.removeChild(iframe);
     });
 
@@ -824,7 +713,7 @@ describe('Logging', () => {
     let log;
 
     // Promise.resolve would be nicer, but it won't resolve sync'ly.
-    const syncResolve = v => ({then: cb => cb(v)});
+    const syncResolve = (v) => ({then: (cb) => cb(v)});
 
     function mockExternalMessages(messageTemplates) {
       win.fetch = () =>

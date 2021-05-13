@@ -17,19 +17,16 @@
 import {ClickDelayFilter} from '../../filters/click-delay';
 import {FilterType} from '../../filters/filter';
 
-describe('click-delay', () => {
+describes.sandboxed('click-delay', {}, (env) => {
   const DEFAULT_CONFIG = {
     type: FilterType.CLICK_DELAY,
     delay: 123,
     startTimingEvent: 'navigationStart',
   };
-  let sandbox;
-  beforeEach(() => (sandbox = sinon.sandbox));
-  afterEach(() => sandbox.restore());
 
   it('should use performance timing', () => {
     const win = {performance: {timing: {'navigationStart': 456}}};
-    sandbox.stub(Date, 'now').returns(123);
+    env.sandbox.stub(Date, 'now').returns(123);
     expect(
       new ClickDelayFilter('foo', DEFAULT_CONFIG, win).intervalStart
     ).to.equal(456);
@@ -48,7 +45,7 @@ describe('click-delay', () => {
       {config: DEFAULT_CONFIG, win: {performance: {}}},
       {config: DEFAULT_CONFIG, win: {performance: {timing: {}}}},
     ];
-    tests.forEach(test => {
+    tests.forEach((test) => {
       it(
         `should properly handle ${JSON.stringify(test.config)} and win ` +
           `${JSON.stringify(test.win)}`,
@@ -60,7 +57,7 @@ describe('click-delay', () => {
               ).to.throw(win.err)
             );
           } else {
-            sandbox.stub(Date, 'now').returns(123);
+            env.sandbox.stub(Date, 'now').returns(123);
             expect(
               new ClickDelayFilter('foo', test.config, test.win).intervalStart
             ).to.equal(123);
@@ -75,7 +72,7 @@ describe('click-delay', () => {
       const filter = new ClickDelayFilter('foo', DEFAULT_CONFIG, {
         performance: {timing: {navigationStart: 1}},
       });
-      const nowStub = sandbox.stub(Date, 'now');
+      const nowStub = env.sandbox.stub(Date, 'now');
       nowStub.onFirstCall().returns(1001);
       expect(filter.filter()).to.be.true;
     });
@@ -84,7 +81,7 @@ describe('click-delay', () => {
       const filter = new ClickDelayFilter('foo', DEFAULT_CONFIG, {
         performance: {timing: {navigationStart: 1}},
       });
-      const nowStub = sandbox.stub(Date, 'now');
+      const nowStub = env.sandbox.stub(Date, 'now');
       nowStub.onFirstCall().returns(1);
       nowStub.onSecondCall().returns(125);
       expect(filter.filter()).to.be.false;

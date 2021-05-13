@@ -32,7 +32,7 @@ describes.repeated(
           extensions: ['amp-font'],
         },
       },
-      function(env) {
+      function (env) {
         let ampdoc, doc, root, body;
 
         beforeEach(() => {
@@ -58,13 +58,13 @@ describes.repeated(
           font.setAttribute('on-load-remove-class', 'comic-amp-font-loading');
           body.appendChild(font);
           return font
-            .build()
+            .buildInternal()
             .then(() => font.layoutCallback())
             .then(() => font);
         }
 
-        it('should timeout while loading custom font', function() {
-          sandbox
+        it('should timeout while loading custom font', function () {
+          env.sandbox
             .stub(FontLoader.prototype, 'load')
             .returns(Promise.reject('mock rejection'));
           return getAmpFont().then(() => {
@@ -73,8 +73,10 @@ describes.repeated(
           });
         });
 
-        it('should load custom font', function() {
-          sandbox.stub(FontLoader.prototype, 'load').returns(Promise.resolve());
+        it('should load custom font', function () {
+          env.sandbox
+            .stub(FontLoader.prototype, 'load')
+            .returns(Promise.resolve());
           return getAmpFont().then(() => {
             expect(root).to.have.class('comic-amp-font-loaded');
             expect(root).to.not.have.class('comic-amp-font-loading');

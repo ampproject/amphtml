@@ -16,11 +16,13 @@
 
 /* NOTE: styles that affect sizing are in ampdoc.css to avoid FOUC */
 amp-autocomplete,
-amp-autocomplete > input {
+amp-autocomplete > input,
+amp-autocomplete > textarea {
   font-family: sans-serif; /* default-ui-font-stack */
 }
 
-amp-autocomplete > input {
+amp-autocomplete > input,
+amp-autocomplete > textarea {
   border-radius: 4px; /* default-ui-border-radius */
   box-sizing: border-box;
 }

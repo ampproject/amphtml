@@ -15,105 +15,96 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
-const closureCompiler = require('google-closure-compiler');
-const colors = require('ansi-colors');
-const {highlight} = require('cli-highlight');
-
-let compilerErrors = '';
-
-/**
- * Formats a closure compiler error message into a more readable form by
- * dropping the closure compiler plugin's logging prefix and then syntax
- * highlighting the error text.
- * @param {string} message
- * @return {string}
- */
-function formatClosureCompilerError(message) {
-  const closurePluginLoggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
-  message = message.replace(closurePluginLoggingPrefix, '');
-  message = highlight(message, {ignoreIllegals: true});
-  message = message.replace(/WARNING/g, colors.yellow('WARNING'));
-  message = message.replace(/ERROR/g, colors.red('ERROR'));
-  return message;
-}
-
-function handleCompilerError(outputFilename) {
-  handleError(
-    colors.red('Compilation failed for ') +
-      colors.cyan(outputFilename) +
-      colors.red(':')
-  );
-}
-
-function handleTypeCheckError() {
-  handleError(colors.red('Type checking failed:'));
-}
-
-function handleSinglePassCompilerError() {
-  handleError(colors.red('Single pass compilation failed:'));
-}
+const compiler = require('@ampproject/google-closure-compiler');
+const vinylFs = require('vinyl-fs');
+const {cyan, red, yellow} = require('../common/colors');
+const {getBabelOutputDir} = require('./pre-closure-babel');
+const {log, logWithoutTimestamp} = require('../common/logging');
 
 /**
- * Prints an error message when compilation fails
+ * Logs a closure compiler error message after syntax highlighting it and then
+ * formatting it into a more readable form by dropping the plugin's logging
+ * prefix, normalizing paths, and emphasizing errors and warnings.
  * @param {string} message
  */
-function handleError(message) {
-  console./*OK*/ error(
-    `${message}\n` + formatClosureCompilerError(compilerErrors)
-  );
+function logClosureCompilerError(message) {
+  log(red('ERROR:'));
+  const babelOutputDir = `${getBabelOutputDir()}/`;
+  const loggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
+  const {highlight} = require('cli-highlight'); // Lazy-required to speed up task loading.
+  const highlightedMessage = highlight(message, {ignoreIllegals: true});
+  const formattedMessage = highlightedMessage
+    .replace(loggingPrefix, '')
+    .replace(new RegExp(babelOutputDir, 'g'), '')
+    .replace(/ ERROR /g, red(' ERROR '))
+    .replace(/ WARNING /g, yellow(' WARNING '));
+  logWithoutTimestamp(formattedMessage);
 }
 
 /**
- * @param {Array<string>} compilerOptions
- * @param {?string} nailgunPort
- * @return {stream.Writable}
+ * Handles a closure error during compilation and type checking. Passes through
+ * the error except in watch mode, where we want to print a failure message and
+ * continue.
+ * @param {!PluginError} err
+ * @param {string} outputFilename
+ * @param {?Object} options
+ * @return {!PluginError|undefined}
  */
-function gulpClosureCompile(compilerOptions, nailgunPort) {
-  const initOptions = {
-    extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
-  };
-  const pluginOptions = {
-    platform: ['java'], // Override the binary used by closure compiler
-    logger: errors => (compilerErrors = errors), // Capture compiler errors
-  };
-
-  if (compilerOptions.includes('SINGLE_FILE_COMPILATION=true')) {
-    // For single-pass compilation, use the default compiler.jar
-    closureCompiler.compiler.JAR_PATH = require.resolve(
-      '../../node_modules/google-closure-compiler-java/compiler.jar'
-    );
-  } else {
-    // On Mac OS and Linux, speed up compilation using nailgun (unless the
-    // --disable_nailgun flag was passed in)
-    // See https://github.com/facebook/nailgun.
-    if (
-      !argv.disable_nailgun &&
-      (process.platform == 'darwin' || process.platform == 'linux')
-    ) {
-      compilerOptions = [
-        '--nailgun-port',
-        nailgunPort,
-        'org.ampproject.AmpCommandLineRunner',
-        '--',
-      ].concat(compilerOptions);
-      pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
-      initOptions.extraArguments = null; // Already part of nailgun-server
-    } else {
-      // For other platforms, or if nailgun is explicitly disabled, use AMP's
-      // custom runner.jar
-      closureCompiler.compiler.JAR_PATH = require.resolve(
-        `../runner/dist/${nailgunPort}/runner.jar`
-      );
+function handleClosureCompilerError(err, outputFilename, options) {
+  if (options.typeCheckOnly) {
+    if (!options.logger) {
+      log(`${red('ERROR:')} Type checking failed`);
     }
+    return err;
   }
+  log(`${red('ERROR:')} Could not minify ${cyan(outputFilename)}`);
+  if (options.continueOnError) {
+    options.errored = true;
+    return;
+  }
+  return err;
+}
 
-  return closureCompiler.gulp(initOptions)(compilerOptions, pluginOptions);
+/**
+ * Initializes closure compiler with the given set of flags. We use the gulp
+ * streaming plugin because invoking a command with a long list of --fs flags
+ * on Windows exceeds the command line size limit. The stream mode is 'IN'
+ * because output files and sourcemaps are written directly to disk.
+ * @param {Array<string>} flags
+ * @param {!Object} options
+ * @return {!Object}
+ */
+function initializeClosure(flags, options) {
+  const pluginOptions = {
+    streamMode: 'IN',
+    logger: options.logger || logClosureCompilerError,
+  };
+  return compiler.gulp()(flags, pluginOptions);
+}
+
+/**
+ * Runs closure compiler with the given set of flags.
+ * @param {string} outputFilename
+ * @param {!Object} options
+ * @param {Array<string>} flags
+ * @param {Array<string>} srcFiles
+ * @return {Promise<void>}
+ */
+function runClosure(outputFilename, options, flags, srcFiles) {
+  return new Promise((resolve, reject) => {
+    vinylFs
+      .src(srcFiles, {base: getBabelOutputDir()})
+      .pipe(initializeClosure(flags, options))
+      .on('error', (err) => {
+        const reason = handleClosureCompilerError(err, outputFilename, options);
+        reason ? reject(reason) : resolve();
+      })
+      .on('end', resolve)
+      .pipe(vinylFs.dest('.'));
+  });
 }
 
 module.exports = {
-  gulpClosureCompile,
-  handleCompilerError,
-  handleSinglePassCompilerError,
-  handleTypeCheckError,
+  logClosureCompilerError,
+  runClosure,
 };

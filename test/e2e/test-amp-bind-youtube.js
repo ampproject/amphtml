@@ -17,10 +17,9 @@
 describes.endtoend(
   'amp-bind',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-bind/bind-youtube.html',
+    fixture: 'amp-bind/bind-youtube.html',
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {

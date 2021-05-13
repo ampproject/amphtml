@@ -36,8 +36,8 @@ import {CSS} from '../../../build/amp-byside-content-0.1.css';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {debounce} from '../../../src/utils/rate-limit';
-import {dict} from '../../../src/utils/object';
+import {debounce} from '../../../src/core/types/function';
+import {dict} from '../../../src/core/types/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {setStyles} from '../../../src/style';
@@ -111,7 +111,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     /** @const {function()} */
     this.boundUpdateSize_ = debounce(
       this.win,
-      data => {
+      (data) => {
         this.updateSize_(/** @type {Object} */ (data));
       },
       100
@@ -129,7 +129,11 @@ export class AmpBysideContent extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     if (this.origin_) {
-      this.preconnect.url(this.origin_, onLayout);
+      Services.preconnectFor(this.win).url(
+        this.getAmpDoc(),
+        this.origin_,
+        onLayout
+      );
     }
   }
 
@@ -196,7 +200,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     this.applyFillContent(iframe);
 
     return this.composeSrcUrl_()
-      .then(src => {
+      .then((src) => {
         this.iframeSrc_ = assertHttpsUrl(src, this.element, this.getName_());
         iframe.src = this.iframeSrc_;
 
@@ -387,7 +391,7 @@ export class AmpBysideContent extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
 
     if (this.iframe_) {
@@ -399,6 +403,6 @@ export class AmpBysideContent extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-byside-content', '0.1', AMP => {
+AMP.extension('amp-byside-content', '0.1', (AMP) => {
   AMP.registerElement('amp-byside-content', AmpBysideContent, CSS);
 });

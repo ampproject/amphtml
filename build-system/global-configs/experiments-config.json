@@ -1,26 +1,11 @@
 {
-  "experimentA": {
-    "name": "ANALYTICS_VENDOR_SPLIT",
-    "environment": "INABOX",
-    "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=ANALYTICS_VENDOR_SPLIT",
-    "issue": "",
-    "expirationDateUTC": "2019-10-08",
-    "defineExperimentConstant": "ANALYTICS_VENDOR_SPLIT"
-  },
+  "experimentA": {},
   "experimentB": {
-    "name": "INABOX_LITE",
-    "environment": "INABOX",
-    "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=_RTVEXP_INABOX_LITE",
-    "issue": "https://github.com/ampproject/amphtml/issues/22867",
-    "expirationDateUTC": "2019-10-10",
-    "defineExperimentConstant": "_RTVEXP_INABOX_LITE"
-  },
-  "experimentC": {
-    "name": "Custom Elements V1",
+    "name": "amp-img in the deferred mount mode",
     "environment": "AMP",
-    "command": "gulp dist --defineExperimentConstant=CUSTOM_ELEMENTS_V1",
-    "issue": "https://github.com/ampproject/amphtml/issues/17243",
-    "expirationDateUTC": "2020-01-01",
-    "defineExperimentConstant": "CUSTOM_ELEMENTS_V1"
-  }
+    "issue": "https://github.com/ampproject/amphtml/issues/31915",
+    "expiration_date_utc": "2021-06-30",
+    "define_experiment_constant": "R1_IMG_DEFERRED_BUILD"
+  },
+  "experimentC": {}
 }

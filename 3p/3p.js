@@ -21,9 +21,10 @@
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
-import {devAssert, rethrowAsync, userAssert} from '../src/log';
-import {hasOwn, map} from '../src/utils/object';
-import {isArray} from '../src/types';
+import {devAssert, userAssert} from '../src/log';
+import {hasOwn, map} from '../src/core/types/object';
+import {isArray} from '../src/core/types';
+import {rethrowAsync} from '../src/core/error';
 
 /** @typedef {function(!Window, !Object)}  */
 let ThirdPartyFunctionDef;
@@ -197,7 +198,7 @@ export function computeInMasterFrame(global, taskId, work, cb) {
   if (!global.context.isMaster) {
     return; // Only do work in master.
   }
-  work(result => {
+  work((result) => {
     for (let i = 0; i < cbs.length; i++) {
       cbs[i].call(null, result);
     }
@@ -232,7 +233,8 @@ export function validateData(data, mandatoryFields, opt_optionalFields) {
       allowedFields = allowedFields.concat(field);
     } else {
       userAssert(
-        data[field],
+        // Allow zero values for height, width etc.
+        data[field] != null,
         'Missing attribute for %s: %s.',
         data.type,
         field
@@ -253,7 +255,7 @@ export function validateData(data, mandatoryFields, opt_optionalFields) {
  */
 function validateExactlyOne(data, alternativeFields) {
   userAssert(
-    alternativeFields.filter(field => data[field]).length === 1,
+    alternativeFields.filter((field) => data[field]).length === 1,
     '%s must contain exactly one of attributes: %s.',
     data.type,
     alternativeFields.join(', ')

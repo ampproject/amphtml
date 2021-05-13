@@ -20,7 +20,7 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types';
 import {user, userAssert} from '../../../src/log';
 
 const ADSENSE_REC_ORIGIN = 'https://googleads.g.doubleclick.net';
@@ -72,7 +72,7 @@ export function assertConfig(context, config, documentUrl) {
  * @param {string} documentUrl
  */
 function assertRecos(context, recos, documentUrl) {
-  recos.forEach(reco => assertReco(context, reco, documentUrl));
+  recos.forEach((reco) => assertReco(context, reco, documentUrl));
 }
 
 const BANNED_SELECTOR_PATTERNS = [/(^|\W)i-amphtml-/];
@@ -83,8 +83,8 @@ const BANNED_SELECTOR_PATTERNS = [/(^|\W)i-amphtml-/];
  * @param {!Array<string>} selectors
  */
 function assertSelectors(selectors) {
-  selectors.forEach(selector => {
-    BANNED_SELECTOR_PATTERNS.forEach(pattern => {
+  selectors.forEach((selector) => {
+    BANNED_SELECTOR_PATTERNS.forEach((pattern) => {
       user().assertString(
         selector,
         'amp-next-page hideSelector value should be a string'

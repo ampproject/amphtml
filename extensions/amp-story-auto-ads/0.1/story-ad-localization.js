@@ -19,27 +19,29 @@ import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../../src/localized-strings';
-import LocalizedStringsAr from './_locales/ar';
-import LocalizedStringsDe from './_locales/de';
-import LocalizedStringsEn from './_locales/en';
-import LocalizedStringsEnGb from './_locales/en-GB';
-import LocalizedStringsEs from './_locales/es';
-import LocalizedStringsEs419 from './_locales/es-419';
-import LocalizedStringsFr from './_locales/fr';
-import LocalizedStringsHi from './_locales/hi';
-import LocalizedStringsId from './_locales/id';
-import LocalizedStringsIt from './_locales/it';
-import LocalizedStringsJa from './_locales/ja';
-import LocalizedStringsKo from './_locales/ko';
-import LocalizedStringsNl from './_locales/nl';
-import LocalizedStringsNo from './_locales/no';
-import LocalizedStringsPtBr from './_locales/pt-BR';
-import LocalizedStringsPtPt from './_locales/pt-PT';
-import LocalizedStringsRu from './_locales/ru';
-import LocalizedStringsTr from './_locales/tr';
-import LocalizedStringsVi from './_locales/vi';
-import LocalizedStringsZhCn from './_locales/zh-CN';
-import LocalizedStringsZhTw from './_locales/zh-TW';
+import {Services} from '../../../src/services';
+import {registerServiceBuilderForDoc} from '../../../src/service';
+import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEn from './_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEnGb from './_locales/en-GB.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEs from './_locales/es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEs419 from './_locales/es-419.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsFr from './_locales/fr.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsHi from './_locales/hi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsId from './_locales/id.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsIt from './_locales/it.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsJa from './_locales/ja.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsKo from './_locales/ko.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsNl from './_locales/nl.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsNo from './_locales/no.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsPtBr from './_locales/pt-BR.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsPtPt from './_locales/pt-PT.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsRu from './_locales/ru.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsTr from './_locales/tr.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 
 /** @const */
 export const CtaTypes = {
@@ -69,20 +71,39 @@ export const CtaTypes = {
     LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE,
 };
 
+/**
+ * Util function to retrieve the localization service. Ensures we can retrieve
+ * the service synchronously without running into race conditions.
+ * @param {!Element} element
+ * @return {!../../../src/service/localization.LocalizationService}
+ */
+const getLocalizationService = (element) => {
+  let localizationService = Services.localizationForDoc(element);
+
+  if (!localizationService) {
+    localizationService = new LocalizationService(element);
+    registerServiceBuilderForDoc(element, 'localization', function () {
+      return localizationService;
+    });
+  }
+
+  return localizationService;
+};
+
 export class StoryAdLocalization {
   /**
-   * @param {!Window} win
+   * @param {!Element} storyAutoAdsEl
    */
-  constructor(win) {
-    /** @private @const {!Window} win */
-    this.win_ = win;
-    /** @private {?LocalizationService} */
+  constructor(storyAutoAdsEl) {
+    /** @private @const {!Element} */
+    this.storyAutoAdsEl_ = storyAutoAdsEl;
+    /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
   }
 
   /**
    * @param {!../../../src/localized-strings.LocalizedStringId} id
-   * @return {string|null}
+   * @return {?string}
    */
   getLocalizedString(id) {
     if (!this.localizationService_) {
@@ -95,11 +116,11 @@ export class StoryAdLocalization {
    * Create localization service and register all bundles.
    */
   init_() {
-    this.localizationService_ = new LocalizationService(this.win_);
+    this.localizationService_ = getLocalizationService(this.storyAutoAdsEl_);
 
     const enXaPseudoLocaleBundle = createPseudoLocale(
       LocalizedStringsEn,
-      s => `[${s} one two]`
+      (s) => `[${s} one two]`
     );
 
     this.localizationService_

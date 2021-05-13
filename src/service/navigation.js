@@ -22,22 +22,23 @@ import {
   tryFocus,
 } from '../dom';
 import {dev, user, userAssert} from '../log';
-import {dict} from '../utils/object';
-import {escapeCssSelectorIdent} from '../css';
+import {dict} from '../core/types/object';
+import {escapeCssSelectorIdent} from '../core/dom/css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
+import {isLocalhostOrigin} from '../url';
+import {registerServiceBuilderForDoc} from '../service';
 import {toWin} from '../types';
-import PriorityQueue from '../utils/priority-queue';
+import PriorityQueue from '../core/data-structures/priority-queue';
 
 const TAG = 'navigation';
+
 /** @private @const {string} */
 const EVENT_TYPE_CLICK = 'click';
+
 /** @private @const {string} */
 const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
+
 const VALID_TARGETS = ['_top', '_blank'];
 
 /** @private @const {string} */
@@ -87,22 +88,18 @@ export function maybeExpandUrlParamsForTesting(ampdoc, e) {
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * @implements {../service.EmbeddableService}
  * @visibleForTesting
  */
 export class Navigation {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
-  constructor(ampdoc, opt_rootNode) {
-    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
-
+  constructor(ampdoc) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const {!Document|!ShadowRoot} */
-    this.rootNode_ = opt_rootNode || ampdoc.getRootNode();
+    this.rootNode_ = ampdoc.getRootNode();
 
     /** @private @const {!./viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
@@ -134,11 +131,11 @@ export class Navigation {
      * Must use URL parsing scoped to `rootNode_` for correct FIE behavior.
      * @private @const {!Element|!ShadowRoot}
      */
-    this.serviceContext_ =
-      /** @type {!Element|!ShadowRoot} */ (this.rootNode_.nodeType ==
-      Node.DOCUMENT_NODE
+    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (
+      this.rootNode_.nodeType == Node.DOCUMENT_NODE
         ? this.rootNode_.documentElement
-        : this.rootNode_);
+        : this.rootNode_
+    );
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
@@ -146,8 +143,20 @@ export class Navigation {
     this.rootNode_.addEventListener(EVENT_TYPE_CONTEXT_MENU, this.boundHandle_);
     /** @private {boolean} */
     this.appendExtraParams_ = false;
-    shouldAppendExtraParams(this.ampdoc).then(res => {
+    shouldAppendExtraParams(this.ampdoc).then((res) => {
       this.appendExtraParams_ = res;
+    });
+
+    /** @private {boolean} */
+    this.isTrustedViewer_ = false;
+    /** @private {boolean} */
+    this.isLocalViewer_ = false;
+    Promise.all([
+      this.viewer_.isTrustedViewer(),
+      this.viewer_.getViewerOrigin(),
+    ]).then((values) => {
+      this.isTrustedViewer_ = values[0];
+      this.isLocalViewer_ = isLocalhostOrigin(values[1]);
     });
 
     /**
@@ -182,19 +191,6 @@ export class Navigation {
       'click',
       maybeExpandUrlParams.bind(null, ampdoc),
       /* capture */ true
-    );
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      TAG,
-      new Navigation(ampdoc, embedWin.document)
     );
   }
 
@@ -250,14 +246,10 @@ export class Navigation {
    * @param {!{
    *   target: (string|undefined),
    *   opener: (boolean|undefined),
-   * }=} opt_options
+   * }=} options
    */
-  navigateTo(
-    win,
-    url,
-    opt_requestedBy,
-    {target = '_top', opener = false} = {}
-  ) {
+  navigateTo(win, url, opt_requestedBy, options = {}) {
+    const {target = '_top', opener = false} = options;
     url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {
@@ -270,8 +262,9 @@ export class Navigation {
       `Target '${target}' not supported.`
     );
 
-    // Resolve navigateTos relative to the source URL, not the proxy URL.
-    url = urlService.getSourceUrl(url);
+    // If we're on cache, resolve relative URLs to the publisher (non-cache) origin.
+    const sourceUrl = urlService.getSourceUrl(win.location);
+    url = urlService.resolveRelativeUrl(url, sourceUrl);
 
     // If we have a target of "_blank", we will want to open a new window. A
     // target of "_top" should behave like it would on an anchor tag and
@@ -334,7 +327,7 @@ export class Navigation {
       return meta
         .getAttribute('content')
         .split(',')
-        .map(s => s.trim());
+        .map((s) => s.trim());
     }
     return [];
   }
@@ -360,7 +353,6 @@ export class Navigation {
     if (!target || !target.href) {
       return;
     }
-
     if (e.type == EVENT_TYPE_CLICK) {
       this.handleClick_(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
@@ -369,68 +361,59 @@ export class Navigation {
   }
 
   /**
-   * @param {!Element} target
+   * @param {!Element} element
    * @param {!Event} e
    * @private
    */
-  handleClick_(target, e) {
-    this.expandVarsForAnchor_(target);
+  handleClick_(element, e) {
+    this.expandVarsForAnchor_(element);
 
-    let tgtLoc = this.parseUrl_(target.href);
+    let toLocation = this.parseUrl_(element.href);
 
-    // Handle AMP-to-AMP navigation if rel=amphtml.
-    if (this.handleA2AClick_(e, target, tgtLoc)) {
+    // Handle AMP-to-AMP navigation and early-outs, if rel=amphtml.
+    if (this.handleA2AClick_(e, element, toLocation)) {
       return;
     }
 
-    // Handle navigating to custom protocol if applicable.
-    if (this.handleCustomProtocolClick_(e, target, tgtLoc)) {
+    // Handle navigating to custom protocol and early-outs, if applicable.
+    if (this.handleCustomProtocolClick_(e, element, toLocation)) {
       return;
     }
 
-    // In test mode, we're not able to properly fix the anchor tag's base URL.
-    // So, we have to use the (mocked) window's location instead.
-    const baseHref =
-      getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
-    const curLoc = this.parseUrl_(baseHref);
-    const tgtHref = getHref(tgtLoc);
-    const curHref = getHref(curLoc);
-
-    if (tgtHref != curHref) {
-      // Only apply anchor mutator if this is an external navigation
-      this.applyAnchorMutators_(target, e);
-      tgtLoc = this.parseUrl_(target.href);
+    const fromLocation = this.getLocation_();
+    // Only apply anchor mutator if this is an external navigation.
+    // Note that anchor mutators may theoretically change the navigation
+    // from external to internal, so we re-parse the new targetLocation
+    // in handleNavigation_().
+    if (getHrefMinusHash(toLocation) != getHrefMinusHash(fromLocation)) {
+      this.applyAnchorMutators_(element, e);
+      toLocation = this.parseUrl_(element.href);
     }
 
     // Finally, handle normal click-navigation behavior.
-    this.handleNavClick_(e, target, tgtLoc, curLoc);
+    this.handleNavigation_(e, element, toLocation, fromLocation);
   }
 
   /**
-   * @param {!Element} target
+   * Handles "contextmenu" event e.g. right mouse button click.
+   * @param {!Element} element
    * @param {!Event} e
    * @private
    */
-  handleContextMenuClick_(target, e) {
-    // Handles contextmenu click. Note that currently this only deals
-    // with url variable substitution and expansion, as there is
-    // straightforward way of determining what the user clicked in the
-    // context menu, required for A2A navigation and custom link protocol
-    // handling.
-    // TODO(alabiaga): investigate fix for handling A2A and custom link
-    // protocols.
-    this.expandVarsForAnchor_(target);
-    this.applyAnchorMutators_(target, e);
+  handleContextMenuClick_(element, e) {
+    // TODO(wg-performance): Handle A2A, custom link protocols, and ITP 2.3 mitigation.
+    this.expandVarsForAnchor_(element);
+    this.applyAnchorMutators_(element, e);
   }
 
   /**
    * Apply anchor transformations.
-   * @param {!Element} target
+   * @param {!Element} element
    * @param {!Event} e
    */
-  applyAnchorMutators_(target, e) {
-    this.anchorMutators_.forEach(anchorMutator => {
-      anchorMutator(target, e);
+  applyAnchorMutators_(element, e) {
+    this.anchorMutators_.forEach((anchorMutator) => {
+      anchorMutator(element, e);
     });
   }
 
@@ -440,7 +423,7 @@ export class Navigation {
    * @return {string}
    */
   applyNavigateToMutators_(url) {
-    this.navigateToMutators_.forEach(mutator => {
+    this.navigateToMutators_.forEach((mutator) => {
       url = mutator(url);
     });
     return url;
@@ -466,20 +449,20 @@ export class Navigation {
    * Handles clicking on a custom protocol link.
    * Returns true if the navigation was handled. Otherwise, returns false.
    * @param {!Event} e
-   * @param {!Element} target
+   * @param {!Element} element
    * @param {!Location} location
    * @return {boolean}
    * @private
    */
-  handleCustomProtocolClick_(e, target, location) {
+  handleCustomProtocolClick_(e, element, location) {
     // Handle custom protocols only if the document is iframed.
     if (!this.isIframed_) {
       return false;
     }
 
     /** @const {!Window} */
-    const win = toWin(target.ownerDocument.defaultView);
-    const url = target.href;
+    const win = toWin(element.ownerDocument.defaultView);
+    const url = element.href;
     const {protocol} = location;
 
     // On Safari iOS, custom protocol links will fail to open apps when the
@@ -510,19 +493,19 @@ export class Navigation {
    * Handles clicking on an AMP link.
    * Returns true if the navigation was handled. Otherwise, returns false.
    * @param {!Event} e
-   * @param {!Element} target
+   * @param {!Element} element
    * @param {!Location} location
    * @return {boolean}
    * @private
    */
-  handleA2AClick_(e, target, location) {
-    if (!target.hasAttribute('rel')) {
+  handleA2AClick_(e, element, location) {
+    if (!element.hasAttribute('rel')) {
       return false;
     }
-    const relations = target
+    const relations = element
       .getAttribute('rel')
       .split(' ')
-      .map(s => s.trim());
+      .map((s) => s.trim());
     if (!relations.includes('amphtml')) {
       return false;
     }
@@ -535,63 +518,120 @@ export class Navigation {
   }
 
   /**
-   * Handles clicking on a link with hash navigation.
+   * Handles click-navigation on a non-A2A, standard-protocol link.
    * @param {!Event} e
-   * @param {!Element} target
-   * @param {!Location} tgtLoc
-   * @param {!Location} curLoc
+   * @param {!Element} element
+   * @param {!Location} toLocation
+   * @param {!Location} fromLocation
    * @private
    */
-  handleNavClick_(e, target, tgtLoc, curLoc) {
-    const tgtHref = getHref(tgtLoc);
-    const curHref = getHref(curLoc);
+  handleNavigation_(e, element, toLocation, fromLocation) {
+    const to = getHrefMinusHash(toLocation);
+    const from = getHrefMinusHash(fromLocation);
 
-    // If the current target anchor link is the same origin + path
-    // as the current document then we know we are just linking to an
-    // identifier in the document. Otherwise, it's an external navigation.
-    if (!tgtLoc.hash || tgtHref != curHref) {
+    // Handle same-page (hash) navigation separately.
+    if (toLocation.hash && to == from) {
+      this.handleHashNavigation_(e, toLocation, fromLocation);
+    } else {
+      // Otherwise, this is an other-page (external) navigation.
+      let target = (element.getAttribute('target') || '').toLowerCase();
+
       if (this.isEmbed_ || this.isInABox_) {
-        // Target in the embed must be either _top or _blank. If none specified,
-        // force to _blank.
-        const targetAttr = (target.getAttribute('target') || '').toLowerCase();
-        if (targetAttr != '_top' && targetAttr != '_blank') {
-          target.setAttribute('target', '_blank');
+        // Target in the embed must be either _top or _blank (default).
+        if (target != '_top' && target != '_blank') {
+          target = '_blank';
+          element.setAttribute('target', target);
         }
-        return; // bail early.
       }
 
-      // Accessibility fix for IE browser.
-      // Issue: anchor navigation in IE changes visual focus of the browser
-      // and shifts to the element being linked to,
-      // where the input focus stays where it was.
-      // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
-      // @see https://github.com/ampproject/amphtml/issues/18671
-      if (Services.platformFor(this.ampdoc.win).isIe()) {
-        const internalTargetElmId = tgtLoc.hash.substring(1);
-        const internalElm = this.ampdoc.getElementById(internalTargetElmId);
-        if (internalElm) {
-          if (
-            !/^(?:a|select|input|button|textarea)$/i.test(internalElm.tagName)
-          ) {
-            internalElm.tabIndex = -1;
-          }
-          tryFocus(internalElm);
-        }
+      // ITP 2.3 mitigation. See https://github.com/ampproject/amphtml/issues/25179.
+      const {win} = this.ampdoc;
+      const platform = Services.platformFor(win);
+      const viewer = Services.viewerForDoc(element);
+      if (
+        fromLocation.search &&
+        platform.isSafari() &&
+        platform.getMajorVersion() >= 13 &&
+        viewer.isProxyOrigin() &&
+        viewer.isEmbedded()
+      ) {
+        this.removeViewerQueryBeforeNavigation_(win, fromLocation, target);
       }
-      return;
+
+      if (this.viewerInterceptsNavigation(to, 'intercept_click')) {
+        e.preventDefault();
+      }
     }
+  }
 
-    this.handleInternalNavigation_(e, tgtLoc, curLoc);
+  /**
+   * Temporarily remove viewer query params from iframe (e.g. amp_js_v, usqp)
+   * to prevent document.referrer from being reduced to eTLD+1 (e.g. ampproject.org).
+   * @param {!Window} win
+   * @param {!Location} fromLocation
+   * @param {string} target
+   * @private
+   */
+  removeViewerQueryBeforeNavigation_(win, fromLocation, target) {
+    dev().info(
+      TAG,
+      'Removing iframe query string before navigation:',
+      fromLocation.search
+    );
+    const original = fromLocation.href;
+    const noQuery = `${fromLocation.origin}${fromLocation.pathname}${fromLocation.hash}`;
+    win.history.replaceState(null, '', noQuery);
+
+    const restoreQuery = () => {
+      const currentHref = win.location.href;
+      if (currentHref == noQuery) {
+        dev().info(TAG, 'Restored iframe URL with query string:', original);
+        win.history.replaceState(null, '', original);
+      } else {
+        dev().error(TAG, 'Unexpected iframe URL change:', currentHref, noQuery);
+      }
+    };
+
+    // For blank_, restore query params after the new page opens.
+    if (target === '_blank') {
+      win.setTimeout(restoreQuery, 0);
+    } else {
+      // For _top etc., wait until page is restored from page cache (bfcache).
+      // https://webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
+      win.addEventListener('pageshow', function onPageShow(e) {
+        if (e.persisted) {
+          restoreQuery();
+          win.removeEventListener('pageshow', onPageShow);
+        }
+      });
+    }
   }
 
   /**
    * Handles clicking on an internal link
    * @param {!Event} e
-   * @param {!Location} tgtLoc
-   * @param {!Location} curLoc
+   * @param {!Location} toLocation
+   * @param {!Location} fromLocation
    * @private
    */
-  handleInternalNavigation_(e, tgtLoc, curLoc) {
+  handleHashNavigation_(e, toLocation, fromLocation) {
+    // Anchor navigation in IE doesn't change input focus, which can result in
+    // confusing behavior e.g. when pressing "tab" button.
+    // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
+    // @see https://github.com/ampproject/amphtml/issues/18671
+    if (!IS_ESM && Services.platformFor(this.ampdoc.win).isIe()) {
+      const id = toLocation.hash.substring(1);
+      const elementWithId = this.ampdoc.getElementById(id);
+      if (elementWithId) {
+        if (
+          !/^(?:a|select|input|button|textarea)$/i.test(elementWithId.tagName)
+        ) {
+          elementWithId.tabIndex = -1;
+        }
+        tryFocus(elementWithId);
+      }
+    }
+
     // We prevent default so that the current click does not push
     // into the history stack as this messes up the external documents
     // history which contains the amp document.
@@ -604,11 +644,11 @@ export class Navigation {
     }
 
     // Look for the referenced element.
-    const hash = tgtLoc.hash.slice(1);
-    let elem = null;
+    const hash = toLocation.hash.slice(1);
+    let el = null;
     if (hash) {
       const escapedHash = escapeCssSelectorIdent(hash);
-      elem =
+      el =
         this.rootNode_.getElementById(hash) ||
         // Fallback to anchor[name] if element with id is not found.
         // Linking to an anchor element with name is obsolete in html5.
@@ -617,13 +657,13 @@ export class Navigation {
 
     // If possible do update the URL with the hash. As explained above
     // we do `replace` to avoid messing with the container's history.
-    if (tgtLoc.hash != curLoc.hash) {
-      this.history_.replaceStateForTarget(tgtLoc.hash).then(() => {
-        this.scrollToElement_(elem, hash);
+    if (toLocation.hash != fromLocation.hash) {
+      this.history_.replaceStateForTarget(toLocation.hash).then(() => {
+        this.scrollToElement_(el, hash);
       });
     } else {
       // If the hash did not update just scroll to the element.
-      this.scrollToElement_(elem, hash);
+      this.scrollToElement_(el, hash);
     }
   }
 
@@ -681,6 +721,61 @@ export class Navigation {
   parseUrl_(url) {
     return Services.urlForDoc(this.serviceContext_).parse(url);
   }
+
+  /**
+   * @return {!Location}
+   * @private
+   */
+  getLocation_() {
+    // In test mode, we're not able to properly fix the anchor tag's base URL.
+    // So, we have to use the (mocked) window's location instead.
+    const baseHref =
+      getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
+    return this.parseUrl_(baseHref);
+  }
+
+  /**
+   * Requests navigation through a Viewer to the given destination.
+   *
+   * This function only proceeds if:
+   * 1. The viewer supports the 'interceptNavigation' capability.
+   * 2. The contained AMP doc has 'opted in' via including the 'allow-navigation-interception'
+   * attribute on the <html> tag.
+   * 3. The viewer is trusted or from localhost.
+   *
+   * @param {string} url A URL.
+   * @param {string} requestedBy Informational string about the entity that
+   *     requested the navigation.
+   * @return {boolean} Returns true if navigation message was sent to viewer.
+   *     Otherwise, returns false.
+   */
+  viewerInterceptsNavigation(url, requestedBy) {
+    const viewerHasCapability = this.viewer_.hasCapability(
+      'interceptNavigation'
+    );
+    const docOptedIn =
+      this.ampdoc.isSingleDoc() &&
+      this.ampdoc
+        .getRootNode()
+        .documentElement.hasAttribute('allow-navigation-interception');
+
+    if (
+      !viewerHasCapability ||
+      !docOptedIn ||
+      !(this.isTrustedViewer_ || this.isLocalViewer_)
+    ) {
+      return false;
+    }
+
+    this.viewer_.sendMessage(
+      'navigateTo',
+      dict({
+        'url': url,
+        'requestedBy': requestedBy,
+      })
+    );
+    return true;
+  }
 }
 
 /**
@@ -715,11 +810,10 @@ function maybeExpandUrlParams(ampdoc, e) {
   const newHref = Services.urlReplacementsForDoc(target).expandUrlSync(
     hrefToExpand,
     vars,
-    undefined,
-    /* opt_whitelist */ {
+    /* opt_allowlist */ {
       // For now we only allow to replace the click location vars
       // and nothing else.
-      // NOTE: Addition to this whitelist requires additional review.
+      // NOTE: Addition to this allowlist requires additional review.
       'CLICK_X': true,
       'CLICK_Y': true,
     }
@@ -735,10 +829,10 @@ function maybeExpandUrlParams(ampdoc, e) {
 }
 
 /**
- * Calculate and return the href from the Location
+ * Returns href without hash.
  * @param {!Location} location
  * @return {string}
  */
-function getHref(location) {
+function getHrefMinusHash(location) {
   return `${location.origin}${location.pathname}${location.search}`;
 }

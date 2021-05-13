@@ -23,10 +23,11 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../utils/xhr-utils';
+import {dev, user} from '../log';
 import {getCorsUrl, parseUrlDeprecated} from '../url';
 import {getService, registerServiceBuilder} from '../service';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {user} from '../log';
+import {parseJson} from '../json';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -71,7 +72,7 @@ export class Xhr {
       this.ampdocSingle_,
       input,
       init
-    ).then(interceptorResponse => {
+    ).then((interceptorResponse) => {
       if (interceptorResponse) {
         return interceptorResponse;
       }
@@ -79,8 +80,9 @@ export class Xhr {
       // will expect a native `FormData` object in the `body` property, so
       // the native `FormData` object needs to be unwrapped.
       if (isFormDataWrapper(init.body)) {
-        const formDataWrapper =
-          /** @type {!FormDataWrapperInterface} */ (init.body);
+        const formDataWrapper = /** @type {!FormDataWrapperInterface} */ (
+          init.body
+        );
         init.body = formDataWrapper.getFormData();
       }
       return this.win.fetch.apply(null, arguments);
@@ -103,13 +105,13 @@ export class Xhr {
     input = setupInput(this.win, input, init);
     init = setupAMPCors(this.win, input, init);
     return this.fetch_(input, init).then(
-      response => response,
-      reason => {
+      (response) => response,
+      (reason) => {
         const targetOrigin = parseUrlDeprecated(input).origin;
         throw user().createExpectedError(
           'XHR',
           `Failed fetching (${targetOrigin}/...):`,
-          reason && reason.message
+          reason && /** @type {!Error} */ (reason).message
         );
       }
     );
@@ -148,13 +150,37 @@ export class Xhr {
   }
 
   /**
+   * A subsitute for the standard response.json(), which may optionally strip a prefix before calling JSON.parse().
+   *
+   * @param {!Response} res fetch response to convert to json.
+   * @param {string|undefined} prefix to strip away.
+   * @return {Promise<*>}
+   */
+  xssiJson(res, prefix) {
+    if (!prefix) {
+      return res.json();
+    }
+
+    return res.text().then((txt) => {
+      if (!txt.startsWith(dev().assertString(prefix))) {
+        user().warn(
+          'XHR',
+          `Failed to strip missing prefix "${prefix}" in fetch response.`
+        );
+        return parseJson(txt);
+      }
+      return parseJson(txt.slice(prefix.length));
+    });
+  }
+
+  /**
    * @param {string} input URL
    * @param {?FetchInitDef=} opt_init Fetch options object.
    * @return {!Promise<!Response>}
    */
   fetch(input, opt_init) {
     const init = setupInit(opt_init);
-    return this.fetchAmpCors_(input, init).then(response =>
+    return this.fetchAmpCors_(input, init).then((response) =>
       assertSuccess(response)
     );
   }
@@ -171,7 +197,7 @@ export class Xhr {
    * @return {!Promise}
    */
   sendSignal(input, opt_init) {
-    return this.fetchAmpCors_(input, opt_init).then(response =>
+    return this.fetchAmpCors_(input, opt_init).then((response) =>
       assertSuccess(response)
     );
   }

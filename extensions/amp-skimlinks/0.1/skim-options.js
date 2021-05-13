@@ -20,7 +20,7 @@ import {userAssert} from '../../../src/log';
 
 import {
   DEFAULT_CONFIG,
-  GLOBAL_DOMAIN_BLACKLIST,
+  GLOBAL_DOMAIN_DENYLIST,
   OPTIONS_ERRORS,
   WAYPOINT_BASE_URL,
 } from './constants';
@@ -61,7 +61,7 @@ export function getAmpSkimlinksOptions(element, docInfo) {
 function getExcludedDomains_(element, internalDomains) {
   let excludedDomains = []
     .concat(internalDomains)
-    .concat(GLOBAL_DOMAIN_BLACKLIST);
+    .concat(GLOBAL_DOMAIN_DENYLIST);
 
   const excludedDomainsAttr = element.getAttribute('excluded-domains');
   if (excludedDomainsAttr) {
@@ -69,7 +69,7 @@ function getExcludedDomains_(element, internalDomains) {
       excludedDomainsAttr
         .trim()
         .split(/\s+/)
-        .map(domain => domain.replace(/^www\./, ''))
+        .map((domain) => domain.replace(/^www\./, ''))
     );
   }
 

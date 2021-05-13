@@ -16,20 +16,10 @@
 
 import * as tr from '../../src/transition';
 
-describe('Transition', () => {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox;
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
+describes.sandboxed('Transition', {}, (env) => {
   it('all', () => {
-    const func1 = sandbox.spy();
-    const func2 = sandbox.spy();
+    const func1 = env.sandbox.spy();
+    const func2 = env.sandbox.spy();
     const all = tr.all([func1, func2]);
 
     expect(func1).to.have.not.been.called;
@@ -105,7 +95,7 @@ describe('Transition', () => {
 
   it('withCurve', () => {
     const func1 = (time, complete) => `${time * 2};${complete}`;
-    const curve = unusedTime => 0.2;
+    const curve = (unusedTime) => 0.2;
     const curved = tr.withCurve(func1, curve);
 
     expect(curved(0, false)).to.equal('0.4;false');
@@ -117,10 +107,10 @@ describe('Transition', () => {
   it('setStyles', () => {
     const element = document.createElement('div');
     const func = tr.setStyles(element, {
-      width: tr.px(function(n) {
+      width: tr.px(function (n) {
         return n * 100 + 1;
       }),
-      height: tr.px(function(n) {
+      height: tr.px(function (n) {
         return n * 100 + 2;
       }),
     });
@@ -158,7 +148,7 @@ describe('Transition', () => {
     expect(func(1)).to.equal(-10);
   });
 
-  it('spring', () => {
+  it('springAds.js', () => {
     let func = tr.spring(2, 10, 12, 0.8);
     expect(func(0)).to.equal(2);
     expect(func(0.3)).to.be.closeTo(5.75, 1e-3);

@@ -21,9 +21,11 @@
 
 import {dev, devAssert, userAssert} from './log';
 import {htmlFor} from './static-template';
-import {isFiniteNumber} from './types';
+import {isExperimentOn} from './experiments';
+import {isFiniteNumber, toWin} from './types';
 import {setStyle, setStyles, toggle} from './style';
-import {startsWith} from './string';
+
+import {transparentPng} from './utils/img';
 
 /**
  * @enum {string}
@@ -113,7 +115,14 @@ export const LOADING_ELEMENTS_ = {
  * reasons, so they are listed individually.
  * @private @const {!RegExp}
  */
-const videoPlayerTagNameRe = /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO|AMP-IMA-VIDEO/i;
+const videoPlayerTagNameRe =
+  /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO|AMP-IMA-VIDEO/i;
+
+/**
+ * Whether aspect-ratio CSS can be used to implement responsive layouts.
+ * @type {?boolean}
+ */
+let aspectRatioCssCache = null;
 
 /**
  * @param {string} s
@@ -170,7 +179,7 @@ export function isLayoutSizeFixed(layout) {
  */
 export function isInternalElement(tag) {
   const tagName = typeof tag == 'string' ? tag : tag.tagName;
-  return tagName && startsWith(tagName.toLowerCase(), 'i-');
+  return tagName && tagName.toLowerCase().startsWith('i-');
 }
 
 /**
@@ -233,9 +242,8 @@ export function assertLengthOrPercent(length) {
  */
 export function getLengthUnits(length) {
   assertLength(length);
-  dev().assertString(length);
   const m = userAssert(
-    length.match(/[a-z]+/i),
+    /[a-z]+/i.exec(length),
     'Failed to read units from %s',
     length
   );
@@ -266,7 +274,7 @@ export function hasNaturalDimensions(tagName) {
 /**
  * Determines the default dimensions for an element which could vary across
  * different browser implementations, like <audio> for instance.
- * This operation can only be completed for an element whitelisted by
+ * This operation can only be completed for an element allowlisted by
  * `hasNaturalDimensions`.
  * @param {!Element} element
  * @return {DimensionsDef}
@@ -295,7 +303,7 @@ export function getNaturalDimensions(element) {
 }
 
 /**
- * Whether the loading can be shown for the specified elemeent. This set has
+ * Whether the loading can be shown for the specified element. This set has
  * to be externalized since the element's implementation may not be
  * downloaded yet.
  * @param {!Element} element
@@ -309,7 +317,7 @@ export function isLoadingAllowed(element) {
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ whitelist.
+ * reasons, so they're present in the LOADING_ELEMENTS_ allowlist.
  * @param {string} tagName
  * @return {boolean}
  */
@@ -334,18 +342,19 @@ export function isIframeVideoPlayerComponent(tagName) {
  * implement SSR. For more information on SSR see bit.ly/amp-ssr.
  *
  * @param {!Element} element
+ * @param {boolean} fixIeIntrinsic
  * @return {!Layout}
  */
-export function applyStaticLayout(element) {
+export function applyStaticLayout(element, fixIeIntrinsic = false) {
   // Check if the layout has already been done by server-side rendering or
   // client-side rendering and the element was cloned. The document may be
   // visible to the user if the boilerplate was removed so please take care in
   // making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
-    const layout = /** @type {!Layout} */ (devAssert(
-      parseLayout(completedLayoutAttr)
-    ));
+    const layout = /** @type {!Layout} */ (
+      devAssert(parseLayout(completedLayoutAttr))
+    );
     if (
       (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) &&
       element.firstElementChild
@@ -353,6 +362,9 @@ export function applyStaticLayout(element) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =
         element.querySelector('i-amphtml-sizer') || undefined;
+      if (element.sizerElement) {
+        element.sizerElement.setAttribute('slot', 'i-amphtml-svc');
+      }
     } else if (layout == Layout.NODISPLAY) {
       toggle(element, false);
       // TODO(jridgewell): Temporary hack while SSR still adds an inline
@@ -375,15 +387,30 @@ export function applyStaticLayout(element) {
 
   // Input layout attributes.
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
-  userAssert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  userAssert(
+    inputLayout !== undefined,
+    'Invalid "layout" value: %s, %s',
+    layoutAttr,
+    element
+  );
   /** @const {string|null|undefined} */
   const inputWidth =
     widthAttr && widthAttr != 'auto' ? parseLength(widthAttr) : widthAttr;
-  userAssert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  userAssert(
+    inputWidth !== undefined,
+    'Invalid "width" value: %s, %s',
+    widthAttr,
+    element
+  );
   /** @const {string|null|undefined} */
   const inputHeight =
     heightAttr && heightAttr != 'fluid' ? parseLength(heightAttr) : heightAttr;
-  userAssert(inputHeight !== undefined, 'Invalid height value: %s', heightAttr);
+  userAssert(
+    inputHeight !== undefined,
+    'Invalid "height" value: %s, %s',
+    heightAttr,
+    element
+  );
 
   // Effective layout attributes. These are effectively constants.
   let width;
@@ -433,14 +460,13 @@ export function applyStaticLayout(element) {
     layout == Layout.RESPONSIVE ||
     layout == Layout.INTRINSIC
   ) {
-    userAssert(height, 'Expected height to be available: %s', heightAttr);
+    userAssert(height, 'The "height" attribute is missing: %s', element);
   }
   if (layout == Layout.FIXED_HEIGHT) {
     userAssert(
       !width || width == 'auto',
-      'Expected width to be either absent or equal "auto" ' +
-        'for fixed-height layout: %s',
-      widthAttr
+      'The "width" attribute must be missing or "auto": %s',
+      element
     );
   }
   if (
@@ -450,22 +476,24 @@ export function applyStaticLayout(element) {
   ) {
     userAssert(
       width && width != 'auto',
-      'Expected width to be available and not equal to "auto": %s',
-      widthAttr
+      'The "width" attribute must be present and not "auto": %s',
+      element
     );
   }
 
   if (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
     userAssert(
       getLengthUnits(width) == getLengthUnits(height),
-      'Length units should be the same for width and height: %s, %s',
+      'Length units should be the same for "width" and "height": %s, %s, %s',
       widthAttr,
-      heightAttr
+      heightAttr,
+      element
     );
   } else {
     userAssert(
       heightsAttr === null,
-      'Unexpected "heights" attribute for none-responsive layout'
+      '"heights" attribute must be missing: %s',
+      element
     );
   }
 
@@ -489,26 +517,41 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout.FIXED_HEIGHT) {
     setStyle(element, 'height', dev().assertString(height));
   } else if (layout == Layout.RESPONSIVE) {
-    const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
-    setStyles(sizer, {
-      paddingTop:
-        (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
-    });
-    element.insertBefore(sizer, element.firstChild);
-    element.sizerElement = sizer;
+    if (shouldUseAspectRatioCss(toWin(element.ownerDocument.defaultView))) {
+      setStyle(
+        element,
+        'aspect-ratio',
+        `${getLengthNumeral(width)}/${getLengthNumeral(height)}`
+      );
+    } else {
+      const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+      sizer.setAttribute('slot', 'i-amphtml-svc');
+      setStyles(sizer, {
+        paddingTop:
+          (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
+      });
+      element.insertBefore(sizer, element.firstChild);
+      element.sizerElement = sizer;
+    }
   } else if (layout == Layout.INTRINSIC) {
     // Intrinsic uses an svg inside the sizer element rather than the padding
     // trick Note a naked svg won't work becasue other thing expect the
     // i-amphtml-sizer element
     const sizer = htmlFor(element)`
-      <i-amphtml-sizer class="i-amphtml-sizer">
+      <i-amphtml-sizer class="i-amphtml-sizer" slot="i-amphtml-svc">
         <img alt="" role="presentation" aria-hidden="true"
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;
     const intrinsicSizer = sizer.firstElementChild;
     intrinsicSizer.setAttribute(
       'src',
-      `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
+      !IS_ESM && fixIeIntrinsic && element.ownerDocument
+        ? transparentPng(
+            element.ownerDocument,
+            dev().assertNumber(getLengthNumeral(width)),
+            dev().assertNumber(getLengthNumeral(height))
+          )
+        : `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
     );
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
@@ -538,4 +581,27 @@ export function applyStaticLayout(element) {
   // in the future.
   element.setAttribute('i-amphtml-layout', layout);
   return layout;
+}
+
+/**
+ * Whether aspect-ratio CSS can be used to implement responsive layouts.
+ *
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function shouldUseAspectRatioCss(win) {
+  if (aspectRatioCssCache == null) {
+    aspectRatioCssCache =
+      (isExperimentOn(win, 'layout-aspect-ratio-css') &&
+        win.CSS &&
+        win.CSS.supports &&
+        win.CSS.supports('aspect-ratio: 1/1')) ||
+      false;
+  }
+  return aspectRatioCssCache;
+}
+
+/** @visibleForTesting */
+export function resetShouldUseAspectRatioCssForTesting() {
+  aspectRatioCssCache = null;
 }

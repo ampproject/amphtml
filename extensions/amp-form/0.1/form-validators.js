@@ -85,15 +85,15 @@ export class FormValidator {
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = Services.ampdoc(form);
 
-    /** @const @protected {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources = Services.resourcesForDoc(form);
+    /** @const @protected {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator = Services.mutatorForDoc(form);
 
     /** @protected @const {!Document|!ShadowRoot} */
     this.root = this.ampdoc.getRootNode();
 
     /**
      * Tribool indicating last known validity of form.
-     * @private {boolean|null}
+     * @private {?boolean}
      */
     this.formValidity_ = null;
   }
@@ -171,7 +171,7 @@ export class FormValidator {
    * @private
    */
   checkTextAreaValidityInForm_(form) {
-    iterateCursor(form.elements, element => {
+    iterateCursor(form.elements, (element) => {
       if (element.tagName == 'TEXTAREA') {
         this.checkInputValidity(element);
       }
@@ -379,7 +379,7 @@ export class AbstractCustomValidator extends FormValidator {
     input.setAttribute('aria-invalid', 'true');
     input.setAttribute('aria-describedby', validationId);
 
-    this.resources.mutateElement(validation, () =>
+    this.mutator.mutateElement(validation, () =>
       validation.classList.add('visible')
     );
   }
@@ -397,7 +397,7 @@ export class AbstractCustomValidator extends FormValidator {
     input.removeAttribute('aria-invalid');
     input.removeAttribute('aria-describedby');
 
-    this.resources.mutateElement(visibleValidation, () =>
+    this.mutator.mutateElement(visibleValidation, () =>
       visibleValidation.classList.remove('visible')
     );
   }
@@ -588,6 +588,8 @@ function getInvalidType(input) {
     }
   }
   // Finding error type with value true
-  const response = validityTypes.filter(type => input.validity[type] === true);
+  const response = validityTypes.filter(
+    (type) => input.validity[type] === true
+  );
   return response.length ? response[0] : null;
 }

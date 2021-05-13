@@ -20,7 +20,7 @@ import {Linkmate} from '../linkmate';
 import {Services} from '../../../../src/services';
 import {TwoStepsResponse} from '../../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
 
-const helpersFactory = env => {
+const helpersFactory = (env) => {
   const {win} = env;
 
   return {
@@ -46,7 +46,7 @@ const helpersFactory = env => {
 describes.fakeWin(
   'amp-smartlinks',
   {amp: {extensions: ['amp-smartlinks']}},
-  env => {
+  (env) => {
     let helpers, xhr, linkmate;
 
     beforeEach(() => {
@@ -73,7 +73,7 @@ describes.fakeWin(
           publisherID: 999,
           linkAttribute: 'href',
         };
-        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions, env.win);
         anchorList = [
           {attributeName: 'href', link: 'http://fakelink.example'},
           {attributeName: 'href', link: 'http://fakelink2.example'},
@@ -260,14 +260,17 @@ describes.fakeWin(
           {
             'raw_url': 'http://fakelink.example/',
             'exclusive_match_requested': false,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'http://fakelink2.example/',
             'exclusive_match_requested': false,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'https://examplelocklink.example/#locklink',
             'exclusive_match_requested': true,
+            'link_source': 'linkmate',
           },
         ];
 
@@ -284,14 +287,17 @@ describes.fakeWin(
           {
             'raw_url': 'http://fakelink.example/',
             'exclusive_match_requested': true,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'http://fakelink2.example/',
             'exclusive_match_requested': true,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'https://examplelocklink.example/#locklink',
             'exclusive_match_requested': true,
+            'link_source': 'linkmate',
           },
         ];
 
@@ -316,10 +322,12 @@ describes.fakeWin(
           {
             'raw_url': 'http://fakelink.example/',
             'exclusive_match_requested': false,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'https://examplelocklink.example/#locklink',
             'exclusive_match_requested': true,
+            'link_source': 'linkmate',
           },
         ];
 
@@ -373,14 +381,17 @@ describes.fakeWin(
           {
             'raw_url': 'http://fakelink.example/',
             'exclusive_match_requested': false,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'http://fakelink2.example/',
             'exclusive_match_requested': false,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'https://examplelocklink.example/#locklink',
             'exclusive_match_requested': true,
+            'link_source': 'linkmate',
           },
         ];
 
@@ -397,12 +408,12 @@ describes.fakeWin(
           publisherID: 999,
           linkAttribute: 'href',
         };
-        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
-        const envRoot = env.ampdoc.getRootNode();
-        envRoot.title = 'Fake Website Title';
-
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions, env.win);
         env.sandbox
-          .stub(env.ampdoc, 'getUrl')
+          .stub(linkmate, 'getEditName_')
+          .returns('Fake Website Title');
+        env.sandbox
+          .stub(linkmate, 'getLocationHref_')
           .returns('http://fakewebsite.example/');
         env.sandbox.spy(linkmate, 'getEditInfo_');
 
@@ -461,21 +472,15 @@ describes.fakeWin(
         const expectedMapping = [
           {
             anchor: anchorList[0],
-            replacementUrl: `https://shop-links.co/${
-              linkmateResponse[0]['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[0]['auction_id']}/?amp=true`,
           },
           {
             anchor: anchorList[1],
-            replacementUrl: `https://shop-links.co/${
-              linkmateResponse[1]['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
           },
           {
             anchor: anchorList[2],
-            replacementUrl: `https://shop-links.co/${
-              linkmateResponse[1]['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
           },
         ];
 
@@ -533,21 +538,15 @@ describes.fakeWin(
         const expectedMapping = [
           {
             anchor: anchorList[0],
-            replacementUrl: `https://shop-links.co/${
-              linkmateResponse[0]['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[0]['auction_id']}/?amp=true`,
           },
           {
             anchor: anchorList[1],
-            replacementUrl: `https://shop-links.co/${
-              linkmateResponse[1]['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
           },
           {
             anchor: anchorList[2],
-            replacementUrl: `https://shop-links.co/${
-              linkmateResponse[1]['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
           },
         ];
 

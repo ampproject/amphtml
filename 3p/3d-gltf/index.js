@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../src/utils/object';
+import {dict} from '../../src/core/types/object';
 import {listenParent, nonSensitiveDataPostMessage} from '../messaging';
 import {loadScript} from '../3p';
 import {parseJson} from '../../src/json';
@@ -22,8 +22,8 @@ import {user} from '../../src/log';
 
 import GltfViewer from './viewer';
 
-const seq = (taskA, taskB) => cb => taskA(() => taskB(cb));
-const parallel = (taskA, taskB) => cb => {
+const seq = (taskA, taskB) => (cb) => taskA(() => taskB(cb));
+const parallel = (taskA, taskB) => (cb) => {
   let n = 0;
   const finish = () => {
     n++;
@@ -36,8 +36,8 @@ const parallel = (taskA, taskB) => cb => {
 };
 
 const loadThree = (global, cb) => {
-  const loadScriptCb = url => cb => loadScript(global, url, cb);
-  const loadThreeExample = examplePath =>
+  const loadScriptCb = (url) => (cb) => loadScript(global, url, cb);
+  const loadThreeExample = (examplePath) =>
     loadScriptCb(
       'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/' + examplePath
     );
@@ -62,7 +62,7 @@ export function gltfViewer(global) {
       onload: () => {
         nonSensitiveDataPostMessage('loaded');
       },
-      onprogress: e => {
+      onprogress: (e) => {
         if (!e.lengthComputable) {
           return;
         }
@@ -74,7 +74,7 @@ export function gltfViewer(global) {
           })
         );
       },
-      onerror: err => {
+      onerror: (err) => {
         user().error('3DGLTF', err);
         nonSensitiveDataPostMessage(
           'error',
@@ -84,7 +84,7 @@ export function gltfViewer(global) {
         );
       },
     });
-    listenParent(global, 'action', msg => {
+    listenParent(global, 'action', (msg) => {
       viewer.actions[msg['action']](msg['args']);
     });
     nonSensitiveDataPostMessage('ready');

@@ -23,6 +23,28 @@
         line-height: 1.174;
         text-transform: uppercase;
       }
+      .box {
+        background: rgba(255, 0, 0, 0.3);
+      }
+      .top {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        background: green;
+      }
+      .bottom {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 20px;
+        height: 20px;
+        background: blue;
+      }
+      .text {
+        font-size: 1em;
+      }
     </style>
   </head>
 
@@ -34,12 +56,20 @@
           <h1>Hello World</h1>
           <p>This is the cover page of this story.</p>
         </amp-story-grid-layer>
+        <amp-story-grid-layer class="box" aspect-ratio="9:16">
+          <div class="top"></div>
+          <div class="bottom"></div>
+          <div class="text">9:16</div>
+        </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="page-1" auto-advance-after="5s">
         <amp-story-grid-layer template="vertical">
           <h1>First Page</h1>
           <p>This is the first page of this story.</p>
+          <amp-img src="https://picsum.photos/1600/900?image=110"
+              width="400"
+              height="225"></amp-img>
         </amp-story-grid-layer>
       </amp-story-page>
 

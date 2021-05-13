@@ -16,7 +16,7 @@
 
 import {VideoSessionManager} from '../../src/service/video-session-manager';
 
-describes.sandboxed('VideoSessionManager', {}, () => {
+describes.sandboxed('VideoSessionManager', {}, (env) => {
   let manager;
 
   beforeEach(() => {
@@ -24,7 +24,7 @@ describes.sandboxed('VideoSessionManager', {}, () => {
   });
 
   it('should trigger a listener when a session ends', () => {
-    const sessionSpy = sandbox.spy();
+    const sessionSpy = env.sandbox.spy();
     manager.onSessionEnd(sessionSpy);
 
     manager.beginSession();
@@ -33,7 +33,7 @@ describes.sandboxed('VideoSessionManager', {}, () => {
   });
 
   it('should only begin a session once even after repeated calls', () => {
-    const sessionSpy = sandbox.spy();
+    const sessionSpy = env.sandbox.spy();
     manager.onSessionEnd(sessionSpy);
 
     manager.beginSession();
@@ -44,7 +44,7 @@ describes.sandboxed('VideoSessionManager', {}, () => {
   });
 
   it('should only end a session once even after repeated calls', () => {
-    const sessionSpy = sandbox.spy();
+    const sessionSpy = env.sandbox.spy();
     manager.onSessionEnd(sessionSpy);
 
     manager.beginSession();

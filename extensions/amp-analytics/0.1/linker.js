@@ -18,7 +18,7 @@ import {WindowInterface} from '../../../src/window-interface';
 import {
   base64UrlDecodeFromString,
   base64UrlEncodeFromString,
-} from '../../../src/utils/base64';
+} from '../../../src/core/types/string/base64';
 import {crc32} from './crc32';
 import {user} from '../../../src/log';
 
@@ -156,14 +156,14 @@ function serialize(pairs) {
     return '';
   }
   return Object.keys(pairs)
-    .filter(key => {
+    .filter((key) => {
       const valid = KEY_VALIDATOR.test(key);
       if (!valid) {
         user().error(TAG, 'Invalid linker key: ' + key);
       }
       return valid;
     })
-    .map(key => key + DELIMITER + encode(pairs[key]))
+    .map((key) => key + DELIMITER + encode(pairs[key]))
     .join(DELIMITER);
 }
 

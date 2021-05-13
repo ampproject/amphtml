@@ -15,10 +15,12 @@
  */
 
 const chai = require('chai');
+chai.use(require('chai-as-promised'));
 const {ControllerPromise} = require('./controller-promise');
 
 let installed;
 let lastExpectError;
+let networkLogger;
 
 function clearLastExpectError() {
   lastExpectError = null;
@@ -60,7 +62,7 @@ const ChaiType = {
  * Not all chai properties need to be overwritten, like those that set
  * flags or are only language chains e.g. `not` or 'to'
  * See the Chai implementation for the original definitions:
- * {@link https://github.com/chaijs/chai/blob/master/lib/chai/core/assertions.js}
+ * {@link https://github.com/chaijs/chai/blob/main/lib/chai/core/assertions.js}
  */
 const chaiMethodsAndProperties = [
   {name: 'a', type: ChaiType.CHAINABLE_METHOD},
@@ -133,6 +135,10 @@ const chaiMethodsAndProperties = [
   {name: 'within', type: ChaiType.METHOD},
 ];
 
+/**
+ * @param {chai.ChaiStatic} chai
+ * @param {chai.ChaiUtils} utils
+ */
 function installWrappers(chai, utils) {
   const {METHOD, PROPERTY, CHAINABLE_METHOD} = ChaiType;
   const {Assertion} = chai;
@@ -162,11 +168,15 @@ function installWrappers(chai, utils) {
   }
 }
 
+/**
+ * @param {Chai.ChaiUtils} utils
+ * @return {Function(_super: Chai.AssertionStatic): Function(): any}
+ */
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
 
-  return function(_super) {
-    return function() {
+  return function (_super) {
+    return function () {
       const obj = this._obj;
       const isControllerPromise = obj instanceof ControllerPromise;
       if (!isControllerPromise) {
@@ -174,7 +184,7 @@ function overwriteAlwaysUseSuper(utils) {
       }
       const {waitForValue} = obj;
       if (!waitForValue) {
-        return obj.then(result => {
+        return obj.then((result) => {
           flag(this, 'object', result);
           return _super.apply(this, arguments);
         });
@@ -188,7 +198,7 @@ function overwriteAlwaysUseSuper(utils) {
        * @return {boolean} true if the ControllerPromise polling value
        * satisfies the `expect` chain.
        */
-      const valueSatisfiesExpectation = value => {
+      const valueSatisfiesExpectation = (value) => {
         try {
           // Tell chai to use value as the subject of the expect chain.
           flag(this, 'object', value);
@@ -217,14 +227,22 @@ function overwriteAlwaysUseSuper(utils) {
   };
 }
 
+/**
+ * @param {Chai.AssertionStatic} _super
+ * @return {Function(): *}
+ */
 function inheritChainingBehavior(_super) {
-  return function() {
+  return function () {
     _super.apply(this, arguments);
   };
 }
 
+/**
+ * @param {Chai.AssertionStatic} _super
+ * @return {Function(): *}
+ */
 function overwriteUnsupported(_super) {
-  return function() {
+  return function () {
     const obj = this._obj;
     const isControllerPromise = obj instanceof ControllerPromise;
     if (isControllerPromise) {
@@ -236,8 +254,48 @@ function overwriteUnsupported(_super) {
   };
 }
 
+/**
+ * @param {*} _networkLogger
+ */
+function installBrowserAssertions(_networkLogger) {
+  networkLogger = _networkLogger;
+  chai.use(installBrowserWrappers);
+}
+
+/**
+ * @param {chai.ChaiStatic} chai
+ * @param {chai.ChaiUtils} utils
+ */
+function installBrowserWrappers(chai, utils) {
+  const {Assertion} = chai;
+
+  // Assert that a request with a testUrl was sent
+  // Example usage: await expect(testUrl).to.have.been.sent;
+  utils.addProperty(Assertion.prototype, 'sent', async function () {
+    const url = this._obj;
+    const requests = await networkLogger.getSentRequests(url);
+    this.assert(0 < requests.length, 'expected #{this} to have been sent');
+  });
+  Assertion.overwriteProperty('sent', overwriteAlwaysUseSuper(utils));
+
+  // Assert that a request was sent n number of times
+  // Example usage: await expect(testUrl).to.have.sentCount(n);
+  utils.addMethod(Assertion.prototype, 'sentCount', async function (count) {
+    const url = this._obj;
+    const requests = await networkLogger.getSentRequests(url);
+    this.assert(
+      count === requests.length,
+      `expected #{this} to have been sent ${
+        count == 1 ? 'once' : count + ' times'
+      }`
+    );
+  });
+  Assertion.overwriteMethod('sentCount', overwriteAlwaysUseSuper(utils));
+}
+
 module.exports = {
   clearLastExpectError,
   expect,
   getLastExpectError,
+  installBrowserAssertions,
 };

@@ -15,8 +15,17 @@
  */
 
 import '../amp-brightcove';
+import * as consent from '../../../../src/consent';
+import {BaseElement} from '../../../../src/base-element';
+import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
+import {
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
+import {macroTask} from '../../../../testing/yield';
 import {parseUrlDeprecated} from '../../../../src/url';
 
 describes.realWin(
@@ -24,92 +33,104 @@ describes.realWin(
   {
     amp: {
       extensions: ['amp-brightcove'],
+      runtimeOn: true,
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+
+      // make sync
+      env.sandbox
+        .stub(BaseElement.prototype, 'mutateElement')
+        .callsFake((mutator) => {
+          mutator();
+        });
     });
 
-    function getBrightcove(attributes, opt_responsive) {
-      const bc = doc.createElement('amp-brightcove');
-      for (const key in attributes) {
-        bc.setAttribute(key, attributes[key]);
-      }
-      bc.setAttribute('width', '111');
-      bc.setAttribute('height', '222');
-      if (opt_responsive) {
-        bc.setAttribute('layout', 'responsive');
-      }
-      doc.body.appendChild(bc);
-      return bc
-        .build()
-        .then(() => bc.layoutCallback())
-        .then(() => bc);
+    async function getBrightcoveBuild(attributes) {
+      const element = createElementWithAttributes(doc, 'amp-brightcove', {
+        width: '111',
+        height: '222',
+        ...attributes,
+      });
+
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
+
+      return element;
     }
 
-    function fakePostMessage(bc, info) {
-      bc.implementation_.handlePlayerMessage_({
+    async function getBrightcove(attributes) {
+      const element = await getBrightcoveBuild(attributes);
+      const impl = await element.getImpl(false);
+
+      await element.signals().whenSignal(CommonSignals.LOAD_START);
+
+      // Wait for the promise in layoutCallback() to resolve
+      await macroTask();
+
+      try {
+        fakePostMessage(impl, {event: 'ready'});
+      } catch (_) {
+        // This fails when the iframe is not available (after layoutCallback
+        // fails) in which case awaiting the LOAD_END sigal below will throw.
+      }
+
+      await element.signals().whenSignal(CommonSignals.LOAD_END);
+
+      return element;
+    }
+
+    function fakePostMessage(impl, info) {
+      impl.handlePlayerMessage_({
         origin: 'https://players.brightcove.net',
-        source: bc.querySelector('iframe').contentWindow,
+        source: impl.element.querySelector('iframe').contentWindow,
         data: JSON.stringify(info),
       });
     }
+
+    it('should not remove `dock`', async () => {
+      const element = await getBrightcoveBuild({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+        'dock': '',
+      });
+      expect(element.hasAttribute('dock')).to.be.true;
+    });
 
     it('renders', () => {
       return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
           'https://players.brightcove.net/1290862519001/default_default' +
-            '/index.html?videoId=ref:amp-test-video&playsinline=true'
+            '/index.html?amp=1' +
+            '&videoId=ref:amp-test-video&playsinline=true'
         );
       });
     });
 
-    it('renders responsively', () => {
-      return getBrightcove(
-        {
-          'data-account': '1290862519001',
-          'data-video-id': 'ref:amp-test-video',
-        },
-        true
-      ).then(bc => {
-        const iframe = bc.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    it('removes iframe after unlayoutCallback', async () => {
+      const bc = await getBrightcove({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
       });
-    });
-
-    it('requires data-account', () => {
-      expectAsyncConsoleError(/The data-account attribute is required for/, 1);
-      return getBrightcove({}).should.eventually.be.rejectedWith(
-        /The data-account attribute is required for/
-      );
-    });
-
-    it('removes iframe after unlayoutCallback', () => {
-      return getBrightcove(
-        {
-          'data-account': '1290862519001',
-          'data-video-id': 'ref:amp-test-video',
-        },
-        true
-      ).then(bc => {
-        const iframe = bc.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        const obj = bc.implementation_;
-        obj.unlayoutCallback();
-        expect(bc.querySelector('iframe')).to.be.null;
-        expect(obj.iframe_).to.be.null;
-      });
+      const obj = await bc.getImpl();
+      const iframe = bc.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      obj.unlayoutCallback();
+      expect(bc.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
     });
 
     it('should pass data-param-* attributes to the iframe src', () => {
@@ -117,10 +138,22 @@ describes.realWin(
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-param-my-param': 'hello world',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         const params = parseUrlDeprecated(iframe.src).search.split('&');
         expect(params).to.contain('myParam=hello%20world');
+      });
+    });
+
+    it('should exclude data-param-autoplay attribute', () => {
+      return getBrightcove({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+        'data-param-autoplay': 'muted',
+      }).then((bc) => {
+        const iframe = bc.querySelector('iframe');
+        const params = parseUrlDeprecated(iframe.src).search.split('&');
+        expect(params).to.not.contain('autoplay');
       });
     });
 
@@ -128,12 +161,13 @@ describes.realWin(
       return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).to.equal(
           'https://players.brightcove.net/1290862519001/default_default' +
-            '/index.html?videoId=ref:amp-test-video&playsinline=true'
+            '/index.html?amp=1' +
+            '&videoId=ref:amp-test-video&playsinline=true'
         );
 
         bc.setAttribute('data-account', '12345');
@@ -145,7 +179,8 @@ describes.realWin(
 
         expect(iframe.src).to.equal(
           'https://players.brightcove.net/' +
-            '12345/default_default/index.html?videoId=abcdef&playsinline=true'
+            '12345/default_default/index.html?amp=1' +
+            '&videoId=abcdef&playsinline=true'
         );
       });
     });
@@ -155,7 +190,7 @@ describes.realWin(
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-playlist-id': 'ref:test-playlist',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).to.contain('playlistId=ref:test-playlist');
@@ -166,7 +201,7 @@ describes.realWin(
     it('should allow both playlist and video id to be unset', () => {
       return getBrightcove({
         'data-account': '1290862519001',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).not.to.contain('&playlistId');
@@ -178,7 +213,7 @@ describes.realWin(
       return getBrightcove({
         'data-account': '1290862519001',
         'data-referrer': 'COUNTER',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).to.contain('referrer=1');
@@ -190,89 +225,132 @@ describes.realWin(
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-param-playsinline': 'false',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).to.contain('playsinline=true');
       });
     });
 
-    it('should forward events', () => {
+    it('should forward events', async () => {
+      const bc = await getBrightcove({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+      });
+      const impl = await bc.getImpl();
+      return Promise.resolve()
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.LOAD);
+          fakePostMessage(impl, {event: 'ready', muted: false, playing: false});
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.LOADEDMETADATA);
+          fakePostMessage(impl, {
+            event: 'loadedmetadata',
+            muted: false,
+            playing: false,
+          });
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.AD_START);
+          fakePostMessage(impl, {
+            event: 'ads-ad-started',
+            muted: false,
+            playing: false,
+          });
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.AD_END);
+          fakePostMessage(impl, {
+            event: 'ads-ad-ended',
+            muted: false,
+            playing: false,
+          });
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.PLAYING);
+          fakePostMessage(impl, {
+            event: 'playing',
+            muted: false,
+            playing: true,
+          });
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.MUTED);
+          fakePostMessage(impl, {
+            event: 'volumechange',
+            muted: true,
+            playing: true,
+          });
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.UNMUTED);
+          fakePostMessage(impl, {
+            event: 'volumechange',
+            muted: false,
+            playing: true,
+          });
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.PAUSE);
+          fakePostMessage(impl, {event: 'pause', muted: false, playing: false});
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.ENDED);
+          fakePostMessage(impl, {event: 'ended', muted: false, playing: false});
+          return p;
+        });
+    });
+
+    it('should propagate consent state to iframe', () => {
+      env.sandbox
+        .stub(consent, 'getConsentPolicyState')
+        .resolves(CONSENT_POLICY_STATE.SUFFICIENT);
+      env.sandbox
+        .stub(consent, 'getConsentPolicySharedData')
+        .resolves({a: 1, b: 2});
+      env.sandbox.stub(consent, 'getConsentPolicyInfo').resolves('abc');
+
       return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
-      }).then(bc => {
-        return Promise.resolve()
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.LOAD);
-            fakePostMessage(bc, {event: 'ready', muted: false, playing: false});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.LOADEDMETADATA);
-            fakePostMessage(bc, {
-              event: 'loadedmetadata',
-              muted: false,
-              playing: false,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.AD_START);
-            fakePostMessage(bc, {
-              event: 'ads-ad-started',
-              muted: false,
-              playing: false,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.AD_END);
-            fakePostMessage(bc, {
-              event: 'ads-ad-ended',
-              muted: false,
-              playing: false,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PLAYING);
-            fakePostMessage(bc, {
-              event: 'playing',
-              muted: false,
-              playing: true,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.MUTED);
-            fakePostMessage(bc, {
-              event: 'volumechange',
-              muted: true,
-              playing: true,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.UNMUTED);
-            fakePostMessage(bc, {
-              event: 'volumechange',
-              muted: false,
-              playing: true,
-            });
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PAUSE);
-            fakePostMessage(bc, {event: 'pause', muted: false, playing: false});
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.ENDED);
-            fakePostMessage(bc, {event: 'ended', muted: false, playing: false});
-            return p;
-          });
+        'data-block-on-consent': '_till_accepted',
+      }).then((bc) => {
+        const iframe = bc.querySelector('iframe');
+
+        expect(iframe.src).to.contain(
+          `ampInitialConsentState=${CONSENT_POLICY_STATE.SUFFICIENT}`
+        );
+        expect(iframe.src).to.contain(
+          `ampConsentSharedData=${encodeURIComponent(
+            JSON.stringify({a: 1, b: 2})
+          )}`
+        );
+        expect(iframe.src).to.contain('ampInitialConsentValue=abc');
       });
+    });
+
+    it('should distinguish autoplay', async () => {
+      const bc = await getBrightcove({
+        'data-account': '1290862519001',
+        'data-video-id': 'ref:amp-test-video',
+      });
+      const impl = await bc.getImpl();
+      const spy = env.sandbox.spy(impl, 'sendCommand_');
+
+      impl.play(true);
+      expect(spy).to.be.calledWith('play', true);
+
+      impl.play(false);
+      expect(spy).to.be.calledWith('play', false);
     });
   }
 );

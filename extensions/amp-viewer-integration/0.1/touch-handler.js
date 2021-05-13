@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {listen} from '../../../src/event-helper';
 
 /**
@@ -113,7 +113,7 @@ export class TouchHandler {
    * @private
    */
   unlisten_() {
-    this.unlistenHandlers_.forEach(unlisten => unlisten());
+    this.unlistenHandlers_.forEach((unlisten) => unlisten());
     this.unlistenHandlers_.length = 0;
   }
 
@@ -138,6 +138,12 @@ export class TouchHandler {
    * @private
    */
   forwardEvent_(e) {
+    // Check if an AMP component is signaling that we should
+    // stop propagation of the event from bubbling up to the viewer
+    if (e?.shouldViewerCancelPropagation) {
+      e.stopImmediatePropagation();
+      return;
+    }
     if (e && e.type) {
       const msg = this.copyTouchEvent_(e);
       this.messaging_.sendRequest(e.type, msg, false);

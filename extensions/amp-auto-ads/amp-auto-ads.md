@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Dynamically injects ads into an AMP page by using a remotely-served configuration file.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,40 +24,14 @@ limitations under the License.
 
 # amp-auto-ads
 
+## Usage
+
 Dynamically injects ads into an AMP page by using a remotely-served configuration file.
 
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Experimental</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <code>
-        &lt;script async custom-element="amp-auto-ads"
-        src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">&lt;/script>
-      </code>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty">
-      <strong>
-        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">
-          Supported Layouts
-        </a>
-      </strong>
-    </td>
-    <td>N/A</td>
-  </tr>
-</table>
-
-[TOC]
-
-## Behavior
 Given a sufficient number of valid placements (supplied in the configuration),
 `amp-auto-ads` tries to insert additional ads while adhering to a set of
 constraints specified by the ad network. These constraints will limit:
+
 <ul>
   <li>The total number of ads that can be inserted</li>
   <li>The minimum distance that there should be between any adjacent ads</li>
@@ -68,39 +43,26 @@ The `<amp-auto-ads>` tag should be placed as the first child of the `<body>`.
 
 The ad network type and any additional information (required by the ad network)
 should be specified on the tag.
+
 ```html
-<amp-auto-ads
-    type="adsense"
-    data-ad-client="ca-pub-5439573510495356">
+<amp-auto-ads type="adsense" data-ad-client="ca-pub-5439573510495356">
 </amp-auto-ads>
 ```
 
-## Supported ad networks
-- [AdSense](../../ads/google/adsense.md)
-- [Denakop](https://denakop.com)
-- [DoubleClick (experimental)](../../ads/google/doubleclick.md)
+### Supported ad networks
 
-## Attributes
-<table>
-  <tr>
-    <td width="40%"><strong>type (required)</strong></td>
-    <td>An identifier for the ad network.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-foo-bar</strong></td>
-    <td>Most ad networks require further configuration, which can be passed to the network by using HTML <code>data-</code> attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar". See the documentation for the <a href="#supported-ad-networks">ad network</a> on which attributes can be used.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
+-   [AdSense](../../ads/google/adsense.md)
+-   [Alright](https://alright.com.br)
+-   [Denakop](https://denakop.com)
+-   [DoubleClick (experimental)](../../ads/google/doubleclick.md)
+-   [FirstImpression.io](https://www.firstimpression.io)
+-   [Premium Programmatic](https://premiumads.com.br)
 
-## Configuration Spec
+### Configuration Spec
 
 The configuration defines where on the page `<amp-auto-ads>` can place ads. The configuration is fetched from a third-party ad network at the URL defined in `ad-network-config.js`. The configuration should be a serialized JSON object matching the [`ConfigObj`](#configobj) definition described below.
 
-### Example Configuration
+#### Example Configuration
 
 The following example specifies that the ad should be positioned immediately
 positions immediately after all `<P class='paragraph'>` elements that are within the third `<DIV id='domId'>` on the page. An ad placed in any of these positions should be of type BANNER and have a top margin of 4px and a bottom margin of 10px.
@@ -114,22 +76,23 @@ positions immediately after all `<P class='paragraph'>` elements that are within
         "index": 2,
         "sub": {
           "selector": "P.paragraph",
-          "all": true,
-        },
+          "all": true
+        }
       },
       "pos": 4,
       "type": 1,
       "style": {
         "top_m": 5,
-        "bot_m": 10,
-      },
-    },
+        "bot_m": 10
+      }
+    }
   ]
 }
 ```
-### Object Definitions
 
-#### ConfigObj
+#### Object Definitions
+
+##### ConfigObj
 
 The fields to specify in the configuration object:
 
@@ -159,13 +122,13 @@ The fields to specify in the configuration object:
     <td><code>adConstraints</code></td>
     <td>AdConstraintsObj</td>
     <td>
-      An <em>optional</em> field that specifies the contraints that should be used when placing ads on the page. If not specified then
+      An <em>optional</em> field that specifies the constraints that should be used when placing ads on the page. If not specified then
       <code>amp-auto-ads</code> will attempt to use the default constraints specified in [ad-network-config.js](0.1/ad-network-config.js).
     </td>
   </tr>
 </table>
 
-#### PlacementObj
+##### PlacementObj
 
 The fields to specify in the `placements` configuration object:
 
@@ -219,7 +182,7 @@ The fields to specify in the `placements` configuration object:
   </tr>
 </table>
 
-#### AnchorObj
+##### AnchorObj
 
 The fields to specify in the `anchor` configuration object:
 
@@ -259,7 +222,7 @@ The fields to specify in the `anchor` configuration object:
   </tr>
 </table>
 
-#### PlacementStyleObj
+##### PlacementStyleObj
 
 The fields to specify in the `style` configuration object:
 
@@ -283,7 +246,7 @@ The fields to specify in the `style` configuration object:
   </tr>
 </table>
 
-#### RelativePositionEnum
+##### RelativePositionEnum
 
 The ENUM values for the `pos` field in the `placements` configuration object:
 
@@ -315,7 +278,7 @@ The ENUM values for the `pos` field in the `placements` configuration object:
   </tr>
 </table>
 
-#### AttributesEnum
+##### AttributesEnum
 
 The ENUM value indicates attributes from configuration object for different ad formats:
 
@@ -337,7 +300,7 @@ The ENUM value indicates attributes from configuration object for different ad f
   </tr>
 </table>
 
-#### PlacementTypeEnum
+##### PlacementTypeEnum
 
 The ENUM values for the `type` field in the `placements` configuration object:
 
@@ -354,7 +317,7 @@ The ENUM values for the `type` field in the `placements` configuration object:
   </tr>
 </table>
 
-#### AdConstraintsObj
+##### AdConstraintsObj
 
 The fields to specify in the `adConstraints` configuration object:
 
@@ -394,11 +357,12 @@ The fields to specify in the `adConstraints` configuration object:
   </tr>
 </table>
 
-#### SubsequentMinSpacingObj
+##### SubsequentMinSpacingObj
 
 The fields to specify in the `subsequentMinSpacing` configuration object. `subsequentMinSpacing` entries
 can be used to change the spacing required between any additional ads based on the number of ads already on
 the page. As an example, consider the following scenario:
+
 <ul>
   <li>2 existing ads on the page</li>
   <li>subsequentMinSpacing field is:
@@ -449,6 +413,27 @@ it to be clear of other ads by at least 1000px.
   </tr>
 </table>
 
+## Attributes
+
+### `type` (required)
+
+An identifier for the ad network.
+
+### `data-foo-bar`
+
+Most ad networks require further configuration, which can be passed to the
+network by using HTML `data–` attributes. The parameter names are subject to
+standard data attribute dash to camel case conversion. For example,
+"data-foo-bar" is send to the ad for configuration as "fooBar". See the
+documentation for the
+[ad network](#supported-ad-networks)
+on which attributes can be used.
+
+### common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
+
 ## Validation
 
-See [amp-auto-ads rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-auto-ads/validator-amp-auto-ads.protoascii) in the AMP validator specification.
+See [amp-auto-ads rules](validator-amp-auto-ads.protoascii) in the AMP validator specification.

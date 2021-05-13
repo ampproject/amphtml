@@ -15,27 +15,26 @@
  */
 
 import {
+  ALLOWLISTED_ATTRS,
+  ALLOWLISTED_ATTRS_BY_TAGS,
+  ALLOWLISTED_TARGETS,
   BIND_PREFIX,
-  BLACKLISTED_TAGS,
-  EMAIL_WHITELISTED_AMP_TAGS,
-  TRIPLE_MUSTACHE_WHITELISTED_TAGS,
-  WHITELISTED_ATTRS,
-  WHITELISTED_ATTRS_BY_TAGS,
-  WHITELISTED_TARGETS,
+  DENYLISTED_TAGS,
+  EMAIL_ALLOWLISTED_AMP_TAGS,
+  TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
   isValidAttr,
-} from './sanitation';
-import {dict} from './utils/object';
+} from './purifier/sanitation';
+import {dict} from './core/types/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {isAmp4Email} from './format';
 import {rewriteAttributeValue} from './url-rewrite';
-import {startsWith} from './string';
 import {user} from './log';
 
 /** @private @const {string} */
 const TAG = 'sanitizer';
 
 /**
- * Whitelist of supported self-closing tags for Caja. These are used for
+ * Allowlist of supported self-closing tags for Caja. These are used for
  * correct parsing on Caja and are not necessary for DOMPurify which uses
  * the browser's HTML parser.
  * @const {!Object<string, boolean>}
@@ -64,7 +63,7 @@ const SELF_CLOSING_TAGS = dict({
  * Only needed in Caja. Internally supported by DOMPurify.
  * @const {!RegExp}
  */
-const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
+const ALLOWLISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
 
 /**
  * Sanitizes the provided HTML.
@@ -78,33 +77,34 @@ const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
  * @return {string}
  */
 export function sanitizeHtml(html, doc) {
-  const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
+  const tagPolicy = htmlSanitizer.makeTagPolicy((parsed) =>
     parsed.getScheme() === 'https' ? parsed : null
   );
   const output = [];
   let ignore = 0;
 
-  const emit = content => {
+  const emit = (content) => {
     if (ignore == 0) {
       output.push(content);
     }
   };
 
   // No Caja support for <script> or <svg>.
-  const cajaBlacklistedTags = Object.assign(
-    {'script': true, 'svg': true},
-    BLACKLISTED_TAGS
-  );
+  const cajaDenylistedTags = {
+    'script': true,
+    'svg': true,
+    ...DENYLISTED_TAGS,
+  };
 
   const parser = htmlSanitizer.makeSaxParser({
-    'startTag': function(tagName, attribs) {
+    'startTag': function (tagName, attribs) {
       if (ignore > 0) {
         if (!SELF_CLOSING_TAGS[tagName]) {
           ignore++;
         }
         return;
       }
-      const isAmpElement = startsWith(tagName, 'amp-');
+      const isAmpElement = tagName.startsWith('amp-');
       // Preprocess "binding" attributes, e.g. [attr], by stripping enclosing
       // brackets before custom validation and restoring them afterwards.
       const bindingAttribs = [];
@@ -114,7 +114,7 @@ export function sanitizeHtml(html, doc) {
           continue;
         }
         const classicBinding = attr[0] == '[' && attr[attr.length - 1] == ']';
-        const alternativeBinding = startsWith(attr, BIND_PREFIX);
+        const alternativeBinding = attr.startsWith(BIND_PREFIX);
         if (classicBinding) {
           attribs[i] = attr.slice(1, -1);
         }
@@ -123,21 +123,20 @@ export function sanitizeHtml(html, doc) {
         }
       }
 
-      if (cajaBlacklistedTags[tagName]) {
+      if (cajaDenylistedTags[tagName]) {
         ignore++;
       } else if (isAmpElement) {
-        // Enforce AMP4EMAIL tag whitelist at runtime.
-        if (isAmp4Email(doc) && !EMAIL_WHITELISTED_AMP_TAGS[tagName]) {
+        // Enforce AMP4EMAIL tag allowlist at runtime.
+        if (isAmp4Email(doc) && !EMAIL_ALLOWLISTED_AMP_TAGS[tagName]) {
           ignore++;
         }
       } else {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
-        const scrubbed = /** @type {!JsonObject} */ (tagPolicy(
-          tagName,
-          attribs
-        ));
+        const scrubbed = /** @type {!JsonObject} */ (
+          tagPolicy(tagName, attribs)
+        );
         if (!scrubbed) {
           ignore++;
         } else {
@@ -146,13 +145,13 @@ export function sanitizeHtml(html, doc) {
           // for, such as "on".
           for (let i = 0; i < attribs.length; i += 2) {
             const attrName = attribs[i];
-            if (WHITELISTED_ATTRS.includes(attrName)) {
+            if (ALLOWLISTED_ATTRS.includes(attrName)) {
               attribs[i + 1] = savedAttribs[i + 1];
-            } else if (attrName.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
+            } else if (attrName.search(ALLOWLISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
             } else if (
-              WHITELISTED_ATTRS_BY_TAGS[tagName] &&
-              WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrName)
+              ALLOWLISTED_ATTRS_BY_TAGS[tagName] &&
+              ALLOWLISTED_ATTRS_BY_TAGS[tagName].includes(attrName)
             ) {
               attribs[i + 1] = savedAttribs[i + 1];
             }
@@ -176,7 +175,7 @@ export function sanitizeHtml(html, doc) {
           let origTarget = index != -1 ? savedAttribs[index] : null;
           if (origTarget != null) {
             origTarget = origTarget.toLowerCase();
-            if (WHITELISTED_TARGETS.indexOf(origTarget) != -1) {
+            if (ALLOWLISTED_TARGETS.indexOf(origTarget) != -1) {
               attribs[index] = origTarget;
             } else {
               attribs[index] = '_top';
@@ -193,7 +192,7 @@ export function sanitizeHtml(html, doc) {
         return;
       }
       // Filter out bindings with empty attribute values.
-      const hasBindings = bindingAttribs.some(i => !!attribs[i + 1]);
+      const hasBindings = bindingAttribs.some((i) => !!attribs[i + 1]);
       if (hasBindings) {
         // Set a custom attribute to identify elements with bindings.
         // This is an optimization that avoids the need for a DOM scan later.
@@ -213,7 +212,7 @@ export function sanitizeHtml(html, doc) {
           continue;
         }
         emit(' ');
-        if (bindingAttribs.includes(i) && !startsWith(attrName, BIND_PREFIX)) {
+        if (bindingAttribs.includes(i) && !attrName.startsWith(BIND_PREFIX)) {
           emit(`[${attrName}]`);
         } else {
           emit(attrName);
@@ -231,7 +230,7 @@ export function sanitizeHtml(html, doc) {
       }
       emit('>');
     },
-    'endTag': function(tagName) {
+    'endTag': function (tagName) {
       if (ignore > 0) {
         ignore--;
         return;
@@ -279,7 +278,7 @@ function tripleMustacheTagPolicy(tagName, attribs) {
       }
     }
   }
-  if (!TRIPLE_MUSTACHE_WHITELISTED_TAGS.includes(tagName)) {
+  if (!TRIPLE_MUSTACHE_ALLOWLISTED_TAGS.includes(tagName)) {
     return null;
   }
   return {

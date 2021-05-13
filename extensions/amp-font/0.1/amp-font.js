@@ -69,6 +69,11 @@ const DEFAULT_SIZE_ = 'medium';
 const CACHED_FONT_LOAD_TIME_ = 100;
 
 export class AmpFont extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -87,11 +92,6 @@ export class AmpFont extends AMP.BaseElement {
 
     /** @private {?FontLoader} */
     this.fontLoader_ = null;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */
@@ -127,7 +127,7 @@ export class AmpFont extends AMP.BaseElement {
       .then(() => {
         this.onFontLoadSuccess_();
       })
-      .catch(unusedError => {
+      .catch((unusedError) => {
         this.onFontLoadError_();
         user().warn(TAG, 'Font download timed out for ' + this.fontFamily_);
       });
@@ -197,6 +197,6 @@ export class AmpFont extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpFont);
 });

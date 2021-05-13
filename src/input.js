@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
+import {Observable} from './core/data-structures/observable';
 import {Services} from './services';
 import {dev} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
@@ -84,11 +84,27 @@ export class Input {
     // mouse events.
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
-      this.boundOnMouseMove_ = /** @type {function(!Event)} */ (this.onMouseMove_.bind(
-        this
-      ));
+      this.boundOnMouseMove_ = /** @type {function(!Event)} */ (
+        this.onMouseMove_.bind(this)
+      );
       listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
+  }
+
+  /**
+   * See https://github.com/ampproject/amphtml/blob/main/spec/amp-css-classes.md#input-mode-classes
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  setupInputModeClasses(ampdoc) {
+    this.onTouchDetected((detected) => {
+      this.toggleInputClass_(ampdoc, 'amp-mode-touch', detected);
+    }, true);
+    this.onMouseDetected((detected) => {
+      this.toggleInputClass_(ampdoc, 'amp-mode-mouse', detected);
+    }, true);
+    this.onKeyboardStateChanged((active) => {
+      this.toggleInputClass_(ampdoc, 'amp-mode-keyboard-active', active);
+    }, true);
   }
 
   /**
@@ -155,6 +171,21 @@ export class Input {
   }
 
   /**
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} clazz
+   * @param {boolean} on
+   * @private
+   */
+  toggleInputClass_(ampdoc, clazz, on) {
+    ampdoc.waitForBodyOpen().then((body) => {
+      const vsync = Services./*OK*/ vsyncFor(this.win);
+      vsync.mutate(() => {
+        body.classList.toggle(clazz, on);
+      });
+    });
+  }
+
+  /**
    * @param {!Event} e
    * @private
    */
@@ -218,7 +249,7 @@ export class Input {
       this.win.document,
       'click',
       /* capture */ undefined,
-      unlistener => {
+      (unlistener) => {
         unlisten = unlistener;
       }
     );

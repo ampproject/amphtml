@@ -13,13 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /** @enum {string} */
 export const GrantReason = {
   'SUBSCRIBER': 'SUBSCRIBER',
   'METERING': 'METERING',
+  'FREE': 'UNLOCKED',
+  'LAA': 'LAA',
 };
+
+/**
+ * The constructor arg for an {@link Entitlement}
+ *
+ * @typedef {{
+ *   source: string,
+ *   raw: string,
+ *   service: string,
+ *   granted: boolean,
+ *   grantReason: ?GrantReason,
+ *   dataObject: ?JsonObject,
+ *   decryptedDocumentKey: ?string
+ * }} EntitlementConstructorInputDef
+ */
 
 /**
  * The single entitlement object.
@@ -39,24 +55,18 @@ export class Entitlement {
   }
 
   /**
-   * @param {Object} input
-   * @param {string} [input.source]
-   * @param {string} [input.raw]
-   * @param {string} [input.service]
-   * @param {boolean} [input.granted]
-   * @param {?GrantReason} [input.grantReason]
-   * @param {?JsonObject} [input.dataObject]
-   * @param {?string} [input.decryptedDocumentKey]
+   * @param {!EntitlementConstructorInputDef} input
    */
-  constructor({
-    source,
-    raw = '',
-    service,
-    granted = false,
-    grantReason = '',
-    dataObject,
-    decryptedDocumentKey,
-  }) {
+  constructor(input) {
+    const {
+      source,
+      raw = '',
+      service,
+      granted = false,
+      grantReason = '',
+      dataObject,
+      decryptedDocumentKey,
+    } = input;
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
@@ -94,11 +104,7 @@ export class Entitlement {
    * @return {!JsonObject}
    */
   jsonForPingback() {
-    return /** @type {!JsonObject} */ (Object.assign(
-      {},
-      {'raw': this.raw},
-      this.json()
-    ));
+    return /** @type {!JsonObject} */ ({'raw': this.raw, ...this.json()});
   }
 
   /**
@@ -128,10 +134,18 @@ export class Entitlement {
   }
 
   /**
-   * Returns if the user is a subscriber.
+   * Returns true if the user is a subscriber.
    * @return {boolean}
    */
   isSubscriber() {
     return this.granted && this.grantReason === GrantReason.SUBSCRIBER;
+  }
+
+  /**
+   * Returns true if the article is free.
+   * @return {boolean}
+   */
+  isFree() {
+    return this.granted && this.grantReason === GrantReason.FREE;
   }
 }

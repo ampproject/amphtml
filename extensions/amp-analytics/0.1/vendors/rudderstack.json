@@ -1,0 +1,40 @@
+{
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  },
+  "requestOrigin": "${dataPlaneUrl}",
+  "requests": {
+    "base": "?writeKey=${writeKey}&context.library.name=Rudderstack AMP SDK&context.library.version=1.0.0&context.platform=AMP&anonymousId=${anonymousId}&context.locale=${browserLanguage}&context.userAgent=${userAgent}&context.page.path=${canonicalPath}&context.page.url=${canonicalUrl}&context.page.referrer=${documentReferrer}&context.page.title=${title}&context.screen.width=${screenWidth}&context.screen.height=${screenHeight}",
+    "page": {
+      "baseUrl": "/pixel/v1/page${base}&properties.path=${canonicalPath}&properties.url=${canonicalUrl}&properties.referrer=${documentReferrer}&properties.title=${title}&name=${pageName}"
+    },
+    "track": {
+      "baseUrl": "/pixel/v1/track${base}&event=${eventName}"
+    }
+  },
+  "vars": {
+    "anonymousId": "CLIENT_ID(rl_anonymous_id)",
+    "dataPlaneUrl": "https://hosted.rudderlabs.com"
+  },
+  "triggers": {
+    "pageView": {
+      "on": "visible",
+      "request": "page"
+    }
+  },
+  "linkers": {
+    "rudderstack": {
+      "ids": {
+        "rs_amp_id": "${anonymousId}"
+      },
+      "proxyOnly": false
+    }
+  },
+  "cookies": {
+    "rl_anonymous_id": {
+      "value": "LINKER_PARAM(rudderstack, rs_amp_id)"
+    }
+  }
+}

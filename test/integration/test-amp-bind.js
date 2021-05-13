@@ -16,14 +16,14 @@
 import {BrowserController} from '../../testing/test-helper';
 import {poll as classicPoll} from '../../testing/iframe';
 
-const TIMEOUT = 15000;
+const TIMEOUT = 10000;
 
 // Skip Edge, which throws "Permission denied" errors when inspecting
 // element properties in the testing iframe (Edge 17, Windows 10).
-describe
+describes.sandboxed
   .configure()
   .skipEdge()
-  .run('amp-bind', function() {
+  .run('amp-bind', {}, function () {
     this.timeout(TIMEOUT);
 
     // Helper that sets the poll timeout.
@@ -34,16 +34,14 @@ describe
     describes.integration(
       'basic',
       {
-        /* eslint-disable max-len */
         body: `
       <button on="tap:AMP.setState({t: 'after_text'})" id="changeText"></button>
       <button on="tap:AMP.setState({c: 'after_class'})" id="changeClass"></button>
       <p class="before_class" [class]="c" [text]="t">before_text</p>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-bind'],
       },
-      env => {
+      (env) => {
         let browser;
         let doc;
         let text;
@@ -54,14 +52,14 @@ describe
           browser = new BrowserController(env.win);
         });
 
-        it('[text]', function*() {
+        it('[text]', function* () {
           expect(text.textContent).to.equal('before_text');
           yield browser.wait(200);
           browser.click('#changeText');
           yield poll('[text]', () => text.textContent === 'after_text');
         });
 
-        it('[class]', function*() {
+        it('[class]', function* () {
           expect(text.className).to.equal('before_class');
           yield browser.wait(200);
           browser.click('#changeClass');
@@ -86,7 +84,7 @@ describe
     `,
         extensions: ['amp-bind'],
       },
-      env => {
+      (env) => {
         let doc, img;
 
         beforeEach(() => {
@@ -129,7 +127,6 @@ describe
     describes.integration(
       '+ forms',
       {
-        /* eslint-disable max-len */
         body: `
       <input type="range" min=0 max=100 value=0 on="change:AMP.setState({rangeChange: event})">
       <p id="range" [text]="rangeChange.min + ' <= ' + rangeChange.value + ' <= ' + rangeChange.max">before_range</p>
@@ -141,10 +138,9 @@ describe
       <input type="radio" on="change:AMP.setState({radioChange: event})">
       <p id="radio" [text]="'checked: ' + radioChange.checked" id="radioText">before_radio</p>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-bind'],
       },
-      env => {
+      (env) => {
         let doc;
 
         beforeEach(() => {
@@ -170,7 +166,7 @@ describe
           poll('[text]', () => checkboxText.textContent === 'checked: true');
         });
 
-        it('[checked]', function*() {
+        it('[checked]', function* () {
           const checkbox = doc.querySelector('input[type="checkbox"]');
           const button = doc.querySelector('button');
 
@@ -202,7 +198,6 @@ describe
     describes.integration(
       '+ amp-carousel',
       {
-        /* eslint-disable max-len */
         body: `
       <button on="tap:AMP.setState({slide: 1})" id="goToSlideOne"></button>
       <p [text]="slide">0</p>
@@ -212,10 +207,9 @@ describe
         <amp-img src="http://example.com/bar.jpg" width=10 height=10></amp-img>
       </amp-carousel>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-bind', 'amp-carousel'],
       },
-      env => {
+      (env) => {
         let doc, carousel, slideText;
 
         beforeEach(() => {
@@ -237,7 +231,7 @@ describe
           return poll('[slide]', () => slideText.textContent === '1');
         });
 
-        it('[slide]', function*() {
+        it('[slide]', function* () {
           const slides = carousel.querySelectorAll(
             '.i-amphtml-slide-item > amp-img'
           );
@@ -262,7 +256,6 @@ describe
       }
     );
 
-    /* eslint-disable max-len */
     const list = `
     <amp-state id="foo">
       <script type="application/json">
@@ -276,9 +269,8 @@ describe
       <p [text]="foo.bar"></p>
     </template>
   `;
-    /* eslint-enable max-len */
 
-    const listTests = env => {
+    const listTests = (env) => {
       let doc;
       let list;
       let browser;
@@ -300,11 +292,11 @@ describe
         );
       });
 
-      it('evaluate bindings in children', function*() {
+      it('evaluate bindings in children', function* () {
         yield browser.waitForElementLayout('amp-list');
         const children = list.querySelectorAll('p');
         expect(children.length).to.equal(3);
-        children.forEach(span => {
+        children.forEach((span) => {
           expect(span.textContent).to.equal('123');
         });
       });
@@ -331,7 +323,6 @@ describe
     describes.integration(
       '+ amp-selector',
       {
-        /* eslint-disable max-len */
         body: `
       <button on="tap:AMP.setState({selected: 2})"></button>
       <p [text]="selected"></p>
@@ -341,10 +332,9 @@ describe
         <amp-img src="/2.jpg" width=10 height=10 option=2></amp-img>
       </amp-selector>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-bind', 'amp-selector'],
       },
-      env => {
+      (env) => {
         let doc, images, selectedText;
 
         beforeEach(() => {
@@ -356,7 +346,7 @@ describe
           return browserController.waitForElementLayout('amp-selector');
         });
 
-        it('on:select', function*() {
+        it('on:select', function* () {
           expect(images[0].hasAttribute('selected')).to.be.false;
           expect(images[1].hasAttribute('selected')).to.be.false;
           expect(images[2].hasAttribute('selected')).to.be.false;
@@ -368,7 +358,7 @@ describe
           expect(images[2].hasAttribute('selected')).to.be.false;
         });
 
-        it('[selected]', function*() {
+        it('[selected]', function* () {
           const button = doc.querySelector('button');
           expect(images[0].hasAttribute('selected')).to.be.false;
           expect(images[1].hasAttribute('selected')).to.be.false;

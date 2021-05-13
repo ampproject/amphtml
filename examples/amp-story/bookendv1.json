@@ -3,7 +3,10 @@
   "shareProviders": [
     "email",
     {"provider": "facebook", "app_id": "254325784911610"},
-    {"provider": "twitter", "text": "This is custom share text that I would like for the Twitter platform"},
+    {
+      "provider": "twitter",
+      "text": "This is custom share text that I would like for the Twitter platform"
+    },
     "whatsapp",
     "pinterest",
     "line"
@@ -17,7 +20,8 @@
       "type": "small",
       "title": "This is an example article",
       "url": "/article.html",
-      "image": "http://placehold.it/500x600"
+      "image": "http://placehold.it/500x600",
+      "alt": "Example alt text for the image. If alt is not specified it will default to an empty string."
     },
     {
       "type": "small",

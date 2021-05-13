@@ -15,31 +15,52 @@
  */
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getVariableService} from './variable-service';
+import {map} from '../../../src/core/types/object';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
+/** @const {string} */
+export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
+
 /** @enum {string} */
-export const AnalyticsEvent = {
+export const StoryAnalyticsEvent = {
   BOOKEND_CLICK: 'story-bookend-click',
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
+  CLICK_THROUGH: 'story-click-through',
+  FOCUS: 'story-focus',
   LAST_PAGE_VISIBLE: 'story-last-page-visible',
+  OPEN: 'story-open',
+  CLOSE: 'story-close',
   PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
   PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
   PAGE_VISIBLE: 'story-page-visible',
+  INTERACTIVE: 'story-interactive',
+  STORY_CONTENT_LOADED: 'story-content-loaded',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
 };
 
-/** @enum {string} */
+/**
+ * @enum {string}
+ * Note: auto advance advancements should always be prefixed with "autoAdvance".
+ */
 export const AdvancementMode = {
   GO_TO_PAGE: 'goToPageAction',
   AUTO_ADVANCE_TIME: 'autoAdvanceTime',
   AUTO_ADVANCE_MEDIA: 'autoAdvanceMedia',
   MANUAL_ADVANCE: 'manualAdvance',
   ADVANCE_TO_ADS: 'manualAdvanceFromAd',
+  VIEWER_SELECT_PAGE: 'viewerSelectPage',
 };
+
+/** @typedef {!Object<string, !PageEventCountDef>} */
+let EventsPerPageDef;
+
+/** @typedef {!Object<string, number>} */
+let PageEventCountDef;
 
 /**
  * Util function to retrieve the analytics service. Ensures we can retrieve the
@@ -54,7 +75,9 @@ export const getAnalyticsService = (win, el) => {
 
   if (!service) {
     service = new StoryAnalyticsService(win, el);
-    registerServiceBuilder(win, 'story-analytics', () => service);
+    registerServiceBuilder(win, 'story-analytics', function () {
+      return service;
+    });
   }
 
   return service;
@@ -78,6 +101,9 @@ export class StoryAnalyticsService {
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(win);
 
+    /** @private {EventsPerPageDef} */
+    this.pageEventsMap_ = map();
+
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);
 
@@ -86,27 +112,30 @@ export class StoryAnalyticsService {
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.triggerEvent(
-        isActive ? AnalyticsEvent.BOOKEND_ENTER : AnalyticsEvent.BOOKEND_EXIT
+        isActive
+          ? StoryAnalyticsEvent.BOOKEND_ENTER
+          : StoryAnalyticsEvent.BOOKEND_EXIT
       );
     });
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
-      pageId => {
-        if (!pageId) {
+      (pageId) => {
+        const isAd = this.storeService_.get(StateProperty.AD_STATE);
+        if (!pageId || isAd) {
           return;
         }
 
-        this.triggerEvent(AnalyticsEvent.PAGE_VISIBLE);
+        this.triggerEvent(StoryAnalyticsEvent.PAGE_VISIBLE);
 
         const pageIds = this.storeService_.get(StateProperty.PAGE_IDS);
         const pageIndex = this.storeService_.get(
           StateProperty.CURRENT_PAGE_INDEX
         );
         if (pageIndex === pageIds.length - 1) {
-          this.triggerEvent(AnalyticsEvent.LAST_PAGE_VISIBLE);
+          this.triggerEvent(StoryAnalyticsEvent.LAST_PAGE_VISIBLE);
         }
       },
       true /* callToInitialize */
@@ -114,13 +143,63 @@ export class StoryAnalyticsService {
   }
 
   /**
-   * @param {!AnalyticsEvent} eventType
+   * @param {!StoryAnalyticsEvent} eventType
+   * @param {Element=} element
    */
-  triggerEvent(eventType) {
+  triggerEvent(eventType, element = null) {
+    this.incrementPageEventCount_(eventType);
+
     triggerAnalyticsEvent(
       this.element_,
       eventType,
-      this.variableService_.get()
+      this.updateDetails(eventType, element)
     );
+  }
+
+  /**
+   * Updates event details.
+   * @param {!StoryAnalyticsEvent} eventType
+   * @param {Element=} element
+   * @visibleForTesting
+   * @return {!JsonObject}}
+   */
+  updateDetails(eventType, element = null) {
+    const details = {};
+    const vars = this.variableService_.get();
+    const pageId = vars['storyPageId'];
+
+    if (this.pageEventsMap_[pageId][eventType] > 1) {
+      details.repeated = true;
+    }
+
+    if (element) {
+      details.tagName =
+        element[ANALYTICS_TAG_NAME] || element.tagName.toLowerCase();
+      Object.assign(
+        vars,
+        getDataParamsFromAttributes(
+          element,
+          /* computeParamNameFunc */ undefined,
+          /^vars(.+)/
+        )
+      );
+    }
+
+    return /** @type {!JsonObject} */ ({eventDetails: details, ...vars});
+  }
+
+  /**
+   * Keeps count of number of events emitted by page for an event type.
+   * @param {!StoryAnalyticsEvent} eventType
+   * @private
+   */
+  incrementPageEventCount_(eventType) {
+    const vars = this.variableService_.get();
+    const pageId = vars['storyPageId'];
+
+    this.pageEventsMap_[pageId] = this.pageEventsMap_[pageId] || {};
+    this.pageEventsMap_[pageId][eventType] =
+      this.pageEventsMap_[pageId][eventType] || 0;
+    this.pageEventsMap_[pageId][eventType]++;
   }
 }

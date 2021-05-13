@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  clickThroughPages,
+  switchToAdFrame,
+} from './test-amp-story-auto-ads-utils';
+
 const viewport = {
   HEIGHT: 823,
   WIDTH: 500,
@@ -22,14 +27,15 @@ const viewport = {
 describes.endtoend(
   'amp-story-auto-ads:basic',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/basic.html',
+    fixture: 'amp-story-auto-ads/basic.html',
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
     // TODO(ccordry): reenable shadow demo? fails while waiting for
     // .amp-doc-host[style="visibility: visible;"]
-    environments: ['single', 'viewer-demo'],
+    // TODO(ccordry): re-enable viewer-demo that should handle the 64px
+    // offset set by the viewer header.
+    environments: ['single' /*, 'viewer-demo'*/],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {
@@ -65,12 +71,13 @@ describes.endtoend(
 describes.endtoend(
   'amp-story-auto-ads:dv3',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/dv3-request.html',
+    fixture: 'amp-story-auto-ads/dv3-request.html',
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
-    environments: ['single', 'viewer-demo'],
+    // TODO(ccordry): re-enable viewer-demo that should handle the 64px
+    // offset set by the viewer header.
+    environments: ['single' /*, 'viewer-demo'*/],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {
@@ -100,13 +107,6 @@ describes.endtoend(
   }
 );
 
-async function clickThroughPages(controller, numPages) {
-  for (let i = 0; i < numPages; i++) {
-    const page = await controller.findElement('[active]');
-    await controller.click(page);
-  }
-}
-
 async function validateAdOverlay(controller) {
   const overlayHost = await controller.findElement(
     '.i-amphtml-ad-overlay-host'
@@ -120,14 +120,13 @@ async function validateAdOverlay(controller) {
     .to.exist;
 
   const adBadge = await controller.findElement('.i-amphtml-story-ad-badge');
-  await expect(controller.getElementText(adBadge)).to.equal('Ad');
   await expect(controller.getElementCssValue(adBadge, 'visibility')).to.equal(
     'visible'
   );
   // Design spec is 14px from top, 16px from left.
   await expect(controller.getElementRect(adBadge)).to.include({
-    left: 16,
-    top: 14,
+    left: 12,
+    top: 12,
   });
 
   await controller.switchToLight();
@@ -155,7 +154,7 @@ async function validateCta(controller, ctaUrl) {
   });
   // TODO(ccordry): write e2e test for dynamic font scaling when launched.
   await expect(controller.getElementCssValue(ctaButton, 'font-size')).to.equal(
-    '13px'
+    '14px'
   );
 }
 
@@ -186,9 +185,4 @@ async function validateAdAttribution(controller, iconUrl) {
   });
 
   await controller.switchToLight();
-}
-
-async function switchToAdFrame(controller) {
-  const frame = await controller.findElement('#i-amphtml-ad-page-1 iframe');
-  await controller.switchToFrame(frame);
 }

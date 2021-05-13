@@ -17,10 +17,10 @@
 describes.endtoend(
   'amp-bind with <amp-video>',
   {
-    testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-bind/bind-video.html',
+    fixture: 'amp-bind/bind-video.html',
     environments: 'ampdoc-amp4ads-preset',
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {

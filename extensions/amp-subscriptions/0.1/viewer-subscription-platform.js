@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
+import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 
@@ -41,7 +42,7 @@ export class ViewerSubscriptionPlatform {
     /** @private @const */
     this.serviceAdapter_ = serviceAdapter;
 
-    /** @private @const {!PageConfig} */
+    /** @private @const {!PageConfigInterface} */
     this.pageConfig_ = serviceAdapter.getPageConfig();
 
     /** @private @const {!./subscription-platform.SubscriptionPlatform} */
@@ -69,6 +70,9 @@ export class ViewerSubscriptionPlatform {
 
     /** @private @const {string} */
     this.origin_ = origin;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(ampdoc.win);
   }
 
   /** @override */
@@ -79,38 +83,64 @@ export class ViewerSubscriptionPlatform {
   /** @override */
   getEntitlements() {
     devAssert(this.currentProductId_, 'Current product is not set');
+
     /** @type {JsonObject} */
-    const messageData = dict({
+    const authRequest = dict({
       'publicationId': this.publicationId_,
       'productId': this.currentProductId_,
       'origin': this.origin_,
     });
-    // TODO(chenshay): Viewer Matching: We don't know which viewer it actually
-    // is. Need to check the viewerUrl to know, or more specificlly iterate via
-    // configured platforms and check whether any of these support the viewer.
-    const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
-      'google.com'
-    );
-    if (encryptedDocumentKey) {
-      messageData['encryptedDocumentKey'] = encryptedDocumentKey;
-    }
-    const entitlementPromise = this.viewer_
-      .sendMessageAwaitResponse('auth', messageData)
-      .then(entitlementData => {
-        const authData = (entitlementData || {})['authorization'];
-        const decryptedDocumentKey = (entitlementData || {})[
-          'decryptedDocumentKey'
-        ];
-        if (!authData) {
-          return Entitlement.empty('local');
+
+    // Defaulting to google.com for now.
+    // TODO(@elijahsoria): Remove google.com and only rely on what is returned
+    // in the cryptokeys param.
+    let encryptedDocumentKey;
+    const cryptokeysNames = this.viewer_.getParam('cryptokeys') || 'google.com';
+    if (cryptokeysNames) {
+      const keyNames = cryptokeysNames.split(',');
+      for (let i = 0; i != keyNames.length; i++) {
+        encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
+          keyNames[i]
+        );
+        if (encryptedDocumentKey) {
+          break;
         }
-        return this.verifyAuthToken_(authData, decryptedDocumentKey);
-      })
-      .catch(reason => {
-        this.sendAuthTokenErrorToViewer_(reason.message);
-        throw reason;
-      });
-    return /** @type {!Promise<Entitlement>} */ (entitlementPromise);
+      }
+    }
+    if (encryptedDocumentKey) {
+      authRequest['encryptedDocumentKey'] = encryptedDocumentKey;
+    }
+
+    return /** @type {!Promise<Entitlement>} */ (
+      this.timer_
+        .timeoutPromise(
+          ENTITLEMENTS_REQUEST_TIMEOUT,
+          this.viewer_.sendMessageAwaitResponse('auth', authRequest)
+        )
+        .then((entitlementData) => {
+          entitlementData = entitlementData || {};
+
+          /** Note to devs: Send error at top level of postMessage instead. */
+          const deprecatedError = entitlementData['error'];
+          const authData = entitlementData['authorization'];
+          const decryptedDocumentKey = entitlementData['decryptedDocumentKey'];
+
+          if (deprecatedError) {
+            throw new Error(deprecatedError.message);
+          }
+
+          if (!authData) {
+            return Entitlement.empty('local');
+          }
+
+          return this.verifyAuthToken_(authData, decryptedDocumentKey).catch(
+            (reason) => {
+              this.sendAuthTokenErrorToViewer_(reason.message);
+              throw reason;
+            }
+          );
+        })
+    );
   }
 
   /**
@@ -121,14 +151,13 @@ export class ViewerSubscriptionPlatform {
    * @private
    */
   verifyAuthToken_(token, decryptedDocumentKey) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const origin = getWinOrigin(this.ampdoc_.win);
       const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
       const decodedData = this.jwtHelper_.decode(token);
-      const currentProductId = /** @type {string} */ (userAssert(
-        this.pageConfig_.getProductId(),
-        'Product id is null'
-      ));
+      const currentProductId = /** @type {string} */ (
+        userAssert(this.pageConfig_.getProductId(), 'Product id is null')
+      );
       if (decodedData['aud'] != origin && decodedData['aud'] != sourceOrigin) {
         throw user().createError(
           `The mismatching "aud" field: ${decodedData['aud']}`
@@ -139,26 +168,41 @@ export class ViewerSubscriptionPlatform {
       }
       const entitlements = decodedData['entitlements'];
       let entitlement = Entitlement.empty('local');
-      if (Array.isArray(entitlements)) {
-        for (let index = 0; index < entitlements.length; index++) {
-          if (
-            entitlements[index]['products'].indexOf(currentProductId) !== -1
-          ) {
-            const entitlementObject = entitlements[index];
-            entitlement = new Entitlement({
-              source: 'viewer',
-              raw: token,
-              granted: true,
-              grantReason: entitlementObject.subscriptionToken
-                ? GrantReason.SUBSCRIBER
-                : '',
-              dataObject: entitlementObject,
-              decryptedDocumentKey,
-            });
-            break;
+      let entitlementObject;
+
+      if (entitlements) {
+        // Not null
+        if (Array.isArray(entitlements)) {
+          // Multi entitlement case
+          for (let index = 0; index < entitlements.length; index++) {
+            if (
+              entitlements[index]['products'].indexOf(currentProductId) !== -1
+            ) {
+              entitlementObject = entitlements[index];
+              break;
+            }
           }
+        } else if (entitlements['products'].indexOf(currentProductId) !== -1) {
+          // Single entitlment case
+          entitlementObject = entitlements;
         }
-      } else if (decodedData['metering'] && !decodedData['entitlements']) {
+
+        if (entitlementObject) {
+          // Found a match
+          entitlement = new Entitlement({
+            source: 'viewer',
+            raw: token,
+            granted: true,
+            grantReason: entitlementObject.subscriptionToken
+              ? GrantReason.SUBSCRIBER
+              : '',
+            dataObject: entitlementObject,
+            decryptedDocumentKey,
+          });
+        }
+      }
+
+      if (decodedData['metering'] && !entitlement.granted) {
         // Special case where viewer gives metering but no entitlement
         entitlement = new Entitlement({
           source: decodedData['iss'] || '',
@@ -166,18 +210,6 @@ export class ViewerSubscriptionPlatform {
           granted: true,
           grantReason: GrantReason.METERING,
           dataObject: decodedData['metering'],
-          decryptedDocumentKey,
-        });
-      } else if (entitlements) {
-        // Not null
-        entitlement = new Entitlement({
-          source: 'viewer',
-          raw: token,
-          granted: entitlements.granted,
-          grantReason: entitlements.subscriptionToken
-            ? GrantReason.SUBSCRIBER
-            : '',
-          dataObject: entitlements,
           decryptedDocumentKey,
         });
       }
@@ -201,8 +233,8 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
-  getServiceId() {
-    return this.platform_.getServiceId();
+  getPlatformKey() {
+    return this.platform_.getPlatformKey();
   }
 
   /** @override */
@@ -237,8 +269,8 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
-  executeAction(action) {
-    return this.platform_.executeAction(action);
+  executeAction(action, sourceId) {
+    return this.platform_.executeAction(action, sourceId);
   }
 
   /** @override */
@@ -254,14 +286,4 @@ export class ViewerSubscriptionPlatform {
   subscriptionChange_() {
     this.serviceAdapter_.resetPlatforms();
   }
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
 }

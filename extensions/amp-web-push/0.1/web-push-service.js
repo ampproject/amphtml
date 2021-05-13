@@ -27,7 +27,7 @@ import {Services} from '../../../src/services';
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {WindowMessenger} from './window-messenger';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -62,10 +62,9 @@ export let AmpWebPushConfig;
  * @return {!Promise<!./web-push-service.WebPushService>}
  */
 export function webPushServiceForDoc(element) {
-  return /** @type {!Promise<!./web-push-service.WebPushService>} */ (getServicePromiseForDoc(
-    element,
-    SERVICE_TAG
-  ));
+  return /** @type {!Promise<!./web-push-service.WebPushService>} */ (
+    getServicePromiseForDoc(element, SERVICE_TAG)
+  );
 }
 
 /**
@@ -285,7 +284,7 @@ export class WebPushService {
       .then(() => {
         return this.frameMessenger_.send(messageTopic, message);
       })
-      .then(result => {
+      .then((result) => {
         const replyPayload = result[0];
         if (replyPayload.success) {
           return replyPayload.result;
@@ -392,7 +391,7 @@ export class WebPushService {
    */
   isServiceWorkerActivated() {
     const self = this;
-    return this.queryServiceWorkerState_().then(serviceWorkerState => {
+    return this.queryServiceWorkerState_().then((serviceWorkerState) => {
       const isControllingFrame = serviceWorkerState.isControllingFrame === true;
       const serviceWorkerHasCorrectUrl = this.isUrlSimilarForQueryParams(
         serviceWorkerState.url,
@@ -524,7 +523,7 @@ export class WebPushService {
    * Subscribe.
    */
   storeLastKnownPermission_() {
-    return this.queryNotificationPermission().then(permission => {
+    return this.queryNotificationPermission().then((permission) => {
       this.lastKnownPermission_ = permission;
     });
   }
@@ -550,7 +549,7 @@ export class WebPushService {
      */
     return this.storeLastKnownPermission_()
       .then(() => this.isQuerySupported_(WindowMessenger.Topics.STORAGE_GET))
-      .then(response => {
+      .then((response) => {
         /*
           Response could be "denied", "granted", or "default". This is a
           response to the notification permission state query, and we're
@@ -578,7 +577,7 @@ export class WebPushService {
           return Promise.resolve(NotificationPermission.DEFAULT);
         }
       })
-      .then(canonicalNotificationPermission => {
+      .then((canonicalNotificationPermission) => {
         /*
             If the canonical notification permission is:
               - Blocked
@@ -599,7 +598,7 @@ export class WebPushService {
           }
         } else {
           return this.isServiceWorkerActivated().then(
-            isServiceWorkerActivated => {
+            (isServiceWorkerActivated) => {
               if (isServiceWorkerActivated) {
                 this.updateWidgetVisibilitiesServiceWorkerActivated_();
               } else {
@@ -618,7 +617,7 @@ export class WebPushService {
   updateWidgetVisibilitiesServiceWorkerActivated_() {
     return Services.timerFor(this.ampdoc.win).timeoutPromise(
       5000,
-      this.querySubscriptionStateRemotely().then(reply => {
+      this.querySubscriptionStateRemotely().then((reply) => {
         /*
           This Promise will never resolve if the service worker does not support
           amp-web-push, and widgets will stay hidden.
@@ -686,7 +685,7 @@ export class WebPushService {
     // Register the service worker in the background in parallel for a headstart
     promises.push(this.registerServiceWorker());
     promises.push(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         /*
             In most environments, the canonical notification permission returned
             is accurate. On Chrome 62+, the permission is non-ambiguous only if
@@ -725,7 +724,7 @@ export class WebPushService {
             ]);
 
             this.onPermissionDialogInteracted()
-              .then(result => {
+              .then((result) => {
                 return this.handlePermissionDialogInteraction(result);
               })
               .then(() => {
@@ -859,7 +858,7 @@ export class WebPushService {
    * @return {Promise<Array<(NotificationPermission|function({closeFrame: boolean}))>>}
    */
   onPermissionDialogInteracted() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.popupMessenger_.on(
         WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
         (message, replyToFrame) => {
@@ -910,9 +909,8 @@ export class WebPushService {
 
     const permissionDialogUrlHasQueryParams =
       this.config_['permission-dialog-url'].indexOf('?') !== -1;
-    const permissionDialogUrlQueryParamPrefix = permissionDialogUrlHasQueryParams
-      ? '&'
-      : '?';
+    const permissionDialogUrlQueryParamPrefix =
+      permissionDialogUrlHasQueryParams ? '&' : '?';
     // The permission dialog URL, containing the return URL above embedded in a
     // query parameter
     const openingPopupUrl =
@@ -950,7 +948,7 @@ export class WebPushService {
       )
     );
 
-    this.queryNotificationPermission().then(permission => {
+    this.queryNotificationPermission().then((permission) => {
       switch (permission) {
         case NotificationPermission.DENIED:
         case NotificationPermission.DEFAULT:

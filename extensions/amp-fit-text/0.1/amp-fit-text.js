@@ -17,11 +17,18 @@
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {px, setStyle, setStyles} from '../../../src/style';
+import {throttle} from '../../../src/core/types/function';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;
+const RESIZE_THROTTLE_MS = 100;
 
 class AmpFitText extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -40,6 +47,16 @@ class AmpFitText extends AMP.BaseElement {
 
     /** @private {number} */
     this.maxFontSize_ = -1;
+
+    /** @private {?UnlistenDef} */
+    this.resizeObserverUnlistener_ = null;
+
+    /**
+     * Synchronously stores updated textContent, but only after it has been
+     * updated.
+     * @private {string}
+     */
+    this.textContent_ = '';
   }
 
   /** @override */
@@ -69,10 +86,10 @@ class AmpFitText extends AMP.BaseElement {
       lineHeight: `${LINE_HEIGHT_EM_}em`,
     });
 
-    this.getRealChildNodes().forEach(node => {
+    this.getRealChildNodes().forEach((node) => {
       this.contentWrapper_.appendChild(node);
     });
-    this.measurer_./*OK*/ innerHTML = this.contentWrapper_./*OK*/ innerHTML;
+    this.updateMeasurerContent_();
     this.element.appendChild(this.content_);
     this.element.appendChild(this.measurer_);
 
@@ -81,11 +98,22 @@ class AmpFitText extends AMP.BaseElement {
 
     this.maxFontSize_ =
       getLengthNumeral(this.element.getAttribute('max-font-size')) || 72;
-  }
 
-  /** @override */
-  prerenderAllowed() {
-    return true;
+    // Make it so that updates to the textContent of the amp-fit-text element
+    // actually update the text of the content element.
+    Object.defineProperty(this.element, 'textContent', {
+      set: (v) => {
+        this.textContent_ = v;
+        this.mutateElement(() => {
+          this.contentWrapper_.textContent = v;
+          this.updateMeasurerContent_();
+          this.updateFontSize_();
+        });
+      },
+      get: () => {
+        return this.textContent_ || this.contentWrapper_.textContent;
+      },
+    });
   }
 
   /** @override */
@@ -95,15 +123,49 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (this.win.ResizeObserver && this.resizeObserverUnlistener_ === null) {
+      const observer = new this.win.ResizeObserver(
+        throttle(
+          this.win,
+          () =>
+            this.mutateElement(() => {
+              this.updateMeasurerContent_();
+              this.updateFontSize_();
+            }),
+          RESIZE_THROTTLE_MS
+        )
+      );
+
+      observer.observe(this.content_);
+      observer.observe(this.measurer_);
+      this.resizeObserverUnlistener_ = function () {
+        observer.disconnect();
+      };
+    }
     return this.mutateElement(() => {
       this.updateFontSize_();
     });
   }
 
+  /** @override */
+  unlayoutCallback() {
+    if (this.resizeObserverUnlistener_ !== null) {
+      this.resizeObserverUnlistener_();
+      this.resizeObserverUnlistener_ = null;
+    }
+  }
+
+  /**
+   * Copies text from the displayed content to the measurer element.
+   */
+  updateMeasurerContent_() {
+    this.measurer_./*OK*/ innerHTML = this.contentWrapper_./*OK*/ innerHTML;
+  }
+
   /** @private */
   updateFontSize_() {
-    const maxHeight = this.element./*OK*/ offsetHeight;
-    const maxWidth = this.element./*OK*/ offsetWidth;
+    const maxHeight = this.content_./*OK*/ offsetHeight;
+    const maxWidth = this.content_./*OK*/ offsetWidth;
     const fontSize = calculateFontSize_(
       this.measurer_,
       maxHeight,
@@ -145,6 +207,7 @@ export function calculateFontSize_(
       minFontSize = mid;
     }
   }
+
   return minFontSize;
 }
 
@@ -167,6 +230,6 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
   });
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpFitText, CSS);
 });

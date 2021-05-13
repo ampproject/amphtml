@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {listen} from '../../../src/event-helper';
@@ -141,11 +141,13 @@ export class LaterpayVendor {
     this.currentLocale_ = this.laterpayConfig_['locale'] || 'en';
 
     /** @private {!JsonObject} */
-    this.i18n_ = /** @type {!JsonObject} */ (Object.assign(
-      dict(),
-      DEFAULT_MESSAGES,
-      this.laterpayConfig_['localeMessages'] || dict()
-    ));
+    this.i18n_ = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict(),
+        DEFAULT_MESSAGES,
+        this.laterpayConfig_['localeMessages'] || dict()
+      )
+    );
 
     /** @private {string} */
     this.purchaseConfigBaseUrl_ = this.getConfigUrl_() + CONFIG_BASE_PATH;
@@ -191,7 +193,7 @@ export class LaterpayVendor {
    */
   authorize() {
     return this.getPurchaseConfig_().then(
-      response => {
+      (response) => {
         if (response.status === 204) {
           throw user().createError(
             'No merchant domains have been matched for this ' +
@@ -205,7 +207,7 @@ export class LaterpayVendor {
         this.emptyContainer_();
         return {access: response.access};
       },
-      err => {
+      (err) => {
         if (!err || !err.response) {
           throw err;
         }
@@ -216,7 +218,7 @@ export class LaterpayVendor {
         return response
           .json()
           .catch(() => undefined)
-          .then(responseJson => {
+          .then((responseJson) => {
             this.purchaseConfig_ = responseJson;
             // empty before rendering, in case authorization is being called
             // again with the same state
@@ -241,10 +243,10 @@ export class LaterpayVendor {
       /* useAuthData */ false
     );
     return urlPromise
-      .then(url => {
+      .then((url) => {
         return this.accessSource_.getLoginUrl(url);
       })
-      .then(url => {
+      .then((url) => {
         dev().info(TAG, 'Authorization URL: ', url);
         return this.timer_
           .timeoutPromise(
@@ -253,7 +255,7 @@ export class LaterpayVendor {
               credentials: 'include',
             })
           )
-          .then(res => res.json());
+          .then((res) => res.json());
       });
   }
 
@@ -335,26 +337,28 @@ export class LaterpayVendor {
     }
     this.renderTextBlock_('header');
     const listContainer = this.createElement_('ul');
-    this.purchaseConfig_['premiumcontent']['title'] = this.i18n_[
-      'premiumContentTitle'
-    ];
-    this.purchaseConfig_['premiumcontent'][
-      'description'
-    ] = this.getArticleTitle_();
+    this.purchaseConfig_['premiumcontent']['title'] =
+      this.i18n_['premiumContentTitle'];
+    this.purchaseConfig_['premiumcontent']['description'] =
+      this.getArticleTitle_();
     listContainer.appendChild(
       this.createPurchaseOption_(this.purchaseConfig_['premiumcontent'])
     );
-    this.purchaseConfig_['timepasses'].forEach(timepass => {
-      listContainer.appendChild(this.createPurchaseOption_(timepass));
-    });
-    this.purchaseConfig_['subscriptions'].forEach(subscription => {
-      listContainer.appendChild(this.createPurchaseOption_(subscription));
-    });
+    /** @type {!Array} */ (this.purchaseConfig_['timepasses']).forEach(
+      (timepass) => {
+        listContainer.appendChild(this.createPurchaseOption_(timepass));
+      }
+    );
+    /** @type {!Array} */ (this.purchaseConfig_['subscriptions']).forEach(
+      (subscription) => {
+        listContainer.appendChild(this.createPurchaseOption_(subscription));
+      }
+    );
     const purchaseButton = this.createElement_('button');
     purchaseButton.className = TAG + '-purchase-button';
     purchaseButton.textContent = this.i18n_['defaultButton'];
     this.purchaseButton_ = purchaseButton;
-    this.purchaseButtonListener_ = listen(purchaseButton, 'click', ev => {
+    this.purchaseButtonListener_ = listen(purchaseButton, 'click', (ev) => {
       const {value} = this.selectedPurchaseOption_;
       const purchaseType = this.selectedPurchaseOption_.dataset['purchaseType'];
       this.handlePurchase_(ev, value, purchaseType);
@@ -505,7 +509,7 @@ export class LaterpayVendor {
     const a = this.createElement_('a');
     a.href = href;
     a.textContent = this.i18n_['alreadyPurchasedLink'];
-    this.alreadyPurchasedListener_ = listen(a, 'click', ev => {
+    this.alreadyPurchasedListener_ = listen(a, 'click', (ev) => {
       this.handlePurchase_(ev, href, 'alreadyPurchased');
     });
     p.appendChild(a);
@@ -552,7 +556,7 @@ export class LaterpayVendor {
       purchaseUrl,
       /* useAuthData */ false
     );
-    return urlPromise.then(url => {
+    return urlPromise.then((url) => {
       dev().fine(TAG, 'Authorization URL: ', url);
       this.accessSource_.loginWithUrl(url, purchaseType);
     });

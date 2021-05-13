@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 
 const overrideKeys = [
   'backgroundColor',
@@ -58,7 +58,7 @@ const overrideKeys = [
  */
 export function getWidgetOverload(self) {
   const override = dict({});
-  overrideKeys.forEach(item => {
+  overrideKeys.forEach((item) => {
     const data = self.element.getAttribute(`data-attr-${item}`);
     if (
       typeof data === 'string' ||

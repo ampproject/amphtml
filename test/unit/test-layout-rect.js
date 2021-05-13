@@ -16,7 +16,7 @@
 
 import * as lr from '../../src/layout-rect';
 
-describe('LayoutRect', () => {
+describes.sandboxed('LayoutRect', {}, () => {
   it('layoutRectLtwh', () => {
     const rect = lr.layoutRectLtwh(1, 2, 3, 4);
     expect(rect.left).to.equal(1);
@@ -27,13 +27,13 @@ describe('LayoutRect', () => {
     expect(rect.right).to.equal(4);
   });
 
-  it('layoutRectsOverlap', () => {
+  it('rectsOverlap', () => {
     const rect1 = lr.layoutRectLtwh(10, 20, 30, 40);
     const rect2 = lr.layoutRectLtwh(40, 60, 10, 10);
     const rect3 = lr.layoutRectLtwh(41, 60, 10, 10);
-    expect(lr.layoutRectsOverlap(rect1, rect2)).to.equal(true);
-    expect(lr.layoutRectsOverlap(rect1, rect3)).to.equal(false);
-    expect(lr.layoutRectsOverlap(rect2, rect3)).to.equal(true);
+    expect(lr.rectsOverlap(rect1, rect2)).to.equal(true);
+    expect(lr.rectsOverlap(rect1, rect3)).to.equal(false);
+    expect(lr.rectsOverlap(rect2, rect3)).to.equal(true);
   });
 
   it('expandLayoutRect', () => {
@@ -119,7 +119,7 @@ describe('LayoutRect', () => {
   });
 });
 
-describe('cloneLayoutMarginsChangeDef', () => {
+describes.sandboxed('cloneLayoutMarginsChangeDef', {}, () => {
   it('should clone margins change correctly into new object', () => {
     const marginsChange = {
       top: 1,
@@ -135,7 +135,7 @@ describe('cloneLayoutMarginsChangeDef', () => {
   });
 });
 
-describe('layoutRectSizeEquals', () => {
+describes.sandboxed('layoutRectSizeEquals', {}, () => {
   it('should detect changes', () => {
     const from = lr.layoutRectLtwh(10, 20, 1, 1);
     const to = lr.layoutRectLtwh(10, 20, 40, 50);
@@ -149,7 +149,7 @@ describe('layoutRectSizeEquals', () => {
   });
 });
 
-describe('areMarginsChanged', () => {
+describes.sandboxed('areMarginsChanged', {}, () => {
   it('should find margins are not changed when values the same', () => {
     const margins = {
       top: 1,

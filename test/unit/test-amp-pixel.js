@@ -17,21 +17,24 @@
 import {VariableSource} from '../../src/service/variable-source';
 import {installUrlReplacementsForEmbed} from '../../src/service/url-replacements-impl';
 
-describes.realWin('amp-pixel', {amp: true}, env => {
+describes.realWin('amp-pixel', {amp: true}, (env) => {
+  const urlErrorRegex = /src attribute must start with/;
+
   let win;
   let whenFirstVisiblePromise, whenFirstVisibleResolver;
   let pixel;
-  let implementation;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     win = env.win;
-    whenFirstVisiblePromise = new Promise(resolve => {
+    whenFirstVisiblePromise = new Promise((resolve) => {
       whenFirstVisibleResolver = resolve;
     });
-    sandbox
+    env.sandbox
       .stub(env.ampdoc, 'whenFirstVisible')
       .callsFake(() => whenFirstVisiblePromise);
-    createPixel('https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+    await createPixel(
+      'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
+    );
   });
 
   function createPixel(src, referrerPolicy) {
@@ -41,9 +44,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
       pixel.setAttribute('referrerpolicy', referrerPolicy);
     }
     win.document.body.appendChild(pixel);
-    const buildPromise = pixel.build();
-    implementation = pixel.implementation_;
-    return buildPromise;
+    return pixel.buildInternal();
   }
 
   /**
@@ -55,10 +56,14 @@ describes.realWin('amp-pixel', {amp: true}, env => {
       pixel.setAttribute('src', opt_src);
     }
     whenFirstVisibleResolver();
-    return whenFirstVisiblePromise.then(() => {
-      expect(implementation.triggerPromise_).to.be.not.null;
-      return implementation.triggerPromise_;
-    });
+    return whenFirstVisiblePromise
+      .then(() => {
+        return pixel.getImpl(false);
+      })
+      .then((impl) => {
+        expect(impl.triggerPromise_).to.be.not.null;
+        return impl.triggerPromise_;
+      });
   }
 
   it('should be non-displayed', () => {
@@ -68,19 +73,21 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     expect(pixel).to.have.display('none');
   });
 
-  it('should NOT trigger when src is empty', () => {
+  it('should NOT trigger when src is empty', async () => {
+    const implementation = await pixel.getImpl(false);
     expect(pixel.children).to.have.length(0);
     expect(implementation.triggerPromise_).to.be.null;
-    return trigger('').then(img => {
+    return trigger('').then((img) => {
       expect(implementation.triggerPromise_).to.be.ok;
       expect(img).to.be.undefined;
     });
   });
 
-  it('should trigger when doc becomes visible', () => {
+  it('should trigger when doc becomes visible', async () => {
+    const implementation = await pixel.getImpl(false);
     expect(pixel.children).to.have.length(0);
     expect(implementation.triggerPromise_).to.be.null;
-    return trigger().then(img => {
+    return trigger().then((img) => {
       expect(implementation.triggerPromise_).to.be.ok;
       expect(img.src).to.equal(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
@@ -90,7 +97,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   it('should allow protocol-relative URLs', () => {
     const url = '//pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
-    return trigger(url).then(img => {
+    return trigger(url).then((img) => {
       // Protocol is resolved to `http:` relative to test server.
       expect(img.src).to.equal(
         'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2'
@@ -99,30 +106,27 @@ describes.realWin('amp-pixel', {amp: true}, env => {
   });
 
   it('should disallow http URLs', () => {
+    expectAsyncConsoleError(urlErrorRegex);
     const url = 'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
-    return expect(trigger(url)).to.eventually.be.rejectedWith(
-      /src attribute must start with/
-    );
+    return expect(trigger(url)).to.eventually.be.rejectedWith(urlErrorRegex);
   });
 
   it('should disallow relative URLs', () => {
+    expectAsyncConsoleError(urlErrorRegex);
     const url = '/activity;dc_iu=1/abc;ord=2';
-    return expect(trigger(url)).to.eventually.be.rejectedWith(
-      /src attribute must start with/
-    );
+    return expect(trigger(url)).to.eventually.be.rejectedWith(urlErrorRegex);
   });
 
   it('should disallow fake-protocol URLs', () => {
+    expectAsyncConsoleError(urlErrorRegex);
     const url = 'https/activity;dc_iu=1/abc;ord=2';
-    return expect(trigger(url)).to.eventually.be.rejectedWith(
-      /src attribute must start with/
-    );
+    return expect(trigger(url)).to.eventually.be.rejectedWith(urlErrorRegex);
   });
 
   it('should replace URL parameters', () => {
-    sandbox.stub(Math, 'random').callsFake(() => 111);
+    env.sandbox.stub(Math, 'random').callsFake(() => 111);
     const url = 'https://pubads.g.doubleclick.net/activity;r=RANDOM';
-    return trigger(url).then(img => {
+    return trigger(url).then((img) => {
       expect(img.src).to.equal(
         'https://pubads.g.doubleclick.net/activity;r=111'
       );
@@ -138,7 +142,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
         () => {
           throw new Error('must have failed.');
         },
-        reason => {
+        (reason) => {
           expect(reason.message).to.match(/referrerpolicy/);
         }
       );
@@ -153,7 +157,7 @@ describes.realWin(
       ampdoc: 'fie',
     },
   },
-  env => {
+  (env) => {
     class TestVariableSource extends VariableSource {
       constructor() {
         super(env.ampdoc);
@@ -168,17 +172,17 @@ describes.realWin(
     let pixel;
     let implementation;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       win = env.win;
 
-      whenFirstVisiblePromise = new Promise(resolve => {
+      whenFirstVisiblePromise = new Promise((resolve) => {
         whenFirstVisibleResolver = resolve;
       });
-      sandbox
+      env.sandbox
         .stub(env.ampdoc, 'whenFirstVisible')
         .callsFake(() => whenFirstVisiblePromise);
 
-      installUrlReplacementsForEmbed(env.ampdoc, win, new TestVariableSource());
+      installUrlReplacementsForEmbed(env.ampdoc, new TestVariableSource());
 
       pixel = win.document.createElement('amp-pixel');
       pixel.setAttribute(
@@ -186,8 +190,8 @@ describes.realWin(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
       );
       win.document.body.appendChild(pixel);
-      pixel.build();
-      implementation = pixel.implementation_;
+      await pixel.buildInternal();
+      implementation = await pixel.getImpl();
     });
 
     /**
@@ -207,7 +211,7 @@ describes.realWin(
 
     it("should use embed's URL replacer", () => {
       const url = 'https://pubads.g.doubleclick.net/activity;t=TEST';
-      return trigger(url).then(img => {
+      return trigger(url).then((img) => {
         expect(img.src).to.equal(
           'https://pubads.g.doubleclick.net/activity;t=value1'
         );

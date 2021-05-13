@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
-import {areEqualOrdered} from '../../../src/utils/array';
+import {areEqualOrdered, toArray} from '../../../src/core/types/array';
 import {
   closestAncestorElementBySelector,
   isRTL,
@@ -27,9 +27,8 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {mod} from '../../../src/utils/math';
-import {toArray} from '../../../src/types';
 
 const TAG = 'amp-selector';
 
@@ -45,6 +44,11 @@ const KEYBOARD_SELECT_MODES = {
 };
 
 export class AmpSelector extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -121,28 +125,28 @@ export class AmpSelector extends AMP.BaseElement {
 
     this.registerAction(
       'selectUp',
-      invocation => {
-        const {args} = invocation;
+      (invocation) => {
+        const {args, trust} = invocation;
         const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
-        this.select_(delta);
+        this.select_(delta, trust);
       },
       ActionTrust.LOW
     );
 
     this.registerAction(
       'selectDown',
-      invocation => {
-        const {args} = invocation;
+      (invocation) => {
+        const {args, trust} = invocation;
         const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
-        this.select_(delta);
+        this.select_(delta, trust);
       },
       ActionTrust.LOW
     );
 
     this.registerAction(
       'toggle',
-      invocation => {
-        const {args} = invocation;
+      (invocation) => {
+        const {args, trust} = invocation;
         userAssert(args['index'] >= 0, "'index' must be greater than 0");
         userAssert(
           args['index'] < this.elements_.length,
@@ -150,12 +154,20 @@ export class AmpSelector extends AMP.BaseElement {
             'be less than the length of options in the <amp-selector>'
         );
         if (args && args['index'] !== undefined) {
-          return this.toggle_(args['index'], args['value']);
+          return this.toggle_(args['index'], args['value'], trust);
         } else {
           return Promise.reject("'index' must be specified");
         }
       },
       ActionTrust.LOW
+    );
+
+    /** If the element is in an `email` document, allow its `clear`,
+     * `selectDown`, `selectUp`, and `toggle` actions. */
+    this.action_.addToAllowlist(
+      TAG,
+      ['clear', 'selectDown', 'selectUp', 'toggle'],
+      ['email']
     );
 
     // Triggers on DOM children updates
@@ -241,7 +253,7 @@ export class AmpSelector extends AMP.BaseElement {
       return;
     }
 
-    this.elements_.forEach(option => {
+    this.elements_.forEach((option) => {
       option.tabIndex = -1;
     });
 
@@ -282,7 +294,7 @@ export class AmpSelector extends AMP.BaseElement {
     const elements = opt_elements
       ? opt_elements
       : toArray(this.element.querySelectorAll('[option]'));
-    elements.forEach(el => {
+    elements.forEach((el) => {
       if (!el.hasAttribute('role')) {
         el.setAttribute('role', 'option');
       }
@@ -317,13 +329,13 @@ export class AmpSelector extends AMP.BaseElement {
     }
     const formId = this.element.getAttribute('form');
 
-    this.inputs_.forEach(input => {
+    this.inputs_.forEach((input) => {
       this.element.removeChild(input);
     });
     this.inputs_ = [];
     const doc = this.win.document;
     const fragment = doc.createDocumentFragment();
-    this.selectedElements_.forEach(option => {
+    this.selectedElements_.forEach((option) => {
       if (!option.hasAttribute('disabled')) {
         const hidden = doc.createElement('input');
         const value = option.getAttribute('option');
@@ -363,7 +375,8 @@ export class AmpSelector extends AMP.BaseElement {
       }
       // Newly picked option should always have focus.
       this.updateFocus_(el);
-      this.fireSelectEvent_(el);
+      // User gesture trigger is "high" trust.
+      this.fireSelectEvent_(el, ActionTrust.HIGH);
     });
   }
 
@@ -372,7 +385,7 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   selectedOptions_() {
-    return this.selectedElements_.map(el => el.getAttribute('option'));
+    return this.selectedElements_.map((el) => el.getAttribute('option'));
   }
 
   /**
@@ -399,18 +412,18 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Handles toggle action.
    * @param {number} index
-   * @param {boolean=} opt_value
+   * @param {boolean|undefined} value
+   * @param {!ActionTrust} trust
    * @return {!Promise}
    * @private
    */
-  toggle_(index, opt_value) {
+  toggle_(index, value, trust) {
     // Change the selection to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
     const el = this.elements_[index];
     const indexCurrentStatus = el.hasAttribute('selected');
-    const indexFinalStatus =
-      opt_value !== undefined ? opt_value : !indexCurrentStatus;
+    const indexFinalStatus = value !== undefined ? value : !indexCurrentStatus;
     const selectedIndex = this.elements_.indexOf(this.selectedElements_[0]);
 
     if (indexFinalStatus === indexCurrentStatus) {
@@ -428,8 +441,8 @@ export class AmpSelector extends AMP.BaseElement {
       } else {
         this.clearSelection_(el);
       }
-
-      this.fireSelectEvent_(el);
+      // Propagate the trust of the originating action.
+      this.fireSelectEvent_(el, trust);
     });
   }
 
@@ -438,9 +451,10 @@ export class AmpSelector extends AMP.BaseElement {
    * 'targetOption' - option value of the selected or deselected element.
    * 'selectedOptions' - array of option values of selected elements.
    * @param {!Element} el The element that was selected or deslected.
+   * @param {!ActionTrust} trust
    * @private
    */
-  fireSelectEvent_(el) {
+  fireSelectEvent_(el, trust) {
     const name = 'select';
     const selectEvent = createCustomEvent(
       this.win,
@@ -450,15 +464,16 @@ export class AmpSelector extends AMP.BaseElement {
         'selectedOptions': this.selectedOptions_(),
       })
     );
-    this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
+    this.action_.trigger(this.element, name, selectEvent, trust);
   }
 
   /**
    * Handles selectUp events.
    * @param {number} delta
+   * @param {!ActionTrust} trust
    * @private
    */
-  select_(delta) {
+  select_(delta, trust) {
     // Change the selection to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
@@ -479,7 +494,8 @@ export class AmpSelector extends AMP.BaseElement {
     }
 
     this.setInputs_();
-    this.fireSelectEvent_(el);
+    // Propagate the trust of the source action.
+    this.fireSelectEvent_(el, trust);
   }
 
   /**
@@ -555,7 +571,7 @@ export class AmpSelector extends AMP.BaseElement {
     // Make currently selected option unfocusable
     this.elements_[this.focusedIndex_].tabIndex = -1;
 
-    return this.getElementsSizes_().then(sizes => {
+    return this.getElementsSizes_().then((sizes) => {
       const originalIndex = this.focusedIndex_;
 
       // For Home/End keys, start at end/beginning respectively and wrap around
@@ -680,7 +696,7 @@ export class AmpSelector extends AMP.BaseElement {
    */
   getElementsSizes_() {
     return this.measureElement(() => {
-      return this.elements_.map(element =>
+      return this.elements_.map((element) =>
         element./*OK*/ getBoundingClientRect()
       );
     });
@@ -698,6 +714,6 @@ function isElementHidden(element, rect) {
   return element.hidden || width == 0 || height == 0;
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpSelector, CSS);
 });

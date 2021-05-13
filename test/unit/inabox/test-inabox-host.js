@@ -17,7 +17,7 @@
 import {InaboxHost} from '../../../ads/inabox/inabox-host';
 import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
 
-describes.fakeWin('inabox-host', {}, env => {
+describes.fakeWin('inabox-host', {}, (env) => {
   let processMessageSpy;
   beforeEach(() => {
     processMessageSpy = env.sandbox.spy(
@@ -36,9 +36,9 @@ describes.fakeWin('inabox-host', {}, env => {
     env.win['ampInaboxPendingMessages'] = invalidMessages.concat(messages);
     new InaboxHost(env.win);
     expect(processMessageSpy.callCount).to.equal(3);
-    messages.forEach(e => expect(processMessageSpy.withArgs(e)).to.be.called);
+    messages.forEach((e) => expect(processMessageSpy.withArgs(e)).to.be.called);
     invalidMessages.forEach(
-      e => expect(processMessageSpy.withArgs(e)).to.not.be.called
+      (e) => expect(processMessageSpy.withArgs(e)).to.not.be.called
     );
     // Calling push should have no effect
     expect(env.win['ampInaboxPendingMessages'].length).to.equal(0);

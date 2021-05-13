@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
+import {Deferred} from './core/data-structures/promise';
 import {Services} from './services';
 
 /** @const {function()} */
-const NOOP_CALLBACK_ = function() {};
+const NOOP_CALLBACK_ = function () {};
 
 /** @const {number} */
 const MIN_VELOCITY_ = 0.02;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../observable';
+import {Observable} from '../../core/data-structures/observable';
 import {Services} from '../../services';
 import {
   ViewportBindingDef,
@@ -69,7 +69,6 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {function()} */
     this.boundScrollEventListener_ = this.onScrolled_.bind(this);
 
-    // eslint-disable-next-line jsdoc/require-returns
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 

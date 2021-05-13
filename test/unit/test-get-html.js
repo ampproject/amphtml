@@ -28,7 +28,7 @@ const template = `<div id="wrapper">
 
 import {getHtml} from '../../src/get-html';
 
-describe('getHtml', () => {
+describes.sandboxed('getHtml', {}, () => {
   let element;
 
   beforeEach(() => {
@@ -60,7 +60,7 @@ describe('getHtml', () => {
     expect(result).to.equal('<div class="tmp">Lorem ipsum</div>');
   });
 
-  it('should works only with attributes from whitelist', () => {
+  it('should works only with attributes from allowlist', () => {
     const result = getHtml(window, '.tmp', ['class', 'test']);
     expect(result).to.equal('<div class="tmp">Lorem ipsum</div>');
   });

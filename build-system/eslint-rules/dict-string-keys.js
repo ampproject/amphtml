@@ -15,9 +15,9 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    CallExpression: function(node) {
+    CallExpression: function (node) {
       if (node.callee.name === 'dict') {
         if (node.arguments[0]) {
           const arg1 = node.arguments[0];
@@ -37,23 +37,28 @@ module.exports = function(context) {
   };
 };
 
+/**
+ * @param {*} node
+ * @param {*} context
+ */
 function checkNode(node, context) {
   if (node.type === 'ObjectExpression') {
-    node.properties.forEach(function(prop) {
-      if (!prop.key.raw && !prop.computed) {
+    node.properties.forEach(function (prop) {
+      if (!prop.key || (!prop.key.raw && !prop.computed)) {
+        const {name = `[${prop.type}]`} = prop.key || prop.argument || {};
         context.report({
-          node,
+          node: prop,
           message:
-            'Found: ' +
-            prop.key.name +
-            '. The keys of the Object ' +
-            'Literal Expression passed into `dict` must have string keys.',
+            `Found: ${name}.` +
+            'The Object Literal Expression passed into `dict` must only contain string keyed properties.',
         });
       }
-      checkNode(prop.value, context);
+      if (prop.value) {
+        checkNode(prop.value, context);
+      }
     });
   } else if (node.type === 'ArrayExpression') {
-    node.elements.forEach(function(elem) {
+    node.elements.forEach(function (elem) {
       checkNode(elem, context);
     });
   }

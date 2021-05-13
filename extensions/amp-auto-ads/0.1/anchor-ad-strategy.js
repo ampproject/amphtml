@@ -15,7 +15,7 @@
  */
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-auto-ads';
@@ -27,7 +27,7 @@ export class AnchorAdStrategy {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject<string, string>} baseAttributes Any attributes that
    *     should be added to any inserted ads.
-   * @param {!JSONType} configObj
+   * @param {!JsonObject} configObj
    */
   constructor(ampdoc, baseAttributes, configObj) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
@@ -36,7 +36,7 @@ export class AnchorAdStrategy {
     /** @const @private {!JsonObject<string, string>} */
     this.baseAttributes_ = baseAttributes;
 
-    /** @const @private {!JSONType} */
+    /** @const @private {!JsonObject} */
     this.configObj_ = configObj;
   }
 
@@ -88,14 +88,16 @@ export class AnchorAdStrategy {
    */
   placeStickyAd_() {
     const viewportWidth = Services.viewportForDoc(this.ampdoc).getWidth();
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      dict(),
-      this.baseAttributes_,
-      dict({
-        'width': String(viewportWidth),
-        'height': '100',
-      })
-    ));
+    const attributes = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict(),
+        this.baseAttributes_,
+        dict({
+          'width': String(viewportWidth),
+          'height': '100',
+        })
+      )
+    );
     const doc = this.ampdoc.win.document;
     const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
     const stickyAd = createElementWithAttributes(

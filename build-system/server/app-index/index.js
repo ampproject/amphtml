@@ -17,8 +17,7 @@
 
 const api = require('./api/api');
 const basepathMappings = require('./basepath-mappings');
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
+const fs = require('fs');
 const path = require('path');
 const {
   getListing,
@@ -35,6 +34,12 @@ const root = path.join(__dirname, '../../../');
 // CSS
 const mainCssFile = join(__dirname, '/main.css');
 
+/**
+ * @param {*} param0 require(express).Request
+ * @param {*} res require(express).Response
+ * @param {*=} next require(express).NextFunction
+ * @return {Promise<string|undefined>}
+ */
 async function serveIndex({url}, res, next) {
   const mappedPath = basepathMappings[url] || url;
   const fileSet = await getListing(root, mappedPath);
@@ -43,7 +48,7 @@ async function serveIndex({url}, res, next) {
     return next();
   }
 
-  const css = (await fs.readFileAsync(mainCssFile)).toString();
+  const css = fs.readFileSync(mainCssFile).toString();
 
   const renderedHtml = renderTemplate({
     fileSet,
@@ -59,6 +64,9 @@ async function serveIndex({url}, res, next) {
   return renderedHtml; // for testing
 }
 
+/**
+ * @param {*} app require('express')
+ */
 function installExpressMiddleware(app) {
   api.installExpressMiddleware(app);
 

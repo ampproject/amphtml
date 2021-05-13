@@ -1,10 +1,11 @@
 {
   "private": true,
-  "name": "gulp-visual-diff",
+  "name": "amp-visual-diff",
   "version": "0.1.0",
-  "description": "Gulp visual diff",
+  "description": "amp visual diff",
   "devDependencies": {
-    "@percy/puppeteer": "0.4.0",
-    "puppeteer": "1.20.0"
+    "@percy/core": "1.0.0-beta.48",
+    "@percy/puppeteer": "2.0.0",
+    "puppeteer": "9.1.1"
   }
 }

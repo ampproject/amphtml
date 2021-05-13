@@ -15,7 +15,7 @@
  */
 import {LogLevel, dev} from '../../../src/log';
 import {Services} from '../../../src/services';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types';
 import {removeChildren} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 
@@ -41,7 +41,7 @@ function createButton(win, classNameOrList, handler) {
   button.setAttribute('role', 'button');
 
   if (isArray(classNameOrList)) {
-    classNameOrList.forEach(className => button.classList.add(className));
+    classNameOrList.forEach((className) => button.classList.add(className));
   } else {
     button.classList.add(/** @type {string} */ (classNameOrList));
   }

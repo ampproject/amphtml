@@ -16,16 +16,14 @@
 
 /** @externs */
 
-
 /** @constructor */
-var DomPurifyConfig = function() {};
+var DomPurifyConfig = function () {};
 
 DomPurifyConfig.prototype.ALLOWED_TAGS;
 DomPurifyConfig.prototype.ALLOWED_ATTR;
 DomPurifyConfig.prototype.FORBID_TAGS;
 DomPurifyConfig.prototype.FORBID_ATTR;
-/** @type {?Object} */
-DomPurifyConfig.prototype.USE_PROFILES = {};
+DomPurifyConfig.prototype.USE_PROFILES;
 /** @type {boolean} */
 DomPurifyConfig.prototype.USE_PROFILES.html;
 /** @type {boolean} */

@@ -27,11 +27,11 @@ import {
   getFragmentId,
   getServiceFromUrlFragment,
 } from './fragment';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
 import {parseUrlDeprecated} from '../../../../src/url';
-import {toArray} from '../../../../src/types';
+import {toArray} from '../../../../src/core/types/array';
 
 const VIEW_EVENT_CHANNEL = 100;
 const nonTrackedDomainMatcher = /\.gov|\.mil/;
@@ -72,10 +72,11 @@ let LojsonDataDef;
 let AtConfigDef;
 
 /**
- * @param {!LojsonDataDef} param1
+ * @param {!LojsonDataDef} jsonData
  * @return {!JsonObject}
  */
-export function getLojsonData({loc, title, pubId, atConfig, referrer, ampDoc}) {
+export function getLojsonData(jsonData) {
+  const {loc, title, pubId, atConfig, referrer, ampDoc} = jsonData;
   const {href, hostname, host, search, pathname, hash, protocol, port} = loc;
   const pageInfo = {
     du: href.split('#').shift(),

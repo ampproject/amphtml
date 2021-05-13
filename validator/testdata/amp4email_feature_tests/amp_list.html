@@ -18,7 +18,7 @@
   Tests the additional restrictions AMP4EMAIL sets on AMP-LIST.
 -->
 <!doctype html>
-<html ⚡4email>
+<html ⚡4email data-css-strict>
 <head>
   <meta charset="utf-8">
   <style amp4email-boilerplate>body{visibility:hidden}</style>
@@ -38,6 +38,15 @@
       <a href="https://somelink.com">{{blah}}</a>
     </div>
   </template>
+</amp-list>
+
+<!-- Valid container layout -->
+<amp-list layout="container" src="https://data.com/articles.json?ref=CANONICAL_URL">
+  <div></div>
+</amp-list>
+<!-- Width/height missing allowed because it is container layout -->
+<amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
+  <div></div>
 </amp-list>
 
 <!--
@@ -199,4 +208,3 @@ URLs cannot be empty.
 
 </body>
 </html>
-

@@ -19,7 +19,7 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -27,18 +27,21 @@ import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
   childElementByTag,
+  closest,
   closestAncestorElementBySelector,
   isJsonScriptTag,
+  matches,
 } from '../../../src/dom';
 import {computedStyle, setImportantStyles} from '../../../src/style';
 import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,
   getTextColorForRGB,
+  triggerClickFromLightDom,
 } from './utils';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {isArray} from '../../../src/types';
+import {dict} from './../../../src/core/types/object';
+import {isArray} from '../../../src/core/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
 
@@ -114,7 +117,7 @@ const getTemplate = (config, consentId, logoSrc) => ({
                   attrs: dict({'class': 'i-amphtml-story-consent-vendors'}),
                   children:
                     config.vendors &&
-                    config.vendors.map(vendor => ({
+                    config.vendors.map((vendor) => ({
                       tag: 'li',
                       attrs: dict({'class': 'i-amphtml-story-consent-vendor'}),
                       children: [],
@@ -184,8 +187,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(this.element);
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.actions_ = null;
 
     /** @private {?Object} */
     this.consentConfig_ = null;
@@ -202,6 +205,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.actions_ = Services.actionServiceForDoc(this.element);
+
     this.assertAndParseConfig_();
 
     const storyEl = dev().assertElement(
@@ -217,12 +222,14 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
-    logoSrc
-      ? assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src')
-      : user().warn(
-          TAG,
-          'Expected "publisher-logo-src" attribute on <amp-story>'
-        );
+    if (logoSrc) {
+      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src');
+    } else {
+      user().warn(
+        TAG,
+        'Expected "publisher-logo-src" attribute on <amp-story>'
+      );
+    }
 
     // Story consent config is set by the `assertAndParseConfig_` method.
     if (this.storyConsentConfig_) {
@@ -238,7 +245,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
         {tagOrTarget: 'AMP-CONSENT', method: 'prompt'},
         {tagOrTarget: 'AMP-CONSENT', method: 'reject'},
       ];
-      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
+      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
 
       this.setAcceptButtonFontColor_();
 
@@ -257,13 +264,13 @@ export class AmpStoryConsent extends AMP.BaseElement {
   initializeListeners_() {
     this.storyConsentEl_.addEventListener(
       'click',
-      event => this.onClick_(event),
+      (event) => this.onClick_(event),
       true /** useCapture */
     );
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => {
+      (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
       true /** callToInitialize */
@@ -279,9 +286,17 @@ export class AmpStoryConsent extends AMP.BaseElement {
    * @private
    */
   onClick_(event) {
-    if (event.target && event.target.hasAttribute('on')) {
+    if (!event.target) {
+      return;
+    }
+    if (event.target.hasAttribute('on')) {
       const targetEl = dev().assertElement(event.target);
       this.actions_.trigger(targetEl, 'tap', event, ActionTrust.HIGH);
+    }
+    const anchorClicked = closest(event.target, (e) => matches(e, 'a[href]'));
+    if (anchorClicked) {
+      triggerClickFromLightDom(anchorClicked, this.element);
+      event.preventDefault();
     }
   }
 
@@ -311,6 +326,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     const parentEl = dev().assertElement(this.element.parentElement);
     const consentScript = childElementByTag(parentEl, 'script');
     this.consentConfig_ = consentScript && parseJson(consentScript.textContent);
+    this.mergeLegacyConsents_();
 
     // amp-consent already triggered console errors, step out to avoid polluting
     // the console.
@@ -326,11 +342,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
         'type="application/json"'
     );
 
-    this.storyConsentConfig_ = Object.assign(
-      {},
-      DEFAULT_OPTIONAL_PARAMETERS,
-      /** @type {Object} */ (parseJson(storyConsentScript.textContent))
-    );
+    this.storyConsentConfig_ = {
+      ...DEFAULT_OPTIONAL_PARAMETERS,
+      ...parseJson(storyConsentScript.textContent),
+    };
 
     user().assertString(
       this.storyConsentConfig_.title,
@@ -369,26 +384,42 @@ export class AmpStoryConsent extends AMP.BaseElement {
   }
 
   /**
+   * Merge legacy `consents` policy object from
+   * amp-consent config into top level.
+   * @private
+   */
+  mergeLegacyConsents_() {
+    const legacyConsents = this.consentConfig_['consents'];
+    if (legacyConsents) {
+      const policyId = Object.keys(legacyConsents)[0];
+      const policy = legacyConsents[policyId];
+      this.consentConfig_.consentInstanceId = policyId;
+      this.consentConfig_.checkConsentHref = policy.checkConsentHref;
+      this.consentConfig_.promptIfUnknownForGeoGroup =
+        policy.promptIfUnknownForGeoGroup;
+      delete this.consentConfig_['consents'];
+    }
+  }
+
+  /**
    * @param {string} consentId
    * @private
    */
   storeConsentId_(consentId) {
-    const policyId = Object.keys(this.consentConfig_['consents'])[0];
-    const policy = this.consentConfig_['consents'][policyId];
-
     // checkConsentHref response overrides the amp-geo config, if provided.
-    if (policy.checkConsentHref) {
+    if (this.consentConfig_.checkConsentHref) {
       this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
       return;
     }
 
     // If using amp-access with amp-geo, only set the consent id if the user is
     // in the expected geo group.
-    if (policy['promptIfUnknownForGeoGroup']) {
-      Services.geoForDocOrNull(this.element).then(geo => {
-        const geoGroup = policy['promptIfUnknownForGeoGroup'];
-        const matchedGeoGroups =
-          /** @type {!Array<string>} */ (geo.matchedISOCountryGroups);
+    const geoGroup = this.consentConfig_.promptIfUnknownForGeoGroup;
+    if (geoGroup) {
+      Services.geoForDocOrNull(this.element).then((geo) => {
+        const matchedGeoGroups = /** @type {!Array<string>} */ (
+          geo.matchedISOCountryGroups
+        );
         if (geo && !matchedGeoGroups.includes(geoGroup)) {
           return;
         }

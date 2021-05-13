@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../../utils/object';
-import {rethrowAsync, user, userAssert} from '../../log';
-import {trimStart} from '../../string';
-import {tryResolve} from '../../utils/promise';
+import {hasOwn} from '../../core/types/object';
+import {rethrowAsync} from '../../core/error';
+import {trimStart} from '../../core/types/string';
+import {tryResolve} from '../../core/data-structures/promise';
+import {user} from '../../log';
 
 /** @private @const {string} */
 const PARSER_IGNORE_FLAG = '`';
@@ -25,9 +26,26 @@ const PARSER_IGNORE_FLAG = '`';
 /** @private @const {string} */
 const TAG = 'Expander';
 
-/** A whitelist for replacements whose values should not be %-encoded. */
-/** @const {Object<string, boolean>} */
-export const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
+/**
+ * @typedef {{
+ *   name: string,
+ *   prioritized: (!BindingInfoDef|undefined),
+ *   encode: boolean,
+ *   sync: ../variable-source.SyncResolverDef,
+ *   async: ../variable-source.AsyncResolverDef,
+ * }}
+ */
+let BindingInfoDef;
+
+/**
+ * @typedef {{
+ *   start: number,
+ *   stop: number,
+ *   name: string,
+ *   length: number,
+ * }}
+ */
+let MatchDef;
 
 /** Rudamentary parser to handle nested Url replacement. */
 export class Expander {
@@ -38,7 +56,7 @@ export class Expander {
    * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
    *   variable resolutions.
    * @param {boolean=} opt_sync If the method should resolve syncronously.
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @param {boolean=} opt_noEncode Should not urlEncode macro resolution.
    */
@@ -47,7 +65,7 @@ export class Expander {
     opt_bindings,
     opt_collectVars,
     opt_sync,
-    opt_whiteList,
+    opt_allowlist,
     opt_noEncode
   ) {
     /** @const {?../variable-source.VariableSource} */
@@ -64,7 +82,7 @@ export class Expander {
     this.sync_ = opt_sync;
 
     /**@const {!Object<string, boolean>|undefined} */
-    this.whiteList_ = opt_whiteList;
+    this.allowlist_ = opt_allowlist;
 
     /**@const {boolean|undefined} */
     this.encode_ = !opt_noEncode;
@@ -79,7 +97,7 @@ export class Expander {
     if (!url.length) {
       return this.sync_ ? url : Promise.resolve(url);
     }
-    const expr = this.variableSource_.getExpr(this.bindings_, this.whiteList_);
+    const expr = this.variableSource_.getExpr(this.bindings_, this.allowlist_);
 
     const matches = this.findMatches_(url, expr);
     // if no keywords move on
@@ -95,7 +113,7 @@ export class Expander {
    * @return {!Array}
    */
   getMacroNames(url) {
-    const expr = this.variableSource_.getExpr(this.bindings_, this.whiteList_);
+    const expr = this.variableSource_.getExpr(this.bindings_, this.allowlist_);
     const matches = url.match(expr);
     if (matches) {
       return matches;
@@ -107,11 +125,10 @@ export class Expander {
    * Structures the regex matching into the desired format
    * @param {string} url url to be substituted
    * @param {RegExp} expression regex containing all keywords
-   * @return {Array<Object<string, string|number>>} array of objects representing
-   *  matching keywords
+   * @return {!Array<!MatchDef>} array of matching keywords.
    */
   findMatches_(url, expression) {
-    const matches = [];
+    const matches = /** @type {!Array<!MatchDef>} */ ([]);
     url.replace(expression, (match, name, startPosition) => {
       const {length} = match;
       const stopPosition = length + startPosition - 1;
@@ -128,8 +145,7 @@ export class Expander {
 
   /**
    * @param {string} url
-   * @param {!Array<Object<string, string|number>>} matches Array of objects
-   *   representing matching keywords.
+   * @param {!Array<!MatchDef>} matches Array of matching keywords.
    * @return {!Promise<string>|string}
    */
   parseUrlRecursively_(url, matches) {
@@ -139,18 +155,18 @@ export class Expander {
     let match = matches[matchIndex];
     let numOfPendingCalls = 0;
     let ignoringChars = false;
-    let nextArgShouldBeRaw = false;
 
-    const evaluateNextLevel = encode => {
+    const evaluateNextLevel = (encode) => {
       let builder = '';
       let results = [];
       const args = [];
 
       while (urlIndex < url.length && matchIndex <= matches.length) {
+        const trimmedBuilder = builder.trim();
         if (match && urlIndex === match.start) {
           // Collect any chars that may be prefixing the macro, if we are in
           // a nested context trim the args.
-          if (builder.trim().length) {
+          if (trimmedBuilder) {
             results.push(numOfPendingCalls ? trimStart(builder) : builder);
           }
 
@@ -161,16 +177,17 @@ export class Expander {
           // in optional bindings, or the global variable source.
           if (this.bindings_ && hasOwn(this.bindings_, match.name)) {
             // Macro is from optional bindings.
-            binding = {
+            binding = /** @type {!BindingInfoDef} */ ({
               // This construction helps us save the match name and determine
               // precedence of resolution choices in #expandBinding_ later.
               name: match.name,
               prioritized: this.bindings_[match.name],
               encode,
-            };
+            });
           } else {
             // Macro is from the global source.
-            binding = Object.assign({}, this.variableSource_.get(match.name), {
+            binding = /** @type {!BindingInfoDef} */ ({
+              ...this.variableSource_.get(match.name),
               name: match.name,
               encode,
             });
@@ -197,16 +214,18 @@ export class Expander {
         } else if (url[urlIndex] === PARSER_IGNORE_FLAG) {
           if (!ignoringChars) {
             ignoringChars = true;
-            nextArgShouldBeRaw = true;
-            userAssert(
-              builder.trim() === '',
-              `The substring "${builder}" was lost during url-replacement. ` +
-                'Please ensure the url syntax is correct'
-            );
-            builder = '';
+            // Collect any chars that may exist before backticks, eg FOO(a`b`)
+            if (trimmedBuilder) {
+              results.push(trimmedBuilder);
+            }
           } else {
             ignoringChars = false;
+            // Collect any chars inside backticks without trimming whitespace.
+            if (builder.length) {
+              results.push(builder);
+            }
           }
+          builder = '';
           urlIndex++;
         } else if (
           numOfPendingCalls &&
@@ -214,13 +233,10 @@ export class Expander {
           !ignoringChars
         ) {
           // Commas tell us to create a new argument when in nested context and
-          // not ignoring them due to backticks. We push any string built so far,
-          // create a new array for the next argument, and reset our string
-          // builder.
-          if (builder.length) {
-            const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
-            results.push(nextArg);
-            nextArgShouldBeRaw = false;
+          // we push any string built so far, create a new array for the next
+          // argument, and reset our string builder.
+          if (trimmedBuilder) {
+            results.push(trimmedBuilder);
           }
           args.push(results);
           results = [];
@@ -243,12 +259,10 @@ export class Expander {
           urlIndex++;
           numOfPendingCalls--;
           const binding = stack.pop();
-          const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
-          if (nextArg) {
-            results.push(nextArg);
+          if (trimmedBuilder) {
+            results.push(trimmedBuilder);
           }
           args.push(results);
-          nextArgShouldBeRaw = false;
           const value = this.evaluateBinding_(binding, /* opt_args */ args);
           return value;
         } else {
@@ -271,8 +285,8 @@ export class Expander {
       }
 
       return Promise.all(results)
-        .then(promiseArray => promiseArray.join(''))
-        .catch(e => {
+        .then((promiseArray) => promiseArray.join(''))
+        .catch((e) => {
           rethrowAsync(e);
           return '';
         });
@@ -284,7 +298,7 @@ export class Expander {
   /**
    * Called when a binding is ready to be resolved. Determines which version of
    * binding to use and if syncronous or asyncronous version should be called.
-   * @param {Object<string, *>} bindingInfo An object containing the name of
+   * @param {!BindingInfoDef} bindingInfo An object containing the name of
    *    macro and value to be resolved.
    * @param {Array=} opt_args Arguments passed to the macro. Arguments come as
    *    an array of arrays that will be eventually passed to a function.apply
@@ -315,14 +329,12 @@ export class Expander {
       binding = bindingInfo.async || bindingInfo.sync;
     }
 
-    // We should only ever encode the top level resolution, or not at all.
-    const shouldEncode = encode && !NOENCODE_WHITELIST[name];
     if (this.sync_) {
       const result = this.evaluateBindingSync_(binding, name, opt_args);
-      return shouldEncode ? encodeURIComponent(result) : result;
+      return encode ? encodeURIComponent(result) : result;
     } else {
-      return this.evaluateBindingAsync_(binding, name, opt_args).then(result =>
-        shouldEncode ? encodeURIComponent(result) : result
+      return this.evaluateBindingAsync_(binding, name, opt_args).then(
+        (result) => (encode ? encodeURIComponent(result) : result)
       );
     }
   }
@@ -338,18 +350,19 @@ export class Expander {
     let value;
     try {
       if (typeof binding === 'function') {
+        const bindingFunc = binding;
         if (opt_args) {
-          value = this.processArgsAsync_(opt_args).then(args =>
-            binding.apply(null, args)
+          value = this.processArgsAsync_(opt_args).then((args) =>
+            bindingFunc.apply(null, args)
           );
         } else {
-          value = tryResolve(binding);
+          value = tryResolve(bindingFunc);
         }
       } else {
         value = Promise.resolve(binding);
       }
       return value
-        .then(val => {
+        .then((val) => {
           this.maybeCollectVars_(name, val, opt_args);
 
           let result;
@@ -361,7 +374,7 @@ export class Expander {
           }
           return result;
         })
-        .catch(e => {
+        .catch((e) => {
           rethrowAsync(e);
           this.maybeCollectVars_(name, '', opt_args);
           return Promise.resolve('');
@@ -385,8 +398,8 @@ export class Expander {
    */
   processArgsAsync_(argsArray) {
     return Promise.all(
-      argsArray.map(argArray => {
-        return Promise.all(argArray).then(resolved => resolved.join(''));
+      argsArray.map((argArray) => {
+        return Promise.all(argArray).then((resolved) => resolved.join(''));
       })
     );
   }
@@ -407,7 +420,7 @@ export class Expander {
 
       let result;
 
-      if (value && value.then) {
+      if (value && typeof value.then == 'function') {
         // If binding is passed in as opt_binding we try to resolve it and it
         // may return a promise. NOTE: We do not collect this discarded value,
         // even if collectVars exists.
@@ -450,7 +463,7 @@ export class Expander {
     if (!argsArray) {
       return argsArray;
     }
-    return argsArray.map(argArray => {
+    return argsArray.map((argArray) => {
       return argArray.join('');
     });
   }
@@ -468,7 +481,7 @@ export class Expander {
 
     let args = '';
     if (opt_args) {
-      const rawArgs = opt_args.filter(arg => arg !== '').join(',');
+      const rawArgs = opt_args.filter((arg) => arg !== '').join(',');
       args = `(${rawArgs})`;
     }
     this.collectVars_[`${name}${args}`] = value || '';

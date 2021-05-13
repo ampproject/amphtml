@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../services';
+import {registerServiceBuilderForDoc} from '../service';
 
 /**
  * @implements {../service/mutator-interface.MutatorInterface}
@@ -22,19 +23,18 @@ import {Services} from '../services';
 export class InaboxMutator {
   /**
    * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../service/resources-interface.ResourcesInterface} resources
    */
-  constructor(ampdoc, resources) {
+  constructor(ampdoc) {
     /** @const @private {!../service/resources-interface.ResourcesInterface} */
-    this.resources_ = resources;
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @private @const {!../service/vsync-impl.Vsync} */
     this.vsync_ = Services./*OK*/ vsyncFor(ampdoc.win);
   }
 
   /** @override */
-  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
-    this.attemptChangeSize(element, newHeight, newWidth, opt_newMargins).then(
+  forceChangeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
+    this.requestChangeSize(element, newHeight, newWidth, opt_newMargins).then(
       () => {
         if (opt_callback) {
           opt_callback();
@@ -44,11 +44,11 @@ export class InaboxMutator {
   }
 
   /** @override */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
+  requestChangeSize(element, newHeight, newWidth, opt_newMargins) {
     return this.mutateElement(element, () => {
       this.resources_
         .getResourceForElement(element)
-        ./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
+        .changeSize(newHeight, newWidth, opt_newMargins);
     });
   }
 
@@ -56,10 +56,6 @@ export class InaboxMutator {
   expandElement(element) {
     const resource = this.resources_.getResourceForElement(element);
     resource.completeExpand();
-    const owner = resource.getOwner();
-    if (owner) {
-      owner.expandedCallback(element);
-    }
     this.resources_./*OK*/ schedulePass();
   }
 
@@ -100,4 +96,11 @@ export class InaboxMutator {
       },
     });
   }
+}
+
+/**
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installInaboxMutatorServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'mutator', InaboxMutator);
 }

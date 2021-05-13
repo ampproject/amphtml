@@ -23,23 +23,23 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {installXhrService} from '../../../src/service/xhr-impl';
 
-describe('invokeWebWorker', () => {
-  let sandbox;
+describes.sandboxed('invokeWebWorker', {}, (env) => {
   let fakeWin;
 
   let ampWorker;
   let postMessageStub;
+  let blobStub;
   let fakeWorker;
   let fetchTextCallStub;
   let workerReadyPromise;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    sandbox.stub(Services, 'ampdocServiceFor').returns({
+    env.sandbox.stub(Services, 'ampdocServiceFor').returns({
       isSingleDoc: () => false,
     });
 
-    postMessageStub = sandbox.stub();
+    postMessageStub = env.sandbox.stub();
+    blobStub = env.sandbox.stub();
 
     fakeWorker = {};
     fakeWorker.postMessage = postMessageStub;
@@ -47,29 +47,25 @@ describe('invokeWebWorker', () => {
     // Fake Worker constructor just returns our `fakeWorker` instance.
     fakeWin = {
       Worker: () => fakeWorker,
-      Blob: sandbox.stub(),
-      URL: {createObjectURL: sandbox.stub()},
+      Blob: blobStub,
+      URL: {createObjectURL: env.sandbox.stub()},
       location: window.location,
     };
 
     // Stub xhr.fetchText() to return a resolved promise.
     installXhrService(fakeWin);
-    fetchTextCallStub = sandbox
+    fetchTextCallStub = env.sandbox
       .stub(Services.xhrFor(fakeWin), 'fetchText')
       .callsFake(() =>
         Promise.resolve({
           text() {
-            return Promise.resolve();
+            return Promise.resolve('//# sourceMappingURL=foo.js');
           },
         })
       );
 
     ampWorker = ampWorkerForTesting(fakeWin);
     workerReadyPromise = ampWorker.fetchPromiseForTesting();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should check if Worker is supported', () => {
@@ -87,7 +83,7 @@ describe('invokeWebWorker', () => {
     return workerReadyPromise.then(() => {
       expect(postMessageStub).to.have.been.calledWithMatch({
         method: 'foo',
-        args: sinon.match(['bar', 123]),
+        args: env.sandbox.match(['bar', 123]),
         id: 0,
       });
 
@@ -107,7 +103,7 @@ describe('invokeWebWorker', () => {
       };
       fakeWorker.onmessage({data});
 
-      return invokePromise.then(returnValue => {
+      return invokePromise.then((returnValue) => {
         expect(returnValue).to.deep.equals({'qux': 456});
       });
     });
@@ -141,7 +137,7 @@ describe('invokeWebWorker', () => {
         },
       });
 
-      return Promise.all([foo, bar, qux]).then(values => {
+      return Promise.all([foo, bar, qux]).then((values) => {
         expect(values[0]).to.equal('foo-retVal');
         expect(values[1]).to.equal('bar-retVal');
         expect(values[2]).to.equal('qux-retVal');
@@ -190,7 +186,7 @@ describe('invokeWebWorker', () => {
         },
       });
 
-      return Promise.all([one, two, three]).then(values => {
+      return Promise.all([one, two, three]).then((values) => {
         expect(values[0]).to.equal('one');
         expect(values[1]).to.equal('two');
         expect(values[2]).to.equal('three');
@@ -199,7 +195,7 @@ describe('invokeWebWorker', () => {
   });
 
   it('should log error when unexpected message is received', () => {
-    const errorStub = sandbox.stub(dev(), 'error');
+    const errorStub = env.sandbox.stub(dev(), 'error');
 
     invokeWebWorker(fakeWin, 'foo');
 
@@ -282,6 +278,22 @@ describe('invokeWebWorker', () => {
         method: 'e',
         scope: 0,
       });
+    });
+  });
+
+  it('should replace the relative sourceMappingURL with the absolute one', () => {
+    invokeWebWorker(fakeWin, 'foo', ['bar', 123]);
+    getMode(fakeWin).bypassInterceptorForDev = true;
+
+    return workerReadyPromise.then(() => {
+      expect(blobStub).to.have.been.calledWithMatch(
+        [
+          '//# sourceMappingURL=http://localhost:9876/dist/ww.js.map\n//# sourceurl=http://localhost:9876/dist/ww.js',
+        ],
+        {
+          type: 'text/javascript',
+        }
+      );
     });
   });
 });

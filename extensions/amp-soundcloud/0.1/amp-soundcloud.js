@@ -27,8 +27,11 @@
  * </amp-soundcloud>
  */
 
-import {dict} from '../../../src/utils/object';
+import {PauseHelper} from '../../../src/utils/pause-helper';
+import {Services} from '../../../src/services';
+import {dict} from '../../../src/core/types/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 class AmpSoundcloud extends AMP.BaseElement {
@@ -38,6 +41,9 @@ class AmpSoundcloud extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -45,12 +51,21 @@ class AmpSoundcloud extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://api.soundcloud.com/', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://api.soundcloud.com/',
+      opt_onLayout
+    );
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  buildCallback() {
+    setIsMediaComponent(this.element);
   }
 
   /**@override*/
@@ -98,7 +113,30 @@ class AmpSoundcloud extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
+  }
+
+  /**@override*/
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    return true;
   }
 
   /** @override */
@@ -112,6 +150,6 @@ class AmpSoundcloud extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-soundcloud', '0.1', AMP => {
+AMP.extension('amp-soundcloud', '0.1', (AMP) => {
   AMP.registerElement('amp-soundcloud', AmpSoundcloud);
 });

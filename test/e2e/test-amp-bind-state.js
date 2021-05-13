@@ -17,10 +17,10 @@
 describes.endtoend(
   'amp-bind',
   {
-    testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-bind/bind-basic.html',
+    fixture: 'amp-bind/bind-basic.html',
     environments: 'ampdoc-amp4ads-preset',
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {
@@ -28,6 +28,14 @@ describes.endtoend(
     });
 
     describe('+ amp-state', () => {
+      it('should update text', async () => {
+        const text = await controller.findElement('#textDisplay');
+        await expect(controller.getElementText(text)).to.equal('hello');
+        const button = await controller.findElement('#changeTextButton');
+        await controller.click(button);
+        await expect(controller.getElementText(text)).to.equal('world');
+      });
+
       // TODO(cvializ, choumx): Update server to have an endpoint that
       // would test the infinite-loop blocking behavior
       it.skip('should not loop infinitely if updates change its src binding', async () => {

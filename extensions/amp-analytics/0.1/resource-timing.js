@@ -15,9 +15,8 @@
  */
 
 import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {findIndex} from '../../../src/utils/array';
-import {isObject} from '../../../src/types';
-import {parseUrlDeprecated} from '../../../src/url';
+import {findIndex} from '../../../src/core/types/array';
+import {isObject} from '../../../src/core/types';
 import {user} from '../../../src/log';
 
 /**
@@ -68,7 +67,7 @@ const RESOURCE_TIMING_BUFFER_SIZE = 150;
  * @template OUT
  */
 function yieldThread(fn) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => resolve(fn()));
   });
 }
@@ -120,9 +119,9 @@ function validateResourceTimingSpec(spec) {
  * @return {!Array<!PerformanceResourceTiming>}
  */
 function getResourceTimingEntries(win) {
-  return /** @type {!Array<!PerformanceResourceTiming>} */ (win.performance.getEntriesByType(
-    'resource'
-  ));
+  return /** @type {!Array<!PerformanceResourceTiming>} */ (
+    win.performance.getEntriesByType('resource')
+  );
 }
 
 /**
@@ -163,7 +162,7 @@ function entryToExpansionOptions(entry, name, format) {
  * @return {?string} The name of the entry, or null if no matching name exists.
  */
 function nameForEntry(entry, resourcesByHost) {
-  const url = parseUrlDeprecated(entry.name);
+  const url = entry.name;
   for (let i = 0; i < resourcesByHost.length; ++i) {
     const {hostPattern, resources} = resourcesByHost[i];
     if (!hostPattern.test(url.host)) {
@@ -171,7 +170,7 @@ function nameForEntry(entry, resourcesByHost) {
     }
     const index = findIndex(
       resources,
-      res =>
+      (res) =>
         res.pathPattern.test(url.pathname) && res.queryPattern.test(url.search)
     );
     if (index != -1) {
@@ -230,7 +229,7 @@ function filterEntries(entries, resourceDefs) {
   // definitions to have the same host.
   const byHost = groupSpecsByHost(resourceDefs);
   const results = [];
-  entries.forEach(entry => {
+  entries.forEach((entry) => {
     const name = nameForEntry(entry, byHost);
     if (name) {
       results.push({entry, name});
@@ -244,33 +243,36 @@ function filterEntries(entries, resourceDefs) {
  * single string.
  * @param {!Array<!PerformanceResourceTiming>} entries
  * @param {!JsonObject} resourceTimingSpec
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element} element amp-analytics element.
  * @return {!Promise<string>}
  */
-function serialize(entries, resourceTimingSpec, ampdoc) {
+function serialize(entries, resourceTimingSpec, element) {
   const resources = resourceTimingSpec['resources'];
   const encoding = resourceTimingSpec['encoding'];
 
-  const variableService = variableServiceForDoc(ampdoc);
+  const variableService = variableServiceForDoc(element);
   const format = (val, relativeTo = 0) =>
     Math.round(val - relativeTo).toString(encoding['base'] || 10);
 
   const promises = filterEntries(entries, resources)
-    .map(({entry, name}) => entryToExpansionOptions(entry, name, format))
-    .map(expansion =>
-      variableService.expandTemplate(encoding['entry'], expansion)
+    .map((resourceTimingEntry) => {
+      const {entry, name} = resourceTimingEntry;
+      return entryToExpansionOptions(entry, name, format);
+    })
+    .map((expansion) =>
+      variableService.expandTemplate(encoding['entry'], expansion, element)
     );
-  return Promise.all(promises).then(vars => vars.join(encoding['delim']));
+  return Promise.all(promises).then((vars) => vars.join(encoding['delim']));
 }
 
 /**
  * Serializes resource timing entries according to the resource timing spec.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element} element amp-analytics element.
  * @param {!JsonObject} resourceTimingSpec
  * @return {!Promise<string>}
  */
-function serializeResourceTiming(ampdoc, resourceTimingSpec) {
-  const {win} = ampdoc;
+function serializeResourceTiming(element, resourceTimingSpec) {
+  const {win} = element.getAmpDoc();
   // Check that the performance timing API exists before and that the spec is
   // valid before proceeding. If not, we simply return an empty string.
   if (
@@ -299,24 +301,24 @@ function serializeResourceTiming(ampdoc, resourceTimingSpec) {
   );
 
   // Filter resources that are too early.
-  entries = entries.filter(e => e.startTime + e.duration >= responseAfter);
+  entries = entries.filter((e) => e.startTime + e.duration >= responseAfter);
   if (!entries.length) {
     return Promise.resolve('');
   }
   // Yield the thread in case iterating over all resources takes a long time.
-  return yieldThread(() => serialize(entries, resourceTimingSpec, ampdoc));
+  return yieldThread(() => serialize(entries, resourceTimingSpec, element));
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element} element amp-analytics element.
  * @param {!JsonObject|undefined} spec resource timing spec.
  * @param {number} startTime start timestamp.
  * @return {!Promise<string>}
  */
-export function getResourceTiming(ampdoc, spec, startTime) {
+export function getResourceTiming(element, spec, startTime) {
   // Only allow collecting timing within 1s
   if (spec && Date.now() < startTime + 60 * 1000) {
-    return serializeResourceTiming(ampdoc, spec);
+    return serializeResourceTiming(element, spec);
   } else {
     return Promise.resolve('');
   }

@@ -100,6 +100,9 @@ export class Platform {
    * @return {boolean}
    */
   isIe() {
+    if (IS_ESM) {
+      return false;
+    }
     return /Trident|MSIE|IEMobile/i.test(this.navigator_.userAgent);
   }
 
@@ -230,8 +233,7 @@ export class Platform {
 
 /**
  * @param {!Window} window
- * @return {*} TODO(#23582): Specify return type
  */
 export function installPlatformService(window) {
-  return registerServiceBuilder(window, 'platform', Platform);
+  registerServiceBuilder(window, 'platform', Platform);
 }

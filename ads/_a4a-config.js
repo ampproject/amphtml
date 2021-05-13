@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {cloudflareIsA4AEnabled} from '../extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config';
-import {gmosspIsA4AEnabled} from '../extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config';
-import {map} from '../src/utils/object';
-import {tripleliftIsA4AEnabled} from '../extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config';
+import {map} from '../src/core/types/object';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
@@ -44,13 +41,12 @@ export function getA4ARegistry() {
       'adsense': () => true,
       'adzerk': () => true,
       'doubleclick': () => true,
-      'triplelift': tripleliftIsA4AEnabled,
-      'cloudflare': cloudflareIsA4AEnabled,
-      'gmossp': gmosspIsA4AEnabled,
       'fake': () => true,
+      'nws': () => true,
+      'valueimpression': () => true,
       // TODO: Add new ad network implementation "is enabled" functions here.
       // Note: if you add a function here that requires a new "import", above,
-      // you'll probably also need to add a whitelist exception to
+      // you'll probably also need to add an exception to
       // build-system/test-configs/dep-check-config.js in the
       // "filesMatching: 'ads/**/*.js'" rule.
     });
@@ -66,7 +62,4 @@ export function getA4ARegistry() {
 export const signingServerURLs = {
   'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
   'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
-  'cloudflare': 'https://amp.cloudflare.com/amp-ad-verifying-keyset.json',
-  'cloudflare-dev':
-    'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
 };

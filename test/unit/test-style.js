@@ -16,17 +16,7 @@
 
 import * as st from '../../src/style';
 
-describe('Style', () => {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox;
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
+describes.sandboxed('Style', {}, (env) => {
   it('toggle', () => {
     const element = document.createElement('div');
 
@@ -55,6 +45,13 @@ describe('Style', () => {
     expect(element.style.WebkitTransitionDuration).to.equal('1s');
   });
 
+  it('setStyle with custom var', () => {
+    const element = document.createElement('div');
+    st.setStyle(element, '--x', '1px');
+    expect(element.style.getPropertyValue('--x')).to.equal('1px');
+    expect(st.getStyle(element, '--x')).to.equal('1px');
+  });
+
   it('setStyles', () => {
     const element = document.createElement('div');
     st.setStyles(element, {
@@ -75,7 +72,7 @@ describe('Style', () => {
   });
 
   it('setImportantStyles with vendor prefix', () => {
-    const spy = sandbox.spy();
+    const spy = env.sandbox.spy();
     const element = {
       style: {
         WebkitTransitionDurationImportant: '',

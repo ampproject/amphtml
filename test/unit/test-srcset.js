@@ -21,7 +21,7 @@ import {
   srcsetFromSrc,
 } from '../../src/srcset';
 
-describe('Srcset', () => {
+describes.sandboxed('Srcset', {}, () => {
   describe('parseSrcset', () => {
     function test(s, expected) {
       const res = parseSrcset(s);
@@ -294,12 +294,18 @@ describe('Srcset', () => {
     it('should not allow duplicate sources', () => {
       allowConsoleError(() => {
         expect(() => {
-          new Srcset([{url: 'image', width: 100}, {url: 'image', width: 100}]);
+          new Srcset([
+            {url: 'image', width: 100},
+            {url: 'image', width: 100},
+          ]);
         }).to.throw(/Duplicate width/);
       });
       allowConsoleError(() => {
         expect(() => {
-          new Srcset([{url: 'image', dpr: 2}, {url: 'image', dpr: 2}]);
+          new Srcset([
+            {url: 'image', dpr: 2},
+            {url: 'image', dpr: 2},
+          ]);
         }).to.throw(/Duplicate dpr/);
       });
     });

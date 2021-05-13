@@ -24,7 +24,7 @@ describes.realWin(
       extensions: ['amp-audio'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let ampAudio;
 
@@ -39,7 +39,7 @@ describes.realWin(
         ampAudio.setAttribute(key, attributes[key]);
       }
       if (opt_childNodesAttrs) {
-        opt_childNodesAttrs.forEach(childNodeAttrs => {
+        opt_childNodesAttrs.forEach((childNodeAttrs) => {
           let child;
           if (childNodeAttrs.tag === 'text') {
             child = doc.createTextNode(childNodeAttrs.text);
@@ -62,10 +62,10 @@ describes.realWin(
       naturalDimensions_['AMP-AUDIO'] = {width: '300px', height: '30px'};
       const ampAudio = getAmpAudio(attributes, opt_childNodesAttrs);
       return ampAudio
-        .build()
+        .buildInternal()
         .then(() => ampAudio.layoutCallback())
         .then(() => ampAudio)
-        .catch(error => {
+        .catch((error) => {
           // Ignore failed to load errors since sources are fake.
           if (error.toString().indexOf('Failed to load') > -1) {
             return ampAudio;
@@ -86,10 +86,10 @@ describes.realWin(
       doc.body.appendChild(ampStory);
 
       return ampAudio
-        .build()
+        .buildInternal()
         .then(() => ampAudio.layoutCallback())
         .then(() => ampAudio)
-        .catch(error => {
+        .catch((error) => {
           // Ignore failed to load errors since sources are fake.
           if (error.toString().indexOf('Failed to load') > -1) {
             return ampAudio;
@@ -102,7 +102,7 @@ describes.realWin(
     it('should load audio through attribute', () => {
       return attachAndRun({
         src: 'audio.mp3',
-      }).then(a => {
+      }).then((a) => {
         const audio = a.querySelector('audio');
         expect(audio.tagName).to.equal('AUDIO');
         expect(audio.getAttribute('src')).to.equal('audio.mp3');
@@ -116,7 +116,7 @@ describes.realWin(
       return attachAndRun({
         src: 'audio.mp3',
         preload: 'none',
-      }).then(a => {
+      }).then((a) => {
         const audio = a.querySelector('audio');
         expect(audio.getAttribute('preload')).to.be.equal('none');
       });
@@ -126,7 +126,7 @@ describes.realWin(
       return attachAndRun({
         src: 'audio.mp3',
         preload: 'metadata',
-      }).then(a => {
+      }).then((a) => {
         const audio = a.querySelector('audio');
         expect(audio.getAttribute('preload')).to.be.equal('metadata');
       });
@@ -135,22 +135,22 @@ describes.realWin(
     it(
       'should attach `<audio>` element and execute relevant actions for ' +
         'layout="nodisplay"',
-      () => {
-        return attachAndRun({
+      async () => {
+        const ampAudio = await attachAndRun({
           src: 'audio.mp3',
           preload: 'none',
           layout: 'nodisplay',
-        }).then(ampAudio => {
-          const audio = ampAudio.querySelector('audio');
-          expect(audio).to.not.be.null;
-
-          const impl = ampAudio.implementation_;
-          impl.executeAction({method: 'play', satisfiesTrust: () => true});
-          expect(impl.isPlaying).to.be.true;
-
-          impl.executeAction({method: 'pause', satisfiesTrust: () => true});
-          expect(impl.isPlaying).to.be.false;
         });
+        const impl = await ampAudio.getImpl();
+
+        const audio = ampAudio.querySelector('audio');
+        expect(audio).to.not.be.null;
+
+        impl.executeAction({method: 'play', satisfiesTrust: () => true});
+        expect(impl.isPlaying).to.be.true;
+
+        impl.executeAction({method: 'pause', satisfiesTrust: () => true});
+        expect(impl.isPlaying).to.be.false;
       }
     );
 
@@ -169,7 +169,7 @@ describes.realWin(
           {tag: 'source', src: 'audio.ogg', type: 'audio/ogg'},
           {tag: 'text', text: 'Unsupported.'},
         ]
-      ).then(a => {
+      ).then((a) => {
         const audio = a.querySelector('audio');
         expect(audio.tagName).to.equal('AUDIO');
         expect(a.getAttribute('width')).to.be.equal('503');
@@ -194,7 +194,7 @@ describes.realWin(
     it('should set its dimensions to the browser natural', () => {
       return attachAndRun({
         src: 'audio.mp3',
-      }).then(a => {
+      }).then((a) => {
         const audio = a.querySelector('audio');
         expect(a.style.width).to.be.equal('300px');
         expect(a.style.height).to.be.equal('30px');
@@ -212,28 +212,29 @@ describes.realWin(
       return attachAndRun({
         'width': '500',
         src: 'audio.mp3',
-      }).then(a => {
+      }).then((a) => {
         expect(a.style.width).to.be.equal('500px');
         expect(a.style.height).to.be.equal('30px');
       });
     });
 
     it('should fallback when not available', () => {
-      const savedCreateElement = doc.createElement;
-      doc.createElement = name => {
-        if (name == 'audio') {
-          return savedCreateElement.call(doc, 'audio2');
+      // For this single test, cause audio elements that are
+      // created to lack the necessary feature set, which should trigger
+      // fallback behavior.
+      const {createElement} = doc;
+      doc.createElement = (name) => {
+        if (name === 'audio') {
+          name = 'busted-audio';
         }
-        return savedCreateElement.call(doc, name);
+        return createElement.call(doc, name);
       };
+
       const element = doc.createElement('div');
-      element.toggleFallback = sandbox.spy();
+      element.toggleFallback = env.sandbox.spy();
       const audio = new AmpAudio(element);
-      const promise = audio.buildAudioElement();
-      doc.createElement = savedCreateElement;
-      return promise.then(() => {
-        expect(element.toggleFallback).to.be.calledOnce;
-      });
+      audio.buildAudioElement();
+      expect(element.toggleFallback).to.be.calledOnce;
     });
 
     it('should propagate ARIA attributes', () => {
@@ -242,7 +243,7 @@ describes.realWin(
         'aria-label': 'Hello',
         'aria-labelledby': 'id2',
         'aria-describedby': 'id3',
-      }).then(a => {
+      }).then((a) => {
         const audio = a.querySelector('audio');
         expect(audio.getAttribute('aria-label')).to.equal('Hello');
         expect(audio.getAttribute('aria-labelledby')).to.equal('id2');
@@ -250,35 +251,35 @@ describes.realWin(
       });
     });
 
-    it('should play/pause when `play`/`pause` actions are called', () => {
-      return attachAndRun({
+    it('should play/pause when `play`/`pause` actions are called', async () => {
+      const ampAudio = await attachAndRun({
         'width': '500',
         src: 'audio.mp3',
-      }).then(ampAudio => {
-        const impl = ampAudio.implementation_;
-        impl.executeAction({method: 'play', satisfiesTrust: () => true});
-        expect(impl.isPlaying).to.be.true;
-
-        impl.executeAction({method: 'pause', satisfiesTrust: () => true});
-        expect(impl.isPlaying).to.be.false;
       });
+      const impl = await ampAudio.getImpl();
+
+      impl.executeAction({method: 'play', satisfiesTrust: () => true});
+      expect(impl.isPlaying).to.be.true;
+
+      impl.executeAction({method: 'pause', satisfiesTrust: () => true});
+      expect(impl.isPlaying).to.be.false;
     });
 
     it(
       'should not play/pause when `amp-audio` is a direct descendant ' +
         'of `amp-story`',
-      () => {
-        return attachToAmpStoryAndRun({
+      async () => {
+        const ampAudio = await attachToAmpStoryAndRun({
           'width': '500',
           src: 'audio.mp3',
-        }).then(ampAudio => {
-          const impl = ampAudio.implementation_;
-          impl.executeAction({method: 'play', satisfiesTrust: () => true});
-          expect(impl.isPlaying).to.be.false;
-
-          impl.executeAction({method: 'pause', satisfiesTrust: () => true});
-          expect(impl.isPlaying).to.be.false;
         });
+        const impl = await ampAudio.getImpl();
+
+        impl.executeAction({method: 'play', satisfiesTrust: () => true});
+        expect(impl.isPlaying).to.be.false;
+
+        impl.executeAction({method: 'pause', satisfiesTrust: () => true});
+        expect(impl.isPlaying).to.be.false;
       }
     );
   }

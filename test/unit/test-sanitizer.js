@@ -19,11 +19,11 @@ import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../src/sanitizer';
 let sanitize;
 let html;
 
-describe('Caja-based', () => {
+describes.sandboxed('Caja-based', {}, () => {
   beforeEach(() => {
     html = document.createElement('html');
     const documentEl = {documentElement: html};
-    sanitize = html => sanitizeHtml(html, documentEl);
+    sanitize = (html) => sanitizeHtml(html, documentEl);
   });
 
   runSanitizerTests();
@@ -266,25 +266,34 @@ function runSanitizerTests() {
         expect(sanitize('a<a href="javascript:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
-        expect(sanitize('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
+        expect(sanitize('a<a href=" JAVASCRIPT:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
         expect(sanitize('a<a href="vbscript:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
-        expect(sanitize('a<a href="VBSCRIPT:alert">b</a>')).to.be.equal(
+        expect(sanitize('a<a href=" VBSCRIPT:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
         expect(sanitize('a<a href="data:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
-        expect(sanitize('a<a href="DATA:alert">b</a>')).to.be.equal(
+        expect(sanitize('a<a href=" DATA:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
+        expect(sanitize('a<a href="blob:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>'
+        );
+        expect(sanitize('a<a href=" BLOB:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>'
+        );
+        expect(
+          sanitize('a<a href="?__amp_source_origin=foo">b</a>')
+        ).to.be.equal('a<a target="_top">b</a>');
       });
     });
 
-    it('should NOT output blacklisted values for class attributes', () => {
+    it('should NOT output denylisted values for class attributes', () => {
       allowConsoleError(() => {
         expect(sanitize('<p class="i-amphtml-">hello</p>')).to.be.equal(
           '<p>hello</p>'
@@ -322,10 +331,7 @@ function runSanitizerTests() {
       );
     });
 
-    // TODO(choumx): HTTPS-only URI attributes are not enforced consistently
-    // in the sanitizer yet. E.g. amp-video requires HTTPS, amp-img does not.
-    // Unskip when this is fixed.
-    it.skip('should not allow source::src with invalid protocol', () => {
+    it('should not allow source::src with invalid protocol', () => {
       expect(sanitize('<source src="http://www.foo.com">')).to.equal(
         '<source src="">'
       );
@@ -387,13 +393,10 @@ function runSanitizerTests() {
     });
 
     it('should allow for input type file and password', () => {
-      // Given that the doc is not provided.
-      allowConsoleError(() => {
-        expect(sanitize('<input type="file">')).to.equal('<input type="file">');
-        expect(sanitize('<input type="password">')).to.equal(
-          '<input type="password">'
-        );
-      });
+      expect(sanitize('<input type="file">')).to.equal('<input type="file">');
+      expect(sanitize('<input type="password">')).to.equal(
+        '<input type="password">'
+      );
     });
 
     it('should disallow certain attributes on form for AMP4Email', () => {
@@ -410,17 +413,15 @@ function runSanitizerTests() {
       });
     });
 
-    it('should only allow whitelisted AMP elements in AMP4EMAIL', () => {
+    it('should only allow allowlisted AMP elements in AMP4EMAIL', () => {
       html.setAttribute('amp4email', '');
-      allowConsoleError(() => {
-        expect(sanitize('<amp-analytics>')).to.equal('');
-        expect(sanitize('<amp-iframe>')).to.equal('');
-        expect(sanitize('<amp-list>')).to.equal('');
-        expect(sanitize('<amp-pixel>')).to.equal('');
-        expect(sanitize('<amp-twitter>')).to.equal('');
-        expect(sanitize('<amp-video>')).to.equal('');
-        expect(sanitize('<amp-youtube>')).to.equal('');
-      });
+      expect(sanitize('<amp-analytics>')).to.equal('');
+      expect(sanitize('<amp-iframe>')).to.equal('');
+      expect(sanitize('<amp-list>')).to.equal('');
+      expect(sanitize('<amp-pixel>')).to.equal('');
+      expect(sanitize('<amp-twitter>')).to.equal('');
+      expect(sanitize('<amp-video>')).to.equal('');
+      expect(sanitize('<amp-youtube>')).to.equal('');
 
       expect(sanitize('<amp-accordion>')).to.equal('<amp-accordion>');
       expect(sanitize('<amp-anim>')).to.equal('<amp-anim>');
@@ -465,7 +466,7 @@ function runSanitizerTests() {
       );
     });
 
-    it('should NOT output non-whitelisted markup', () => {
+    it('should NOT output non-allowlisted markup', () => {
       expect(sanitizeTagsForTripleMustache('a<style>b</style>c')).to.be.equal(
         'ac'
       );

@@ -14,51 +14,55 @@
  * limitations under the License.
  */
 
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../src/experiments/ads-initial-intersection-exp';
 import {Services} from '../../src/services';
+import {createCustomEvent} from '../../src/event-helper';
 import {createFixtureIframe, poll} from '../../testing/iframe';
+import {forceExperimentBranch} from '../../src/experiments';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
+const IFRAME_HEIGHT = 3000;
 function createFixture() {
-  return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
+  return createFixtureIframe(
+    'test/fixtures/3p-ad.html',
+    IFRAME_HEIGHT,
+    () => {}
+  );
 }
 
-describe.configure().run('amp-ad 3P', () => {
+describes.sandboxed('amp-ad 3P', {}, () => {
   let fixture;
 
   beforeEach(() => {
-    return createFixture().then(f => {
+    return createFixture().then((f) => {
       fixture = f;
       installPlatformService(fixture.win);
+      forceExperimentBranch(
+        fixture.win,
+        ADS_INITIAL_INTERSECTION_EXP.id,
+        ADS_INITIAL_INTERSECTION_EXP.experiment
+      );
     });
   });
 
-  it('create an iframe with APIs', function() {
+  it('create an iframe with APIs', async function () {
     this.timeout(20000);
     let iframe;
     let lastIO = null;
     const platform = Services.platformFor(fixture.win);
     return poll(
-      'frame to be in DOM',
+      'frame to be in DOM and context is available',
       () => {
-        return fixture.doc.querySelector('amp-ad > iframe');
+        iframe = fixture.doc.querySelector('amp-ad > iframe');
+        if (iframe) {
+          return iframe.contentWindow.context;
+        }
       },
       undefined,
       5000
     )
-      .then(iframeElement => {
-        iframe = iframeElement;
-        return new Promise(resolve => {
-          if (iframe.contentWindow.context) {
-            resolve(iframe.contentWindow.context);
-          }
-          iframe.onload = () => {
-            expect(iframe.contentWindow.document.getElementById('c')).to.exist;
-            resolve(iframe.contentWindow.context);
-          };
-        });
-      })
-      .then(context => {
+      .then((context) => {
         expect(context.canary).to.be.a('boolean');
         expect(context.canonicalUrl).to.equal(
           'https://www.example.com/doubleclick.html'
@@ -94,19 +98,26 @@ describe.configure().run('amp-ad 3P', () => {
         });
         const {initialIntersection} = context;
         expect(initialIntersection.rootBounds).to.deep.equal(
-          layoutRectLtwh(0, 0, 500, 3000)
+          layoutRectLtwh(
+            0,
+            0,
+            Math.min(
+              iframe.ownerDocument.body.clientWidth,
+              iframe.ownerDocument.defaultView.innerWidth
+            ),
+            Math.min(
+              iframe.ownerDocument.body.clientHeight,
+              iframe.ownerDocument.defaultView.innerHeight
+            )
+          )
         );
+
         expect(initialIntersection.boundingClientRect).to.deep.equal(
           layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250)
         );
-        expect(initialIntersection.intersectionRect).to.deep.equal(
-          layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250)
-        );
-        expect(initialIntersection.intersectionRatio).to.equal(1);
-        expect(initialIntersection.time).to.be.a('number');
         expect(context.isMaster).to.exist;
         expect(context.computeInMasterFrame).to.exist;
-        expect(context.location).to.deep.equal({
+        expect(context.location).to.deep.include({
           hash: '',
           host: 'localhost:9876',
           hostname: 'localhost',
@@ -125,11 +136,11 @@ describe.configure().run('amp-ad 3P', () => {
           );
         }
         expect(context.startTime).to.be.a('number');
-        // Edge has different opinion about window.location in srcdoc iframe.
+        // Edge/IE has different opinion about window.location in srcdoc iframe.
         // Nevertheless this only happens in test. In real world AMP will not
         // in srcdoc iframe.
         expect(context.sourceUrl).to.equal(
-          platform.isEdge()
+          platform.isEdge() || platform.isIe()
             ? 'http://localhost:9876/context.html'
             : 'about:srcdoc'
         );
@@ -139,8 +150,6 @@ describe.configure().run('amp-ad 3P', () => {
         expect(context.addContextToIframe).to.be.a('function');
         expect(context.getHtml).to.be.a('function');
         expect(context.noContentAvailable).to.be.a('function');
-        expect(context.onResizeDenied).to.be.a('function');
-        expect(context.onResizeSuccess).to.be.a('function');
         expect(context.renderStart).to.be.a('function');
         expect(context.reportRenderedEntityIdentifier).to.be.a('function');
         expect(context.requestResize).to.be.a('function');
@@ -162,46 +171,100 @@ describe.configure().run('amp-ad 3P', () => {
       .then(() => {
         expect(iframe.offsetHeight).to.equal(250);
         expect(iframe.offsetWidth).to.equal(300);
-        expect(iframe.contentWindow.ping.resizeSuccess).to.be.undefined;
-        iframe.contentWindow.context.requestResize(200, 50);
-        return poll('wait for embed-size to be received', () => {
-          return !!fixture.messages.getFirstMessageEventOfType('embed-size');
-        });
+        return iframe.contentWindow.context
+          .requestResize(200, 50)
+          .catch(() => {});
       })
       .then(() => {
         // The userActivation feature is known to be available on Chrome 74+
         if (platform.isChrome() && platform.getMajorVersion() >= 74) {
-          const event = fixture.messages.getFirstMessageEventOfType(
-            'embed-size'
-          );
+          const event =
+            fixture.messages.getFirstMessageEventOfType('embed-size');
           expect(event.userActivation).to.be.ok;
           expect(event.userActivation.isActive).to.be.a('boolean');
         }
-
-        return poll(
-          'wait for attemptChangeSize',
-          () => {
-            return iframe.contentWindow.ping.resizeSuccess != undefined;
-          },
-          null,
-          5000
-        );
       })
-      .then(() => {
+      .then(async function () {
         lastIO = null;
-        iframe.contentWindow.context.observeIntersection(changes => {
+        // Ad is fully visible
+        iframe.contentWindow.context.observeIntersection((changes) => {
           lastIO = changes[changes.length - 1];
         });
-        fixture.win.scrollTo(0, 1000);
-        fixture.win.document.body.dispatchEvent(new Event('scroll'));
-        return poll('wait for new IO entry', () => {
-          return lastIO != null;
+        await poll('wait for initial IO entry', () => {
+          return lastIO != null && lastIO.boundingClientRect.top == 1000;
         });
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
+        lastIO = null;
+
+        // Ad is still fully visible. observeIntersection fire when
+        // ads is fully visible with position change
+        fixture.win.scrollTo(0, 1000);
+        fixture.win.dispatchEvent(
+          createCustomEvent(fixture.win, 'scroll', null)
+        );
+        await poll('wait for new IO entry when ad is fully visible', () => {
+          return (
+            lastIO != null &&
+            lastIO.boundingClientRect.top == (platform.isIos() ? 1 : 0) &&
+            lastIO.intersectionRatio == 1
+          );
+        });
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
+        lastIO = null;
+
+        // Ad is partially visible (around 50%)
+        fixture.win.scrollTo(0, 1125);
+        fixture.win.dispatchEvent(
+          createCustomEvent(fixture.win, 'scroll', null)
+        );
+        await poll(
+          'wait for new IO entry when intersectionRatio changes',
+          () => {
+            return (
+              lastIO != null &&
+              lastIO.intersectionRatio > 0 &&
+              lastIO.intersectionRatio < 1
+            );
+          }
+        );
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
+        lastIO = null;
+
+        // Ad first becomes invisible
+        fixture.win.scrollTo(0, 1251);
+        fixture.win.dispatchEvent(
+          createCustomEvent(fixture.win, 'scroll', null)
+        );
+        await poll('wait for new IO entry when ad exit viewport', () => {
+          return lastIO != null && lastIO.intersectionRatio == 0;
+        });
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
+        lastIO = null;
+
+        // Scroll when ad is invisible
+        fixture.win.scrollTo(0, 1451);
+        fixture.win.dispatchEvent(
+          createCustomEvent(fixture.win, 'scroll', null)
+        );
+        await new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        });
+        expect(lastIO).to.be.null;
       })
       .then(
         () =>
           new Promise((resolve, reject) => {
-            iframe.contentWindow.context.getHtml('a', ['href'], content => {
+            iframe.contentWindow.context.getHtml('a', ['href'], (content) => {
               if (content == '<a href="http://test.com/test">Test link</a>') {
                 resolve();
               } else {

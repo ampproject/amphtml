@@ -14,38 +14,29 @@
  * limitations under the License.
  */
 
+import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
 import {Services} from './services';
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
 import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
-  isShadowDomSupported,
 } from './web-components';
-import {
-  childElementsByTag,
-  closestNode,
-  isShadowRoot,
-  iterateCursor,
-  removeElement,
-} from './dom';
 import {dev, devAssert} from './log';
-import {escapeCssSelectorIdent} from './css';
+import {escapeCssSelectorIdent} from './core/dom/css';
 import {installCssTransformer} from './style-installer';
+import {iterateCursor} from './dom';
 import {setInitialDisplay, setStyle} from './style';
-import {toArray, toWin} from './types';
-
-/**
- * Used for non-composed root-node search. See `getRootNode`.
- * @const {!GetRootNodeOptions}
- */
-const UNCOMPOSED_SEARCH = {composed: false};
+import {toArray} from './core/types/array';
+import {toWin} from './types';
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_END_REGEX = /[^\-\_0-9a-zA-Z]/;
+
+const SHADOW_CSS_CACHE = '__AMP_SHADOW_CSS';
 
 /**
  * @type {boolean|undefined}
@@ -73,9 +64,9 @@ export function createShadowRoot(hostElement) {
     shadowRoot = hostElement.attachShadow({mode: 'open'});
     if (!shadowRoot.styleSheets) {
       Object.defineProperty(shadowRoot, 'styleSheets', {
-        get: function() {
+        get: function () {
           const items = [];
-          iterateCursor(shadowRoot.childNodes, child => {
+          iterateCursor(shadowRoot.childNodes, (child) => {
             if (child.tagName === 'STYLE') {
               items.push(child.sheet);
             }
@@ -92,11 +83,11 @@ export function createShadowRoot(hostElement) {
 
   if (!isShadowCssSupported()) {
     const rootId = `i-amphtml-sd-${win.Math.floor(win.Math.random() * 10000)}`;
-    shadowRoot.id = rootId;
+    shadowRoot['id'] = rootId;
     shadowRoot.host.classList.add(rootId);
 
     // CSS isolation.
-    installCssTransformer(shadowRoot, css => {
+    installCssTransformer(shadowRoot, (css) => {
       return transformShadowCss(shadowRoot, css);
     });
   }
@@ -138,11 +129,11 @@ function createShadowRootPolyfill(hostElement) {
   shadowRoot.host = hostElement;
 
   // `getElementById` is resolved via `querySelector('#id')`.
-  shadowRoot.getElementById = function(id) {
+  shadowRoot.getElementById = function (id) {
     const escapedId = escapeCssSelectorIdent(id);
-    return /** @type {HTMLElement|null} */ (shadowRoot./*OK*/ querySelector(
-      `#${escapedId}`
-    ));
+    return /** @type {?HTMLElement} */ (
+      shadowRoot./*OK*/ querySelector(`#${escapedId}`)
+    );
   };
 
   // The styleSheets property should have a list of local styles.
@@ -151,27 +142,13 @@ function createShadowRootPolyfill(hostElement) {
       if (!doc.styleSheets) {
         return [];
       }
-      return toArray(doc.styleSheets).filter(styleSheet =>
+      return toArray(doc.styleSheets).filter((styleSheet) =>
         shadowRoot.contains(styleSheet.ownerNode)
       );
     },
   });
 
   return shadowRoot;
-}
-
-/**
- * Return shadow root for the specified node.
- * @param {!Node} node
- * @return {?ShadowRoot}
- */
-export function getShadowRootNode(node) {
-  // TODO(#22733): remove in preference to dom's `rootNodeFor`.
-  if (isShadowDomSupported() && Node.prototype.getRootNode) {
-    return /** @type {?ShadowRoot} */ (node.getRootNode(UNCOMPOSED_SEARCH));
-  }
-  // Polyfill shadow root lookup.
-  return /** @type {?ShadowRoot} */ (closestNode(node, n => isShadowRoot(n)));
 }
 
 /**
@@ -202,8 +179,15 @@ export function importShadowBody(shadowRoot, body, deep) {
     }
   }
   setStyle(resultBody, 'position', 'relative');
+  const oldBody = shadowRoot['body'];
+  if (oldBody) {
+    shadowRoot.removeChild(oldBody);
+  }
   shadowRoot.appendChild(resultBody);
-  Object.defineProperty(shadowRoot, 'body', {value: resultBody});
+  Object.defineProperty(shadowRoot, 'body', {
+    configurable: true,
+    value: resultBody,
+  });
   return resultBody;
 }
 
@@ -230,7 +214,7 @@ export function transformShadowCss(shadowRoot, css) {
  * @visibleForTesting
  */
 export function scopeShadowCss(shadowRoot, css) {
-  const id = devAssert(shadowRoot.id);
+  const id = devAssert(shadowRoot['id']);
   const doc = shadowRoot.ownerDocument;
   let rules = null;
   // Try to use a separate document.
@@ -297,12 +281,12 @@ function rootSelectorPrefixer(match, name, pos, selector) {
  * @return {?CSSRuleList}
  */
 function getStylesheetRules(doc, css) {
-  const style = doc.createElement('style');
+  const style = /** @type {!HTMLStyleElement} */ (doc.createElement('style'));
   style./*OK*/ textContent = css;
   try {
     (doc.head || doc.documentElement).appendChild(style);
     if (style.sheet) {
-      return style.sheet.cssRules;
+      return /** @type {!CSSStyleSheet} */ (style.sheet).cssRules;
     }
     return null;
   } finally {
@@ -310,6 +294,43 @@ function getStylesheetRules(doc, css) {
       style.parentNode.removeChild(style);
     }
   }
+}
+
+/**
+ * @param {!ShadowRoot} shadowRoot
+ * @param {string} name
+ * @param {string} cssText
+ */
+export function installShadowStyle(shadowRoot, name, cssText) {
+  const doc = shadowRoot.ownerDocument;
+  const win = toWin(doc.defaultView);
+  if (
+    shadowRoot.adoptedStyleSheets !== undefined &&
+    win.CSSStyleSheet.prototype.replaceSync !== undefined
+  ) {
+    const cache = win[SHADOW_CSS_CACHE] || (win[SHADOW_CSS_CACHE] = {});
+    let styleSheet = cache[name];
+    if (!styleSheet) {
+      styleSheet = new win.CSSStyleSheet();
+      styleSheet.replaceSync(cssText);
+      cache[name] = styleSheet;
+    }
+    shadowRoot.adoptedStyleSheets =
+      shadowRoot.adoptedStyleSheets.concat(styleSheet);
+  } else {
+    const styleEl = doc.createElement('style');
+    styleEl.setAttribute('data-name', name);
+    styleEl.textContent = cssText;
+    shadowRoot.appendChild(styleEl);
+  }
+}
+
+/**
+ * @param {!Window} win
+ * @visibleForTesting
+ */
+export function resetShadowStyleCacheForTesting(win) {
+  win[SHADOW_CSS_CACHE] = null;
 }
 
 /**
@@ -356,339 +377,11 @@ function calcShadowDomStreamingSupported(win) {
 /**
  * Creates the Shadow DOM writer available on this platform.
  * @param {!Window} win
- * @return {!ShadowDomWriter}
+ * @return {!./utils/dom-writer.DomWriter}
  */
 export function createShadowDomWriter(win) {
   if (isShadowDomStreamingSupported(win)) {
-    return new ShadowDomWriterStreamer(win);
+    return new DomWriterStreamer(win);
   }
-  return new ShadowDomWriterBulk(win);
-}
-
-/**
- * Takes as an input a text stream, parses it and incrementally reconstructs
- * it in the shadow root.
- *
- * See https://jakearchibald.com/2016/fun-hacks-faster-content/ for more
- * details.
- *
- * @interface
- * @extends {WritableStreamDefaultWriter}
- * @visibleForTesting
- */
-export class ShadowDomWriter {
-  /**
-   * Sets the callback that will be called when body has been parsed.
-   *
-   * Unlike most of other nodes, `<body>` cannot be simply merged to support
-   * SD polyfill where the use of `<body>` element is not possible. The
-   * callback will be given the parsed document and it must return back
-   * the reconstructed `<body>` node in the target DOM where all children
-   * will be streamed into.
-   *
-   * @param {function(!Document):!Element} unusedCallback
-   */
-  onBody(unusedCallback) {}
-
-  /**
-   * Sets the callback that will be called when new nodes have been merged
-   * into the target DOM.
-   * @param {function()} unusedCallback
-   */
-  onBodyChunk(unusedCallback) {}
-
-  /**
-   * Sets the callback that will be called when the DOM has been fully
-   * constructed.
-   * @param {function()} unusedCallback
-   */
-  onEnd(unusedCallback) {}
-}
-
-/**
- * Takes as an input a text stream, parses it and incrementally reconstructs
- * it in the shadow root.
- *
- * See https://jakearchibald.com/2016/fun-hacks-faster-content/ for more
- * details.
- *
- * @implements {ShadowDomWriter}
- * @visibleForTesting
- */
-export class ShadowDomWriterStreamer {
-  /**
-   * @param {!Window} win
-   */
-  constructor(win) {
-    /** @const @private {!Document} */
-    this.parser_ = win.document.implementation.createHTMLDocument('');
-    this.parser_.open();
-
-    /** @const @private */
-    this.vsync_ = Services.vsyncFor(win);
-
-    /** @private @const */
-    this.boundMerge_ = this.merge_.bind(this);
-
-    /** @private {?function(!Document):!Element} */
-    this.onBody_ = null;
-
-    /** @private {?function()} */
-    this.onBodyChunk_ = null;
-
-    /** @private {?function()} */
-    this.onEnd_ = null;
-
-    /** @private {boolean} */
-    this.mergeScheduled_ = false;
-
-    /** @const @private {!Promise} */
-    this.success_ = Promise.resolve();
-
-    /** @private {boolean} */
-    this.eof_ = false;
-
-    /** @private {?Element} */
-    this.targetBody_ = null;
-  }
-
-  /** @override */
-  onBody(callback) {
-    this.onBody_ = callback;
-  }
-
-  /** @override */
-  onBodyChunk(callback) {
-    this.onBodyChunk_ = callback;
-  }
-
-  /** @override */
-  onEnd(callback) {
-    this.onEnd_ = callback;
-  }
-
-  /** @override */
-  write(chunk) {
-    if (this.eof_) {
-      throw new Error('closed already');
-    }
-    if (chunk) {
-      this.parser_.write(/** @type {string} */ (chunk));
-    }
-    this.schedule_();
-    return this.success_;
-  }
-
-  /** @override */
-  close() {
-    this.parser_.close();
-    this.eof_ = true;
-    this.schedule_();
-    return this.success_;
-  }
-
-  /** @override */
-  abort(unusedReason) {
-    throw new Error('Not implemented');
-  }
-
-  /** @override */
-  releaseLock() {
-    throw new Error('Not implemented');
-  }
-
-  /** @override */
-  get closed() {
-    throw new Error('Not implemented');
-  }
-
-  /** @override */
-  get desiredSize() {
-    throw new Error('Not implemented');
-  }
-
-  /** @override */
-  get ready() {
-    throw new Error('Not implemented');
-  }
-
-  /** @private */
-  schedule_() {
-    devAssert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
-    if (!this.mergeScheduled_) {
-      this.mergeScheduled_ = true;
-      this.vsync_.mutate(this.boundMerge_);
-    }
-  }
-
-  /** @private */
-  merge_() {
-    this.mergeScheduled_ = false;
-
-    // Body has been newly parsed.
-    if (!this.targetBody_ && this.parser_.body) {
-      this.targetBody_ = this.onBody_(this.parser_);
-    }
-
-    // Merge body children.
-    if (this.targetBody_) {
-      const inputBody = dev().assertElement(this.parser_.body);
-      const targetBody = devAssert(this.targetBody_);
-      let transferCount = 0;
-      removeNoScriptElements(inputBody);
-      while (inputBody.firstChild) {
-        transferCount++;
-        targetBody.appendChild(inputBody.firstChild);
-      }
-      if (transferCount > 0) {
-        this.onBodyChunk_();
-      }
-    }
-
-    // EOF.
-    if (this.eof_) {
-      this.onEnd_();
-    }
-  }
-}
-
-/**
- * Takes as an input a text stream, aggregates it and parses it in one bulk.
- * This is a workaround against the browsers that do not support streaming DOM
- * parsing. Mainly currently Firefox.
- *
- * See https://github.com/whatwg/html/issues/2827 and
- * https://bugzilla.mozilla.org/show_bug.cgi?id=867102
- *
- * @implements {ShadowDomWriter}
- * @visibleForTesting
- */
-export class ShadowDomWriterBulk {
-  /**
-   * @param {!Window} win
-   */
-  constructor(win) {
-    /** @private {!Array<string>} */
-    this.fullHtml_ = [];
-
-    /** @const @private */
-    this.vsync_ = Services.vsyncFor(win);
-
-    /** @private {?function(!Document):!Element} */
-    this.onBody_ = null;
-
-    /** @private {?function()} */
-    this.onBodyChunk_ = null;
-
-    /** @private {?function()} */
-    this.onEnd_ = null;
-
-    /** @const @private {!Promise} */
-    this.success_ = Promise.resolve();
-
-    /** @private {boolean} */
-    this.eof_ = false;
-  }
-
-  /** @override */
-  onBody(callback) {
-    this.onBody_ = callback;
-  }
-
-  /** @override */
-  onBodyChunk(callback) {
-    this.onBodyChunk_ = callback;
-  }
-
-  /** @override */
-  onEnd(callback) {
-    this.onEnd_ = callback;
-  }
-
-  /** @override */
-  write(chunk) {
-    devAssert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
-    if (this.eof_) {
-      throw new Error('closed already');
-    }
-    if (chunk) {
-      this.fullHtml_.push(dev().assertString(chunk));
-    }
-    return this.success_;
-  }
-
-  /** @override */
-  close() {
-    devAssert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
-    this.eof_ = true;
-    this.vsync_.mutate(() => this.complete_());
-    return this.success_;
-  }
-
-  /** @override */
-  abort(unusedReason) {
-    throw new Error('Not implemented');
-  }
-
-  /** @override */
-  releaseLock() {
-    throw new Error('Not implemented');
-  }
-
-  /** @override */
-  get closed() {
-    throw new Error('Not implemented');
-  }
-
-  /** @override */
-  get desiredSize() {
-    throw new Error('Not implemented');
-  }
-
-  /** @override */
-  get ready() {
-    throw new Error('Not implemented');
-  }
-
-  /** @private */
-  complete_() {
-    const fullHtml = this.fullHtml_.join('');
-    const doc = new DOMParser().parseFromString(fullHtml, 'text/html');
-
-    // Merge body.
-    if (doc.body) {
-      const inputBody = doc.body;
-      const targetBody = this.onBody_(doc);
-      let transferCount = 0;
-      removeNoScriptElements(inputBody);
-      while (inputBody.firstChild) {
-        transferCount++;
-        targetBody.appendChild(inputBody.firstChild);
-      }
-      if (transferCount > 0) {
-        this.onBodyChunk_();
-      }
-    }
-
-    // EOF.
-    this.onEnd_();
-  }
-}
-
-/**
- * Remove any noscript elements.
- *
- * According to the spec
- * (https://w3c.github.io/DOM-Parsing/#the-domparser-interface), with
- * `DOMParser().parseFromString`, contents of `noscript` get parsed as markup,
- * so we need to remove them manually. Why? ¯\_(ツ)_/¯ `createHTMLDocument()`
- * seems to behave the same way.
- *
- * @param {!Element} parent
- */
-function removeNoScriptElements(parent) {
-  const noscriptElements = childElementsByTag(parent, 'noscript');
-  iterateCursor(noscriptElements, element => {
-    removeElement(element);
-  });
+  return new DomWriterBulk(win);
 }

@@ -39,14 +39,14 @@ export class LightboxCaption {
     const el = htmlFor(doc)`
       <div class="i-amphtml-lbg-caption">
         <div class="i-amphtml-lbg-caption-scroll">
-          <div class="i-amphtml-lbg-caption-text"></div>
+          <div class="i-amphtml-lbg-caption-text amp-lightbox-gallery-caption"></div>
         </div>
         <div class="i-amphtml-lbg-caption-mask"></div>
       </div>`;
     return new LightboxCaption(
       el,
       dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-scroll')),
-      dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-text')),
+      dev().assertElement(el.querySelector('.amp-lightbox-gallery-caption')),
       dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-mask')),
       measureMutateElement
     );
@@ -107,9 +107,9 @@ export class LightboxCaption {
    * @return {!OverflowState} state
    */
   getOverflowState() {
-    return /** @type {OverflowState} */ (this.scrollContainer_.getAttribute(
-      'i-amphtml-lbg-caption-state'
-    ));
+    return /** @type {OverflowState} */ (
+      this.scrollContainer_.getAttribute('i-amphtml-lbg-caption-state')
+    );
   }
 
   /**

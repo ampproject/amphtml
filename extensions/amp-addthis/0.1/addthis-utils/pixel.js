@@ -17,9 +17,9 @@ import {COOKIELESS_API_SERVER} from '../constants';
 import {Services} from '../../../../src/services';
 import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {getData} from '../../../../src/event-helper';
-import {isObject} from '../../../../src/types';
+import {isObject} from '../../../../src/core/types';
 import {parseJson} from '../../../../src/json';
 
 import {setStyles, toggle} from '../../../../src/style';
@@ -36,25 +36,27 @@ const pixelatorFrameTitle = 'Pxltr Frame';
  * }>} pixelList
  * @return {Array}
  */
-const groupPixelsByTime = pixelList => {
+const groupPixelsByTime = (pixelList) => {
   // Clean delay value; if it's empty/doesn't exist, default to [0]
-  const cleanedPixels = pixelList.map(pixel => {
+  const cleanedPixels = pixelList.map((pixel) => {
     const {delay} = pixel;
-    return Object.assign({}, pixel, {
+    return {
+      ...pixel,
       delay: Array.isArray(delay) && delay.length ? delay : [0],
-    });
+    };
   });
 
   const delayMap = cleanedPixels
-    .map(pixel => {
+    .map((pixel) => {
       const delays = pixel.delay;
-      return delays.map(delay => ({
+      return delays.map((delay) => ({
         delay,
         pixels: [pixel],
       }));
     })
     .reduce((a, b) => a.concat(b), []) // flatten
-    .reduce((currentDelayMap, {delay, pixels}) => {
+    .reduce((currentDelayMap, curDelay) => {
+      const {delay, pixels} = curDelay;
       if (!currentDelayMap[delay]) {
         currentDelayMap[delay] = [];
       }
@@ -62,7 +64,7 @@ const groupPixelsByTime = pixelList => {
       return currentDelayMap;
     }, {});
 
-  return Object.keys(delayMap).map(delay => ({
+  return Object.keys(delayMap).map((delay) => ({
     delay: Number(delay),
     pixels: delayMap[delay],
   }));
@@ -82,12 +84,13 @@ export const pixelDrop = (url, ampDoc) => {
   doc.body.appendChild(ampPixel);
 };
 
-const getIframeName = url =>
+const getIframeName = (url) =>
   parseUrlDeprecated(url)
     .host.split('.')
     .concat(pixelatorFrameTitle.toLowerCase().replace(/\s/, '_'));
 
-const iframeDrop = (url, ampDoc, {name, title}) => {
+const iframeDrop = (url, ampDoc, data) => {
+  const {name, title} = data;
   const doc = ampDoc.win.document;
   const iframe = createElementWithAttributes(
     doc,
@@ -127,21 +130,16 @@ const dropPixelatorPixel = (url, ampDoc) => {
 
 /**
  * Requests groups of pixels at specified delays
- * @param  {Array<{
- * delay: number,
- * id: string,
- * url: string
- * }>} pixels
- * @param  {{
- * sid: string,
- * ampDoc: *
- * }} options
+ * @param  {Array<{delay: number, id: string,url: string}>} pixels
+ * @param  {{sid: string, ampDoc: *}} options
  */
-const dropPixelGroups = (pixels, {sid, ampDoc}) => {
+const dropPixelGroups = (pixels, options) => {
+  const {sid, ampDoc} = options;
   const pixelGroups = groupPixelsByTime(pixels);
-  pixelGroups.forEach(({delay, pixels}) => {
+  pixelGroups.forEach((pixelGroup) => {
+    const {delay, pixels} = pixelGroup;
     setTimeout(() => {
-      const pids = pixels.map(pixel => {
+      const pids = pixels.map((pixel) => {
         dropPixelatorPixel(pixel.url, ampDoc);
         return pixel.id;
       });
@@ -186,7 +184,7 @@ function getJsonObject_(object) {
   return params;
 }
 
-export const callPixelEndpoint = event => {
+export const callPixelEndpoint = (event) => {
   const {ampDoc, endpoint} = event;
   const eventData = getJsonObject_(getData(event));
   const url = addParamsToUrl(endpoint, eventData);
@@ -200,9 +198,9 @@ export const callPixelEndpoint = event => {
       ampCors: false,
       credentials: 'include',
     })
-    .then(res => res.json())
+    .then((res) => res.json())
     .then(
-      json => {
+      (json) => {
         const {pixels = []} = json;
         if (pixels.length > 0) {
           dropPixelGroups(pixels, {

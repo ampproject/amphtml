@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import '../amp-video';
+import {AmpVideo, isCachedByCdn} from '../amp-video';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
-import {VisibilityState} from '../../../../src/visibility-state';
+import {VisibilityState} from '../../../../src/core/constants/visibility-state';
+import {dispatchCustomEvent} from '../../../../src/dom';
+import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -28,21 +30,29 @@ describes.realWin(
       extensions: ['amp-video'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let timer;
+    let resizeObserverStub;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       timer = Services.timerFor(win);
+
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
     function getFooVideoSrc(filetype) {
       return '//someHost/foo.' + filetype.slice(filetype.indexOf('/') + 1); // assumes no optional params
     }
 
-    async function getVideo(attributes, children, opt_beforeLayoutCallback) {
+    async function getVideo(
+      attributes,
+      children,
+      opt_beforeLayoutCallback,
+      opt_noLayout
+    ) {
       const v = doc.createElement('amp-video');
       for (const key in attributes) {
         v.setAttribute(key, attributes[key]);
@@ -53,10 +63,14 @@ describes.realWin(
         }
       }
       doc.body.appendChild(v);
-      await v.build();
+      await v.buildInternal();
+      const impl = await v.getImpl(false);
 
+      if (opt_noLayout) {
+        return;
+      }
       if (opt_beforeLayoutCallback) {
-        opt_beforeLayoutCallback(v);
+        opt_beforeLayoutCallback(v, impl);
       }
       try {
         await v.layoutCallback();
@@ -71,19 +85,86 @@ describes.realWin(
       }
     }
 
+    it('should preconnect', async () => {
+      const v = await getVideo({
+        src: 'video.mp4',
+        width: 160,
+        height: 90,
+      });
+      const impl = await v.getImpl(false);
+      const preconnect = Services.preconnectFor(win);
+      env.sandbox.spy(preconnect, 'url');
+      impl.preconnectCallback();
+      expect(preconnect.url).to.have.been.calledWithExactly(
+        env.sandbox.match.object, // AmpDoc
+        'video.mp4',
+        undefined
+      );
+    });
+
     it('should load a video', async () => {
       const v = await getVideo({
         src: 'video.mp4',
         width: 160,
         height: 90,
       });
-      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
-      v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('src')).to.equal('video.mp4');
       expect(video.hasAttribute('controls')).to.be.false;
+    });
+
+    it('should load a cached video', async () => {
+      const v = await getVideo({
+        src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+        'amp-orig-src': 'https://example.com/video.mp4',
+        width: 160,
+        height: 90,
+      });
+      const video = v.querySelector('video');
+      expect(video.getAttribute('src')).to.be.null;
+      const sources = video.querySelectorAll('source');
+      expect(sources.length).to.equal(4);
+      expect(sources[0].getAttribute('src')).to.equal(
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=high'
+      );
+      expect(sources[1].getAttribute('src')).to.equal(
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=medium'
+      );
+      expect(sources[2].getAttribute('src')).to.equal(
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=low'
+      );
+      expect(sources[3].getAttribute('src')).to.equal(
+        'https://example.com/video.mp4'
+      );
+    });
+
+    it('should load a cached video and bitrate', async () => {
+      const source = doc.createElement('source');
+      source.setAttribute(
+        'src',
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+      );
+      source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+      source.setAttribute('data-bitrate', '1000');
+      const v = await getVideo(
+        {
+          width: 160,
+          height: 90,
+        },
+        [source]
+      );
+      const video = v.querySelector('video');
+      expect(video.getAttribute('src')).to.be.null;
+      const sources = video.querySelectorAll('source');
+      expect(sources.length).to.equal(4);
+      expect(sources[0].getAttribute('data-bitrate')).to.equal('2000');
+      expect(sources[1].getAttribute('data-bitrate')).to.equal('720');
+      expect(sources[2].getAttribute('data-bitrate')).to.equal('400');
+      expect(sources[3].hasAttribute('data-bitrate')).to.be.false;
+      expect(sources[3].getAttribute('src')).to.equal(
+        'https://example.com/video.mp4'
+      );
     });
 
     it('should load a video', async () => {
@@ -97,9 +178,6 @@ describes.realWin(
         'crossorigin': '',
         'disableremoteplayback': '',
       });
-      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
-      v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('controls')).to.be.true;
@@ -134,9 +212,6 @@ describes.realWin(
         },
         sources
       );
-      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
-      v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       // check that the source tags were propogated
       expect(video.children.length).to.equal(mediatypes.length);
@@ -174,9 +249,6 @@ describes.realWin(
         },
         tracks
       );
-      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
-      v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       // check that the source tags were propogated
       expect(video.children.length).to.equal(tracktypes.length);
@@ -205,11 +277,12 @@ describes.realWin(
           'autoplay': '',
           'muted': '',
           'loop': '',
-        }).catch(e => {
+        }).catch(async (e) => {
           const v = doc.querySelector('amp-video');
+          const impl = await v.getImpl(false);
           // preconnectCallback could get called again after this test is done, and
           // trigger an other "start with https://" error that would crash mocha.
-          sandbox.stub(v.implementation_, 'preconnectCallback');
+          env.sandbox.stub(impl, 'preconnectCallback');
           throw e;
         })
       ).to.be.rejectedWith(/start with/);
@@ -253,7 +326,7 @@ describes.realWin(
           'controlsList': 'nofullscreen nodownload noremoteplayback',
         },
         null,
-        function(element) {
+        function (element) {
           // Should set appropriate attributes in buildCallback
           const video = element.querySelector('video');
           expect(video.getAttribute('controls')).to.exist;
@@ -281,7 +354,7 @@ describes.realWin(
           'poster': 'img.png',
         },
         null,
-        function(element) {
+        function (element) {
           const video = element.querySelector('video');
           expect(video.getAttribute('preload')).to.equal('none');
           expect(video.hasAttribute('poster')).to.be.false;
@@ -304,7 +377,7 @@ describes.realWin(
           'poster': 'img.png',
         },
         null,
-        function(element) {
+        function (element) {
           const video = element.querySelector('video');
           expect(video.getAttribute('preload')).to.equal('none');
           expect(video.hasAttribute('poster')).to.be.false;
@@ -339,7 +412,7 @@ describes.realWin(
           'loop': '',
         },
         sources,
-        function(element) {
+        function (element) {
           const video = element.querySelector('video');
           expect(video.children.length).to.equal(0);
         }
@@ -369,7 +442,7 @@ describes.realWin(
           'poster': 'img.png',
         },
         null,
-        function(element) {
+        function (element) {
           const video = element.querySelector('video');
           expect(video.getAttribute('preload')).to.equal('none');
           expect(video.hasAttribute('poster')).to.be.false;
@@ -382,16 +455,25 @@ describes.realWin(
       expect(video.getAttribute('poster')).to.equal('img.png');
     });
 
-    it('should pause the video when document inactive', async () => {
+    it('should auto-pause the video', async () => {
       const v = await getVideo({
         src: 'video.mp4',
         width: 160,
         height: 90,
       });
-      const impl = v.implementation_;
       const video = v.querySelector('video');
-      sandbox.spy(video, 'pause');
-      impl.pauseCallback();
+      env.sandbox.spy(video, 'pause');
+      // The auto-pause only happens on when the video is actually playing.
+      dispatchCustomEvent(video, 'play');
+      // First send "size" event and then "no size".
+      resizeObserverStub.notifySync({
+        target: v,
+        borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+      });
+      resizeObserverStub.notifySync({
+        target: v,
+        borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+      });
       expect(video.pause.called).to.be.true;
     });
 
@@ -403,20 +485,19 @@ describes.realWin(
           height: 90,
         },
         null,
-        function(element) {
-          const impl = element.implementation_;
-          sandbox.stub(impl, 'isVideoSupported_').returns(false);
-          sandbox.spy(impl, 'toggleFallback');
+        function (element, impl) {
+          env.sandbox.stub(impl, 'isVideoSupported_').returns(false);
+          env.sandbox.spy(impl, 'toggleFallback');
         }
       );
-      const impl = v.implementation_;
+      const impl = await v.getImpl(false);
       expect(impl.toggleFallback.called).to.be.true;
       expect(impl.toggleFallback).to.have.been.calledWith(true);
     });
 
     it('play() should not log promise rejections', async () => {
       const playPromise = Promise.reject('The play() request was interrupted');
-      const catchSpy = sandbox.spy(playPromise, 'catch');
+      const catchSpy = env.sandbox.spy(playPromise, 'catch');
       await getVideo(
         {
           src: 'video.mp4',
@@ -424,13 +505,72 @@ describes.realWin(
           height: 90,
         },
         null,
-        function(element) {
-          const impl = element.implementation_;
-          sandbox.stub(impl.video_, 'play').returns(playPromise);
+        function (element, impl) {
+          env.sandbox.stub(impl.video_, 'play').returns(playPromise);
           impl.play();
         }
       );
       expect(catchSpy.called).to.be.true;
+    });
+
+    it('decode error retries the next source', async () => {
+      const s0 = doc.createElement('source');
+      s0.setAttribute('src', './0.mp4');
+      const s1 = doc.createElement('source');
+      s1.setAttribute('src', 'https://example.com/1.mp4');
+      const video = await getVideo(
+        {
+          width: 160,
+          height: 90,
+        },
+        [s0, s1]
+      );
+      const impl = await video.getImpl(false);
+      const ele = impl.video_;
+      ele.play = env.sandbox.stub();
+      ele.load = env.sandbox.stub();
+      Object.defineProperty(ele, 'error', {
+        value: {
+          code: MediaError.MEDIA_ERR_DECODE,
+        },
+      });
+      const secondErrorHandler = env.sandbox.stub();
+      ele.addEventListener('error', secondErrorHandler);
+      expect(ele.childElementCount).to.equal(2);
+      ele.dispatchEvent(new ErrorEvent('error'));
+      expect(ele.childElementCount).to.equal(1);
+      expect(ele.load).to.have.been.called;
+      expect(ele.play).to.have.been.called;
+      expect(secondErrorHandler).to.not.have.been.called;
+    });
+
+    it('non-decode error has no side effect', async () => {
+      const s0 = doc.createElement('source');
+      s0.setAttribute('src', 'https://example.com/0.mp4');
+      const s1 = doc.createElement('source');
+      s1.setAttribute('src', 'https://example.com/1.mp4');
+      const video = await getVideo(
+        {
+          width: 160,
+          height: 90,
+        },
+        [s0, s1]
+      );
+      const impl = await video.getImpl(false);
+      const ele = impl.video_;
+      ele.play = env.sandbox.stub();
+      ele.load = env.sandbox.stub();
+      Object.defineProperty(ele, 'error', {
+        value: {
+          code: MediaError.MEDIA_ERR_ABORTED,
+        },
+      });
+      const secondErrorHandler = env.sandbox.stub();
+      ele.addEventListener('error', secondErrorHandler);
+      expect(ele.childElementCount).to.equal(2);
+      ele.dispatchEvent(new ErrorEvent('error'));
+      expect(ele.childElementCount).to.equal(2);
+      expect(secondErrorHandler).to.have.been.called;
     });
 
     it('should propagate ARIA attributes', async () => {
@@ -461,7 +601,7 @@ describes.realWin(
         controls: null,
         controlsList: 'nodownload nofullscreen',
       };
-      Object.keys(mutations).forEach(property => {
+      Object.keys(mutations).forEach((property) => {
         const value = mutations[property];
         if (value === null) {
           v.removeAttribute(property);
@@ -482,6 +622,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-fit': 'cover',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectFit).to.equal('cover');
@@ -491,6 +632,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-fit': 'foo 80%',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectFit).to.be.empty;
@@ -500,6 +642,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-position': '20% 80%',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectPosition).to.equal('20% 80%');
@@ -509,6 +652,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-position': 'url("example.com")',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectPosition).to.be.empty;
@@ -521,12 +665,14 @@ describes.realWin(
         width: 160,
         height: 90,
       });
-      const impl = v.implementation_;
+      const impl = await v.getImpl(false);
       await Promise.resolve();
       impl.mute();
       await listenOncePromise(v, VideoEvents.MUTED);
       impl.play();
+      const playPromise = listenOncePromise(v, VideoEvents.PLAY);
       await listenOncePromise(v, VideoEvents.PLAYING);
+      await playPromise;
       impl.pause();
       await listenOncePromise(v, VideoEvents.PAUSE);
       impl.unmute();
@@ -548,10 +694,6 @@ describes.realWin(
     });
 
     describe('blurred image placeholder', () => {
-      beforeEach(() => {
-        toggleExperiment(win, 'blurry-placeholder', true, true);
-      });
-
       /**
        * Creates an amp-video with an image child that could potentially be a
        * blurry placeholder.
@@ -559,9 +701,9 @@ describes.realWin(
        *     placeholder attribute.
        * @param {boolean} addBlurClass Whether the child should have the
        *     class that allows it to be a blurred placeholder.
-       * @return {AmpImg} An amp-video potentially with a blurry placeholder
+       * @return {!Promise<AmpImg>} An amp-video potentially with a blurry placeholder
        */
-      function getVideoWithBlur(addPlaceholder, addBlurClass) {
+      async function getVideoWithBlur(addPlaceholder, addBlurClass) {
         const v = doc.createElement('amp-video');
         v.setAttribute('layout', 'fixed');
         v.setAttribute('width', '300px');
@@ -571,7 +713,7 @@ describes.realWin(
           img.setAttribute('placeholder', '');
           v.getPlaceholder = () => img;
         } else {
-          v.getPlaceholder = sandbox.stub();
+          v.getPlaceholder = env.sandbox.stub();
         }
         if (addBlurClass) {
           img.classList.add('i-amphtml-blurry-placeholder');
@@ -579,14 +721,14 @@ describes.realWin(
         v.setAttribute('poster', 'img.png');
         doc.body.appendChild(v);
         v.appendChild(img);
-        v.build();
-        const impl = v.implementation_;
-        impl.togglePlaceholder = sandbox.stub();
+        v.buildInternal();
+        const impl = await v.getImpl(false);
+        impl.togglePlaceholder = env.sandbox.stub();
         return impl;
       }
 
-      it('should only fade out blurry image placeholders', () => {
-        let impl = getVideoWithBlur(true, true);
+      it('should only fade out blurry image placeholders', async () => {
+        let impl = await getVideoWithBlur(true, true);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -595,7 +737,7 @@ describes.realWin(
         expect(img.style.opacity).to.equal('0');
         expect(impl.togglePlaceholder).to.not.be.called;
 
-        impl = getVideoWithBlur(true, false);
+        impl = await getVideoWithBlur(true, false);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -604,7 +746,7 @@ describes.realWin(
         expect(img.style.opacity).to.be.equal('');
         expect(impl.togglePlaceholder).to.have.been.calledWith(false);
 
-        impl = getVideoWithBlur(false, true);
+        impl = await getVideoWithBlur(false, true);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -613,7 +755,7 @@ describes.realWin(
         expect(img.style.opacity).to.be.equal('');
         expect(impl.togglePlaceholder).to.have.been.calledWith(false);
 
-        impl = getVideoWithBlur(false, false);
+        impl = await getVideoWithBlur(false, false);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -622,8 +764,8 @@ describes.realWin(
         expect(impl.togglePlaceholder).to.have.been.calledWith(false);
       });
 
-      it('should fade out the blurry image placeholder on video load', () => {
-        const impl = getVideoWithBlur(true, true);
+      it('should fade out the blurry image placeholder on video load', async () => {
+        const impl = await getVideoWithBlur(true, true);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -633,8 +775,8 @@ describes.realWin(
         expect(impl.togglePlaceholder).to.not.be.called;
       });
 
-      it('should fade out the blurry image placeholder on poster load', () => {
-        const impl = getVideoWithBlur(true, true);
+      it('should fade out the blurry image placeholder on poster load', async () => {
+        const impl = await getVideoWithBlur(true, true);
         impl.buildCallback();
         impl.layoutCallback();
         const el = impl.element;
@@ -653,144 +795,191 @@ describes.realWin(
 
       beforeEach(() => {
         visibilityStubs = {
-          getVisibilityState: sandbox.stub(env.ampdoc, 'getVisibilityState'),
-          whenFirstVisible: sandbox.stub(env.ampdoc, 'whenFirstVisible'),
+          getVisibilityState: env.sandbox.stub(
+            env.ampdoc,
+            'getVisibilityState'
+          ),
+          whenFirstVisible: env.sandbox.stub(env.ampdoc, 'whenFirstVisible'),
         };
         visibilityStubs.getVisibilityState.returns(VisibilityState.PRERENDER);
-        visiblePromise = new Promise(resolve => {
+        visiblePromise = new Promise((resolve) => {
           makeVisible = resolve;
         });
         visibilityStubs.whenFirstVisible.returns(visiblePromise);
+
+        video = doc.createElement('amp-video');
+        video.setAttribute('layout', 'nodisplay');
+        doc.body.appendChild(video);
       });
 
       describe('should not prerender if no cached sources', () => {
         it('with just src', () => {
-          return new Promise(resolve => {
-            getVideo(
-              {
-                src: 'video.mp4',
-                width: 160,
-                height: 90,
-              },
-              null,
-              element => {
-                expect(element.implementation_.prerenderAllowed()).to.be.false;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute('src', 'video.mp4');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
         });
 
         it('with just source', () => {
-          return new Promise(resolve => {
-            const source = doc.createElement('source');
-            source.setAttribute('src', 'video.mp4');
-            getVideo(
-              {
-                width: 160,
-                height: 90,
-              },
-              null,
-              element => {
-                expect(element.implementation_.prerenderAllowed()).to.be.false;
-                resolve();
-              }
-            );
-          });
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
         });
 
         it('with both src and source', () => {
-          return new Promise(resolve => {
-            const source = doc.createElement('source');
-            source.setAttribute('src', 'video.mp4');
-            getVideo(
-              {
-                src: 'video.mp4',
-                width: 160,
-                height: 90,
-              },
-              [source],
-              element => {
-                expect(element.implementation_.prerenderAllowed()).to.be.false;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute('src', 'video.mp4');
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
         });
       });
 
       describe('should prerender cached sources', () => {
         it('with just cached src', () => {
-          return new Promise(resolve => {
-            getVideo(
-              {
-                'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
-                'amp-orig-src': 'https://example.com/video.mp4',
-                width: 160,
-                height: 90,
-              },
-              null,
-              element => {
-                expect(element.implementation_.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          video.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
         });
 
         it('with just cached source', () => {
-          return new Promise(resolve => {
-            const source = doc.createElement('source');
-            source.setAttribute(
-              'src',
-              'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-            );
-            source.setAttribute(
-              'amp-orig-src',
-              'https://example.com/video.mp4'
-            );
-            getVideo(
-              {
-                width: 160,
-                height: 90,
-              },
-              [source],
-              element => {
-                expect(element.implementation_.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          const source = doc.createElement('source');
+          source.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
         });
 
         it('with a mix or cached and non-cached', () => {
-          return new Promise(resolve => {
-            const source = doc.createElement('source');
-            source.setAttribute('src', 'video.mp4');
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
 
-            const cachedSource = doc.createElement('source');
-            cachedSource.setAttribute(
-              'src',
-              'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-            );
-            cachedSource.setAttribute(
-              'amp-orig-src',
-              'https://example.com/video.mp4'
-            );
+          const cachedSource = doc.createElement('source');
+          cachedSource.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          cachedSource.setAttribute(
+            'amp-orig-src',
+            'https://example.com/video.mp4'
+          );
+          video.appendChild(cachedSource);
 
-            getVideo(
-              {
-                src: 'video.mp4',
-                width: 160,
-                height: 90,
-              },
-              [source, cachedSource],
-              element => {
-                expect(element.implementation_.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+        });
+      });
+
+      describe('should prerender poster image', () => {
+        it('with just cached src', () => {
+          video.setAttribute('src', 'https://example.com/video.mp4');
+          video.setAttribute('poster', 'https://example.com/poster.jpg');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+        });
+      });
+
+      describe('should preconnect to all sources', () => {
+        let preconnect;
+
+        beforeEach(() => {
+          preconnect = {url: env.sandbox.stub()};
+          env.sandbox.stub(Services, 'preconnectFor').returns(preconnect);
+        });
+
+        it('no cached source', async () => {
+          await getVideo(
+            {
+              src: 'https://example.com/video.mp4',
+              poster: 'https://example.com/poster.jpg',
+              width: 160,
+              height: 90,
+            },
+            null,
+            null,
+            /* opt_noLayout */ true
+          );
+
+          expect(preconnect.url).to.have.been.calledOnce;
+          expect(preconnect.url.getCall(0)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
+            'https://example.com/video.mp4'
+          );
+        });
+
+        it('cached source', async () => {
+          const cachedSource = doc.createElement('source');
+          cachedSource.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          cachedSource.setAttribute(
+            'amp-orig-src',
+            'https://example.com/video.mp4'
+          );
+
+          await getVideo(
+            {
+              poster: 'https://example.com/poster.jpg',
+              width: 160,
+              height: 90,
+            },
+            [cachedSource],
+            null,
+            /* opt_noLayout */ true
+          );
+
+          expect(preconnect.url).to.have.been.calledTwice;
+          expect(preconnect.url.getCall(0)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          expect(preconnect.url.getCall(1)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
+            'https://example.com/video.mp4'
+          );
+        });
+
+        it('mixed sources', async () => {
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'https://example.com/video.mp4');
+
+          const cachedSource = doc.createElement('source');
+          cachedSource.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          cachedSource.setAttribute(
+            'amp-orig-src',
+            'https://example.com/video.mp4'
+          );
+          await getVideo(
+            {
+              poster: 'https://example.com/poster.jpg',
+              width: 160,
+              height: 90,
+            },
+            [source, cachedSource],
+            null,
+            /* opt_noLayout */ true
+          );
+          expect(preconnect.url).to.have.been.calledThrice;
+          expect(preconnect.url.getCall(0)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
+            'https://example.com/video.mp4'
+          );
+          expect(preconnect.url.getCall(1)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          expect(preconnect.url.getCall(2)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
+            'https://example.com/video.mp4'
+          );
         });
       });
 
@@ -961,7 +1150,7 @@ describes.realWin(
 
       describe('isCachedByCDN', () => {
         it('must have amp-orig-src attribute', () => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             getVideo(
               {
                 'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
@@ -969,9 +1158,8 @@ describes.realWin(
                 height: 90,
               },
               null,
-              element => {
-                expect(element.implementation_.isCachedByCDN_(element)).to.be
-                  .false;
+              (element) => {
+                expect(isCachedByCdn(element)).to.be.false;
                 resolve();
               }
             );
@@ -979,7 +1167,7 @@ describes.realWin(
         });
 
         it('must be CDN url', () => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             getVideo(
               {
                 'src':
@@ -989,9 +1177,8 @@ describes.realWin(
                 height: 90,
               },
               null,
-              element => {
-                expect(element.implementation_.isCachedByCDN_(element)).to.be
-                  .false;
+              (element) => {
+                expect(isCachedByCdn(element)).to.be.false;
                 resolve();
               }
             );
@@ -1002,7 +1189,7 @@ describes.realWin(
 
     describe('seekTo', () => {
       it('changes `currentTime`', () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           getVideo(
             {
               'src': 'https://example-com.cdn.FAKEampproject.org/m/s/video.mp4',
@@ -1010,14 +1197,13 @@ describes.realWin(
               height: 90,
             },
             /* children */ null,
-            element => {
-              const {implementation_} = element;
-              const {video_} = implementation_;
+            (element, impl) => {
+              const {video_} = impl;
 
               expect(video_.currentTime).to.equal(0);
 
-              [20, 100, 0, 50, 22].forEach(timeSeconds => {
-                implementation_.seekTo(timeSeconds);
+              [20, 100, 0, 50, 22].forEach((timeSeconds) => {
+                impl.seekTo(timeSeconds);
                 expect(video_.currentTime).to.equal(timeSeconds);
               });
 
@@ -1025,6 +1211,26 @@ describes.realWin(
             }
           );
         }));
+    });
+
+    describe('bitrate manager', () => {
+      it('should manage bitrate of replaced video from mediapool', async () => {
+        toggleExperiment(env.win, 'flexible-bitrate', true);
+        const v = await getVideo(
+          {
+            src: 'video.mp4',
+            width: 160,
+            height: 90,
+          },
+          null,
+          null
+        );
+        const impl = await v.getImpl(false);
+        impl.hasBitrateSources_ = true;
+        impl.resetOnDomChange();
+
+        expect(impl.video_.changedSources).to.not.be.undefined;
+      });
     });
   }
 );

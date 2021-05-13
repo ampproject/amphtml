@@ -42,7 +42,7 @@ export class BindMacro {
    * @return {BindExpressionResultDef}
    */
   evaluate(scope, args) {
-    const copy = /** @type {!JsonObject} */ (Object.assign({}, scope));
+    const copy = /** @type {!JsonObject} */ ({...scope});
     for (let i = 0; i < this.argumentNames_.length; i++) {
       copy[this.argumentNames_[i]] = args[i];
     }

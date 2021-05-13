@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert} from '../log';
+import {devAssert} from '../core/assert';
 
 /**
  * Maps a value in a first range to its equivalent in a second range
@@ -160,7 +160,7 @@ export function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
  * @return {number}
  */
 export function sum(values) {
-  return values.reduce(function(a, b) {
+  return values.reduce(function (a, b) {
     return a + b;
   });
 }

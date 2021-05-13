@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Reddit comment or post embed.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,25 +24,6 @@ limitations under the License.
 
 # amp-reddit
 
-Displays a Reddit comment or post embed.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-reddit" src="https://cdn.ampproject.org/v0/amp-reddit-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-reddit/">amp-reddit example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Examples
 
 Use the `amp-reddit` component to embed a Reddit post or comment.
@@ -54,7 +36,8 @@ Use the `amp-reddit` component to embed a Reddit post or comment.
   width="300"
   height="400"
   data-embedtype="post"
-  data-src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed">
+  data-src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"
+>
 </amp-reddit>
 ```
 
@@ -70,7 +53,8 @@ Use the `amp-reddit` component to embed a Reddit post or comment.
   data-uuid="b1246282-bd7b-4778-8c5b-5b08ac0e175e"
   data-embedcreated="2016-09-26T21:26:17.823Z"
   data-embedparent="true"
-  data-embedlive="true">
+  data-embedlive="true"
+>
 </amp-reddit>
 ```
 
@@ -102,6 +86,10 @@ Use the `amp-reddit` component to embed a Reddit post or comment.
     <td>Indicates whether the embedded comment should update if the original comment is updated. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
   </tr>
   <tr>
+    <td width="40%"><strong>title</strong></td>
+    <td>Define a <code>title</code> attribute for the component. The default is <code>Reddit</code>.</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
@@ -109,4 +97,4 @@ Use the `amp-reddit` component to embed a Reddit post or comment.
 
 ## Validation
 
-See [amp-reddit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reddit/validator-amp-reddit.protoascii) in the AMP validator specification.
+See [amp-reddit rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-reddit/validator-amp-reddit.protoascii) in the AMP validator specification.

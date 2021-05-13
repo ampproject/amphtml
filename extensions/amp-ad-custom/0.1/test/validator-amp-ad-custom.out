@@ -41,7 +41,7 @@ FAIL
 |    <!-- Invalid: non-HTTPS src -->
 |    <amp-ad-custom
 >>   ^~~~~~~~~
-amp-ad-custom/0.1/test/validator-amp-ad-custom.html:41:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-ad-custom'. (see https://amp.dev/documentation/components/amp-ad-custom) [AMP_TAG_PROBLEM]
+amp-ad-custom/0.1/test/validator-amp-ad-custom.html:41:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-ad-custom'. (see https://amp.dev/documentation/components/amp-ad-custom)
 |        width=300
 |        height=250
 |        src="http://www.example.com/ad?type=amp"

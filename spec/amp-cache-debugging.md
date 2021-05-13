@@ -12,9 +12,9 @@ Cache](https://developers.google.com/amp/cache/overview#amp-cache-url-format)),
 try the following:
 
 1. Open your browser's developer/error tools console, and resolve
-    any errors or warnings that appear.
-2.  Run the document through [AMPBench](https://ampbench.appspot.com/) and
-    resolve any unexpected errors or warnings.
+   any errors or warnings that appear.
+2. Run the document through [an AMP document validator](https://search.google.com/test/amp) and
+   resolve any unexpected errors or warnings.
 
 If you still have a problem after following these steps, check the table below.
 
@@ -30,8 +30,8 @@ If you still have a problem after following these steps, check the table below.
   <tbody>
     <tr>
       <td>Web fonts do not appear (fallback fonts are used)</td>
-      <td>The AMP Cache is not white listed by the font provider.</td>
-      <td>Contact the font provider and ask them to whitelist <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests#cors-security-in-amp">all caches</a>.</td>
+      <td>The AMP Cache is not allowlisted by the font provider.</td>
+      <td>Contact the font provider and ask them to allowlist <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests#cors-security-in-amp">all caches</a>.</td>
     </tr>
     <tr>
       <td>Assets (e.g., fonts and images) do not appear (<strong>HTTP origins only</strong>)</td>
@@ -41,7 +41,7 @@ If you still have a problem after following these steps, check the table below.
     <tr>
       <td rowspan="2">Assets (e.g., fonts and images) do not appear</td>
       <td>The assets are served with the incorrect MIME type.</td>
-      <td>Specify an <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-cache-guidelines.md#guidelines-accepted-mime-types">acceptable MIME type</a>.</td>
+      <td>Specify an <a href="https://github.com/ampproject/amphtml/blob/main/spec/amp-cache-guidelines.md#guidelines-accepted-mime-types">acceptable MIME type</a>.</td>
     </tr>
     <tr>
       <td>The AMP Cache cannot access the assets.</td>
@@ -50,7 +50,7 @@ If you still have a problem after following these steps, check the table below.
     <tr>
       <td>Dynamic elements such as <code>&lt;amp-form&gt;</code>, <code>&lt;amp-list&gt;</code>, do not behave as expected.</td>
       <td>Broken or missing CORS headers.</td>
-      <td>These components make cross-origin requests from the AMP Cache to your origin. By default, browsers block these requests. To allow these requests, emit <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS">CORS headers</a> that whitelist <a href="https://amp.dev/documentation/guides-and-tutorials/amp-cors-requests.html">all caches</a>.</td>
+      <td>These components make cross-origin requests from the AMP Cache to your origin. By default, browsers block these requests. To allow these requests, emit <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS">CORS headers</a> that allowlist <a href="https://amp.dev/documentation/guides-and-tutorials/amp-cors-requests.html">all caches</a>.</td>
     </tr>
     <tr>
       <td>Content is being served that must be removed due to a legal takedown notice.</td>

@@ -18,15 +18,15 @@ import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
 import {getChildJsonConfig} from '../../../src/json';
 import {isProtocolValid} from '../../../src/url';
-import {once} from '../../../src/utils/function';
+import {once} from '../../../src/core/types/function';
 import {registerServiceBuilder} from '../../../src/service';
 import {user, userAssert} from '../../../src/log';
 
 /** @private @const {string} */
-export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';
+export const CONFIG_SRC_ATTRIBUTE_NAME = 'src';
 
 /** @private const {string} */
-export const BOOKEND_CREDENTIALS_ATTRIBUTE_NAME = 'data-credentials';
+export const CREDENTIALS_ATTRIBUTE_NAME = 'data-credentials';
 
 /** @private @const {string} */
 const TAG = 'amp-story-request-service';
@@ -48,6 +48,9 @@ export class AmpStoryRequestService {
 
     /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
     this.loadBookendConfig = once(() => this.loadBookendConfigImpl_());
+
+    /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
+    this.loadShareConfig = once(() => this.loadShareConfigImpl_());
   }
 
   /**
@@ -66,12 +69,10 @@ export class AmpStoryRequestService {
       return Promise.resolve(null);
     }
 
-    if (bookendEl.hasAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME)) {
-      const rawUrl = bookendEl.getAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME);
-      const credentials = bookendEl.getAttribute(
-        BOOKEND_CREDENTIALS_ATTRIBUTE_NAME
-      );
-      return this.loadJsonFromAttribute_(rawUrl, credentials);
+    if (bookendEl.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {
+      const rawUrl = bookendEl.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
+      const credentials = bookendEl.getAttribute(CREDENTIALS_ATTRIBUTE_NAME);
+      return this.executeRequest(rawUrl, credentials ? {credentials} : {});
     }
 
     // Fallback. Check for an inline json config.
@@ -85,29 +86,53 @@ export class AmpStoryRequestService {
 
   /**
    * @param {string} rawUrl
-   * @param {string|null} credentials
+   * @param {Object=} opts
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
-   * @private
    */
-  loadJsonFromAttribute_(rawUrl, credentials) {
-    const opts = {};
-
+  executeRequest(rawUrl, opts = {}) {
     if (!isProtocolValid(rawUrl)) {
       user().error(TAG, 'Invalid config url.');
       return Promise.resolve(null);
     }
 
-    if (credentials) {
-      opts.credentials = credentials;
-    }
-
     return Services.urlReplacementsForDoc(this.storyElement_)
       .expandUrlAsync(user().assertString(rawUrl))
-      .then(url => this.xhr_.fetchJson(url, opts))
-      .then(response => {
+      .then((url) => this.xhr_.fetchJson(url, opts))
+      .then((response) => {
         userAssert(response.ok, 'Invalid HTTP response');
         return response.json();
       });
+  }
+
+  /**
+   * Retrieves the publisher share providers.
+   * Has to be called through `loadShareConfig`.
+   * @return {(!Promise<!JsonObject>|!Promise<null>)}
+   */
+  loadShareConfigImpl_() {
+    const shareConfigEl = childElementByTag(
+      this.storyElement_,
+      'amp-story-social-share'
+    );
+    if (!shareConfigEl) {
+      return this.loadBookendConfig();
+    }
+
+    if (shareConfigEl.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {
+      const rawUrl = shareConfigEl.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
+      const credentials = shareConfigEl.getAttribute(
+        CREDENTIALS_ATTRIBUTE_NAME
+      );
+      return this.executeRequest(rawUrl, credentials ? {credentials} : {});
+    }
+
+    // Fallback. Check for an inline json config.
+    let config = null;
+    try {
+      config = getChildJsonConfig(shareConfigEl);
+    } catch (err) {}
+
+    return Promise.resolve(config);
   }
 }
 
@@ -124,7 +149,9 @@ export const getRequestService = (win, storyEl) => {
 
   if (!service) {
     service = new AmpStoryRequestService(win, storyEl);
-    registerServiceBuilder(win, 'story-request', () => service);
+    registerServiceBuilder(win, 'story-request', function () {
+      return service;
+    });
   }
 
   return service;

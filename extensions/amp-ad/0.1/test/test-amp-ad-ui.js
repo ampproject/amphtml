@@ -29,19 +29,17 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
-    let sandbox;
+  (env) => {
     let adImpl;
     let uiHandler;
     let adContainer;
     let adElement;
 
     beforeEach(() => {
-      sandbox = env.sandbox;
       adElement = env.win.document.createElement('amp-ad');
       adImpl = new BaseElement(adElement);
       uiHandler = new AmpAdUIHandler(adImpl);
-      sandbox.stub(adHelper, 'getAdContainer').callsFake(() => {
+      env.sandbox.stub(adHelper, 'getAdContainer').callsFake(() => {
         return adContainer;
       });
       adContainer = null;
@@ -50,8 +48,8 @@ describes.realWin(
     describe('applyNoContentUI', () => {
       it('should force collapse ad in sticky ad container', () => {
         adContainer = 'AMP-STICKY-AD';
-        const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
-        const collapseSpy = sandbox
+        const attemptCollapseSpy = env.sandbox.spy(adImpl, 'attemptCollapse');
+        const collapseSpy = env.sandbox
           .stub(adImpl, 'collapse')
           .callsFake(() => {});
         uiHandler.applyNoContentUI();
@@ -62,14 +60,14 @@ describes.realWin(
       it(
         'should force collapse ad inside flying carpet, ' +
           'if it is the only and direct child of flying carpet',
-        function*() {
+        function* () {
           adContainer = 'AMP-FX-FLYING-CARPET';
-          const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
-          const collapseSpy = sandbox
+          const attemptCollapseSpy = env.sandbox.spy(adImpl, 'attemptCollapse');
+          const collapseSpy = env.sandbox
             .stub(adImpl, 'collapse')
             .callsFake(() => {});
 
-          sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -91,16 +89,16 @@ describes.realWin(
       it(
         'should NOT force collapse ad inside flying carpet, ' +
           'if there is another element',
-        function*() {
+        function* () {
           adContainer = 'AMP-FX-FLYING-CARPET';
-          const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
-          const collapseSpy = sandbox
+          const attemptCollapseSpy = env.sandbox.spy(adImpl, 'attemptCollapse');
+          const collapseSpy = env.sandbox
             .stub(adImpl, 'collapse')
             .callsFake(() => {});
 
           const otherElement = env.win.document.createElement('div');
 
-          sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -122,10 +120,10 @@ describes.realWin(
       it(
         'should NOT force collapse ad inside flying carpet, ' +
           'if it is not a direct child of flying carpet.',
-        function*() {
+        function* () {
           adContainer = 'AMP-FX-FLYING-CARPET';
-          const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
-          const collapseSpy = sandbox
+          const attemptCollapseSpy = env.sandbox.spy(adImpl, 'attemptCollapse');
+          const collapseSpy = env.sandbox
             .stub(adImpl, 'collapse')
             .callsFake(() => {});
 
@@ -133,7 +131,7 @@ describes.realWin(
           adElement.remove();
           otherElement.appendChild(adElement);
 
-          sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -165,19 +163,19 @@ describes.realWin(
         env.win.document.body.appendChild(container);
         adImpl = new BaseElement(adElement);
         uiHandler = new AmpAdUIHandler(adImpl);
-        const adAttemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
+        const adAttemptCollapseSpy = env.sandbox.spy(adImpl, 'attemptCollapse');
         uiHandler.applyNoContentUI();
         expect(adAttemptCollapseSpy).to.not.be.called;
       });
 
       it('should try to collapse element first', () => {
-        sandbox.stub(adImpl, 'getFallback').callsFake(() => {
+        env.sandbox.stub(adImpl, 'getFallback').callsFake(() => {
           return true;
         });
-        const fallbackSpy = sandbox
+        const fallbackSpy = env.sandbox
           .stub(adImpl, 'toggleFallback')
           .callsFake(() => {});
-        const collapseSpy = sandbox
+        const collapseSpy = env.sandbox
           .stub(adImpl, 'attemptCollapse')
           .callsFake(() => {
             expect(fallbackSpy).to.not.been.called;
@@ -189,21 +187,21 @@ describes.realWin(
 
       it('should toggle fallback when collapse fail', () => {
         let resolve = null;
-        const promise = new Promise(resolve_ => {
+        const promise = new Promise((resolve_) => {
           resolve = resolve_;
         });
-        const placeholderSpy = sandbox.spy(adImpl, 'togglePlaceholder');
-        const fallbackSpy = sandbox
+        const placeholderSpy = env.sandbox.spy(adImpl, 'togglePlaceholder');
+        const fallbackSpy = env.sandbox
           .stub(adImpl, 'toggleFallback')
           .callsFake(() => {});
-        sandbox
+        env.sandbox
           .stub(uiHandler.baseInstance_, 'attemptCollapse')
           .callsFake(() => {
             return Promise.reject();
           });
-        sandbox
+        env.sandbox
           .stub(uiHandler.baseInstance_, 'mutateElement')
-          .callsFake(callback => {
+          .callsFake((callback) => {
             callback();
             resolve();
           });
@@ -215,22 +213,22 @@ describes.realWin(
       });
 
       it('should apply default holder if not provided', () => {
-        sandbox.stub(adImpl, 'getFallback').callsFake(() => {
+        env.sandbox.stub(adImpl, 'getFallback').callsFake(() => {
           return false;
         });
         let resolve = null;
-        const promise = new Promise(resolve_ => {
+        const promise = new Promise((resolve_) => {
           resolve = resolve_;
         });
-        sandbox.stub(adImpl, 'attemptCollapse').callsFake(() => {
+        env.sandbox.stub(adImpl, 'attemptCollapse').callsFake(() => {
           return Promise.reject();
         });
-        sandbox.stub(adImpl, 'mutateElement').callsFake(callback => {
+        env.sandbox.stub(adImpl, 'mutateElement').callsFake((callback) => {
           callback();
           resolve();
         });
-        sandbox.stub(adImpl, 'togglePlaceholder').callsFake(() => {});
-        sandbox.stub(adImpl, 'toggleFallback').callsFake(() => {});
+        env.sandbox.stub(adImpl, 'togglePlaceholder').callsFake(() => {});
+        env.sandbox.stub(adImpl, 'toggleFallback').callsFake(() => {});
         uiHandler.applyNoContentUI();
         return promise.then(() => {
           const el = adImpl.element.querySelector('[fallback]');
@@ -247,14 +245,15 @@ describes.realWin(
             height: '50px',
           });
           env.win.document.body.appendChild(adElement);
-          sandbox
+          env.sandbox.stub(uiHandler, 'setSize_');
+          env.sandbox
             .stub(adImpl, 'attemptChangeSize')
             .callsFake((height, width) => {
               expect(height).to.equal(100);
               expect(width).to.equal(450);
               return Promise.resolve();
             });
-          return uiHandler.updateSize(100, 400, 50, 300, {}).then(sizes => {
+          return uiHandler.updateSize(100, 400, 50, 300, {}).then((sizes) => {
             expect(sizes).to.deep.equal({
               success: true,
               newWidth: 450,
@@ -264,14 +263,15 @@ describes.realWin(
         });
 
         it('should tolerate string input', () => {
-          sandbox
+          env.sandbox.stub(uiHandler, 'setSize_');
+          env.sandbox
             .stub(adImpl, 'attemptChangeSize')
             .callsFake((height, width) => {
               expect(height).to.equal(100);
               expect(width).to.equal(400);
               return Promise.resolve();
             });
-          return uiHandler.updateSize('100', 400, 0, 0, {}).then(sizes => {
+          return uiHandler.updateSize('100', 400, 0, 0, {}).then((sizes) => {
             expect(sizes).to.deep.equal({
               success: true,
               newWidth: 400,
@@ -281,10 +281,13 @@ describes.realWin(
         });
 
         it('should reject on special case undefined sizes', () => {
-          const attemptChangeSizeSpy = sandbox.spy(adImpl, 'attemptChangeSize');
+          const attemptChangeSizeSpy = env.sandbox.spy(
+            adImpl,
+            'attemptChangeSize'
+          );
           return uiHandler
             .updateSize(undefined, undefined, 0, 0, {})
-            .catch(e => {
+            .catch((e) => {
               expect(e.message).to.equal('undefined width and height');
               expect(attemptChangeSizeSpy).to.not.be.called;
             });
@@ -292,8 +295,11 @@ describes.realWin(
 
         it('should reject on special case inside sticky ad', () => {
           adContainer = 'AMP-STICKY-AD';
-          const attemptChangeSizeSpy = sandbox.spy(adImpl, 'attemptChangeSize');
-          return uiHandler.updateSize(100, 400, 0, 0, {}).then(sizes => {
+          const attemptChangeSizeSpy = env.sandbox.spy(
+            adImpl,
+            'attemptChangeSize'
+          );
+          return uiHandler.updateSize(100, 400, 0, 0, {}).then((sizes) => {
             expect(sizes).to.deep.equal({
               success: false,
               newWidth: 400,
@@ -304,10 +310,10 @@ describes.realWin(
         });
 
         it('should reject on attemptChangeSize reject', () => {
-          sandbox.stub(adImpl, 'attemptChangeSize').callsFake(() => {
+          env.sandbox.stub(adImpl, 'attemptChangeSize').callsFake(() => {
             return Promise.reject();
           });
-          return uiHandler.updateSize(100, 400, 0, 0, {}).then(sizes => {
+          return uiHandler.updateSize(100, 400, 0, 0, {}).then((sizes) => {
             expect(sizes).to.deep.equal({
               success: false,
               newWidth: 400,
@@ -315,6 +321,21 @@ describes.realWin(
             });
           });
         });
+      });
+    });
+
+    describe('sticky ads', () => {
+      it('should render close buttons on render once', () => {
+        expect(uiHandler.unlisteners_).to.be.empty;
+        uiHandler.stickyAdPosition_ = 'bottom';
+        uiHandler.onResizeSuccess();
+        expect(uiHandler.closeButtonRendered_).to.be.true;
+        expect(uiHandler.unlisteners_.length).to.equal(1);
+        expect(uiHandler.element_.querySelector('.amp-ad-close-button')).to.be
+          .not.null;
+
+        uiHandler.onResizeSuccess();
+        expect(uiHandler.unlisteners_.length).to.equal(1);
       });
     });
   }

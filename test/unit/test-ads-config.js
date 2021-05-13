@@ -15,11 +15,11 @@
  */
 
 import {adConfig} from '../../ads/_config';
-import {hasOwn} from '../../src/utils/object';
+import {hasOwn} from '../../src/core/types/object';
 
-describe('test-ads-config', () => {
+describes.sandboxed('test-ads-config', {}, () => {
   it('should have all ad networks configured', () => {
-    window.ampTestRuntimeConfig.adTypes.forEach(adType => {
+    window.ampTestRuntimeConfig.adTypes.forEach((adType) => {
       expect(adConfig, `Missing config for [${adType}]`).to.contain.key(adType);
     });
   });

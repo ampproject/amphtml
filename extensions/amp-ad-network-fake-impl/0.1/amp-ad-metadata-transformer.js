@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {parseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 
@@ -50,7 +50,6 @@ export class AmpAdMetadataTransformer {
    * Please note: once runtime offsets are computed the document must not
    * change.
    *
-   * https://cs.corp.google.com/piper///depot/google3/search/amphtml/transformers/amp_ad_metadata_transformer.cc
    * @param {Document} doc
    * @return {string}
    */
@@ -222,10 +221,10 @@ export class AmpAdMetadataTransformer {
     let start = 0;
     let end = 0;
     if (this.firstRuntimeElement_ != null) {
-      const firstRuntimeElementString = this.firstRuntimeElement_
-        ./*OK*/ outerHTML;
-      const lastRuntimeElementString = this.lastRuntimeElement_
-        ./*OK*/ outerHTML;
+      const firstRuntimeElementString =
+        this.firstRuntimeElement_./*OK*/ outerHTML;
+      const lastRuntimeElementString =
+        this.lastRuntimeElement_./*OK*/ outerHTML;
       start = creative.indexOf(firstRuntimeElementString);
       end =
         creative.indexOf(lastRuntimeElementString) +

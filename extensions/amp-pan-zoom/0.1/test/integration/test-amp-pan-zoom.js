@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../../src/amp-events';
+import {AmpEvents} from '../../../../../src/core/constants/amp-events';
 import {createFixtureIframe} from '../../../../../testing/iframe';
 import {toggleExperiment} from '../../../../../src/experiments';
 
-describe
+describes.sandboxed
   .configure()
   .ifChrome()
-  .run('amp-pan-zoom', function() {
+  .run('amp-pan-zoom', {}, function () {
     this.timeout(100000);
     let fixture;
     beforeEach(() => {
       return createFixtureIframe('test/fixtures/amp-pan-zoom.html', 1000).then(
-        f => {
+        (f) => {
           fixture = f;
           toggleExperiment(fixture.win, 'amp-pan-zoom', true, true);
         }

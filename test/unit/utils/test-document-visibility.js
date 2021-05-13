@@ -21,13 +21,13 @@ import {
   removeDocumentVisibilityChangeListener,
 } from '../../../src/utils/document-visibility';
 
-describes.sandboxed('document-visibility', {}, env => {
+describes.sandboxed('document-visibility', {}, (env) => {
   let doc;
 
   beforeEach(() => {
     doc = {
-      addEventListener: sandbox.spy(),
-      removeEventListener: sandbox.spy(),
+      addEventListener: env.sandbox.spy(),
+      removeEventListener: env.sandbox.spy(),
     };
   });
 

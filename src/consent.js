@@ -16,9 +16,9 @@
 
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from './consent-state';
+} from './core/constants/consent-state';
 import {Services} from './services';
-import {user} from './log';
+import {dict} from './core/types/object';
 
 /**
  * Returns a promise that resolve when all consent state the policy wait
@@ -29,7 +29,7 @@ import {user} from './log';
  */
 export function getConsentPolicyState(element, policyId = 'default') {
   return Services.consentPolicyServiceForDocOrNull(element).then(
-    consentPolicy => {
+    (consentPolicy) => {
       if (!consentPolicy) {
         return null;
       }
@@ -47,7 +47,7 @@ export function getConsentPolicyState(element, policyId = 'default') {
  */
 export function getConsentPolicySharedData(element, policyId) {
   return Services.consentPolicyServiceForDocOrNull(element).then(
-    consentPolicy => {
+    (consentPolicy) => {
       if (!consentPolicy) {
         return null;
       }
@@ -59,16 +59,14 @@ export function getConsentPolicySharedData(element, policyId) {
 }
 
 /**
- * TODO(zhouyx): Combine with getConsentPolicyState and return a consentInfo
- * object.
  * @param {!Element|!ShadowRoot} element
- * @param {string} policyId
+ * @param {string=} policyId
  * @return {!Promise<string>}
  */
-export function getConsentPolicyInfo(element, policyId) {
+export function getConsentPolicyInfo(element, policyId = 'default') {
   // Return the stored consent string.
   return Services.consentPolicyServiceForDocOrNull(element).then(
-    consentPolicy => {
+    (consentPolicy) => {
       if (!consentPolicy) {
         return null;
       }
@@ -80,38 +78,73 @@ export function getConsentPolicyInfo(element, policyId) {
 }
 
 /**
- * Determine if an element needs to be blocked by consent based on metaTags.
+ * @param {!Element|!ShadowRoot} element
+ * @param {string=} policyId
+ * @return {!Promise<?Object|undefined>}
+ */
+export function getConsentMetadata(element, policyId = 'default') {
+  // Return the stored consent metadata.
+  return Services.consentPolicyServiceForDocOrNull(element).then(
+    (consentPolicy) => {
+      if (!consentPolicy) {
+        return null;
+      }
+      return consentPolicy.getConsentMetadataInfo(
+        /** @type {string} */ (policyId)
+      );
+    }
+  );
+}
+
+/**
+ * Returns a set of consent values to forward to a 3rd party (like an iframe).
+ * @param {!Element} element
+ * @param {?string=} opt_policyId
+ * @return {!Promise<!JsonObject>}
+ *   See extensions/amp-consent/customizing-extension-behaviors-on-consent.md:
+ *    - consentMetadata
+ *    - consentString
+ *    - consentPolicyState
+ *    - consentPolicySharedData
+ */
+export function getConsentDataToForward(element, opt_policyId) {
+  return Services.consentPolicyServiceForDocOrNull(element).then((policy) => {
+    const gettersOrNull = dict({
+      'consentMetadata': policy && policy.getConsentMetadataInfo,
+      'consentString': policy && policy.getConsentStringInfo,
+      'consentPolicyState': policy && policy.whenPolicyResolved,
+      'consentPolicySharedData': policy && policy.getMergedSharedData,
+    });
+    if (!policy) {
+      return gettersOrNull;
+    }
+    return /** @type {!JsonObject} */ (
+      Promise.all(
+        Object.keys(gettersOrNull).map((key) =>
+          gettersOrNull[key]
+            .call(policy, opt_policyId || 'default')
+            .then((value) => ({[key]: value}))
+        )
+      ).then((objs) => Object.assign.apply({}, objs))
+    );
+  });
+}
+
+/**
+ * Determine if an element needs to be blocked by consent based on meta tags.
  * @param {*} element
  * @return {boolean}
  */
 export function shouldBlockOnConsentByMeta(element) {
   const ampdoc = element.getAmpDoc();
-  let content = Services.documentInfoForDoc(ampdoc).metaTags[
-    'amp-consent-blocking'
-  ];
-
+  let content = ampdoc.getMetaByName('amp-consent-blocking');
   if (!content) {
     return false;
   }
 
-  // validator enforce uniqueness of <meta name='amp-consent-blocking'>
-  // content will not be an array.
-  if (typeof content !== 'string') {
-    user().error(
-      'CONSENT',
-      'Invalid amp-consent-blocking value, ignore meta tag'
-    );
-    return false;
-  }
-
   // Handles whitespace
-  content = content
-    .toUpperCase()
-    .replace(/\s/g, '')
-    .split(',');
+  content = content.toUpperCase().replace(/\s+/g, '');
 
-  if (content.includes(element.tagName)) {
-    return true;
-  }
-  return false;
+  const contents = /** @type {Array<string>} */ (content.split(','));
+  return contents.includes(element.tagName);
 }

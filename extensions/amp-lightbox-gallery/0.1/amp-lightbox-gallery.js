@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {
   ELIGIBLE_TAP_TAGS,
   LightboxManager,
@@ -23,7 +23,7 @@ import {
   VIDEO_TAGS,
 } from './service/lightbox-manager-impl';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {LightboxCaption, OverflowState} from './lightbox-caption';
 import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
 import {Services} from '../../../src/services';
@@ -44,23 +44,24 @@ import {
   secondsToTimestampString,
 } from './utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {dict} from '../../../src/core/types/object';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {prepareImageAnimation} from '@ampproject/animations/dist/animations.mjs';
-import {reportError} from '../../../src/error';
+import {prepareImageAnimation} from '@ampproject/animations';
+import {reportError} from '../../../src/error-reporting';
 import {setStyle, setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';
+const AMP_CAROUSEL_TAG = 'amp-carousel';
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 const SLIDE_ITEM_SELECTOR =
-  '.i-amphtml-slide-item, .i-amphtml-carousel-slide-item';
+  '.i-amphtml-slide-item, .i-amphtml-carousel-slotted';
 
 /**
  * Set of namespaces that indicate the lightbox controls mode.
@@ -177,9 +178,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private {string} */
     this.currentLightboxGroupId_ = 'default';
 
-    /** @private {?Element} */
-    this.sourceElement_ = null;
-
     /**
      * @private {boolean}
      */
@@ -192,7 +190,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.swipeToDismiss_ = new SwipeToDismiss(
       this.win,
       this.element,
-      cb => this.mutateElement(cb),
+      (cb) => this.mutateElement(cb),
       () => this.close_()
     );
   }
@@ -205,7 +203,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     return lightboxManagerForDoc(this.element)
-      .then(manager => {
+      .then((manager) => {
         this.manager_ = manager;
         this.history_ = Services.historyForDoc(this.getAmpDoc());
         this.action_ = Services.actionServiceForDoc(this.element);
@@ -220,7 +218,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.element.appendChild(this.container_);
         this.manager_.maybeInit();
         this.registerDefaultAction(
-          invocation => this.openAction_(invocation),
+          (invocation) => this.openAction_(invocation),
           'open'
         );
       });
@@ -273,15 +271,22 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * Return a cleaned clone of the given element for building
    * carousel slides with.
    * @param {!Element} element
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Node}
    * @private
    */
   cloneLightboxableElement_(element) {
+    const fallback = element.getFallback();
+    const shouldCloneFallback =
+      element.classList.contains('amp-notsupported') && !!fallback;
+    if (shouldCloneFallback) {
+      element = fallback;
+    }
     const deepClone = !element.classList.contains('i-amphtml-element');
     const clonedNode = element.cloneNode(deepClone);
     clonedNode.removeAttribute('on');
     clonedNode.removeAttribute('id');
     clonedNode.removeAttribute('i-amphtml-layout');
+    clonedNode.removeAttribute('fallback');
     return clonedNode;
   }
   /**
@@ -292,7 +297,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   buildCarouselSlides_(lightboxableElements) {
     let index = 0;
     this.elementsMetadata_[this.currentLightboxGroupId_] = [];
-    lightboxableElements.forEach(element => {
+    lightboxableElements.forEach((element) => {
       element.lightboxItemId = index++;
       const clonedNode = this.cloneLightboxableElement_(element);
       const descText = this.manager_.getDescription(element);
@@ -366,17 +371,20 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildCarousel_(lightboxGroupId) {
-    const carouselVersion = isExperimentOn(
+    const extensionVersion =
+      this.getAmpDoc().getExtensionVersion(AMP_CAROUSEL_TAG);
+    const experimentVersion = isExperimentOn(
       this.win,
       'amp-lightbox-gallery-carousel-0-2'
     )
       ? '0.2'
       : '0.1';
+    const carouselVersion = extensionVersion ?? experimentVersion;
 
     return Promise.all([
       Services.extensionsFor(this.win).installExtensionForDoc(
         this.getAmpDoc(),
-        'amp-carousel',
+        AMP_CAROUSEL_TAG,
         carouselVersion
       ),
       Services.extensionsFor(this.win).installExtensionForDoc(
@@ -387,7 +395,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       .then(() => {
         return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
       })
-      .then(list => {
+      .then((list) => {
         this.carousel_ = htmlFor(this.doc_)`
           <amp-carousel type="slides" layout="fill" loop="true"></amp-carousel>
         `;
@@ -438,7 +446,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.boundMeasureMutate_
     );
     const el = this.lightboxCaption_.getElement();
-    el.addEventListener('click', event => {
+    el.addEventListener('click', (event) => {
       triggerAnalyticsEvent(
         this.element,
         'descriptionOverflowToggled',
@@ -464,7 +472,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.boundMeasureMutate_
     );
     const el = this.lightboxControls_.getElement();
-    el.addEventListener('action', event => {
+    el.addEventListener('action', (event) => {
       switch (getDetail(event)['action']) {
         case LightboxControlsAction.CLOSE:
           this.close_();
@@ -512,7 +520,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   nextSlide_() {
     devAssert(this.carousel_)
       .getImpl()
-      .then(carousel => {
+      .then((carousel) => {
         carousel.interactionNext();
       });
   }
@@ -523,7 +531,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   prevSlide_() {
     devAssert(this.carousel_)
       .getImpl()
-      .then(carousel => {
+      .then((carousel) => {
         carousel.interactionPrev();
       });
   }
@@ -539,7 +547,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const target = dev().assertElement(e.target);
     const consumingElement = closest(
       target,
-      element => {
+      (element) => {
         return (
           element.tagName == 'BUTTON' ||
           element.tagName == 'A' ||
@@ -623,7 +631,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   setupGestures_() {
     const gestures = Gestures.get(dev().assertElement(this.carousel_));
-    gestures.onGesture(SwipeYRecognizer, ({data}) => {
+    gestures.onGesture(SwipeYRecognizer, (e) => {
+      const {data} = e;
       this.swipeGesture_(data);
     });
   }
@@ -635,9 +644,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   swipeGesture_(data) {
     if (data.first) {
       const {sourceElement} = this.getCurrentElement_();
-      const parentCarousel = this.getSourceElementParentCarousel_(
-        sourceElement
-      );
+      const parentCarousel =
+        this.getSourceElementParentCarousel_(sourceElement);
 
       this.swipeToDismiss_.startSwipe({
         swipeElement: dev().assertElement(this.carousel_),
@@ -645,11 +653,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         mask: dev().assertElement(this.mask_),
         overlay: dev().assertElement(this.overlay_),
       });
-      return;
-    }
-
-    if (data.last) {
-      this.swipeToDismiss_.endSwipe(data);
       return;
     }
 
@@ -662,7 +665,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   pauseLightboxChildren_() {
     const lbgId = this.currentLightboxGroupId_;
     const slides = this.elementsMetadata_[lbgId].map(
-      elemMetadata => elemMetadata.element
+      (elemMetadata) => elemMetadata.element
     );
     Services.ownersForDoc(this.element).schedulePause(this.element, slides);
   }
@@ -694,7 +697,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       .then(() => {
         return this.history_.push(this.close_.bind(this));
       })
-      .then(historyId => {
+      .then((historyId) => {
         this.historyId_ = historyId;
       });
   }
@@ -733,7 +736,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   openLightboxGallery_(element, expandDescription) {
-    this.sourceElement_ = element;
     const lightboxGroupId = element.getAttribute('lightbox') || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
     this.hasVerticalScrollbarWidth_ = getVerticalScrollbarWidth(this.win) > 0;
@@ -752,11 +754,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.isActive_ = true;
 
         const owners = Services.ownersForDoc(this.element);
-        owners.updateInViewport(
-          this.element,
-          dev().assertElement(this.container_),
-          true
-        );
         owners.scheduleLayout(
           this.element,
           dev().assertElement(this.container_)
@@ -799,7 +796,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.currentElemId_ = element.lightboxItemId;
     devAssert(this.carousel_)
       .getImpl()
-      .then(carousel => carousel.goToSlide(this.currentElemId_));
+      .then((carousel) => carousel.goToSlide(this.currentElemId_));
     this.updateDescriptionBox_(expandDescription);
     return this.enter_();
   }
@@ -835,33 +832,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   shouldAnimateOut_() {
     const target = this.getCurrentElement_().sourceElement;
-    if (!this.transitionTargetIsInViewport_(target)) {
-      return false;
-    }
-    if (!this.elementTypeCanBeAnimated_(target)) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   *
-   * @param {!Element} target
-   * @return {boolean}
-   * @private
-   */
-  transitionTargetIsInViewport_(target) {
-    if (target == this.sourceElement_) {
-      return true;
-    }
-    if (target.isInViewport()) {
-      return true;
-    }
-    const parentCarousel = this.getSourceElementParentCarousel_(target);
-    if (parentCarousel && parentCarousel.isInViewport()) {
-      return true;
-    }
-    return false;
+    return this.elementTypeCanBeAnimated_(target);
   }
 
   /**
@@ -876,7 +847,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   transitionImg_(sourceElement, enter) {
     return this.getCurrentElement_()
       .imageViewer.getImpl()
-      .then(imageViewer => {
+      .then((imageViewer) => {
         const {width, height} = imageViewer.getImageBoxWithOffset() || {};
 
         // Check if our imageBox has a width or height. We may be in the
@@ -1131,7 +1102,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const targetSlideIndex = allSlides.indexOf(targetSlide);
       devAssert(parentCarousel)
         .getImpl()
-        .then(carousel => carousel.goToSlide(targetSlideIndex));
+        .then((carousel) => carousel.goToSlide(targetSlideIndex));
     }
   }
 
@@ -1240,7 +1211,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }
     devAssert(this.carousel_)
       .getImpl()
-      .then(carousel => {
+      .then((carousel) => {
         carousel.goCallback(
           direction,
           /* animate */ true,
@@ -1316,12 +1287,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   updateVideoThumbnails_() {
     const thumbnails = this.manager_
       .getThumbnails(this.currentLightboxGroupId_)
-      .map((thumbnail, index) => Object.assign({index}, thumbnail))
-      .filter(thumbnail => VIDEO_TAGS[thumbnail.element.tagName]);
+      .map((thumbnail, index) => ({index, ...thumbnail}))
+      .filter((thumbnail) => VIDEO_TAGS[thumbnail.element.tagName]);
 
     this.mutateElement(() => {
-      thumbnails.forEach(thumbnail => {
-        thumbnail.timestampPromise.then(ts => {
+      thumbnails.forEach((thumbnail) => {
+        thumbnail.timestampPromise.then((ts) => {
           // Many video players (e.g. amp-youtube) that don't support this API
           // will often return 1. So sometimes we will erroneously show a
           // timestamp of 1 second instead of no timestamp.
@@ -1352,7 +1323,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const thumbnails = [];
     this.manager_
       .getThumbnails(this.currentLightboxGroupId_)
-      .forEach(thumbnail => {
+      .forEach((thumbnail) => {
         // Don't include thumbnails for ads, this may be subject to
         // change pending user feedback or ux experiments after launch
         if (thumbnail.element.tagName == 'AMP-AD') {
@@ -1362,7 +1333,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         thumbnails.push(thumbnailElement);
       });
     this.mutateElement(() => {
-      thumbnails.forEach(thumbnailElement => {
+      thumbnails.forEach((thumbnailElement) => {
         this.gallery_.appendChild(thumbnailElement);
       });
     });
@@ -1378,7 +1349,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     Promise.all([
       this.closeGallery_(),
       devAssert(this.carousel_).getImpl(),
-    ]).then(values => {
+    ]).then((values) => {
       this.currentElemId_ = id;
       values[1].goToSlide(this.currentElemId_);
       this.updateDescriptionBox_();
@@ -1411,7 +1382,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         <span class="i-amphtml-lbg-thumbnail-play-icon"></span>
       <div>`;
 
-      thumbnailObj.timestampPromise.then(ts => {
+      thumbnailObj.timestampPromise.then((ts) => {
         // Many video players (e.g. amp-youtube) that don't support this API
         // will often return 1. This will sometimes result in erroneous values
         // of 1 second for video players that don't support getDuration.
@@ -1425,7 +1396,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       element.appendChild(timestampDiv);
     }
 
-    element.addEventListener('click', e => {
+    element.addEventListener('click', (e) => {
       this.handleThumbnailClick_(e, thumbnailObj.element.lightboxItemId);
     });
     return element;
@@ -1444,7 +1415,7 @@ export function installLightboxGallery(ampdoc) {
   return ampdoc
     .whenReady()
     .then(() => ampdoc.getBody())
-    .then(body => {
+    .then((body) => {
       const existingGallery = elementByTag(ampdoc.getRootNode(), TAG);
       if (!existingGallery) {
         const gallery = ampdoc.win.document.createElement(TAG);
@@ -1461,14 +1432,16 @@ export function installLightboxGallery(ampdoc) {
  * @return {!Promise<?LightboxManager>}
  */
 function lightboxManagerForDoc(element) {
-  return /** @type {!Promise<?LightboxManager>} */ (getElementServiceForDoc(
-    element,
-    'amp-lightbox-manager',
-    'amp-lightbox-gallery'
-  ));
+  return /** @type {!Promise<?LightboxManager>} */ (
+    getElementServiceForDoc(
+      element,
+      'amp-lightbox-manager',
+      'amp-lightbox-gallery'
+    )
+  );
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpLightboxGallery, CSS);
   AMP.registerServiceForDoc('amp-lightbox-manager', LightboxManager);
   Services.extensionsFor(AMP.win).addDocFactory(installLightboxGallery);

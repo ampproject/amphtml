@@ -16,11 +16,11 @@
 /* eslint-disable */
 'use strict';
 
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
+const fs = require('fs');
 const {JSDOM} = require('jsdom');
 const {replaceUrls} = require('./app-utils');
 const {getServeMode} = require('./app-utils');
+
 
 const sourceFile = 'test/manual/amp-video.amp.html';
 
@@ -367,7 +367,7 @@ function isValidExtension(extension) {
 
 
 function runVideoTestBench(req, res, next) {
-  fs.readFileAsync(sourceFile).then(contents => {
+  fs.promises.readFile(sourceFile).then(contents => {
     const dom = new JSDOM(contents);
     const {window} = dom;
     const doc = window.document;
@@ -395,7 +395,7 @@ function runVideoTestBench(req, res, next) {
     appendClientScript(doc);
 
     return res.end(replaceUrls(getServeMode(), dom.serialize()));
-  }).error(() => {
+  }).catch(() => {
     next();
   });
 }

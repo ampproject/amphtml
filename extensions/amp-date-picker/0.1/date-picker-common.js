@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {dict, omit} from '../../../src/utils/object';
+import {dict, omit} from '../../../src/core/types/object';
 import {requireExternal} from '../../../src/module';
 
 /**
  * A higher-order component that wraps a specific date-picker implmentation
  * with common functionality.
- * @param {function(new:React.Component, !JsonObject)} WrappedComponent A date-picker component to wrap
- * @return {function(new:React.Component, !JsonObject)} A date picker component with common functionality
+ * @param {typeof React.Component} WrappedComponent A date-picker component to wrap
+ * @return {typeof React.Component} A date picker component with common functionality
  */
 export function withDatePickerCommon(WrappedComponent) {
   const reactDates = requireExternal('react-dates');
@@ -159,14 +159,14 @@ export function withDatePickerCommon(WrappedComponent) {
   DateComponent.prototype.constructor = DateComponent;
 
   /** @override */
-  DateComponent.prototype.componentDidMount = function() {
+  DateComponent.prototype.componentDidMount = function () {
     if (this.props['onMount']) {
       this.props['onMount']();
     }
   };
 
   /** @override */
-  DateComponent.prototype.componentWillReceiveProps = function(nextProps) {
+  DateComponent.prototype.componentWillReceiveProps = function (nextProps) {
     const allowBlockedEndDate = nextProps['allowBlockedEndDate'];
     const blocked = nextProps['blocked'];
     const endDate = nextProps['endDate'];
@@ -200,11 +200,10 @@ export function withDatePickerCommon(WrappedComponent) {
   };
 
   /** @override */
-  DateComponent.prototype.render = function() {
-    const props = /** @type {!JsonObject} */ (omit(
-      this.props,
-      Object.keys(defaultProps)
-    ));
+  DateComponent.prototype.render = function () {
+    const props = /** @type {!JsonObject} */ (
+      omit(this.props, Object.keys(defaultProps))
+    );
 
     const date = props['date'];
     const daySize = props['daySize'];
@@ -216,19 +215,15 @@ export function withDatePickerCommon(WrappedComponent) {
       initialVisibleMonth || date || startDate || endDate || undefined;
     props['initialVisibleMonth'] = () => Moment(initialDate);
 
-    return react.createElement(
-      WrappedComponent,
-      Object.assign(
-        {},
-        props,
-        dict({
-          'daySize': Number(daySize),
-          'isDayBlocked': this.isDayBlocked,
-          'isDayHighlighted': this.isDayHighlighted,
-          'isOutsideRange': this.isOutsideRange,
-        })
-      )
-    );
+    return react.createElement(WrappedComponent, {
+      ...props,
+      ...dict({
+        'daySize': Number(daySize),
+        'isDayBlocked': this.isDayBlocked,
+        'isDayHighlighted': this.isDayHighlighted,
+        'isOutsideRange': this.isOutsideRange,
+      }),
+    });
   };
 
   /** @dict */

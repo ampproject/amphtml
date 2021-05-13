@@ -20,26 +20,24 @@ import {classifyPage, classifyReferrer, getKeywordsString} from './classify';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
 import {parseUrlDeprecated} from '../../../../src/url';
-import {toArray} from '../../../../src/types';
+import {toArray} from '../../../../src/core/types/array';
 
 // "gen" value for shares
 const SHARE = 300;
 
 /**
  * @param {{
- * loc:Location,
- * referrer:string,
- * title:string,
- * ampDoc: *,
- * pubId:string,
- * data: {
- *   url: string,
- *   service: string
- * }
+ *   loc:Location,
+ *   referrer:string,
+ *   title:string,
+ *   ampDoc: *,
+ *   pubId:string,
+ *   data: {url: string, service: string}
  * }} pjson
  * @return {{amp: number, cb: number, dc: number, dest: *, gen: number, mk: string, pub: *, rb: number, sid, url}}
  */
-const getPjsonData = ({loc, referrer, title, ampDoc, pubId, data}) => {
+const getPjsonData = (pjson) => {
+  const {loc, referrer, title, ampDoc, pubId, data} = pjson;
   const {href, hostname, search, pathname, hash, protocol, port} = loc;
   /** @typedef {{
    * du: string,
@@ -87,7 +85,7 @@ const getPjsonData = ({loc, referrer, title, ampDoc, pubId, data}) => {
   };
 };
 
-export const callPjson = props => {
+export const callPjson = (props) => {
   const data = getPjsonData(props);
   const endpoint = `${API_SERVER}/live/red_pjson`;
 

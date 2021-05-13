@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body style="margin: 0; border: 0; background: #eee;">
+  This is an iframe.
+  It will try to execute some "bad" code.
+  <script>
+    (function() {
+      let failed = false;
+      try {
+        parent.document.body.style.background = 'red';
+      } catch (e) {
+        failed = true;
+        console.log('Failed as expected:', e.message);
+      }
+      if (!failed) {
+        throw new Error('The page got unallowed access');
+      }
+    })();
+  </script>
+</body>
+</html>

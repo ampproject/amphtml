@@ -17,17 +17,11 @@
 import {BindEvaluator} from '../bind-evaluator';
 import {BindExpression} from '../bind-expression';
 
-describe('BindEvaluator', () => {
+describes.sandboxed('BindEvaluator', {}, (env) => {
   let evaluator;
-  let sandbox;
 
   beforeEach(() => {
     evaluator = new BindEvaluator();
-    sandbox = sinon.sandbox;
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   /** @return {number} */
@@ -97,7 +91,7 @@ describe('BindEvaluator', () => {
         expressionString: '1+1',
       },
     ]);
-    const stub = sandbox.stub(BindExpression.prototype, 'evaluate');
+    const stub = env.sandbox.stub(BindExpression.prototype, 'evaluate');
     stub.returns('stubbed');
     evaluator.evaluateBindings({});
     expect(stub.calledOnce).to.be.true;

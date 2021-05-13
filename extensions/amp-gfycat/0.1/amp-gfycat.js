@@ -18,8 +18,12 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
+import {
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
@@ -53,12 +57,14 @@ class AmpGfycat extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
+    const preconnect = Services.preconnectFor(this.win);
+    const ampdoc = this.getAmpDoc();
     // Gfycat iframe
-    this.preconnect.url('https://gfycat.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://gfycat.com', opt_onLayout);
 
     // Iframe video and poster urls
-    this.preconnect.url('https://giant.gfycat.com', opt_onLayout);
-    this.preconnect.url('https://thumbs.gfycat.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://giant.gfycat.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://thumbs.gfycat.com', opt_onLayout);
   }
 
   /** @override */
@@ -158,7 +164,7 @@ class AmpGfycat extends AMP.BaseElement {
 
     this.element.appendChild(iframe);
     return this.loadPromise(this.iframe_).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(this.element, VideoEvents.LOAD);
     });
   }
 
@@ -203,14 +209,16 @@ class AmpGfycat extends AMP.BaseElement {
     }
 
     if (eventData == 'paused') {
-      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      dispatchCustomEvent(this.element, VideoEvents.PAUSE);
     } else if (eventData == 'playing') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+      dispatchCustomEvent(this.element, VideoEvents.PLAYING);
     }
   }
 
   /** @override */
   pauseCallback() {
+    // gfycat automatically paused in the zero-size case and additional
+    // intervention is not needed. Additionally, gfycat are always muted.
     this.pause();
   }
 
@@ -317,6 +325,6 @@ class AmpGfycat extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpGfycat);
 });

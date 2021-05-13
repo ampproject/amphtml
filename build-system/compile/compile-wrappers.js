@@ -18,9 +18,15 @@ const {VERSION} = require('./internal-version');
 
 // If there is a sync JS error during initial load,
 // at least try to unhide the body.
+// If "AMP" is already an object then that means another runtime has already
+// been initialized and the current runtime must exit early. This can occur
+// if multiple AMP libraries are included in the html or when both the module
+// and nomodule runtimes execute in older browsers such as safari < 11.
 exports.mainBinary =
   'var global=self;self.AMP=self.AMP||[];' +
-  'try{(function(_){\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
+  'try{(function(_){' +
+  'if(self.AMP&&!Array.isArray(self.AMP))return;' +
+  '\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
   'setTimeout(function(){' +
   'var s=document.body.style;' +
   's.opacity=1;' +
@@ -28,32 +34,7 @@ exports.mainBinary =
   's.animation="none";' +
   's.WebkitAnimation="none;"},1000);throw e};';
 
-exports.extension = function(
-  name,
-  loadPriority,
-  intermediateDeps,
-  opt_splitMarker
-) {
-  opt_splitMarker = opt_splitMarker || '';
-
-  // Single pass intermediate modules do not need an AMP.push wrapper.
-  if (name.startsWith('_base_')) {
-    return '(function() {<%= contents %>}());';
-  }
-
-  let deps = '';
-  if (intermediateDeps && intermediateDeps.length) {
-    deps = 'i:';
-    function quote(s) {
-      return `"${s}"`;
-    }
-    if (intermediateDeps.length == 1) {
-      deps += quote(intermediateDeps[0]);
-    } else {
-      deps += `[${intermediateDeps.map(quote).join(',')}]`;
-    }
-    deps += ',';
-  }
+exports.extension = function (name, version, latest, isModule, loadPriority) {
   let priority = '';
   if (loadPriority) {
     if (loadPriority != 'high') {
@@ -61,9 +42,12 @@ exports.extension = function(
     }
     priority = 'p:"high",';
   }
+  // Use a numeric value instead of boolean. "m" stands for "module"
+  const m = isModule ? 1 : 0;
   return (
-    `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}${deps}` +
-    `v:"${VERSION}",f:(function(AMP,_){${opt_splitMarker}\n` +
+    `(self.AMP=self.AMP||[]).push({n:"${name}",ev:"${version}",l:${latest},` +
+    `${priority}` +
+    `v:"${VERSION}",m:${m},f:(function(AMP,_){\n` +
     '<%= contents %>\n})});'
   );
 };

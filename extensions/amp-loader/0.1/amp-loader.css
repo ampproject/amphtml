@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-
-
 /* Placeholder */
 .i-amphtml-loader-background {
   position: absolute;
@@ -26,7 +24,7 @@
   background-color: #f8f8f8;
 }
 
- /* Container and sizes */
+/* Container and sizes */
 .i-amphtml-new-loader {
   display: inline-block;
   position: absolute;
@@ -45,7 +43,7 @@
   height: 72px;
 }
 
- /* Logo */
+/* Logo */
 .i-amphtml-new-loader-logo {
   transform-origin: center;
   opacity: 0;
@@ -78,7 +76,7 @@
   display: none;
   transform-origin: center;
   opacity: 0;
-  background-color: rgba(0, 0, 0, .6);
+  background-color: rgba(0, 0, 0, 0.6);
   animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in forwards;
   animation-delay: 0.6s;
   animation-delay: calc(0.6s - var(--loader-delay-offset));
@@ -94,10 +92,6 @@
   margin: 12px;
 }
 
-.i-amphtml-new-loader-has-shim {
-  color: #fff !important;
-}
-
 .i-amphtml-new-loader-has-shim .i-amphtml-new-loader-shim {
   display: initial;
 }
@@ -107,7 +101,7 @@
 }
 
 .i-amphtml-new-loader-has-shim .i-amphtml-new-loader-transparent-on-shim {
- /*
+  /*
   * The shim sets the color to white above, for anything using currentColor.
   * Other parts can specify that they want to be transparent while the shim is
   * present using the `i-amphtml-new-loader-transparent-on-shim` class.
@@ -141,27 +135,24 @@
 }
 
 .i-amphtml-new-loader-spinner-path {
-  animation:
-    frame-position-first-spin 0.6s steps(30),
+  animation: frame-position-first-spin 0.6s steps(30),
     frame-position-infinite-spin 1.2s steps(59) infinite;
   animation-delay: 2.8s, 3.4s;
-  animation-delay:
-      calc(2.8s - var(--loader-delay-offset)),
-      calc(3.4s - var(--loader-delay-offset));
+  animation-delay: calc(2.8s - var(--loader-delay-offset)),
+    calc(3.4s - var(--loader-delay-offset));
 }
 
 .i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner {
   /** Scale down the spinner to a 12px radius, default is 22. */
-  transform: scale(calc(12/ 22));
+  transform: scale(calc(12 / 22));
   /** Increase the stroke-width to counteract the scaling. */
   stroke-width: calc(1.5px * 22 / 12);
 }
 
 .i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner-path {
   animation-delay: 1.4s, 2s;
-  animation-delay:
-      calc(1.4s - var(--loader-delay-offset)),
-      calc(2s - var(--loader-delay-offset));
+  animation-delay: calc(1.4s - var(--loader-delay-offset)),
+    calc(2s - var(--loader-delay-offset));
 }
 
 /* Animations only run when active */
@@ -187,7 +178,7 @@
    * Make sure inherited font properties or those set via other selectors do
    * not impact rendering of the label.
    */
-  all: initial !important; 
+  all: initial !important;
   display: inline-block !important;
   padding: 0 0.4ch !important;
   border: 1px solid currentColor !important;
@@ -196,6 +187,7 @@
   font-size: 11px !important;
   font-family: sans-serif !important;
   line-height: 1.1 !important;
+  visibility: inherit !important;
 }
 
 @keyframes i-amphtml-new-loader-fade-in {

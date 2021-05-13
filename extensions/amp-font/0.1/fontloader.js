@@ -77,7 +77,7 @@ export class FontLoader {
           this.fontLoadResolved_ = true;
           this.dispose_();
         },
-        reason => {
+        (reason) => {
           this.fontLoadRejected_ = true;
           this.dispose_();
           throw reason;
@@ -169,7 +169,7 @@ export class FontLoader {
             resolve();
           } else if (this.fontLoadRejected_) {
             reject(new Error('Font loading timed out.'));
-          } else if (comparators.some(comparator => comparator.compare())) {
+          } else if (comparators.some((comparator) => comparator.compare())) {
             resolve();
           } else {
             vsyncTask();
@@ -187,9 +187,8 @@ export class FontLoader {
    * @private
    */
   createFontComparators_() {
-    const containerElement = (this.container_ = this.document_.createElement(
-      'div'
-    ));
+    const containerElement = (this.container_ =
+      this.document_.createElement('div'));
     setStyles(containerElement, {
       // Use larger font-size to better detect font load.
       fontSize: '40px',
@@ -206,7 +205,7 @@ export class FontLoader {
     });
 
     const comparators = DEFAULT_FONTS_.map(
-      defaultFont =>
+      (defaultFont) =>
         new FontComparator(
           containerElement,
           this.fontConfig_.family,

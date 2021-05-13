@@ -15,17 +15,16 @@
  */
 
 import {MessageType} from '../../src/3p-frame-messaging';
-import {Observable} from '../observable';
+import {Observable} from '../core/data-structures/observable';
 import {Services} from '../services';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
-import {ViewportImpl} from '../service/viewport/viewport-impl';
 import {ViewportInterface} from '../service/viewport/viewport-interface';
 import {canInspectWindow} from '../iframe-helper';
-import {dev, devAssert} from '../log';
+import {dev} from '../log';
+import {devAssert, devAssertElement} from '../core/assert';
 import {getFrameOverlayManager} from '../../ads/inabox/frame-overlay-manager.js';
 import {getPositionObserver} from '../../ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {isExperimentOn} from '../experiments';
 import {isIframed} from '../dom';
 import {
   layoutRectFromDomRect,
@@ -34,7 +33,7 @@ import {
 } from '../layout-rect';
 import {px, resetStyles, setImportantStyles} from '../style';
 import {registerServiceBuilderForDoc} from '../service';
-import {throttle} from '../utils/rate-limit';
+import {throttle} from '../core/types/function';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
@@ -51,11 +50,11 @@ const MIN_EVENT_INTERVAL = 100;
 export function prepareBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).runPromise(
     {
-      measure: state => {
+      measure: (state) => {
         state.width = win./*OK*/ innerWidth;
         state.height = win./*OK*/ innerHeight;
       },
-      mutate: state => {
+      mutate: (state) => {
         // We need to override runtime-level !important rules
         setImportantStyles(bodyElement, {
           'background': 'transparent',
@@ -134,9 +133,20 @@ class InaboxViewportImpl {
     /** @private @const {!Observable<!../service/viewport/viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
-    this.binding_.connect();
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
+
+    /** @private {boolean} */
+    this.visible_ = false;
+    this.ampdoc.onVisibilityChanged(this.updateVisibility_.bind(this));
+    this.updateVisibility_();
+
+    // Workaround for Safari not firing visibilityChange when the page is
+    // unloaded (https://bugs.webkit.org/show_bug.cgi?id=151234).
+    // TODO(zombifier): Remove this when ampdoc can handle this event.
+    /** @private @const {function()} */
+    this.boundDispose_ = this.dispose.bind(this);
+    win.addEventListener('pagehide', this.boundDispose_);
 
     // Top-level mode classes.
     const docElement = win.document.documentElement;
@@ -150,6 +160,7 @@ class InaboxViewportImpl {
   /** @override */
   dispose() {
     this.binding_.disconnect();
+    this.ampdoc.win.removeEventListener('pagehide', this.boundDispose_);
   }
 
   /** @override */
@@ -235,7 +246,7 @@ class InaboxViewportImpl {
    */
   getClientRectAsync(el) {
     const local = el./*OK*/ getBoundingClientRect();
-    return this.binding_.getRootClientRectAsync().then(root => {
+    return this.binding_.getRootClientRectAsync().then((root) => {
       if (!root) {
         return layoutRectFromDomRect(local);
       }
@@ -338,7 +349,9 @@ class InaboxViewportImpl {
   }
 
   /** @override */
-  updateFixedLayer() {}
+  updateFixedLayer() {
+    return Promise.resolve();
+  }
 
   /** @override */
   addToFixedLayer(unusedElement, opt_forceTransfer) {
@@ -347,6 +360,9 @@ class InaboxViewportImpl {
 
   /** @override */
   removeFromFixedLayer(unusedElement) {}
+
+  /** @override */
+  createFixedLayer(unusedConstructor) {}
 
   /**
    * @private
@@ -388,6 +404,22 @@ class InaboxViewportImpl {
       width: newSize.width,
       height: newSize.height,
     });
+  }
+
+  /** @private */
+  updateVisibility_() {
+    const visible = this.ampdoc.isVisible();
+    if (visible != this.visible_) {
+      this.visible_ = visible;
+      if (visible) {
+        this.binding_.connect();
+        // Check the size again in case it has changed between `disconnect` and
+        // `connect`.
+        this.resize_();
+      } else {
+        this.binding_.disconnect();
+      }
+    }
   }
 }
 
@@ -451,9 +483,7 @@ export class ViewportBindingInabox {
     );
 
     /** @private @const {boolean} */
-    this.isFriendlyIframed_ =
-      isExperimentOn(this.win, 'inabox-viewport-friendly') &&
-      canInspectWindow(this.win.top);
+    this.isFriendlyIframed_ = canInspectWindow(this.win.top);
 
     /** @private {?../../ads/inabox/position-observer.PositionObserver} */
     this.topWindowPositionObserver_ = this.isFriendlyIframed_
@@ -485,7 +515,7 @@ export class ViewportBindingInabox {
     this.iframeClient_.makeRequest(
       MessageType.SEND_POSITIONS,
       MessageType.POSITION,
-      data => {
+      (data) => {
         dev().fine(TAG, 'Position changed: ', data);
         this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
       }
@@ -499,22 +529,21 @@ export class ViewportBindingInabox {
     // registered (since it's registered after the inabox services so it won't
     // be available immediately).
     // TODO(lannka): Investigate why this is the case.
-    if (this.unobserveFunction_) {
-      return Promise.resolve();
-    }
     return Services.resourcesPromiseForDoc(
       this.win.document.documentElement
     ).then(() => {
-      this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
-        // If the window is the top window (not sitting in an iframe) then
-        // frameElement doesn't exist. In that case we observe the scrolling
-        // element.
-        /** @type {!HTMLIFrameElement|!HTMLElement} */
-        (this.win.frameElement || this.getScrollingElement()),
-        data => {
-          this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
-        }
-      );
+      this.unobserveFunction_ =
+        this.unobserveFunction_ ||
+        this.topWindowPositionObserver_.observe(
+          // If the window is the top window (not sitting in an iframe) then
+          // frameElement doesn't exist. In that case we observe the scrolling
+          // element.
+          /** @type {!HTMLIFrameElement|!HTMLElement} */
+          (this.win.frameElement || this.getScrollingElement()),
+          (data) => {
+            this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
+          }
+        );
     });
   }
 
@@ -627,7 +656,7 @@ export class ViewportBindingInabox {
 
   /** @private */
   remeasureAllElements_() {
-    this.getChildResources().forEach(resource => resource.measure());
+    this.getChildResources().forEach((resource) => resource.measure());
   }
 
   /** @override */
@@ -650,11 +679,11 @@ export class ViewportBindingInabox {
       );
     }
     if (!this.requestPositionPromise_) {
-      this.requestPositionPromise_ = new Promise(resolve => {
+      this.requestPositionPromise_ = new Promise((resolve) => {
         this.iframeClient_.requestOnce(
           MessageType.SEND_POSITIONS,
           MessageType.POSITION,
-          data => {
+          (data) => {
             this.requestPositionPromise_ = null;
             devAssert(data['targetRect'], 'Host should send targetRect');
             resolve(data['targetRect']);
@@ -712,7 +741,7 @@ export class ViewportBindingInabox {
       if (this.isFriendlyIframed_) {
         const iframe = /** @type {?HTMLIFrameElement}*/ (this.win.frameElement);
         if (iframe) {
-          this.topWindowFrameOverlayManager_.expandFrame(iframe, boxRect => {
+          this.topWindowFrameOverlayManager_.expandFrame(iframe, (boxRect) => {
             this.updateBoxRect_(boxRect);
             resolve();
           });
@@ -723,7 +752,7 @@ export class ViewportBindingInabox {
         this.iframeClient_.requestOnce(
           MessageType.FULL_OVERLAY_FRAME,
           MessageType.FULL_OVERLAY_FRAME_RESPONSE,
-          response => {
+          (response) => {
             if (response['success']) {
               this.updateBoxRect_(response['boxRect']);
               resolve();
@@ -745,10 +774,13 @@ export class ViewportBindingInabox {
       if (this.isFriendlyIframed_) {
         const iframe = /** @type {?HTMLIFrameElement}*/ (this.win.frameElement);
         if (iframe) {
-          this.topWindowFrameOverlayManager_.collapseFrame(iframe, boxRect => {
-            this.updateBoxRect_(boxRect);
-            resolve();
-          });
+          this.topWindowFrameOverlayManager_.collapseFrame(
+            iframe,
+            (boxRect) => {
+              this.updateBoxRect_(boxRect);
+              resolve();
+            }
+          );
         } else {
           reject('Request to open lightbox failed; frame does not exist.');
         }
@@ -756,7 +788,7 @@ export class ViewportBindingInabox {
         this.iframeClient_.requestOnce(
           MessageType.CANCEL_FULL_OVERLAY_FRAME,
           MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
-          response => {
+          (response) => {
             this.updateBoxRect_(response['boxRect']);
             resolve();
           }
@@ -767,7 +799,7 @@ export class ViewportBindingInabox {
 
   /** @visibleForTesting */
   getBodyElement() {
-    return dev().assertElement(this.win.document.body);
+    return devAssertElement(this.win.document.body);
   }
 
   /** @override */
@@ -836,12 +868,8 @@ export function installInaboxViewportService(ampdoc) {
   registerServiceBuilderForDoc(
     ampdoc,
     'viewport',
-    function() {
-      // eslint-disable-next-line no-undef
-      return _RTVEXP_INABOX_LITE ||
-        isExperimentOn(ampdoc.win, 'inabox-viewport-lite')
-        ? new InaboxViewportImpl(ampdoc, binding)
-        : new ViewportImpl(ampdoc, binding, Services.viewerForDoc(ampdoc));
+    function () {
+      return new InaboxViewportImpl(ampdoc, binding);
     },
     /* opt_instantiate */ true
   );

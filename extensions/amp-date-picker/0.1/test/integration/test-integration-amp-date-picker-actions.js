@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {poll} from '../../../../../testing/iframe';
 
-const config = describe
-  .configure()
-  .ifChrome()
-  .skipSinglePass();
-config.skip('amp-date-picker', function() {
+const config = describes.sandboxed.configure().ifChrome();
+config.skip('amp-date-picker', {}, function () {
   this.timeout(10000);
 
   const extensions = ['amp-date-picker'];
@@ -47,7 +44,7 @@ config.skip('amp-date-picker', function() {
       extensions,
       experiments,
     },
-    env => {
+    (env) => {
       let clock;
       let win;
       let document;
@@ -55,8 +52,7 @@ config.skip('amp-date-picker', function() {
       beforeEach(() => {
         win = env.win;
         document = env.win.document;
-        clock = lolex.install({
-          target: win,
+        clock = fakeTimers.withGlobal(win).install({
           now: new Date('2018-01-01T08:00:00Z'),
         });
       });
@@ -106,7 +102,7 @@ config.skip('amp-date-picker', function() {
       extensions,
       experiments,
     },
-    env => {
+    (env) => {
       let clock;
       let win;
       let document;
@@ -114,8 +110,7 @@ config.skip('amp-date-picker', function() {
       beforeEach(() => {
         win = env.win;
         document = env.win.document;
-        clock = lolex.install({
-          target: win,
+        clock = fakeTimers.withGlobal(win).install({
           now: new Date('2018-01-01T08:00:00Z'),
         });
       });
@@ -130,7 +125,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'date');
         today.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2018-01-01');
         });
       });
@@ -141,7 +136,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'date');
         tomorrow.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2018-01-02');
         });
       });
@@ -152,7 +147,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'date');
         yesterday.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2017-12-31');
         });
       });
@@ -174,7 +169,7 @@ config.skip('amp-date-picker', function() {
       extensions,
       experiments,
     },
-    env => {
+    (env) => {
       let win;
       let document;
       let clock;
@@ -182,8 +177,7 @@ config.skip('amp-date-picker', function() {
       beforeEach(() => {
         win = env.win;
         document = env.win.document;
-        clock = lolex.install({
-          target: win,
+        clock = fakeTimers.withGlobal(win).install({
           now: new Date('2018-01-01T08:00:00Z'),
         });
       });
@@ -198,7 +192,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'start-date');
         today.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2018-01-01');
           picker.removeAttribute('start-date');
         });
@@ -210,7 +204,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'start-date');
         tomorrow.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2018-01-02');
         });
       });
@@ -221,7 +215,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'start-date');
         yesterday.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2017-12-31');
         });
       });
@@ -243,7 +237,7 @@ config.skip('amp-date-picker', function() {
       extensions,
       experiments,
     },
-    env => {
+    (env) => {
       let win;
       let document;
       let clock;
@@ -251,8 +245,7 @@ config.skip('amp-date-picker', function() {
       beforeEach(() => {
         win = env.win;
         document = env.win.document;
-        clock = lolex.install({
-          target: win,
+        clock = fakeTimers.withGlobal(win).install({
           now: new Date('2018-01-01T08:00:00Z'),
         });
       });
@@ -267,7 +260,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'end-date');
         today.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2018-01-01');
         });
       });
@@ -278,7 +271,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'end-date');
         tomorrow.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2018-01-02');
         });
       });
@@ -289,7 +282,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'end-date');
         yesterday.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2017-12-31');
         });
       });

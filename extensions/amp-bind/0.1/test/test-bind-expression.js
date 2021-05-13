@@ -17,7 +17,7 @@
 import {BindExpression} from '../bind-expression';
 import {BindMacro} from '../bind-macro';
 
-describe('BindExpression', () => {
+describes.sandboxed('BindExpression', {}, () => {
   const argumentTypeError = 'Unexpected argument type';
   const unsupportedFunctionError = 'not a supported function';
   const expressionSizeExceededError = 'exceeds max';
@@ -140,7 +140,7 @@ describe('BindExpression', () => {
     });
 
     /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators */
-    it('disallow: non-whitelisted operators', () => {
+    it('disallow: non-allowlisted operators', () => {
       expect(evaluate('this')).to.be.null;
       expect(evaluate('self')).to.be.null;
       expect(evaluate('global')).to.be.null;
@@ -225,13 +225,14 @@ describe('BindExpression', () => {
       expect(evaluate('\'a"\\n"c\'')).to.equal('a"\n"c');
     });
 
-    it('whitelisted functions', () => {
+    it('allowlisted functions', () => {
       expect(evaluate('"abc".charAt(0)')).to.equal('a');
       expect(evaluate('"abc".charCodeAt(0)')).to.equal(97);
       expect(evaluate('"abc".concat("def")')).to.equal('abcdef');
       expect(evaluate('"abc".indexOf("b")')).to.equal(1);
       expect(evaluate('"aaa".lastIndexOf("a")')).to.equal(2);
       expect(evaluate('"abc".slice(0, 2)')).to.equal('ab');
+      expect(evaluate('"abc".replace("bc", "xy")')).to.equal('axy');
       expect(evaluate('"a-b-c".split("-")')).to.deep.equal(['a', 'b', 'c']);
       expect(evaluate('"abc".substr(1)')).to.equal('bc');
       expect(evaluate('"abc".substring(0, 2)')).to.equal('ab');
@@ -239,7 +240,16 @@ describe('BindExpression', () => {
       expect(evaluate('"abc".toUpperCase()')).to.equal('ABC');
     });
 
-    it('ban: non-whitelisted string methods', () => {
+    it('escaped quotes', () => {
+      expect(evaluate(`'\\"'`)).to.equal(`"`);
+      expect(evaluate(`"\\'"`)).to.equal(`'`);
+
+      expect(evaluate(`"Hello \\"World\\""`)).to.equal(`Hello "World"`);
+      expect(evaluate(`'Hello\\'s world'`)).to.equal(`Hello's world`);
+      expect(evaluate(`"\t\r"`)).to.equal(`\t\r`);
+    });
+
+    it('ban: non-allowlisted string methods', () => {
       expect(() => {
         evaluate('"abc".anchor()');
       }).to.throw(Error, unsupportedFunctionError);
@@ -251,9 +261,6 @@ describe('BindExpression', () => {
       }).to.throw(Error, unsupportedFunctionError);
       expect(() => {
         evaluate('"abc".repeat(2)');
-      }).to.throw(Error, unsupportedFunctionError);
-      expect(() => {
-        evaluate('"abc".replace("bc", "xy")');
       }).to.throw(Error, unsupportedFunctionError);
       expect(() => {
         evaluate('"abc".search()');
@@ -340,27 +347,18 @@ describe('BindExpression', () => {
     it('custom Array#sort()', () => {
       expect(evaluate('[11, 1, 2].sort()')).to.deep.equal([1, 11, 2]);
       expect(evaluate('[11, 1, 2].sort((x, y) => x - y)')).to.deep.equal([
-        1,
-        2,
-        11,
+        1, 2, 11,
       ]);
 
       const a = [11, 1, 2];
       expect(evaluate('a.sort()', {a})).to.deep.equal([1, 11, 2]);
       expect(evaluate('a.sort((x, y) => x - y)', {a})).to.deep.equal([
-        1,
-        2,
-        11,
+        1, 2, 11,
       ]);
 
       // Sort should be out-of-place i.e. does not sort the caller.
       expect(evaluate('a.sort().concat(a)', {a})).to.deep.equal([
-        1,
-        11,
-        2,
-        11,
-        1,
-        2,
+        1, 11, 2, 11, 1, 2,
       ]);
     });
 
@@ -378,14 +376,11 @@ describe('BindExpression', () => {
 
       // Splice should be out-of-place i.e. does not splice the caller.
       expect(evaluate('a.splice(1).concat(a)', {a})).to.deep.equal([
-        1,
-        1,
-        2,
-        3,
+        1, 1, 2, 3,
       ]);
     });
 
-    it('non-whitelisted functions', () => {
+    it('non-allowlisted functions', () => {
       expect(() => {
         evaluate('["a", "b", "c"].find()');
       }).to.throw(Error, unsupportedFunctionError);
@@ -462,7 +457,7 @@ describe('BindExpression', () => {
       expect(evaluate('sqrt(4) + sqrt', {sqrt: 2})).to.equal(4);
       expect(evaluate('log(20) + log', {log: 1})).to.equal(3.995732273553991);
 
-      // Don't support non-whitelisted functions.
+      // Don't support non-allowlisted functions.
       expect(() => {
         evaluate('sin(0.5)');
       }).to.throw(unsupportedFunctionError);

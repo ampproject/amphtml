@@ -21,16 +21,15 @@ import {parseQueryString_} from './url-parse-query-string';
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
- *   filter: (string|undefined),
  *   minified: boolean,
- *   lite: boolean,
  *   test: boolean,
+ *   examiner: boolean,
  *   log: (string|undefined),
  *   version: string,
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
- *   singlePassType: (string|undefined)
+ *   esm: (boolean|undefined),
  * }}
  */
 export let ModeDef;
@@ -66,31 +65,26 @@ function getMode_(win) {
 
   // Magic constants that are replaced by closure compiler.
   // IS_MINIFIED is always replaced with true when closure compiler is used
-  // while IS_DEV is only replaced when `gulp dist` is called without the
+  // while IS_FORTESTING is only replaced when `amp dist` is called without the
   // --fortesting flag.
-  const IS_DEV = true;
+  const IS_FORTESTING = true;
   const IS_MINIFIED = false;
 
-  const localDevEnabled = !!AMP_CONFIG.localDev;
   const runningTests =
-    !!AMP_CONFIG.test || (IS_DEV && !!(win.__AMP_TEST || win.__karma__));
-  const runningTestsOnIe = win.__karma__ && win.__karma__.config.amp.testOnIe;
-  const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
+    IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
+  const isLocalDev = IS_FORTESTING && (!!AMP_CONFIG.localDev || runningTests);
   const hashQuery = parseQueryString_(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
-    win.location.originalHash || win.location.hash
+    win.location['originalHash'] || win.location.hash
   );
-  const singlePassType = AMP_CONFIG.spt;
-
-  const searchQuery = parseQueryString_(win.location.search);
 
   if (!rtvVersion) {
-    rtvVersion = getRtvVersion(win, isLocalDev);
+    rtvVersion = getRtvVersion(win);
   }
 
   // The `minified`, `test` and `localDev` properties are replaced
-  // as boolean literals when we run `gulp dist` without the `--fortesting`
+  // as boolean literals when we run `amp dist` without the `--fortesting`
   // flags. This improved DCE on the production file we deploy as the code
   // paths for localhost/testing/development are eliminated.
   return {
@@ -105,23 +99,14 @@ function getMode_(win) {
       ) >= 0 || win.AMP_DEV_MODE
     ),
     examiner: hashQuery['development'] == '2',
-    // Allows filtering validation errors by error category. For the
-    // available categories, see ErrorCategory in validator/validator.proto.
-    filter: hashQuery['filter'],
+    esm: IS_ESM,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
-    // amp-user-location override
-    userLocationOverride: hashQuery['amp-user-location'],
     minified: IS_MINIFIED,
-    // Whether document is in an amp-lite viewer. It signal that the user
-    // would prefer to use less bandwidth.
-    lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
-    testIe: runningTestsOnIe,
     log: hashQuery['log'],
     version: internalRuntimeVersion(),
     rtvVersion,
-    singlePassType,
   };
 }
 
@@ -130,16 +115,9 @@ function getMode_(win) {
  * denoting canary/prod/experiment (unless `isLocalDev` is true).
  *
  * @param {!Window} win
- * @param {boolean} isLocalDev
  * @return {string}
  */
-function getRtvVersion(win, isLocalDev) {
-  // If it's local dev then we won't actually have a full version so
-  // just use the version.
-  if (isLocalDev) {
-    return internalRuntimeVersion();
-  }
-
+function getRtvVersion(win) {
   if (win.AMP_CONFIG && win.AMP_CONFIG.v) {
     return win.AMP_CONFIG.v;
   }
@@ -154,12 +132,11 @@ function getRtvVersion(win, isLocalDev) {
 
 /**
  * @param {!Window} win
- * @param {boolean} isLocalDev
  * @return {string}
  * @visibleForTesting
  */
-export function getRtvVersionForTesting(win, isLocalDev) {
-  return getRtvVersion(win, isLocalDev);
+export function getRtvVersionForTesting(win) {
+  return getRtvVersion(win);
 }
 
 /** @visibleForTesting */

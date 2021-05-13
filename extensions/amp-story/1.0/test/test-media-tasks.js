@@ -25,29 +25,29 @@ import {
   UpdateSourcesTask,
 } from '../media-tasks';
 import {Sources} from '../sources';
-import {toArray} from '../../../../src/types';
+import {toArray} from '../../../../src/core/types/array';
 
-describes.realWin('media-tasks', {}, () => {
-  let sandbox;
+describes.realWin('media-tasks', {}, (env) => {
+  let win;
   let el;
   let vsyncApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
+    win = env.win;
     el = document.createElement('video');
 
     // Mock vsync
     vsyncApi = {
       mutatePromise: () => {},
     };
-    sandbox.stub(vsyncApi, 'mutatePromise').resolves(callback => {
+    env.sandbox.stub(vsyncApi, 'mutatePromise').resolves((callback) => {
       callback();
     });
   });
 
   describe('PauseTask', () => {
     it('should call pause()', () => {
-      const pause = sandbox.spy(el, 'pause');
+      const pause = env.sandbox.spy(el, 'pause');
       const task = new PauseTask();
       task.execute(el);
       expect(pause).to.have.been.called;
@@ -58,7 +58,7 @@ describes.realWin('media-tasks', {}, () => {
     it('should call play() if element was not yet playing', () => {
       expect(el.paused).to.be.true;
 
-      const play = sandbox.spy(el, 'play');
+      const play = env.sandbox.spy(el, 'play');
       const task = new PlayTask();
       task.execute(el);
       expect(play).to.have.been.called;
@@ -68,7 +68,7 @@ describes.realWin('media-tasks', {}, () => {
       el.play();
       expect(el.paused).to.be.false;
 
-      const play = sandbox.spy(el, 'play');
+      const play = env.sandbox.spy(el, 'play');
       const task = new PlayTask();
       task.execute(el);
       expect(play).not.to.have.been.called;
@@ -99,7 +99,7 @@ describes.realWin('media-tasks', {}, () => {
 
   describe('LoadTask', () => {
     it('should call load()', () => {
-      const load = sandbox.spy(el, 'load');
+      const load = env.sandbox.spy(el, 'load');
       const task = new LoadTask();
       task.execute(el);
       expect(load).to.have.been.called;
@@ -150,7 +150,7 @@ describes.realWin('media-tasks', {}, () => {
      * @return {!Array<!Element>}
      */
     function getFakeSources(indices) {
-      return indices.map(index => getFakeSource(index));
+      return indices.map((index) => getFakeSource(index));
     }
 
     it('should clear existing src attribute', () => {
@@ -159,7 +159,7 @@ describes.realWin('media-tasks', {}, () => {
 
       expect(el.src).to.not.be.empty;
       const newSources = new Sources(null, []);
-      const task = new UpdateSourcesTask(newSources);
+      const task = new UpdateSourcesTask(win, newSources);
       task.execute(el);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.be.empty;
@@ -167,13 +167,13 @@ describes.realWin('media-tasks', {}, () => {
 
     it('should clear existing source elements', () => {
       const OLD_SRC_ELS = getFakeSources([1, 2, 3]);
-      OLD_SRC_ELS.forEach(source => {
+      OLD_SRC_ELS.forEach((source) => {
         el.appendChild(source);
       });
 
       expect(toArray(el.children)).to.deep.equal(OLD_SRC_ELS);
       const newSources = new Sources(null, []);
-      const task = new UpdateSourcesTask(newSources);
+      const task = new UpdateSourcesTask(win, newSources);
       task.execute(el);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.be.empty;
@@ -186,7 +186,7 @@ describes.realWin('media-tasks', {}, () => {
 
       expect(el.src).to.not.be.empty;
       const newSources = new Sources(NEW_SRC_URL, []);
-      const task = new UpdateSourcesTask(newSources);
+      const task = new UpdateSourcesTask(win, newSources);
       task.execute(el);
       expect(el.src).to.equal(NEW_SRC_URL);
       expect(toArray(el.children)).to.be.empty;
@@ -196,16 +196,53 @@ describes.realWin('media-tasks', {}, () => {
       const OLD_SRC_ELS = getFakeSources([1, 2, 3]);
       const NEW_SRC_ELS = getFakeSources([4, 5, 6]);
 
-      OLD_SRC_ELS.forEach(source => {
+      OLD_SRC_ELS.forEach((source) => {
         el.appendChild(source);
       });
 
       expect(toArray(el.children)).to.deep.equal(OLD_SRC_ELS);
       const newSources = new Sources(null, NEW_SRC_ELS);
-      const task = new UpdateSourcesTask(newSources);
+      const task = new UpdateSourcesTask(win, newSources);
       task.execute(el);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.deep.equal(NEW_SRC_ELS);
+    });
+
+    it('should propagate the src attribute as a source', () => {
+      el.setAttribute('src', './foo.mp4');
+      const newSources = Sources.removeFrom(win, el);
+      const task = new UpdateSourcesTask(win, newSources);
+      task.execute(el);
+      expect(el).to.not.have.attribute('src');
+      expect(toArray(el.children)).to.have.length(1);
+      expect(el.firstElementChild).to.have.attribute('src');
+      expect(el.firstElementChild.getAttribute('src')).to.equal('./foo.mp4');
+    });
+
+    it('should propagate the amp-orig-src attribute as a source', () => {
+      el.setAttribute('src', './foo.mp4');
+      el.setAttribute('amp-orig-src', './bar.mp4');
+      const newSources = Sources.removeFrom(win, el);
+      const task = new UpdateSourcesTask(win, newSources);
+      task.execute(el);
+      expect(el.firstElementChild).to.have.attribute('amp-orig-src');
+      expect(el.firstElementChild.getAttribute('amp-orig-src')).to.equal(
+        './bar.mp4'
+      );
+    });
+
+    it('should drop sources if a src attribute is specified', () => {
+      el.setAttribute('src', './foo.mp4');
+      getFakeSources([1, 2, 3]).forEach((source) => {
+        el.appendChild(source);
+      });
+      const newSources = Sources.removeFrom(win, el);
+      const task = new UpdateSourcesTask(win, newSources);
+      task.execute(el);
+      expect(el).to.not.have.attribute('src');
+      expect(toArray(el.children)).to.have.length(1);
+      expect(el.firstElementChild).to.have.attribute('src');
+      expect(el.firstElementChild.getAttribute('src')).to.equal('./foo.mp4');
     });
   });
 

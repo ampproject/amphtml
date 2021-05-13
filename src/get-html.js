@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {startsWith} from './string';
+import {isElement} from './core/types';
 
 /** @type {!Array<string>} */
 const excludedTags = ['script', 'style'];
@@ -76,7 +76,7 @@ export function getHtml(win, selector, attrs) {
  */
 function appendToResult(node, attrs, result) {
   const stack = [node];
-  const allowedAttrs = attrs.filter(attr => {
+  const allowedAttrs = attrs.filter((attr) => {
     return allowedAttributes.includes(attr);
   });
 
@@ -87,7 +87,7 @@ function appendToResult(node, attrs, result) {
       result.push(node);
     } else if (node.nodeType === Node.TEXT_NODE) {
       result.push(node.textContent);
-    } else if (node.nodeType === Node.ELEMENT_NODE && isApplicableNode(node)) {
+    } else if (isElement(node) && isApplicableNode(node)) {
       appendOpenTag(node, allowedAttrs, result);
       stack.push(`</${node.tagName.toLowerCase()}>`);
 
@@ -106,7 +106,7 @@ function appendToResult(node, attrs, result) {
 function isApplicableNode(node) {
   const tagName = node.tagName.toLowerCase();
 
-  if (startsWith(tagName, 'amp-')) {
+  if (tagName.startsWith('amp-')) {
     return !!(allowedAmpTags.includes(tagName) && node.textContent);
   } else {
     return !!(!excludedTags.includes(tagName) && node.textContent);
@@ -122,7 +122,7 @@ function isApplicableNode(node) {
 function appendOpenTag(node, attrs, result) {
   result.push(`<${node.tagName.toLowerCase()}`);
 
-  attrs.forEach(function(attr) {
+  attrs.forEach(function (attr) {
     if (node.hasAttribute(attr)) {
       result.push(` ${attr}="${node.getAttribute(attr)}"`);
     }

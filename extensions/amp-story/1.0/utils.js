@@ -13,40 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Layout} from '../../../src/layout';
+
 import {Services} from '../../../src/services';
+import {
+  assertHttpsUrl,
+  getSourceOrigin,
+  isProxyOrigin,
+  resolveRelativeUrl,
+} from '../../../src/url';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
+import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {getSourceOrigin} from '../../../src/url';
-import {getState} from '../../../src/history';
-import {setStyle} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+import {setStyle, toggle} from '../../../src/style';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
  * @param {string} time
+ * @param {number=} fallbackMs Used when `time` is not a valid time string.
  * @return {number|undefined}
  */
-export function timeStrToMillis(time) {
+export function timeStrToMillis(time, fallbackMs = NaN) {
   const match = time.toLowerCase().match(/^([0-9\.]+)\s*(s|ms)$/);
-  if (!match) {
-    return NaN;
+
+  const num = match ? match[1] : undefined;
+  const units = match ? match[2] : undefined;
+
+  if (!match || match.length !== 3 || (units !== 's' && units !== 'ms')) {
+    return fallbackMs;
   }
 
-  const num = match[1];
-  const units = match[2];
-
-  userAssert(
-    match && match.length == 3 && (units == 's' || units == 'ms'),
-    'Invalid time string %s',
-    time
-  );
-
-  return units == 's' ? parseFloat(num) * 1000 : parseInt(num, 10);
+  return Math.round((units == 's' ? 1000 : 1) * parseFloat(num));
 }
 
 /**
@@ -148,10 +148,11 @@ export function getRGBFromCssColorValue(cssValue) {
  * @param  {!Object<string, number>} rgb  ie: {r: 0, g: 0, b: 0}
  * @return {string} '#fff' or '#000'
  */
-export function getTextColorForRGB({r, g, b}) {
+export function getTextColorForRGB(rgb) {
+  const {r, g, b} = rgb;
   // Calculates the relative luminance L.
   // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-  const getLinearRGBValue = x => {
+  const getLinearRGBValue = (x) => {
     // 8bit to sRGB.
     x /= 255;
 
@@ -231,59 +232,52 @@ export function getSourceOriginForElement(element, url) {
   return domainName;
 }
 
-/** @enum {string} */
-export const HistoryState = {
-  ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
-  BOOKEND_ACTIVE: 'ampStoryBookendActive',
-  PAGE_ID: 'ampStoryPageId',
-  NAVIGATION_PATH: 'ampStoryNavigationPath',
-};
-
 /**
- * Updates the value for a given state in the window history.
+ * Resolves an image url and optimizes it if served from the cache.
  * @param {!Window} win
- * @param {string} stateName
- * @param {string|boolean|Array<string>|null} value
+ * @param {string} url
+ * @return {string}
  */
-export function setHistoryState(win, stateName, value) {
-  const {history} = win;
-  const state = getState(history) || {};
-  const newHistory = Object.assign({}, /** @type {!Object} */ (state), {
-    [stateName]: value,
-  });
-
-  history.replaceState(newHistory, '');
-}
-
-/**
- * Returns the value of a given state of the window history.
- * @param {!Window} win
- * @param {string} stateName
- * @return {*}
- */
-export function getHistoryState(win, stateName) {
-  const {history} = win;
-  if (history && getState(history)) {
-    return getState(history)[stateName];
+export function resolveImgSrc(win, url) {
+  let urlSrc = resolveRelativeUrl(url, win.location);
+  if (isProxyOrigin(win.location.href)) {
+    // TODO(Enriqe): add extra params for resized image, for example:
+    // (/ii/w${width}/s)
+    urlSrc = urlSrc.replace('/c/s/', '/i/s/');
   }
-  return null;
+  return urlSrc;
 }
 
 /**
- * Returns a boolean indicating whether the media element is visible or has to
- * play, or hidden by any publisher CSS rule.
- * @param {!Element} ampMediaEl amp-video or amp-audio
- * @param {!../../../src/service/resource.Resource} resource
+ * Whether a Story should show the URL info dialog.
+ * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
  * @return {boolean}
  */
-export function isMediaDisplayed(ampMediaEl, resource) {
-  // Considers amp-audio elements with a layout=nodisplay attribute as
-  // displayed, since they are expected to play when the page is active.
-  return (
-    resource.isDisplayed() ||
-    (ampMediaEl.tagName === 'AMP-AUDIO' &&
-      ampMediaEl.getLayout() === Layout.NODISPLAY)
+export function shouldShowStoryUrlInfo(viewer) {
+  const showStoryUrlInfo = viewer.getParam('showStoryUrlInfo');
+  return showStoryUrlInfo ? showStoryUrlInfo !== '0' : viewer.isEmbedded();
+}
+
+/**
+ * Retrieves an attribute src from the <amp-story> element.
+ * @param {!Element} element
+ * @param {string} attribute
+ * @param {string=} warn
+ * @return {?string}
+ */
+export function getStoryAttributeSrc(element, attribute, warn = false) {
+  const storyEl = dev().assertElement(
+    closestAncestorElementBySelector(element, 'AMP-STORY')
   );
+  const attrSrc = storyEl && storyEl.getAttribute(attribute);
+
+  if (attrSrc) {
+    assertHttpsUrl(attrSrc, storyEl, attribute);
+  } else if (warn) {
+    user().warn('AMP-STORY', `Expected ${attribute} attribute on <amp-story>`);
+  }
+
+  return attrSrc;
 }
 
 /**
@@ -309,8 +303,22 @@ export function setTextBackgroundColor(element) {
     TEXT_BACKGROUND_COLOR_SELECTOR
   );
 
-  Array.prototype.forEach.call(elementsToUpgradeStyles, el => {
+  Array.prototype.forEach.call(elementsToUpgradeStyles, (el) => {
     const color = el.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
     setStyle(el, 'background-color', color);
   });
+}
+
+/**
+ * Click a clone of the anchor in the context of the light dom.
+ * Used to apply linker logic on shadow-dom anchors.
+ * @param {!Element} anchorElement
+ * @param {!Element} domElement element from the light dom
+ */
+export function triggerClickFromLightDom(anchorElement, domElement) {
+  const outerAnchor = anchorElement.cloneNode();
+  toggle(outerAnchor, false);
+  domElement.appendChild(outerAnchor);
+  outerAnchor.click();
+  outerAnchor.remove();
 }

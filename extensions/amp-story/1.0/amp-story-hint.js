@@ -24,7 +24,7 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from './utils';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {renderAsElement} from './simple-template';
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -178,7 +178,7 @@ export class AmpStoryHint {
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => {
+      (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
       true /** callToInitialize */
@@ -186,18 +186,20 @@ export class AmpStoryHint {
 
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
-      isVisible => {
+      (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isOpen => {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isOpen) => {
       this.onBookendStateUpdate_(isOpen);
     });
 
     this.storeService_.subscribe(
       StateProperty.INTERACTIVE_COMPONENT_STATE,
-      /** @param {./amp-story-store-service.InteractiveComponentDef} component */ component => {
+      /** @param {./amp-story-store-service.InteractiveComponentDef} component */ (
+        component
+      ) => {
         this.hideOnFocusedState_(
           component.state === EmbeddedComponentState.FOCUSED
         );

@@ -6,6 +6,7 @@ formats:
 teaser:
   text: Run Narrativ's Linkmate process inside your AMP page
 ---
+
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -22,22 +23,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-smartlinks"></a> `amp-smartlinks`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Run Narrativ's Linkmate process inside your AMP page</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-smartlinks" src="https://cdn.ampproject.org/v0/amp-smartlinks-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-</table>
+# amp-smartlinks
 
 ## Overview
 
@@ -54,24 +40,32 @@ NOTE: If you plan to use `amp-smartlinks` alongside other affiliate partners you
 In your AMP page you will have to add the following snippets:
 
 ```html
-<!doctype html>
+<!DOCTYPE html>
 <html ⚡>
-<head>
-  ...
-  <meta name="amp-link-rewriter-priorities" content="amp-smartlinks amp-other-affiliate">
-  <script async custom-element="amp-smartlinks" src="https://cdn.ampproject.org/v0/amp-smartlinks-0.1.js"></script>
-  ...
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-</head>
-<body>
+  <head>
+    ...
+    <meta
+      name="amp-link-rewriter-priorities"
+      content="amp-smartlinks amp-other-affiliate"
+    />
+    <script
+      async
+      custom-element="amp-smartlinks"
+      src="https://cdn.ampproject.org/v0/amp-smartlinks-0.1.js"
+    ></script>
+    ...
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
     ...
     <amp-smartlinks
-        layout="nodisplay"
-        nrtv-account-name="supercoolpublisher"
-        linkmate>
+      layout="nodisplay"
+      nrtv-account-name="supercoolpublisher"
+      linkmate
+    >
     </amp-smartlinks>
     ...
-</body>
+  </body>
 </html>
 ```
 

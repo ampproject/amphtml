@@ -19,8 +19,8 @@ import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base'
 import {Services} from '../../../src/services';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {isArray} from '../../../src/types';
+import {dict} from '../../../src/core/types/object';
+import {isArray} from '../../../src/core/types';
 
 /**
  * Implments the remotel local subscriptions platform which uses
@@ -57,23 +57,53 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
 
   /** @override */
   getEntitlements() {
-    return this.urlBuilder_
-      .buildUrl(this.authorizationUrl_, /* useAuthData */ false)
-      .then(fetchUrl => {
-        const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
-          'local'
-        );
+    const fetchUrlPromise = this.urlBuilder_.buildUrl(
+      this.authorizationUrl_,
+      /* useAuthData */ false
+    );
+    const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
+    return Promise.all([fetchUrlPromise, meteringStatePromise]).then(
+      (results) => {
+        let fetchUrl = results[0];
+        const meteringState = results[1];
+
+        // WARNING: If this value is really long, you might run into issues by hitting
+        // the maximum URL length in some browsers when sending the GET fetch URL.
+        if (meteringState) {
+          fetchUrl = addParamToUrl(
+            fetchUrl,
+            'meteringState',
+            btoa(JSON.stringify(meteringState))
+          );
+        }
+
+        // WARNING: If this key is really long, you might run into issues by hitting
+        // the maximum URL length in some browsers when sending the GET fetch URL.
+        const encryptedDocumentKey =
+          this.serviceAdapter_.getEncryptedDocumentKey('local');
         if (encryptedDocumentKey) {
           //TODO(chenshay): if crypt, switch to 'post'
           fetchUrl = addParamToUrl(fetchUrl, 'crypt', encryptedDocumentKey);
         }
         return this.xhr_
           .fetchJson(fetchUrl, {credentials: 'include'})
-          .then(res => res.json())
-          .then(resJson => {
-            return Entitlement.parseFromJson(resJson);
+          .then((res) => res.json())
+          .then((resJson) => {
+            const promises = [];
+
+            // Save metering state, if present.
+            if (resJson.metering && resJson.metering.state) {
+              promises.push(
+                this.serviceAdapter_.saveMeteringState(resJson.metering.state)
+              );
+            }
+
+            return Promise.all(promises).then(() =>
+              Entitlement.parseFromJson(resJson)
+            );
           });
-      });
+      }
+    );
   }
 
   /** @override */
@@ -90,7 +120,7 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
   stringifyPingbackData_(entitlements) {
     if (isArray(entitlements)) {
       const entitlementArray = [];
-      entitlements.forEach(ent => {
+      entitlements.forEach((ent) => {
         entitlementArray.push(ent.jsonForPingback());
       });
       return JSON.stringify(entitlementArray);
@@ -103,16 +133,15 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
     if (!this.isPingbackEnabled) {
       return;
     }
-    const pingbackUrl = /** @type {string} */ (devAssert(
-      this.pingbackUrl_,
-      'pingbackUrl is null'
-    ));
+    const pingbackUrl = /** @type {string} */ (
+      devAssert(this.pingbackUrl_, 'pingbackUrl is null')
+    );
 
     const promise = this.urlBuilder_.buildUrl(
       pingbackUrl,
       /* useAuthData */ true
     );
-    return promise.then(url => {
+    return promise.then((url) => {
       // Content should be 'text/plain' to avoid CORS preflight.
       return this.xhr_.sendSignal(url, {
         method: 'POST',

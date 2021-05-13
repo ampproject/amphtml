@@ -17,7 +17,7 @@
 import * as DocumentReady from '../../../../src/document-ready';
 import * as SkimOptionsModule from '../skim-options';
 import * as chunkModule from '../../../../src/chunk';
-import {Deferred} from '../../../../src/utils/promise';
+import {Deferred} from '../../../../src/core/data-structures/promise';
 import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
 import {SKIMLINKS_REWRITER_ID} from '../constants';
 import {EVENTS as linkRewriterEvents} from '../link-rewriter/constants';
@@ -30,7 +30,7 @@ describes.fakeWin(
       extensions: ['amp-skimlinks'],
     },
   },
-  env => {
+  (env) => {
     let ampSkimlinks, helpers, ampdoc;
 
     beforeEach(() => {
@@ -309,7 +309,7 @@ describes.fakeWin(
 
         it('Should wait until visible to send the impression tracking', () => {
           const isVisibleDefer = new Deferred();
-          sandbox
+          env.sandbox
             .stub(ampdoc, 'whenFirstVisible')
             .returns(isVisibleDefer.promise);
 
@@ -341,9 +341,8 @@ describes.fakeWin(
 
       describe('When beacon call has already been made', () => {
         beforeEach(() => {
-          ampSkimlinks.affiliateLinkResolver_.firstRequest = Promise.resolve(
-            beaconResponse
-          );
+          ampSkimlinks.affiliateLinkResolver_.firstRequest =
+            Promise.resolve(beaconResponse);
         });
 
         it('Should not make the fallback call', () => {
@@ -369,7 +368,7 @@ describes.fakeWin(
 
         it('Should wait until visible to send the impression tracking', () => {
           const isVisibleDefer = new Deferred();
-          sandbox
+          env.sandbox
             .stub(ampdoc, 'whenFirstVisible')
             .returns(isVisibleDefer.promise);
 

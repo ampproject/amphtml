@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {InaboxMutator} from './inabox-mutator';
-import {Observable} from '../observable';
+import {Deferred} from '../core/data-structures/promise';
+import {Observable} from '../core/data-structures/observable';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL} from '../service/resources-interface';
 import {Resource, ResourceState} from '../service/resource';
+import {Services} from '../services';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {dev} from '../log';
+import {getMode} from '../mode';
+import {hasNextNodeInDocumentOrder} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 
 const TAG = 'inabox-resources';
@@ -28,6 +31,7 @@ const FOUR_FRAME_DELAY = 70;
 
 /**
  * @implements {../service/resources-interface.ResourcesInterface}
+ * @implements {../service.Disposable}
  * @visibleForTesting
  */
 export class InaboxResources {
@@ -56,8 +60,48 @@ export class InaboxResources {
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
 
-    /** @const @private {!InaboxMutator} */
-    this.mutator_ = new InaboxMutator(ampdoc, this);
+    /** @private {?IntersectionObserver} */
+    this.inViewportObserver_ = null;
+
+    const input = Services.inputFor(this.win);
+    input.setupInputModeClasses(ampdoc);
+
+    // TODO(#31246): launch the visibility logic in inabox as well.
+    if (getMode(this.win).runtime != 'inabox') {
+      ampdoc.onVisibilityChanged(() => {
+        switch (ampdoc.getVisibilityState()) {
+          case VisibilityState.PAUSED:
+            this.resources_.forEach((r) => r.pause());
+            break;
+          case VisibilityState.VISIBLE:
+            this.resources_.forEach((r) => r.resume());
+            this./*OK*/ schedulePass();
+            break;
+        }
+      });
+    }
+
+    /** @private {!Array<Resource>} */
+    this.pendingBuildResources_ = [];
+
+    /** @private {boolean} */
+    this.documentReady_ = false;
+
+    this.ampdoc_.whenReady().then(() => {
+      this.documentReady_ = true;
+      this.buildReadyResources_();
+      this./*OK*/ schedulePass(1);
+    });
+  }
+
+  /** @override */
+  dispose() {
+    this.resources_.forEach((r) => r.unload());
+    this.resources_.length = 0;
+    if (this.inViewportObserver_) {
+      this.inViewportObserver_.disconnect();
+      this.inViewportObserver_ = null;
+    }
   }
 
   /** @override */
@@ -95,11 +139,8 @@ export class InaboxResources {
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    this.ampdoc_
-      .whenReady()
-      .then(resource.build.bind(resource))
-      .then(this.schedulePass.bind(this));
-    dev().fine(TAG, 'resource upgraded:', resource.debugid);
+    this.pendingBuildResources_.push(resource);
+    this.buildReadyResources_();
   }
 
   /** @override */
@@ -107,6 +148,9 @@ export class InaboxResources {
     const resource = Resource.forElementOptional(element);
     if (!resource) {
       return;
+    }
+    if (this.inViewportObserver_) {
+      this.inViewportObserver_.unobserve(element);
     }
     const index = this.resources_.indexOf(resource);
     if (index !== -1) {
@@ -117,13 +161,19 @@ export class InaboxResources {
 
   /** @override */
   scheduleLayoutOrPreload(unusedResource) {
-    // all elements are immediately scheduled for layout after being added
+    this.pass_.schedule();
   }
 
   /** @override */
   schedulePass(opt_delay) {
     return this.pass_.schedule(opt_delay);
   }
+
+  /** @override */
+  updateOrEnqueueMutateTask(unusedResource, unusedNewRequest) {}
+
+  /** @override */
+  schedulePassVsync() {}
 
   /** @override */
   onNextPass(callback) {
@@ -139,55 +189,10 @@ export class InaboxResources {
   }
 
   /** @override */
-  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
-    this.mutator_./*OK*/ changeSize(
-      element,
-      newHeight,
-      newWidth,
-      opt_callback,
-      opt_newMargins
-    );
-  }
+  setRelayoutTop(unusedRelayoutTop) {}
 
   /** @override */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
-    return this.mutator_.attemptChangeSize(
-      element,
-      newHeight,
-      newWidth,
-      opt_newMargins
-    );
-  }
-
-  /** @override */
-  expandElement(element) {
-    this.mutator_.expandElement(element);
-  }
-
-  /** @override */
-  attemptCollapse(element) {
-    return this.mutator_.attemptCollapse(element);
-  }
-
-  /** @override */
-  collapseElement(element) {
-    this.mutator_.collapseElement(element);
-  }
-
-  /** @override */
-  measureElement(measurer) {
-    return this.mutator_.measureElement(measurer);
-  }
-
-  /** @override */
-  mutateElement(element, mutator) {
-    return this.mutator_.mutateElement(element, mutator);
-  }
-
-  /** @override */
-  measureMutateElement(element, measurer, mutator) {
-    return this.mutator_.measureMutateElement(element, measurer, mutator);
-  }
+  maybeHeightChanged() {}
 
   /**
    * @return {!Promise} when first pass executed.
@@ -200,20 +205,23 @@ export class InaboxResources {
    * @private
    */
   doPass_() {
+    const now = Date.now();
     dev().fine(TAG, 'doPass');
     // measure in a batch
-    this.resources_.forEach(resource => {
-      if (!resource.isLayoutPending()) {
+    this.resources_.forEach((resource) => {
+      if (!resource.isLayoutPending() || resource.element.R1()) {
         return;
       }
       resource.measure();
     });
     // mutation in a batch
-    this.resources_.forEach(resource => {
+    this.resources_.forEach((resource) => {
       if (
+        !resource.element.R1() &&
         resource.getState() === ResourceState.READY_FOR_LAYOUT &&
         resource.isDisplayed()
       ) {
+        resource.layoutScheduled(now);
         resource.startLayout();
       }
     });
@@ -221,6 +229,25 @@ export class InaboxResources {
     this.ampdoc_.signals().signal(READY_SCAN_SIGNAL);
     this.passObservable_.fire();
     this.firstPassDone_.resolve();
+  }
+
+  /**
+   * Builds any pending resouces if document is ready, or next element has been
+   * added to DOM.
+   * @private
+   */
+  buildReadyResources_() {
+    for (let i = this.pendingBuildResources_.length - 1; i >= 0; i--) {
+      const resource = this.pendingBuildResources_[i];
+      if (
+        this.documentReady_ ||
+        hasNextNodeInDocumentOrder(resource.element, this.ampdoc_.getRootNode())
+      ) {
+        this.pendingBuildResources_.splice(i, 1);
+        resource.build().then(() => this./*OK*/ schedulePass());
+        dev().fine(TAG, 'resource upgraded:', resource.debugid);
+      }
+    }
   }
 }
 

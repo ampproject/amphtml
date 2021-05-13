@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {Services} from '../../src/services';
 import {
   addMissingParamsToUrl,
   addParamToUrl,
   addParamsToUrl,
+  appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
   getCorsUrl,
@@ -40,7 +42,7 @@ import {
   serializeQueryString,
 } from '../../src/url';
 
-describe('getWinOrigin', () => {
+describes.sandboxed('getWinOrigin', {}, () => {
   it('should return origin if available', () => {
     expect(
       getWinOrigin({
@@ -96,7 +98,7 @@ describe('getWinOrigin', () => {
   });
 });
 
-describe('parseUrlDeprecated', () => {
+describes.sandboxed('parseUrlDeprecated', {}, () => {
   const currentPort = location.port;
 
   function compareParse(url, result) {
@@ -249,9 +251,15 @@ describe('parseUrlDeprecated', () => {
   it('should parse origin data:12345', () => {
     expect(parseUrlDeprecated('data:12345').origin).to.equal('data:12345');
   });
+
+  it('should parse relative', () => {
+    expect(parseUrlDeprecated('chilaquiles/rojos')).to.include({
+      pathname: '/chilaquiles/rojos',
+    });
+  });
 });
 
-describe('parseQueryString', () => {
+describes.sandboxed('parseQueryString', {}, () => {
   it('should return empty params when query string is empty or null', () => {
     expect(parseQueryString(null)).to.deep.equal({});
     expect(parseQueryString('')).to.deep.equal({});
@@ -303,7 +311,7 @@ describe('parseQueryString', () => {
   });
 });
 
-describe('serializeQueryString', () => {
+describes.sandboxed('serializeQueryString', {}, () => {
   it('should return empty string for empty params', () => {
     expect(serializeQueryString({})).to.equal('');
     expect(
@@ -332,7 +340,7 @@ describe('serializeQueryString', () => {
   });
 });
 
-describe('assertHttpsUrl/isSecureUrl', () => {
+describes.sandboxed('assertHttpsUrl/isSecureUrl', {}, () => {
   const referenceElement = document.createElement('div');
   it('should NOT allow null or undefined, but allow empty string', () => {
     allowConsoleError(() => {
@@ -384,7 +392,7 @@ describe('assertHttpsUrl/isSecureUrl', () => {
   });
 });
 
-describe('assertAbsoluteHttpOrHttpsUrl', () => {
+describes.sandboxed('assertAbsoluteHttpOrHttpsUrl', {}, () => {
   it('should allow http', () => {
     expect(assertAbsoluteHttpOrHttpsUrl('http://twitter.com/')).to.equal(
       'http://twitter.com/'
@@ -426,7 +434,7 @@ describe('assertAbsoluteHttpOrHttpsUrl', () => {
   });
 });
 
-describe('removeFragment', () => {
+describes.sandboxed('removeFragment', {}, () => {
   it('should remove fragment', () => {
     expect(removeFragment('https://twitter.com/path#abc')).to.equal(
       'https://twitter.com/path'
@@ -444,7 +452,7 @@ describe('removeFragment', () => {
   });
 });
 
-describe('removeSearch', () => {
+describes.sandboxed('removeSearch', {}, () => {
   it('should remove search', () => {
     expect(removeSearch('https://twitter.com/path?abc')).to.equal(
       'https://twitter.com/path'
@@ -495,7 +503,7 @@ describe('removeSearch', () => {
   });
 });
 
-describe('addParamToUrl', () => {
+describes.sandboxed('addParamToUrl', {}, () => {
   let url;
 
   beforeEach(() => {
@@ -560,7 +568,7 @@ describe('addParamToUrl', () => {
   });
 });
 
-describe('addParamsToUrl', () => {
+describes.sandboxed('addParamsToUrl', {}, () => {
   let url;
   const params = {
     hello: 'world',
@@ -599,7 +607,7 @@ describe('addParamsToUrl', () => {
   });
 });
 
-describe('addMissingParamsToUrl', () => {
+describes.sandboxed('addMissingParamsToUrl', {}, () => {
   let url;
   const params = {
     hello: 'world',
@@ -618,7 +626,7 @@ describe('addMissingParamsToUrl', () => {
   });
 });
 
-describe('isProxyOrigin', () => {
+describes.sandboxed('isProxyOrigin', {}, () => {
   function testProxyOrigin(href, bool) {
     it(
       'should return that ' +
@@ -669,7 +677,7 @@ describe('isProxyOrigin', () => {
   );
 });
 
-describe('isLocalhostOrigin', () => {
+describes.sandboxed('isLocalhostOrigin', {}, () => {
   function testLocalhostOrigin(href, bool) {
     it(
       'should return that ' +
@@ -690,7 +698,7 @@ describe('isLocalhostOrigin', () => {
   testLocalhostOrigin('http://www.example.com/foo.html', false);
 });
 
-describe('isProtocolValid', () => {
+describes.sandboxed('isProtocolValid', {}, () => {
   function testProtocolValid(href, bool) {
     it.configure()
       .skipFirefox()
@@ -720,7 +728,7 @@ describe('isProtocolValid', () => {
   testProtocolValid('vbscript:foo', false);
 });
 
-describe('getSourceOrigin/Url', () => {
+describes.sandboxed('getSourceOrigin/Url', {}, () => {
   function testOrigin(href, sourceHref) {
     it('should return the source origin/url from ' + href, () => {
       expect(getSourceUrl(href)).to.equal(sourceHref);
@@ -762,14 +770,6 @@ describe('getSourceOrigin/Url', () => {
   testOrigin(
     'https://cdn.ampproject.org/ad/www.origin.com/foo/?f=0#h',
     'http://www.origin.com/foo/?f=0#h'
-  );
-  testOrigin(
-    'https://cdn.ampproject.org/action/www.origin.com/foo/?f=0#h',
-    'http://www.origin.com/foo/?f=0#h'
-  );
-  testOrigin(
-    'https://cdn.ampproject.org/action/s/www.origin.com/foo/?f=0#h',
-    'https://www.origin.com/foo/?f=0#h'
   );
 
   // Prefixed CDN
@@ -888,7 +888,7 @@ describe('getSourceOrigin/Url', () => {
   });
 });
 
-describe('resolveRelativeUrl', () => {
+describes.sandboxed('resolveRelativeUrl', {}, () => {
   function testRelUrl(href, baseHref, resolvedHref) {
     it.configure()
       .skipFirefox()
@@ -933,12 +933,6 @@ describe('resolveRelativeUrl', () => {
     'http://base.org/bpath/bfile?bf=0#bh',
     'http://acme.org/path/file?f=0#h'
   );
-
-  // TODO(camelburrito, #11827): This resolves to file:// on Sauce Labs.
-  // testRelUrl(
-  //     '\\\\acme.org/path/file?f=0#h',
-  //     'http://base.org/bpath/bfile?bf=0#bh',
-  //     'http://acme.org/path/file?f=0#h');
 
   // Absolute path.
   testRelUrl(
@@ -988,15 +982,16 @@ describe('resolveRelativeUrl', () => {
   );
 });
 
-describe('getCorsUrl', () => {
+describes.sandboxed('getCorsUrl', {}, () => {
   it('should error if __amp_source_origin is set', () => {
     allowConsoleError(() => {
       expect(() =>
         getCorsUrl(window, 'http://example.com/?__amp_source_origin')
       ).to.throw(/Source origin is not allowed in/);
     });
-    expect(() => getCorsUrl(window, 'http://example.com/?name=hello')).to.not
-      .throw;
+    expect(() =>
+      getCorsUrl(window, 'http://example.com/?name=hello')
+    ).to.not.throw();
   });
 
   it('should set __amp_source_origin as a url param', () => {
@@ -1007,7 +1002,7 @@ describe('getCorsUrl', () => {
   });
 });
 
-describe('removeAmpJsParamsFromUrl', () => {
+describes.sandboxed('removeAmpJsParamsFromUrl', {}, () => {
   it('should handle unaffected URLs', () => {
     expect(removeAmpJsParamsFromUrl('http://example.com')).to.equal(
       'http://example.com/'
@@ -1061,7 +1056,7 @@ describe('removeAmpJsParamsFromUrl', () => {
   });
 });
 
-describe('removeParamsFromSearch', () => {
+describes.sandboxed('removeParamsFromSearch', {}, () => {
   it('should remove the leading ? or &', () => {
     expect(removeParamsFromSearch('?a=1&', 'a')).to.equal('');
   });
@@ -1077,7 +1072,7 @@ describe('removeParamsFromSearch', () => {
   });
 });
 
-describe('getProxyServingType', () => {
+describes.sandboxed('getProxyServingType', {}, () => {
   it('should ignore non-proxy origins', () => {
     expect(getProxyServingType('http://www.example.com')).to.be.null;
     expect(getProxyServingType('http://cdn.ampproject.org/c/o.com/foo/')).to.be
@@ -1106,5 +1101,60 @@ describe('getProxyServingType', () => {
     expect(
       getProxyServingType('https://not.cdn.ampproject.org/test/blah.com/foo/')
     ).to.equal('test');
+  });
+});
+
+describes.realWin('appendPathToUrl', {'amp': true}, (env) => {
+  let urlService;
+  beforeEach(() => {
+    urlService = Services.urlForDoc(env.win.document.body);
+  });
+
+  it('should properly join url and path', () => {
+    expect(
+      appendPathToUrl(urlService.parse('https://cdn.ampproject.org'), '/foo')
+    ).to.be.equal('https://cdn.ampproject.org/foo');
+  });
+
+  it('should join url and path if none contain /', () => {
+    expect(
+      appendPathToUrl(urlService.parse('https://cdn.ampproject.org'), 'foo')
+    ).to.be.equal('https://cdn.ampproject.org/foo');
+  });
+
+  it('should properly join url with path, and path', () => {
+    expect(
+      appendPathToUrl(
+        urlService.parse('https://cdn.ampproject.org/bar/'),
+        '/foo'
+      )
+    ).to.be.equal('https://cdn.ampproject.org/bar/foo');
+  });
+
+  it('should add path before query params', () => {
+    expect(
+      appendPathToUrl(
+        urlService.parse('https://cdn.ampproject.org?a=b'),
+        '/foo'
+      )
+    ).to.be.equal('https://cdn.ampproject.org/foo?a=b');
+  });
+
+  it('should add path before fragment', () => {
+    expect(
+      appendPathToUrl(
+        urlService.parse('https://cdn.ampproject.org/#hello'),
+        '/foo'
+      )
+    ).to.be.equal('https://cdn.ampproject.org/foo#hello');
+  });
+
+  it('should add path before query params and fragment', () => {
+    expect(
+      appendPathToUrl(
+        urlService.parse('https://cdn.ampproject.org?a=b#hello'),
+        'foo'
+      )
+    ).to.be.equal('https://cdn.ampproject.org/foo?a=b#hello');
   });
 });

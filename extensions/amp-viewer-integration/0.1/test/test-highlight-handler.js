@@ -18,8 +18,9 @@ import * as docready from '../../../../src/document-ready';
 import {HighlightHandler, getHighlightParam} from '../highlight-handler';
 import {Messaging, WindowPortEmulator} from '../messaging/messaging';
 import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/visibility-state';
+import {VisibilityState} from '../../../../src/core/constants/visibility-state';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin(
   'getHighlightParam',
@@ -28,7 +29,7 @@ describes.fakeWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     it('get a param', () => {
       // URL encoded '{"s":["amp","highlight"]}'.
       env.win.location =
@@ -121,7 +122,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let root = null;
     let docreadyCb = null;
     beforeEach(() => {
@@ -135,8 +136,8 @@ describes.realWin(
       div1.textContent = 'highlighted text';
       root.appendChild(div1);
 
-      sandbox.stub(docready, 'whenDocumentReady').returns({
-        then: cb => {
+      env.sandbox.stub(docready, 'whenDocumentReady').returns({
+        then: (cb) => {
           docreadyCb = cb;
         },
       });
@@ -144,16 +145,16 @@ describes.realWin(
 
     it('initialize with visibility=visible', () => {
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
-      const setScrollTop = sandbox.stub(
+      const setScrollTop = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'setScrollTop'
       );
@@ -196,8 +197,8 @@ describes.realWin(
 
       const viewerOrigin = 'http://localhost:9876';
       const port = new WindowPortEmulator(window, viewerOrigin);
-      port.addEventListener = function() {};
-      port.postMessage = function() {};
+      port.addEventListener = function () {};
+      port.postMessage = function () {};
       const messaging = new Messaging(env.win, port);
 
       handler.setupMessaging(messaging);
@@ -212,12 +213,12 @@ describes.realWin(
 
     it('initialize with skipRendering', () => {
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
@@ -246,16 +247,16 @@ describes.realWin(
 
     it('initialize with skipScrollAnimation', () => {
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
-      const setScrollTop = sandbox.stub(
+      const setScrollTop = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'setScrollTop'
       );
@@ -299,12 +300,12 @@ describes.realWin(
       document.body.appendChild(script);
 
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
@@ -330,20 +331,20 @@ describes.realWin(
       // If visibility != visible, highlight texts and scroll to the start
       // position of the animation. But do not trigger the animation.
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
-      const setScrollTop = sandbox.stub(
+      const setScrollTop = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'setScrollTop'
       );
-      sandbox
+      env.sandbox
         .stub(ampdoc, 'getVisibilityState')
         .returns(VisibilityState.PRERENDER);
 
@@ -369,11 +370,11 @@ describes.realWin(
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
-      sandbox
+      env.sandbox
         .stub(viewport, 'getLayoutRect')
         .returns(layoutRectLtwh(0, 500, 100, 50));
-      sandbox.stub(viewport, 'getHeight').returns(300);
-      sandbox.stub(viewport, 'getPaddingTop').returns(50);
+      env.sandbox.stub(viewport, 'getHeight').returns(300);
+      env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
 
       // 525px (The center of the element) - 0.5 * 250px (window height)
       // - 50px (padding top) = 350px.
@@ -386,11 +387,11 @@ describes.realWin(
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
-      sandbox
+      env.sandbox
         .stub(viewport, 'getLayoutRect')
         .returns(layoutRectLtwh(0, 500, 100, 500));
-      sandbox.stub(viewport, 'getHeight').returns(300);
-      sandbox.stub(viewport, 'getPaddingTop').returns(50);
+      env.sandbox.stub(viewport, 'getHeight').returns(300);
+      env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
 
       // Scroll to the top of the element with PAGE_TOP_MARGIN margin
       // because it's too tall.
@@ -407,20 +408,84 @@ describes.realWin(
       // Set up an environment where calcTopToCenterHighlightedNodes_
       // returns 350.
       const viewport = Services.viewportForDoc(env.ampdoc);
-      sandbox
+      env.sandbox
         .stub(viewport, 'getLayoutRect')
         .returns(layoutRectLtwh(0, 500, 100, 50));
-      sandbox.stub(viewport, 'getHeight').returns(300);
-      sandbox.stub(viewport, 'getPaddingTop').returns(50);
+      env.sandbox.stub(viewport, 'getHeight').returns(300);
+      env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
       // The current top is 500.
-      sandbox.stub(viewport, 'getScrollTop').returns(500);
+      env.sandbox.stub(viewport, 'getScrollTop').returns(500);
 
-      const setScrollTopStub = sandbox.stub(viewport, 'setScrollTop');
+      const setScrollTopStub = env.sandbox.stub(viewport, 'setScrollTop');
 
       const param = handler.mayAdjustTop_(400);
       expect(param).to.deep.equal({'nd': 150, 'od': 100});
       expect(setScrollTopStub).to.be.calledOnce;
       expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
     });
+
+    // TODO(dmanek): remove `ifChrome` once other major browsers support
+    // text fragments (i.e. 'fragmentDirective' in document = true)
+    it.configure()
+      .ifChrome()
+      .run('should highlight using text fragments', async () => {
+        toggleExperiment(env.win, 'use-text-fragments-for-highlights', true);
+        const {ampdoc} = env;
+        let whenFirstVisiblePromiseResolve;
+        const whenFirstVisiblePromise = new Promise((resolve) => {
+          whenFirstVisiblePromiseResolve = resolve;
+        });
+        env.sandbox
+          .stub(ampdoc, 'whenFirstVisible')
+          .returns(whenFirstVisiblePromise);
+
+        const highlightHandler = new HighlightHandler(ampdoc, {
+          sentences: ['amp', 'highlight'],
+        });
+
+        const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+        highlightHandler.updateUrlWithTextFragment_ =
+          updateUrlWithTextFragmentSpy;
+
+        whenFirstVisiblePromiseResolve();
+        await whenFirstVisiblePromise;
+
+        expect(updateUrlWithTextFragmentSpy).to.be.calledOnce;
+        expect(updateUrlWithTextFragmentSpy.getCall(0).args[0]).to.equal(
+          'text=amp&text=highlight'
+        );
+      });
+
+    // TODO(dmanek): remove `ifChrome` once other major browsers support
+    // text fragments (i.e. 'fragmentDirective' in document = true)
+    it.configure()
+      .ifChrome()
+      .run(
+        'should not highlight if highlightInfo.sentences is empty',
+        async () => {
+          toggleExperiment(env.win, 'use-text-fragments-for-highlights', true);
+          const {ampdoc} = env;
+          let whenFirstVisiblePromiseResolve;
+          const whenFirstVisiblePromise = new Promise((resolve) => {
+            whenFirstVisiblePromiseResolve = resolve;
+          });
+          env.sandbox
+            .stub(ampdoc, 'whenFirstVisible')
+            .returns(whenFirstVisiblePromise);
+
+          const highlightHandler = new HighlightHandler(ampdoc, {
+            sentences: [],
+          });
+
+          const updateUrlWithTextFragmentSpy = env.sandbox.spy();
+          highlightHandler.updateUrlWithTextFragment_ =
+            updateUrlWithTextFragmentSpy;
+
+          whenFirstVisiblePromiseResolve();
+          await whenFirstVisiblePromise;
+
+          expect(updateUrlWithTextFragmentSpy).not.to.be.called;
+        }
+      );
   }
 );

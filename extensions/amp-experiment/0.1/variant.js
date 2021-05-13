@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
-import {hasOwn} from '../../../src/utils/object';
-import {isObject} from '../../../src/types';
+import {hasOwn} from '../../../src/core/types/object';
+import {isObject} from '../../../src/core/types';
 
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;
@@ -93,8 +93,10 @@ export function allocateVariant(ampdoc, experimentName, config) {
   if (sticky && config['consentNotificationId']) {
     const element = ampdoc.getHeadNode();
     hasConsentPromise = Services.userNotificationManagerForDoc(element)
-      .then(manager => manager.getNotification(config['consentNotificationId']))
-      .then(userNotification => {
+      .then((manager) =>
+        manager.getNotification(config['consentNotificationId'])
+      )
+      .then((userNotification) => {
         userAssert(
           userNotification,
           `Notification not found: ${config['consentNotificationId']}`
@@ -103,13 +105,13 @@ export function allocateVariant(ampdoc, experimentName, config) {
       });
   }
 
-  return hasConsentPromise.then(hasConsent => {
+  return hasConsentPromise.then((hasConsent) => {
     if (!hasConsent) {
       return null;
     }
     const group = config['group'] || experimentName;
     return getBucketTicket(ampdoc, group, sticky ? cidScope : null).then(
-      ticket => {
+      (ticket) => {
         let upperBound = 0;
 
         // Loop through keys in a specific order since the default object key
@@ -176,7 +178,7 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
     return Promise.resolve(ampdoc.win.Math.random() * 100);
   }
 
-  const cidPromise = Services.cidForDoc(ampdoc).then(cidService =>
+  const cidPromise = Services.cidForDoc(ampdoc).then((cidService) =>
     cidService.get(
       {
         scope: dev().assertString(opt_cidScope),
@@ -187,8 +189,8 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
   );
 
   return Promise.all([cidPromise, Services.cryptoFor(ampdoc.win)])
-    .then(results => results[1].uniform(group + ':' + results[0]))
-    .then(hash => hash * 100);
+    .then((results) => results[1].uniform(group + ':' + results[0]))
+    .then((hash) => hash * 100);
 }
 
 /**

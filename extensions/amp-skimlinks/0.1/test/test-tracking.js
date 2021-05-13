@@ -37,7 +37,7 @@ describes.fakeWin(
       extensions: ['amp-skimlinks'],
     },
   },
-  env => {
+  (env) => {
     let helpers;
     let createAnchorReplacementObj;
 
@@ -55,13 +55,13 @@ describes.fakeWin(
     });
 
     function setupTrackingService(skimOptions, trackingInfo) {
-      trackingInfo = Object.assign(
-        {pageImpressionId: 'page-imp-id', guid: 'guid'},
-        trackingInfo
-      );
-      const trackingService = helpers.createTrackingWithStubAnalytics(
-        skimOptions
-      );
+      trackingInfo = {
+        pageImpressionId: 'page-imp-id',
+        guid: 'guid',
+        ...trackingInfo,
+      };
+      const trackingService =
+        helpers.createTrackingWithStubAnalytics(skimOptions);
       trackingService.setTrackingInfo(trackingInfo);
 
       return trackingService;
@@ -194,7 +194,7 @@ describes.fakeWin(
             'page-impressions'
           );
 
-          expect(urlVars.data).to.be.a.string;
+          expect(urlVars.data).to.be.a('string');
           const trackingData = JSON.parse(urlVars.data);
           expect(trackingData).to.deep.equal(expectedData);
         });
@@ -209,7 +209,7 @@ describes.fakeWin(
             'page-impressions'
           );
 
-          expect(urlVars.data).to.be.a.string;
+          expect(urlVars.data).to.be.a('string');
           const trackingData = JSON.parse(urlVars.data);
           expect(trackingData.slc).to.equal(3);
         });
@@ -278,7 +278,7 @@ describes.fakeWin(
             'link-impressions'
           );
 
-          expect(urlVars.data).to.be.a.string;
+          expect(urlVars.data).to.be.a('string');
           const trackingData = JSON.parse(urlVars.data);
           expect(trackingData).to.deep.equal(expectedData);
         });
@@ -294,7 +294,7 @@ describes.fakeWin(
           'link-impressions'
         );
 
-        expect(urlVars.data).to.be.a.string;
+        expect(urlVars.data).to.be.a('string');
         const trackingData = JSON.parse(urlVars.data);
         expect(trackingData.dl).to.deep.equal({
           'http://merchant1.com/': {count: 2, ae: 1},
@@ -343,7 +343,7 @@ describes.fakeWin(
           'link-impressions'
         );
 
-        expect(urlVars.data).to.be.a.string;
+        expect(urlVars.data).to.be.a('string');
         const trackingData = JSON.parse(urlVars.data);
         expect(trackingData.dl).to.deep.equal({
           'http://merchant1.com/': {count: 2, ae: 1},
@@ -379,7 +379,7 @@ describes.fakeWin(
           trackingService,
           'non-affiliate-click'
         );
-        expect(urlVars.data).to.be.a.string;
+        expect(urlVars.data).to.be.a('string');
         const trackingData = JSON.parse(urlVars.data);
         expect(trackingData).to.deep.equal(expectedData);
       });

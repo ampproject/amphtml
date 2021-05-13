@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 
 /** @const {string} */
@@ -58,9 +58,8 @@ export class AccessClientAdapter {
     }
 
     /** @const @private {number} */
-    this.authorizationTimeout_ = this.buildConfigAuthorizationTimeout_(
-      configJson
-    );
+    this.authorizationTimeout_ =
+      this.buildConfigAuthorizationTimeout_(configJson);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(ampdoc.win);
@@ -125,7 +124,7 @@ export class AccessClientAdapter {
       this.authorizationUrl_,
       /* useAuthData */ false
     );
-    return urlPromise.then(url => {
+    return urlPromise.then((url) => {
       dev().fine(TAG, 'Authorization URL: ', url);
       return this.timer_
         .timeoutPromise(
@@ -134,7 +133,7 @@ export class AccessClientAdapter {
             credentials: 'include',
           })
         )
-        .then(res => res.json());
+        .then((res) => res.json());
     });
   }
 
@@ -149,7 +148,7 @@ export class AccessClientAdapter {
       devAssert(this.pingbackUrl_),
       /* useAuthData */ true
     );
-    return promise.then(url => {
+    return promise.then((url) => {
       dev().fine(TAG, 'Pingback URL: ', url);
       return this.xhr_.sendSignal(url, {
         method: 'POST',

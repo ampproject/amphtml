@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
+import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {
   DevelopmentModeLog,
@@ -27,12 +29,21 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {createShadowRootWithStyle} from './utils';
+import {closest, matches, scopedQuerySelector} from '../../../src/dom';
+import {
+  createShadowRootWithStyle,
+  getStoryAttributeSrc,
+  shouldShowStoryUrlInfo,
+  triggerClickFromLightDom,
+} from './utils';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getMode} from '../../../src/mode';
-import {matches} from '../../../src/dom';
+import {getSourceOrigin} from '../../../src/url';
 import {renderAsElement} from './simple-template';
+import {setImportantStyles} from '../../../src/style';
+import {toArray} from '../../../src/core/types/array';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -41,13 +52,31 @@ const AD_SHOWING_ATTRIBUTE = 'ad-showing';
 const AUDIO_MUTED_ATTRIBUTE = 'muted';
 
 /** @private @const {string} */
+const PAUSED_ATTRIBUTE = 'paused';
+
+/** @private @const {string} */
 const HAS_INFO_BUTTON_ATTRIBUTE = 'info';
 
 /** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
 /** @private @const {string} */
+const CLOSE_CLASS = 'i-amphtml-story-close-control';
+
+/** @private @const {string} */
+const SKIP_TO_NEXT_CLASS = 'i-amphtml-story-skip-to-next';
+
+/** @private @const {string} */
+const VIEWER_CUSTOM_CONTROL_CLASS = 'i-amphtml-story-viewer-custom-control';
+
+/** @private @const {string} */
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
+
+/** @private @const {string} */
+const PAUSE_CLASS = 'i-amphtml-story-pause-control';
+
+/** @private @const {string} */
+const PLAY_CLASS = 'i-amphtml-story-play-control';
 
 /** @private @const {string} */
 const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
@@ -70,6 +99,9 @@ const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 /** @private @const {string} */
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
 
+/** @private @const {string} */
+const ATTRIBUTION_CLASS = 'i-amphtml-story-attribution';
+
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
@@ -80,6 +112,36 @@ const TEMPLATE = {
     'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
   }),
   children: [
+    {
+      tag: 'a',
+      attrs: dict({
+        'class': ATTRIBUTION_CLASS,
+        'target': '_blank',
+      }),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-logo-container',
+          }),
+          children: [
+            {
+              tag: 'img',
+              attrs: dict({
+                'alt': '',
+                'class': 'i-amphtml-story-attribution-logo',
+              }),
+            },
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-text',
+          }),
+        },
+      ],
+    },
     {
       tag: 'div',
       attrs: dict({
@@ -161,18 +223,16 @@ const TEMPLATE = {
               ],
             },
             {
-              tag: 'div',
+              tag: 'button',
               attrs: dict({
-                'role': 'button',
                 'class': UNMUTE_CLASS + ' i-amphtml-story-button',
               }),
               localizedLabelId:
                 LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL,
             },
             {
-              tag: 'div',
+              tag: 'button',
               attrs: dict({
-                'role': 'button',
                 'class': MUTE_CLASS + ' i-amphtml-story-button',
               }),
               localizedLabelId:
@@ -181,24 +241,98 @@ const TEMPLATE = {
           ],
         },
         {
-          tag: 'a',
+          tag: 'div',
           attrs: dict({
-            'role': 'button',
+            'class': 'i-amphtml-paused-display',
+          }),
+          children: [
+            {
+              tag: 'button',
+              attrs: dict({
+                'class': PAUSE_CLASS + ' i-amphtml-story-button',
+              }),
+              localizedLabelId: LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL,
+            },
+            {
+              tag: 'button',
+              attrs: dict({
+                'class': PLAY_CLASS + ' i-amphtml-story-button',
+              }),
+              localizedLabelId: LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL,
+            },
+          ],
+        },
+        {
+          tag: 'button',
+          attrs: dict({
+            'class':
+              SKIP_TO_NEXT_CLASS +
+              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+          }),
+          localizedLabelId:
+            LocalizedStringId.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL,
+        },
+        {
+          tag: 'button',
+          attrs: dict({
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
           localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
         },
         {
-          tag: 'div',
+          tag: 'button',
           attrs: dict({
-            'role': 'button',
             'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
           localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
         },
+        {
+          tag: 'button',
+          attrs: dict({
+            'class':
+              CLOSE_CLASS +
+              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+          }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL,
+        },
       ],
     },
+    {
+      tag: 'div',
+      attrs: dict({
+        'class': 'i-amphtml-story-system-layer-buttons-start-position',
+      }),
+    },
   ],
+};
+
+/**
+ * Contains the event name belonging to the viewer control.
+ * @const {string}
+ */
+const VIEWER_CONTROL_EVENT_NAME = '__AMP_VIEWER_CONTROL_EVENT_NAME__';
+
+/** @enum {string} */
+const VIEWER_CONTROL_TYPES = {
+  CLOSE: 'close',
+  SHARE: 'share',
+  DEPRECATED_SKIP_NEXT: 'skip-next', // Deprecated in favor of SKIP_TO_NEXT.
+  SKIP_TO_NEXT: 'skip-to-next',
+};
+
+const VIEWER_CONTROL_DEFAULTS = {
+  [VIEWER_CONTROL_TYPES.SHARE]: {
+    'selector': `.${SHARE_CLASS}`,
+  },
+  [VIEWER_CONTROL_TYPES.CLOSE]: {
+    'selector': `.${CLOSE_CLASS}`,
+  },
+  [VIEWER_CONTROL_TYPES.DEPRECATED_SKIP_NEXT]: {
+    'selector': `.${SKIP_TO_NEXT_CLASS}`,
+  },
+  [VIEWER_CONTROL_TYPES.SKIP_TO_NEXT]: {
+    'selector': `.${SKIP_TO_NEXT_CLASS}`,
+  },
 };
 
 /**
@@ -211,6 +345,8 @@ const TEMPLATE = {
  *   - domain info button
  *   - sidebar
  *   - story updated label (for live stories)
+ *   - close (for players)
+ *   - skip (for players)
  */
 export class SystemLayer {
   /**
@@ -262,6 +398,12 @@ export class SystemLayer {
 
     /** @private {?number|?string} */
     this.timeoutId_ = null;
+
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = null;
+
+    /** @private {?AmpStoryViewerMessagingHandler} */
+    this.viewerMessagingHandler_ = null;
   }
 
   /**
@@ -276,13 +418,13 @@ export class SystemLayer {
     this.isBuilt_ = true;
 
     this.root_ = this.win_.document.createElement('div');
+    this.root_.classList.add('i-amphtml-system-layer-host');
     this.systemLayerEl_ = renderAsElement(this.win_.document, TEMPLATE);
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
-    this.systemLayerEl_.querySelector(
-      '.i-amphtml-story-share-control'
-    ).href = Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
+    this.systemLayerEl_.querySelector('.i-amphtml-story-share-control').href =
+      Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
@@ -301,7 +443,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS,
-      canShowButtons => {
+      (canShowButtons) => {
         this.systemLayerEl_.classList.toggle(
           'i-amphtml-story-ui-no-buttons',
           !canShowButtons
@@ -314,18 +456,50 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    if (
-      Services.viewerForDoc(this.win_.document.documentElement).isEmbedded()
-    ) {
+    this.viewer_ = Services.viewerForDoc(this.win_.document.documentElement);
+    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
+      ? new AmpStoryViewerMessagingHandler(this.win_, this.viewer_)
+      : null;
+
+    if (shouldShowStoryUrlInfo(this.viewer_)) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
       this.getShadowRoot().removeAttribute(HAS_INFO_BUTTON_ATTRIBUTE);
     }
 
+    this.maybeBuildAttribution_();
+
     this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
     return this.getRoot();
+  }
+
+  /** @private */
+  maybeBuildAttribution_() {
+    if (!this.viewer_ || this.viewer_.getParam('attribution') !== 'auto') {
+      return;
+    }
+
+    this.systemLayerEl_.querySelector('.i-amphtml-story-attribution-logo').src =
+      getStoryAttributeSrc(this.parentEl_, 'entity-logo-src') ||
+      getStoryAttributeSrc(this.parentEl_, 'publisher-logo-src');
+
+    const anchorEl = this.systemLayerEl_.querySelector(
+      `.${escapeCssSelectorIdent(ATTRIBUTION_CLASS)}`
+    );
+
+    anchorEl.href =
+      getStoryAttributeSrc(this.parentEl_, 'entity-url') ||
+      getSourceOrigin(Services.documentInfoForDoc(this.parentEl_).sourceUrl);
+
+    this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-attribution-text'
+    ).textContent =
+      this.parentEl_.getAttribute('entity') ||
+      this.parentEl_.getAttribute('publisher');
+
+    anchorEl.classList.add('i-amphtml-story-attribution-visible');
   }
 
   /**
@@ -349,33 +523,57 @@ export class SystemLayer {
    */
   initializeListeners_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
-    this.getShadowRoot().addEventListener('click', event => {
+    this.getShadowRoot().addEventListener('click', (event) => {
       const target = dev().assertElement(event.target);
 
       if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
         this.onAudioIconClick_(true);
       } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onAudioIconClick_(false);
+      } else if (matches(target, `.${PAUSE_CLASS}, .${PAUSE_CLASS} *`)) {
+        this.onPausedClick_(true);
+      } else if (matches(target, `.${PLAY_CLASS}, .${PLAY_CLASS} *`)) {
+        this.onPausedClick_(false);
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
         this.onShareClick_(event);
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
         this.onInfoClick_();
       } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
         this.onSidebarClick_();
+      } else if (
+        matches(
+          target,
+          `.${VIEWER_CUSTOM_CONTROL_CLASS}, .${VIEWER_CUSTOM_CONTROL_CLASS} *`
+        )
+      ) {
+        this.onViewerControlClick_(dev().assertElement(event.target));
+      } else if (
+        matches(target, `.${ATTRIBUTION_CLASS}, .${ATTRIBUTION_CLASS} *`)
+      ) {
+        const anchorClicked = closest(target, (e) => matches(e, 'a[href]'));
+        triggerClickFromLightDom(anchorClicked, this.parentEl_);
       }
     });
 
-    this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
+    this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
     });
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.onBookendStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(
+      StateProperty.CAN_SHOW_AUDIO_UI,
+      (show) => {
+        this.onCanShowAudioUiUpdate_(show);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SHARING_UIS,
-      show => {
+      (show) => {
         this.onCanShowSharingUisUpdate_(show);
       },
       true /** callToInitialize */
@@ -383,15 +581,23 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.STORY_HAS_AUDIO_STATE,
-      hasAudio => {
+      (hasAudio) => {
         this.onStoryHasAudioStateUpdate_(hasAudio);
       },
       true /** callToInitialize */
     );
 
     this.storeService_.subscribe(
+      StateProperty.STORY_HAS_PLAYBACK_UI_STATE,
+      (hasPlaybackUi) => {
+        this.onStoryHasPlaybackUiStateUpdate_(hasPlaybackUi);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.MUTED_STATE,
-      isMuted => {
+      (isMuted) => {
         this.onMutedStateUpdate_(isMuted);
       },
       true /** callToInitialize */
@@ -399,15 +605,23 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
     );
 
     this.storeService_.subscribe(
+      StateProperty.PAUSED_STATE,
+      (isPaused) => {
+        this.onPausedStateUpdate_(isPaused);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
-      index => {
+      (index) => {
         this.onPageIndexUpdate_(index);
       },
       true /** callToInitialize */
@@ -415,23 +629,39 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => {
+      (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
       true /** callToInitialize */
     );
 
     this.storeService_.subscribe(
+      StateProperty.KEYBOARD_ACTIVE_STATE,
+      (keyboardState) => {
+        this.onKeyboardActiveUpdate_(keyboardState);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.PAGE_HAS_AUDIO_STATE,
-      audio => {
+      (audio) => {
         this.onPageHasAudioStateUpdate_(audio);
       },
       true /** callToInitialize */
     );
 
     this.storeService_.subscribe(
+      StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE,
+      (hasPlaybackUi) => {
+        this.onPageHasElementsWithPlaybackStateUpdate_(hasPlaybackUi);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.HAS_SIDEBAR_STATE,
-      hasSidebar => {
+      (hasSidebar) => {
         this.onHasSidebarStateUpdate_(hasSidebar);
       },
       true /** callToInitialize */
@@ -439,7 +669,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
-      isVisible => {
+      (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
@@ -447,6 +677,12 @@ export class SystemLayer {
     this.storeService_.subscribe(StateProperty.NEW_PAGE_AVAILABLE_ID, () => {
       this.onNewPageAvailable_();
     });
+
+    this.storeService_.subscribe(
+      StateProperty.VIEWER_CUSTOM_CONTROLS,
+      (config) => this.onViewerCustomControls_(config),
+      true /* callToInitialize */
+    );
   }
 
   /**
@@ -469,11 +705,12 @@ export class SystemLayer {
    * @private
    */
   onAdStateUpdate_(isAd) {
-    this.vsync_.mutate(() => {
-      isAd
-        ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
-        : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
-    });
+    // This is not in vsync as we are showing/hiding items in the system layer
+    // based upon this attribute, and when wrapped in vsync there is a visual
+    // lag after the page change before the icons are updated.
+    isAd
+      ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
+      : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
   }
 
   /**
@@ -500,6 +737,21 @@ export class SystemLayer {
     } else {
       this.getShadowRoot().removeAttribute(HAS_SIDEBAR_ATTRIBUTE);
     }
+  }
+
+  /**
+   * Reacts to updates to whether audio UI may be shown, and updates the UI
+   * accordingly.
+   * @param {boolean} canShowAudioUi
+   * @private
+   */
+  onCanShowAudioUiUpdate_(canShowAudioUi) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-story-no-audio-ui',
+        !canShowAudioUi
+      );
+    });
   }
 
   /**
@@ -533,6 +785,20 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to story having elements with playback.
+   * @param {boolean} hasPlaybackUi
+   * @private
+   */
+  onStoryHasPlaybackUiStateUpdate_(hasPlaybackUi) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-story-has-playback-ui',
+        hasPlaybackUi
+      );
+    });
+  }
+
+  /**
    * Reacts to the presence of audio on a page to determine which audio messages
    * to display.
    * @param {boolean} pageHasAudio
@@ -555,6 +821,23 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to the presence of elements with playback on the page.
+   * @param {boolean} pageHasElementsWithPlayback
+   * @private
+   */
+  onPageHasElementsWithPlaybackStateUpdate_(pageHasElementsWithPlayback) {
+    this.vsync_.mutate(() => {
+      toArray(
+        this.getShadowRoot().querySelectorAll(
+          '.i-amphtml-paused-display button'
+        )
+      ).forEach((button) => {
+        button.disabled = !pageHasElementsWithPlayback;
+      });
+    });
+  }
+
+  /**
    * Reacts to muted state updates.
    * @param {boolean} isMuted
    * @private
@@ -564,6 +847,19 @@ export class SystemLayer {
       isMuted
         ? this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '')
         : this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
+    });
+  }
+
+  /**
+   * Reacts to paused state updates.
+   * @param {boolean} isPaused
+   * @private
+   */
+  onPausedStateUpdate_(isPaused) {
+    this.vsync_.mutate(() => {
+      isPaused
+        ? this.getShadowRoot().setAttribute(PAUSED_ATTRIBUTE, '')
+        : this.getShadowRoot().removeAttribute(PAUSED_ATTRIBUTE);
     });
   }
 
@@ -607,12 +903,15 @@ export class SystemLayer {
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
       shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+      shadowRoot.removeAttribute('desktop');
 
       switch (uiState) {
         case UIType.DESKTOP_PANELS:
+          shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-panels');
           break;
         case UIType.DESKTOP_FULLBLEED:
+          shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
           break;
       }
@@ -666,6 +965,20 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to keyboard updates and updates the UI.
+   * @param {boolean} keyboardActive
+   * @private
+   */
+  onKeyboardActiveUpdate_(keyboardActive) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle(
+        'amp-mode-keyboard-active',
+        keyboardActive
+      );
+    });
+  }
+
+  /**
    * Handles click events on the mute and unmute buttons.
    * @param {boolean} mute Specifies if the audio is being muted or unmuted.
    * @private
@@ -679,14 +992,46 @@ export class SystemLayer {
   }
 
   /**
+   * Handles click events on the paused and play buttons.
+   * @param {boolean} paused Specifies if the story is being paused or not.
+   * @private
+   */
+  onPausedClick_(paused) {
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, paused);
+  }
+
+  /**
    * Handles click events on the share button and toggles the share menu.
    * @param {!Event} event
    * @private
    */
   onShareClick_(event) {
     event.preventDefault();
+    if (event.target[VIEWER_CONTROL_EVENT_NAME]) {
+      this.onViewerControlClick_(dev().assertElement(event.target));
+      return;
+    }
+
     const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
+  }
+
+  /**
+   * Sends message back to the viewer with the corresponding event.
+   * @param {!Element} element
+   * @private
+   */
+  onViewerControlClick_(element) {
+    const eventName = element[VIEWER_CONTROL_EVENT_NAME];
+
+    this.viewerMessagingHandler_ &&
+      this.viewerMessagingHandler_.send(
+        'documentStateUpdate',
+        dict({
+          'state': AMP_STORY_PLAYER_EVENT,
+          'value': eventName,
+        })
+      );
   }
 
   /**
@@ -714,6 +1059,83 @@ export class SystemLayer {
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'show');
       this.hideMessageAfterTimeout_(HAS_NEW_PAGE_ATTRIBUTE);
+    });
+  }
+
+  /**
+   * Reacts to a custom configuration change coming from the player level.
+   * Updates UI to match configuration described by publisher.
+   * @param {!Array<!../../../src/amp-story-player/amp-story-player-impl.ViewerControlDef>} controls
+   * @private
+   */
+  onViewerCustomControls_(controls) {
+    if (controls.length <= 0) {
+      return;
+    }
+
+    controls.forEach((control) => {
+      if (!control.name) {
+        return;
+      }
+
+      const defaultConfig = VIEWER_CONTROL_DEFAULTS[control.name];
+
+      let element;
+      if (defaultConfig && defaultConfig.selector) {
+        element = scopedQuerySelector(
+          this.getShadowRoot(),
+          defaultConfig.selector
+        );
+      } else {
+        element = this.win_.document.createElement('button');
+        this.vsync_.mutate(() => {
+          element.classList.add('i-amphtml-story-button');
+          this.buttonsContainer_.appendChild(element);
+        });
+      }
+
+      this.vsync_.mutate(() => {
+        element.classList.add(VIEWER_CUSTOM_CONTROL_CLASS);
+      });
+
+      if (control.visibility === 'hidden') {
+        this.vsync_.mutate(() => {
+          element.classList.add('i-amphtml-story-ui-hide-button');
+        });
+      }
+
+      if (!control.visibility || control.visibility === 'visible') {
+        this.vsync_.mutate(() => {
+          dev()
+            .assertElement(element)
+            .classList.remove('i-amphtml-story-ui-hide-button');
+        });
+      }
+
+      if (control.state === 'disabled') {
+        this.vsync_.mutate(() => {
+          element.disabled = true;
+        });
+      }
+
+      if (control.position === 'start') {
+        const startButtonContainer = this.systemLayerEl_.querySelector(
+          '.i-amphtml-story-system-layer-buttons-start-position'
+        );
+
+        this.vsync_.mutate(() => {
+          this.buttonsContainer_.removeChild(element);
+          startButtonContainer.appendChild(element);
+        });
+      }
+
+      if (control.backgroundImageUrl) {
+        setImportantStyles(dev().assertElement(element), {
+          'background-image': `url('${control.backgroundImageUrl}')`,
+        });
+      }
+
+      element[VIEWER_CONTROL_EVENT_NAME] = `amp-story-player-${control.name}`;
     });
   }
 
@@ -748,7 +1170,7 @@ export class SystemLayer {
     }
 
     this.vsync_.mutate(() => {
-      logEntries.forEach(logEntry => this.logInternal_(logEntry));
+      logEntries.forEach((logEntry) => this.logInternal_(logEntry));
     });
   }
 

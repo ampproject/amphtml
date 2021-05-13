@@ -20,13 +20,12 @@ const pageHeight = 600;
 describes.endtoend(
   'AMP Lightbox Gallery Open/Close',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-lightbox-gallery-launch.amp.html',
+    fixture: 'amp-lightbox/amp-lightbox-gallery-launch.amp.html',
     initialRect: {width: pageWidth, height: pageHeight},
     // TODO(sparhami) Get this working in other environments.
     environments: ['single'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     function css(handle, name) {
@@ -43,7 +42,8 @@ describes.endtoend(
 
     // TODO(sparhami) Cover swipe to dismiss if possible.
     // TODO(sparhami) Test basic transition to gallery and back.
-    it('should open/close lightbox', async () => {
+    // TODO(#28948) fix this flaky test.
+    it.skip('should open/close lightbox', async () => {
       // First open the gallery.
       const firstAmpImg = await controller.findElement('amp-img');
       await controller.click(firstAmpImg);

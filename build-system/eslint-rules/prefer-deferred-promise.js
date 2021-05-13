@@ -15,7 +15,15 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
+  /**
+   * @param {*} node
+   * @param {string} name
+   * @return {{
+   *  CallExpression: {Function(*): undefined},
+   *  NewExpression: {Function(*): undefined}
+   * } | boolean}
+   */
   function isAssignment(node, name) {
     if (node.type !== 'AssignmentExpression') {
       return false;
@@ -72,7 +80,7 @@ module.exports = function(context) {
       }
 
       const comments = context.getCommentsBefore(callee);
-      const ok = comments.some(comment => comment.value === 'OK');
+      const ok = comments.some((comment) => comment.value === 'OK');
       if (ok) {
         return;
       }

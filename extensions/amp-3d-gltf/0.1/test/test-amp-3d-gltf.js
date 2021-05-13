@@ -25,7 +25,7 @@ describes.realWin(
     },
     allowExternalResources: true,
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let iframe;
@@ -41,8 +41,8 @@ describes.realWin(
       iframe.setAttribute('data-amp-3p-sentinel', sentinel);
       iframe.name = 'test_nomaster';
 
-      sendFakeMessage = type => {
-        return new Promise(resolve => {
+      sendFakeMessage = (type) => {
+        return new Promise((resolve) => {
           iframe.postMessageToParent({sentinel, type});
           setTimeout(resolve, 100);
         });
@@ -57,10 +57,10 @@ describes.realWin(
       amp3dGltfEl.setAttribute('height', '240');
 
       doc.body.appendChild(amp3dGltfEl);
-      await amp3dGltfEl.build();
+      await amp3dGltfEl.buildInternal();
 
-      const amp3dGltf = amp3dGltfEl.implementation_;
-      sandbox
+      const amp3dGltf = await amp3dGltfEl.getImpl();
+      env.sandbox
         .stub(amp3dGltf, 'iframe_')
         .get(() => iframe)
         .set(() => {});
@@ -80,11 +80,11 @@ describes.realWin(
       expect(!!doc.body.querySelector('amp-3d-gltf > iframe')).to.be.true;
     });
 
-    // TODO (#16080): this test times out on Travis. Re-enable when fixed.
+    // TODO (#16080): this test times out on CI. Re-enable when fixed.
     it.skip('sends toggleAmpViewport(false) when exiting viewport', async () => {
       const amp3dGltf = await createElement();
 
-      const postMessageSpy = sandbox.spy(amp3dGltf, 'postMessage_');
+      const postMessageSpy = env.sandbox.spy(amp3dGltf, 'postMessage_');
       await amp3dGltf.viewportCallback(false);
       expect(postMessageSpy.calledOnce).to.be.true;
       expect(postMessageSpy.firstCall.args[0]).to.equal('action');
@@ -94,10 +94,10 @@ describes.realWin(
       expect(postMessageSpy.firstCall.args[1].args).to.be.false;
     });
 
-    // TODO (#16080): this test times out on Travis. Re-enable when fixed.
+    // TODO (#16080): this test times out on CI. Re-enable when fixed.
     it.skip('sends toggleAmpViewport(true) when entering viewport', async () => {
       const amp3dGltf = await createElement();
-      const postMessageSpy = sandbox.spy(amp3dGltf, 'postMessage_');
+      const postMessageSpy = env.sandbox.spy(amp3dGltf, 'postMessage_');
       await amp3dGltf.viewportCallback(true);
       expect(postMessageSpy.calledOnce).to.be.true;
       expect(postMessageSpy.firstCall.args[0]).to.equal('action');

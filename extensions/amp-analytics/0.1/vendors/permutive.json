@@ -1,0 +1,51 @@
+{
+  "vars": {
+    "identity": "${clientId(_ga)}",
+    "viewId": "PAGE_VIEW_ID_64"
+  },
+  "requests": {
+    "track": "https://${namespace}.amp.permutive.com/track?k=${key}&i=${identity}&it=amp&vid=${viewId}&s=${viewId}",
+    "pageview": "${track}&e=Pageview&_ep_isp_info=%24ip_isp_info&_ep_geo_info=%24ip_geo_info",
+    "engagement": "${track}&e=PageviewEngagement&_ep_engaged_time=5",
+    "completion": "${track}&e=PageviewEngagement&_ep_completion=0.25",
+    "custom": "${track}&e=${event}"
+  },
+  "triggers": {
+    "trackPageview": {
+      "on": "visible",
+      "request": "pageview"
+    },
+    "trackEngagement": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 5,
+        "maxTimerLength": 600,
+        "immediate": false
+      },
+      "request": "engagement"
+    },
+    "trackCompletion": {
+      "on": "scroll",
+      "scrollSpec": {
+        "verticalBoundaries": [25, 50, 75, 100]
+      },
+      "request": "completion"
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  },
+  "extraUrlParams": {
+    "properties.client.type": "amp",
+    "properties.client.title": "${title}",
+    "properties.client.domain": "${canonicalHost}",
+    "properties.client.url": "${canonicalUrl}",
+    "properties.client.referrer": "${documentReferrer}",
+    "properties.client.user_agent": "${userAgent}"
+  },
+  "extraUrlParamsReplaceMap": {
+    "properties.": "_ep_"
+  }
+}

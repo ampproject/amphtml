@@ -21,6 +21,7 @@ import {
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
+  validateMediaMetadata,
 } from '../../src/mediasession-helper';
 
 const schemaTemplate = `
@@ -55,7 +56,7 @@ const schemaTemplate = `
 }
 `;
 
-describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
+describes.sandboxed('MediaSessionAPI Helper Functions', {}, (env) => {
   let element;
   let ampdoc;
   let favicon;
@@ -65,7 +66,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
 
   beforeEach(() => {
     element = {};
-    sandbox
+    env.sandbox
       .stub(Services, 'urlForDoc')
       .withArgs(element)
       .returns({isProtocolValid});
@@ -142,9 +143,20 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       'artwork': ['http://example.com/image.png'],
       'title': 'Some title',
     };
-    setMediaSession(element, ampdoc.win, fakeMetaData);
+    setMediaSession(ampdoc.win, fakeMetaData);
     const newMetaData = ampdoc.win.navigator.mediaSession.metadata;
     expect(newMetaData).to.deep.equal(fakeMetaData);
+  });
+
+  it('validate correct metadata', () => {
+    expect(() =>
+      validateMediaMetadata(element, {
+        'artist': 'Some artist',
+        'album': 'Some album',
+        'artwork': ['http://example.com/image.png'],
+        'title': 'Some title',
+      })
+    ).to.not.throw();
   });
 
   it('should throw if artwork src is invalid - object', () => {
@@ -159,7 +171,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
     };
     return allowConsoleError(() => {
       expect(() => {
-        setMediaSession(element, ampdoc.win, fakeMetaData);
+        validateMediaMetadata(element, fakeMetaData);
       }).to.throw();
     });
   });
@@ -176,7 +188,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
     };
     return allowConsoleError(() => {
       expect(() => {
-        setMediaSession(element, ampdoc.win, fakeMetaData);
+        validateMediaMetadata(element, fakeMetaData);
       }).to.throw();
     });
   });
@@ -190,7 +202,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
     };
     return allowConsoleError(() => {
       expect(() => {
-        setMediaSession(element, ampdoc.win, fakeMetaData);
+        validateMediaMetadata(element, fakeMetaData);
       }).to.throw();
     });
   });

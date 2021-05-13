@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
-  compileAllUnminifiedJs,
+  compileAllJs,
+  compileCoreRuntime,
   printConfigHelp,
   printNobuildHelp,
 } = require('./helpers');
@@ -27,137 +26,82 @@ const {
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
 const {buildExtensions} = require('./extension-helpers');
+const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
-const {compileJison} = require('./compile-jison');
-const {cyan, green} = require('ansi-colors');
-const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
-const {serve} = require('./serve');
+
+const argv = require('minimist')(process.argv.slice(2));
 
 /**
- * Enables watching for file changes in css, extensions.
- * @return {!Promise}
+ * Perform the prerequisite steps before starting the unminified build.
+ * Used by `amp` and `amp build`.
+ *
+ * @param {!Object} options
+ * @return {Promise}
  */
-async function watch() {
-  maybeUpdatePackages();
-  createCtrlcHandler('watch');
-  return performBuild(/* watch */ true);
+async function runPreBuildSteps(options) {
+  return Promise.all([compileCss(options), bootstrapThirdPartyFrames(options)]);
 }
 
 /**
- * Main build
- * @return {!Promise}
+ * Unminified build. Entry point for `amp build`.
  */
 async function build() {
-  maybeUpdatePackages();
+  await doBuild();
+}
+
+/**
+ * Performs an unminified build with the given extra args.
+ *
+ * @param {Object=} extraArgs
+ */
+async function doBuild(extraArgs = {}) {
   const handlerProcess = createCtrlcHandler('build');
-  await performBuild();
-  return exitCtrlcHandler(handlerProcess);
-}
-
-/**
- * Prints a useful help message prior to the default gulp task
- */
-function printDefaultTaskHelp() {
-  log(green('Running the default ') + cyan('gulp ') + green('task.'));
-  const defaultTaskMessage =
-    green('⤷ JS and extensions will be ') +
-    green(
-      argv.eager_build
-        ? 'built after server startup.'
-        : 'lazily built when requested from the server.'
-    );
-  log(defaultTaskMessage);
-  if (!argv.eager_build) {
-    const eagerBuildMessage =
-      green('⤷ Use ') +
-      cyan('--eager_build ') +
-      green('to build JS and extensions after server startup.');
-    log(eagerBuildMessage);
-  }
-}
-
-/**
- * Performs the pre-requisite build steps for gulp, gulp build, and gulp watch
- * @param {boolean} watch
- * @return {!Promise}
- */
-async function performPrerequisiteSteps(watch) {
-  await compileCss(watch);
-  await compileJison();
-  await bootstrapThirdPartyFrames(watch);
-}
-
-/**
- * Performs the build steps for gulp build and gulp watch
- * @param {boolean} watch
- * @return {!Promise}
- */
-async function performBuild(watch) {
   process.env.NODE_ENV = 'development';
+  const options = {
+    fortesting: extraArgs.fortesting || argv.fortesting,
+    minify: false,
+    watch: argv.watch,
+  };
   printNobuildHelp();
-  printConfigHelp(watch ? 'gulp watch' : 'gulp build');
+  printConfigHelp('amp build');
   parseExtensionFlags();
-  await performPrerequisiteSteps(watch);
-  await compileAllUnminifiedJs(watch);
-  await buildExtensions({watch});
-}
-
-/**
- * The default task run when `gulp` is executed
- * @return {!Promise}
- */
-async function defaultTask() {
-  maybeUpdatePackages();
-  createCtrlcHandler('gulp');
-  process.env.NODE_ENV = 'development';
-  printConfigHelp('gulp');
-  printDefaultTaskHelp();
-  parseExtensionFlags(/* preBuild */ !argv.eager_build);
-  await performPrerequisiteSteps(/* watch */ true);
-  await serve();
-  if (!argv.eager_build) {
-    log(green('JS and extensions will be lazily built when requested...'));
+  await runPreBuildSteps(options);
+  if (argv.core_runtime_only) {
+    await compileCoreRuntime(options);
   } else {
-    log(green('Building JS and extensions...'));
-    await compileAllUnminifiedJs(/* watch */ true);
-    await buildExtensions({watch: true});
+    await compileAllJs(options);
+  }
+  await buildExtensions(options);
+
+  if (!argv.core_runtime_only) {
+    await buildVendorConfigs(options);
+  }
+  if (!argv.watch) {
+    exitCtrlcHandler(handlerProcess);
   }
 }
 
 module.exports = {
   build,
-  defaultTask,
-  watch,
+  doBuild,
+  runPreBuildSteps,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
 
 build.description = 'Builds the AMP library';
 build.flags = {
-  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  extensions: '  Builds only the listed extensions.',
-  extensions_from: '  Builds only the extensions from the listed AMP(s).',
-  noextensions: '  Builds with no extensions.',
-};
-
-watch.description = 'Watches for changes in files, re-builds when detected';
-watch.flags = {
-  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  extensions: '  Watches and builds only the listed extensions.',
-  extensions_from:
-    '  Watches and builds only the extensions from the listed AMP(s).',
-  noextensions: '  Watches and builds with no extensions.',
-};
-
-defaultTask.description =
-  'Starts the dev server and lazily builds JS and extensions when requested';
-defaultTask.flags = {
-  eager_build:
-    '  Starts the dev server and builds JS and extensions after server startup',
-  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  extensions: '  Watches and builds only the listed extensions.',
-  extensions_from:
-    '  Watches and builds only the extensions from the listed AMP(s).',
-  noextensions: '  Watches and builds with no extensions.',
+  config: 'Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  fortesting: 'Builds the AMP library for local testing',
+  extensions: 'Builds only the listed extensions.',
+  extensions_from: 'Builds only the extensions from the listed AMP(s).',
+  noextensions: 'Builds with no extensions.',
+  core_runtime_only: 'Builds only the core runtime.',
+  coverage: 'Adds code coverage instrumentation to JS files using istanbul.',
+  version_override: 'Overrides the version written to AMP_CONFIG',
+  watch: 'Watches for changes in files, re-builds when detected',
+  esm: 'Do not transpile down to ES5',
+  define_experiment_constant:
+    'Builds runtime with the EXPERIMENT constant set to true',
 };

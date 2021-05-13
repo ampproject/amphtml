@@ -16,251 +16,378 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const babelify = require('babelify');
-const karmaConfig = require('../karma.conf');
-const log = require('fancy-log');
-const testConfig = require('../../test-configs/config');
+const karmaConfig = require('../../test-configs/karma.conf');
+const {
+  commonIntegrationTestPaths,
+  commonUnitTestPaths,
+  integrationTestPaths,
+  karmaHtmlFixturesPath,
+  karmaJsPaths,
+  unitTestCrossBrowserPaths,
+  unitTestPaths,
+} = require('../../test-configs/config');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
-const {
-  createKarmaServer,
-  getAdTypes,
-  runTestInSauceLabs,
-} = require('./helpers');
 const {app} = require('../../server/test-server');
-const {green, yellow, cyan, red} = require('ansi-colors');
-const {isTravisBuild} = require('../../common/travis');
-const {reportTestStarted} = require('.././report-test-status');
+const {createKarmaServer, getAdTypes} = require('./helpers');
+const {cyan, green, red, yellow} = require('../../common/colors');
+const {dotWrappingWidth} = require('../../common/logging');
+const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
+const {getFilesFromArgv} = require('../../common/utils');
+const {isCiBuild, isCircleciBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
+const {reportTestStarted} = require('../report-test-status');
+const {SERVER_TRANSFORM_PATH} = require('../../server/typescript-compile');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
 
 /**
- * Updates the browsers based off of the test type
- * being run (unit, integration, a4a) and test settings.
- * Keeps the default spec as is if no matching settings are found.
- * @param {!RuntimeTestConfig} config
+ * Used to print dots during esbuild + babel transforms
  */
-function updateBrowsers(config) {
-  if (argv.saucelabs) {
-    if (config.testType == 'unit') {
-      Object.assign(config, {browsers: ['SL_Safari_12', 'SL_Firefox']});
-      return;
-    }
+let wrapCounter = 0;
 
-    if (config.testType == 'integration') {
-      Object.assign(config, {
-        browsers: [
-          'SL_Chrome',
-          'SL_Firefox',
-          'SL_Edge_17',
-          'SL_Safari_12',
-          'SL_Safari_11',
-          'SL_IE_11',
-          // TODO(amp-infra): Evaluate and add more platforms here.
-          //'SL_Chrome_Android_7',
-          //'SL_iOS_11',
-          //'SL_iOS_12',
-          'SL_Chrome_Beta',
-          'SL_Firefox_Beta',
-        ],
+/**
+ * Used to lazy-require the HTML transformer function after the server is built.
+ */
+let transform;
+
+/**
+ * Consumes {@link karmaConfig} and dynamically populates fields based on test
+ * type and command line arguments.
+ */
+class RuntimeTestConfig {
+  /** @type {Array<string|Record<string, [string, *]>>} */
+  plugins = [];
+
+  /**@type {Record<string, string|string[]>} */
+  preprocessors = {};
+
+  /** @type {string[]} */
+  reporters = [];
+
+  client = {};
+
+  /**
+   * @param {string} testType
+   */
+  constructor(testType) {
+    this.testType = testType;
+    /**
+     * TypeScript is used for typechecking here and is unable to infer the type
+     * after using Object.assign. This results in errors relating properties of
+     * which can never be `null` being treated as though they could be.
+     */
+    Object.assign(this, karmaConfig);
+    this.updateBrowsers();
+    this.updateReporters();
+    this.updateFiles();
+    this.updatePreprocessors();
+    this.updateEsbuildConfig();
+    this.updateClient();
+    this.updateMiddleware();
+    this.updateCoverageSettings();
+  }
+
+  /**
+   * Updates the set of preprocessors to run on HTML and JS files before testing.
+   * Notes:
+   * - The HTML transform is lazy-required because the server is built at startup.
+   * - We must use babel on windows until esbuild can natively downconvert to ES5.
+   */
+  updatePreprocessors() {
+    const createHtmlTransformer = function () {
+      return function (content, _file, done) {
+        if (!transform) {
+          const outputDir = `../../../${SERVER_TRANSFORM_PATH}/dist/transform`;
+          transform = require(outputDir).transformSync;
+        }
+        done(transform(content));
+      };
+    };
+    createHtmlTransformer.$inject = [];
+    this.plugins.push({
+      'preprocessor:htmlTransformer': ['factory', createHtmlTransformer],
+    });
+    this.preprocessors[karmaHtmlFixturesPath] = ['htmlTransformer', 'html2js'];
+    for (const karmaJsPath of karmaJsPaths) {
+      this.preprocessors[karmaJsPath] = ['esbuild'];
+    }
+  }
+
+  /**
+   * Updates the browsers based off of the test type
+   * being run (unit, integration, a4a) and test settings.
+   * Defaults to Chrome if no matching settings are found.
+   */
+  updateBrowsers() {
+    if (argv.edge) {
+      Object.assign(this, {
+        browsers: [argv.headless ? 'EdgeHeadless' : 'Edge'],
       });
       return;
     }
 
-    throw new Error(
-      'The --saucelabs flag is valid only for `gulp unit` and `gulp integration`.'
-    );
-  }
+    if (argv.firefox) {
+      Object.assign(this, {
+        browsers: ['Firefox_flags'],
+        customLaunchers: {
+          // eslint-disable-next-line
+        Firefox_flags: {
+            base: 'Firefox',
+            flags: argv.headless ? ['-headless'] : [],
+          },
+        },
+      });
+      return;
+    }
 
-  const chromeFlags = [];
-  if (argv.chrome_flags) {
-    argv.chrome_flags.split(',').forEach(flag => {
-      chromeFlags.push('--'.concat(flag));
+    if (argv.ie) {
+      Object.assign(this, {
+        browsers: ['IE'],
+        customLaunchers: {
+          IeNoAddOns: {
+            base: 'IE',
+            flags: ['-extoff'],
+          },
+        },
+      });
+      return;
+    }
+
+    if (argv.safari) {
+      Object.assign(this, {browsers: ['SafariNative']});
+      return;
+    }
+
+    if (argv.chrome_canary) {
+      Object.assign(this, {browsers: ['ChromeCanary']});
+      return;
+    }
+
+    if (argv.chrome_flags) {
+      const chromeFlags = [];
+      argv.chrome_flags.split(',').forEach((flag) => {
+        chromeFlags.push('--'.concat(flag));
+      });
+      Object.assign(this, {
+        browsers: ['Chrome_flags'],
+        customLaunchers: {
+          // eslint-disable-next-line
+        Chrome_flags: {
+            base: 'Chrome',
+            flags: chromeFlags,
+          },
+        },
+      });
+      return;
+    }
+
+    if (argv.headless) {
+      Object.assign(this, {browsers: ['Chrome_no_extensions_headless']});
+      return;
+    }
+
+    // Default to Chrome.
+    Object.assign(this, {
+      browsers: [isCiBuild() ? 'Chrome_ci' : 'Chrome_no_extensions'],
     });
   }
 
-  const options = new Map();
-  options
-    .set('chrome_canary', {browsers: ['ChromeCanary']})
-    .set('chrome_flags', {
-      browsers: ['Chrome_flags'],
-      customLaunchers: {
-        // eslint-disable-next-line
-        Chrome_flags: {
-          base: 'Chrome',
-          flags: chromeFlags,
-        },
-      },
-    })
-    .set('edge', {browsers: ['Edge']})
-    .set('firefox', {browsers: ['Firefox']})
-    .set('headless', {browsers: ['Chrome_no_extensions_headless']})
-    .set('ie', {
-      browsers: ['IE'],
-      customLaunchers: {
-        IeNoAddOns: {
-          base: 'IE',
-          flags: ['-extoff'],
-        },
-      },
-    })
-    .set('safari', {browsers: ['Safari']});
+  /**
+   * Adds reporters to the default karma spec per test settings.
+   * Overrides default reporters for verbose settings.
+   */
+  updateReporters() {
+    if (
+      (argv.testnames || argv.local_changes || argv.files || argv.verbose) &&
+      !isCiBuild()
+    ) {
+      this.reporters = ['mocha'];
+    }
 
-  for (const [key, value] of options) {
-    if (argv.hasOwnProperty(key)) {
-      Object.assign(config, value);
-      return;
+    if (isCircleciBuild()) {
+      this.reporters.push('junit');
+      this.junitReporter = {
+        outputFile: `result-reports/${this.testType}.xml`,
+        useBrowserName: false,
+      };
+    }
+
+    if (argv.coverage) {
+      this.reporters.push('coverage-istanbul');
+    }
+
+    if (argv.report) {
+      this.reporters.push('json-result');
+      this.jsonResultReporter = {
+        outputFile: `result-reports/${this.testType}.json`,
+      };
     }
   }
-}
 
-/**
- * Get the appropriate files based off of the test type
- * being run (unit, integration, a4a) and test settings.
- * @param {string} testType
- * @return {!Array<string>}
- */
-function getFiles(testType) {
-  let files;
-
-  switch (testType) {
-    case 'unit':
-      files = testConfig.commonUnitTestPaths.concat(testConfig.chaiAsPromised);
-      if (argv.files) {
-        return files.concat(argv.files);
-      }
-      if (argv.saucelabs) {
-        return files.concat(testConfig.unitTestOnSaucePaths);
-      }
-      if (argv.local_changes) {
-        return files.concat(unitTestsToRun(testConfig.unitTestPaths));
-      }
-      return files.concat(testConfig.unitTestPaths);
-
-    case 'integration':
-      files = testConfig.commonIntegrationTestPaths;
-      if (argv.files) {
-        return files.concat(argv.files);
-      }
-      return files.concat(testConfig.integrationTestPaths);
-
-    case 'a4a':
-      return testConfig.chaiAsPromised.concat(testConfig.a4aTestPaths);
-
-    default:
-      throw new Error(`Test type ${testType} was not recognized`);
-  }
-}
-
-/**
- * Adds reporters to the default karma spec per test settings.
- * Overrides default reporters for verbose settings.
- * @param {!RuntimeTestConfig} config
- */
-function updateReporters(config) {
-  if (
-    (argv.testnames || argv.local_changes || argv.files || argv.verbose) &&
-    !isTravisBuild()
-  ) {
-    config.reporters = ['mocha'];
-  }
-
-  if (argv.coverage) {
-    config.reporters.push('coverage-istanbul');
-  }
-
-  if (argv.saucelabs) {
-    config.reporters.push('saucelabs');
-  }
-}
-
-class RuntimeTestConfig {
-  constructor(testType) {
-    this.testType = testType;
-
-    Object.assign(this, karmaConfig);
-    updateBrowsers(this);
-    updateReporters(this);
-    this.files = getFiles(this.testType);
-    this.singleRun = !argv.watch && !argv.w;
-    this.client.mocha.grep = !!argv.grep;
-    this.client.verboseLogging = !!argv.verbose || !!argv.v;
-    this.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
-    this.browserify.configure = function(bundle) {
-      bundle.on('prebundle', function() {
-        log(
-          green('Transforming tests with'),
-          cyan('browserify') + green('...')
-        );
-      });
-      bundle.on('transform', function(tr) {
-        if (tr instanceof babelify) {
-          tr.once('babelify', function() {
-            process.stdout.write('.');
-          });
+  /**
+   * Computes the set of files for Karma to load based on factors like test type,
+   * target browser, and flags.
+   */
+  updateFiles() {
+    switch (this.testType) {
+      case 'unit':
+        if (argv.files) {
+          this.files = commonUnitTestPaths.concat(getFilesFromArgv());
+          return;
         }
-      });
-    };
+        if (argv.firefox || argv.safari || argv.edge) {
+          this.files = commonUnitTestPaths.concat(unitTestCrossBrowserPaths);
+          return;
+        }
+        if (argv.local_changes) {
+          this.files = commonUnitTestPaths.concat(unitTestsToRun());
+          return;
+        }
+        this.files = commonUnitTestPaths.concat(unitTestPaths);
+        return;
 
-    // c.client is available in test browser via window.parent.karma.config
+      case 'integration':
+        if (argv.files) {
+          this.files = commonIntegrationTestPaths.concat(getFilesFromArgv());
+          return;
+        }
+        this.files = commonIntegrationTestPaths.concat(integrationTestPaths);
+        return;
+
+      default:
+        throw new Error(`Test type ${this.testType} was not recognized`);
+    }
+  }
+
+  /**
+   * Logs a message indicating the start of babel transforms.
+   */
+  logBabelStart() {
+    wrapCounter = 0;
+    log(
+      green('Transforming tests with'),
+      cyan('esbuild'),
+      green('and'),
+      cyan('babel') + green('...')
+    );
+  }
+
+  /**
+   * Prints a dot for every babel transform, with wrapping if needed.
+   */
+  printBabelDot() {
+    process.stdout.write('.');
+    if (++wrapCounter >= dotWrappingWidth) {
+      wrapCounter = 0;
+      process.stdout.write('\n');
+    }
+  }
+
+  /**
+   * Updates the esbuild config in the karma spec so esbuild can run with it.
+   */
+  updateEsbuildConfig() {
+    const importPathPlugin = {
+      name: 'import-path',
+      setup(build) {
+        build.onResolve({filter: /^[\w-]+$/}, (file) => {
+          if (file.path === 'stream') {
+            return {path: require.resolve('stream-browserify'), namespace: ''};
+          }
+        });
+      },
+    };
+    const babelPlugin = getEsbuildBabelPlugin(
+      /* callerName */ 'test',
+      /* enableCache */ true,
+      /* preSetup */ this.logBabelStart,
+      /* postLoad */ this.printBabelDot
+    );
+    this.esbuild = {
+      target: 'es5',
+      define: {
+        'process.env.NODE_DEBUG': 'false',
+        'process.env.NODE_ENV': '"test"',
+      },
+      plugins: [importPathPlugin, babelPlugin],
+      sourcemap: 'inline',
+      // TODO(rsimha): Remove this workaround once evanw/esbuild#1202 is fixed.
+      banner: {
+        js: "function require(x) { throw new Error('Cannot require ' + x) }",
+      },
+    };
+  }
+
+  /**
+   * Updates the client so that tests can access karma state. This is available in
+   * the browser via window.parent.karma.config.
+   */
+  updateClient() {
+    this.singleRun = !argv.watch;
+    this.client.mocha.grep = !!argv.grep;
+    this.client.verboseLogging = !!argv.verbose;
+    this.client.captureConsole = !!argv.verbose || !!argv.files;
     this.client.amp = {
       useCompiledJs: !!argv.compiled,
-      saucelabs: !!argv.saucelabs,
-      singlePass: !!argv.single_pass,
       adTypes: getAdTypes(),
       mochaTimeout: this.client.mocha.timeout,
-      propertiesObfuscated: !!argv.single_pass,
       testServerPort: this.client.testServerPort,
-      testOnIe:
-        this.browsers.includes('IE') || this.browsers.includes('SL_IE_11'),
+      isModuleBuild: !!argv.esm, // Used by skip matchers in testing/test-config.js
     };
+  }
 
-    if (argv.coverage && this.testType != 'a4a') {
+  /**
+   * Inserts the AMP dev server into the middleware used by the Karma server.
+   */
+  updateMiddleware() {
+    const createDevServerMiddleware = function () {
+      return require(require.resolve('../../server/app.js'));
+    };
+    this.plugins.push({
+      'middleware:devServer': ['factory', createDevServerMiddleware],
+    });
+    this.beforeMiddleware = ['devServer'];
+  }
+
+  /**
+   * Updates the Karma config to gather coverage info if coverage is enabled.
+   */
+  updateCoverageSettings() {
+    if (argv.coverage) {
       this.plugins.push('karma-coverage-istanbul-reporter');
       this.coverageIstanbulReporter = {
         dir: 'test/coverage',
-        reports: isTravisBuild()
-          ? ['lcovonly']
-          : ['html', 'text', 'text-summary'],
-        'report-config': {lcovonly: {file: `lcov-${testType}.info`}},
+        reports: isCiBuild() ? ['lcovonly'] : ['html', 'text', 'text-summary'],
+        'report-config': {lcovonly: {file: `lcov-${this.testType}.info`}},
       };
-
-      const instanbulPlugin = [
-        'istanbul',
-        {
-          exclude: [
-            'ads/**/*.js',
-            'build-system/**/*.js',
-            'extensions/**/test/**/*.js',
-            'third_party/**/*.js',
-            'test/**/*.js',
-            'testing/**/*.js',
-          ],
-        },
-      ];
-      // don't overwrite existing plugins
-      const plugins = [instanbulPlugin].concat(this.babelifyConfig.plugins);
-
-      this.browserify.transform = [
-        ['babelify', Object.assign({}, this.babelifyConfig, {plugins})],
-      ];
     }
   }
 }
 
 class RuntimeTestRunner {
+  /**
+   *
+   * @param {RuntimeTestConfig} config
+   */
   constructor(config) {
     this.config = config;
     this.env = null;
     this.exitCode = 0;
   }
 
+  /**
+   * @return {Promise<void>}
+   */
   async maybeBuild() {
     throw new Error('maybeBuild method must be overridden');
   }
 
+  /**
+   * @return {Promise<void>}
+   */
   async setup() {
     await this.maybeBuild();
     await startServer({
@@ -269,31 +396,28 @@ class RuntimeTestRunner {
       port: this.config.client.testServerPort,
       middleware: () => [app],
     });
-    const handlerProcess = createCtrlcHandler(`gulp ${this.config.testType}`);
-
+    const handlerProcess = createCtrlcHandler(`amp ${this.config.testType}`);
     this.env = new Map().set('handlerProcess', handlerProcess);
   }
 
+  /**
+   * @return {Promise<void>}
+   */
   async run() {
-    reportTestStarted();
-
-    if (argv.saucelabs) {
-      this.exitCode = await runTestInSauceLabs(this.config);
-    } else {
-      this.exitCode = await createKarmaServer(this.config);
-    }
+    await reportTestStarted();
+    this.exitCode = await createKarmaServer(this.config);
   }
 
+  /**
+   * @return {Promise<void>}
+   */
   async teardown() {
-    stopServer();
-    exitCtrlcHandler(this.env.get('handlerProcess'));
-
+    await stopServer();
+    exitCtrlcHandler(/** @type {Map} */ (this.env).get('handlerProcess'));
     if (this.exitCode != 0) {
-      log(
-        red('ERROR:'),
-        yellow(`Karma test failed with exit code ${this.exitCode}`)
-      );
-      process.exitCode = this.exitCode;
+      const message = `Karma test failed with exit code ${this.exitCode}`;
+      log(red('ERROR:'), yellow(message));
+      throw new Error(message);
     }
   }
 }

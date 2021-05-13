@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
+import {Observable} from './core/data-structures/observable';
 import {Pass} from './pass';
 import {devAssert} from './log';
-import {findIndex} from './utils/array';
+import {findIndex} from './core/types/array';
+import {supportsPassiveEventListener} from './event-helper-listen';
 import {toWin} from './types';
 
 const PROP_ = '__AMP_Gestures';
@@ -144,9 +145,19 @@ export class Gestures {
     /** @private @const {function(!Event)} */
     this.boundOnTouchCancel_ = this.onTouchCancel_.bind(this);
 
-    this.element_.addEventListener('touchstart', this.boundOnTouchStart_);
+    const win = element.ownerDocument.defaultView;
+    const passiveSupported = supportsPassiveEventListener(toWin(win));
+    this.element_.addEventListener(
+      'touchstart',
+      this.boundOnTouchStart_,
+      passiveSupported ? {passive: true} : false
+    );
     this.element_.addEventListener('touchend', this.boundOnTouchEnd_);
-    this.element_.addEventListener('touchmove', this.boundOnTouchMove_);
+    this.element_.addEventListener(
+      'touchmove',
+      this.boundOnTouchMove_,
+      passiveSupported ? {passive: true} : false
+    );
     this.element_.addEventListener('touchcancel', this.boundOnTouchCancel_);
 
     /** @private {boolean} */
@@ -170,8 +181,8 @@ export class Gestures {
    * gesture handler registered in this method the recognizer is installed
    * and from that point on it participates in the event processing.
    *
-   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
-   * @param {function(!Gesture<DATA>)} handler
+   * @param {function(new:GestureRecognizer, !Gestures)} recognizerConstr
+   * @param {function(!Gesture)} handler
    * @return {!UnlistenDef}
    * @template DATA
    */
@@ -192,7 +203,7 @@ export class Gestures {
    * true if anything was done. Returns false if there were no handlers
    * registered on the given gesture recognizer in first place.
    *
-   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
+   * @param {function(new:GestureRecognizer, !Gestures)} recognizerConstr
    * @return {boolean}
    */
   removeGesture(recognizerConstr) {
@@ -200,7 +211,7 @@ export class Gestures {
     const overserver = this.overservers_[type];
     if (overserver) {
       overserver.removeAll();
-      const index = findIndex(this.recognizers_, e => e.getType() == type);
+      const index = findIndex(this.recognizers_, (e) => e.getType() == type);
       if (index < 0) {
         return false;
       }

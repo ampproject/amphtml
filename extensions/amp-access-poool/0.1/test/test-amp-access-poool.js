@@ -21,7 +21,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document, ampdoc;
     let accessSource;
     let accessService;
@@ -55,10 +55,10 @@ describes.fakeWin(
         getSource: () => accessSource,
       };
 
-      accessSourceMock = sandbox.mock(accessSource);
+      accessSourceMock = env.sandbox.mock(accessSource);
 
       vendor = new PooolVendor(accessService, accessSource);
-      xhrMock = sandbox.mock(vendor.xhr_);
+      xhrMock = env.sandbox.mock(vendor.xhr_);
     });
 
     afterEach(() => {
@@ -73,7 +73,7 @@ describes.fakeWin(
         container = document.createElement('div');
         container.id = 'poool-widget';
         document.body.appendChild(container);
-        sandbox.stub(vendor, 'renderPoool_');
+        env.sandbox.stub(vendor, 'renderPoool_');
       });
 
       afterEach(() => {
@@ -101,7 +101,7 @@ describes.fakeWin(
             })
           )
           .once();
-        return vendor.authorize().then(resp => {
+        return vendor.authorize().then((resp) => {
           expect(resp.access).to.be.true;
         });
       });
@@ -125,7 +125,7 @@ describes.fakeWin(
             })
           )
           .once();
-        return vendor.authorize().catch(err => {
+        return vendor.authorize().catch((err) => {
           expect(err.message).to.exist;
         });
       });
@@ -145,7 +145,7 @@ describes.fakeWin(
             })
           )
           .once();
-        return vendor.authorize().then(err => {
+        return vendor.authorize().then((err) => {
           expect(err.access).to.be.false;
         });
       });

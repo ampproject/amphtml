@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {PauseHelper} from '../../../src/utils/pause-helper';
+import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
 
@@ -23,6 +25,9 @@ class AmpVine extends AMP.BaseElement {
     super(element);
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -31,9 +36,17 @@ class AmpVine extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // the Vine iframe
-    this.preconnect.url('https://vine.co', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://vine.co',
+      onLayout
+    );
     // Vine assets loaded in the iframe
-    this.preconnect.url('https://v.cdn.vine.co', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://v.cdn.vine.co',
+      onLayout
+    );
   }
 
   /** @override */
@@ -59,7 +72,20 @@ class AmpVine extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
   }
 
   /** @override */
@@ -70,6 +96,6 @@ class AmpVine extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-vine', '0.1', AMP => {
+AMP.extension('amp-vine', '0.1', (AMP) => {
   AMP.registerElement('amp-vine', AmpVine);
 });

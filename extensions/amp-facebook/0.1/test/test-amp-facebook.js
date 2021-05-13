@@ -27,7 +27,7 @@ describes.realWin(
       canonicalUrl: 'https://foo.bar/baz',
     },
   },
-  function(env) {
+  function (env) {
     this.timeout(5000);
 
     const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
@@ -55,7 +55,7 @@ describes.realWin(
         ampFB.setAttribute('data-locale', 'en_US');
       }
       doc.body.appendChild(ampFB);
-      await ampFB.build();
+      await ampFB.buildInternal();
       await ampFB.layoutCallback();
       return ampFB;
     }
@@ -101,7 +101,8 @@ describes.realWin(
 
     it('adds loading element correctly', async () => {
       const ampFB = await getAmpFacebook(fbVideoHref, 'post');
-      expect(ampFB.implementation_.toggleLoadingCounter_).to.equal(1);
+      const impl = await ampFB.getImpl(false);
+      expect(impl.toggleLoadingCounter_).to.equal(1);
     });
 
     it('adds fb-post element correctly', () => {
@@ -229,9 +230,9 @@ describes.realWin(
 
     it('removes iframe after unlayoutCallback', async () => {
       const ampFB = await getAmpFacebook(fbPostHref);
+      const obj = await ampFB.getImpl(false);
       const iframe = ampFB.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      const obj = ampFB.implementation_;
       obj.unlayoutCallback();
       expect(ampFB.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
@@ -247,7 +248,7 @@ describes.realWin(
         },
         allowExternalResources: true,
       },
-      function(env) {
+      function (env) {
         beforeEach(() => {
           win = env.win;
           doc = win.document;
@@ -261,9 +262,10 @@ describes.realWin(
           resetServiceForTesting(win, 'bootstrapBaseUrl');
           setDefaultBootstrapBaseUrlForTesting(iframeSrc);
           const ampFB = await getAmpFacebook(fbPostHref);
+          const impl = await ampFB.getImpl(false);
           return new Promise((resolve, unusedReject) => {
-            const {firstChild: iframe, implementation_: impl} = ampFB;
-            impl.changeHeight = newHeight => {
+            const {firstChild: iframe} = ampFB;
+            impl.forceChangeHeight = (newHeight) => {
               expect(newHeight).to.equal(666);
               resolve(ampFB);
             };

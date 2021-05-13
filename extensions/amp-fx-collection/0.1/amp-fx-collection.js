@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {
   FxBindings,
   FxObservesSignal,
   FxType, // eslint-disable-line no-unused-vars
   getFxTypes,
 } from './fx-type';
-import {devAssert, rethrowAsync} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {
   installPositionBoundFx,
   installScrollToggledFx,
 } from './providers/fx-provider';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
+import {tryCallback} from '../../../src/core/error';
 
 const TAG = 'amp-fx-collection';
 
@@ -62,17 +63,13 @@ export class AmpFxCollection {
    */
   scan_() {
     const elements = this.ampdoc_.getRootNode().querySelectorAll('[amp-fx]');
-    iterateCursor(elements, element => {
+    iterateCursor(elements, (element) => {
       if (this.seen_.includes(element)) {
         return;
       }
 
       // Don't break for all components if only a subset are misconfigured.
-      try {
-        this.register_(element);
-      } catch (e) {
-        rethrowAsync(e);
-      }
+      tryCallback(() => this.register_(element));
     });
   }
 
@@ -85,7 +82,7 @@ export class AmpFxCollection {
     devAssert(!this.seen_.includes(element));
     devAssert(this.ampdoc_.isVisible());
 
-    getFxTypes(element).forEach(type => {
+    getFxTypes(element).forEach((type) => {
       this.install_(element, type);
     });
 
@@ -107,6 +104,6 @@ export class AmpFxCollection {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc(TAG, AmpFxCollection);
 });

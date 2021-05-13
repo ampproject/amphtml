@@ -20,8 +20,8 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../src/layout-rect';
-import {Observable} from '../../src/observable';
-import {throttle} from '../../src/utils/rate-limit';
+import {Observable} from '../../src/core/data-structures/observable';
+import {throttle} from '../../src/core/types/function';
 
 /**
  * @typedef {{
@@ -136,7 +136,11 @@ export class PositionObserver {
     const parentWin = element.ownerDocument.defaultView;
     for (
       let j = 0, tempWin = parentWin;
-      j < 10 && tempWin != this.win_ && tempWin != this.win_.top;
+      j < 10 &&
+      // win can be null if the ad iframe is already destroyed
+      tempWin &&
+      tempWin != this.win_ &&
+      tempWin != this.win_.top;
       j++, tempWin = tempWin.parent
     ) {
       const parentFrameRect = layoutRectFromDomRect(

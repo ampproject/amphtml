@@ -36,7 +36,6 @@ export class ViewerInterface {
    * exported. Need to make sure it's not used externally.
    * @param {string} name
    * @return {?string}
-   * @export
    */
   getParam(name) {}
 
@@ -102,13 +101,6 @@ export class ViewerInterface {
   isOvertakeHistory() {}
 
   /**
-   * How much the viewer has requested the runtime to prerender the document.
-   * The values are in number of screens.
-   * @return {number}
-   */
-  getPrerenderSize() {}
-
-  /**
    * Returns the resolved viewer URL value. It's by default the current page's
    * URL. The trusted viewers are allowed to override this value.
    * @return {string}
@@ -139,7 +131,7 @@ export class ViewerInterface {
   getReferrerUrl() {}
 
   /**
-   * Whether the viewer has been whitelisted for more sensitive operations
+   * Whether the viewer has been allowlisted for more sensitive operations
    * such as customizing referrer.
    * @return {!Promise<boolean>}
    */
@@ -175,17 +167,14 @@ export class ViewerInterface {
    * @param {!JsonObject} data
    * @param {boolean} unusedAwaitResponse
    * @return {(!Promise<*>|undefined)}
-   * @export
    */
   receiveMessage(eventType, data, unusedAwaitResponse) {}
 
   /**
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
-   * @param {function(string, (?JsonObject|string|undefined), boolean):
-   *     (!Promise<*>|undefined)} deliverer
+   * @param {function(string, (?JsonObject|string|undefined), boolean):(!Promise<*>|undefined)} deliverer
    * @param {string} origin
-   * @export
    */
   setMessageDeliverer(deliverer, origin) {}
 

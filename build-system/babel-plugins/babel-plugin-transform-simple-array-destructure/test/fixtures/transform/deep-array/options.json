@@ -1,0 +1,4 @@
+{
+  "plugins": ["../../../.."],
+  "throws": "Cannot handle array non-simple array destructure"
+}

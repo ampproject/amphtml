@@ -15,10 +15,10 @@
  */
 
 import {Services} from '../services';
-import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {base64UrlEncodeFromBytes} from '../core/types/string/base64';
 import {dev, devAssert, user} from '../log';
 import {getService, registerServiceBuilder} from '../service';
-import {stringToBytes, utf8Encode} from '../utils/bytes';
+import {stringToBytes, utf8Encode} from '../core/types/string/bytes';
 
 /** @const {string} */
 const TAG = 'Crypto';
@@ -79,7 +79,7 @@ export class Crypto {
     if (!this.subtle || this.polyfillPromise_) {
       // means native Crypto API is not available or failed before.
       return (this.polyfillPromise_ || this.loadPolyfill_()).then(
-        polyfillSha384 => polyfillSha384(input)
+        (polyfillSha384) => polyfillSha384(input)
       );
     }
 
@@ -89,8 +89,8 @@ export class Crypto {
           .digest({name: 'SHA-384'}, input)
           /** @param {?} buffer */
           .then(
-            buffer => new Uint8Array(buffer),
-            e => {
+            (buffer) => new Uint8Array(buffer),
+            (e) => {
               // Chrome doesn't allow the usage of Crypto API under
               // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
               if (e.message && e.message.indexOf('secure origin') < 0) {
@@ -120,7 +120,9 @@ export class Crypto {
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384Base64(input) {
-    return this.sha384(input).then(buffer => base64UrlEncodeFromBytes(buffer));
+    return this.sha384(input).then((buffer) =>
+      base64UrlEncodeFromBytes(buffer)
+    );
   }
 
   /**
@@ -131,7 +133,7 @@ export class Crypto {
    * @return {!Promise<number>}
    */
   uniform(input) {
-    return this.sha384(input).then(buffer => {
+    return this.sha384(input).then((buffer) => {
       // Consider the Uint8 array as a base256 fraction number,
       // then convert it to the decimal form.
       let result = 0;
@@ -185,13 +187,9 @@ export class Crypto {
     const keyData = this.isLegacyWebkit_
       ? utf8Encode(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
       : /** @type {!webCrypto.JsonWebKey} */ (jwk);
-    return /** @type {!Promise<!webCrypto.CryptoKey>} */ (this.subtle.importKey(
-      'jwk',
-      keyData,
-      this.pkcsAlgo,
-      true,
-      ['verify']
-    ));
+    return /** @type {!Promise<!webCrypto.CryptoKey>} */ (
+      this.subtle.importKey('jwk', keyData, this.pkcsAlgo, true, ['verify'])
+    );
   }
 
   /**
@@ -206,12 +204,9 @@ export class Crypto {
    */
   verifyPkcs(key, signature, data) {
     devAssert(this.isPkcsAvailable());
-    return /** @type {!Promise<boolean>} */ (this.subtle.verify(
-      this.pkcsAlgo,
-      key,
-      signature,
-      data
-    ));
+    return /** @type {!Promise<boolean>} */ (
+      this.subtle.verify(this.pkcsAlgo, key, signature, data)
+    );
   }
 }
 

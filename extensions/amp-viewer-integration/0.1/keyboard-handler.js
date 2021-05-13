@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Keys} from '../../../src/utils/key-codes';
-import {dict} from '../../../src/utils/object';
+import {Keys} from '../../../src/core/constants/key-codes';
+import {dict} from '../../../src/core/types/object';
 import {listen} from '../../../src/event-helper';
 
 /**
@@ -145,7 +145,7 @@ function isHandledByEventTarget(e) {
  */
 function getKeyboardEventInit(e) {
   const copiedEvent = dict();
-  eventProperties.forEach(eventProperty => {
+  eventProperties.forEach((eventProperty) => {
     if (e[eventProperty] !== undefined) {
       copiedEvent[eventProperty] = e[eventProperty];
     }

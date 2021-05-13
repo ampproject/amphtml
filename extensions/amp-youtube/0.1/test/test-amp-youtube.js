@@ -17,6 +17,7 @@
 import '../amp-youtube';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
+import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
 
 const EXAMPLE_VIDEOID = 'mGENRKrdoGY';
@@ -32,17 +33,17 @@ describes.realWin(
       extensions: ['amp-youtube'],
     },
   },
-  function(env) {
+  function (env) {
     this.timeout(5000);
     let win, doc;
     let timer;
-    let sandbox;
+    let resizeObserverStub;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      sandbox = env.sandbox;
       timer = Services.timerFor(win);
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
     async function getYt(attributes, opt_responsive, opt_beforeLayoutCallback) {
@@ -56,13 +57,14 @@ describes.realWin(
         yt.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(yt);
-      await yt.build();
+      await yt.buildInternal();
       if (opt_beforeLayoutCallback) {
         opt_beforeLayoutCallback(yt);
       }
       await yt.layoutCallback();
+      const impl = await yt.getImpl(false);
       const ytIframe = yt.querySelector('iframe');
-      yt.implementation_.handleYoutubeMessage_({
+      impl.handleYoutubeMessage_({
         origin: 'https://www.youtube.com',
         source: ytIframe.contentWindow,
         data: JSON.stringify({event: 'onReady'}),
@@ -70,11 +72,11 @@ describes.realWin(
       return yt;
     }
 
-    describe('with data-videoid', function() {
+    describe('with data-videoid', function () {
       runTestsForDatasource(EXAMPLE_VIDEOID);
     });
 
-    describe('with data-live-channelid', function() {
+    describe('with data-live-channelid', function () {
       runTestsForDatasource(EXAMPLE_LIVE_CHANNELID);
     });
 
@@ -93,9 +95,10 @@ describes.realWin(
 
       it('should pause if the video is playing', async () => {
         const yt = await getYt({'data-videoid': datasource});
-        sandbox.spy(yt.implementation_, 'pause');
-        yt.implementation_.pauseCallback();
-        expect(yt.implementation_.pause.called).to.be.true;
+        const impl = await yt.getImpl(false);
+        env.sandbox.spy(impl, 'pause');
+        impl.pauseCallback();
+        expect(impl.pause.called).to.be.true;
       });
 
       it('should pass data-param-* attributes to the iframe src', async () => {
@@ -163,10 +166,16 @@ describes.realWin(
           'data-videoid': datasource,
           'data-param-playsinline': '0',
         });
+        const impl = await yt.getImpl(false);
         const {src} = yt.querySelector('iframe');
-        const preloadSpy = sandbox.spy(yt.implementation_.preconnect, 'url');
-        yt.implementation_.preconnectCallback();
-        preloadSpy.should.have.been.calledWithExactly(src);
+
+        const preconnect = Services.preconnectFor(win);
+        env.sandbox.spy(preconnect, 'url');
+        impl.preconnectCallback();
+        expect(preconnect.url).to.have.been.calledWith(
+          env.sandbox.match.object, // AmpDoc
+          src
+        );
       });
 
       it('should forward certain events from youtube to the amp element', async () => {
@@ -174,31 +183,75 @@ describes.realWin(
         const iframe = yt.querySelector('iframe');
         await Promise.resolve();
         const p1 = listenOncePromise(yt, VideoEvents.MUTED);
-        sendFakeInfoDeliveryMessage(yt, iframe, {muted: true});
+        await sendFakeInfoDeliveryMessage(yt, iframe, {muted: true});
         await p1;
         const p2 = listenOncePromise(yt, VideoEvents.PLAYING);
-        sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
+        await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
         await p2;
         const p3 = listenOncePromise(yt, VideoEvents.PAUSE);
-        sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
+        await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
         await p3;
         const p4 = listenOncePromise(yt, VideoEvents.UNMUTED);
-        sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
+        await sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
         await p4;
         // Should not send the unmute event twice if already sent once.
         const p5 = listenOncePromise(yt, VideoEvents.UNMUTED).then(() => {
           assert.fail('Should not have dispatch unmute message twice');
         });
-        sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
+        await sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
         const successTimeout = timer.promise(10);
         await Promise.race([p5, successTimeout]);
         // Make sure pause and end are triggered when video ends.
         const pEnded = listenOncePromise(yt, VideoEvents.ENDED);
         const pPause = listenOncePromise(yt, VideoEvents.PAUSE);
-        sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 0});
+        await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 0});
         return Promise.all([pEnded, pPause]);
       });
     }
+
+    describe('pause', () => {
+      let yt, impl, iframe;
+      let pauseCallbackSpy;
+
+      beforeEach(async () => {
+        yt = await getYt({'data-videoid': EXAMPLE_VIDEOID});
+        impl = await yt.getImpl();
+        iframe = yt.querySelector('iframe');
+        pauseCallbackSpy = env.sandbox.spy(impl, 'pauseCallback');
+      });
+
+      it('should auto-pause when playing and no size', async () => {
+        // PLAYING state.
+        await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
+        // First send "size" event and then "no size".
+        resizeObserverStub.notifySync({
+          target: yt,
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: yt,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+        });
+        expect(pauseCallbackSpy).to.be.calledOnce;
+      });
+
+      it('should NOT auto-pause when not playing', async () => {
+        // PLAYING state.
+        await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
+        // PAUSE state.
+        await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
+        // First send "size" event and then "no size".
+        resizeObserverStub.notifySync({
+          target: yt,
+          borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+        });
+        resizeObserverStub.notifySync({
+          target: yt,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+        });
+        expect(pauseCallbackSpy).to.not.be.called;
+      });
+    });
 
     it('renders for video ids', async () => {
       const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID});
@@ -236,22 +289,24 @@ describes.realWin(
     });
 
     it('adds an img placeholder in prerender mode if source is videoid', async () => {
-      const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function(
-        yt
-      ) {
-        const iframe = yt.querySelector('iframe');
-        expect(iframe).to.be.null;
-        const imgPlaceholder = yt.querySelector('img[placeholder]');
-        expect(imgPlaceholder).to.not.be.null;
-        expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
-        expect(imgPlaceholder.src).to.be.equal(
-          `https://i.ytimg.com/vi/${EXAMPLE_VIDEOID}/sddefault.jpg#404_is_fine`
-        );
-        expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal(
-          'origin'
-        );
-        expect(imgPlaceholder.getAttribute('alt')).to.equal('Loading video');
-      });
+      const yt = await getYt(
+        {'data-videoid': EXAMPLE_VIDEOID},
+        true,
+        function (yt) {
+          const iframe = yt.querySelector('iframe');
+          expect(iframe).to.be.null;
+          const imgPlaceholder = yt.querySelector('img[placeholder]');
+          expect(imgPlaceholder).to.not.be.null;
+          expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+          expect(imgPlaceholder.src).to.be.equal(
+            `https://i.ytimg.com/vi/${EXAMPLE_VIDEOID}/sddefault.jpg#404_is_fine`
+          );
+          expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal(
+            'origin'
+          );
+          expect(imgPlaceholder.getAttribute('alt')).to.equal('Loading video');
+        }
+      );
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
       const imgPlaceholder = yt.querySelector('img[placeholder]');
@@ -265,7 +320,7 @@ describes.realWin(
           'aria-label': 'kind video',
         },
         true,
-        function(yt) {
+        function (yt) {
           const iframe = yt.querySelector('iframe');
           expect(iframe).to.be.null;
           const imgPlaceholder = yt.querySelector('img[placeholder]');
@@ -280,19 +335,21 @@ describes.realWin(
       );
     });
 
-    it('loads only sddefault when it exists if source is videoid', async () => {
-      const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function(
-        yt
-      ) {
-        const iframe = yt.querySelector('iframe');
-        expect(iframe).to.be.null;
-        const imgPlaceholder = yt.querySelector('img[placeholder]');
-        expect(imgPlaceholder).to.not.be.null;
-        expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
-        expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal(
-          'origin'
-        );
-      });
+    it('loads only default when it exists if source is videoid', async () => {
+      const yt = await getYt(
+        {'data-videoid': EXAMPLE_VIDEOID},
+        true,
+        function (yt) {
+          const iframe = yt.querySelector('iframe');
+          expect(iframe).to.be.null;
+          const imgPlaceholder = yt.querySelector('img[placeholder]');
+          expect(imgPlaceholder).to.not.be.null;
+          expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+          expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal(
+            'origin'
+          );
+        }
+      );
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
       const imgPlaceholder = yt.querySelector('img[placeholder]');
@@ -304,19 +361,19 @@ describes.realWin(
     });
 
     it('loads hqdefault thumbnail source when sddefault fails', async () => {
-      const yt = await getYt({'data-videoid': 'FAKE'}, true, function(yt) {
+      const yt = await getYt({'data-videoid': 'FAKE'}, true, function (yt) {
         const iframe = yt.querySelector('iframe');
         expect(iframe).to.be.null;
         const imgPlaceholder = yt.querySelector('img[placeholder]');
         expect(imgPlaceholder).to.not.be.null;
         expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
         // Fake out the 404 image response dimensions of YT.
-        sandbox.defineProperty(imgPlaceholder, 'naturalWidth', {
+        env.sandbox.defineProperty(imgPlaceholder, 'naturalWidth', {
           get() {
             return 120;
           },
         });
-        sandbox.defineProperty(imgPlaceholder, 'naturalHeight', {
+        env.sandbox.defineProperty(imgPlaceholder, 'naturalHeight', {
           get() {
             return 90;
           },
@@ -333,20 +390,21 @@ describes.realWin(
 
     it('should propagate attribute mutations for videoid', async () => {
       const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID});
-      const spy = sandbox.spy(yt.implementation_, 'sendCommand_');
+      const impl = await yt.getImpl(false);
+      const spy = env.sandbox.spy(impl, 'sendCommand_');
       yt.setAttribute('data-videoid', 'lBTCB7yLs8Y');
       yt.mutatedAttributesCallback({'data-videoid': 'lBTCB7yLs8Y'});
       expect(spy).to.be.calledWith(
         'loadVideoById',
-        sinon.match(['lBTCB7yLs8Y'])
+        env.sandbox.match(['lBTCB7yLs8Y'])
       );
     });
 
     it('should remove iframe after unlayoutCallback', async () => {
       const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID});
+      const obj = await yt.getImpl(false);
       const placeholder = yt.querySelector('[placeholder]');
-      const obj = yt.implementation_;
-      const unlistenSpy = sandbox.spy(obj, 'unlistenMessage_');
+      const unlistenSpy = env.sandbox.spy(obj, 'unlistenMessage_');
       obj.unlayoutCallback();
       expect(unlistenSpy).to.have.been.called;
       expect(yt.querySelector('iframe')).to.be.null;
@@ -354,8 +412,9 @@ describes.realWin(
       expect(placeholder).to.not.have.display('');
     });
 
-    function sendFakeInfoDeliveryMessage(yt, iframe, info) {
-      yt.implementation_.handleYoutubeMessage_({
+    async function sendFakeInfoDeliveryMessage(yt, iframe, info) {
+      const impl = await yt.getImpl(false);
+      impl.handleYoutubeMessage_({
         origin: 'https://www.youtube.com',
         source: iframe.contentWindow,
         data: JSON.stringify({

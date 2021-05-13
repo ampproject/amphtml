@@ -73,7 +73,7 @@ const ViewportChangeState = {
  * intersect with the AMP component. The parent AMP component should notify the
  * manager as its own layout state changes so that the children can be updated
  * accordingly.
- * 
+ *
  * Note: For Safari 12, this does not schedule layout for slides until they
  * enter the viewport, since `rootMargin` on `IntersectionObserver` is not
  * properly handled.
@@ -87,7 +87,7 @@ const ViewportChangeState = {
  *     ampElement: this,
  *   });
  * }
- 
+
  * buildCallback() {
  *   // Call this each time the effective children you want to manage change.
  *   this.childLayoutManager.updateChildren(children);
@@ -119,14 +119,16 @@ export class ChildLayoutManager {
    *  viewportIntersectionCallback: (function(!Element, boolean)|undefined)
    * }} config
    */
-  constructor({
-    ampElement,
-    intersectionElement,
-    intersectionThreshold = DEFAULT_INTERSECTION_THRESHOLD,
-    nearbyMarginInPercent = DEFAULT_NEARBY_MARGIN,
-    viewportIntersectionThreshold = intersectionThreshold,
-    viewportIntersectionCallback = () => {},
-  }) {
+  constructor(config) {
+    const {
+      ampElement,
+      intersectionElement,
+      intersectionThreshold = DEFAULT_INTERSECTION_THRESHOLD,
+      nearbyMarginInPercent = DEFAULT_NEARBY_MARGIN,
+      viewportIntersectionThreshold = intersectionThreshold,
+      viewportIntersectionCallback = () => {},
+    } = config;
+
     /** @private @const */
     this.ampElement_ = ampElement;
 
@@ -196,11 +198,6 @@ export class ChildLayoutManager {
    * @param {boolean} isIntersecting
    */
   triggerVisibility_(target, isIntersecting) {
-    this.owners_.updateInViewport(
-      this.ampElement_.element,
-      target,
-      isIntersecting
-    );
     this.viewportIntersectionCallback_(target, isIntersecting);
   }
 
@@ -225,7 +222,7 @@ export class ChildLayoutManager {
     const {win} = this.ampElement_;
 
     this.nearingViewportObserver_ = new win.IntersectionObserver(
-      entries => this.processNearingChanges_(entries),
+      (entries) => this.processNearingChanges_(entries),
       {
         root: this.intersectionElement_,
         rootMargin: `${this.nearbyMarginInPercent_}%`,
@@ -234,7 +231,7 @@ export class ChildLayoutManager {
     );
 
     this.backingAwayViewportObserver_ = new win.IntersectionObserver(
-      entries => this.processBackingAwayChanges_(entries),
+      (entries) => this.processBackingAwayChanges_(entries),
       {
         root: this.intersectionElement_,
         rootMargin: `${this.nearbyMarginInPercent_ + UNLAYOUT_MARGIN}%`,
@@ -243,7 +240,7 @@ export class ChildLayoutManager {
     );
 
     this.inViewportObserver_ = new win.IntersectionObserver(
-      entries => this.processInViewportChanges_(entries),
+      (entries) => this.processInViewportChanges_(entries),
       {
         root: this.intersectionElement_,
         rootMargin: NO_INTERSECTION_MARGIN,
@@ -259,8 +256,12 @@ export class ChildLayoutManager {
    */
   processNearingChanges_(entries) {
     entries
-      .filter(({isIntersecting}) => isIntersecting)
-      .forEach(({target}) => {
+      .filter((entry) => {
+        const {isIntersecting} = entry;
+        return isIntersecting;
+      })
+      .forEach((entry) => {
+        const {target} = entry;
         target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.ENTER;
       });
 
@@ -276,8 +277,12 @@ export class ChildLayoutManager {
    */
   processBackingAwayChanges_(entries) {
     entries
-      .filter(({isIntersecting}) => !isIntersecting)
-      .forEach(({target}) => {
+      .filter((entry) => {
+        const {isIntersecting} = entry;
+        return !isIntersecting;
+      })
+      .forEach((entry) => {
+        const {target} = entry;
         target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.LEAVE;
       });
 
@@ -292,7 +297,8 @@ export class ChildLayoutManager {
    * @param {!Array<!IntersectionObserverEntry>} entries
    */
   processInViewportChanges_(entries) {
-    entries.forEach(({target, isIntersecting}) => {
+    entries.forEach((entry) => {
+      const {target, isIntersecting} = entry;
       target[IN_VIEWPORT_FLAG] = isIntersecting
         ? ViewportChangeState.ENTER
         : ViewportChangeState.LEAVE;
@@ -348,6 +354,7 @@ export class ChildLayoutManager {
       const child = this.children_[i];
 
       if (child[IN_VIEWPORT_FLAG] == ViewportChangeState.ENTER) {
+        this.triggerLayout_(child, true);
         this.triggerVisibility_(child, true);
       } else if (child[IN_VIEWPORT_FLAG] == ViewportChangeState.LEAVE) {
         this.triggerVisibility_(child, false);

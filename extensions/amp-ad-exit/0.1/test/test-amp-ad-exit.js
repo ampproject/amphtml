@@ -132,10 +132,10 @@ describes.realWin(
       extensions: ['amp-ad-exit'],
     },
   },
-  env => {
-    let sandbox;
+  (env) => {
     let win;
     let element;
+    let clock;
 
     function makeClickEvent(
       time = 0,
@@ -143,9 +143,9 @@ describes.realWin(
       y = 0,
       target = win.document.body
     ) {
-      sandbox.clock.tick(time);
+      clock.tick(time);
       return {
-        preventDefault: sandbox.spy(),
+        preventDefault: env.sandbox.spy(),
         clientX: x,
         clientY: y,
         target,
@@ -160,7 +160,7 @@ describes.realWin(
       json.setAttribute('type', 'application/json');
       el.appendChild(json);
       win.document.body.appendChild(el);
-      return el.build().then(() => el);
+      return el.buildInternal().then(() => el);
     }
 
     // Ad ad div or the relativeTo element cannot be found.
@@ -175,21 +175,39 @@ describes.realWin(
       win.document.body.appendChild(adDiv);
     }
 
+    async function pointTo(target) {
+      const impl = await element.getImpl();
+      impl.executeAction({
+        method: 'setVariable',
+        args: {name: 'indirect', target},
+        satisfiesTrust: () => true,
+      });
+    }
+
+    async function exitIndirect() {
+      const impl = await element.getImpl();
+      impl.executeAction({
+        method: 'exit',
+        args: {variable: 'indirect', default: 'simple'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+    }
+
     beforeEach(() => {
-      sandbox = sinon.createSandbox({useFakeTimers: true});
+      clock = env.sandbox.useFakeTimers();
       win = env.win;
       toggleExperiment(win, 'amp-ad-exit', true);
       addAdDiv();
       // TEST_3P_VENDOR must be in IFRAME_TRANSPORTS
       // *before* makeElementWithConfig
       IFRAME_TRANSPORTS[TEST_3P_VENDOR] = '/nowhere.html';
-      return makeElementWithConfig(EXIT_CONFIG).then(el => {
+      return makeElementWithConfig(EXIT_CONFIG).then((el) => {
         element = el;
       });
     });
 
     afterEach(() => {
-      sandbox.restore();
       env.win.document.body.removeChild(element);
       env.win.document.body.removeChild(env.win.document.getElementById('ad'));
       element = undefined;
@@ -202,15 +220,16 @@ describes.realWin(
       el.appendChild(win.document.createElement('p'));
       win.document.body.appendChild(el);
       let promise;
-      allowConsoleError(() => (promise = el.build()));
+      allowConsoleError(() => (promise = el.buildInternal()));
       return promise.should.be.rejectedWith(/application\/json/);
     });
 
-    it('should do nothing for missing targets', () => {
-      const open = sandbox.stub(win, 'open');
+    it('should do nothing for missing targets', async () => {
+      const open = env.sandbox.stub(win, 'open');
+      const impl = await element.getImpl();
       try {
         allowConsoleError(() =>
-          element.implementation_.executeAction({
+          impl.executeAction({
             method: 'exit',
             args: {target: 'not-a-real-target'},
             event: makeClickEvent(1001),
@@ -221,9 +240,10 @@ describes.realWin(
       } catch (expected) {}
     });
 
-    it('should stop event propagation', () => {
+    it('should stop event propagation', async () => {
       const event = makeClickEvent(1001);
-      element.implementation_.executeAction({
+      const impl = await element.getImpl();
+      impl.executeAction({
         method: 'exit',
         args: {target: 'twoSecondDelay'},
         event,
@@ -232,17 +252,18 @@ describes.realWin(
       expect(event.preventDefault).to.have.been.called;
     });
 
-    it('should reject fast clicks', () => {
-      const open = sandbox.stub(win, 'open');
+    it('should reject fast clicks', async () => {
+      const open = env.sandbox.stub(win, 'open');
+      const impl = await element.getImpl();
 
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'simple'},
         event: makeClickEvent(999),
         satisfiesTrust: () => true,
       });
 
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'twoSecondDelay'},
         event: makeClickEvent(1000), // 1000 ms + 999 from the previous exit.
@@ -252,8 +273,8 @@ describes.realWin(
       expect(open).to.not.have.been.called;
     });
 
-    it('should use options.startTimingEvent', () => {
-      return makeElementWithConfig({
+    it('should use options.startTimingEvent', async () => {
+      const el = await makeElementWithConfig({
         targets: {
           navStart: {
             'finalUrl': 'http://localhost:8000/simple',
@@ -267,24 +288,25 @@ describes.realWin(
             delay: 2000,
           },
         },
-      }).then(el => {
-        expect(el.implementation_.defaultFilters_.length).to.equal(2);
-        let clickFilter = el.implementation_.defaultFilters_[0];
-        expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
-        expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
-        clickFilter = el.implementation_.userFilters_['twoSecond'];
-        expect(clickFilter).to.be.ok;
-        expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
-        expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
       });
+      const impl = await el.getImpl();
+      expect(impl.defaultFilters_.length).to.equal(2);
+      let clickFilter = impl.defaultFilters_[0];
+      expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
+      expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
+      clickFilter = impl.userFilters_['twoSecond'];
+      expect(clickFilter).to.be.ok;
+      expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
+      expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
     });
 
-    it('should attempt new-tab navigation', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+    it('should attempt new-tab navigation', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
+      const impl = await element.getImpl();
 
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'simple'},
         event: makeClickEvent(1001),
@@ -298,10 +320,11 @@ describes.realWin(
       );
     });
 
-    it('should fall back to top navigation', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => null);
+    it('should fall back to top navigation', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => null);
+      const impl = await element.getImpl();
 
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'simple'},
         event: makeClickEvent(1001),
@@ -319,12 +342,13 @@ describes.realWin(
       );
     });
 
-    it('should attempt same-tab navigation', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+    it('should attempt same-tab navigation', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
+      const impl = await element.getImpl();
 
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'clickTargetTest'},
         event: makeClickEvent(1001),
@@ -338,15 +362,16 @@ describes.realWin(
       );
     });
 
-    it('should ping tracking URLs with sendBeacon', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+    it('should ping tracking URLs with sendBeacon', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
-      const sendBeacon = sandbox
+      const sendBeacon = env.sandbox
         .stub(win.navigator, 'sendBeacon')
         .callsFake(() => true);
+      const impl = await element.getImpl();
 
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'tracking'},
         event: makeClickEvent(1001),
@@ -369,20 +394,22 @@ describes.realWin(
       );
     });
 
-    it('should ping tracking URLs with image requests (no sendBeacon)', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+    it('should ping tracking URLs with image requests (no sendBeacon)', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
+      const impl = await element.getImpl();
 
       let sendBeacon;
       if (win.navigator.sendBeacon) {
-        sendBeacon = sandbox
+        sendBeacon = env.sandbox
           .stub(win.navigator, 'sendBeacon')
           .callsFake(() => true);
       }
-      const createElement = sandbox.spy(win.document, 'createElement');
+      const {createElement} = win.document;
+      createElement.resetHistory();
 
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'tracking'},
         event: makeClickEvent(1001),
@@ -401,17 +428,19 @@ describes.realWin(
       }
     });
 
-    it('should ping tracking URLs with image requests (sendBeacon fails)', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+    it('should ping tracking URLs with image requests (sendBeacon fails)', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
+      const impl = await element.getImpl();
 
-      const sendBeacon = sandbox
+      const sendBeacon = env.sandbox
         .stub(win.navigator, 'sendBeacon')
         .callsFake(() => false);
-      const createElement = sandbox.spy(win.document, 'createElement');
+      const {createElement} = win.document;
+      createElement.resetHistory();
 
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'tracking'},
         event: makeClickEvent(1001),
@@ -427,7 +456,7 @@ describes.realWin(
       expect(imgs[2].src).to.equal('http://localhost:8000/tracking?3');
     });
 
-    it('should ping tracking URLs with image requests (transport)', () => {
+    it('should ping tracking URLs with image requests (transport)', async () => {
       const config = {
         targets: EXIT_CONFIG.targets,
         filters: EXIT_CONFIG.filters,
@@ -435,53 +464,55 @@ describes.realWin(
           beacon: false,
         },
       };
-      return makeElementWithConfig(config).then(el => {
-        const open = sandbox.stub(win, 'open').callsFake(() => {
-          return {name: 'fakeWin'};
-        });
-
-        const sendBeacon = sandbox
-          .stub(win.navigator, 'sendBeacon')
-          .callsFake(() => true);
-        const createElement = sandbox.spy(win.document, 'createElement');
-
-        el.implementation_.executeAction({
-          method: 'exit',
-          args: {target: 'tracking'},
-          event: makeClickEvent(1001),
-          satisfiesTrust: () => true,
-        });
-
-        expect(open).to.have.been.calledOnce;
-        expect(sendBeacon).to.not.have.been.called;
-        expect(createElement.withArgs('img')).to.have.been.calledThrice;
-        const imgs = createElement.withArgs('img').returnValues;
-        expect(imgs[0].src).to.equal('http://localhost:8000/tracking?1');
-        expect(imgs[1].src).to.equal('http://localhost:8000/tracking?2');
-        expect(imgs[2].src).to.equal('http://localhost:8000/tracking?3');
-      });
-    });
-
-    it('should replace standard URL variables', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
+
+      const sendBeacon = env.sandbox
+        .stub(win.navigator, 'sendBeacon')
+        .callsFake(() => true);
+      const {createElement} = win.document;
+      createElement.resetHistory();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'tracking'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(open).to.have.been.calledOnce;
+      expect(sendBeacon).to.not.have.been.called;
+      expect(createElement.withArgs('img')).to.have.been.calledThrice;
+      const imgs = createElement.withArgs('img').returnValues;
+      expect(imgs[0].src).to.equal('http://localhost:8000/tracking?1');
+      expect(imgs[1].src).to.equal('http://localhost:8000/tracking?2');
+      expect(imgs[2].src).to.equal('http://localhost:8000/tracking?3');
+    });
+
+    it('should replace standard URL variables', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
+        return {name: 'fakeWin'};
+      });
+      const impl = await element.getImpl();
 
       if (!win.navigator) {
         win.navigator = {sendBeacon: () => false};
       }
-      const sendBeacon = sandbox
+      const sendBeacon = env.sandbox
         .stub(win.navigator, 'sendBeacon')
         .callsFake(() => true);
 
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'variables'},
         event: makeClickEvent(1001, 101, 102),
         satisfiesTrust: () => true,
       });
 
-      const urlMatcher = sinon.match(
+      const urlMatcher = env.sandbox.match(
         new RegExp(
           'http:\\/\\/localhost:8000\\/vars\\?' +
             'foo=bar&ampdoc=AMPDOC_HOST&r=[0-9\\.]+&x=101&y=102'
@@ -489,25 +520,26 @@ describes.realWin(
       );
       expect(open).to.have.been.calledWith(urlMatcher, '_blank');
 
-      const trackingMatcher = sinon.match(
+      const trackingMatcher = env.sandbox.match(
         /http:\/\/localhost:8000\/tracking\?r=[0-9\.]+&x=101&y=102/
       );
       expect(sendBeacon).to.have.been.calledWith(trackingMatcher, '');
     });
 
-    it('should replace custom URL variables with vars', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+    it('should replace custom URL variables with vars', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
+      const impl = await element.getImpl();
 
       if (!win.navigator) {
         win.navigator = {sendBeacon: () => false};
       }
-      const sendBeacon = sandbox
+      const sendBeacon = env.sandbox
         .stub(win.navigator, 'sendBeacon')
         .callsFake(() => true);
 
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {
           target: 'customVars',
@@ -534,21 +566,22 @@ describes.realWin(
       );
     });
 
-    it('border protection', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+    it('border protection', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
+      const impl = await element.getImpl();
 
       win.innerWidth = 1000;
       win.innerHeight = 2000;
       // Replace the getVsync function so that the measure can happen at once.
-      element.implementation_.getVsync = () => {
-        return {measure: callback => callback()};
+      impl.getVsync = () => {
+        return {measure: (callback) => callback()};
       };
-      element.implementation_.onLayoutMeasure();
+      impl.onLayoutMeasure();
 
       // The click is within the top border.
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'borderProtection'},
         event: makeClickEvent(1001, 500, 8),
@@ -556,7 +589,7 @@ describes.realWin(
       });
 
       // The click is within the right border.
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'borderProtection'},
         event: makeClickEvent(1001, 993, 500),
@@ -564,7 +597,7 @@ describes.realWin(
       });
 
       // The click is within the bottom border.
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'borderProtection'},
         event: makeClickEvent(1001, 500, 1992),
@@ -575,7 +608,7 @@ describes.realWin(
 
       // The click is within the left border but left border protection is not
       // set.
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'borderProtection'},
         event: makeClickEvent(1001, 8, 500),
@@ -583,7 +616,7 @@ describes.realWin(
       });
 
       // THe click is not within the border area.
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'borderProtection'},
         event: makeClickEvent(1001, 500, 500),
@@ -596,19 +629,20 @@ describes.realWin(
       );
     });
 
-    it('border protection relative to div', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+    it('border protection relative to div', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
+      const impl = await element.getImpl();
 
       // Replace the getVsync function so that the measure can happen at once.
-      element.implementation_.getVsync = () => {
-        return {measure: callback => callback()};
+      impl.getVsync = () => {
+        return {measure: (callback) => callback()};
       };
-      element.implementation_.onLayoutMeasure();
+      impl.onLayoutMeasure();
 
       // The click is within the top border.
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'borderProtectionRelativeTo'},
         event: makeClickEvent(1001, 200, 208),
@@ -616,7 +650,7 @@ describes.realWin(
       });
 
       // The click is within the right border.
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'borderProtectionRelativeTo'},
         event: makeClickEvent(1001, 293, 300),
@@ -624,7 +658,7 @@ describes.realWin(
       });
 
       // The click is within the bottom border.
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'borderProtectionRelativeTo'},
         event: makeClickEvent(1001, 200, 392),
@@ -635,7 +669,7 @@ describes.realWin(
 
       // The click is within the left border but left border protection is not
       // set.
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'borderProtectionRelativeTo'},
         event: makeClickEvent(1001, 103, 300),
@@ -643,7 +677,7 @@ describes.realWin(
       });
 
       // THe click is not within the border area.
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'borderProtectionRelativeTo'},
         event: makeClickEvent(1001, 200, 300),
@@ -656,11 +690,12 @@ describes.realWin(
       );
     });
 
-    it('should not trigger for amp-carousel buttons', () => {
-      const open = sandbox.stub(win, 'open');
+    it('should not trigger for amp-carousel buttons', async () => {
+      const open = env.sandbox.stub(win, 'open');
+      const impl = await element.getImpl();
       const fakeCarouselButton = document.createElement('div');
       fakeCarouselButton.classList.add('amp-carousel-button');
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'simple'},
         event: makeClickEvent(1001, 200, 300, fakeCarouselButton),
@@ -669,18 +704,19 @@ describes.realWin(
       expect(open).to.not.have.been.called;
     });
 
-    it('should not trigger for elements matching InactiveElementFilter', () => {
-      const open = sandbox.stub(win, 'open');
+    it('should not trigger for elements matching InactiveElementFilter', async () => {
+      const open = env.sandbox.stub(win, 'open');
+      const impl = await element.getImpl();
       const unclickable = document.createElement('span');
       unclickable.id = 'unclickable';
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'inactiveElementTest'},
         event: makeClickEvent(1001, 200, 300, unclickable),
         satisfiesTrust: () => true,
       });
       expect(open).to.not.have.been.called;
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'inactiveElementTest'},
         event: makeClickEvent(1001, 200, 300, win.document.body),
@@ -689,10 +725,11 @@ describes.realWin(
       expect(open).to.have.been.called;
     });
 
-    it('should replace custom URL variables with 3P Analytics defaults', () => {
-      const open = sandbox.stub(win, 'open').returns({name: 'fakeWin'});
+    it('should replace custom URL variables with 3P Analytics defaults', async () => {
+      const open = env.sandbox.stub(win, 'open').returns({name: 'fakeWin'});
+      const impl = await element.getImpl();
 
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'variableFrom3pAnalytics'},
         event: makeClickEvent(1004),
@@ -705,17 +742,18 @@ describes.realWin(
       );
     });
 
-    it('should replace custom URL variables with 3P Analytics signals', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+    it('should replace custom URL variables with 3P Analytics signals', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
+      const impl = await element.getImpl();
 
-      element.implementation_.vendorResponses_[TEST_3P_VENDOR] = {
+      impl.vendorResponses_[TEST_3P_VENDOR] = {
         'unused': 'unused',
         'collected-data': 'abc123',
       };
 
-      element.implementation_.executeAction({
+      impl.executeAction({
         method: 'exit',
         args: {target: 'variableFrom3pAnalytics'},
         event: makeClickEvent(1005),
@@ -747,15 +785,164 @@ describes.realWin(
       doc.body.appendChild(ampAd);
       const adFrame = doc.createElement('iframe');
       ampAd.appendChild(adFrame);
-      const ampAdExitElement = adFrame.contentDocument.createElement(
-        'amp-ad-exit'
-      );
+      const ampAdExitElement =
+        adFrame.contentDocument.createElement('amp-ad-exit');
       adFrame.contentDocument.body.appendChild(ampAdExitElement);
       installTimerService(frame.contentWindow);
       installPlatformService(frame.contentWindow);
       setParentWindow(adFrame.contentWindow, frame.contentWindow);
       expect(new AmpAdExit(ampAdExitElement).getAmpAdResourceId_()).to.equal(
         '12345'
+      );
+    });
+
+    it('should exit to the default target if varible target is never set', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
+        return {name: 'fakeWin'};
+      });
+      await exitIndirect();
+      expect(open).to.have.been.calledOnce;
+      expect(open).to.have.been.calledWith(
+        EXIT_CONFIG.targets.simple.finalUrl,
+        '_blank'
+      );
+    });
+
+    it('should cause error when variable target is never set and default value is not provided', async () => {
+      const impl = await element.getImpl();
+      try {
+        allowConsoleError(() => {
+          impl.executeAction({
+            method: 'exit',
+            args: {
+              variable: 'indirect',
+            },
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when variable target was pointed to an invalid target', async () => {
+      const impl = await element.getImpl();
+      try {
+        allowConsoleError(() => {
+          impl.executeAction({
+            method: 'setVariable',
+            args: {name: 'indirect', target: 'not-a-real-target'},
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when exiting to an invalid variable target', async () => {
+      const impl = await element.getImpl();
+      try {
+        allowConsoleError(() => {
+          impl.executeAction({
+            method: 'exit',
+            args: {variable: 'not-a-real-target', default: 'not-a-real-target'},
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when neither "target" nor "variable" is provided in arguments', async () => {
+      const impl = await element.getImpl();
+      try {
+        allowConsoleError(() => {
+          impl.executeAction({
+            method: 'exit',
+            args: {},
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when both "target" and "variable" are provided in arguments', async () => {
+      const impl = await element.getImpl();
+      try {
+        allowConsoleError(() => {
+          impl.executeAction({
+            method: 'exit',
+            args: {
+              target: 'customVars',
+              variable: 'indirect',
+              default: 'simple',
+            },
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should exit to the pointed-to target and work with custom URL variables', async () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
+        return {name: 'fakeWin'};
+      });
+      const impl = await element.getImpl();
+      if (!win.navigator) {
+        win.navigator = {sendBeacon: () => false};
+      }
+      const sendBeacon = env.sandbox
+        .stub(win.navigator, 'sendBeacon')
+        .callsFake(() => true);
+
+      await pointTo('clickTargetTest');
+      await exitIndirect();
+      expect(open).to.have.been.calledOnce;
+      expect(open).to.have.been.calledWith(
+        EXIT_CONFIG.targets.clickTargetTest.finalUrl,
+        '_top'
+      );
+
+      await pointTo('customVars');
+      impl.executeAction({
+        method: 'exit',
+        args: {
+          variable: 'indirect',
+          _foo: 'foo',
+          _bar: 'bar',
+          _numVar: 0,
+          _boolVar: false,
+        },
+        event: makeClickEvent(1001, 101, 102),
+        satisfiesTrust: () => true,
+      });
+      expect(open).to.have.been.calledTwice;
+      expect(open).to.have.been.calledWith(
+        'http://localhost:8000/vars?foo=foo',
+        '_blank'
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?bar=bar',
+        ''
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?numVar=0&boolVar=false',
+        ''
       );
     });
   }

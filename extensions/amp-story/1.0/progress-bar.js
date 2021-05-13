@@ -21,10 +21,10 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert} from '../../../src/log';
-import {escapeCssSelectorNth} from '../../../src/css';
-import {hasOwn, map} from '../../../src/utils/object';
+import {escapeCssSelectorNth} from '../../../src/core/dom/css';
+import {hasOwn, map} from '../../../src/core/types/object';
 import {removeChildren, scopedQuerySelector} from '../../../src/dom';
 import {scale, setImportantStyles} from '../../../src/style';
 
@@ -97,8 +97,8 @@ export class ProgressBar {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = Services.ampdocServiceFor(this.win_).getSingleDoc();
 
-    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(this.ampdoc_);
+    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(this.ampdoc_);
 
     /** @private {!Object<string, number>} */
     this.segmentIdMap_ = map();
@@ -146,6 +146,7 @@ export class ProgressBar {
     }
 
     this.root_ = this.win_.document.createElement('ol');
+    this.root_.setAttribute('aria-hidden', true);
     this.root_.classList.add('i-amphtml-story-progress-bar');
     this.storyEl_.addEventListener(EventType.REPLAY, () => {
       this.replay_();
@@ -153,15 +154,15 @@ export class ProgressBar {
 
     this.storeService_.subscribe(
       StateProperty.PAGE_IDS,
-      pageIds => {
+      (pageIds) => {
         if (this.isBuilt_) {
           this.clear_();
         }
 
-        this.segmentsAddedPromise_ = this.resources_.mutateElement(
+        this.segmentsAddedPromise_ = this.mutator_.mutateElement(
           this.getRoot(),
           () => {
-            pageIds.forEach(id => {
+            /** @type {!Array} */ (pageIds).forEach((id) => {
               if (!(id in this.segmentIdMap_)) {
                 this.addSegment_(id);
               }
@@ -182,7 +183,7 @@ export class ProgressBar {
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => {
+      (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
       true /** callToInitialize */
@@ -190,14 +191,14 @@ export class ProgressBar {
 
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
     );
 
     Services.viewportForDoc(this.ampdoc_).onResize(
-      debounce(this.win_, () => this.onResize_(), 30)
+      debounce(this.win_, () => this.onResize_(), 300)
     );
 
     this.segmentsAddedPromise_.then(() => {
@@ -235,12 +236,12 @@ export class ProgressBar {
    * @private
    */
   render_(shouldAnimate = true) {
-    this.getSegmentWidth_().then(segmentWidth => {
+    this.getSegmentWidth_().then((segmentWidth) => {
       let translateX =
         -(this.firstExpandedSegmentIndex_ - this.getPrevEllipsisCount_()) *
         (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
 
-      this.resources_.mutateElement(this.getRoot(), () => {
+      this.mutator_.mutateElement(this.getRoot(), () => {
         this.getRoot().classList.toggle(
           'i-amphtml-animate-progress',
           shouldAnimate
@@ -275,8 +276,9 @@ export class ProgressBar {
     // http://mir.aculo.us/2011/12/07/the-case-of-the-disappearing-element/
     segment.setAttribute(
       'style',
-      `transform: translate3d(${translateX}px, 0px, 0.00001px) scaleX(${width /
-        ELLIPSE_WIDTH_PX});`
+      `transform: translate3d(${translateX}px, 0px, 0.00001px) scaleX(${
+        width / ELLIPSE_WIDTH_PX
+      });`
     );
   }
 
@@ -291,7 +293,7 @@ export class ProgressBar {
     const totalEllipsisWidth =
       (nextEllipsisCount + prevEllipsisCount) *
       (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
-    return this.getBarWidth_().then(barWidth => {
+    return this.getBarWidth_().then((barWidth) => {
       const totalSegmentsWidth = barWidth - totalEllipsisWidth;
 
       return (
@@ -307,7 +309,7 @@ export class ProgressBar {
    * @private
    */
   getBarWidth_() {
-    return this.resources_.measureElement(() => {
+    return this.mutator_.measureElement(() => {
       return this.getRoot()./*OK*/ getBoundingClientRect().width;
     });
   }
@@ -373,7 +375,7 @@ export class ProgressBar {
    * @private
    */
   onRtlStateUpdate_(rtlState) {
-    this.resources_.mutateElement(this.getRoot(), () => {
+    this.mutator_.mutateElement(this.getRoot(), () => {
       rtlState
         ? this.getRoot().setAttribute('dir', 'rtl')
         : this.getRoot().removeAttribute('dir');
@@ -607,7 +609,7 @@ export class ProgressBar {
         nthChildIndex
       )}) .i-amphtml-story-page-progress-value`
     );
-    this.resources_.mutateElement(devAssert(progressEl), () => {
+    this.mutator_.mutateElement(devAssert(progressEl), () => {
       let transition = 'none';
       if (withTransition) {
         // Using an eased transition only if filling the bar to 0 or 1.

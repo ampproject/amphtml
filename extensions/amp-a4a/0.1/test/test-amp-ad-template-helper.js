@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import '../../../amp-mustache/0.2/amp-mustache';
 import {AmpAdTemplateHelper} from '../amp-ad-template-helper';
-import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {Xhr} from '../../../../src/service/xhr-impl';
 
-describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {
+describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
   const cdnUrl =
     'https://adserver-com.cdn.ampproject.org/ad/s/' +
     'adserver.com/amp_template_1';
   const canonicalUrl = 'https://adserver.com/amp_template_1';
 
-  let win, doc;
+  let win, doc, ampdoc;
   let fetchTextMock;
   let ampAdTemplateHelper;
 
@@ -32,8 +32,16 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {
     win = env.win;
     win.__AMP_MODE = {localDev: false};
     doc = win.document;
-    fetchTextMock = sandbox.stub(Xhr.prototype, 'fetchText');
-    ampAdTemplateHelper = new AmpAdTemplateHelper(win);
+    ampdoc = env.ampdoc;
+    fetchTextMock = env.sandbox.stub(Xhr.prototype, 'fetchText');
+    ampAdTemplateHelper = new AmpAdTemplateHelper(ampdoc);
+
+    env.installExtension(
+      'amp-mustache',
+      '0.2',
+      /* latest */ true,
+      /* auto */ false
+    );
   });
 
   it('should return a promise resolving to a string template', () => {
@@ -53,7 +61,7 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {
       );
     return ampAdTemplateHelper
       .fetch(canonicalUrl)
-      .then(fetchedTemplate => expect(fetchedTemplate).to.equal(template));
+      .then((fetchedTemplate) => expect(fetchedTemplate).to.equal(template));
   });
 
   it('should use CDN url if one is supplied', () => {
@@ -67,19 +75,16 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {
   });
 
   it('should render a template with correct values', () => {
-    win.AMP.registerTemplate('amp-mustache', AmpMustache);
-  });
-
-  it('should render a template with correct values', () => {
-    win.AMP.registerTemplate('amp-mustache', AmpMustache);
     const parentDiv = doc.createElement('div');
     parentDiv./*OK*/ innerHTML =
       '<template type="amp-mustache"><p>{{foo}}</p></template>';
     doc.body.appendChild(parentDiv);
-    return ampAdTemplateHelper.render({foo: 'bar'}, parentDiv).then(result => {
-      expect(result).to.not.be.null;
-      expect(result./*OK*/ innerHTML).to.equal('bar');
-    });
+    return ampAdTemplateHelper
+      .render({foo: 'bar'}, parentDiv)
+      .then((result) => {
+        expect(result).to.not.be.null;
+        expect(result./*OK*/ innerHTML).to.equal('bar');
+      });
   });
 
   it('should insert analytics component', () => {

@@ -17,7 +17,7 @@
 import {assertAttributeMutationFormat} from './mutation';
 import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
 import {dev, user} from '../../../../src/log';
-import {dict, hasOwn} from '../../../../src/utils/object';
+import {dict, hasOwn} from '../../../../src/core/types/object';
 import {isAmpElement} from '../../../../src/dom';
 
 /** @const {RegExp} */
@@ -126,7 +126,7 @@ export class AttributeMutationDefaultStyle {
 
   /** @override */
   mutate() {
-    this.elements_.forEach(element => {
+    this.elements_.forEach((element) => {
       setStyles(
         dev().assertElement(element),
         assertDoesNotContainDisplay(this.styles_)

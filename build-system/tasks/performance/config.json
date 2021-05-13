@@ -1,0 +1,41 @@
+{
+  "runs": 50,
+  "handlers": [
+    {
+      "handlerName": "defaultHandler",
+      "urls": ["http://localhost:8000/examples/bind/basic.amp.html"]
+    },
+    {
+      "handlerName": "analyticsHandler",
+      "urls": [
+        "http://localhost:8000/test/manual/amp-analytics/performance-test-pages/visible-basic.html",
+        "http://localhost:8000/test/manual/amp-analytics/performance-test-pages/visible-multiple.html"
+      ],
+      "timeout": 2000,
+      "extraUrlParam": {
+        "analytics": "amp-analytics-performance-param"
+      }
+    },
+    {
+      "handlerName": "adsHandler",
+      "urls": [
+        "http://localhost:8000/test/fixtures/performance/amp-ad/hostile-inabox-env.html"
+      ],
+      "adsUrls": [
+        "http://localhost:8000/test/fixtures/performance/amp-ad/amphtml-ad.html"
+      ],
+      "timeout": 5000,
+      "extraUrlParam": {
+        "intercept": true
+      }
+    },
+    {
+      "handlerName": "runtimeHandler",
+      "urls": [
+        "http://localhost:8000/examples/runtime/article.html",
+        "http://localhost:8000/examples/runtime/images.html",
+        "http://localhost:8000/examples/runtime/list-always.html"
+      ]
+    }
+  ]
+}

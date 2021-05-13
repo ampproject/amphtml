@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-izlesene'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -41,7 +41,7 @@ describes.realWin(
       }
       doc.body.appendChild(izlesene);
       return izlesene
-        .build()
+        .buildInternal()
         .then(() => {
           return izlesene.layoutCallback();
         })
@@ -49,7 +49,7 @@ describes.realWin(
     }
 
     it('renders', () => {
-      return getIzlesene('7221390').then(izlesene => {
+      return getIzlesene('7221390').then((izlesene) => {
         const iframe = izlesene.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -60,7 +60,7 @@ describes.realWin(
     });
 
     it('renders responsively', () => {
-      return getIzlesene('7221390', true).then(izlesene => {
+      return getIzlesene('7221390', true).then((izlesene) => {
         const iframe = izlesene.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -73,6 +73,18 @@ describes.realWin(
           /The data-videoid attribute is required for/
         );
       });
+    });
+
+    it('unlayout and relayout', async () => {
+      const izlesene = await getIzlesene('7221390');
+      expect(izlesene.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = izlesene.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(izlesene.querySelector('iframe')).to.not.exist;
+
+      await izlesene.layoutCallback();
+      expect(izlesene.querySelector('iframe')).to.exist;
     });
   }
 );

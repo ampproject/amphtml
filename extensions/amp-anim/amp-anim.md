@@ -7,6 +7,7 @@ formats:
 teaser:
   text: Manages an animated image, typically a GIF.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -25,84 +26,83 @@ limitations under the License.
 
 # amp-anim
 
-A runtime-managed animated image, typically a GIF.
+## Usage
 
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-anim/">Annotated code example for amp-anim</a></td>
-  </tr>
-</table>
+The `amp-anim` component displays a GIF animation with optimized CPU management.
 
-[TOC]
-
-## Behavior
-
-The `amp-anim` component is almost identical to the `amp-img` element, but allows the AMP runtime to reduce CPU usage when the animation is off-screen. Like [other elements](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders), it supports an optional `placeholder` child, to display while the `src` file is loading:
+The `amp-anim` component lets the AMP framework reduce the resources it spends
+on the animation when it's off-screen. Otherwise, the behavior of `amp-anim` is
+identical to [`amp-img`](https://amp.dev/documentation/components/amp-img/). You
+can implement a [placeholder](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders/)
+element to further optimize `amp-anim`.
 
 ```html
-<amp-anim width=400 height=300 src="my-gif.gif">
-  <amp-img placeholder width=400 height=300 src="my-gif-screencap.jpg">
+<amp-anim width="400" height="300" src="my-gif.gif">
+  <amp-img placeholder width="400" height="300" src="my-gif-screencap.jpg">
   </amp-img>
 </amp-anim>
 ```
 
-In the future, additional functionality, such as animation playback control, could be added.
-
 ## Attributes
-<table>
-  <tr>
-    <td width="40%"><strong>src</strong></td>
-    <td>
-        [filter formats="websites, stories, ads"]
-        Similar to the <code>src</code> attribute on the <code>img</code> tag. The value must be a URL that
-        points to a publicly-cacheable image file. Cache providers may rewrite these
-        URLs when ingesting AMP files to point to a cached version of the image.
-        [/filter]
-        [filter formats="email"]
-        Similar to the <code>src</code> attribute on the `img` tag. For emails, the URL must be <code>https</code>. 
-        [/filter]
-    </td>
-  </tr>
-  <tr>
-     <td width="40%"><strong>srcset</strong></td>
-     <td>Same as <code>srcset</code> attribute on the <code>img</code> tag.</td>
-   </tr>
-   <tr>
-      <td width="40%"><strong>alt</strong></td>
-      <td>A string of alternate text, similar to the <code>alt</code> attribute on <code>img</code>.</td>
-    </tr>
-    <tr>
-       <td width="40%"><strong>attribution</strong></td>
-       <td>A string that indicates the attribution of the image. For example, <code>attribution="CC courtesy of Cats on Flicker"</code>.</td>
-     </tr>
-     <tr>
-        <td width="40%"><strong>height and width</strong></td>
-        <td>An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image.</td>
-      </tr>
-      <tr>
-         <td width="40%"><strong>common attributes</strong></td>
-         <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-       </tr>
-</table>
+
+### `src`
+
+Specifies the URL for a GIF image.
+
+[filter formats="email"]
+In an AMP email, the `src` must point to an absolute `https` URL. Use of
+`amp-anim` in email doesn't allow the following attributes:
+
+-   `srcset`
+-   `object-fit`
+-   `object-position`
+
+[/filter]
+
+[filter formats="websites, ads"]
+
+### `srcset`
+
+Specifies the image URL to use in different circumstances. Operates the same as
+the [`srcset` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-srcset)
+on the `img` tag.
+
+[/filter]
+
+### `alt`
+
+Provides a string of alternate text for accessibility purposes. Operates the
+same as the [`alt` attribute](https://www.w3schools.com/tags/att_img_alt.asp) on
+the `img` tag.
+
+### `attribution`
+
+Indicates the attribution of the image. For example, `attribution="CC courtesy of Cats on Flicker"`.
+
+### `width` and `height`
+
+Provides the explicit size of the image.
+
+### Common attributes
+
+`amp-anim` includes the
+[common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 ## Styling
 
-`amp-img` can be styled directly via CSS properties. Setting a grey background
-placeholder for example could be achieved via:
-```css
-amp-anim {
-  background-color: grey;
-}
+You can directly style `amp-img` with CSS properties. The following example sets
+a grey background placeholder:
+
+```html
+<style amp-custom>
+      .amp-anim {
+          background-color: grey;
+       }
+</amp style-custom>
 ```
+
 ## Validation
 
-See [amp-anim rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/validator-amp-anim.protoascii) in the AMP validator specification.
+See [`amp-anim` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-anim/validator-amp-anim.protoascii)
+in the AMP validator specification.

@@ -23,16 +23,13 @@ import {installVsyncService} from '../../src/service/vsync-impl';
 import {toggleExperiment} from '../../src/experiments';
 import {whenDocumentReady} from '../../src/document-ready';
 
-describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
+describes.realWin('ViewportBindingNatural', {ampCss: true}, (env) => {
   let binding;
   let win;
   let ampdoc;
   let child;
-  let sandbox;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
-
     env.iframe.style.width = '100px';
     env.iframe.style.height = '200px';
     win = env.win;
@@ -72,8 +69,8 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     binding = new ViewportBindingNatural_(ampdoc);
     const bodyStyles = win.getComputedStyle(win.document.body);
     expect(bodyStyles.position).to.equal('relative');
-    expect(bodyStyles.overflowX).to.equal('hidden');
-    expect(bodyStyles.overflowY).to.not.equal('hidden');
+    expect(bodyStyles.overflowX).to.equal('visible');
+    expect(bodyStyles.overflowY).to.equal('visible');
   });
 
   it('should NOT require fixed layer transferring', () => {
@@ -142,8 +139,8 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   });
 
   it('should account for child margin-top (WebKit)', () => {
-    sandbox.stub(win.document, 'scrollingElement').value(null);
-    sandbox.stub(binding.platform_, 'isWebKit').returns(true);
+    env.sandbox.stub(win.document, 'scrollingElement').value(null);
+    env.sandbox.stub(binding.platform_, 'isWebKit').returns(true);
 
     child.style.marginTop = '15px';
     expect(binding.getContentHeight()).to.equal(315);
@@ -158,14 +155,14 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
 
   it('should fallback scrollTop to pageYOffset', () => {
     win.pageYOffset = 11;
-    delete win.document.scrollingElement.scrollTop;
+    win.document.scrollingElement.scrollTop = 0;
     expect(binding.getScrollTop()).to.equal(11);
   });
 
   it('should offset client rect for layout', () => {
     win.pageXOffset = 0;
     win.pageYOffset = 200;
-    delete win.document.scrollingElement;
+    win.document.scrollingElement.scrollTop = 0;
     const el = {
       getBoundingClientRect: () => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
@@ -181,7 +178,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   it('should offset client rect for layout and position passed in', () => {
     win.pageXOffset = 0;
     win.pageYOffset = 2000;
-    delete win.document.scrollingElement;
+    win.document.scrollingElement.scrollTop = 0;
     const el = {
       getBoundingClientRect: () => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
@@ -219,16 +216,13 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   });
 });
 
-describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, env => {
+describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, (env) => {
   let binding;
   let win;
   let ampdoc;
   let child;
-  let sandbox;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
-
     env.iframe.style.width = '100px';
     env.iframe.style.height = '200px';
     win = env.win;
@@ -243,25 +237,13 @@ describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, env => {
     installVsyncService(win);
     installDocService(win, /* isSingleDoc */ true);
     ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-    sandbox.stub(Services.platformFor(win), 'isIos').returns(true);
+    env.sandbox.stub(Services.platformFor(win), 'isIos').returns(true);
     binding = new ViewportBindingNatural_(ampdoc);
     binding.connect();
   });
-
-  it('should reset overscroll on X-axis', () => {
-    win.scrollTo(1, 0);
-    expect(win.pageXOffset).to.equal(1);
-    return new Promise(resolve => {
-      win.addEventListener('scroll', () => {
-        if (win.pageXOffset == 0) {
-          resolve();
-        }
-      });
-    });
-  });
 });
 
-describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
+describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, (env) => {
   let win;
   let binding;
   let vsync;
@@ -301,7 +283,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
 
   // TODO(#22220): Remove when "ios-fixed-no-transfer" experiment is cleaned up.
   it('should require fixed layer transferring for later iOS w/o experiment', () => {
-    sandbox
+    env.sandbox
       .stub(Services.platformFor(win), 'getIosVersionString')
       .callsFake(() => '12.2');
     expect(binding.requiresFixedLayerTransfer()).to.be.true;
@@ -310,7 +292,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   it('should configure fixed layer transferring based on iOS version', () => {
     toggleExperiment(win, 'ios-fixed-no-transfer');
     let version;
-    sandbox
+    env.sandbox
       .stub(Services.platformFor(win), 'getIosVersionString')
       .callsFake(() => version);
 
@@ -514,7 +496,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   });
 
   it('should call scroll event', () => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       binding.onScroll(resolve);
       binding.wrapper_.scrollTop = 11;
     }).then(() => {

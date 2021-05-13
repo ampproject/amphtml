@@ -19,7 +19,7 @@ import {ConfigManager} from '../config-manager';
 
 import {createCUID, isDateInFuture} from '../addthis-utils/cuid';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {
   getAddThisMode,
   isProductCode,
@@ -31,7 +31,7 @@ import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
 import {getSessionId} from '../addthis-utils/session';
 import {getWidgetOverload} from '../addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
-import {toArray} from '../../../../src/types';
+import {toArray} from '../../../../src/core/types/array';
 
 describes.realWin(
   'amp-addthis',
@@ -40,7 +40,7 @@ describes.realWin(
       extensions: ['amp-addthis'],
     },
   },
-  env => {
+  (env) => {
     const configManager = getConfigManager();
     const pubId = 'ra-5988ef04ee1db125';
     const widgetId = '29nf';
@@ -72,7 +72,7 @@ describes.realWin(
       if (configuration.productCode) {
         elementAttributes['data-product-code'] = configuration.productCode;
       }
-      Object.keys(shareConfig).forEach(key => {
+      Object.keys(shareConfig).forEach((key) => {
         elementAttributes[`data-share-${key}`] = shareConfig[key];
       });
       const at = createElementWithAttributes(
@@ -85,7 +85,7 @@ describes.realWin(
       }
       doc.body.appendChild(at);
       return at
-        .build()
+        .buildInternal()
         .then(() => {
           if (opt_beforeLayoutCallback) {
             opt_beforeLayoutCallback(at);
@@ -101,9 +101,11 @@ describes.realWin(
 
     function testIframe(iframe) {
       expect(iframe).to.not.equal(null);
-      expect(iframe.getAttribute('src')).to.equal(
-        `${ORIGIN}/dc/amp-addthis.html`
-      );
+      const srcPrefix = `${ORIGIN}/dc/amp-addthis.html?`;
+      expect(
+        iframe.getAttribute('src').startsWith(srcPrefix),
+        `iframe src starts with ${srcPrefix}`
+      ).to.be.true;
       expect(iframe.getAttribute('title')).to.equal(ALT_TEXT);
     }
 
@@ -194,14 +196,13 @@ describes.realWin(
       ).to.not.equal(void 0);
     });
 
-    it('removes the iframe after unlayoutCallback', () => {
-      return getAT({pubId, widgetId}).then(({at}) => {
-        const obj = at.implementation_;
-        testIframe(at.querySelector('iframe'));
-        obj.unlayoutCallback();
-        expect(at.querySelector('iframe')).to.equal(null);
-        expect(obj.iframe_).to.equal(null);
-      });
+    it('removes the iframe after unlayoutCallback', async () => {
+      const {at} = await getAT({pubId, widgetId});
+      const obj = await at.getImpl();
+      testIframe(at.querySelector('iframe'));
+      obj.unlayoutCallback();
+      expect(at.querySelector('iframe')).to.equal(null);
+      expect(obj.iframe_).to.equal(null);
     });
 
     it('registers the frame with the configManager on layout', () => {
@@ -210,13 +211,12 @@ describes.realWin(
       });
     });
 
-    it('unregisters the frame with the configManager on unlayoutCallback', () => {
-      return getAT({pubId, widgetId}).then(({at}) => {
-        const obj = at.implementation_;
-        obj.unlayoutCallback();
+    it('unregisters the frame with the configManager on unlayoutCallback', async () => {
+      const {at} = await getAT({pubId, widgetId});
+      const obj = await at.getImpl();
+      obj.unlayoutCallback();
 
-        expect(unregisterStub.calledOnce).to.equal(true);
-      });
+      expect(unregisterStub.calledOnce).to.equal(true);
     });
 
     it('accepts and stores shareConfig data via custom attributes', () => {
@@ -229,7 +229,7 @@ describes.realWin(
 
       return getAT({pubId, widgetId, shareConfig}).then(({at}) => {
         expect(Object.keys(shareConfig).length).to.equal(4);
-        Object.keys(shareConfig).forEach(key => {
+        Object.keys(shareConfig).forEach((key) => {
           expect(at.getAttribute(`data-share-${key}`)).to.equal(
             shareConfig[key]
           );
@@ -237,16 +237,15 @@ describes.realWin(
       });
     });
 
-    it("defaults to sharing ownerDocument's title and url", () => {
-      return getAT({pubId, widgetId}).then(({at}) => {
-        const obj = at.implementation_;
-        const {shareConfig_} = obj;
-        expect(shareConfig_.title).to.equal(doc.title);
-        expect(shareConfig_.url).to.equal(doc.location.href);
-      });
+    it("defaults to sharing ownerDocument's title and url", async () => {
+      const {at} = await getAT({pubId, widgetId});
+      const obj = await at.getImpl();
+      const {shareConfig_} = obj;
+      expect(shareConfig_.title).to.equal(doc.title);
+      expect(shareConfig_.url).to.equal(doc.location.href);
     });
 
-    it('registers a view at most once per "session"', done => {
+    it('registers a view at most once per "session"', (done) => {
       const testConfigManager = new ConfigManager();
       let numPendingRequests = 0;
       let numViewsRegistered = 0;
@@ -255,7 +254,7 @@ describes.realWin(
         done();
         const mockIframe = {
           contentWindow: {
-            postMessage: json => {
+            postMessage: (json) => {
               let receivedJSON;
 
               numPendingRequests--;
@@ -350,7 +349,7 @@ describes.realWin(
       return new Promise((resolve, reject) => {
         const mockIframe = {
           contentWindow: {
-            postMessage: json => {
+            postMessage: (json) => {
               let receivedJSON;
 
               numPendingRequests--;
@@ -529,7 +528,7 @@ describes.realWin(
         'data-attr-counts': 'none',
         'data-attr-numPreferredServices': 5,
       };
-      const getAttribute = key => mock[key];
+      const getAttribute = (key) => mock[key];
       const self = {element: {getAttribute}};
       expect(getWidgetOverload(self)).to.equal(result);
     });
@@ -539,7 +538,7 @@ describes.realWin(
         'data-attr-csounts': 'none',
         'data-attr-nsumPreferredServices': 5,
       };
-      const getAttribute = key => mock[key];
+      const getAttribute = (key) => mock[key];
       const self = {element: {getAttribute}};
       expect(getWidgetOverload(self)).to.equal('');
     });
@@ -552,7 +551,7 @@ describes.realWin(
         'data-attr-countsFontSize': {},
         'data-attr-desktopPosition': new Function(),
       };
-      const getAttribute = key => mock[key];
+      const getAttribute = (key) => mock[key];
       const self = {element: {getAttribute}};
       expect(getWidgetOverload(self)).to.equal('');
     });
@@ -585,13 +584,13 @@ describes.realWin(
         'data-attr-titleFontSize': 1,
         'data-attr-__hideOnHomepage': 1,
       };
-      const getAttribute = key => mock[key];
+      const getAttribute = (key) => mock[key];
       const self = {element: {getAttribute}};
       expect(getWidgetOverload(self).length).to.equal(447);
     });
 
     it('getSessionId: returns a string of 16 characters containing 0-9 a-f', () => {
-      expect(typeof getSessionId() === 'string').to.equal(true);
+      expect(typeof getSessionId()).to.equal('string');
       expect(getSessionId().length).to.equal(16);
       expect(/^[0-9a-f]{16}$/.test(getSessionId())).to.equal(true);
 
@@ -602,7 +601,7 @@ describes.realWin(
     });
 
     it('createCUID: returns a string of 16 characters containing 0-9 a-f', () => {
-      expect(typeof createCUID() === 'string').to.equal(true);
+      expect(typeof createCUID()).to.equal('string');
 
       const a = createCUID();
       const b = createCUID();

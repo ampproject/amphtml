@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../src/amp-events';
+import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {EVENTS, PRIORITY_META_TAG_NAME} from './constants';
 import {LinkRewriter} from './link-rewriter';
 import {Priority} from '../../../../src/service/navigation';
@@ -87,7 +87,7 @@ export class LinkRewriterManager {
   /**
    * Create and configure a new LinkRewriter on the page.
    * @param {string} linkRewriterId - A unique id used to identify the link rewriter.
-   * @param {!function(!Array<!HTMLElement>): !./two-steps-response.TwoStepsResponse} resolveUnknownLinks
+   * @param {function(!Array<!HTMLElement>): !./two-steps-response.TwoStepsResponse} resolveUnknownLinks
    *   - Function to determine which anchor should be replaced and by what URL.
    *     Should return an instance of './two-steps-response.TwoStepsResponse'.
    * @param {?{linkSelector: string}=} options
@@ -164,7 +164,7 @@ export class LinkRewriterManager {
         clickType: event.type,
       };
 
-      suitableLinkRewriters.forEach(linkRewriter => {
+      suitableLinkRewriters.forEach((linkRewriter) => {
         const event = {
           type: EVENTS.CLICK,
           eventData,
@@ -184,9 +184,7 @@ export class LinkRewriterManager {
    * @private
    */
   getPriorityList_(ampdoc) {
-    const docInfo = Services.documentInfoForDoc(ampdoc);
-    const value = docInfo.metaTags[PRIORITY_META_TAG_NAME];
-
+    const value = ampdoc.getMetaByName(PRIORITY_META_TAG_NAME);
     return value ? value.trim().split(/\s+/) : [];
   }
 
@@ -209,7 +207,7 @@ export class LinkRewriterManager {
    * @private
    */
   onDomChanged_() {
-    this.linkRewriters_.forEach(linkRewriter => {
+    this.linkRewriters_.forEach((linkRewriter) => {
       linkRewriter.onDomUpdated();
     });
   }

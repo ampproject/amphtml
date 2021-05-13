@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Soundcloud clip.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,43 +24,32 @@ limitations under the License.
 
 # amp-soundcloud
 
-Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-soundcloud" src="https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-soundcloud/">Annotated code example for amp-soundcloud</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Examples
 
 With the responsive layout, the `width` and `height` from the example should yield correct layouts for 1:1 aspect ratio embeds:
 
 Visual Mode:
+
 ```html
-<amp-soundcloud width="480" height="480"
-    layout="responsive"
-    data-trackid="243169232"
-    data-visual="true"></amp-soundcloud>
+<amp-soundcloud
+  width="480"
+  height="480"
+  layout="responsive"
+  data-trackid="243169232"
+  data-visual="true"
+></amp-soundcloud>
 ```
 
 Classic Mode:
+
 ```html
-<amp-soundcloud width="480" height="480"
-    layout="responsive"
-    data-trackid="243169232"
-    data-color="ff5500"></amp-soundcloud>
+<amp-soundcloud
+  width="480"
+  height="480"
+  layout="responsive"
+  data-trackid="243169232"
+  data-color="ff5500"
+></amp-soundcloud>
 ```
 
 ## Attributes
@@ -95,4 +85,4 @@ The value for this attribute is the ID of a playlist, an integer.</td>
 
 ## Validation
 
-See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/validator-amp-soundcloud.protoascii) in the AMP validator specification.
+See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-soundcloud/validator-amp-soundcloud.protoascii) in the AMP validator specification.

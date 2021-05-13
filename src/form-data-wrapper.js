@@ -17,7 +17,7 @@
 import {Services} from './services';
 import {getFormAsObject, getSubmitButtonUsed} from './form';
 import {iterateCursor} from './dom';
-import {map} from './utils/object';
+import {map} from './core/types/object';
 
 /**
  * Create a form data wrapper. The wrapper is necessary to provide a common
@@ -93,9 +93,9 @@ export class PolyfillFormDataWrapper {
   /** @override */
   entries() {
     const fieldEntries = [];
-    Object.keys(this.fieldValues_).forEach(name => {
+    Object.keys(this.fieldValues_).forEach((name) => {
       const values = this.fieldValues_[name];
-      values.forEach(value => fieldEntries.push([name, value]));
+      values.forEach((value) => fieldEntries.push([name, value]));
     });
 
     // Generator functions are not supported by the current Babel configuration,
@@ -114,9 +114,9 @@ export class PolyfillFormDataWrapper {
   getFormData() {
     const formData = new FormData();
 
-    Object.keys(this.fieldValues_).forEach(name => {
+    Object.keys(this.fieldValues_).forEach((name) => {
       const values = this.fieldValues_[name];
-      values.forEach(value => formData.append(name, value));
+      values.forEach((value) => formData.append(name, value));
     });
 
     return formData;
@@ -198,7 +198,7 @@ class Ios11NativeFormDataWrapper extends NativeFormDataWrapper {
     super(opt_form);
 
     if (opt_form) {
-      iterateCursor(opt_form.elements, input => {
+      iterateCursor(opt_form.elements, (input) => {
         if (input.type == 'file' && input.files.length == 0) {
           this.formData_.delete(input.name);
           this.formData_.append(input.name, new Blob([]), '');

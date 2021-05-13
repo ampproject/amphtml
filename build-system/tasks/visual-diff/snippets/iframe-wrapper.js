@@ -2,8 +2,16 @@
 // with an <iframe>, so that we can perform viewport-constrained visual diff
 // tests.
 
-// The texts __WIDTH__ and __HEIGHT__ will be replaced at execution time with
-// the viewport's size from the visual test's config.
+// The following strings will be replaced at execution time:
+// * __WIDTH__ and __HEIGHT__ with the viewport's size from the visual test's config.
+// * __PERCY_CSS__ with Percy-specific CSS.
+
+if ('__PERCY_CSS__' !== '__' + 'PERCY_CSS' + '__') {
+  const style = document.createElement('style');
+  style.setAttribute('data-percy-specific-css', '');
+  style.textContent = '__PERCY_CSS__';
+  document.body.appendChild(style);
+}
 
 const pageContents = document.documentElement.outerHTML;
 

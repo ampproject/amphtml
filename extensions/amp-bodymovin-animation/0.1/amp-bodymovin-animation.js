@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {clamp} from '../../../src/utils/math';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isFiniteNumber, isObject} from '../../../src/types';
+import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/core/types';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
-import {startsWith} from '../../../src/string';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';
+const TYPE = 'bodymovinanimation';
 
 export class AmpBodymovinAnimation extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -72,12 +73,15 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    const scriptToLoad =
-      this.renderer_ === 'svg'
-        ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js'
-        : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
-    preloadBootstrap(this.win, this.preconnect);
-    this.preconnect.url(scriptToLoad, opt_onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
+    // Different scripts are loaded based on `renderer` but their origin is the
+    // same. See 3p/bodymovinanimation.js#libSourceUrl.
+    preconnect.url(
+      this.getAmpDoc(),
+      'https://cdnjs.cloudflare.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -118,7 +122,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     );
     this.registerAction(
       'seekTo',
-      invocation => {
+      (invocation) => {
         const {args} = invocation;
         if (args) {
           this.seekTo_(args);
@@ -131,19 +135,15 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const animData = batchFetchJsonFor(this.ampdoc_, this.element);
-    return animData.then(data => {
+    return animData.then((data) => {
       const opt_context = {
         loop: this.loop_,
         autoplay: this.autoplay_,
         renderer: this.renderer_,
         animationData: data,
       };
-      const iframe = getIframe(
-        this.win,
-        this.element,
-        'bodymovinanimation',
-        opt_context
-      );
+      const iframe = getIframe(this.win, this.element, TYPE, opt_context);
+      iframe.title = this.element.title || 'Airbnb BodyMovin animation';
       return Services.vsyncFor(this.win)
         .mutatePromise(() => {
           this.applyFillContent(iframe);
@@ -188,16 +188,16 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       !getData(event) ||
       !(
         isObject(getData(event)) ||
-        startsWith(/** @type {string} */ (getData(event)), '{')
+        /** @type {string} */ (getData(event)).startsWith('{')
       )
     ) {
       return; // Doesn't look like JSON.
     }
 
     /** @const {?JsonObject} */
-    const eventData = /** @type {?JsonObject} */ (isObject(getData(event))
-      ? getData(event)
-      : parseJson(getData(event)));
+    const eventData = /** @type {?JsonObject} */ (
+      isObject(getData(event)) ? getData(event) : parseJson(getData(event))
+    );
     if (eventData === undefined) {
       return; // We only process valid JSON.
     }
@@ -261,6 +261,6 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpBodymovinAnimation);
 });

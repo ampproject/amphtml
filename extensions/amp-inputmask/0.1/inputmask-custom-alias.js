@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
-import {startsWith} from '../../../src/string';
+import {dict} from '../../../src/core/types/object';
 import {user} from '../../../src/log';
 
 /**
@@ -42,7 +41,7 @@ export function getAliasDefinition() {
        * @param {!JsonObject} opts
        * @return {!Object}
        */
-      'mask': function(opts) {
+      'mask': function (opts) {
         const customMask = opts['customMask'];
         opts['prefixes'] = getPrefixSubsets(customMask);
 
@@ -53,7 +52,7 @@ export function getAliasDefinition() {
        * @param {!JsonObject} opts
        * @return {string}
        */
-      'onBeforeMask': function(value, opts) {
+      'onBeforeMask': function (value, opts) {
         const prefixes = opts['prefixes'];
         const trimZeros = opts['trimZeros'] || 0;
 
@@ -140,7 +139,7 @@ export function getMaskPrefix(mask) {
  */
 export function removePrefix(value, prefixes) {
   const longestPrefix = prefixes
-    .filter(prefix => startsWith(value, prefix))
+    .filter((prefix) => value.startsWith(prefix))
     .sort((a, b) => b.length - a.length)[0];
 
   if (longestPrefix) {

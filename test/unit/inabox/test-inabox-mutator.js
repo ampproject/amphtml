@@ -16,37 +16,35 @@
 import {InaboxMutator} from '../../../src/inabox/inabox-mutator';
 import {Services} from '../../../src/services';
 
-describes.realWin('inabox-mutator', {amp: true}, env => {
-  let sandbox;
+describes.realWin('inabox-mutator', {amp: true}, (env) => {
   let mutator;
   let resource;
   let element;
   let schedulePassStub;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
     element = env.win.document.createElement('div');
 
     const resources = Services.resourcesForDoc(env.ampdoc);
-    sandbox.stub(resources, 'getResourceForElement').callsFake(el => {
+    env.sandbox.stub(resources, 'getResourceForElement').callsFake((el) => {
       expect(el).to.equal(element);
       return resource;
     });
-    schedulePassStub = sandbox.stub(resources, 'schedulePass');
+    schedulePassStub = env.sandbox.stub(resources, 'schedulePass');
 
     mutator = new InaboxMutator(env.ampdoc, resources);
 
     resource = {
-      changeSize: sandbox.spy(),
-      completeExpand: sandbox.spy(),
-      completeCollapse: sandbox.spy(),
+      changeSize: env.sandbox.spy(),
+      completeExpand: env.sandbox.spy(),
+      completeCollapse: env.sandbox.spy(),
       getOwner: () => null,
     };
   });
 
-  it('changeSize', async () => {
-    const callback = sandbox.spy();
-    mutator.changeSize(element, 12, 34, callback, {
+  it('forceChangeSize', async () => {
+    const callback = env.sandbox.spy();
+    mutator.forceChangeSize(element, 12, 34, callback, {
       top: 4,
       right: 5,
       bottom: 6,
@@ -64,8 +62,8 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
     expect(schedulePassStub).to.be.calledOnce;
   });
 
-  it('attemptChangeSize', async () => {
-    const resultPromise = mutator.attemptChangeSize(element, 12, 34, {
+  it('requestChangeSize', async () => {
+    const resultPromise = mutator.requestChangeSize(element, 12, 34, {
       top: 4,
       right: 5,
       bottom: 6,
@@ -105,7 +103,7 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
   });
 
   it('measureElement', async () => {
-    const measurerSpy = sandbox.spy();
+    const measurerSpy = env.sandbox.spy();
     const resultPromise = mutator.measureElement(measurerSpy);
     env.flushVsync();
 
@@ -114,7 +112,7 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
   });
 
   it('mutateElement', async () => {
-    const mutatorSpy = sandbox.spy();
+    const mutatorSpy = env.sandbox.spy();
     const resultPromise = mutator.mutateElement(element, mutatorSpy);
     env.flushVsync();
 
@@ -123,8 +121,8 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
   });
 
   it('measureMutateElement', async () => {
-    const measurerSpy = sandbox.spy();
-    const mutatorSpy = sandbox.spy();
+    const measurerSpy = env.sandbox.spy();
+    const mutatorSpy = env.sandbox.spy();
     const resultPromise = mutator.measureMutateElement(
       element,
       measurerSpy,

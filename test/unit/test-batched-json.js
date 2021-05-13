@@ -18,13 +18,13 @@ import {Services} from '../../src/services';
 import {UrlReplacementPolicy, batchFetchJsonFor} from '../../src/batched-json';
 import {user} from '../../src/log';
 
-describe('batchFetchJsonFor', () => {
-  let sandbox;
+describes.sandboxed('batchFetchJsonFor', {}, (env) => {
   // Fakes.
   const ampdoc = {win: null};
   // Service fakes.
   let urlReplacements;
   let batchedXhr;
+  let xhr;
   // Function stubs.
   let fetchJson;
   // Mutable return variables.
@@ -42,25 +42,25 @@ describe('batchFetchJsonFor', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-
     urlReplacements = {
-      expandUrlAsync: sandbox.stub(),
-      collectUnwhitelistedVarsSync: sandbox.stub(),
+      expandUrlAsync: env.sandbox.stub(),
+      collectDisallowedVarsSync: env.sandbox.stub(),
     };
-    sandbox.stub(Services, 'urlReplacementsForDoc').returns(urlReplacements);
+    env.sandbox
+      .stub(Services, 'urlReplacementsForDoc')
+      .returns(urlReplacements);
 
-    fetchJson = sandbox.stub().returns(
+    fetchJson = env.sandbox.stub().returns(
       Promise.resolve({
         json: () => Promise.resolve(data),
       })
     );
-    batchedXhr = {fetchJson};
-    sandbox.stub(Services, 'batchedXhrFor').returns(batchedXhr);
-  });
 
-  afterEach(() => {
-    sandbox.restore();
+    xhr = {xssiJson: () => Promise.resolve(data)};
+    env.sandbox.stub(Services, 'xhrFor').returns(xhr);
+
+    batchedXhr = {fetchJson};
+    env.sandbox.stub(Services, 'batchedXhrFor').returns(batchedXhr);
   });
 
   describe('URL replacement', () => {
@@ -70,31 +70,27 @@ describe('batchFetchJsonFor', () => {
       return batchFetchJsonFor(ampdoc, el).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=FOO&y=BAR');
         expect(urlReplacements.expandUrlAsync).to.not.be.called;
-        expect(urlReplacements.collectUnwhitelistedVarsSync).to.not.be.called;
+        expect(urlReplacements.collectDisallowedVarsSync).to.not.be.called;
       });
     });
 
     it(
-      'should throw user error if expanding non-whitelisted vars with ' +
-        'opt_urlReplacement == OPT_IN',
+      'should throw user error if expanding non-allowlisted vars with ' +
+        'urlReplacement == OPT_IN',
       () => {
         const el = element('https://data.com?x=FOO&y=BAR');
 
         urlReplacements.expandUrlAsync
           .withArgs('https://data.com?x=FOO&y=BAR')
           .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
-        urlReplacements.collectUnwhitelistedVarsSync
-          .withArgs(el)
-          .returns(['BAR']);
+        urlReplacements.collectDisallowedVarsSync.withArgs(el).returns(['BAR']);
 
         const optIn = UrlReplacementPolicy.OPT_IN;
-        const rejectError = /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
-        return batchFetchJsonFor(
-          ampdoc,
-          el,
-          null,
-          optIn
-        ).should.eventually.be.rejectedWith(rejectError);
+        const rejectError =
+          /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
+        return batchFetchJsonFor(ampdoc, el, {
+          urlReplacement: optIn,
+        }).should.eventually.be.rejectedWith(rejectError);
       }
     );
 
@@ -105,76 +101,13 @@ describe('batchFetchJsonFor', () => {
         .withArgs('https://data.com?x=FOO&y=BAR')
         .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
 
-      const userError = sandbox.stub(user(), 'error');
+      const userError = env.sandbox.stub(user(), 'error');
       const all = UrlReplacementPolicy.ALL;
-      return batchFetchJsonFor(ampdoc, el, null, all).then(() => {
+      return batchFetchJsonFor(ampdoc, el, {urlReplacement: all}).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
-        expect(urlReplacements.collectUnwhitelistedVarsSync).to.not.be.called;
+        expect(urlReplacements.collectDisallowedVarsSync).to.not.be.called;
         expect(userError).to.not.be.called;
       });
     });
   });
-
-  describe('POST based identity', () => {
-    it('should send POST request with auth token is present', () => {
-      const el = element('https://data.com');
-      const all = UrlReplacementPolicy.ALL;
-
-      urlReplacements.expandUrlAsync
-        .withArgs('https://data.com')
-        .returns(Promise.resolve('https://data.com'));
-
-      const expectedRequest = {
-        'body': {'ampViewerAuthToken': 'idtoken'},
-        'headers': {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        'method': 'POST',
-      };
-
-      return batchFetchJsonFor(ampdoc, el, null, all, false, 'idtoken').then(
-        () => {
-          expect(fetchJson).to.be.calledWithExactly(
-            'https://data.com',
-            expectedRequest
-          );
-        }
-      );
-    });
-
-    it('should send POST request with empty, defined identity token', () => {
-      const el = element('https://data.com');
-      const all = UrlReplacementPolicy.ALL;
-
-      urlReplacements.expandUrlAsync
-        .withArgs('https://data.com')
-        .returns(Promise.resolve('https://data.com'));
-
-      const token = '';
-      return batchFetchJsonFor(ampdoc, el, null, all, false, token).then(() => {
-        const fetchOpt = fetchJson.firstCall.args[1];
-        expect(fetchOpt.body.ampViewerAuthToken).to.equal('');
-        expect(fetchOpt.method).to.equal('POST');
-      });
-    });
-
-    it('should not transform the request with an undefined token', () => {
-      const el = element('https://data.com');
-      const all = UrlReplacementPolicy.ALL;
-
-      urlReplacements.expandUrlAsync
-        .withArgs('https://data.com')
-        .returns(Promise.resolve('https://data.com'));
-
-      const expectedRequest = {};
-
-      return batchFetchJsonFor(ampdoc, el, null, all, false).then(() => {
-        expect(fetchJson).to.be.calledWithExactly(
-          'https://data.com',
-          expectedRequest
-        );
-      });
-    });
-  });
-  // TODO(choumx): Add tests for normal fetch functionality.
 });

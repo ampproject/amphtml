@@ -25,14 +25,14 @@ describes.realWin(
       extensions: ['amp-call-tracking'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let xhrMock;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      xhrMock = sandbox.mock(Services.xhrFor(win));
+      xhrMock = env.sandbox.mock(Services.xhrFor(win));
     });
 
     afterEach(() => {
@@ -53,7 +53,7 @@ describes.realWin(
 
       doc.body.appendChild(callTrackingEl);
       return callTrackingEl
-        .build()
+        .buildInternal()
         .then(() => {
           return callTrackingEl.layoutCallback();
         })
@@ -63,7 +63,10 @@ describes.realWin(
     function mockXhrResponse(url, response) {
       xhrMock
         .expects('fetchJson')
-        .withArgs(url, sandbox.match(init => init.credentials == 'include'))
+        .withArgs(
+          url,
+          env.sandbox.match((init) => init.credentials == 'include')
+        )
         .returns(
           Promise.resolve({
             json() {
@@ -94,7 +97,7 @@ describes.realWin(
         url,
         defaultNumber,
         defaultContent,
-      }).then(callTrackingEl => {
+      }).then((callTrackingEl) => {
         expectHyperlinkToBe(callTrackingEl, `tel:${phoneNumber}`, phoneNumber);
       });
     });
@@ -114,7 +117,7 @@ describes.realWin(
         url,
         defaultNumber,
         defaultContent,
-      }).then(callTrackingEl => {
+      }).then((callTrackingEl) => {
         expectHyperlinkToBe(
           callTrackingEl,
           `tel:${phoneNumber}`,
@@ -135,7 +138,7 @@ describes.realWin(
         url,
         defaultNumber,
         defaultContent,
-      }).then(callTrackingEl => {
+      }).then((callTrackingEl) => {
         expectHyperlinkToBe(
           callTrackingEl,
           `tel:${defaultNumber}`,

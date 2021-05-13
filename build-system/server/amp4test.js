@@ -24,7 +24,6 @@ const upload = require('multer')();
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls, getServeMode} = require('./app-utils');
 
-const KARMA_SERVER_PORT = 9876;
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const SERVE_MODE = getServeMode();
 
@@ -38,7 +37,7 @@ function log(...messages) {
   }
 }
 
-app.use('/compose-doc', function(req, res) {
+app.use('/compose-doc', function (req, res) {
   res.setHeader('X-XSS-Protection', '0');
 
   const {body, css, experiments, extensions, spec} = req.query;
@@ -75,7 +74,7 @@ app.use('/compose-doc', function(req, res) {
   res.send(doc);
 });
 
-app.use('/compose-html', function(req, res) {
+app.use('/compose-html', function (req, res) {
   res.setHeader('X-XSS-Protection', '0');
   res.send(`
 <!doctype html>
@@ -91,11 +90,10 @@ ${req.query.body}
   `);
 });
 
-app.use('/compose-shadow', function(req, res) {
+app.use('/compose-shadow', function (req, res) {
   const {docUrl} = req.query;
   const viewerHtml = renderShadowViewer({
     src: docUrl.replace(/^\//, ''),
-    port: KARMA_SERVER_PORT,
     baseHref: path.dirname(req.url),
   });
   res.send(replaceUrls(SERVE_MODE, viewerHtml));
@@ -144,7 +142,7 @@ app.use('/request-bank/:bid/withdraw/:id/', (req, res) => {
       .status(500)
       .send(`another client is withdrawing this ID [${key}]`);
   }
-  const callback = function(result) {
+  const callback = function (result) {
     if (result === undefined) {
       // This happens when tearDown is called but no request
       // of given ID has been received yet.
@@ -189,7 +187,7 @@ app.get('/a4a/:bid', (req, res) => {
   cors.enableCors(req, res);
   const {bid} = req.params;
   const body = `
-  <a href=https://ampbyexample.com target=_blank>
+  <a href=https://amp.dev target=_blank>
     <amp-img alt="AMP Ad" height=250 src=//localhost:9876/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
   </a>
   <amp-pixel src="//localhost:9876/amp4test/request-bank/${bid}/deposit/pixel/foo?cid=CLIENT_ID(a)"></amp-pixel>
@@ -233,7 +231,7 @@ app.get('/a4a/:bid', (req, res) => {
 });
 
 /**
- * @param {{body: string, css: string|undefined, extensions: Array<string>|undefined, head: string|undefined, spec: string|undefined}} config
+ * @param {{body: string, css?: string|undefined, extensions: Array<string>|undefined, head?: string|undefined, spec?: string|undefined, mode?: string|undefined}} config
  * @return {string}
  */
 function composeDocument(config) {
@@ -283,7 +281,7 @@ function composeDocument(config) {
   let extensionScripts = '';
   if (extensions) {
     extensionScripts = extensions
-      .map(extension => {
+      .map((extension) => {
         const tuple = extension.split(':');
         const name = tuple[0];
         const version = tuple[1] || '0.1';
@@ -325,8 +323,8 @@ function composeDocument(config) {
     if (extensions) {
       end = topHalfOfHtml.indexOf(extensionScripts) + extensionScripts.length;
       // Filter out extensions that are not custom elements, e.g. amp-mustache.
-      customElements = extensions.filter(e => !CUSTOM_TEMPLATES.includes(e));
-      extensionsMap = customElements.map(ce => {
+      customElements = extensions.filter((e) => !CUSTOM_TEMPLATES.includes(e));
+      extensionsMap = customElements.map((ce) => {
         return {
           'custom-element': ce,
           // TODO: Should this be a local URL i.e. /dist/v0/...?

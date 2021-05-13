@@ -1,0 +1,14 @@
+// For an explanation of the OWNERS rules and syntax, see:
+// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
+
+{
+  rules: [
+    {
+      owners: [{name: 'ampproject/wg-caching', required: true}],
+    },
+    {
+      pattern: '{package.json,package-lock.json,WORKSPACE}',
+      owners: [{name: 'ampproject/wg-caching', required: false}],
+    },
+  ],
+}

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
+import {Deferred} from './core/data-structures/promise';
 import {Services} from './services';
+import {WindowInterface} from './window-interface';
 import {
   addParamsToUrl,
   isProxyOrigin,
@@ -37,9 +38,9 @@ const DEFAULT_APPEND_URL_PARAM = ['gclid', 'gclsrc'];
  * sending impression requests. If you believe your domain should be here,
  * file the issue on GitHub to discuss. The process will be similar
  * (but somewhat more stringent) to the one described in the [3p/README.md](
- * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+ * https://github.com/ampproject/amphtml/blob/main/3p/README.md)
  *
- * @export {!Array<!RegExp>}
+ * @type {!Array<!RegExp>}
  */
 const TRUSTED_REFERRER_HOSTS = [
   /**
@@ -76,7 +77,7 @@ export function maybeTrackImpression(win) {
 
   trackImpressionPromise = Services.timerFor(win)
     .timeoutPromise(TIMEOUT_VALUE, promise, 'TrackImpressionPromise timeout')
-    .catch(error => {
+    .catch((error) => {
       dev().warn('IMPRESSION', error);
     });
 
@@ -84,9 +85,9 @@ export function maybeTrackImpression(win) {
   const isTrustedViewerPromise = viewer.isTrustedViewer();
   const isTrustedReferrerPromise = viewer
     .getReferrerUrl()
-    .then(referrer => isTrustedReferrer(referrer));
+    .then((referrer) => isTrustedReferrer(referrer));
   Promise.all([isTrustedViewerPromise, isTrustedReferrerPromise]).then(
-    results => {
+    (results) => {
       const isTrustedViewer = results[0];
       const isTrustedReferrer = results[1];
       // Enable the feature in the case of trusted viewer,
@@ -153,14 +154,14 @@ function handleReplaceUrl(win) {
   return viewer
     .sendMessageAwaitResponse('getReplaceUrl', /* data */ undefined)
     .then(
-      response => {
+      (response) => {
         if (!response || typeof response != 'object') {
           dev().warn('IMPRESSION', 'get invalid replaceUrl response');
           return;
         }
         viewer.replaceUrl(response['replaceUrl'] || null);
       },
-      err => {
+      (err) => {
         dev().warn('IMPRESSION', 'Error request replaceUrl from viewer', err);
       }
     );
@@ -176,7 +177,7 @@ export function isTrustedReferrer(referrer) {
   if (url.protocol != 'https:') {
     return false;
   }
-  return TRUSTED_REFERRER_HOSTS.some(th => th.test(url.hostname));
+  return TRUSTED_REFERRER_HOSTS.some((th) => th.test(url.hostname));
 }
 
 /**
@@ -204,11 +205,11 @@ function handleClickUrl(win) {
     return Promise.resolve();
   }
 
-  if (win.location.hash) {
+  if (WindowInterface.getLocation(win).hash) {
     // This is typically done using replaceState inside the viewer.
     // If for some reason it failed, get rid of the fragment here to
     // avoid duplicate tracking.
-    win.location.hash = '';
+    WindowInterface.getLocation(win).hash = '';
   }
 
   // TODO(@zhouyx) need test with a real response.
@@ -217,10 +218,10 @@ function handleClickUrl(win) {
     .then(() => {
       return invoke(win, dev().assertString(clickUrl));
     })
-    .then(response => {
+    .then((response) => {
       applyResponse(win, response);
     })
-    .catch(err => {
+    .catch((err) => {
       user().warn('IMPRESSION', 'Error on request clickUrl: ', err);
     });
 }
@@ -239,7 +240,7 @@ function invoke(win, clickUrl) {
     .fetchJson(clickUrl, {
       credentials: 'include',
     })
-    .then(res => {
+    .then((res) => {
       // Treat 204 no content response specially
       if (res.status == 204) {
         return null;
@@ -278,7 +279,7 @@ function applyResponse(win, response) {
     }
 
     const viewer = Services.viewerForDoc(win.document.documentElement);
-    const currentHref = win.location.href;
+    const currentHref = WindowInterface.getLocation(win).href;
     const url = parseUrlDeprecated(adLocation);
     const params = parseQueryString(url.search);
     const newHref = addParamsToUrl(currentHref, params);
@@ -310,7 +311,7 @@ export function shouldAppendExtraParams(ampdoc) {
  */
 export function getExtraParamsUrl(win, target) {
   // Get an array with extra params that needs to append.
-  const url = parseUrlDeprecated(win.location.href);
+  const url = parseUrlDeprecated(WindowInterface.getLocation(win).href);
   const params = parseQueryString(url.search);
   const appendParams = [];
   for (let i = 0; i < DEFAULT_APPEND_URL_PARAM.length; i++) {

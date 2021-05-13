@@ -71,6 +71,11 @@ limitations under the License.
     <td>Launched</td>
   </tr>
   <tr>
+    <td><a href="lazy-fetch.md">Lazy Fetch</a></td>
+    <td>Allows for delaying ad request until slot is within a configurable distance from the viewport.</td>
+    <td>Launched</td>
+  </tr>
+  <tr>
     <td><a href="refresh.md">Refresh</a></td>
     <td>Enabled slots will periodically refetch new creatives.</td>
     <td>Launched</td>
@@ -94,20 +99,25 @@ limitations under the License.
     <td>Integration with AMP Consent extension.</td>
     <td>Launched</td>
   </tr>
+  <tr>
+    <td><a href="always-serve-npa.md">Always Serve NPA</a></td>
+    <td>Utilizes <code>&lt;amp-geo></code> to detect user's geo location to decide if a non-personalized ad should be requested regardless of user consent.</td>
+    <td>Beta</td>
+  </tr>
 </table>
 
 #### Examples
+
 Example - Google Ad Manager Ad
+
 ```html
-<amp-ad width=728 height=90
-    type="doubleclick"
-    data-slot="/6355419/Travel">
+<amp-ad width="728" height="90" type="doubleclick" data-slot="/6355419/Travel">
 </amp-ad>
 ```
+
 ### Configuration
 
 For semantics of configuration, please see [ad network documentation](https://developers.google.com/doubleclick-gpt/reference).
-
 
 #### Ad size
 
@@ -116,11 +126,14 @@ By default the ad size is based on the `width` and `height` attributes of the `a
 Example:
 
 ```html
-<amp-ad width=320 height=50
-    data-override-width=111
-    data-override-height=222
-    type="doubleclick"
-    data-slot="/4119129/mobile_ad_banner">
+<amp-ad
+  width="320"
+  height="50"
+  data-override-width="111"
+  data-override-height="222"
+  type="doubleclick"
+  data-slot="/4119129/mobile_ad_banner"
+>
 </amp-ad>
 ```
 
@@ -128,37 +141,42 @@ For multi-size attributes, see the <a href="multi-size.md">multi-size documentat
 
 ### Supported parameters
 
-- `data-slot`: Full path of the ad unit with the network code and unit code.
-- `data-multi-size`: See the <a href="multi-size.md">multi-size documentation page</a> for details.
-- `data-multi-size-validation`
+-   `data-slot`: Full path of the ad unit with the network code and unit code.
+-   `data-multi-size`: See the <a href="multi-size.md">multi-size documentation page</a> for details.
+-   `data-multi-size-validation`
 
 Supported via `json` attribute:
 
-- `categoryExclusions`: Sets a slot-level category exclusion for the given label name.
-- `cookieOptions`: Sets options for ignoring DFP cookies on the current page.
-  - 0: Enables DFP cookies on ad requests on the page. This option is set by default.
-  - 1: Ignores DFP cookies on subsequent ad requests and prevents cookies from being created on the page.
-- `tagForChildDirectedTreatment`: Configures whether the slot should be treated as child-directed.
-See the TFCD article for <a href="https://support.google.com/dfp_sb/answer/3721907">Small Business</a> or <a href="https://support.google.com/dfp_premium/answer/3671211">Premium</a> for more details and allowed values.
-- `targeting`: Sets a custom targeting parameter for this slot. Values must of the form:
-  - `"<key_string>":"<value_string>"` or
-  - `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
+-   `categoryExclusions`: Sets a slot-level category exclusion for the given label name.
+-   `cookieOptions`: Sets options for ignoring DFP cookies on the current page.
+    -   0: Enables DFP cookies on ad requests on the page. This option is set by default.
+    -   1: Ignores DFP cookies on subsequent ad requests and prevents cookies from being created on the page.
+-   `tagForChildDirectedTreatment`: Configures whether the slot should be treated as child-directed.
+    See the TFCD article for <a href="https://support.google.com/dfp_sb/answer/3721907">Small Business</a> or <a href="https://support.google.com/dfp_premium/answer/3671211">Premium</a> for more details and allowed values.
+-   `targeting`: Sets a custom targeting parameter for this slot. Values must of the form:
+    -   `"<key_string>":"<value_string>"` or
+    -   `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
 
 Example with json attribute:
 
 ```html
-<amp-ad width=320 height=50
-    type="doubleclick"
-    data-slot="/4119129/mobile_ad_banner"
-    json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1}'>
+<amp-ad
+  width="320"
+  height="50"
+  type="doubleclick"
+  data-slot="/4119129/mobile_ad_banner"
+  json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1}'
+>
 </amp-ad>
 ```
 
 ### Supported DFP Formats
-- Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
-- Expandable formats can now leverage the <a href="safeframe.md">Safeframe API</a>.
+
+-   Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
+-   Expandable formats can now leverage the <a href="safeframe.md">Safeframe API</a>.
 
 ### Unsupported DFP Formats
-- Interstitials
-- Flash
-- Creatives served over HTTP.
+
+-   Interstitials
+-   Flash
+-   Creatives served over HTTP.

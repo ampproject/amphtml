@@ -23,14 +23,10 @@ function poll(description, condition, opt_onError) {
   return classicPoll(description, condition, opt_onError, TIMEOUT);
 }
 
-// TODO(choumx): If possible / desired, make these tests work on Single-pass,
-// on Windows (Edge, Firefox, and Chrome), and on Safari.
-// TODO (choumx@): Do not stub private method and unskip
-describe
+describes.sandboxed
   .configure()
-  .skipSafari()
-  .skipSinglePass()
-  .skip('amp-script', function() {
+  .skipFirefox()
+  .run('amp-script', {}, function () {
     this.timeout(TIMEOUT);
 
     let browser, doc, element;
@@ -38,24 +34,22 @@ describe
     describes.integration(
       'container ',
       {
-        /* eslint-disable max-len */
         body: `
       <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert Hello World!</button>
         <button id="long">Long task</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
-      env => {
+      (env) => {
         beforeEach(() => {
           browser = new BrowserController(env.win);
           doc = env.win.document;
           element = doc.querySelector('amp-script');
         });
 
-        it('should say "hello world"', function*() {
+        it('should say "hello world"', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -64,7 +58,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+          env.sandbox
+            .stub(impl.getUserActivation(), 'isActive')
+            .callsFake(() => true);
           browser.click('button#hello');
 
           yield poll('mutations applied', () => {
@@ -73,7 +69,7 @@ describe
           });
         });
 
-        it('should terminate without gesture', function*() {
+        it('should terminate without gesture', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -82,7 +78,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
+          env.sandbox
+            .stub(impl.getUserActivation(), 'isActive')
+            .callsFake(() => false);
           browser.click('button#hello');
 
           // Give mutations time to apply.
@@ -92,7 +90,7 @@ describe
           });
         });
 
-        it('should start long task', function*() {
+        it('should start long task', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -101,10 +99,15 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+          env.sandbox
+            .stub(impl.getUserActivation(), 'isActive')
+            .callsFake(() => true);
           // TODO(dvoytenko): Find a way to test this with the race condition when
           // the resource is fetched before the first polling iteration.
-          const stub = sandbox.stub(impl.userActivation_, 'expandLongTask');
+          const stub = env.sandbox.stub(
+            impl.getUserActivation(),
+            'expandLongTask'
+          );
           browser.click('button#long');
           yield poll('long task started', () => {
             return stub.callCount > 0;
@@ -116,7 +119,6 @@ describe
     describes.integration(
       'sanitizer',
       {
-        /* eslint-disable max-len */
         body: `
       <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
         <p>Number of mutations: <span id="mutationCount">0</span></p>
@@ -124,17 +126,16 @@ describe
         <button id="img">Insert img</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
-      env => {
+      (env) => {
         beforeEach(() => {
           browser = new BrowserController(env.win);
           doc = env.win.document;
           element = doc.querySelector('amp-script');
         });
 
-        it('should sanitize <script> injection', function*() {
+        it('should sanitize <script> injection', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -143,7 +144,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+          env.sandbox
+            .stub(impl.getUserActivation(), 'isActive')
+            .callsFake(() => true);
           browser.click('button#script');
 
           yield poll('mutations applied', () => {
@@ -155,7 +158,7 @@ describe
           expect(scripts.length).to.equal(0);
         });
 
-        it('should sanitize <img> injection', function*() {
+        it('should sanitize <img> injection', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -164,7 +167,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+          env.sandbox
+            .stub(impl.getUserActivation(), 'isActive')
+            .callsFake(() => true);
           browser.click('button#img');
 
           yield poll('mutations applied', () => {
@@ -179,26 +184,24 @@ describe
     );
 
     describes.integration(
-      'fixed small',
+      'sandboxed',
       {
-        /* eslint-disable max-len */
         body: `
-      <amp-script layout=fixed width=300 height=200
-          src="/examples/amp-script/amp-script-demo.js">
-        <button id="hello">Insert</button>
+      <amp-script sandboxed src="/examples/amp-script/amp-script-demo.js">
+        <button id="hello">Insert Hello World!</button>
+        <button id="long">Long task</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
-      env => {
+      (env) => {
         beforeEach(() => {
           browser = new BrowserController(env.win);
           doc = env.win.document;
           element = doc.querySelector('amp-script');
         });
 
-        it('should allow without gesture for small size-defined', function*() {
+        it('should say "hello world"', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -207,8 +210,11 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
+          env.sandbox
+            .stub(impl.getUserActivation(), 'isActive')
+            .callsFake(() => true);
           browser.click('button#hello');
+
           yield poll('mutations applied', () => {
             const h1 = doc.querySelector('h1');
             return h1 && h1.textContent == 'Hello World!';
@@ -218,26 +224,24 @@ describe
     );
 
     describes.integration(
-      'fixed big',
+      'defined-layout',
       {
-        /* eslint-disable max-len */
         body: `
-      <amp-script layout=fixed width=300 height=301
+      <amp-script layout=fixed width=300 height=200
           src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
-      env => {
+      (env) => {
         beforeEach(() => {
           browser = new BrowserController(env.win);
           doc = env.win.document;
           element = doc.querySelector('amp-script');
         });
 
-        it('should terminate without gesture for big size-defined', function*() {
+        it('should allow mutation without gesture', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -246,13 +250,13 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
+          env.sandbox
+            .stub(impl.getUserActivation(), 'isActive')
+            .callsFake(() => false);
           browser.click('button#hello');
-
-          // Give mutations time to apply.
-          yield browser.wait(100);
-          yield poll('terminated', () => {
-            return element.classList.contains('i-amphtml-broken');
+          yield poll('mutations applied', () => {
+            const h1 = doc.querySelector('h1');
+            return h1 && h1.textContent == 'Hello World!';
           });
         });
       }

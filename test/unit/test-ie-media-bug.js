@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import {checkAndFix} from '../../src/service/ie-media-bug';
 import {dev} from '../../src/log';
+import {ieMediaCheckAndFix} from '../../src/service/ie-media-bug';
 
-describe('ie-media-bug', () => {
-  let sandbox;
+describes.sandboxed('ie-media-bug', {}, (env) => {
   let clock;
   let windowApi, windowMock;
   let platform;
@@ -26,13 +25,12 @@ describe('ie-media-bug', () => {
   let devErrorStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     platform = {
       isIe: () => false,
     };
-    platformMock = sandbox.mock(platform);
-    devErrorStub = sandbox.stub(dev(), 'error');
+    platformMock = env.sandbox.mock(platform);
+    devErrorStub = env.sandbox.stub(dev(), 'error');
 
     windowApi = {
       innerWidth: 320,
@@ -40,20 +38,19 @@ describe('ie-media-bug', () => {
       clearInterval: () => {},
       matchMedia: () => {},
     };
-    windowMock = sandbox.mock(windowApi);
+    windowMock = env.sandbox.mock(windowApi);
   });
 
   afterEach(() => {
     platformMock.verify();
     windowMock.verify();
-    sandbox.restore();
   });
 
   it('should bypass polling for non-IE browsers', () => {
     platformMock.expects('isIe').returns(false);
     windowMock.expects('matchMedia').never();
     windowMock.expects('setInterval').never();
-    const promise = checkAndFix(windowApi, platform);
+    const promise = ieMediaCheckAndFix(windowApi, platform);
     expect(promise).to.be.null;
     expect(devErrorStub).to.have.not.been.called;
   });
@@ -66,7 +63,7 @@ describe('ie-media-bug', () => {
       .returns({matches: true})
       .once();
     windowMock.expects('setInterval').never();
-    const promise = checkAndFix(windowApi, platform);
+    const promise = ieMediaCheckAndFix(windowApi, platform);
     expect(promise).to.be.null;
     expect(devErrorStub).to.have.not.been.called;
   });
@@ -85,7 +82,7 @@ describe('ie-media-bug', () => {
     windowMock
       .expects('setInterval')
       .withExactArgs(
-        sinon.match(arg => {
+        env.sandbox.match((arg) => {
           intervalCallback = arg;
           return true;
         }),
@@ -94,7 +91,7 @@ describe('ie-media-bug', () => {
       .returns(intervalId)
       .once();
 
-    const promise = checkAndFix(windowApi, platform);
+    const promise = ieMediaCheckAndFix(windowApi, platform);
     expect(promise).to.be.not.null;
     expect(devErrorStub).to.have.not.been.called;
     expect(intervalCallback).to.exist;
@@ -103,7 +100,7 @@ describe('ie-media-bug', () => {
 
     // Second pass.
     clock.tick(10);
-    windowMock = sandbox.mock(windowApi);
+    windowMock = env.sandbox.mock(windowApi);
     windowMock
       .expects('matchMedia')
       .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
@@ -117,16 +114,13 @@ describe('ie-media-bug', () => {
 
     // Third pass - succeed.
     clock.tick(10);
-    windowMock = sandbox.mock(windowApi);
+    windowMock = env.sandbox.mock(windowApi);
     windowMock
       .expects('matchMedia')
       .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
       .returns({matches: true})
       .once();
-    windowMock
-      .expects('clearInterval')
-      .withExactArgs(intervalId)
-      .once();
+    windowMock.expects('clearInterval').withExactArgs(intervalId).once();
     intervalCallback();
     windowMock.verify();
     windowMock./*OK*/ restore();
@@ -150,7 +144,7 @@ describe('ie-media-bug', () => {
     windowMock
       .expects('setInterval')
       .withExactArgs(
-        sinon.match(arg => {
+        env.sandbox.match((arg) => {
           intervalCallback = arg;
           return true;
         }),
@@ -158,12 +152,9 @@ describe('ie-media-bug', () => {
       )
       .returns(intervalId)
       .once();
-    windowMock
-      .expects('clearInterval')
-      .withExactArgs(intervalId)
-      .once();
+    windowMock.expects('clearInterval').withExactArgs(intervalId).once();
 
-    const promise = checkAndFix(windowApi, platform);
+    const promise = ieMediaCheckAndFix(windowApi, platform);
     expect(promise).to.be.not.null;
     expect(devErrorStub).to.have.not.been.called;
     expect(intervalCallback).to.exist;
@@ -193,7 +184,7 @@ describe('ie-media-bug', () => {
       .once();
     windowMock.expects('setInterval').never();
 
-    const promise = checkAndFix(windowApi, platform);
+    const promise = ieMediaCheckAndFix(windowApi, platform);
     expect(promise).to.be.null;
     expect(devErrorStub).to.be.calledOnce;
   });

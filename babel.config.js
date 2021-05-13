@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview Global configuration file for the babelify transform.
+ * @fileoverview Global configuration file for various babel transforms.
  *
  * Notes: From https://babeljs.io/docs/en/plugins#plugin-ordering:
  * 1. Plugins run before Presets.
@@ -25,45 +25,45 @@
 
 'use strict';
 
-const minimist = require('minimist');
-const {isTravisBuild} = require('./build-system/common/travis');
-const argv = minimist(process.argv.slice(2));
+const {cyan, yellow} = require('./build-system/common/colors');
+const {log} = require('./build-system/common/logging');
 
-const isDist = argv._.includes('dist');
-const {esm} = argv;
-const noModuleTarget = {
-  'browsers': isTravisBuild()
-    ? ['Last 2 versions', 'safari >= 9']
-    : ['Last 2 versions'],
-};
+/**
+ * Mapping of each babel transform caller to the name of the function that
+ * returns its config.
+ */
+const babelTransforms = new Map([
+  ['babel-jest', 'getEmptyConfig'],
+  ['post-closure', 'getPostClosureConfig'],
+  ['pre-closure', 'getPreClosureConfig'],
+  ['test', 'getTestConfig'],
+  ['unminified', 'getUnminifiedConfig'],
+  ['minified', 'getMinifiedConfig'],
+  ['@babel/eslint-parser', 'getEslintConfig'],
+]);
 
-// eslint-disable-next-line local/no-module-exports
-module.exports = function(api) {
-  api.cache(true);
-  // `dist` builds do not use any of the default settings below until its
-  // an esm build. (Both Multipass and Singlepass)
-  if (isDist && !esm) {
+/**
+ * Main entry point. Returns babel config corresponding to the caller, or an
+ * empty object if the caller is unrecognized. Configs are lazy-required when
+ * requested so we don't unnecessarily compute the entire set for all callers.
+ *
+ * @param {!Object} api
+ * @return {!Object}
+ */
+module.exports = function (api) {
+  const callerName = api.caller((callerObj) => {
+    return callerObj ? callerObj.name : '<unnamed>';
+  });
+  if (callerName && babelTransforms.has(callerName)) {
+    const configFunctionName = babelTransforms.get(callerName);
+    return require('./build-system/babel-config')[configFunctionName]();
+  } else {
+    log(
+      yellow('WARNING:'),
+      'Unrecognized Babel caller',
+      cyan(callerName),
+      '(see babel.config.js).'
+    );
     return {};
   }
-  return {
-    'presets': [
-      esm
-        ? [
-            'babel-preset-modules',
-            {
-              'loose': true,
-            },
-          ]
-        : [
-            '@babel/preset-env',
-            {
-              'modules': isDist ? false : 'commonjs',
-              'loose': true,
-              'targets': noModuleTarget,
-            },
-          ],
-    ],
-    'compact': false,
-    'sourceType': 'module',
-  };
 };

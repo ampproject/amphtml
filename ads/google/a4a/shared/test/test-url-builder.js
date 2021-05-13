@@ -16,10 +16,10 @@
 
 import {buildUrl} from '../url-builder';
 
-describe('buildUrl', () => {
+describes.sandboxed('buildUrl', {}, () => {
   it('should build a simple URL', () => {
     expect(
-      buildUrl('https://example.com', {'key': 'value'}, Infinity)
-    ).to.equal('https://example.com?key=value');
+      buildUrl('https://example.test', {'key': 'value'}, Infinity)
+    ).to.equal('https://example.test?key=value');
   });
 });

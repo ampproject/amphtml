@@ -24,9 +24,9 @@ import {
   setModalAsOpen,
 } from '../../src/modal';
 import {htmlFor} from '../../src/static-template';
-import {toArray} from '../../src/types';
+import {toArray} from '../../src/core/types/array';
 
-describes.fakeWin('modal', {}, env => {
+describes.fakeWin('modal', {}, (env) => {
   let win;
   let doc;
   let html;

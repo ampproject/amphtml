@@ -40,7 +40,7 @@ FAIL
 |      <amp-story-grid-layer template="vertical">
 |        <p><not-a-real-tag></p>
 >>          ^~~~~~~~~
-feature_tests/stamp-descendant.html:40:9 The tag 'not-a-real-tag' is disallowed. [DISALLOWED_HTML]
+feature_tests/stamp-descendant.html:40:9 The tag 'not-a-real-tag' is disallowed.
 |      </amp-story-grid-layer>
 |    </amp-story-page>
 |  </amp-story>

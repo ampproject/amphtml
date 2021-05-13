@@ -16,9 +16,9 @@
 
 import {Input} from '../../src/input';
 import {installTimerService} from '../../src/service/timer-impl.js';
+import {stubService} from '../../testing/test-helper';
 
-describe('Input', () => {
-  let sandbox;
+describes.sandboxed('Input', {}, (env) => {
   let clock;
   let input;
   let eventListeners;
@@ -26,8 +26,7 @@ describe('Input', () => {
   let documentApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     eventListeners = {};
 
@@ -54,10 +53,6 @@ describe('Input', () => {
     input = new Input(windowApi);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('should initialize in touch mode', () => {
     expect(input.isTouchDetected()).to.equal(true);
     expect(input.isMouseDetected()).to.equal(false);
@@ -71,19 +66,19 @@ describe('Input', () => {
 
   it('should fire states immediately', () => {
     let touchDetected = undefined;
-    input.onTouchDetected(detected => {
+    input.onTouchDetected((detected) => {
       touchDetected = detected;
     }, true);
     expect(touchDetected).to.equal(true);
 
     let mouseDetected = undefined;
-    input.onMouseDetected(detected => {
+    input.onMouseDetected((detected) => {
       mouseDetected = detected;
     }, true);
     expect(mouseDetected).to.equal(false);
 
     let kbActive = undefined;
-    input.onKeyboardStateChanged(active => {
+    input.onKeyboardStateChanged((active) => {
       kbActive = active;
     }, true);
     expect(kbActive).to.equal(false);
@@ -98,7 +93,7 @@ describe('Input', () => {
   it('should detect mouse', () => {
     expect(input.isMouseDetected()).to.equal(false);
     let mouseDetected = undefined;
-    input.onMouseDetected(detected => {
+    input.onMouseDetected((detected) => {
       mouseDetected = detected;
     });
     expect(mouseDetected).to.equal(undefined);
@@ -118,7 +113,7 @@ describe('Input', () => {
   it('should try to detect mouse again', () => {
     expect(input.isMouseDetected()).to.equal(false);
     let mouseDetected = undefined;
-    input.onMouseDetected(detected => {
+    input.onMouseDetected((detected) => {
       mouseDetected = detected;
     });
     expect(mouseDetected).to.equal(undefined);
@@ -138,7 +133,7 @@ describe('Input', () => {
   it('should ignore mouse move if it belongs to touch', () => {
     expect(input.isMouseDetected()).to.equal(false);
     let mouseDetected = undefined;
-    input.onMouseDetected(detected => {
+    input.onMouseDetected((detected) => {
       mouseDetected = detected;
     });
     expect(mouseDetected).to.equal(undefined);
@@ -157,7 +152,7 @@ describe('Input', () => {
   it('should stop trying to detect mouse after few attempts', () => {
     expect(input.isMouseDetected()).to.equal(false);
     let mouseDetected = undefined;
-    input.onMouseDetected(detected => {
+    input.onMouseDetected((detected) => {
       mouseDetected = detected;
     });
     expect(mouseDetected).to.equal(undefined);
@@ -179,7 +174,7 @@ describe('Input', () => {
   it('should detect keyboard states', () => {
     expect(input.isKeyboardActive()).to.equal(false);
     let kbActive = undefined;
-    input.onKeyboardStateChanged(active => {
+    input.onKeyboardStateChanged((active) => {
       kbActive = active;
     });
     expect(kbActive).to.equal(undefined);
@@ -205,7 +200,7 @@ describe('Input', () => {
   it('should ignore keyboard state on input', () => {
     expect(input.isKeyboardActive()).to.equal(false);
     let kbActive = undefined;
-    input.onKeyboardStateChanged(active => {
+    input.onKeyboardStateChanged((active) => {
       kbActive = active;
     });
     expect(kbActive).to.equal(undefined);
@@ -216,3 +211,48 @@ describe('Input', () => {
     expect(kbActive).to.equal(undefined);
   });
 });
+
+describes.realWin(
+  'test-input.js setupInputModeClasses',
+  {amp: false},
+  (env) => {
+    let ampdoc;
+    let input;
+    let body;
+
+    beforeEach(() => {
+      body = env.win.document.body;
+      ampdoc = {
+        waitForBodyOpen: () => Promise.resolve(body),
+      };
+      stubService(env.sandbox, env.win, 'vsync', 'mutate').callsFake((func) => {
+        func();
+      });
+      input = new Input(env.win);
+      input.setupInputModeClasses(ampdoc);
+    });
+
+    it('should add amp-mode-mouse class to body when mouseConfirmed', async () => {
+      expect(body).to.not.have.class('amp-mode-mouse');
+      input.mouseConfirmed_();
+      await new Promise(setTimeout);
+      expect(body).to.have.class('amp-mode-mouse');
+    });
+
+    it('should add amp-mode-keyboard-active class to body when onKeyDown', async () => {
+      expect(body).to.not.have.class('amp-mode-keyboard-active');
+      simulateKeyDown();
+      await new Promise(setTimeout);
+      expect(body).to.have.class('amp-mode-keyboard-active');
+    });
+
+    function simulateKeyDown() {
+      const event = new /*OK*/ KeyboardEvent('keydown', {
+        'keyCode': 65,
+        'which': 65,
+        bubbles: true,
+      });
+      env.win.document.body.dispatchEvent(event);
+    }
+  }
+);

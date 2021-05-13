@@ -21,16 +21,16 @@ Collect and enforce user consent with the Didomi Consent Management Platform. Us
 ## Example
 
 ```html
-<amp-consent id='didomi' layout='nodisplay' type='didomi'>
+<amp-consent id="didomi" layout="nodisplay" type="didomi">
   <script type="application/json">
-  {
-    "postPromptUI": "postPromptUI",
-    "clientConfig": {"config": {"app": {"apiKey": "Your-API-Key"}}}}
-  }
+    {
+      "postPromptUI": "postPromptUI",
+      "clientConfig": {"config": {"app": {"apiKey": "Your-API-Key"}}}}
+    }
   </script>
   <div id="postPromptUI">
     Post Prompt UI
-    <button on="tap:didomi.prompt(consent=didomi)" role="button">Manage</button>
+    <button on="tap:didomi.prompt(consent=didomi)">Manage</button>
   </div>
 </amp-consent>
 ```

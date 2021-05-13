@@ -15,9 +15,9 @@
  */
 
 import {Services} from '../services';
-import {devAssert, user, userAssert} from '../log';
-import {dict, map} from './object';
-import {fromIterator} from './array';
+import {devAssert, userAssert} from '../core/assert';
+import {dict, isObject, map} from '../core/types/object';
+import {fromIterator, isArray} from '../core/types/array';
 import {
   getCorsUrl,
   getWinOrigin,
@@ -26,7 +26,8 @@ import {
   serializeQueryString,
 } from '../url';
 import {getMode} from '../mode';
-import {isArray, isObject} from '../types';
+import {user} from '../log';
+
 import {isExperimentOn} from '../experiments';
 import {isFormDataWrapper} from '../form-data-wrapper';
 
@@ -77,10 +78,9 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  *     cloneable.
  * @return {{input: string, init: !FetchInitDef}} The serialized structurally-
  *     cloneable request.
- * @private
  */
 export function toStructuredCloneable(input, init) {
-  const newInit = Object.assign({}, init);
+  const newInit = /** @type {!FetchInitDef} */ ({...init});
   if (isFormDataWrapper(init.body)) {
     const wrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
@@ -155,12 +155,11 @@ export function fromStructuredCloneable(response, responseType) {
   if (response['init']) {
     const init = response['init'];
     if (isArray(init.headers)) {
-      init.headers.forEach(entry => {
+      /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
-        lowercasedHeaders[String(headerName).toLowerCase()] = String(
-          headerValue
-        );
+        lowercasedHeaders[String(headerName).toLowerCase()] =
+          String(headerValue);
       });
     }
     if (init.status) {
@@ -193,7 +192,6 @@ export function fromStructuredCloneable(response, responseType) {
  * @return {!Promise<!Response|undefined>}
  *     A response returned by the interceptor if XHR is intercepted or
  *     `Promise<undefined>` otherwise.
- * @private
  */
 export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   if (!ampdocSingle) {
@@ -220,7 +218,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
 
   return whenUnblocked
     .then(() => viewer.isTrustedViewer())
-    .then(viewerTrusted => {
+    .then((viewerTrusted) => {
       if (
         !(
           viewerTrusted ||
@@ -235,7 +233,9 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
       });
       return viewer
         .sendMessageAwaitResponse('xhr', messagePayload)
-        .then(response => fromStructuredCloneable(response, init.responseType));
+        .then((response) =>
+          fromStructuredCloneable(response, init.responseType)
+        );
     });
 }
 
@@ -317,7 +317,7 @@ export function setupJsonFetchInit(init) {
     // Assume JSON strict mode where only objects or arrays are allowed
     // as body.
     devAssert(
-      allowedJsonBodyTypes_.some(test => test(fetchInit.body)),
+      allowedJsonBodyTypes_.some((test) => test(fetchInit.body)),
       'body must be of type object or array. %s',
       fetchInit.body
     );
@@ -373,52 +373,19 @@ function isRetriable(status) {
  * Returns the response if successful or otherwise throws an error.
  * @param {!Response} response
  * @return {!Promise<!Response>}
- * @private Visible for testing
  */
 export function assertSuccess(response) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     if (response.ok) {
       return resolve(response);
     }
 
     const {status} = response;
     const err = user().createError(`HTTP error ${status}`);
-    err.retriable = isRetriable(status);
+    err['retriable'] = isRetriable(status);
     // TODO(@jridgewell, #9448): Callers who need the response should
     // skip processing.
-    err.response = response;
+    err['response'] = response;
     throw err;
   });
-}
-
-/**
- * Returns a promise resolving to a string identity token if the element
- * contains the 'crossorigin' attribute and the amp-viewer-assistance extension
- * is present. Resolves to undefined otherwise.
- * @param {!Element} element
- * @return {!Promise<undefined>}
- */
-export function getViewerAuthTokenIfAvailable(element) {
-  const crossOriginAttr = element.getAttribute('crossorigin');
-  if (
-    crossOriginAttr &&
-    crossOriginAttr.trim() === 'amp-viewer-auth-token-via-post'
-  ) {
-    return (
-      Services.viewerAssistanceForDocOrNull(element)
-        .then(va => {
-          userAssert(
-            va,
-            'crossorigin="amp-viewer-auth-token-post" ' +
-              'requires amp-viewer-assistance extension.'
-          );
-          return va.getIdTokenPromise();
-        })
-        // If crossorigin attr is present, resolve with token or empty string.
-        .then(token => token || '')
-        .catch(() => '')
-    );
-  }
-  // If crossorigin attribute is missing, always resolve with undefined.
-  return Promise.resolve(undefined);
 }

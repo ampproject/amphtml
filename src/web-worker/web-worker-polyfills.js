@@ -23,8 +23,12 @@ import {install as installArrayIncludes} from '../polyfills/array-includes';
 import {install as installMathSign} from '../polyfills/math-sign';
 import {install as installObjectAssign} from '../polyfills/object-assign';
 import {install as installObjectValues} from '../polyfills/object-values';
+import {install as installStringStartsWith} from '../polyfills/string-starts-with';
 
-installArrayIncludes(self);
-installObjectAssign(self);
-installObjectValues(self);
-installMathSign(self);
+if (!IS_ESM) {
+  installArrayIncludes(self);
+  installObjectAssign(self);
+  installObjectValues(self);
+  installMathSign(self);
+  installStringStartsWith(self);
+}

@@ -5,6 +5,7 @@ formats:
 teaser:
   text: A single screen of an AMP story.
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -21,48 +22,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-story-page`
+# amp-story-page
+
+## Usage
 
 The `<amp-story-page>` component represents the content to display on a single page of a story.
 
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>container</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/introduction/stories_in_amp">Annotated code example for stories</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 <figure class="centered-fig">
-  <amp-anim alt="Page 1 example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/pages-page-1.gif">
+  <amp-anim alt="Page 1 example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/pages-page-1.gif">
   <noscript>
-    <img alt="Page 1 example" width="200" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/pages-page-1.gif" />
+    <img alt="Page 1 example" width="200" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/pages-page-1.gif" />
   </noscript>
   </amp-anim>
 </figure>
 <figure class="centered-fig">
-  <amp-anim alt="Page 2 example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/pages-page-2.gif">
+  <amp-anim alt="Page 2 example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/pages-page-2.gif">
   <noscript>
-    <img alt="Page 2 example" width="200" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/pages-page-2.gif" />
+    <img alt="Page 2 example" width="200" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/pages-page-2.gif" />
   </noscript>
   </amp-anim>
 </figure>
-
-## Example
 
 ```html
 <amp-story-page id="cover">
   <amp-story-grid-layer template="fill">
-    <amp-video layout="fill" src="background.mp4" poster="background.png" muted autoplay></amp-video>
+    <amp-video
+      layout="fill"
+      src="background.mp4"
+      poster="background.png"
+      muted
+      autoplay
+    ></amp-video>
   </amp-story-grid-layer>
   <amp-story-grid-layer template="vertical">
     <h1>These are the Top 5 World's Most...</h1>
@@ -70,10 +60,19 @@ The `<amp-story-page>` component represents the content to display on a single p
     <p>May 18</p>
   </amp-story-grid-layer>
   <amp-story-grid-layer template="thirds">
-    <amp-img grid-area="bottom-third" src="a-logo.svg" width="64" height="64"></amp-img>
+    <amp-img
+      grid-area="bottom-third"
+      src="a-logo.svg"
+      width="64"
+      height="64"
+    ></amp-img>
   </amp-story-grid-layer>
 </amp-story-page>
 ```
+
+## Valid children
+
+The `<amp-story-page>` component contains one or more [layers](amp-story-grid-layer.md). Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).
 
 ## Attributes
 
@@ -83,15 +82,33 @@ A unique identifier for the page. Can be used for styling the page and its desce
 
 ### auto-advance-after [optional]
 
-Specifies when to auto-advance to the next page.  If omitted, the page will not automatically advance. The value for `auto-advance-after` must be either:
+Specifies when to auto-advance to the next page. If omitted, the page will not automatically advance. The value for `auto-advance-after` must be either a specified amount of time, or the `id` of an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) or video-interface.
 
-  * A positive amount of [time](https://developer.mozilla.org/en-US/docs/Web/CSS/time) to wait before automatically advancing to the next page
-  * An ID of an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) or video-interface video whose completion will trigger the auto-advance
+#### Time
 
-For example:
+Auto-advance to the next story page after a specified amount of [time](https://developer.mozilla.org/en-US/docs/Web/CSS/time). The time must be positive.
 
 ```html
 <amp-story-page id="tokyo" auto-advance-after="1s">
+  ...
+</amp-story-page>
+```
+
+#### Element `id`
+
+You can auto-advance to the next story page when a video completes. Point the `auto-advance-after` attribute to the id of an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) or video-interface that displays the video. This includes AMP specific components, like [`amp-video`](../amp-video/amp-video.md).
+
+```html
+<amp-story-page id="tokyo" auto-advance-after="video1">
+  ...
+  	<amp-video autoplay id="video1"
+    width="720" height="1280"
+    poster="todo.jpg"
+    layout="responsive">
+    <source src="video1.mp4" type="video/mp4">
+    </amp-video>
+  ...
+</amp-story-page>
 ```
 
 ### background-audio [optional]
@@ -101,9 +118,8 @@ A URI to an audio file that plays while this page is in view.
 For example:
 
 ```html
-<amp-story-page id="zurich" background-audio="./media/switzerland.mp3">
+<amp-story-page
+  id="zurich"
+  background-audio="./media/switzerland.mp3"
+></amp-story-page>
 ```
-
-## Children (of amp-story-page)
-
-The `<amp-story-page>` component contains one or more [layers](amp-story-grid-layer.md).  Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).

@@ -14,46 +14,40 @@
  * limitations under the License.
  */
 
-import {getData} from '../../../../src/event-helper';
-import {parseJson} from '../../../../src/json';
-
 const TAG = 'amp-viewer-messaging';
-export const APP = '__AMPHTML__';
+const CHANNEL_OPEN_MSG = 'channelOpen';
+const HANDSHAKE_POLL_MSG = 'handshake-poll';
+const APP = '__AMPHTML__';
 
 /**
  * @enum {string}
  */
-export const MessageType = {
+const MessageType = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
 
 /**
- * @typedef {!AmpViewerMessage}
- */
-export let Message;
-
-/**
  * @typedef {function(string, *, boolean):(!Promise<*>|undefined)}
  */
-export let RequestHandler;
+let RequestHandler; // eslint-disable-line no-unused-vars
 
 /**
  * @param {*} message
- * @return {?Message}
+ * @return {?AmpViewerMessage}
  */
 export function parseMessage(message) {
   if (typeof message != 'string') {
-    return /** @type {Message} */ (message);
+    return /** @type {AmpViewerMessage} */ (message);
   }
   if (message.charAt(0) != '{') {
     return null;
   }
 
   try {
-    return /** @type {?Message} */ /** @type {?} */ (parseJson(
-      /** @type {string} */ (message)
-    ));
+    return /** @type {?AmpViewerMessage} */ (
+      JSON.parse(/** @type {string} */ (message))
+    );
   } catch (e) {
     return null;
   }
@@ -71,26 +65,22 @@ export class WindowPortEmulator {
    * @param {!Window} target
    */
   constructor(win, origin, target) {
-    /** @const {!Window} */
-    this.win = win;
-    /** @private {string} */
+    /** @const @private {!Window} */
+    this.win_ = win;
+    /** @const @private {string} */
     this.origin_ = origin;
-    /** @private @const {!Window} */
+    /** @const @private {!Window} */
     this.target_ = target;
   }
 
   /**
    * @param {string} eventType
-   * @param {function(!Event):undefined} handler
+   * @param {function(!Event):*} handler
    */
   addEventListener(eventType, handler) {
-    this.win.addEventListener('message', e => {
-      if (
-        e.origin == this.origin_ &&
-        e.source == this.target_ &&
-        getData(e)['app'] == APP
-      ) {
-        handler(e);
+    this.win_.addEventListener('message', (event) => {
+      if (event.origin == this.origin_ && event.source == this.target_) {
+        handler(event);
       }
     });
   }
@@ -99,7 +89,10 @@ export class WindowPortEmulator {
    * @param {JsonObject} data
    */
   postMessage(data) {
-    this.target_./*OK*/ postMessage(data, this.origin_);
+    // Opaque (null) origin can only receive messages sent to "*"
+    const targetOrigin = this.origin_ === 'null' ? '*' : this.origin_;
+
+    this.target_./*OK*/ postMessage(data, targetOrigin);
   }
 
   /**
@@ -117,18 +110,111 @@ export class WindowPortEmulator {
  */
 export class Messaging {
   /**
+   * Performs a handshake and initializes messaging.
+   *
+   * Requires the `handshakepoll` viewer capability and the `origin` viewer parameter to be specified.
+   * @param {!Window} target - window containing AMP document to perform handshake with
+   * @param {?string=} opt_token - message token to verify on incoming messages (must be provided as viewer parameter)
+   * @return {!Promise<!Messaging>}
+   */
+  static initiateHandshakeWithDocument(target, opt_token) {
+    return new Promise((resolve) => {
+      const intervalRef = setInterval(() => {
+        const channel = new MessageChannel();
+        const pollMessage = /** @type {JsonObject} */ ({
+          app: APP,
+          name: HANDSHAKE_POLL_MSG,
+        });
+        target./*OK*/ postMessage(pollMessage, '*', [channel.port2]);
+
+        const port = channel.port1;
+        const listener = (event) => {
+          const message = parseMessage(event.data);
+          if (!message) {
+            return;
+          }
+          if (message.app === APP && message.name === CHANNEL_OPEN_MSG) {
+            clearInterval(intervalRef);
+            port.removeEventListener('message', listener);
+            const messaging = new Messaging(
+              null,
+              port,
+              /* opt_isWebview */ false,
+              opt_token,
+              /* opt_verifyToken */ true
+            );
+            messaging.sendResponse_(message.requestid, CHANNEL_OPEN_MSG, null);
+            resolve(messaging);
+          }
+        };
+        port.addEventListener('message', listener);
+        port.start();
+      }, 1000);
+    });
+  }
+
+  /**
+   * Waits for handshake from iframe and initializes messaging.
+   *
+   * Requires the `origin` viewer parameter to be specified.
+   * @param {!Window} source - the source window containing the viewer
+   * @param {!Window} target - window containing AMP document to perform handshake with (usually contentWindow of iframe)
+   * @param {string} origin - origin of target window (use "null" if opaque)
+   * @param {?string=} opt_token - message token to verify on incoming messages (must be provided as viewer parameter)
+   * @param {?RegExp=} opt_cdnProxyRegex
+   * @return {!Promise<!Messaging>}
+   */
+  static waitForHandshakeFromDocument(
+    source,
+    target,
+    origin,
+    opt_token,
+    opt_cdnProxyRegex
+  ) {
+    return new Promise((resolve) => {
+      const listener = (event) => {
+        const message = parseMessage(event.data);
+        if (!message) {
+          return;
+        }
+        if (
+          (event.origin == origin ||
+            (opt_cdnProxyRegex && opt_cdnProxyRegex.test(event.origin))) &&
+          (!event.source || event.source == target) &&
+          message.app === APP &&
+          message.name === CHANNEL_OPEN_MSG
+        ) {
+          source.removeEventListener('message', listener);
+          const port = new WindowPortEmulator(source, event.origin, target);
+          const messaging = new Messaging(
+            null,
+            port,
+            /* opt_isWebview */ false,
+            opt_token,
+            /* opt_verifyToken */ true
+          );
+          messaging.sendResponse_(message.requestid, CHANNEL_OPEN_MSG, null);
+          resolve(messaging);
+        }
+      };
+      source.addEventListener('message', listener);
+    });
+  }
+
+  /**
    * Conversation (messaging protocol) between me and Bob.
-   * @param {!Window} win
+   * @param {?Window} win
    * @param {!MessagePort|!WindowPortEmulator} port
    * @param {boolean=} opt_isWebview
    * @param {?string=} opt_token
+   * @param {boolean=} opt_verifyToken
    */
-  constructor(win, port, opt_isWebview, opt_token) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(win, port, opt_isWebview, opt_token, opt_verifyToken) {
+    /** @const @private {?Window} */
+    this.win_ = win;
     /** @const @private {!MessagePort|!WindowPortEmulator} */
     this.port_ = port;
-    /** @const @private */
+    /** @const @private {boolean} */
     this.isWebview_ = !!opt_isWebview;
 
     /**
@@ -159,6 +245,13 @@ export class Messaging {
      * @const @private {?string}
      */
     this.token_ = opt_token || null;
+
+    /**
+     * If true, the token above is verified on incoming messages instead of
+     * being attached to outgoing messages.
+     * @const @private {boolean}
+     */
+    this.verifyToken_ = !!opt_verifyToken;
 
     /** @private {number} */
     this.requestIdCounter_ = 0;
@@ -209,13 +302,22 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    const message = parseMessage(getData(event));
-    if (!message) {
+    const message = parseMessage(event.data);
+    if (!message || message.app !== APP) {
       return;
     }
-    if (message.type == MessageType.REQUEST) {
+    if (
+      this.token_ &&
+      this.verifyToken_ &&
+      message.messagingToken !== this.token_
+    ) {
+      // We received a message with an invalid token - dismiss it.
+      this.logError_(TAG + ': handleMessage_ error: ', 'invalid token');
+      return;
+    }
+    if (message.type === MessageType.REQUEST) {
       this.handleRequest_(message);
-    } else if (message.type == MessageType.RESPONSE) {
+    } else if (message.type === MessageType.RESPONSE) {
       this.handleResponse_(message);
     }
   }
@@ -276,7 +378,7 @@ export class Messaging {
   sendResponseError_(requestId, messageName, reason) {
     const errString = this.errorToString_(reason);
     this.logError_(
-      TAG + ': sendResponseError_, Message name: ' + messageName,
+      TAG + ': sendResponseError_, message name: ' + messageName,
       errString
     );
     this.sendMessage_(
@@ -292,13 +394,13 @@ export class Messaging {
   }
 
   /**
-   * @param {Message} message
+   * @param {!AmpViewerMessage} message
    * @private
    */
   sendMessage_(message) {
     const /** Object<string, *> */ finalMessage = Object.assign(message, {});
-    if (this.token_) {
-      finalMessage['messagingToken'] = this.token_;
+    if (this.token_ && !this.verifyToken_) {
+      finalMessage.messagingToken = this.token_;
     }
     this.port_./*OK*/ postMessage(
       this.isWebview_
@@ -311,7 +413,7 @@ export class Messaging {
    * I'm handling an incoming request from Bob. I'll either respond normally
    * (ex: "got it Bob!") or with an error (ex: "I didn't get a word of what
    * you said!").
-   * @param {Message} message
+   * @param {!AmpViewerMessage} message
    * @private
    */
   handleRequest_(message) {
@@ -321,7 +423,7 @@ export class Messaging {
     }
     if (!handler) {
       const error = new Error(
-        'Cannot handle request because handshake is not yet confirmed!'
+        'Cannot handle request because no default handler is set!'
       );
       error.args = message.name;
       throw error;
@@ -339,10 +441,10 @@ export class Messaging {
         throw new Error('expected response but none given: ' + message.name);
       }
       promise.then(
-        data => {
+        (data) => {
           this.sendResponse_(requestId, message.name, data);
         },
-        reason => {
+        (reason) => {
           this.sendResponseError_(requestId, message.name, reason);
         }
       );
@@ -352,7 +454,7 @@ export class Messaging {
   /**
    * I sent out a request to Bob. He responded. And now I'm handling that
    * response.
-   * @param {Message} message
+   * @param {!AmpViewerMessage} message
    * @private
    */
   handleResponse_(message) {
@@ -377,10 +479,13 @@ export class Messaging {
    * @private
    */
   logError_(state, opt_data) {
+    if (!this.win_) {
+      return;
+    }
     let stateStr = 'amp-messaging-error-logger: ' + state;
     const dataStr = ' data: ' + this.errorToString_(opt_data);
     stateStr += dataStr;
-    this.win['viewerState'] = stateStr;
+    this.win_['viewerState'] = stateStr;
   }
 
   /**

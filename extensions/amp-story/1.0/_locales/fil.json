@@ -1,0 +1,47 @@
+{
+  "2": {"string": "I-tap ang Susunod"},
+  "3": {"string": "I-tap ang Bumalik"},
+  "4": {"string": "Hindi makopya sa clipboard ang link :("},
+  "5": {"string": "Nakopya ang link!"},
+  "6": {"string": "Email"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Kunin ang Link"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Palawakin ang parehong taas at lapad ng iyong window para tingnan ang karanasang ito"
+  },
+  "19": {
+    "string": "Kailangan mong i-enable ang amp-story experiment para makita ang content na ito."
+  },
+  "20": {"string": "Pinakamahusay na tingnan ang page na ito sa portrait mode"},
+  "21": {
+    "string": "Ikinalulungkot namin, mukhang hindi sinusuportahan ng iyong browser ang karanasang ito"
+  },
+  "22": {"string": "Tanggapin"},
+  "23": {"string": "Tanggihan"},
+  "25": {"string": "Tingnan sa orihinal na domain:"},
+  "26": {"string": "Higit pa tungkol sa mga resulta ng AMP"},
+  "27": {"string": "Magpatuloy Pa Rin"},
+  "28": {"string": "Baguhin ang mga setting ng privacy ng data"},
+  "29": {"string": "Mga setting ng privacy"},
+  "30": {"string": "Higit pang babasahin"},
+  "31": {"string": "I-off ang tunog"},
+  "32": {"string": "I-on ang tunog"},
+  "33": {"string": "Walang tunog ang page na ito"},
+  "34": {"string": "I-play ang video"},
+  "35": {"string": "Mag-swipe pataas"},
+  "36": {"string": "I-expand ang Tweet"},
+  "37": {
+    "string": "Palawakin ang taas ng iyong window para makita ang karanasang ito"
+  },
+  "38": {
+    "string": "Palawakin ang lapad ng iyong window para makita ang karanasang ito"
+  },
+  "63": {"string": "Line"}
+}

@@ -6,32 +6,14 @@ Test coverage for the repository as computed by CodeCov
 
 ![Absolute Code Coverage](https://amp-project-metrics.appspot.com/api/plot/AbsoluteCoverageMetric.png)
 
-## Presubmit Latency
+## Cherrypick Issue Count
 
-Average Travis build time over the last 90 days
+Number of cherry-pick issues in the last 90 days
 
-![Presubmit Latency](https://amp-project-metrics.appspot.com/api/plot/PresubmitLatencyMetric.png)
-
-## Release Cherrypick Count
-
-Number of cherry-picks in releases over the last 90 days
-
-![Release Cherrypick Count](https://amp-project-metrics.appspot.com/api/plot/ReleaseCherrypickCountMetric.png)
+![Cherrypick Issue Count](https://amp-project-metrics.appspot.com/api/plot/CherrypickIssueCountMetric.png)
 
 ## Release Granularity
 
 Average commits per release over the last 90 days
 
 ![Release Granularity](https://amp-project-metrics.appspot.com/api/plot/ReleaseGranularityMetric.png)
-
-## Travis Greenness
-
-Percentage of green Travis builds over the last 90 days
-
-![Travis Greenness](https://amp-project-metrics.appspot.com/api/plot/TravisGreennessMetric.png)
-
-## Travis Flakiness
-
-Percentage of flaky Travis builds over the last 90 days
-
-![Travis Flakiness](https://amp-project-metrics.appspot.com/api/plot/TravisFlakinessMetric.png)

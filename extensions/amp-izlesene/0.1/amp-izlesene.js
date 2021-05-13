@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+import {PauseHelper} from '../../../src/utils/pause-helper';
+import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpIzlesene extends AMP.BaseElement {
   /**
@@ -33,6 +36,9 @@ class AmpIzlesene extends AMP.BaseElement {
     this.iframe_ = null;
     /** @private {?string} */
     this.videoIframeSrc_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -40,9 +46,16 @@ class AmpIzlesene extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url(this.getVideoIframeSrc_());
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      this.getVideoIframeSrc_()
+    );
     // Host that Izlesene uses to serve poster frames needed by player.
-    this.preconnect.url('https://i1.imgiz.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://i1.imgiz.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -52,6 +65,8 @@ class AmpIzlesene extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    setIsMediaComponent(this.element);
+
     this.videoid_ = userAssert(
       this.element.getAttribute('data-videoid'),
       'The data-videoid attribute is required for <amp-izlesene> %s',
@@ -93,7 +108,19 @@ class AmpIzlesene extends AMP.BaseElement {
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
 
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      this.element.removeChild(this.iframe_);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
   }
 
   /** @override */
@@ -109,6 +136,6 @@ class AmpIzlesene extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-izlesene', '0.1', AMP => {
+AMP.extension('amp-izlesene', '0.1', (AMP) => {
   AMP.registerElement('amp-izlesene', AmpIzlesene);
 });

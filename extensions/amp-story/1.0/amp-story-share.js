@@ -15,21 +15,20 @@
  */
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
 import {Toast} from './toast';
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
 } from '../../../src/clipboard';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, map} from './../../../src/utils/object';
+import {dict, map} from './../../../src/core/types/object';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
-import {isExperimentOn} from '../../../src/experiments';
-import {isObject} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import {throttle} from '../../../src/utils/rate-limit';
+import {throttle} from '../../../src/core/types/function';
 
 /**
  * Maps share provider type to visible name.
@@ -65,13 +64,13 @@ const MIN_BUTTON_PADDING = 10;
 
 /**
  * Key for share providers in bookend config.
- * @private @const {string}
+ * @const {string}
  */
 export const SHARE_PROVIDERS_KEY = 'shareProviders';
 
 /**
  * Deprecated key for share providers in bookend config.
- * @private @const {string}
+ * @const {string}
  */
 export const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
 
@@ -94,51 +93,37 @@ const TEMPLATE = {
 };
 
 /** @private @const {!./simple-template.ElementDef} */
-const SHARE_PAGE_TEMPLATE = {
-  tag: 'div',
-  attrs: dict({
-    'class': 'i-amphtml-story-page-share',
-  }),
-  children: [
-    {
-      tag: 'input',
-      attrs: dict({
-        'class': 'i-amphtml-story-page-share-input',
-        'type': 'checkbox',
-        'id': 'page-share',
-      }),
-    },
-    {
-      tag: 'label',
-      attrs: dict({
-        'class': 'i-amphtml-story-page-share-label',
-        'for': 'page-share',
-      }),
-      localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PAGE_LABEL,
-    },
-  ],
-};
-
-/** @private @const {!./simple-template.ElementDef} */
 const SHARE_ITEM_TEMPLATE = {
   tag: 'li',
   attrs: dict({'class': 'i-amphtml-story-share-item'}),
 };
 
-/** @private @const {!./simple-template.ElementDef} */
-const LINK_SHARE_ITEM_TEMPLATE = {
-  tag: 'div',
-  attrs: dict({
-    'class': 'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
-  }),
-  children: [
-    {
-      tag: 'span',
-      attrs: dict({'class': 'i-amphtml-story-share-label'}),
-      localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
-    },
-  ],
-};
+/**
+ * @private
+ * @param {!Element} el
+ * @return {./simple-template-ElementDef}
+ */
+function buildLinkShareItemTemplate(el) {
+  return {
+    tag: 'div',
+    attrs: dict({
+      'class': 'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
+      'tabindex': 0,
+      'role': 'button',
+      'aria-label': getLocalizationService(el).getLocalizedString(
+        LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+      ),
+    }),
+    children: [
+      {
+        tag: 'span',
+        attrs: dict({'class': 'i-amphtml-story-share-label'}),
+        localizedStringId:
+          LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
+      },
+    ],
+  };
+}
 
 /** @private @const {string} */
 const SCROLLABLE_CLASSNAME = 'i-amphtml-story-share-widget-scrollable';
@@ -151,7 +136,7 @@ function buildProviderParams(opt_params) {
   const attrs = dict();
 
   if (opt_params) {
-    Object.keys(opt_params).forEach(field => {
+    Object.keys(opt_params).forEach((field) => {
       if (field === 'provider') {
         return;
       }
@@ -179,15 +164,17 @@ function buildProvider(doc, shareType, opt_params) {
     /** @type {!Array<!./simple-template.ElementDef>} */ ([
       {
         tag: 'amp-social-share',
-        attrs: /** @type {!JsonObject} */ (Object.assign(
-          dict({
-            'width': 48,
-            'height': 48,
-            'class': 'i-amphtml-story-share-icon',
-            'type': shareType,
-          }),
-          buildProviderParams(opt_params)
-        )),
+        attrs: /** @type {!JsonObject} */ (
+          Object.assign(
+            dict({
+              'width': 48,
+              'height': 48,
+              'class': 'i-amphtml-story-share-icon',
+              'type': shareType,
+            }),
+            buildProviderParams(opt_params)
+          )
+        ),
         children: [
           {
             tag: 'span',
@@ -248,14 +235,8 @@ export class ShareWidget {
     /** @protected {?Element} */
     this.root = null;
 
-    /** @private {?Promise<?../../../src/service/localization.LocalizationService>} */
-    this.localizationServicePromise_ = null;
-
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, storyEl);
-
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win);
   }
 
   /**
@@ -275,16 +256,12 @@ export class ShareWidget {
     devAssert(!this.root, 'Already built.');
 
     this.ampdoc_ = ampdoc;
-    this.localizationServicePromise_ = Services.localizationServiceForOrNull(
-      this.win
-    );
 
     this.root = renderAsElement(this.win.document, TEMPLATE);
 
     this.loadProviders();
     this.maybeAddLinkShareButton_();
     this.maybeAddSystemShareButton_();
-    this.maybeAddPageShareButton_();
 
     return this.root;
   }
@@ -305,61 +282,38 @@ export class ShareWidget {
 
     const linkShareButton = renderAsElement(
       this.win.document,
-      LINK_SHARE_ITEM_TEMPLATE
+      buildLinkShareItemTemplate(this.storyEl)
     );
 
     this.add_(linkShareButton);
 
-    listen(linkShareButton, 'click', e => {
+    listen(linkShareButton, 'click', (e) => {
       e.preventDefault();
-      let shareFromCurrentPage = false;
-      if (isExperimentOn(this.win, 'amp-story-branching')) {
-        shareFromCurrentPage = this.root.querySelector('#page-share').checked;
+      this.copyUrlToClipboard_();
+    });
+    listen(linkShareButton, 'keyup', (e) => {
+      const code = e.charCode || e.keyCode;
+      // Check if pressed Space or Enter to trigger button.
+      if (code === 32 || code === 13) {
+        e.preventDefault();
+        this.copyUrlToClipboard_();
       }
-      this.copyUrlToClipboard_(shareFromCurrentPage);
     });
   }
 
   /**
-   * On desktop mode, with branching, users should be able to share a story
-   * starting from a specific page.
    * @private
    */
-  maybeAddPageShareButton_() {
-    if (isExperimentOn(this.win, 'amp-story-branching')) {
-      const list = devAssert(this.root).firstChild;
-      const sharePageCheck = renderAsElement(
-        this.win.document,
-        SHARE_PAGE_TEMPLATE
-      );
-      this.root.insertBefore(sharePageCheck, list);
-    }
-  }
-
-  /**
-   * @param {boolean} shareFromCurrentPage
-   * @private
-   */
-  copyUrlToClipboard_(shareFromCurrentPage) {
-    const currentPageId = this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
-    const shouldAddFragment =
-      isExperimentOn(this.win, 'amp-story-branching') && shareFromCurrentPage;
-
-    const url =
-      Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl +
-      (shouldAddFragment ? '#page=' + currentPageId : '');
+  copyUrlToClipboard_() {
+    const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
-      this.localizationServicePromise_.then(localizationService => {
-        devAssert(
-          localizationService,
-          'Could not retrieve LocalizationService.'
-        );
-        const failureString = localizationService.getLocalizedString(
-          LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
-        );
-        Toast.show(this.storyEl, dev().assertString(failureString));
-      });
+      const localizationService = getLocalizationService(this.storyEl);
+      devAssert(localizationService, 'Could not retrieve LocalizationService.');
+      const failureString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
+      );
+      Toast.show(this.storyEl, dev().assertString(failureString));
       return;
     }
 
@@ -408,7 +362,7 @@ export class ShareWidget {
   loadProviders() {
     this.loadRequiredExtensions();
 
-    this.requestService_.loadBookendConfig().then(config => {
+    this.requestService_.loadShareConfig().then((config) => {
       const providers =
         config &&
         (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);
@@ -425,7 +379,7 @@ export class ShareWidget {
    * TODO(alanorozco): Set story metadata in share config.
    */
   setProviders_(providers) {
-    providers.forEach(provider => {
+    /** @type {!Array} */ (providers).forEach((provider) => {
       if (isObject(provider)) {
         this.add_(
           buildProvider(
@@ -529,17 +483,17 @@ export class ScrollableShareWidget extends ShareWidget {
       if (this.root./*OK*/ offsetWidth < this.root./*OK*/ scrollWidth) {
         this.root.addEventListener(
           'touchstart',
-          event => event.stopPropagation(),
+          (event) => event.stopPropagation(),
           {capture: true}
         );
         this.root.addEventListener(
           'touchmove',
-          event => event.stopPropagation(),
+          (event) => event.stopPropagation(),
           {capture: true}
         );
         this.root.addEventListener(
           'touchend',
-          event => event.stopPropagation(),
+          (event) => event.stopPropagation(),
           {capture: true}
         );
       }
@@ -562,7 +516,7 @@ export class ScrollableShareWidget extends ShareWidget {
 
     this.vsync_.run(
       {
-        measure: state => {
+        measure: (state) => {
           const containerWidth = this.root./*OK*/ clientWidth;
 
           if (containerWidth == this.containerWidth_) {
@@ -606,7 +560,7 @@ export class ScrollableShareWidget extends ShareWidget {
 
           this.containerWidth_ = containerWidth;
         },
-        mutate: state => {
+        mutate: (state) => {
           if (state.noop) {
             return;
           }
@@ -630,10 +584,8 @@ export class ScrollableShareWidget extends ShareWidget {
    */
   getVisibleItems_() {
     return Array.prototype.filter.call(
-      dev()
-        .assertElement(this.root)
-        .querySelectorAll('li'),
-      el => !!el.firstElementChild
+      dev().assertElement(this.root).querySelectorAll('li'),
+      (el) => !!el.firstElementChild
     );
   }
 

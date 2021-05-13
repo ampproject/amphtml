@@ -16,7 +16,7 @@
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
 import {
-  InternalWebAnimationRequestDef, // eslint-disable-line no-unused-vars
+  InternalWebAnimationRequestDef,
   WebAnimationDef,
   WebAnimationSelectorDef,
   WebAnimationSubtargetDef,
@@ -28,21 +28,29 @@ import {
   WebKeyframesDef,
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
-  isWhitelistedProp,
+  isAllowlistedProp,
 } from './web-animation-types';
 import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {closestAncestorElementBySelector, matches} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  matches,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
-import {dashToCamelCase, startsWith} from '../../../src/string';
+import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject, toArray} from '../../../src/types';
+import {isArray, toArray} from '../../../src/core/types/array';
 import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
-import {map} from '../../../src/utils/object';
+import {isObject} from '../../../src/core/types';
+import {layoutRectLtwh} from '../../../src/layout-rect';
+import {map} from '../../../src/core/types/object';
 import {parseCss} from './parsers/css-expr';
 
 /** @const {string} */
@@ -62,6 +70,16 @@ let animIdCounter = 0;
 const SERVICE_PROPS = {
   'offset': true,
   'easing': true,
+};
+
+/**
+ * Clip-path is an only CSS property we allow for animation that may require
+ * vendor prefix. And it's always "-webkit". Use a simple map to avoid
+ * expensive lookup for all other properties.
+ */
+const ADD_PROPS = {
+  'clip-path': '-webkit-clip-path',
+  'clipPath': '-webkit-clip-path',
 };
 
 /**
@@ -152,13 +170,14 @@ export class Builder {
    * @param {string} baseUrl
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
    * @param {!../../../src/service/owners-interface.OwnersInterface} owners
+   * @param {!./web-animation-types.WebAnimationBuilderOptionsDef=} options
    */
-  constructor(win, rootNode, baseUrl, vsync, owners) {
+  constructor(win, rootNode, baseUrl, vsync, owners, options = {}) {
     /** @const @private */
     this.win_ = win;
 
     /** @const @private */
-    this.css_ = new CssContextImpl(win, rootNode, baseUrl);
+    this.css_ = new CssContextImpl(win, rootNode, baseUrl, options);
 
     /** @const @private */
     this.vsync_ = vsync;
@@ -182,7 +201,7 @@ export class Builder {
    * @return {!Promise<!./runners/animation-runner.AnimationRunner>}
    */
   createRunner(spec, opt_args, opt_positionObserverData = null) {
-    return this.resolveRequests([], spec, opt_args).then(requests => {
+    return this.resolveRequests([], spec, opt_args).then((requests) => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
@@ -399,7 +418,7 @@ export class MeasureScanner extends Scanner {
       animationElement.tagName == 'AMP-ANIMATION',
       `Element is not an animation: "${spec.animation}"`
     );
-    const otherSpecPromise = animationElement.getImpl().then(impl => {
+    const otherSpecPromise = animationElement.getImpl().then((impl) => {
       return impl.getAnimationSpec();
     });
     this.with_(spec, () => {
@@ -410,7 +429,7 @@ export class MeasureScanner extends Scanner {
         timing_: timing,
       } = this;
       const promise = otherSpecPromise
-        .then(otherSpec => {
+        .then((otherSpec) => {
           if (!otherSpec) {
             return;
           }
@@ -424,8 +443,10 @@ export class MeasureScanner extends Scanner {
             timing
           );
         })
-        .then(requests => {
-          requests.forEach(request => this.requests_.push(request));
+        .then((requests) => {
+          /** @type {!Array} */ (requests).forEach((request) =>
+            this.requests_.push(request)
+          );
         });
       this.deps_.push(promise);
     });
@@ -455,7 +476,7 @@ export class MeasureScanner extends Scanner {
     let specKeyframes = spec.keyframes;
     if (typeof specKeyframes == 'string') {
       // Keyframes name to be extracted from `<style>`.
-      const keyframes = extractKeyframes(this.css_.rootNode_, specKeyframes);
+      const keyframes = extractKeyframes(this.css_.rootNode, specKeyframes);
       userAssert(
         keyframes,
         `Keyframes not found in stylesheet: "${specKeyframes}"`
@@ -466,7 +487,7 @@ export class MeasureScanner extends Scanner {
     if (isObject(specKeyframes)) {
       // Property -> keyframes form.
       // The object is cloned, while properties are verified to be
-      // whitelisted. Additionally, the `offset:0` frames are inserted
+      // allowlisted. Additionally, the `offset:0` frames are inserted
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187
       const object = /** @type {!Object<string, *>} */ (specKeyframes);
@@ -484,16 +505,19 @@ export class MeasureScanner extends Scanner {
           const toValue = isArray(value) ? value[0] : value;
           preparedValue = [fromValue, this.css_.resolveCss(toValue)];
         } else {
-          preparedValue = value.map(v => this.css_.resolveCss(v));
+          preparedValue = value.map((v) => this.css_.resolveCss(v));
         }
         keyframes[prop] = preparedValue;
+        if (prop in ADD_PROPS) {
+          keyframes[ADD_PROPS[prop]] = preparedValue;
+        }
       }
       return keyframes;
     }
 
     if (isArray(specKeyframes) && specKeyframes.length > 0) {
       // Keyframes -> property form.
-      // The array is cloned, while properties are verified to be whitelisted.
+      // The array is cloned, while properties are verified to be allowlisted.
       // Additionally, if the `offset:0` properties are inserted when absent
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187 and
@@ -521,6 +545,14 @@ export class MeasureScanner extends Scanner {
         }
         keyframes.push(this.css_.resolveCssMap(frame));
       }
+      for (let i = 0; i < keyframes.length; i++) {
+        const frame = keyframes[i];
+        for (const k in ADD_PROPS) {
+          if (k in frame) {
+            frame[ADD_PROPS[k]] = frame[k];
+          }
+        }
+      }
       return keyframes;
     }
 
@@ -546,8 +578,8 @@ export class MeasureScanner extends Scanner {
       return;
     }
     userAssert(
-      isWhitelistedProp(prop),
-      'Property is not whitelisted for animation: %s',
+      isAllowlistedProp(prop),
+      'Property is not allowlisted for animation: %s',
       prop
     );
   }
@@ -621,7 +653,7 @@ export class MeasureScanner extends Scanner {
     } else if (this.target_) {
       targets = [this.target_];
     }
-    targets.forEach(target => this.builder_.requireLayout(target));
+    targets.forEach((target) => this.builder_.requireLayout(target));
     return targets;
   }
 
@@ -636,7 +668,7 @@ export class MeasureScanner extends Scanner {
       return spec;
     }
     const result = map(spec);
-    spec.subtargets.forEach(subtargetSpec => {
+    spec.subtargets.forEach((subtargetSpec) => {
       const matcher = this.getMatcher_(subtargetSpec);
       if (matcher(target, index)) {
         Object.assign(result, subtargetSpec);
@@ -667,7 +699,7 @@ export class MeasureScanner extends Scanner {
     } else {
       // Match by selector, e.g. `:nth-child(2n+1)`.
       const specSelector = /** @type {string} */ (spec.selector);
-      matcher = target => {
+      matcher = (target) => {
         try {
           return matches(target, specSelector);
         } catch (e) {
@@ -694,13 +726,13 @@ export class MeasureScanner extends Scanner {
     // the previous and new vars.
     const result = map(prevVars);
     for (const k in newVars) {
-      if (startsWith(k, '--')) {
+      if (k.startsWith('--')) {
         result[k] = newVars[k];
       }
     }
     this.css_.withVars(result, () => {
       for (const k in newVars) {
-        if (startsWith(k, '--')) {
+        if (k.startsWith('--')) {
           result[k] = this.css_.resolveCss(newVars[k]);
         }
       }
@@ -739,14 +771,12 @@ export class MeasureScanner extends Scanner {
 
     // Identifier CSS values.
     const easing = this.css_.resolveIdent(newTiming.easing, prevTiming.easing);
-    const direction = /** @type {!WebAnimationTimingDirection} */ (this.css_.resolveIdent(
-      newTiming.direction,
-      prevTiming.direction
-    ));
-    const fill = /** @type {!WebAnimationTimingFill} */ (this.css_.resolveIdent(
-      newTiming.fill,
-      prevTiming.fill
-    ));
+    const direction = /** @type {!WebAnimationTimingDirection} */ (
+      this.css_.resolveIdent(newTiming.direction, prevTiming.direction)
+    );
+    const fill = /** @type {!WebAnimationTimingFill} */ (
+      this.css_.resolveIdent(newTiming.fill, prevTiming.fill)
+    );
 
     // Validate.
     this.validateTime_(duration, newTiming.duration, 'duration');
@@ -819,13 +849,22 @@ class CssContextImpl {
    * @param {!Window} win
    * @param {!Document|!ShadowRoot} rootNode
    * @param {string} baseUrl
+   * @param {!./web-animation-types.WebAnimationBuilderOptionsDef} options
    */
-  constructor(win, rootNode, baseUrl) {
+  constructor(win, rootNode, baseUrl, options) {
+    const {scope = null, scaleByScope = false} = options;
+
     /** @const @private */
     this.win_ = win;
 
-    /** @const @private */
+    /** @const @private {!Document|!ShadowRoot} */
     this.rootNode_ = rootNode;
+
+    /** @const @private {?Element} */
+    this.scope_ = scope;
+
+    /** @const @private {boolean} */
+    this.scaleByScope_ = scaleByScope;
 
     /** @const @private */
     this.baseUrl_ = baseUrl;
@@ -854,8 +893,20 @@ class CssContextImpl {
     /** @private {?string} */
     this.dim_ = null;
 
-    /** @private {?{width: number, height: number}} */
-    this.viewportSize_ = null;
+    /**
+     * @private {?{
+     *   size: {width: number, height: number},
+     *   offset: {x: number, y: number},
+     *   scaleFactorX: number,
+     *   scaleFactorY: number,
+     * }}
+     */
+    this.viewportParams_ = null;
+  }
+
+  /** @return {!Document|!ShadowRoot} */
+  get rootNode() {
+    return this.rootNode_;
   }
 
   /**
@@ -882,7 +933,7 @@ class CssContextImpl {
    * @return {?Element}
    */
   getElementById(id) {
-    return this.rootNode_.getElementById(id);
+    return this.scopedQuerySelector_(`#${escapeCssSelectorIdent(id)}`);
   }
 
   /**
@@ -891,7 +942,7 @@ class CssContextImpl {
    */
   queryElements(selector) {
     try {
-      return toArray(this.rootNode_./*OK*/ querySelectorAll(selector));
+      return toArray(this.scopedQuerySelectorAll_(selector));
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
     }
@@ -914,13 +965,13 @@ class CssContextImpl {
     let styles = this.computedStyleCache_[targetId];
     if (!styles) {
       styles = computedStyle(this.win_, target);
-      this.computedStyleCache_[
-        targetId
-      ] = /** @type {!CSSStyleDeclaration} */ (styles);
+      this.computedStyleCache_[targetId] = /** @type {!CSSStyleDeclaration} */ (
+        styles
+      );
     }
 
     // Resolve a var or a property.
-    return startsWith(prop, '--')
+    return prop.startsWith('--')
       ? styles.getPropertyValue(prop)
       : styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
   }
@@ -1139,13 +1190,32 @@ class CssContextImpl {
 
   /** @override */
   getViewportSize() {
-    if (!this.viewportSize_) {
-      this.viewportSize_ = {
-        width: this.win_./*OK*/ innerWidth,
-        height: this.win_./*OK*/ innerHeight,
-      };
+    return this.getViewportParams_().size;
+  }
+
+  /** @private */
+  getViewportParams_() {
+    if (!this.viewportParams_) {
+      if (this.scope_ && this.scaleByScope_) {
+        const rect = this.scope_./*OK*/ getBoundingClientRect();
+        const {offsetWidth, offsetHeight} = this.scope_;
+        this.viewportParams_ = {
+          offset: {x: rect.x, y: rect.y},
+          size: {width: offsetWidth, height: offsetHeight},
+          scaleFactorX: offsetWidth / (rect.width || 1),
+          scaleFactorY: offsetHeight / (rect.height || 1),
+        };
+      } else {
+        const {innerWidth, innerHeight} = this.win_;
+        this.viewportParams_ = {
+          offset: {x: 0, y: 0},
+          size: {width: innerWidth, height: innerHeight},
+          scaleFactorX: 1,
+          scaleFactorY: 1,
+        };
+      }
     }
-    return this.viewportSize_;
+    return this.viewportParams_;
   }
 
   /** @override */
@@ -1180,13 +1250,13 @@ class CssContextImpl {
   }
 
   /** @override */
-  getCurrentElementSize() {
-    return this.getElementSize_(this.requireTarget_());
+  getCurrentElementRect() {
+    return this.getElementRect_(this.requireTarget_());
   }
 
   /** @override */
-  getElementSize(selector, selectionMethod) {
-    return this.getElementSize_(this.getElement_(selector, selectionMethod));
+  getElementRect(selector, selectionMethod) {
+    return this.getElementRect_(this.getElement_(selector, selectionMethod));
   }
 
   /**
@@ -1204,12 +1274,18 @@ class CssContextImpl {
     let element;
     try {
       if (selectionMethod == 'closest') {
-        element = closestAncestorElementBySelector(
+        const maybeFoundInScope = closestAncestorElementBySelector(
           this.requireTarget_(),
           selector
         );
+        if (
+          maybeFoundInScope &&
+          (!this.scope_ || this.scope_.contains(maybeFoundInScope))
+        ) {
+          element = maybeFoundInScope;
+        }
       } else {
-        element = this.rootNode_./*OK*/ querySelector(selector);
+        element = this.scopedQuerySelector_(selector);
       }
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
@@ -1219,17 +1295,49 @@ class CssContextImpl {
 
   /**
    * @param {!Element} target
-   * @return {!{width: number, height: number}}
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    * @private
    */
-  getElementSize_(target) {
-    const b = target./*OK*/ getBoundingClientRect();
-    return {width: b.width, height: b.height};
+  getElementRect_(target) {
+    const {offset, scaleFactorX, scaleFactorY} = this.getViewportParams_();
+    const {x, y, width, height} = target./*OK*/ getBoundingClientRect();
+
+    // This assumes default `transform-origin: center center`
+    return layoutRectLtwh(
+      (x - offset.x) * scaleFactorX,
+      (y - offset.y) * scaleFactorY,
+      width * scaleFactorX,
+      height * scaleFactorY
+    );
   }
 
   /** @override */
   resolveUrl(url) {
     const resolvedUrl = resolveRelativeUrl(url, this.baseUrl_);
     return assertHttpsUrl(resolvedUrl, this.currentTarget_ || '');
+  }
+
+  /**
+   * @param {string} selector
+   * @return {?Element}
+   * @private
+   */
+  scopedQuerySelector_(selector) {
+    if (this.scope_) {
+      return /*OK*/ scopedQuerySelector(this.scope_, selector);
+    }
+    return this.rootNode_./*OK*/ querySelector(selector);
+  }
+
+  /**
+   * @param {string} selector
+   * @return {!NodeList}
+   * @private
+   */
+  scopedQuerySelectorAll_(selector) {
+    if (this.scope_) {
+      return /*OK*/ scopedQuerySelectorAll(this.scope_, selector);
+    }
+    return this.rootNode_./*OK*/ querySelectorAll(selector);
   }
 }

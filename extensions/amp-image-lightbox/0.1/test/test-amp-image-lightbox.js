@@ -16,9 +16,11 @@
 
 import '../amp-image-lightbox';
 import * as dom from '../../../../src/dom';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
+import {ActionService} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {ImageViewer} from '../amp-image-lightbox';
-import {Keys} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
 import {WindowInterface} from '../../../../src/window-interface';
 import {parseSrcset} from '../../../../src/srcset';
@@ -28,9 +30,10 @@ describes.realWin(
   {
     amp: {
       extensions: ['amp-image-lightbox'],
+      runtimeOn: true,
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -43,13 +46,13 @@ describes.realWin(
       el.setAttribute('layout', 'nodisplay');
       doc.body.appendChild(el);
       return el
-        .build()
+        .buildInternal()
         .then(() => el.layoutCallback())
         .then(() => el);
     }
 
     it('should not render if not activated', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const container = lightbox.querySelector(
           '.i-amphtml-image-lightbox-container'
         );
@@ -57,194 +60,235 @@ describes.realWin(
       });
     });
 
-    it('should render correctly', () => {
-      return getImageLightbox().then(lightbox => {
-        const impl = lightbox.implementation_;
-        const noop = () => {};
-        impl.getViewport = () => {
-          return {
-            onChanged: noop,
-            enterLightboxMode: noop,
-          };
+    it('should render correctly', async () => {
+      const lightbox = await getImageLightbox();
+      const impl = await lightbox.getImpl(false);
+
+      const noop = () => {};
+      impl.getViewport = () => {
+        return {
+          onChanged: noop,
+          enterLightboxMode: noop,
         };
-        impl.getHistory_ = () => {
-          return {
-            push: () => {
-              return Promise.resolve();
-            },
-          };
+      };
+      impl.getHistory_ = () => {
+        return {
+          push: () => {
+            return Promise.resolve();
+          },
         };
-        impl.enter_ = noop;
+      };
+      impl.enter_ = noop;
 
-        const ampImage = doc.createElement('amp-img');
-        ampImage.setAttribute('src', 'data:');
-        impl.open_({caller: ampImage});
+      const ampImage = doc.createElement('amp-img');
+      ampImage.setAttribute('src', 'data:');
+      impl.open_({caller: ampImage});
 
-        const container = lightbox.querySelector(
-          '.i-amphtml-image-lightbox-container'
-        );
-        expect(container).to.not.equal(null);
+      const container = lightbox.querySelector(
+        '.i-amphtml-image-lightbox-container'
+      );
+      expect(container).to.not.equal(null);
 
-        const caption = container.querySelector(
-          '.i-amphtml-image-lightbox-caption'
-        );
-        expect(caption).to.not.equal(null);
-        expect(caption).to.have.class('amp-image-lightbox-caption');
+      const caption = container.querySelector(
+        '.i-amphtml-image-lightbox-caption'
+      );
+      expect(caption).to.not.equal(null);
+      expect(caption).to.have.class('amp-image-lightbox-caption');
 
-        const viewer = container.querySelector(
-          '.i-amphtml-image-lightbox-viewer'
-        );
-        expect(viewer).to.not.equal(null);
+      const viewer = container.querySelector(
+        '.i-amphtml-image-lightbox-viewer'
+      );
+      expect(viewer).to.not.equal(null);
 
-        const image = viewer.querySelector(
-          '.i-amphtml-image-lightbox-viewer-image'
-        );
-        expect(image).to.not.equal(null);
+      const image = viewer.querySelector(
+        '.i-amphtml-image-lightbox-viewer-image'
+      );
+      expect(image).to.not.equal(null);
 
-        // Very important. Image must have transform-origin=50% 50%.
-        const win = image.ownerDocument.defaultView;
-        expect(win.getComputedStyle(image)['transform-origin']).to.equal(
-          '50% 50%'
-        );
-      });
+      // Very important. Image must have transform-origin=50% 50%.
+      const win = image.ownerDocument.defaultView;
+      expect(win.getComputedStyle(image)['transform-origin']).to.equal(
+        '50% 50%'
+      );
     });
 
-    it('should activate all steps', () => {
-      return getImageLightbox().then(lightbox => {
-        const impl = lightbox.implementation_;
-        const viewportOnChanged = sandbox.spy();
-        const enterLightboxMode = sandbox.spy();
-        const leaveLightboxMode = sandbox.spy();
-        impl.getViewport = () => {
-          return {
-            onChanged: viewportOnChanged,
-            enterLightboxMode,
-            leaveLightboxMode,
-          };
-        };
-        const historyPush = sandbox.spy();
-        impl.getHistory_ = () => {
-          return {
-            push: () => {
-              historyPush();
-              return Promise.resolve(11);
-            },
-          };
-        };
-        const enter = sandbox.spy();
-        impl.enter_ = enter;
+    it('should activate all steps', async () => {
+      const lightbox = await getImageLightbox();
+      const impl = await lightbox.getImpl(false);
 
-        const ampImage = doc.createElement('amp-img');
-        ampImage.setAttribute('src', 'data:');
-        impl.open_({caller: ampImage});
+      const viewportOnChanged = env.sandbox.spy();
+      const enterLightboxMode = env.sandbox.spy();
+      const leaveLightboxMode = env.sandbox.spy();
+      impl.getViewport = () => {
+        return {
+          onChanged: viewportOnChanged,
+          enterLightboxMode,
+          leaveLightboxMode,
+        };
+      };
+      const historyPush = env.sandbox.spy();
+      impl.getHistory_ = () => {
+        return {
+          push: () => {
+            historyPush();
+            return Promise.resolve(11);
+          },
+        };
+      };
+      const enter = env.sandbox.spy();
+      impl.enter_ = enter;
 
-        expect(viewportOnChanged).to.be.calledOnce;
-        expect(impl.unlistenViewport_).to.not.equal(null);
-        expect(historyPush).to.be.calledOnce;
-        expect(enter).to.be.calledOnce;
-        expect(impl.sourceElement_).to.equal(ampImage);
-        expect(enterLightboxMode).to.be.calledOnce;
-        expect(leaveLightboxMode).to.have.not.been.called;
-      });
+      const ampImage = doc.createElement('amp-img');
+      ampImage.setAttribute('src', 'data:');
+      impl.open_({caller: ampImage});
+
+      expect(viewportOnChanged).to.be.calledOnce;
+      expect(impl.unlistenViewport_).to.not.equal(null);
+      expect(historyPush).to.be.calledOnce;
+      expect(enter).to.be.calledOnce;
+      expect(impl.sourceElement_).to.equal(ampImage);
+      expect(enterLightboxMode).to.be.calledOnce;
+      expect(leaveLightboxMode).to.have.not.been.called;
     });
 
-    it('should deactivate all steps', () => {
-      return getImageLightbox().then(lightbox => {
-        const impl = lightbox.implementation_;
-        impl.active_ = true;
-        impl.historyId_ = 11;
-        const viewportOnChangedUnsubscribed = sandbox.spy();
-        impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
-        const enterLightboxMode = sandbox.spy();
-        const leaveLightboxMode = sandbox.spy();
-        impl.getViewport = () => {
-          return {enterLightboxMode, leaveLightboxMode};
-        };
-        const historyPop = sandbox.spy();
-        impl.getHistory_ = () => {
-          return {pop: historyPop};
-        };
-        const exit = sandbox.spy();
-        impl.exit_ = exit;
+    it('should deactivate all steps', async () => {
+      const lightbox = await getImageLightbox();
+      const impl = await lightbox.getImpl(false);
 
-        impl.close();
+      impl.active_ = true;
+      impl.historyId_ = 11;
+      const viewportOnChangedUnsubscribed = env.sandbox.spy();
+      impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
+      const enterLightboxMode = env.sandbox.spy();
+      const leaveLightboxMode = env.sandbox.spy();
+      impl.getViewport = () => {
+        return {enterLightboxMode, leaveLightboxMode};
+      };
+      const historyPop = env.sandbox.spy();
+      impl.getHistory_ = () => {
+        return {pop: historyPop};
+      };
+      const exit = env.sandbox.spy();
+      impl.exit_ = exit;
 
-        expect(impl.active_).to.equal(false);
-        expect(exit).to.be.calledOnce;
-        expect(viewportOnChangedUnsubscribed).to.be.calledOnce;
-        expect(impl.unlistenViewport_).to.equal(null);
-        expect(leaveLightboxMode).to.be.calledOnce;
-        expect(enterLightboxMode).to.have.not.been.called;
-        expect(historyPop).to.be.calledOnce;
-      });
+      impl.close();
+
+      expect(impl.active_).to.equal(false);
+      expect(exit).to.be.calledOnce;
+      expect(viewportOnChangedUnsubscribed).to.be.calledOnce;
+      expect(impl.unlistenViewport_).to.equal(null);
+      expect(leaveLightboxMode).to.be.calledOnce;
+      expect(enterLightboxMode).to.have.not.been.called;
+      expect(historyPop).to.be.calledOnce;
     });
 
-    it('should close on ESC', () => {
-      return getImageLightbox().then(lightbox => {
-        const impl = lightbox.implementation_;
-        const setupCloseSpy = sandbox.spy(impl, 'close');
-        const nullAddEventListenerSpy = sandbox
-          .spy(impl.win.document.documentElement, 'addEventListener')
-          .withArgs('keydown', null);
-        const viewportOnChanged = sandbox.spy();
-        const enterLightboxMode = sandbox.spy();
-        const leaveLightboxMode = sandbox.spy();
-        impl.getViewport = () => {
-          return {
-            onChanged: viewportOnChanged,
-            enterLightboxMode,
-            leaveLightboxMode,
-          };
-        };
-        const historyPush = sandbox.spy();
-        impl.getHistory_ = () => {
-          return {
-            push: () => {
-              historyPush();
-              return Promise.resolve(11);
-            },
-          };
-        };
-        const enter = sandbox.spy();
-        impl.enter_ = enter;
+    it('should close on ESC', async () => {
+      const lightbox = await getImageLightbox();
+      const impl = await lightbox.getImpl(false);
 
-        const ampImage = doc.createElement('amp-img');
-        ampImage.setAttribute('src', 'data:');
-        ampImage.setAttribute('width', '100');
-        ampImage.setAttribute('height', '100');
-        impl.open_({caller: ampImage});
-        impl.closeOnEscape_(new KeyboardEvent('keydown', {key: Keys.ESCAPE}));
-        expect(setupCloseSpy).to.be.calledOnce;
+      const setupCloseSpy = env.sandbox.spy(impl, 'close');
+      const nullAddEventListenerSpy = env.sandbox
+        .spy(impl.win.document.documentElement, 'addEventListener')
+        .withArgs('keydown', null);
+      const viewportOnChanged = env.sandbox.spy();
+      const enterLightboxMode = env.sandbox.spy();
+      const leaveLightboxMode = env.sandbox.spy();
+      impl.getViewport = () => {
+        return {
+          onChanged: viewportOnChanged,
+          enterLightboxMode,
+          leaveLightboxMode,
+        };
+      };
+      const historyPush = env.sandbox.spy();
+      impl.getHistory_ = () => {
+        return {
+          push: () => {
+            historyPush();
+            return Promise.resolve(11);
+          },
+        };
+      };
+      const enter = env.sandbox.spy();
+      impl.enter_ = enter;
 
-        // Regression test: ensure escape event listener is bound properly
-        expect(nullAddEventListenerSpy).to.have.not.been.called;
-        impl.open_({caller: ampImage});
-        expect(nullAddEventListenerSpy).to.have.not.been.called;
-      });
+      const ampImage = doc.createElement('amp-img');
+      ampImage.setAttribute('src', 'data:');
+      ampImage.setAttribute('width', '100');
+      ampImage.setAttribute('height', '100');
+      impl.open_({caller: ampImage});
+      impl.closeOnEscape_(new KeyboardEvent('keydown', {key: Keys.ESCAPE}));
+      expect(setupCloseSpy).to.be.calledOnce;
+
+      // Regression test: ensure escape event listener is bound properly
+      expect(nullAddEventListenerSpy).to.have.not.been.called;
+      impl.open_({caller: ampImage});
+      expect(nullAddEventListenerSpy).to.have.not.been.called;
     });
 
     // Accessibility
-    it('should return focus to source element after close', () => {
-      return getImageLightbox().then(lightbox => {
-        const impl = lightbox.implementation_;
-        impl.enter_ = () => {};
-        impl.getHistory_ = () => {
-          return {
-            pop: () => {},
-            push: () => Promise.resolve(11),
-          };
+    it('should return focus to source element after close', async () => {
+      const lightbox = await getImageLightbox();
+      const impl = await lightbox.getImpl(false);
+
+      impl.enter_ = () => {};
+      impl.getHistory_ = () => {
+        return {
+          pop: () => {},
+          push: () => Promise.resolve(11),
         };
+      };
 
-        const tryFocus = sandbox.spy(dom, 'tryFocus');
+      const tryFocus = env.sandbox.spy(dom, 'tryFocus');
 
-        const sourceElement = doc.createElement('amp-img');
-        sourceElement.setAttribute('src', 'data:');
+      const sourceElement = doc.createElement('amp-img');
+      sourceElement.setAttribute('src', 'data:');
 
-        impl.open_({caller: sourceElement});
-        impl.close();
+      impl.open_({caller: sourceElement});
+      impl.close();
 
-        expect(tryFocus).to.be.calledOnce;
-      });
+      expect(tryFocus).to.be.calledOnce;
+    });
+
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+
+      const element = dom.createElementWithAttributes(
+        env.win.document,
+        'amp-image-lightbox',
+        {'layout': 'nodisplay'}
+      );
+      env.win.document.body.appendChild(element);
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
+      await dom.whenUpgradedToCustomElement(element);
+
+      const impl = await element.getImpl();
+      env.sandbox.stub(impl, 'open_');
+      action.execute(
+        element,
+        'open',
+        null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH
+      );
+      expect(element.enqueAction).to.be.calledWith(
+        env.sandbox.match({
+          actionEventType: '?',
+          args: null,
+          caller: 'caller',
+          event: 'event',
+          method: 'open',
+          node: element,
+          source: 'source',
+          trust: ActionTrust.HIGH,
+        })
+      );
+      expect(impl.open_).to.be.calledOnce;
     });
   }
 );
@@ -256,7 +300,7 @@ describes.realWin(
       extensions: ['amp-image-lightbox'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let clock;
     let lightbox;
@@ -267,31 +311,31 @@ describes.realWin(
     const sourceElement = {
       offsetWidth: 101,
       offsetHeight: 201,
-      getAttribute: name => {
+      getAttribute: (name) => {
         if (name == 'src') {
           return 'image1';
         }
         return undefined;
       },
       hasAttribute: () => undefined,
-      getImpl: () => Promise.resolve(sourceElement.implementation_),
+      getImpl: () => Promise.resolve({}),
     };
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      clock = lolex.install();
+      clock = fakeTimers.withGlobal(win).install();
 
-      sandbox.stub(WindowInterface, 'getDevicePixelRatio').returns(1);
+      env.sandbox.stub(WindowInterface, 'getDevicePixelRatio').returns(1);
       lightbox = {
         element: {
           ownerDocument: doc,
         },
       };
-      lightboxMock = sandbox.mock(lightbox);
-      loadPromiseStub = sandbox.stub().returns(Promise.resolve());
+      lightboxMock = env.sandbox.mock(lightbox);
+      loadPromiseStub = env.sandbox.stub().returns(Promise.resolve());
 
-      sandbox
+      env.sandbox
         .stub(Services.timerFor(win), 'promise')
         .returns(Promise.resolve());
       imageViewer = new ImageViewer(lightbox, win, loadPromiseStub);
@@ -433,7 +477,7 @@ describes.realWin(
       extensions: ['amp-image-lightbox'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let lightbox;
     let lightboxMock;
@@ -442,7 +486,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      sandbox.stub(WindowInterface, 'getDevicePixelRatio').returns(1);
+      env.sandbox.stub(WindowInterface, 'getDevicePixelRatio').returns(1);
       lightbox = {
         close: () => {},
         toggleViewMode: () => {},
@@ -450,7 +494,7 @@ describes.realWin(
           ownerDocument: doc,
         },
       };
-      lightboxMock = sandbox.mock(lightbox);
+      lightboxMock = env.sandbox.mock(lightbox);
 
       imageViewer = new ImageViewer(lightbox, win);
       doc.body.appendChild(imageViewer.getElement());
@@ -533,7 +577,7 @@ describes.realWin(
     });
 
     it('should zoom release', () => {
-      const updateSrc = sandbox.spy();
+      const updateSrc = env.sandbox.spy();
       imageViewer.updateSrc_ = updateSrc;
       imageViewer.onZoomInc_(10, 10, -10, -10);
       return imageViewer.onZoomRelease_(10, 10, -10, -10, 0, 0).then(() => {

@@ -23,6 +23,15 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
+   * @return {!Window}
+   */
+  static getTop(win) {
+    return win.top;
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
    * @return {!Location}
    */
   static getLocation(win) {
@@ -62,7 +71,9 @@ export class WindowInterface {
    * @return {string}
    */
   static getUserLanguage(win) {
-    return win.navigator.userLanguage || win.navigator.language;
+    // The `navigator.userLanguage` is only supported by IE. The standard is
+    // the `navigator.language`.
+    return win.navigator['userLanguage'] || win.navigator.language;
   }
 
   /**
@@ -89,7 +100,7 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
-   * @return {function(new:XMLHttpRequest)}
+   * @return {typeof XMLHttpRequest}
    */
   static getXMLHttpRequest(win) {
     return win.XMLHttpRequest;
@@ -98,7 +109,7 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
-   * @return {function(new:Image)}
+   * @return {typeof Image}
    */
   static getImage(win) {
     return win.Image;

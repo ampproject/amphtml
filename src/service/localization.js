@@ -18,6 +18,7 @@
 // LocalizedStringId enum values and any other strings.
 // eslint-disable-next-line no-unused-vars
 import {LocalizedStringId} from '../localized-strings';
+import {Services} from '../services';
 import {closest} from '../dom';
 
 /**
@@ -37,7 +38,7 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
  * @param {!Object<string, !../localized-strings.LocalizedStringBundleDef>} localizedStringBundles
  * @param {!Array<string>} languageCodes
  * @param {!LocalizedStringId} localizedStringId
- * @return {string|null}
+ * @return {?string}
  */
 function findLocalizedString(
   localizedStringBundles,
@@ -46,7 +47,7 @@ function findLocalizedString(
 ) {
   let localizedString = null;
 
-  languageCodes.some(languageCode => {
+  languageCodes.some((languageCode) => {
     const localizedStringBundle = localizedStringBundles[languageCode];
     if (localizedStringBundle && localizedStringBundle[localizedStringId]) {
       localizedString =
@@ -89,15 +90,15 @@ export function getLanguageCodesFromString(languageCode) {
  */
 export class LocalizationService {
   /**
-   * @param {!Window} win
+   * @param {!Element} element
    */
-  constructor(win) {
-    const rootEl = win.document.documentElement;
+  constructor(element) {
+    this.element_ = element;
 
     /**
-     * @private @const {!Array<string>}
+     * @private @const {?string}
      */
-    this.rootLanguageCodes_ = this.getLanguageCodesForElement_(rootEl);
+    this.viewerLanguageCode_ = Services.viewerForDoc(element).getParam('lang');
 
     /**
      * A mapping of language code to localized string bundle.
@@ -112,9 +113,15 @@ export class LocalizationService {
    * @private
    */
   getLanguageCodesForElement_(element) {
-    const languageEl = closest(element, el => el.hasAttribute('lang'));
+    const languageEl = closest(element, (el) => el.hasAttribute('lang'));
     const languageCode = languageEl ? languageEl.getAttribute('lang') : null;
-    return getLanguageCodesFromString(languageCode || '');
+    const languageCodesToUse = getLanguageCodesFromString(languageCode || '');
+
+    if (this.viewerLanguageCode_) {
+      languageCodesToUse.unshift(this.viewerLanguageCode_);
+    }
+
+    return languageCodesToUse;
   }
 
   /**
@@ -143,12 +150,10 @@ export class LocalizationService {
    *     used.  The language is based on the language at that part of the
    *     document.  If unspecified, will use the document-level language, if
    *     one exists, or the default otherwise.
-   * @return {string|null}
+   * @return {?string}
    */
-  getLocalizedString(localizedStringId, elementToUse = undefined) {
-    const languageCodes = elementToUse
-      ? this.getLanguageCodesForElement_(elementToUse)
-      : this.rootLanguageCodes_;
+  getLocalizedString(localizedStringId, elementToUse = this.element_) {
+    const languageCodes = this.getLanguageCodesForElement_(elementToUse);
 
     return findLocalizedString(
       this.localizedStringBundles_,

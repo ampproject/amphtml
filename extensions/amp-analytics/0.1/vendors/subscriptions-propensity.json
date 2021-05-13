@@ -1,0 +1,77 @@
+{
+  "vars": {
+    "clientId": "CLIENT_ID(__gads)",
+    "productObj": "{\"product\": [${products}]}",
+    "stateParams": "${publicationId}:${state}",
+    "eventParams": "${publicationId}:${event}"
+  },
+  "requests": {
+    "baseParams": "u_tz=240&v=1&cookie=${clientId}&cdm=${sourceHostName}&_amp_source_origin=${sourceHost}&extrainfo=",
+    "sendBase": "https://pubads.g.doubleclick.net/subopt/data?${baseParams}",
+    "sendSubscriptionState": "${sendBase}${productObj}&states=${stateParams}",
+    "sendEvent": "${sendBase}${data}&events=${eventParams}"
+  },
+  "triggers": {
+    "onSubscribed": {
+      "on": "subscriptions-access-granted",
+      "request": "sendSubscriptionState",
+      "vars": {
+        "state": "subscriber",
+        "products": "\"${productId}\""
+      }
+    },
+    "onNotSubscribed": {
+      "on": "subscriptions-access-denied",
+      "request": "sendSubscriptionState",
+      "vars": {
+        "state": "non_subscriber",
+        "products": "\"${productId}\""
+      }
+    },
+    "onShowOffers": {
+      "on": "subscriptions-action-showOffers-started",
+      "request": "sendEvent",
+      "vars": {
+        "event": "offers_shown",
+        "data": "{\"skus\": \"${skus}\",\"source\": \"${source}\"}"
+      }
+    },
+    "onPaywall": {
+      "on": "subscriptions-paywall-activated",
+      "request": "sendEvent",
+      "vars": {
+        "event": "paywall",
+        "data": "{\"is_active\": false, \"source\": \"${source}\"}"
+      }
+    },
+    "onSelectOffer": {
+      "on": "subscriptions-action-subscribe-started",
+      "request": "sendEvent",
+      "vars": {
+        "event": "offer_selected",
+        "data": "{\"is_active\": true,\"product\": \"${product}\"}"
+      }
+    },
+    "onStartBuyflow": {
+      "on": "subscriptions-action-subscribe-started",
+      "request": "sendEvent",
+      "vars": {
+        "event": "payment_flow_start",
+        "data": "{\"is_active\": true,\"product\": \"${product}\"}"
+      }
+    },
+    "onPaymentComplete": {
+      "on": "subscriptions-action-subscribe-success",
+      "request": "sendEvent",
+      "vars": {
+        "event": "payment_complete",
+        "data": "{\"is_active\": true,\"product\": \"${product}\"}"
+      }
+    }
+  },
+  "transport": {
+    "beacon": true,
+    "xhrpost": false,
+    "image": false
+  }
+}

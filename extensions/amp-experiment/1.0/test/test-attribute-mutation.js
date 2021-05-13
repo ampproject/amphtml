@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-experiment:1.0'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let elements;
 
@@ -87,16 +87,14 @@ describes.realWin(
     describe('parseAndValidate', () => {
       describe('default class', () => {
         it('should allow valid mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultClass(
-            'my-class'
-          );
+          const attributeMutation =
+            getAttributeMutationDefaultClass('my-class');
           expect(attributeMutation.parseAndValidate()).to.be.equal(true);
         });
 
         it('should not allow i-amphtml-*', () => {
-          const attributeMutation = getAttributeMutationDefaultClass(
-            'i-amphtml-my-class'
-          );
+          const attributeMutation =
+            getAttributeMutationDefaultClass('i-amphtml-my-class');
           expect(attributeMutation.parseAndValidate()).to.be.equal(false);
         });
       });
@@ -110,16 +108,14 @@ describes.realWin(
           expect(attributeMutation.parseAndValidate()).to.equal(false);
 
           // invalid style attribute value "<"
-          attributeMutation = getAttributeMutationDefaultStyle(
-            'color: <#000000;'
-          );
+          attributeMutation =
+            getAttributeMutationDefaultStyle('color: <#000000;');
           expect(attributeMutation.parseAndValidate()).to.equal(false);
         });
 
         it('NOT allowed style mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultStyle(
-            'random: abc'
-          );
+          const attributeMutation =
+            getAttributeMutationDefaultStyle('random: abc');
           expect(attributeMutation.parseAndValidate()).to.equal(false);
         });
 
@@ -137,9 +133,8 @@ describes.realWin(
           );
           expect(attributeMutation.parseAndValidate()).to.equal(false);
 
-          attributeMutation = getAttributeMutationDefaultStyle(
-            'background-color: '
-          );
+          attributeMutation =
+            getAttributeMutationDefaultStyle('background-color: ');
           expect(attributeMutation.parseAndValidate()).to.equal(true);
 
           attributeMutation = getAttributeMutationDefaultStyle(
@@ -171,9 +166,8 @@ describes.realWin(
         });
 
         it('visibility mutations', () => {
-          let attributeMutation = getAttributeMutationDefaultStyle(
-            'visibility: hidden'
-          );
+          let attributeMutation =
+            getAttributeMutationDefaultStyle('visibility: hidden');
           expect(attributeMutation.parseAndValidate()).to.equal(true);
 
           attributeMutation = getAttributeMutationDefaultStyle(
@@ -191,9 +185,8 @@ describes.realWin(
         });
 
         it('display mutations', () => {
-          let attributeMutation = getAttributeMutationDefaultStyle(
-            'display: none'
-          );
+          let attributeMutation =
+            getAttributeMutationDefaultStyle('display: none');
           expect(attributeMutation.parseAndValidate()).to.equal(true);
 
           attributeMutation = getAttributeMutationDefaultStyle(
@@ -203,14 +196,12 @@ describes.realWin(
         });
 
         it('position mutations', () => {
-          let attributeMutation = getAttributeMutationDefaultStyle(
-            'position: absolute'
-          );
+          let attributeMutation =
+            getAttributeMutationDefaultStyle('position: absolute');
           expect(attributeMutation.parseAndValidate()).to.equal(true);
 
-          attributeMutation = getAttributeMutationDefaultStyle(
-            'position: fixed'
-          );
+          attributeMutation =
+            getAttributeMutationDefaultStyle('position: fixed');
           expect(attributeMutation.parseAndValidate()).to.equal(false);
         });
 
@@ -231,30 +222,26 @@ describes.realWin(
       describe('default url', () => {
         it('should allow valid mutations', () => {
           elements = [document.createElement('a')];
-          const attributeMutation = getAttributeMutationDefaultUrl(
-            'https://amp.dev/'
-          );
+          const attributeMutation =
+            getAttributeMutationDefaultUrl('https://amp.dev/');
           expect(attributeMutation.parseAndValidate()).to.equal(true);
         });
 
         it('should not allow http:// mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultUrl(
-            'http://amp.dev/'
-          );
+          const attributeMutation =
+            getAttributeMutationDefaultUrl('http://amp.dev/');
           expect(attributeMutation.parseAndValidate()).to.equal(false);
         });
 
         it('should not allow non HTTPS mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultUrl(
-            'tel:555-555-5555'
-          );
+          const attributeMutation =
+            getAttributeMutationDefaultUrl('tel:555-555-5555');
           expect(attributeMutation.parseAndValidate()).to.equal(false);
         });
 
         it('should not allow unsupported element mutations', () => {
-          const attributeMutation = getAttributeMutationDefaultUrl(
-            'tel:555-555-5555'
-          );
+          const attributeMutation =
+            getAttributeMutationDefaultUrl('tel:555-555-5555');
           attributeMutation.elements = [doc.createElement('div')];
           expect(attributeMutation.parseAndValidate()).to.equal(false);
         });
@@ -269,7 +256,7 @@ describes.realWin(
         attributeMutation.parseAndValidate();
         attributeMutation.mutate();
 
-        attributeMutation.elements_.forEach(element => {
+        attributeMutation.elements_.forEach((element) => {
           expect(element.getAttribute(attributeName)).to.equal(value);
         });
       });
@@ -282,7 +269,7 @@ describes.realWin(
           attributeMutation.parseAndValidate();
           attributeMutation.mutate();
 
-          attributeMutation.elements_.forEach(element => {
+          attributeMutation.elements_.forEach((element) => {
             expect(element.getAttribute('style')).to.equal(
               'background-color: rgb(0, 0, 0); color: rgb(0, 0, 0);'
             );
@@ -313,18 +300,17 @@ describes.realWin(
         const element1 = document.createElement('amp-img');
         const element2 = document.createElement('a');
         elements = [element1, element2];
-        const mutatedAttributesCallbackSpy = sandbox.spy();
+        const mutatedAttributesCallbackSpy = env.sandbox.spy();
         element1.mutatedAttributesCallback = () => {
           mutatedAttributesCallbackSpy();
         };
-        const attributeMutation = getAttributeMutationDefaultUrl(
-          'https://amp.dev/'
-        );
+        const attributeMutation =
+          getAttributeMutationDefaultUrl('https://amp.dev/');
         const {attributeName, value} = attributeMutation.mutationRecord_;
         attributeMutation.parseAndValidate();
         attributeMutation.mutate();
 
-        attributeMutation.elements_.forEach(element => {
+        attributeMutation.elements_.forEach((element) => {
           expect(element.getAttribute(attributeName)).to.equal(value);
         });
         expect(mutatedAttributesCallbackSpy).to.be.calledOnce;

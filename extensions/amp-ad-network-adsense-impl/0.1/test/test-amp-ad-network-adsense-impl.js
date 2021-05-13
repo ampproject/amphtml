@@ -19,18 +19,21 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import * as experiments from '../../../../src/experiments';
 import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
-import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, MODULE_NOMODULE_PARAMS_EXP} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
-} from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
+} from '../amp-ad-network-adsense-impl';
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {Preconnect} from '../../../../src/preconnect';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../../src/core/constants/consent-state';
 import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
@@ -40,7 +43,8 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
+import {toWin} from '../../../../src/types';
+import {utf8Decode, utf8Encode} from '../../../../src/core/types/string/bytes';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -55,10 +59,9 @@ describes.realWin(
   {
     amp: {
       extensions: ['amp-ad', 'amp-ad-network-adsense-impl'],
-      // runtimeOn: true,
     },
   },
-  env => {
+  (env) => {
     let win, doc, ampdoc, viewer;
     let impl;
     let element;
@@ -67,13 +70,13 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       ampdoc = env.ampdoc;
-      sandbox
+      env.sandbox
         .stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames')
         .callsFake(() => {
           return ['google'];
         });
       viewer = win.__AMP_SERVICES.viewer.obj;
-      sandbox
+      env.sandbox
         .stub(viewer, 'getReferrerUrl')
         .callsFake(() => Promise.resolve('https://acme.org/'));
       element = createAdsenseImplElement(
@@ -85,11 +88,11 @@ describes.realWin(
         },
         doc
       );
-      sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
+      env.sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       impl.win['goog_identity_prom'] = Promise.resolve({});
-      sandbox.stub(Services, 'timerFor').returns({
+      env.sandbox.stub(Services, 'timerFor').returns({
         timeoutPromise: (unused, promise) => {
           if (promise) {
             return promise;
@@ -97,6 +100,18 @@ describes.realWin(
           return Promise.reject(new Error('No token'));
         },
       });
+      env.sandbox
+        .stub(impl, 'getIntersectionElementLayoutBox')
+        .callsFake(() => {
+          return {
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: 320,
+            height: 50,
+          };
+        });
     });
 
     /**
@@ -116,7 +131,7 @@ describes.realWin(
       // amp-ad.
       const iframe = doc.createElement('iframe');
       element.appendChild(iframe);
-      sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
+      env.sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       impl.buildCallback();
@@ -201,9 +216,9 @@ describes.realWin(
           'layout': 'fixed',
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
-        sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
+        env.sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
         const extensions = Services.extensionsFor(impl.win);
-        preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
+        preloadExtensionSpy = env.sandbox.spy(extensions, 'preloadExtension');
       });
 
       it('without analytics', () => {
@@ -276,11 +291,13 @@ describes.realWin(
         impl = new AmpAdNetworkAdsenseImpl(element);
         impl.getA4aAnalyticsConfig = () => {};
         impl.buildCallback();
-        sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
-        sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
+        env.sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
+        env.sandbox
+          .stub(env.ampdocService, 'getAmpDoc')
+          .callsFake(() => ampdoc);
       });
 
-      [true, false].forEach(exp => {
+      [true, false].forEach((exp) => {
         it(
           'injects amp analytics' +
             (exp ? ', trigger immediate disable exp' : ''),
@@ -316,12 +333,12 @@ describes.realWin(
             };
             // To placate assertion.
             impl.responseHeaders_ = {
-              get: function(name) {
+              get: function (name) {
                 if (name == 'X-QQID') {
                   return 'qqid_string';
                 }
               },
-              has: function(name) {
+              has: function (name) {
                 if (name == 'X-QQID') {
                   return true;
                 }
@@ -336,9 +353,8 @@ describes.realWin(
                 '1';
             }
             impl.onCreativeRender(false);
-            const ampAnalyticsElement = impl.element.querySelector(
-              'amp-analytics'
-            );
+            const ampAnalyticsElement =
+              impl.element.querySelector('amp-analytics');
             expect(ampAnalyticsElement).to.be.ok;
             expect(ampAnalyticsElement.CONFIG).jsonEqual(
               impl.ampAnalyticsConfig_
@@ -363,7 +379,7 @@ describes.realWin(
         const adBody = impl.iframe.contentDocument.body;
         let clickHandlerCalled = 0;
 
-        adBody.onclick = function(e) {
+        adBody.onclick = function (e) {
           expect(e.defaultPrevented).to.be.false;
           e.preventDefault(); // Make the test not actually navigate.
           clickHandlerCalled++;
@@ -377,13 +393,13 @@ describes.realWin(
         const ev1 = new Event('click', {bubbles: true});
         ev1.pageX = 10;
         ev1.pageY = 20;
-        sandbox.stub(impl, 'getResource').returns({
+        env.sandbox.stub(impl, 'getResource').returns({
           getUpgradeDelayMs: () => 1,
         });
 
         // Make sure the ad iframe (FIE) has a local URL replacements service.
         const urlReplacements = Services.urlReplacementsForDoc(element);
-        sandbox
+        env.sandbox
           .stub(Services, 'urlReplacementsForDoc')
           .withArgs(a)
           .returns(urlReplacements);
@@ -402,7 +418,7 @@ describes.realWin(
         const adBody = impl.iframe.contentDocument.body;
         let clickHandlerCalled = 0;
 
-        adBody.onclick = function(e) {
+        adBody.onclick = function (e) {
           expect(e.defaultPrevented).to.be.false;
           e.preventDefault(); // Make the test not actually navigate.
           clickHandlerCalled++;
@@ -416,7 +432,7 @@ describes.realWin(
         const ev1 = new Event('click', {bubbles: true});
         ev1.pageX = 10;
         ev1.pageY = 20;
-        sandbox.stub(impl, 'getResource').returns({
+        env.sandbox.stub(impl, 'getResource').returns({
           getUpgradeDelayMs: () => 1,
         });
         impl.buildCallback();
@@ -443,11 +459,11 @@ describes.realWin(
       it('should write auto ad size data to localstorage', async () => {
         const storage = await Services.storageForDoc(doc);
         let promiseResolver;
-        const savePromise = new Promise(resolve => {
+        const savePromise = new Promise((resolve) => {
           promiseResolver = resolve;
         });
         const storageContent = {};
-        sandbox.stub(storage, 'set').callsFake((key, value) => {
+        env.sandbox.stub(storage, 'set').callsFake((key, value) => {
           storageContent[key] = value;
           promiseResolver();
           return Promise.resolve();
@@ -475,7 +491,7 @@ describes.realWin(
           'enableAutoAdSize': '1',
         };
 
-        win.postMessage(data, '*');
+        win.postMessage(JSON.stringify(data), '*');
 
         await savePromise;
 
@@ -487,8 +503,6 @@ describes.realWin(
       function verifyCss(iframe) {
         expect(iframe).to.be.ok;
         const style = win.getComputedStyle(iframe);
-        expect(style.top).to.equal('50%');
-        expect(style.left).to.equal('50%');
         // We expect these set, but the exact dimensions will be determined by the
         // IOb.
         expect(style.width).to.be.ok;
@@ -497,9 +511,7 @@ describes.realWin(
         // as this can vary depending on whether we use the height/width
         // attributes, or the actual size of the frame. To make this less of a
         // hassle, we'll just match against regexp.
-        expect(style.transform).to.match(
-          new RegExp('matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)')
-        );
+        expect(style.transform).to.equal('none');
       }
 
       it('centers iframe in slot when height && width', () => {
@@ -558,14 +570,11 @@ describes.realWin(
     });
 
     describe('#getAdUrl', () => {
-      const adsenseFormatExpName = 'as-use-attr-for-format';
-
       beforeEach(() => {
         resetSharedState();
       });
 
       afterEach(() => {
-        toggleExperiment(impl.win, adsenseFormatExpName, false);
         toggleExperiment(
           impl.win,
           'ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME',
@@ -579,7 +588,7 @@ describes.realWin(
         });
         ampStickyAd.appendChild(element);
         doc.body.appendChild(ampStickyAd);
-        return impl.getAdUrl().then(adUrl => {
+        return impl.getAdUrl().then((adUrl) => {
           expect(adUrl).to.contain('act=sa');
         });
       });
@@ -604,7 +613,7 @@ describes.realWin(
             element.setAttribute('data-no-fill', `${noFill}`);
             ampStickyAd.appendChild(element);
             doc.body.appendChild(ampStickyAd);
-            return impl.getAdUrl().then(url => {
+            return impl.getAdUrl().then((url) => {
               if (notPresent) {
                 expect(url).to.not.match(
                   new RegExp(`(\\?|&)aanf=${noFill}(&|$)`)
@@ -619,60 +628,43 @@ describes.realWin(
 
       it('formats client properly', () => {
         element.setAttribute('data-ad-client', 'SoMeClient');
-        return impl.getAdUrl().then(url => {
+        return impl.getAdUrl().then((url) => {
           expect(url).to.match(/\\?client=ca-someclient/);
         });
       });
       it('has correct format when width == "auto"', () => {
         element.setAttribute('width', 'auto');
         expect(impl.element.getAttribute('width')).to.equal('auto');
-        return impl.getAdUrl().then(url =>
-          // With exp as-use-attr-for-format off, we can't test for specific
-          // numbers, but we know that the values should be numeric.
+        return impl.getAdUrl().then((url) =>
+          // The values should be numeric.
           expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/)
         );
       });
       it('has correct format when height == "auto"', () => {
         element.setAttribute('height', 'auto');
         expect(impl.element.getAttribute('height')).to.equal('auto');
-        return impl.getAdUrl().then(url =>
-          // With exp as-use-attr-for-format off, we can't test for specific
-          // numbers, but we know that the values should be numeric.
+        return impl.getAdUrl().then((url) =>
+          // The values should be numeric.
           expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/)
         );
       });
-      it('has correct format when as-use-attr-for-format is on', () => {
-        forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
+      it('has correct format when width and height are specified', () => {
         impl.divertExperiments();
         const width = element.getAttribute('width');
         const height = element.getAttribute('height');
         return impl
           .getAdUrl()
-          .then(url =>
+          .then((url) =>
             expect(url).to.match(
               new RegExp(`format=${width}x${height}&w=${width}&h=${height}`)
             )
           );
       });
-      it('has experiment eid in adsense frmt exp and width/height numeric', () => {
-        forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
-        impl.divertExperiments();
-        return impl
-          .getAdUrl()
-          .then(url => expect(url).to.match(/eid=[^&]*21062004/));
-      });
-      it('has control eid in adsense frmt exp and width/height numeric', () => {
-        forceExperimentBranch(impl.win, adsenseFormatExpName, '21062003');
-        impl.divertExperiments();
-        return impl
-          .getAdUrl()
-          .then(url => expect(url).to.match(/eid=[^&]*21062003/));
-      });
       it('returns the right URL', () => {
-        sandbox.stub(impl, 'isXhrAllowed').returns(true);
+        env.sandbox.stub(impl, 'isXhrAllowed').returns(true);
         element.setAttribute('data-ad-slot', 'some_slot');
         element.setAttribute('data-language', 'lxz');
-        return impl.getAdUrl().then(url => {
+        return impl.getAdUrl().then((url) => {
           [
             /^https:\/\/googleads\.g\.doubleclick\.net\/pagead\/ads/,
             /(\?|&)adk=\d+(&|$)/,
@@ -695,7 +687,7 @@ describes.realWin(
             /(\?|&)ady=-?\d+(&|$)/,
             /(\?|&)u_aw=\d+(&|$)/,
             /(\?|&)u_ah=\d+(&|$)/,
-            /(\?|&)u_cd=24(&|$)/,
+            /(\?|&)u_cd=(24|30)(&|$)/,
             /(\?|&)u_w=\d+(&|$)/,
             /(\?|&)u_h=\d+(&|$)/,
             /(\?|&)u_tz=-?\d+(&|$)/,
@@ -709,19 +701,19 @@ describes.realWin(
             /(\?|&)top=localhost(&|$)/,
             /(\?|&)ref=https%3A%2F%2Facme.org%2F(&|$)/,
             /(\?|&)dtd=\d+(&|$)/,
-          ].forEach(regexp => expect(url).to.match(regexp));
+          ].forEach((regexp) => expect(url).to.match(regexp));
         });
         it('sets rafmt for responsive', () => {
           element.setAttribute('data-ad-slot', 'some_slot');
           element.setAttribute('data-auto-format', 'rspv');
-          return impl.getAdUrl().then(url => {
+          return impl.getAdUrl().then((url) => {
             expect(url).to.match(/(\?|&)ramft=13(&|$)/);
           });
         });
         it('sets rafmt for matched content responsive', () => {
           element.setAttribute('data-ad-slot', 'some_slot');
           element.setAttribute('data-auto-format', 'mcrspv');
-          return impl.getAdUrl().then(url => {
+          return impl.getAdUrl().then((url) => {
             expect(url).to.match(/(\?|&)ramft=15(&|$)/);
           });
         });
@@ -729,23 +721,31 @@ describes.realWin(
           element.setAttribute('data-matched-content-ui-type', 'ui');
           element.setAttribute('data-matched-content-rows-num', 'rows');
           element.setAttribute('data-matched-content-columns-num', 'cols');
-          return impl.getAdUrl().then(url => {
+          return impl.getAdUrl().then((url) => {
             expect(url).to.match(/(\?|&)crui=ui(&|$)/);
             expect(url).to.match(/(\?|&)cr_row=rows(&|$)/);
             expect(url).to.match(/(\?|&)cr_col=cols(&|$)/);
           });
         });
         it('sets appropriate is_amp for canonical', () => {
-          sandbox.stub(impl, 'isXhrAllowed').returns(false);
+          env.sandbox.stub(impl, 'isXhrAllowed').returns(false);
           return expect(impl.getAdUrl()).to.eventually.match(
             /(\?|&)is_amp=5(&|$)/
+          );
+        });
+        it('does not set ptt parameter by default', () =>
+          expect(impl.getAdUrl()).to.not.eventually.match(/(\?|&)ptt=(&|$)/));
+        it('sets ptt parameter', () => {
+          forceExperimentBranch(impl.win, 'adsense-ptt-exp', '21068092');
+          return expect(impl.getAdUrl()).to.eventually.match(
+            /(\?|&)ptt=12(&|$)/
           );
         });
       });
 
       // Not using arrow function here because otherwise the way closure behaves
       // prevents me from calling this.timeout(5000).
-      it('with multiple slots', function() {
+      it('with multiple slots', function () {
         // When run locally, this test tends to exceed 2000ms timeout.
         this.timeout(10000);
         // Reset counter for purpose of this test.
@@ -786,18 +786,17 @@ describes.realWin(
         const impl1 = new AmpAdNetworkAdsenseImpl(elem1);
         const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
         const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
-        toggleExperiment(impl1.win, 'as-use-attr-for-format', true);
-        return impl1.getAdUrl().then(adUrl1 => {
+        return impl1.getAdUrl().then((adUrl1) => {
           expect(adUrl1).to.match(/pv=2/);
           expect(adUrl1).to.not.match(/prev_fmts/);
           expect(adUrl1).to.not.match(/prev_slotnames/);
           expect(adUrl1).to.match(/ifi=1/);
-          return impl2.getAdUrl().then(adUrl2 => {
+          return impl2.getAdUrl().then((adUrl2) => {
             expect(adUrl2).to.match(/pv=1/);
             expect(adUrl2).to.match(/prev_fmts=\d+?x\d+?/);
             expect(adUrl2).to.not.match(/prev_slotnames/);
             expect(adUrl2).to.match(/ifi=2/);
-            return impl3.getAdUrl().then(adUrl3 => {
+            return impl3.getAdUrl().then((adUrl3) => {
               expect(adUrl3).to.match(/pv=2/);
               // By some quirk of the test infrastructure, when this test
               // is ran individually, each added slot after the first one
@@ -815,19 +814,20 @@ describes.realWin(
 
       it('should include identity', () => {
         // Force get identity result by overloading window variable.
-        const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
-          token: 'abcdef',
-          jar: 'some_jar',
-          pucrd: 'some_pucrd',
-        });
+        const token =
+          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
+            token: 'abcdef',
+            jar: 'some_jar',
+            pucrd: 'some_pucrd',
+          });
         impl.win['goog_identity_prom'] = Promise.resolve(token);
         impl.buildCallback();
-        return impl.getAdUrl().then(url => {
+        return impl.getAdUrl().then((url) => {
           [
             /(\?|&)adsid=abcdef(&|$)/,
             /(\?|&)jar=some_jar(&|$)/,
             /(\?|&)pucrd=some_pucrd(&|$)/,
-          ].forEach(regexp => expect(url).to.match(regexp));
+          ].forEach((regexp) => expect(url).to.match(regexp));
         });
       });
 
@@ -839,38 +839,228 @@ describes.realWin(
       });
 
       it('should return empty string if unknown consentState', () =>
-        expect(impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually.equal(
-          ''
-        ));
+        expect(
+          impl.getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN})
+        ).to.eventually.equal(''));
 
       it('should include npa=1 if unknown consent & explicit npa', () => {
         impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
-        return impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then(url => {
-          expect(url).to.match(/(\?|&)npa=1(&|$)/);
-        });
+        return impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN})
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          });
       });
 
       it('should include npa=1 if insufficient consent', () =>
-        impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT).then(url => {
-          expect(url).to.match(/(\?|&)npa=1(&|$)/);
-        }));
+        impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.INSUFFICIENT})
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          }));
 
       it('should not include not npa, if sufficient consent', () =>
-        impl.getAdUrl(CONSENT_POLICY_STATE.SUFFICIENT).then(url => {
-          expect(url).to.not.match(/(\?|&)npa=(&|$)/);
-        }));
+        impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.SUFFICIENT})
+          .then((url) => {
+            expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+          }));
 
       it('should not include npa, if not required consent', () =>
-        impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then(url => {
-          expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+        impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED})
+          .then((url) => {
+            expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+          }));
+      it('should include npa=1 if `serveNpaSignal` is found, regardless of consent', () =>
+        impl
+          .getAdUrl(
+            {consentState: CONSENT_POLICY_STATE.SUFFICIENT},
+            undefined,
+            true
+          )
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          }));
+
+      it('should include npa=1 if `serveNpaSignal` is false & insufficient consent', () =>
+        impl
+          .getAdUrl(
+            {consentState: CONSENT_POLICY_STATE.INSUFFICIENT},
+            undefined,
+            false
+          )
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          }));
+
+      it('should include gdpr_consent, if TC String is provided', () =>
+        impl.getAdUrl({consentString: 'tcstring'}).then((url) => {
+          expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
         }));
+
+      it('should include gdpr=1, if gdprApplies is true', () =>
+        impl.getAdUrl({gdprApplies: true}).then((url) => {
+          expect(url).to.match(/(\?|&)gdpr=1(&|$)/);
+        }));
+
+      it('should include gdpr=0, if gdprApplies is false', () =>
+        impl.getAdUrl({gdprApplies: false}).then((url) => {
+          expect(url).to.match(/(\?|&)gdpr=0(&|$)/);
+        }));
+
+      it('should not include gdpr, if gdprApplies is missing', () =>
+        impl.getAdUrl({}).then((url) => {
+          expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
+        }));
+
+      it('should include addtl_consent', () =>
+        impl.getAdUrl({additionalConsent: 'abc123'}).then((url) => {
+          expect(url).to.match(/(\?|&)addtl_consent=abc123(&|$)/);
+        }));
+
+      it('should not include addtl_consent, if additionalConsent is missing', () =>
+        impl.getAdUrl({}).then((url) => {
+          expect(url).to.not.match(/(\?|&)addtl_consent=(&|$)/);
+        }));
+
+      it('should include us_privacy, if consentStringType matches', () =>
+        impl
+          .getAdUrl({
+            consentStringType: CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+            consentString: 'usPrivacyString',
+          })
+          .then((url) => {
+            expect(url).to.match(/(\?|&)us_privacy=usPrivacyString(&|$)/);
+            expect(url).to.not.match(/(\?|&)gdpr_consent=/);
+          }));
+
+      it('should include gdpr_consent, if consentStringType is not US_PRIVACY_STRING', () =>
+        impl
+          .getAdUrl({
+            consentStringType: CONSENT_STRING_TYPE.TCF_V2,
+            consentString: 'gdprString',
+          })
+          .then((url) => {
+            expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
+            expect(url).to.not.match(/(\?|&)us_privacy=/);
+          }));
+
+      it('should include gdpr_consent, if consentStringType is undefined', () =>
+        impl
+          .getAdUrl({consentStringType: undefined, consentString: 'gdprString'})
+          .then((url) => {
+            expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
+            expect(url).to.not.match(/(\?|&)us_privacy=/);
+          }));
+
       it('should have spsa and size 1x1 when single page story ad', () => {
         impl.isSinglePageStoryAd = true;
-        return impl.getAdUrl().then(url => {
+        return impl.getAdUrl().then((url) => {
           expect(url).to.match(/format=1x1/);
           expect(url).to.match(/h=1/);
           expect(url).to.match(/w=1/);
           expect(url).to.match(/spsa=\d+?x\d+?/);
+        });
+      });
+
+      describe('module/nomodule', () => {
+        it('should have module nomodule experiment id in url when runtime type is 2', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('2');
+          return impl.buildCallback().then(() => {
+            impl.getAdUrl().then((url) => {
+              expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+            });
+          });
+        });
+
+        it('should have module nomodule experiment id in url when runtime type is 10', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('10');
+          return impl.buildCallback().then(() => {
+            impl.getAdUrl().then((url) => {
+              expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+            });
+          });
+        });
+
+        // 2, 4, and 10 should the only one that triggers this experiment diversion.
+        it('should not have module nomodule experiment id in url when runtime type is 0', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('0');
+          impl.buildCallback();
+          return impl.getAdUrl().then((url) => {
+            expect(url).to.not.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+            expect(url).to.not.have.string(
+              MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT
+            );
+          });
+        });
+      });
+
+      describe('SSR experiments', () => {
+        it('should include SSR experiments', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=45,3579282=0');
+          return impl.buildCallback().then(() => {
+            impl.getAdUrl().then((url) => {
+              expect(url).to.have.string('579823748245!357928200');
+            });
+          });
+        });
+
+        it('should pad value to two chars', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=1');
+          return impl.buildCallback().then(() => {
+            impl.getAdUrl().then((url) => {
+              expect(url).to.have.string('579823748201');
+            });
+          });
+        });
+
+        it('should ignore excessively large value', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=100');
+          impl.buildCallback();
+          return impl.getAdUrl().then((url) => {
+            expect(url).not.to.have.string('5798237482');
+          });
+        });
+
+        it('should ignore negative values', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=-1');
+          impl.buildCallback();
+          return impl.getAdUrl().then((url) => {
+            expect(url).not.to.have.string('5798237482');
+          });
+        });
+
+        it('should ignore non-number values', () => {
+          env.sandbox
+            .stub(ampdoc, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=testing');
+          impl.buildCallback();
+          return impl.getAdUrl().then((url) => {
+            expect(url).not.to.have.string('5798237482');
+          });
         });
       });
     });
@@ -884,7 +1074,7 @@ describes.realWin(
         impl.win.ampAdSlotIdCounter = 1;
         expect(impl.element.getAttribute('data-amp-slot-index')).to.not.be.ok;
         impl.layoutMeasureExecuted_ = true;
-        impl.uiHandler = {applyUnlayoutUI: () => {}};
+        impl.uiHandler = {applyUnlayoutUI: () => {}, cleanup: () => {}};
         const placeholder = doc.createElement('div');
         placeholder.setAttribute('placeholder', '');
         const fallback = doc.createElement('div');
@@ -935,6 +1125,8 @@ describes.realWin(
 
       let iframe;
       let didAttemptSizeChange;
+      let didMeasure;
+      let didMutate;
 
       function constructImpl(config) {
         config.type = 'adsense';
@@ -962,6 +1154,20 @@ describes.realWin(
             },
           })
         );
+
+        didMeasure = false;
+        didMutate = false;
+        const vsyncMock = Services.vsyncFor(
+          toWin(element.ownerDocument.defaultView)
+        );
+        env.sandbox.stub(vsyncMock, 'runPromise').callsFake((task, state) => {
+          didMeasure = true;
+          didMutate = true;
+          task.measure(state);
+          task.mutate(state);
+          return Promise.resolve();
+        });
+
         return impl;
       }
 
@@ -975,6 +1181,29 @@ describes.realWin(
         await promise;
 
         expect(didAttemptSizeChange).to.be.false;
+        expect(didMeasure).to.be.false;
+        expect(didMutate).to.be.false;
+      });
+
+      it('should not schedule a resize for desktop container width responsive', async () => {
+        const adsense = constructImpl({
+          width: '100vw',
+          height: '100',
+          'data-auto-format': 'rspv',
+        });
+        // Overwrite the viewport size to be wide viewport one.
+        adsense.getViewport().getSize = () => ({
+          width: 1400,
+          height: 1024,
+        });
+
+        const promise = adsense.buildCallback();
+        expect(promise).to.exist;
+        await promise;
+
+        expect(didAttemptSizeChange).to.be.false;
+        expect(didMeasure).to.be.true;
+        expect(didMutate).to.be.true;
       });
 
       it('should schedule a resize for responsive', async () => {
@@ -989,6 +1218,8 @@ describes.realWin(
         await promise;
 
         expect(didAttemptSizeChange).to.be.true;
+        expect(didMeasure).to.be.false;
+        expect(didMutate).to.be.false;
       });
 
       it('should schedule a resize for matched content responsive', async () => {
@@ -1002,6 +1233,8 @@ describes.realWin(
         expect(promise).to.exist;
         await promise;
         expect(didAttemptSizeChange).to.be.true;
+        expect(didMeasure).to.be.false;
+        expect(didMutate).to.be.false;
       });
 
       describe('for publisher opted in to auto ad size optimization', () => {
@@ -1009,28 +1242,9 @@ describes.realWin(
           const storage = await Services.storageForDoc(doc);
           const storageContent = {'aas-ca-adsense': true};
 
-          sandbox.stub(storage, 'get').callsFake(key => {
+          env.sandbox.stub(storage, 'get').callsFake((key) => {
             return Promise.resolve(storageContent[key]);
           });
-        });
-
-        it('does nothing if experiment is disabled', async () => {
-          forceExperimentBranch(
-            impl.win,
-            AD_SIZE_OPTIMIZATION_EXP.branch,
-            AD_SIZE_OPTIMIZATION_EXP.control
-          );
-          const adsense = constructImpl({
-            width: '320',
-            height: '150',
-          });
-
-          const promise = adsense.buildCallback();
-          expect(promise).to.exist;
-          await promise;
-
-          expect(didAttemptSizeChange).to.be.false;
-          expect(adsense.element.hasAttribute('data-auto-format')).to.be.false;
         });
 
         it('does nothing if ad unit is responsive already', async () => {
@@ -1083,7 +1297,7 @@ describes.realWin(
           const storage = await Services.storageForDoc(doc);
           const storageContent = {'aas-ca-adsense': false};
 
-          sandbox.stub(storage, 'get').callsFake(key => {
+          env.sandbox.stub(storage, 'get').callsFake((key) => {
             return Promise.resolve(storageContent[key]);
           });
         });
@@ -1234,12 +1448,16 @@ describes.realWin(
 
     describe('#preconnect', () => {
       it('should preload nameframe', () => {
-        const preloadSpy = sandbox.spy(Preconnect.prototype, 'preload');
+        const preconnect = Services.preconnectFor(win);
+        env.sandbox.spy(preconnect, 'preload');
         expect(impl.getPreconnectUrls()).to.deep.equal([
           'https://googleads.g.doubleclick.net',
         ]);
-        expect(preloadSpy).to.be.calledOnce;
-        expect(preloadSpy.args[0]).to.match(/nameframe/);
+        expect(preconnect.preload).to.be.calledOnce;
+        expect(preconnect.preload).to.be.calledWithMatch(
+          env.sandbox.match.object,
+          /nameframe/
+        );
       });
     });
 
@@ -1269,12 +1487,12 @@ describes.realWin(
 
     describe('#checksumVerification', () => {
       it('should call super if missing Algorithm header', () => {
-        sandbox
+        env.sandbox
           .stub(AmpA4A.prototype, 'maybeValidateAmpCreative')
           .returns(Promise.resolve('foo'));
         const creative = '<html><body>This is some text</body></html>';
         const mockHeaders = {
-          get: key => {
+          get: (key) => {
             switch (key) {
               case 'AMP-Verification-Checksum-Algorithm':
                 return 'unknown';
@@ -1296,7 +1514,7 @@ describes.realWin(
       it('should properly validate checksum', () => {
         const creative = '<html><body>This is some text</body></html>';
         const mockHeaders = {
-          get: key => {
+          get: (key) => {
             switch (key) {
               case 'AMP-Verification-Checksum-Algorithm':
                 return 'djb2a-32';
@@ -1309,7 +1527,7 @@ describes.realWin(
         };
         return AmpAdNetworkAdsenseImpl.prototype
           .maybeValidateAmpCreative(utf8Encode(creative), mockHeaders)
-          .then(result => {
+          .then((result) => {
             expect(result).to.be.ok;
             expect(utf8Decode(result)).to.equal(creative);
           });
@@ -1318,7 +1536,7 @@ describes.realWin(
       it('should fail validation if invalid checksum', () => {
         const creative = '<html><body>This is some text</body></html>';
         const mockHeaders = {
-          get: key => {
+          get: (key) => {
             switch (key) {
               case 'AMP-Verification-Checksum-Algorithm':
                 return 'djb2a-32';
@@ -1345,7 +1563,8 @@ describes.realWin(
         });
         ampStickyAd.appendChild(element);
         doc.body.appendChild(ampStickyAd);
-        const letCreativeTriggerRenderStart = impl.letCreativeTriggerRenderStart();
+        const letCreativeTriggerRenderStart =
+          impl.letCreativeTriggerRenderStart();
         expect(letCreativeTriggerRenderStart).to.equal(true);
       });
 
@@ -1354,7 +1573,7 @@ describes.realWin(
           'layout': 'nodisplay',
         });
         let promiseResolver;
-        const renderPromise = new Promise(resolve => {
+        const renderPromise = new Promise((resolve) => {
           promiseResolver = resolve;
         });
         ampStickyAd.appendChild(element);
@@ -1363,18 +1582,13 @@ describes.realWin(
         impl.renderStarted = () => {
           promiseResolver();
         };
-        let key, val;
         impl.iframe = {
           contentWindow: window,
-          setAttribute: (k, v) => {
-            key = k;
-            val = v;
-          },
+          style: {'visibility': 'hidden'},
         };
         win.postMessage('fill_sticky', '*');
         return renderPromise.then(() => {
-          expect(key).to.equal('visible');
-          expect(val).to.equal('');
+          expect(impl.iframe.style['visibility']).to.equal('');
         });
       });
 
@@ -1388,8 +1602,29 @@ describes.realWin(
         );
         ampStickyAd.appendChild(element);
         doc.body.appendChild(ampStickyAd);
-        const letCreativeTriggerRenderStart = impl.letCreativeTriggerRenderStart();
+        const letCreativeTriggerRenderStart =
+          impl.letCreativeTriggerRenderStart();
         expect(letCreativeTriggerRenderStart).to.equal(false);
+      });
+    });
+
+    describe('#divertExperiments', () => {
+      it('should have correctly formatted experiment map', () => {
+        const randomlySelectUnsetExperimentsStub = env.sandbox.stub(
+          experiments,
+          'randomlySelectUnsetExperiments'
+        );
+        randomlySelectUnsetExperimentsStub.returns({});
+        impl.divertExperiments();
+        const experimentMap =
+          randomlySelectUnsetExperimentsStub.firstCall.args[1];
+        Object.keys(experimentMap).forEach((key) => {
+          expect(key).to.be.a('string');
+          const {branches} = experimentMap[key];
+          expect(branches).to.exist;
+          expect(branches).to.be.a('array');
+          branches.forEach((branch) => expect(branch).to.be.a('string'));
+        });
       });
     });
   }

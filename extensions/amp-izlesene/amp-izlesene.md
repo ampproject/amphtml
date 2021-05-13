@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays an Izlesene video.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,33 +24,21 @@ limitations under the License.
 
 # amp-izlesene
 
-Displays an embedded <a href="https://www.izlesene.com/">Izlesene</a> video.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-izlesene" src="https://cdn.ampproject.org/v0/amp-izlesene-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 With responsive layout the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
 
 ```html
 <amp-izlesene
-    data-videoid="7221390"
-    layout="responsive"
-    width="480" height="270"></amp-izlesene>
+  data-videoid="7221390"
+  layout="responsive"
+  width="480"
+  height="270"
+></amp-izlesene>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-videoid (required)</strong></td>
@@ -77,7 +66,6 @@ With responsive layout the width and height from the example should yield correc
   </tr>
 </table>
 
-
 ## Validation
 
-See [amp-izlesene rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-izlesene/validator-amp-izlesene.protoascii) in the AMP validator specification.
+See [amp-izlesene rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-izlesene/validator-amp-izlesene.protoascii) in the AMP validator specification.

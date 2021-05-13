@@ -15,19 +15,30 @@
  */
 
 import {Services} from '../../../src/services';
-import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {TickLabel} from '../../../src/core/constants/enums';
+import {asyncStringReplace} from '../../../src/core/types/string';
+import {base64UrlEncodeFromString} from '../../../src/core/types/string/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getConsentPolicyState} from '../../../src/consent';
+import {dict} from '../../../src/core/types/object';
+import {
+  getActiveExperimentBranches,
+  getExperimentBranch,
+} from '../../../src/experiments';
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {isArray, isFiniteNumber} from '../../../src/types';
+import {isArray} from '../../../src/core/types';
+import {isFiniteNumber} from '../../../src/types';
+import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';
-import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
 const TAG = 'amp-analytics/variables';
@@ -172,6 +183,59 @@ function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
 }
 
 /**
+ * This macro function allows arithmetic operations over other analytics variables.
+ *
+ * @param {string} leftOperand
+ * @param {string} rightOperand
+ * @param {string} operation
+ * @param {string} round If this flag is truthy the result will be rounded
+ * @return {number}
+ */
+function calcMacro(leftOperand, rightOperand, operation, round) {
+  const left = Number(leftOperand);
+  const right = Number(rightOperand);
+  userAssert(!isNaN(left), 'CALC macro - left operand must be a number');
+  userAssert(!isNaN(right), 'CALC macro - right operand must be a number');
+  let result = 0;
+  switch (operation) {
+    case 'add':
+      result = left + right;
+      break;
+    case 'subtract':
+      result = left - right;
+      break;
+    case 'multiply':
+      result = left * right;
+      break;
+    case 'divide':
+      userAssert(right, 'CALC macro - cannot divide by 0');
+      result = left / right;
+      break;
+    default:
+      user().error(TAG, 'CALC macro - Invalid operation');
+  }
+  return stringToBool(round) ? Math.round(result) : result;
+}
+
+/**
+ * If given an experiment name returns the branch id if a branch is selected.
+ * If no branch name given, it returns a comma separated list of active branch
+ * experiment ids and their names or an empty string if none exist.
+ * @param {!Window} win
+ * @param {string=} opt_expName
+ * @return {string}
+ */
+function experimentBranchesMacro(win, opt_expName) {
+  if (opt_expName) {
+    return getExperimentBranch(win, opt_expName) || '';
+  }
+  const branches = getActiveExperimentBranches(win);
+  return Object.keys(branches)
+    .map((expName) => `${expName}:${branches[expName]}`)
+    .join(',');
+}
+
+/**
  * Provides support for processing of advanced variable syntax like nested
  * expansions macros etc.
  */
@@ -191,26 +255,59 @@ export class VariableService {
 
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
-    this.register_('$TRIM', value => value.trim());
-    this.register_('$TOLOWERCASE', value => value.toLowerCase());
-    this.register_('$TOUPPERCASE', value => value.toUpperCase());
-    this.register_('$NOT', value => String(!value));
-    this.register_('$BASE64', value => base64UrlEncodeFromString(value));
+    this.register_('$TRIM', (value) => value.trim());
+    this.register_('$TOLOWERCASE', (value) => value.toLowerCase());
+    this.register_('$TOUPPERCASE', (value) => value.toUpperCase());
+    this.register_('$NOT', (value) => String(!value));
+    this.register_('$BASE64', (value) => base64UrlEncodeFromString(value));
     this.register_('$HASH', this.hashMacro_.bind(this));
     this.register_('$IF', (value, thenValue, elseValue) =>
       stringToBool(value) ? thenValue : elseValue
     );
     this.register_('$REPLACE', replaceMacro);
     this.register_('$MATCH', matchMacro);
+    this.register_('$CALC', calcMacro);
     this.register_(
       '$EQUALS',
       (firstValue, secValue) => firstValue === secValue
     );
-    // TODO(ccordry): Make sure this stays a window level service when this
-    // VariableService is migrated to document level.
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
+
+    // Returns the IANA timezone code
+    this.register_('TIMEZONE_CODE', () => {
+      let tzCode = '';
+      if (
+        'Intl' in this.ampdoc_.win &&
+        'DateTimeFormat' in this.ampdoc_.win.Intl
+      ) {
+        // It could be undefined (i.e. IE11)
+        tzCode = new this.ampdoc_.win.Intl.DateTimeFormat().resolvedOptions()
+          .timeZone;
+      }
+
+      return tzCode;
+    });
+
+    // Returns a promise resolving to viewport.getScrollTop.
+    this.register_('SCROLL_TOP', () =>
+      Math.round(Services.viewportForDoc(this.ampdoc_).getScrollTop())
+    );
+
+    // Returns a promise resolving to viewport.getScrollLeft.
+    this.register_('SCROLL_LEFT', () =>
+      Math.round(Services.viewportForDoc(this.ampdoc_).getScrollLeft())
+    );
+
+    this.register_('EXPERIMENT_BRANCHES', (opt_expName) =>
+      experimentBranchesMacro(this.ampdoc_.win, opt_expName)
+    );
+
+    // Returns the content of a meta tag in the ampdoc
+    this.register_('AMPDOC_META', (meta, defaultValue = '') => {
+      return this.ampdoc_.getMetaByName(meta) ?? defaultValue;
+    });
   }
 
   /**
@@ -219,15 +316,52 @@ export class VariableService {
    */
   getMacros(element) {
     const elementMacros = {
-      'COOKIE': name =>
+      'COOKIE': (name) =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
+      'CONSENT_STRING': getConsentPolicyInfo(element),
+      'CONSENT_METADATA': (key) =>
+        getConsentMetadataValue(
+          element,
+          userAssert(key, 'CONSENT_METADATA macro must contain a key')
+        ),
     };
-    const merged = Object.assign({}, this.macros_, elementMacros);
+    const perfMacros = isInFie(element)
+      ? {}
+      : {
+          'FIRST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_VIEWPORT_READY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_VIEWPORT_READY
+            ),
+          'MAKE_BODY_VISIBLE': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.MAKE_BODY_VISIBLE
+            ),
+          'LARGEST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_INPUT_DELAY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_INPUT_DELAY
+            ),
+          'CUMULATIVE_LAYOUT_SHIFT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.CUMULATIVE_LAYOUT_SHIFT
+            ),
+        };
+    const merged = {...this.macros_, ...elementMacros, ...perfMacros};
     return /** @type {!JsonObject} */ (merged);
   }
 
   /**
+   * TODO (micajuineho): If we add new synchronous macros, we
+   * will need to split this method and getMacros into sync and
+   * async version (currently all macros are async).
    * @param {string} name
    * @param {*} macro
    */
@@ -237,22 +371,17 @@ export class VariableService {
   }
 
   /**
-   * @param {string} template The template to expand
-   * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {!Promise<string>} The expanded string
+   * Converts templates from ${} format to MACRO() and resolves any platform
+   * level macros when encountered.
+   * @param {string} template The template to expand.
+   * @param {!ExpansionOptions} options configuration to use for expansion.
+   * @param {!Element} element amp-analytics element.
+   * @param {!JsonObject=} opt_bindings
+   * @param {!Object=} opt_allowlist
+   * @return {!Promise<string>} The expanded string.
    */
-  expandTemplate(template, options) {
-    return tryResolve(this.expandTemplateSync.bind(this, template, options));
-  }
-
-  /**
-   * @param {string} template The template to expand
-   * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {string} The expanded string
-   * @visibleForTesting
-   */
-  expandTemplateSync(template, options) {
-    return template.replace(/\${([^}]*)}/g, (match, key) => {
+  expandTemplate(template, options, element, opt_bindings, opt_allowlist) {
+    return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
           TAG,
@@ -275,26 +404,80 @@ export class VariableService {
       }
 
       let value = options.getVar(name);
+      const urlReplacements = Services.urlReplacementsForDoc(element);
 
       if (typeof value == 'string') {
-        value = this.expandTemplateSync(
+        value = this.expandValueAndReplaceAsync_(
           value,
-          new ExpansionOptions(
-            options.vars,
-            options.iterations - 1,
-            true /* noEncode */
-          )
+          options,
+          element,
+          urlReplacements,
+          opt_bindings,
+          opt_allowlist,
+          argList
         );
+      } else if (isArray(value)) {
+        // Treat each value as a template and expand
+        for (let i = 0; i < value.length; i++) {
+          value[i] =
+            typeof value[i] == 'string'
+              ? this.expandValueAndReplaceAsync_(
+                  value[i],
+                  options,
+                  element,
+                  urlReplacements,
+                  opt_bindings,
+                  opt_allowlist
+                )
+              : value[i];
+        }
+        value = Promise.all(/** @type {!Array<string>} */ (value));
       }
 
-      if (!options.noEncode) {
-        value = encodeVars(/** @type {string|?Array<string>} */ (value));
-      }
-      if (value) {
-        value += argList;
-      }
-      return value;
+      return Promise.resolve(value).then((value) =>
+        !options.noEncode
+          ? encodeVars(/** @type {string|?Array<string>} */ (value))
+          : value
+      );
     });
+  }
+
+  /**
+   * @param {string} value
+   * @param {!ExpansionOptions} options
+   * @param {!Element} element amp-analytics element.
+   * @param {!../../../src/service/url-replacements-impl.UrlReplacements} urlReplacements
+   * @param {!JsonObject=} opt_bindings
+   * @param {!Object=} opt_allowlist
+   * @param {string=} opt_argList
+   * @return {Promise<string>}
+   */
+  expandValueAndReplaceAsync_(
+    value,
+    options,
+    element,
+    urlReplacements,
+    opt_bindings,
+    opt_allowlist,
+    opt_argList
+  ) {
+    return this.expandTemplate(
+      value,
+      new ExpansionOptions(
+        options.vars,
+        options.iterations - 1,
+        true /* noEncode */
+      ),
+      element,
+      opt_bindings,
+      opt_allowlist
+    ).then((val) =>
+      urlReplacements.expandStringAsync(
+        opt_argList ? val + opt_argList : val,
+        opt_bindings || this.getMacros(element),
+        opt_allowlist
+      )
+    );
   }
 
   /**
@@ -365,10 +548,9 @@ export function variableServiceForDoc(elementOrAmpDoc) {
  * @return {!Promise<!VariableService>}
  */
 export function variableServicePromiseForDoc(elementOrAmpDoc) {
-  return /** @type {!Promise<!VariableService>} */ (getServicePromiseForDoc(
-    elementOrAmpDoc,
-    'amp-analytics-variables'
-  ));
+  return /** @type {!Promise<!VariableService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, 'amp-analytics-variables')
+  );
 }
 
 /**
@@ -386,11 +568,27 @@ export function getNameArgsForTesting(key) {
  * @return {!Promise<?string>}
  */
 function getConsentStateStr(element) {
-  return getConsentPolicyState(element).then(consent => {
+  return getConsentPolicyState(element).then((consent) => {
     if (!consent) {
       return null;
     }
     return EXTERNAL_CONSENT_POLICY_STATE_STRING[consent];
+  });
+}
+
+/**
+ * Get the associated value from the resolved consent metadata object
+ * @param {!Element} element
+ * @param {string} key
+ * @return {!Promise<?Object>}
+ */
+function getConsentMetadataValue(element, key) {
+  // Get the metadata using the default policy id
+  return getConsentMetadata(element).then((consentMetadata) => {
+    if (!consentMetadata) {
+      return null;
+    }
+    return consentMetadata[key];
   });
 }
 

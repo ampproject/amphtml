@@ -23,7 +23,7 @@ import {
 } from '../../../src/service/variable-source';
 import {user, userAssert} from '../../../src/log';
 
-const WHITELISTED_VARIABLES = [
+const ALLOWLISTED_VARIABLES = [
   'AMPDOC_HOST',
   'AMPDOC_HOSTNAME',
   'AMPDOC_URL',
@@ -39,27 +39,19 @@ const WHITELISTED_VARIABLES = [
   'COUNTER',
   'DOCUMENT_CHARSET',
   'DOCUMENT_REFERRER',
-  'FIRST_CONTENTFUL_PAINT',
-  'FIRST_VIEWPORT_READY',
-  'MAKE_BODY_VISIBLE',
   'PAGE_VIEW_ID',
   'RANDOM',
   'SCREEN_COLOR_DEPTH',
   'SCREEN_HEIGHT',
   'SCREEN_WIDTH',
   'SCROLL_HEIGHT',
-  'SCROLL_LEFT',
-  'SCROLL_TOP',
   'SCROLL_WIDTH',
-  'SHARE_TRACKING_INCOMING',
-  'SHARE_TRACKING_OUTGOING',
   'SOURCE_HOST',
   'SOURCE_HOSTNAME',
   'SOURCE_PATH',
   'SOURCE_URL',
   'TIMESTAMP',
   'TIMEZONE',
-  'TIMEZONE_CODE',
   'TITLE',
   'TOTAL_ENGAGED_TIME',
   'USER_AGENT',
@@ -92,10 +84,10 @@ export class A4AVariableSource extends VariableSource {
 
   /** @override */
   initialize() {
-    // Initiate whitelisted varaibles first in case the resolver function needs
+    // Initiate allowed varaibles first in case the resolver function needs
     // to be overwritten.
-    for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
-      const varName = WHITELISTED_VARIABLES[v];
+    for (let v = 0; v < ALLOWLISTED_VARIABLES.length; v++) {
+      const varName = ALLOWLISTED_VARIABLES[v];
       const resolvers = this.globalVariableSource_.get(varName);
       this.set(varName, resolvers.sync).setAsync(varName, resolvers.async);
     }
@@ -206,9 +198,8 @@ export class A4AVariableSource extends VariableSource {
       for (let j = 0; j < attributeNames.length; ++j) {
         const attributeName = attributeNames[j];
         if (elements[i].hasAttribute(attributeName)) {
-          currentResult[attributeName] = elements[i].getAttribute(
-            attributeName
-          );
+          currentResult[attributeName] =
+            elements[i].getAttribute(attributeName);
           foundAtLeastOneAttr = true;
         }
       }
