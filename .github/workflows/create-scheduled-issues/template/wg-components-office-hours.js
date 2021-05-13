@@ -17,9 +17,9 @@
 const { getGoogleCalendarAddEventLink } = require("../utils");
 
 const descriptionUrl = 'https://go.amp.dev/wg-components-hours-announcement';
-const vcUrl = 'https://go.amp.dev/wg-components-hours';
+const vcUrl = 'https://meet.google.com/spd-oowj-ndo';
 
-const sessionDurationHours = 1;
+const sessionDurationHours = 0.5;
 
 module.exports = {
   frequency: {
@@ -52,7 +52,7 @@ module.exports = {
 Time: [${time} UTC](${timeUrl}) ([add to Google Calendar](${calendarUrl}))
 Location: [Video conference via Google Meet](${vcUrl})
 
-We hold monthly [Office Hours](${descriptionUrl}).
+_More information coming soon._
 `;
   },
 };
