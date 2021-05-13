@@ -55,8 +55,9 @@ describes.realWin(
       );
 
       const parsedName = JSON.parse(iframe.name);
-      const sourceChildren = parsedName?.attributes?._context?.sourceChildren;
-      expect(sourceChildren).to.not.be.null;
+      const sourceChildrenSerialized = parsedName?.attributes?.sourceChildren;
+      expect(sourceChildrenSerialized).to.not.be.null;
+      const sourceChildren = JSON.parse(sourceChildrenSerialized);
       expect(sourceChildren).to.have.length(2);
       expect(sourceChildren[0][0]).to.eql('SOURCE');
       expect(sourceChildren[0][1]).to.eql({'data-foo': 'bar', src: 'src'});
