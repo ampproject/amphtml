@@ -35,7 +35,7 @@ import {
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
 import {setStyle} from '../../../src/style';

@@ -21,8 +21,6 @@ import {isArray} from '../array';
  * {@link http://json.org/}.
  */
 
-import {isObject} from '../object';
-
 // NOTE Type are changed to {*} because of
 // https://github.com/google/closure-compiler/issues/1999
 

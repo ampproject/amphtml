@@ -24,10 +24,10 @@ import {Keys} from '../core/constants/key-codes';
 import {Services} from '../services';
 import {debounce, throttle} from '../core/types/function';
 import {dev, devAssert, user, userAssert} from '../log';
-import {dict, hasOwn, map} from '../core/types/object';
+import {dict, getValueForExpr, hasOwn, map} from '../core/types/object';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
-import {getValueForExpr} from '../json';
+
 import {isAmp4Email} from '../format';
 import {isArray, toArray} from '../core/types/array';
 import {isEnabled} from '../dom';
