@@ -44,7 +44,7 @@ const stripColors = (str) => str.replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
 
 /**
  * @param {string} line
- * @return {Array<string>|null} [filename, report]
+ * @return {?Array<string>} [filename, report]
  */
 function getJscodeshiftReport(line) {
   const stripped = stripColors(line);
