@@ -25,7 +25,7 @@ import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
 import {tryParseJson} from '../../../src/json';
 import {urls} from '../../../src/config';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Decode} from '../../../src/core/types/string/bytes';
 
 /** @const {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-Ad-Template-Extension';

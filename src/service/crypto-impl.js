@@ -15,10 +15,10 @@
  */
 
 import {Services} from '../services';
-import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {base64UrlEncodeFromBytes} from '../core/types/string/base64';
 import {dev, devAssert, user} from '../log';
 import {getService, registerServiceBuilder} from '../service';
-import {stringToBytes, utf8Encode} from '../utils/bytes';
+import {stringToBytes, utf8Encode} from '../core/types/string/bytes';
 
 /** @const {string} */
 const TAG = 'Crypto';

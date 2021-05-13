@@ -25,7 +25,7 @@ import {
 import {dict} from './core/types/object';
 import {duplicateErrorIfNecessary} from './core/error';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
-import {exponentialBackoff} from './exponential-backoff';
+import {exponentialBackoff} from './core/types/function/exponential-backoff';
 import {findIndex} from './core/types/array';
 import {getMode} from './mode';
 import {isLoadErrorMessage} from './event-helper';

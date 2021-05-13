@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {map} from '../types/object';
+
 /**
  * @template T
  */
@@ -35,7 +37,7 @@ export class LruCache {
     this.access_ = 0;
 
     /** @private {!Object<(number|string), {payload: T, access: number}>} */
-    this.cache_ = Object.create(null);
+    this.cache_ = map();
   }
 
   /**

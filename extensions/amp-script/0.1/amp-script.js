@@ -31,7 +31,7 @@ import {getService, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {tryParseJson} from '../../../src/json';
 import {urls} from '../../../src/config';
-import {utf8Encode} from '../../../src/utils/bytes';
+import {utf8Encode} from '../../../src/core/types/string/bytes';
 
 /** @const {string} */
 const TAG = 'amp-script';

@@ -807,7 +807,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/js/webui/webui.js',
       'src/url.js',
       'src/url-try-decode-uri-component.js',
-      'src/utils/bytes.js',
+      'src/core/types/string/bytes.js',
     ],
   },
   'Text(Encoder|Decoder)\\(': {
@@ -817,7 +817,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
-      'src/utils/bytes.js',
+      'src/core/types/string/bytes.js',
       'src/utils/stream-response.js',
     ],
   },
@@ -942,10 +942,11 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unresolved merge conflict.',
   },
   '\\.indexOf\\([\'"][^)]+\\)\\s*===?\\s*0\\b': {
-    message: 'use startsWith helper in src/string.js',
+    message: 'use startsWith helper in src/core/types/string',
     allowlist: ['build-system/server/app.js'],
   },
-  '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
+  '\\.indexOf\\(.*===?.*\\.length':
+    'use endsWith helper in src/core/types/string',
   '/url-parse-query-string': {
     message: 'Import parseQueryString from `src/url.js`',
     allowlist: [

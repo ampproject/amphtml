@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import {devAssert} from './log';
+import {devAssert} from '../assert';
+import {map} from '../types/object';
 
-/**
- * @template STATE
- */
+/** @template STATE */
 export class FiniteStateMachine {
   /**
    * Constructs a FSM using the bits defined in initialState as changeable
@@ -37,7 +36,7 @@ export class FiniteStateMachine {
      * to the new.
      * @private {Object<string, function()>}
      */
-    this.transitions_ = Object.create(null);
+    this.transitions_ = map();
   }
 
   /**

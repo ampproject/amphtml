@@ -30,7 +30,7 @@ import {
   appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
-import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {base64UrlEncodeFromString} from '../../../src/core/types/string/base64';
 import {
   buildInteractiveDisclaimer,
   tryCloseDisclaimer,

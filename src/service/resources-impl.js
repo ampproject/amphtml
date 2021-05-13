@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../core/data-structures/promise';
-import {FiniteStateMachine} from '../finite-state-machine';
+import {FiniteStateMachine} from '../core/data-structures/finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';

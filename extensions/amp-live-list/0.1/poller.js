@@ -18,7 +18,7 @@ import {Services} from '../../../src/services';
 import {
   exponentialBackoffClock,
   getJitter,
-} from '../../../src/exponential-backoff';
+} from '../../../src/core/types/function/exponential-backoff';
 
 /**
  * Poller with backoff functionality.

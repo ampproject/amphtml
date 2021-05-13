@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {bytesToString, stringToBytes} from '../utils/bytes';
+import {bytesToString, stringToBytes} from '../core/types/string/bytes';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin} from '../url';
 import {parseJson} from '../json';
