@@ -87,6 +87,7 @@ exports.rules = [
       '3p/**->src/core/data-structures/observable.js',
       '3p/**->src/core/data-structures/promise.js',
       '3p/**->src/core/error.js',
+      '3p/**->src/core/types/enum.js',
       '3p/**->src/core/types/function/index.js',
       '3p/**->src/core/types/index.js',
       '3p/**->src/core/types/object.js',
