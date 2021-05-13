@@ -273,7 +273,7 @@ function markAsVisited(candidate) {
 }
 
 /**
- * @param {Array<string>} tagNames
+ * @param {!Array<string>} tagNames
  * @return {string}
  */
 function candidateSelector(tagNames) {
