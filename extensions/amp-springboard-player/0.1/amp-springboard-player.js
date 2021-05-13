@@ -153,7 +153,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
+    const placeholder = this.win.document.createElement('img');
     this.propagateAttributes(['aria-label'], placeholder);
     placeholder.setAttribute(
       'src',
@@ -182,6 +182,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading video');
     }
+    this.applyFillContent(placeholder);
     return placeholder;
   }
 }

@@ -242,12 +242,10 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     const {partnerID_: partnerID, feedID_: feedID} = this;
 
-    const placeholder = htmlFor(element)`
-      <amp-img referrerpolicy=origin layout=fill placeholder>
-        <amp-img referrerpolicy=origin layout=fill fallback
-            src="https://cdn.brid.tv/live/default/defaultSnapshot.png">
-        </amp-img>
-      </amp-img>`;
+    const html = htmlFor(element);
+    const placeholder = html`
+      <img placeholder referrerpolicy="origin" loading="lazy" />
+    `;
 
     this.propagateAttributes(['aria-label'], placeholder);
     this.applyFillContent(placeholder);
@@ -263,6 +261,10 @@ class AmpBridPlayer extends AMP.BaseElement {
       : 'Loading video';
 
     placeholder.setAttribute('alt', altText);
+
+    this.loadPromise(placeholder).catch(() => {
+      placeholder.src = 'https://cdn.brid.tv/live/default/defaultSnapshot.png';
+    });
 
     return placeholder;
   }

@@ -124,7 +124,7 @@ class AmpKaltura extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
+    const placeholder = this.win.document.createElement('img');
     this.propagateAttributes(['aria-label'], placeholder);
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
@@ -140,7 +140,7 @@ class AmpKaltura extends AMP.BaseElement {
       src += `/height/${height}`;
     }
     placeholder.setAttribute('src', src);
-    placeholder.setAttribute('layout', 'fill');
+    placeholder.setAttribute('loading', 'lazy');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {
@@ -151,6 +151,7 @@ class AmpKaltura extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading video');
     }
+    this.applyFillContent(placeholder);
     return placeholder;
   }
 
