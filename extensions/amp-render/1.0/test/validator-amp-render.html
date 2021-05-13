@@ -35,15 +35,12 @@
     <amp-render
       width="10"
       height="10"
-      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      src="amp-state:source"
     >
     </amp-render>
 
     <!-- Valid: amp-render with only [src] attribute -->
-    <amp-render width="10" height="10" [src]="foo.bar"> </amp-render>
-
-    <!-- Valid: amp-render with only [src] attribute -->
-    <amp-render width="10" height="10" src="foo.bar"> </amp-render>
+    <amp-render width="10" height="10" [src]="srcUrl"> </amp-render>
 
     <!-- Valid: amp-render with both src and [src] attributes -->
     <amp-render
@@ -52,13 +49,6 @@
       src="https://data.com/articles.json?ref=CANONICAL_URL"
       [src]="foo.bar"
     >
-    </amp-render>
-
-    <!-- Valid: amp-render with amp-state src -->
-    <amp-render width="10" height="10" src="amp-state:source"> </amp-render>
-
-    <!-- Valid: amp-render with amp-script src -->
-    <amp-render width="10" height="10" src="amp-script:scriptFn.dataFn">
     </amp-render>
 
     <!-- Valid: amp-render with binding="refresh" attribute -->
