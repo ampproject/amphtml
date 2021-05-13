@@ -23,9 +23,11 @@ import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
+  useContext,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from '../../../src/preact';
@@ -180,12 +182,63 @@ const Sidebar = forwardRef(SidebarWithRef);
 Sidebar.displayName = 'Sidebar'; // Make findable for tests.
 export {Sidebar};
 
+const ToolbarContext = Preact.createContext(
+  /** @type {SidebarDef.ToolbarContext} */ ({})
+);
+
 /**
  * @param {!SidebarDef.SidebarToolbarProps} props
  * @return {PreactDef.Renderable}
  */
+<<<<<<< HEAD
 export function SidebarToolbar({
   children,
+=======
+export function SidebarToolbar(props) {
+  const context = useMemo(
+    () => ({
+      preactMode: true,
+      domElement: null,
+    }),
+    []
+  );
+
+  return (
+    <ToolbarContext.Provider value={context}>
+      <ToolbarHelper {...props}></ToolbarHelper>
+    </ToolbarContext.Provider>
+  );
+}
+
+/**
+ * @param {!SidebarDef.AmpSidebarToolbarProps} props
+ * @return {PreactDef.Renderable}
+ */
+export function AmpSidebarToolbar(props) {
+  const childProps = {...props};
+  const {domElement} = childProps;
+  delete childProps.domElement;
+  const context = useMemo(
+    () => ({
+      preactMode: false,
+      domElement,
+    }),
+    [domElement]
+  );
+
+  return (
+    <ToolbarContext.Provider value={context}>
+      <ToolbarHelper {...childProps}></ToolbarHelper>
+    </ToolbarContext.Provider>
+  );
+}
+
+/**
+ * @param {!SidebarDef.ToolbarHelperProps} props
+ * @return {PreactDef.Renderable}
+ */
+function ToolbarHelper({
+>>>>>>> 2b67abd5f (Amp sidebar ssr design)
   toolbar: mediaQueryProp,
   toolbarTarget: toolbarTargetProp,
   ...rest
@@ -194,6 +247,11 @@ export function SidebarToolbar({
   const [mediaQuery, setMediaQuery] = useState(null);
   const [toolbarTarget, setToolbarTarget] = useState(null);
   const [targetEl, setTargetEl] = useState(null);
+
+  const {preactMode, domElement} = useContext(ToolbarContext);
+  if (!preactMode) {
+    ref.current = domElement;
+  }
 
   useEffect(() => {
     const doc = ref.current?.ownerDocument;
@@ -237,14 +295,16 @@ export function SidebarToolbar({
   }, [mediaQuery, toolbarTarget, targetEl]);
 
   return (
-    <nav
-      ref={ref}
-      toolbar={mediaQueryProp}
-      toolbar-target={toolbarTargetProp}
-      {...rest}
-    >
-      {children}
-    </nav>
+    preactMode && (
+      <nav
+        ref={ref}
+        toolbar={mediaQueryProp}
+        toolbar-target={toolbarTargetProp}
+        {...rest}
+      >
+        {children}
+      </nav>
+    )
   );
 }
 
