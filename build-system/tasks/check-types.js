@@ -77,7 +77,6 @@ const CORE_SRCS_GLOBS = [
 
   // Needed for CSS escape polyfill
   'third_party/css-escape/css-escape.js',
-  '!src/core/types/object/json.js',
 ];
 const CORE_EXTERNS_GLOBS = ['src/core/**/*.extern.js'];
 

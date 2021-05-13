@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {isArray} from '../array';
+
 /**
  * @fileoverview This module declares JSON types as defined in the
  * {@link http://json.org/}.
@@ -32,13 +34,13 @@ let JSONScalarDef;
 
 /**
  * JSON object. It's a map with string keys and JSON values.
- * @typedef {!Object<string, ?JSONValueDef>}
+ * @typedef {!Object<string, ?*>} (* should be JSONValueDef)
  */
 let JSONObjectDef;
 
 /**
  * JSON array. It's an array with JSON values.
- * @typedef {!Array<?JSONValueDef>}
+ * @typedef {!Array<?*>} (* should be JSONValueDef)
  */
 let JSONArrayDef;
 
@@ -61,18 +63,18 @@ let InternalJsonLiteralTypeDef;
  * Simple wrapper around JSON.parse that casts the return value
  * to JsonObject.
  * Create a new wrapper if an array return value is desired.
- * @param {*} json JSON string to parse
+ * @param {string} json JSON string to parse
  * @return {?JsonObject} May be extend to parse arrays.
  */
 export function parseJson(json) {
-  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
+  return /** @type {?JsonObject} */ (JSON.parse(json));
 }
 
 /**
  * Parses the given `json` string without throwing an exception if not valid.
  * Returns `undefined` if parsing fails.
  * Returns the `Object` corresponding to the JSON string when parsing succeeds.
- * @param {*} json JSON string to parse
+ * @param {string} json JSON string to parse
  * @param {function(!Error)=} opt_onFailed Optional function that will be called
  *     with the error if parsing fails.
  * @return {?JsonObject} May be extend to parse arrays.
@@ -112,7 +114,7 @@ export function deepEquals(a, b, depth = 5) {
     if (depth > 0) {
       if (typeof a !== typeof b) {
         return false;
-      } else if (Array.isArray(a) && Array.isArray(b)) {
+      } else if (isArray(a) && isArray(b)) {
         if (a.length !== b.length) {
           return false;
         }
@@ -121,13 +123,12 @@ export function deepEquals(a, b, depth = 5) {
         }
         continue;
       } else if (a && b && typeof a === 'object' && typeof b === 'object') {
-        const keysA = Object.keys(/** @type {!Object} */ (a));
-        const keysB = Object.keys(/** @type {!Object} */ (b));
+        const keysA = Object.keys(a);
+        const keysB = Object.keys(b);
         if (keysA.length !== keysB.length) {
           return false;
         }
-        for (let i = 0; i < keysA.length; i++) {
-          const k = keysA[i];
+        for (const k of keysA) {
           queue.push({a: a[k], b: b[k], depth: depth - 1});
         }
         continue;
@@ -160,7 +161,7 @@ export function jsonConfiguration(obj) {
  * This converts an Object into a suitable type to be used in `includeJsonLiteral`.
  * This doesn't actually do any conversion, it only changes the closure type.
  *
- * @param {!Object|!Array|string|number|boolean|null} value
+ * @param {?JSONValueDef} value
  * @return {!InternalJsonLiteralTypeDef}
  */
 export function jsonLiteral(value) {
