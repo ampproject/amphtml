@@ -533,9 +533,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.state_ = state;
         break;
       case PageState.PAUSED:
-        // canResume keeps the time advancement timer if set to true, and resets
-        // it when set to false. When user is long pressing, don't reset it.
-        this.advancement_.stop(true /* canResume */);
+        this.advancement_.stop();
         this.pauseAllMedia_(false /** rewindToBeginning */);
         this.animationManager_?.pauseAll();
         this.state_ = state;
@@ -1585,9 +1583,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    const videoEls = /** @type {!Array<!HTMLMediaElement>} */ (
-      this.getAllVideos_()
-    );
+    const videoEls = /** @type {!Array<!HTMLMediaElement>} */ (this.getAllVideos_());
     for (let i = 0; i < videoEls.length; i++) {
       this.startMeasuringVideoPerformance_(videoEls[i]);
     }

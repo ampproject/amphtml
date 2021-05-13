@@ -323,10 +323,6 @@ export class PaginationButtons {
     }
 
     if (pageIndex === totalPages - 1) {
-      this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
-    }
-
-    if (pageIndex === totalPages - 1) {
       const viewer = Services.viewerForDoc(this.ampStory_.element);
       if (viewer.hasCapability('swipe')) {
         this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
@@ -344,14 +340,14 @@ export class PaginationButtons {
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (isVisible) {
       this.backButton_.updateState(
-        /** @type {!ButtonState_1_0_Def} */ (
-          devAssert(this.backButtonStateToRestore_)
-        )
+        /** @type {!ButtonState_1_0_Def} */ (devAssert(
+          this.backButtonStateToRestore_
+        ))
       );
       this.forwardButton_.updateState(
-        /** @type {!ButtonState_1_0_Def} */ (
-          devAssert(this.forwardButtonStateToRestore_)
-        )
+        /** @type {!ButtonState_1_0_Def} */ (devAssert(
+          this.forwardButtonStateToRestore_
+        ))
       );
     } else {
       this.backButtonStateToRestore_ = this.backButton_.getState();
