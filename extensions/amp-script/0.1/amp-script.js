@@ -140,7 +140,7 @@ export class AmpScript extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.sandboxed_ = this.element.hasAttribute('sandboxed');
-    this.nodom_ = this.element.hasAttribute('nodom') || this.sandboxed_;
+    this.nodom_ = this.sandboxed_ || this.element.hasAttribute('nodom');
     this.development_ =
       this.element.hasAttribute('data-ampdevmode') ||
       this.element.ownerDocument.documentElement.hasAttribute(
