@@ -61,27 +61,7 @@ export class AmpStoryRequestService {
    * @private
    */
   loadBookendConfigImpl_() {
-    const bookendEl = childElementByTag(
-      this.storyElement_,
-      'amp-story-bookend'
-    );
-    if (!bookendEl) {
-      return Promise.resolve(null);
-    }
-
-    if (bookendEl.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {
-      const rawUrl = bookendEl.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
-      const credentials = bookendEl.getAttribute(CREDENTIALS_ATTRIBUTE_NAME);
-      return this.executeRequest(rawUrl, credentials ? {credentials} : {});
-    }
-
-    // Fallback. Check for an inline json config.
-    let config = null;
-    try {
-      config = getChildJsonConfig(bookendEl);
-    } catch (err) {}
-
-    return Promise.resolve(config);
+    return this.loadShareConfigImpl_();
   }
 
   /**
@@ -110,12 +90,11 @@ export class AmpStoryRequestService {
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    */
   loadShareConfigImpl_() {
-    const shareConfigEl = childElementByTag(
-      this.storyElement_,
-      'amp-story-social-share'
+    const shareConfigEl = this.storyElement_.querySelector(
+      'amp-story-social-share, amp-story-bookend'
     );
     if (!shareConfigEl) {
-      return this.loadBookendConfig();
+      return Promise.resolve();
     }
 
     if (shareConfigEl.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {
