@@ -46,7 +46,7 @@ import {srcsetFromElement} from '../../../src/srcset';
 const TAG = 'amp-image-lightbox';
 
 /** @private @const {!Set<string>} */
-const SUPPORTED_AMP_ELEMENTS_ = new Set(['amp-img', 'amp-anim']);
+const SUPPORTED_ELEMENTS_ = new Set(['amp-img', 'amp-anim', 'img']);
 
 /** @private @const */
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby', 'aria-labelledby'];
@@ -875,7 +875,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     const source = invocation.caller;
     const tagName = source.tagName.toLowerCase();
     userAssert(
-      source && (SUPPORTED_AMP_ELEMENTS_.has(tagName) || 'img' === tagName),
+      source && SUPPORTED_ELEMENTS_.has(tagName),
       'Unsupported element: %s',
       source.tagName
     );
