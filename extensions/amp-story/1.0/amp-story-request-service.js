@@ -15,7 +15,6 @@
  */
 
 import {Services} from '../../../src/services';
-import {childElementByTag} from '../../../src/dom';
 import {getChildJsonConfig} from '../../../src/json';
 import {isProtocolValid} from '../../../src/url';
 import {once} from '../../../src/core/types/function';
