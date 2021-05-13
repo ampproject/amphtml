@@ -81,23 +81,23 @@ describes.realWin(
       const container = lightbox.querySelector(
         '.i-amphtml-image-lightbox-container'
       );
-      expect(container).to.not.equal(null);
+      expect(container).to.not.be.null;
 
       const caption = container.querySelector(
         '.i-amphtml-image-lightbox-caption'
       );
-      expect(caption).to.not.equal(null);
+      expect(caption).to.not.be.null;
       expect(caption).to.have.class('amp-image-lightbox-caption');
 
       const viewer = container.querySelector(
         '.i-amphtml-image-lightbox-viewer'
       );
-      expect(viewer).to.not.equal(null);
+      expect(viewer).to.not.be.null;
 
       const image = viewer.querySelector(
         '.i-amphtml-image-lightbox-viewer-image'
       );
-      expect(image).to.not.equal(null);
+      expect(image).to.not.be.null;
 
       // Very important. Image must have transform-origin=50% 50%.
       const win = image.ownerDocument.defaultView;
@@ -127,23 +127,23 @@ describes.realWin(
       const container = lightbox.querySelector(
         '.i-amphtml-image-lightbox-container'
       );
-      expect(container).to.not.equal(null);
+      expect(container).to.not.be.null;
 
       const caption = container.querySelector(
         '.i-amphtml-image-lightbox-caption'
       );
-      expect(caption).to.not.equal(null);
+      expect(caption).to.not.be.null;
       expect(caption).to.have.class('amp-image-lightbox-caption');
 
       const viewer = container.querySelector(
         '.i-amphtml-image-lightbox-viewer'
       );
-      expect(viewer).to.not.equal(null);
+      expect(viewer).to.not.be.null;
 
       const image = viewer.querySelector(
         '.i-amphtml-image-lightbox-viewer-image'
       );
-      expect(image).to.not.equal(null);
+      expect(image).to.not.be.null;
 
       // Very important. Image must have transform-origin=50% 50%.
       const win = image.ownerDocument.defaultView;
