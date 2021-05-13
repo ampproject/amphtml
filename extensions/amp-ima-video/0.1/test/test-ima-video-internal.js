@@ -672,13 +672,8 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.setVideoPlayerForTesting(getVideoPlayerMock());
     imaVideoObj.setContentCompleteForTesting(true);
     // expect a subset of controls to be hidden / displayed during ad
-    const {
-      controlsDiv,
-      playPauseDiv,
-      timeDiv,
-      muteUnmuteDiv,
-      fullscreenDiv,
-    } = imaVideoObj.getPropertiesForTesting();
+    const {controlsDiv, playPauseDiv, timeDiv, muteUnmuteDiv, fullscreenDiv} =
+      imaVideoObj.getPropertiesForTesting();
     expect(controlsDiv).not.to.be.null;
     expect(playPauseDiv).not.to.be.null;
     expect(timeDiv).not.to.be.null;
