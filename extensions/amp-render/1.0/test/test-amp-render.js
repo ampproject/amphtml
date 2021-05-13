@@ -517,5 +517,75 @@ describes.realWin(
       await getRenderedData();
       expect(element.getAttribute('aria-live')).to.equal('assertive');
     });
+
+    it('should render a placeholder', async () => {
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+
+      element = html`
+        <amp-render
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+          <p placeholder>Loading data</p>
+          <p fallback>Failed</p>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await element.buildInternal();
+      await waitFor(() => {
+        const div = element.querySelector(`[placeholder]`);
+        return div && div.textContent;
+      }, 'placeholder rendered');
+      const placeholder = element.querySelector(`[placeholder]`);
+
+      expect(placeholder.textContent).to.equal('Loading data');
+
+      fetchStub.resolves({name: 'Joe'});
+      const text = await getRenderedData();
+      expect(text).to.equal('Hello Joe');
+      expect(fetchStub).to.be.calledOnce;
+    });
+
+    it('should render a fallback', async () => {
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+
+      element = html`
+        <amp-render
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+          <p placeholder>Loading data</p>
+          <p fallback>Failed</p>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+
+      fetchStub.rejects();
+      await element.buildInternal();
+
+      await waitFor(() => {
+        const div = element.querySelector(`[fallback]`);
+        return div && div.textContent;
+      }, 'fallback rendered');
+      const fallback = element.querySelector(`[fallback]`);
+
+      expect(fallback.textContent).to.equal('Failed');
+    });
   }
 );
