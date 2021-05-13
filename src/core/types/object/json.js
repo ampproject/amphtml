@@ -26,25 +26,25 @@ import {isObject} from '../object';
 
 /**
  * JSON scalar. It's either string, number or boolean.
- * @typedef {*} should be string|number|boolean|null
+ * @typedef {string|number|boolean|null}
  */
 let JSONScalarDef;
 
 /**
  * JSON object. It's a map with string keys and JSON values.
- * @typedef {*} should be !Object<string, ?JSONValueDef>
+ * @typedef {!Object<string, ?JSONValueDef>}
  */
 let JSONObjectDef;
 
 /**
  * JSON array. It's an array with JSON values.
- * @typedef {*} should be !Array<?JSONValueDef>
+ * @typedef {!Array<?JSONValueDef>}
  */
 let JSONArrayDef;
 
 /**
  * JSON value. It's either a scalar, an object or an array.
- * @typedef {*} should be !JSONScalarDef|!JSONObjectDef|!JSONArrayDef
+ * @typedef {!JSONScalarDef|!JSONObjectDef|!JSONArrayDef}
  */
 let JSONValueDef;
 
@@ -56,58 +56,6 @@ let JSONValueDef;
  * }}
  */
 let InternalJsonLiteralTypeDef;
-
-/**
- * Recreates objects with prototype-less copies.
- * @param {!JsonObject} obj
- * @return {!JsonObject}
- */
-export function recreateNonProtoObject(obj) {
-  const copy = Object.create(null);
-  for (const k in obj) {
-    if (!hasOwnProperty(obj, k)) {
-      continue;
-    }
-    const v = obj[k];
-    copy[k] = isObject(v) ? recreateNonProtoObject(v) : v;
-  }
-  return /** @type {!JsonObject} */ (copy);
-}
-
-/**
- * Returns a value from an object for a field-based expression. The expression
- * is a simple nested dot-notation of fields, such as `field1.field2`. If any
- * field in a chain does not exist or is not an object or array, the returned
- * value will be `undefined`.
- *
- * @param {!JsonObject} obj
- * @param {string} expr
- * @return {*}
- */
-export function getValueForExpr(obj, expr) {
-  // The `.` indicates "the object itself".
-  if (expr == '.') {
-    return obj;
-  }
-  // Otherwise, navigate via properties.
-  const parts = expr.split('.');
-  let value = obj;
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
-    if (
-      part &&
-      value &&
-      value[part] !== undefined &&
-      hasOwnProperty(value, part)
-    ) {
-      value = value[part];
-      continue;
-    }
-    value = undefined;
-    break;
-  }
-  return value;
-}
 
 /**
  * Simple wrapper around JSON.parse that casts the return value
@@ -191,21 +139,6 @@ export function deepEquals(a, b, depth = 5) {
     }
   }
   return true;
-}
-
-/**
- * @param {*} obj
- * @param {string} key
- * @return {boolean}
- */
-function hasOwnProperty(obj, key) {
-  if (obj == null || typeof obj != 'object') {
-    return false;
-  }
-  return Object.prototype.hasOwnProperty.call(
-    /** @type {!Object} */ (obj),
-    key
-  );
 }
 
 /**
