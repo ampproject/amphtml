@@ -314,6 +314,10 @@ class RuntimeTestConfig {
       },
       plugins: [importPathPlugin, babelPlugin],
       sourcemap: 'inline',
+      // TODO(rsimha): Remove this workaround once evanw/esbuild#1202 is fixed.
+      banner: {
+        js: "function require(x) { throw new Error('Cannot require ' + x) }",
+      },
     };
   }
 
@@ -331,7 +335,7 @@ class RuntimeTestConfig {
       adTypes: getAdTypes(),
       mochaTimeout: this.client.mocha.timeout,
       testServerPort: this.client.testServerPort,
-      isModuleBuild: !!argv.esm, // Used by skip matchers in _init_tests.js
+      isModuleBuild: !!argv.esm, // Used by skip matchers in testing/test-config.js
     };
   }
 

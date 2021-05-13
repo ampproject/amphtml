@@ -433,6 +433,28 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(mediaPoolRegister).to.not.have.been.called;
   });
 
+  it('should use storyNextUp value as default for auto-advance-after', async () => {
+    env.sandbox
+      .stub(Services.viewerForDoc(element), 'getParam')
+      .withArgs('storyNextUp')
+      .returns('5s');
+    expect(element.getAttribute('auto-advance-after')).to.be.equal(null);
+    page.buildCallback();
+
+    expect(element.getAttribute('auto-advance-after')).to.be.equal('5s');
+  });
+
+  it('should not use storyNextUp to override auto-advance-after value', async () => {
+    env.sandbox
+      .stub(Services.viewerForDoc(element), 'getParam')
+      .withArgs('storyNextUp')
+      .returns('5s');
+    element.setAttribute('auto-advance-after', '20000ms');
+    page.buildCallback();
+
+    expect(element.getAttribute('auto-advance-after')).to.be.equal('20000ms');
+  });
+
   it('should stop the advancement when state becomes not active', async () => {
     page.buildCallback();
     const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
@@ -655,7 +677,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl).to.exist;
   });
 
-  it('should build the open attachment UI with target="_top" to navigate in top window', async () => {
+  it('should build the open attachment UI with target="_top" to navigate in top window. For viewers, this ensures the link will open in the parent window.', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
@@ -673,7 +695,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
   });
 
-  it('should build the new outlink page attachment UI with target="_top" to navigate in top level browsing context', async () => {
+  it('should build the new outlink page attachment UI with target="_top" to navigate in top level browsing context. For viewers, this ensures the link will open in the parent window.', async () => {
     toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
 
     const attachmentEl = win.document.createElement(

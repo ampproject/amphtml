@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-// Imported just for the side effect of getting the `types` it exports into
-// the type system during compile time.
-import './time';
+import {isString} from '../types';
+
+/**
+ * Number between 0 and 1 that designates normalized time, as in "from start to
+ * end".
+ * @typedef {number}
+ */
+export let NormTimeDef;
 
 /**
  * A CurveDef is a function that returns a normtime value (0 to 1) for another
  * normtime value.
- * @typedef {function(./time.normtimeDef): ./time.normtimeDef}
+ * @typedef {function(NormTimeDef): NormTimeDef}
  */
 export let CurveDef;
 
@@ -34,8 +39,8 @@ export let CurveDef;
  * @return {!CurveDef}
  */
 export function bezierCurve(x1, y1, x2, y2) {
-  const bezier = new Bezier(0, 0, x1, y1, x2, y2, 1, 1);
-  return bezier.solveYValueFromXValue.bind(bezier);
+  return (xVal) =>
+    Bezier.solveYValueFromXValue(xVal, 0, 0, x1, y1, x2, y2, 1, 1);
 }
 
 /**
@@ -44,6 +49,8 @@ export function bezierCurve(x1, y1, x2, y2) {
  */
 class Bezier {
   /**
+   * Computes the y coordinate of a point on the curve given its x coordinate.
+   * @param {number} xVal The x coordinate of the point on the curve.
    * @param {number} x0 X coordinate of the start point.
    * @param {number} y0 Y coordinate of the start point.
    * @param {number} x1 X coordinate of the first control point.
@@ -52,64 +59,16 @@ class Bezier {
    * @param {number} y2 Y coordinate of the second control point.
    * @param {number} x3 X coordinate of the end point.
    * @param {number} y3 Y coordinate of the end point.
-   */
-  constructor(x0, y0, x1, y1, x2, y2, x3, y3) {
-    /**
-     * X coordinate of the first point.
-     * @type {number}
-     */
-    this.x0 = x0;
-
-    /**
-     * Y coordinate of the first point.
-     * @type {number}
-     */
-    this.y0 = y0;
-
-    /**
-     * X coordinate of the first control point.
-     * @type {number}
-     */
-    this.x1 = x1;
-
-    /**
-     * Y coordinate of the first control point.
-     * @type {number}
-     */
-    this.y1 = y1;
-
-    /**
-     * X coordinate of the second control point.
-     * @type {number}
-     */
-    this.x2 = x2;
-
-    /**
-     * Y coordinate of the second control point.
-     * @type {number}
-     */
-    this.y2 = y2;
-
-    /**
-     * X coordinate of the end point.
-     * @type {number}
-     */
-    this.x3 = x3;
-
-    /**
-     * Y coordinate of the end point.
-     * @type {number}
-     */
-    this.y3 = y3;
-  }
-
-  /**
-   * Computes the y coordinate of a point on the curve given its x coordinate.
-   * @param {number} xVal The x coordinate of the point on the curve.
    * @return {number} The y coordinate of the point on the curve.
    */
-  solveYValueFromXValue(xVal) {
-    return this.getPointY(this.solvePositionFromXValue(xVal));
+  static solveYValueFromXValue(xVal, x0, y0, x1, y1, x2, y2, x3, y3) {
+    return Bezier.getPointY_(
+      Bezier.solvePositionFromXValue_(xVal, x0, x1, x2, x3),
+      y0,
+      y1,
+      y2,
+      y3
+    );
   }
 
   /**
@@ -118,14 +77,19 @@ class Bezier {
    * As such, the following should always be true up to some small epsilon:
    * t ~ solvePositionFromXValue(getPointX(t)) for t in [0, 1].
    * @param {number} xVal The x coordinate of the point to find on the curve.
+   * @param {number} x0 X coordinate of the start point.
+   * @param {number} x1 X coordinate of the first control point.
+   * @param {number} x2 X coordinate of the second control point.
+   * @param {number} x3 X coordinate of the end point.
    * @return {number} The position t.
+   * @private
    */
-  solvePositionFromXValue(xVal) {
+  static solvePositionFromXValue_(xVal, x0, x1, x2, x3) {
     // Desired precision on the computation.
     const epsilon = 1e-6;
 
     // Initial estimate of t using linear interpolation.
-    let t = (xVal - this.x0) / (this.x3 - this.x0);
+    let t = (xVal - x0) / (x3 - x0);
     if (t <= 0) {
       return 0;
     } else if (t >= 1) {
@@ -137,8 +101,9 @@ class Bezier {
     let tMax = 1;
     let value = 0;
     for (let i = 0; i < 8; i++) {
-      value = this.getPointX(t);
-      const derivative = (this.getPointX(t + epsilon) - value) / epsilon;
+      value = Bezier.getPointX_(t, x0, x1, x2, x3);
+      const derivative =
+        (Bezier.getPointX_(t + epsilon, x0, x1, x2, x3) - value) / epsilon;
       if (Math.abs(value - xVal) < epsilon) {
         return t;
       } else if (Math.abs(derivative) < epsilon) {
@@ -164,7 +129,7 @@ class Bezier {
         tMax = t;
         t = (t + tMin) / 2;
       }
-      value = this.getPointX(t);
+      value = Bezier.getPointX_(t, x0, x1, x2, x3);
     }
     return t;
   }
@@ -172,53 +137,63 @@ class Bezier {
   /**
    * Computes the curve's X coordinate at a point between 0 and 1.
    * @param {number} t The point on the curve to find.
+   * @param {number} x0 X coordinate of the start point.
+   * @param {number} x1 X coordinate of the first control point.
+   * @param {number} x2 X coordinate of the second control point.
+   * @param {number} x3 X coordinate of the end point.
    * @return {number} The computed coordinate.
+   * @private
    */
-  getPointX(t) {
+  static getPointX_(t, x0, x1, x2, x3) {
     // Special case start and end.
     if (t == 0) {
-      return this.x0;
+      return x0;
     } else if (t == 1) {
-      return this.x3;
+      return x3;
     }
 
     // Step one - from 4 points to 3
-    let ix0 = this.lerp(this.x0, this.x1, t);
-    let ix1 = this.lerp(this.x1, this.x2, t);
-    const ix2 = this.lerp(this.x2, this.x3, t);
+    let ix0 = Bezier.lerp_(x0, x1, t);
+    let ix1 = Bezier.lerp_(x1, x2, t);
+    const ix2 = Bezier.lerp_(x2, x3, t);
 
     // Step two - from 3 points to 2
-    ix0 = this.lerp(ix0, ix1, t);
-    ix1 = this.lerp(ix1, ix2, t);
+    ix0 = Bezier.lerp_(ix0, ix1, t);
+    ix1 = Bezier.lerp_(ix1, ix2, t);
 
     // Final step - last point
-    return this.lerp(ix0, ix1, t);
+    return Bezier.lerp_(ix0, ix1, t);
   }
 
   /**
    * Computes the curve's Y coordinate at a point between 0 and 1.
    * @param {number} t The point on the curve to find.
+   * @param {number} y0 Y coordinate of the start point.
+   * @param {number} y1 Y coordinate of the first control point.
+   * @param {number} y2 Y coordinate of the second control point.
+   * @param {number} y3 Y coordinate of the end point.
    * @return {number} The computed coordinate.
+   * @private
    */
-  getPointY(t) {
+  static getPointY_(t, y0, y1, y2, y3) {
     // Special case start and end.
     if (t == 0) {
-      return this.y0;
+      return y0;
     } else if (t == 1) {
-      return this.y3;
+      return y3;
     }
 
     // Step one - from 4 points to 3
-    let iy0 = this.lerp(this.y0, this.y1, t);
-    let iy1 = this.lerp(this.y1, this.y2, t);
-    const iy2 = this.lerp(this.y2, this.y3, t);
+    let iy0 = Bezier.lerp_(y0, y1, t);
+    let iy1 = Bezier.lerp_(y1, y2, t);
+    const iy2 = Bezier.lerp_(y2, y3, t);
 
     // Step two - from 3 points to 2
-    iy0 = this.lerp(iy0, iy1, t);
-    iy1 = this.lerp(iy1, iy2, t);
+    iy0 = Bezier.lerp_(iy0, iy1, t);
+    iy1 = Bezier.lerp_(iy1, iy2, t);
 
     // Final step - last point
-    return this.lerp(iy0, iy1, t);
+    return Bezier.lerp_(iy0, iy1, t);
   }
 
   /**
@@ -229,8 +204,9 @@ class Bezier {
    * @param {number} b A number.
    * @param {number} x The proportion between a and b.
    * @return {number} The interpolated value between a and b.
+   * @private
    */
-  lerp(a, b, x) {
+  static lerp_(a, b, x) {
     return a + x * (b - a);
   }
 }
@@ -243,32 +219,48 @@ class Bezier {
 export const Curves = {
   /**
    * linear
-   * @param {number} n
-   * @return {number}
+   * @param {!NormTimeDef} xVal
+   * @return {!NormTimeDef}
    */
-  LINEAR(n) {
-    return n;
+  LINEAR(xVal) {
+    return xVal;
   },
 
   /**
    * ease
+   * @param {!NormTimeDef} xVal
+   * @return {!NormTimeDef}
    */
-  EASE: bezierCurve(0.25, 0.1, 0.25, 1.0),
+  EASE(xVal) {
+    return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.25, 0.1, 0.25, 1.0, 1, 1);
+  },
 
   /**
    * ease-in: slow out, fast in
+   * @param {!NormTimeDef} xVal
+   * @return {!NormTimeDef}
    */
-  EASE_IN: bezierCurve(0.42, 0.0, 1.0, 1.0),
+  EASE_IN(xVal) {
+    return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.42, 0.0, 1.0, 1.0, 1, 1);
+  },
 
   /**
    * ease-out: fast out, slow in
+   * @param {!NormTimeDef} xVal
+   * @return {!NormTimeDef}
    */
-  EASE_OUT: bezierCurve(0.0, 0.0, 0.58, 1.0),
+  EASE_OUT(xVal) {
+    return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.0, 0.0, 0.58, 1.0, 1, 1);
+  },
 
   /**
    * ease-in-out
+   * @param {!NormTimeDef} xVal
+   * @return {!NormTimeDef}
    */
-  EASE_IN_OUT: bezierCurve(0.42, 0.0, 0.58, 1.0),
+  EASE_IN_OUT(xVal) {
+    return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.42, 0.0, 0.58, 1.0, 1, 1);
+  },
 };
 
 /**
@@ -291,7 +283,8 @@ export function getCurve(curve) {
   if (!curve) {
     return null;
   }
-  if (typeof curve == 'string') {
+  if (isString(curve)) {
+    curve = /** @type {string} */ (curve);
     // If the curve is a custom cubic-bezier curve
     if (curve.indexOf('cubic-bezier') != -1) {
       const match = curve.match(/cubic-bezier\((.+)\)/);
@@ -310,5 +303,5 @@ export function getCurve(curve) {
     }
     return NAME_MAP[curve];
   }
-  return curve;
+  return /** @type {!CurveDef} */ (curve);
 }

@@ -41,20 +41,22 @@ export function renderCreativeIntoFriendlyFrame(
   creativeMetadata
 ) {
   // Create and setup friendly iframe.
-  const iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
-    /** @type {!Document} */ (element.ownerDocument),
-    'iframe',
-    dict({
-      // NOTE: It is possible for either width or height to be 'auto',
-      // a non-numeric value.
-      'height': size.height,
-      'width': size.width,
-      'frameborder': '0',
-      'allowfullscreen': '',
-      'allowtransparency': '',
-      'scrolling': 'no',
-    })
-  ));
+  const iframe = /** @type {!HTMLIFrameElement} */ (
+    createElementWithAttributes(
+      /** @type {!Document} */ (element.ownerDocument),
+      'iframe',
+      dict({
+        // NOTE: It is possible for either width or height to be 'auto',
+        // a non-numeric value.
+        'height': size.height,
+        'width': size.width,
+        'frameborder': '0',
+        'allowfullscreen': '',
+        'allowtransparency': '',
+        'scrolling': 'no',
+      })
+    )
+  );
   iframe.classList.add('i-amphtml-fill-content');
 
   const fontsArray = [];

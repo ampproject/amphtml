@@ -77,7 +77,7 @@ import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Decode} from '../../../src/core/types/string/bytes';
 import {whenWithinViewport} from './within-viewport';
 
 /** @type {Array<string>} */
@@ -304,7 +304,8 @@ export class AmpA4A extends AMP.BaseElement {
      * uses safeframe when response header is not specified.
      * @private {?XORIGIN_MODE}
      */
-    this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
+    this.experimentalNonAmpCreativeRenderMethod_ =
+      this.getNonAmpCreativeRenderingMethod();
 
     /**
      * Gets a notion of current time, in ms.  The value is not necessarily
@@ -790,8 +791,8 @@ export class AmpA4A extends AMP.BaseElement {
           ? consentMetadata['consentStringType']
           : consentMetadata;
 
-        return /** @type {!Promise<?string>} */ (this.getServeNpaSignal().then(
-          (npaSignal) =>
+        return /** @type {!Promise<?string>} */ (
+          this.getServeNpaSignal().then((npaSignal) =>
             this.getAdUrl(
               {
                 consentState,
@@ -803,11 +804,14 @@ export class AmpA4A extends AMP.BaseElement {
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
-                /** @type {?Object<string, string|number|boolean|undefined>} */ (consentMetadata)
+                /** @type {?Object<string, string|number|boolean|undefined>} */ (
+                  consentMetadata
+                )
               ),
               npaSignal
             )
-        ));
+          )
+        );
       })
       // This block returns the (possibly empty) response to the XHR request.
       /** @return {!Promise<?Response>} */
@@ -1380,7 +1384,9 @@ export class AmpA4A extends AMP.BaseElement {
 
         if (this.isInNoSigningExp()) {
           friendlyRenderPromise = this.renderFriendlyTrustless_(
-            /** @type {!./head-validation.ValidatedHeadDef} */ (creativeMetaData),
+            /** @type {!./head-validation.ValidatedHeadDef} */ (
+              creativeMetaData
+            ),
             checkStillCurrent
           );
         } else {
@@ -1467,7 +1473,8 @@ export class AmpA4A extends AMP.BaseElement {
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
     this.transferDomBody_ = null;
-    this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
+    this.experimentalNonAmpCreativeRenderMethod_ =
+      this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
   }
 
@@ -1882,21 +1889,23 @@ export class AmpA4A extends AMP.BaseElement {
     devAssert(!!this.element.ownerDocument, 'missing owner document?!');
     this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
-    this.iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
-      /** @type {!Document} */ (this.element.ownerDocument),
-      'iframe',
-      dict({
-        // NOTE: It is possible for either width or height to be 'auto',
-        // a non-numeric value.
-        'height': this.creativeSize_.height,
-        'width': this.creativeSize_.width,
-        'frameborder': '0',
-        'allowfullscreen': '',
-        'allowtransparency': '',
-        'scrolling': 'no',
-        'title': this.getIframeTitle(),
-      })
-    ));
+    this.iframe = /** @type {!HTMLIFrameElement} */ (
+      createElementWithAttributes(
+        /** @type {!Document} */ (this.element.ownerDocument),
+        'iframe',
+        dict({
+          // NOTE: It is possible for either width or height to be 'auto',
+          // a non-numeric value.
+          'height': this.creativeSize_.height,
+          'width': this.creativeSize_.width,
+          'frameborder': '0',
+          'allowfullscreen': '',
+          'allowtransparency': '',
+          'scrolling': 'no',
+          'title': this.getIframeTitle(),
+        })
+      )
+    );
     if (!this.uiHandler.isStickyAd()) {
       this.applyFillContent(this.iframe);
     }
@@ -2029,14 +2038,15 @@ export class AmpA4A extends AMP.BaseElement {
     // as they block the UI thread for the arbitrary amount of time until the
     // request completes.
     mergedAttributes['allow'] = "sync-xhr 'none';";
-    this.iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
-      /** @type {!Document} */ (this.element.ownerDocument),
-      'iframe',
-      /** @type {!JsonObject} */ (Object.assign(
-        mergedAttributes,
-        SHARED_IFRAME_PROPERTIES
-      ))
-    ));
+    this.iframe = /** @type {!HTMLIFrameElement} */ (
+      createElementWithAttributes(
+        /** @type {!Document} */ (this.element.ownerDocument),
+        'iframe',
+        /** @type {!JsonObject} */ (
+          Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)
+        )
+      )
+    );
     if (this.sandboxHTMLCreativeFrame()) {
       applySandbox(this.iframe);
     }
@@ -2090,9 +2100,8 @@ export class AmpA4A extends AMP.BaseElement {
     );
 
     return this.initialIntersectionPromise_.then((intersection) => {
-      contextMetadata['_context'][
-        'initialIntersection'
-      ] = intersectionEntryToJson(intersection);
+      contextMetadata['_context']['initialIntersection'] =
+        intersectionEntryToJson(intersection);
       return this.iframeRenderHelper_(
         dict({
           'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
@@ -2167,9 +2176,8 @@ export class AmpA4A extends AMP.BaseElement {
       );
 
       return this.initialIntersectionPromise_.then((intersection) => {
-        contextMetadata['initialIntersection'] = intersectionEntryToJson(
-          intersection
-        );
+        contextMetadata['initialIntersection'] =
+          intersectionEntryToJson(intersection);
         if (method == XORIGIN_MODE.NAMEFRAME) {
           contextMetadata['creative'] = creative;
           name = JSON.stringify(contextMetadata);
@@ -2345,10 +2353,12 @@ export class AmpA4A extends AMP.BaseElement {
     const analyticsEvent = devAssert(
       LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage]
     );
-    const analyticsVars = /** @type {!JsonObject} */ (Object.assign(
-      dict({'time': Math.round(this.getNow_())}),
-      this.getA4aAnalyticsVars(analyticsEvent)
-    ));
+    const analyticsVars = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict({'time': Math.round(this.getNow_())}),
+        this.getA4aAnalyticsVars(analyticsEvent)
+      )
+    );
     triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);
   }
 
@@ -2391,17 +2401,16 @@ export class AmpA4A extends AMP.BaseElement {
       return this.getBlockRtc_().then((shouldBlock) =>
         shouldBlock
           ? undefined
-          : Services.realTimeConfigForDoc(
-              this.getAmpDoc()
-            ).then((realTimeConfig) =>
-              realTimeConfig.maybeExecuteRealTimeConfig(
-                this.element,
-                this.getCustomRealTimeConfigMacros_(),
-                consentState,
-                consentString,
-                consentMetadata,
-                this.verifyStillCurrent()
-              )
+          : Services.realTimeConfigForDoc(this.getAmpDoc()).then(
+              (realTimeConfig) =>
+                realTimeConfig.maybeExecuteRealTimeConfig(
+                  this.element,
+                  this.getCustomRealTimeConfigMacros_(),
+                  consentState,
+                  consentString,
+                  consentMetadata,
+                  this.verifyStillCurrent()
+                )
             )
       );
     }

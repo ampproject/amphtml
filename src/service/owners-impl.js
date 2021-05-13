@@ -26,9 +26,9 @@ import {registerServiceBuilderForDoc} from '../service';
  * @return {!Array<!Element>}
  */
 function elements(elements) {
-  return /** @type {!Array<!Element>} */ (isArray(elements)
-    ? elements
-    : [elements]);
+  return /** @type {!Array<!Element>} */ (
+    isArray(elements) ? elements : [elements]
+  );
 }
 
 /**

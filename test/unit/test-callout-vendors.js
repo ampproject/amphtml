@@ -19,7 +19,7 @@ import {isSecureUrlDeprecated} from '../../src/url';
 
 // The keys of RTC_VENDORS are not allowed to have any capital letters.
 // This test acts as a presubmit to enforce that.
-describe('RTC_VENDORS', () => {
+describes.sandboxed('RTC_VENDORS', {}, () => {
   it('should have all lowercase keys', () =>
     Object.keys(RTC_VENDORS).forEach((key) =>
       expect(key).to.equal(key.toLowerCase())

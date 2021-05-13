@@ -19,7 +19,7 @@ import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../src/sanitizer';
 let sanitize;
 let html;
 
-describe('Caja-based', () => {
+describes.sandboxed('Caja-based', {}, () => {
   beforeEach(() => {
     html = document.createElement('html');
     const documentEl = {documentElement: html};

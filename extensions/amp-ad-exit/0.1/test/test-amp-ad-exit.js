@@ -785,9 +785,8 @@ describes.realWin(
       doc.body.appendChild(ampAd);
       const adFrame = doc.createElement('iframe');
       ampAd.appendChild(adFrame);
-      const ampAdExitElement = adFrame.contentDocument.createElement(
-        'amp-ad-exit'
-      );
+      const ampAdExitElement =
+        adFrame.contentDocument.createElement('amp-ad-exit');
       adFrame.contentDocument.body.appendChild(ampAdExitElement);
       installTimerService(frame.contentWindow);
       installPlatformService(frame.contentWindow);

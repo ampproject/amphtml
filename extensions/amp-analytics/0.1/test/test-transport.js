@@ -453,9 +453,8 @@ describes.realWin(
           '<amp-analytics type="bg"></amp-analytics>'
         );
         frame.contentWindow.__AMP_TOP = win;
-        const ampAnalyticsEl = frame.contentWindow.document.querySelector(
-          'amp-analytics'
-        );
+        const ampAnalyticsEl =
+          frame.contentWindow.document.querySelector('amp-analytics');
 
         transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;
@@ -479,9 +478,8 @@ describes.realWin(
           '<amp-analytics type="bg"></amp-analytics>'
         );
         frame.contentWindow.__AMP_TOP = win;
-        const ampAnalyticsEl = frame.contentWindow.document.querySelector(
-          'amp-analytics'
-        );
+        const ampAnalyticsEl =
+          frame.contentWindow.document.querySelector('amp-analytics');
 
         transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;
