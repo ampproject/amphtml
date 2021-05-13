@@ -88,18 +88,6 @@ export function ownProperty(obj, key) {
 }
 
 /**
- * @param {*} obj
- * @param {string} key
- * @return {boolean}
- */
-function hasOwnProperty(obj, key) {
-  if (obj == null || typeof obj != 'object') {
-    return false;
-  }
-  return hasOwn(/** @type {!Object} */ (obj), key);
-}
-
-/**
  * Deep merges source into target.
  *
  * @param {!Object} target
@@ -212,7 +200,7 @@ export function memo(obj, prop, factory) {
 export function recreateNonProtoObject(obj) {
   const copy = map();
   for (const k in obj) {
-    if (!hasOwnProperty(obj, k)) {
+    if (!hasOwn(obj, k)) {
       continue;
     }
     const v = obj[k];
@@ -239,13 +227,13 @@ export function getValueForExpr(obj, expr) {
   // Otherwise, navigate via properties.
   const parts = expr.split('.');
   let value = obj;
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
+  for (const part of parts) {
     if (
       part &&
       value &&
       value[part] !== undefined &&
-      hasOwnProperty(value, part)
+      typeof value == 'object' &&
+      hasOwn(value, part)
     ) {
       value = value[part];
       continue;
