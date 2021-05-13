@@ -15,13 +15,17 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Facebook} from '../component';
-import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
+import {boolean, select, withKnobs} from '@storybook/addon-knobs';
+import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'Facebook',
-  component: Facebook,
-  decorators: [withKnobs],
+  title: 'amp-facebook-1_0',
+  decorators: [withKnobs, withAmp],
+
+  parameters: {
+    extensions: [{name: 'amp-facebook', version: '1.0'}],
+    experiments: ['bento'],
+  },
 };
 
 const SAMPLE_HREFS = {
@@ -32,7 +36,7 @@ const SAMPLE_HREFS = {
     'https://www.facebook.com/NASA/photos/a.67899501771/10159193669016772/?comment_id=10159193676606772',
 };
 
-export const _default = () => {
+export const Default = () => {
   const embedAs = select('embed type', ['post', 'video', 'comment'], 'post');
   const href = SAMPLE_HREFS[embedAs];
   const allowFullScreen = boolean('allowfullscreen', false);
@@ -43,40 +47,18 @@ export const _default = () => {
     false
   );
   return (
-    <Facebook
-      allowFullScreen={allowFullScreen}
-      bootstrap="./vendor/facebook.max.js"
-      embedAs={embedAs}
-      href={href}
-      includeCommentParent={includeCommentParent}
-      locale={locale}
-      showText={showText}
-      src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
-      style={{width: '400px', height: '400px'}}
+    <amp-facebook
+      data-allowfullscreen={allowFullScreen}
+      data-embed-as={embedAs}
+      data-href={href}
+      data-include-comment-parent={includeCommentParent}
+      data-locale={locale}
+      data-show-text={showText}
+      width="300"
+      height="200"
+      layout="responsive"
     >
-      This text is inside.
-    </Facebook>
-  );
-};
-
-export const Comments = () => {
-  const href = text(
-    'href',
-    'http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html'
-  );
-  const numPosts = boolean('show 5 comments max') ? 5 : undefined;
-  const orderBy = boolean('order by time') ? 'time' : undefined;
-  const locale = boolean('french locale') ? 'fr_FR' : undefined;
-  return (
-    <Facebook
-      bootstrap="./vendor/facebook.max.js"
-      embedAs="comments"
-      href={href}
-      locale={locale}
-      numPosts={numPosts}
-      orderBy={orderBy}
-      src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
-      style={{width: '400px', height: '400px'}}
-    ></Facebook>
+      <div placeholder>Loading...</div>
+    </amp-facebook>
   );
 };
