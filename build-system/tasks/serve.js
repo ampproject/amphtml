@@ -60,7 +60,7 @@ const {watch} = require('chokidar');
  *   index: boolean | string | string[],
  * }}
  */
-let GulpConnectOptions; // eslint-disable-line no-unused-vars
+let GulpConnectOptionsDef;
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
