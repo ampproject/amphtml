@@ -16,7 +16,10 @@
 
 import {randomlySelectUnsetExperiments} from '../experiments';
 
-/** @const {!{id: string, control: string, experiment: string}} */
+// typedef imports
+import {ExperimentInfoDef} from './experiments.type';
+
+/** @const */
 export const StoryAdPlacements = {
   ID: 'story-ad-placements',
   CONTROL: '31060567',
@@ -30,17 +33,16 @@ export const StoryAdPlacements = {
  * @param {!Window} win
  */
 export function divertStoryAdPlacements(win) {
-  const experimentInfo = [
-    {
-      experimentId: StoryAdPlacements.ID,
-      isTrafficEligible: () => true,
-      branches: [
-        StoryAdPlacements.CONTROL,
-        StoryAdPlacements.PREDETERMINED_EIGHT,
-        StoryAdPlacements.PREDETERMINED_TEN,
-        StoryAdPlacements.PREDETERMINED_TWELVE,
-      ],
-    },
-  ];
-  randomlySelectUnsetExperiments(win, experimentInfo);
+  /** @type {!ExperimentInfoDef} */
+  const experimentInfo = {
+    experimentId: StoryAdPlacements.ID,
+    isTrafficEligible: () => true,
+    branches: [
+      StoryAdPlacements.CONTROL,
+      StoryAdPlacements.PREDETERMINED_EIGHT,
+      StoryAdPlacements.PREDETERMINED_TEN,
+      StoryAdPlacements.PREDETERMINED_TWELVE,
+    ],
+  };
+  randomlySelectUnsetExperiments(win, [experimentInfo]);
 }

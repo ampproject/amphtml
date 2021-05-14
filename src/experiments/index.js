@@ -21,11 +21,15 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {dev, user} from './log';
-import {getMode} from './mode';
-import {getTopWindow} from './service';
-import {hasOwn} from './core/types/object';
-import {parseQueryString} from './url';
+import {dev, user} from '../log';
+import {getMode} from '../mode';
+import {getTopWindow} from '../service';
+import {hasOwn, map} from '../core/types/object';
+import {isArray} from '../core/types';
+import {parseQueryString} from '../url';
+
+// typedef imports
+import {ExperimentInfoDef} from './experiments.type';
 
 /** @const {string} */
 const TAG = 'EXPERIMENTS';
@@ -37,21 +41,12 @@ const LOCAL_STORAGE_KEY = 'amp-experiment-toggles';
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
 /**
- * @typedef {{
- *   experimentId: string,
- *   isTrafficEligible: function(!Window):boolean,
- *   branches: !Array<string>
- * }}
- */
-export let ExperimentInfo;
-
-/**
  * Whether we are in canary.
  * @param {!Window} win
  * @return {boolean}
  */
 export function isCanary(win) {
-  return !!(win.AMP_CONFIG && win.AMP_CONFIG.canary);
+  return !!win.AMP_CONFIG?.canary;
 }
 
 /**
@@ -60,9 +55,7 @@ export function isCanary(win) {
  * @return {string}
  */
 export function getBinaryType(win) {
-  return win.AMP_CONFIG && win.AMP_CONFIG.type
-    ? win.AMP_CONFIG.type
-    : 'unknown';
+  return win.AMP_CONFIG?.type || 'unknown';
 }
 
 /**
@@ -95,7 +88,7 @@ export function toggleExperiment(
   opt_transientExperiment
 ) {
   const currentlyOn = isExperimentOn(win, /*OK*/ experimentId);
-  const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
+  const on = opt_on ?? !currentlyOn;
   if (on != currentlyOn) {
     const toggles = experimentToggles(win);
     toggles[experimentId] = on;
@@ -129,7 +122,7 @@ export function experimentToggles(win) {
   if (win[TOGGLES_WINDOW_PROPERTY]) {
     return win[TOGGLES_WINDOW_PROPERTY];
   }
-  win[TOGGLES_WINDOW_PROPERTY] = Object.create(null);
+  win[TOGGLES_WINDOW_PROPERTY] = map();
   const toggles = win[TOGGLES_WINDOW_PROPERTY];
 
   // Read the default config of this build.
@@ -142,20 +135,16 @@ export function experimentToggles(win) {
     }
   }
   // Read document level override from meta tag.
-  if (
-    win.AMP_CONFIG &&
-    Array.isArray(win.AMP_CONFIG['allow-doc-opt-in']) &&
-    win.AMP_CONFIG['allow-doc-opt-in'].length > 0
-  ) {
-    const allowed = win.AMP_CONFIG['allow-doc-opt-in'];
+  const allowedDocOptIn = win.AMP_CONFIG?.['allow-doc-opt-in'];
+  if (isArray(allowedDocOptIn) && allowedDocOptIn.length) {
     const meta = win.document.head.querySelector(
       'meta[name="amp-experiments-opt-in"]'
     );
     if (meta) {
       const optedInExperiments = meta.getAttribute('content').split(',');
-      for (let i = 0; i < optedInExperiments.length; i++) {
-        if (allowed.indexOf(optedInExperiments[i]) != -1) {
-          toggles[optedInExperiments[i]] = true;
+      for (const experiment of optedInExperiments) {
+        if (dev().assertArray(allowedDocOptIn).includes(experiment)) {
+          toggles[experiment] = true;
         }
       }
     }
@@ -163,21 +152,17 @@ export function experimentToggles(win) {
 
   Object.assign(toggles, getExperimentToggles(win));
 
-  if (
-    win.AMP_CONFIG &&
-    Array.isArray(win.AMP_CONFIG['allow-url-opt-in']) &&
-    win.AMP_CONFIG['allow-url-opt-in'].length > 0
-  ) {
-    const allowed = win.AMP_CONFIG['allow-url-opt-in'];
+  const allowedUrlOptIn = win.AMP_CONFIG?.['allow-url-opt-in'];
+  if (isArray(allowedUrlOptIn) && allowedUrlOptIn.length) {
     const hash = win.location['originalHash'] || win.location.hash;
     const params = parseQueryString(hash);
-    for (let i = 0; i < allowed.length; i++) {
-      const param = params[`e-${allowed[i]}`];
+    for (const experiment of allowedUrlOptIn) {
+      const param = params[`e-${experiment}`];
       if (param == '1') {
-        toggles[allowed[i]] = true;
+        toggles[experiment] = true;
       }
       if (param == '0') {
-        toggles[allowed[i]] = false;
+        toggles[experiment] = false;
       }
     }
   }
@@ -188,7 +173,7 @@ export function experimentToggles(win) {
  * Returns the cached experiments toggles, or null if they have not been
  * computed yet.
  * @param {!Window} win
- * @return {Object<string, boolean>}
+ * @return {?Object<string, boolean>}
  */
 export function experimentTogglesOrNull(win) {
   return win[TOGGLES_WINDOW_PROPERTY] || null;
@@ -205,20 +190,20 @@ function getExperimentToggles(win) {
     if ('localStorage' in win) {
       experimentsString = win.localStorage.getItem(LOCAL_STORAGE_KEY);
     }
-  } catch (e) {
+  } catch {
     dev().warn(TAG, 'Failed to retrieve experiments from localStorage.');
   }
-  const tokens = experimentsString ? experimentsString.split(/\s*,\s*/g) : [];
+  const tokens = experimentsString?.split(/\s*,\s*/g) || [];
 
-  const toggles = Object.create(null);
-  for (let i = 0; i < tokens.length; i++) {
-    if (tokens[i].length == 0) {
+  const toggles = map();
+  for (const token of tokens) {
+    if (!token) {
       continue;
     }
-    if (tokens[i][0] == '-') {
-      toggles[tokens[i].substr(1)] = false;
+    if (token[0] == '-') {
+      toggles[token.substr(1)] = false;
     } else {
-      toggles[tokens[i]] = true;
+      toggles[token] = true;
     }
   }
   return toggles;
@@ -235,9 +220,7 @@ function saveExperimentToggles(win, toggles) {
     experimentIds.push((toggles[experiment] === false ? '-' : '') + experiment);
   }
   try {
-    if ('localStorage' in win) {
-      win.localStorage.setItem(LOCAL_STORAGE_KEY, experimentIds.join(','));
-    }
+    win.localStorage?.setItem(LOCAL_STORAGE_KEY, experimentIds.join(','));
   } catch (e) {
     user().error(TAG, 'Failed to save experiments to localStorage.');
   }
@@ -311,7 +294,7 @@ function selectRandomItem(arr) {
  *
  * @param {!Window} win Window context on which to save experiment
  *     selection state.
- * @param {!Array<!ExperimentInfo>} experiments  Set of experiments to
+ * @param {!Array<!ExperimentInfoDef>} experiments  Set of experiments to
  *     configure for this page load.
  * @return {!Object<string, string>} Map of experiment names to selected
  *     branches.
@@ -319,8 +302,7 @@ function selectRandomItem(arr) {
 export function randomlySelectUnsetExperiments(win, experiments) {
   win.__AMP_EXPERIMENT_BRANCHES = win.__AMP_EXPERIMENT_BRANCHES || {};
   const selectedExperiments = {};
-  for (let i = 0; i < experiments.length; i++) {
-    const experiment = experiments[i];
+  for (const experiment of experiments) {
     const experimentName = experiment.experimentId;
     if (hasOwn(win.__AMP_EXPERIMENT_BRANCHES, experimentName)) {
       selectedExperiments[experimentName] =
@@ -328,7 +310,7 @@ export function randomlySelectUnsetExperiments(win, experiments) {
       continue;
     }
 
-    if (!experiment.isTrafficEligible || !experiment.isTrafficEligible(win)) {
+    if (!experiment.isTrafficEligible?.(win)) {
       win.__AMP_EXPERIMENT_BRANCHES[experimentName] = null;
       continue;
     }

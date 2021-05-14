@@ -138,7 +138,7 @@ exports.rules = [
       'ads/google/a4a/**->src/ad-cid.js',
       'ads/google/a4a/**->src/consent.js',
       'ads/google/a4a/**->src/dom.js',
-      'ads/google/a4a/**->src/experiments.js',
+      'ads/google/a4a/**->src/experiments/index.js',
       'ads/google/a4a/**->src/services.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
