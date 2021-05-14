@@ -27,6 +27,9 @@ import {getTopWindow} from '../service';
 import {hasOwn} from '../core/types/object';
 import {parseQueryString} from '../url';
 
+// typedef imports
+import {ExperimentInfoDef} from './experiments.type';
+
 /** @const {string} */
 const TAG = 'EXPERIMENTS';
 
@@ -35,15 +38,6 @@ const LOCAL_STORAGE_KEY = 'amp-experiment-toggles';
 
 /** @const {string} */
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
-
-/**
- * @typedef {{
- *   experimentId: string,
- *   isTrafficEligible: function(!Window):boolean,
- *   branches: !Array<string>
- * }}
- */
-export let ExperimentInfo;
 
 /**
  * Whether we are in canary.
@@ -311,7 +305,7 @@ function selectRandomItem(arr) {
  *
  * @param {!Window} win Window context on which to save experiment
  *     selection state.
- * @param {!Array<!ExperimentInfo>} experiments  Set of experiments to
+ * @param {!Array<!ExperimentInfoDef>} experiments  Set of experiments to
  *     configure for this page load.
  * @return {!Object<string, string>} Map of experiment names to selected
  *     branches.
