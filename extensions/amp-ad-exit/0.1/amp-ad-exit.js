@@ -34,7 +34,7 @@ import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {isObject} from '../../../src/core/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {parseUrlDeprecated} from '../../../src/url';
 
 const TAG = 'amp-ad-exit';

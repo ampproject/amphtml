@@ -23,7 +23,7 @@ import {
 } from './amp-ad-utils';
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {urls} from '../../../src/config';
 import {utf8Decode} from '../../../src/core/types/string/bytes';
 

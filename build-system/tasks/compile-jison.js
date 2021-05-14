@@ -30,7 +30,7 @@ const imports = new Map([
   [
     'bindParser',
     "import {AstNode, AstNodeType} from '../../extensions/amp-bind/0.1/bind-expr-defines';\n" +
-      "import {tryParseJson} from '../../src/json';",
+      "import {tryParseJson} from '../../src/core/types/object/json';",
   ],
 ]);
 

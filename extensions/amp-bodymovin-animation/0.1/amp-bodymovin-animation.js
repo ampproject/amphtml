@@ -26,7 +26,7 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/core/types';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 

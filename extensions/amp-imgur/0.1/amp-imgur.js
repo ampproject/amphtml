@@ -33,7 +33,7 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/core/types';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-imgur';

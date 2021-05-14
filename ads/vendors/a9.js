@@ -16,7 +16,7 @@
 
 import {hasOwn} from '../../src/core/types/object';
 import {loadScript, validateData, writeScript} from '../../3p/3p';
-import {parseJson} from '../../src/json';
+import {parseJson} from '../../src/core/types/object/json';
 
 const mandatoryParams = [],
   optionalParams = [

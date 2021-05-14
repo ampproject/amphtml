@@ -128,7 +128,7 @@ import {
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
 import {stringHash32} from '../../../src/core/types/string';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';

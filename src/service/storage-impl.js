@@ -16,9 +16,9 @@
 
 import {Services} from '../services';
 import {dev, devAssert} from '../log';
-import {dict} from '../core/types/object';
+import {dict, recreateNonProtoObject} from '../core/types/object';
 import {getSourceOrigin} from '../url';
-import {parseJson, recreateNonProtoObject} from '../json';
+import {parseJson} from '../core/types/object/json';
 import {registerServiceBuilderForDoc} from '../service';
 
 /** @const */

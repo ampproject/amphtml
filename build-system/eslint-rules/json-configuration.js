@@ -16,8 +16,8 @@
 'use strict';
 
 /**
- * Finds the jsonConfiguration helper function from src/json.js, and performs
- * validation on its input.
+ * Finds the jsonConfiguration helper function from src/core/types/object/json,
+ * and performs validation on its input.
  */
 
 module.exports = function (context) {

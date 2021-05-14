@@ -15,7 +15,7 @@
  */
 
 import {computeInMasterFrame, loadScript} from '../../3p/3p';
-import {parseJson} from '../../src/json';
+import {parseJson} from '../../src/core/types/object/json';
 
 /**
  * @param context

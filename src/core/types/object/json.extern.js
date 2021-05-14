@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview Externs for object types and helpers
+ * @fileoverview Externs for JSON types and helpers
  * @externs
  */
 

@@ -27,7 +27,7 @@ import {
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
 import {internalRuntimeVersion} from '../src/internal-version';
-import {parseJson} from '../src/json';
+import {parseJson} from '../src/core/types/object/json';
 import {run, setExperimentToggles} from './3p';
 import {urls} from '../src/config';
 

@@ -28,7 +28,7 @@ module.exports = {
             node,
             message:
               'Do not use hasOwnProperty directly. ' +
-              'Use hasOwn from src/core/types/object.js instead.',
+              'Use hasOwn from src/core/types/object instead.',
           });
         }
       },

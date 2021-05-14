@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {getValueForExpr} from '../../../src/json';
+import {getValueForExpr} from '../../../src/core/types/object';
 
 export class UrlBuilder {
   /**

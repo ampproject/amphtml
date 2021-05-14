@@ -15,7 +15,7 @@
  */
 
 import {CONSENT_STRING_TYPE} from '../../../src/core/constants/consent-state';
-import {deepEquals} from '../../../src/json';
+import {deepEquals} from '../../../src/core/types/object/json';
 import {dev, user} from '../../../src/log';
 import {hasOwn, map} from '../../../src/core/types/object';
 import {isEnumValue, isObject} from '../../../src/core/types';

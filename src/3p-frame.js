@@ -26,7 +26,7 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
-import {tryParseJson} from './json';
+import {tryParseJson} from './core/types/object/json';
 import {urls} from './config';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
