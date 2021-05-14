@@ -21,7 +21,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {once} from '../../../src/core/types/function';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {parseQueryString} from '../../../src/url';
 import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
 import {whenDocumentReady} from '../../../src/document-ready';

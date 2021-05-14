@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {getMode} from '../../mode';
-import {jsonConfiguration} from '../../json';
+import {jsonConfiguration} from '../../core/types/object/json';
 
 //////////////////////////////////////////////////////////////////
 //                                                              //

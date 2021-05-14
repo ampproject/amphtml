@@ -34,7 +34,7 @@ import {
 import {dev} from '../../../src/log';
 import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
 import {toArray} from '../../../src/core/types/array';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 const TAG = 'amp-auto-lightbox';
 

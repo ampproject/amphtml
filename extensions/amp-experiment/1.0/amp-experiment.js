@@ -26,7 +26,7 @@ import {
   originExperimentsForDoc,
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 
 const TAG = 'amp-experiment';
 

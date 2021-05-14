@@ -22,7 +22,7 @@ import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
 import {remove} from './core/types/array';
 import {setStyle} from './style';
-import {tryParseJson} from './json';
+import {tryParseJson} from './core/types/object/json';
 
 /**
  * Sentinel used to force unlistening after a iframe is detached.

@@ -36,7 +36,7 @@ import {isLayoutSizeFixed} from '../../../src/layout';
 import {isObject} from '../../../src/core/types';
 import {removeElement} from '../../../src/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {userAssert} from '../../../src/log';
 
 class AmpMegaphone extends AMP.BaseElement {

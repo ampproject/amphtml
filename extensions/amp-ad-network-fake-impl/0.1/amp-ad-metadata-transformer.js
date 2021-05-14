@@ -15,7 +15,7 @@
  */
 
 import {dict} from '../../../src/core/types/object';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {user} from '../../../src/log';
 
 export class AmpAdMetadataTransformer {

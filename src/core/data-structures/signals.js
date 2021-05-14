@@ -66,7 +66,7 @@ export class Signals {
    * @return {!Promise<!TimestampDef>}
    */
   whenSignal(name) {
-    let promiseStruct = this.promiseMap_ && this.promiseMap_[name];
+    let promiseStruct = this.promiseMap_?.[name];
     if (!promiseStruct) {
       const result = this.map_[name];
       if (result != null) {
@@ -101,9 +101,9 @@ export class Signals {
       // Do not duplicate signals.
       return;
     }
-    const time = opt_time == undefined ? Date.now() : opt_time;
+    const time = opt_time ?? Date.now();
     this.map_[name] = time;
-    const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
+    const promiseStruct = this.promiseMap_?.[name];
     if (promiseStruct?.resolve) {
       promiseStruct.resolve(time);
       promiseStruct.resolve = undefined;
@@ -123,7 +123,7 @@ export class Signals {
       return;
     }
     this.map_[name] = error;
-    const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
+    const promiseStruct = this.promiseMap_?.[name];
     if (promiseStruct?.reject) {
       promiseStruct.reject(error);
       promiseStruct.promise.catch(() => {});
@@ -141,7 +141,7 @@ export class Signals {
       delete this.map_[name];
     }
     // Reset promise it has already been resolved.
-    const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
+    const promiseStruct = this.promiseMap_?.[name];
     if (promiseStruct && !promiseStruct.resolve) {
       delete this.promiseMap_[name];
     }

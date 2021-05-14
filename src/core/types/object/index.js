@@ -191,3 +191,55 @@ export function memo(obj, prop, factory) {
   }
   return result;
 }
+
+/**
+ * Recreates objects with prototype-less copies.
+ * @param {!JsonObject} obj
+ * @return {!JsonObject}
+ */
+export function recreateNonProtoObject(obj) {
+  const copy = map();
+  for (const k in obj) {
+    if (!hasOwn(obj, k)) {
+      continue;
+    }
+    const v = obj[k];
+    copy[k] = isObject(v) ? recreateNonProtoObject(v) : v;
+  }
+  return /** @type {!JsonObject} */ (copy);
+}
+
+/**
+ * Returns a value from an object for a field-based expression. The expression
+ * is a simple nested dot-notation of fields, such as `field1.field2`. If any
+ * field in a chain does not exist or is not an object or array, the returned
+ * value will be `undefined`.
+ *
+ * @param {!JsonObject} obj
+ * @param {string} expr
+ * @return {*}
+ */
+export function getValueForExpr(obj, expr) {
+  // The `.` indicates "the object itself".
+  if (expr == '.') {
+    return obj;
+  }
+  // Otherwise, navigate via properties.
+  const parts = expr.split('.');
+  let value = obj;
+  for (const part of parts) {
+    if (
+      part &&
+      value &&
+      value[part] !== undefined &&
+      typeof value == 'object' &&
+      hasOwn(value, part)
+    ) {
+      value = value[part];
+      continue;
+    }
+    value = undefined;
+    break;
+  }
+  return value;
+}

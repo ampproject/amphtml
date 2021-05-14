@@ -22,7 +22,7 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/core/types';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {toggle} from '../../../src/style';
 
 const AUTHORIZATION_TIMEOUT = 3000;

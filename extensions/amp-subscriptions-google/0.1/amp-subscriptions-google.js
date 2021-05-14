@@ -46,7 +46,7 @@ import {
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {getValueForExpr} from '../../../src/json';
+import {getValueForExpr} from '../../../src/core/types/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 import {devAssert, user, userAssert} from '../../../src/log';

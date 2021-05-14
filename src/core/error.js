@@ -21,7 +21,7 @@
  */
 export function duplicateErrorIfNecessary(error) {
   const messageProperty = Object.getOwnPropertyDescriptor(error, 'message');
-  if (messageProperty && messageProperty.writable) {
+  if (messageProperty?.writable) {
     return error;
   }
 
@@ -44,8 +44,7 @@ export function duplicateErrorIfNecessary(error) {
 export function createErrorVargs(var_args) {
   let error = null;
   let message = '';
-  for (let i = 0; i < arguments.length; i++) {
-    const arg = arguments[i];
+  for (const arg of arguments) {
     if (arg instanceof Error && !error) {
       error = duplicateErrorIfNecessary(arg);
     } else {
@@ -74,10 +73,7 @@ export function rethrowAsync(var_args) {
   setTimeout(() => {
     // __AMP_REPORT_ERROR is installed globally per window in the entry point.
     // It may not exist for Bento components without the runtime.
-    if (self.__AMP_REPORT_ERROR) {
-      self.__AMP_REPORT_ERROR(error);
-    }
-
+    self.__AMP_REPORT_ERROR?.(error);
     throw error;
   });
 }

@@ -16,7 +16,7 @@
 
 import {dict} from './../../../src/core/types/object';
 import {getData} from './../../../src/event-helper';
-import {parseJson} from './../../../src/json';
+import {parseJson} from './../../../src/core/types/object/json';
 import {
   parseUrlDeprecated,
   removeFragment,

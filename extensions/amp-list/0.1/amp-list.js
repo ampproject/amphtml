@@ -48,10 +48,10 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {getValueForExpr} from '../../../src/json';
+
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/core/types/array';
 import {isExperimentOn} from '../../../src/experiments';

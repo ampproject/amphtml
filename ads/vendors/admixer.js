@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {tryParseJson} from '../../src/json';
+import {tryParseJson} from '../../src/core/types/object/json';
 import {validateData, writeScript} from '../../3p/3p';
 
 /**

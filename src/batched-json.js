@@ -16,7 +16,7 @@
 
 import {Services} from './services';
 import {assertHttpsUrl} from './url';
-import {getValueForExpr} from './json';
+import {getValueForExpr} from './core/types/object';
 import {user} from './log';
 
 /**
