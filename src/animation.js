@@ -15,9 +15,10 @@
  */
 
 import {Deferred} from './core/data-structures/promise';
+import {NormTimeDef, getCurve} from './core/data-structures/curve';
 import {Services} from './services';
+import {TimestampDef} from './core/types/date';
 import {dev} from './log';
-import {getCurve} from './curve';
 
 const TAG_ = 'Animation';
 
@@ -37,8 +38,8 @@ export class Animation {
    *
    * @param {!Node} contextNode The context node.
    * @param {!TransitionDef<?>} transition Transition to animate.
-   * @param {./time.timeDef} duration Duration in milliseconds.
-   * @param {(!./curve.CurveDef|string)=} opt_curve Optional curve to use for
+   * @param {TimestampDef} duration Duration in milliseconds.
+   * @param {(!./core/data-structures/curve.CurveDef|string)=} opt_curve Optional curve to use for
    *   animation. Default is the linear animation.
    * @return {!AnimationPlayer}
    */
@@ -60,7 +61,7 @@ export class Animation {
     /** @private @const {!./service/vsync-impl.Vsync} */
     this.vsync_ = opt_vsync || Services.vsyncFor(self);
 
-    /** @private {?./curve.CurveDef} */
+    /** @private {?./core/data-structures/curve.CurveDef} */
     this.curve_ = null;
 
     /**
@@ -73,7 +74,7 @@ export class Animation {
    * Sets the default curve for the animation. Each segment is allowed to have
    * its own curve, but this curve will be used if a segment doesn't specify
    * its own.
-   * @param {!./curve.CurveDef|string|undefined} curve
+   * @param {!./core/data-structures/curve.CurveDef|string|undefined} curve
    * @return {!Animation}
    */
   setCurve(curve) {
@@ -86,15 +87,15 @@ export class Animation {
   /**
    * Adds a segment to the animation. Each segment starts at offset (delay) and
    * runs for a portion of the overall animation (duration). Note that both
-   * delay and duration and normtimeDef types which accept values from 0 to 1.
+   * delay and duration and NormTimeDef types which accept values from 0 to 1.
    * Optionally, the time is pushed through a curve. If curve is not specified,
    * the default animation curve will be used. The specified transition is
    * animated over the specified duration from 0 to 1.
    *
-   * @param {./time.normtimeDef} delay
+   * @param {!NormTimeDef} delay
    * @param {!TransitionDef<?>} transition
-   * @param {./time.normtimeDef} duration
-   * @param {(!./curve.CurveDef|string)=} opt_curve
+   * @param {!NormTimeDef} duration
+   * @param {(!./core/data-structures/curve.CurveDef|string)=} opt_curve
    * @return {!Animation}
    */
   add(delay, transition, duration, opt_curve) {
@@ -111,7 +112,7 @@ export class Animation {
    * Starts the animation and returns the AnimationPlayer object that can be
    * used to monitor and control the animation.
    *
-   * @param {./time.timeDef} duration Absolute time in milliseconds.
+   * @param {!TimestampDef} duration Absolute time in milliseconds.
    * @return {!AnimationPlayer}
    */
   start(duration) {
@@ -140,8 +141,8 @@ class AnimationPlayer {
    * @param {!./service/vsync-impl.Vsync} vsync
    * @param {!Node} contextNode
    * @param {!Array<!SegmentDef>} segments
-   * @param {?./curve.CurveDef} defaultCurve
-   * @param {./time.timeDef} duration
+   * @param {?./core/data-structures/curve.CurveDef} defaultCurve
+   * @param {!TimestampDef} duration
    */
   constructor(vsync, contextNode, segments, defaultCurve, duration) {
     /** @private @const {!./service/vsync-impl.Vsync} */
@@ -167,13 +168,13 @@ class AnimationPlayer {
     /** @private @const */
     this.duration_ = duration;
 
-    /** @private {./time.timeDef} */
+    /** @private {!TimestampDef} */
     this.startTime_ = Date.now();
 
-    /** @private {./time.normtimeDef} */
+    /** @private {!NormTimeDef} */
     // this.normLinearTime_ = 0;
 
-    /** @private {./time.normtimeDef} */
+    /** @private {!NormTimeDef} */
     // this.normTime_ = 0;
 
     /** @private {boolean} */
@@ -370,20 +371,20 @@ class AnimationPlayer {
 
 /**
  * @typedef {{
- *   delay: ./time.normtimeDef,
+ *   delay: NormTimeDef,
  *   func: !TransitionDef,
- *   duration: ./time.normtimeDef,
- *   curve: ?./curve.CurveDef
+ *   duration: NormTimeDef,
+ *   curve: ?./core/data-structures/curve.CurveDef
  * }}
  */
 let SegmentDef;
 
 /**
  * @typedef {{
- *   delay: ./time.normtimeDef,
+ *   delay: NormTimeDef,
  *   func: !TransitionDef,
- *   duration: ./time.normtimeDef,
- *   curve: ?./curve.CurveDef,
+ *   duration: NormTimeDef,
+ *   curve: ?./core/data-structures/curve.CurveDef,
  *   started: boolean,
  *   completed: boolean
  * }}

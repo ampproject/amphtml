@@ -187,9 +187,9 @@ export class Log {
     // migrated to an AMP-independent form for use in core. This binding allows
     // Log assertion helpers to maintain message-extraction capabilities until
     // that logic can be moved to core.
-    this.boundAssertFn_ = /** @type {!AssertionFunction} */ (this.assert.bind(
-      this
-    ));
+    this.boundAssertFn_ = /** @type {!assertions.AssertionFunctionDef} */ (
+      this.assert.bind(this)
+    );
   }
 
   /**

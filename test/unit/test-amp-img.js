@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpImg, installImg} from '../../builtins/amp-img';
+import {AmpImg, installImg} from '../../builtins/amp-img/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {Layout, LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
@@ -411,8 +411,8 @@ describes.sandboxed('amp-img', {}, (env) => {
     impl.layoutCallback();
 
     expect(propagateAttributesSpy).to.be.calledOnce;
-    const spiedAttributesToPropagate = propagateAttributesSpy.getCall(0)
-      .args[0];
+    const spiedAttributesToPropagate =
+      propagateAttributesSpy.getCall(0).args[0];
 
     expect(
       spiedAttributesToPropagate[spiedAttributesToPropagate.length - 1]

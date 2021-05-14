@@ -217,9 +217,8 @@ export class AnalyticsConfig {
         body: config,
       };
       if (this.element_.hasAttribute('data-credentials')) {
-        fetchConfig.credentials = this.element_.getAttribute(
-          'data-credentials'
-        );
+        fetchConfig.credentials =
+          this.element_.getAttribute('data-credentials');
       }
       return (
         Services.urlReplacementsForDoc(this.element_)

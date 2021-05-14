@@ -17,9 +17,9 @@
 import {CommonSignals} from '../../src/core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
-const t = describe.configure().ifChrome();
+const t = describes.sandboxed.configure().ifChrome();
 
-t.run('amp-carousel', function () {
+t.run('amp-carousel', {}, function () {
   this.timeout(10000);
   let document;
 

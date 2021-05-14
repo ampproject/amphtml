@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {cyan} = require('kleur/colors');
+const {cyan} = require('../common/colors');
 const {matchForbiddenTerms} = require('../test-configs/forbidden-terms');
 const {relative} = require('path');
 
