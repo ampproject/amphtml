@@ -17,7 +17,7 @@
 import {parseQueryString} from '../../../../../src/core/types/string/url';
 
 describes.sandboxed('type helpers - strings - urls', {}, () => {
-  describe('parseQueryString', {}, () => {
+  describe('parseQueryString', () => {
     it('should return empty params when query string is empty or null', () => {
       expect(parseQueryString(null)).to.deep.equal({});
       expect(parseQueryString('')).to.deep.equal({});
