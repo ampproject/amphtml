@@ -199,8 +199,7 @@ export class Values {
    * @return {boolean}
    */
   has(prop) {
-    const {key} = prop;
-    return !!this.inputsByKey_?.has(key);
+    return !!this.inputsByKey_?.has(prop.key);
   }
 
   /**
