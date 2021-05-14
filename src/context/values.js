@@ -42,9 +42,9 @@ const Pending = {
  * @template T
  */
 function InputDef() {}
-/** @type {!Array<!T>} */
+/** @type {!Array<T>} */
 InputDef.prototype.values;
-/** @type {!Array<function(!T)>} */
+/** @type {!Array<function(T)>} */
 InputDef.prototype.setters;
 
 /**
@@ -54,17 +54,17 @@ InputDef.prototype.setters;
  * @template DEP
  */
 function UsedDef() {}
-/** @type {!ContextPropDef<!T>} */
+/** @type {!ContextPropDef<T, DEP>} */
 UsedDef.prototype.prop;
 /** @type {!Array<function(!T)>} */
 UsedDef.prototype.subscribers;
-/** @type {!T} */
+/** @type {T} */
 UsedDef.prototype.value;
 /** @type {!Pending} */
 UsedDef.prototype.pending;
 /** @type {number} */
 UsedDef.prototype.counter;
-/** @type {!Array<!DEP>} */
+/** @type {!Array<DEP>} */
 UsedDef.prototype.depValues;
 /** @type {!T} */
 UsedDef.prototype.parentValue;
@@ -72,9 +72,9 @@ UsedDef.prototype.parentValue;
 UsedDef.prototype.parentContextNode;
 /** @type {function(boolean)} */
 UsedDef.prototype.ping;
-/** @type {!Array<function(!DEP)>} */
+/** @type {!Array<function(DEP)>} */
 UsedDef.prototype.pingDep;
-/** @type {?function(!T)} */
+/** @type {?function(T)} */
 UsedDef.prototype.pingParent;
 
 /**
@@ -385,10 +385,11 @@ export class Values {
   /**
    * Start the used value tracker if it hasn't started yet.
    *
-   * @param {!ContextPropDef<T>} prop
-   * @return {!UsedDef<T>}
+   * @param {!ContextPropDef<T, DEF>} prop
+   * @return {!UsedDef<T, DEF>}
    * @private
    * @template T
+   * @template DEF
    */
   startUsed_(prop) {
     const {key, deps} = prop;
