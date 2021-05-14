@@ -32,12 +32,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {"name": "amp-action-macro", "version": "0.1", "latestVersion": "0.1"},
@@ -150,12 +145,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
@@ -168,12 +158,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
@@ -211,12 +196,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {"name": "amp-font", "version": "0.1", "latestVersion": "0.1"},
@@ -297,12 +277,7 @@
     "options": {
       "hasCss": true,
       "cssBinaries": ["amp-inline-gallery-pagination"],
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {"name": "amp-inputmask", "version": "0.1", "latestVersion": "0.1"},
@@ -318,12 +293,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
@@ -351,12 +321,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
@@ -459,15 +424,7 @@
   {
     "name": "amp-render",
     "version": "1.0",
-    "latestVersion": "1.0",
-    "options": {
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
-    }
+    "latestVersion": "1.0"
   },
   {
     "name": "amp-resize-observer-polyfill",
@@ -493,12 +450,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
@@ -509,23 +461,9 @@
   },
   {
     "name": "amp-sidebar",
-    "version": ["0.1", "0.2"],
+    "version": ["0.1", "0.2", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
-  },
-  {
-    "name": "amp-sidebar",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
-    }
   },
   {"name": "amp-skimlinks", "version": "0.1", "latestVersion": "0.1"},
   {
@@ -646,9 +584,20 @@
   },
   {
     "name": "amp-stream-gallery",
-    "version": ["0.1", "1.0"],
-    "latestVersion": "1.0",
-    "options": {"hasCss": true}
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-stream-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
   },
   {
     "name": "amp-subscriptions",
@@ -668,7 +617,15 @@
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
-  {"name": "amp-timeago", "version": ["0.1", "1.0"], "latestVersion": "0.1"},
+  {"name": "amp-timeago", "version": "0.1", "latestVersion": "0.1"},
+  {
+    "name": "amp-timeago",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true
+    }
+  },
   {
     "name": "amp-truncate-text",
     "version": "0.1",
@@ -684,12 +641,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
@@ -712,6 +664,12 @@
     "options": {"hasCss": true}
   },
   {"name": "amp-video-iframe", "version": "0.1", "latestVersion": "0.1"},
+  {
+    "name": "amp-video-iframe",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {"hasCss": true}
+  },
   {
     "name": "amp-viewer-integration",
     "version": "0.1",
@@ -755,12 +713,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   }
 ]

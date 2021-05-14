@@ -34,6 +34,7 @@ import {
   subscribe,
 } from '../context';
 import {
+  childElementByAttr,
   childElementByTag,
   createElementWithAttributes,
   dispatchCustomEvent,
@@ -41,7 +42,7 @@ import {
   parseBooleanAttribute,
 } from '../dom';
 import {dashToCamelCase} from '../core/types/string';
-import {devAssert} from '../log';
+import {devAssert} from '../core/assert';
 import {dict, hasOwn, map} from '../core/types/object';
 import {getDate} from '../core/types/date';
 import {getMode} from '../mode';
@@ -114,8 +115,17 @@ const SHADOW_CONTAINER_ATTRS = dict({
   'part': 'c',
 });
 
+/** @const {string} */
+const SERVICE_SLOT_NAME = 'i-amphtml-svc';
+
 /** @const {!JsonObject<string, string>} */
-const SERVICE_SLOT_ATTRS = dict({'name': 'i-amphtml-svc'});
+const SERVICE_SLOT_ATTRS = dict({'name': SERVICE_SLOT_NAME});
+
+/** @const {string} */
+const RENDERED_ATTR = 'i-amphtml-rendered';
+
+/** @const {!JsonObject<string, string>} */
+const RENDERED_ATTRS = dict({'i-amphtml-rendered': ''});
 
 /**
  * The same as `applyFillContent`, but inside the shadow.
@@ -193,7 +203,7 @@ const IS_EMPTY_TEXT_NODE = (node) =>
  */
 export class PreactBaseElement extends AMP.BaseElement {
   /** @override @nocollapse */
-  static V1() {
+  static R1() {
     return true;
   }
 
@@ -624,6 +634,8 @@ export class PreactBaseElement extends AMP.BaseElement {
             SERVICE_SLOT_ATTRS
           );
           shadowRoot.appendChild(serviceSlot);
+          this.getPlaceholder()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getFallback()?.setAttribute('slot', SERVICE_SLOT_NAME);
         }
         this.container_ = container;
 
@@ -638,8 +650,8 @@ export class PreactBaseElement extends AMP.BaseElement {
       } else if (lightDomTag) {
         this.container_ = this.element;
         const replacement =
-          childElementByTag(this.container_, lightDomTag) ||
-          doc.createElement(lightDomTag);
+          childElementByAttr(this.container_, RENDERED_ATTR) ||
+          createElementWithAttributes(doc, lightDomTag, RENDERED_ATTRS);
         replacement[RENDERED_PROP] = true;
         if (Ctor['layoutSizeDefined']) {
           replacement.classList.add('i-amphtml-fill-content');
@@ -701,7 +713,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       hydrate(v, this.container_);
     } else {
       const replacement = lightDomTag
-        ? childElementByTag(this.container_, lightDomTag)
+        ? childElementByAttr(this.container_, RENDERED_ATTR)
         : null;
       if (replacement) {
         replacement[RENDERED_PROP] = true;
@@ -1030,6 +1042,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
 
   // Light DOM.
   if (lightDomTag) {
+    props[RENDERED_ATTR] = true;
     props[RENDERED_PROP] = true;
     props['as'] = lightDomTag;
   }

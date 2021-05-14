@@ -30,7 +30,7 @@ import {
   appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
-import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {base64UrlEncodeFromString} from '../../../src/core/types/string/base64';
 import {
   buildInteractiveDisclaimer,
   tryCloseDisclaimer,
@@ -97,14 +97,12 @@ const fontsToLoad = [
   {
     family: 'Poppins',
     weight: '400',
-    src:
-      "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
+    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
   },
   {
     family: 'Poppins',
     weight: '700',
-    src:
-      "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
+    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
 

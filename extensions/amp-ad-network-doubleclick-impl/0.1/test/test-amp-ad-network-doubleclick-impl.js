@@ -19,7 +19,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as bytesUtils from '../../../../src/utils/bytes';
+import * as bytesUtils from '../../../../src/core/types/string/bytes';
 import {
   AMP_EXPERIMENT_ATTRIBUTE,
   QQID_HEADER,
@@ -521,9 +521,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
               '1';
           }
           impl.onCreativeRender(false);
-          const ampAnalyticsElement = impl.element.querySelector(
-            'amp-analytics'
-          );
+          const ampAnalyticsElement =
+            impl.element.querySelector('amp-analytics');
           expect(ampAnalyticsElement).to.be.ok;
           expect(ampAnalyticsElement.CONFIG).jsonEqual(
             impl.ampAnalyticsConfig_
@@ -632,7 +631,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
       // Temporary fix for local test failure.
-      window.sandbox
+      env.sandbox
         .stub(impl, 'getIntersectionElementLayoutBox')
         .callsFake(() => {
           return {

@@ -20,9 +20,12 @@ import {createCustomEvent} from '../../src/event-helper';
 import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
-const t = describe.configure().skipIfPropertiesObfuscated().ifChrome();
+const t = describes.sandboxed
+  .configure()
+  .skipIfPropertiesObfuscated()
+  .ifChrome();
 
-t.run('Viewer Visibility State', () => {
+t.run('Viewer Visibility State', {}, () => {
   function noop() {}
 
   describes.integration(
@@ -85,7 +88,7 @@ t.run('Viewer Visibility State', () => {
           shouldPass = true;
           resources.schedulePass();
         }).then(() => {
-          if (V1_IMG_DEFERRED_BUILD) {
+          if (R1_IMG_DEFERRED_BUILD) {
             return new Promise((resolve) => setTimeout(resolve, 20));
           }
         });
@@ -127,8 +130,8 @@ t.run('Viewer Visibility State', () => {
             img.setAttribute('width', 100);
             img.setAttribute('height', 100);
             img.setAttribute('layout', 'fixed');
-            // TODO(#31915): Cleanup when V1_IMG_DEFERRED_BUILD is complete.
-            if (!V1_IMG_DEFERRED_BUILD) {
+            // TODO(#31915): Cleanup when R1_IMG_DEFERRED_BUILD is complete.
+            if (!R1_IMG_DEFERRED_BUILD) {
               win.document.body.appendChild(img);
             }
 
@@ -138,16 +141,16 @@ t.run('Viewer Visibility State', () => {
             prerenderAllowed = env.sandbox.stub(img, 'prerenderAllowed');
             prerenderAllowed.returns(false);
 
-            if (V1_IMG_DEFERRED_BUILD) {
+            if (R1_IMG_DEFERRED_BUILD) {
               win.document.body.appendChild(img);
             }
             return img.getImpl(false);
           })
           .then((impl) => {
-            layoutCallback = V1_IMG_DEFERRED_BUILD
+            layoutCallback = R1_IMG_DEFERRED_BUILD
               ? env.sandbox.stub(impl, 'mountCallback')
               : env.sandbox.stub(impl, 'layoutCallback');
-            unlayoutCallback = V1_IMG_DEFERRED_BUILD
+            unlayoutCallback = R1_IMG_DEFERRED_BUILD
               ? env.sandbox.stub(impl, 'unmountCallback')
               : env.sandbox.stub(impl, 'unlayoutCallback');
             pauseCallback = env.sandbox.stub(impl, 'pauseCallback');
@@ -260,7 +263,7 @@ t.run('Viewer Visibility State', () => {
             });
             changeVisibility('hidden');
             return waitForNextPass().then(() => {
-              if (V1_IMG_DEFERRED_BUILD) {
+              if (R1_IMG_DEFERRED_BUILD) {
                 expect(layoutCallback).to.have.been.called;
               } else {
                 expect(layoutCallback).not.to.have.been.called;
@@ -439,7 +442,7 @@ t.run('Viewer Visibility State', () => {
           });
           changeVisibility('hidden');
           return waitForNextPass().then(() => {
-            if (V1_IMG_DEFERRED_BUILD) {
+            if (R1_IMG_DEFERRED_BUILD) {
               expect(layoutCallback).to.have.been.called;
             } else {
               expect(layoutCallback).not.to.have.been.called;

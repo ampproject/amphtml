@@ -26,7 +26,7 @@ import {getMode} from '../../../src/mode';
 import {mergeExtensionsMetadata} from '../../amp-a4a/0.1/amp-ad-utils';
 import {tryParseJson} from '../../../src/json';
 import {tryResolve} from '../../../src/core/data-structures/promise';
-import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
+import {utf8Decode, utf8Encode} from '../../../src/core/types/string/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-adzerk-impl';
@@ -97,15 +97,16 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     // TODO(wg-monetization): this header name has been deprecated elsewhere,
     // and is never returned by dev server.
     if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
-      return /**@type {!Promise<(ArrayBuffer|null)>}*/ (Promise.resolve(null));
+      return /**@type {!Promise<?ArrayBuffer>}*/ (Promise.resolve(null));
     }
     // Shorthand for: reject promise if current promise chain is out of date.
     const checkStillCurrent = this.verifyStillCurrent();
     return tryResolve(() => utf8Decode(bytes)).then((body) => {
       checkStillCurrent();
-      this.ampCreativeJson_ = /** @type {!../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */ (tryParseJson(
-        body
-      ) || {});
+      this.ampCreativeJson_ =
+        /** @type {!../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+          tryParseJson(body) || {}
+        );
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
       const ampAdTemplateHelper = getAmpAdTemplateHelper(this.element);
       return ampAdTemplateHelper
