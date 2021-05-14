@@ -371,9 +371,8 @@ describes.repeated(
                 .onSecondCall()
                 .resolves(response);
 
-              const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
-                event
-              );
+              const handleSubmitEventPromise =
+                ampForm.handleSubmitEvent_(event);
               return whenCalled(ssr)
                 .then(() => {
                   expect(ampForm.ssrTemplateHelper_.ssr).to.have.been.called;
@@ -446,9 +445,8 @@ describes.repeated(
                 .onSecondCall()
                 .resolves(response);
 
-              const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
-                event
-              );
+              const handleSubmitEventPromise =
+                ampForm.handleSubmitEvent_(event);
               return whenCalled(ssr)
                 .then(() => {
                   expect(ampForm.ssrTemplateHelper_.ssr).to.have.been.called;
@@ -526,9 +524,8 @@ describes.repeated(
                 'renderTemplate_'
               );
 
-              const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
-                event
-              );
+              const handleSubmitEventPromise =
+                ampForm.handleSubmitEvent_(event);
               return whenCalled(renderTemplate, 2).then(() => {
                 expect(ampForm.ssrTemplateHelper_.applySsrOrCsrTemplate).to.have
                   .been.called;
@@ -761,7 +758,8 @@ describes.repeated(
           env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
           env.sandbox.stub(ampForm, 'analyticsEvent_');
           env.sandbox.spy(form, 'checkValidity');
-          const errorRe = /Only XHR based \(via action-xhr attribute\) submissions are supported/;
+          const errorRe =
+            /Only XHR based \(via action-xhr attribute\) submissions are supported/;
           expectAsyncConsoleError(errorRe);
           return ampForm.handleSubmitEvent_(event).catch(() => {
             expect(event.preventDefault).to.be.called;
@@ -830,7 +828,8 @@ describes.repeated(
           };
           env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
           env.sandbox.spy(form, 'checkValidity');
-          const submitErrorRe = /Only XHR based \(via action-xhr attribute\) submissions are supported/;
+          const submitErrorRe =
+            /Only XHR based \(via action-xhr attribute\) submissions are supported/;
           expectAsyncConsoleError(submitErrorRe);
           return ampForm.handleSubmitEvent_(event).catch(() => {
             expect(event.preventDefault).to.be.called;
@@ -1271,9 +1270,10 @@ describes.repeated(
               })
               .then(() => {
                 expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
-                expect(
-                  ampForm.templates_.findAndRenderTemplate
-                ).calledWith(messageContainer, {'name': 'John Doe'});
+                expect(ampForm.templates_.findAndRenderTemplate).calledWith(
+                  messageContainer,
+                  {'name': 'John Doe'}
+                );
                 expect(mutateElementStub).to.have.been.calledOnce;
                 expect(messageContainer.firstChild).to.equal(renderedTemplate);
 
@@ -2143,9 +2143,8 @@ describes.repeated(
               };
 
               // Submit an invalid form
-              const invalidFormPromiseResponse = ampForm.handleSubmitEvent_(
-                event
-              );
+              const invalidFormPromiseResponse =
+                ampForm.handleSubmitEvent_(event);
               return invalidFormPromiseResponse
                 .then(() => {
                   expect(form.checkValidity).to.be.called;
@@ -3447,12 +3446,8 @@ describes.repeated(
               'hidden inputs for Async Inputs',
             () => {
               return getAmpFormWithAsyncInput().then((response) => {
-                const {
-                  ampForm,
-                  asyncInput,
-                  asyncInputValue,
-                  getValueStub,
-                } = response;
+                const {ampForm, asyncInput, asyncInputValue, getValueStub} =
+                  response;
 
                 const newAsyncInputValue = 'new-async-input-value';
                 let hiddenInput;
@@ -3461,9 +3456,8 @@ describes.repeated(
                 return ampForm
                   .submit_(ActionTrust.HIGH)
                   .then(() => {
-                    previousHiddenInputCount = ampForm.form_.querySelectorAll(
-                      'input[hidden]'
-                    ).length;
+                    previousHiddenInputCount =
+                      ampForm.form_.querySelectorAll('input[hidden]').length;
                     const name = asyncInput.getAttribute(
                       AsyncInputAttributes.NAME
                     );
@@ -3477,9 +3471,8 @@ describes.repeated(
                     return ampForm.submit_(ActionTrust.HIGH);
                   })
                   .then(() => {
-                    const totalHiddenInputs = ampForm.form_.querySelectorAll(
-                      'input[hidden]'
-                    );
+                    const totalHiddenInputs =
+                      ampForm.form_.querySelectorAll('input[hidden]');
                     expect(totalHiddenInputs.length).to.be.equal(
                       previousHiddenInputCount
                     );

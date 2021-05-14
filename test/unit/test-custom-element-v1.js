@@ -69,7 +69,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
   });
 
   class TestElement extends BaseElement {
-    static V1() {
+    static R1() {
       return true;
     }
 

@@ -25,7 +25,8 @@ import {
 import {dict} from './core/types/object';
 import {duplicateErrorIfNecessary} from './core/error';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
-import {exponentialBackoff} from './exponential-backoff';
+import {exponentialBackoff} from './core/types/function/exponential-backoff';
+import {findIndex} from './core/types/array';
 import {getMode} from './mode';
 import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
@@ -118,13 +119,6 @@ function tryJsonStringify(value) {
 }
 
 /**
- * The true JS engine, as detected by inspecting an Error stack. This should be
- * used with the userAgent to tell definitely. I.e., Chrome on iOS is really a
- * Safari JS engine.
- */
-let detectedJsEngine;
-
-/**
  * @param {!Window} win
  * @param {*} error
  * @param {!Element=} opt_associatedElement
@@ -183,6 +177,15 @@ export function reportError(error, opt_associatedElement) {
     }
     error.reported = true;
 
+    // `associatedElement` is used to add the i-amphtml-error class; in
+    // `#development=1` mode, it also adds `i-amphtml-element-error` to the
+    // element and sets the `error-message` attribute.
+    if (error.messageArray) {
+      const elIndex = findIndex(error.messageArray, (item) => item?.tagName);
+      if (elIndex > -1) {
+        error.associatedElement = error.messageArray[elIndex];
+      }
+    }
     // Update element.
     const element = opt_associatedElement || error.associatedElement;
     if (element && element.classList) {
@@ -445,7 +448,6 @@ export function errorReportingDataForViewer(errorReportData) {
     'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
     'pt': errorReportData['pt'], // is pre-throttled
-    'jse': errorReportData['jse'], // detectedJsEngine
   });
 }
 
@@ -597,11 +599,6 @@ export function getErrorReportData(
     }
   }
 
-  if (!detectedJsEngine) {
-    detectedJsEngine = detectJsEngineFromStack();
-  }
-  data['jse'] = detectedJsEngine;
-
   const exps = [];
   const experiments = experimentTogglesOrNull(self);
   for (const exp in experiments) {
@@ -673,56 +670,6 @@ export function detectNonAmpJs(win) {
  */
 export function resetAccumulatedErrorMessagesForTesting() {
   accumulatedErrorMessages = [];
-}
-
-/**
- * Does a series of checks on the stack of an thrown error to determine the
- * JS engine that is currently running. This gives a bit more information than
- * just the UserAgent, since browsers often allow overriding it to "emulate"
- * mobile.
- * @return {string}
- * @visibleForTesting
- */
-export function detectJsEngineFromStack() {
-  /** @constructor */
-  function Fn() {}
-  Fn.prototype.t = function () {
-    throw new Error('message');
-  };
-  const object = new Fn();
-  try {
-    object.t();
-  } catch (e) {
-    const {stack} = e;
-
-    // Safari 12 and under only mentions the method name.
-    if (stack.startsWith('t@')) {
-      return 'Safari';
-    }
-
-    // Firefox mentions "prototype".
-    if (stack.indexOf('.prototype.t@') > -1) {
-      return 'Firefox';
-    }
-
-    // IE looks like Chrome, but includes a context for the base stack line.
-    // Explicitly, we're looking for something like:
-    // "    at Global code (https://example.com/app.js:1:200)" or
-    // "    at Anonymous function (https://example.com/app.js:1:200)"
-    // vs Chrome which has:
-    // "    at https://example.com/app.js:1:200"
-    const last = stack.split('\n').pop();
-    if (/\bat .* \(/i.test(last)) {
-      return 'IE';
-    }
-
-    // Finally, chrome includes the error message in the stack.
-    if (stack.startsWith('Error: message')) {
-      return 'Chrome';
-    }
-  }
-
-  return 'unknown';
 }
 
 /**

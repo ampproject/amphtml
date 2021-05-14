@@ -16,17 +16,66 @@
 
 import * as Preact from '../../../../src/preact';
 import {Twitter} from '../component';
-import {withA11y} from '@storybook/addon-a11y';
-import {withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'Twitter',
   component: Twitter,
-  decorators: [withKnobs, withA11y],
+  decorators: [withKnobs],
 };
 
 export const _default = () => {
+  const tweetId = select(
+    'tweet id',
+    ['1356304203044499462', '495719809695621121', '463440424141459456'],
+    '1356304203044499462'
+  );
+  const cards = boolean('show cards', true) ? undefined : 'hidden';
+  const conversation = boolean('show conversation', false) ? undefined : 'none';
   return (
-    <Twitter style={{width: 300, height: 200}} tweetId="638793490521001985" />
+    <Twitter
+      bootstrap="https://3p.ampproject.net/2104170104001/f.js"
+      options={{cards, conversation}}
+      tweetid={tweetId}
+      src="https://d-41929527682976137678.ampproject.net/2104170104001/frame.html"
+      style={{width: '300px', height: '200px'}}
+    />
+  );
+};
+
+export const moments = () => {
+  const limit = number('limit to', 2);
+  return (
+    <Twitter
+      bootstrap="https://3p.ampproject.net/2104170104001/f.js"
+      options={{limit}}
+      momentid="1009149991452135424"
+      src="https://d-41929527682976137678.ampproject.net/2104170104001/frame.html"
+      style={{width: '300px', height: '200px'}}
+    />
+  );
+};
+
+export const timelines = () => {
+  const tweetLimit = number('limit to', 5);
+  const timelineSourceType = select(
+    'source type',
+    ['profile', 'likes', 'list', 'source', 'collection', 'url', 'widget'],
+    'profile'
+  );
+  const timelineScreenName = 'amphtml';
+  const timelineUserId = '3450662892';
+  return (
+    <Twitter
+      bootstrap="https://3p.ampproject.net/2104170104001/f.js"
+      options={{
+        tweetLimit,
+        timelineSourceType,
+        timelineScreenName,
+        timelineUserId,
+      }}
+      src="https://d-41929527682976137678.ampproject.net/2104170104001/frame.html"
+      style={{width: '300px', height: '200px'}}
+    />
   );
 };

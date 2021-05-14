@@ -20,7 +20,7 @@ import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/curve';
+import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {clamp} from '../../../src/utils/math';
 import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -242,9 +242,9 @@ class AmpAccordion extends AMP.BaseElement {
         dev().assertString(this.sessionId_)
       );
       return sessionStr
-        ? /** @type {!JsonObject} */ (devAssert(
-            parseJson(dev().assertString(sessionStr))
-          ))
+        ? /** @type {!JsonObject} */ (
+            devAssert(parseJson(dev().assertString(sessionStr)))
+          )
         : dict();
     } catch (e) {
       dev().fine(

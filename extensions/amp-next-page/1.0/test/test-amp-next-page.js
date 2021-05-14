@@ -601,6 +601,37 @@ describes.realWin(
       });
     });
 
+    describe('amp-next-page within Viewer', () => {
+      let element;
+      let service;
+
+      beforeEach(async () => {
+        element = await getAmpNextPage({
+          inlineConfig: VALID_CONFIG,
+        });
+
+        service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+      });
+
+      afterEach(async () => {
+        element.parentNode.removeChild(element);
+      });
+
+      it('propagates viewer cid capabilties', async () => {
+        // Fake capabilities
+        ampdoc.params_['cap'] = 'swipe,cid';
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+        // Don't need to check the host page.
+        // Will only be forwarded `cid`
+        [1, 2].forEach((index) => {
+          expect(
+            service.pages_[index].shadowDoc.ampdoc.getParam('cap')
+          ).to.equal('cid');
+        });
+      });
+    });
+
     describe('default separators & footers', () => {
       let element;
       let service;
@@ -720,12 +751,10 @@ describes.realWin(
           }
         );
 
-        const template1 = service.pages_[1].container.querySelector(
-          '[separator]'
-        );
-        const template2 = service.pages_[2].container.querySelector(
-          '[separator]'
-        );
+        const template1 =
+          service.pages_[1].container.querySelector('[separator]');
+        const template2 =
+          service.pages_[2].container.querySelector('[separator]');
 
         expect(template1.innerText).to.equal('Rendered 1');
         expect(template2.innerText).to.equal('Rendered 2');

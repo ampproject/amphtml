@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
+import * as assertions from './core/assert/base';
 import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './core/error-message-helpers';
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
-import {findIndex, isArray} from './core/types/array';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isEnumValue} from './core/types';
+import {isArray} from './core/types';
 import {once} from './core/types/function';
-import {pureDevAssert, pureUserAssert} from './core/assert';
 import {urls} from './config';
 
 const noop = () => {};
@@ -76,7 +75,7 @@ export const LogLevel = {
 /**
  * Sets reportError function. Called from error.js to break cyclic
  * dependency.
- * @param {function(*, !Element=)|undefined} fn
+ * @param {function(this:Window, Error, (?Element)=): ?|undefined} fn
  */
 export function setReportError(fn) {
   self.__AMP_REPORT_ERROR = fn;
@@ -182,6 +181,15 @@ export class Log {
           }
         });
     });
+
+    // This bound assertion function is capable of handling the format used when
+    // error/assertion messages are extracted. This logic hasn't yet been
+    // migrated to an AMP-independent form for use in core. This binding allows
+    // Log assertion helpers to maintain message-extraction capabilities until
+    // that logic can be moved to core.
+    this.boundAssertFn_ = /** @type {!assertions.AssertionFunctionDef} */ (
+      this.assert.bind(this)
+    );
   }
 
   /**
@@ -402,15 +410,10 @@ export class Log {
       );
     }
 
-    try {
-      const assertion = this == logs.user ? pureUserAssert : pureDevAssert;
-      return assertion.apply(null, arguments);
-    } catch (e) {
-      this.prepareError_(e);
-      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-      self.__AMP_REPORT_ERROR(e);
-      throw e;
-    }
+    return assertions.assert.apply(
+      null,
+      [this.suffix_].concat(Array.prototype.slice.call(arguments))
+    );
   }
 
   /**
@@ -421,18 +424,14 @@ export class Log {
    * @param {*} shouldBeElement
    * @param {!Array|string=} opt_message The assertion message
    * @return {!Element} The value of shouldBeTrueish.
-   * @template T
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertElement(shouldBeElement, opt_message) {
-    const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
-    this.assertType_(
+    return assertions.assertElement(
+      this.boundAssertFn_,
       shouldBeElement,
-      shouldBeTrueish,
-      'Element expected',
       opt_message
     );
-    return /** @type {!Element} */ (shouldBeElement);
   }
 
   /**
@@ -447,13 +446,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertString(shouldBeString, opt_message) {
-    this.assertType_(
+    return assertions.assertString(
+      this.boundAssertFn_,
       shouldBeString,
-      typeof shouldBeString == 'string',
-      'String expected',
       opt_message
     );
-    return /** @type {string} */ (shouldBeString);
   }
 
   /**
@@ -469,13 +466,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertNumber(shouldBeNumber, opt_message) {
-    this.assertType_(
+    return assertions.assertNumber(
+      this.boundAssertFn_,
       shouldBeNumber,
-      typeof shouldBeNumber == 'number',
-      'Number expected',
       opt_message
     );
-    return /** @type {number} */ (shouldBeNumber);
   }
 
   /**
@@ -488,13 +483,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertArray(shouldBeArray, opt_message) {
-    this.assertType_(
+    return assertions.assertArray(
+      this.boundAssertFn_,
       shouldBeArray,
-      isArray(shouldBeArray),
-      'Array expected',
       opt_message
     );
-    return /** @type {!Array} */ (shouldBeArray);
   }
 
   /**
@@ -508,13 +501,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertBoolean(shouldBeBoolean, opt_message) {
-    this.assertType_(
+    return assertions.assertBoolean(
+      this.boundAssertFn_,
       shouldBeBoolean,
-      !!shouldBeBoolean === shouldBeBoolean,
-      'Boolean expected',
       opt_message
     );
-    return /** @type {boolean} */ (shouldBeBoolean);
   }
 
   /**
@@ -529,10 +520,12 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertEnumValue(enumObj, s, opt_enumName) {
-    if (isEnumValue(enumObj, s)) {
-      return s;
-    }
-    this.assert(false, 'Unknown %s value: "%s"', opt_enumName || 'enum', s);
+    return assertions.assertEnumValue(
+      this.boundAssertFn_,
+      enumObj,
+      s,
+      opt_enumName
+    );
   }
 
   /**
@@ -542,15 +535,6 @@ export class Log {
   prepareError_(error) {
     error = duplicateErrorIfNecessary(error);
 
-    // `associatedElement` is used to add the i-amphtml-error class; in
-    // `#development=1` mode, it also adds `i-amphtml-element-error` to the
-    // element and sets the `error-message` attribute.
-    if (error.messageArray) {
-      const elIndex = findIndex(error.messageArray, (item) => item?.tagName);
-      if (elIndex > -1) {
-        error.associatedElement = error.messageArray[elIndex];
-      }
-    }
     if (this.suffix_) {
       if (!error.message) {
         error.message = this.suffix_;
@@ -600,27 +584,6 @@ export class Log {
       return [this.messages_[id]].concat(parts);
     }
     return [`More info at ${externalMessageUrl(id, parts)}`];
-  }
-
-  /**
-   * Asserts types, backbone of `assertNumber`, `assertString`, etc.
-   *
-   * It understands array-based "id"-contracted messages.
-   *
-   * Otherwise creates a sprintf syntax string containing the optional message or the
-   * default. An interpolation token is added at the end to include the `subject`.
-   * @param {*} subject
-   * @param {*} assertion
-   * @param {string} defaultMessage
-   * @param {!Array|string=} opt_message
-   * @private
-   */
-  assertType_(subject, assertion, defaultMessage, opt_message) {
-    if (isArray(opt_message)) {
-      this.assert(assertion, opt_message.concat(subject));
-    } else {
-      this.assert(assertion, `${opt_message || defaultMessage}: %s`, subject);
-    }
   }
 }
 

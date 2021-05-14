@@ -27,7 +27,7 @@ import {Services} from '../../../src/services';
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {WindowMessenger} from './window-messenger';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -62,10 +62,9 @@ export let AmpWebPushConfig;
  * @return {!Promise<!./web-push-service.WebPushService>}
  */
 export function webPushServiceForDoc(element) {
-  return /** @type {!Promise<!./web-push-service.WebPushService>} */ (getServicePromiseForDoc(
-    element,
-    SERVICE_TAG
-  ));
+  return /** @type {!Promise<!./web-push-service.WebPushService>} */ (
+    getServicePromiseForDoc(element, SERVICE_TAG)
+  );
 }
 
 /**
@@ -910,9 +909,8 @@ export class WebPushService {
 
     const permissionDialogUrlHasQueryParams =
       this.config_['permission-dialog-url'].indexOf('?') !== -1;
-    const permissionDialogUrlQueryParamPrefix = permissionDialogUrlHasQueryParams
-      ? '&'
-      : '?';
+    const permissionDialogUrlQueryParamPrefix =
+      permissionDialogUrlHasQueryParams ? '&' : '?';
     // The permission dialog URL, containing the return URL above embedded in a
     // query parameter
     const openingPopupUrl =

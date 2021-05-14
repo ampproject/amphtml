@@ -42,7 +42,7 @@ import {
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/core/types/array';
@@ -771,14 +771,12 @@ export class MeasureScanner extends Scanner {
 
     // Identifier CSS values.
     const easing = this.css_.resolveIdent(newTiming.easing, prevTiming.easing);
-    const direction = /** @type {!WebAnimationTimingDirection} */ (this.css_.resolveIdent(
-      newTiming.direction,
-      prevTiming.direction
-    ));
-    const fill = /** @type {!WebAnimationTimingFill} */ (this.css_.resolveIdent(
-      newTiming.fill,
-      prevTiming.fill
-    ));
+    const direction = /** @type {!WebAnimationTimingDirection} */ (
+      this.css_.resolveIdent(newTiming.direction, prevTiming.direction)
+    );
+    const fill = /** @type {!WebAnimationTimingFill} */ (
+      this.css_.resolveIdent(newTiming.fill, prevTiming.fill)
+    );
 
     // Validate.
     this.validateTime_(duration, newTiming.duration, 'duration');
@@ -967,9 +965,9 @@ class CssContextImpl {
     let styles = this.computedStyleCache_[targetId];
     if (!styles) {
       styles = computedStyle(this.win_, target);
-      this.computedStyleCache_[
-        targetId
-      ] = /** @type {!CSSStyleDeclaration} */ (styles);
+      this.computedStyleCache_[targetId] = /** @type {!CSSStyleDeclaration} */ (
+        styles
+      );
     }
 
     // Resolve a var or a property.

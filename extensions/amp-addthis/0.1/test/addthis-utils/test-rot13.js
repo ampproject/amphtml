@@ -16,7 +16,7 @@
 
 import {rot13Array} from '../../addthis-utils/rot13';
 
-describe('rot13', () => {
+describes.sandboxed('rot13', {}, () => {
   it('should properly rotate alphabetical characters', () => {
     const expected = [
       '',

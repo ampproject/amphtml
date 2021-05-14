@@ -26,7 +26,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/curve';
+import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
@@ -145,13 +145,13 @@ export class AmpPanZoom extends AMP.BaseElement {
     /** @private */
     this.disableDoubleTap_ = false;
 
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenMouseDown_ = null;
 
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenMouseUp_ = null;
 
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenMouseMove_ = null;
 
     /** @private */
@@ -478,7 +478,7 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /**
    * Unlisten a listener and clear. If null, does nothing
-   * @param {UnlistenDef|null} handle
+   * @param {?UnlistenDef} handle
    * @private
    */
   unlisten_(handle) {

@@ -23,7 +23,7 @@ const {default: ignore} = require('ignore');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
 const {gitDiffNameOnlyMain} = require('./git');
-const {green, cyan, yellow} = require('kleur/colors');
+const {green, cyan, red, yellow} = require('./colors');
 const {log, logLocalDev} = require('./logging');
 
 /**
@@ -46,7 +46,7 @@ async function buildRuntime(opt_compiled = false) {
 /**
  * Extracts and validates the config for the given experiment.
  * @param {string} experiment
- * @return {Object|null}
+ * @return {?Object}
  */
 function getExperimentConfig(experiment) {
   const config = experimentsConfig[experiment];
@@ -68,13 +68,14 @@ function getValidExperiments() {
 
 /**
  * Gets the list of files changed on the current branch that match the given
- * array of glob patterns
+ * array of glob patterns using the given options.
  *
  * @param {!Array<string>} globs
+ * @param {!Object} options
  * @return {!Array<string>}
  */
-function getFilesChanged(globs) {
-  const allFiles = globby.sync(globs, {dot: true});
+function getFilesChanged(globs, options) {
+  const allFiles = globby.sync(globs, options);
   return gitDiffNameOnlyMain().filter((changedFile) => {
     return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
@@ -95,21 +96,28 @@ function logFiles(files) {
 }
 
 /**
- * Extracts the list of files from argv.files.
+ * Extracts the list of files from argv.files. Throws an error if no matching
+ * files were found.
  *
  * @return {Array<string>}
  */
 function getFilesFromArgv() {
-  // TODO: https://github.com/ampproject/amphtml/issues/30223
-  // Switch from globby to a lib that supports Windows.
+  if (!argv.files) {
+    return [];
+  }
+  // TODO(#30223): globby only takes posix globs. Find a Windows alternative.
   const toPosix = (str) => str.replace(/\\\\?/g, '/');
-  return argv.files
-    ? globby.sync(
-        (Array.isArray(argv.files) ? argv.files : argv.files.split(','))
-          .map((s) => s.trim())
-          .map(toPosix)
-      )
-    : [];
+  const globs = Array.isArray(argv.files) ? argv.files : argv.files.split(',');
+  const allFiles = [];
+  for (const glob of globs) {
+    const files = globby.sync(toPosix(glob.trim()));
+    if (files.length == 0) {
+      log(red('ERROR:'), 'Argument', cyan(glob), 'matched zero files.');
+      throw new Error('Argument matched zero files.');
+    }
+    allFiles.push(...files);
+  }
+  return allFiles;
 }
 
 /**
@@ -132,7 +140,7 @@ function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
     return logFiles(ignored.filter(getFilesFromArgv()));
   }
   if (argv.local_changes) {
-    const filesChanged = ignored.filter(getFilesChanged(globs));
+    const filesChanged = ignored.filter(getFilesChanged(globs, options));
     if (filesChanged.length == 0) {
       log(green('INFO: ') + 'No files to check in this PR');
       return [];

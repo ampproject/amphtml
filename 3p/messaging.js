@@ -84,9 +84,9 @@ function startListening(win) {
       return;
     }
     // Parse JSON only once per message.
-    const data = /** @type {!JsonObject} */ (parseJson(
-      /**@type {string} */ (getData(event)).substr(4)
-    ));
+    const data = /** @type {!JsonObject} */ (
+      parseJson(/**@type {string} */ (getData(event)).substr(4))
+    );
     if (win.context.sentinel && data['sentinel'] != win.context.sentinel) {
       return;
     }

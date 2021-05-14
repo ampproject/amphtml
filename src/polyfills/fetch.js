@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, devAssert, user} from '../log';
+import {dev, user} from '../log';
+import {devAssert} from '../core/assert';
 import {hasOwn, map} from '../core/types/object';
 import {isArray, isObject} from '../core/types';
-
 import {parseJson} from '../json';
-import {utf8Encode} from '../utils/bytes';
+import {utf8Encode} from '../core/types/string/bytes';
 
 /** @enum {number} Allowed fetch responses. */
 const allowedFetchTypes = {
@@ -151,7 +151,7 @@ class FetchResponse {
     /** @type {?ReadableStream} */
     this.body = null;
 
-    /** @type {string|null} */
+    /** @type {?string} */
     this.url = xhr.responseURL;
   }
 
@@ -189,9 +189,9 @@ class FetchResponse {
    * @return {!Promise<!JsonObject>}
    */
   json() {
-    return /** @type {!Promise<!JsonObject>} */ (this.drainText_().then(
-      parseJson
-    ));
+    return /** @type {!Promise<!JsonObject>} */ (
+      this.drainText_().then(parseJson)
+    );
   }
 
   /**
@@ -200,9 +200,9 @@ class FetchResponse {
    * @return {!Promise<!ArrayBuffer>}
    */
   arrayBuffer() {
-    return /** @type {!Promise<!ArrayBuffer>} */ (this.drainText_().then(
-      utf8Encode
-    ));
+    return /** @type {!Promise<!ArrayBuffer>} */ (
+      this.drainText_().then(utf8Encode)
+    );
   }
 }
 
@@ -283,9 +283,8 @@ export class Response extends FetchResponse {
       /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
-        lowercasedHeaders[String(headerName).toLowerCase()] = String(
-          headerValue
-        );
+        lowercasedHeaders[String(headerName).toLowerCase()] =
+          String(headerValue);
       });
     } else if (isObject(init.headers)) {
       for (const key in init.headers) {

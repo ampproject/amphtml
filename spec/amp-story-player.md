@@ -182,6 +182,7 @@ playerEl.load();
 
 -   number: the story in the player to which you want to move, relative to the current story.
 -   number (optional): the page of the story to which you want to move, relative to the current page.
+-   {animate: boolean} (optional): options for the navigation (animate: whether to animate the story transition).
 
 If the player is currently on the third story out of five stories:
 
@@ -189,6 +190,7 @@ If the player is currently on the third story out of five stories:
 -   `player.go(-1)` will go backward one story to the second story
 -   `player.go(-1, 1)` will go backward one story and navigate one page backwards
 -   `player.go(0, 5)` will stay in the current story and navigate 5 pages forward
+-   `player.go(1, 0, {animate: false})` will go to the next page without the swipe animation
 
 #### show
 
@@ -196,6 +198,7 @@ If the player is currently on the third story out of five stories:
 
 -   string or null: the URL of the story to show.
 -   string (optional): the ID attribute of the page element.
+-   {animate: boolean} (optional): options for the navigation (animate: whether to animate the story transition).
 
 Will change the current story being displayed by the player.
 
@@ -203,6 +206,7 @@ Will change the current story being displayed by the player.
 player.show('cool-story.html'); // Will display cool-story.html
 player.show('cool-story.html', 'page-4'); // Will display cool-story.html and switch to page-4
 player.show(null, 'page-4'); // Stay on current story and switch to page-4
+player.show('cool-story.html', null, {animate: false}); // Will display cool-story.html without the swipe animation
 ```
 
 #### rewind
@@ -607,7 +611,7 @@ Fired when the player detects a touchstart event.
 
 ```javascript
 player.addEventListener('amp-story-player-touchstart', (event) => {
-  console.log('Coordinates:' event.detail.coordinates);
+  console.log('Coordinates:', event.detail.coordinates);
 })
 ```
 
@@ -617,7 +621,7 @@ Fired when the player detects a touchmove event.
 
 ```javascript
 player.addEventListener('amp-story-player-touchmove', (event) => {
-  console.log('Coordinates:' event.detail.coordinates);
+  console.log('Coordinates:', event.detail.coordinates);
 })
 ```
 
@@ -681,9 +685,8 @@ Fired when the player changes to a new story and provides the `index`, the playe
 
 ```javascript
 player.addEventListener('navigation', (event) => {
-  console.log('Navigated from story 0 to story 1 of 3');
-  console.log('Current story:' event.index); // 1
-  console.log('Current story:' event.remaining); // 1
+  console.log(`Navigated to story with index ${event.detail.index}`);
+  console.log('Stories remaining in the player:', event.detail.remaining);
 })
 ```
 
@@ -694,8 +697,8 @@ Fired when the story inside the player changes to a new page. It provides the `p
 ```javascript
 player.addEventListener('storyNavigation', (event) => {
   console.log('User navigated from one page to the other.');
-  console.log('Current page id:' event.pageId); // page-2
-  console.log('Story progress:' event.progress); // Number from 0 to 1.
+  console.log('Current page id:', event.detail.pageId); // page-2
+  console.log('Story progress:', event.detail.progress); // Number from 0 to 1.
 })
 ```
 
@@ -714,7 +717,7 @@ player.addEventListener('noNextStory', (event) => {
 Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
 
 ```javascript
-player.addEventListener('noPreviousStory', (event) => {
+player.addEventListener('noPreviousStory', () => {
   console.log('User is tapping back on the first page and there are no more stories.');
 });
 ```

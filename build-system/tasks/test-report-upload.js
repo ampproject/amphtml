@@ -34,7 +34,7 @@ const {
 } = require('../common/ci');
 const {log} = require('../common/logging');
 
-const {cyan, green, red, yellow} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('../common/colors');
 
 const REPORTING_API_URL = 'https://amp-test-cases.appspot.com/report';
 

@@ -36,14 +36,13 @@ import {
 } from '../video-interface';
 import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
-import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {clamp} from '../utils/math';
 import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {createViewportObserver} from '../viewport-observer';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../core/types/object';
 import {dispatchCustomEvent, removeElement} from '../dom';
-import {getMode} from '../mode';
+import {getInternalVideoElementFor, isAutoplaySupported} from '../utils/video';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
 import {measureIntersection} from '../utils/intersection';
@@ -224,7 +223,9 @@ export class VideoManager {
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
     // appropriately each time.
-    const signals = /** @type {!../base-element.BaseElement} */ (video).signals();
+    const signals = /** @type {!../base-element.BaseElement} */ (
+      video
+    ).signals();
 
     signals.signal(VideoEvents.REGISTERED);
 
@@ -338,10 +339,9 @@ export class VideoManager {
       `Could not find an element with id="${id}" for VIDEO_STATE`
     );
     const entry = this.getEntry_(videoElement);
-    return (entry
-      ? entry.getAnalyticsDetails()
-      : Promise.resolve()
-    ).then((details) => (details ? details[property] : ''));
+    return (entry ? entry.getAnalyticsDetails() : Promise.resolve()).then(
+      (details) => (details ? details[property] : '')
+    );
   }
 
   // TODO(go.amp.dev/issue/27010): For getters below, let's expose VideoEntry
@@ -456,13 +456,6 @@ class VideoEntry {
     this.visibilitySessionManager_.onSessionEnd(() =>
       analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE)
     );
-
-    // eslint-disable-next-line jsdoc/require-returns
-    /** @private @const {function(): !Promise<boolean>} */
-    this.supportsAutoplay_ = () => {
-      const {win} = this.ampdoc_;
-      return VideoUtils.isAutoplaySupported(win, getMode(win).lite);
-    };
 
     /** @private @const {function(): !AnalyticsPercentageTracker} */
     this.getAnalyticsPercentageTracker_ = once(
@@ -783,10 +776,10 @@ class VideoEntry {
     if (!this.ampdoc_.isVisible()) {
       return;
     }
-    this.supportsAutoplay_().then((supportsAutoplay) => {
+    isAutoplaySupported(this.ampdoc_.win).then((isAutoplaySupported) => {
       const canAutoplay = this.hasAutoplay && !this.userInteracted();
 
-      if (canAutoplay && supportsAutoplay) {
+      if (canAutoplay && isAutoplaySupported) {
         this.autoplayLoadedVideoVisibilityChanged_();
       } else {
         this.nonAutoplayLoadedVideoVisibilityChanged_();
@@ -808,8 +801,8 @@ class VideoEntry {
       this.video.hideControls();
     }
 
-    this.supportsAutoplay_().then((supportsAutoplay) => {
-      if (!supportsAutoplay && this.video.isInteractive()) {
+    isAutoplaySupported(this.ampdoc_.win).then((isAutoplaySupported) => {
+      if (!isAutoplaySupported && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
         this.video.showControls();
@@ -997,13 +990,16 @@ class VideoEntry {
    */
   getAnalyticsDetails() {
     const {video} = this;
-    const supportsAutoplay = this.supportsAutoplay_();
-    const intersection = measureIntersection(video.element);
-    return Promise.all([supportsAutoplay, intersection]).then((responses) => {
-      const supportsAutoplay = /** @type {boolean} */ (responses[0]);
-      const intersection = /** @type {!IntersectionObserverEntry} */ (responses[1]);
+    return Promise.all([
+      isAutoplaySupported(this.ampdoc_.win),
+      measureIntersection(video.element),
+    ]).then((responses) => {
+      const isAutoplaySupported = /** @type {boolean} */ (responses[0]);
+      const intersection = /** @type {!IntersectionObserverEntry} */ (
+        responses[1]
+      );
       const {width, height} = intersection.boundingClientRect;
-      const autoplay = this.hasAutoplay && supportsAutoplay;
+      const autoplay = this.hasAutoplay && isAutoplaySupported;
       const playedRanges = video.getPlayedRanges();
       const playedTotal = playedRanges.reduce(
         (acc, range) => acc + range[1] - range[0],
