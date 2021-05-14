@@ -250,17 +250,17 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.propagateAttributes(['aria-label'], placeholder);
     this.applyFillContent(placeholder);
 
-    placeholder.setAttribute(
-      'src',
-      `https://cdn.brid.tv/live/partners/${encodeURIComponent(partnerID)}` +
-        `/snapshot/${encodeURIComponent(feedID)}.jpg`
-    );
-
     const altText = placeholder.hasAttribute('aria-label')
       ? 'Loading video - ' + placeholder.getAttribute('aria-label')
       : 'Loading video';
 
     placeholder.setAttribute('alt', altText);
+
+    placeholder.setAttribute(
+      'src',
+      `https://cdn.brid.tv/live/partners/${encodeURIComponent(partnerID)}` +
+        `/snapshot/${encodeURIComponent(feedID)}.jpg`
+    );
 
     this.loadPromise(placeholder).catch(() => {
       placeholder.src = 'https://cdn.brid.tv/live/default/defaultSnapshot.png';

@@ -350,12 +350,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     }
     const placeholder = this.win.document.createElement('img');
     this.propagateAttributes(['aria-label'], placeholder);
-    placeholder.setAttribute(
-      'src',
-      'https://content.jwplatform.com/thumbs/' +
-        encodeURIComponent(this.contentid_) +
-        '-720.jpg'
-    );
+    this.applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {
@@ -367,7 +362,12 @@ class AmpJWPlayer extends AMP.BaseElement {
       placeholder.setAttribute('alt', 'Loading video');
     }
     placeholder.setAttribute('loading', 'lazy');
-    this.applyFillContent(placeholder);
+    placeholder.setAttribute(
+      'src',
+      'https://content.jwplatform.com/thumbs/' +
+        encodeURIComponent(this.contentid_) +
+        '-720.jpg'
+    );
     return placeholder;
   }
 
