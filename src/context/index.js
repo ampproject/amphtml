@@ -100,7 +100,7 @@ export function rediscoverChildren(node) {
  *
  * @param {!Node} node The target node.
  * @param {!ContextPropDef<T>} prop
- * @param {*} setter
+ * @param {function(T)} setter
  * @param {T} value
  * @template T
  */
@@ -113,8 +113,9 @@ export function setProp(node, prop, setter, value) {
  * See `setProp()` for more info.
  *
  * @param {!Node} node The target node.
- * @param {!ContextPropDef} prop
- * @param {*} setter
+ * @param {!ContextPropDef<T>} prop
+ * @param {function(T)} setter
+ * @template T
  */
 export function removeProp(node, prop, setter) {
   ContextNode.get(node).values.remove(prop, setter);
@@ -134,7 +135,7 @@ export function addGroup(node, name, match, weight = 0) {
  * @param {!Node} node
  * @param {string} groupName
  * @param {!ContextPropDef<T>} prop
- * @param {*} setter
+ * @param {function(T)} setter
  * @param {T} value
  * @template T
  */
@@ -145,8 +146,9 @@ export function setGroupProp(node, groupName, prop, setter, value) {
 /**
  * @param {!Node} node
  * @param {string} groupName
- * @param {!ContextPropDef} prop
- * @param {*} setter
+ * @param {!ContextPropDef<T>} prop
+ * @param {function(T)} setter
+ * @template T
  */
 export function removeGroupProp(node, groupName, prop, setter) {
   ContextNode.get(node).group(groupName).values.remove(prop, setter);
