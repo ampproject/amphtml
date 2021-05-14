@@ -626,6 +626,7 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/helpers.js',
       'src/config.js',
       'src/experiments/index.js',
+      'src/experiments/shame.extern.js',
       'src/mode.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'testing/init-tests.js',
