@@ -361,6 +361,7 @@ class AmpImaVideo extends AMP.BaseElement {
     const img = new Image();
     img.src = poster;
     img.setAttribute('placeholder', '');
+    img.setAttribute('loading', 'lazy');
     this.applyFillContent(img);
     return img;
   }
