@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/** @typedef {function(!Function)} */
+/** @typedef {function(function())} */
 let SchedulerDef;
 /**
  * Creates a scheduling function that executes the callback based on the
