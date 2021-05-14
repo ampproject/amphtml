@@ -605,7 +605,7 @@ describes.sandboxed('experiment branch tests', {}, (env) => {
     it('handles empty experiments list', () => {
       // Opt out of experiment.
       toggleExperiment(env.sandbox.win, 'testExperimentId', false, true);
-      randomlySelectUnsetExperiments(env.sandbox.win, {});
+      randomlySelectUnsetExperiments(env.sandbox.win, []);
       expect(
         isExperimentOn(env.sandbox.win, 'testExperimentId'),
         'experiment is on'
@@ -864,7 +864,7 @@ describes.sandboxed('experiment branch tests', {}, (env) => {
     it('returns empty experiments map', () => {
       // Opt out of experiment.
       toggleExperiment(env.sandbox.win, 'testExperimentId', false, true);
-      const exps = randomlySelectUnsetExperiments(env.sandbox.win, {});
+      const exps = randomlySelectUnsetExperiments(env.sandbox.win, []);
       expect(exps).to.be.empty;
     });
 

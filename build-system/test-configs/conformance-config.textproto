@@ -468,7 +468,7 @@ requirement: {
   value: 'module$src$cookies.getCookie'
   value: 'module$src$cookies.setCookie'
   allowlist: 'src/cookies.js'
-  allowlist: 'src/experiments.js'
+  allowlist: 'src/experiments/index.js'
   allowlist: 'src/service/cid-api.js'
   allowlist: 'src/service/cid-impl.js'
   allowlist: 'extensions/amp-analytics/0.1/cookie-writer.js'
