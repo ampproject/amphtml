@@ -45,6 +45,11 @@
     "trackingIdentifier": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues",
     "defaultTrackingValues": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues&sourceUrl=_source_url_&canonicalUrl=_canonical_url_&referrer=_document_referrer_&title=_title_&visitDate=_timestamp_&geoLocation=_amp_geo(ISOCountry)_&userAgent=_user_agent_"
   },
+  "bluetriangle": {
+    "host": "https://d.btttag.com",
+    "endpoint": "https://d.btttag.com/btt.gif",
+    "pageview": "https://d.btttag.com/btt.gif?gID=_client_id(bluetriangle_guid)_&sID=_client_id(bluetriangle_sessionid)_&siteID=!siteID&pageName=!pageName&txnName=!trafficSegment&thisURL=_canonical_url_&RefURL=_document_referrer_&dom=_nav_timing(domLoading%2CdomComplete)_&domContentLoadedEnd=_nav_timing(domContentLoadedEventEnd)_&domContentLoadedStart=_nav_timing(domContentLoadedEventStart)_&domInteractive=_nav_timing(domInteractive)_&domLoading=_nav_timing(domLoading)_&domainLookupStart=_nav_timing(domainLookupStart)_&elementCount=0&fByte=_nav_timing(requestStart%2CresponseStart)_&fCPnt=FIRST_CONTENTFUL_PAINT&fetchStart=_nav_timing(fetchStart)_&firstPaint=0&fmp=0&fps=0&fps_tti=0&loadEventStart=_nav_timing(loadEventStart)_&lt_tti=0&nst=_nav_timing(navigationStart)_&orderTND=0&pSz=0&pWSz=0&pageValue=&pgTm=_nav_timing(navigationStart%2CloadEventStart)_&redirectCount=_nav_redirect_count_&redirectStart=_nav_timing(redirectStart)_&requestStart=_nav_timing(requestStart)_&responseStart=_nav_timing(responseStart)_&secureConnectionStart=_nav_timing(secureConnectionStart)_&ssl=_nav_timing(secureConnectionStart%2CresponseStart)_&tcp=_nav_timing(connectStart%2CconnectEnd)_&top=0&totRD=0&tti=0&tul=0&unloadEventStart=_nav_timing(unloadEventStart)_&largestContentfulPaint=LARGEST_CONTENTFUL_PAINT&cumulativeLayoutShift=CUMULATIVE_LAYOUT_SHIFT&firstInputDelay=FIRST_INPUT_DELAY&wcd=0&eT=1&navigationType=1"
+  },
   "browsi": {
     "host": "https://events.browsiprod.com/events/amp",
     "base": "https://events.browsiprod.com/events/amp?pk=!pubKey&sk=!siteKey&et=!type&pvid=_page_view_id_64_&aid=_ampdoc_url_&now=_timestamp_",
