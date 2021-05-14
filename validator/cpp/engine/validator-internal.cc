@@ -1449,8 +1449,6 @@ class ParsedValidatorRules {
   }
   const vector<ParsedDocCssSpec>& css() const { return parsed_css_; }
 
-  int32_t SpecFileRevision() const { return rules_.spec_file_revision(); }
-
   const ParsedTagSpec* GetTagSpec(int id) const { return &tagspec_by_id_[id]; }
 
   const TagSpecDispatch& DispatchForTagName(const std::string& tagname) const {
@@ -5971,11 +5969,6 @@ ValidationResult Validate(std::string_view html, HtmlFormat_Code html_format,
   Validator validator(ParsedValidatorRulesProvider::Get(html_format),
                       max_errors);
   return validator.Validate(html);
-}
-
-int RulesSpecVersion() {
-  auto rules = ParsedValidatorRulesProvider::Get(HtmlFormat::AMP);
-  return rules->SpecFileRevision();
 }
 
 }  // namespace amp::validator
