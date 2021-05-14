@@ -16,7 +16,7 @@
 
 import {hasOwn} from '../../../src/core/types/object';
 import {parseLinker} from './linker';
-import {parseQueryString} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-consent/linker-reader';

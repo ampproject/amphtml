@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {isEnumValue} from '../../../src/core/types';
-import {parseQueryString} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
 
 /**
  * Embed mode for AMP story.  See ../embed-modes.md for details.
