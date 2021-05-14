@@ -35,22 +35,21 @@ export const StoryAdAutoAdvance = {
   TEN_SECONDS: '31060907',
 };
 
-/** @const @private {!ExperimentInfoDef} */
-const StoryAdAutoAdvanceInfo = {
-  experimentId: StoryAdAutoAdvance.ID,
-  isTrafficEligible: () => true,
-  branches: [
-    StoryAdAutoAdvance.CONTROL,
-    StoryAdAutoAdvance.SIX_SECONDS,
-    StoryAdAutoAdvance.EIGHT_SECONDS,
-    StoryAdAutoAdvance.TEN_SECONDS,
-  ],
-};
-
 /**
  * Choose what time value to auto advance story ads.
  * @param {!Window} win
  */
 export function divertStoryAdAutoAdvance(win) {
-  randomlySelectUnsetExperiments(win, [StoryAdAutoAdvanceInfo]);
+  /** @const @private {!ExperimentInfoDef} */
+  const experimentInfo = {
+    experimentId: StoryAdAutoAdvance.ID,
+    isTrafficEligible: () => true,
+    branches: [
+      StoryAdAutoAdvance.CONTROL,
+      StoryAdAutoAdvance.SIX_SECONDS,
+      StoryAdAutoAdvance.EIGHT_SECONDS,
+      StoryAdAutoAdvance.TEN_SECONDS,
+    ],
+  };
+  randomlySelectUnsetExperiments(win, [experimentInfo]);
 }
