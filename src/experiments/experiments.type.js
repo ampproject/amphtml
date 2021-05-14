@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-/** @const */
-export const ADS_INITIAL_INTERSECTION_EXP = {
-  id: 'ads-initialIntersection',
-  control: '31060065',
-  experiment: '31060066',
-};
+/**
+ * @typedef {{
+ *   experimentId: string,
+ *   isTrafficEligible: function(!Window):boolean,
+ *   branches: !Array<string>
+ * }}
+ */
+export let ExperimentInfoDef;
