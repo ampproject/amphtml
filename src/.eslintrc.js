@@ -74,5 +74,11 @@ module.exports = {
       ],
       'rules': {'local/no-global': 0},
     },
+    {
+      'files': ['./base-element.js'],
+      'rules': {
+        'local/no-private-props': 2,
+      },
+    },
   ],
 };

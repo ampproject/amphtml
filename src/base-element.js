@@ -241,8 +241,8 @@ export class BaseElement {
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
     Any private property for BaseElement MUST be wrapped with quotes. We cannot
-    allow Closure Compiler to mangle privates in this class, becasue it can
-    reuse the same mangled name for a different property in, ie., amp-youtube's
+    allow Closure Compiler to mangle privates in this class, because it can
+    reuse the same mangled name for a different property in, i.e., amp-youtube's
     BaseElement subclass (which lives in a different binary).
     */
 
