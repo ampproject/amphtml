@@ -22,7 +22,6 @@
  */
 
 import {dev, user} from '../log';
-import {devAssertArray} from '../core/assert';
 import {getMode} from '../mode';
 import {getTopWindow} from '../service';
 import {hasOwn, map} from '../core/types/object';
@@ -144,7 +143,7 @@ export function experimentToggles(win) {
     if (meta) {
       const optedInExperiments = meta.getAttribute('content').split(',');
       for (const experiment of optedInExperiments) {
-        if (devAssertArray(allowedDocOptIn).includes(experiment)) {
+        if (dev().assertArray(allowedDocOptIn).includes(experiment)) {
           toggles[experiment] = true;
         }
       }
