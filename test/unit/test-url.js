@@ -31,7 +31,6 @@ import {
   isProtocolValid,
   isProxyOrigin,
   isSecureUrlDeprecated,
-  parseQueryString,
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
@@ -41,6 +40,7 @@ import {
   resolveRelativeUrlFallback_,
   serializeQueryString,
 } from '../../src/url';
+import {parseQueryString} from '../../src/core/types/string/url';
 
 describes.sandboxed('getWinOrigin', {}, () => {
   it('should return origin if available', () => {
