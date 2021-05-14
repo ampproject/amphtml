@@ -29,9 +29,9 @@ import {cssText} from '../../../build/amp-ima-video-iframe.css';
 /**
  * Possible player states.
  * @enum {number}
- * @private
+ * @visibleForTesting
  */
-const PlayerStates = {
+export const PlayerStates = {
   PLAYING: 1,
   PAUSED: 2,
 };
@@ -1437,24 +1437,9 @@ export function getPropertiesForTesting() {
     interactEvent,
     playbackStarted,
     playerState,
-    PlayerStates,
     uiTicker,
     hideControlsQueued,
-    icons,
-    // TODO(alanorozco): Update names on test's end to pass `elements` instead.
     elements,
-    videoPlayer: elements['video'],
-    adContainerDiv: elements['adContainer'],
-    controlsDiv: elements['controls'],
-    playPauseDiv: elements['playButton'],
-    countdownDiv: elements['countdown'],
-    timeDiv: elements['time'],
-    progressBarWrapper: elements['progress'],
-    progressLine: elements['progressLine'],
-    progressMarkerDiv: elements['progressMarker'],
-    muteUnmuteDiv: elements['muteButton'],
-    fullscreenDiv: elements['fullscreenButton'],
-    bigPlayDiv: elements['overlayButton'],
   };
 }
 
@@ -1465,15 +1450,6 @@ export function getPropertiesForTesting() {
  */
 export function getShowControlsThrottledForTesting() {
   return showControlsThrottled;
-}
-
-/**
- * Sets the overlay button.
- * @param {!Element} div
- * @visibleForTesting
- */
-export function setBigPlayDivForTesting(div) {
-  elements['overlayButton'] = div;
 }
 
 /**
@@ -1494,15 +1470,6 @@ export function setAdDisplayContainerForTesting(adc) {
 export function setVideoWidthAndHeightForTesting(width, height) {
   videoWidth = width;
   videoHeight = height;
-}
-
-/**
- * Sets the video muted state
- * @param {boolean} shouldMute
- * @visibleForTesting
- */
-export function setVideoPlayerMutedForTesting(shouldMute) {
-  elements['video'].muted = shouldMute;
 }
 
 /**
