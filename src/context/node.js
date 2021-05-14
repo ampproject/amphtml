@@ -236,7 +236,7 @@ export class ContextNode {
     /** @package {!Values} */
     this.values = new Values(this);
 
-    /** @private {?Map<SID, !./subscriber.Subscriber>} */
+    /** @private {?Map<!SID, !./subscriber.Subscriber>} */
     this.subscribers_ = null;
 
     /** @private {boolean} */
@@ -381,7 +381,7 @@ export class ContextNode {
    * yet exist, it will be created using the specified factory. The use
    * of factory is important to reduce bundling costs for context node.
    *
-   * @param {SID} id
+   * @param {!SID} id
    * @param {typeof ./subscriber.Subscriber} Ctor
    * @param {!Function} func
    * @param {!Array<!ContextPropDef>} deps
@@ -398,7 +398,7 @@ export class ContextNode {
   /**
    * Removes the subscriber previously set with `subscribe`.
    *
-   * @param {SID} id
+   * @param {!SID} id
    */
   unsubscribe(id) {
     const subscribers = this.subscribers_;
