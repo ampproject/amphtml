@@ -44,10 +44,9 @@ tags: {  # <amp-render>
     name: "src"
     mandatory_anyof: "['src','[src]','data-amp-bind-src']"
     value_url: {
-      protocol: "https"
-      protocol: "amp-state"
       protocol: "amp-script"
-      allow_relative: true
+      protocol: "amp-state"
+      protocol: "https"
     }
     disallowed_value_regex: "__amp_source_origin"
   }
