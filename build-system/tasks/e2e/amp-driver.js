@@ -162,7 +162,7 @@ function getViewerUrl(url, {isEmail} = {isEmail: false}) {
  */
 class AmpDriver {
   /**
-   * @param {!./functional-test-controller.FunctionalTestController} controller
+   * @param {!*} controller
    */
   constructor(controller) {
     /** @private @const */

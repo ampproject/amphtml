@@ -280,8 +280,7 @@ describe('ControllerPromise', () => {
         opt_mutate = opt_mutate || ((x) => x);
         return new Promise((resolve, reject) => {
           /**
-           * Poll for the new value. This simulates behavior in the concrete
-           * implementations of the `FunctionalTestController` implementations.
+           * Poll for the new value.
            * See {@link ../../build-system/tasks/e2e/selenium-webdriver-controller.js#getWaitFn_}
            */
           const id = setInterval(async () => {
