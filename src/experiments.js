@@ -129,8 +129,7 @@ export function experimentToggles(win) {
   if (win[TOGGLES_WINDOW_PROPERTY]) {
     return win[TOGGLES_WINDOW_PROPERTY];
   }
-  win[TOGGLES_WINDOW_PROPERTY] = Object.create(null);
-  const toggles = win[TOGGLES_WINDOW_PROPERTY];
+  const toggles = Object.create(null);
 
   // Read the default config of this build.
   if (win.AMP_CONFIG) {
@@ -181,6 +180,8 @@ export function experimentToggles(win) {
       }
     }
   }
+
+  win[TOGGLES_WINDOW_PROPERTY] = toggles;
   return toggles;
 }
 
