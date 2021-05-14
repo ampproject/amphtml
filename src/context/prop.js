@@ -27,16 +27,17 @@ const EMPTY_DEPS = [];
  * @param {string} key
  * @param {{
  *   type: (!Object|undefined),
- *   deps: (!Array<!ContextPropDef>|undefined),
+ *   deps: (!Array<!ContextPropDef<DEP>>|undefined),
  *   recursive: (boolean|(function(!Array<T>):boolean)|undefined),
- *   compute: (function(!Node, !Array<T>, ...*):(T|undefined)),
+ *   compute: (function(!Node, !Array<T>, ...DEP):(T|undefined)),
  *   defaultValue: (T|undefined),
  * }=} opt_spec
- * @return {!ContextPropDef<T>}
+ * @return {!ContextPropDef<T, DEP>}
  * @template T
+ * @template DEP
  */
 export function contextProp(key, opt_spec) {
-  const prop = /** @type {!ContextPropDef} */ ({
+  const prop = /** @type {!ContextPropDef<T, DEP>} */ ({
     key,
     // Default values.
     type: null,

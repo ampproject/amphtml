@@ -19,6 +19,7 @@
  *
  * @interface
  * @template T
+ * @template DEP
  */
 export function ContextPropDef() {}
 
@@ -41,7 +42,7 @@ ContextPropDef.prototype.type;
 /**
  * An array of dependencies that are required for the `compute` callback.
  *
- * @type {!Array<!ContextPropDef>}
+ * @type {!Array<!ContextPropDef<DEP>>}
  */
 ContextPropDef.prototype.deps;
 
@@ -74,7 +75,7 @@ ContextPropDef.prototype.recursive;
  * 3. If it's a recursive property, the parent value.
  * 4. If `deps` are specified - the dep values.
  *
- * @type {function(!Node, !Array<T>, ...*):(T|undefined)}
+ * @type {function(!Node, !Array<T>, ...DEP):(T|undefined)}
  */
 ContextPropDef.prototype.compute;
 
