@@ -35,18 +35,29 @@ tags: {  # <amp-render>
     value: "refresh"
   }
   attrs: { name: "credentials" }
-  attrs: { name: "xssi-prefix" }
-  attrs: { name: "key" }
   attrs: {
     name: "data-amp-bind-src"
     mandatory_anyof: "['src','[src]','data-amp-bind-src']"
   }
+  attrs: { name: "key" }
+  attrs: {
+    name: "src"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
+    value_url: {
+      protocol: "https"
+      protocol: "amp-state"
+      protocol: "amp-script"
+      allow_relative: true
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "xssi-prefix" }
   attrs: {
     name: "[src]"
     mandatory_anyof: "['src','[src]','data-amp-bind-src']"
   }
   attr_lists: "extended-amp-global"
-  # spec_url: "https://amp.dev/documentation/components/amp-render/"
+  spec_url: "https://amp.dev/documentation/components/amp-render/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

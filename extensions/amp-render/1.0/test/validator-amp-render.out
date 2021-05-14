@@ -34,8 +34,6 @@ FAIL
 |    <body>
 |      <!-- Valid: amp-render with only src attribute -->
 |      <amp-render
->>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:35:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
 |        width="10"
 |        height="10"
 |        src="amp-state:source"
@@ -47,8 +45,6 @@ amp-render/1.0/test/validator-amp-render.html:35:4 The attribute 'src' may not a
 |
 |      <!-- Valid: amp-render with both src and [src] attributes -->
 |      <amp-render
->>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:46:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
 |        width="10"
 |        height="10"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
@@ -58,8 +54,6 @@ amp-render/1.0/test/validator-amp-render.html:46:4 The attribute 'src' may not a
 |
 |      <!-- Valid: amp-render with binding="refresh" attribute -->
 |      <amp-render
->>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:55:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
 |        width="10"
 |        height="10"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
@@ -69,8 +63,6 @@ amp-render/1.0/test/validator-amp-render.html:55:4 The attribute 'src' may not a
 |
 |      <!-- Valid: amp-render with binding="no" attribute -->
 |      <amp-render
->>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:64:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
 |        width="10"
 |        height="10"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
@@ -80,8 +72,6 @@ amp-render/1.0/test/validator-amp-render.html:64:4 The attribute 'src' may not a
 |
 |      <!-- Valid: amp-render with binding="always" attribute -->
 |      <amp-render
->>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:73:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
 |        width="10"
 |        height="10"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
@@ -91,8 +81,6 @@ amp-render/1.0/test/validator-amp-render.html:73:4 The attribute 'src' may not a
 |
 |      <!-- Valid: amp-render with credentials="include" -->
 |      <amp-render
->>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:82:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
 |        width="10"
 |        height="10"
 |        src="amp-script:scriptFn.dataFn"
@@ -102,8 +90,6 @@ amp-render/1.0/test/validator-amp-render.html:82:4 The attribute 'src' may not a
 |
 |      <!-- Valid: amp-render with credentials="omit" -->
 |      <amp-render
->>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:91:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
 |        width="10"
 |        height="10"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
@@ -113,8 +99,6 @@ amp-render/1.0/test/validator-amp-render.html:91:4 The attribute 'src' may not a
 |
 |      <!-- Valid: amp-render with xssi-prefix attribute -->
 |      <amp-render
->>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:100:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
 |        width="10"
 |        height="10"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
@@ -124,8 +108,6 @@ amp-render/1.0/test/validator-amp-render.html:100:4 The attribute 'src' may not 
 |
 |      <!-- Valid: amp-render with key attribute -->
 |      <amp-render
->>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:109:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
 |        width="10"
 |        height="10"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
@@ -136,14 +118,12 @@ amp-render/1.0/test/validator-amp-render.html:109:4 The attribute 'src' may not 
 |      <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
 |      <amp-render width="10" height="10"> </amp-render>
 >>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:118:4 The tag 'amp-render' is missing a mandatory attribute - pick at least one of ['src','[src]','data-amp-bind-src']. (see https://amp.dev/documentation/components/amp-render)
+amp-render/1.0/test/validator-amp-render.html:118:4 The tag 'amp-render' is missing a mandatory attribute - pick at least one of ['src','[src]','data-amp-bind-src']. (see https://amp.dev/documentation/components/amp-render/)
 |
 |      <!-- Invalid: container layout -->
 |      <amp-render
 >>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:121:4 The specified layout 'CONTAINER' is not supported by tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
->>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:121:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
+amp-render/1.0/test/validator-amp-render.html:121:4 The specified layout 'CONTAINER' is not supported by tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render/)
 |        layout="container"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
 |      >
@@ -152,9 +132,7 @@ amp-render/1.0/test/validator-amp-render.html:121:4 The attribute 'src' may not 
 |      <!-- Invalid: invalid binding attribute -->
 |      <amp-render
 >>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:128:4 The attribute 'binding' in tag 'amp-render' is set to the invalid value 'foobar'. (see https://amp.dev/documentation/components/amp-render)
->>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:128:4 The attribute 'src' may not appear in tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render)
+amp-render/1.0/test/validator-amp-render.html:128:4 The attribute 'binding' in tag 'amp-render' is set to the invalid value 'foobar'. (see https://amp.dev/documentation/components/amp-render/)
 |        width="10"
 |        height="10"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
