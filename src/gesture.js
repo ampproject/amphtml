@@ -109,13 +109,7 @@ export class Gestures {
     this.eventing_ = null;
 
     /** @private {boolean} */
-    this.passiveEventsSupported_ = supportsPassiveEventListener(
-      toWin(element.ownerDocument.defaultView)
-    );
-
-    /** @private {boolean} */
-    this.shouldNotPreventDefault_ =
-      shouldNotPreventDefault || this.passiveEventsSupported_;
+    this.shouldNotPreventDefault_ = shouldNotPreventDefault;
 
     /** @private {boolean} */
     this.shouldStopPropagation_ = shouldStopPropagation;
@@ -151,16 +145,18 @@ export class Gestures {
     /** @private @const {function(!Event)} */
     this.boundOnTouchCancel_ = this.onTouchCancel_.bind(this);
 
+    const win = element.ownerDocument.defaultView;
+    const passiveSupported = supportsPassiveEventListener(toWin(win));
     this.element_.addEventListener(
       'touchstart',
       this.boundOnTouchStart_,
-      this.passiveEventsSupported_ ? {passive: true} : false
+      passiveSupported ? {passive: true} : false
     );
     this.element_.addEventListener('touchend', this.boundOnTouchEnd_);
     this.element_.addEventListener(
       'touchmove',
       this.boundOnTouchMove_,
-      this.passiveEventsSupported_ ? {passive: true} : false
+      passiveSupported ? {passive: true} : false
     );
     this.element_.addEventListener('touchcancel', this.boundOnTouchCancel_);
 
@@ -449,8 +445,7 @@ export class Gestures {
    * @private
    */
   afterEvent_(event) {
-    let cancelEvent =
-      (!!this.eventing_ || this.wasEventing_) && !supportsPassiveEventListener;
+    let cancelEvent = !!this.eventing_ || this.wasEventing_;
     this.wasEventing_ = false;
     if (!cancelEvent) {
       const now = Date.now();
