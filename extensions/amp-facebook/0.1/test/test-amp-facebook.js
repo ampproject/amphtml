@@ -33,7 +33,6 @@ describes.realWin(
     const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
     const fbVideoHref =
       'https://www.facebook.com/zuck/videos/10102509264909801/';
-    const fbPageHref = 'https://www.facebook.com/itsdougthepug';
     let win, doc;
 
     beforeEach(() => {
@@ -188,28 +187,6 @@ describes.realWin(
       expect(fbVideo).not.to.be.undefined;
       expect(fbVideo.classList.contains('fb-post')).to.be.true;
     });
-
-    it(
-      'check that fb-page element correctly sets `data-adapt-container-width` ' +
-        "attribute to 'true'",
-      () => {
-        const div = doc.createElement('div');
-        div.setAttribute('id', 'c');
-        doc.body.appendChild(div);
-
-        facebook(win, {
-          href: fbPageHref,
-          width: 200,
-          height: 200,
-          embedAs: 'page',
-        });
-        const fbPage = doc.body.getElementsByClassName('fb-page')[0];
-        expect(fbPage).not.to.be.undefined;
-        expect(fbPage.getAttribute('data-adapt-container-width')).to.equal(
-          'true'
-        );
-      }
-    );
 
     it('removes iframe after unlayoutCallback', async () => {
       const ampFB = await getAmpFacebook(fbPostHref);

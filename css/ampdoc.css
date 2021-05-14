@@ -345,7 +345,7 @@ amp-autocomplete > textarea,
 /**
  * amp-script[nodom] is an element with no UI, similar to amp-analytics.
  */
-amp-script[nodom] {
+amp-script[nodom], amp-script[sandboxed] {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;

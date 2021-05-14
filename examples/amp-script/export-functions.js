@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,4 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../../3p/3p';
-
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-export function pressboard(global, data) {
-  validateData(data, ['media']);
-  data.baseUrl = 'https://sr.studiostack.com';
-  global.pbParams = data;
-  loadScript(
-    global,
-    data.baseUrl + '/js/amp-ad.js',
-    () => {
-      global.context.renderStart();
-    },
-    () => {
-      global.context.noContentAvailable();
-    }
-  );
-}
+exportFunction('getData', () => ({data: true}));
