@@ -307,12 +307,7 @@ module.exports = {
       },
     },
     {
-      'files': [
-        '**/test-*',
-        '**/_init_tests.js',
-        '**/*_test.js',
-        '**/testing/**',
-      ],
+      'files': ['**/test-*', '**/*_test.js', '**/testing/**'],
       'rules': {
         'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
       },
@@ -353,6 +348,12 @@ module.exports = {
         'local/closure-type-primitives': 0,
         'local/no-duplicate-name-typedef': 0,
         'google-camelcase/google-camelcase': 0,
+      },
+    },
+    {
+      'files': ['src/base-element.js'],
+      'rules': {
+        'local/no-private-props': 2,
       },
     },
   ],

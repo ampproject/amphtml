@@ -72,6 +72,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isAutoplaySupported} from '../../../src/utils/video';
 import {isExperimentOn} from '../../../src/experiments';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
@@ -1586,7 +1587,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    const videoEls = /** @type {!Array<!HTMLMediaElement>} */ (this.getAllVideos_());
+    const videoEls = /** @type {!Array<!HTMLMediaElement>} */ (
+      this.getAllVideos_()
+    );
     for (let i = 0; i < videoEls.length; i++) {
       this.startMeasuringVideoPerformance_(videoEls[i]);
     }
@@ -1810,8 +1813,10 @@ export class AmpStoryPage extends AMP.BaseElement {
       container.setAttribute('role', 'button');
 
       container.addEventListener('click', (e) => {
-        // Prevent default so link can be opened programmatically after URL preview is shown.
-        e.preventDefault();
+        if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+          // Prevent default so link can be opened programmatically after URL preview is shown.
+          e.preventDefault();
+        }
         this.openAttachment();
       });
 
@@ -1832,7 +1837,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   openAttachment(shouldAnimate = true) {
     const attachmentEl = this.element.querySelector(
-      'amp-story-page-attachment'
+      'amp-story-page-attachment, amp-story-page-outlink'
     );
 
     if (!attachmentEl) {

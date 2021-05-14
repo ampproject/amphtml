@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Helpers to wrap functions.
- */
+/** @fileoverview Helpers to wrap functions. */
 
 /**
  * Creates a function that is evaluated only once and returns the cached result

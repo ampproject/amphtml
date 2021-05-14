@@ -601,9 +601,9 @@ export const FIE_EMBED_PROP = '__AMP_EMBED__';
  * @return {?./friendly-iframe-embed.FriendlyIframeEmbed}
  */
 export function getFriendlyIframeEmbedOptional(iframe) {
-  return /** @type {?./friendly-iframe-embed.FriendlyIframeEmbed} */ (iframe[
-    FIE_EMBED_PROP
-  ]);
+  return /** @type {?./friendly-iframe-embed.FriendlyIframeEmbed} */ (
+    iframe[FIE_EMBED_PROP]
+  );
 }
 
 /**

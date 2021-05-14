@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {base64DecodeToBytes} from '../../../src/utils/base64';
+import {base64DecodeToBytes} from '../../../src/core/types/string/base64';
 import {dev, devAssert, user} from '../../../src/log';
 import {isArray} from '../../../src/core/types';
 
@@ -167,7 +167,8 @@ export class SignatureVerifier {
    * @return {!Promise<!VerificationStatus>}
    */
   verify(creative, headers) {
-    const signatureFormat = /^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):([A-Za-z0-9+/]{341}[AQgw]==)$/;
+    const signatureFormat =
+      /^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):([A-Za-z0-9+/]{341}[AQgw]==)$/;
     if (!headers.has(AMP_SIGNATURE_HEADER)) {
       return Promise.resolve(VerificationStatus.UNVERIFIED);
     }

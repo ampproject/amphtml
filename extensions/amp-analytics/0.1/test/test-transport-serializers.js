@@ -110,7 +110,7 @@ const SerializerTests = {
 /**
  * Real test. Plugin vendors don't need to modify
  */
-describe('Transport serializers', () => {
+describes.sandboxed('Transport serializers', {}, () => {
   it('TransportSerializers sort in alphabetic order', () => {
     const keys = Object.keys(TransportSerializers);
     const sorted = Object.keys(TransportSerializers).sort();

@@ -24,7 +24,7 @@ import {
   isString,
   padStart,
   trimEnd,
-} from '../../../../src/core/types/string';
+} from '../../../../../src/core/types/string';
 
 describes.sandboxed('type helpers - strings', {}, () => {
   describe('dashToCamelCase', () => {

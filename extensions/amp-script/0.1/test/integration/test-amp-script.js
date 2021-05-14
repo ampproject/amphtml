@@ -23,10 +23,10 @@ function poll(description, condition, opt_onError) {
   return classicPoll(description, condition, opt_onError, TIMEOUT);
 }
 
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('amp-script', function () {
+  .run('amp-script', {}, function () {
     this.timeout(TIMEOUT);
 
     let browser, doc, element;
@@ -186,12 +186,7 @@ describe
     describes.integration(
       'sandboxed',
       {
-        body: `
-      <amp-script sandboxed src="/examples/amp-script/amp-script-demo.js">
-        <button id="hello">Insert Hello World!</button>
-        <button id="long">Long task</button>
-      </amp-script>
-    `,
+        body: `<amp-script sandboxed src="/examples/amp-script/export-functions.js"></amp-script>`,
         extensions: ['amp-script'],
       },
       (env) => {
@@ -201,24 +196,10 @@ describe
           element = doc.querySelector('amp-script');
         });
 
-        it('should say "hello world"', function* () {
-          yield poll('<amp-script> to be hydrated', () =>
-            element.classList.contains('i-amphtml-hydrated')
-          );
-          const impl = yield element.getImpl();
-
-          // Give event listeners in hydration a moment to attach.
-          yield browser.wait(100);
-
-          env.sandbox
-            .stub(impl.getUserActivation(), 'isActive')
-            .callsFake(() => true);
-          browser.click('button#hello');
-
-          yield poll('mutations applied', () => {
-            const h1 = doc.querySelector('h1');
-            return h1 && h1.textContent == 'Hello World!';
-          });
+        it('should let you call functions on it', async () => {
+          const impl = await element.getImpl(true);
+          const result = await impl.callFunction('getData');
+          expect(result).deep.equal({data: true});
         });
       }
     );

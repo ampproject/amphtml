@@ -17,7 +17,7 @@
 import {BindEvaluator} from '../bind-evaluator';
 import {BindExpression} from '../bind-expression';
 
-describe('BindEvaluator', () => {
+describes.sandboxed('BindEvaluator', {}, (env) => {
   let evaluator;
 
   beforeEach(() => {
@@ -91,7 +91,7 @@ describe('BindEvaluator', () => {
         expressionString: '1+1',
       },
     ]);
-    const stub = window.sandbox.stub(BindExpression.prototype, 'evaluate');
+    const stub = env.sandbox.stub(BindExpression.prototype, 'evaluate');
     stub.returns('stubbed');
     evaluator.evaluateBindings({});
     expect(stub.calledOnce).to.be.true;

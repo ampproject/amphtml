@@ -596,9 +596,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    */
   onPlayerNavigation_(event, deviceSpecs) {
     const {pageId} = event.detail;
-    const pageIndexInExpectedList = this.expectedNavigationEvents_[
-      deviceSpecs.name
-    ].lastIndexOf(pageId);
+    const pageIndexInExpectedList =
+      this.expectedNavigationEvents_[deviceSpecs.name].lastIndexOf(pageId);
     if (pageIndexInExpectedList > -1) {
       // Remove the expected events up to the most recently received event if it was in the list.
       this.expectedNavigationEvents_[deviceSpecs.name].splice(
@@ -696,12 +695,10 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @private
    * */
   repositionDevices_() {
-    const {
-      offsetWidth: width,
-      offsetHeight: height,
-    } = this.element.querySelector(
-      '.i-amphtml-story-dev-tools-devices-container'
-    );
+    const {offsetWidth: width, offsetHeight: height} =
+      this.element.querySelector(
+        '.i-amphtml-story-dev-tools-devices-container'
+      );
     let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     // Find the sum of the device widths and max of heights since they are horizontally laid out.
