@@ -460,7 +460,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-story/1.0/history.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
-      'src/experiments.js',
+      'src/experiments/index.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'testing/init-tests.js',
@@ -625,7 +625,7 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
       'src/config.js',
-      'src/experiments.js',
+      'src/experiments/index.js',
       'src/mode.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'testing/init-tests.js',
