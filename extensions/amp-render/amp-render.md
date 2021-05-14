@@ -57,44 +57,121 @@ When using `<amp-render>` in tandem with another templating AMP component, such 
 
 For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
-[filter formats=“websites”]
+<!--
+  * [Read more about filtering sections](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#filtering-sections)
+  * [Read more about executable code samples](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#preview-code-samples)
+ -->
 
-### Displaying dynamic data
+### Standalone use outside valid AMP documents (optional)
 
-In the following example, we retrieve JSON data that contains first and last name and nickname, and render the content in a [amp-mustache template](../amp-mustache/amp-mustache.md).
+<!-- TODO: Remove backticks from link when guide is live -->
 
-[example preview="inline" playground="true" imports="amp-render" template="amp-mustache"]
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+#### Example
+
+The example below demonstrates `amp-render` component in standalone use.
+
+[example preview="top-frame" playground="false"]
+
+```
+<head>
+...
+<script async src="https://cdn.ampproject.org/v0.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-render-1.0.css">
+<script async custom-element="amp-render" src="https://cdn.ampproject.org/v0/amp-render-1.0.js"></script>
+...
+</head>
+<amp-render>
+  ...
+</amp-render>
+<button id="element-id">
+  Event Trigger
+</button>
+<script>
+  example of one API usage
+</script>
+```
+
+[/example]
+
+#### Interactivity and API usage
+
+Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
+
+The `amp-render` component API is accessible by including the following script tag in your document:
+
+```
+await customElements.whenDefined('amp-render-component');
+const api = await Render.getApi();
+```
+
+The `amp-render` API allows you to register and respond to the following events:
+
+**event 1**
+Explanation of event, proper syntax/arguments.
+
+```
+example
+```
+
+**event 2**
+Explanation of event, proper syntax/arguments.
+
+```
+example
+```
+
+**action 1**
+Explanation of action, proper syntax/arguments.
+
+```
+example
+```
+
+#### Layout and style
+
+Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
+
+```
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-render-1.0.css">
+```
+
+Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
+
+**Container type**
+
+The `amp-render` component has a container/non-container layout type. To ensure the component renders correctly, apply the following styles:
+
+```css
+example
+```
+
+**style/layout guidelines 2 (optional)**
+
+Information on how to layout and style `amp-render`.
+
+```
+example
+```
+
+### Behavior users should be aware of (optional)
+
+What to do if they want behavior. How to work around it.
 
 ```html
-<amp-render
-  width="auto"
-  height="100"
-  layout="fixed-height"
-  src="{{server_for_email}}/static/inline-examples/data/amp-render-bond.json"
->
-    <template type="amp-mustache">
-    {% raw %}
-      <p>Hello {{name.firstName}} {{name.lastName}}. Your nickname is {{name.nickName}}.</p>
-    {% endraw %}
-  </template>
+<amp-render required-attribute>
+  Code sample of behavior or behavior workaround.
 </amp-render>
 ```
 
-[/example][/filter]
+### Behavior restrictions
 
-Here is the JSON file that we used:
-
-```json
-{
-  "name": {
-    "firstName": "James",
-    "lastName": "Bond",
-    "nickName": "007"
-  }
-}
-```
+What is allowed, what isn't.
 
 ## Attributes
+
+### `attribute-name`
 
 ### `src` (required)
 
@@ -221,46 +298,18 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 
 
-
-## Actions (optional)
-
-### Placeholder and fallback
-
-Optionally, `<amp-list>` supports a placeholder and/or fallback.
-
--   A _placeholder_ is a child element with the `placeholder` attribute. This element is shown until the `<amp-list>` loads successfully. If a fallback is also provided, the placeholder is hidden when the `<amp-list>` fails to load.
--   A _fallback_ is a child element with the `fallback` attribute. This element is shown if the `<amp-list>` fails to load.
-
-Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders). Note that a child element cannot be both a placeholder and a fallback.
-
-```html
-<amp-list src="https://foo.com/list.json">
-  <div placeholder>Loading ...</div>
-  <div fallback>Failed to load data.</div>
-</amp-list>
-```
-
-### Refreshing data
+## Actions
 
 The `<amp-list>` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes.
 
 ```html
 <button on="tap:myList.refresh">Refresh List</button>
-<amp-list id="myList" src="https://foo.com/list.json">
+<amp-list id="myList" src="https://foo.com/data.json">
   <template type="amp-mustache">
     <div>{{title}}</div>
   </template>
 </amp-list>
 ```
-### `action-name`
-
-Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-render` needs to be identified with an `id` to work.
-
-## Events (optional)
-
-### `event-name`
-
-Description of event. Use cases of event-name. Include all the nuances, such as: `amp-render` needs to be identified with an `id` to work.
 
 #### Valid AMP
 
@@ -291,9 +340,6 @@ Syntax and argument details for use in fully valid AMP pages.
 
 [/example]
 
-## Styling (optional)
-
-Explain how to style the element.
 
 ## Accessibility
 
