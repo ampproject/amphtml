@@ -40,7 +40,7 @@ export const StoryAdAutoAdvance = {
  * @param {!Window} win
  */
 export function divertStoryAdAutoAdvance(win) {
-  /** @const @private {!ExperimentInfoDef} */
+  /** @type {!ExperimentInfoDef} */
   const experimentInfo = {
     experimentId: StoryAdAutoAdvance.ID,
     isTrafficEligible: () => true,

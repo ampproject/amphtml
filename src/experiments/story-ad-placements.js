@@ -33,7 +33,7 @@ export const StoryAdPlacements = {
  * @param {!Window} win
  */
 export function divertStoryAdPlacements(win) {
-  /** @const @private {!ExperimentInfoDef} */
+  /** @type {!ExperimentInfoDef} */
   const experimentInfo = {
     experimentId: StoryAdPlacements.ID,
     isTrafficEligible: () => true,
