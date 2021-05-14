@@ -278,5 +278,9 @@
   "96": {
     "string": "Move device to explore",
     "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+  },
+  "97": {
+    "string": "Opening",
+    "description": "Text displayed to users on tap of outlink button."
   }
 }

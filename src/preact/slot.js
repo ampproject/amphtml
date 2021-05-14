@@ -17,28 +17,51 @@
 import * as Preact from './index';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Loading} from '../core/loading-instructions';
-import {pureDevAssert as devAssert} from '../core/assert';
+import {devAssert} from '../core/assert';
 import {isElement} from '../core/types';
 import {
   loadAll,
   pauseAll,
   unmountAll,
 } from '../utils/resource-container-helper';
+import {objectsEqualShallow} from '../core/types/object';
 import {rediscoverChildren, removeProp, setProp} from '../context';
 import {useAmpContext} from './context';
 import {useEffect, useLayoutEffect, useRef} from './index';
 
 const EMPTY = {};
 
+/** @const {WeakMap<Element, {oldDefauls: (!Object|undefined), component: Component}>} */
+const cache = new WeakMap();
+
 /**
  * @param {!Element} element
  * @param {string} name
- * @param {!Object|undefined} props
- * @return {!PreactDef.VNode}
+ * @param {!Object|undefined} defaultProps
+ * @param {boolean|undefined} as
+ * @return {!PreactDef.VNode|!PreactDef.FunctionalComponent}
  */
-export function createSlot(element, name, props) {
+export function createSlot(element, name, defaultProps, as = false) {
   element.setAttribute('slot', name);
-  return <Slot {...(props || EMPTY)} name={name} />;
+  if (!as) {
+    return <Slot {...(defaultProps || EMPTY)} name={name} />;
+  }
+
+  const cached = cache.get(element);
+  if (cached && objectsEqualShallow(cached.oldProps, defaultProps)) {
+    return cached.component;
+  }
+
+  /**
+   * @param {!Object|undefined} props
+   * @return {!PreactDef.VNode}
+   */
+  function SlotWithProps(props) {
+    return <Slot {...(defaultProps || EMPTY)} name={name} {...props} />;
+  }
+  cache.set(element, {oldProps: defaultProps, component: SlotWithProps});
+
+  return SlotWithProps;
 }
 
 /**
@@ -119,7 +142,7 @@ export function useSlotContext(ref, opt_props) {
 
 /**
  * @param {!Element} slot
- * @param {function(!AmpElement|!Array<!AmpElement>)} action
+ * @param {function(!AmpElement):void|function(!Array<!AmpElement>):void} action
  */
 function execute(slot, action) {
   const assignedElements = slot.assignedElements

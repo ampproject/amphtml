@@ -107,10 +107,8 @@ export class AmpAdXOriginIframeHandler {
 
     // Init the legacy observeInterection API service.
     // (Behave like position observer)
-    this.legacyIntersectionObserverApiHost_ = new LegacyAdIntersectionObserverHost(
-      this.baseInstance_,
-      this.iframe
-    );
+    this.legacyIntersectionObserverApiHost_ =
+      new LegacyAdIntersectionObserverHost(this.baseInstance_, this.iframe);
 
     this.embedStateApi_ = new SubscriptionApi(
       this.iframe,
@@ -234,14 +232,10 @@ export class AmpAdXOriginIframeHandler {
       });
 
     // Calculate render-start and no-content signals.
-    const {
-      promise: renderStartPromise,
-      resolve: renderStartResolve,
-    } = new Deferred();
-    const {
-      promise: noContentPromise,
-      resolve: noContentResolve,
-    } = new Deferred();
+    const {promise: renderStartPromise, resolve: renderStartResolve} =
+      new Deferred();
+    const {promise: noContentPromise, resolve: noContentResolve} =
+      new Deferred();
 
     if (
       this.baseInstance_.config &&

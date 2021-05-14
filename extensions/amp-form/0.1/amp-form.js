@@ -73,7 +73,7 @@ import {
 
 import {toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /** @const {string} */
 const TAG = 'amp-form';
@@ -1407,8 +1407,9 @@ export class AmpForm {
     const queryParams = parseQueryString(this.win_.location.search);
     Object.keys(queryParams).forEach((key) => {
       // Typecast since Closure is missing NodeList union type in HTMLFormElement.elements.
-      const formControls = /** @type {(!Element|!NodeList)} */ (this.form_
-        .elements[key]);
+      const formControls = /** @type {(!Element|!NodeList)} */ (
+        this.form_.elements[key]
+      );
       if (!formControls) {
         return;
       }

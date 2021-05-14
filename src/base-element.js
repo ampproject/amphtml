@@ -106,7 +106,7 @@ import {toWin} from './types';
  */
 export class BaseElement {
   /**
-   * Whether this element supports V1 protocol, which includes:
+   * Whether this element supports R1 protocol, which includes:
    * 1. Layout/unlayout are not managed by the runtime, but instead are
    *    implemented by the element as needed.
    * 2. The element can defer its build until later. See `deferredMount`.
@@ -119,7 +119,7 @@ export class BaseElement {
    * @return {boolean}
    * @nocollapse
    */
-  static V1() {
+  static R1() {
     return false;
   }
 
@@ -128,7 +128,7 @@ export class BaseElement {
    * element's build will be deferred roughly based on the
    * `content-visibility: auto` rules.
    *
-   * Only used for V1 elements.
+   * Only used for R1 elements.
    *
    * @param {!AmpElement} unusedElement
    * @return {boolean}
@@ -229,6 +229,10 @@ export class BaseElement {
   constructor(element) {
     /** @public @const {!Element} */
     this.element = element;
+
+    /** @public @const {!Window} */
+    this.win = toWin(element.ownerDocument.defaultView);
+
     /*
     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  ____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
@@ -236,15 +240,11 @@ export class BaseElement {
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
-    Any private property for BaseElement should be declared in
-    build-system/externs/amp.multipass.extern.js. This is so closure compiler
-    doesn't reuse the same symbol it would use in the core compilation unit for
-    the private property in the extensions compilation unit's private
-    properties.
+    Any private property for BaseElement MUST be wrapped with quotes. We cannot
+    allow Closure Compiler to mangle privates in this class, because it can
+    reuse the same mangled name for a different property in, i.e., amp-youtube's
+    BaseElement subclass (which lives in a different binary).
     */
-
-    /** @public @const {!Window} */
-    this.win = toWin(element.ownerDocument.defaultView);
 
     /**
      * Maps action name to struct containing the action handler and minimum
@@ -253,10 +253,10 @@ export class BaseElement {
      *   handler: function(!./service/action-impl.ActionInvocation),
      *   minTrust: ActionTrust,
      * }>} */
-    this.actionMap_ = null;
+    this['actionMap_'] = null;
 
     /** @private {?string} */
-    this.defaultActionAlias_ = null;
+    this['defaultActionAlias_'] = null;
   }
 
   /**
@@ -272,7 +272,7 @@ export class BaseElement {
    * @return {?string}
    */
   getDefaultActionAlias() {
-    return this.defaultActionAlias_;
+    return this['defaultActionAlias_'];
   }
 
   /**
@@ -284,7 +284,7 @@ export class BaseElement {
    *
    * The default priority for base elements is LayoutPriority.CONTENT.
    * @return {number}
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   getLayoutPriority() {
     return LayoutPriority.CONTENT;
@@ -317,7 +317,7 @@ export class BaseElement {
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
    * @return {!./layout-rect.LayoutRectDef}
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   getLayoutBox() {
     return this.element.getLayoutBox();
@@ -326,7 +326,7 @@ export class BaseElement {
   /**
    * Returns a previously measured layout size.
    * @return {!./layout-rect.LayoutSizeDef}
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   getLayoutSize() {
     return this.element.getLayoutSize();
@@ -437,7 +437,7 @@ export class BaseElement {
    * hosts and prefetch resources it is likely to need. May be called
    * multiple times because connections can time out.
    * @param {boolean=} opt_onLayout
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   preconnectCallback(opt_onLayout) {
     // Subclasses may override.
@@ -463,7 +463,7 @@ export class BaseElement {
 
   /**
    * Set itself as a container element that can be monitored by the scheduler
-   * for auto-mounting. Scheduler is used for V1 elements. A container is
+   * for auto-mounting. Scheduler is used for R1 elements. A container is
    * usually a top-level scrollable overlay such as a lightbox or a sidebar.
    * The main scheduler (`IntersectionObserver`) cannot properly handle elements
    * inside a non-document scroller and this method instructs the scheduler
@@ -533,14 +533,14 @@ export class BaseElement {
   /**
    * Ensure that the element is being eagerly loaded.
    *
-   * Only used for V1 elements.
+   * Only used for R1 elements.
    */
   ensureLoaded() {}
 
   /**
    * Update the current `readyState`.
    *
-   * Only used for V1 elements.
+   * Only used for R1 elements.
    *
    * @param {!./ready-state.ReadyState} state
    * @param {*=} opt_failure
@@ -590,7 +590,7 @@ export class BaseElement {
    * {@link isRelayoutNeeded} method.
    *
    * @return {!Promise}
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   layoutCallback() {
     return Promise.resolve();
@@ -613,7 +613,7 @@ export class BaseElement {
    * Requests the element to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   pauseCallback() {}
 
@@ -621,7 +621,7 @@ export class BaseElement {
    * Requests the element to resume its activity when the document returns from
    * an inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content may be resumed.
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   resumeCallback() {}
 
@@ -632,7 +632,7 @@ export class BaseElement {
    * {@link layoutCallback} in case document becomes active again.
    *
    * @return {boolean}
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   unlayoutCallback() {
     return false;
@@ -642,7 +642,7 @@ export class BaseElement {
    * Subclasses can override this method to opt-in into calling
    * {@link unlayoutCallback} when paused.
    * @return {boolean}
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   unlayoutOnPause() {
     return false;
@@ -678,13 +678,6 @@ export class BaseElement {
     return loadPromise(element);
   }
 
-  /** @private */
-  initActionMap_() {
-    if (!this.actionMap_) {
-      this.actionMap_ = this.win.Object.create(null);
-    }
-  }
-
   /**
    * Registers the action handler for the method with the specified name.
    *
@@ -697,8 +690,8 @@ export class BaseElement {
    * @public
    */
   registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
-    this.initActionMap_();
-    this.actionMap_[alias] = {handler, minTrust};
+    initActionMap(this);
+    this['actionMap_'][alias] = {handler, minTrust};
   }
 
   /**
@@ -714,12 +707,12 @@ export class BaseElement {
     minTrust = ActionTrust.DEFAULT
   ) {
     devAssert(
-      !this.defaultActionAlias_,
+      !this['defaultActionAlias_'],
       'Default action "%s" already registered.',
-      this.defaultActionAlias_
+      this['defaultActionAlias_']
     );
     this.registerAction(alias, handler, minTrust);
-    this.defaultActionAlias_ = alias;
+    this['defaultActionAlias_'] = alias;
   }
 
   /**
@@ -737,10 +730,10 @@ export class BaseElement {
     let {method} = invocation;
     // If the default action has an alias, the handler will be stored under it.
     if (method === DEFAULT_ACTION) {
-      method = this.defaultActionAlias_ || method;
+      method = this['defaultActionAlias_'] || method;
     }
-    this.initActionMap_();
-    const holder = this.actionMap_[method];
+    initActionMap(this);
+    const holder = this['actionMap_'][method];
     const {tagName} = this.element;
     userAssert(holder, `Method not found: ${method} in ${tagName}`);
     const {handler, minTrust} = holder;
@@ -1099,7 +1092,7 @@ export class BaseElement {
    * This may currently not work with extended elements. Please file
    * an issue if that is required.
    * @public
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   onLayoutMeasure() {}
 
@@ -1119,5 +1112,17 @@ export class BaseElement {
    */
   getApi() {
     return this;
+  }
+}
+
+/**
+ * This would usually be a private method on BaseElement class, but we cannot
+ * use privates here. So, it's manually devirtualized into a regular function.
+ *
+ * @param {typeof BaseElement} baseElement
+ */
+function initActionMap(baseElement) {
+  if (!baseElement['actionMap_']) {
+    baseElement['actionMap_'] = baseElement.win.Object.create(null);
   }
 }

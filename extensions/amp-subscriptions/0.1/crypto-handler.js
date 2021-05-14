@@ -22,8 +22,8 @@ import {
 import {iterateCursor} from '../../../src/dom';
 import {padStart} from '../../../src/core/types/string';
 import {toArray} from '../../../src/core/types/array';
-import {tryParseJson} from '../../../src/json';
-import {utf8Encode} from '../../../src/utils/bytes';
+import {tryParseJson} from '../../../src/core/types/object/json';
+import {utf8Encode} from '../../../src/core/types/string/bytes';
 
 export class CryptoHandler {
   /**

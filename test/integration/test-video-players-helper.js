@@ -39,6 +39,7 @@ function skipIfAutoplayUnsupported(win) {
 }
 
 export function runVideoPlayerIntegrationTests(
+  env,
   createVideoElementFunc,
   opt_experiment,
   timeout = 2000
@@ -500,7 +501,7 @@ export function runVideoPlayerIntegrationTests(
             autoFullscreen = manager.getAutoFullscreenManagerForTesting_();
           }
           if (!isInLandscapeStub) {
-            isInLandscapeStub = window.sandbox.stub(
+            isInLandscapeStub = env.sandbox.stub(
               autoFullscreen,
               'isInLandscape'
             );
@@ -530,7 +531,7 @@ export function runVideoPlayerIntegrationTests(
           })
           .then(async () => {
             const impl = await video.getImpl(false);
-            const enter = window.sandbox.stub(impl, 'fullscreenEnter');
+            const enter = env.sandbox.stub(impl, 'fullscreenEnter');
             mockLandscape(true);
             autoFullscreen.onRotation_();
             return poll('fullscreen enter', () => enter.called);

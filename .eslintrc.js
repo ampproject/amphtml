@@ -143,7 +143,6 @@ module.exports = {
     'local/no-dynamic-import': 2,
     'local/no-es2015-number-props': 2,
     'local/no-export-side-effect': 2,
-    'local/no-for-of-statement': 2,
     'local/no-forbidden-terms': [
       2,
       forbiddenTermsGlobal,
@@ -276,7 +275,6 @@ module.exports = {
         'local/always-call-chai-methods': 2,
         'local/no-bigint': 0,
         'local/no-dynamic-import': 0,
-        'local/no-for-of-statement': 0,
         'local/no-function-async': 0,
         'local/no-function-generator': 0,
         'local/no-import-meta': 0,
@@ -309,14 +307,15 @@ module.exports = {
       },
     },
     {
-      'files': [
-        '**/test-*',
-        '**/_init_tests.js',
-        '**/*_test.js',
-        '**/testing/**',
-        '**/storybook/*.js',
-      ],
+      'files': ['**/test-*', '**/*_test.js', '**/testing/**'],
       'rules': {
+        'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
+      },
+    },
+    {
+      'files': ['**/storybook/*.js'],
+      'rules': {
+        'require-jsdoc': 0,
         'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
       },
     },

@@ -30,7 +30,7 @@ const {
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
 const {buildRuntime, getFilesFromArgv} = require('../../common/utils');
-const {cyan} = require('kleur/colors');
+const {cyan} = require('../../common/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
@@ -128,27 +128,29 @@ async function fetchCoverage_(outDir) {
   const zipFilename = path.join(outDir, 'coverage.zip');
   const zipFile = fs.createWriteStream(zipFilename);
 
-  await new Promise((resolve, reject) => {
-    http
-      .get(
-        {
-          host: HOST,
-          port: PORT,
-          path: COV_DOWNLOAD_PATH,
-        },
-        (response) => {
-          response.pipe(zipFile);
-          zipFile.on('finish', () => {
-            zipFile.close();
-            resolve();
-          });
-        }
-      )
-      .on('error', (err) => {
-        fs.unlinkSync(zipFilename);
-        reject(err);
-      });
-  });
+  await /** @type {Promise<void>} */ (
+    new Promise((resolve, reject) => {
+      http
+        .get(
+          {
+            host: HOST,
+            port: PORT,
+            path: COV_DOWNLOAD_PATH,
+          },
+          (response) => {
+            response.pipe(zipFile);
+            zipFile.on('finish', () => {
+              zipFile.close();
+              resolve();
+            });
+          }
+        )
+        .on('error', (err) => {
+          fs.unlinkSync(zipFilename);
+          reject(err);
+        });
+    })
+  );
   execOrDie(`unzip -o ${zipFilename} -d ${outDir}`);
 }
 

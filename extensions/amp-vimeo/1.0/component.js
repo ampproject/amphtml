@@ -23,7 +23,6 @@ import {
   makeVimeoMessage,
 } from '../vimeo-api';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {dispatchCustomEvent} from '../../../src/dom';
 import {forwardRef} from '../../../src/preact/compat';
 import {
@@ -59,7 +58,7 @@ function makeMethodMessage(method) {
 
 /**
  * @param {!VimeoDef.Props} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
@@ -68,11 +67,10 @@ export function VimeoWithRef(
   ref
 ) {
   const origin = useMemo(getVimeoOriginRegExp, []);
-  const src = useMemo(() => getVimeoIframeSrc(videoid, autoplay, doNotTrack), [
-    videoid,
-    doNotTrack,
-    autoplay,
-  ]);
+  const src = useMemo(
+    () => getVimeoIframeSrc(videoid, autoplay, doNotTrack),
+    [videoid, doNotTrack, autoplay]
+  );
 
   const readyIframeRef = useRef(null);
   const onReadyMessage = useCallback((iframe) => {
@@ -109,11 +107,10 @@ export function VimeoWithRef(
   }, []);
 
   return (
-    <VideoWrapper
+    <VideoIframe
       ref={ref}
       {...rest}
       origin={origin}
-      component={VideoIframe}
       autoplay={autoplay}
       src={src}
       onMessage={onMessage}

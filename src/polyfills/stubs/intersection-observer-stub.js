@@ -23,7 +23,8 @@
  * amp-intersection-observer-polyfill extension.
  */
 
-import {Services} from '../../services';
+/** @typedef {function(!typeof IntersectionObserver)} */
+let InObUpgraderDef;
 
 const UPGRADERS = '_upgraders';
 const NATIVE = '_native';
@@ -54,23 +55,30 @@ export function shouldLoadPolyfill(win) {
  * @return {boolean}
  */
 function isWebkit(win) {
-  // navigator.vendor is always "Apple Computer, Inc." for all iOS browsers and Mac OS Safari.
+  // navigator.vendor is always "Apple Computer, Inc." for all iOS browsers and
+  // Mac OS Safari.
   return /apple/i.test(win.navigator.vendor);
 }
 
 /**
- * @param {typeof IntersectionObserver} Native
- * @param {typeof IntersectionObserver} Polyfill
- * @return {typeof IntersectionObserver}
+ * @param {!typeof IntersectionObserver} Native
+ * @param {!typeof IntersectionObserver} Polyfill
+ * @return {!typeof IntersectionObserver}
  */
 function getIntersectionObserverDispatcher(Native, Polyfill) {
-  return function (ioCallback, opts) {
-    if (opts && opts.root && opts.root.nodeType === 9) {
+  /**
+   * @param {!IntersectionObserverCallback} ioCallback
+   * @param {IntersectionObserverInit=} opts
+   * @return {!IntersectionObserver}
+   */
+  function Ctor(ioCallback, opts) {
+    if (opts?.root?.nodeType === /* Node.DOCUMENT_NODE */ 9) {
       return new Polyfill(ioCallback, opts);
     } else {
       return new Native(ioCallback, opts);
     }
-  };
+  }
+  return Ctor;
 }
 
 /**
@@ -103,21 +111,14 @@ export function installStub(win) {
  */
 export function supportsDocumentRoot(win) {
   try {
-    new win.IntersectionObserver(() => {}, {root: win.document});
+    new win.IntersectionObserver(() => {}, {
+      // TODO(rcebulko): Update when CC updates their externs
+      // See https://github.com/google/closure-compiler/pull/3804
+      root: /** @type {?} */ (win.document),
+    });
     return true;
   } catch {
     return false;
-  }
-}
-
-/**
- * @param {!Window} win
- */
-export function scheduleUpgradeIfNeeded(win) {
-  if (shouldLoadPolyfill(win)) {
-    Services.extensionsFor(win).preloadExtension(
-      'amp-intersection-observer-polyfill'
-    );
   }
 }
 
@@ -128,8 +129,7 @@ export function scheduleUpgradeIfNeeded(win) {
 export function upgradePolyfill(win, installer) {
   // Can't use the IntersectionObserverStub here directly since it's a separate
   // instance deployed in v0.js vs the polyfill extension.
-  const Stub = /** @type {typeof IntersectionObserverStub} */ (win
-    .IntersectionObserver[STUB]);
+  const Stub = win.IntersectionObserver[STUB];
   if (Stub) {
     const Native = win.IntersectionObserver[NATIVE];
     delete win.IntersectionObserver;
@@ -143,19 +143,14 @@ export function upgradePolyfill(win, installer) {
       );
     }
 
+    /** @type {!Array<!InObUpgraderDef>} */
     const upgraders = Stub[UPGRADERS].slice(0);
     const microtask = Promise.resolve();
     const upgrade = (upgrader) => {
       microtask.then(() => upgrader(Polyfill));
     };
-    if (upgraders.length > 0) {
-      /** @type {!Array} */ (upgraders).forEach(upgrade);
-    }
-    Stub[
-      UPGRADERS
-    ] = /** @type {!Array<function(typeof IntersectionObserver)>} */ ({
-      'push': upgrade,
-    });
+    upgraders.forEach(upgrade);
+    Stub[UPGRADERS] = {'push': upgrade};
   } else {
     // Even if this is not the stub, we still may need to polyfill
     // `isIntersecting`. See `shouldLoadPolyfill` for more info.
@@ -167,6 +162,11 @@ export function upgradePolyfill(win, installer) {
  * The stub for `IntersectionObserver`. Implements the same interface, but
  * keeps the tracked elements in memory until the actual polyfill arives.
  * This stub is necessary because the polyfill itself is significantly bigger.
+ *
+ * It doesn't technically extend IntersectionObserver, but this allows the stub
+ * to be seen as equivalent when typechecking calls expecting an
+ * IntersectionObserver.
+ * @extends IntersectionObserver
  */
 export class IntersectionObserverStub {
   /**
@@ -184,7 +184,7 @@ export class IntersectionObserverStub {
       ...options,
     };
 
-    /** @private {?Array<!Element>} */
+    /** @private {!Array<!Element>} */
     this.elements_ = [];
 
     /** @private {?IntersectionObserver} */
@@ -194,9 +194,7 @@ export class IntersectionObserverStub {
     IntersectionObserverStub[UPGRADERS].push(this.upgrade_.bind(this));
   }
 
-  /**
-   * @return {?Element}
-   */
+  /** @return {?Element} */
   get root() {
     if (this.inst_) {
       return this.inst_.root;
@@ -204,19 +202,18 @@ export class IntersectionObserverStub {
     return this.options_.root || null;
   }
 
-  /**
-   * @return {*}
-   */
+  /** @return {string} */
   get rootMargin() {
     if (this.inst_) {
       return this.inst_.rootMargin;
     }
-    return this.options_.rootMargin;
+    // The CC-provided IntersectionObserverInit type allows for rootMargin to be
+    // undefined, but we provide a default, so it's guaranteed to be a string
+    // here.
+    return /** @type {string} */ (this.options_.rootMargin);
   }
 
-  /**
-   * @return {*}
-   */
+  /** @return {!Array<number>} */
   get thresholds() {
     if (this.inst_) {
       return this.inst_.thresholds;
@@ -224,9 +221,7 @@ export class IntersectionObserverStub {
     return [].concat(this.options_.threshold || 0);
   }
 
-  /**
-   * @return {undefined}
-   */
+  /** @return {undefined} */
   disconnect() {
     if (this.inst_) {
       this.inst_.disconnect();
@@ -235,9 +230,7 @@ export class IntersectionObserverStub {
     }
   }
 
-  /**
-   * @return {!Array}
-   */
+  /** @return {!Array<!IntersectionObserverEntry>} */
   takeRecords() {
     if (this.inst_) {
       return this.inst_.takeRecords();
@@ -245,9 +238,7 @@ export class IntersectionObserverStub {
     return [];
   }
 
-  /**
-   * @param {!Element} target
-   */
+  /** @param {!Element} target */
   observe(target) {
     if (this.inst_) {
       this.inst_.observe(target);
@@ -258,9 +249,7 @@ export class IntersectionObserverStub {
     }
   }
 
-  /**
-   * @param {!Element} target
-   */
+  /** @param {!Element} target */
   unobserve(target) {
     if (this.inst_) {
       this.inst_.unobserve(target);
@@ -273,20 +262,20 @@ export class IntersectionObserverStub {
   }
 
   /**
-   * @param {typeof IntersectionObserver} constr
+   * @param {!typeof IntersectionObserver} Ctor
    * @private
    */
-  upgrade_(constr) {
-    const inst = new constr(this.callback_, this.options_);
+  upgrade_(Ctor) {
+    const inst = new Ctor(this.callback_, this.options_);
     this.inst_ = inst;
-    this.elements_.forEach((e) => inst.observe(e));
-    this.elements_ = null;
+    for (const e of this.elements_) {
+      inst.observe(e);
+    }
+    this.elements_.length = 0;
   }
 }
 
-/**
- * @type {!Array<function(typeof IntersectionObserver)>}
- */
+/** @type {!Array<!InObUpgraderDef>} */
 IntersectionObserverStub[UPGRADERS] = [];
 
 /** @visibleForTesting */

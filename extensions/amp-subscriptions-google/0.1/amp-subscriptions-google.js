@@ -46,7 +46,7 @@ import {
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {getValueForExpr} from '../../../src/json';
+import {getValueForExpr} from '../../../src/core/types/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 import {devAssert, user, userAssert} from '../../../src/log';
@@ -608,9 +608,8 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   getEntitlements() {
-    const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
-      'google.com'
-    );
+    const encryptedDocumentKey =
+      this.serviceAdapter_.getEncryptedDocumentKey('google.com');
     userAssert(
       !(this.enableLAA_ && encryptedDocumentKey),
       `enableLAA cannot be used when the document is encrypted`

@@ -1,0 +1,59 @@
+---
+name: Bug Report
+description: Used to report bugs in AMP.
+labels: "Type: Bug"
+body:
+- type: markdown
+  id: header
+  attributes:
+    value: |
+      Thanks for filling out this bug report.
+      - Bugs related to the [AMP](https://amp.dev) format and cache can be reported using the form below.
+      - Bugs related to the [AMP Wordpress Plugin](https://wordpress.org/plugins/accelerated-mobile-pages/) can be reported at the [`amp-wp`](https://github.com/ampproject/amp-wp/issues) repository.
+      - Questions about AMP uage can be asked at the [`#using-amp`](https://amphtml.slack.com/archives/C9HPA6HGB) Slack channel or the [`amp-html`](http://stackoverflow.com/questions/tagged/amp-html) tag at Stack Overflow.
+      - Questions about Google Search can be asked at Google's [Help Community](https://goo.gl/utQ1KZ).
+- type: textarea
+  id: description
+  attributes:
+    label: Description
+    description: Briefly describe the bug.
+    placeholder: Describing the expected vs. the current behavior will help us direct this issue to the correct working group for investigation.
+  validations:
+    required: true
+- type: textarea
+  id: repro_steps
+  attributes:
+    label: Reproduction Steps
+    description: Provide step-by-step instructions for reproducing the issue.
+    placeholder: Please provide a public URL and ideally a reduced test case that clearly demonstrates your issue.
+  validations:
+    required: true
+- type: textarea
+  id: logs
+  attributes:
+    label: Relevant Logs
+    description: Optionally paste any relevant log output here.
+    placeholder: Paste any plain-text logs here (e.g. console warnings or errors from Chrome DevTools). They will automatically be formatted as code.
+    render: shell
+- type: dropdown
+  id: browsers
+  attributes:
+    label: Browser(s) Affected
+    description: Select one or more browser(s).
+    multiple: true
+    options:
+      - Chrome
+      - Firefox
+      - Safari
+      - Edge
+      - UC Browser
+  validations:
+    required: true
+- type: input
+  id: version
+  attributes:
+    label: AMP Version Affected
+    description: If applicable, indicate a version in the format YYMMDDHHMMXXX. Otherwise just put down 'latest'.
+    placeholder: e.g. 2101280515000
+  validations:
+    required: true

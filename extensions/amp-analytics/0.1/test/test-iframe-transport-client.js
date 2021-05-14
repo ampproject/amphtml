@@ -28,7 +28,7 @@ function createUniqueId() {
   return String(++nextId);
 }
 
-describe('iframe-transport-client', () => {
+describes.sandboxed('iframe-transport-client', {}, (env) => {
   let iframeTransportClient;
   let sentinel;
 
@@ -123,7 +123,7 @@ describe('iframe-transport-client', () => {
   });
 
   it('calls onNewContextInstance', () => {
-    const onNewContextInstanceSpy = window.sandbox.spy();
+    const onNewContextInstanceSpy = env.sandbox.spy();
     window.onNewContextInstance = (ctx) => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(
       window,
@@ -137,7 +137,7 @@ describe('iframe-transport-client', () => {
   });
 
   it('Sets listener and baseMessage properly', () => {
-    const onNewContextInstanceSpy = window.sandbox.spy();
+    const onNewContextInstanceSpy = env.sandbox.spy();
     window.onNewContextInstance = (ctx) => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(
       window,
@@ -149,8 +149,8 @@ describe('iframe-transport-client', () => {
     expect(ctx.baseMessage_).to.not.be.null;
     expect(ctx.baseMessage_.creativeId).to.equal('my_creative');
     expect(ctx.baseMessage_.vendor).to.equal('my_vendor');
-    const listener1 = window.sandbox.spy();
-    const listener2 = window.sandbox.spy();
+    const listener1 = env.sandbox.spy();
+    const listener2 = env.sandbox.spy();
     ctx.onAnalyticsEvent(listener1);
     expect(ctx.listener_).to.equal(listener1);
     ctx.onAnalyticsEvent(listener2);
@@ -159,7 +159,7 @@ describe('iframe-transport-client', () => {
   });
 
   it('dispatches event', () => {
-    const onNewContextInstanceSpy = window.sandbox.spy();
+    const onNewContextInstanceSpy = env.sandbox.spy();
     window.onNewContextInstance = (ctx) => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(
       window,
@@ -167,7 +167,7 @@ describe('iframe-transport-client', () => {
       'my_creative',
       'my_vendor'
     );
-    const listener = window.sandbox.spy();
+    const listener = env.sandbox.spy();
     ctx.onAnalyticsEvent(listener);
     const event = 'Something important happened';
     ctx.dispatch(event);
@@ -177,7 +177,7 @@ describe('iframe-transport-client', () => {
   });
 
   it('sends response', () => {
-    const onNewContextInstanceSpy = window.sandbox.spy();
+    const onNewContextInstanceSpy = env.sandbox.spy();
     window.onNewContextInstance = (ctx) => onNewContextInstanceSpy(ctx);
     // This const exists solely to avoid triggering a false positive on the
     // presubmit rule that says you can't call stub() on a cross-domain iframe.
@@ -189,7 +189,7 @@ describe('iframe-transport-client', () => {
       'my_vendor'
     );
     const response = {foo: 'bar', answer: '42'};
-    window.sandbox.stub(imc, 'sendMessage').callsFake((type, opt_payload) => {
+    env.sandbox.stub(imc, 'sendMessage').callsFake((type, opt_payload) => {
       expect(type).to.equal(MessageType.IFRAME_TRANSPORT_RESPONSE);
       expect(opt_payload).to.not.be.null;
       expect(opt_payload.creativeId).to.equal('my_creative');

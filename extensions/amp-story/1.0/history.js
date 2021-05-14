@@ -16,7 +16,7 @@
 
 import {dict} from '../../../src/core/types/object';
 import {getState} from '../../../src/history';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 
 const EXPIRATION_DURATION_MILLIS = 10 * 60 * 1000; // 10 Minutes
 const CREATION_TIME = 'time';
@@ -68,8 +68,9 @@ export function getHistoryState(win, stateName) {
     state = getLocalStorageState(win);
   }
   if (state) {
-    return /** @type {string|boolean|Array<string>|null} */ (state[stateName] ||
-      null);
+    return /** @type {string|boolean|Array<string>|null} */ (
+      state[stateName] || null
+    );
   }
   return null;
 }

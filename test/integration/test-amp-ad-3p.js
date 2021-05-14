@@ -31,7 +31,7 @@ function createFixture() {
   );
 }
 
-describe('amp-ad 3P', () => {
+describes.sandboxed('amp-ad 3P', {}, () => {
   let fixture;
 
   beforeEach(() => {
@@ -178,9 +178,8 @@ describe('amp-ad 3P', () => {
       .then(() => {
         // The userActivation feature is known to be available on Chrome 74+
         if (platform.isChrome() && platform.getMajorVersion() >= 74) {
-          const event = fixture.messages.getFirstMessageEventOfType(
-            'embed-size'
-          );
+          const event =
+            fixture.messages.getFirstMessageEventOfType('embed-size');
           expect(event.userActivation).to.be.ok;
           expect(event.userActivation.isActive).to.be.a('boolean');
         }

@@ -34,7 +34,7 @@ const {
 } = require('../common/ci');
 const {log} = require('../common/logging');
 
-const {cyan, green, red, yellow} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('../common/colors');
 
 const REPORTING_API_URL = 'https://amp-test-cases.appspot.com/report';
 
@@ -120,7 +120,7 @@ async function sendCiKarmaReport(testType) {
       'failed to report results of type',
       cyan(testType),
       ': \n',
-      yellow(await response.text())
+      yellow(/** @type {string} */ (await response.text()))
     );
   }
 }
