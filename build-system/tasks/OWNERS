@@ -9,6 +9,6 @@
     {
       pattern: 'check-types.js',
       owners: [{name: 'ampproject/wg-performance'}]
-    }
+    },
   ],
 }
