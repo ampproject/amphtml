@@ -115,6 +115,12 @@ Adds support for Black Crow AI. You are required to fill out the `site_name` var
 
 Type attribute value: `blueconic`
 
+### Blue Triangle
+
+Type attribute value: `bluetriangle`
+
+Adds support for blue Triangle. More details can be found at [help.bluetriangle.com](https://help.bluetriangle.com/hc/en-us/articles/1500006133061).
+
 ### Browsi
 
 Type attribute value: `browsi`
