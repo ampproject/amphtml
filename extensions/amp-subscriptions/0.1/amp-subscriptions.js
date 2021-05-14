@@ -38,13 +38,13 @@ import {SubscriptionPlatform as SubscriptionPlatformInterface} from './subscript
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isStoryDocument} from '../../../src/utils/story';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /** @const */
 const TAG = 'amp-subscriptions';

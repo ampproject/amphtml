@@ -391,7 +391,7 @@ requirement: {
   allowlist: 'ads/google/ima/ima-video.js'
   allowlist: 'ads/vendors/zen.js'
   allowlist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
-  allowlist: 'src/json.js' # Where parseJson itself is implemented.
+  allowlist: 'src/core/types/object/json.js' # Where parseJson itself is implemented.
   allowlist_regexp: '.*\\.jss\\.js'
 }
 

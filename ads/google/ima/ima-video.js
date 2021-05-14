@@ -22,7 +22,7 @@ import {htmlFor, htmlRefs, svgFor} from '../../../src/static-template';
 import {isArray, isObject} from '../../../src/core/types';
 import {loadScript} from '../../../3p/3p';
 import {throttle} from '../../../src/core/types/function';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 // Source for this constant is css/amp-ima-video-iframe.css
 import {cssText} from '../../../build/amp-ima-video-iframe.css';
 
