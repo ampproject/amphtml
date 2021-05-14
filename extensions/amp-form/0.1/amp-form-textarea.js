@@ -249,9 +249,9 @@ function maybeRemoveResizeBehavior(element, startHeight, endHeight) {
  */
 export function maybeResizeTextarea(element) {
   const mutator = Services.mutatorForDoc(element);
-  const win = /** @type {!Window} */ (devAssert(
-    element.ownerDocument.defaultView
-  ));
+  const win = /** @type {!Window} */ (
+    devAssert(element.ownerDocument.defaultView)
+  );
 
   let offset = 0;
   let scrollHeight = 0;

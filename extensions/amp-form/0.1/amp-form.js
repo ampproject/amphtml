@@ -53,7 +53,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {
   formOrNullForElement,
   getFormAsObject,
@@ -1407,8 +1407,9 @@ export class AmpForm {
     const queryParams = parseQueryString(this.win_.location.search);
     Object.keys(queryParams).forEach((key) => {
       // Typecast since Closure is missing NodeList union type in HTMLFormElement.elements.
-      const formControls = /** @type {(!Element|!NodeList)} */ (this.form_
-        .elements[key]);
+      const formControls = /** @type {(!Element|!NodeList)} */ (
+        this.form_.elements[key]
+      );
       if (!formControls) {
         return;
       }

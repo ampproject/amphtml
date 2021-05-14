@@ -20,7 +20,7 @@ import {CSS} from '../../../build/amp-date-picker-0.1.css';
 import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
 import {DatesList} from './dates-list';
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {FiniteStateMachine} from '../../../src/finite-state-machine';
+import {FiniteStateMachine} from '../../../src/core/data-structures/finite-state-machine';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -40,7 +40,7 @@ import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {once} from '../../../src/core/types/function';
 import {requireExternal} from '../../../src/module';
 
@@ -216,18 +216,18 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.reactRender_ = requireExternal('react-dom').render;
 
     /** @private @const */
-    this.ReactDates_ = /** @type {!JsonObject} */ (requireExternal(
-      'react-dates'
-    ));
+    this.ReactDates_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates')
+    );
 
     /**
      * @private
      * @const
      * @dict
      */
-    this.ReactDatesConstants_ = /** @type {!JsonObject} */ (requireExternal(
-      'react-dates/constants'
-    ));
+    this.ReactDatesConstants_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates/constants')
+    );
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -595,12 +595,8 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setupStateMachine_(initialState) {
     const sm = new FiniteStateMachine(initialState);
-    const {
-      OVERLAY_OPEN_INPUT,
-      OVERLAY_CLOSED,
-      OVERLAY_OPEN_PICKER,
-      STATIC,
-    } = DatePickerState;
+    const {OVERLAY_OPEN_INPUT, OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, STATIC} =
+      DatePickerState;
     const noop = () => {};
     sm.addTransition(STATIC, STATIC, noop);
 
@@ -879,10 +875,9 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setState_(newState) {
     return this.render(
-      /** @type {!JsonObject} */ (Object.assign(
-        /** @type {!Object} */ (this.state_),
-        newState
-      ))
+      /** @type {!JsonObject} */ (
+        Object.assign(/** @type {!Object} */ (this.state_), newState)
+      )
     );
   }
 

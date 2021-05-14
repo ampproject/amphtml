@@ -50,6 +50,15 @@ let JSONArrayDef;
 let JSONValueDef;
 
 /**
+ * @typedef {{
+ *   YOU_MUST_USE: string,
+ *   jsonLiteral: function(),
+ *   TO_MAKE_THIS_TYPE: string,
+ * }}
+ */
+let InternalJsonLiteralTypeDef;
+
+/**
  * Recreates objects with prototype-less copies.
  * @param {!JsonObject} obj
  * @return {!JsonObject}

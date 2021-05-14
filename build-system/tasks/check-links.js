@@ -20,7 +20,7 @@ const markdownLinkCheck = require('markdown-link-check');
 const path = require('path');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {gitDiffAddedNameOnlyMain} = require('../common/git');
-const {green, cyan, red, yellow} = require('kleur/colors');
+const {green, cyan, red, yellow} = require('../common/colors');
 const {linkCheckGlobs} = require('../test-configs/config');
 const {log, logLocalDev} = require('../common/logging');
 
@@ -121,7 +121,8 @@ function checkLinksInFile(file) {
       {pattern: /https:\/\/codepen.*/},
       // GitHub PRs and Issues can be assumed to exist
       {
-        pattern: /https:\/\/github.com\/ampproject\/amphtml\/(pull|issue)\/d+.*/,
+        pattern:
+          /https:\/\/github.com\/ampproject\/amphtml\/(pull|issue)\/d+.*/,
       },
       // Templated links are merely used to generate other markdown files.
       {pattern: /\$\{[a-z]*\}/},

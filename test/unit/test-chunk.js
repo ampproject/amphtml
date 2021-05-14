@@ -24,7 +24,7 @@ import {
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
 
-describe('chunk2', () => {
+describes.sandboxed('chunk2', {}, () => {
   beforeEach(() => {
     activateChunkingForTesting();
   });
@@ -217,9 +217,8 @@ describe('chunk2', () => {
           env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return false;
           });
-          env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
-            15
-          );
+          env.win.requestIdleCallback =
+            resolvingIdleCallbackWithTimeRemaining(15);
           const chunks = chunkInstanceForTesting(env.win.document);
           env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
             throw new Error('No calls expected: executeAsap_');
@@ -252,9 +251,8 @@ describe('chunk2', () => {
           env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return false;
           });
-          env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
-            15
-          );
+          env.win.requestIdleCallback =
+            resolvingIdleCallbackWithTimeRemaining(15);
           const chunks = chunkInstanceForTesting(env.win.document);
           env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
             throw new Error('No calls expected: executeAsap_');
@@ -360,7 +358,7 @@ describe('chunk2', () => {
   );
 });
 
-describe('long tasks', () => {
+describes.sandboxed('long tasks', {}, () => {
   describes.fakeWin(
     'long chunk tasks force a macro task between work',
     {
@@ -482,7 +480,7 @@ describe('long tasks', () => {
   );
 });
 
-describe('isInputPending usage', () => {
+describes.sandboxed('isInputPending usage', {}, () => {
   describes.fakeWin(
     'pending input breaks microtask loop to subsequent macrotask',
     {
@@ -589,14 +587,14 @@ describe('isInputPending usage', () => {
   );
 });
 
-describe('onIdle', () => {
+describes.sandboxed('onIdle', {}, (env) => {
   let win;
   let calls;
   let callbackCalled;
   let clock;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     calls = [];
     callbackCalled = false;
     win = {

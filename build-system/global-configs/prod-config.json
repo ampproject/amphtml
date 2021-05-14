@@ -11,11 +11,11 @@
   "ios-fixed-no-transfer": 0,
   "visibility-trigger-improvements": 1,
   "layout-aspect-ratio-css": 0,
-  "sticky-ad-transition": 1,
   "disable-a4a-non-sd": 1,
   "tcf-post-message-proxy-api": 1,
   "amp-consent-granular-consent": 1,
   "amp-cid-backup": 1,
   "3p-vendor-split": 0.1,
-  "story-ad-placements": 0.01
+  "story-ad-placements": 0.01,
+  "auto-ads-no-insertion-above": 0.2
 }

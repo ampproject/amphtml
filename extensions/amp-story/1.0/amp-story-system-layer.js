@@ -38,7 +38,7 @@ import {
 } from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {renderAsElement} from './simple-template';
@@ -423,9 +423,8 @@ export class SystemLayer {
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
-    this.systemLayerEl_.querySelector(
-      '.i-amphtml-story-share-control'
-    ).href = Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
+    this.systemLayerEl_.querySelector('.i-amphtml-story-share-control').href =
+      Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 

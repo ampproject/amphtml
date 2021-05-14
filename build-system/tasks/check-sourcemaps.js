@@ -17,7 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const {cyan, green, red} = require('kleur/colors');
+const {cyan, green, red} = require('../common/colors');
 const {decode} = require('sourcemap-codec');
 const {execOrDie} = require('../common/exec');
 const {log} = require('../common/logging');
@@ -110,9 +110,9 @@ function checkSourcemapSources(sourcemapJson, map) {
  * Performs a sanity check on the mappings field in the sourcemap file.
  *
  * Today, the first line of amp.js after resolving imports comes from
- * src/polyfills/array-includes.js. (The import chain is src/amp.js -> src/polyfills.js
- * -> src/polyfills/array-includes.js.) This sequence changes rarely, so we can
- * use it as a sentinel value. Here is the process:
+ * src/polyfills/array-includes.js. (The import chain is src/amp.js ->
+ * src/polyfills/index.js -> src/polyfills/array-includes.js.) This sequence
+ * changes rarely, so we can use it as a sentinel value. Here is the process:
  *
  * 1. Decode the 'mappings' field into a 3d array using 'sourcemap-codec'.
  * 2. Extract the mapping for the first line of code in minified v0.js.

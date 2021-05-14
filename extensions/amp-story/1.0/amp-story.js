@@ -97,7 +97,7 @@ import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
 import {endsWith} from '../../../src/core/types/string';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {findIndex, lastItem, toArray} from '../../../src/core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
@@ -106,7 +106,7 @@ import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-open-page-attachment';
+import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {parseQueryString} from '../../../src/url';
 import {
   removeAttributeInMutate,
@@ -894,9 +894,9 @@ export class AmpStory extends AMP.BaseElement {
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, (gesture) => {
       const {deltaX, deltaY} = gesture.data;
-      const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-        StateProperty.INTERACTIVE_COMPONENT_STATE
-      ));
+      const embedComponent = /** @type {InteractiveComponentDef} */ (
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+      );
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (
         this.storeService_.get(StateProperty.BOOKEND_STATE) ||
@@ -1133,10 +1133,9 @@ export class AmpStory extends AMP.BaseElement {
       return maybePageId;
     }
 
-    const pages = /**  @type {!Array} */ (getHistoryState(
-      this.win,
-      HistoryState.NAVIGATION_PATH
-    ) || []);
+    const pages = /**  @type {!Array} */ (
+      getHistoryState(this.win, HistoryState.NAVIGATION_PATH) || []
+    );
     const historyPage = lastItem(pages);
     if (historyPage && this.isActualPage_(historyPage)) {
       return historyPage;
@@ -1197,6 +1196,9 @@ export class AmpStory extends AMP.BaseElement {
     );
     this.viewerMessagingHandler_ &&
       this.viewerMessagingHandler_.send('storyContentLoaded', dict({}));
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.STORY_CONTENT_LOADED
+    );
     this.signals().signal(CommonSignals.INI_LOAD);
     this.mutateElement(() => {
       this.element.classList.add(STORY_LOADED_CLASS_NAME);
@@ -1268,7 +1270,8 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      this.areAccessAuthorizationsCompleted_ = accessService.areFirstAuthorizationsCompleted();
+      this.areAccessAuthorizationsCompleted_ =
+        accessService.areFirstAuthorizationsCompleted();
       accessService.onApplyAuthorizations(() =>
         this.onAccessApplyAuthorizations_()
       );
@@ -1609,9 +1612,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateNavigationPath_(targetPageId, direction) {
-    const navigationPath = /** @type {!Array<string>} */ (this.storeService_.get(
-      StateProperty.NAVIGATION_PATH
-    ));
+    const navigationPath = /** @type {!Array<string>} */ (
+      this.storeService_.get(StateProperty.NAVIGATION_PATH)
+    );
 
     if (direction === NavigationDirection.PREVIOUS) {
       navigationPath.pop();
@@ -2348,17 +2351,18 @@ export class AmpStory extends AMP.BaseElement {
       .signals()
       .whenSignal(CommonSignals.LOAD_END)
       .then(() => {
-        backgroundAudioEl = /** @type {!HTMLMediaElement} */ (backgroundAudioEl);
+        backgroundAudioEl = /** @type {!HTMLMediaElement} */ (
+          backgroundAudioEl
+        );
         this.mediaPool_.register(backgroundAudioEl);
         return this.mediaPool_.preload(backgroundAudioEl);
       })
       .then(() => {
-        this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */ (childElement(
-          this.element,
-          (el) => {
+        this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */ (
+          childElement(this.element, (el) => {
             return el.tagName.toLowerCase() === 'audio';
-          }
-        ));
+          })
+        );
       });
   }
 
@@ -2550,8 +2554,8 @@ export class AmpStory extends AMP.BaseElement {
     let audioMediaElementsCount = this.element.querySelectorAll(
       'amp-audio, [background-audio]'
     ).length;
-    const videoMediaElementsCount = this.element.querySelectorAll('amp-video')
-      .length;
+    const videoMediaElementsCount =
+      this.element.querySelectorAll('amp-video').length;
 
     // The root element (amp-story) might have a background-audio as well.
     if (this.element.hasAttribute('background-audio')) {
@@ -2645,9 +2649,8 @@ export class AmpStory extends AMP.BaseElement {
     const containsMediaElementWithAudio = !!this.element.querySelector(
       'amp-audio, amp-video:not([noaudio]), [background-audio]'
     );
-    const storyHasBackgroundAudio = this.element.hasAttribute(
-      'background-audio'
-    );
+    const storyHasBackgroundAudio =
+      this.element.hasAttribute('background-audio');
 
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_AUDIO,
@@ -2669,9 +2672,8 @@ export class AmpStory extends AMP.BaseElement {
       'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
     );
 
-    const storyHasBackgroundAudio = this.element.hasAttribute(
-      'background-audio'
-    );
+    const storyHasBackgroundAudio =
+      this.element.hasAttribute('background-audio');
 
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_PLAYBACK_UI,
@@ -2982,5 +2984,6 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
+  AMP.registerElement('amp-story-page-outlink', AmpStoryPageAttachment); // Shares codepath with amp-story-page-attachment.
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

@@ -41,7 +41,7 @@ export function maybeValidate(win) {
   }
 
   if (validator) {
-    loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
+    loadScript(win.document, `${urls.cdn}/v0/validator_wasm.js`).then(() => {
       /* global amp: false */
       amp.validator.validateUrlAndLog(filename, win.document);
     });
@@ -58,9 +58,9 @@ export function maybeValidate(win) {
  * @return {!Promise}
  */
 export function loadScript(doc, url) {
-  const script = /** @type {!HTMLScriptElement} */ (doc.createElement(
-    'script'
-  ));
+  const script = /** @type {!HTMLScriptElement} */ (
+    doc.createElement('script')
+  );
   script.src = url;
 
   // Propagate nonce to all generated script tags.

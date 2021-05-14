@@ -47,8 +47,8 @@ import {
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {ResponsiveState} from './responsive-state';
-import {STICKY_AD_TRANSITION_EXP} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
+import {StoryAdAutoAdvance} from '../../../src/experiments/story-ad-auto-advance';
 import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 import {
   addAmpExperimentIdToElement,
@@ -69,7 +69,7 @@ import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/core/types/string';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Decode} from '../../../src/core/types/string/bytes';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -231,24 +231,17 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @visibleForTesting
    */
   divertExperiments() {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: STICKY_AD_TRANSITION_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          STICKY_AD_TRANSITION_EXP.control,
-          STICKY_AD_TRANSITION_EXP.experiment,
-        ],
-      },
-      {
-        experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          ADS_INITIAL_INTERSECTION_EXP.control,
-          ADS_INITIAL_INTERSECTION_EXP.experiment,
-        ],
-      },
-    ]);
+    const experimentInfoList =
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+        {
+          experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
+          isTrafficEligible: () => true,
+          branches: [
+            ADS_INITIAL_INTERSECTION_EXP.control,
+            ADS_INITIAL_INTERSECTION_EXP.experiment,
+          ],
+        },
+      ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win,
       experimentInfoList
@@ -272,6 +265,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     );
     if (storyAdPlacementsExpId) {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
+    }
+
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win,
+      StoryAdAutoAdvance.ID
+    );
+    if (autoAdvanceExpBranch) {
+      addExperimentIdToElement(autoAdvanceExpBranch, this.element);
     }
   }
 

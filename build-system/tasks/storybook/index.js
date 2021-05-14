@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const path = require('path');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
-const {cyan} = require('kleur/colors');
+const {cyan} = require('../../common/colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {exec, execScriptAsync} = require('../../common/exec');
 const {getBaseUrl} = require('../pr-deploy-bot-utils');

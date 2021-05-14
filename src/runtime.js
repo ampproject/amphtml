@@ -40,9 +40,9 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {reportErrorForWin} from './error-reporting';
-import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
-import {scheduleUpgradeIfNeeded as scheduleResObUpgradeIfNeeded} from './polyfillstub/resize-observer-stub';
 import {setStyle} from './style';
+import {shouldLoadPolyfill as shouldLoadInObPolyfill} from './polyfills/stubs/intersection-observer-stub';
+import {shouldLoadPolyfill as shouldLoadResObPolyfill} from './polyfills/stubs/resize-observer-stub';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 import {waitForBodyOpenPromise} from './dom';
@@ -250,9 +250,10 @@ function adoptShared(global, callback) {
   // If the closure passed to maybePumpEarlyFrame didn't execute
   // immediately we need to keep pushing onto preregisteredExtensions
   if (!global.AMP.push) {
-    global.AMP.push = /** @type {function((ExtensionPayload|function(!Object, !Object): ?))} */ (preregisteredExtensions.push.bind(
-      preregisteredExtensions
-    ));
+    global.AMP.push =
+      /** @type {function((ExtensionPayload|function(!Object, !Object): ?))} */ (
+        preregisteredExtensions.push.bind(preregisteredExtensions)
+      );
   }
 
   // For iOS we need to set `cursor:pointer` to ensure that click events are
@@ -262,8 +263,13 @@ function adoptShared(global, callback) {
   }
 
   // Some deferred polyfills.
-  scheduleInObUpgradeIfNeeded(global);
-  scheduleResObUpgradeIfNeeded(global);
+  const extensionsFor = Services.extensionsFor(global);
+  if (shouldLoadResObPolyfill(global)) {
+    extensionsFor.preloadExtension('amp-resize-observer-polyfill');
+  }
+  if (shouldLoadInObPolyfill(global)) {
+    extensionsFor.preloadExtension('amp-intersection-observer-polyfill');
+  }
 
   return iniPromise;
 }
@@ -409,9 +415,8 @@ export function adoptShadowMode(global) {
      * @param {!Object<string, string>=} opt_initParams
      * @return {!Object}
      */
-    global.AMP.attachShadowDocAsStream = manager.attachShadowDocAsStream.bind(
-      manager
-    );
+    global.AMP.attachShadowDocAsStream =
+      manager.attachShadowDocAsStream.bind(manager);
 
     return waitForBodyOpenPromise(global.document);
   });

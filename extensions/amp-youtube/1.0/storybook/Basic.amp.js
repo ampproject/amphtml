@@ -15,13 +15,13 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers';
 import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-youtube-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
   parameters: {
     extensions: [
       {name: 'amp-youtube', version: '1.0'},
@@ -31,7 +31,7 @@ export default {
   },
 };
 
-export const Default = () => {
+export const Default = ({id}) => {
   const videoid = text('videoid', 'IAvf-rkzNck');
   const layout = text('layout', 'responsive');
   const autoplay = boolean('autoplay', false);
@@ -41,6 +41,7 @@ export const Default = () => {
   const credentials = text('credentials', 'include');
   return (
     <amp-youtube
+      id={id}
       width={width}
       height={height}
       data-videoid={videoid}
@@ -49,6 +50,15 @@ export const Default = () => {
       loop={loop}
       credentials={credentials}
     ></amp-youtube>
+  );
+};
+
+export const Actions = () => {
+  const id = 'my-amp-youtube';
+  return (
+    <VideoElementWithActions id={id}>
+      <Default id={id} />
+    </VideoElementWithActions>
   );
 };
 

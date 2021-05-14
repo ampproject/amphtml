@@ -20,7 +20,7 @@ import {
   resetStubsForTesting,
   shouldLoadPolyfill,
   upgradePolyfill,
-} from '../../../src/polyfillstub/resize-observer-stub';
+} from '../../../src/polyfills/stubs/resize-observer-stub';
 import {
   install,
   installForChildWin,
@@ -292,7 +292,7 @@ describes.fakeWin('ResizeObserverStub', {}, (env) => {
       ro.unobserve(element1);
       const native = upgrade(ro);
       expect(native.observe).to.not.be.called;
-      expect(ro.elements_).to.be.null;
+      expect(ro.elements_.length).to.equal(0);
     });
 
     it('should re-observe previously observed elements', () => {
@@ -303,7 +303,7 @@ describes.fakeWin('ResizeObserverStub', {}, (env) => {
       expect(native.observe).to.be.calledTwice;
       expect(native.observe).to.be.calledWith(element1);
       expect(native.observe).to.be.calledWith(element2);
-      expect(ro.elements_).to.be.null;
+      expect(ro.elements_.length).to.equal(0);
     });
 
     it('should observe new elements only on native', () => {

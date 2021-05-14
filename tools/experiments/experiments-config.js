@@ -212,13 +212,17 @@ export const EXPERIMENTS = [
   },
   {
     id: 'flexible-bitrate',
-    name:
-      'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
+    name: 'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
     spec: 'https://github.com/ampproject/amphtml/projects/111',
   },
   {
     id: 'story-ad-placements',
     name: 'Optimization of story ad placements',
     spec: 'https://github.com/ampproject/amphtml/issues/33147',
+  },
+  {
+    id: 'story-ad-auto-advance',
+    name: 'Auto advancing story ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/33969',
   },
 ];

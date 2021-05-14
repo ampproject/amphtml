@@ -22,7 +22,6 @@ import {parseQueryString_} from './url-parse-query-string';
  *   localDev: boolean,
  *   development: boolean,
  *   minified: boolean,
- *   lite: boolean,
  *   test: boolean,
  *   examiner: boolean,
  *   log: (string|undefined),
@@ -72,15 +71,13 @@ function getMode_(win) {
   const IS_MINIFIED = false;
 
   const runningTests =
-    IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win.__karma__);
+    IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
   const isLocalDev = IS_FORTESTING && (!!AMP_CONFIG.localDev || runningTests);
   const hashQuery = parseQueryString_(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
     win.location['originalHash'] || win.location.hash
   );
-
-  const searchQuery = parseQueryString_(win.location.search);
 
   if (!rtvVersion) {
     rtvVersion = getRtvVersion(win);
@@ -106,9 +103,6 @@ function getMode_(win) {
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
     minified: IS_MINIFIED,
-    // Whether document is in an amp-lite viewer. It signal that the user
-    // would prefer to use less bandwidth.
-    lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
     log: hashQuery['log'],
     version: internalRuntimeVersion(),

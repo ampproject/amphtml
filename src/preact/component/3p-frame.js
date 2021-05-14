@@ -27,11 +27,19 @@ import {
   getOptionalSandboxFlags,
   getRequiredSandboxFlags,
 } from '../../core/3p-frame';
+import {includes} from '../../core/types/string';
 import {parseUrlDeprecated} from '../../url';
 import {sequentialIdGenerator} from '../../utils/id-generator';
-import {useLayoutEffect, useMemo, useRef, useState} from '../../../src/preact';
+import {
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from '../../../src/preact';
 
-/** @type {!Object<string,function>} 3p frames for that type. */
+/** @type {!Object<string,function():void>} 3p frames for that type. */
 export const countGenerators = {};
 
 /** @enum {string} */
@@ -43,7 +51,7 @@ export const MessageType = {
 // Block synchronous XHR in ad. These are very rare, but super bad for UX
 // as they block the UI thread for the arbitrary amount of time until the
 // request completes.
-const BLOCK_SYNC_XHR = "sync-xhr 'none';";
+const BLOCK_SYNC_XHR = "sync-xhr 'none'";
 
 // TODO(wg-bento): UA check for required flags without iframe element
 const DEFAULT_SANDBOX =
@@ -60,8 +68,13 @@ const DEFAULT_SANDBOX =
  */
 function ProxyIframeEmbedWithRef(
   {
+    allow = BLOCK_SYNC_XHR,
+    bootstrap,
+    contextOptions,
+    excludeSandbox,
     name: nameProp,
     messageHandler,
+    options,
     sandbox = DEFAULT_SANDBOX,
     src: srcProp,
     type,
@@ -70,7 +83,14 @@ function ProxyIframeEmbedWithRef(
   },
   ref
 ) {
+  if (!includes(allow, BLOCK_SYNC_XHR)) {
+    throw new Error(
+      `'allow' prop must contain "${BLOCK_SYNC_XHR}". Found "${allow}".`
+    );
+  }
+
   const contentRef = useRef(null);
+  const iframeRef = useRef(null);
   const count = useMemo(() => {
     if (!countGenerators[type]) {
       countGenerators[type] = sequentialIdGenerator();
@@ -90,21 +110,28 @@ function ProxyIframeEmbedWithRef(
     if (!win) {
       return;
     }
-    const attrs = dict({
-      'title': title,
-      'type': type,
-      '_context': dict({
+    const context = Object.assign(
+      dict({
         'location': {
           'href': win.location.href,
         },
         'sentinel': generateSentinel(win),
       }),
-    });
+      contextOptions
+    );
+    const attrs = Object.assign(
+      dict({
+        'title': title,
+        'type': type,
+        '_context': context,
+      }),
+      options
+    );
     setNameAndSrc({
       name: JSON.stringify(
         dict({
           'host': parseUrlDeprecated(src).hostname,
-          'bootstrap': getBootstrapUrl(type, win),
+          'bootstrap': bootstrap ?? getBootstrapUrl(type, win),
           'type': type,
           // "name" must be unique across iframes, so we add a count.
           // See: https://github.com/ampproject/amphtml/pull/2955
@@ -114,17 +141,50 @@ function ProxyIframeEmbedWithRef(
       ),
       src,
     });
-  }, [count, nameProp, srcProp, title, type]);
+  }, [
+    bootstrap,
+    contextOptions,
+    count,
+    nameProp,
+    options,
+    srcProp,
+    title,
+    type,
+  ]);
+
+  useEffect(() => {
+    const iframe = iframeRef.current?.node;
+    if (!iframe) {
+      return;
+    }
+    const parent = iframe.parentNode;
+    parent.insertBefore(iframe, iframe.nextSibling);
+  }, [name]);
+
+  // Component API: IframeEmbedDef.Api.
+  useImperativeHandle(
+    ref,
+    () => ({
+      // Standard Bento
+      get readyState() {
+        return iframeRef.current?.readyState;
+      },
+      get node() {
+        return iframeRef.current?.node;
+      },
+    }),
+    []
+  );
 
   return (
     <IframeEmbed
-      allow={BLOCK_SYNC_XHR}
+      allow={allow}
       contentRef={contentRef}
       messageHandler={messageHandler}
       name={name}
-      ref={ref}
+      ref={iframeRef}
       ready={!!name}
-      sandbox={sandbox}
+      sandbox={excludeSandbox ? undefined : sandbox}
       src={src}
       title={title}
       {...rest}

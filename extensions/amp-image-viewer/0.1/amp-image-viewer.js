@@ -30,7 +30,7 @@ import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
-import {bezierCurve} from '../../../src/curve';
+import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
@@ -773,12 +773,9 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
-    return /** @type {!Promise|undefined} */ (this.set_(
-      newScale,
-      newPosX,
-      newPosY,
-      animate
-    ));
+    return /** @type {!Promise|undefined} */ (
+      this.set_(newScale, newPosX, newPosY, animate)
+    );
   }
 
   /**
