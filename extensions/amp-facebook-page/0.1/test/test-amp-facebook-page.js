@@ -252,7 +252,6 @@ describes.realWin(
           href,
           width: 200,
           height: 200,
-          embedAs: 'page',
         });
         const container = doc.body.getElementsByClassName('fb-page')[0];
         expect(container).not.to.be.undefined;
