@@ -119,7 +119,6 @@ const TYPE_CHECK_TARGETS = {
   },
   'src-examiner': {
     srcGlobs: ['src/examiner/**/*.js'],
-    warningLevel: 'QUIET',
   },
   'src-experiments': {
     srcGlobs: ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
