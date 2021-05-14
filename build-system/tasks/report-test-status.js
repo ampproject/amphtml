@@ -136,7 +136,7 @@ async function postReport(type, action) {
           'Content-Type': 'application/json',
         },
       });
-      const body = await response.text();
+      const body = /** @type {string} */ (await response.text());
 
       log('Reported', cyan(`${type}/${action}`), 'to GitHub');
       if (body.length > 0) {
@@ -211,7 +211,11 @@ async function reportAllExpectedTests() {
  * Callback to the Karma.Server on('run_complete') event for simple test types.
  * Optionally takes an object containing test results if they were run.
  *
- * @param {?Karma.TestResults} results
+ * @param {?{
+ *   error: string|number,
+ *   failed: string|number,
+ *   success: string|number,
+ * }} results
  */
 async function reportTestRunComplete(results) {
   if (!results || results.error) {
