@@ -120,7 +120,7 @@ async function sendCiKarmaReport(testType) {
       'failed to report results of type',
       cyan(testType),
       ': \n',
-      yellow(await response.text())
+      yellow(/** @type {string} */ (await response.text()))
     );
   }
 }

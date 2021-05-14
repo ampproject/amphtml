@@ -142,6 +142,7 @@ function maybePrintArgvMessages() {
     log(green('Running tests against unminified code.'));
   }
   Object.keys(argv).forEach((arg) => {
+    /** @type {string} */
     const message = argvMessages[arg];
     if (message) {
       log(yellow(`--${arg}:`), green(message));

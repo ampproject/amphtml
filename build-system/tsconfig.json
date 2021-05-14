@@ -53,6 +53,6 @@
     "server/typescript-compile.js",
     "test-configs/dep-check-config.js",
     "tasks/e2e/helper.js",
-    "tasks/get-zindex/test-1.js"
+    "tasks/get-zindex/*"
   ]
 }

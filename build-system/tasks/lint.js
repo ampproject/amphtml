@@ -28,6 +28,7 @@ const {ESLint} = require('eslint');
 const {getFilesToCheck} = require('../common/utils');
 const {lintGlobs} = require('../test-configs/config');
 
+/** @type {ESLint.Options} */
 const options = {
   fix: argv.fix,
   reportUnusedDisableDirectives: 'error',
