@@ -22,13 +22,16 @@ import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user, userAssert} from '../../../src/log';
+import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
+import {listen, loadPromise} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {setStyles} from '../../../src/style';
+import {setStyle, setStyles} from '../../../src/style';
+
+const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
 
 export class AmpImageSlider extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -42,10 +45,11 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.container_ = null;
 
     /** @private {?Element} */
-    this.leftAmpImage_ = null;
-
+    this.leftImage_ = null;
     /** @private {?Element} */
-    this.rightAmpImage_ = null;
+    this.rightImage_ = null;
+    /** @private {boolean} */
+    this.containsAMPImages_ = false;
 
     /** @private {?Element} */
     this.leftLabelWrapper_ = null;
@@ -59,15 +63,11 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.leftMask_ = null;
-
     /** @private {?Element} */
     this.rightMask_ = null;
 
     /** @private {?Element} */
     this.bar_ = null;
-
-    /** @private {?Element} */
-    this.barStick_ = null;
 
     /** @private {?Element} */
     this.hintLeftArrow_ = null;
@@ -112,22 +112,22 @@ export class AmpImageSlider extends AMP.BaseElement {
   buildCallback() {
     const children = this.getRealChildren();
 
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i];
-      if (child.tagName.toLowerCase() === 'amp-img') {
+    for (const child of children) {
+      if (VALID_IMAGE_TAGNAMES.has(child.tagName)) {
         // First encountered = left image
         // Second encountered = right image
-        if (!this.leftAmpImage_) {
-          this.leftAmpImage_ = child;
-        } else if (!this.rightAmpImage_) {
-          this.rightAmpImage_ = child;
+        if (!this.leftImage_) {
+          this.leftImage_ = child;
+        } else if (!this.rightImage_) {
+          this.rightImage_ = child;
         } else {
           user().error(
             'AMP-IMAGE-SLIDER',
-            'Should not contain more than 2 <amp-img>s.'
+            'Should not contain more than 2 images.'
           );
+          break;
         }
-      } else if (child.tagName.toLowerCase() === 'div') {
+      } else if (child.tagName === 'DIV') {
         if (child.hasAttribute('first')) {
           this.leftLabel_ = child;
         } else if (child.hasAttribute('second')) {
@@ -138,23 +138,31 @@ export class AmpImageSlider extends AMP.BaseElement {
             'Should not contain <div>s without ' +
               '"first" or "second" attributes.'
           );
+          break;
         }
       }
     }
 
     userAssert(
-      this.leftAmpImage_ && this.rightAmpImage_,
-      '2 <amp-img>s must be provided for comparison'
+      this.leftImage_ && this.rightImage_,
+      '2 images must be provided for comparison'
     );
 
     // see comment in layoutCallback
     // When layers not enabled
     const owners = Services.ownersForDoc(this.element);
-    owners.setOwner(dev().assertElement(this.leftAmpImage_), this.element);
-    owners.setOwner(dev().assertElement(this.rightAmpImage_), this.element);
+    if (this.leftImage_.tagName === 'AMP-IMG') {
+      owners.setOwner(dev().assertElement(this.leftImage_), this.element);
+      this.containsAMPImages_ = true;
+    }
+    if (this.rightImage_.tagName === 'AMP-IMG') {
+      owners.setOwner(dev().assertElement(this.rightImage_), this.element);
+      this.containsAMPImages_ = true;
+    }
 
-    this.container_ = this.doc_.createElement('div');
-    this.container_.classList.add('i-amphtml-image-slider-container');
+    this.container_ = htmlFor(
+      this.doc_
+    )`<div class='i-amphtml-image-slider-container'></div>`;
 
     this.buildImageWrappers_();
     this.buildBar_();
@@ -187,8 +195,8 @@ export class AmpImageSlider extends AMP.BaseElement {
     return this.mutateElement(() => {
       this.element.appendChild(this.container_);
       // Ensure ampdoc exists on the amp-imgs
-      this.leftMask_.appendChild(this.leftAmpImage_);
-      this.rightMask_.appendChild(this.rightAmpImage_);
+      this.leftMask_.appendChild(this.leftImage_);
+      this.rightMask_.appendChild(this.rightImage_);
       // Set initial positioning
       if (initialPositionString) {
         const initialPosition = Number(initialPositionString);
@@ -196,9 +204,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       }
       // Prevent Edge horizontal swipe for go back/forward
       if (this.isEdge_) {
-        setStyles(this.element, {
-          'touch-action': 'pan-y', // allow browser only default y behavior
-        });
+        setStyle(this.element, 'touch-action', 'pan-y'); // allow browser only default y behavior
       }
     });
   }
@@ -226,7 +232,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.rightMask_.classList.add('i-amphtml-image-slider-right-mask');
     this.rightMask_.classList.add('i-amphtml-image-slider-push-right');
-    this.rightAmpImage_.classList.add('i-amphtml-image-slider-push-left');
+    this.rightImage_.classList.add('i-amphtml-image-slider-push-left');
     if (this.rightLabel_) {
       this.rightLabelWrapper_ = this.doc_.createElement('div');
       this.rightLabelWrapper_.classList.add(
@@ -243,14 +249,11 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   buildBar_() {
-    this.bar_ = this.doc_.createElement('div');
-    this.barStick_ = this.doc_.createElement('div');
-    this.bar_.appendChild(this.barStick_);
-
-    this.bar_.classList.add('i-amphtml-image-slider-bar');
-    this.bar_.classList.add('i-amphtml-image-slider-push-right');
-    this.barStick_.classList.add('i-amphtml-image-slider-bar-stick');
-    this.barStick_.classList.add('i-amphtml-image-slider-push-left');
+    this.bar_ = htmlFor(
+      this.doc_
+    )`<div class='i-amphtml-image-slider-bar i-amphtml-image-slider-push-right'>
+      <div class='i-amphtml-image-slider-bar-stick i-amphtml-image-slider-push-left'></div>
+    </div>`;
 
     this.container_.appendChild(this.bar_);
   }
@@ -295,8 +298,13 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   checkARIA_() {
-    const leftAmpImage = dev().assertElement(this.leftAmpImage_);
-    const rightAmpImage = dev().assertElement(this.rightAmpImage_);
+    if (!this.containsAMPImages_) {
+      return;
+    }
+
+    // Only if there are AMP-IMG Elements in use should this pathway execute.
+    const leftAmpImage = dev().assertElement(this.leftImage_);
+    const rightAmpImage = dev().assertElement(this.rightImage_);
     leftAmpImage
       .signals()
       .whenSignal(CommonSignals.LOAD_END)
@@ -666,7 +674,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.updateTranslateX_(this.bar_, percentFromLeft);
     this.updateTranslateX_(this.rightMask_, percentFromLeft);
-    this.updateTranslateX_(this.rightAmpImage_, -percentFromLeft);
+    this.updateTranslateX_(this.rightImage_, -percentFromLeft);
     const adjustedDeltaFromLeft = percentFromLeft - 0.5;
     this.updateTranslateX_(this.hintLeftBody_, adjustedDeltaFromLeft);
     this.updateTranslateX_(this.hintRightBody_, adjustedDeltaFromLeft);
@@ -708,45 +716,44 @@ export class AmpImageSlider extends AMP.BaseElement {
     observeWithSharedInOb(this.element, (inViewport) =>
       this.viewportCallback_(inViewport)
     );
-    // Extensions such as amp-carousel still uses .setOwner()
-    // This would break the rendering of the images as carousel
-    // will call .scheduleLayout on the slider but not the contents
-    // while Resources would found amp-imgs' parent has owner and
-    // refuse to run the normal scheduling in discoverWork_.
-    // SIMPLER SOL: simply always call scheduleLayout no matter what
-    const owners = Services.ownersForDoc(this.element);
-    owners.scheduleLayout(
-      this.element,
-      dev().assertElement(this.leftAmpImage_)
-    );
-    owners.scheduleLayout(
-      this.element,
-      dev().assertElement(this.rightAmpImage_)
-    );
+
+    const appendHints = () => {
+      this.container_.appendChild(this.hintLeftBody_);
+      this.container_.appendChild(this.hintRightBody_);
+    };
 
     this.registerEvents_();
 
+    if (this.containsAMPImages_) {
+      // Extensions such as amp-carousel still uses .setOwner()
+      // This would break the rendering of the images as carousel
+      // will call .scheduleLayout on the slider but not the contents
+      // while Resources would found amp-imgs' parent has owner and
+      // refuse to run the normal scheduling in discoverWork_.
+      // SIMPLER SOL: simply always call scheduleLayout no matter what
+      const owners = Services.ownersForDoc(this.element);
+      owners.scheduleLayout(this.element, dev().assertElement(this.leftImage_));
+      owners.scheduleLayout(
+        this.element,
+        dev().assertElement(this.rightImage_)
+      );
+
+      return Promise.all([
+        dev()
+          .assertElement(this.leftImage_)
+          .signals()
+          .whenSignal(CommonSignals.LOAD_END),
+        dev()
+          .assertElement(this.rightImage_)
+          .signals()
+          .whenSignal(CommonSignals.LOAD_END),
+      ]).then(appendHints, appendHints);
+    }
+
     return Promise.all([
-      dev()
-        .assertElement(this.leftAmpImage_)
-        .signals()
-        .whenSignal(CommonSignals.LOAD_END),
-      dev()
-        .assertElement(this.rightAmpImage_)
-        .signals()
-        .whenSignal(CommonSignals.LOAD_END),
-    ]).then(
-      () => {
-        // Notice: hints are attached after amp-img finished loading
-        this.container_.appendChild(this.hintLeftBody_);
-        this.container_.appendChild(this.hintRightBody_);
-      },
-      () => {
-        // Do the same thing when signal rejects
-        this.container_.appendChild(this.hintLeftBody_);
-        this.container_.appendChild(this.hintRightBody_);
-      }
-    );
+      loadPromise(this.leftImage_),
+      loadPromise(this.rightImage_),
+    ]).then(appendHints, appendHints);
   }
 
   /** @override */
