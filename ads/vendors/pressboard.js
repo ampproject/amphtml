@@ -22,7 +22,7 @@ import {loadScript, validateData} from '../../3p/3p';
  */
 export function pressboard(global, data) {
   validateData(data, ['media']);
-  data.baseUrl = 'https://adserver.pressboard.ca';
+  data.baseUrl = 'https://sr.studiostack.com';
   global.pbParams = data;
   loadScript(
     global,

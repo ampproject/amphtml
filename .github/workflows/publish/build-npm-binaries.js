@@ -15,11 +15,14 @@
  */
 
 /**
- * @fileoverview Type externs for assertions.
- * @externs
+ * @fileoverview
+ * Builds npm binaries for specified Bento components.
  */
 
-/**
- * @typedef {function(?, string=, ...*):?|function(?, !Array<*>)}
- */
-let AssertionFunction;
+const [extension] = process.argv.slice(2);
+const {timedExecOrDie} = require('../../../build-system/pr-check/utils');
+const {updatePackages} = require('../../../build-system/common/update-packages');
+
+updatePackages();
+timedExecOrDie(`amp build --extensions=${extension} --core_runtime_only`);
+timedExecOrDie(`amp dist --extensions=${extension} --core_runtime_only`);
