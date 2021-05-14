@@ -126,7 +126,7 @@ async function startServer(
   });
   setServeMode(modeOptions);
 
-  /** @type {GulpConnectOptions} */
+  /** @type {GulpConnectOptionsDef} */
   const options = {
     name: 'AMP Dev Server',
     root: process.cwd(),
