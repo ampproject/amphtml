@@ -807,7 +807,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/js/engine/validator.js',
       'validator/js/webui/webui.js',
       'src/url.js',
-      'src/url-try-decode-uri-component.js',
+      'src/core/types/string/url.js',
       'src/core/types/string/bytes.js',
     ],
   },
@@ -945,16 +945,6 @@ const forbiddenTermsSrcInclusive = {
   '\\.indexOf\\([\'"][^)]+\\)\\s*===?\\s*0\\b': {
     message: 'use startsWith helper in src/core/types/string',
     allowlist: ['build-system/server/app.js'],
-  },
-  '\\.indexOf\\(.*===?.*\\.length':
-    'use endsWith helper in src/core/types/string',
-  '/url-parse-query-string': {
-    message: 'Import parseQueryString from `src/url.js`',
-    allowlist: [
-      'build-system/tasks/check-types.js',
-      'src/mode.js',
-      'src/url.js',
-    ],
   },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
