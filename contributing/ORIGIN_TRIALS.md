@@ -29,5 +29,8 @@ Traditionally, a feature in experimental mode can only be used in development an
 
 Include the following <meta> tag within the <head> tag on each page that uses the Origin Trial experiment:
 
+```html
 <meta name="amp-experiment-token" content="{copy your token here}">
+```
+
 "amp-experiment-token" is the literal string, "amp-experiment-token". Not the token itself (which goes into the content attribute), or the name of the experiment.
