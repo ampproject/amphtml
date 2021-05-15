@@ -350,11 +350,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.win,
       StoryAdAutoAdvance.ID
     );
+    // TODO(ccordry): move to experiment id when viewer is able to share.
+    const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
+      'storyNextUp'
+    );
     if (
       autoAdvanceExpBranch &&
       autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
     ) {
       this.createProgressBar_(AdvanceExpToTime[autoAdvanceExpBranch]);
+    } else if (storyNextUpParam) {
+      this.createProgressBar_(storyNextUpParam);
     }
   }
 
