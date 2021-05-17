@@ -276,16 +276,6 @@ class AmpApesterMedia extends AMP.BaseElement {
     return overflow;
   }
 
-  /**
-   *  @param {Element} iframe
-   *  @param {object} data
-   * */
-  safePostMessageToIframe(iframe, data) {
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow./*OK*/ postMessage(data, '*');
-    }
-  }
-
   /** @override */
   layoutCallback() {
     this.element.classList.add('amp-apester-container');
@@ -333,10 +323,13 @@ class AmpApesterMedia extends AMP.BaseElement {
                   if (campaignData) {
                     const bottomAdOptions = campaignData['bottomAdOptions'];
                     if (bottomAdOptions && bottomAdOptions.enabled) {
-                      this.safePostMessageToIframe(this.iframe_, {
-                        type: HAS_BOTTOM_AD_EVENT,
-                        adHeight: BOTTOM_AD_HEIGHT,
-                      });
+                      this.iframe_.contentWindow./*OK*/ postMessage(
+                        /** @type {JsonObject} */ ({
+                          type: HAS_BOTTOM_AD_EVENT,
+                          adHeight: BOTTOM_AD_HEIGHT,
+                        }),
+                        '*'
+                      );
                     }
                     this.iframe_.contentWindow./*OK*/ postMessage(
                       /** @type {JsonObject} */ ({
