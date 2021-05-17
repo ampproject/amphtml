@@ -16,8 +16,7 @@
 
  import {Services} from '../../../../../src/services';
  import {createElementWithAttributes} from '../../../../../src/dom';
- import {getValueForExpr} from '../../../../../src/json';
- import {dict} from '../../../../../src/core/types/object';
+ import {dict, getValueForExpr} from '../../../../../src/core/types/object';
  
  /**
   * @param {!JsonObject} media
