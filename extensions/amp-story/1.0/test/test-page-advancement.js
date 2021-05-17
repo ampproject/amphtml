@@ -151,7 +151,7 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
         // Simulate a pause after 1 second.
         advancement.start();
         advancement.startTimeMs_ -= 1000;
-        advancement.stop(true);
+        advancement.stop();
         expect(advancement.remainingDelayMs_).to.be.above(1500).and.below(2500);
 
         advancement.updateTimeDelay('5s');

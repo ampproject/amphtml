@@ -54,7 +54,7 @@ import {isArray, isObject} from '../../../src/core/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {urls} from '../../../src/config';
 
 /** @const */

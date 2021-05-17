@@ -15,7 +15,7 @@
  */
 
 import {hasOwn} from '../../src/core/types/object';
-import {tryParseJson} from '../../src/json.js';
+import {tryParseJson} from '../../src/core/types/object/json';
 import {validateData} from '../../3p/3p';
 
 /**
