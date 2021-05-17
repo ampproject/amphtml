@@ -103,9 +103,6 @@ describes.realWin(
       ampdoc = env.ampdoc;
 
       replaceStateStub = env.sandbox.stub(win.history, 'replaceState');
-      // Required by the bookend code.
-      win.document.title = 'Story';
-      env.ampdoc.defaultView = env.win;
 
       const localizationService = new LocalizationService(win.document.body);
       env.sandbox

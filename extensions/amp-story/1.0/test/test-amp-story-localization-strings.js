@@ -34,7 +34,7 @@ describes.fakeWin('amp-story-localization-strings', {amp: true}, () => {
         const localizedStringIdKeys = Object.values(LocalizedStringId);
 
         languageKeys.forEach((key) => {
-          expect(localizedStringIdKeys.indexOf(key)).to.not.eql(-1);
+          expect(localizedStringIdKeys).to.contain(key);
         });
       });
     });

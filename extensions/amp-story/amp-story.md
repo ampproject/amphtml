@@ -171,8 +171,6 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
           <h1>The End</h1>
         </amp-story-grid-layer>
       </amp-story-page>
-      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
-      </amp-story-bookend>
     </amp-story>
   </body>
 </html>
@@ -218,13 +216,12 @@ The `amp-story` component represents an entire story. The component itself imple
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
-  <amp-story-bookend src="./related.json"></amp-story-bookend>
 </amp-story>
 ```
 
 ### Metadata guidelines
 
-Metadata attributes display a preview of the story across the Web Stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rich, embedded experience Web Stories surfaces to come.
+Metadata attributes display a preview of the story across the Web Stories ecosystem, such as rendering an engaging preview link. These attributes future-proof your story for rich, embedded experience Web Stories surfaces to come.
 
 These metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data to your Web Stories](https://developers.google.com/search/docs/guides/enable-web-stories#implement).
 

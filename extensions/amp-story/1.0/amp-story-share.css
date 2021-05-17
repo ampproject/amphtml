@@ -16,7 +16,6 @@
 
 @import '../../amp-social-share/0.1/amp-social-share.css';
 
-/* All top-level bookend elements need to set their own left/right margins */
 .i-amphtml-story-share-widget {
   display: block !important;
   margin: 16px 8px !important;
@@ -31,11 +30,6 @@
   overflow: auto !important;
 }
 
-.i-amphtml-story-bookend-fullbleed .i-amphtml-story-share-widget {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
 .i-amphtml-story-share-widget::-webkit-scrollbar {
   width: 0px !important;
   background: transparent !important;
@@ -48,11 +42,6 @@
   display: flex !important;
   flex-wrap: wrap !important;
   width: 100% !important;
-}
-
-.i-amphtml-story-bookend-fullbleed .i-amphtml-story-share-list {
-  padding-left: 16px !important;
-  padding-right: 16px !important;
 }
 
 .i-amphtml-story-share-item {

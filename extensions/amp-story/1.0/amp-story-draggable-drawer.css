@@ -99,35 +99,6 @@
   overflow: hidden !important;
 }
 
-/** Bookend overrides. */
-
-.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-container,
-.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-container[hidden] {
-  height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-  background: transparent !important;
-  transition: none !important;
-}
-
-.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
-  margin-top: auto !important;
-  padding-top: 88px !important;
-}
-
-.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {
-  opacity: 1 !important;
-}
-
-[desktop] .i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer {
-  height: 100% !important;
-  width: 100% !important;
-}
-
-[desktop] .i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
-  padding-top: 0 !important;
-}
-
 /* For amp-story-page-attachment-ui-v2 experiment. */
 
 [desktop] .i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
@@ -187,9 +158,4 @@ body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-amp-stor
 
 amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
   border-radius: inherit !important;
-}
-
-amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
-  padding-top: 0 !important;
-  background: none !important;
 }

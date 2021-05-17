@@ -1524,7 +1524,6 @@ export class AmpStory extends AMP.BaseElement {
       // sending analytics events.
       () => {
         this.preloadPagesByDistance_();
-
         this.triggerActiveEventForPage_();
 
         this.systemLayer_.resetDeveloperLogs();

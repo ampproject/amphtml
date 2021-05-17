@@ -340,7 +340,6 @@ const VIEWER_CONTROL_DEFAULTS = {
  * Chrome contains:
  *   - mute/unmute button
  *   - story progress bar
- *   - bookend close button
  *   - share button
  *   - domain info button
  *   - sidebar
