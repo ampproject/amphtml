@@ -25,14 +25,14 @@ import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/core/constants/enums';
 import {cancellation} from '../../../src/error-reporting';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getSourceOrigin} from '../../../src/url';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isArray} from '../../../src/core/types';
 import {isJsonScriptTag} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /** @const */
 const TAG = 'amp-access';

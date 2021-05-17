@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseQueryString} from '../../src/url';
+import {parseQueryString} from '../../src/core/types/string/url';
 import {validateData, writeScript} from '../../3p/3p';
 
 /**

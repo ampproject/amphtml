@@ -40,7 +40,7 @@ component's visual area. If the user scrolls back, the video reverts to its orig
 
 ### Support
 
-This extension is used in conjunction with a [supported video player](../../spec/amp-video-interface.md).
+This extension is used in conjunction with a [supported video player](../../docs/spec/amp-video-interface.md).
 Currently, the supported players are:
 
 -   [`amp-brid-player`](https://amp.dev/documentation/components/amp-brid-player)
