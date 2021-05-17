@@ -69,7 +69,7 @@ function getMode_(win) {
   // --fortesting flag.
   const IS_FORTESTING = true;
 
-  const runningTests = isTestMode();
+  const runningTests = isTestMode(win);
   const isLocalDev = IS_FORTESTING && (!!AMP_CONFIG.localDev || runningTests);
   const hashQuery = parseQueryString(
     // location.originalHash is set by the viewer when it removes the fragment

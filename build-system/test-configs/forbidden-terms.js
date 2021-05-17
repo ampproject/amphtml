@@ -150,7 +150,7 @@ const forbiddenTermsGlobal = {
     message:
       'IS_FORTESTING local var only allowed in mode.js and ' +
       'dist.3p/current/integration.js',
-    allowlist: ['src/mode.js'],
+    allowlist: ['src/mode.js', 'src/core/mode/test.js'],
   },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',

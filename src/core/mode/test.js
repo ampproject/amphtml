@@ -20,8 +20,9 @@ const IS_FORTESTING = true;
 
 /**
  * Returns true during tests.
+ * @param {!Window} win
  * @return {boolean}
  */
-export function isTest() {
+export function isTest(win) {
   return IS_FORTESTING && !!win.__AMP_TEST;
 }
