@@ -47,16 +47,4 @@ module.exports = {
       '.prev-container > button.i-amphtml-story-button-move',
     ]);
   },
-  'shows corresponding buttons for bookend': async (page, name) => {
-    await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#page-2[active]');
-    await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#page-3[active]');
-    await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('.i-amphtml-story-bookend-active');
-    await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-fwd-replay',
-      '.i-amphtml-story-back-close-bookend',
-    ]);
-  },
 };

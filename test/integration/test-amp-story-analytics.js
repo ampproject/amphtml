@@ -40,10 +40,9 @@ config.run('amp-story analytics', {}, () => {
           <p id="right-2">Click me</p>
         </amp-story-grid-layer>
       </amp-story-page>
-      <amp-story-bookend layout="nodisplay">
+      <amp-story-social-share layout="nodisplay">
         <script type="application/json">
         {
-          "bookendVersion": "v1.0",
           "shareProviders": [
             {
               "provider": "facebook",
@@ -54,32 +53,10 @@ config.run('amp-story analytics', {}, () => {
               "provider": "twitter",
               "data-param-url": "https://twitter.com/larocheposayfr?lang=fr"
             }
-          ],
-          "components": [
-            {
-              "type": "heading",
-              "text": "Learn more about our 0% formulation charter"
-            },
-            {
-              "type": "cta-link",
-              "links": [
-                {
-                  "text": "Click here",
-                  "url": "https://www.laroche-posay.fr/produits-soins/anthelios/peaux-sensibles-ou-allergiques-au-soleil-r93.aspx"
-                }
-              ]
-            },
-            {
-              "type": "landscape",
-              "title": "TRAPPIST-1 Planets May Still Be Wet Enough for Life",
-              "url": "http://example.com/article.html",
-              "category": "astronomy",
-              "image": "http://placehold.it/360x760"
-            }
           ]
         }
         </script>
-      </amp-story-bookend>
+      </amp-story-social-share>
     </amp-story>
     <amp-analytics>
       <script type="application/json">
@@ -95,20 +72,6 @@ config.run('amp-story analytics', {}, () => {
               "pageVisible": "\${storyPageId}"
             }
           },
-          "trackBookendEnter": {
-            "on": "story-bookend-enter",
-            "request": "endpoint",
-            "extraUrlParams": {
-              "bookendEnter": true
-            }
-          },
-          "trackBookendExit": {
-            "on": "story-bookend-exit",
-            "request": "endpoint",
-            "extraUrlParams": {
-              "bookendExit": true
-            }
-          },
           "trackFocusedState": {
             "on": "story-focus",
             "request": "endpoint",
@@ -120,8 +83,6 @@ config.run('amp-story analytics', {}, () => {
         },
         "extraUrlParams": {
           "pageVisible": "\${storyPageId}",
-          "bookendEnter": false,
-          "bookendExit": false,
           "muted": false,
           "unmuted": false,
           "focusedLink": "\${linkId}"

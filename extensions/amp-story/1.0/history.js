@@ -27,7 +27,6 @@ export const LOCAL_STORAGE_KEY = 'amp-story-state';
 /** @enum {string} */
 export const HistoryState = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
-  BOOKEND_ACTIVE: 'ampStoryBookendActive',
   NAVIGATION_PATH: 'ampStoryNavigationPath',
 };
 
