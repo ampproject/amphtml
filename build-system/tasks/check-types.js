@@ -110,8 +110,8 @@ const TYPE_CHECK_TARGETS = {
     warningLevel: 'QUIET',
   },
   'src-context': {
-    srcGlobs: ['src/context/**/*.js'],
-    warningLevel: 'QUIET',
+    srcGlobs: ['src/context/**/*.js', ...CORE_SRCS_GLOBS],
+    externGlobs: ['src/context/**/*.extern.js', ...CORE_EXTERNS_GLOBS],
   },
   'src-core': {
     srcGlobs: CORE_SRCS_GLOBS,
