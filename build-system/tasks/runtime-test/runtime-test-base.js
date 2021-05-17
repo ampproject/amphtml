@@ -314,10 +314,6 @@ class RuntimeTestConfig {
       },
       plugins: [importPathPlugin, babelPlugin],
       sourcemap: 'inline',
-      // TODO(rsimha): Remove this workaround once evanw/esbuild#1202 is fixed.
-      banner: {
-        js: "function require(x) { throw new Error('Cannot require ' + x) }",
-      },
     };
   }
 
