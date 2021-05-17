@@ -46,21 +46,7 @@ export class AmpStoryRequestService {
     this.xhr_ = Services.xhrFor(win);
 
     /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
-    this.loadBookendConfig = once(() => this.loadBookendConfigImpl_());
-
-    /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
     this.loadShareConfig = once(() => this.loadShareConfigImpl_());
-  }
-
-  /**
-   * Retrieves the publisher bookend configuration, including the share
-   * providers.
-   * Has to be called through `loadBookendConfig`.
-   * @return {(!Promise<!JsonObject>|!Promise<null>)}
-   * @private
-   */
-  loadBookendConfigImpl_() {
-    return this.loadShareConfigImpl_();
   }
 
   /**

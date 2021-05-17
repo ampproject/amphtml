@@ -43,7 +43,7 @@
               "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/main/examples/img/ampicon.png",
               "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
               "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}",
-              "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&bookendTargetHref=${storyBookendTargetHref}&bookendCardType=${storyBookendComponentType}&bookendCardPosition=${storyBookendComponentPosition}"
+              "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}"
             },
             "triggers": {
               "trackAnchorClicks": {
@@ -52,13 +52,6 @@
                 "request": "click",
                 "vars": {
                   "eventId": "clickOnAnyAnchor"
-                }
-              },
-              "trackBookendClicks": {
-                "on": "story-bookend-click",
-                "request": "click",
-                "vars": {
-                  "eventId": "clickOnBookend"
                 }
               },
               "trackPageAttachmentOpen": {
@@ -87,16 +80,6 @@
                 "storySpec": {
                   "repeat": false
                 }
-              },
-              "trackBookendEnter": {
-                "on": "story-open",
-                "tagName": "amp-story-bookend",
-                "request": "pageView"
-              },
-              "trackBookendExit": {
-                "on": "story-close",
-                "tagName": "amp-story-bookend",
-                "request": "pageView"
               },
               "trackAudioEnable": {
                 "on": "story-audio-muted",
@@ -192,9 +175,6 @@
           </amp-video>
         </amp-story-grid-layer>
       </amp-story-page>
-
-      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
-      </amp-story-bookend>
     </amp-story>
   </body>
 </html>

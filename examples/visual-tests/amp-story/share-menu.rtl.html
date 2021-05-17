@@ -69,8 +69,23 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-bookend src="bookend-ar.json" layout="nodisplay">
-      </amp-story-bookend>
+      <amp-story-social-share layout="nodisplay">
+        <script type="application/json">
+          {
+            "shareProviders": [
+                "email",
+                {"provider": "facebook", "app_id": "254325784911610"},
+                {
+                  "provider": "twitter",
+                  "text": "This is custom share text that I would like for the Twitter platform"
+                },
+                "whatsapp",
+                "pinterest",
+                "line"
+              ]
+          }
+        </script>
+      </amp-story-social-share>
 
     </amp-story>
   </body>

@@ -511,7 +511,6 @@
     "options": {
       "hasCss": true,
       "cssBinaries": [
-        "amp-story-bookend",
         "amp-story-consent",
         "amp-story-draggable-drawer-header",
         "amp-story-hint",

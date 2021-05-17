@@ -20,7 +20,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
@@ -34,12 +33,6 @@ let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcas
 
 /** @const {!Object<string, !ButtonState_1_0_Def>} */
 const BackButtonStates = {
-  CLOSE_BOOKEND: {
-    className: 'i-amphtml-story-back-close-bookend',
-    action: Action.TOGGLE_BOOKEND,
-    data: false,
-    label: LocalizedStringId.AMP_STORY_CLOSE_BOOKEND,
-  },
   HIDDEN: {className: 'i-amphtml-story-button-hidden'},
   PREVIOUS_PAGE: {
     className: 'i-amphtml-story-back-prev',
@@ -65,12 +58,6 @@ const ForwardButtonStates = {
     className: 'i-amphtml-story-fwd-replay',
     triggers: EventType.REPLAY,
     label: LocalizedStringId.AMP_STORY_REPLAY,
-  },
-  SHOW_BOOKEND: {
-    className: 'i-amphtml-story-fwd-more',
-    action: Action.TOGGLE_BOOKEND,
-    data: true,
-    label: LocalizedStringId.AMP_STORY_SHOW_BOOKEND,
   },
 };
 
@@ -271,18 +258,10 @@ export class PaginationButtons {
     this.storeService_.subscribe(
       StateProperty.PAGE_IDS,
       () => {
-        // Since onCurrentPageIndexUpdate_ uses this.hasBookend, and the bookend
-        // isn't initialized until after the story is laid out, we wait for the
-        // story to be laid out before calling this function.
-        this.ampStory_.element
-          .signals()
-          .whenSignal(CommonSignals.LOAD_END)
-          .then(() => {
-            const currentPageIndex = Number(
-              this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
-            );
-            this.onCurrentPageIndexUpdate_(currentPageIndex);
-          });
+        const currentPageIndex = Number(
+          this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
+        );
+        this.onCurrentPageIndexUpdate_(currentPageIndex);
       },
       true /** callToInitialize */
     );
