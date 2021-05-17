@@ -60,7 +60,7 @@ export class ContextNode {
    * Returns the existing context node or creates a new one.
    *
    * @param {!Node} node
-   * @return {!ContextNode<SID>}
+   * @return {!ContextNode}
    */
   static get(node) {
     let contextNode = /** @type {!ContextNode|undefined} */ (node[NODE_PROP]);
