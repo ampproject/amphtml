@@ -22,7 +22,7 @@ import {
 import {dashToUnderline} from '../../../src/core/types/string';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {forwardRef} from '../../../src/preact/compat';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {useCallback, useLayoutEffect, useState} from '../../../src/preact';
 
 /** @const {string} */

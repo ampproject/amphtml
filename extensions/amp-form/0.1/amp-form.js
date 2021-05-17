@@ -76,7 +76,7 @@ import {
 
 import {toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /** @const {string} */
 const TAG = 'amp-form';

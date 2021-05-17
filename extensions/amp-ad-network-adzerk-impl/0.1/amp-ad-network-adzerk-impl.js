@@ -24,7 +24,7 @@ import {dev, devAssert} from '../../../src/log';
 import {getAmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {getMode} from '../../../src/mode';
 import {mergeExtensionsMetadata} from '../../amp-a4a/0.1/amp-ad-utils';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {tryResolve} from '../../../src/core/data-structures/promise';
 import {utf8Decode, utf8Encode} from '../../../src/core/types/string/bytes';
 

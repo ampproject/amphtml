@@ -113,7 +113,7 @@
 `.i-amphtml-base-carousel-arrow-next-slot` | 1 | [extensions/amp-base-carousel/0.1/amp-base-carousel.css](/extensions/amp-base-carousel/0.1/amp-base-carousel.css)
 `.i-amphtml-base-carousel-arrow-prev-slot` | 1 | [extensions/amp-base-carousel/0.1/amp-base-carousel.css](/extensions/amp-base-carousel/0.1/amp-base-carousel.css)
 `.i-amphtml-base-carousel-arrows` | 1 | [extensions/amp-base-carousel/0.1/amp-base-carousel.css](/extensions/amp-base-carousel/0.1/amp-base-carousel.css)
-`arrow` | 1 | [extensions/amp-base-carousel/1.0/base-carousel.jss.js](/extensions/amp-base-carousel/1.0/base-carousel.jss.js)
+`arrow` | 1 | [extensions/amp-base-carousel/1.0/component.jss.js](/extensions/amp-base-carousel/1.0/component.jss.js)
 `.i-amphtml-carousel-arrows` | 1 | [extensions/amp-carousel/0.2/amp-carousel.css](/extensions/amp-carousel/0.2/amp-carousel.css)
 `setStyles` | 1 | [extensions/amp-fit-text/0.1/amp-fit-text.js](/extensions/amp-fit-text/0.1/amp-fit-text.js)
 `.i-amphtml-image-lightbox-viewer` | 1 | [extensions/amp-image-lightbox/0.1/amp-image-lightbox.css](/extensions/amp-image-lightbox/0.1/amp-image-lightbox.css)

@@ -29,7 +29,7 @@ import {getData} from '../../../src/event-helper';
 import {hasOwn} from '../../../src/core/types/object';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 const TAG = 'amp-ad-network-adsense-impl';
 
