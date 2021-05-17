@@ -122,8 +122,6 @@ We could instruct `amp-render` to remove the security prefix like so:
 <amp-render xssi-prefix=")]}" src="https://example.com/data.json"></amp-render>
 ```
 
-[/filter]<!-- formats="websites, stories" -->
-
 ### `key`
 
 Defines the expression to locate the sub-object to be rendered within the response. For example, let's say we had an API that returned this response:
@@ -133,40 +131,26 @@ Defines the expression to locate the sub-object to be rendered within the respon
 ```json
 {
   "automobiles": {
-    "cars": [
-      {
+    "cars": {
+      "german": {
         "make": "BMW",
         "model": "M3"
       },
-      {
+      "american": {
         "make": "Tesla",
         "model": "Model X"
       }
-    ],
-    "trucks": [
-      {
-        "make": "Ford",
-        "model": "F-150"
-      },
-      {
-        "make": "Chevy",
-        "model": "Silverado"
-      }
-    ]
+    }
   }
 }
 ```
 
-If we just want to display the cars from the response, we can do that using the `key` attribute.
+If we just want to display the German cars from the response, we can use the `key` attribute.
 
 ```html
-<amp-render src="https://example.com/data.json" key="automobiles.cars">
+<amp-render src="https://example.com/data.json" key="automobiles.cars.german">
   <template type="amp-mustache">
-    <ul>
-    {{#cars}}
-      <li>{{model}} by {{make}}</li>
-    {{/cars}}
-    </ul>
+    {{make}} {{model}}
   </template>
 </amp-render>
 ```
@@ -182,11 +166,11 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
 If `binding` attribute is not provided, default is `always`.
 
+[/filter]<!-- formats="websites, stories" -->
+
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
-
-
 
 ## Actions
 
