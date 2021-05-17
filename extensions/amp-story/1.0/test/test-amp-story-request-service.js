@@ -76,7 +76,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    const config = await requestService.loadshareConfig();
+    const config = await requestService.loadShareConfig();
     expect(config).to.equal(fetchedConfig);
     xhrMock.verify();
   });
@@ -95,19 +95,13 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    await requestService.loadshareConfig();
-    await requestService.loadshareConfig();
+    await requestService.loadShareConfig();
     xhrMock.verify();
   });
 
   it('should return the social share config from the share element', async () => {
     const shareUrl = 'https://publisher.com/share';
     const fetchedConfig = 'amazingConfig';
-
-    const shareElement = env.win.document.createElement(
-      'amp-story-social-share'
-    );
-    storyElement.appendChild(shareElement);
 
     shareElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, shareUrl);
     xhrMock
