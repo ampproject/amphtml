@@ -724,8 +724,8 @@ actions that apply to the whole document.
     </td>
   </tr>
   <tr>
-    <td><code>goBack</code></td>
-    <td>Navigates back in history.</td>
+    <td><code>goBack(navigate=BOOLEAN)</code></td>
+    <td>When <code>navigate</code> is <code>false</code> or unspecified, <code>goBack</code> will attempt to go back in history while remaining in the current document. When <code>navigate</code> is <code>true</code>, the action will allow cross-document navigation, similar to [history.back](https://developer.mozilla.org/en-US/docs/Web/API/History/back).</td>
   </tr>
   <tr>
     <td><code>print</code></td>
