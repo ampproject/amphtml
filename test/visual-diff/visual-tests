@@ -363,15 +363,6 @@
       ]
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-bookend.html",
-      "name": "amp-story: bookend",
-      "viewport": {"width": 320, "height": 480},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-bookend"
-      ]
-    },
-    {
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent",
       "viewport": {"width": 320, "height": 480},
@@ -467,15 +458,6 @@
       ]
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-bookend.html",
-      "name": "amp-story: bookend (desktop)",
-      "viewport": {"width": 1440, "height": 900},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-bookend"
-      ]
-    },
-    {
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent (desktop)",
       "viewport": {"width": 1440, "height": 900},
@@ -523,15 +505,6 @@
       ]
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-bookend.rtl.html",
-      "name": "amp-story: bookend (rtl)",
-      "viewport": {"width": 320, "height": 480},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-bookend"
-      ]
-    },
-    {
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
       "name": "amp-story: consent (rtl)",
       "viewport": {"width": 320, "height": 480},
@@ -551,15 +524,6 @@
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
-    },
-    {
-      "url": "examples/visual-tests/amp-story/amp-story-bookend.rtl.html",
-      "name": "amp-story: bookend (desktop) (rtl)",
-      "viewport": {"width": 1440, "height": 900},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-bookend"
-      ]
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",

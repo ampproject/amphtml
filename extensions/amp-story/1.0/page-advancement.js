@@ -153,9 +153,8 @@ export class AdvancementConfig {
 
   /**
    * Invoked when the advancement configuration should cease taking effect.
-   * @param {boolean=} unusedCanResume
    */
-  stop(unusedCanResume) {
+  stop() {
     this.isRunning_ = false;
   }
 
@@ -862,7 +861,7 @@ export class TimeBasedAdvancement extends AdvancementConfig {
   }
 
   /** @override */
-  stop(canResume = false) {
+  stop() {
     super.stop();
 
     if (this.timeoutId_ !== null) {
@@ -871,9 +870,8 @@ export class TimeBasedAdvancement extends AdvancementConfig {
 
     // Store the remaining time if the advancement can be resume, ie: if it is
     // paused.
-    this.remainingDelayMs_ = canResume
-      ? this.startTimeMs_ + this.delayMs_ - this.getCurrentTimestampMs_()
-      : null;
+    this.remainingDelayMs_ =
+      this.startTimeMs_ + this.delayMs_ - this.getCurrentTimestampMs_();
   }
 
   /**
