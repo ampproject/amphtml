@@ -834,14 +834,14 @@ class VideoEntry {
     }
 
     const animation = renderIcon(win, element);
-    const elements = [animation];
+    const children = [animation];
 
     /** @param {boolean} display */
     function toggleElements(display) {
       video.mutateElementSkipRemeasure(() => {
-        for (const child of elements) {
+        children.forEach((child) => {
           toggle(child, display);
-        }
+        });
       });
     }
 
@@ -870,14 +870,14 @@ class VideoEntry {
       video.hideControls();
 
       const mask = renderInteractionOverlay(element, this.metadata_);
-      elements.push(mask);
+      children.push(mask);
       unlisteners.push(listen(mask, 'click', () => userInteractedWith(video)));
     }
 
     video.mutateElementSkipRemeasure(() => {
-      for (const child of elements) {
+      children.forEach((child) => {
         element.appendChild(child);
-      }
+      });
     });
 
     if (this.isRollingAd_) {
@@ -897,9 +897,9 @@ class VideoEntry {
           unlistener();
         });
         video.mutateElementSkipRemeasure(() => {
-          for (const child of elements) {
+          children.forEach((child) => {
             removeElement(child);
-          }
+          });
         });
       });
   }
