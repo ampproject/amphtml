@@ -367,13 +367,12 @@ export class ContextNode {
     }
     let found = null;
     let maxWeight = Number.NEGATIVE_INFINITY;
-    for (const group of groups) {
-      const {cn, match, weight} = group;
+    groups.forEach(({cn, match, weight}) => {
       if (match(node, this.node) && weight > maxWeight) {
         found = cn;
         maxWeight = weight;
       }
-    }
+    });
     return found;
   }
 

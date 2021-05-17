@@ -296,19 +296,19 @@ export class Values {
     }
     if (this.isConnected_()) {
       // Ping all properties for recalculation when the tree is connected.
-      for (const used of usedByKey) {
+      usedByKey.forEach((used) => {
         const {prop} = used;
         this.ping(prop, true);
-      }
+      });
     } else {
       // On disconnect, only do minimal possible work: disconnect recursive
       // subscribers to ensure that they are not leaked.
-      for (const used of usedByKey) {
+      usedByKey.forEach((used) => {
         const {prop} = used;
         if (isRecursive(prop)) {
           this.updateParentContextNode_(used, null);
         }
-      }
+      });
     }
   }
 
@@ -351,7 +351,7 @@ export class Values {
     let newScheduled = null;
     const usedByKey = this.usedByKey_;
     if (usedByKey) {
-      for (const used of usedByKey) {
+      usedByKey.forEach((used) => {
         const {prop} = used;
         const {key} = prop;
         // Only ping unhandled props.
@@ -367,7 +367,7 @@ export class Values {
             newScheduled.push(key);
           }
         }
-      }
+      });
     }
     return newScheduled || scheduled;
   }
@@ -483,16 +483,16 @@ export class Values {
       return;
     }
 
-    for (const used of usedByKey) {
+    usedByKey.forEach((used) => {
       used.counter = 0;
-    }
+    });
 
     // Recompute all "pinged" values for this node. It checks if dependencies
     // are satisfied and recomputes values accordingly.
     let updated;
     do {
       updated = 0;
-      for (const used of usedByKey) {
+      usedByKey.forEach((used) => {
         if (used.pending != Pending.NOT_PENDING) {
           const {key} = used.prop;
           used.counter++;
@@ -505,7 +505,7 @@ export class Values {
           updated++;
           this.tryUpdate_(used);
         }
-      }
+      });
     } while (updated > 0);
   }
 
