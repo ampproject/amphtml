@@ -842,6 +842,7 @@ export function onContentPauseRequested(global) {
     adsManagerHeightOnLoad = null;
   }
   adsActive = true;
+  playerState = PlayerStates.PLAYING;
   postMessage({event: VideoEvents.AD_START});
   toggle(elements['adContainer'], true);
   showAdControls();
@@ -889,6 +890,7 @@ export function onContentResumeRequested() {
  */
 export function onAdPaused() {
   toggleRootDataAttribute('playing', false);
+  playerState = PlayerStates.PAUSE;
 }
 
 /**
@@ -900,6 +902,7 @@ export function onAdPaused() {
  */
 export function onAdResumed() {
   toggleRootDataAttribute('playing', true);
+  playerState = PlayerStates.PLAYING;
 }
 
 /**
