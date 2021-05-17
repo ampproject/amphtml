@@ -48,7 +48,7 @@ The AMP framework can be built from source or downloaded pre-built. Building the
 
 ### Option 1: Build the framework yourself
 
-Refer to the [Developing in AMP](https://github.com/ampproject/amphtml/blob/main/contributing/DEVELOPING.md) guide to familiarize yourself with building and testing the AMP framework. Once you are comfortable with the build system, a few small changes will customize the framework to run from your host.
+Refer to the [Developing in AMP](https://github.com/ampproject/amphtml/blob/main/docs/developing.md) guide to familiarize yourself with building and testing the AMP framework. Once you are comfortable with the build system, a few small changes will customize the framework to run from your host.
 
 #### Update URLs config
 
@@ -227,7 +227,7 @@ The properties are defined as follows:
 -   `ampCssUrl` (optional) is a URL to the boilerplate CSS for the current stable runtime version.
 -   `canaryPercentage` (optional) indicates the fraction of users who receive the experimental runtime version of the AMP framework instead of the current stable runtime version.
 -   `diversions` (optional) lists active non-stable runtime versions.
--   `ltsRuntimeVersion` (optional) is the current [long-term stable](https://github.com/ampproject/amphtml/blob/main/contributing/lts-release.md) runtime version.
+-   `ltsRuntimeVersion` (optional) is the current [long-term stable](https://github.com/ampproject/amphtml/blob/main/docs/lts-release.md) runtime version.
 -   `ltsCssUrl` (optional) is a URL to the boilerplate CSS for the current long-term stable runtime version.
 
 ### amp-geo hotpatching

@@ -206,14 +206,18 @@ class AmpImaVideo extends AMP.BaseElement {
     const consentPromise = consentPolicyId
       ? getConsentPolicyState(element, consentPolicyId)
       : Promise.resolve(null);
+    element.setAttribute(
+      'data-source-children',
+      JSON.stringify(this.sourceChildren_)
+    );
     return consentPromise.then((initialConsentState) => {
-      const iframeContext = {
-        initialConsentState,
-        sourceChildren: this.sourceChildren_,
-      };
-      const iframe = getIframe(win, element, TYPE, iframeContext, {
-        allowFullscreen: true,
-      });
+      const iframe = getIframe(
+        win,
+        element,
+        TYPE,
+        {initialConsentState},
+        {allowFullscreen: true}
+      );
       iframe.title = this.element.title || 'IMA video';
 
       this.applyFillContent(iframe);

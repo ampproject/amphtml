@@ -36,10 +36,10 @@ import {dict} from '../core/types/object';
 import {isJsonScriptTag, tryFocus} from '../dom';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
-import {dev} from '../log';
+import {devAssertElement} from '../core/assert';
 import {findIndex, toArray} from '../core/types/array';
 import {getMode} from '../../src/mode';
-import {parseJson} from '../json';
+import {parseJson} from '../core/types/object/json';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {urls} from '../config';
 
@@ -338,6 +338,9 @@ export class AmpStoryPlayer {
    * @public
    */
   play() {
+    if (!this.element_.isLaidOut_) {
+      this.layoutPlayer();
+    }
     this.togglePaused_(false);
   }
 
@@ -1702,16 +1705,13 @@ export class AmpStoryPlayer {
     const currentIframe = this.stories_[this.currentIdx_].iframe;
 
     requestAnimationFrame(() => {
-      resetStyles(dev().assertElement(currentIframe), [
-        'transform',
-        'transition',
-      ]);
+      resetStyles(devAssertElement(currentIframe), ['transform', 'transition']);
     });
 
     const secondaryStory = this.getSecondaryStory_();
     if (secondaryStory) {
       requestAnimationFrame(() => {
-        resetStyles(dev().assertElement(secondaryStory.iframe), [
+        resetStyles(devAssertElement(secondaryStory.iframe), [
           'transform',
           'transition',
         ]);
@@ -1833,7 +1833,7 @@ export class AmpStoryPlayer {
     const translate = `translate3d(${deltaX}px, 0, 0)`;
 
     requestAnimationFrame(() => {
-      setStyles(dev().assertElement(iframe), {
+      setStyles(devAssertElement(iframe), {
         transform: translate,
         transition: 'none',
       });
@@ -1845,7 +1845,7 @@ export class AmpStoryPlayer {
     }
 
     requestAnimationFrame(() => {
-      setStyles(dev().assertElement(secondaryStory.iframe), {
+      setStyles(devAssertElement(secondaryStory.iframe), {
         transform: secondaryTranslate,
         transition: 'none',
       });

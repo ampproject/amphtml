@@ -115,6 +115,12 @@ Adds support for Black Crow AI. You are required to fill out the `site_name` var
 
 Type attribute value: `blueconic`
 
+### Blue Triangle
+
+Type attribute value: `bluetriangle`
+
+Adds support for blue Triangle. More details can be found at [help.bluetriangle.com](https://help.bluetriangle.com/hc/en-us/articles/1500006133061).
+
 ### Browsi
 
 Type attribute value: `browsi`
@@ -231,11 +237,15 @@ Type attribute value: `ibeatanalytics`
 
 Adds support for Ibeat Analytics. More details for adding Ibeat support can be found at [Ibeat Integration Support](https://ibeat.indiatimes.com/support.html#h.a5rit14mwie1).
 
+<!-- markdown-link-check-disable -->
+
 ### INFOnline / IVW
 
 Type attribute value: `infonline`
 
 Adds support for [INFOnline](https://www.infonline.de) / [IVW](http://www.ivw.de). Requires a copy of [amp-analytics-infonline.html](https://3p.ampproject.net/custom/amp-analytics-infonline.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/main/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `amp-analytics-infonline.html` needs to be on another subdomain such as `iframe.example.com` or `assets.example.com`.
+
+<!-- markdown-link-check-enable -->
 
 Additionally, the following variables must be defined:
 
@@ -473,11 +483,7 @@ Adds support for Piwik PRO Analytics Suite. Configuration details can be found a
 
 Type attribute value: `pressboard`
 
-<!--
-(Link 404s, unclear whether vendor is still supported.)
-
-Adds support for Pressboard. Configuration details can be found at [help.pressboard.ca](http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp).
--->
+Adds support for Pressboard. Configuration details can be found at [help.pressboardmedia.com](https://help.pressboardmedia.com/implementing-google-amp).
 
 ### Quantcast Measurement
 

@@ -71,8 +71,16 @@ module.exports = {
       'files': [
         './core/window.extern.js',
         './polyfills/custom-elements.extern.js',
+        './experiments/experiments.extern.js',
+        './experiments/shame.extern.js',
       ],
       'rules': {'local/no-global': 0},
+    },
+    {
+      'files': ['./base-element.js'],
+      'rules': {
+        'local/no-private-props': 2,
+      },
     },
   ],
 };

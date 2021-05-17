@@ -156,7 +156,7 @@ To create an ad network implementation, you must perform the following:
     replaced by their own network. Files must implement all requirements as
     specified below. Anything not specified, i.e. helper functions etc are at the
     discretion of the ad network, but must be approved using the [process required
-    for all AMP contributions](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md).
+    for all AMP contributions](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md).
 
 #### Create the implementation script
 

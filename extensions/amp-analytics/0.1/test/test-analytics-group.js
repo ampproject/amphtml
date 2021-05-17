@@ -26,7 +26,7 @@ import {
   VisibilityTracker,
 } from '../events';
 import {AnalyticsGroup} from '../analytics-group.js';
-import {toggleExperiment} from '../../../../src/experiments.js';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('AnalyticsGroup', {amp: 1}, (env) => {
   let win;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/** @const {!{id: string, control: string, experiment: string}} */
+/** @const */
 export const ADS_INITIAL_INTERSECTION_EXP = {
   id: 'ads-initialIntersection',
   control: '31060065',

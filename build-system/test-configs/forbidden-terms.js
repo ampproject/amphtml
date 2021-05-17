@@ -220,7 +220,7 @@ const forbiddenTermsGlobal = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
-      'testing/_init_tests.js',
+      'testing/init-tests.js',
       'testing/describes.js',
       'testing/iframe.js',
     ],
@@ -333,8 +333,8 @@ const forbiddenTermsGlobal = {
       'src/runtime.js',
       'src/log.js',
       'src/web-worker/web-worker.js',
+      'testing/async-errors.js',
       'tools/experiments/experiments.js',
-      'testing/_init_tests.js',
     ],
   },
   'parseUrlWithA': {
@@ -460,10 +460,10 @@ const forbiddenTermsGlobal = {
       'extensions/amp-story/1.0/history.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
-      'src/experiments.js',
+      'src/experiments/index.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
-      'testing/_init_tests.js',
+      'testing/init-tests.js',
       'testing/fake-dom.js',
     ],
   },
@@ -625,10 +625,11 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
       'src/config.js',
-      'src/experiments.js',
+      'src/experiments/index.js',
+      'src/experiments/shame.extern.js',
       'src/mode.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
-      'testing/_init_tests.js',
+      'testing/init-tests.js',
       'tools/experiments/experiments.js',
     ],
   },
@@ -664,7 +665,7 @@ const forbiddenTermsGlobal = {
       'Use of `this.skip()` is forbidden in test files. Use ' +
       '`this.skipTest()` from within a `before()` block instead. See #17245.',
     checkInTestFolder: true,
-    allowlist: ['testing/_init_tests.js'],
+    allowlist: ['testing/init-tests.js'],
   },
   '[^\\.]makeBodyVisible\\(': {
     message:
@@ -702,7 +703,6 @@ const forbiddenTermsGlobal = {
       'build-system/server/app-index/test/test-self.js',
       'build-system/server/app-index/test/test-template.js',
       'build-system/server/app-index/test/test.js',
-      'testing/_init_tests.js',
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
       'validator/js/engine/amp4ads-parse-css_test.js',
@@ -808,7 +808,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/js/webui/webui.js',
       'src/url.js',
       'src/url-try-decode-uri-component.js',
-      'src/utils/bytes.js',
+      'src/core/types/string/bytes.js',
     ],
   },
   'Text(Encoder|Decoder)\\(': {
@@ -818,7 +818,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
-      'src/utils/bytes.js',
+      'src/core/types/string/bytes.js',
       'src/utils/stream-response.js',
     ],
   },
@@ -943,10 +943,11 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unresolved merge conflict.',
   },
   '\\.indexOf\\([\'"][^)]+\\)\\s*===?\\s*0\\b': {
-    message: 'use startsWith helper in src/string.js',
+    message: 'use startsWith helper in src/core/types/string',
     allowlist: ['build-system/server/app.js'],
   },
-  '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
+  '\\.indexOf\\(.*===?.*\\.length':
+    'use endsWith helper in src/core/types/string',
   '/url-parse-query-string': {
     message: 'Import parseQueryString from `src/url.js`',
     allowlist: [
