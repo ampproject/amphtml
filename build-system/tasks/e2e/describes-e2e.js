@@ -204,6 +204,7 @@ function getFirefoxArgs(config) {
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
+ *  experiments: (!Array<string>|undefined),
  *  testUrl: string|undefined,
  *  fixture: string,
  *  initialRect: ({width: number, height:number}|undefined),
@@ -664,7 +665,7 @@ function getDriver({headless = false}, browserName, deviceName) {
  */
 async function setUpTest(
   {environment, ampDriver, controller},
-  {testUrl, version, experiments = [], initialRect}
+  {testUrl = '', version, experiments = [], initialRect}
 ) {
   const url = new URL(testUrl);
 

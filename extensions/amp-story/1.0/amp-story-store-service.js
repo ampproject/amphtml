@@ -17,7 +17,7 @@
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/core/data-structures/observable';
 import {Services} from '../../../src/services';
-import {deepEquals} from '../../../src/json';
+import {deepEquals} from '../../../src/core/types/object/json';
 import {dev} from '../../../src/log';
 import {hasOwn} from '../../../src/core/types/object';
 import {registerServiceBuilder} from '../../../src/service';
@@ -343,11 +343,6 @@ const actions = (state, action, data) => {
         [StateProperty.BOOKEND_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
       });
-    case Action.TOGGLE_CAN_SHOW_BOOKEND:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.CAN_SHOW_BOOKEND]: !!data,
-      });
     case Action.TOGGLE_EDUCATION:
       return /** @type {!State} */ ({
         ...state,
@@ -605,7 +600,7 @@ export class AmpStoryStoreService {
     // properties, so we have to force the type.
     return /** @type {!State} */ ({
       [StateProperty.CAN_INSERT_AUTOMATIC_AD]: true,
-      [StateProperty.CAN_SHOW_BOOKEND]: true,
+      [StateProperty.CAN_SHOW_BOOKEND]: false,
       [StateProperty.CAN_SHOW_AUDIO_UI]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
@@ -670,7 +665,6 @@ export class AmpStoryStoreService {
       case EmbedMode.NAME_TBD:
         return {
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-          [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
           [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
@@ -685,7 +679,6 @@ export class AmpStoryStoreService {
         return {
           [StateProperty.PREVIEW_STATE]: true,
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-          [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
           [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,

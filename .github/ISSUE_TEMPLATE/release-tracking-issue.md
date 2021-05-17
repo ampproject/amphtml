@@ -52,7 +52,7 @@ If you perform cherry picks, add/update the checkboxes above as needed e.g.
 - [ ] Release <CHERRY_PICK_RELEASE_NUMBER> promoted to Experimental and Beta channels (<CL submit time>)
 -->
 
-See the [release documentation](https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md) for more information on the release process, including how to test changes in the Experimental channel.
+See the [release documentation](https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md) for more information on the release process, including how to test changes in the Experimental channel.
 
 If you find a bug in this build, please file an [issue](https://github.com/ampproject/amphtml/issues/new). If you believe the bug should be fixed in this build, follow the instructions in the [cherry picks documentation](https://go.amp.dev/cherry-picks).
 
