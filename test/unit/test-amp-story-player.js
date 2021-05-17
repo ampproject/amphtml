@@ -19,6 +19,8 @@ import {AmpStoryPlayer} from '../../src/amp-story-player/amp-story-player-impl';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from '../../src/amp-story-player/page-scroller';
 import {expect} from 'chai';
+import {listenOncePromise} from '../../src/event-helper';
+import {macroTask} from '../../testing/yield';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
@@ -1499,7 +1501,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         .querySelector('.i-amphtml-story-player-main-container');
 
       // Wait for event dispatched to be listened
-      await new Promise((resolve) => setTimeout(() => resolve(), 50));
+      await listenOncePromise(playerEl, 'transitionend');
+      await macroTask();
 
       expect(
         rootEl.classList.contains(

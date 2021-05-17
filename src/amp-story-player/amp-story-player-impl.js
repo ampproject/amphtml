@@ -39,7 +39,7 @@ import {cssText} from '../../build/amp-story-player-iframe.css';
 import {devAssertElement} from '../core/assert';
 import {findIndex, toArray} from '../core/types/array';
 import {getMode} from '../../src/mode';
-import {parseJson} from '../json';
+import {parseJson} from '../core/types/object/json';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {urls} from '../config';
 
@@ -338,6 +338,9 @@ export class AmpStoryPlayer {
    * @public
    */
   play() {
+    if (!this.element_.isLaidOut_) {
+      this.layoutPlayer();
+    }
     this.togglePaused_(false);
   }
 
