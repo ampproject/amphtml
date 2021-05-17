@@ -7,15 +7,6 @@ teaser:
 ---
 
 <!--
-  All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
-  and improves SEO.
-  * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
-  * List applicable format(s): websites, ads, stories, email
-  * Do not include markdown formatting in the frontmatter - plain text and punctionation only!
-  * Remove this comment!
--->
-
-<!--
 Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -125,8 +116,6 @@ We could instruct `amp-render` to remove the security prefix like so:
 ### `key`
 
 Defines the expression to locate the sub-object to be rendered within the response. For example, let's say we had an API that returned this response:
-
- <!-- TODO: fix this example -->
 
 ```json
 {
