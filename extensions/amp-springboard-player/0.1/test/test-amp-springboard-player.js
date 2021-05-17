@@ -224,8 +224,8 @@ describes.realWin(
             'https://www.springboardplatform.com/storage/default/' +
               'snapshots/default_snapshot.png'
           );
-          expect(img.getAttribute('layout')).to.equal('fill');
-          expect(img.hasAttribute('placeholder')).to.be.true;
+          expect(img).to.have.class('i-amphtml-fill-content');
+          expect(img).to.have.attribute('placeholder');
           expect(img.getAttribute('referrerpolicy')).to.equal('origin');
         });
       });
