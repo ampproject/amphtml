@@ -96,11 +96,11 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
-import {getMode} from '../../../src/mode';
+import {getMode, isModeDevelopment} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
-import {parseQueryString} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {
   removeAttributeInMutate,
   setAttributeInMutate,
@@ -1524,7 +1524,6 @@ export class AmpStory extends AMP.BaseElement {
       // sending analytics events.
       () => {
         this.preloadPagesByDistance_();
-
         this.triggerActiveEventForPage_();
 
         this.systemLayer_.resetDeveloperLogs();
@@ -2746,7 +2745,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   maybeLoadStoryDevTools_() {
     if (
-      !getMode().development ||
+      !isModeDevelopment(this.win) ||
       this.element.getAttribute('mode') === 'inspect'
     ) {
       return false;

@@ -36,7 +36,6 @@ import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
   isProxyOrigin,
-  parseQueryString,
   serializeQueryString,
 } from '../../../src/url';
 import {Services} from '../../../src/services';
@@ -68,6 +67,7 @@ import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/core/types/array';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {
   setupAMPCors,
   setupInit,
