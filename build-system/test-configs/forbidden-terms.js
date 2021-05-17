@@ -946,6 +946,8 @@ const forbiddenTermsSrcInclusive = {
     message: 'use startsWith helper in src/core/types/string',
     allowlist: ['build-system/server/app.js'],
   },
+  '\\.indexOf\\(.*===?.*\\.length':
+    'use endsWith helper in src/core/types/string',
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
