@@ -261,10 +261,6 @@ export class PaginationButtons {
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.onBookendStateUpdate_(isActive);
-    });
-
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
       (pageIndex) => {
@@ -308,32 +304,17 @@ export class PaginationButtons {
   }
 
   /**
-   * @param {boolean} isActive
-   * @private
-   */
-  onBookendStateUpdate_(isActive) {
-    if (isActive) {
-      this.backButton_.updateState(BackButtonStates.CLOSE_BOOKEND);
-      this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
-    } else {
-      this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
-      this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
-    }
-  }
-
-  /**
    * @param {number} pageIndex
    * @private
    */
   onCurrentPageIndexUpdate_(pageIndex) {
     const totalPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
-    const bookendActive = this.storeService_.get(StateProperty.BOOKEND_STATE);
 
     if (pageIndex === 0) {
       this.backButton_.updateState(BackButtonStates.HIDDEN);
     }
 
-    if (pageIndex > 0 && !bookendActive) {
+    if (pageIndex > 0) {
       this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
     }
 
@@ -341,21 +322,13 @@ export class PaginationButtons {
       this.forwardButton_.updateState(ForwardButtonStates.NEXT_PAGE);
     }
 
-    if (pageIndex === totalPages - 1 && !bookendActive) {
-      this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
-    }
-
     if (pageIndex === totalPages - 1) {
-      this.ampStory_.hasBookend().then((hasBookend) => {
-        const viewer = Services.viewerForDoc(this.ampStory_.element);
-        if (!hasBookend) {
-          if (viewer.hasCapability('swipe')) {
-            this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
-          } else {
-            this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
-          }
-        }
-      });
+      const viewer = Services.viewerForDoc(this.ampStory_.element);
+      if (viewer.hasCapability('swipe')) {
+        this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
+      } else {
+        this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
+      }
     }
   }
 

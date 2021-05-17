@@ -112,14 +112,6 @@ export class StoryAnalyticsService {
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.triggerEvent(
-        isActive
-          ? StoryAnalyticsEvent.BOOKEND_ENTER
-          : StoryAnalyticsEvent.BOOKEND_EXIT
-      );
-    });
-
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (pageId) => {

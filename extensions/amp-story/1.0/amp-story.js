@@ -44,7 +44,6 @@ import {
 } from './story-analytics';
 import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
-import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
@@ -79,19 +78,13 @@ import {
   childElements,
   childNodes,
   closest,
-  createElementWithAttributes,
   isRTL,
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
-import {
-  computedStyle,
-  resetStyles,
-  setImportantStyles,
-  toggle,
-} from '../../../src/style';
+import {computedStyle, setImportantStyles, toggle} from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
@@ -209,14 +202,6 @@ const MAX_MEDIA_ELEMENT_COUNTS = {
 const TAG = 'amp-story';
 
 /**
- * Selector for elements that should be hidden when the bookend is open on
- * desktop view.
- * @private @const {string}
- */
-const HIDE_ON_BOOKEND_SELECTOR =
-  'amp-story-page, .i-amphtml-story-system-layer';
-
-/**
  * The default dark gray for chrome supported theme color.
  * @const {string}
  */
@@ -260,9 +245,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
-
-    /** @private {?AmpStoryBookend} */
-    this.bookend_ = null;
 
     /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
     this.shareMenu_ = new ShareMenu(this.win, this.element);
@@ -432,11 +414,6 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeStoryPlayer_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
-
-    // Disables the bookend entirely if the story is within a group of stories.
-    if (this.viewer_.hasCapability('swipe')) {
-      this.storeService_.dispatch(Action.TOGGLE_CAN_SHOW_BOOKEND, false);
-    }
 
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
@@ -704,11 +681,6 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     this.element.addEventListener(EventType.SWITCH_PAGE, (e) => {
-      if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
-        // Disallow switching pages while the bookend is active.
-        return;
-      }
-
       this.switchTo_(getDetail(e)['targetPageId'], getDetail(e)['direction']);
       this.ampStoryHint_.hideAllNavigationHint();
     });
@@ -767,10 +739,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
-    });
-
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.onBookendStateUpdate_(isActive);
     });
 
     if (isPageAttachmentUiV2ExperimentOn(this.win)) {
@@ -899,7 +867,6 @@ export class AmpStory extends AMP.BaseElement {
       );
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (
-        this.storeService_.get(StateProperty.BOOKEND_STATE) ||
         embedComponent.state !== EmbeddedComponentState.HIDDEN ||
         this.storeService_.get(StateProperty.ACCESS_STATE) ||
         this.storeService_.get(StateProperty.SIDEBAR_STATE) ||
@@ -1021,20 +988,6 @@ export class AmpStory extends AMP.BaseElement {
         // Build pagination buttons if they can be displayed.
         if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
           new PaginationButtons(this);
-        }
-      })
-      .then(() => this.initializeBookend_())
-      .then(() => {
-        const bookendInHistory = !!getHistoryState(
-          this.win,
-          HistoryState.BOOKEND_ACTIVE
-        );
-        if (bookendInHistory) {
-          return this.hasBookend().then((hasBookend) => {
-            if (hasBookend) {
-              return this.showBookend_();
-            }
-          });
         }
       })
       .then(() =>
@@ -1384,12 +1337,6 @@ export class AmpStory extends AMP.BaseElement {
       );
       return;
     }
-
-    this.hasBookend().then((hasBookend) => {
-      if (hasBookend) {
-        this.showBookend_();
-      }
-    });
   }
 
   /**
@@ -1577,7 +1524,6 @@ export class AmpStory extends AMP.BaseElement {
       // sending analytics events.
       () => {
         this.preloadPagesByDistance_();
-        this.maybePreloadBookend_();
 
         this.triggerActiveEventForPage_();
 
@@ -1744,10 +1690,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onKeyDown_(e) {
-    if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
-      return;
-    }
-
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
@@ -1897,8 +1839,6 @@ export class AmpStory extends AMP.BaseElement {
           this.element,
           'amp-story-page amp-story-page-attachment'
         );
-
-        this.initializeBookend_().then(() => this.showBookend_());
 
         this.vsync_.mutate(() => {
           this.element.setAttribute('i-amphtml-vertical', '');
@@ -2154,33 +2094,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Shows the bookend overlay.
-   * @private
-   */
-  showBookend_() {
-    this.buildAndPreloadBookend_().then(() => {
-      this.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
-    });
-  }
-
-  /**
-   * Hides the bookend overlay.
-   * @private
-   */
-  hideBookend_() {
-    this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
-  }
-
-  /**
-   * @param {boolean} isActive
-   * @private
-   */
-  onBookendStateUpdate_(isActive) {
-    this.toggleElementsOnBookend_(/* display */ isActive);
-    this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
-  }
-
-  /**
    * @param {boolean} isActive
    * @private
    */
@@ -2189,35 +2102,6 @@ export class AmpStory extends AMP.BaseElement {
       'i-amphtml-story-attachment-active',
       isActive
     );
-  }
-
-  /**
-   * Toggles content when bookend is opened/closed.
-   * @param {boolean} isActive
-   * @private
-   */
-  toggleElementsOnBookend_(isActive) {
-    if (
-      this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS
-    ) {
-      return;
-    }
-
-    const elements = scopedQuerySelectorAll(
-      this.element,
-      HIDE_ON_BOOKEND_SELECTOR
-    );
-
-    Array.prototype.forEach.call(elements, (el) => {
-      if (isActive) {
-        setImportantStyles(el, {
-          opacity: 0,
-          transition: 'opacity 0.1s',
-        });
-      } else {
-        resetStyles(el, ['opacity', 'transition']);
-      }
-    });
   }
 
   /**
@@ -2385,81 +2269,6 @@ export class AmpStory extends AMP.BaseElement {
       this.getAmpDoc(),
       'amp-story-education'
     );
-  }
-
-  /**
-   * Initializes bookend.
-   * @return {!Promise}
-   * @private
-   */
-  initializeBookend_() {
-    let bookendEl = this.element.querySelector('amp-story-bookend');
-    if (!bookendEl) {
-      bookendEl = createElementWithAttributes(
-        this.win.document,
-        'amp-story-bookend',
-        dict({'layout': 'nodisplay'})
-      );
-      this.element.appendChild(bookendEl);
-    }
-
-    return whenUpgradedToCustomElement(bookendEl).then(() => {
-      return bookendEl.getImpl().then((bookendImpl) => {
-        this.bookend_ = bookendImpl;
-      });
-    });
-  }
-
-  /**
-   * Preloads the bookend config if on the last page.
-   * @private
-   */
-  maybePreloadBookend_() {
-    if (
-      !this.activePage_ ||
-      !this.storeService_.get(StateProperty.CAN_SHOW_BOOKEND)
-    ) {
-      return;
-    }
-
-    const pageIndex = this.getPageIndex(this.activePage_);
-
-    if (pageIndex + 1 >= this.getPageCount()) {
-      this.buildAndPreloadBookend_();
-    }
-  }
-
-  /**
-   * Builds, fetches and sets the bookend publisher configuration.
-   * @return {!Promise<?./bookend/bookend-component.BookendDataDef>}
-   * @private
-   */
-  buildAndPreloadBookend_() {
-    this.bookend_.build();
-    return this.bookend_.loadConfigAndMaybeRenderBookend();
-  }
-
-  /**
-   * @return {!Promise<boolean>}
-   */
-  hasBookend() {
-    if (!this.storeService_.get(StateProperty.CAN_SHOW_BOOKEND)) {
-      return Promise.resolve(false);
-    }
-
-    // TODO(newmuis): Change this comment.
-    // On mobile there is always a bookend. On desktop, the bookend will only
-    // be shown if related articles have been configured.
-    if (this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE) {
-      return Promise.resolve(true);
-    }
-
-    return this.bookend_
-      .loadConfigAndMaybeRenderBookend(false /** renderBookend */)
-      .then(
-        (config) =>
-          !!(config && config.components && config.components.length > 0)
-      );
   }
 
   /**
@@ -2800,9 +2609,6 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   replay_() {
-    if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
-      this.hideBookend_();
-    }
     this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, []);
     const switchPromise = this.switchTo_(
       dev().assertElement(this.pages_[0].element).id,
@@ -2978,7 +2784,6 @@ export class AmpStory extends AMP.BaseElement {
 AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story', AmpStory, CSS);
   AMP.registerElement('amp-story-access', AmpStoryAccess);
-  AMP.registerElement('amp-story-bookend', AmpStoryBookend);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);

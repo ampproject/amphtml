@@ -178,35 +178,6 @@ config.run('amp-story analytics', {}, () => {
         expect(q['pageVisible']).to.equal('page-2');
       });
 
-      it('should send analytics event when entering bookend', async () => {
-        await browser.waitForElementLayout('#page-1[active]');
-        await clickAndWait('#right-1');
-
-        await browser.waitForElementLayout('#page-2[active]');
-        await clickAndWait('#right-2');
-
-        await browser.waitForElementLayout('amp-story-bookend');
-
-        const req = await RequestBank.withdraw();
-        const q = parseQueryString(req.url.substr(1));
-        expect(q['bookendEnter']).to.equal('true');
-      });
-
-      it('should send analytics event when exiting bookend', async () => {
-        await browser.waitForElementLayout('#page-1[active]');
-        await clickAndWait('#right-1');
-
-        await browser.waitForElementLayout('#page-2[active]');
-        await clickAndWait('#right-2');
-
-        await browser.waitForElementLayout('amp-story-bookend');
-        await clickAndWait('amp-story-bookend');
-
-        const req = await RequestBank.withdraw();
-        const q = parseQueryString(req.url.substr(1));
-        expect(q['bookendExit']).to.equal('true');
-      });
-
       it('should send same event twice when repeat option is absent in storyspec', async () => {
         await browser.waitForElementLayout('#page-1[active]');
         await clickAndWait('#right-1');
