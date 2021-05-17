@@ -15,10 +15,10 @@
  */
 
 import {Services} from '../services';
-import {bytesToString, stringToBytes} from '../utils/bytes';
+import {bytesToString, stringToBytes} from '../core/types/string/bytes';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin} from '../url';
-import {parseJson} from '../json';
+import {parseJson} from '../core/types/object/json';
 import {user} from '../log';
 
 /** @const {string} */

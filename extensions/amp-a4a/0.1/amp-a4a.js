@@ -71,13 +71,13 @@ import {
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
 import {padStart} from '../../../src/core/types/string';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {processHead} from './head-validation';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Decode} from '../../../src/core/types/string/bytes';
 import {whenWithinViewport} from './within-viewport';
 
 /** @type {Array<string>} */

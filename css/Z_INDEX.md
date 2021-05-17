@@ -99,6 +99,7 @@
 `.i-amphtml-story-consent-header` | 2 | [extensions/amp-story/1.0/amp-story-consent.css](/extensions/amp-story/1.0/amp-story-consent.css)
 `.i-amphtml-story-hint-container` | 2 | [extensions/amp-story/1.0/amp-story-hint.css](/extensions/amp-story/1.0/amp-story-hint.css)
 `amp-story-grid-layer` | 2 | [extensions/amp-story/1.0/amp-story.css](/extensions/amp-story/1.0/amp-story.css)
+`.controls` | 1 | [css/amp-ima-video-iframe.css](/css/amp-ima-video-iframe.css)
 `.amp-story-player-exit-control-button` | 1 | [css/amp-story-player-iframe.css](/css/amp-story-player-iframe.css)
 `.i-amphtml-layout-size-defined > [fallback]` | 1 | [css/ampshared.css](/css/ampshared.css)
 `.i-amphtml-layout-size-defined > [placeholder]` | 1 | [css/ampshared.css](/css/ampshared.css)

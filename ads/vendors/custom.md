@@ -222,7 +222,7 @@ If no slot was specified, the server returns a single template rather than an ar
 }
 ```
 
-The ad server must enforce [AMP CORS](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md#cors-security-in-amp).
+The ad server must enforce [AMP CORS](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-cors-requests.md#cors-security-in-amp).
 Here is an example set of the relevant response headers:
 
 ```html

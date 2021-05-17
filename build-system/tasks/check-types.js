@@ -119,11 +119,10 @@ const TYPE_CHECK_TARGETS = {
   },
   'src-examiner': {
     srcGlobs: ['src/examiner/**/*.js'],
-    warningLevel: 'QUIET',
   },
   'src-experiments': {
-    srcGlobs: ['src/experiments/**/*.js'],
-    warningLevel: 'QUIET',
+    srcGlobs: ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
+    externGlobs: ['src/experiments/**/*.extern.js', ...CORE_EXTERNS_GLOBS],
   },
   'src-inabox': {
     srcGlobs: ['src/inabox/**/*.js'],

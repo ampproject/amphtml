@@ -27,7 +27,7 @@ import {dev, user} from '../log';
 import {getCorsUrl, parseUrlDeprecated} from '../url';
 import {getService, registerServiceBuilder} from '../service';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {parseJson} from '../json';
+import {parseJson} from '../core/types/object/json';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
