@@ -108,7 +108,6 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       'amp-story-social-share'
     );
     storyElement.appendChild(shareElement);
-    bookendElement.remove();
 
     shareElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, shareUrl);
     xhrMock
