@@ -37,6 +37,8 @@ import {setStyles} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-apester-media';
+const BOTTOM_AD_HEIGHT = 50;
+const HAS_BOTTOM_AD_EVENT = 'has_bottom_ad';
 /**
  * @enum {string}
  */
@@ -274,6 +276,16 @@ class AmpApesterMedia extends AMP.BaseElement {
     return overflow;
   }
 
+  /**
+   *  @param {Element} iframe
+   *  @param {object} data
+   * */
+  safePostMessageToIframe(iframe, data) {
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow./*OK*/ postMessage(data, '*');
+    }
+  }
+
   /** @override */
   layoutCallback() {
     this.element.classList.add('amp-apester-container');
@@ -317,11 +329,19 @@ class AmpApesterMedia extends AMP.BaseElement {
               return vsync.mutatePromise(() => {
                 if (this.iframe_) {
                   this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
-                  if (media['campaignData']) {
+                  const campaignData = media['campaignData'];
+                  if (campaignData) {
+                    const bottomAdOptions = campaignData['bottomAdOptions'];
+                    if (bottomAdOptions && bottomAdOptions.enabled) {
+                      this.safePostMessageToIframe(this.iframe_, {
+                        type: HAS_BOTTOM_AD_EVENT,
+                        adHeight: BOTTOM_AD_HEIGHT,
+                      });
+                    }
                     this.iframe_.contentWindow./*OK*/ postMessage(
                       /** @type {JsonObject} */ ({
                         type: 'campaigns',
-                        data: media['campaignData'],
+                        data: campaignData,
                       }),
                       '*'
                     );
