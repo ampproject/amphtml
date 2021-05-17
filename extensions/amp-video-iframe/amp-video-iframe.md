@@ -32,10 +32,10 @@ supported by the AMP component library.
 
 1. If you'd like to **include a video directly on the AMP document**, you should use [`amp-video`](https://amp.dev/documentation/components/amp-video).
 
-2. If you're using a **common 3rd party** like Youtube, Vimeo or [others supported in AMP](../../spec/amp-video-interface.md), you should use their supported component (e.g. [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube), [`amp-vimeo`](https://amp.dev/documentation/components/amp-vimeo)).
+2. If you're using a **common 3rd party** like Youtube, Vimeo or [others supported in AMP](../../docs/spec/amp-video-interface.md), you should use their supported component (e.g. [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube), [`amp-vimeo`](https://amp.dev/documentation/components/amp-vimeo)).
 
 3. If you've built a **custom player** or are using one provided by an **unsupported 3rd party**, **you should use `amp-video-iframe`**. This is different from using [`amp-iframe`](https://amp.dev/documentation/components/amp-iframe) in that it enables
-   [Video Features on AMP](../../spec/amp-video-interface.md). See [behavior](#behavior) below for more details.
+   [Video Features on AMP](../../docs/spec/amp-video-interface.md). See [behavior](#behavior) below for more details.
 
 4. If you're a **3rd party video vendor**, **you can use `amp-video-iframe`** to [provide a simple way for authors to embed video.](#third-party-video-vendors)
 
@@ -45,7 +45,7 @@ supported by the AMP component library.
 
 -   By default, an `amp-video-iframe` is sandboxed.
 
--   `amp-video-iframe` implements all [Video Features](../../spec/amp-video-interface.md), like autoplay, minimize-to-corner and rotate-to-fullscreen.
+-   `amp-video-iframe` implements all [Video Features](../../docs/spec/amp-video-interface.md), like autoplay, minimize-to-corner and rotate-to-fullscreen.
 
 -   `amp-video-iframe` must only request resources via HTTPS.
 
@@ -82,7 +82,7 @@ not already have a fragment.</td>
     <td width="40%"><strong>autoplay</strong></td>
     <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
 played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, <a href="https://github.com/ampproject/amphtml/blob/main/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
+to be played, <a href="https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
@@ -142,9 +142,9 @@ Include an `amp-video-iframe` on your AMP document:
 
 ### Third-party video vendors
 
-If you're a vendor that does _not_ provide a [custom video player component](../../spec/amp-video-interface.md), you can integrate with AMP in the form of an `amp-video-iframe` configuration, so authors can embed video provided through your service.
+If you're a vendor that does _not_ provide a [custom video player component](../../docs/spec/amp-video-interface.md), you can integrate with AMP in the form of an `amp-video-iframe` configuration, so authors can embed video provided through your service.
 
-Note: For most video providers, `amp-video-iframe` provides enough tools for common playback actions (see [methods](#method) and [events](#postEvent)). Refer to the [vendor player spec](../../spec/amp-3p-video.md) for more details on whether you can use `amp-video-iframe` or you should build a third-party player component instead.
+Note: For most video providers, `amp-video-iframe` provides enough tools for common playback actions (see [methods](#method) and [events](#postEvent)). Refer to the [vendor player spec](../../docs/spec/amp-3p-video.md) for more details on whether you can use `amp-video-iframe` or you should build a third-party player component instead.
 
 As a vendor, you can serve a generic [integration document](#integration-inside-the-frame) that references provided videos via URL parameters. AMP authors who use your video service only need to include an `<amp-video-iframe>` tag in their documents:
 

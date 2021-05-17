@@ -117,7 +117,7 @@ is allowed by including the following headers in the response:
     custom headers are not included, they will be dropped by the browser.</dd>
 </dl>
 
-For details on CORS verification in AMP context, see [Verify CORS requests](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md#verify-cors-header).
+For details on CORS verification in AMP context, see [Verify CORS requests](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-cors-requests.md#verify-cors-header).
 
 ### Creating an AMPHTML ad extension implementation
 

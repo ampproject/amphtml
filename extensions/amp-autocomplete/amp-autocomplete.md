@@ -75,7 +75,7 @@ You can specify a template in one of two ways:
 -   a `template` attribute that references an ID of an existing templating element.
 -   a templating element nested directly inside the `amp-autocomplete` element.
 
-For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
+For more details on templates, see [AMP HTML Templates](../../docs/spec/amp-html-templates.md).
 
 [tip type="note"]
 Note also that a good practice is to provide templates a single top-level element to prevent unintended side effects. This also guarantees control of the [`data-value` or `data-disabled`](https://amp.dev/documentation/examples/components/amp-autocomplete/#suggesting-rich-content) attribute on the delimiting element. As an example, the following input:

@@ -89,7 +89,7 @@ The AMP runtime provides the following information to the ad:
     </ul>
   </dd>
   <dt><code>window.context.sourceUrl</code></dt>
-  <dd>Contains the source URL of the original AMP document. See details <a href="../spec/amp-var-substitutions.md#source-url">here</a></code>.</dd>
+  <dd>Contains the source URL of the original AMP document. See details <a href="../docs/spec/amp-var-substitutions.md#source-url">here</a></code>.</dd>
   <dt><code>window.context.startTime</code></dt>
   <dd>Contains the time at which processing of the amp-ad element started.</dd>
 </dl>

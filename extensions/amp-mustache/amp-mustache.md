@@ -45,7 +45,7 @@ Mustache is a logic-less template syntax. See [Mustache specification](http://mu
 ## Usage
 
 The `amp-mustache` template has to be defined and used according to the
-[AMP Template Spec](../../spec/amp-html-templates.md).
+[AMP Template Spec](../../docs/spec/amp-html-templates.md).
 
 First, the `amp-mustache` has to be declared/loaded like this:
 

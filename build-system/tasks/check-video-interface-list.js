@@ -19,7 +19,7 @@ const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../common/diff');
 
 /** Checks or updates 3rd party video player list on this Markdown file. */
-const filepath = 'spec/amp-video-interface.md';
+const filepath = 'docs/spec/amp-video-interface.md';
 
 /** Excludes these extensions since they're on a separate list. */
 const excludeGeneric = ['amp-video', 'amp-video-iframe'];

@@ -140,7 +140,7 @@ selectors will be set to `display: none` in all child documents.
 ### Substitutions
 
 The `amp-next-page` src allows all standard URL variable substitutions. See
-the [Substitutions Guide](../../../spec/amp-var-substitutions.md) for more info.
+the [Substitutions Guide](../../../docs/spec/amp-var-substitutions.md) for more info.
 
 For example:
 

@@ -45,7 +45,7 @@ the `layout` attribute.
 [tip type="read-on"]
 
 Learn more about layouts in the
-[AMP HTML Layout System](../../spec/amp-html-layout.md)
+[AMP HTML Layout System](../../docs/spec/amp-html-layout.md)
 spec and
 [Supported Layouts](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout.html#the-layout-attribute).
 

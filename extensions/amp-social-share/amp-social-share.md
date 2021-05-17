@@ -230,7 +230,7 @@ As these providers are not pre-configured, you'll need to create the appropriate
 
 ### Variable Substitution
 
-You can use [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. In the example below, `TITLE` is substituted with the page title and `CANONICAL_URL` with the document's canonical URL.
+You can use [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. In the example below, `TITLE` is substituted with the page title and `CANONICAL_URL` with the document's canonical URL.
 
 ```html
 <amp-social-share
