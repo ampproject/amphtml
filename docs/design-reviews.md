@@ -19,18 +19,18 @@ You can optionally join the [design review Google Group](https://groups.google.c
 
 Because AMP contributors are located all over the world we rotate the design review times to accommodate people in different time zones. The time and date for a design review will be specified in that design review's issue.
 
-If none of the design review times are convenient for you and you have a design you would like to discuss please reach out to mrjoro on [Slack](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md#discussion-channels).
+If none of the design review times are convenient for you and you have a design you would like to discuss please reach out to mrjoro on [Slack](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels).
 
 ## Bringing your design to a design review
 
-Design reviews are a great way to discuss and refine your designs with knowledgeable people in the community. Not every feature/change has to be brought to a design review. For smaller changes a design review is completely optional; for larger changes covered by the [code and feature contribution process](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md) work with your reviewer to determine if a design review makes sense.
+Design reviews are a great way to discuss and refine your designs with knowledgeable people in the community. Not every feature/change has to be brought to a design review. For smaller changes a design review is completely optional; for larger changes covered by the [code and feature contribution process](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md) work with your reviewer to determine if a design review makes sense.
 
 The process for bringing a design to the design review is:
 
 -   Determine how to document your design.
     -   Most larger, more complex designs should use an [explainer](#explainers).
     -   For smaller issues, you may use a fully detailed Intent-to-implement (I2I) GitHub issue or other GitHub issue describing the problem and proposed solution.
-    -   If you aren't sure which option you should use to document your design, ask your reviewer or the [#contributing Slack channel](https://amphtml.slack.com/messages/contributing/) ([sign up](https://bit.ly/amp-slack-signup)).
+    -   If you aren't sure which option you should use to document your design, ask your reviewer or the [#contributing Slack channel](https://amphtml.slack.com/messages/docs/) ([sign up](https://bit.ly/amp-slack-signup)).
 -   Perform a design pre-review with your reviewer if you have one; they may include other people that know the areas your design affects in this pre-review as well. If you don't have a reviewer you can request a pre-review in the [#contributing Slack channel](https://amphtml.slack.com/messages/contributing) ([sign up](https://bit.ly/amp-slack-signup)). It is fine to request a pre-review before your design is complete.
 -   When your design is ready to be discussed at a design review add a comment on the [Design Review GitHub issue](https://github.com/ampproject/amphtml/labels/Type%3A%20Design%20Review) for the date/time that works best for you.
     -   You must add your design review topic to the design review issue at least 24 hours in advance of the design review.

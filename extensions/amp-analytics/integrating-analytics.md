@@ -20,7 +20,7 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
 
 ## Adding your configuration to the AMP HTML runtime
 
-1. Create an [Intent-To-Implement issue](../../CONTRIBUTING.md#contributing-features) stating that you'll be adding your analytics service's configuration to AMP HTML's runtime. Be sure to include **cc @ampproject/wg-analytics** in your description.
+1. Create an [Intent-To-Implement issue](../../docs/contributing.md#contributing-features) stating that you'll be adding your analytics service's configuration to AMP HTML's runtime. Be sure to include **cc @ampproject/wg-analytics** in your description.
 1. Develop a patch that implements the following:
     1. A new configuration json file `${vendorName}.json` in the vendors [folder](https://github.com/ampproject/amphtml/tree/main/extensions/amp-analytics/0.1/vendors) including any options above and beyond the default, such as:
         1. `"vars": {}` for additional default variables.

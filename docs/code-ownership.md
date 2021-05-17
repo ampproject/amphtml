@@ -3,7 +3,7 @@
 This document describes the code ownership (OWNERS) model for the AMP open source
 project. This model is used in the [amphtml repository](https://github.com/ampproject/amphtml) and may be used by other AMP repositories as well.
 
-For more information on the overall code contribution process that the OWNERS model is a part of, see the [Contributing code and features](https://github.com/ampproject/amphtml/blob/main/contributing/contributing-code.md) documentation.
+For more information on the overall code contribution process that the OWNERS model is a part of, see the [Contributing code and features](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md) documentation.
 
 The goals of enforcing AMP code ownership are as follows:
 

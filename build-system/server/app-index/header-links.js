@@ -18,13 +18,13 @@ module.exports = [
   {
     'name': 'Developing',
     'href':
-      'https://' +
-      'github.com/ampproject/amphtml/blob/main/contributing/DEVELOPING.md',
+      'https://github.com/ampproject/amphtml/blob/main/docs/developing.md',
   },
   {
     'divider': true,
     'name': 'Contributing',
-    'href': 'https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md',
+    'href':
+      'https://github.com/ampproject/amphtml/blob/main/docs/contributing.md',
   },
   {
     'name': 'Github',

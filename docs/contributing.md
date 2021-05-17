@@ -27,7 +27,7 @@ If you have questions about _using_ AMP or are _encountering problems using AMP_
 
 [File an issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.md&title=) if you find a bug in AMP. Provide a detailed description and steps for reproducing the bug; screenshots and working examples that demonstrate the problem are appreciated!
 
-The community regularly monitoring issues and will try to fix open bugs quickly according to our [prioritization guidelines](./contributing/issue-priorities.md).
+The community regularly monitoring issues and will try to fix open bugs quickly according to our [prioritization guidelines](./issue-priorities.md).
 
 ## Make a suggestion
 
@@ -39,19 +39,19 @@ If you are suggesting a feature that you are intending to implement, please see 
 
 We'd love to have your help contributing code and features to AMP!
 
-See the [Contributing code and features](contributing/contributing-code.md) document for details on the process you can use to add code/features.
+See the [Contributing code and features](docs/contributing-code.md) document for details on the process you can use to add code/features.
 
 ## Get started with open source
 
 If you are new to contributing to an open source project, Git/GitHub, etc. welcome! We are glad you're interested in contributing to AMP and we want to help make your open source experience a success.
 
-The [Getting Started End-to-End Guide](./contributing/getting-started-e2e.md) provides step-by-step instructions for everything from creating a GitHub account to getting your code reviewed and merged. Even if you've never contributed to an open source project before you'll soon be building AMP, making improvements and seeing your code live across the web.
+The [Getting Started End-to-End Guide](./getting-started-e2e.md) provides step-by-step instructions for everything from creating a GitHub account to getting your code reviewed and merged. Even if you've never contributed to an open source project before you'll soon be building AMP, making improvements and seeing your code live across the web.
 
 The community has created a list of [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) specifically for new contributors to the project. Feel free to find one of the [unclaimed Good First Issues](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aopen%20label%3A%22good%20first%20issue%22%20-label%3A%22GFI%20Claimed!%22) that interests you, claim it by adding a comment to it and jump in!
 
 If you're interested in helping out but can't find a Good First Issue that matches your skills/interests, [sign up for our Slack](https://bit.ly/amp-slack-signup) and then reach out in the [#welcome-contributors channel](https://amphtml.slack.com/messages/welcome-contributors/) or send a Direct Message to [mrjoro](https://amphtml.slack.com/team/mrjoro/).
 
-If you run into any problems we have plenty of people who are willing to help; see the [How to get help](./contributing/getting-started-e2e.md#how-to-get-help) section of the Getting Started guide.
+If you run into any problems we have plenty of people who are willing to help; see the [How to get help](./getting-started-e2e.md#how-to-get-help) section of the Getting Started guide.
 
 ## Ongoing participation
 
@@ -77,4 +77,4 @@ Most working groups post approximately bi-weekly [Status Update GitHub issues](h
 
 ### Weekly design reviews
 
-The community holds weekly engineering [design reviews](./contributing/design-reviews.md) via video conference. We encourage everyone in the community to participate in these discussions and to bring their designs for new features and significant bug fixes to these reviews.
+The community holds weekly engineering [design reviews](./design-reviews.md) via video conference. We encourage everyone in the community to participate in these discussions and to bring their designs for new features and significant bug fixes to these reviews.
