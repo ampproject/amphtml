@@ -237,8 +237,7 @@ export class Values {
    * @template T
    */
   unsubscribe(prop, handler) {
-    const {key} = prop;
-    const used = this.usedByKey_?.get(key);
+    const used = this.usedByKey_?.get(prop.key);
     if (!used || !removeItem(used.subscribers, handler)) {
       // Not a subscriber.
       return;
@@ -258,8 +257,7 @@ export class Values {
    * @protected
    */
   ping(prop, refreshParent) {
-    const {key} = prop;
-    this.usedByKey_?.get(key)?.ping(refreshParent);
+    this.usedByKey_?.get(prop.key)?.ping(refreshParent);
   }
 
   /**
@@ -298,19 +296,19 @@ export class Values {
     }
     if (this.isConnected_()) {
       // Ping all properties for recalculation when the tree is connected.
-      usedByKey.forEach((used) => {
+      for (const used of usedByKey) {
         const {prop} = used;
         this.ping(prop, true);
-      });
+      }
     } else {
       // On disconnect, only do minimal possible work: disconnect recursive
       // subscribers to ensure that they are not leaked.
-      usedByKey.forEach((used) => {
+      for (const used of usedByKey) {
         const {prop} = used;
         if (isRecursive(prop)) {
           this.updateParentContextNode_(used, null);
         }
-      });
+      }
     }
   }
 
@@ -353,10 +351,11 @@ export class Values {
     let newScheduled = null;
     const usedByKey = this.usedByKey_;
     if (usedByKey) {
-      usedByKey.forEach((used) => {
+      for (const used of usedByKey) {
         const {prop} = used;
+        const {key} = prop;
         // Only ping unhandled props.
-        if ((newScheduled || scheduled).indexOf(prop.key) == -1) {
+        if ((newScheduled || scheduled).indexOf(key) == -1) {
           this.ping(prop, true);
 
           if (this.contextNode_.children && this.has(prop)) {
@@ -365,10 +364,10 @@ export class Values {
             }
             // Stop the deepscan for this value. It will be propagated
             // by the responsible node.
-            newScheduled.push(prop.key);
+            newScheduled.push(key);
           }
         }
-      });
+      }
     }
     return newScheduled || scheduled;
   }
@@ -484,29 +483,29 @@ export class Values {
       return;
     }
 
-    usedByKey.forEach((used) => {
+    for (const used of usedByKey) {
       used.counter = 0;
-    });
+    }
 
     // Recompute all "pinged" values for this node. It checks if dependencies
     // are satisfied and recomputes values accordingly.
     let updated;
     do {
       updated = 0;
-      usedByKey.forEach((used) => {
+      for (const used of usedByKey) {
         if (used.pending != Pending.NOT_PENDING) {
           const {key} = used.prop;
           used.counter++;
           if (used.counter > 5) {
             // A simple protection from infinte loops.
-            rethrowAsync(new Error('cyclical prop: ' + key));
+            rethrowAsync(`cyclical prop: ${key}`);
             used.pending = Pending.NOT_PENDING;
             return;
           }
           updated++;
           this.tryUpdate_(used);
         }
-      });
+      }
     } while (updated > 0);
   }
 
@@ -549,7 +548,7 @@ export class Values {
     const usedByKey = this.usedByKey_;
     if (
       oldValue === value ||
-      used !== (usedByKey && usedByKey.get(key)) ||
+      used !== usedByKey?.get(key) ||
       !this.isConnected_()
     ) {
       // Either the value didn't change, or no one needs this value anymore.
@@ -560,9 +559,9 @@ export class Values {
 
     // Notify subscribers.
     const {subscribers} = used;
-    subscribers.forEach((handler) => {
+    for (const handler of subscribers) {
       handler(value);
-    });
+    }
   }
 
   /**
@@ -580,9 +579,7 @@ export class Values {
     const {prop, depValues} = used;
     const {key, compute, defaultValue} = prop;
 
-    const inputsByKey = this.inputsByKey_;
-    const inputs = inputsByKey && inputsByKey.get(key);
-    const inputValues = inputs && inputs.values;
+    const inputValues = this.inputsByKey_?.get(key)?.values;
 
     // Calculate parent value.
     const recursive = calcRecursive(prop, inputValues);
