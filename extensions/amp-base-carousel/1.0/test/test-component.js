@@ -15,9 +15,9 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {BaseCarousel} from '../base-carousel';
+import {BaseCarousel} from '../component';
 import {mount} from 'enzyme';
-import {useStyles} from '../base-carousel.jss';
+import {useStyles} from '../component.jss';
 
 describes.sandboxed('BaseCarousel preact component', {}, () => {
   const styles = useStyles();
