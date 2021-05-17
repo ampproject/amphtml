@@ -62,6 +62,7 @@ initializeTests();
  * Initializes the global state required by all AMP unit and integration tests.
  */
 function initializeTests() {
+  window.__AMP_TEST = true;
   initializeTestConstructs();
   exposeKarmaConfig();
   resetTestingState();

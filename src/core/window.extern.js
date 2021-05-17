@@ -24,3 +24,6 @@ window.__AMP_ASSERTION_CHECK;
 
 /** @type {undefined|function(this:Window,!Error,Element=)} */
 window.__AMP_REPORT_ERROR;
+
+/** @type {undefined|boolean} */
+window.__AMP_TEST;

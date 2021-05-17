@@ -15,6 +15,7 @@
  */
 
 import {internalRuntimeVersion} from './internal-version';
+import {isMinified as isMinifiedMode, isTest as isTestMode} from './core/mode';
 import {parseQueryString} from './core/types/string/url';
 
 /**
@@ -64,14 +65,11 @@ function getMode_(win) {
   const AMP_CONFIG = self.AMP_CONFIG || {};
 
   // Magic constants that are replaced by closure compiler.
-  // IS_MINIFIED is always replaced with true when closure compiler is used
-  // while IS_FORTESTING is only replaced when `amp dist` is called without the
+  // IS_FORTESTING is only replaced when `amp dist` is called without the
   // --fortesting flag.
   const IS_FORTESTING = true;
-  const IS_MINIFIED = false;
 
-  const runningTests =
-    IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
+  const runningTests = isTestMode();
   const isLocalDev = IS_FORTESTING && (!!AMP_CONFIG.localDev || runningTests);
   const hashQuery = parseQueryString(
     // location.originalHash is set by the viewer when it removes the fragment
@@ -94,7 +92,7 @@ function getMode_(win) {
     esm: IS_ESM,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
-    minified: IS_MINIFIED,
+    minified: isMinifiedMode(),
     test: runningTests,
     log: hashQuery['log'],
     version: internalRuntimeVersion(),

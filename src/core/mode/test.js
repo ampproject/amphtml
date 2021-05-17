@@ -15,13 +15,13 @@
  */
 
 // Magic constant that is replaced by babel.
-// IS_MINIFIED is always replaced with true when closure compiler is used
-const IS_MINIFIED = false;
+// IS_FORTESTING is replaced with false when --fortesting is not used.
+const IS_FORTESTING = true;
 
 /**
- * Returns true whenever closure compiler is used.
+ * Returns true during tests.
  * @return {boolean}
  */
-export function isMinified() {
-  return IS_MINIFIED;
+export function isTest() {
+  return IS_FORTESTING && !!win.__AMP_TEST;
 }

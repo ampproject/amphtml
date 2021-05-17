@@ -22,6 +22,6 @@ const IS_MINIFIED = false;
  * Returns true whenever closure compiler is used.
  * @return {boolean}
  */
-export function isMinified() {
+export function isMinifiedMode() {
   return IS_MINIFIED;
 }
