@@ -53,7 +53,7 @@
      'amp-ad',
      dict({
         'width': `${width}`,
-        'height': '0',
+        'height': `${height}`,
         'type': 'doubleclick',
         'style': 'position: absolute; bottom: 0;left: 50%;margin-left: -150px;margin-bottom: 0;',
         'layout': 'fixed',
