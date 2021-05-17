@@ -1,6 +1,6 @@
 # Inclusion of third party software, embeds, and services into AMP
 
-In general all inclusions are subject to [CONTRIBUTING.md](../CONTRIBUTING.md). This files outlines specific rules for certain types of external embed and other software inclusions.
+In general all inclusions are subject to [docs/contributing.md](../docs/contributing.md). This files outlines specific rules for certain types of external embed and other software inclusions.
 
 In order to qualify for inclusion, an extended component that integrates a third-party service must generally meet the notability requirements of the English Wikipedia, and is in common use in Internet publishing. As a rough rule of thumb, it should be used or requested by 5% of the top 10,000 websites as noted on builtwith.com, or already integrated into [oEmbed](http://oembed.com/).
 
@@ -10,7 +10,7 @@ We highly prefer integrations that do not use iframes. JSONP cannot be used for 
 
 Examples: Youtube, Vimeo videos; Tweets, Instagrams; comment systems; polls; quizzes; document viewers
 
--   Our intent is to provide first class support for all embeds that fulfill the notability guidelines laid out in [CONTRIBUTING.md](../CONTRIBUTING.md).
+-   Our intent is to provide first class support for all embeds that fulfill the notability guidelines laid out in [docs/contributing.md](../docs/contributing.md).
 -   Consider whether a iframe-with-placeholder solution fits your use case where iframe generation is not done immediately (can be done before user action for instant loading of iframe).
 -   Consider whether all that is needed is some documentation for how to use the embed with `amp-iframe`.
 -   Iframes and all sub resources must be served from HTTPS.
@@ -66,5 +66,5 @@ Review the [ads/README](../ads/README.md) for further details on ad integration.
 You should ensure there are integration tests for your extension. These should be added to the AMP
 repo where it makes sense. In some cases this won't be possible because it relies on bringing up
 third-party infrastructure. In these cases you should maintain testing for the extension on your
-infrastructure against both production AMP and [canary](https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md#amp-experimental-and-beta-channels).
-Upon any monitored failures, an escalation can be raised in [regular AMP communication channel](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md#discussion-channels).
+infrastructure against both production AMP and [canary](https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md#amp-experimental-and-beta-channels).
+Upon any monitored failures, an escalation can be raised in [regular AMP communication channel](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels).

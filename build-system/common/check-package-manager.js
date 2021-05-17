@@ -30,7 +30,7 @@ const https = require('https');
 const {getStdout} = require('./process');
 
 const setupInstructionsUrl =
-  'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-quick.md#one-time-setup';
+  'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-quick.md#one-time-setup';
 const nodeDistributionsUrl = 'https://nodejs.org/dist/index.json';
 
 const warningDelaySecs = 10;

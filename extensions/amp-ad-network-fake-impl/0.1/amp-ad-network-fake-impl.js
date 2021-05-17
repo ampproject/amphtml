@@ -95,7 +95,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
       // In the convert creative mode the content is the plain AMP HTML.
       // This mode is primarily used for A4A Envelope for testing.
-      // See DEVELOPING.md for more info.
+      // See developing.md for more info.
       if (this.element.getAttribute('a4a-conversion') == 'true') {
         return response.text().then((responseText) => {
           // When using data: url the legacy amp cors param is interpreted as

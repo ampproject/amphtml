@@ -450,10 +450,10 @@ Yes! These features have been merged to the main repository, but since there is 
 
 ### I want the bleeding-edge and latest features, how can I get them?
 
-AMP provides some channels that you can opt-in to get the latest changes. To opt-in, visit the [AMP Project Experiments page](https://cdn.ampproject.org/experiments.html) and select a channel. More information about the [AMP Release Channels](https://github.com/ampproject/amphtml/blob/main/contributing/release-schedule.md#amp-experimental-and-beta-channels).
+AMP provides some channels that you can opt-in to get the latest changes. To opt-in, visit the [AMP Project Experiments page](https://cdn.ampproject.org/experiments.html) and select a channel. More information about the [AMP Release Channels](https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md#amp-experimental-and-beta-channels).
 
 ### I have found a bug or have questions / comments / issues, how do I contact you?
 
 If you have found a bug or have an issue request, file a [Github issue](https://github.com/ampproject/amphtml/issues?q=is%3Aissue+is%3Aopen+label%3A%22WG%3A+stories%22+) and tag the @ampproject/wg-stories working group.
 
-For questions / disscusion, join the [amp-story slack channel](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md#discussion-channels) and ping us!.
+For questions / disscusion, join the [amp-story slack channel](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) and ping us!.

@@ -111,7 +111,7 @@ function printFixMessages() {
     yellow('NOTE 4:'),
     'For more information, read',
     cyan(
-      'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#code-quality-and-style\n'
+      'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md#code-quality-and-style\n'
     )
   );
 }

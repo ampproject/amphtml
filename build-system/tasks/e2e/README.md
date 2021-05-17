@@ -17,7 +17,7 @@ AMP contributors embrace testing to maintain confidence that their code is execu
 
 This document is a usage guide. For full test command documentation, consult the following resource:
 
--   [Information on executing tests](../../../contributing/TESTING.md)
+-   [Information on executing tests](../../../docs/testing.md)
 
 ## What is an end-to-end test?
 

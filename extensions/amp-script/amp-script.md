@@ -151,7 +151,7 @@ For a complete list of supported DOM APIs, see the [API compatibility table](htt
 
 `amp-script` supports common Web APIs like `Fetch`, `WebSockets`, `localStorage`, `sessionStorage`, and `Canvas`. Presently, the `History` API is not implemented, and neither are cookies.
 
-`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md).
+`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md).
 
 [tip type="default"]
 For a set of samples showing `amp-script` in use, [see here](https://amp.dev/documentation/examples/components/amp-script/).

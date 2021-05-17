@@ -41,7 +41,7 @@ this code in the amphtml src tree at the location of
 `amphtml/extensions/amp-cat/0.1/`. This document only describes how to specify
 validation rules for an extended component - it does not cover implementing its
 runtime behavior. For the latter, see the [Building an AMP
-Extension](https://github.com/ampproject/amphtml/blob/main/contributing/building-an-amp-extension.md)
+Extension](https://github.com/ampproject/amphtml/blob/main/docs/building-an-amp-extension.md)
 guide.
 
 ## Validation Rules
@@ -502,4 +502,4 @@ This document attempts to summarize some of the more commonly used rules for
 creating validator extended components. More complex rules are possible and new rule
 types can even be added as needed. If your goals are not met by the rules in
 this document, [don't hesitate to
-contact](https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md#discussion-channels) the AMP developers and ask for suggestions.
+contact](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) the AMP developers and ask for suggestions.

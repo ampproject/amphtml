@@ -9,8 +9,8 @@
   - Mention the GitHub issue that is being addressed by the pull request.
   - The keywords `Fixes`, `Closes`, or `Resolves` followed the issue number will automatically close the issue.
 
-> NOTE1: All non-trivial changes (like introducing new features or components) should have an associated issue or reference an I2I (intent-to-implement: go.amp.dev/i2i). Please read through the contribution process (go.amp.dev/contributing/code) for more information.
-> NOTE2: To ensure that all PR checks are triggered, make sure you've authenticated with the services listed in the one-time setup instructions at https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-quick.md#one-time-setup (see last step).
+> NOTE1: All non-trivial changes (like introducing new features or components) should have an associated issue or reference an I2I (intent-to-implement: go.amp.dev/i2i). Please read through the contribution process (go.amp.dev/docs/code) for more information.
+> NOTE2: To ensure that all PR checks are triggered, make sure you've authenticated with the services listed in the one-time setup instructions at https://github.com/ampproject/amphtml/blob/main/docs/getting-started-quick.md#one-time-setup (see last step).
 
 # Example of a good description:
 

@@ -128,7 +128,7 @@ amp-fantastic-player:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-
 
 ### `props`
 
-[**`props`**](https://github.com/ampproject/amphtml/blob/main/contributing/building-a-bento-amp-extension.md#preactbaseelementprops) map the AMP element's attributes to the Preact component props. Take a look at [`VideoBaseElement`](../extensions/amp-video/1.0/base-element.js) for how most video properties are mapped. On your own `base-element.js`, you should specify any of them you support.
+[**`props`**](https://github.com/ampproject/amphtml/blob/main/docs/building-a-bento-amp-extension.md#preactbaseelementprops) map the AMP element's attributes to the Preact component props. Take a look at [`VideoBaseElement`](../extensions/amp-video/1.0/base-element.js) for how most video properties are mapped. On your own `base-element.js`, you should specify any of them you support.
 
 ```js
 // base-element.js

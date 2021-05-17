@@ -41,7 +41,7 @@ module.exports = () => html`
       <div class="form-info">
         <span>Takes canonical, AMPHTML and Google viewer URLs.</span>
         <a
-          href="https://github.com/ampproject/amphtml/blob/main/contributing/TESTING.md#document-proxy"
+          href="https://github.com/ampproject/amphtml/blob/main/docs/testing.md#document-proxy"
           target="_blank"
         >
           What's this?

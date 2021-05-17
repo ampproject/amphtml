@@ -40,7 +40,7 @@ Significant changes (e.g. new components or significant changes to behavior) req
 -   [ ] Determine who needs to approve your I2I. Changes that have a significant impact on AMP's behavior or significant new features require the approval from the [Approvers Working Group (WG)](https://github.com/ampproject/wg-approvers). Work with your guide to determine whether your change is significant enough that it requires approval from the Approvers Working Group and/or any other [Working Group](https://github.com/ampproject/meta/tree/main/working-groups).
 -   [ ] Get pre-approval from the Approvers WG if needed. For changes that require approval from the Approvers WG, at least 3 members of the Approvers WG should provide pre-approval on the I2I before significant implementation work proceeds.
 -   [ ] Finalize the design of your change.
-    -   Familiarize yourself with our [Design Principles](DESIGN_PRINCIPLES.md).
+    -   Familiarize yourself with our [Design Principles](design-principles.md).
     -   Your guide can help you determine if your change requires a design doc and whether it should be brought to a [design review](./design-reviews.md).
 -   [ ] Proceed with the [implementation](#implementation) of your change.
 -   [ ] For changes that require approval from the Approvers WG, file an [Intent-to-ship (I2S) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+SHIP&template=intent-to-ship--i2s-.md&title=I2S:%20%3Cyour%20change/update%3E). Indicate which experiment is gating your change and a rollout plan. Once this issue is approved by 3 members of the Approvers WG the rollout plan described in the I2S may proceed.
@@ -69,12 +69,12 @@ Once you have found a guide, make sure to @-mention them on any issues / PRs rel
 -   Write your code.
     -   For more substantial changes, multiple smaller PRs are preferable to one large PR. These will be easier to review and can prevent wasted work.
     -   Consult these resources for guidance and guidelines:
-        -   **Design**: [AMP Design Principles](./DESIGN_PRINCIPLES.md)
+        -   **Design**: [AMP Design Principles](./design-principles.md)
         -   **JavaScript**: [Google JavaScript Code Style Guide](https://google.github.io/styleguide/jsguide.html)
         -   **CSS**: [Writing CSS For AMP Runtime](./writing-css.md)
         -   **Creating new components**:
             -   [Instructions and Guidelines for building an AMP component](./building-an-amp-extension.md)
-            -   Learn to create your first component in this [guide](https://github.com/ampproject/amphtml/blob/main/contributing/building-an-amp-extension.md)
+            -   Learn to create your first component in this [guide](https://github.com/ampproject/amphtml/blob/main/docs/building-an-amp-extension.md)
             -   Watch this [YouTube video](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) to learn about "Building a new AMP component"
         -   **Integrating third-party software, embeds, services**: [Guidelines](../3p/README.md)
         -   **Accessibility**:
@@ -87,8 +87,8 @@ Once you have found a guide, make sure to @-mention them on any issues / PRs rel
 -   Prepare for your code review.
     -   For more substantial changes, it's usually preferable to have your code reviewed before you make a significant investment in new tests, examples, etc.
     -   Before your final review, make sure your change:
-        -   [Has good test coverage](./TESTING.md)
-        -   [Follows the style and design guidelines](./DEVELOPING.md#guidelines--style)
+        -   [Has good test coverage](./testing.md)
+        -   [Follows the style and design guidelines](./developing.md#guidelines--style)
         -   [Provides good documentation](./building-an-amp-extension.md#documenting-your-element)
         -   [Passes the presubmit checks (no lint and type check errors, tests are passing)](../build-system/common/enable-git-pre-push.sh#L17-L20)
         -   [Includes validation rules and tests, if relevant](./building-an-amp-extension.md#allowing-proper-validations)
@@ -144,7 +144,7 @@ We now have a bot that will automatically assign Owners to a PR once it is creat
 
 Once the PR has been approved, anyone with commit rights to the repository may merge the PR, including its author.
 
-These guidelines are specific to the amphtml repository. Other ampproject repos may follow the same guidelines or use different guidelines as documented in their CONTRIBUTING.md files.
+These guidelines are specific to the amphtml repository. Other ampproject repos may follow the same guidelines or use different guidelines as documented in their docs/contributing.md files.
 
 ### Roles
 
@@ -182,7 +182,7 @@ We have a well-defined process for handling requests for changes to the **experi
 
 **Keep in mind that performing a cherry-pick requires a significant amount of work from you and the on-duty engineer** and they can take a long time to process.
 
--   In general only fixes for [P0 issues](https://github.com/ampproject/amphtml/blob/main/contributing/issue-priorities.md) may be cherry-picked. P0 issues are those that:
+-   In general only fixes for [P0 issues](https://github.com/ampproject/amphtml/blob/main/docs/issue-priorities.md) may be cherry-picked. P0 issues are those that:
     -   cause privacy or security issues
     -   cause user data loss
     -   break existing AMP web pages in a significant way
