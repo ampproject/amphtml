@@ -35,7 +35,7 @@ import {
   useMemo,
   useRef,
 } from '../../../src/preact';
-import {useStyles} from './base-carousel.jss';
+import {useStyles} from './component.jss';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last

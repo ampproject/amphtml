@@ -25,7 +25,7 @@ import {poll} from '../../../../testing/iframe';
 import {setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/core/types/array';
 import {toggleExperiment} from '../../../../src/experiments';
-import {useStyles} from '../../../amp-base-carousel/1.0/base-carousel.jss';
+import {useStyles} from '../../../amp-base-carousel/1.0/component.jss';
 import {waitFor} from '../../../../testing/test-helper';
 
 describes.realWin(

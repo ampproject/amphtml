@@ -42,7 +42,7 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
-import {useStyles} from './base-carousel.jss';
+import {useStyles} from './component.jss';
 
 /**
  * @enum {string}
