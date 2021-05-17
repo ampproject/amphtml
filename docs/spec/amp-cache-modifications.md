@@ -2,7 +2,7 @@
 
 These are guidelines for what AMP cache implementations should look like. Some items are required for overall security of the platform while others are suggestions for performance improvements. All modifications are made to both AMP and AMP4ADS documents except where noted.
 
-For example, given a [recent version](https://github.com/ampproject/amphtml/tree/main/spec/amp-cache-modifications.everything.amp.html) of [everything.amp.html](https://github.com/ampproject/amphtml/blob/main/examples/everything.amp.html), the output after modifications will be [this version](https://github.com/ampproject/amphtml/tree/main/spec/amp-cache-modifications.everything.cache.html).
+For example, given a [recent version](https://github.com/ampproject/amphtml/tree/main/docs/spec/amp-cache-modifications.everything.amp.html) of [everything.amp.html](https://github.com/ampproject/amphtml/blob/main/examples/everything.amp.html), the output after modifications will be [this version](https://github.com/ampproject/amphtml/tree/main/docs/spec/amp-cache-modifications.everything.cache.html).
 
 ### HTML Sanitization
 

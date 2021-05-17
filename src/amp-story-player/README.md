@@ -44,7 +44,7 @@ Beyond this, you’ll also find:
 
 ## Player setup
 
-If you need a refresher on how to set up the amp-story-player, including what scripts to import and how to add stories, visit the [documentation](https://github.com/ampproject/amphtml/blob/main/spec/amp-story-player.md).
+If you need a refresher on how to set up the amp-story-player, including what scripts to import and how to add stories, visit the [documentation](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-story-player.md).
 
 ## Navigating between stories
 
@@ -58,7 +58,7 @@ To navigate between stories on desktop, there are a couple of options:
     <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/skip-next-desktop.png?raw=true"></td>
   </tr>
   <tr>
-    <td>2. Use the Javascript APIs to implement your own navigational buttons.  If you want to use the Javascript APIs, you can use the <a href="https://github.com/ampproject/amphtml/blob/main/spec/amp-story-player.md#go">go() method</a> (see documentation for more details) as shown in the following example:</td>
+    <td>2. Use the Javascript APIs to implement your own navigational buttons.  If you want to use the Javascript APIs, you can use the <a href="https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-story-player.md#go">go() method</a> (see documentation for more details) as shown in the following example:</td>
     <td>
 
 ```javascript
@@ -375,7 +375,7 @@ On desktop, you can now display a button that navigates from the current story t
 
 ## Custom Events
 
-We’ve recently introduced some new events that the player will dispatch and that you can listen to. To see the existing events, refer to the documentation of [Custom Events](https://github.com/ampproject/amphtml/blob/main/spec/amp-story-player.md#custom-events).
+We’ve recently introduced some new events that the player will dispatch and that you can listen to. To see the existing events, refer to the documentation of [Custom Events](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-story-player.md#custom-events).
 
 ### noNextStory
 

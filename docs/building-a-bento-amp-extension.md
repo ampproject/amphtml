@@ -59,7 +59,7 @@ This generates CSS used by the AMP element `<amp-my-element>`, and JSS used by t
 All Bento AMP component extensions have their tag names prefixed with `amp-`.
 Make sure to choose an accurate and clear name for your extension.
 
-Extensions that embed a third-party service must follow the [guidelines for naming a third-party component](../spec/amp-3p-naming.md).
+Extensions that embed a third-party service must follow the [guidelines for naming a third-party component](../docs/spec/amp-3p-naming.md).
 
 ## Directory structure
 
@@ -339,7 +339,7 @@ AmpMyElement['shadowCss'] = CSS;
 ## Actions and events
 
 AMP provides a framework for [elements to fire their own
-events](https://github.com/ampproject/amphtml/blob/main/spec/amp-actions-and-events.md)
+events](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-actions-and-events.md)
 to allow users of that element to listen and react to the events. For
 example, the `amp-base-carousel` extension fires a `slideChange` event.
 This allow publishers to listen to that event and react to it, for example, by updating an `amp-selector` state to match the current slide shown.
@@ -382,7 +382,7 @@ this.registerApiAction('close', (api) => api.close());
 
 Your element can choose to override the default `activate` method inherited from BaseElement. For example `amp-lightbox` overrides `activate` to define the `open` default case.
 
-You must document your element's actions and events in its own reference documentation and in [`AMP Actions and Events`](https://github.com/ampproject/amphtml/blob/main/spec/amp-actions-and-events.md).
+You must document your element's actions and events in its own reference documentation and in [`AMP Actions and Events`](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-actions-and-events.md).
 
 ## Allowing proper validation
 
@@ -409,9 +409,9 @@ AMP defines different layouts that elements can choose whether or not to
 support. Your element needs to announce which layouts it supports through
 overriding the `isLayoutSupported(layout)` callback and returning true
 if the element supports that layout. [Read more about AMP Layout
-System](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md)
+System](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md)
 and [Layout
-Types](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md#layout).
+Types](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md#layout).
 
 ### What layout should your element support?
 

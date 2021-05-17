@@ -386,7 +386,7 @@ function getCustomBootstrapBaseUrl(
       parsed.origin != parseUrlDeprecated(parentWindow.location.href).origin,
     '3p iframe url must not be on the same origin as the current document ' +
       '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
-      '/blob/main/spec/amp-iframe-origin-policy.md for details.',
+      '/blob/main/docs/spec/amp-iframe-origin-policy.md for details.',
     url,
     parsed.origin,
     meta

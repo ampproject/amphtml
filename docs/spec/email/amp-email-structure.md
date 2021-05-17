@@ -23,7 +23,7 @@ To embed AMP within an email, add a new MIME part with a content type of `text/x
 <amp-img alt="AMP for Email MIME Parts Diagram"
     layout="responsive"
     width="752" height="246"
-    src="https://github.com/ampproject/amphtml/raw/main/spec/img/amp-email-mime-parts.png">
+    src="https://github.com/ampproject/amphtml/raw/main/docs/spec/img/amp-email-mime-parts.png">
 <noscript>
 <img alt="AMP for Email MIME Parts Diagram" src="../img/amp-email-mime-parts.png" />
 </noscript>
