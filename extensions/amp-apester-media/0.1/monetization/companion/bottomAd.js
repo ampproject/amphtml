@@ -28,7 +28,6 @@
      /**@type {!JsonObject}*/ (media),
      'campaignData.bottomAdOptions'
    );
-   console.log("bottomAdOptions", bottomAdOptions)
    if (!bottomAdOptions) {
      return;
    }
@@ -57,7 +56,7 @@
         'width': `${width}`,
         'height': '0',
         'type': 'doubleclick',
-        'style': 'background: green;position: absolute; bottom: 0;left: 50%;margin-left: -150px;margin-bottom: 0;',
+        'style': 'position: absolute; bottom: 0;left: 50%;margin-left: -150px;margin-bottom: 0;',
         'layout': 'fixed',
         'data-multi-size-validation': 'false',
      })
