@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {addParamsToUrl, assertHttpsUrl} from '../../src/url.js';
+import {addParamsToUrl, assertHttpsUrl} from '../../src/url';
 import {dev} from '../../src/log.js';
 import {dict} from '../../src/core/types/object';
 import {loadScript, validateData, writeScript} from '../../3p/3p';

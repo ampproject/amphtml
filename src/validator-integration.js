@@ -16,7 +16,7 @@
 
 import {getMode} from './mode';
 import {loadPromise} from './event-helper';
-import {parseQueryString} from './url';
+import {parseQueryString} from './core/types/string/url';
 import {urls} from './config';
 
 /**

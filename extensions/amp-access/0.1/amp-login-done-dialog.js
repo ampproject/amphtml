@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {listen} from '../../../src/event-helper';
 import {
-  assertAbsoluteHttpOrHttpsUrl,
   parseQueryString,
   tryDecodeUriComponent,
-} from '../../../src/url';
-import {listen} from '../../../src/event-helper';
+} from '../../../src/core/types/string/url';
 
 /**
  * @private Visible for testing.

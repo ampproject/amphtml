@@ -14,21 +14,46 @@
  * limitations under the License.
  */
 
+import {map} from '../object';
+
+const QUERY_STRING_REGEX = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
+
 /**
  * Tries to decode a URI component, falling back to opt_fallback (or an empty
  * string)
- *
- * DO NOT import the function from this file. Instead, import
- * tryDecodeUriComponent from `src/url.js`.
  *
  * @param {string} component
  * @param {string=} fallback
  * @return {string}
  */
-export function tryDecodeUriComponent_(component, fallback = '') {
+export function tryDecodeUriComponent(component, fallback = '') {
   try {
     return decodeURIComponent(component);
   } catch (e) {
     return fallback;
   }
+}
+
+/**
+ * Parses the query string of an URL. This method returns a simple key/value
+ * map. If there are duplicate keys the latest value is returned.
+ *
+ * @param {string} queryString
+ * @return {!JsonObject}
+ */
+export function parseQueryString(queryString) {
+  const params = map();
+  if (!queryString) {
+    return params;
+  }
+
+  let match;
+  while ((match = QUERY_STRING_REGEX.exec(queryString))) {
+    const name = tryDecodeUriComponent(match[1], match[1]);
+    const value = match[2]
+      ? tryDecodeUriComponent(match[2].replace(/\+/g, ' '), match[2])
+      : '';
+    params[name] = value;
+  }
+  return params;
 }

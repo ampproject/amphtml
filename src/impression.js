@@ -17,15 +17,11 @@
 import {Deferred} from './core/data-structures/promise';
 import {Services} from './services';
 import {WindowInterface} from './window-interface';
-import {
-  addParamsToUrl,
-  isProxyOrigin,
-  parseQueryString,
-  parseUrlDeprecated,
-} from './url';
+import {addParamsToUrl, isProxyOrigin, parseUrlDeprecated} from './url';
 import {dev, user, userAssert} from './log';
 import {getMode} from './mode';
 import {isExperimentOn} from './experiments';
+import {parseQueryString} from './core/types/string/url';
 
 const TIMEOUT_VALUE = 8000;
 

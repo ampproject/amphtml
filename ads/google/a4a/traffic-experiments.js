@@ -28,7 +28,7 @@ import {
   mergeExperimentIds,
 } from './utils';
 import {Services} from '../../../src/services';
-import {parseQueryString} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
 
 /** @typedef {{
  *    control: string,
