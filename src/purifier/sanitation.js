@@ -72,7 +72,7 @@ export function markElementForDiffing(element, generateKey) {
 
 /**
  * @const {!Object<string, boolean>}
- * @see https://github.com/ampproject/amphtml/blob/main/spec/amp-html-format.md
+ * @see https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-format.md
  */
 export const DENYLISTED_TAGS = {
   'applet': true,
@@ -95,7 +95,7 @@ export const DENYLISTED_TAGS = {
  * - amp-list and amp-state, which cannot be nested.
  * - amp-lightbox and amp-image-lightbox, which are deprecated.
  * @const {!Object<string, boolean>}
- * @see https://github.com/ampproject/amphtml/blob/main/spec/email/amp-email-components.md
+ * @see https://github.com/ampproject/amphtml/blob/main/docs/spec/email/amp-email-components.md
  */
 export const EMAIL_ALLOWLISTED_AMP_TAGS = {
   'amp-accordion': true,

@@ -774,7 +774,7 @@ export class GlobalVariableSource extends VariableSource {
 
 /**
  * This class replaces substitution variables with their values.
- * Document new values in ../spec/amp-var-substitutions.md
+ * Document new values in ../docs/spec/amp-var-substitutions.md
  * @package For export
  */
 export class UrlReplacements {

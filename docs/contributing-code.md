@@ -26,9 +26,9 @@ If your run into any issues finding a Reviewer/Owner or have any other questions
 
 Significant changes (e.g. new components or significant changes to behavior) require consultation with and approval from knowledgeable members of the community.
 
-**If you are making a change to existing behavior, familiarize yourself with AMP's [policy on breaking changes](https://github.com/ampproject/amphtml/blob/main/spec/amp-versioning-policy.md#breaking-changes).**
+**If you are making a change to existing behavior, familiarize yourself with AMP's [policy on breaking changes](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-versioning-policy.md#breaking-changes).**
 
-**If you are deprecating/removing a feature, follow the [deprecation process](https://github.com/ampproject/amphtml/blob/main/spec/amp-versioning-policy.md#deprecations) instead of this process.**
+**If you are deprecating/removing a feature, follow the [deprecation process](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-versioning-policy.md#deprecations) instead of this process.**
 
 -   [ ] _Before you start coding_, [find a guide](#find-a-guide) who you can discuss your change with and who can help guide you through the process.
 -   [ ] Agree to the [OpenJSF Contributor License Agreement (CLA)](#contributor-license-agreement).

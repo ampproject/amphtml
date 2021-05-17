@@ -28,7 +28,7 @@ limitations under the License.
   <tr>
     <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/carousel-cards-entry-point.png?raw=true"></td>
     <td><img src="https://github.com/ampproject/amphtml/blob/main/src/amp-story-player/img/player-in-recipe.png?raw=true"></td>
-<td><img src="https://github.com/ampproject/amphtml/raw/main/spec/img/amp-story-player.gif?raw=true"></td>
+<td><img src="https://github.com/ampproject/amphtml/raw/main/docs/spec/img/amp-story-player.gif?raw=true"></td>
   </tr>
 </table>
 

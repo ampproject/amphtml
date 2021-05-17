@@ -83,10 +83,10 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 ## Eng docs
 
 -   [Life of an AMP \*](https://docs.google.com/document/d/1WdNj3qNFDmtI--c2PqyRYrPrxSg2a-93z5iX0SzoQS0/edit#)
--   [AMP Layout system](../spec/amp-html-layout.md)
+-   [AMP Layout system](../docs/spec/amp-html-layout.md)
 -   [Building an AMP Extension](building-an-amp-extension.md)
 
-We also recommend scanning the [spec](../spec/). The non-element part should help understand some of the design aspects.
+We also recommend scanning the [spec](../docs/spec/). The non-element part should help understand some of the design aspects.
 
 ## Builds and releases
 

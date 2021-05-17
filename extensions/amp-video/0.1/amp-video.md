@@ -76,7 +76,7 @@ Alternatively, you can present a click-to-play overlay.
 
 If this attribute is present, and the browser supports autoplay, the video will be automatically
 played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, [which are outlined in the Video in AMP spec](../../../spec/amp-video-interface.md#autoplay).
+to be played, [which are outlined in the Video in AMP spec](../../../docs/spec/amp-video-interface.md#autoplay).
 
 ### controls
 
@@ -113,7 +113,7 @@ when the video has autoplay.
 
 ### rotate-to-fullscreen
 
-If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](../../../spec/amp-video-interface.md#rotate-to-fullscreen).
+If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](../../../docs/spec/amp-video-interface.md#rotate-to-fullscreen).
 
 ### common attributes
 

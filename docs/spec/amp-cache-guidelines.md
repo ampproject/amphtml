@@ -14,7 +14,7 @@ AMP is an open ecosystem and actively encourages the development of more AMP Cac
 
 ## Guidelines: Core
 
-1. An AMP Cache only serves [valid AMP input documents](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-format.md).
+1. An AMP Cache only serves [valid AMP input documents](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-format.md).
 
 2. It participates in the [AMP validator release cycle](https://github.com/ampproject/amphtml/tree/main/validator).
 
@@ -60,7 +60,7 @@ AMP is an open ecosystem and actively encourages the development of more AMP Cac
 
     1. The cache is allowed to serve stale content independent of HTTP caching headers. It must make reasonable efforts to keep the cache contents fresh and must revalidate content after serving stale responses.
 
-15. Follows [AMP cache modifications best practices](../spec/amp-cache-modifications.md).
+15. Follows [AMP cache modifications best practices](../docs/spec/amp-cache-modifications.md).
 
 ## Guidelines: Crawling
 
@@ -99,7 +99,7 @@ For resources (i.e., HTML, images, fonts) that are larger than 12 MB, you may no
 ## Guidelines: Adding a new cache to the AMP ecosystem
 
 -   Add the details of your cache to [caches.json](../build-system/global-configs/caches.json).
-    -   Some tools use the deployed version of this file (<https://cdn.ampproject.org/caches.json>) to automatically generate appropriate CORS headers as described at [CORS Security in AMP Guidelines](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md#cors-security-in-amp).
+    -   Some tools use the deployed version of this file (<https://cdn.ampproject.org/caches.json>) to automatically generate appropriate CORS headers as described at [CORS Security in AMP Guidelines](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-cors-requests.md#cors-security-in-amp).
 -   Handle dynamically generated components:
     -   [`<amp-geo>`](../extensions/amp-geo/amp-geo.md) — at delivery time, the string `{{AMP_ISO_COUNTRY_HOTPATCH}}` in [`amp-geo.js`](../extensions/amp-geo/0.1/amp-geo.js) is replaced by a string consisting of the user's ISO country code followed by exactly 26 spaces (to avoid breaking map files).
 

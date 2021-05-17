@@ -360,7 +360,7 @@ function onError(message, filename, line, col, error) {
 
 /**
  * Determines the error reporting endpoint which should be used.
- * If changing this URL, keep `/spec/amp-errors.md` in sync.
+ * If changing this URL, keep `docs/spec/amp-errors.md` in sync.
  * @return {string} error reporting endpoint URL.
  */
 function chooseReportingUrl_() {

@@ -211,7 +211,7 @@ Fully valid AMP pages use the AMP layout system to infer sizing of elements to c
 
 ### Clearing selections
 
-To clear all selections when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify the AMP Selector `id` with the `clear` action method.
+To clear all selections when an element is tapped or clicked, set the [`on`](../../docs/spec/amp-actions-and-events.md) action attribute on the element, and specify the AMP Selector `id` with the `clear` action method.
 
 Example:
 
@@ -249,7 +249,7 @@ The `keyboard-select-mode` attribute dictates the keyboard navigation behavior f
 </ul>
 
 This attribute can be configured to use different
-options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
+options based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
 ### Attributes on `<amp-selector>` options
 
@@ -266,7 +266,7 @@ The attributes above behave the same way as they do on a standard HTML [`<option
 Events may trigger actions on other AMP components using the `on` attribute.
 e.g. `on="select: my-tab.show"`
 
-Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
+Read more about [AMP Actions and Events](../../docs/spec/amp-actions-and-events.md).
 
 ### select
 

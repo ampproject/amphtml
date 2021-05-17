@@ -51,7 +51,7 @@ export class Tracking {
       customTrackingId: skimOptions.customTrackingId,
       guid: null,
       pageImpressionId: generatePageImpressionId(),
-      // https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md
+      // https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md
       pageUrl: 'CANONICAL_URL',
       pubcode: skimOptions.pubcode,
       referrer,

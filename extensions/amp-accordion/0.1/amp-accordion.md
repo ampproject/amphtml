@@ -44,7 +44,7 @@ on mobile devices.
     `amp-accordion`. It must be a heading element such as `<h1>-<h6>` or
     `<header>`.
 -   The second child in a `<section>` is the expandable/collapsible content. It
-    can be any tag allowed in [AMP HTML](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-format.md).
+    can be any tag allowed in [AMP HTML](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-format.md).
 -   A click or tap on a `<section>` heading expands or collapses the section.
 -   An `amp-accordion` with a defined `id` preserves the collapsed or expanded
     state of each section while the user remains on your domain.
@@ -60,7 +60,7 @@ on mobile devices.
     `amp-accordion`. It must be a heading element such as `<h1>-<h6>` or
     `<header>`.
 -   The second child in a `<section>` is the expandable/collapsible content. It
-    can be any tag allowed in [AMP for Email](https://github.com/ampproject/amphtml/blob/main/spec/email/amp-email-html.md).
+    can be any tag allowed in [AMP for Email](https://github.com/ampproject/amphtml/blob/main/docs/spec/email/amp-email-html.md).
 -   A click or tap on a `<section>` heading expands or collapses the section.
 
 [/filter]

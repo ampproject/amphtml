@@ -163,7 +163,7 @@ export class AmpIframe extends AMP.BaseElement {
         (origin != containerUrl.origin && protocol != 'data:'),
       'Origin of <amp-iframe> must not be equal to container %s' +
         ' if allow-same-origin is set. See https://github.com/ampproject/' +
-        'amphtml/blob/main/spec/amp-iframe-origin-policy.md for details.',
+        'amphtml/blob/main/docs/spec/amp-iframe-origin-policy.md for details.',
       element
     );
     userAssert(

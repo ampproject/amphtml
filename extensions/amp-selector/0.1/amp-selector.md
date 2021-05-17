@@ -102,7 +102,7 @@ Example:
 
 ### Clearing selections
 
-To clear all selections when an element is tapped or clicked, set the [`on`](../../../spec/amp-actions-and-events.md) action attribute on the element, and specify the AMP Selector `id` with the `clear` action method.
+To clear all selections when an element is tapped or clicked, set the [`on`](../../../docs/spec/amp-actions-and-events.md) action attribute on the element, and specify the AMP Selector `id` with the `clear` action method.
 
 Example:
 
@@ -158,7 +158,7 @@ The attributes above behave the same way as they do on a standard HTML [`<option
 Events may trigger actions on other AMP components using the `on` attribute.
 e.g. `on="select: my-tab.show"`
 
-Read more about [AMP Actions and Events](../../../spec/amp-actions-and-events.md).
+Read more about [AMP Actions and Events](../../../docs/spec/amp-actions-and-events.md).
 
 ### select
 

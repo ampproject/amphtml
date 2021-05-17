@@ -23,4 +23,4 @@ See the [Components](https://www.ampproject.org/docs/reference/components) list.
 
 ## AMP HTML Extended Templates
 
-See the [AMP template spec](../spec/amp-html-templates.md) for details about supported templates.
+See the [AMP template spec](../docs/spec/amp-html-templates.md) for details about supported templates.

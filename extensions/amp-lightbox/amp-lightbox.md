@@ -155,7 +155,7 @@ be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and
 `fly-in-top`.
 
 This attribute can be configured to use different
-options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
+options based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
 ### `scrollable`
 
