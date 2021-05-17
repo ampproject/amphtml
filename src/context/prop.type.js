@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-/** @externs */
-
 /**
  * A context property.
  *
  * @interface
  * @template T
+ * @template DEP
  */
-function ContextProp() {}
+export function ContextPropDef() {}
 
 /**
  * A globally unique key. Extensions must use a fully qualified name such
@@ -30,7 +29,7 @@ function ContextProp() {}
  *
  * @type {string}
  */
-ContextProp.prototype.key;
+ContextPropDef.prototype.key;
 
 /**
  * An optional type object that can be used for a using system. E.g.
@@ -38,14 +37,14 @@ ContextProp.prototype.key;
  *
  * @type {?Object}
  */
-ContextProp.prototype.type;
+ContextPropDef.prototype.type;
 
 /**
  * An array of dependencies that are required for the `compute` callback.
  *
- * @type {!Array<!ContextProp>}
+ * @type {!Array<!ContextPropDef<DEP>>}
  */
-ContextProp.prototype.deps;
+ContextPropDef.prototype.deps;
 
 /**
  * Whether the value needs a recursive resolution of the parent value. The
@@ -66,7 +65,7 @@ ContextProp.prototype.deps;
  *
  * @type {boolean|function(!Array<T>):boolean}
  */
-ContextProp.prototype.recursive;
+ContextPropDef.prototype.recursive;
 
 /**
  * Computes the property value. This callback is passed the following
@@ -76,13 +75,13 @@ ContextProp.prototype.recursive;
  * 3. If it's a recursive property, the parent value.
  * 4. If `deps` are specified - the dep values.
  *
- * @type {function(!Node, !Array<T>, ...*):(T|undefined)}
+ * @type {function(!Node, !Array<T>, ...DEP):(T|undefined)}
  */
-ContextProp.prototype.compute;
+ContextPropDef.prototype.compute;
 
 /**
  * The default value of a recursive property.
  *
  * @type {T|undefined}
  */
-ContextProp.prototype.defaultValue;
+ContextPropDef.prototype.defaultValue;
