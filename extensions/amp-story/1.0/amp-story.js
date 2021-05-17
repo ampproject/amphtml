@@ -44,6 +44,7 @@ import {
 } from './story-analytics';
 import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
+import {AmpStoryBackground} from './amp-story-background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
@@ -361,6 +362,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
+
+    /** @private {?AmpStoryBackground} */
+    this.background_ = null;
   }
 
   /** @override */
@@ -1571,6 +1575,8 @@ export class AmpStory extends AMP.BaseElement {
         if (!oldPage) {
           this.registerAndPreloadBackgroundAudio_();
         }
+
+        this.updateBackground_(targetPage.element, /* initial */ !oldPage);
       },
       // Third and last step contains all the actions that can be delayed after
       // the navigation happened, like preloading the following pages, or
@@ -1786,7 +1792,7 @@ export class AmpStory extends AMP.BaseElement {
 
     // Only called when the desktop media query is not matched and the landscape
     // mode is not enabled.
-    this.maybeTriggerViewportWarning_(isLandscape);
+    // this.maybeTriggerViewportWarning_(isLandscape);
   }
 
   /**
@@ -1808,36 +1814,36 @@ export class AmpStory extends AMP.BaseElement {
     });
   }
 
-  /**
-   * Maybe triggers the viewport warning overlay.
-   * @param {boolean} isLandscape
-   * @private
-   */
-  maybeTriggerViewportWarning_(isLandscape) {
-    if (
-      isLandscape ===
-      this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE)
-    ) {
-      return;
-    }
+  // /**
+  //  * Maybe triggers the viewport warning overlay.
+  //  * @param {boolean} isLandscape
+  //  * @private
+  //  */
+  // maybeTriggerViewportWarning_(isLandscape) {
+  //   if (
+  //     isLandscape ===
+  //     this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE)
+  //   ) {
+  //     return;
+  //   }
 
-    this.mutateElement(() => {
-      if (isLandscape) {
-        this.pausedStateToRestore_ = !!this.storeService_.get(
-          StateProperty.PAUSED_STATE
-        );
-        this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-        this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
-      } else {
-        this.storeService_.dispatch(
-          Action.TOGGLE_PAUSED,
-          this.pausedStateToRestore_
-        );
-        this.pausedStateToRestore_ = null;
-        this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
-      }
-    });
-  }
+  //   this.mutateElement(() => {
+  //     if (isLandscape) {
+  //       this.pausedStateToRestore_ = !!this.storeService_.get(
+  //         StateProperty.PAUSED_STATE
+  //       );
+  //       this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+  //       this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
+  //     } else {
+  //       this.storeService_.dispatch(
+  //         Action.TOGGLE_PAUSED,
+  //         this.pausedStateToRestore_
+  //       );
+  //       this.pausedStateToRestore_ = null;
+  //       this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
+  //     }
+  //   });
+  // }
 
   /**
    * Reacts to the browser tab becoming active/inactive.
@@ -1871,23 +1877,30 @@ export class AmpStory extends AMP.BaseElement {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
-          this.element.classList.remove('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop');
         });
         break;
       case UIType.DESKTOP_PANELS:
         this.setDesktopPositionAttributes_(this.activePage_);
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
-          this.element.classList.add('i-amphtml-story-desktop-panels');
+          this.element.classList.add('i-amphtml-story-desktop');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
+        if (!this.background_) {
+          this.background_ = new AmpStoryBackground(this.win, this.element);
+          this.background_.attach();
+        }
+        if (this.activePage_) {
+          this.updateBackground_(this.activePage_.element, /* initial */ true);
+        }
         break;
       case UIType.DESKTOP_FULLBLEED:
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
-          this.element.classList.remove('i-amphtml-story-desktop-panels');
+          this.element.classList.remove('i-amphtml-story-desktop');
         });
         break;
       // Because of the DOM mutations, switching from this mode to another is
@@ -1967,7 +1980,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isLandscape_() {
-    return this.landscapeOrientationMedia_.matches;
+    return window.innerWidth / window.innerHeight > 0.6;
+    // return this.landscapeOrientationMedia_.matches;
   }
 
   /**
@@ -2971,6 +2985,65 @@ export class AmpStory extends AMP.BaseElement {
       element,
       (e) => matches(e, 'a.i-amphtml-story-page-open-attachment[href]'),
       this.element
+    );
+  }
+
+  /**
+   * Get the URL of the given page's background resource.
+   * @param {!Element} pageElement
+   * @return {?string} The URL of the background resource
+   */
+  getBackgroundElement_(pageElement) {
+    let fillElement = pageElement.querySelector(
+      '[template="fill"]:not(.i-amphtml-hidden-by-media-query) img'
+    );
+
+    if (!fillElement) {
+      return null;
+    }
+
+    fillElement = dev().assertElement(fillElement);
+
+    const fillPosterElement = fillElement.querySelector(
+      '[poster]:not(.i-amphtml-hidden-by-media-query) img'
+    );
+
+    const srcElement = fillElement.querySelector(
+      '[src]:not(.i-amphtml-hidden-by-media-query)' 
+    );
+
+    const fillPoster = fillPosterElement
+      ? fillPosterElement.getAttribute('poster')
+      : '';
+    const src = srcElement ? srcElement.getAttribute('src') : '';
+
+    return fillElement || src;
+    // return fillPoster || src;
+  }
+
+  /**
+   * Update the background to the specified page's background.
+   * @param {!Element} pageElement
+   * @param {boolean=} initial
+   */
+  updateBackground_(pageElement, initial = false) {
+    if (!this.background_) {
+      return;
+    }
+
+    this.getVsync().run(
+      {
+        measure: (state) => {
+          state.element = this.getBackgroundElement_(pageElement);
+          state.color = computedStyle(this.win, pageElement).getPropertyValue(
+            'background-color'
+          );
+        },
+        mutate: (state) => {
+          this.background_.setBackground(state.color, state.element, initial);
+        },
+      },
+      {}
     );
   }
 }
