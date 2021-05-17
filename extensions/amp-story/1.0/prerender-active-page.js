@@ -15,7 +15,7 @@
  */
 
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {parseQueryString} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {toWin} from '../../../src/types';
 
 /**

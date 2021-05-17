@@ -26,7 +26,7 @@ import {getMode} from '../mode';
 import {getTopWindow} from '../service';
 import {hasOwn, map} from '../core/types/object';
 import {isArray} from '../core/types';
-import {parseQueryString} from '../url';
+import {parseQueryString} from '../core/types/string/url';
 
 // typedef imports
 import {ExperimentInfoDef} from './experiments.type';

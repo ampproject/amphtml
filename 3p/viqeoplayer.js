@@ -15,7 +15,7 @@
  */
 import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
-import {tryDecodeUriComponent} from '../src/url';
+import {tryDecodeUriComponent} from '../src/core/types/string/url';
 
 /**
  * @param {Window} global

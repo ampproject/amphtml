@@ -29,7 +29,7 @@ import {
   generateSentinel,
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
-import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
+import {assertHttpsUrl} from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
@@ -64,6 +64,7 @@ import {
 } from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/core/types';
+import {tryDecodeUriComponent} from '../../../src/core/types/string/url';
 
 import {listenOnce} from '../../../src/event-helper';
 import {

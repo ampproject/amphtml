@@ -17,11 +17,12 @@
 import {CSS} from '../../../build/amp-social-share-0.1.css';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
-import {addParamsToUrl, parseQueryString} from '../../../src/url';
+import {addParamsToUrl} from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-social-share';

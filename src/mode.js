@@ -15,7 +15,7 @@
  */
 
 import {internalRuntimeVersion} from './internal-version';
-import {parseQueryString_} from './url-parse-query-string';
+import {parseQueryString} from './core/types/string/url';
 
 /**
  * @typedef {{
@@ -73,7 +73,7 @@ function getMode_(win) {
   const runningTests =
     IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
   const isLocalDev = IS_FORTESTING && (!!AMP_CONFIG.localDev || runningTests);
-  const hashQuery = parseQueryString_(
+  const hashQuery = parseQueryString(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
     win.location['originalHash'] || win.location.hash

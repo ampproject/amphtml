@@ -25,7 +25,6 @@ import {findIndex} from '../core/types/array';
 import {
   getSourceOrigin,
   isProxyOrigin,
-  parseQueryString,
   parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
@@ -33,6 +32,7 @@ import {
 import {isIframed} from '../dom';
 import {listen} from '../event-helper';
 import {map} from '../core/types/object';
+import {parseQueryString} from '../core/types/string/url';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error-reporting';
 import {urls} from '../config';

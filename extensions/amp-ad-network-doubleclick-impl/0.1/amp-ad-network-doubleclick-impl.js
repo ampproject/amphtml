@@ -126,7 +126,7 @@ import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
-import {parseQueryString} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {stringHash32} from '../../../src/core/types/string';
 import {tryParseJson} from '../../../src/core/types/object/json';
 

@@ -16,7 +16,7 @@
 
 import {loadScript, validateData} from '../../3p/3p';
 import {parseJson} from '../../src/core/types/object/json';
-import {tryDecodeUriComponent} from '../../src/url';
+import {tryDecodeUriComponent} from '../../src/core/types/string/url';
 
 /**
  * @param {!Window} global
