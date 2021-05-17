@@ -130,7 +130,7 @@ function getRtvVersion(win) {
  * @return {boolean}
  */
 export function isModeDevelopment(win) {
-  const hashQuery = parseQueryString_(
+  const hashQuery = parseQueryString(
     win.location['originalHash'] || win.location.hash
   );
   return !!(
