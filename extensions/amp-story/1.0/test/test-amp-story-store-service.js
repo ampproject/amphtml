@@ -37,15 +37,15 @@ describes.fakeWin('amp-story-store-service', {}, (env) => {
   it('should subscribe to property mutations and receive the new value', () => {
     const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.MUTED_STATE, listenerSpy);
-    storeService.dispatch(Action.MUTED_STATE, true);
+    storeService.dispatch(Action.TOGGLE_MUTED, false);
     expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(true);
+    expect(listenerSpy).to.have.been.calledWith(false);
   });
 
   it('should not trigger a listener if another property changed', () => {
     const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.CAN_INSERT_AUTOMATIC_AD, listenerSpy);
-    storeService.dispatch(Action.MUTED_STATE, true);
+    storeService.dispatch(Action.TOGGLE_MUTED, true);
     expect(listenerSpy).to.have.callCount(0);
   });
 
@@ -59,7 +59,7 @@ describes.fakeWin('amp-story-store-service', {}, (env) => {
     const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.MUTED_STATE, listenerSpy, true);
     expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(false);
+    expect(listenerSpy).to.have.been.calledWith(true);
   });
 });
 

@@ -104,6 +104,11 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
     const shareUrl = 'https://publisher.com/share';
     const fetchedConfig = 'amazingConfig';
 
+    const shareElement = env.win.document.createElement(
+      'amp-story-social-share'
+    );
+    storyElement.appendChild(shareElement);
+
     shareElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, shareUrl);
     xhrMock
       .expects('fetchJson')

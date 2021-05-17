@@ -1180,19 +1180,10 @@ describes.realWin(
 
             story.activePage_.advancement_.onAdvance();
 
-            await waitFor(() => {
-              if (sendMessageStub.calledOnce) {
-                expect(sendMessageStub).to.be.calledWithExactly(
-                  'selectDocument',
-                  {
-                    next: true,
-                    advancementMode: AdvancementMode.AUTO_ADVANCE_TIME,
-                  }
-                );
-                return true;
-              }
-              return false;
-            }, 'sendMessageStub should be called');
+            expect(sendMessageStub).to.be.calledWithExactly('selectDocument', {
+              next: true,
+              advancementMode: AdvancementMode.AUTO_ADVANCE_TIME,
+            });
           });
         });
       });
