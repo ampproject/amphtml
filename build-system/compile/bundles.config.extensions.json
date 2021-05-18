@@ -289,10 +289,12 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-date-countdown",
-    "version": "0.1",
+    "name": "amp-dailymotion",
+    "version": "1.0",
+    "options": {"hasCss": true},
     "latestVersion": "0.1"
   },
+  {"name": "amp-date-countdown", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-date-countdown",
     "version": "1.0",
@@ -308,6 +310,7 @@
     "version": "0.1",
     "latestVersion": "0.1"
   },
+  {"name": "amp-date-display", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-date-display",
     "version": "1.0",
@@ -1063,9 +1066,7 @@
     "name": "amp-stream-gallery",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "options": {"hasCss": true}
   },
   {
     "name": "amp-stream-gallery",
@@ -1137,11 +1138,9 @@
     "name": "amp-twitter",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
       "hasCss": true,
       "npm": true,
       "wrapper": "bento"
-    }
   },
   {
     "name": "amp-user-notification",
@@ -1268,10 +1267,8 @@
     "name": "amp-youtube",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
       "hasCss": true,
       "npm": true,
       "wrapper": "bento"
     }
   }
-]
