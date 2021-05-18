@@ -115,7 +115,7 @@ describes.endtoend(
       it('does not load videos out of range when a video buffers', async () => {
         await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
-        const video2El = await controller.findElement('#video4 video');
+        const video4El = await controller.findElement('#video4 video');
 
         // If currentSrc is empty, video is not loaded.
         await expect(
