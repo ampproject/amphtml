@@ -20,20 +20,38 @@ const {
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
-  'default inline attachment UI element should display': async (page, name) => {
-    await page.waitForSelector('amp-story-page#inline-default[active]');
-    await page.waitForTimeout(1600); // For animations to finish.
-    await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-inline-page-attachment-chip',
-    ]);
-  },
-
   'inline attachment UI element with custom text should display': async (
     page,
     name
   ) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
+    await page.waitForTimeout(400); // For animations to finish.
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-inline-page-attachment-chip',
+    ]);
+  },
+
+  '1 inline attachment UI element with dark theme should display': async (
+    page,
+    name
+  ) => {
+    await page.tap('.next-container > button.i-amphtml-story-button-move');
+    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
+    await page.tap('.next-container > button.i-amphtml-story-button-move');
+    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
+    await page.waitForTimeout(400); // For animations to finish.
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-inline-page-attachment-chip',
+    ]);
+  },
+
+  '2 inline attachment UI element with dark theme should display': async (
+    page,
+    name
+  ) => {
+    await page.tap('.next-container > button.i-amphtml-story-button-move');
+    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-inline-page-attachment-chip',
