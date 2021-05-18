@@ -13,28 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 'use strict';
+'use strict';
 
 const {
-  verifySelectorsVisible
+  verifySelectorsVisible,
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
- module.exports = {
-   'default inline attachment UI element should display': async (page, name) => {
-     await page.waitForSelector('amp-story-page#inline-default[active]');
-     await page.waitForTimeout(1600); // For animations to finish.
-     await verifySelectorsVisible(page, name, [
+module.exports = {
+  'default inline attachment UI element should display': async (page, name) => {
+    await page.waitForSelector('amp-story-page#inline-default[active]');
+    await page.waitForTimeout(1600); // For animations to finish.
+    await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-inline-page-attachment-chip',
-     ]);
-   },
+    ]);
+  },
  
-   'inline attachment UI element with custom text should display': async (page, name) => {
-     const screen = page.touchscreen;
-     await screen.tap(200, 240);
-     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-     await page.waitForTimeout(400); // For animations to finish.
-     await verifySelectorsVisible(page, name, [
+  'inline attachment UI element with custom text should display': async (page, name) => {
+    const screen = page.touchscreen;
+    await screen.tap(200, 240);
+    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
+    await page.waitForTimeout(400); // For animations to finish.
+    await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-inline-page-attachment-chip',
-     ]);
+    ]);
    },
  };
