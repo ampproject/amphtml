@@ -25,7 +25,7 @@ module.exports = {
     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-inline-page-attachment-chip',
+      '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
@@ -36,7 +36,7 @@ module.exports = {
     await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-inline-page-attachment-chip',
+      '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
@@ -54,7 +54,7 @@ module.exports = {
     );
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-inline-page-attachment-chip',
+      '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
@@ -76,7 +76,7 @@ module.exports = {
     );
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-inline-page-attachment-chip',
+      '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
@@ -102,7 +102,7 @@ module.exports = {
     );
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-inline-page-attachment-chip',
+      '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
@@ -127,7 +127,7 @@ module.exports = {
     await page.waitForSelector('amp-story-page#outlink-default[active]');
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-inline-page-attachment-chip',
+      '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
@@ -154,7 +154,7 @@ module.exports = {
     await page.waitForSelector('amp-story-page#outlink-custom-text[active]');
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-inline-page-attachment-chip',
+      '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
@@ -183,7 +183,7 @@ module.exports = {
     await page.waitForSelector('amp-story-page#outlink-no-image[active]');
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-inline-page-attachment-chip',
+      '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
@@ -214,7 +214,7 @@ module.exports = {
     await page.waitForSelector('amp-story-page#outlink-custom-image[active]');
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-inline-page-attachment-chip',
+      '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
@@ -247,7 +247,7 @@ module.exports = {
     await page.waitForSelector('amp-story-page#outlink-dark-theme[active]');
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-inline-page-attachment-chip',
+      '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
@@ -287,7 +287,7 @@ module.exports = {
     );
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-story-inline-page-attachment-chip',
+      '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
