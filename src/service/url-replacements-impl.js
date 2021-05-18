@@ -23,28 +23,27 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from './variable-source';
+import {Expander} from './url-expander/expander';
+import {Services} from '../services';
+import {WindowInterface} from '../window-interface';
 import {
   addMissingParamsToUrl,
   addParamsToUrl,
   getSourceUrl,
   isProtocolValid,
-  parseQueryString,
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
+import {getTrackImpressionPromise} from '../impression.js';
+import {hasOwn} from '../core/types/object';
 import {
   installServiceInEmbedDoc,
   registerServiceBuilderForDoc,
 } from '../service';
-
-import {Expander} from './url-expander/expander';
-import {Services} from '../services';
-import {WindowInterface} from '../window-interface';
-import {getTrackImpressionPromise} from '../impression.js';
-import {hasOwn} from '../core/types/object';
 import {internalRuntimeVersion} from '../internal-version';
+import {parseQueryString} from '../core/types/string/url';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -774,7 +773,7 @@ export class GlobalVariableSource extends VariableSource {
 
 /**
  * This class replaces substitution variables with their values.
- * Document new values in ../spec/amp-var-substitutions.md
+ * Document new values in ../docs/spec/amp-var-substitutions.md
  * @package For export
  */
 export class UrlReplacements {

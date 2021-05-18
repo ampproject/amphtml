@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {BaseCarousel} from '../base-carousel';
+import {BaseCarousel} from '../component';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 const CONTROLS = ['auto', 'always', 'never'];

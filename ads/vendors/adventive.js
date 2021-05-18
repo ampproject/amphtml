@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {addParamsToUrl} from '../../src/url.js';
+import {addParamsToUrl} from '../../src/url';
 import {dict, hasOwn} from '../../src/core/types/object';
 import {endsWith} from '../../src/core/types/string';
 import {loadScript, validateData, writeScript} from '../../3p/3p';

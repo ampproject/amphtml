@@ -36,7 +36,7 @@ function getLastExpectError() {
 /**
  * @param {*} actual
  * @param {string=} opt_message
- * @return {!ExpectStatic}
+ * @return {!chai.ExpectStatic}
  */
 function expect(actual, opt_message) {
   if (!installed) {
@@ -169,8 +169,8 @@ function installWrappers(chai, utils) {
 }
 
 /**
- * @param {Chai.ChaiUtils} utils
- * @return {Function(_super: Chai.AssertionStatic): Function(): any}
+ * @param {chai.ChaiUtils} utils
+ * @return {function(chai.AssertionStatic): function(): any}
  */
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
@@ -228,8 +228,8 @@ function overwriteAlwaysUseSuper(utils) {
 }
 
 /**
- * @param {Chai.AssertionStatic} _super
- * @return {Function(): *}
+ * @param {chai.AssertionStatic} _super
+ * @return {function(): *}
  */
 function inheritChainingBehavior(_super) {
   return function () {
@@ -238,8 +238,8 @@ function inheritChainingBehavior(_super) {
 }
 
 /**
- * @param {Chai.AssertionStatic} _super
- * @return {Function(): *}
+ * @param {chai.AssertionStatic} _super
+ * @return {function(): *}
  */
 function overwriteUnsupported(_super) {
   return function () {

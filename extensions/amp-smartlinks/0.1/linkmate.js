@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {deepEquals} from '../../../src/json';
+import {deepEquals} from '../../../src/core/types/object/json';
 import {dict} from '../../../src/core/types/object';
 
 import {ENDPOINTS} from './constants';

@@ -15,12 +15,12 @@
  */
 
 import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
-import {parseJson} from '../../src/json';
+import {parseJson} from '../../src/core/types/object/json';
 import {setStyle, setStyles} from '../../src/style';
 
 /*
  * How to develop:
- * https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md
+ * https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md
  */
 
 /**
