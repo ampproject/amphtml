@@ -23,7 +23,7 @@ import {
 } from '../dom';
 import {dev, user, userAssert} from '../log';
 import {dict} from '../core/types/object';
-import {escapeCssSelectorIdent} from '../css';
+import {escapeCssSelectorIdent} from '../core/dom/css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
 import {isLocalhostOrigin} from '../url';
@@ -131,10 +131,11 @@ export class Navigation {
      * Must use URL parsing scoped to `rootNode_` for correct FIE behavior.
      * @private @const {!Element|!ShadowRoot}
      */
-    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (this.rootNode_
-      .nodeType == Node.DOCUMENT_NODE
-      ? this.rootNode_.documentElement
-      : this.rootNode_);
+    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (
+      this.rootNode_.nodeType == Node.DOCUMENT_NODE
+        ? this.rootNode_.documentElement
+        : this.rootNode_
+    );
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);

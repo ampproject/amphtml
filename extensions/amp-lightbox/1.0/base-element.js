@@ -45,11 +45,6 @@ export class BaseElement extends PreactBaseElement {
     this.removeAsContainer();
   }
 
-  /** @override */
-  updatePropsForRendering(props) {
-    props['closeButtonAs'] = () => props['closeButton'];
-  }
-
   /** @private */
   beforeOpen_() {
     this.open_ = true;
@@ -95,7 +90,7 @@ BaseElement['Component'] = Lightbox;
 /** @override */
 BaseElement['props'] = {
   'animation': {attr: 'animation', media: true, default: 'fade-in'},
-  'closeButton': {selector: '[slot="close-button"]', single: true},
+  'closeButtonAs': {selector: '[slot="close-button"]', single: true, as: true},
   'children': {passthrough: true},
 };
 

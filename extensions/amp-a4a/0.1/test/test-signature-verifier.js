@@ -17,9 +17,9 @@
 // TODO(@jridgewell, #11081): fix linter to allow fixing weird indentation
 
 import {SignatureVerifier, VerificationStatus} from '../signature-verifier';
-import {base64EncodeFromBytes} from '../../../../src/utils/base64';
+import {base64EncodeFromBytes} from '../../../../src/core/types/string/base64';
 import {dev, user} from '../../../../src/log';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Encode} from '../../../../src/core/types/string/bytes';
 
 const networkFailure = {throws: new TypeError('Failed to fetch')};
 

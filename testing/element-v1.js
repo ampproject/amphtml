@@ -24,8 +24,8 @@ import {BaseElement} from '../src/base-element';
  */
 const RULES = [
   {
-    name: 'V1=true',
-    test: (implClass) => implClass.V1() === true,
+    name: 'R1=true',
+    test: (implClass) => implClass.R1() === true,
   },
 
   {
@@ -138,7 +138,7 @@ const RULES = [
  *   exceptions: (!Array<string>|undefined),
  * }=} options
  */
-export function testElementV1(implClass, options = {}) {
+export function testElementR1(implClass, options = {}) {
   const exceptions = options.exceptions || [];
   RULES.forEach(({name, notes, test}) => {
     if (exceptions.includes(name)) {

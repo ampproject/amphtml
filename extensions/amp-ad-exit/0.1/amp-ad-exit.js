@@ -34,7 +34,7 @@ import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {isObject} from '../../../src/core/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {parseUrlDeprecated} from '../../../src/url';
 
 const TAG = 'amp-ad-exit';
@@ -126,7 +126,9 @@ export class AmpAdExit extends AMP.BaseElement {
     const target = this.targets_[targetName];
     userAssert(target, `Exit target not found: '${targetName}'`);
     userAssert(event, 'Unexpected null event');
-    event = /** @type {!../../../src/service/action-impl.ActionEventDef} */ (event);
+    event = /** @type {!../../../src/service/action-impl.ActionEventDef} */ (
+      event
+    );
 
     event.preventDefault();
     if (
@@ -199,9 +201,9 @@ export class AmpAdExit extends AMP.BaseElement {
         if (customVarName[0] != '_') {
           continue;
         }
-        const customVar = /** @type {!./config.VariableDef} */ (target['vars'][
-          customVarName
-        ]);
+        const customVar = /** @type {!./config.VariableDef} */ (
+          target['vars'][customVarName]
+        );
         if (!customVar) {
           continue;
         }

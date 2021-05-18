@@ -42,7 +42,7 @@ import {
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from './../../../src/core/types/object';
 import {isArray} from '../../../src/core/types';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {renderAsElement} from './simple-template';
 
 /** @const {string} */
@@ -417,7 +417,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
     const geoGroup = this.consentConfig_.promptIfUnknownForGeoGroup;
     if (geoGroup) {
       Services.geoForDocOrNull(this.element).then((geo) => {
-        const matchedGeoGroups = /** @type {!Array<string>} */ (geo.matchedISOCountryGroups);
+        const matchedGeoGroups = /** @type {!Array<string>} */ (
+          geo.matchedISOCountryGroups
+        );
         if (geo && !matchedGeoGroups.includes(geoGroup)) {
           return;
         }

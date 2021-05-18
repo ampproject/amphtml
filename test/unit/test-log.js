@@ -27,7 +27,7 @@ import {
   userAssert,
 } from '../../src/log';
 
-describe('Logging', () => {
+describes.sandboxed('Logging', {}, (env) => {
   const RETURNS_FINE = () => LogLevel.FINE;
   const RETURNS_INFO = () => LogLevel.INFO;
   const RETURNS_WARN = () => LogLevel.WARN;
@@ -43,8 +43,8 @@ describe('Logging', () => {
     mode = {};
     window.__AMP_MODE = mode;
 
-    logSpy = window.sandbox.spy();
-    timeoutSpy = window.sandbox.spy();
+    logSpy = env.sandbox.spy();
+    timeoutSpy = env.sandbox.spy();
     win = {
       console: {
         log: logSpy,
@@ -53,7 +53,7 @@ describe('Logging', () => {
       setTimeout: timeoutSpy,
       __AMP_REPORT_ERROR: (error) => error,
     };
-    window.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake((error) => error);
+    env.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake((error) => error);
   });
 
   afterEach(() => {
@@ -369,7 +369,14 @@ describe('Logging', () => {
       }
       expect(error).to.be.instanceof(Error);
       expect(error.message).to.equal('1 a 2 b 3' + USER_ERROR_SENTINEL);
-      expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
+      expect(error.messageArray).to.deep.equal([
+        1,
+        'a',
+        2,
+        'b',
+        3,
+        USER_ERROR_SENTINEL,
+      ]);
     });
 
     it('should add element and assert info', () => {

@@ -16,7 +16,11 @@
 
 import {ContextNode} from './node';
 import {arrayOrSingleItemToArray} from '../core/types/array';
-import {throttleTail, tryCallback} from './scheduler';
+import {throttleTail} from './scheduler';
+import {tryCallback} from '../core/error';
+
+// typedef imports
+import {ContextPropDef} from './prop.type';
 
 const EMPTY_ARRAY = [];
 const EMPTY_FUNC = () => {};
@@ -30,8 +34,9 @@ const EMPTY_FUNC = () => {};
  * - A subscriber can optionally return a cleanup function.
  *
  * @param {!Node} node
- * @param {!ContextProp|!Array<!ContextProp>} deps
- * @param {function(...?)} callback
+ * @param {!ContextPropDef<DEP>|!Array<!ContextPropDef<DEP>>} deps
+ * @param {function(...DEP)} callback
+ * @template DEP
  */
 export function subscribe(node, deps, callback) {
   deps = arrayOrSingleItemToArray(deps);
@@ -44,7 +49,8 @@ export function subscribe(node, deps, callback) {
  * Removes the subscriber prevoiously registered with `subscribe` API.
  *
  * @param {!Node} node
- * @param {function(...?)} callback
+ * @param {function(...DEP)} callback
+ * @template DEP
  */
 export function unsubscribe(node, callback) {
   const id = callback;
@@ -57,32 +63,33 @@ export function unsubscribe(node, callback) {
  * internal state, and cleanup functions.
  *
  * @package
+ * @template DEP
  */
 export class Subscriber {
   /**
-   * @param {!./node.ContextNode} contextNode
-   * @param {function(...?)} func
-   * @param {!Array<!ContextProp>} deps
+   * @param {!ContextNode} contextNode
+   * @param {function(...DEP)} func
+   * @param {!Array<!ContextPropDef<DEP>>} deps
    */
   constructor(contextNode, func, deps) {
-    /** @package @const {!./node.ContextNode} */
+    /** @package @const {!ContextNode} */
     this.contextNode = contextNode;
 
-    /** @private @const {!Function} */
+    /** @private @const {function(DEP)} */
     this.func_ = func;
 
-    /** @private @const {!Array<!ContextProp>} */
+    /** @private @const {!Array<!ContextPropDef<DEP>>} */
     this.deps_ = deps;
 
     /**
-     * @private @const {!Array}
+     * @private @const {!Array<DEP|undefined>}
      *
      * Start with a pre-allocated array filled with `undefined`. The filling
      * is important to ensure the correct `Array.every` execution.
      */
     this.depValues_ = deps.length > 0 ? deps.map(EMPTY_FUNC) : EMPTY_ARRAY;
 
-    /** @private @const {!Array<function(*)>} */
+    /** @private @const {!Array<function(DEP)>} */
     this.depSubscribers_ =
       deps.length > 0
         ? deps.map((unusedDep, index) => (value) => {
@@ -206,9 +213,10 @@ function isDefined(v) {
 /**
  * Creates a subscriber.
  *
- * @param {function(...?)} callback
- * @param {!Array<?>} deps
+ * @param {function(...DEP)} callback
+ * @param {!Array<DEP>} deps
  * @return {?function()}
+ * @template DEP
  */
 function callHandler(callback, deps) {
   switch (deps.length) {

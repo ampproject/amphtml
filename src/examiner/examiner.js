@@ -18,21 +18,20 @@
  * @param {!Window} win
  */
 function detectLongTasks(win) {
-  const observer = new win.PerformanceObserver(function (entryList) {
+  const observer = new win.PerformanceObserver((entryList) => {
+    /** @type {!Array<!PerformanceLongTaskTiming>} */
     const entries = entryList.getEntries();
-    for (let i = 0; i < entries.length; i++) {
-      if (
-        entries[i].entryType != 'longtask' ||
-        entries[i].name != 'cross-origin-descendant'
-      ) {
+    for (const entry of entries) {
+      const {entryType, name, attribution, duration} = entry;
+
+      if (entryType != 'longtask' || name != 'cross-origin-descendant') {
         continue;
       }
-      const attr = entries[i].attribution[0];
-      if (!attr || !attr.containerSrc) {
+      const attr = attribution[0];
+      if (!attr?.containerSrc) {
         continue;
       }
 
-      const {duration} = entries[i];
       let culprit = attr.containerSrc;
       if (attr.containerName) {
         const match = attr.containerName.match(/"type":"([^\"]*)"/);

@@ -41,9 +41,9 @@ export function guaranteeSrcForSrcsetUnsupportedBrowsers(img) {
  * @return {string}
  */
 export function transparentPng(doc, width, height) {
-  const canvas = /** @type {!HTMLCanvasElement} */ (doc.createElement(
-    'canvas'
-  ));
+  const canvas = /** @type {!HTMLCanvasElement} */ (
+    doc.createElement('canvas')
+  );
   canvas.width = width;
   canvas.height = height;
 

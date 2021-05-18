@@ -20,7 +20,7 @@ import {
   resetStubsForTesting,
   shouldLoadPolyfill,
   upgradePolyfill,
-} from '../../../src/polyfillstub/intersection-observer-stub';
+} from '../../../src/polyfills/stubs/intersection-observer-stub';
 import {Services} from '../../../src/services';
 import {
   install,
@@ -562,7 +562,7 @@ describes.fakeWin('IntersectionObserverStub', {}, (env) => {
       io.unobserve(element1);
       const native = upgrade(io);
       expect(native.observe).to.not.be.called;
-      expect(io.elements_).to.be.null;
+      expect(io.elements_.length).to.equal(0);
     });
 
     it('should re-observe previously observed elements', () => {
@@ -573,7 +573,7 @@ describes.fakeWin('IntersectionObserverStub', {}, (env) => {
       expect(native.observe).to.be.calledTwice;
       expect(native.observe).to.be.calledWith(element1);
       expect(native.observe).to.be.calledWith(element2);
-      expect(io.elements_).to.be.null;
+      expect(io.elements_.length).to.equal(0);
     });
 
     it('should observe new elements only on native', () => {

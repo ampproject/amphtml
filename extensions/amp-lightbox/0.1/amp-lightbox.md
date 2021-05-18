@@ -104,9 +104,9 @@ iframe.
 <amp-img alt="lightbox ad in friendly iframe"
     layout="fixed"
     width="360" height="480"
-    src="https://github.com/ampproject/amphtml/raw/main/spec/img/lightbox-ad-fie.gif" >
+    src="https://github.com/ampproject/amphtml/raw/main/docs/spec/img/lightbox-ad-fie.gif" >
 <noscript>
-<img alt="lightbox ad in friendly iframe" src="../../spec/img/lightbox-ad-fie.gif" />
+<img alt="lightbox ad in friendly iframe" src="../../docs/spec/img/lightbox-ad-fie.gif" />
 </noscript>
 </amp-img>
 
@@ -115,9 +115,9 @@ iframe.
 <amp-img alt="lightbox ad in 3p iframe"
     layout="fixed"
     width="360" height="480"
-    src="https://github.com/ampproject/amphtml/raw/main/spec/img/lightbox-ad-3p.gif" >
+    src="https://github.com/ampproject/amphtml/raw/main/docs/spec/img/lightbox-ad-3p.gif" >
 <noscript>
-<img alt="lightbox ad in 3p iframe" src="../../spec/img/lightbox-ad-3p.gif" />
+<img alt="lightbox ad in 3p iframe" src="../../docs/spec/img/lightbox-ad-3p.gif" />
 </noscript>
 </amp-img>
 

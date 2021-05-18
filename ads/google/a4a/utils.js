@@ -33,7 +33,7 @@ import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */
@@ -114,7 +114,8 @@ export let NameframeExperimentConfig;
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
 /** @const {Object} */
-const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+const CDN_PROXY_REGEXP =
+  /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
 /**
  * Returns the value of some navigation timing parameter.
@@ -523,7 +524,7 @@ function makeCorrelator(pageViewId, opt_clientId) {
 /**
  * Collect additional dimensions for the brdim parameter.
  * @param {!Window} win The window for which we read the browser dimensions.
- * @param {{width: number, height: number}|null} viewportSize
+ * @param {?{width: number, height: number}} viewportSize
  * @return {string}
  * @visibleForTesting
  */

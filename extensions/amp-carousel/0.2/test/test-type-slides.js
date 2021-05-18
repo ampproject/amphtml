@@ -171,8 +171,9 @@ describes.realWin(
       const slideWrappers = getSlideWrappers(carousel);
       expect(slideWrappers.length).to.equal(5);
 
-      const slides = carousel.querySelector('.i-amphtml-carousel-scroll')
-        .children;
+      const slides = carousel.querySelector(
+        '.i-amphtml-carousel-scroll'
+      ).children;
 
       // Ensure that the spacers have the snap property and not the
       // slides.
@@ -405,12 +406,10 @@ describes.realWin(
 
         const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
         const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
-        const {left: nextLeft} = getNextButton(
-          carousel
-        ).getBoundingClientRect();
-        const {left: prevLeft} = getPrevButton(
-          carousel
-        ).getBoundingClientRect();
+        const {left: nextLeft} =
+          getNextButton(carousel).getBoundingClientRect();
+        const {left: prevLeft} =
+          getPrevButton(carousel).getBoundingClientRect();
 
         expect(firstLeft).to.be.greaterThan(secondLeft);
         expect(prevLeft).to.be.greaterThan(nextLeft);
@@ -424,12 +423,10 @@ describes.realWin(
 
         const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
         const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
-        const {left: nextLeft} = getNextButton(
-          carousel
-        ).getBoundingClientRect();
-        const {left: prevLeft} = getPrevButton(
-          carousel
-        ).getBoundingClientRect();
+        const {left: nextLeft} =
+          getNextButton(carousel).getBoundingClientRect();
+        const {left: prevLeft} =
+          getPrevButton(carousel).getBoundingClientRect();
 
         expect(firstLeft).to.be.greaterThan(secondLeft);
         expect(prevLeft).to.be.greaterThan(nextLeft);
@@ -443,12 +440,10 @@ describes.realWin(
 
         const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
         const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
-        const {left: nextLeft} = getNextButton(
-          carousel
-        ).getBoundingClientRect();
-        const {left: prevLeft} = getPrevButton(
-          carousel
-        ).getBoundingClientRect();
+        const {left: nextLeft} =
+          getNextButton(carousel).getBoundingClientRect();
+        const {left: prevLeft} =
+          getPrevButton(carousel).getBoundingClientRect();
 
         expect(secondLeft).to.be.greaterThan(firstLeft);
         expect(nextLeft).to.be.greaterThan(prevLeft);
@@ -462,12 +457,10 @@ describes.realWin(
 
         const {left: firstLeft} = slideWrappers[0].getBoundingClientRect();
         const {left: secondLeft} = slideWrappers[1].getBoundingClientRect();
-        const {left: nextLeft} = getNextButton(
-          carousel
-        ).getBoundingClientRect();
-        const {left: prevLeft} = getPrevButton(
-          carousel
-        ).getBoundingClientRect();
+        const {left: nextLeft} =
+          getNextButton(carousel).getBoundingClientRect();
+        const {left: prevLeft} =
+          getPrevButton(carousel).getBoundingClientRect();
 
         expect(secondLeft).to.be.greaterThan(firstLeft);
         expect(nextLeft).to.be.greaterThan(prevLeft);

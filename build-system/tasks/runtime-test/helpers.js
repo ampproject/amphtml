@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
-const {green, yellow, cyan} = require('kleur/colors');
+const {green, yellow, cyan, red} = require('../../common/colors');
 const {isCiBuild} = require('../../common/ci');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
@@ -142,6 +142,7 @@ function maybePrintArgvMessages() {
     log(green('Running tests against unminified code.'));
   }
   Object.keys(argv).forEach((arg) => {
+    /** @type {string} */
     const message = argvMessages[arg];
     if (message) {
       log(yellow(`--${arg}:`), green(message));
@@ -156,15 +157,16 @@ function maybePrintArgvMessages() {
 async function karmaBrowserComplete_(browser) {
   const result = browser.lastResult;
   result.total = result.success + result.failed + result.skipped;
-  // Initially we were reporting an error with reportTestErrored() when zero tests were detected (see #16851),
-  // but since Karma sometimes returns a transient, recoverable state, we will
-  // print a warning without reporting an error to the github test status. (see #24957)
+  // This used to be a warning with karma-browserify. See #16851 and #24957.
+  // Now, with karma-esbuild, this is a fatal error. See #34040.
   if (result.total == 0) {
     log(
-      yellow('WARNING:'),
-      'Received a status with zero tests:',
-      cyan(JSON.stringify(result))
+      red('ERROR:'),
+      'Karma returned a result with zero tests.',
+      'This usually indicates a transformation error. See logs above.'
     );
+    log(cyan(JSON.stringify(result)));
+    process.exit(1);
   }
 }
 

@@ -17,12 +17,13 @@
 import {BaseElement} from './base-element';
 import {
   BatchFetchOptionsDef,
+  UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {isAmpScriptUri} from '../../../src/url';
+import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
@@ -70,50 +71,6 @@ const getAmpStateJson = (element, src) => {
     });
 };
 
-/**
- * @param {!AmpElement} element
- * @param {boolean} shouldRefresh true to force refresh of browser cache.
- * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
- */
-function buildOptionsObject(element, shouldRefresh = false) {
-  return {
-    xssiPrefix: element.getAttribute('xssi-prefix'),
-    expr: element.getAttribute('key') ?? '.',
-    refresh: shouldRefresh,
-  };
-}
-
-/**
- * Returns a function to fetch json from remote url, amp-state or
- * amp-script.
- *
- * @param {!AmpElement} element
- * @return {Function}
- */
-export function getJsonFn(element) {
-  const src = element.getAttribute('src');
-  if (!src) {
-    // TODO(dmanek): assert that src is provided instead of silently failing below.
-    return () => {};
-  }
-  if (isAmpStateSrc(src)) {
-    return (src) => getAmpStateJson(element, src);
-  }
-  if (isAmpScriptUri(src)) {
-    return (src) =>
-      Services.scriptForDocOrNull(element).then((ampScriptService) => {
-        userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
-        return ampScriptService.fetch(src);
-      });
-  }
-  return (unusedSrc, shouldRefresh = false) =>
-    batchFetchJsonFor(
-      element.getAmpDoc(),
-      element,
-      buildOptionsObject(element, shouldRefresh)
-    );
-}
-
 export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -124,6 +81,12 @@ export class AmpRender extends BaseElement {
 
     /** @private {?Element} */
     this.template_ = null;
+
+    /** @private {?string} */
+    this.initialSrc_ = null;
+
+    /** @private {?string} */
+    this.src_ = null;
   }
 
   /** @override */
@@ -135,8 +98,76 @@ export class AmpRender extends BaseElement {
     return super.isLayoutSupported(layout);
   }
 
+  /**
+   * @return {!UrlReplacementPolicy}
+   * @private
+   */
+  getPolicy_() {
+    const src = this.element.getAttribute('src');
+    // Require opt-in for URL variable replacements on CORS fetches triggered
+    // by [src] mutation. @see spec/amp-var-substitutions.md
+    // TODO(dmanek): Update spec/amp-var-substitutions.md with this information
+    // and add a `Substitution` sections in this component's markdown file.
+    let policy = UrlReplacementPolicy.OPT_IN;
+    if (
+      src == this.initialSrc_ ||
+      getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
+    ) {
+      policy = UrlReplacementPolicy.ALL;
+    }
+    return policy;
+  }
+
+  /**
+   * @param {boolean} shouldRefresh true to force refresh of browser cache.
+   * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
+   * @private
+   */
+  buildOptionsObject_(shouldRefresh = false) {
+    return {
+      xssiPrefix: this.element.getAttribute('xssi-prefix'),
+      expr: this.element.getAttribute('key') ?? '.',
+      refresh: shouldRefresh,
+      urlReplacement: this.getPolicy_(),
+    };
+  }
+
+  /**
+   * Returns a function to fetch json from remote url, amp-state or
+   * amp-script.
+   *
+   * @return {Function}
+   */
+  getFetchJsonFn() {
+    const {element} = this;
+    const src = element.getAttribute('src');
+    if (!src) {
+      // TODO(dmanek): assert that src is provided instead of silently failing below.
+      return () => {};
+    }
+    if (isAmpStateSrc(src)) {
+      return (src) => getAmpStateJson(element, src);
+    }
+    if (isAmpScriptUri(src)) {
+      return (src) =>
+        Services.scriptForDocOrNull(element).then((ampScriptService) => {
+          userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
+          return ampScriptService.fetch(src);
+        });
+    }
+    return (unusedSrc, shouldRefresh = false) =>
+      batchFetchJsonFor(
+        element.getAmpDoc(),
+        element,
+        this.buildOptionsObject_(shouldRefresh)
+      );
+  }
+
   /** @override */
   init() {
+    this.initialSrc_ = this.element.getAttribute('src');
+    this.src_ = this.initialSrc_;
+
     this.registerApiAction('refresh', (api) => {
       const src = this.element.getAttribute('src');
       // There is an alternative way to do this using `mutationObserverCallback` while using a boolean
@@ -150,8 +181,41 @@ export class AmpRender extends BaseElement {
     });
 
     return dict({
-      'getJson': getJsonFn(this.element),
+      'getJson': this.getFetchJsonFn(),
+      'onReady': () => this.togglePlaceholder(false),
+      'onRefresh': () => {
+        this.togglePlaceholder(true);
+        this.toggleFallback(false);
+      },
+      'onError': () => {
+        // If the content fails to load and there's a fallback element, display the fallback.
+        // Otherwise, continue displaying the placeholder.
+        if (this.getFallback()) {
+          this.togglePlaceholder(false);
+          this.toggleFallback(true);
+        } else {
+          this.togglePlaceholder(true);
+        }
+      },
     });
+  }
+
+  /** @override */
+  buildCallback() {
+    super.buildCallback();
+    if (!this.element.hasAttribute('aria-live')) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
+  }
+
+  /** @override */
+  mutationObserverCallback() {
+    const src = this.element.getAttribute('src');
+    if (src === this.src_) {
+      return;
+    }
+    this.src_ = src;
+    this.mutateProps(dict({'getJson': this.getFetchJsonFn()}));
   }
 
   /**
@@ -202,11 +266,6 @@ export class AmpRender extends BaseElement {
     return !this.template_ || 'render' in props;
   }
 }
-
-AmpRender['props'] = {
-  ...BaseElement['props'],
-  'getJson': {attrs: ['src'], parseAttrs: getJsonFn},
-};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);

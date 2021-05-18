@@ -26,16 +26,16 @@ import {CacheCidApi} from './cache-cid-api';
 import {GoogleCidApi, TokenStatus} from './cid-api';
 import {Services} from '../services';
 import {ViewerCidApi} from './viewer-cid-api';
-import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {base64UrlEncodeFromBytes} from '../core/types/string/base64';
 import {dev, user, userAssert} from '../log';
 import {dict} from '../core/types/object';
 import {getCookie, setCookie} from '../cookies';
-import {getCryptoRandomBytesArray} from '../utils/bytes';
+import {getCryptoRandomBytesArray} from '../core/types/string/bytes';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
 import {isExperimentOn} from '../../src/experiments';
 import {isIframed} from '../dom';
-import {parseJson, tryParseJson} from '../json';
+import {parseJson, tryParseJson} from '../core/types/object/json';
 import {rethrowAsync} from '../core/error';
 import {tryResolve} from '../core/data-structures/promise';
 
@@ -477,9 +477,9 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
             setCidBackup(ampdoc, cookieName, existingCookie);
           }
         }
-        return /** @type {!Promise<?string>} */ (Promise.resolve(
-          existingCookie
-        ));
+        return /** @type {!Promise<?string>} */ (
+          Promise.resolve(existingCookie)
+        );
       }
 
       if (cid.externalCidCache_[scope]) {

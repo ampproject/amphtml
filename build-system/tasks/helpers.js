@@ -32,7 +32,7 @@ const {
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
-const {green, red, cyan} = require('kleur/colors');
+const {green, red, cyan} = require('../common/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
@@ -344,8 +344,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
  * @param {string} destFilename
  */
 function handleBundleError(err, continueOnError, destFilename) {
-  /** @type {Error|string} */
-  let message = err;
+  let message = err.toString();
   if (err.stack) {
     // Drop the node_modules call stack, which begins with '    at'.
     message = err.stack.replace(/    at[^]*/, '').trim();
@@ -393,7 +392,11 @@ async function finishBundle(
     );
     endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
   } else {
-    endBuildStep(logPrefix, destFilename, startTime);
+    const loggingName =
+      options.npm && !destFilename.startsWith('amp-')
+        ? `${options.name} → ${destFilename}`
+        : destFilename;
+    endBuildStep(logPrefix, loggingName, startTime);
   }
 
   const targets = options.minify ? MINIFIED_TARGETS : UNMINIFIED_TARGETS;

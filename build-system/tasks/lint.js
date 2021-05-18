@@ -23,11 +23,12 @@ const {
   logOnSameLine,
   logOnSameLineLocalDev,
 } = require('../common/logging');
-const {cyan, green, red, yellow} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('../common/colors');
 const {ESLint} = require('eslint');
 const {getFilesToCheck} = require('../common/utils');
 const {lintGlobs} = require('../test-configs/config');
 
+/** @type {ESLint.Options} */
 const options = {
   fix: argv.fix,
   reportUnusedDisableDirectives: 'error',
@@ -111,7 +112,7 @@ function summarizeResults(results, fixedFiles) {
         cyan('prettier/prettier'),
         'errors, read',
         cyan(
-          'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#code-quality-and-style'
+          'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md#code-quality-and-style'
         )
       );
     }

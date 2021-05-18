@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonConfiguration} from '../src/json';
+import {jsonConfiguration} from '../src/core/types/object/json';
 
 /**
  * @typedef {{
@@ -983,6 +983,11 @@ const adConfig = jsonConfiguration({
   },
 
   'rbinfox': {
+    renderStartImplemented: true,
+  },
+
+  'rcmwidget': {
+    prefetch: 'https://rcmjs.rambler.ru/static/rcmw/rcmw-amp.js',
     renderStartImplemented: true,
   },
 

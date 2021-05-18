@@ -18,7 +18,7 @@ import {computedStyle} from '../../../src/style';
 
 /**
  *  Returns the min opacity found amongst the element and its ancestors
- *  @param {!Element|null} el
+ *  @param {?Element} el
  *  @return {number} minimum opacity value
  */
 export function getMinOpacity(el) {
@@ -73,7 +73,7 @@ function getElementOpacity(el) {
 /**
  * Returns the node tree of the current element starting from
  * the document root
- * @param {!Element|null} el
+ * @param {?Element} el
  * @return {Array} node list of the element's node tree
  */
 function getElementNodeTree(el) {

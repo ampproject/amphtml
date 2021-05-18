@@ -33,7 +33,7 @@ import {
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
 import {map} from '../core/types/object';
-import {parseQueryString} from '../url';
+import {parseQueryString} from '../core/types/string/url';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -675,9 +675,9 @@ export class AmpDoc {
    * @return {?time}
    */
   getFirstVisibleTime() {
-    return /** @type {?number} */ (this.signals_.get(
-      AmpDocSignals.FIRST_VISIBLE
-    ));
+    return /** @type {?number} */ (
+      this.signals_.get(AmpDocSignals.FIRST_VISIBLE)
+    );
   }
 
   /**

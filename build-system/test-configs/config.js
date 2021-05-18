@@ -24,7 +24,7 @@
  *   watched: boolean
  * }>
  */
-const initTestsPath = ['test/_init_tests.js'];
+const initTestsPath = ['testing/init-tests.js'];
 
 const karmaHtmlFixturesPath = 'test/fixtures/*.html';
 
@@ -105,8 +105,11 @@ const unitTestPaths = [
   'extensions/**/test/unit/*.js',
 ];
 
-// TODO(rsimha, #28838): Refine this opt-in mechanism.
-const unitTestCrossBrowserPaths = ['test/unit/test-error.js'];
+// TODO(amphtml): Opt-in more unit tests to run on Safari / FF / Edge.
+const unitTestCrossBrowserPaths = [
+  'test/unit/core/test-error.js',
+  'test/unit/test-log.js',
+];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
@@ -425,8 +428,6 @@ const htmlFixtureGlobs = [
   '!examples/visual-tests/amp-story-player/player-local-story.html',
   '!examples/visual-tests/amp-story-player/story-attribution.html',
   '!examples/visual-tests/amp-story/amp-story-360-image.html',
-  '!examples/visual-tests/amp-story/amp-story-bookend.html',
-  '!examples/visual-tests/amp-story/amp-story-bookend.rtl.html',
   '!examples/visual-tests/amp-story/amp-story-bot-rendering.html',
   '!examples/visual-tests/amp-story/amp-story-consent.html',
   '!examples/visual-tests/amp-story/amp-story-consent.rtl.html',

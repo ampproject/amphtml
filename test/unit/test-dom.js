@@ -17,8 +17,9 @@
 import * as dom from '../../src/dom';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementForTesting} from '../../src/custom-element';
+import {isElement} from '../../src/core/types';
 import {loadPromise} from '../../src/event-helper';
-import {setScopeSelectorSupportedForTesting} from '../../src/css';
+import {setScopeSelectorSupportedForTesting} from '../../src/core/dom/css';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 import {toArray} from '../../src/core/types/array';
 
@@ -250,7 +251,7 @@ describes.sandboxed('DOM', {}, (env) => {
     element.appendChild(text);
 
     expect(dom.closestNode(text, () => true)).to.equal(text);
-    expect(dom.closestNode(text, (n) => n.nodeType == 1)).to.equal(element);
+    expect(dom.closestNode(text, isElement)).to.equal(element);
     expect(dom.closestNode(text, (n) => n.nodeType == 11)).to.equal(fragment);
   });
 
