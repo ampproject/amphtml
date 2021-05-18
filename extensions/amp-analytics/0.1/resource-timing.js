@@ -119,9 +119,9 @@ function validateResourceTimingSpec(spec) {
  * @return {!Array<!PerformanceResourceTiming>}
  */
 function getResourceTimingEntries(win) {
-  return /** @type {!Array<!PerformanceResourceTiming>} */ (win.performance.getEntriesByType(
-    'resource'
-  ));
+  return /** @type {!Array<!PerformanceResourceTiming>} */ (
+    win.performance.getEntriesByType('resource')
+  );
 }
 
 /**

@@ -704,8 +704,9 @@ export class VideoDocking {
    * @private
    */
   isPlaying_(optVideo = null) {
-    const video = /** @type {!VideoInterface} */ (optVideo ||
-      this.getDockedVideo_());
+    const video = /** @type {!VideoInterface} */ (
+      optVideo || this.getDockedVideo_()
+    );
     return (
       this.manager_().getPlayingState(video) == PlayingStates.PLAYING_MANUAL
     );
@@ -969,9 +970,8 @@ export class VideoDocking {
         'transition-timing-function': transitionTiming,
       });
 
-    const isSmallPlaceholderIcon = placeholderIcon.classList.contains(
-      'amp-small'
-    );
+    const isSmallPlaceholderIcon =
+      placeholderIcon.classList.contains('amp-small');
 
     const placeholderIconWidth = isSmallPlaceholderIcon
       ? PLACEHOLDER_ICON_SMALL_WIDTH

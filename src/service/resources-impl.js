@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../core/data-structures/promise';
-import {FiniteStateMachine} from '../finite-state-machine';
+import {FiniteStateMachine} from '../core/data-structures/finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
@@ -748,10 +748,8 @@ export class ResourcesImpl {
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
-        const {
-          resource,
-          event,
-        } = /** @type {!./resources-interface.ChangeSizeRequestDef} */ (request);
+        const {resource, event} =
+          /** @type {!./resources-interface.ChangeSizeRequestDef} */ (request);
         const box = resource.getLayoutBox();
 
         let topMarginDiff = 0;
@@ -949,7 +947,8 @@ export class ResourcesImpl {
         this.vsync_.run(
           {
             measure: (state) => {
-              state./*OK*/ scrollHeight = this.viewport_./*OK*/ getScrollHeight();
+              state./*OK*/ scrollHeight =
+                this.viewport_./*OK*/ getScrollHeight();
               state./*OK*/ scrollTop = this.viewport_./*OK*/ getScrollTop();
             },
             mutate: (state) => {

@@ -199,30 +199,29 @@ export class IframeTransport {
     if (!isLongTaskApiSupported(this.ampWin_)) {
       return;
     }
-    IframeTransport.performanceObservers_[
-      this.type_
-    ] = new this.ampWin_.PerformanceObserver((entryList) => {
-      if (!entryList) {
-        return;
-      }
-      entryList.getEntries().forEach((entry) => {
-        if (
-          entry &&
-          entry['entryType'] == 'longtask' &&
-          entry['name'] == 'cross-origin-descendant' &&
-          entry.attribution
-        ) {
-          /** @type {!Array} */ (entry.attribution).forEach((attrib) => {
-            if (
-              this.frameUrl_ == attrib['containerSrc'] &&
-              ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0
-            ) {
-              user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
-            }
-          });
+    IframeTransport.performanceObservers_[this.type_] =
+      new this.ampWin_.PerformanceObserver((entryList) => {
+        if (!entryList) {
+          return;
         }
+        entryList.getEntries().forEach((entry) => {
+          if (
+            entry &&
+            entry['entryType'] == 'longtask' &&
+            entry['name'] == 'cross-origin-descendant' &&
+            entry.attribution
+          ) {
+            /** @type {!Array} */ (entry.attribution).forEach((attrib) => {
+              if (
+                this.frameUrl_ == attrib['containerSrc'] &&
+                ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0
+              ) {
+                user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
+              }
+            });
+          }
+        });
       });
-    });
     IframeTransport.performanceObservers_[this.type_].observe({
       entryTypes: ['longtask'],
     });

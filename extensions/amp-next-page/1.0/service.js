@@ -45,7 +45,7 @@ import {
 import {setStyles, toggle} from '../../../src/style';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
@@ -503,17 +503,19 @@ export class NextPageService {
       parseFavicon(this.doc_) ||
       '';
 
-    return /** @type {!HostPage} */ (new HostPage(
-      this,
-      {
-        url,
-        title: title || '',
-        image,
-      },
-      PageState.INSERTED /** initState */,
-      VisibilityState.VISIBLE /** initVisibility */,
-      this.doc_
-    ));
+    return /** @type {!HostPage} */ (
+      new HostPage(
+        this,
+        {
+          url,
+          title: title || '',
+          image,
+        },
+        PageState.INSERTED /** initState */,
+        VisibilityState.VISIBLE /** initVisibility */,
+        this.doc_
+      )
+    );
   }
 
   /**
@@ -882,10 +884,12 @@ export class NextPageService {
       user().error(TAG, 'failed to parse inline page list', error);
     });
 
-    const pages = /** @type {!Array<!./page.PageMeta>} */ (user().assertArray(
-      parsed,
-      `${TAG} Page list expected an array, found: ${typeof parsed}`
-    ));
+    const pages = /** @type {!Array<!./page.PageMeta>} */ (
+      user().assertArray(
+        parsed,
+        `${TAG} Page list expected an array, found: ${typeof parsed}`
+      )
+    );
 
     removeElement(scriptElement);
     return pages;
@@ -903,8 +907,9 @@ export class NextPageService {
     }
 
     if (this.remoteFetchingPromise_) {
-      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
-        .remoteFetchingPromise_);
+      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (
+        this.remoteFetchingPromise_
+      );
     }
 
     this.remoteFetchingPromise_ = batchFetchJsonFor(
@@ -928,8 +933,9 @@ export class NextPageService {
         return [];
       });
 
-    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
-      .remoteFetchingPromise_);
+    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (
+      this.remoteFetchingPromise_
+    );
   }
 
   /**

@@ -31,11 +31,18 @@ import {
 import {addParamToUrl} from '../../../src/url';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict, hasOwn, map, ownProperty} from '../../../src/core/types/object';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
+import {
+  dict,
+  getValueForExpr,
+  hasOwn,
+  map,
+  ownProperty,
+} from '../../../src/core/types/object';
+
 import {includes} from '../../../src/core/types/string';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, isEnumValue} from '../../../src/core/types';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 import {mod} from '../../../src/utils/math';
 import {once} from '../../../src/core/types/function';
@@ -615,9 +622,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
   inputHandler_() {
     if (
       this.binding_.shouldAutocomplete(
-        /** @type {!HTMLInputElement} */ (dev().assertElement(
-          this.inputElement_
-        ))
+        /** @type {!HTMLInputElement} */ (
+          dev().assertElement(this.inputElement_)
+        )
       )
     ) {
       return this.maybeFetchAndAutocomplete_();
@@ -683,9 +690,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
   selectHandler_(event) {
     const element = dev().assertElement(event.target);
     const selectedElement = this.getItemElement_(element);
-    const {selectedObject, selectedText} = this.updateAndGetElementSelections_(
-      selectedElement
-    );
+    const {selectedObject, selectedText} =
+      this.updateAndGetElementSelections_(selectedElement);
     return this.mutateElement(() => {
       this.selectItem_(selectedText, selectedObject);
     });
@@ -1213,9 +1219,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const newValue = newActiveElement.getAttribute('data-value');
 
     this.binding_.displayActiveItemInInput(
-      /** @type {!HTMLInputElement} */ (dev().assertElement(
-        this.inputElement_
-      )),
+      /** @type {!HTMLInputElement} */ (
+        dev().assertElement(this.inputElement_)
+      ),
       newValue,
       this.userInput_
     );
@@ -1226,10 +1232,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return this.measureMutateElement(
       () => {
         const {offsetTop: itemTop, offsetHeight: itemHeight} = newActiveElement;
-        const {
-          scrollTop: resultTop,
-          offsetHeight: resultHeight,
-        } = this.container_;
+        const {scrollTop: resultTop, offsetHeight: resultHeight} =
+          this.container_;
         shouldScroll =
           resultTop > itemTop ||
           resultTop + resultHeight < itemTop + itemHeight;
@@ -1352,10 +1356,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         this.binding_.removeSelectionHighlighting(this.inputElement_);
         if (this.areResultsDisplayed_() && this.activeElement_) {
-          const {
-            selectedObject,
-            selectedText,
-          } = this.updateAndGetElementSelections_(this.activeElement_);
+          const {selectedObject, selectedText} =
+            this.updateAndGetElementSelections_(this.activeElement_);
           return this.mutateElement(() => {
             this.selectItem_(selectedText, selectedObject);
             this.resetActiveElement_();
@@ -1376,10 +1378,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       case Keys.TAB:
         if (this.areResultsDisplayed_() && this.activeElement_) {
           event.preventDefault();
-          const {
-            selectedObject,
-            selectedText,
-          } = this.updateAndGetElementSelections_(this.activeElement_);
+          const {selectedObject, selectedText} =
+            this.updateAndGetElementSelections_(this.activeElement_);
           return this.mutateElement(() => {
             this.selectItem_(selectedText, selectedObject);
           });

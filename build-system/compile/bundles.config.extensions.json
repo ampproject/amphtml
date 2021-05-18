@@ -32,12 +32,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {"name": "amp-action-macro", "version": "0.1", "latestVersion": "0.1"},
@@ -108,9 +103,18 @@
   },
   {
     "name": "amp-base-carousel",
-    "version": ["0.1", "1.0"],
+    "version": "0.1",
     "latestVersion": "0.1",
     "options": {"hasCss": true}
+  },
+  {
+    "name": "amp-base-carousel",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
   },
   {"name": "amp-beopinion", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-bind", "version": "0.1", "latestVersion": "0.1"},
@@ -150,12 +154,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
@@ -168,12 +167,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
@@ -211,12 +205,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {"name": "amp-font", "version": "0.1", "latestVersion": "0.1"},
@@ -297,12 +286,7 @@
     "options": {
       "hasCss": true,
       "cssBinaries": ["amp-inline-gallery-pagination"],
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {"name": "amp-inputmask", "version": "0.1", "latestVersion": "0.1"},
@@ -318,12 +302,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
@@ -351,12 +330,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
@@ -485,12 +459,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
@@ -542,7 +511,6 @@
     "options": {
       "hasCss": true,
       "cssBinaries": [
-        "amp-story-bookend",
         "amp-story-consent",
         "amp-story-draggable-drawer-header",
         "amp-story-hint",
@@ -624,9 +592,20 @@
   },
   {
     "name": "amp-stream-gallery",
-    "version": ["0.1", "1.0"],
-    "latestVersion": "1.0",
-    "options": {"hasCss": true}
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-stream-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
   },
   {
     "name": "amp-subscriptions",
@@ -652,12 +631,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   },
   {
@@ -669,7 +643,15 @@
       "cssBinaries": ["amp-truncate-text", "amp-truncate-text-shadow"]
     }
   },
-  {"name": "amp-twitter", "version": ["0.1", "1.0"], "latestVersion": "0.1"},
+  {"name": "amp-twitter", "version": "0.1", "latestVersion": "0.1"},
+  {
+    "name": "amp-twitter",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true
+    }
+  },
   {
     "name": "amp-user-notification",
     "version": "0.1",
@@ -739,12 +721,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": {
-        "component.js": {
-          "preact": "component-preact.js",
-          "react": "component-react.js"
-        }
-      }
+      "npm": true
     }
   }
 ]

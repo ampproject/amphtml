@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseQueryString} from '../../src/url';
+import {parseQueryString} from '../../src/core/types/string/url';
 import {validateData, writeScript} from '../../3p/3p';
 
 /**
@@ -23,12 +23,17 @@ import {validateData, writeScript} from '../../3p/3p';
  */
 export function firstimpression(global, data) {
   validateData(data, ['zoneId', 'websiteId']);
-  const locationHash = parseQueryString(global.context.location.hash);
+
+  const {hash, search} = global.context.location;
+  const parameters = Object.assign(
+    parseQueryString(hash),
+    parseQueryString(search)
+  );
 
   const cdnHost =
-    'https://' + (locationHash['fi_ecdnhost'] || 'ecdn.firstimpression.io');
+    'https://' + (parameters['fi_ecdnhost'] || 'ecdn.firstimpression.io');
 
-  const cdnpath = locationHash['fi_ecdnpath'] || '/static/js/fiamp.js';
+  const cdnpath = parameters['fi_ecdnpath'] || '/static/js/fiamp.js';
 
   global.params = data;
 

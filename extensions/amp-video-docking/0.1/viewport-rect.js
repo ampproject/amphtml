@@ -36,13 +36,12 @@ export function createViewportRect(viewport) {
   const width = readonlyGetterProp(() => viewport.getSize().width);
   const height = readonlyGetterProp(() => viewport.getSize().height);
 
-  return /** @type {!LayoutRectDef} */ (Object.defineProperties(
-    layoutRectLtwh(0, 0, 0, 0),
-    {
+  return /** @type {!LayoutRectDef} */ (
+    Object.defineProperties(layoutRectLtwh(0, 0, 0, 0), {
       width,
       height,
       right: width,
       bottom: height,
-    }
-  ));
+    })
+  );
 }

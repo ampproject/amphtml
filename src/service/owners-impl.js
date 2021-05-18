@@ -26,9 +26,9 @@ import {registerServiceBuilderForDoc} from '../service';
  * @return {!Array<!Element>}
  */
 function elements(elements) {
-  return /** @type {!Array<!Element>} */ (isArray(elements)
-    ? elements
-    : [elements]);
+  return /** @type {!Array<!Element>} */ (
+    isArray(elements) ? elements : [elements]
+  );
 }
 
 /**
@@ -114,10 +114,10 @@ export class OwnersImpl {
    * @private
    */
   findResourcesInElements_(parentResource, elements, callback) {
-    elements.forEach((element) => {
+    for (const element of elements) {
       devAssert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
-    });
+    }
   }
 
   /**

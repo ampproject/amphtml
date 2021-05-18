@@ -19,7 +19,7 @@ import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/curve';
+import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {
   closestAncestorElementBySelector,
   dispatchCustomEvent,
@@ -300,23 +300,23 @@ export class AmpSlideScroll extends BaseSlides {
       Services.timerFor(this.win).cancel(this.scrollTimeout_);
     }
 
-    this.scrollTimeout_ = /** @type {number} */ (Services.timerFor(
-      this.win
-    ).delay(() => {
-      this.scrollTimeout_ = null;
+    this.scrollTimeout_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(() => {
+        this.scrollTimeout_ = null;
 
-      if (this.snappingInProgress_ || this.isTouching_) {
-        return;
-      }
+        if (this.snappingInProgress_ || this.isTouching_) {
+          return;
+        }
 
-      const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
+        const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
 
-      if (this.hasNativeSnapPoints_) {
-        this.updateOnScroll_(currentScrollLeft, ActionTrust.LOW);
-      } else {
-        this.customSnap_(currentScrollLeft, undefined, ActionTrust.LOW);
-      }
-    }, timeout));
+        if (this.hasNativeSnapPoints_) {
+          this.updateOnScroll_(currentScrollLeft, ActionTrust.LOW);
+        } else {
+          this.customSnap_(currentScrollLeft, undefined, ActionTrust.LOW);
+        }
+      }, timeout)
+    );
   }
 
   /**
@@ -749,9 +749,8 @@ export class AmpSlideScroll extends BaseSlides {
         this.slides_[showIndex].setAttribute('aria-hidden', 'true');
       }
     });
-    this.slidesContainer_./*OK*/ scrollLeft = this.getScrollLeftForIndex_(
-      newIndex
-    );
+    this.slidesContainer_./*OK*/ scrollLeft =
+      this.getScrollLeftForIndex_(newIndex);
     this.triggerAnalyticsEvent_(newIndex);
     this.slideIndex_ = newIndex;
     // If we have a specified number of autoplay loops and

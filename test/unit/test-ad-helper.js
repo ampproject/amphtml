@@ -18,7 +18,7 @@ import {computedStyle} from '../../src/style';
 import {createIframePromise} from '../../testing/iframe';
 import {getAdContainer, isAdPositionAllowed} from '../../src/ad-helper';
 
-describe('ad-helper', () => {
+describes.sandboxed('ad-helper', {}, () => {
   describe('isAdPositionAllowed function', () => {
     it('should allow position fixed element that is allowlisted', () => {
       return createIframePromise().then((iframe) => {

@@ -17,7 +17,7 @@
 
 const {getFilesToCheck} = require('../common/utils');
 const {getStdout} = require('../common/process');
-const {green, red} = require('kleur/colors');
+const {green, red} = require('../common/colors');
 const {invalidWhitespaceGlobs} = require('../test-configs/config');
 const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
 

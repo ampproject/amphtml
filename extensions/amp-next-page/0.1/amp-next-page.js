@@ -36,7 +36,7 @@ import {fetchDocument} from '../../../src/document-fetcher';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
-import {parseJson, tryParseJson} from '../../../src/json';
+import {parseJson, tryParseJson} from '../../../src/core/types/object/json';
 
 const TAG = 'amp-next-page';
 
@@ -292,10 +292,9 @@ export class AmpNextPage extends AMP.BaseElement {
  * @return {!Promise<!NextPageService>}
  */
 function nextPageServiceForDoc(elementOrAmpDoc) {
-  return /** @type {!Promise<!NextPageService>} */ (getServicePromiseForDoc(
-    elementOrAmpDoc,
-    SERVICE_ID
-  ));
+  return /** @type {!Promise<!NextPageService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, SERVICE_ID)
+  );
 }
 
 /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {isEnumValue} from '../../../src/core/types';
-import {parseQueryString} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
 
 /**
  * Embed mode for AMP story.  See ../embed-modes.md for details.
@@ -30,7 +30,6 @@ export const EmbedMode = {
    * TBD embed mode.
    *
    * This differs from the NOT_EMBEDDED embed mode in the following ways:
-   * - Hides bookend
    * - Hides all system layer buttons
    * - Disables swipe-based user education
    * - Disallows ads
@@ -45,7 +44,6 @@ export const EmbedMode = {
    *
    * This differs from the NOT_EMBEDDED embed mode in the following ways:
    * - Removes share icon from system layer
-   * - Removes sharing section from bookend
    * - TODO(#14923): Removes the link information from embedded UIs.
    */
   NO_SHARING: 2,
@@ -55,7 +53,6 @@ export const EmbedMode = {
    *
    * This differs from the NOT_EMBEDDED embed mode in the following ways:
    * - Auto-advances pages by a given duration.
-   * - Hides bookend
    * - Hides all system layer buttons
    * - Disables swipe-based user education
    * - Disallows ads
@@ -68,7 +65,6 @@ export const EmbedMode = {
    *
    * This differs from the NOT_EMBEDDED embed mode in the following ways:
    * - Removes share icon from system layer
-   * - Removes sharing section from bookend
    * - Removes audio icon from system layer
    */
   NO_SHARING_NOR_AUDIO_UI: 4,

@@ -29,9 +29,9 @@ import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {urls} from '../../../src/config';
-import {utf8Encode} from '../../../src/utils/bytes';
+import {utf8Encode} from '../../../src/core/types/string/bytes';
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -125,7 +125,7 @@ export class AmpScript extends AMP.BaseElement {
     /**
      * If true, signals that worker-dom should activate sandboxed mode.
      * In this mode the Worker lives in its own crossorigin iframe, creating
-     * a strong security boundary.
+     * a strong security boundary. It also forces nodom mode.
      *
      * @private {boolean}
      */
@@ -139,8 +139,8 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.nodom_ = this.element.hasAttribute('nodom');
     this.sandboxed_ = this.element.hasAttribute('sandboxed');
+    this.nodom_ = this.sandboxed_ || this.element.hasAttribute('nodom');
     this.development_ =
       this.element.hasAttribute('data-ampdevmode') ||
       this.element.ownerDocument.documentElement.hasAttribute(
@@ -601,6 +601,7 @@ export class AmpScriptService {
         throw user().createError(
           TAG,
           `Script hash not found or incorrect for ${debugId}. You must include <meta name="amp-script-src" content="sha384-${hash}">. ` +
+            `During development, you can disable this check by adding the "data-ampdevmode" attribute to ${debugId}, or the root html node` +
             'See https://amp.dev/documentation/components/amp-script/#script-hash.'
         );
       }

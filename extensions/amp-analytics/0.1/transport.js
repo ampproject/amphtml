@@ -63,9 +63,9 @@ export class Transport {
     this.options_ = options;
 
     /** @private {string|undefined} */
-    this.referrerPolicy_ = /** @type {string|undefined} */ (this.options_[
-      'referrerPolicy'
-    ]);
+    this.referrerPolicy_ = /** @type {string|undefined} */ (
+      this.options_['referrerPolicy']
+    );
 
     // no-referrer is only supported in image transport
     if (this.referrerPolicy_ === 'no-referrer') {
@@ -222,7 +222,7 @@ export class Transport {
         parseUrlDeprecated(this.win_.location.href).origin,
       'Origin of iframe request must not be equal to the document origin.' +
         ' See https://github.com/ampproject/' +
-        'amphtml/blob/main/spec/amp-iframe-origin-policy.md for details.'
+        'amphtml/blob/main/docs/spec/amp-iframe-origin-policy.md for details.'
     );
 
     /** @const {!Element} */
@@ -244,9 +244,9 @@ export class Transport {
    * @return {!TransportSerializerDef}
    */
   getSerializer_() {
-    return /** @type {!TransportSerializerDef} */ (TransportSerializers[
-      'default'
-    ]);
+    return /** @type {!TransportSerializerDef} */ (
+      TransportSerializers['default']
+    );
   }
 
   /**
