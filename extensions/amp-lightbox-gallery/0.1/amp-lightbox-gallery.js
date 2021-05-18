@@ -1369,6 +1369,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     </div>`;
     const imgElement = childElementByTag(element, 'img');
 
+    console.log({thumbnailObj});
     if (thumbnailObj.srcset) {
       imgElement.setAttribute('srcset', thumbnailObj.srcset.stringify());
     } else {

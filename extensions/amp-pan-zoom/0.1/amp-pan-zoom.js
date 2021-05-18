@@ -33,6 +33,7 @@ import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
+import {htmlFor} from '../../../src/static-template';
 import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
 import {numeric} from '../../../src/transition';
 import {
@@ -46,13 +47,14 @@ const TAG = 'amp-pan-zoom';
 const DEFAULT_MAX_SCALE = 3;
 const MAX_ANIMATION_DURATION = 250;
 
-const ELIGIBLE_TAGS = {
-  'svg': true,
-  'DIV': true,
-  'AMP-IMG': true,
-  'AMP-LAYOUT': true,
-  'AMP-SELECTOR': true,
-};
+const ELIGIBLE_TAGS = new Set([
+  'svg',
+  'DIV',
+  'AMP-IMG',
+  'AMP-LAYOUT',
+  'AMP-SELECTOR',
+  'IMG',
+]);
 
 /**
  * @extends {AMP.BaseElement}
@@ -173,8 +175,12 @@ export class AmpPanZoom extends AMP.BaseElement {
       '%s should have its target element as its one and only child',
       TAG
     );
+    console.log('attempt', {
+      valid: ELIGIBLE_TAGS.has(children[0].tagName),
+      child: children[0],
+    });
     userAssert(
-      this.elementIsSupported_(children[0]),
+      ELIGIBLE_TAGS.has(children[0].tagName),
       '%s is not supported by %s',
       children[0].tagName,
       TAG
@@ -266,23 +272,14 @@ export class AmpPanZoom extends AMP.BaseElement {
   }
 
   /**
-   * Checks to see if an element is supported.
-   * @param {Element} element
-   * @return {boolean}
-   * @private
-   */
-  elementIsSupported_(element) {
-    return ELIGIBLE_TAGS[element.tagName];
-  }
-
-  /**
    * Creates zoom buttoms
    * @private
    */
   createZoomButton_() {
-    this.zoomButton_ = this.element.ownerDocument.createElement('div');
-    this.zoomButton_.classList.add('amp-pan-zoom-in-icon');
-    this.zoomButton_.classList.add('amp-pan-zoom-button');
+    this.zoomButton_ = htmlFor(
+      this.element
+    )`<div class='amp-pan-zoom-in-icon amp-pan-zoom-button'></div>`;
+
     this.zoomButton_.addEventListener('click', () => {
       if (this.zoomButton_.classList.contains('amp-pan-zoom-in-icon')) {
         this.transform(0, 0, this.maxScale_);
