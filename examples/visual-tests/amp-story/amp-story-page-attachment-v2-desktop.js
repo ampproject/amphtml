@@ -20,10 +20,7 @@ const {
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
-  'custom text - inline CTA pre-tap UI should display': async (
-    page,
-    name
-  ) => {
+  'custom text - inline CTA pre-tap UI should display': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
     await page.waitForTimeout(400); // For animations to finish.
@@ -32,10 +29,7 @@ module.exports = {
     ]);
   },
 
-  'dark theme - inline CTA pre-tap UI should display': async (
-    page,
-    name
-  ) => {
+  'dark theme - inline CTA pre-tap UI should display': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
@@ -55,7 +49,9 @@ module.exports = {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-1-image[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-1-image[active]'
+    );
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-inline-page-attachment-chip',
@@ -71,9 +67,13 @@ module.exports = {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-1-image[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-1-image[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-2-images[active]'
+    );
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-inline-page-attachment-chip',
@@ -89,31 +89,40 @@ module.exports = {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-1-image[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-1-image[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-light-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-light-theme-2-images[active]'
+    );
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-inline-page-attachment-chip',
     ]);
   },
 
-  'outlink CTA pre-tap UI should display': async (
-    page,
-    name
-  ) => {
+  'outlink CTA pre-tap UI should display': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-1-image[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-1-image[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-light-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-light-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#outlink-default[active]');
     await page.waitForTimeout(400); // For animations to finish.
@@ -122,20 +131,23 @@ module.exports = {
     ]);
   },
 
-  'custom text - outlink CTA pre-tap UI should display': async (
-    page,
-    name
-  ) => {
+  'custom text - outlink CTA pre-tap UI should display': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-1-image[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-1-image[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-light-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-light-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#outlink-default[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
@@ -146,20 +158,23 @@ module.exports = {
     ]);
   },
 
-  'no img - outlink CTA pre-tap UI should display': async (
-    page,
-    name
-  ) => {
+  'no img - outlink CTA pre-tap UI should display': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-1-image[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-1-image[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-light-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-light-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#outlink-default[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
@@ -172,20 +187,23 @@ module.exports = {
     ]);
   },
 
-  'custom img - outlink CTA pre-tap UI should display': async (
-    page,
-    name
-  ) => {
+  'custom img - outlink CTA pre-tap UI should display': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-1-image[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-1-image[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-light-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-light-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#outlink-default[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
@@ -200,20 +218,23 @@ module.exports = {
     ]);
   },
 
-  'dark theme - outlink CTA pre-tap UI should display': async (
-    page,
-    name
-  ) => {
+  'dark theme - outlink CTA pre-tap UI should display': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-1-image[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-1-image[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-light-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-light-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#outlink-default[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
@@ -239,11 +260,17 @@ module.exports = {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-1-image[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-1-image[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-light-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-light-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#outlink-default[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
@@ -255,27 +282,32 @@ module.exports = {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#outlink-dark-theme[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#outlink-custom-background-color[active]');
+    await page.waitForSelector(
+      'amp-story-page#outlink-custom-background-color[active]'
+    );
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-inline-page-attachment-chip',
     ]);
   },
 
-  'pink text - outlink CTA pre-tap UI should display': async (
-    page,
-    name
-  ) => {
+  'pink text - outlink CTA pre-tap UI should display': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-1-image[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-1-image[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-dark-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-dark-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#inline-light-theme-2-images[active]');
+    await page.waitForSelector(
+      'amp-story-page#inline-light-theme-2-images[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#outlink-default[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
@@ -287,9 +319,13 @@ module.exports = {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#outlink-dark-theme[active]');
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#outlink-custom-background-color[active]');
+    await page.waitForSelector(
+      'amp-story-page#outlink-custom-background-color[active]'
+    );
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#outlink-custom-text-color[active]');
+    await page.waitForSelector(
+      'amp-story-page#outlink-custom-text-color[active]'
+    );
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-inline-page-attachment-chip',
