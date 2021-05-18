@@ -1241,7 +1241,7 @@ tags: {
   spec_name: "BLOCKQUOTE with TikTok"
   attrs: { name: "align" }
   attr_lists: "cite-attr"
-  mandatory_ancestor: "AMP-TIKTOK" 
+  mandatory_ancestor: "AMP-TIKTOK blockquote" 
 }
 # 4.4.5 The ol element
 tags: {
