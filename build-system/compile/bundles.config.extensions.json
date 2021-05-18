@@ -30,10 +30,7 @@
     "name": "amp-accordion",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "npm": true
-    }
+    "options": {"hasCss": true, "npm": true}
   },
   {"name": "amp-action-macro", "version": "0.1", "latestVersion": "0.1"},
   {
@@ -111,10 +108,7 @@
     "name": "amp-base-carousel",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "npm": true
-    }
+    "options": {"hasCss": true, "npm": true}
   },
   {"name": "amp-beopinion", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-bind", "version": "0.1", "latestVersion": "0.1"},
@@ -145,30 +139,24 @@
   {"name": "amp-crypto-polyfill", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-dailymotion", "version": "0.1", "latestVersion": "0.1"},
   {
-    "name": "amp-date-countdown",
-    "version": "0.1",
+    "name": "amp-dailymotion",
+    "version": "1.0",
+    "options": {"hasCss": true},
     "latestVersion": "0.1"
   },
+  {"name": "amp-date-countdown", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-date-countdown",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
-      "npm": true
-    }
+    "options": {"npm": true}
   },
-  {
-    "name": "amp-date-display",
-    "version": "0.1",
-    "latestVersion": "0.1"
-  },
+  {"name": "amp-date-display", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-date-display",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
-      "npm": true
-    }
+    "options": {"npm": true}
   },
   {
     "name": "amp-date-picker",
@@ -203,10 +191,7 @@
     "name": "amp-fit-text",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "npm": true
-    }
+    "options": {"hasCss": true, "npm": true}
   },
   {"name": "amp-font", "version": "0.1", "latestVersion": "0.1"},
   {
@@ -300,10 +285,7 @@
     "name": "amp-instagram",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "npm": true
-    }
+    "options": {"hasCss": true, "npm": true}
   },
   {
     "name": "amp-install-serviceworker",
@@ -328,10 +310,7 @@
     "name": "amp-lightbox",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "npm": true
-    }
+    "options": {"hasCss": true, "npm": true}
   },
   {
     "name": "amp-lightbox-gallery",
@@ -430,11 +409,7 @@
   },
   {"name": "amp-redbull-player", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-reddit", "version": "0.1", "latestVersion": "0.1"},
-  {
-    "name": "amp-render",
-    "version": "1.0",
-    "latestVersion": "1.0"
-  },
+  {"name": "amp-render", "version": "1.0", "latestVersion": "1.0"},
   {
     "name": "amp-resize-observer-polyfill",
     "version": "0.1",
@@ -457,10 +432,7 @@
     "name": "amp-selector",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "npm": true
-    }
+    "options": {"hasCss": true, "npm": true}
   },
   {
     "name": "amp-shadow-dom-polyfill",
@@ -594,18 +566,13 @@
     "name": "amp-stream-gallery",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "options": {"hasCss": true}
   },
   {
     "name": "amp-stream-gallery",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "npm": true
-    }
+    "options": {"hasCss": true, "npm": true}
   },
   {
     "name": "amp-subscriptions",
@@ -630,9 +597,7 @@
     "name": "amp-timeago",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
-      "npm": true
-    }
+    "options": {"npm": true}
   },
   {
     "name": "amp-truncate-text",
@@ -648,9 +613,7 @@
     "name": "amp-twitter",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
-      "npm": true
-    }
+    "options": {"npm": true}
   },
   {
     "name": "amp-user-notification",
@@ -719,9 +682,6 @@
     "name": "amp-youtube",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "npm": true
-    }
+    "options": {"hasCss": true, "npm": true}
   }
 ]
