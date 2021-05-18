@@ -39,5 +39,5 @@ module.exports = {
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-inline-page-attachment-chip',
     ]);
-   },
- };
+  },
+};
