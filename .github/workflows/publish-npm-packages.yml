@@ -1,4 +1,4 @@
-name: Publish NPM Packages
+name: Publish Bento Packages on NPM
 on:
   workflow_dispatch:
     inputs:
@@ -10,6 +10,7 @@ on:
         required: true
 jobs:
   publish:
+    if: github.repository == 'ampproject/amphtml'
     environment: NPM_TOKEN #TODO: change environment name in repo settings
     runs-on: ubuntu-latest
     strategy:
@@ -33,23 +34,20 @@ jobs:
           ref: ${{ github.events.inputs.ampversion }}
       - uses: actions/setup-node@v2
         with:
-          node-version: 14.x
+          check-latest: true
           registry-url: https://registry.npmjs.org
       - name: Build package
         run: |
-          node ${{ github.workspace }}/build-system/npm-publish/build-npm-binaries.js ${{ matrix.extension }}
-          node ${{ github.workspace }}/build-system/npm-publish/write-package-json.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }}
+          node ./build-system/npm-publish/build-npm-binaries.js ${{ matrix.extension }}
+          node ./build-system/npm-publish/write-package-json.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }}
       - name: Publish v1
-        run: |
-          cd ${{ github.workspace }}/extensions/${{ matrix.extension }}/1.0 
-          npm publish --access public --tag ${{ github.event.inputs.tag }}
+        run: npm publish ./extensions/${{ matrix.extension }}/1.0 --access public --tag ${{ github.event.inputs.tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish v2 if it exists
         run: |
           if $(test -d ${{ github.workspace }}/extensions/${{ matrix.extension }}/2.0); then      
-            cd ${{ github.workspace }}/extensions/${{ matrix.extension }}/2.0
-            npm publish --access public --tag ${{ github.event.inputs.tag }}
+            npm publish ./extensions/${{ matrix.extension }}/2.0 --access public --tag ${{ github.event.inputs.tag }}
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
