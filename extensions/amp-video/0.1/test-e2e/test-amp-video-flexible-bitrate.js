@@ -66,28 +66,27 @@ describes.endtoend(
     describe('downgrades on active videos', () => {
       it('changes the video to a lower quality when it buffers', async () => {
         await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 1);
+        await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
         const video1El = await controller.findElement('#video1 video');
-
-        await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
         await expect(
           await controller.getElementProperty(video1El, 'currentSrc')
         ).contains('#med');
       });
 
-      it('keeps playing the video at the same time when a video downgrades to a lower quality source', async () => {
-        const video1El = await controller.findElement('#video1 video');
-
+      it('keeps playing the video at the same time when a video downgrades', async () => {
         await sleep(100);
+
+        await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 1);
+        await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
+
+        const video1El = await controller.findElement('#video1 video');
 
         const currentTime = await controller.getElementProperty(
           video1El,
           'currentTime'
         );
-
-        await forceEventOnVideo(VIDEO_EVENTS.UNLOAD, 1);
-        await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
         await expect(
           await controller.getElementProperty(video1El, 'currentTime')
