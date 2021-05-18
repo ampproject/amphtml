@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-description: Used to report a feature request for AMP.
+description: Request a new feature in AMP.
 labels: "Type: Feature Request"
 body:
 - type: markdown
@@ -16,7 +16,7 @@ body:
   id: description
   attributes:
     label: Description
-    description: Briefly describe the feature request.
+    description: A brief description of the feature request.
     placeholder: Provide a clear and concise description of the new feature or change to an existing feature you'd like to see.
   validations:
     required: true
@@ -24,7 +24,7 @@ body:
   id: alternatives_considered
   attributes:
     label: Alternatives Considered
-    description: Describe any alternatives you've considered.
+    description: Alternatives to this feature request.
     placeholder: Provide details around any alternative solutions or features you've considered.
   validations:
     required: true
@@ -32,5 +32,5 @@ body:
   id: additional_context
   attributes:
     label: Additional Context
-    description: Add any other context here.
+    description: Other relevant context.
     placeholder: Add any other context about your feature request here. E.g. paste a screenshot, or provide a link.
