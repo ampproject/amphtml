@@ -24,7 +24,7 @@
  *   watched: boolean
  * }>
  */
-const initTestsPath = ['test/_init_tests.js'];
+const initTestsPath = ['testing/init-tests.js'];
 
 const karmaHtmlFixturesPath = 'test/fixtures/*.html';
 
@@ -428,8 +428,6 @@ const htmlFixtureGlobs = [
   '!examples/visual-tests/amp-story-player/player-local-story.html',
   '!examples/visual-tests/amp-story-player/story-attribution.html',
   '!examples/visual-tests/amp-story/amp-story-360-image.html',
-  '!examples/visual-tests/amp-story/amp-story-bookend.html',
-  '!examples/visual-tests/amp-story/amp-story-bookend.rtl.html',
   '!examples/visual-tests/amp-story/amp-story-bot-rendering.html',
   '!examples/visual-tests/amp-story/amp-story-consent.html',
   '!examples/visual-tests/amp-story/amp-story-consent.rtl.html',

@@ -22,7 +22,7 @@ import {isAmpScriptUri} from '../../../src/url';
 import {isArray, isObject} from '../../core/types';
 import {isCancellation} from '../../error-reporting';
 import {registerServiceBuilderForDoc} from '../../service';
-import {tryParseJson} from '../../json';
+import {tryParseJson} from '../../core/types/object/json';
 
 /** @type {string} */
 const TAG = 'real-time-config';
@@ -298,14 +298,13 @@ export class RealTimeConfigManager {
     macros['TIMEOUT'] = () => this.rtcConfig_.timeoutMillis;
     macros['CONSENT_STATE'] = () => this.consentState_;
     macros['CONSENT_STRING'] = () => this.consentString_;
-    macros[
-      'CONSENT_METADATA'
-    ] = /** @type {!../../../src/service/variable-source.AsyncResolverDef} */ ((
-      key
-    ) => {
-      userAssert(key, 'CONSENT_METADATA macro must contian a key');
-      return this.consentMetadata_ ? this.consentMetadata_[key] : null;
-    });
+    macros['CONSENT_METADATA'] =
+      /** @type {!../../../src/service/variable-source.AsyncResolverDef} */ (
+        (key) => {
+          userAssert(key, 'CONSENT_METADATA macro must contian a key');
+          return this.consentMetadata_ ? this.consentMetadata_[key] : null;
+        }
+      );
     return macros;
   }
 

@@ -72,7 +72,7 @@ export function markElementForDiffing(element, generateKey) {
 
 /**
  * @const {!Object<string, boolean>}
- * @see https://github.com/ampproject/amphtml/blob/main/spec/amp-html-format.md
+ * @see https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-format.md
  */
 export const DENYLISTED_TAGS = {
   'applet': true,
@@ -95,7 +95,7 @@ export const DENYLISTED_TAGS = {
  * - amp-list and amp-state, which cannot be nested.
  * - amp-lightbox and amp-image-lightbox, which are deprecated.
  * @const {!Object<string, boolean>}
- * @see https://github.com/ampproject/amphtml/blob/main/spec/email/amp-email-components.md
+ * @see https://github.com/ampproject/amphtml/blob/main/docs/spec/email/amp-email-components.md
  */
 export const EMAIL_ALLOWLISTED_AMP_TAGS = {
   'amp-accordion': true,
@@ -242,7 +242,8 @@ const DENYLISTED_PROTOCOLS = /^(?:\w+script|data|blob):/i;
 const EXTENDED_DENYLISTED_PROTOCOLS = /^(?:blob):/i;
 
 // From https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
-const ATTR_WHITESPACE = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
+const ATTR_WHITESPACE =
+  /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
 const DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
@@ -305,7 +306,8 @@ const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
  *
  * @const {!RegExp}
  */
-const INVALID_INLINE_STYLE_REGEX = /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
+const INVALID_INLINE_STYLE_REGEX =
+  /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
 /**
  * Whether the attribute/value is valid.

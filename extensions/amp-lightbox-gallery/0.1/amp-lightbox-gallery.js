@@ -58,6 +58,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';
+const AMP_CAROUSEL_TAG = 'amp-carousel';
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 const SLIDE_ITEM_SELECTOR =
   '.i-amphtml-slide-item, .i-amphtml-carousel-slotted';
@@ -370,17 +371,20 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildCarousel_(lightboxGroupId) {
-    const carouselVersion = isExperimentOn(
+    const extensionVersion =
+      this.getAmpDoc().getExtensionVersion(AMP_CAROUSEL_TAG);
+    const experimentVersion = isExperimentOn(
       this.win,
       'amp-lightbox-gallery-carousel-0-2'
     )
       ? '0.2'
       : '0.1';
+    const carouselVersion = extensionVersion ?? experimentVersion;
 
     return Promise.all([
       Services.extensionsFor(this.win).installExtensionForDoc(
         this.getAmpDoc(),
-        'amp-carousel',
+        AMP_CAROUSEL_TAG,
         carouselVersion
       ),
       Services.extensionsFor(this.win).installExtensionForDoc(
@@ -640,9 +644,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   swipeGesture_(data) {
     if (data.first) {
       const {sourceElement} = this.getCurrentElement_();
-      const parentCarousel = this.getSourceElementParentCarousel_(
-        sourceElement
-      );
+      const parentCarousel =
+        this.getSourceElementParentCarousel_(sourceElement);
 
       this.swipeToDismiss_.startSwipe({
         swipeElement: dev().assertElement(this.carousel_),
@@ -1429,11 +1432,13 @@ export function installLightboxGallery(ampdoc) {
  * @return {!Promise<?LightboxManager>}
  */
 function lightboxManagerForDoc(element) {
-  return /** @type {!Promise<?LightboxManager>} */ (getElementServiceForDoc(
-    element,
-    'amp-lightbox-manager',
-    'amp-lightbox-gallery'
-  ));
+  return /** @type {!Promise<?LightboxManager>} */ (
+    getElementServiceForDoc(
+      element,
+      'amp-lightbox-manager',
+      'amp-lightbox-gallery'
+    )
+  );
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {

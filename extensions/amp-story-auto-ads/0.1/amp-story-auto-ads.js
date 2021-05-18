@@ -175,9 +175,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {!StoryAdPage} adPage
    */
   forcePlaceAdAfterPage_(adPage) {
-    const pageBeforeAdId = /** @type {string} */ (this.storeService_.get(
-      StateProperty.CURRENT_PAGE_ID
-    ));
+    const pageBeforeAdId = /** @type {string} */ (
+      this.storeService_.get(StateProperty.CURRENT_PAGE_ID)
+    );
     adPage.registerLoadCallback(() =>
       this.adPageManager_
         .maybeInsertPageAfter(pageBeforeAdId, adPage)
@@ -350,11 +350,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.win,
       StoryAdAutoAdvance.ID
     );
+    // TODO(ccordry): move to experiment id when viewer is able to share.
+    const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
+      'storyNextUp'
+    );
     if (
       autoAdvanceExpBranch &&
       autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
     ) {
       this.createProgressBar_(AdvanceExpToTime[autoAdvanceExpBranch]);
+    } else if (storyNextUpParam) {
+      this.createProgressBar_(storyNextUpParam);
     }
   }
 

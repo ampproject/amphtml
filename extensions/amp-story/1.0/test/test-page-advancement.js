@@ -139,7 +139,7 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
 
         advancement.updateTimeDelay('5s');
 
-        expect(advancement.delayMs_).to.be.equal(5000);
+        expect(advancement.delayMs_).to.be.above(4500).and.below(5500);
         expect(advancement.remainingDelayMs_).to.be.equal(null);
       });
 
@@ -151,12 +151,12 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
         // Simulate a pause after 1 second.
         advancement.start();
         advancement.startTimeMs_ -= 1000;
-        advancement.stop(true);
-        expect(advancement.remainingDelayMs_).to.be.equal(2000);
+        advancement.stop();
+        expect(advancement.remainingDelayMs_).to.be.above(1500).and.below(2500);
 
         advancement.updateTimeDelay('5s');
 
-        expect(advancement.remainingDelayMs_).to.be.equal(4000);
+        expect(advancement.remainingDelayMs_).to.be.above(3500).and.below(4500);
       });
     });
 

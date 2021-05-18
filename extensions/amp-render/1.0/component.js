@@ -45,7 +45,15 @@ const DEFAULT_GET_JSON = (url) => {
  * @return {PreactDef.Renderable}
  */
 export function RenderWithRef(
-  {src = '', getJson = DEFAULT_GET_JSON, render = DEFAULT_RENDER, ...rest},
+  {
+    src = '',
+    getJson = DEFAULT_GET_JSON,
+    render = DEFAULT_RENDER,
+    onReady,
+    onRefresh,
+    onError,
+    ...rest
+  },
   ref
 ) {
   useResourcesNotify();
@@ -59,21 +67,32 @@ export function RenderWithRef(
       return;
     }
     let cancelled = false;
-    getJson(src).then((data) => {
-      if (!cancelled) {
-        setData(data);
-      }
-    });
+    getJson(src)
+      .then((data) => {
+        if (!cancelled) {
+          setData(data);
+          onReady?.();
+        }
+      })
+      .catch((e) => {
+        onError?.(e);
+      });
     return () => {
       cancelled = true;
     };
-  }, [src, getJson]);
+  }, [getJson, src, onReady, onError]);
 
   const refresh = useCallback(() => {
-    getJson(src, /* shouldRefresh */ true).then((data) => {
-      setData(data);
-    });
-  }, [getJson, src]);
+    onRefresh?.();
+    getJson(src, /* shouldRefresh */ true)
+      .then((data) => {
+        setData(data);
+        onReady?.();
+      })
+      .catch((e) => {
+        onError?.(e);
+      });
+  }, [getJson, src, onReady, onRefresh, onError]);
 
   useImperativeHandle(
     ref,

@@ -25,14 +25,14 @@ import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/core/constants/enums';
 import {cancellation} from '../../../src/error-reporting';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getSourceOrigin} from '../../../src/url';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isArray} from '../../../src/core/types';
 import {isJsonScriptTag} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /** @const */
 const TAG = 'amp-access';
@@ -261,7 +261,10 @@ export class AccessService {
     for (let i = 0; i < this.sources_.length; i++) {
       const source = this.sources_[i];
       if (source.getType() == AccessType.VENDOR) {
-        const vendorAdapter = /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (source.getAdapter());
+        const vendorAdapter =
+          /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (
+            source.getAdapter()
+          );
         if (vendorAdapter.getVendorName() == name) {
           return source;
         }
@@ -771,8 +774,9 @@ export class AccessService {
    */
   combinedResponses() {
     if (this.sources_.length == 1 && !this.sources_[0].getNamespace()) {
-      return /** @type {!JsonObject} */ (this.sources_[0].getAuthResponse() ||
-        {});
+      return /** @type {!JsonObject} */ (
+        this.sources_[0].getAuthResponse() || {}
+      );
     }
 
     const combined = /** @type {!JsonObject} */ ({});

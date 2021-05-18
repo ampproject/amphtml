@@ -24,7 +24,7 @@ import {
 } from './amp-story-dev-tools-tab-preview';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '../../../src/static-template';
-import {parseQueryString} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {toggle} from '../../../src/style';
 import {updateHash} from './utils';
 
@@ -33,14 +33,12 @@ const fontsToLoad = [
   {
     family: 'Poppins',
     weight: '400',
-    src:
-      "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
+    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
   },
   {
     family: 'Poppins',
     weight: '600',
-    src:
-      "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
+    src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
 
@@ -155,9 +153,8 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   buildLayout_() {
     const container = buildContainerTemplate(this.element);
     this.element.appendChild(container);
-    this.element.querySelector(
-      '.i-amphtml-story-dev-tools-close'
-    ).href = this.storyUrl_;
+    this.element.querySelector('.i-amphtml-story-dev-tools-close').href =
+      this.storyUrl_;
 
     // Create tabs on top
     const tabsContainer = container.querySelector(

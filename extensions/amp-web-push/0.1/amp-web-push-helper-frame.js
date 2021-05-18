@@ -17,8 +17,12 @@
 import {TAG} from './vars';
 import {WindowMessenger} from './window-messenger';
 import {getMode} from '../../../src/mode';
-import {parseQueryString} from '../../../src/url.js';
-import {user} from '../../../src/log';
+import {initLogConstructor, setReportError, user} from '../../../src/log';
+import {parseQueryString} from '../../../src/core/types/string/url';
+import {reportError} from '../../../src/error-reporting';
+
+initLogConstructor();
+setReportError(reportError);
 
 /**
  * @typedef {{

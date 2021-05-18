@@ -104,7 +104,7 @@ requirement: {
   error_message: 'string.prototype.trimStart is not allowed'
   value: 'string.prototype.trimStart'
   value: 'string.prototype.trimLeft'
-  allowlist: 'src/core/types/string.js'
+  allowlist: 'src/core/types/string/index.js'
 }
 
 requirement: {
@@ -112,7 +112,7 @@ requirement: {
   error_message: 'string.prototype.trimEnd is not allowed'
   value: 'string.prototype.trimEnd'
   value: 'string.prototype.trimRight'
-  allowlist: 'src/core/types/string.js'
+  allowlist: 'src/core/types/string/index.js'
 }
 
 requirement: {
@@ -391,7 +391,7 @@ requirement: {
   allowlist: 'ads/google/ima/ima-video.js'
   allowlist: 'ads/vendors/zen.js'
   allowlist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
-  allowlist: 'src/json.js' # Where parseJson itself is implemented.
+  allowlist: 'src/core/types/object/json.js' # Where parseJson itself is implemented.
   allowlist_regexp: '.*\\.jss\\.js'
 }
 
@@ -468,7 +468,7 @@ requirement: {
   value: 'module$src$cookies.getCookie'
   value: 'module$src$cookies.setCookie'
   allowlist: 'src/cookies.js'
-  allowlist: 'src/experiments.js'
+  allowlist: 'src/experiments/index.js'
   allowlist: 'src/service/cid-api.js'
   allowlist: 'src/service/cid-impl.js'
   allowlist: 'extensions/amp-analytics/0.1/cookie-writer.js'

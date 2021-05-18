@@ -238,10 +238,9 @@ function ContentShimWithRef(
  */
 const bindContentShimToElement = (element) =>
   forwardRef(
-    /** @type {function(?, {current:?}):PreactDef.Renderable} */ (ContentShimWithRef.bind(
-      null,
-      element
-    ))
+    /** @type {function(?, {current:?}):PreactDef.Renderable} */ (
+      ContentShimWithRef.bind(null, element)
+    )
   );
 
 /** @override */

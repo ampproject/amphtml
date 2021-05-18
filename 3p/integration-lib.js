@@ -27,7 +27,7 @@ import {
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
 import {internalRuntimeVersion} from '../src/internal-version';
-import {parseJson} from '../src/json';
+import {parseJson} from '../src/core/types/object/json';
 import {run, setExperimentToggles} from './3p';
 import {urls} from '../src/config';
 
@@ -277,8 +277,9 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
     // If we are on the cache domain, parse the source hostname from
     // the referrer. The referrer is used because it should be
     // trustable.
-    hostname = parseUrlDeprecated(getSourceUrl(window.document.referrer))
-      .hostname;
+    hostname = parseUrlDeprecated(
+      getSourceUrl(window.document.referrer)
+    ).hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
     // Either the hostname is allowed

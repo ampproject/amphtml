@@ -122,7 +122,6 @@ Example:
 The `story-open` trigger is fired when opening a drawer or dialog inside a story. The components that are currently trackable by this are:
 
 -   Page attachment (`<amp-story-page-attachment>`)
--   Bookend (`<amp-story-bookend>`)
 -   Share dialog (`<amp-story-share-menu>`)
 -   Info dialog (`<amp-story-info-dialog>`)
 -   Sidebar (`<amp-sidebar>`)
@@ -154,18 +153,6 @@ Example:
 ### Story close trigger (`"on": "story-close"`)
 
 The `story-close` trigger is fired when closing a drawer or dialog inside a story. The components that are currently trackable by this are the same as the [`story-open` trigger](#Story-open-trigger-"on":-"story-open").
-
-### Bookend enter trigger (`"on": "story-bookend-enter"`)
-
-The `story-bookend-enter` trigger is fired when the bookend is shown to the user, after the last page of the current story.
-
-### Bookend exit trigger (`"on": "story-bookend-exit"`)
-
-The `story-bookend-exit` trigger is fired when the bookend is dismissed by the user.
-
-### Bookend click trigger (`"on": "story-bookend-click"`)
-
-The `story-bookend-click` trigger is fired when a user clicks a link inside the bookend. This trigger can be tracked with the accompanying variables: [`storyBookendComponentPosition`](#storyBookendComponentPosition), [`storyBookendComponentType`](#storyBookendComponentType), and [`storyBookendTargetHref`](#storyBookendTargetHref) listed below.
 
 ### Mute trigger (`"on": "story-audio-muted"`)
 
@@ -253,18 +240,6 @@ The user's progress through the story, as a decimal in the range [0...1]. This r
 ### `storyIsMuted`
 
 A boolean representing whether the story was muted when the accompanying trigger was fired.
-
-### `storyBookendComponentPosition`
-
-A number representing the index of the bookend component that the user clicked when the accompanying trigger, [`story-bookend-click`](#bookend-click-trigger-"on":-"story-bookend-click") was fired.
-
-### `storyBookendComponentType`
-
-The type of component in the bookend that was clicked when the accompanying trigger, [`story-bookend-click`](#bookend-click-trigger-"on":-"story-bookend-click") was fired.
-
-### `storyBookendTargetHref`
-
-The url of the bookend component that was clicked when the accompanying trigger, [`story-bookend-click`](#bookend-click-trigger-"on":-"story-bookend-click") was fired.
 
 ### Additional Vars
 

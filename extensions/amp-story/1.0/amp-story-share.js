@@ -26,9 +26,7 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '../../../src/core/types';
 import {listen} from '../../../src/event-helper';
-import {px, setImportantStyles} from '../../../src/style';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import {throttle} from '../../../src/core/types/function';
 
 /**
  * Maps share provider type to visible name.
@@ -51,25 +49,13 @@ const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
 });
 
 /**
- * Default left/right padding for share buttons.
- * @private @const {number}
- */
-const DEFAULT_BUTTON_PADDING = 16;
-
-/**
- * Minimum left/right padding for share buttons.
- * @private @const {number}
- */
-const MIN_BUTTON_PADDING = 10;
-
-/**
- * Key for share providers in bookend config.
+ * Key for share providers in config.
  * @const {string}
  */
 export const SHARE_PROVIDERS_KEY = 'shareProviders';
 
 /**
- * Deprecated key for share providers in bookend config.
+ * Deprecated key for share providers in config.
  * @const {string}
  */
 export const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
@@ -125,9 +111,6 @@ function buildLinkShareItemTemplate(el) {
   };
 }
 
-/** @private @const {string} */
-const SCROLLABLE_CLASSNAME = 'i-amphtml-story-share-widget-scrollable';
-
 /**
  * @param {!JsonObject=} opt_params
  * @return {!JsonObject}
@@ -164,15 +147,17 @@ function buildProvider(doc, shareType, opt_params) {
     /** @type {!Array<!./simple-template.ElementDef>} */ ([
       {
         tag: 'amp-social-share',
-        attrs: /** @type {!JsonObject} */ (Object.assign(
-          dict({
-            'width': 48,
-            'height': 48,
-            'class': 'i-amphtml-story-share-icon',
-            'type': shareType,
-          }),
-          buildProviderParams(opt_params)
-        )),
+        attrs: /** @type {!JsonObject} */ (
+          Object.assign(
+            dict({
+              'width': 48,
+              'height': 48,
+              'class': 'i-amphtml-story-share-icon',
+              'type': shareType,
+            }),
+            buildProviderParams(opt_params)
+          )
+        ),
         children: [
           {
             tag: 'span',
@@ -213,7 +198,7 @@ function buildCopySuccessfulToast(doc, url) {
 }
 
 /**
- * Social share widget for story bookend.
+ * Social share widget for the system button.
  */
 export class ShareWidget {
   /**
@@ -427,172 +412,5 @@ export class ShareWidget {
     // `lastElementChild` is the system share button container, which should
     // always be last in list
     list.insertBefore(item, list.lastElementChild);
-  }
-}
-
-/**
- * Social share widget for story bookend with a scrollable layout.
- * This class is coupled to the DOM structure for ShareWidget, but that's ok.
- */
-export class ScrollableShareWidget extends ShareWidget {
-  /**
-   * @param {!Window} win
-   * @param {!Element} storyEl
-   */
-  constructor(win, storyEl) {
-    super(win, storyEl);
-
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(win);
-
-    /**
-     * Container width is being tracked to prevent unnecessary layout
-     * calculations.
-     * @private {?number}
-     */
-    this.containerWidth_ = null;
-  }
-
-  /**
-   * @param {!Window} win
-   * @param {!Element} storyEl
-   * @return {!ScrollableShareWidget}
-   */
-  static create(win, storyEl) {
-    return new ScrollableShareWidget(win, storyEl);
-  }
-
-  /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @return {!Element}
-   */
-  build(ampdoc) {
-    super.build(ampdoc);
-
-    this.root.classList.add(SCROLLABLE_CLASSNAME);
-
-    Services.viewportForDoc(ampdoc).onResize(
-      throttle(this.win, () => this.applyButtonPadding_(), 100)
-    );
-
-    this.vsync_.measure(() => {
-      // If the element is actually scrollable, don't propagate the touch events
-      // so it is not interpreted as a swipe to the next story.
-      if (this.root./*OK*/ offsetWidth < this.root./*OK*/ scrollWidth) {
-        this.root.addEventListener(
-          'touchstart',
-          (event) => event.stopPropagation(),
-          {capture: true}
-        );
-        this.root.addEventListener(
-          'touchmove',
-          (event) => event.stopPropagation(),
-          {capture: true}
-        );
-        this.root.addEventListener(
-          'touchend',
-          (event) => event.stopPropagation(),
-          {capture: true}
-        );
-      }
-    });
-
-    return this.root;
-  }
-
-  /**
-   * Calculates padding between buttons so that the result is that there's
-   * always one item visually "cut off" for scroll affordance.
-   * @private
-   */
-  applyButtonPadding_() {
-    const items = this.getVisibleItems_();
-
-    if (!items.length) {
-      return;
-    }
-
-    this.vsync_.run(
-      {
-        measure: (state) => {
-          const containerWidth = this.root./*OK*/ clientWidth;
-
-          if (containerWidth == this.containerWidth_) {
-            // Don't recalculate if width has not changed (i.e. onscreen keyboard)
-            state.noop = true;
-            return;
-          }
-
-          const icon = devAssert(items[0].firstElementChild);
-
-          const leftMargin =
-            icon./*OK*/ offsetLeft - this.root./*OK*/ offsetLeft;
-          const iconWidth = icon./*OK*/ offsetWidth;
-
-          // Total width that the buttons will occupy with minimum padding.
-          const totalItemWidth =
-            iconWidth * items.length +
-            2 * MIN_BUTTON_PADDING * (items.length - 1);
-
-          // If buttons don't fit within the available area, calculate padding so
-          // that there will be an element cut-off.
-          if (totalItemWidth > containerWidth - leftMargin * 2) {
-            const availableWidth = containerWidth - leftMargin - iconWidth / 2;
-            const amountVisible = Math.floor(
-              availableWidth / (iconWidth + MIN_BUTTON_PADDING * 2)
-            );
-
-            state.padding = 0.5 * (availableWidth / amountVisible - iconWidth);
-          } else {
-            // Otherwise, calculate padding in from MIN_PADDING to DEFAULT_PADDING
-            // so that all elements fit and take as much area as possible.
-            const totalPadding =
-              (containerWidth - leftMargin * 2 - iconWidth * items.length) /
-              (items.length - 1);
-
-            state.padding = Math.min(
-              DEFAULT_BUTTON_PADDING,
-              0.5 * totalPadding
-            );
-          }
-
-          this.containerWidth_ = containerWidth;
-        },
-        mutate: (state) => {
-          if (state.noop) {
-            return;
-          }
-          items.forEach((el, i) => {
-            if (i != 0) {
-              setImportantStyles(el, {'padding-left': px(state.padding)});
-            }
-            if (i != items.length - 1) {
-              setImportantStyles(el, {'padding-right': px(state.padding)});
-            }
-          });
-        },
-      },
-      {}
-    );
-  }
-
-  /**
-   * @return {!Array<!Element>}
-   * @private
-   */
-  getVisibleItems_() {
-    return Array.prototype.filter.call(
-      dev().assertElement(this.root).querySelectorAll('li'),
-      (el) => !!el.firstElementChild
-    );
-  }
-
-  /**
-   * Loads and applies the share providers configured by the publisher.
-   * @protected
-   */
-  loadProviders() {
-    super.loadProviders();
-    this.applyButtonPadding_();
   }
 }

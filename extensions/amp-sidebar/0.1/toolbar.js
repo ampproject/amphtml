@@ -60,8 +60,9 @@ export class Toolbar {
    */
   onLayoutChange() {
     // Get if we match the current toolbar media
-    const matchesMedia = this.ampdoc_.win.matchMedia(this.toolbarMedia_)
-      .matches;
+    const matchesMedia = this.ampdoc_.win.matchMedia(
+      this.toolbarMedia_
+    ).matches;
 
     // Remove and add the toolbar dynamically
     if (matchesMedia) {

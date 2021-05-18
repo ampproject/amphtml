@@ -18,8 +18,8 @@ import {poll} from '../../testing/iframe';
 
 //TODO(aghassemi,#10878): Run in all platforms.
 //TODO(aghasemi, #10877): in-a-box, FIE integration tests.
-const config = describe.configure().ifChrome();
-config.run('amp-position-observer', function () {
+const config = describes.sandboxed.configure().ifChrome();
+config.run('amp-position-observer', {}, function () {
   this.timeout(100000);
 
   const css = `
