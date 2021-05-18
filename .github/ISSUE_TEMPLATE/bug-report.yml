@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-description: Used to report bugs in AMP.
+description: Report a bug in AMP.
 labels: "Type: Bug"
 body:
 - type: markdown
@@ -16,23 +16,23 @@ body:
   id: description
   attributes:
     label: Description
-    description: Briefly describe the bug.
-    placeholder: Describing the expected vs. the current behavior will help us direct this issue to the correct working group for investigation.
+    description: A brief description of the bug.
+    placeholder: Describe the expected vs. the current behavior, so this issue can be directed to the correct working group for investigation.
   validations:
     required: true
 - type: textarea
   id: repro_steps
   attributes:
     label: Reproduction Steps
-    description: Provide step-by-step instructions for reproducing the issue.
-    placeholder: Please provide a public URL and ideally a reduced test case that clearly demonstrates your issue.
+    description: Step-by-step instructions for reproducing the issue.
+    placeholder: Provide a publicly accessible URL and a reduced set of steps that clearly demonstrate the issue.
   validations:
     required: true
 - type: textarea
   id: logs
   attributes:
     label: Relevant Logs
-    description: Optionally paste any relevant log output here.
+    description: Relevant logging output.
     placeholder: Paste any plain-text logs here (e.g. console warnings or errors from Chrome DevTools). They will automatically be formatted as code.
     render: shell
 - type: dropdown
