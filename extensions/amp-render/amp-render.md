@@ -40,11 +40,23 @@ Your endpoint must implement the requirements specified in the [CORS Requests in
 You can specify a template in one of two ways:
 
 -   a `template` attribute that references an ID of an existing templating element.
--   a templating element nested directly inside the `amp-render` element.
 
-[tip type="note"]
-When using `<amp-render>` in tandem with another templating AMP component, such as `<amp-form>`, note that templates may not nest in valid AMP documents. In this case a valid workaround is to provide the template by `id` via the `template` attribute. Learn more about [nested templates in `<amp-mustache>`](../amp-mustache/amp-mustache.md).
-[/tip]
+```html
+<template id="my-template" type="amp-mustache">
+  Your personal offer: ${{price}}
+</template>
+<amp-render template="my-template" src="https://example.com/data.json">
+</amp-render>
+```
+
+-   a templating element nested directly inside the `amp-render` element.
+```html
+<amp-render src="https://example.com/data.json">
+  <template type="amp-mustache">
+    Your personal offer: ${{price}}
+  </template>
+</amp-render>
+```
 
 For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
@@ -69,8 +81,6 @@ within this `<amp-render>`. There are three valid protocols for the `src` attrib
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 [/tip]
-
-If fetching the data at the `src` URL fails, `<amp-render>` triggers a low-trust `fetch-error` event.
 
 The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supports URL and non-URL expression values.
 
