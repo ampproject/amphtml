@@ -1,0 +1,44 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+_;
+import {Dailymotion} from './component';
+import {VideoBaseElement} from '../../amp-video/1.0/base-element';
+
+export class BaseElement extends VideoBaseElement {}
+
+/** @override */
+BaseElement['Component'] = Dailymotion;
+
+/** @override */
+BaseElement['props'] = {
+  'children': {passthrough: true},
+  // 'children': {passthroughNonEmpty: true},
+  // 'children': {selector: '...'},
+};
+
+/** @override */
+BaseElement['layoutSizeDefined'] = true;
+
+/** @override */
+BaseElement['usesShadowDom'] = true;
+
+// DO NOT SUBMIT: If BaseElement['shadowCss']  is set to `null`, remove the
+// following declaration.
+// Otherwise, keep it when defined to an actual value like `COMPONENT_CSS`.
+// Once addressed, remove this set of comments.
+/** @override */
+BaseElement['shadowCss'] = null;
