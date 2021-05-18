@@ -15,10 +15,13 @@
  */
 
 import {Values} from './values';
-import {pureDevAssert as devAssert} from '../core/assert';
+import {devAssert, devAssertElement} from '../core/assert';
 import {getMode} from '../mode';
 import {pushIfNotExist, removeItem} from '../core/types/array';
 import {throttleTail} from './scheduler';
+
+// typedef imports
+import {ContextPropDef} from './prop.type';
 
 // Properties set on the DOM nodes to track the context state.
 const NODE_PROP = '__AMP_NODE';
@@ -50,6 +53,7 @@ let GroupDef;
  * are auto-discovered or prompted.
  *
  * @package
+ * @template SID subscriber ID type(s)
  */
 export class ContextNode {
   /**
@@ -105,16 +109,18 @@ export class ContextNode {
           return /** @type {!ContextNode} */ (n[NODE_PROP]);
         }
         const {nodeType} = n;
-        if (nodeType == DOCUMENT_NODE || nodeType == FRAGMENT_NODE) {
+        if (
           // A context node is always created for a root. Due to this, a
           // non-root element is always at least attached to a root. This
           // allows for quick discovery and reattachment when new information
           // becomes available.
-          return ContextNode.get(n);
-        }
-        if (nodeType == ELEMENT_NODE && n.tagName.startsWith(AMP_PREFIX)) {
+          nodeType == DOCUMENT_NODE ||
+          nodeType == FRAGMENT_NODE ||
           // An AMP node will always have a context node backing it at some
           // point.
+          (nodeType == ELEMENT_NODE &&
+            devAssertElement(n).tagName.startsWith(AMP_PREFIX))
+        ) {
           return ContextNode.get(n);
         }
       }
@@ -173,10 +179,7 @@ export class ContextNode {
    */
   static rediscoverChildren(node) {
     const contextNode = /** @type {!ContextNode|undefined} */ (node[NODE_PROP]);
-    const children = contextNode && contextNode.children;
-    if (children) {
-      children.forEach(discoverContextNode);
-    }
+    contextNode?.children?.forEach(discoverContextNode);
   }
 
   /**
@@ -233,7 +236,7 @@ export class ContextNode {
     /** @package {!Values} */
     this.values = new Values(this);
 
-    /** @private {?Map<*, !./subscriber.Subscriber>} */
+    /** @private {?Map<!SID, !./subscriber.Subscriber>} */
     this.subscribers_ = null;
 
     /** @private {boolean} */
@@ -250,14 +253,9 @@ export class ContextNode {
       node.addEventListener('slotchange', (e) => {
         const slot = /** @type {!HTMLSlotElement} */ (e.target);
         // Rediscover newly assigned nodes.
-        const assignedNodes = slot.assignedNodes();
-        assignedNodes.forEach(discoverContained);
+        slot.assignedNodes().forEach(discoverContained);
         // Rediscover unassigned nodes.
-        const closest = ContextNode.closest(slot);
-        const closestChildren = closest && closest.children;
-        if (closestChildren) {
-          closestChildren.forEach(discoverContextNode);
-        }
+        ContextNode.closest(slot)?.children?.forEach(discoverContextNode);
       });
     }
 
@@ -293,10 +291,9 @@ export class ContextNode {
    * @param {!ContextNode|!Node|null} parent
    */
   setParent(parent) {
-    const parentContext =
-      parent && parent.nodeType
-        ? ContextNode.get(/** @type {!Node} */ (parent))
-        : /** @type {?ContextNode} */ (parent);
+    const parentContext = parent?.nodeType
+      ? ContextNode.get(/** @type {!Node} */ (parent))
+      : /** @type {?ContextNode} */ (parent);
     this.updateTree_(parentContext, /* parentOverridden */ parent != null);
   }
 
@@ -308,7 +305,7 @@ export class ContextNode {
    */
   setIsRoot(isRoot) {
     this.isRoot = isRoot;
-    const newRoot = isRoot ? this : this.parent ? this.parent.root : null;
+    const newRoot = isRoot ? this : this.parent?.root ?? null;
     this.updateRoot(newRoot);
   }
 
@@ -327,17 +324,10 @@ export class ContextNode {
       this.values.rootUpdated();
 
       // Make sure the tree changes have been reflected for subscribers.
-      const subscribers = this.subscribers_;
-      if (subscribers) {
-        subscribers.forEach((comp) => {
-          comp.rootUpdated();
-        });
-      }
+      this.subscribers_?.forEach((comp) => comp.rootUpdated());
 
       // Propagate the root to the subtree.
-      if (this.children) {
-        this.children.forEach((child) => child.updateRoot(root));
-      }
+      this.children?.forEach((child) => child.updateRoot(root));
     }
   }
 
@@ -353,9 +343,7 @@ export class ContextNode {
     const cn = new ContextNode(node, name);
     groups.set(name, {cn, match, weight});
     cn.setParent(this);
-    if (children) {
-      children.forEach(discoverContextNode);
-    }
+    children?.forEach(discoverContextNode);
     return cn;
   }
 
@@ -364,9 +352,7 @@ export class ContextNode {
    * @return {?ContextNode}
    */
   group(name) {
-    const {groups} = this;
-    const group = groups && groups.get(name);
-    return (group && group.cn) || null;
+    return this.groups?.get(name)?.cn || null;
   }
 
   /**
@@ -395,16 +381,16 @@ export class ContextNode {
    * yet exist, it will be created using the specified factory. The use
    * of factory is important to reduce bundling costs for context node.
    *
-   * @param {*} id
-   * @param {function(new:./subscriber.Subscriber, function(...?), !Array<!ContextProp>):void} constr
+   * @param {!SID} id
+   * @param {typeof ./subscriber.Subscriber} Ctor
    * @param {!Function} func
-   * @param {!Array<!ContextProp>} deps
+   * @param {!Array<!ContextPropDef>} deps
    */
-  subscribe(id, constr, func, deps) {
+  subscribe(id, Ctor, func, deps) {
     const subscribers = this.subscribers_ || (this.subscribers_ = new Map());
     let subscriber = subscribers.get(id);
     if (!subscriber) {
-      subscriber = new constr(this, func, deps);
+      subscriber = new Ctor(this, func, deps);
       subscribers.set(id, subscriber);
     }
   }
@@ -412,11 +398,11 @@ export class ContextNode {
   /**
    * Removes the subscriber previously set with `subscribe`.
    *
-   * @param {*} id
+   * @param {!SID} id
    */
   unsubscribe(id) {
     const subscribers = this.subscribers_;
-    const subscriber = subscribers && subscribers.get(id);
+    const subscriber = subscribers?.get(id);
     if (subscriber) {
       subscriber.dispose();
       subscribers.delete(id);
@@ -434,8 +420,7 @@ export class ContextNode {
       return;
     }
     const closestNode = ContextNode.closest(this.node, /* includeSelf */ false);
-    const parent =
-      (closestNode && closestNode.findGroup(this.node)) || closestNode;
+    const parent = closestNode?.findGroup(this.node) || closestNode;
     this.updateTree_(parent, /* parentOverridden */ false);
   }
 
@@ -453,8 +438,8 @@ export class ContextNode {
       this.parent = parent;
 
       // Remove from the old parent.
-      if (oldParent && oldParent.children) {
-        removeItem(oldParent.children, this);
+      if (oldParent?.children) {
+        removeItem(devAssert(oldParent.children), this);
       }
 
       // Add to the new parent.
@@ -466,8 +451,7 @@ export class ContextNode {
         // it's other children.
         // Since the new parent (`this`) is already known, this is a very
         // fast operation.
-        for (let i = 0; i < parentChildren.length; i++) {
-          const child = parentChildren[i];
+        for (const child of parentChildren) {
           if (child != this && child.isDiscoverable()) {
             child.discover();
           }
@@ -478,7 +462,7 @@ export class ContextNode {
     }
 
     // Check the root.
-    this.updateRoot(parent ? parent.root : null);
+    this.updateRoot(parent?.root ?? null);
   }
 }
 
@@ -498,11 +482,11 @@ function forEachContained(node, callback, includeSelf = true) {
   if (closest.node == node) {
     callback(closest);
   } else if (closest.children) {
-    closest.children.forEach((child) => {
+    for (const child of closest.children) {
       if (node.contains(child.node)) {
         callback(child);
       }
-    });
+    }
   }
 }
 

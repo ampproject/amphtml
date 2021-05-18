@@ -15,10 +15,6 @@
  */
 import * as Preact from '../../../../src/preact';
 
-/**
- * @param {*} props
- * @return {*}
- */
 export const VideoElementWithActions = ({
   id,
   children,

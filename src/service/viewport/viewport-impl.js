@@ -867,9 +867,9 @@ export class ViewportImpl {
       return null;
     }
     if (this.viewportMeta_ === undefined) {
-      this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (this.globalDoc_.querySelector(
-        'meta[name=viewport]'
-      ));
+      this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (
+        this.globalDoc_.querySelector('meta[name=viewport]')
+      );
       if (this.viewportMeta_) {
         this.originalViewportMetaString_ = this.viewportMeta_.content;
       }
@@ -1199,7 +1199,7 @@ const ViewportType = {
    * that AMP sets when Viewer has requested "natural" viewport on a iOS
    * device.
    * See:
-   * https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md
+   * https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md
    */
   NATURAL_IOS_EMBED: 'natural-ios-embed',
 };

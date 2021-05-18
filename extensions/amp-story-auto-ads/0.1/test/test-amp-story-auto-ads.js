@@ -55,11 +55,12 @@ describes.realWin(
     let story;
     let storeService;
     let storeGetterStub;
+    let viewer;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      const viewer = Services.viewerForDoc(env.ampdoc);
+      viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       registerServiceBuilder(win, 'performance', function () {
         return {
@@ -265,6 +266,22 @@ describes.realWin(
         );
         expect(removeVisibleStub.calledOnce).to.be.true;
       });
+    });
+
+    // TODO(#33969) remove when launched.
+    it('should create progress bar from #storyNextUp', async () => {
+      env.sandbox.stub(viewer, 'getParam').returns('6s');
+      env.sandbox.stub(autoAds, 'mutateElement').callsArg(0);
+      addStoryAutoAdsConfig(adElement);
+      await story.buildCallback();
+      // Fire these events so that story ads thinks the parent story is ready.
+      story.signals().signal(CommonSignals.BUILT);
+      story.signals().signal(CommonSignals.INI_LOAD);
+      await autoAds.buildCallback();
+      await autoAds.layoutCallback();
+
+      const progressBar = doc.querySelector('.i-amphtml-story-ad-progress-bar');
+      expect(progressBar).to.exist;
     });
 
     describe('system layer', () => {

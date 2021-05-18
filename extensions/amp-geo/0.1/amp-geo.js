@@ -54,7 +54,7 @@ import {isArray, isObject} from '../../../src/core/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {urls} from '../../../src/config';
 
 /** @const */
@@ -375,9 +375,9 @@ export class AmpGeo extends AMP.BaseElement {
    */
   matchCountryGroups_(config) {
     // ISOCountryGroups are optional but if specified at least one must exist
-    const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */ (config[
-      'ISOCountryGroups'
-    ]);
+    const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */ (
+      config['ISOCountryGroups']
+    );
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
       // TODO(zhouyx@): Change the name with generic ISO subdivision support

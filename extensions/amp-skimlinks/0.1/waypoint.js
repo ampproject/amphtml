@@ -58,12 +58,8 @@ export class Waypoint {
       return null;
     }
 
-    const {
-      pubcode,
-      pageImpressionId,
-      customTrackingId,
-      guid,
-    } = this.tracking_.getTrackingInfo();
+    const {pubcode, pageImpressionId, customTrackingId, guid} =
+      this.tracking_.getTrackingInfo();
 
     const xcust = anchor.getAttribute(XCUST_ATTRIBUTE_NAME) || customTrackingId;
 

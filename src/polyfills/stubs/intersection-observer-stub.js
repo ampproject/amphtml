@@ -184,7 +184,7 @@ export class IntersectionObserverStub {
       ...options,
     };
 
-    /** @private {?Array<!Element>} */
+    /** @private {!Array<!Element>} */
     this.elements_ = [];
 
     /** @private {?IntersectionObserver} */
@@ -268,8 +268,10 @@ export class IntersectionObserverStub {
   upgrade_(Ctor) {
     const inst = new Ctor(this.callback_, this.options_);
     this.inst_ = inst;
-    this.elements_.forEach((e) => inst.observe(e));
-    this.elements_ = null;
+    for (const e of this.elements_) {
+      inst.observe(e);
+    }
+    this.elements_.length = 0;
   }
 }
 

@@ -17,7 +17,7 @@
 import {dict} from '../../src/core/types/object';
 import {listenParent, nonSensitiveDataPostMessage} from '../messaging';
 import {loadScript} from '../3p';
-import {parseJson} from '../../src/json';
+import {parseJson} from '../../src/core/types/object/json';
 import {user} from '../../src/log';
 
 import GltfViewer from './viewer';

@@ -26,7 +26,7 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/core/types';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
@@ -195,9 +195,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     }
 
     /** @const {?JsonObject} */
-    const eventData = /** @type {?JsonObject} */ (isObject(getData(event))
-      ? getData(event)
-      : parseJson(getData(event)));
+    const eventData = /** @type {?JsonObject} */ (
+      isObject(getData(event)) ? getData(event) : parseJson(getData(event))
+    );
     if (eventData === undefined) {
       return; // We only process valid JSON.
     }

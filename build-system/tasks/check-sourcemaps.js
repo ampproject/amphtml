@@ -17,7 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const {cyan, green, red} = require('kleur/colors');
+const {cyan, green, red} = require('../common/colors');
 const {decode} = require('sourcemap-codec');
 const {execOrDie} = require('../common/exec');
 const {log} = require('../common/logging');
@@ -92,6 +92,7 @@ function checkSourcemapSources(sourcemapJson, map) {
     log(red('ERROR:'), 'Could not find', cyan('sources'));
     throw new Error('Could not find sources array');
   }
+  /** @type {string[]} */
   const invalidSources = sourcemapJson.sources
     .filter((source) => !source.match(/\[.*\]/)) // Ignore non-path sources '[...]'
     .filter((source) => !fs.existsSync(source)); // All source paths should exist
@@ -133,7 +134,8 @@ function checkSourcemapMappings(sourcemapJson, map) {
   // Zeroth sub-array corresponds to ';' and has no mappings.
   // See https://www.npmjs.com/package/sourcemap-codec#usage
   const firstLineMapping = decode(sourcemapJson.mappings)[1][0];
-  const [, sourceIndex, sourceCodeLine, sourceCodeColumn] = firstLineMapping;
+  const [, sourceIndex = 0, sourceCodeLine = 0, sourceCodeColumn] =
+    firstLineMapping;
 
   const firstLineFile = sourcemapJson.sources[sourceIndex];
   const contents = fs.readFileSync(firstLineFile, 'utf8').split('\n');

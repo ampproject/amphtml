@@ -16,12 +16,8 @@
 
 const fs = require('fs');
 const selenium = require('selenium-webdriver');
-const {
-  DOMRectDef,
-  ElementHandle,
-  Key,
-} = require('./functional-test-controller');
 const {ControllerPromise} = require('./controller-promise');
+const {DOMRectDef, ElementHandle, Key} = require('./e2e-types');
 const {expect} = require('chai');
 const {NetworkLogger} = require('./network-logger');
 
@@ -84,7 +80,6 @@ async function waitFor(driver, valueFn, condition, opt_mutate) {
   return result.value; // Unbox the value.
 }
 
-/** @implements {FunctionalTestController} */
 class SeleniumWebDriverController {
   /**
    * @param {!selenium.WebDriver} driver
@@ -398,14 +393,8 @@ class SeleniumWebDriverController {
       // Extracting the values seems to perform better than returning
       // the raw ClientRect from the element, in terms of flakiness.
       // The raw ClientRect also has hundredths of a pixel. We round to int.
-      const {
-        width,
-        height,
-        top,
-        bottom,
-        left,
-        right,
-      } = element./*OK*/ getBoundingClientRect();
+      const {width, height, top, bottom, left, right} =
+        element./*OK*/ getBoundingClientRect();
       return {
         x: Math.round(left),
         y: Math.round(top),

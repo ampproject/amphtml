@@ -103,9 +103,18 @@
   },
   {
     "name": "amp-base-carousel",
-    "version": ["0.1", "1.0"],
+    "version": "0.1",
     "latestVersion": "0.1",
     "options": {"hasCss": true}
+  },
+  {
+    "name": "amp-base-carousel",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
   },
   {"name": "amp-beopinion", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-bind", "version": "0.1", "latestVersion": "0.1"},
@@ -502,7 +511,6 @@
     "options": {
       "hasCss": true,
       "cssBinaries": [
-        "amp-story-bookend",
         "amp-story-consent",
         "amp-story-draggable-drawer-header",
         "amp-story-hint",
@@ -584,9 +592,20 @@
   },
   {
     "name": "amp-stream-gallery",
-    "version": ["0.1", "1.0"],
-    "latestVersion": "1.0",
-    "options": {"hasCss": true}
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-stream-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
   },
   {
     "name": "amp-subscriptions",
@@ -624,7 +643,15 @@
       "cssBinaries": ["amp-truncate-text", "amp-truncate-text-shadow"]
     }
   },
-  {"name": "amp-twitter", "version": ["0.1", "1.0"], "latestVersion": "0.1"},
+  {"name": "amp-twitter", "version": "0.1", "latestVersion": "0.1"},
+  {
+    "name": "amp-twitter",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true
+    }
+  },
   {
     "name": "amp-user-notification",
     "version": "0.1",

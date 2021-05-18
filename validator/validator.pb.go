@@ -2119,7 +2119,7 @@ func (m *CdataSpec) GetDocCssBytes() bool {
 // Specifies which AMP Layouts are supported by a given element.
 // For the purpose of the validator, this specifies which
 // values for layout, height, and width attributes are allowed. Also see
-// https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md
+// https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md
 // TODO(johannes): Make the error messages around layouts better. This
 // may require revamping the documentation for elements and/or the above spec,
 // so that a user gets more clearly informed about which layouts are
