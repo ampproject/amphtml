@@ -1804,6 +1804,12 @@ export class AmpStoryPage extends AMP.BaseElement {
         attachmentEl
       );
 
+      // This ensures `active` is set on first render.
+      // Otherwise setState may be called before this.openAttachmentEl_ exists.
+      if (this.element.hasAttribute('active')) {
+        this.openAttachmentEl_.setAttribute('active', '');
+      }
+
       const container = this.win.document.createElement('div');
       container.classList.add('i-amphtml-story-page-open-attachment-host');
       container.setAttribute('role', 'button');
