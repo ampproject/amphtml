@@ -34,4 +34,3 @@ const {
      await page.waitForSelector('amp-story-page#inline-custom-text[active]');
    },
  };
- 

@@ -21,7 +21,7 @@ const {
 
  module.exports = {
    'default inline attachment UI element should display': async (page, name) => {
-       await page.waitForTimeout(1600);
+     await page.waitForTimeout(1600);
    },
  
    'inline attachment UI element with custom text should display': async (page, name) => {
@@ -30,4 +30,3 @@ const {
      await page.waitForTimeout(150); // For animations to finish.
    },
  };
- 
