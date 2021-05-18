@@ -20,8 +20,8 @@
  */
 
 const [extension] = process.argv.slice(2);
-const {timedExecOrDie} = require('../../../build-system/pr-check/utils');
-const {updatePackages} = require('../../../build-system/common/update-packages');
+const {timedExecOrDie} = require('../pr-check/utils');
+const {updatePackages} = require('../common/update-packages');
 
 updatePackages();
 timedExecOrDie(`amp build --extensions=${extension} --core_runtime_only`);
