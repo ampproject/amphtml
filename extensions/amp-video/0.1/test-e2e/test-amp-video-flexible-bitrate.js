@@ -119,7 +119,7 @@ describes.endtoend(
 
         // If currentSrc is empty, video is not loaded.
         await expect(
-          await controller.getElementProperty(video2El, 'currentSrc')
+          await controller.getElementProperty(video4El, 'currentSrc')
         ).equal('');
       });
 
