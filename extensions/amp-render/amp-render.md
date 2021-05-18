@@ -31,7 +31,7 @@ limitations under the License.
 
 ## Usage
 
-The `amp-render` component fetches dyanmic content from a CORS JSON endpoint, inline `amp-state` or `amp-script` and renders it in the specified template.
+The amp-render component renders content in a specified template. It can fetch content from a CORS JSON endpoint or inline from `amp-state` or `amp-script`.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
@@ -57,7 +57,6 @@ For more details on templates, see [AMP HTML Templates](../../spec/amp-html-temp
 
 ### `src` (required)
 
-[filter formats="websites"]
 
 The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-render>`. There are three valid protocols for the `src` attribute.
@@ -84,7 +83,7 @@ Defines a `credentials` option as specified by the [Fetch API](https://fetch.spe
 
 To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
 
-Here's an example that specifies including credentials to display personalized content:
+The example below uses the "include" value in `credentials` to display personalized content:
 
 ```html
 <amp-render
@@ -155,7 +154,6 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
 If `binding` attribute is not provided, default is `always`.
 
-[/filter]<!-- formats="websites, stories" -->
 
 ### Common attributes
 
