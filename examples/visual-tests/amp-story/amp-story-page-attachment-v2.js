@@ -340,7 +340,7 @@ module.exports = {
     );
     await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
-      '..i-amphtml-story-page-open-attachment[active]',
+      '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 };
