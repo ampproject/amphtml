@@ -27,8 +27,11 @@ module.exports = {
       '.i-amphtml-story-inline-page-attachment-chip',
     ]);
   },
- 
-  'inline attachment UI element with custom text should display': async (page, name) => {
+
+  'inline attachment UI element with custom text should display': async (
+    page,
+    name
+  ) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
     await page.waitForTimeout(400); // For animations to finish.

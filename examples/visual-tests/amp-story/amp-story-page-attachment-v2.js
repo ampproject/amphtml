@@ -27,8 +27,11 @@ module.exports = {
       '.i-amphtml-story-inline-page-attachment-chip',
     ]);
   },
- 
-  'inline attachment UI element with custom text should display': async (page, name) => {
+
+  'inline attachment UI element with custom text should display': async (
+    page,
+    name
+  ) => {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitForSelector('amp-story-page#inline-custom-text[active]');
