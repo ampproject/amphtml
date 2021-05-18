@@ -214,7 +214,7 @@ export class ConsentUI {
     if (promptUI) {
       // Always respect promptUI first
       const promptElement = this.ampdoc_.getElementById(promptUI);
-      if (!promptElement || !this.parent_.contains(promptElement)) {
+      if (!promptElement) {
         user().error(
           TAG,
           'child element of <amp-consent> with promptUI id %s not found',
@@ -290,8 +290,8 @@ export class ConsentUI {
         if (!this.isPostPrompt_) {
           this.elementWithFocusBeforeShowing_ = this.document_.activeElement;
 
-          this.maybeShowOverlay_();
-          this.resume();
+          // this.maybeShowOverlay_();
+          // this.resume();
           this.ui_./*OK*/ focus();
         }
       };
@@ -365,12 +365,12 @@ export class ConsentUI {
 
   /** */
   pause() {
-    if (this.ui_) {
-      Services.ownersForDoc(this.baseInstance_.element).schedulePause(
-        this.baseInstance_.element,
-        this.ui_
-      );
-    }
+    // if (this.ui_) {
+    //   Services.ownersForDoc(this.baseInstance_.element).schedulePause(
+    //     this.baseInstance_.element,
+    //     this.ui_
+    //   );
+    // }
   }
 
   /** */
