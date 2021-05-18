@@ -35,17 +35,19 @@
      'enabled'
    );
    if (enabledBottomAd ) {
+    const slot = bottomAdOptions['tag'];
     const bannerSizes = [[300, 50]];
-    constructCompanionBottomAd(bannerSizes, apesterElement);
+    constructCompanionBottomAd(slot, bannerSizes, apesterElement);
    }
  }
  
  /**
+  * @param {string} slot
   * @param {Array} bannerSizes
   * @param {!AmpElement} apesterElement
   * @return {!Element}
   */
- function constructCompanionBottomAd(bannerSizes, apesterElement) {
+ function constructCompanionBottomAd(slot, bannerSizes, apesterElement) {
    const width = bannerSizes[0][0]
    const height = bannerSizes[0][1]
    const ampAd = createElementWithAttributes(
@@ -57,6 +59,7 @@
         'type': 'doubleclick',
         'style': 'position: absolute; bottom: 0;left: 50%;margin-left: -150px;margin-bottom: 0;',
         'layout': 'fixed',
+        'data-slot': `${slot}`,
         'data-multi-size-validation': 'false',
      })
    );
