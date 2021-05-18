@@ -534,11 +534,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.state_ = state;
         break;
       case PageState.PAUSED:
-        // canResume keeps the time advancement timer if set to true, and resets
-        // it when set to false. If the bookend if open, reset the timer. If
-        // user is long pressing, don't reset it.
-        const canResume = !this.storeService_.get(StateProperty.BOOKEND_STATE);
-        this.advancement_.stop(canResume);
+        this.advancement_.stop();
         this.pauseAllMedia_(false /** rewindToBeginning */);
         this.animationManager_?.pauseAll();
         this.state_ = state;

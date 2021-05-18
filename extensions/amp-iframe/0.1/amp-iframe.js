@@ -35,7 +35,7 @@ import {
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
@@ -164,7 +164,7 @@ export class AmpIframe extends AMP.BaseElement {
         (origin != containerUrl.origin && protocol != 'data:'),
       'Origin of <amp-iframe> must not be equal to container %s' +
         ' if allow-same-origin is set. See https://github.com/ampproject/' +
-        'amphtml/blob/main/spec/amp-iframe-origin-policy.md for details.',
+        'amphtml/blob/main/docs/spec/amp-iframe-origin-policy.md for details.',
       element
     );
     userAssert(

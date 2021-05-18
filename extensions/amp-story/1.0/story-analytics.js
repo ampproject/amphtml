@@ -26,9 +26,6 @@ export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
 
 /** @enum {string} */
 export const StoryAnalyticsEvent = {
-  BOOKEND_CLICK: 'story-bookend-click',
-  BOOKEND_ENTER: 'story-bookend-enter',
-  BOOKEND_EXIT: 'story-bookend-exit',
   CLICK_THROUGH: 'story-click-through',
   FOCUS: 'story-focus',
   LAST_PAGE_VISIBLE: 'story-last-page-visible',
@@ -112,14 +109,6 @@ export class StoryAnalyticsService {
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.triggerEvent(
-        isActive
-          ? StoryAnalyticsEvent.BOOKEND_ENTER
-          : StoryAnalyticsEvent.BOOKEND_EXIT
-      );
-    });
-
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (pageId) => {

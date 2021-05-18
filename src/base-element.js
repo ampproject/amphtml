@@ -229,6 +229,10 @@ export class BaseElement {
   constructor(element) {
     /** @public @const {!Element} */
     this.element = element;
+
+    /** @public @const {!Window} */
+    this.win = toWin(element.ownerDocument.defaultView);
+
     /*
     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  ____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
@@ -236,15 +240,11 @@ export class BaseElement {
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
-    Any private property for BaseElement should be declared in
-    build-system/externs/amp.multipass.extern.js. This is so closure compiler
-    doesn't reuse the same symbol it would use in the core compilation unit for
-    the private property in the extensions compilation unit's private
-    properties.
+    Any private property for BaseElement MUST be wrapped with quotes. We cannot
+    allow Closure Compiler to mangle privates in this class, because it can
+    reuse the same mangled name for a different property in, i.e., amp-youtube's
+    BaseElement subclass (which lives in a different binary).
     */
-
-    /** @public @const {!Window} */
-    this.win = toWin(element.ownerDocument.defaultView);
 
     /**
      * Maps action name to struct containing the action handler and minimum
@@ -253,10 +253,10 @@ export class BaseElement {
      *   handler: function(!./service/action-impl.ActionInvocation),
      *   minTrust: ActionTrust,
      * }>} */
-    this.actionMap_ = null;
+    this['actionMap_'] = null;
 
     /** @private {?string} */
-    this.defaultActionAlias_ = null;
+    this['defaultActionAlias_'] = null;
   }
 
   /**
@@ -272,7 +272,7 @@ export class BaseElement {
    * @return {?string}
    */
   getDefaultActionAlias() {
-    return this.defaultActionAlias_;
+    return this['defaultActionAlias_'];
   }
 
   /**
@@ -678,13 +678,6 @@ export class BaseElement {
     return loadPromise(element);
   }
 
-  /** @private */
-  initActionMap_() {
-    if (!this.actionMap_) {
-      this.actionMap_ = this.win.Object.create(null);
-    }
-  }
-
   /**
    * Registers the action handler for the method with the specified name.
    *
@@ -697,8 +690,8 @@ export class BaseElement {
    * @public
    */
   registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
-    this.initActionMap_();
-    this.actionMap_[alias] = {handler, minTrust};
+    initActionMap(this);
+    this['actionMap_'][alias] = {handler, minTrust};
   }
 
   /**
@@ -714,12 +707,12 @@ export class BaseElement {
     minTrust = ActionTrust.DEFAULT
   ) {
     devAssert(
-      !this.defaultActionAlias_,
+      !this['defaultActionAlias_'],
       'Default action "%s" already registered.',
-      this.defaultActionAlias_
+      this['defaultActionAlias_']
     );
     this.registerAction(alias, handler, minTrust);
-    this.defaultActionAlias_ = alias;
+    this['defaultActionAlias_'] = alias;
   }
 
   /**
@@ -737,10 +730,10 @@ export class BaseElement {
     let {method} = invocation;
     // If the default action has an alias, the handler will be stored under it.
     if (method === DEFAULT_ACTION) {
-      method = this.defaultActionAlias_ || method;
+      method = this['defaultActionAlias_'] || method;
     }
-    this.initActionMap_();
-    const holder = this.actionMap_[method];
+    initActionMap(this);
+    const holder = this['actionMap_'][method];
     const {tagName} = this.element;
     userAssert(holder, `Method not found: ${method} in ${tagName}`);
     const {handler, minTrust} = holder;
@@ -1096,5 +1089,17 @@ export class BaseElement {
    */
   getApi() {
     return this;
+  }
+}
+
+/**
+ * This would usually be a private method on BaseElement class, but we cannot
+ * use privates here. So, it's manually devirtualized into a regular function.
+ *
+ * @param {typeof BaseElement} baseElement
+ */
+function initActionMap(baseElement) {
+  if (!baseElement['actionMap_']) {
+    baseElement['actionMap_'] = baseElement.win.Object.create(null);
   }
 }

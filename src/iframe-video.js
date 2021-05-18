@@ -19,9 +19,8 @@ import {dev} from './log';
 import {dispatchCustomEvent} from './dom';
 import {htmlFor} from './static-template';
 import {isArray, isObject} from './core/types';
-
 import {propagateAttributes} from './core/dom/propagate-attributes';
-import {tryParseJson} from './json';
+import {tryParseJson} from './core/types/object/json';
 
 /** @enum {string} */
 export const SandboxOptions = {
