@@ -27,12 +27,13 @@ tags: {  # amp-tiktok
 tags: {  # <amp-tiktok>
   html_format: AMP
   tag_name: "AMP-TIKTOK"
-  spec_name:"AMP-TIKTOK video id"
+  spec_name: "AMP-TIKTOK"
   requires_extension: "amp-tiktok"
   attr_lists: "extended-amp-global"
   attrs: {
-    name: 'data-src';
-    value_regex: '[0-9]+';
+    name: "data-src";
+    value_regex: "\d";
+    mandatory: true
   }
   spec_url: "https://amp.dev/documentation/components/amp-tiktok"
   amp_layout: {
@@ -48,32 +49,7 @@ tags: {  # <amp-tiktok>
 tags: {  # <amp-tiktok>
   html_format: AMP
   tag_name: "AMP-TIKTOK"
-  spec_name:"AMP-TIKTOK video source url"
-  requires_extension: "amp-tiktok"
-  attr_lists: "extended-amp-global"
-  attrs: {
-    name: 'data-src';
-    value_url: {
-      protocol: 'https';
-      allow_relative: false;
-      allow_empty: false;
-    }
-  }
-  spec_url: "https://amp.dev/documentation/components/amp-tiktok"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
-    supported_layouts: INTRINSIC
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-tiktok>
-  html_format: AMP
-  tag_name: "AMP-TIKTOK"
-  spec_name:"AMP-TIKTOK blockquote"
+  spec_name: "AMP-TIKTOK blockquote"
   requires_extension: "amp-tiktok"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-tiktok"
@@ -86,27 +62,7 @@ tags: {  # <amp-tiktok>
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
-  reference_points: {
-    tag_spec_name: "AMP-TIKTOK blockquote [child]"
-  }
-}
-tags: {
-  html_format: AMP
-  tag_name: "$REFERENCE_POINT"
-  spec_name: "AMP-TIKTOK blockquote [child]"
-  attrs: {
-    name: "placeholder"
-  }
-  attrs: {
-    name: "data-video-id"
-    value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "cite"
-    value_url: {
-      protocol: 'https';
-      allow_relative: false;
-      allow_empty: false;
-    }
-  }
+  child_tags: {
+    child_tag_name_oneof: "BLOCKQUOTE"
+  } 
 }
