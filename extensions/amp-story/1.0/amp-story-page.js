@@ -316,9 +316,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.animationManager_) {
       return;
     }
-    if (prefersReducedMotion(this.win)) {
-      return;
-    }
     if (!hasAnimations(this.element)) {
       return;
     }
@@ -1246,7 +1243,16 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   maybeStartAnimations_() {
-    this.animationManager_?.animateIn();
+    if (!this.animationManager_) {
+      return;
+    }
+    if (prefersReducedMotion(this.win)) {
+      this.maybeApplyLastAnimationFrame().then(
+        () => this.animationManager_.finishAll()
+      )
+    } else {
+      this.animationManager_?.animateIn();
+    }
   }
 
   /**
@@ -1260,7 +1266,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
     this.signals()
       .whenSignal(CommonSignals.LOAD_END)
-      .then(() => this.maybeApplyFirstAnimationFrame())
+      .then(() => this.maybeApplyLastAnimationFrame())
       .then(() => {
         this.animationManager_.finishAll();
       });
@@ -1271,6 +1277,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   maybeApplyFirstAnimationFrame() {
     return Promise.resolve(this.animationManager_?.applyFirstFrame());
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  maybeApplyLastAnimationFrame() {
+    return Promise.resolve(this.animationManager_?.applyLastFrame());
   }
 
   /**

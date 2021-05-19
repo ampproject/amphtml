@@ -165,6 +165,18 @@ export class AnimationRunner {
       return omit(keyframes[0], ['offset']);
     });
 
+    /**
+     * Evaluated set of CSS properties for last animation frame.
+     * @private @const {!Promise<?Object<string, *>>}
+     */
+     this.lastFrameProps_ = this.resolvedSpecPromise_.then((spec) => {
+      const {keyframes} = spec;
+      if (!this.presetTarget_) {
+        return null;
+      }
+      return omit(keyframes[keyframes.length - 1], ['offset']);
+    });
+
     /** @private {?../../amp-animation/0.1/runners/animation-runner.AnimationRunner} */
     this.runner_ = null;
 
@@ -322,6 +334,16 @@ export class AnimationRunner {
           assertDoesNotContainDisplay(devAssert(firstFrameProps))
         );
       });
+    });
+  }
+
+  /**
+   * Applies the last animation frame.
+   * @return {!Promise<void>}
+   */
+  applyLastFrame() {
+    this.runnerPromise_.then((runner) => {
+      runner.finish();
     });
   }
 
@@ -563,6 +585,16 @@ export class AnimationManager {
   applyFirstFrame() {
     return Promise.all(
       this.getOrCreateRunners_().map((runner) => runner.applyFirstFrame())
+    );
+  }
+
+  /**
+   * Applies first frame to target element before starting animation.
+   * @return {!Promise}
+   */
+  applyLastFrame() {
+    return Promise.all(
+      this.getOrCreateRunners_().map((runner) => runner.applyLastFrame())
     );
   }
 

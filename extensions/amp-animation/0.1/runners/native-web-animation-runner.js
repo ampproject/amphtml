@@ -204,7 +204,12 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     this.players_ = null;
     this.setPlayState_(WebAnimationPlayState.FINISHED);
     players.forEach((player) => {
-      player.finish();
+      try {
+        // Will fail if animation is infinite, in that case we pause it.
+        player.finish();
+      } catch (error) {
+        player.pause();
+      }
     });
   }
 
