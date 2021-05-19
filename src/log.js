@@ -18,6 +18,8 @@ import * as assertions from './core/assert/base';
 import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
+  isUserErrorMessage,
+  stripUserError,
 } from './core/error-message-helpers';
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
 import {getMode} from './mode';
@@ -28,7 +30,9 @@ import {urls} from './config';
 
 const noop = () => {};
 
-export {USER_ERROR_SENTINEL};
+// These are exported here despite being defined in core to avoid updating
+// imports for now.
+export {USER_ERROR_SENTINEL, isUserErrorMessage, stripUserError};
 
 /**
  * Four zero width space.
@@ -36,22 +40,6 @@ export {USER_ERROR_SENTINEL};
  * @const {string}
  */
 export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
-
-/**
- * @param {string} message
- * @return {boolean} Whether this message was a user error.
- */
-export function isUserErrorMessage(message) {
-  return message.indexOf(USER_ERROR_SENTINEL) >= 0;
-}
-
-/**
- * @param {string} message
- * @return {string} The new message without USER_ERROR_SENTINEL
- */
-export function stripUserError(message) {
-  return message.replace(USER_ERROR_SENTINEL, '');
-}
 
 /**
  * @param {string} message
