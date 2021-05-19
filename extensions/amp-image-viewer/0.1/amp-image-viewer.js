@@ -154,6 +154,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    debugger;
     if (this.loadPromise_) {
       return this.loadPromise_;
     }
@@ -177,14 +178,11 @@ export class AmpImageViewer extends AMP.BaseElement {
     // wait for the layout signal.
     const img = dev().assertElement(this.sourceImage_);
     const haveImg = !!this.image_;
-    const isAMPImage = img.tagName === 'AMP-IMG';
     const laidOutPromise = haveImg
       ? Promise.resolve()
-      : isAMPImage
-      ? img.signals().whenSignal(CommonSignals.LOAD_END)
-      : loadPromise(img);
+      : img.signals().whenSignal(CommonSignals.LOAD_END);
 
-    if (!haveImg && isAMPImage) {
+    if (!haveImg) {
       Services.ownersForDoc(this.element).scheduleLayout(this.element, img);
     }
 
@@ -321,10 +319,6 @@ export class AmpImageViewer extends AMP.BaseElement {
       });
       st.toggle(img, false);
       this.element.appendChild(this.image_);
-      if (img.tagName === 'IMG') {
-        propagateAttributes(ARIA_ATTRIBUTES, img, this.image_);
-        return Promise.resolve();
-      }
       return img.getImpl().then((impl) => {
         propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_);
       });
