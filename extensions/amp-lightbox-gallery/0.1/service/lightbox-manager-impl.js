@@ -123,7 +123,7 @@ export class LightboxManager {
      * List of lightbox elements that have already been scanned.
      * @private {!Set<!Element>}
      */
-    this.seen_ = new Set([]);
+    this.seen_ = new Set();
   }
 
   /**
