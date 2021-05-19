@@ -402,10 +402,7 @@ export class LightboxManager {
     if (element.hasAttribute('lightbox-thumbnail-id')) {
       const thumbnailId = element.getAttribute('lightbox-thumbnail-id');
       const thumbnailImage = this.ampdoc_.getElementById(thumbnailId);
-      if (
-        thumbnailImage &&
-        LIGHTBOX_ELIGIBLE_TAGS.has(thumbnailImage.tagName)
-      ) {
+      if (LIGHTBOX_ELIGIBLE_TAGS.has(thumbnailImage?.tagName)) {
         return srcsetFromElement(thumbnailImage);
       }
     }
