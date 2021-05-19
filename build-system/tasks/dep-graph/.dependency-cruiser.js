@@ -71,7 +71,7 @@ module.exports = {
       from: {},
       to: {
         couldNotResolve: true,
-        pathNot: '^@rollup/'
+        pathNot: '^@(rollup|storybook)/'
       }
     },
     {
@@ -189,7 +189,7 @@ module.exports = {
           leave out if you want to exclude neither (recommended!)
     */
     exclude : {
-      path: ['\\.extern\\.js$', '^src/[^/]+\\.js'],
+      path: ['\\.extern\\.js$'],
       dynamic: true
     },
 
@@ -308,10 +308,10 @@ module.exports = {
          */
         collapsePattern: [
           '^(node_modules|third_party|@storybook|@rollup)/[^/]+',
-          '^src/core/[^/]+',
-          '^src/(amp-story-player|experiments|inabox|polyfills|preact|purifier|service|utils|web-worker)',
-          '^src/[^/]+\\.js',
-          // '^src/[^/]+',
+          // '^src/core/[^/]+',
+          // '^src/(amp-story-player|experiments|inabox|polyfills|preact|purifier|service|utils|web-worker)',
+          '^src(?=/[^/]+\\.js)',
+          '^src/[^/]+',
           '^(extensions|builtins)/[^/]+',
           '^(3p|build|ads)',
         ],

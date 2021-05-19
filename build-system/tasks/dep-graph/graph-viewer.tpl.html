@@ -11,57 +11,7 @@
     }
   </style>
 
-  <script>
-    function getEdges(filter) {
-      return Array.from(document.querySelectorAll('.edge'))
-        .map(el => {
-          const [title, edge, arrow] = el.children;
-          const [src, dest] = title.textContent.trim().split('->');
-          return {edge, arrow, src, dest};
-        });
-    }
-
-    function applyColorToEdge(color, {edge, arrow}) {
-        edge.style.stroke = color;
-        arrow.style.fill = color;
-        arrow.style.stroke = color;
-    }
-
-    // Dependency predicates for coloring
-    function isInRootSrc({src, dest}) {
-      const isInSrc = path => {
-        const parts = path.split('/');
-        return parts.length == 2 && parts[0] == 'src';
-      }
-      return isInSrc(src) || isInSrc(dest);
-    }
-    function isSubmoduleImport({src, dest}) {
-        const srcDir = src.split('/').slice(0, -1).join('/');
-        return dest.startsWith(`${srcDir}/`);
-    }
-    function isCoreImport({dest}) {
-      return dest.startsWith('src/core/');
-    }
-    function is3pImport({dest}) {
-        return dest.startsWith('third_party/')
-          || dest.startsWith('node_modules/');
-    }
-
-    const edgeColors = new Map([
-      ['#CCC', isCoreImport],
-      ['#006', isSubmoduleImport],
-      ['#066', is3pImport],
-      ['#F00', isInRootSrc],
-    ]);
-
-    function applyColors() {
-      const edges = getEdges();
-      edgeColors.forEach((predicate, color) => {
-        edges.filter(predicate)
-          .map(applyColorToEdge.bind(null, color));
-      });
-    }
-  </script>
+  <script src="graph-viewer.js"></script>
 </head>
 <body>
   __SVG_CONTENT__
