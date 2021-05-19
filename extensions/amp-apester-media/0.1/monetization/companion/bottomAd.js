@@ -17,6 +17,7 @@
  import {Services} from '../../../../../src/services';
  import {createElementWithAttributes} from '../../../../../src/dom';
  import {dict, getValueForExpr} from '../../../../../src/core/types/object';
+ const ALLOWED_AD_PROVIDER = 'gpt';
  
  /**
   * @param {!JsonObject} media
@@ -34,7 +35,7 @@
      /**@type {!JsonObject}*/ (bottomAdOptions),
      'enabled'
    );
-   if (enabledBottomAd ) {
+   if (enabledBottomAd && bottomAdOptions['videoPlayer'] === ALLOWED_AD_PROVIDER) {
     const slot = bottomAdOptions['tag'];
     const bannerSizes = [[300, 50]];
     constructCompanionBottomAd(slot, bannerSizes, apesterElement);
