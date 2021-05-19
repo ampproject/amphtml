@@ -313,6 +313,7 @@ export class Log {
   error(tag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
+      // TODO(rcebulko): Determine if/how this Error#name property is used.
       error.name = tag || error.name;
       // __AMP_REPORT_ERROR is installed globally per window in the entry point.
       self.__AMP_REPORT_ERROR(error);
