@@ -34,7 +34,7 @@ import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
-import {createCustomEvent, loadPromise} from '../../../src/event-helper';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {
   expandLayoutRect,
@@ -154,7 +154,6 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    debugger;
     if (this.loadPromise_) {
       return this.loadPromise_;
     }

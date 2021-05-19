@@ -1000,7 +1000,6 @@ export class Resource {
       return;
     }
     if (this.abortController_) {
-      console.log('calling abort', this.state_, this);
       this.abortController_.abort();
       this.abortController_ = null;
     }
