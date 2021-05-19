@@ -25,6 +25,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
+import {isArray} from '../../../src/core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -248,28 +249,47 @@ export class AmpRender extends BaseElement {
           'render': (data) => {
             if (this.element.getAttribute('binding') === 'no') {
               return templates
-              .renderTemplateAsString(dev().assertElement(template), data)
-              .then((html) => dict({'__html': html}));
+                .renderTemplateAsString(dev().assertElement(template), data)
+                .then((html) => dict({'__html': html}));
             }
 
-            let element;
-            return templates
-            .renderTemplate(dev().assertElement(template), data)
-            .then((el) => {
-              element = el;
-              return Services.bindForDocOrNull(this.element);
-            })
-            .then((bind) => {
-              return bind.rescan([element], [], {
+            let elements;
+            if (this.element.getAttribute('binding') === 'refresh') {
+              return templates
+                .renderTemplate(dev().assertElement(template), data)
+                .then((el) => {
+                  elements = isArray(el) ? el : [el];
+                  return Services.bindForDocOrNull(this.element);
+                })
+                .then((bind) => {
+                  return bind.rescan(elements, [], {
                     'fast': true,
-                    // bind.signals().get('FIRST_MUTATE') gives the timestamp (in ms) of the mutation
-                    // which is null for the initial render
-                    'update': bind.signals().get('FIRST_MUTATE') !== null
+                    // bind.signals().get('FIRST_MUTATE') gives the timestamp (in ms) when mutation
+                    // occured, which is null for the initial render
+                    'update': bind.signals().get('FIRST_MUTATE') !== null,
                   });
                 })
                 .then(() => {
-                  return dict({__html: element.innerHTML}); // or outerHTML?
-                })
+                  return dict({__html: elements[0].innerHTML}); // or outerHTML?
+                });
+            }
+
+            // binding = "always", default case
+            return templates
+              .renderTemplate(dev().assertElement(template), data)
+              .then((el) => {
+                elements = isArray(el) ? el : [el];
+                return Services.bindForDocOrNull(this.element);
+              })
+              .then((bind) => {
+                return bind.rescan(elements, [], {
+                  'fast': true,
+                  'update': true,
+                });
+              })
+              .then(() => {
+                return dict({__html: elements[0].innerHTML}); // or outerHTML?
+              });
           },
         })
       );
