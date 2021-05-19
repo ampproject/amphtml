@@ -21,7 +21,8 @@ const open = require('open');
 const path = require('path');
 const {execOrDie} = require('../../common/exec');
 
-const INCLUDE_GLOB = `src/{context,core,examiner,experiments,polyfills}`;
+const INCLUDE_GLOB =
+  argv.include_glob || `src/{context,core,examiner,experiments,polyfills}`;
 const HTML_TPL_PATH = path.join(__dirname, 'graph-viewer.tpl.html');
 const HTML_OUT_PATH = path.join(__dirname, 'graph-viewer.html');
 const SVG_OUT_PATH = path.join(__dirname, 'dep-graph.svg');
@@ -59,6 +60,6 @@ module.exports = {
 
 depGraph.description = 'Generates a dependency graph of key repo directories.';
 depGraph.flags = {
-  'output_file': 'Path to save SVG output to (default is task directory)',
   'max_depth': 'Max depth to pursue dependencies outside of included list',
+  'include_glob': 'Source files to include in graph',
 };
