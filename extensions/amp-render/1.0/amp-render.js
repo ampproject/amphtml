@@ -243,7 +243,7 @@ export class AmpRender extends BaseElement {
         // A new template has been set while the old one was initializing.
         return;
       }
-      let backupElement;
+      let elementCopy;
       this.mutateProps(
         dict({
           'render': (data) => {
@@ -257,18 +257,14 @@ export class AmpRender extends BaseElement {
 
                 .renderTemplate(dev().assertElement(template), data)
                 .then((element) => {
-                  backupElement = element
-                  console.log({element}, '11111111111', this.element)
+                  elementCopy = element
                   return Services.bindForDocOrNull(this.element)
                 })
                 .then((bind) => {
-                  console.log(backupElement, this.element, '222222')
-                  return bind.rescan([backupElement], [], {'fast': true, 'update': true})
+                  return bind.rescan([elementCopy], [], {'fast': true, 'update': true})
                 })
                 .then((ret) => {
-                  // add  options element
-                  console.log({ret, backupElement}, '33333333')
-                  return dict({__html: backupElement.outerHTML}); // or outerHTML?
+                  return dict({__html: elementCopy.innerHTML}); // or outerHTML?
                 })
             );
           },
