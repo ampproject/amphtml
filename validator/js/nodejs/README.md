@@ -67,6 +67,12 @@ would allow applying the validator rules for `AMP4ADS` or `AMP4EMAIL` as well. `
 
 ## Release Notes
 
+### 1.0.35
+
+-   Set default engine to the WebAssembly version validator, which is
+    `https://cdn.ampproject.org/v0/validator_wasm.js`.
+    (ampproject/amphtml #34213)
+
 ### 1.0.34
 
 -   Updated `colors` dependency version (ampproject/amphtml #31656).
