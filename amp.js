@@ -58,6 +58,7 @@ createTask('coverage-map', 'coverageMap');
 createTask('css');
 createTask('default', 'defaultTask', 'default-task');
 createTask('dep-check', 'depCheck');
+createTask('dep-graph', 'depGraph');
 createTask('dev-dashboard-tests', 'devDashboardTests');
 createTask('dist');
 createTask('e2e');
