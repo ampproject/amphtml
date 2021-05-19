@@ -160,12 +160,8 @@ function installWrappers(chai, utils) {
       case CHAINABLE_METHOD:
         Assertion.overwriteChainableMethod(
           name,
-          overwrite
-          /**
-           * DO_NOT_SUBMIT without validating this
-           * The Chia typings indicate the way this was written did not work
-           * However, they may be wrong and by removing this I may have broken things
-           */
+          overwrite,
+          /** @type {() => any} */ (inheritChainingBehavior)
         );
         break;
       default:
@@ -236,6 +232,17 @@ function overwriteAlwaysUseSuper(utils) {
       flag(that, 'object', resultPromise);
       return resultPromise;
     };
+  };
+}
+
+/**
+ * @param {Chai.AssertionStatic} _super
+ * @return {function(): *}
+ */
+function inheritChainingBehavior(_super) {
+  return function () {
+    // @ts-ignore
+    _super.apply(this, arguments);
   };
 }
 

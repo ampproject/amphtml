@@ -86,8 +86,6 @@ app.use(bodyParser.text());
 // deprecate app.js.
 // TODO(erwinmombay, #32865): Make visual diff tests use the new server
 if (!argv._.includes('visual-diff')) {
-  // DO_NOT_SUBMIT this import causes the checker to type check the compiled code
-  // from new-server which is obviously not type safe.
   app.use(require('./new-server/router'));
 }
 
