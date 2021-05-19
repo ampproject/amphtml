@@ -33,6 +33,7 @@ declare global {
       configure: Function;
     }
   }
+
   namespace NodeJS {
     interface Global {
       repl?: () => Promise<unknown> & {
