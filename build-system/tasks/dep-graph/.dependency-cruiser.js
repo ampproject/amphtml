@@ -1,6 +1,20 @@
 /** @type {import('dependency-cruiser').IConfiguration} */
 module.exports = {
   forbidden: [
+    /* AMP custom rules */
+    {
+      name: 'no-noncore-import-from-core',
+      severity: 'error',
+      comment:
+        'Files under src/core must not import from beyond src/core. If you ' +
+        'need something outside core, either migrate it into core or place ' +
+        'the new functionality outside of core.',
+      from: { path: '^src/core/' },
+      to: {
+        pathNot: ['^src/core/', '^third_party/css-escape'],
+      },
+    },
+
     /* rules from the 'recommended' preset: */
     {
       name: 'no-circular',
@@ -28,7 +42,8 @@ module.exports = {
           '(^|/)\\.[^/]+\\.(js|cjs|mjs|ts|json)$', // dot files
           '\\.d\\.ts$',                            // TypeScript declaration files
           '(^|/)tsconfig\\.json$',                 // TypeScript config
-          '(^|/)(babel|webpack)\\.config\\.(js|cjs|mjs|ts|json)$' // other configs
+          '(^|/)(babel|webpack)\\.config\\.(js|cjs|mjs|ts|json)$', // other configs
+          '^src/examiner\\b' // bundles
         ]
       },
       to: {},
@@ -96,10 +111,10 @@ module.exports = {
         "or there's something in the test folder that isn't a test.",
       severity: 'error',
       from: {
-        pathNot: '^(test)'
+        pathNot: '^(test)\\b'
       },
       to: {
-        path: '^(test)'
+        path: '^(test)\\b'
       }
     },
     {
@@ -309,8 +324,8 @@ module.exports = {
         collapsePattern: [
           '^(node_modules|third_party|@storybook|@rollup)/[^/]+',
           // '^src/core/[^/]+',
-          // '^src/core/[^/]+',
-          '^src/(amp-story-player|context|core|examiner|experiments|inabox|polyfills|preact|purifier|service|utils|web-worker)',
+          '^src/core/[^/]+',
+          '^src/(amp-story-player|examiner|experiments|inabox|purifier|service|utils|web-worker)',
           '^src(?=/[^/]+\\.js)',
           // '^src/[^/]+',
           '^(extensions|builtins)/[^/]+',
@@ -342,25 +357,21 @@ module.exports = {
             }
           ],
           dependencies: [ // Style edges between dependencies/clusters
-        //     {
-        //       criteria: { "rules[0].severity": "error" },
-        //       attributes: { fontcolor: "red", color: "red" }
-        //     },
-        //     {
-        //       criteria: { "rules[0].severity": "warn" },
-        //       attributes: { fontcolor: "orange", color: "orange" }
-        //     },
-        //     {
-        //       criteria: { "rules[0].severity": "info" },
-        //       attributes: { fontcolor: "blue", color: "blue" }
-        //     },
+            {
+              criteria: { "rules[0].severity": "error" },
+              attributes: { fontcolor: "red", color: "red" }
+            },
+            {
+              criteria: { "rules[0].severity": "warn" },
+              attributes: { fontcolor: "orange", color: "orange" }
+            },
+            {
+              criteria: { "rules[0].severity": "info" },
+              attributes: { fontcolor: "blue", color: "blue" }
+            },
             {
               criteria: { resolved: "^src/core" },
               attributes: { color: "#cccccc33" }
-            },
-            {
-              criteria: { resolved: "^src$" },
-              attributes: { color: "#ff000077" }
             },
             {
               criteria: { resolved: "^(node_modules|third_party|@\\w+)" },
@@ -369,6 +380,10 @@ module.exports = {
             {
               criteria: { module: "^\\./" },
               attributes: { color: "#00666677" },
+            },
+            {
+              criteria: { resolved: "^src([^/]+\\.js)?$" },
+              attributes: { color: "#ff000077" }
             },
             {
               criteria: { resolved: "^src/core" },
