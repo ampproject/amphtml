@@ -227,30 +227,33 @@ export class Log {
 
   /**
    * @param {string} tag
-   * @param {string} level
+   * @param {!LogLevel} level
    * @param {!Array} messages
+   * @return {boolean} true if a message was logged
    */
   msg_(tag, level, messages) {
-    if (this.getLevel_() != LogLevel.OFF) {
-      let fn = this.win.console.log;
-      if (level == 'ERROR') {
-        fn = this.win.console.error || fn;
-      } else if (level == 'INFO') {
-        fn = this.win.console.info || fn;
-      } else if (level == 'WARN') {
-        fn = this.win.console.warn || fn;
-      }
-      const args = this.maybeExpandMessageArgs_(messages);
-      // Prefix console message with "[tag]".
-      const prefix = `[${tag}]`;
-      if (typeof args[0] === 'string') {
-        // Prepend string to avoid breaking string substitutions e.g. %s.
-        args[0] = prefix + ' ' + args[0];
-      } else {
-        args.unshift(prefix);
-      }
-      fn.apply(this.win.console, args);
+    if (this.getLevel_() < level) {
+      return false;
     }
+    let fn = this.win.console.log;
+    if (level == LogLevel.ERROR) {
+      fn = this.win.console.error || fn;
+    } else if (level == LogLevel.INFO) {
+      fn = this.win.console.info || fn;
+    } else if (level == LogLevel.WARN) {
+      fn = this.win.console.warn || fn;
+    }
+    const args = this.maybeExpandMessageArgs_(messages);
+    // Prefix console message with "[tag]".
+    const prefix = `[${tag}]`;
+    if (typeof args[0] === 'string') {
+      // Prepend string to avoid breaking string substitutions e.g. %s.
+      args[0] = prefix + ' ' + args[0];
+    } else {
+      args.unshift(prefix);
+    }
+    fn.apply(this.win.console, args);
+    return true;
   }
 
   /**
@@ -267,9 +270,7 @@ export class Log {
    * @param {...*} args
    */
   fine(tag, ...args) {
-    if (this.getLevel_() >= LogLevel.FINE) {
-      this.msg_(tag, 'FINE', args);
-    }
+    this.msg_(tag, LogLevel.FINE, args);
   }
 
   /**
@@ -278,9 +279,7 @@ export class Log {
    * @param {...*} args
    */
   info(tag, ...args) {
-    if (this.getLevel_() >= LogLevel.INFO) {
-      this.msg_(tag, 'INFO', args);
-    }
+    this.msg_(tag, LogLevel.INFO, args);
   }
 
   /**
@@ -289,9 +288,7 @@ export class Log {
    * @param {...*} args
    */
   warn(tag, ...args) {
-    if (this.getLevel_() >= LogLevel.WARN) {
-      this.msg_(tag, 'WARN', args);
-    }
+    this.msg_(tag, LogLevel.WARN, args);
   }
 
   /**
@@ -303,12 +300,8 @@ export class Log {
    * @private
    */
   error_(tag, ...args) {
-    if (this.getLevel_() >= LogLevel.ERROR) {
-      this.msg_(tag, 'ERROR', args);
-    } else {
-      const error = createErrorVargs.apply(null, args);
-      this.prepareError_(error);
-      return error;
+    if (!this.msg_(tag, LogLevel.ERROR, args)) {
+      return this.createError.apply(this, args);
     }
   }
 
