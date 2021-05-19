@@ -251,16 +251,19 @@ export class AmpRender extends BaseElement {
               .renderTemplateAsString(dev().assertElement(template), data)
               .then((html) => dict({'__html': html}));
             }
+
             let element;
             return templates
-                .renderTemplate(dev().assertElement(template), data)
-                .then((el) => {
-                  element = el;
-                  return Services.bindForDocOrNull(this.element);
-                })
-                .then((bind) => {
-                  return bind.rescan([element], [], {
+            .renderTemplate(dev().assertElement(template), data)
+            .then((el) => {
+              element = el;
+              return Services.bindForDocOrNull(this.element);
+            })
+            .then((bind) => {
+              return bind.rescan([element], [], {
                     'fast': true,
+                    // bind.signals().get('FIRST_MUTATE') gives the timestamp (in ms) of the mutation
+                    // which is null for the initial render
                     'update': bind.signals().get('FIRST_MUTATE') !== null
                   });
                 })
