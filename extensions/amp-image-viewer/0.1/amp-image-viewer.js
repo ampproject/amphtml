@@ -184,7 +184,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       ? img.signals().whenSignal(CommonSignals.LOAD_END)
       : loadPromise(img);
 
-    if (!haveImg) {
+    if (!haveImg && isAMPImage) {
       Services.ownersForDoc(this.element).scheduleLayout(this.element, img);
     }
 

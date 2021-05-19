@@ -388,6 +388,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   unlayoutCallback() {
+    console.log('carousel unlayout');
     unobserveWithSharedInOb(this.element);
     this.slideIndex_ = null;
     return super.unlayoutCallback();

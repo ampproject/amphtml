@@ -1332,11 +1332,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         const thumbnailElement = this.createThumbnailElement_(thumbnail);
         thumbnails.push(thumbnailElement);
       });
-    this.mutateElement(() => {
-      thumbnails.forEach((thumbnailElement) => {
-        this.gallery_.appendChild(thumbnailElement);
-      });
-    });
+    this.mutateElement(() =>
+      thumbnails.forEach((thumbnailElement) =>
+        this.gallery_.appendChild(thumbnailElement)
+      )
+    );
   }
 
   /**
@@ -1369,7 +1369,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     </div>`;
     const imgElement = childElementByTag(element, 'img');
 
-    console.log({thumbnailObj});
     if (thumbnailObj.srcset) {
       imgElement.setAttribute('srcset', thumbnailObj.srcset.stringify());
     } else {
