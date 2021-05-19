@@ -1,0 +1,109 @@
+---
+name: Release Tracker
+description: Track a new AMP release.
+labels: "Type: Release"
+title: "\U0001F684 Tracking issue for release VERSION"
+body:
+- type: markdown
+  id: header
+  attributes:
+    value: |
+      This is AMP's release tracker form, meant to be used by on-duty engineers.
+      - See AMP's [release schedule](https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md) to learn about how releases work.
+      - See AMP's [release calendar](https://amp-release-calendar.appspot.com) for information about past releases (e.g. versions, dates, submission times, notes).
+      - Use this form to track a release through the following stages:
+        - Initial promotion to Nightly channel
+        - Promotion to Experimental and Beta opt-in channels
+        - Promotion to Experimental and Beta 1% traffic channels
+        - Promotion to Stable channel
+        - Promotion to LTS channel (if applicable)
+      - See AMP's pre-release [documentation](https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md#beta-and-experimental-channels) to learn how to test changes in the Experimental channel.
+      - If you find a bug in this release, file a [bug report](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.yml).
+      - If you believe a bug should be fixed as part of this release, request a [cherry-pick](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md#Cherry-picks).
+      - For updates that may be of interest to the community (e.g. bug fixes, delayed releases), post a comment to this issue.
+      - The community uses this issue to keep track of releases, so please keep it up to date.
+- type: input
+  id: release_version
+  attributes:
+    label: Release Version
+    description: The version of the release being tracked, in the format YYMMDDHHMMXXX.
+    placeholder: e.g. 2105150310000
+  validations:
+    required: true
+- type: input
+  id: previous_release_version
+  attributes:
+    label: Previous Release Version
+    description: The version of the previous stable channel release, in the format YYMMDDHHMMXXX. Copy it from [here](https://github.com/ampproject/amphtml/releases/latest).
+    placeholder: e.g. 2105072136000
+  validations:
+    required: true
+- type: textarea
+  id: release_progress
+  attributes:
+    label: Release Progress
+    description: Progress details for this release.
+    value: |
+      <!-- Replace VERSION with the contents of the "Release Version" field. -->
+      <!-- Replace PREVIOUS_VERSION with the contents of the "Previous Release Version" field. -->
+      <!-- After creating this issue, check the appropriate checkbox at each stage and replace CL_SUBMIT_TIME with the "Submitted" time from the promotion CL. -->
+
+      This issue tracks release [VERSION](https://github.com/ampproject/amphtml/releases/tag/VERSION). See [new commits](https://github.com/ampproject/amphtml/compare/PREVIOUS_VERSION...VERSION) since the previous Stable channel release.
+
+      - [ ] Release VERSION promoted to Experimental and Beta (opt-in) channels (CL_SUBMIT_TIME)
+      - [ ] Release VERSION promoted to Experimental and Beta (1% traffic) channels (CL_SUBMIT_TIME)
+      - [ ] Release VERSION promoted to Stable channel (CL_SUBMIT_TIME)
+  validations:
+    required: true
+- type: textarea
+  id: lts_release
+  attributes:
+    label: LTS Release
+    description: Details for the LTS promotion if necessary.
+    value: |
+      <!-- Replace VERSION with the contents of the "Release Version" field. -->
+      <!-- After creating this issue, check the checkbox and replace CL_SUBMIT_TIME with the the "Submitted" time from the promotion CL. -->
+
+      - [ ] Release VERSION promoted to LTS channel (CL_SUBMIT_TIME)
+- type: markdown
+  id: lts_release_instructions
+  attributes:
+    value: |
+      On the second Monday of each month, the current Stable channel version will be promoted to the LTS channel.
+      - Releases promoted to Stable channel on the first Tuesday of a given month are promoted to LTS channel on the second Monday of the same month.
+      - Releases promoted to Stable channel on the second, third, fourth, or fifth Tuesday of a given month are not LTS release candidates.
+
+      Based on the above, if this release must be promoted to LTS, fill out the "LTS Release" section.
+- type: input
+  id: cherry_pick_version
+  attributes:
+    label: Cherry-Pick Release Version
+    description: The updated cherry-pick release version if necessary, in the format YYMMDDHHMMXXX.
+    placeholder: e.g. 2105150310001
+- type: markdown
+  id: cherry_pick_instructions
+  attributes:
+    value: |
+      Sometimes, a bug in a release necessitates that a fix be cherry-picked before the release can progress. If this is the case, follow the instructions in the [cherry-picks documentation](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md#Cherry-picks) and fill out this section.
+- type: textarea
+  id: cherry_picks
+  attributes:
+    label: Cherry-Picks
+    description: Details for cherry-picks if necessary.
+    value: |
+      <!-- Replace CP_VERSION with the contents of the "Cherry-Pick Release Version" field. -->
+      <!-- Replace CP_ISSUE with one or more cherry-pick issue numbers. -->
+      <!-- After creating this issue, check the appropriate checkbox at each stage and replace CL_SUBMIT_TIME with the "Submitted" time from the promotion CL. -->
+
+      A cherry-pick release [CP_VERSION](https://github.com/ampproject/amphtml/releases/tag/CP_VERSION) was created with cherry-pick(s) #CP_ISSUE.
+
+      - [ ] Release CP_VERSION promoted to Experimental and Beta (opt-in) channels (CL_SUBMIT_TIME)
+      - [ ] Release CP_VERSION promoted to Experimental and Beta (1% traffic) channels (CL_SUBMIT_TIME)
+      - [ ] Release CP_VERSION promoted to Stable channel (CL_SUBMIT_TIME)
+      - [ ] Release CP_VERSION promoted to LTS channel (CL_SUBMIT_TIME)
+- type: textarea
+  id: notifications
+  attributes:
+    label: Notifications
+    description: Add working groups or individuals you want to notify about this release.
+    value: /cc @ampproject/release-on-duty
