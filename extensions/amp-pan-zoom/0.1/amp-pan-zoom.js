@@ -175,10 +175,6 @@ export class AmpPanZoom extends AMP.BaseElement {
       '%s should have its target element as its one and only child',
       TAG
     );
-    console.log('attempt', {
-      valid: ELIGIBLE_TAGS.has(children[0].tagName),
-      child: children[0],
-    });
     userAssert(
       ELIGIBLE_TAGS.has(children[0].tagName),
       '%s is not supported by %s',
