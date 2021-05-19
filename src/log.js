@@ -73,7 +73,7 @@ export const LogLevel = {
 };
 
 /**
- * Sets reportError function. Called from error.js to break cyclic
+ * Sets reportError function. Called from error-reporting.js to break cyclic
  * dependency.
  * @param {function(this:Window, Error, (?Element)=): ?|undefined} fn
  */
