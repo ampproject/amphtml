@@ -39,6 +39,7 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: Build package
         run: |
+          npm install
           node ./build-system/npm-publish/build-npm-binaries.js ${{ matrix.extension }}
           node ./build-system/npm-publish/write-package-json.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }}
       - name: Publish v1
