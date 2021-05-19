@@ -264,33 +264,33 @@ export class Log {
   /**
    * Reports a fine-grained message.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    */
-  fine(tag, var_args) {
+  fine(tag, ...args) {
     if (this.getLevel_() >= LogLevel.FINE) {
-      this.msg_(tag, 'FINE', Array.prototype.slice.call(arguments, 1));
+      this.msg_(tag, 'FINE', args);
     }
   }
 
   /**
    * Reports a informational message.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    */
-  info(tag, var_args) {
+  info(tag, ...args) {
     if (this.getLevel_() >= LogLevel.INFO) {
-      this.msg_(tag, 'INFO', Array.prototype.slice.call(arguments, 1));
+      this.msg_(tag, 'INFO', args);
     }
   }
 
   /**
    * Reports a warning message.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    */
-  warn(tag, var_args) {
+  warn(tag, ...args) {
     if (this.getLevel_() >= LogLevel.WARN) {
-      this.msg_(tag, 'WARN', Array.prototype.slice.call(arguments, 1));
+      this.msg_(tag, 'WARN', args);
     }
   }
 
@@ -298,18 +298,15 @@ export class Log {
    * Reports an error message. If the logging is disabled, the error is rethrown
    * asynchronously.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    * @return {!Error|undefined}
    * @private
    */
-  error_(tag, var_args) {
+  error_(tag, ...args) {
     if (this.getLevel_() >= LogLevel.ERROR) {
-      this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
+      this.msg_(tag, 'ERROR', args);
     } else {
-      const error = createErrorVargs.apply(
-        null,
-        Array.prototype.slice.call(arguments, 1)
-      );
+      const error = createErrorVargs.apply(null, args);
       this.prepareError_(error);
       return error;
     }
