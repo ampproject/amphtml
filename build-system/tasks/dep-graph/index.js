@@ -22,7 +22,8 @@ const path = require('path');
 const {execOrDie} = require('../../common/exec');
 
 const INCLUDE_GLOB =
-  argv.include_glob || `src/{context,core,examiner,experiments,polyfills}`;
+  argv.include_glob ||
+  `src/{context,core,examiner,experiments,polyfills,preact}`;
 const HTML_TPL_PATH = path.join(__dirname, 'graph-viewer.tpl.html');
 const HTML_OUT_PATH = path.join(__dirname, 'graph-viewer.html');
 const SVG_OUT_PATH = path.join(__dirname, 'dep-graph.svg');
@@ -36,6 +37,7 @@ async function depGraph() {
       'npx depcruise',
       '--output-type dot',
       `--max-depth ${argv.max_depth || 3}`,
+      `-c ${path.join(__dirname, '.dependency-cruiser.js')}`,
       INCLUDE_GLOB,
       `| dot -T svg > ${SVG_OUT_PATH}`,
     ].join(' ')
