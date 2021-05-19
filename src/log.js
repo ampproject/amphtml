@@ -20,7 +20,7 @@ import {
   elementStringOrPassThru,
   isUserErrorMessage,
   stripUserError,
-} from './core/error-message-helpers';
+} from './core/error/message-helpers';
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';

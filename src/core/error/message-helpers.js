@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isElement} from './types';
+import {isElement} from '../types';
 
 /**
  * Triple zero width space.
