@@ -201,10 +201,9 @@ export function withDatePickerCommon(WrappedComponent) {
 
   /** @override */
   DateComponent.prototype.render = function () {
-    const props = /** @type {!JsonObject} */ (omit(
-      this.props,
-      Object.keys(defaultProps)
-    ));
+    const props = /** @type {!JsonObject} */ (
+      omit(this.props, Object.keys(defaultProps))
+    );
 
     const date = props['date'];
     const daySize = props['daySize'];

@@ -22,7 +22,7 @@ import {
   validateExperimentIds,
 } from '../traffic-experiments';
 
-describe('all-traffic-experiments-tests', () => {
+describes.sandboxed('all-traffic-experiments-tests', {}, () => {
   describe('#validateExperimentIds', () => {
     it('should return true for empty list', () => {
       expect(validateExperimentIds([])).to.be.true;

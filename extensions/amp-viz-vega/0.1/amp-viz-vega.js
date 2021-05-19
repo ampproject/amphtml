@@ -28,7 +28,7 @@ import {
   observeContentSize,
   unobserveContentSize,
 } from '../../../src/utils/size-observer';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 export class AmpVizVega extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -168,16 +168,15 @@ export class AmpVizVega extends AMP.BaseElement {
     devAssert(!this.src_ != !this.inlineData_);
 
     if (this.inlineData_) {
-      this.data_ = /** @type {JsonObject} */ (tryParseJson(
-        this.inlineData_,
-        (err) => {
+      this.data_ = /** @type {JsonObject} */ (
+        tryParseJson(this.inlineData_, (err) => {
           userAssert(
             !err,
             'data could not be parsed. Is it in a valid JSON format?: %s',
             err
           );
-        }
-      ));
+        })
+      );
       return Promise.resolve();
     } else {
       // TODO(aghassemi): We may need to expose credentials. But for now Vega

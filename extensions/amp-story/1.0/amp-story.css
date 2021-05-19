@@ -283,13 +283,6 @@ amp-story-page [data-text-background-color] {
   -webkit-box-decoration-break: clone !important;
 }
 
-[desktop].i-amphtml-story-bookend-active amp-story-page[active] {
-  filter: blur(3px) !important;
-  transition: filter 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
-}
-
-/* TODO(gmajoulet): move the overlay to the bookend styles. */
-.i-amphtml-story-bookend-active amp-story-page[active]::after,
 .i-amphtml-story-attachment-active amp-story-page[active]::after {
   content: '' !important;
   display: block !important;
@@ -300,10 +293,10 @@ amp-story-page [data-text-background-color] {
   position: absolute !important;
   background: #000 !important;
   z-index: 2 !important;
-  animation: i-amphtml-bookend-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
+  animation: i-amphtml-drawwer-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
 }
 
-@keyframes i-amphtml-bookend-overlay-opacity {
+@keyframes i-amphtml-drawer-overlay-opacity {
   0% {
     opacity: 0;
   }
@@ -513,8 +506,7 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
  * Development mode
  */
 
-.i-amphtml-story-dev-logs-button[data-count="0"],
-.i-amphtml-story-bookend-active .i-amphtml-story-dev-logs-button {
+.i-amphtml-story-dev-logs-button[data-count="0"] {
   display: none !important;
 }
 

@@ -20,7 +20,7 @@ import {Slot} from '../../../src/preact/slot';
 import {createElementWithAttributes} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
 import {omit} from '../../../src/core/types/object';
-import {testElementV1} from '../../../testing/element-v1';
+import {testElementR1} from '../../../testing/element-v1';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 import {waitFor} from '../../../testing/test-helper';
 
@@ -75,9 +75,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
   }
 
-  describe('V1', () => {
-    it('testElementV1', () => {
-      testElementV1(PreactBaseElement);
+  describe('R1', () => {
+    it('testElementR1', () => {
+      testElementR1(PreactBaseElement);
     });
 
     it('by default prerenderAllowed is tied to the "loadable" flag', () => {
@@ -351,6 +351,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       element = html`
         <amp-preact layout="fixed" width="100" height="100">
           <div id="child1"></div>
+          <div placeholder>foo</div>
+          <div fallback>bar</div>
         </amp-preact>
       `;
     });
@@ -371,6 +373,23 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(
         element.shadowRoot.querySelectorAll('slot[name="i-amphtml-svc"]')
       ).to.have.lengthOf(1);
+    });
+
+    it('should pass placeholder and fallback elements to service slot', async () => {
+      doc.body.appendChild(element);
+      await element.buildInternal();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      const serviceSlot = element.shadowRoot.querySelectorAll(
+        'slot[name="i-amphtml-svc"]'
+      );
+      expect(serviceSlot).to.have.lengthOf(1);
+      const placeholder = element.querySelector('[placeholder]');
+      const fallback = element.querySelector('[fallback]');
+      expect(placeholder.getAttribute('slot')).to.equal('i-amphtml-svc');
+      expect(fallback.getAttribute('slot')).to.equal('i-amphtml-svc');
+      expect(serviceSlot[0].assignedElements()).to.have.lengthOf(2);
+      expect(serviceSlot[0].assignedElements()[0]).to.equal(placeholder);
+      expect(serviceSlot[0].assignedElements()[1]).to.equal(fallback);
     });
 
     describe('SSR', () => {
@@ -484,6 +503,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(component).to.be.calledOnce;
       const lightDom = element.querySelector(':scope > time');
       expect(lightDom.className).to.equal('');
+      expect(lightDom.hasAttribute('i-amphtml-rendered')).to.be.true;
       expect(lightDom.querySelector(':scope > #component')).to.be.ok;
       expect(lastProps.as).to.equal('time');
       await waitFor(
@@ -503,6 +523,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       const lightDom = element.querySelector(':scope > time');
       expect(lightDom.querySelector(':scope > #component')).to.be.ok;
       expect(lightDom.className).to.equal('i-amphtml-fill-content');
+      expect(lightDom.hasAttribute('i-amphtml-rendered')).to.be.true;
       expect(lastProps.className).to.equal('i-amphtml-fill-content');
       expect(lastProps.as).to.equal('time');
       await waitFor(
@@ -513,7 +534,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should use the existing element if exists', async () => {
       Impl['layoutSizeDefined'] = true;
-      const existing = document.createElement('time');
+      const existing = createElementWithAttributes(document, 'time', {
+        'i-amphtml-rendered': '',
+      });
       element.appendChild(existing);
       doc.body.appendChild(element);
       await element.buildInternal();

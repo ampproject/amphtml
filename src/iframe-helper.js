@@ -22,7 +22,7 @@ import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
 import {remove} from './core/types/array';
 import {setStyle} from './style';
-import {tryParseJson} from './json';
+import {tryParseJson} from './core/types/object/json';
 
 /**
  * Sentinel used to force unlistening after a iframe is detached.
@@ -601,9 +601,9 @@ export const FIE_EMBED_PROP = '__AMP_EMBED__';
  * @return {?./friendly-iframe-embed.FriendlyIframeEmbed}
  */
 export function getFriendlyIframeEmbedOptional(iframe) {
-  return /** @type {?./friendly-iframe-embed.FriendlyIframeEmbed} */ (iframe[
-    FIE_EMBED_PROP
-  ]);
+  return /** @type {?./friendly-iframe-embed.FriendlyIframeEmbed} */ (
+    iframe[FIE_EMBED_PROP]
+  );
 }
 
 /**

@@ -229,18 +229,18 @@ const MAX_DEVICE_SPACES = 4;
 /**
  * @typedef {{
  *  element: !Element,
- *  player: !Element
+ *  player: !Element,
  *  chip: !Element,
  *  width: number,
  *  height: number,
  *  deviceHeight: ?number,
  *  deviceSpaces: number,
- * }}
+ * }} DeviceInfo
+ *
  * Contains the data related to the device.
  * Width and height refer to the story viewport, while deviceHeight is the device screen height.
  * The deviceSpaces refers to the MAX_DEVICE_SPACES, ensuring the devices on screen don't go over the max space set.
  */
-export let DeviceInfo;
 
 const DEFAULT_DEVICES = 'iphone11native;oneplus5t;pixel2';
 
@@ -363,7 +363,7 @@ function simplifyDeviceName(name) {
  * Eg: `devices="ipad;iphone"` will find the ipad and also the first device in ALL_DEVICES
  * that starts with "iphone" (ignoring case and symbols).
  * @param {string} queryHash
- * @return {any[]}
+ * @return {Array<*>}
  */
 function parseDevices(queryHash) {
   const screenSizes = [];
@@ -596,9 +596,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    */
   onPlayerNavigation_(event, deviceSpecs) {
     const {pageId} = event.detail;
-    const pageIndexInExpectedList = this.expectedNavigationEvents_[
-      deviceSpecs.name
-    ].lastIndexOf(pageId);
+    const pageIndexInExpectedList =
+      this.expectedNavigationEvents_[deviceSpecs.name].lastIndexOf(pageId);
     if (pageIndexInExpectedList > -1) {
       // Remove the expected events up to the most recently received event if it was in the list.
       this.expectedNavigationEvents_[deviceSpecs.name].splice(
@@ -696,12 +695,10 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @private
    * */
   repositionDevices_() {
-    const {
-      offsetWidth: width,
-      offsetHeight: height,
-    } = this.element.querySelector(
-      '.i-amphtml-story-dev-tools-devices-container'
-    );
+    const {offsetWidth: width, offsetHeight: height} =
+      this.element.querySelector(
+        '.i-amphtml-story-dev-tools-devices-container'
+      );
     let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     // Find the sum of the device widths and max of heights since they are horizontally laid out.

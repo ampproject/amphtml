@@ -15,7 +15,7 @@
  */
 
 const minimist = require('minimist');
-const {cyan, green} = require('kleur/colors');
+const {cyan, green} = require('../common/colors');
 const {log} = require('../common/logging');
 
 let serveMode = 'default';

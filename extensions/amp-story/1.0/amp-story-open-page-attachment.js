@@ -24,6 +24,7 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
+import {toWin} from '../../../src/types';
 
 /**
  * @enum {string}
@@ -71,7 +72,7 @@ export const buildOpenInlineAttachmentElement = (element) =>
 const buildOpenOutlinkAttachmentElement = (element) =>
   htmlFor(element)`
     <a class="i-amphtml-story-page-open-attachment i-amphtml-amp-story-page-attachment-ui-v2" role="button" target="_top">
-      <svg class="i-amphtml-story-outlink-page-attachment-arrow" xmlns="http://www.w3.org/2000/svg" width="18.7px" height="7.5px" viewBox="0 0 18.7 7.5"><path d="M18,4.7l-7.8-4.5C10,0,9.7,0,9.4,0C9.1,0,8.8,0,8.5,0.2L0.7,4.7C0,5.1-0.2,6,0.2,6.7c0.4,0.7,1.3,1,2.1,0.5l7.1-4.1l7.1,4.1c0.7,0.4,1.6,0.2,2.1-0.5C19,6,18.7,5.1,18,4.7z"></path></svg>
+      <svg class="i-amphtml-story-outlink-page-attachment-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 8" width="20px" height="8px"><path d="M18,7.7c-0.2,0-0.5-0.1-0.7-0.2l-7.3-4l-7.3,4C2,7.9,1.1,7.7,0.7,6.9c-0.4-0.7-0.1-1.6,0.6-2l8-4.4c0.5-0.2,1-0.2,1.5,0l8,4.4c0.7,0.4,1,1.3,0.6,2C19,7.4,18.5,7.7,18,7.7z"></path></svg>
       <div class="i-amphtml-story-outlink-page-attachment-outlink-chip" ref="chipEl">
         <span class="i-amphtml-story-page-attachment-label" ref="ctaLabelEl"></span>
       </div>
@@ -269,7 +270,9 @@ export const setCustomThemeStyles = (attachmentEl, openAttachmentEl) => {
     setImportantStyles(attachmentEl, {
       'background-color': attachmentEl.getAttribute('cta-accent-color'),
     });
-    const styles = computedStyle(attachmentEl.getAmpDoc().win, attachmentEl);
+
+    const win = toWin(attachmentEl.ownerDocument.defaultView);
+    const styles = computedStyle(win, attachmentEl);
     const rgb = getRGBFromCssColorValue(styles['background-color']);
     contrastColor = getTextColorForRGB(rgb);
     setImportantStyles(attachmentEl, {

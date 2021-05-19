@@ -131,9 +131,9 @@ function createShadowRootPolyfill(hostElement) {
   // `getElementById` is resolved via `querySelector('#id')`.
   shadowRoot.getElementById = function (id) {
     const escapedId = escapeCssSelectorIdent(id);
-    return /** @type {HTMLElement|null} */ (shadowRoot./*OK*/ querySelector(
-      `#${escapedId}`
-    ));
+    return /** @type {?HTMLElement} */ (
+      shadowRoot./*OK*/ querySelector(`#${escapedId}`)
+    );
   };
 
   // The styleSheets property should have a list of local styles.
@@ -315,9 +315,8 @@ export function installShadowStyle(shadowRoot, name, cssText) {
       styleSheet.replaceSync(cssText);
       cache[name] = styleSheet;
     }
-    shadowRoot.adoptedStyleSheets = shadowRoot.adoptedStyleSheets.concat(
-      styleSheet
-    );
+    shadowRoot.adoptedStyleSheets =
+      shadowRoot.adoptedStyleSheets.concat(styleSheet);
   } else {
     const styleEl = doc.createElement('style');
     styleEl.setAttribute('data-name', name);

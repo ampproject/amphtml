@@ -51,29 +51,31 @@ import objstr from 'obj-str';
  * @return {!MetadataDef}
  */
 const getMetadata = (player, props) =>
-  /** @type {!MetadataDef} */ (Object.assign(
-    dict({
-      'title': props.title || props['aria-label'] || document.title,
-      'artist': props.artist || '',
-      'album': props.album || '',
-      'artwork': [
-        {
-          'src':
-            props.artwork ||
-            props.poster ||
-            parseSchemaImage(document) ||
-            parseOgImage(document) ||
-            parseFavicon(document) ||
-            '',
-        },
-      ],
-    }),
-    player && player.getMetadata ? player.getMetadata() : Object.create(null)
-  ));
+  /** @type {!MetadataDef} */ (
+    Object.assign(
+      dict({
+        'title': props.title || props['aria-label'] || document.title,
+        'artist': props.artist || '',
+        'album': props.album || '',
+        'artwork': [
+          {
+            'src':
+              props.artwork ||
+              props.poster ||
+              parseSchemaImage(document) ||
+              parseOgImage(document) ||
+              parseFavicon(document) ||
+              '',
+          },
+        ],
+      }),
+      player && player.getMetadata ? player.getMetadata() : Object.create(null)
+    )
+  );
 
 /**
  * @param {!VideoWrapperDef.Props} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
@@ -383,14 +385,14 @@ function Autoplay({
   );
 }
 
-const AutoplayIconContent = /** @type {function():!PreactDef.Renderable} */ (once(
-  () => {
+const AutoplayIconContent = /** @type {function():!PreactDef.Renderable} */ (
+  once(() => {
     const classes = useAutoplayStyles();
     return [1, 2, 3, 4].map((i) => (
       <div className={classes.eqCol} key={i}></div>
     ));
-  }
-));
+  })
+);
 
 const VideoWrapper = forwardRef(VideoWrapperWithRef);
 VideoWrapper.displayName = 'VideoWrapper'; // Make findable for tests.

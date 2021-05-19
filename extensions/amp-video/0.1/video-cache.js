@@ -45,7 +45,8 @@ export function fetchCachedSources(videoEl, win) {
     .then((service) => service.createCacheUrl(videoUrl))
     .then((cacheUrl) => {
       const requestUrl = addParamsToUrl(cacheUrl.replace('/c/', '/mbv/'), {
-        'amp_video_host_url': /* document url that contains the video */ canonicalUrl,
+        'amp_video_host_url':
+          /* document url that contains the video */ canonicalUrl,
       });
       return Services.xhrFor(win).fetch(requestUrl);
     })

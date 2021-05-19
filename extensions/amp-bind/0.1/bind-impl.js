@@ -29,8 +29,13 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {debounce} from '../../../src/core/types/function';
-import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
-import {deepMerge, dict, map} from '../../../src/core/types/object';
+import {deepEquals, parseJson} from '../../../src/core/types/object/json';
+import {
+  deepMerge,
+  dict,
+  getValueForExpr,
+  map,
+} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {
@@ -40,6 +45,7 @@ import {
   toArray,
 } from '../../../src/core/types/array';
 import {getMode} from '../../../src/mode';
+
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';
 
@@ -96,6 +102,15 @@ let BoundPropertyDef;
  * @typedef {{boundProperties: !Array<BoundPropertyDef>, element: !Element}}
  */
 let BoundElementDef;
+
+/**
+ * The options bag for binding application.
+ *
+ * @typedef {Record} ApplyOptionsDef
+ * @property {boolean=} skipAmpState If true, skips <amp-state> elements.
+ * @property {Array<!Element>=} constrain If provided, restricts application to children of the provided elements.
+ * @property {boolean=} evaluateOnly If provided, caches the evaluated result on each bound element and skips the actual DOM updates.
+ */
 
 /**
  * A map of tag names to arrays of attributes that do not have non-bind
@@ -1188,12 +1203,7 @@ export class Bind {
    * Applies expression results to elements in the document.
    *
    * @param {Object<string, BindExpressionResultDef>} results
-   * @param {!Object} opts
-   * @param {boolean=} opts.skipAmpState If true, skips <amp-state> elements.
-   * @param {Array<!Element>=} opts.constrain If provided, restricts application
-   *   to children of the provided elements.
-   * @param {boolean=} opts.evaluateOnly If provided, caches the evaluated
-   *   result on each bound element and skips the actual DOM updates.
+   * @param {!ApplyOptionsDef} opts
    * @return {!Promise}
    * @private
    */
@@ -1801,9 +1811,8 @@ class BindWalker {
       'ownerDocument is null.'
     );
 
-    const useQuerySelector = doc.documentElement.hasAttribute(
-      'i-amphtml-binding'
-    );
+    const useQuerySelector =
+      doc.documentElement.hasAttribute('i-amphtml-binding');
     /** @private @const {boolean} */
     this.useQuerySelector_ = useQuerySelector;
 

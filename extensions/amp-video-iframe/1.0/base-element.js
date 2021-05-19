@@ -28,6 +28,7 @@ BaseElement['props'] = {
   'implements-media-session': {attr: 'mediasession', type: 'boolean'},
   'poster': {attr: 'poster'},
   'src': {attr: 'src'},
+  'controls': {attr: 'controls', type: 'boolean'},
 
   // TODO(alanorozco): These props have no internal implementation yet.
   'dock': {attr: 'dock'},

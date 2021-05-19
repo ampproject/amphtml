@@ -15,7 +15,6 @@
  */
 
 import {Services} from '../../../src/services';
-import {childElementByTag} from '../../../src/dom';
 import {getChildJsonConfig} from '../../../src/json';
 import {isProtocolValid} from '../../../src/url';
 import {once} from '../../../src/core/types/function';
@@ -47,41 +46,7 @@ export class AmpStoryRequestService {
     this.xhr_ = Services.xhrFor(win);
 
     /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
-    this.loadBookendConfig = once(() => this.loadBookendConfigImpl_());
-
-    /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
     this.loadShareConfig = once(() => this.loadShareConfigImpl_());
-  }
-
-  /**
-   * Retrieves the publisher bookend configuration, including the share
-   * providers.
-   * Has to be called through `loadBookendConfig`.
-   * @return {(!Promise<!JsonObject>|!Promise<null>)}
-   * @private
-   */
-  loadBookendConfigImpl_() {
-    const bookendEl = childElementByTag(
-      this.storyElement_,
-      'amp-story-bookend'
-    );
-    if (!bookendEl) {
-      return Promise.resolve(null);
-    }
-
-    if (bookendEl.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {
-      const rawUrl = bookendEl.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
-      const credentials = bookendEl.getAttribute(CREDENTIALS_ATTRIBUTE_NAME);
-      return this.executeRequest(rawUrl, credentials ? {credentials} : {});
-    }
-
-    // Fallback. Check for an inline json config.
-    let config = null;
-    try {
-      config = getChildJsonConfig(bookendEl);
-    } catch (err) {}
-
-    return Promise.resolve(config);
   }
 
   /**
@@ -110,12 +75,11 @@ export class AmpStoryRequestService {
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    */
   loadShareConfigImpl_() {
-    const shareConfigEl = childElementByTag(
-      this.storyElement_,
-      'amp-story-social-share'
+    const shareConfigEl = this.storyElement_.querySelector(
+      'amp-story-social-share, amp-story-bookend'
     );
     if (!shareConfigEl) {
-      return this.loadBookendConfig();
+      return Promise.resolve();
     }
 
     if (shareConfigEl.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {

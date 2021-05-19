@@ -19,7 +19,6 @@ import {Services} from '../../src/services';
 import {
   blockedByConsentError,
   cancellation,
-  detectJsEngineFromStack,
   detectNonAmpJs,
   errorReportingDataForViewer,
   getErrorReportData,
@@ -91,14 +90,15 @@ describes.fakeWin('installErrorReporting', {}, (env) => {
   });
 
   it('should ignore blockByConsent', () => {
-    rejectedPromiseEvent.reason = rejectedPromiseError = blockedByConsentError();
+    rejectedPromiseEvent.reason = rejectedPromiseError =
+      blockedByConsentError();
     win.eventListeners.fire(rejectedPromiseEvent);
     expect(rejectedPromiseError.reported).to.be.not.be.ok;
     expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;
   });
 });
 
-describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
+describes.sandboxed('reportErrorToServerOrViewer', {}, (env) => {
   let win;
   let viewer;
   let ampdocServiceForStub;
@@ -117,7 +117,7 @@ describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
     const optedInDoc = window.document.implementation.createHTMLDocument('');
     optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
 
-    ampdocServiceForStub = window.sandbox.stub(Services, 'ampdocServiceFor');
+    ampdocServiceForStub = env.sandbox.stub(Services, 'ampdocServiceFor');
     const ampdoc = {getRootNode: () => optedInDoc};
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
@@ -130,11 +130,11 @@ describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
       isTrustedViewer: () => Promise.resolve(true),
       sendMessage: () => true,
     };
-    sendMessageStub = window.sandbox.stub(viewer, 'sendMessage');
+    sendMessageStub = env.sandbox.stub(viewer, 'sendMessage');
 
-    window.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+    env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
-    createXhr = window.sandbox.spy(XMLHttpRequest.prototype, 'open');
+    createXhr = env.sandbox.spy(XMLHttpRequest.prototype, 'open');
   });
 
   it('should report to server if AMP doc is not single', () => {
@@ -160,7 +160,7 @@ describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
   });
 
   it('should report to server if viewer is not capable', () => {
-    window.sandbox
+    env.sandbox
       .stub(viewer, 'hasCapability')
       .withArgs('errorReporting')
       .returns(false);
@@ -171,9 +171,7 @@ describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
   });
 
   it('should report to server if viewer is not trusted', () => {
-    window.sandbox
-      .stub(viewer, 'isTrustedViewer')
-      .returns(Promise.resolve(false));
+    env.sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
     return reportErrorToServerOrViewer(win, data).then(() => {
       expect(createXhr).to.be.calledOnce;
       expect(sendMessageStub).to.not.have.been.called;
@@ -196,20 +194,19 @@ describes.sandboxed('reportErrorToServerOrViewer', {}, () => {
         expect(data['el']).to.not.be.undefined;
         expect(data['ex']).to.not.be.undefined;
         expect(data['v']).to.not.be.undefined;
-        expect(data['jse']).to.not.be.undefined;
       });
     }
   );
 });
 
-describes.sandboxed('getErrorReportData', {}, () => {
+describes.sandboxed('getErrorReportData', {}, (env) => {
   let onError;
   let nextRandomNumber;
 
   beforeEach(() => {
     onError = window.onerror;
     nextRandomNumber = 0;
-    window.sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
+    env.sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
     self.__AMP_MODE = undefined;
   });
 
@@ -751,63 +748,6 @@ describes.sandboxed('reportError', {}, (env) => {
       clock.tick();
     }).to.throw(/_reported_ Error reported incorrectly/);
   });
-});
-
-describes.sandboxed('detectJsEngineFromStack', {}, () => {
-  // Note that these are not true of every case. You can emulate iOS Safari
-  // on Desktop Chrome and break this.
-  describe
-    .configure()
-    .ifIos()
-    .run('on iOS', () => {
-      it.configure()
-        .ifSafari()
-        .run('detects safari as safari', () => {
-          expect(detectJsEngineFromStack()).to.equal('Safari');
-        });
-
-      it.configure()
-        .ifChrome()
-        .run('detects chrome as safari', () => {
-          expect(detectJsEngineFromStack()).to.equal('Safari');
-        });
-
-      it.configure()
-        .ifFirefox()
-        .run('detects firefox as safari', () => {
-          expect(detectJsEngineFromStack()).to.equal('Safari');
-        });
-    });
-
-  describe
-    .configure()
-    .skipIos()
-    .run('on other OSs', () => {
-      it.configure()
-        .ifSafari()
-        .run('detects safari as safari', () => {
-          // TODO(wg-performance): Fix detection of Safari 13+.
-          expect(detectJsEngineFromStack()).to.equal('unknown');
-        });
-
-      it.configure()
-        .ifChrome()
-        .run('detects chrome as chrome', () => {
-          expect(detectJsEngineFromStack()).to.equal('Chrome');
-        });
-
-      it.configure()
-        .ifFirefox()
-        .run('detects firefox as firefox', () => {
-          expect(detectJsEngineFromStack()).to.equal('Firefox');
-        });
-
-      it.configure()
-        .ifEdge()
-        .run('detects edge as IE', () => {
-          expect(detectJsEngineFromStack()).to.equal('IE');
-        });
-    });
 });
 
 describes.fakeWin('user error reporting', {amp: true}, (env) => {

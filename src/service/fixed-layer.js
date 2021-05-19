@@ -1097,9 +1097,8 @@ class TransferLayerBody {
     if (!fe.placeholder) {
       // Never been transfered before: ensure that it's properly configured.
       setStyle(element, 'pointer-events', 'initial');
-      const placeholder = (fe.placeholder = this.doc_.createElement(
-        'i-amphtml-fpa'
-      ));
+      const placeholder = (fe.placeholder =
+        this.doc_.createElement('i-amphtml-fpa'));
       toggle(placeholder, false);
       placeholder.setAttribute('i-amphtml-fixedid', fe.id);
     }

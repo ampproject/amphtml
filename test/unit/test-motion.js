@@ -16,7 +16,7 @@
 
 import {calcVelocity, continueMotion} from '../../src/motion';
 
-describe('Motion calcVelocity', () => {
+describes.sandboxed('Motion calcVelocity', {}, () => {
   it('should dampen velocity when prevVelocity is 0', () => {
     expect(calcVelocity(200, 10, 0)).to.be.closeTo(15.999, 1e-3);
   });
@@ -50,14 +50,14 @@ describe('Motion calcVelocity', () => {
   });
 });
 
-describe('Motion continueMotion', () => {
+describes.sandboxed('Motion continueMotion', {}, (env) => {
   let clock;
   let vsync;
   let vsyncTasks;
   let contextNode;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {
       runAnimMutateSeries: (unusedContextNode, mutator) => {

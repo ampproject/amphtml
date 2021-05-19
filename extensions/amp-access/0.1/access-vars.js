@@ -38,7 +38,7 @@ export class AccessVars {
    * This is a restricted API.
    *
    * @param {string} unusedField
-   * @return {?Promise<*|null>}
+   * @return {?Promise<*>}
    */
   getAuthdataField(unusedField) {}
 }

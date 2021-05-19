@@ -18,6 +18,9 @@ import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-com
 import {AmpStoryPlayer} from '../../src/amp-story-player/amp-story-player-impl';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from '../../src/amp-story-player/page-scroller';
+import {expect} from 'chai';
+import {listenOncePromise} from '../../src/event-helper';
+import {macroTask} from '../../testing/yield';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
@@ -1439,6 +1442,73 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
           progress: 0.12,
         },
       });
+    });
+
+    it('supress navigation animation if called go with options.animate = false', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 2);
+      playerEl.appendChild(buildCircularWrappingConfig());
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      player.go(1, 0, {animate: false});
+
+      expect(
+        player
+          .getElement()
+          .querySelector('.i-amphtml-story-player-main-container')
+          .classList.contains('i-amphtml-story-player-no-navigation-transition')
+      ).to.be.true;
+    });
+
+    it('not supress navigation animation if called go with options.animate = true', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 2);
+      playerEl.appendChild(buildCircularWrappingConfig());
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      player.go(1, 0, {animate: true});
+
+      expect(
+        player
+          .getElement()
+          .querySelector('.i-amphtml-story-player-main-container')
+          .classList.contains('i-amphtml-story-player-no-navigation-transition')
+      ).to.be.false;
+    });
+
+    it('revert navigation animation after transition ends', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 2);
+      playerEl.appendChild(buildCircularWrappingConfig());
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      player.go(1, 0, {animate: false});
+
+      const rootEl = player
+        .getElement()
+        .querySelector('.i-amphtml-story-player-main-container');
+
+      // Wait for event dispatched to be listened
+      await listenOncePromise(playerEl, 'transitionend');
+      await macroTask();
+
+      expect(
+        rootEl.classList.contains(
+          'i-amphtml-story-player-no-navigation-transition'
+        )
+      ).to.be.false;
     });
   });
 });

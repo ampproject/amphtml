@@ -44,12 +44,14 @@ export function maybeSetupCrossOriginObserver(win) {
     MessageType.SEND_POSITIONS,
     MessageType.POSITION,
     (data) => {
-      const boundingClientRect = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (data[
-        'targetRect'
-      ]);
-      const viewportRect = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (data[
-        'viewportRect'
-      ]);
+      const boundingClientRect =
+        /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
+          data['targetRect']
+        );
+      const viewportRect =
+        /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
+          data['viewportRect']
+        );
       const intersectionRect = calculateIntersectionRect(
         viewportRect,
         boundingClientRect
