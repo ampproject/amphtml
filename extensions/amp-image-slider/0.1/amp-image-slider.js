@@ -125,7 +125,6 @@ export class AmpImageSlider extends AMP.BaseElement {
             'AMP-IMAGE-SLIDER',
             'Should not contain more than 2 images.'
           );
-          break;
         }
       } else if (child.tagName === 'DIV') {
         if (child.hasAttribute('first')) {
@@ -138,7 +137,6 @@ export class AmpImageSlider extends AMP.BaseElement {
             'Should not contain <div>s without ' +
               '"first" or "second" attributes.'
           );
-          break;
         }
       }
     }
