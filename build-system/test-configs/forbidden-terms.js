@@ -460,7 +460,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-story/1.0/history.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
-      'src/experiments.js',
+      'src/experiments/index.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'testing/init-tests.js',
@@ -625,7 +625,8 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
       'src/config.js',
-      'src/experiments.js',
+      'src/experiments/index.js',
+      'src/experiments/shame.extern.js',
       'src/mode.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'testing/init-tests.js',
@@ -806,7 +807,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/js/engine/validator.js',
       'validator/js/webui/webui.js',
       'src/url.js',
-      'src/url-try-decode-uri-component.js',
+      'src/core/types/string/url.js',
       'src/core/types/string/bytes.js',
     ],
   },
@@ -947,14 +948,6 @@ const forbiddenTermsSrcInclusive = {
   },
   '\\.indexOf\\(.*===?.*\\.length':
     'use endsWith helper in src/core/types/string',
-  '/url-parse-query-string': {
-    message: 'Import parseQueryString from `src/url.js`',
-    allowlist: [
-      'build-system/tasks/check-types.js',
-      'src/mode.js',
-      'src/url.js',
-    ],
-  },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],

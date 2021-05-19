@@ -66,10 +66,7 @@ export class FiniteStateMachine {
 
     const transition = this.statesToTransition_(oldState, newState);
     const callback = this.transitions_[transition];
-
-    if (callback) {
-      callback();
-    }
+    callback?.();
   }
 
   /**

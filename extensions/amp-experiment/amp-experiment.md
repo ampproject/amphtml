@@ -31,7 +31,7 @@ Use the `amp-experiment` component to conduct user experience experiments, such 
 
 `<amp-experiment>` provides hooks to define customizable variants and allocates traffic to each of the variants based on the configuration. For each page view, the variant allocation is also exposed to `amp-pixel` and `amp-analytics` so that the necessary data can be collected to perform statistical comparison across variants.
 
-A user-sticky variant assignment is supported to provide a consistent user experience to the same client. This functionality relies upon AMP’s [Client ID](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md#client-id) capability to provide random values that are consistent across page views. Please be aware that usage of this feature with this behavior might require updating your privacy policy, or obtaining end user consent in some jurisdictions. (If this is relevant for you, please see `consentNotificationId` below.)
+A user-sticky variant assignment is supported to provide a consistent user experience to the same client. This functionality relies upon AMP’s [Client ID](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md#client-id) capability to provide random values that are consistent across page views. Please be aware that usage of this feature with this behavior might require updating your privacy policy, or obtaining end user consent in some jurisdictions. (If this is relevant for you, please see `consentNotificationId` below.)
 
 Multiple experiments can be run on the same AMP document in parallel with their own sets of variants. In user sticky mode, the allocations are orthogonal among different experiments, meaning there will be no correlation between 2 variants (user groups) that are from different experiments.
 
@@ -87,7 +87,7 @@ At top level, the JSON is a map of experiment configurations keyed by experiment
   <tr>
     <td><code>cidScope</code></td>
     <td>No, default=<code>amp-experiment</code>
-    </td><td>The <a href="https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md#client-id">CID scope</a> for user sticky experiment. Only useful when you want to reuse an existing CID. This setting is only relevant when <code>sticky=true</code>.</td>
+    </td><td>The <a href="https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md#client-id">CID scope</a> for user sticky experiment. Only useful when you want to reuse an existing CID. This setting is only relevant when <code>sticky=true</code>.</td>
   </tr>
   <tr>
     <td><code>group</code></td>
@@ -100,7 +100,7 @@ Characters used in the experiment name and variant name are restricted to `[a-z,
 
 ## Analytics
 
-Allocated variants are available as a [URL substitution variable](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md): `VARIANT(experiment)`
+Allocated variants are available as a [URL substitution variable](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md): `VARIANT(experiment)`
 
 ```html
 <amp-pixel

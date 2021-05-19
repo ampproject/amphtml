@@ -19,10 +19,11 @@
  * matches the predicate with an optional argument.
  *
  * @param {!./node.ContextNode} startNode
- * @param {function(!./node.ContextNode, ?):boolean} predicate
- * @param {?=} arg
+ * @param {function(!./node.ContextNode, T):boolean} predicate
+ * @param {T=} arg
  * @param {boolean=} includeSelf
  * @return {?./node.ContextNode}
+ * @template T
  */
 export function findParent(
   startNode,
@@ -45,11 +46,12 @@ export function findParent(
  * and the result value will be passed to the children callbacks.
  *
  * @param {!./node.ContextNode} startNode
- * @param {function(!./node.ContextNode, ?, ?):*} callback
- * @param {?=} arg
- * @param {?=} state
+ * @param {function(!./node.ContextNode, T, S):S} callback
+ * @param {T=} arg
+ * @param {S=} state
  * @param {boolean=} includeSelf
- * @return {?}
+ * @template T
+ * @template S
  */
 export function deepScan(
   startNode,
@@ -64,8 +66,8 @@ export function deepScan(
       deepScan(startNode, callback, arg, newState, false);
     }
   } else if (startNode.children) {
-    for (let i = 0; i < startNode.children.length; i++) {
-      deepScan(startNode.children[i], callback, arg, state, true);
+    for (const node of startNode.children) {
+      deepScan(node, callback, arg, state, true);
     }
   }
 }
