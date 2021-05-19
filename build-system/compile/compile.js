@@ -50,6 +50,9 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  *  typeCheckOnly?: boolean,
  *  skipUnknownDepsCheck?: boolean,
  *  warningLevel?: boolean,
+ *  noAddDeps?: boolean,
+ *  continueOnError?: boolean,
+ *   errored?: boolean,
  * }}
  */
 let OptionsDef;
@@ -120,13 +123,11 @@ function cleanupBuildDir() {
  * Generates a list of source files based on various factors.
  * TODO(wg-infra, wg-performance): Clean up unnecessary files.
  *
- * @param {string[]|string} entryModuleFilenames
- * @param {string} outputDir
- * @param {string} outputFilename
+ * @param {string[]} entryModuleFilenames
  * @param {!OptionsDef} options
  * @return {!Array<string>}
  */
-function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
+function getSrcs(entryModuleFilenames, options) {
   const unneededFiles = [
     'build/fake-module/third_party/babel/custom-babel-helpers.js',
   ];
@@ -188,12 +189,11 @@ function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
  * Generates the set of options with which to invoke Closure compiler.
  * TODO(wg-infra,wg-performance): Clean up unnecessary options.
  *
- * @param {string} outputDir
  * @param {string} outputFilename
  * @param {!OptionsDef} options
  * @return {!Object}
  */
-function generateCompilerOptions(outputDir, outputFilename, options) {
+function generateCompilerOptions(outputFilename, options) {
   // Determine externs
   let externs = options.externs || [];
   if (!options.noAddDeps) {
@@ -408,14 +408,10 @@ async function compile(
   }
   const destFile = `${outputDir}/${outputFilename}`;
   const sourcemapFile = `${destFile}.map`;
-  const compilerOptions = generateCompilerOptions(
-    outputDir,
-    outputFilename,
-    options
-  );
+  const compilerOptions = generateCompilerOptions(outputFilename, options);
   const srcs = options.noAddDeps
     ? entryModuleFilenames.concat(options.extraGlobs || [])
-    : getSrcs(entryModuleFilenames, outputDir, outputFilename, options);
+    : getSrcs(entryModuleFilenames, options);
   const transformedSrcFiles = await Promise.all(
     globby
       .sync(srcs)

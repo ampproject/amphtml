@@ -18,6 +18,32 @@ declare global {
   interface Window {
     queryXpath: (xpath: string, root: unknown /** Puppeteer.ElementHandle */) => unknown[] | null;
     AMP: Function[];
+    viewer?: {
+      receivedMessages?: number;
+    };
+    __coverage__: any;
+  }
+
+  interface Error {
+    status?: string;
+  }
+
+  namespace Mocha {
+    interface TestFunction {
+      configure: Function;
+    }
+  }
+  namespace NodeJS {
+    interface Global {
+      repl?: () => Promise<unknown> & {
+        controller;
+        env;
+        continue;
+      };
+      Key?: string;
+      describes?: unknown;
+      expect?: Function;
+    }
   }
 }
 

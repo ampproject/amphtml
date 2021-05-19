@@ -37,6 +37,9 @@ async function babelPluginTests() {
     testPathIgnorePatterns: ['/node_modules/'],
     testRegex: '/babel-plugins/[^/]+/test/.+\\.m?js$',
     transformIgnorePatterns: ['/node_modules/'],
+
+    $0: '',
+    _: [],
   };
 
   // The `jest.runCLI` command is undocumented. See the types file for object shape:

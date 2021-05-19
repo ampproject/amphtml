@@ -144,7 +144,7 @@ function installWrappers(chai, utils) {
   const {Assertion} = chai;
 
   for (const {name, type, unsupported} of chaiMethodsAndProperties) {
-    /** @type {function(Chai.AssertionStatic): any} */
+    /** @type {function(Chai.AssertionStatic): void} */
     const overwrite = unsupported
       ? overwriteUnsupported
       : overwriteAlwaysUseSuper(utils);
@@ -154,7 +154,8 @@ function installWrappers(chai, utils) {
         Assertion.overwriteMethod(name, overwrite);
         break;
       case PROPERTY:
-        Assertion.overwriteProperty(name, /** @type {any} */ (overwrite));
+        // TODO(28387) cleanup this type.
+        Assertion.overwriteProperty(name, /** @type {*} */ (overwrite));
         break;
       case CHAINABLE_METHOD:
         Assertion.overwriteChainableMethod(

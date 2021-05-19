@@ -91,25 +91,17 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   cssBinaries?: Array<string>,
  *   extraGlobs?: Array<string>,
  *   binaries?: Array<ExtensionBinary>,
- *   npm?: Map<string, NpmBinaries>,
+ *   npm?: boolean,
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
 
 /**
  * @typedef {{
- *   preact?: string,
- *   react?: string,
- * }}
- */
-const NpmBinaries = {}; // eslint-disable-line no-unused-vars
-
-/**
- * @typedef {{
  *   entryPoint: string,
  *   outfile: string,
  *   external?: Array<string>
- *   remap?: Map<string, string>
+ *   remap?: Record<string, string>
  * }}
  */
 const ExtensionBinary = {}; // eslint-disable-line no-unused-vars
