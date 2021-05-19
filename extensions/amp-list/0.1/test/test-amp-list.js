@@ -770,7 +770,7 @@ describes.repeated(
             it('should attemptChangeHeight initial content', async () => {
               const initialContent = doc.createElement('div');
               initialContent.setAttribute('role', 'list');
-              initialContent.style.height = '1337px';
+              initialContent.setAttribute('style', 'height: 123px');
 
               // Initial content must be set before buildCallback(), so use
               // a new test AmpList instance.
@@ -785,11 +785,12 @@ describes.repeated(
               // content, once to resize to rendered contents.
               listMock
                 .expects('attemptChangeHeight')
-                .withExactArgs(1337)
+                .withExactArgs(123)
                 .returns(Promise.resolve())
                 .twice();
 
               const itemElement = doc.createElement('div');
+              itemElement.setAttribute('style', 'height: 123px');
               expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
               await list.layoutCallback();
             });
