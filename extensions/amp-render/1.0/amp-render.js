@@ -243,30 +243,30 @@ export class AmpRender extends BaseElement {
         // A new template has been set while the old one was initializing.
         return;
       }
-      let elementCopy;
       this.mutateProps(
         dict({
           'render': (data) => {
-            return (
-              templates
-                // check for binding attr type refresh or no
-                // check for bind service otherwise renderAsString
-
-                // renderTemplateAsString does not get any bindings
-                // .renderTemplateAsString(dev().assertElement(template), data)
-
+            if (this.element.getAttribute('binding') === 'no') {
+              return templates
+              .renderTemplateAsString(dev().assertElement(template), data)
+              .then((html) => dict({'__html': html}));
+            }
+            let element;
+            return templates
                 .renderTemplate(dev().assertElement(template), data)
-                .then((element) => {
-                  elementCopy = element
-                  return Services.bindForDocOrNull(this.element)
+                .then((el) => {
+                  element = el;
+                  return Services.bindForDocOrNull(this.element);
                 })
                 .then((bind) => {
-                  return bind.rescan([elementCopy], [], {'fast': true, 'update': true})
+                  return bind.rescan([element], [], {
+                    'fast': true,
+                    'update': bind.signals().get('FIRST_MUTATE') !== null
+                  });
                 })
-                .then((ret) => {
-                  return dict({__html: elementCopy.innerHTML}); // or outerHTML?
+                .then(() => {
+                  return dict({__html: element.innerHTML}); // or outerHTML?
                 })
-            );
           },
         })
       );
