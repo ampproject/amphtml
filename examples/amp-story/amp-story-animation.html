@@ -50,15 +50,6 @@
       </amp-story-page>
 
       <amp-story-page id="page1">
-        <amp-story-grid-layer template="vertical">
-          <strong class="animate">
-            bounce forward with amp-story-animation
-          </strong>
-          <div animate-in="fly-in-top" id="first">fly-in with animate-in</div>
-          <div animate-in="fly-in-top" animate-in-after="first">
-            fly-in with animate-in, after the previous element
-          </div>
-        </amp-story-grid-layer>
         <amp-story-animation layout="nodisplay" trigger="visibility">
           <script type="application/json">
             {
@@ -72,6 +63,15 @@
             }
           </script>
         </amp-story-animation>
+        <amp-story-grid-layer template="vertical">
+          <strong class="animate">
+            bounce forward with amp-story-animation
+          </strong>
+          <div animate-in="fly-in-top" id="first">fly-in with animate-in</div>
+          <div animate-in="fly-in-top" animate-in-after="first">
+            fly-in with animate-in, after the previous element
+          </div>
+        </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="page2">
@@ -116,6 +116,36 @@
             ]
           </script>
         </amp-story-animation>
+      </amp-story-page>
+
+      <amp-story-page id="hidden-animations">
+        <amp-story-animation layout="nodisplay" trigger="visibility">
+          <script type="application/json">
+            [
+              {
+                "selector": ".anim",
+                "keyframes": {
+                  "transform": ["translate3d(-100%, 0px, 0)", "translate3d(0px, 0px, 0)"]
+                },
+                "delay": 100,
+                "direction": "normal",
+                "duration": 1000,
+                "easing": "cubic-bezier(0.19, 1, 0.22, 1)",
+                "fill": "both"
+              }
+            ]
+          </script>
+        </amp-story-animation>
+        <amp-story-grid-layer template="vertical">
+          <amp-video autoplay="autoplay" layout="fill" loop="loop">
+            <source type="video/mp4" src="./video/stamp.mp4">
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" aspect-ratio="412:618">
+          <div class="anim" style="width:80%;height:20%;position:absolute;top:0;left:0;font-size:30px;background:white;left:10%;top:40%;transform:translate3d(-100%, 0px, 0)">
+            This is the animated text
+          </div>
+        </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
   </body>
