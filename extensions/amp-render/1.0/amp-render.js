@@ -246,9 +246,31 @@ export class AmpRender extends BaseElement {
       this.mutateProps(
         dict({
           'render': (data) => {
-            return templates
-              .renderTemplateAsString(dev().assertElement(template), data)
-              .then((html) => dict({'__html': html}));
+            return (
+              templates
+                // check for binding attr type refresh or no
+                // check for bind service otherwise renderAsString
+
+                // renderTemplateAsString does not get any bindings
+                // .renderTemplateAsString(dev().assertElement(template), data)
+
+                .renderTemplate(dev().assertElement(template), data)
+                .then((element) => {
+
+                  return Services.bindForDocOrNull(this.element)
+                  .then((bind) => {
+
+                    return bind
+                      .rescan([element], [], {'fast': true, 'update': true})
+                      .then((elements) => {
+                        console.log({elements})
+                        // add  options element
+                        return dict({__html: elements[0].innerHTML}); // or outerHTML?
+                      });
+                  });
+                })
+            );
+            // .then((html) => dict({'__html': html}));
           },
         })
       );
