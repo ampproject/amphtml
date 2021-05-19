@@ -9,25 +9,26 @@ on:
         description: 'NPM package tag (latest | nightly)'
         required: true
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      extensions: ${{ steps.get-extensions.outputs.extensions }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.events.inputs.ampversion }}
+      - name: Get extensions to publish
+        id: get-extensions
+        run: |
+          EXTENSIONS=$(node ./build-system/publish-npm/get-extensions.js)
+          echo "::set-output name=extensions::{\"include\":${EXTENSIONS}}"
   publish:
     if: github.repository == 'ampproject/amphtml'
     environment: NPM_TOKEN #TODO: change environment name in repo settings
+    needs: setup
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        extension:
-          [
-            'amp-selector',
-            'amp-accordion',
-            'amp-date-countdown',
-            'amp-date-display',
-            'amp-fit-text',
-            'amp-inline-gallery',
-            'amp-instagram',
-            'amp-lightbox',
-            'amp-timeago',
-            'amp-youtube',
-          ]
+      matrix: ${{ fromJson(needs.setup.outputs.extensions) }}
     steps:
       - uses: actions/checkout@v2
         with:
