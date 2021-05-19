@@ -634,6 +634,18 @@ export class ResourcesImpl {
       dev().fine(TAG_, 'document height on load: %s', this.contentHeight_);
     }
 
+    // Once we know the document is fully parsed, we check to see if every AMP Element has been built
+    const firstPassAfterAllBuilt =
+      !this.firstPassAfterDocumentReady_ &&
+      this.firstPassAfterAllBuilt_ &&
+      this.resources_.every(
+        (r) => r.getState() != Resource.NOT_BUILT || r.element.R1()
+      );
+    if (firstPassAfterAllBuilt) {
+      this.firstPassAfterAllBuilt_ = false;
+      this.maybeChangeHeight_ = true;
+    }
+
     const viewportSize = this.viewport_.getSize();
     dev().fine(
       TAG_,
