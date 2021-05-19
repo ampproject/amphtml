@@ -20,7 +20,7 @@ jobs:
       - name: Get extensions to publish
         id: get-extensions
         run: |
-          EXTENSIONS=$(node ./build-system/publish-npm/get-extensions.js)
+          EXTENSIONS=$(node ./build-system/npm-publish/get-extensions.js)
           echo "::set-output name=extensions::{\"include\":${EXTENSIONS}}"
   publish:
     if: github.repository == 'ampproject/amphtml'
