@@ -128,7 +128,7 @@ const BIND_ONLY_ATTRIBUTES = map({
  * Elements that opt-out of tree walking in favor of rescan() with {fast: true}.
  * @const {!Array<string>}
  */
-const FAST_RESCAN_TAGS = ['AMP-LIST', 'AMP-RENDER'];
+const FAST_RESCAN_TAGS = ['AMP-LIST'];
 
 /**
  * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from

@@ -243,6 +243,7 @@ export class AmpRender extends BaseElement {
         // A new template has been set while the old one was initializing.
         return;
       }
+      let backupElement;
       this.mutateProps(
         dict({
           'render': (data) => {
@@ -256,21 +257,20 @@ export class AmpRender extends BaseElement {
 
                 .renderTemplate(dev().assertElement(template), data)
                 .then((element) => {
-
+                  backupElement = element
+                  console.log({element}, '11111111111', this.element)
                   return Services.bindForDocOrNull(this.element)
-                  .then((bind) => {
-
-                    return bind
-                      .rescan([element], [], {'fast': true, 'update': true})
-                      .then((elements) => {
-                        console.log({elements})
-                        // add  options element
-                        return dict({__html: elements[0].innerHTML}); // or outerHTML?
-                      });
-                  });
+                })
+                .then((bind) => {
+                  console.log(backupElement, this.element, '222222')
+                  return bind.rescan([backupElement], [], {'fast': true, 'update': true})
+                })
+                .then((ret) => {
+                  // add  options element
+                  console.log({ret, backupElement}, '33333333')
+                  return dict({__html: backupElement.outerHTML}); // or outerHTML?
                 })
             );
-            // .then((html) => dict({'__html': html}));
           },
         })
       );
