@@ -309,9 +309,10 @@ module.exports = {
         collapsePattern: [
           '^(node_modules|third_party|@storybook|@rollup)/[^/]+',
           // '^src/core/[^/]+',
-          // '^src/(amp-story-player|experiments|inabox|polyfills|preact|purifier|service|utils|web-worker)',
+          // '^src/core/[^/]+',
+          '^src/(amp-story-player|context|core|examiner|experiments|inabox|polyfills|preact|purifier|service|utils|web-worker)',
           '^src(?=/[^/]+\\.js)',
-          '^src/[^/]+',
+          // '^src/[^/]+',
           '^(extensions|builtins)/[^/]+',
           '^(3p|build|ads)',
         ],
@@ -330,17 +331,17 @@ module.exports = {
             // splines: "ortho",
             // rankdir: "TD",
           },
-          modules: [
+          modules: [ // style individual dependencies (but not clusters)
             {
-              criteria: { source: "^src/core/" },
+              criteria: { source: "^src/core\\b" },
               attributes: { fillcolor: "#cccccc" }
             },
             {
-              criteria: { source: "^src/polyfills/" },
-              attributes: { fillcolor: "#8888aa" }
+              criteria: { source: "^src/polyfills\\b" },
+              attributes: { fillcolor: "#aaaacc" }
             }
           ],
-        //   dependencies: [
+          dependencies: [ // Style edges between dependencies/clusters
         //     {
         //       criteria: { "rules[0].severity": "error" },
         //       attributes: { fontcolor: "red", color: "red" }
@@ -353,15 +354,27 @@ module.exports = {
         //       criteria: { "rules[0].severity": "info" },
         //       attributes: { fontcolor: "blue", color: "blue" }
         //     },
-        //     {
-        //       criteria: { resolved: "^src/model" },
-        //       attributes: { color: "#0000ff77" }
-        //     },
-        //     {
-        //       criteria: { resolved: "^src/view" },
-        //       attributes: { color: "#00770077" }
-        //     }
-        //   ]
+            {
+              criteria: { resolved: "^src/core" },
+              attributes: { color: "#cccccc33" }
+            },
+            {
+              criteria: { resolved: "^src$" },
+              attributes: { color: "#ff000077" }
+            },
+            {
+              criteria: { resolved: "^(node_modules|third_party|@\\w+)" },
+              attributes: { color: "#00666677" }
+            },
+            {
+              criteria: { module: "^\\./" },
+              attributes: { color: "#00666677" },
+            },
+            {
+              criteria: { resolved: "^src/core" },
+              attributes: { color: "#cccccc33" }
+            },
+          ]
         }
       },
       archi: {
