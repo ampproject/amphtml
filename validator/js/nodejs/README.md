@@ -71,7 +71,7 @@ would allow applying the validator rules for `AMP4ADS` or `AMP4EMAIL` as well. `
 
 -   Set default engine to the WebAssembly version validator, which is
     `https://cdn.ampproject.org/v0/validator_wasm.js`.
-    (ampproject/amphtml #34213)
+    [ampproject/amphtml #34213](https://github.com/ampproject/amphtml/pull/34213)
 
 ### 1.0.34
 
