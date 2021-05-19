@@ -23,7 +23,7 @@ jobs:
           EXTENSIONS=$(node ./build-system/npm-publish/get-extensions.js)
           echo "::set-output name=extensions::{\"include\":${EXTENSIONS}}"
   publish:
-    # if: github.repository == 'ampproject/amphtml'
+    if: github.repository == 'ampproject/amphtml'
     environment: NPM_TOKEN #TODO: change environment name in repo settings
     needs: setup
     runs-on: ubuntu-latest
