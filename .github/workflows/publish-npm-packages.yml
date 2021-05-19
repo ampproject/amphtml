@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJson(needs.setup.outputs.extensions) }}
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
         with:
@@ -41,7 +42,7 @@ jobs:
         run: |
           npm install
           node ./build-system/npm-publish/build-npm-binaries.js ${{ matrix.extension }}
-          node ./build-system/npm-publish/write-package-json.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }}
+          node ./build-system/npm-publish/write-package-jsons.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }}
       - name: Publish v1
         run: npm publish ./extensions/${{ matrix.extension }}/1.0 --access public --tag ${{ github.event.inputs.tag }}
         env:
