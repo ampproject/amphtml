@@ -15,8 +15,12 @@
  */
 
 /**
- * @param {*} babel
+ * @fileoverview
+ * Takes enum check calls (isEnumValue, assertEnumValue) and replaces them with
+ * a smaller form that may not require the enum object at all, or only its
+ * values without keys.
  */
+
 module.exports = function (babel) {
   const {types: t, template} = babel;
 
