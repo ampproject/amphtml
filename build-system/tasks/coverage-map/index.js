@@ -66,7 +66,7 @@ async function collectCoverage() {
 
 /**
  * Source: https://github.com/chenxiaochun/blog/issues/38s
- * TODO(28387) change the first parameter to puppeteer.Page once puppeteer is consistently
+ * TODO(#28387) change the first parameter to puppeteer.Page once puppeteer is consistently
  * imported.
  * @param {*} page
  * @return {Promise<void>}
