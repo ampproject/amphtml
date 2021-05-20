@@ -25,15 +25,30 @@ t.run('amp-image-slider', {}, function () {
   // We have 2 sliders, #s1 and #s2
   // #s2 has attribute `disable-hint-reappear` set
   // A huge padding is added to the bottom to allow room for scrolling
-  const sliderBody = `
-    <amp-image-slider tabindex="0" id="s1" layout="responsive" width="1000" height="500">
+  const sliderBody = /* HTML */ `
+    <amp-image-slider
+      tabindex="0"
+      id="s1"
+      layout="responsive"
+      width="1000"
+      height="500"
+    >
       <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
       <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
       <div first class="label">BEFORE</div>
       <div second class="label">AFTER</div>
     </amp-image-slider>
     <button id="b1" on="tap:s1.seekTo(percent=0.4)">seekTo 10%</button>
-    <amp-image-slider tabindex="0" id="s2" layout="responsive" width="1000" height="500" disable-hint-reappear initial-slider-position="0.6" step-size="0.2">
+    <amp-image-slider
+      tabindex="0"
+      id="s2"
+      layout="responsive"
+      width="1000"
+      height="500"
+      disable-hint-reappear
+      initial-slider-position="0.6"
+      step-size="0.2"
+    >
       <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
       <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
       <div first class="label">BEFORE</div>
@@ -43,9 +58,27 @@ t.run('amp-image-slider', {}, function () {
 
     <p id="pad">HUGE PADDING</p>
 
-    <amp-image-slider tabindex="0" id="s3" layout="responsive" width="1000" height="500">
-      <img src="/examples/img/sea@2x.jpg" width="1000" height="500" class="custom-fill" loading="lazy" />
-      <img src="/examples/img/hero@2x.jpg" width="1000" height="500" class="custom-fill" loading="lazy" />
+    <amp-image-slider
+      tabindex="0"
+      id="s3"
+      layout="responsive"
+      width="1000"
+      height="500"
+    >
+      <img
+        src="/examples/img/sea@2x.jpg"
+        width="1000"
+        height="500"
+        class="custom-fill"
+        loading="lazy"
+      />
+      <img
+        src="/examples/img/hero@2x.jpg"
+        width="1000"
+        height="500"
+        class="custom-fill"
+        loading="lazy"
+      />
       <div first class="label">BEFORE</div>
       <div second class="label">AFTER</div>
     </amp-image-slider>
