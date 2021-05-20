@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import {isEnumValue} from '../../../src/core/types';
-import {userAssert} from '../../../src/log';
-
 // WARNING
 // WARNING
 // WARNING

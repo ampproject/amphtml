@@ -346,7 +346,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (this.isSandbox_) {
           const eventType = trigger['on'];
           if (
-            isEnumValue(eventType) &&
+            isEnumValue(AnalyticsEventType, eventType) &&
             !ALLOWLIST_EVENT_IN_SANDBOX.includes(eventType)
           ) {
             this.user().error(

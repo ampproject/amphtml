@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ConsentPolicyManager} from './consent-policy-manager'; // eslint-disable-line no-unused-vars
 import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
 import {hasOwn, map} from '../../../src/core/types/object';
 import {isEnumValue, isObject} from '../../../src/core/types';
