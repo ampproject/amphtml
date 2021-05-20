@@ -39,9 +39,6 @@ module.exports = function (babel) {
     if (path.isIdentifier()) {
       const importDeclaration = path.scope.getBinding(path.node.name).path
         .parentPath;
-      const specifier = importDeclaration.node.specifiers.find(
-        ({local}) => local.name === path.node.name
-      );
       if (importDeclaration.isImportDeclaration()) {
         const importPath = joinPath(
           dirname(filename),
@@ -55,6 +52,9 @@ module.exports = function (babel) {
           } catch (_) {}
         }
         if (code) {
+          const specifier = importDeclaration.node.specifiers.find(
+            ({local}) => local.name === path.node.name
+          );
           let evaluated;
           traverse(parseSync(code), {
             Identifier(path) {
