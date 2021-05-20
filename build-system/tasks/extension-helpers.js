@@ -90,11 +90,11 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   loadPriority?: string,
  *   cssBinaries?: Array<string>,
  *   extraGlobs?: Array<string>,
- *   binaries?: Array<ExtensionBinary>,
+ *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
  * }}
  */
-const ExtensionOption = {}; // eslint-disable-line no-unused-vars
+const ExtensionOptionDef = {};
 
 /**
  * @typedef {{
@@ -104,7 +104,7 @@ const ExtensionOption = {}; // eslint-disable-line no-unused-vars
  *   remap?: Record<string, string>
  * }}
  */
-const ExtensionBinary = {}; // eslint-disable-line no-unused-vars
+const ExtensionBinaryDef = {};
 
 // All declared extensions.
 const extensions = {};
@@ -119,7 +119,7 @@ const adVendors = [];
  * @param {string} name
  * @param {string|!Array<string>} version E.g. 0.1 or [0.1, 0.2]
  * @param {string} latestVersion E.g. 0.1
- * @param {!ExtensionOption|undefined} options extension options object.
+ * @param {!ExtensionOptionDef|undefined} options extension options object.
  * @param {!Object} extensionsObject
  * @param {boolean} includeLatest
  */
@@ -599,7 +599,7 @@ function buildNpmBinaries(extDir, options) {
 
 /**
  * @param {string} extDir
- * @param {!Array<ExtensionBinary>} binaries
+ * @param {!Array<ExtensionBinaryDef>} binaries
  * @param {!Object} options
  * @return {!Promise}
  */

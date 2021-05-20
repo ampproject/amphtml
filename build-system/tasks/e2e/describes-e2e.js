@@ -485,6 +485,7 @@ function describeEnv(factory) {
         // If there is an async expect error, throw it in the final state.
         const lastExpectError = getLastExpectError();
         if (lastExpectError) {
+          /** @type {any} */ (this.test).error(lastExpectError);
           clearLastExpectError();
         }
 

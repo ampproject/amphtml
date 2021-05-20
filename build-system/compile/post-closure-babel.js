@@ -105,7 +105,7 @@ async function postClosureBabel(file) {
   debug(
     CompilationLifecycles['complete'],
     file,
-    /** @type {string|undefined} */ (compressed),
+    compressed?.toString(),
     sourceMap
   );
   await fs.writeJson(`${file}.map`, sourceMap);
