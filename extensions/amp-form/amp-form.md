@@ -36,7 +36,7 @@ If you're submitting data in your form, your server endpoint must implement the 
 
 [/tip]
 
-Before creating a `<form>`, you must include the required script for the `<amp-form>` extension, otherwise your document will be invalid. If you're using `input` tags for purposes other than submitting their values (e.g., inputs not inside a `<form>`), you do not need to load the `amp-form` extension.
+Before creating a `<form>`, you must include the required script for the `<amp-form>` extension, otherwise your document will be invalid. If you're using `input` tags for purposes other than submitting their values, you do not need to load the `amp-form` extension.
 
 [example preview="inline" playground="true" imports="amp-form" template="amp-mustache"]
 
@@ -101,7 +101,7 @@ Before creating a `<form>`, you must include the required script for the `<amp-f
 [filter formats="websites, ads"]
 
 -   `<input type=button>`, `<input type=image>`
--   Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
+-   Most of the form-related attributes on inputs including: `formaction`, `formtarget`, `formmethod` and others.
 
 [/filter]<!-- formats="websites, ads" -->
 
@@ -109,7 +109,7 @@ Before creating a `<form>`, you must include the required script for the `<amp-f
 
 -   `<input type=button>`, `<input type=image>`
 -   `<input type=password>` and `<input type=file>`
--   Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
+-   Most of the form-related attributes on inputs including: `formaction`, `formtarget`, `formmethod` and others.
 
 [/filter]<!-- formats="email" -->
 
@@ -434,7 +434,7 @@ For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
 
 ### Variable substitutions
 
-The `amp-form` extension allows [platform variable substitutions](../../docs/spec/amp-var-substitutions.md) for inputs that are hidden and that have the `data-amp-replace` attribute. On each form submission, `amp-form` finds all `input[type=hidden][data-amp-replace]` inside the form and applies variable substitutions to its `value` attribute and replaces it with the result of the substitution.
+The `amp-form` extension allows [platform variable substitutions](../../docs/spec/amp-var-substitutions.md) for inputs that are hidden and that have the `data-amp-replace` attribute. On each form submission, `amp-form` finds all `input[type=hidden][data-amp-replace]` inside the form (or referenced via the `form` attribute) and applies variable substitutions to its `value` attribute and replaces it with the result of the substitution.
 
 You must provide the variables you are using for each substitution on each input by specifying a space-separated string of the variables used in `data-amp-replace` (see example below). AMP will not replace variables that are not explicitly specified.
 
