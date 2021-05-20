@@ -15,7 +15,7 @@
  */
 
 import {isEnumValue} from '../../../src/core/types';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 // WARNING
 // WARNING
