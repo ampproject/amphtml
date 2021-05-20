@@ -129,8 +129,11 @@ describes.realWin(
       return getGfycat('LeanMediocreBeardeddragon', {
         withAlt: true,
       }).then((gfycat) => {
-        const placeHolder = gfycat.querySelector('amp-img');
+        const placeHolder = gfycat.querySelector('img');
         expect(placeHolder).to.not.be.null;
+        expect(placeHolder).to.have.attribute('placeholder');
+        expect(placeHolder).to.have.class('i-amphtml-fill-content');
+        expect(placeHolder.getAttribute('loading')).to.equal('lazy');
         expect(placeHolder.getAttribute('alt')).to.equal(
           'Loading gif test alt label'
         );
@@ -140,7 +143,7 @@ describes.realWin(
       return getGfycat('LeanMediocreBeardeddragon', {
         withAria: true,
       }).then((gfycat) => {
-        const placeHolder = gfycat.querySelector('amp-img');
+        const placeHolder = gfycat.querySelector('img');
         expect(placeHolder).to.not.be.null;
         expect(placeHolder.getAttribute('alt')).to.equal(
           'Loading gif test aria label'

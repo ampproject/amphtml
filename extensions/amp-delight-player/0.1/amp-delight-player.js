@@ -235,12 +235,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
   createPlaceholderCallback() {
     const html = htmlFor(this.element);
     const placeholder = html`
-      <div placeholder><amp-img layout="fill"></amp-img></div>
+      <img placeholder referrerpolicy="origin" loading="lazy" />
     `;
 
-    const src = `${this.baseURL_}/poster/${this.contentID_}`;
+    this.applyFillContent(placeholder);
 
-    placeholder.firstElementChild.setAttribute('src', src);
+    const src = `${this.baseURL_}/poster/${this.contentID_}`;
+    placeholder.setAttribute('src', src);
 
     this.placeholderEl_ = /** @type {HTMLElement} */ (placeholder);
 
