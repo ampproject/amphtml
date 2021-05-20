@@ -15,8 +15,8 @@ body:
 - type: input
   id: issue
   attributes:
-    label: Issue
-    description: The bug that necessitates this cherry-pick. Remember to update the issue title with this info.
+    label: Issue (P0 Bug)
+    description: The P0 bug that necessitates this cherry-pick. Remember to update the issue title with this info.
     placeholder: "e.g. #11111"
   validations:
     required: true
