@@ -86,7 +86,7 @@ exports.rules = [
       '3p/**->src/core/constants/amp-events.js',
       '3p/**->src/core/data-structures/observable.js',
       '3p/**->src/core/data-structures/promise.js',
-      '3p/**->src/core/error.js',
+      '3p/**->src/core/error/index.js',
       '3p/**->src/core/types/function/index.js',
       '3p/**->src/core/types/index.js',
       '3p/**->src/core/types/object/index.js',
@@ -122,7 +122,7 @@ exports.rules = [
     allowlist: [
       'ads/**->src/utils/dom-fingerprint.js',
       'ads/**->src/core/constants/consent-state.js',
-      'ads/**->src/core/error.js',
+      'ads/**->src/core/error/index.js',
       'ads/**->src/core/types/array.js',
       'ads/**->src/core/types/function/index.js',
       'ads/**->src/core/types/index.js',
