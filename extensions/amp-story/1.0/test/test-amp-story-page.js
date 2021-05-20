@@ -121,18 +121,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(page.animationManager_).to.exist;
   });
 
-  it('should not build the animation manager if `prefers-reduced-motion` is on', async () => {
-    env.sandbox.stub(MediaQueryProps, 'prefersReducedMotion').returns(true);
-
-    const animatedEl = html`<div animate-in="fade-in"></div>`;
-
-    element.appendChild(animatedEl);
-    element.getAmpDoc = () => new AmpDocSingle(win);
-
-    page.buildCallback();
-    expect(page.animationManager_).to.be.null;
-  });
-
   it('should set an active attribute when state becomes active', async () => {
     page.buildCallback();
     await page.layoutCallback();
