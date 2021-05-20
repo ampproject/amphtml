@@ -26,7 +26,7 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {isEnumValue} from '../../../src/core/types';
 import {mod} from '../../../src/utils/math';
@@ -107,8 +107,7 @@ export class AmpSelector extends AMP.BaseElement {
     if (kbSelectMode) {
       kbSelectMode = kbSelectMode.toLowerCase();
       userAssert(
-        isEnumValue(KEYBOARD_SELECT_MODES),
-        kbSelectMode,
+        isEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode),
         `Unknown keyboard-select-mode: ${kbSelectMode}`
       );
       userAssert(
