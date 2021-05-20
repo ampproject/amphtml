@@ -20,10 +20,10 @@ const resolvable = {
   BAR: 2
 };
 userAssert(isEnumValue(unresolvable, x), "Unknown enum value: \"" + x + '"'), x;
-userAssert([1,2].indexOf(y) > -1, "Unknown enum value: \"" + y + '"'), y;
-userAssert([1,2].indexOf(z) > -1, "Unknown foo value: \"" + z + '"'), z;
-userAssert([1,2].indexOf(a) > -1, "Unknown enum value: \"" + a + '"'), a;
-userAssert(["X",2].indexOf(b) > -1, "Unknown bar value: \"" + b + '"'), b;
+userAssert(y === 1 || y === 2, "Unknown enum value: \"" + y + '"'), y;
+userAssert(z === 1 || z === 2, "Unknown foo value: \"" + z + '"'), z;
+userAssert(a === 1 || a === 2, "Unknown enum value: \"" + a + '"'), a;
+userAssert(b === "X" || b === 2, "Unknown bar value: \"" + b + '"'), b;
 subjectOnlyX;
 subjectOnlyY;
 subjectOnlyZ;

@@ -100,11 +100,14 @@ module.exports = function (babel) {
         if (enumValueLengthDelta < 0) {
           return;
         }
-        const serializedEnumValues = JSON.stringify(Object.values(value));
         const subject = path.node.arguments[1];
-        const expression = template.expression`
-          ${serializedEnumValues}.indexOf(${t.cloneNode(subject)}) > -1
-        `();
+        const expression = Object.values(value)
+          .map((value) =>
+            template.expression`${t.cloneNode(subject)} === ${JSON.stringify(
+              value
+            )}`()
+          )
+          .reduce((a, b) => t.logicalExpression('||', a, b));
         path.replaceWith(expression);
       },
     },

@@ -19,6 +19,6 @@ const resolvable = {
   BAR: 100,
   BAZ: 2
 };
-[1,100,2].indexOf(x) > -1;
-["FOO",100,2].indexOf(y) > -1;
+x === 1 || x === 100 || x === 2;
+y === "FOO" || y === 100 || y === 2;
 ignoreMe(resolvable, x);
