@@ -485,10 +485,6 @@ function describeEnv(factory) {
         // If there is an async expect error, throw it in the final state.
         const lastExpectError = getLastExpectError();
         if (lastExpectError) {
-          // DO_NOT_SUBMIT Mocha.Runnable does not have an error function built in
-          // and I am not sure if it has been added someplace or if this just doesn't
-          // work.
-          // this.test.error(lastExpectError);
           clearLastExpectError();
         }
 
