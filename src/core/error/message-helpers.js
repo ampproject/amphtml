@@ -48,7 +48,7 @@ export function elementStringOrPassThru(val) {
  * @return {boolean} Whether this message was a user error.
  */
 export function isUserErrorMessage(message) {
-  return message.includes(USER_ERROR_SENTINEL);
+  return message.indexOf(USER_ERROR_SENTINEL) >= 0;
 }
 
 /**
