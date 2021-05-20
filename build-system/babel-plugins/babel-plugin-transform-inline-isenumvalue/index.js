@@ -103,9 +103,11 @@ module.exports = function (babel) {
         const subject = path.node.arguments[1];
         const expression = Object.values(value)
           .map((value) =>
-            template.expression`${t.cloneNode(subject)} === ${JSON.stringify(
-              value
-            )}`()
+            t.binaryExpression(
+              '===',
+              t.cloneNode(subject),
+              t.valueToNode(value)
+            )
           )
           .reduce((a, b) => t.logicalExpression('||', a, b));
         path.replaceWith(expression);
