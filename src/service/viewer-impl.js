@@ -19,7 +19,7 @@ import {Observable} from '../core/data-structures/observable';
 import {Services} from '../services';
 import {
   VisibilityState,
-  devAssertValidVisibilityState,
+  isValidVisibilityState,
 } from '../core/constants/visibility-state';
 import {dev, devAssert, stripUserError} from '../log';
 import {duplicateErrorIfNecessary} from '../core/error';
@@ -532,7 +532,8 @@ export class ViewerImpl {
     if (!state) {
       return;
     }
-    state = devAssertValidVisibilityState(dev, state);
+
+    devAssert(isValidVisibilityState(state));
 
     // The viewer is informing us we are not currently active because we are
     // being pre-rendered, or the user swiped to another doc (or closed the

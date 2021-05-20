@@ -509,26 +509,6 @@ export class Log {
   }
 
   /**
-   * Asserts and returns the enum value. If the enum doesn't contain such a
-   * value, the error is thrown.
-   *
-   * @param {!Object<T>} enumObj
-   * @param {string} s
-   * @param {string=} opt_enumName
-   * @return {T}
-   * @template T
-   * @closurePrimitive {asserts.matchesReturn}
-   */
-  assertEnumValue(enumObj, s, opt_enumName) {
-    return assertions.assertEnumValue(
-      this.boundAssertFn_,
-      enumObj,
-      s,
-      opt_enumName
-    );
-  }
-
-  /**
    * @param {!Error} error
    * @private
    */

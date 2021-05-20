@@ -16,72 +16,22 @@
 
 /**
  * @fileoverview
- * Takes enum check calls (isEnumValue, assertEnumValue) and replaces them with
- * a smaller form that may not require the enum object at all, or only its
- * values without keys.
+ * Takes isEnumValue() calls and replaces them with a smaller form that only
+ * requires the enum object's values, and not its property keys.
+ *
+ * In:
+ *     isEnumValue({FOO: 'foo', BAR: 'bar'}, x);
+ * Out:
+ *     x === 'foo' || x === 'bar'
  */
 
 module.exports = function (babel) {
-  const {types: t, template} = babel;
-
-  function maybeTransformAssertEnumValue(path) {
-    const callee = path.get('callee');
-    const object = callee.get('object');
-    const property = callee.get('property');
-    if (
-      !callee.isMemberExpression() ||
-      !object.isCallExpression() ||
-      !property.isIdentifier({name: 'assertEnumValue'})
-    ) {
-      return false;
-    }
-    const objectCallee = object.get('callee');
-    const assertFnName = `${objectCallee.node.name}Assert`;
-    const [enumId, subject, enumNameNode] = path.node.arguments;
-    if (assertFnName === 'devAssert') {
-      path.replaceWith(t.cloneNode(subject));
-      return true;
-    }
-    const {specifiers} = path.scope.getBinding(objectCallee.node.name).path
-      .parent;
-    let specifier = specifiers.find(
-      ({imported}) =>
-        imported.type === 'Identifier' && imported.name === assertFnName
-    );
-    if (!specifier) {
-      specifier = t.importSpecifier(
-        t.identifier(assertFnName),
-        t.identifier(assertFnName)
-      );
-      specifiers.push(specifier);
-    }
-    const enumName = enumNameNode?.value || enumNameNode?.name || 'enum';
-    path.replaceWith(
-      template.expression`
-        (
-          ${t.identifier(specifier.local.name)}(
-            isEnumValue(${t.cloneNode(enumId)}, ${t.cloneNode(subject)}),
-            ${t.stringLiteral(`Unknown ${enumName} value: "`)} +
-              ${t.cloneNode(subject)} + '"'
-          ),
-          ${t.cloneNode(subject)}
-        )
-      `()
-    );
-    return true;
-  }
+  const {types: t} = babel;
 
   return {
     name: 'transform-inline-isenumvalue',
     visitor: {
       CallExpression(path) {
-        // Replace x().assertEnumValue() calls with xAssert(isEnumValue(), ...).
-        // The replacement is handled on a subsequent pass.
-        if (maybeTransformAssertEnumValue(path)) {
-          return;
-        }
-
-        // isEnumValue()
         const callee = path.get('callee');
         if (!callee.isIdentifier({name: 'isEnumValue'})) {
           return;
@@ -92,21 +42,15 @@ module.exports = function (babel) {
           // throw path.buildCodeFrameError('Cannot evaluate. Is it imported?');
           return;
         }
-        const enumValueLengthDelta = Object.keys(value).reduce(
-          (delta, key) =>
-            delta + String(key).length - String(value[key]).length,
-          0
-        );
-        if (enumValueLengthDelta < 0) {
-          return;
-        }
-        const subject = path.node.arguments[1];
-        const expression = Object.values(value)
-          .map((value) =>
+        const [enumNode, subject] = path.node.arguments;
+
+        // x === 1 || x === 2 || x === 3 || ...
+        const expression = Object.keys(value)
+          .map((key) =>
             t.binaryExpression(
               '===',
               t.cloneNode(subject),
-              t.valueToNode(value)
+              t.memberExpression(t.cloneNode(enumNode), t.identifier(key))
             )
           )
           .reduce((a, b) => t.logicalExpression('||', a, b));

@@ -19,7 +19,7 @@ import {Observable} from '../core/data-structures/observable';
 import {Signals} from '../core/data-structures/signals';
 import {
   VisibilityState,
-  devAssertValidVisibilityState,
+  isValidVisibilityState,
 } from '../core/constants/visibility-state';
 import {WindowInterface} from '../window-interface';
 import {
@@ -271,11 +271,15 @@ export class AmpDoc {
     /** @private @const {!Object<string, string>} */
     this.declaredExtensions_ = {};
 
+    const paramsVisibilityState = this.params_['visibilityState'];
+    devAssert(
+      !paramsVisibilityState || isValidVisibilityState(paramsVisibilityState)
+    );
+
     /** @private {?VisibilityState} */
     this.visibilityStateOverride_ =
       (opt_options && opt_options.visibilityState) ||
-      (this.params_['visibilityState'] &&
-        devAssertValidVisibilityState(dev, this.params_['visibilityState'])) ||
+      paramsVisibilityState ||
       null;
 
     // Start with `null` to be updated by updateVisibilityState_ in the end

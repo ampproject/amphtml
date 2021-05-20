@@ -27,6 +27,7 @@ import {Services} from '../../../src/services';
 import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
+import {isEnumValue} from '../../../src/core/types';
 import {removeElement} from '../../../src/dom';
 import {user, userAssert} from '../../../src/log';
 
@@ -158,7 +159,10 @@ export class AmpVk extends AMP.BaseElement {
       this.element
     );
 
-    user().assertEnumValue(EmbedType, this.embedType_, 'data-embedtype');
+    userAssert(
+      isEnumValue(EmbedType, this.embedType_),
+      `Unknown data-embedtype: ${this.embedType_}`
+    );
 
     if (this.embedType_ === EmbedType.POST) {
       this.postBuildCallback_();

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
+import {isEnumValue} from '../../../src/core/types';
+import {user, userAssert} from '../../../src/log';
 
 // WARNING
 // WARNING
@@ -194,13 +195,11 @@ export const WebAnimationTimingDirection = {
 
 /**
  * @param {string} direction
- * @return {boolean}
  */
 export function userAssertIsWebAnimationTimingDirection(direction) {
-  return user().assertEnumValue(
-    WebAnimationTimingDirection,
-    direction,
-    'direction'
+  userAssert(
+    isEnumValue(WebAnimationTimingDirection, direction),
+    `Unknown direction: ${direction}`
   );
 }
 
@@ -221,7 +220,10 @@ export const WebAnimationTimingFill = {
  * @return {boolean}
  */
 export function userAssertIsWebAnimationTimingFill(fill) {
-  return user().assertEnumValue(WebAnimationTimingFill, fill, 'fill');
+  userAssert(
+    isEnumValue(WebAnimationTimingFill, fill),
+    `Unknown fill: ${fill}`
+  );
 }
 
 /** @const {!Object<string, boolean>} */
