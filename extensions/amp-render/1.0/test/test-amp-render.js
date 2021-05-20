@@ -100,6 +100,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -127,6 +128,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="https://example.com/data.json"
           width="auto"
           height="140"
@@ -158,6 +160,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-script:dataFunctions.getRemoteData"
           width="auto"
           height="200"
@@ -182,7 +185,12 @@ describes.realWin(
 
     it('fails gracefully when src is omitted', async () => {
       element = html`
-        <amp-render width="auto" height="140" layout="fixed-height">
+        <amp-render
+          width="auto"
+          height="140"
+          layout="fixed-height"
+          binding="no"
+        >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
         </amp-render>
       `;
@@ -201,6 +209,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           id="my-amp-render"
           src="https://example.com/data.json"
           width="auto"
@@ -252,6 +261,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -293,6 +303,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-script:dataFunctions.getRemoteData"
           width="auto"
           height="200"
@@ -344,6 +355,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           xssi-prefix=")]}"
           key="fullName"
           src="https://example.com/data.json"
@@ -387,6 +399,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           xssi-prefix=")]}"
           key="fullName"
           src="https://example.com/data.json?RANDOM"
@@ -431,6 +444,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:president"
           [src]="srcUrl"
           width="auto"
@@ -469,6 +483,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -500,6 +515,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -530,6 +546,7 @@ describes.realWin(
           width="auto"
           height="140"
           layout="fixed-height"
+          binding="no"
         >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
           <p placeholder>Loading data</p>
@@ -565,6 +582,7 @@ describes.realWin(
           width="auto"
           height="140"
           layout="fixed-height"
+          binding="no"
         >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
           <p placeholder>Loading data</p>
