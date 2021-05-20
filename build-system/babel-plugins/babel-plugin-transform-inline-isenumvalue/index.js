@@ -47,15 +47,14 @@ module.exports = function (babel) {
           dirname(filename),
           importDeclaration.node.source.value
         );
-        let importedFileHandle;
+        let code;
         for (const suffix of ['.js', '/index.js']) {
           try {
-            importedFileHandle = openSync(`${importPath}/${suffix}`);
+            code = readFileSync(importPath + suffix, 'utf8');
             break;
           } catch (_) {}
         }
-        if (importedFileHandle != null) {
-          const code = readFileSync(importedFileHandle, 'utf8');
+        if (code) {
           let evaluated;
           traverse(parseSync(code), {
             Identifier(path) {
