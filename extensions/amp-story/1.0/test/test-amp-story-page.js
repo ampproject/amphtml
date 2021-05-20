@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as MediaQueryProps from '../../../../src/utils/media-query-props';
 import * as VideoUtils from '../../../../src/utils/video';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';

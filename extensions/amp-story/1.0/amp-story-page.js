@@ -1247,9 +1247,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
     if (prefersReducedMotion(this.win)) {
-      this.maybeApplyLastAnimationFrame().then(
-        () => this.animationManager_.finishAll()
-      )
+      this.maybeApplyLastAnimationFrame().then(() =>
+        this.animationManager_.finishAll()
+      );
     } else {
       this.animationManager_.animateIn();
     }
