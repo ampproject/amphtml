@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+const {dirname, join: joinPath} = require('path');
+const {openSync, readFileSync} = require('fs');
+
 /**
  * @fileoverview
  * Takes isEnumValue() calls and replaces them with a smaller form that only
@@ -26,20 +29,66 @@
  */
 
 module.exports = function (babel) {
-  const {types: t} = babel;
+  const {types: t, parseSync, traverse} = babel;
+
+  function resolveImportEvaluate(path, filename) {
+    const evaluated = path.evaluate();
+    if (evaluated.confident) {
+      return evaluated;
+    }
+    if (path.isIdentifier()) {
+      const importDeclaration = path.scope.getBinding(path.node.name).path
+        .parentPath;
+      const specifier = importDeclaration.node.specifiers.find(
+        ({local}) => local.name === path.node.name
+      );
+      if (importDeclaration.isImportDeclaration()) {
+        const importPath = joinPath(
+          dirname(filename),
+          importDeclaration.node.source.value
+        );
+        let importedFileHandle;
+        for (const suffix of ['.js', '/index.js']) {
+          try {
+            importedFileHandle = openSync(`${importPath}/${suffix}`);
+            break;
+          } catch (_) {}
+        }
+        if (importedFileHandle != null) {
+          const code = readFileSync(importedFileHandle, 'utf8');
+          let evaluated;
+          traverse(parseSync(code), {
+            Identifier(path) {
+              if (path.node.name === specifier.imported.name) {
+                if (path.parentPath.isVariableDeclarator()) {
+                  evaluated = path.parentPath.get('init').evaluate();
+                }
+              }
+            },
+          });
+          if (evaluated) {
+            return evaluated;
+          }
+        }
+      }
+    }
+    return {confident: false};
+  }
 
   return {
     name: 'transform-inline-isenumvalue',
     visitor: {
-      CallExpression(path) {
+      CallExpression(path, state) {
         const callee = path.get('callee');
         if (!callee.isIdentifier({name: 'isEnumValue'})) {
           return;
         }
         const enumArg = path.get('arguments.0');
-        const {confident, value} = enumArg.evaluate();
+        const {confident, value} = resolveImportEvaluate(
+          enumArg,
+          state.file.opts.filename
+        );
         if (!confident) {
-          // throw path.buildCodeFrameError('Cannot evaluate. Is it imported?');
           return;
         }
         const [enumNode, subject] = path.node.arguments;
