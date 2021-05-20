@@ -90,6 +90,14 @@ export const TCF_POST_MESSAGE_API_COMMANDS = {
 };
 
 /**
+ * @param {string} command
+ * @return {boolean}
+ */
+export function isValidTcfPostMessageApiCommand(command) {
+  return isEnumValue(TCF_POST_MESSAGE_API_COMMANDS, command);
+}
+
+/**
  * @typedef {{
  *  consentState: CONSENT_ITEM_STATE,
  *  consentString: (string|undefined),
