@@ -52,11 +52,3 @@ export const CONSENT_STRING_TYPE = {
 export function isConsentStringType(type) {
   return isEnumValue(CONSENT_STRING_TYPE, type);
 }
-
-/**
- * @param {string} consentStringType
- * @return {boolean}
- */
-export function isValidConsentStringType(consentStringType) {
-  return isEnumValue(CONSENT_STRING_TYPE, consentStringType);
-}
