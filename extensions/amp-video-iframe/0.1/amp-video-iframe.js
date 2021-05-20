@@ -198,6 +198,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
     const img = new Image();
     img.src = addDataParamsToUrl(poster, element);
+    img.setAttribute('loading', 'lazy');
     img.setAttribute('placeholder', '');
     this.applyFillContent(img);
     return img;

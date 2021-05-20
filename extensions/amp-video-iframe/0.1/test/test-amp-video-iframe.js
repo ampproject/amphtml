@@ -274,6 +274,7 @@ describes.realWin(
         expect(placeholder).to.have.attribute('placeholder');
         expect(placeholder.tagName.toLowerCase()).to.equal('img');
         expect(placeholder).to.have.class('i-amphtml-fill-content');
+        expect(placeholder.getAttribute('loading')).to.equal('lazy');
         expect(placeholder.getAttribute('src')).to.equal(poster);
       });
 
