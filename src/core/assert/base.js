@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {elementStringOrPassThru} from '../error-message-helpers';
+import {elementStringOrPassThru} from '../error/message-helpers';
 import {includes} from '../types/string';
 import {isArray, isElement, isEnumValue, isString} from '../types';
 import {remove} from '../types/array';

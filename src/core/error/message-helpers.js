@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isElement} from './types';
+import {isElement} from '../types';
 
 /**
  * Triple zero width space.
@@ -40,4 +40,22 @@ export function elementStringOrPassThru(val) {
     return val.tagName.toLowerCase() + (val.id ? `#${val.id}` : '');
   }
   return val;
+}
+
+/**
+ * Tests if an error message contains the user sentinel.
+ * @param {string} message
+ * @return {boolean} Whether this message was a user error.
+ */
+export function isUserErrorMessage(message) {
+  return message.indexOf(USER_ERROR_SENTINEL) >= 0;
+}
+
+/**
+ * Strips the user error sentinel from an error message.
+ * @param {string} message
+ * @return {string} The new message without USER_ERROR_SENTINEL
+ */
+export function stripUserError(message) {
+  return message.replace(USER_ERROR_SENTINEL, '');
 }
