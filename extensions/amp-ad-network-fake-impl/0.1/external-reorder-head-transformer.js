@@ -164,8 +164,7 @@ export class ExternalReorderHeadTransformer {
     if (
       isAsync &&
       ((src.startsWith(urls.cdn) &&
-        (endsWith(src, '/v0.js') ||
-          endsWith(src, '/amp4ads-v0.js'))) ||
+        (endsWith(src, '/v0.js') || endsWith(src, '/amp4ads-v0.js'))) ||
         endsWith(src, '/dist/amp.js') ||
         endsWith(src, '/dist/amp-inabox.js') ||
         endsWith(src, '/dist/v0.js') ||
