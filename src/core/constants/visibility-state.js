@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {dev} from '../../log';
+
 /**
  * Visibility state of the AMP document.
  * @enum {string}
@@ -46,3 +48,15 @@ export const VisibilityState = {
    */
   INACTIVE: 'inactive',
 };
+
+/**
+ * @param {string} visibilityState
+ * @return {boolean}
+ */
+export function devAssertValidVisibilityState(visibilityState) {
+  return dev().assertEnumValue(
+    VisibilityState,
+    visibilityState,
+    'VisibilityState'
+  );
+}

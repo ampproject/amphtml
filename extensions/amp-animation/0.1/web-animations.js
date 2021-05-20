@@ -29,6 +29,8 @@ import {
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
   isAllowlistedProp,
+  userAssertIsWebAnimationTimingDirection,
+  userAssertIsWebAnimationTimingFill,
 } from './web-animation-types';
 import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
@@ -792,16 +794,10 @@ export class MeasureScanner extends Scanner {
       '"iterationStart" is invalid: %s',
       newTiming.iterationStart
     );
-    user().assertEnumValue(
-      WebAnimationTimingDirection,
-      /** @type {string} */ (direction),
-      'direction'
-    );
-    user().assertEnumValue(
-      WebAnimationTimingFill,
-      /** @type {string} */ (fill),
-      'fill'
-    );
+
+    userAssertIsWebAnimationTimingDirection(direction);
+    userAssertIsWebAnimationTimingFill(fill);
+
     return {
       duration,
       delay,

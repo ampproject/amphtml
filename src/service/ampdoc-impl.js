@@ -17,7 +17,10 @@
 import {Deferred} from '../core/data-structures/promise';
 import {Observable} from '../core/data-structures/observable';
 import {Signals} from '../core/data-structures/signals';
-import {VisibilityState} from '../core/constants/visibility-state';
+import {
+  VisibilityState,
+  devAssertValidVisibilityState,
+} from '../core/constants/visibility-state';
 import {WindowInterface} from '../window-interface';
 import {
   addDocumentVisibilityChangeListener,
@@ -272,11 +275,7 @@ export class AmpDoc {
     this.visibilityStateOverride_ =
       (opt_options && opt_options.visibilityState) ||
       (this.params_['visibilityState'] &&
-        dev().assertEnumValue(
-          VisibilityState,
-          this.params_['visibilityState'],
-          'VisibilityState'
-        )) ||
+        devAssertValidVisibilityState(this.params_['visibilityState'])) ||
       null;
 
     // Start with `null` to be updated by updateVisibilityState_ in the end

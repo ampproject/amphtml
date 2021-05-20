@@ -15,9 +15,12 @@
  */
 
 import {ConsentPolicyManager} from './consent-policy-manager'; // eslint-disable-line no-unused-vars
-import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
+import {
+  TCF_POST_MESSAGE_API_COMMANDS,
+  isValidTcfPostMessageApiCommand,
+} from './consent-info';
 import {hasOwn, map} from '../../../src/core/types/object';
-import {isEnumValue, isObject} from '../../../src/core/types';
+import {isObject} from '../../../src/core/types';
 
 import {user} from '../../../src/log';
 
@@ -300,7 +303,7 @@ export class TcfApiCommandManager {
       return false;
     }
     const {command, parameter, version} = payload;
-    if (!isEnumValue(TCF_POST_MESSAGE_API_COMMANDS, command)) {
+    if (!isValidTcfPostMessageApiCommand(command)) {
       user().error(
         TAG,
         `Unsupported command found in "tcfapiCall": ${command}`

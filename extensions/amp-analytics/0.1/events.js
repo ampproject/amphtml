@@ -57,6 +57,14 @@ export const AnalyticsEventType = {
   VISIBLE: 'visible',
 };
 
+/**
+ * @param {string} eventType
+ * @return {boolean}
+ */
+export function isAnalyticsEventType(eventType) {
+  return isEnumValue(AnalyticsEventType, eventType);
+}
+
 const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
 
 /**

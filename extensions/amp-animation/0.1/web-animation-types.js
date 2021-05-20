@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {user} from '../../../src/log';
+
 // WARNING
 // WARNING
 // WARNING
@@ -191,6 +193,18 @@ export const WebAnimationTimingDirection = {
 };
 
 /**
+ * @param {string} direction
+ * @return {boolean}
+ */
+export function userAssertIsWebAnimationTimingDirection(direction) {
+  return user().assertEnumValue(
+    WebAnimationTimingDirection,
+    direction,
+    'direction'
+  );
+}
+
+/**
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties/fill
  * @enum {string}
  */
@@ -201,6 +215,14 @@ export const WebAnimationTimingFill = {
   BOTH: 'both',
   AUTO: 'auto',
 };
+
+/**
+ * @param {string} fill
+ * @return {boolean}
+ */
+export function userAssertIsWebAnimationTimingFill(fill) {
+  return user().assertEnumValue(WebAnimationTimingFill, fill, 'fill');
+}
 
 /** @const {!Object<string, boolean>} */
 const ALLOWLISTED_PROPS = {

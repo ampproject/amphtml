@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {CONSENT_STRING_TYPE} from '../../../src/core/constants/consent-state';
 import {deepEquals} from '../../../src/core/types/object/json';
 import {dev, user} from '../../../src/log';
 import {hasOwn, map} from '../../../src/core/types/object';
+import {isConsentStringType} from '../../../src/core/constants/consent-state';
 import {isEnumValue, isObject} from '../../../src/core/types';
 
 const TAG = 'amp-consent';
@@ -456,10 +456,7 @@ export function assertMetadataValues(metadata) {
   const purposeOne = metadata['purposeOne'];
   const errorFields = [];
 
-  if (
-    consentStringType &&
-    !isEnumValue(CONSENT_STRING_TYPE, consentStringType)
-  ) {
+  if (consentStringType && !isConsentStringType(consentStringType)) {
     delete metadata['consentStringType'];
     errorFields.push('consentStringType');
   }
