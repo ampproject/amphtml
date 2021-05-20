@@ -253,43 +253,32 @@ export class AmpRender extends BaseElement {
                 .then((html) => dict({'__html': html}));
             }
 
-            let elements;
-            if (this.element.getAttribute('binding') === 'refresh') {
-              return templates
-                .renderTemplate(dev().assertElement(template), data)
-                .then((el) => {
-                  elements = isArray(el) ? el : [el];
-                  return Services.bindForDocOrNull(this.element);
-                })
-                .then((bind) => {
-                  return bind.rescan(elements, [], {
-                    'fast': true,
-                    // bind.signals().get('FIRST_MUTATE') gives the timestamp (in ms) when mutation
-                    // occured, which is null for the initial render
-                    'update': bind.signals().get('FIRST_MUTATE') !== null,
-                  });
-                })
-                .then(() => {
-                  return dict({__html: elements[0].innerHTML}); // or outerHTML?
-                });
-            }
-
-            // binding = "always", default case
+            let element;
             return templates
               .renderTemplate(dev().assertElement(template), data)
               .then((el) => {
-                elements = isArray(el) ? el : [el];
+                element = el;
                 return Services.bindForDocOrNull(this.element);
               })
               .then((bind) => {
-                return bind.rescan(elements, [], {
+                const bindingAttrValue = this.element.getAttribute('binding');
+                return bind.rescan([element], [], {
                   'fast': true,
-                  'update': true,
+                  'update':
+                    // update should be true if:
+                    // 1. no binding is specified (default is binding=always) or
+                    // 2. binding=always is specified or
+                    // 3. binding=refresh and is not the initial render
+                    !bindingAttrValue || bindingAttrValue === 'always' ||
+                    (bindingAttrValue === 'refresh' &&
+                      // bind.signals().get('FIRST_MUTATE') gives the timestamp (in ms) when mutation
+                      // occured, which is null for the initial render
+                      bind.signals().get('FIRST_MUTATE') !== null),
                 });
               })
               .then(() => {
-                return dict({__html: elements[0].innerHTML}); // or outerHTML?
-              });
+                return dict({__html: element.innerHTML}); // or outerHTML?
+              };
           },
         })
       );
