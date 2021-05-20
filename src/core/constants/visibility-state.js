@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {dev} from '../../log';
-
 /**
  * Visibility state of the AMP document.
  * @enum {string}
@@ -50,10 +48,12 @@ export const VisibilityState = {
 };
 
 /**
+ * @param {function():!../../log.Log} dev
+ *   ./log path is restricted. Inject dev as imported here.
  * @param {string} visibilityState
  * @return {boolean}
  */
-export function devAssertValidVisibilityState(visibilityState) {
+export function devAssertValidVisibilityState(dev, visibilityState) {
   return dev().assertEnumValue(
     VisibilityState,
     visibilityState,

@@ -275,7 +275,7 @@ export class AmpDoc {
     this.visibilityStateOverride_ =
       (opt_options && opt_options.visibilityState) ||
       (this.params_['visibilityState'] &&
-        devAssertValidVisibilityState(this.params_['visibilityState'])) ||
+        devAssertValidVisibilityState(dev, this.params_['visibilityState'])) ||
       null;
 
     // Start with `null` to be updated by updateVisibilityState_ in the end
