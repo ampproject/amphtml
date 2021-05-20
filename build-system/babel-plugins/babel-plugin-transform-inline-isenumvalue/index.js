@@ -90,15 +90,15 @@ module.exports = function (babel) {
         if (!confident) {
           return;
         }
-        const [enumNode, subject] = path.node.arguments;
+        const subject = path.node.arguments[1];
 
         // x === 1 || x === 2 || x === 3 || ...
-        const expression = Object.keys(value)
-          .map((key) =>
+        const expression = Object.values(value)
+          .map((value) =>
             t.binaryExpression(
               '===',
               t.cloneNode(subject),
-              t.memberExpression(t.cloneNode(enumNode), t.identifier(key))
+              t.valueToNode(value)
             )
           )
           .reduce((a, b) => t.logicalExpression('||', a, b));
