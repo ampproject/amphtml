@@ -15,7 +15,6 @@
  */
 
 import {dev} from './log';
-import {isEnumValue} from './core/types';
 import {whenUpgradedToCustomElement} from './dom';
 
 export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
@@ -462,14 +461,6 @@ export const PlayingStates = {
    */
   PAUSED: 'paused',
 };
-
-/**
- * @param {string} eventType
- * @return {boolean}
- */
-export function isVideoEvent(eventType) {
-  return isEnumValue(VideoEvents, eventType);
-}
 
 /** @enum {string} */
 export const VideoAnalyticsEvents = {
