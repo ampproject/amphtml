@@ -49,6 +49,7 @@ export function RenderWithRef(
     src = '',
     getJson = DEFAULT_GET_JSON,
     render = DEFAULT_RENDER,
+    onLoading,
     onReady,
     onRefresh,
     onError,
@@ -67,6 +68,7 @@ export function RenderWithRef(
       return;
     }
     let cancelled = false;
+    onLoading?.();
     getJson(src)
       .then((data) => {
         if (!cancelled) {
@@ -80,7 +82,7 @@ export function RenderWithRef(
     return () => {
       cancelled = true;
     };
-  }, [getJson, src, onReady, onError]);
+  }, [getJson, src, onLoading, onReady, onError]);
 
   const refresh = useCallback(() => {
     onRefresh?.();
