@@ -165,18 +165,6 @@ export class AnimationRunner {
       return omit(keyframes[0], ['offset']);
     });
 
-    /**
-     * Evaluated set of CSS properties for last animation frame.
-     * @private @const {!Promise<?Object<string, *>>}
-     */
-     this.lastFrameProps_ = this.resolvedSpecPromise_.then((spec) => {
-      const {keyframes} = spec;
-      if (!this.presetTarget_) {
-        return null;
-      }
-      return omit(keyframes[keyframes.length - 1], ['offset']);
-    });
-
     /** @private {?../../amp-animation/0.1/runners/animation-runner.AnimationRunner} */
     this.runner_ = null;
 

@@ -1251,7 +1251,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         () => this.animationManager_.finishAll()
       )
     } else {
-      this.animationManager_?.animateIn();
+      this.animationManager_.animateIn();
     }
   }
 
