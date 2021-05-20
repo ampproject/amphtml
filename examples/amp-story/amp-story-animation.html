@@ -50,6 +50,15 @@
       </amp-story-page>
 
       <amp-story-page id="page1">
+        <amp-story-grid-layer template="vertical">
+          <strong class="animate">
+            bounce forward with amp-story-animation
+          </strong>
+          <div animate-in="fly-in-top" id="first">fly-in with animate-in</div>
+          <div animate-in="fly-in-top" animate-in-after="first">
+            fly-in with animate-in, after the previous element
+          </div>
+        </amp-story-grid-layer>
         <amp-story-animation layout="nodisplay" trigger="visibility">
           <script type="application/json">
             {
@@ -63,15 +72,6 @@
             }
           </script>
         </amp-story-animation>
-        <amp-story-grid-layer template="vertical">
-          <strong class="animate">
-            bounce forward with amp-story-animation
-          </strong>
-          <div animate-in="fly-in-top" id="first">fly-in with animate-in</div>
-          <div animate-in="fly-in-top" animate-in-after="first">
-            fly-in with animate-in, after the previous element
-          </div>
-        </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="page2">
