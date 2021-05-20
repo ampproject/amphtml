@@ -12,11 +12,6 @@ body:
       - See AMP's [release schedule](https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md) to learn about how releases work.
       - See AMP's [release calendar](https://amp-release-calendar.appspot.com) for information about past releases (e.g. versions, dates, submission times, notes).
       - See AMP's [code contribution docs](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md#Cherry-picks) for an overview of the cherry-pick process.
-      - Use this form to provide the following details:
-        - The bug that necessitates this cherry-pick.
-        - The PR(s) that fix the bug.
-        - The release to which the cherry-pick will be applied.
-        - The channel(s) to which the cherry-pick will be applied.
 - type: input
   id: issue
   attributes:
@@ -36,9 +31,9 @@ body:
 - type: input
   id: release_tracker
   attributes:
-    label: Release Tracker
-    description: The [tracker issue](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) for the release to which the cherry-pick will be applied. Remember to update the issue title with this info.
-    placeholder: "e.g. #44444"
+    label: Release Tracker(s)
+    description: The [tracker issue(s)](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) for the release to which the cherry-pick will be applied. Remember to update the issue title with this info.
+    placeholder: "e.g. #44444, #55555"
   validations:
     required: true
 - type: dropdown
@@ -53,14 +48,6 @@ body:
       - LTS
   validations:
     required: true
-- type: markdown
-  id: channel_instructions
-  attributes:
-    value: |
-      Select one or more channel(s) to which this cherry-pick is applicable.
-      - A cherry-pick to Stable will most likely require a cherry-pick to Beta / Experimental as well.
-      - Without this, it is possible that the fix could be lost when Beta goes to Stable.
-      - Once you select a set of channels, make sure the issue labels match your selection.
 - type: textarea
   id: justification
   attributes:
@@ -70,18 +57,6 @@ body:
   validations:
     required: true
 - type: textarea
-  id: why_not_beta_experimental
-  attributes:
-    label: Why Not Beta / Experimental?
-    description: Why a Stable cherry-pick is necessary, but not Beta / Experimental.
-    placeholder: If the cherry-pick is going into Stable but not Beta / Experimental, provide a rationale (e.g. the PR is already part of the beta channel). Otherwise, skip this section.
-- type: textarea
-  id: why_lts
-  attributes:
-    label: Why LTS?
-    description: Why an LTS cherry-pick is necessary.
-    placeholder: If the cherry-pick is also going into LTS, provide a rationale (e.g. the bug is visible to LTS users). Otherwise, skip this section.
-- type: textarea
   id: verification_steps
   attributes:
     label: Verification Steps
@@ -89,6 +64,45 @@ body:
     placeholder: Provide detailed steps to manually verify the changes in this cherry-pick. They will be run by a developer or a QA expert to ensure that the bug was indeed fixed.
   validations:
     required: true
+- type: markdown
+  id: mini_postmortem
+  attributes:
+    value: |
+      ## Mini Postmortem
+      For cherry-picks to Stable or LTS, the following sections serve as a postmortem, and are meant to document things like the bug summary, its root causes, user impact, and action items. Fill in these sections to the best of your knowledge so that similar issues can be prevented in future. For cherry-picks to only Beta / Experimental, these sections can be ignored.
+- type: textarea
+  id: summary
+  attributes:
+    label: Summary
+    description: A summary of the problem and its root cause(s).
+    placeholder: |
+      For Stable or LTS cherry-picks, provide answers to questions like:
+      - What is the bug being fixed?
+      - What are its root cause(s)?
+      - Could it have been detected by error reports, error / performance graphs, or CI checks?
+      If details are as yet unknown, put down "TODO" in this section and remember to fill it in later.
+- type: textarea
+  id: impact
+  attributes:
+    label: Impact
+    description: How users were impacted.
+    placeholder: |
+      For Stable or LTS cherry-picks, provide answers to questions like:
+      - Which users were affected? E.g. Users of Firefox version XXX.
+      - Roughly how many users? E.g. O(YYY) users.
+      - How were they affected? E.g. ZZZ feature did not work.
+      If details are as yet unknown, put down "TODO" in this section and remember to fill it in later.
+- type: textarea
+  id: action_items
+  attributes:
+    label: Action Items
+    description: What can be done to prevent this in future.
+    placeholder: |
+      For Stable or LTS cherry-picks, provide answers to questions like:
+      - How can this class of bugs be prevented in the future?
+      - How do we detect them sooner and mitigate their impact?
+      - How could we make the investigation of these issues easier?
+      If details are as yet unknown, put down "TODO" in this section and remember to fill it in later.
 - type: textarea
   id: cherry_pick_progress
   attributes:
@@ -105,51 +119,6 @@ body:
       - [ ] New version released to LTS channel
       - [ ] Release tracker updated
       - [ ] Cherry-pick completed
-- type: markdown
-  id: mini_postmortem
-  attributes:
-    value: |
-      ## Mini Postmortem
-      The following sections serve as a postmortem for this cherry-pick, and are meant to document things like the bug summary, its root causes, user impact, and action items. Fill in these sections to the best of your knowledge so that similar issues can be prevented in future.
-- type: textarea
-  id: summary
-  attributes:
-    label: Summary
-    description: A summary of the problem and its root cause(s).
-    placeholder: |
-      Provide answers to questions like:
-      - What is the bug being fixed?
-      - What are its root cause(s)?
-      - How did it end up getting released to stable channel?
-      If details are as yet unknown, put down "TODO" in this section and remember to fill it in later.
-  validations:
-    required: true
-- type: textarea
-  id: impact
-  attributes:
-    label: Impact
-    description: How users were impacted.
-    placeholder: |
-      Provide answers to questions like:
-      - Which users were affected? E.g. Users of Firefox version XXX.
-      - Roughly how many users? E.g. O(YYY) users.
-      - How were they affected? E.g. ZZZ feature did not work.
-      If details are as yet unknown, put down "TODO" in this section and remember to fill it in later.
-  validations:
-    required: true
-- type: textarea
-  id: action_items
-  attributes:
-    label: Action Items
-    description: What can be done to prevent this in future.
-    placeholder: |
-      Provide answers to questions like:
-      - How can this class of bugs be prevented in the future?
-      - How do we detect them sooner and mitigate their impact?
-      - How could we make the investigation of these issues easier?
-      If details are as yet unknown, put down "TODO" in this section and remember to fill it in later.
-  validations:
-    required: true
 - type: textarea
   id: notifications
   attributes:
