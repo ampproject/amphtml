@@ -107,6 +107,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
   'AMP-PLAYBUZZ': true,
+  'AMP-RENDER': true,
   'AMP-TWITTER': true,
 };
 /**
