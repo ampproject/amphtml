@@ -31,6 +31,7 @@ import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {removeElement} from '../../../src/dom';
 
 export const TAG = 'amp-google-document-embed';
@@ -90,7 +91,7 @@ export class AmpDriveViewer extends AMP.BaseElement {
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', '');
-    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, iframe);
+    propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.element, iframe);
 
     iframe.src = this.getSrc_(this.element.getAttribute('src'));
 
@@ -105,7 +106,12 @@ export class AmpDriveViewer extends AMP.BaseElement {
       (value) => mutations[value] !== undefined
     );
     const iframe = dev().assertElement(this.iframe_);
-    this.propagateAttributes(attrs, iframe, /* opt_removeMissingAttrs */ true);
+    propagateAttributes(
+      attrs,
+      this.element,
+      iframe,
+      /* opt_removeMissingAttrs */ true
+    );
     const src = mutations['src'];
     if (src) {
       iframe.src = this.getSrc_(src);

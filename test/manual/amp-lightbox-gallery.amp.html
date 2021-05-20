@@ -10,20 +10,26 @@
   <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style>
-    .object-fit-cover  img {
+    .object-fit-cover img {
       object-fit: cover;
     }
 
-    .object-fit-contain  img {
+    .object-fit-contain img {
       object-fit: contain;
     }
 
-    .object-fit-none  img {
+    .object-fit-none img {
       object-fit: none;
     }
 
     .scale-2x img {
       transform: scale(2);
+    }
+
+    img.custom-fill {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
     }
 
     footer {
@@ -47,15 +53,17 @@
     i-amphtml-layout=responsive
     layout=responsive
     lightbox
-    src=https://ampbyexample-com.cdn.ampproject.org/i/s/ampbyexample.com/img/clean-2.jpg>
+    src="https://unsplash.it/400/300?image=1037">
     <i-amphtml-sizer style=display:block;padding-top:75.0000%;></i-amphtml-sizer>
   </amp-img>
+
+  <img width=400 height=300 data-lightbox src="https://unsplash.it/400/300?image=1037" loading="lazy" class="custom-fill" />
 
   <h2>Test SSR with srcset</h2>
   <amp-img width=400 height=300
     class="i-amphtml-layout-responsive i-amphtml-layout-size-defined"  i-amphtml-layout=responsive layout=responsive lightbox=hero
-    src=https://ampbyexample-com.cdn.ampproject.org/i/s/ampbyexample.com/img/clean-2.jpg
-    srcset="https://ampbyexample-com.cdn.ampproject.org/ii/w470/s/ampbyexample.com/img/clean-2.jpg 470w, https://ampbyexample-com.cdn.ampproject.org/ii/w820/s/ampbyexample.com/img/clean-2.jpg 820w, https://ampbyexample-com.cdn.ampproject.org/ii/w1200/s/ampbyexample.com/img/clean-2.jpg 1200w" >
+    src="https://unsplash.it/400/300?image=1037"
+    srcset="https://unsplash.it/470/352?image=1037 470w, https://unsplash.it/820/615?image=1037 820w, https://unsplash.it/1200/900?image=1037 1200w" >
     <i-amphtml-sizer style=display:block;padding-top:75.0000%;></i-amphtml-sizer>
   </amp-img>
 
@@ -64,7 +72,7 @@
   <amp-img width=120 height=200
     class="object-fit-cover scale-2x"
     lightbox
-    src="https://ampbyexample-com.cdn.ampproject.org/i/s/ampbyexample.com/img/clean-2.jpg">
+    src="https://unsplash.it/400/300?image=1037">
   </amp-img>
 
 
@@ -72,28 +80,28 @@
   <amp-img width=120 height=200
     class="object-fit-cover"
     lightbox
-    src="https://ampbyexample-com.cdn.ampproject.org/i/s/ampbyexample.com/img/clean-2.jpg">
+    src="https://unsplash.it/400/300?image=1037">
   </amp-img>
 
   <h3>Expand vertically</h3>
   <amp-img width=200 height=120
     class="object-fit-cover"
     lightbox
-    src=https://ampbyexample-com.cdn.ampproject.org/i/s/ampbyexample.com/img/clean-2.jpg>
+    src="https://unsplash.it/400/300?image=1037">
   </amp-img>
 
   <h3>Same aspect ratio</h3>
   <amp-img width=200 height=200
     class="object-fit-cover"
     lightbox
-    src=https://ampbyexample-com.cdn.ampproject.org/i/s/ampbyexample.com/img/clean-2.jpg>
+    src="https://unsplash.it/400/300?image=1037">
   </amp-img>
 
   <h2>Test with single src, object-fit: contain</h2>
   <amp-img width=200 height=120
     class="object-fit-contain"
     lightbox
-    src=https://ampbyexample-com.cdn.ampproject.org/i/s/ampbyexample.com/img/clean-2.jpg>
+    src="https://unsplash.it/400/300?image=1037">
   </amp-img>
 
   <h2>Test with single src, object-fit: none</h2>
@@ -101,7 +109,7 @@
     class="object-fit-none"
     layout=responsive
     lightbox
-    src=https://ampbyexample-com.cdn.ampproject.org/i/s/ampbyexample.com/img/clean-2.jpg>
+    src="https://unsplash.it/400/300?image=1037">
   </amp-img>
 
   <footer>

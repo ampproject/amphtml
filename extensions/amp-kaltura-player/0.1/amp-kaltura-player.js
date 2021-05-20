@@ -20,6 +20,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
@@ -125,7 +126,7 @@ class AmpKaltura extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('img');
-    this.propagateAttributes(['aria-label'], placeholder);
+    propagateAttributes(['aria-label'], this.element, placeholder);
     this.applyFillContent(placeholder);
     placeholder.setAttribute('loading', 'lazy');
     placeholder.setAttribute('placeholder', '');

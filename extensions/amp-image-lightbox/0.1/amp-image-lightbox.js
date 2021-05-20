@@ -39,16 +39,14 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
+import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setStyles, toggle} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
 
 const TAG = 'amp-image-lightbox';
 
-/** @private @const {!Object<string, boolean>} */
-const SUPPORTED_ELEMENTS_ = {
-  'amp-img': true,
-  'amp-anim': true,
-};
+/** @private @const {!Set<string>} */
+const SUPPORTED_ELEMENTS_ = new Set(['amp-img', 'amp-anim', 'img']);
 
 /** @private @const */
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby', 'aria-labelledby'];
@@ -253,9 +251,15 @@ export class ImageViewer {
     this.setSourceDimensions_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    sourceElement.getImpl().then((elem) => {
-      elem.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
-    });
+    if (sourceElement.tagName.toLowerCase() === 'img') {
+      propagateAttributes(ARIA_ATTRIBUTES, sourceElement, this.image_);
+    } else {
+      sourceElement
+        .getImpl()
+        .then((impl) =>
+          propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_)
+        );
+    }
 
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
       // Set src provisionally to the known loaded value for fast display.
@@ -869,8 +873,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.buildLightbox_();
 
     const source = invocation.caller;
+    const tagName = source.tagName.toLowerCase();
     userAssert(
-      source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
+      source && SUPPORTED_ELEMENTS_.has(tagName),
       'Unsupported element: %s',
       source.tagName
     );
