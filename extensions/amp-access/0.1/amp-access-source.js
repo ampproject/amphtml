@@ -209,7 +209,7 @@ export class AccessSource {
    * @return {!AccessType}
    */
   buildConfigType_(configJson) {
-    const {'type': type} = configJson;
+    let {'type': type} = configJson;
     userAssert(
       !type || isEnumValue(AccessType, type),
       `Unknown access type: ${type}`
