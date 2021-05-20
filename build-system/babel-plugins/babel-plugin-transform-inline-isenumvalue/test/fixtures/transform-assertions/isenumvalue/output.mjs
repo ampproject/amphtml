@@ -22,4 +22,5 @@ const enumInFile = {
 };
 x === 1 || x === 100 || x === 2;
 y === "FOO" || y === 100 || y === 2;
+foo === "single-item";
 ignoreMe(enumInFile, x);

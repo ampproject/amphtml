@@ -31,4 +31,6 @@ isEnumValue({
   BAZ: 2,
 }, y);
 
+isEnumValue({SINGLE_ITEM: 'single-item'}, foo);
+
 ignoreMe(enumInFile, x);
