@@ -20,7 +20,7 @@ import {setStyle, setStyles} from '../../src/style';
 
 /*
  * How to develop:
- * https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md
+ * https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md
  */
 
 /**

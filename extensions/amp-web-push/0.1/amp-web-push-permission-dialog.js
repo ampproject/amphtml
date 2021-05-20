@@ -20,9 +20,9 @@ import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getMode} from '../../../src/mode';
 import {
   parseQueryString,
-  parseUrlDeprecated,
   tryDecodeUriComponent,
-} from '../../../src/url.js';
+} from '../../../src/core/types/string/url';
+import {parseUrlDeprecated} from '../../../src/url.js';
 
 /** @typedef {{
  *    debug: boolean,

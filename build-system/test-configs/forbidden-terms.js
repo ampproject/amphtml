@@ -304,6 +304,8 @@ const forbiddenTermsGlobal = {
       'extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
+      'extensions/amp-form/0.1/amp-form.js', // References service defined in amp-form.
+      'extensions/amp-form/0.1/form-dirtiness.js', // References service defined in amp-form.
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',
@@ -807,7 +809,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/js/engine/validator.js',
       'validator/js/webui/webui.js',
       'src/url.js',
-      'src/url-try-decode-uri-component.js',
+      'src/core/types/string/url.js',
       'src/core/types/string/bytes.js',
     ],
   },
@@ -948,14 +950,6 @@ const forbiddenTermsSrcInclusive = {
   },
   '\\.indexOf\\(.*===?.*\\.length':
     'use endsWith helper in src/core/types/string',
-  '/url-parse-query-string': {
-    message: 'Import parseQueryString from `src/url.js`',
-    allowlist: [
-      'build-system/tasks/check-types.js',
-      'src/mode.js',
-      'src/url.js',
-    ],
-  },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
