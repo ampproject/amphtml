@@ -15,7 +15,7 @@
  */
 
 const {dirname, join: joinPath} = require('path');
-const {openSync, readFileSync} = require('fs');
+const {readFileSync} = require('fs');
 
 /**
  * @fileoverview
