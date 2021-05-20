@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {isEnumValue} from '../types';
-
 // This file will be imported by 3P scripts.
 
 /**
@@ -44,11 +42,3 @@ export const CONSENT_STRING_TYPE = {
   TCF_V2: 2,
   US_PRIVACY_STRING: 3,
 };
-
-/**
- * @param {number} type
- * @return {boolean}
- */
-export function isConsentStringType(type) {
-  return isEnumValue(CONSENT_STRING_TYPE, type);
-}

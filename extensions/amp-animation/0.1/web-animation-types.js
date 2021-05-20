@@ -194,16 +194,6 @@ export const WebAnimationTimingDirection = {
 };
 
 /**
- * @param {string} direction
- */
-export function userAssertIsWebAnimationTimingDirection(direction) {
-  userAssert(
-    isEnumValue(WebAnimationTimingDirection, direction),
-    `Unknown direction: ${direction}`
-  );
-}
-
-/**
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties/fill
  * @enum {string}
  */
@@ -214,17 +204,6 @@ export const WebAnimationTimingFill = {
   BOTH: 'both',
   AUTO: 'auto',
 };
-
-/**
- * @param {string} fill
- * @return {boolean}
- */
-export function userAssertIsWebAnimationTimingFill(fill) {
-  userAssert(
-    isEnumValue(WebAnimationTimingFill, fill),
-    `Unknown fill: ${fill}`
-  );
-}
 
 /** @const {!Object<string, boolean>} */
 const ALLOWLISTED_PROPS = {

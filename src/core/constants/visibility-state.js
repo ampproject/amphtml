@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {isEnumValue} from '../types';
-
 /**
  * Visibility state of the AMP document.
  * @enum {string}
@@ -48,11 +46,3 @@ export const VisibilityState = {
    */
   INACTIVE: 'inactive',
 };
-
-/**
- * @param {string} visibilityState
- * @return {boolean}
- */
-export function isValidVisibilityState(visibilityState) {
-  return isEnumValue(VisibilityState, visibilityState);
-}

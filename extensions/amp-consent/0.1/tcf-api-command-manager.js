@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  TCF_POST_MESSAGE_API_COMMANDS,
-  isValidTcfPostMessageApiCommand,
-} from './consent-info';
+import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
 import {hasOwn, map} from '../../../src/core/types/object';
-import {isObject} from '../../../src/core/types';
+import {isEnumValue, isObject} from '../../../src/core/types';
 
 import {user} from '../../../src/log';
 
@@ -302,7 +299,7 @@ export class TcfApiCommandManager {
       return false;
     }
     const {command, parameter, version} = payload;
-    if (!isValidTcfPostMessageApiCommand(command)) {
+    if (!isEnumValue(TCF_POST_MESSAGE_API_COMMANDS, command)) {
       user().error(
         TAG,
         `Unsupported command found in "tcfapiCall": ${command}`

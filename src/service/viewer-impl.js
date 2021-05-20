@@ -17,10 +17,7 @@
 import {Deferred, tryResolve} from '../core/data-structures/promise';
 import {Observable} from '../core/data-structures/observable';
 import {Services} from '../services';
-import {
-  VisibilityState,
-  isValidVisibilityState,
-} from '../core/constants/visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {dev, devAssert, stripUserError} from '../log';
 import {duplicateErrorIfNecessary} from '../core/error';
 import {endsWith} from '../core/types/string';
@@ -41,6 +38,7 @@ import {reportError} from '../error-reporting';
 import {urls} from '../config';
 
 import {ViewerInterface} from './viewer-interface';
+import {isEnumValue} from '../core/types';
 
 const TAG_ = 'Viewer';
 
@@ -533,7 +531,7 @@ export class ViewerImpl {
       return;
     }
 
-    devAssert(isValidVisibilityState(state));
+    devAssert(isEnumValue(VisibilityState, state));
 
     // The viewer is informing us we are not currently active because we are
     // being pre-rendered, or the user swiped to another doc (or closed the

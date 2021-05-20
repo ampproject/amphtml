@@ -17,10 +17,7 @@
 import {Deferred} from '../core/data-structures/promise';
 import {Observable} from '../core/data-structures/observable';
 import {Signals} from '../core/data-structures/signals';
-import {
-  VisibilityState,
-  isValidVisibilityState,
-} from '../core/constants/visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {WindowInterface} from '../window-interface';
 import {
   addDocumentVisibilityChangeListener,
@@ -34,6 +31,7 @@ import {
   registerServiceBuilder,
 } from '../service';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
+import {isEnumValue} from '../core/types';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
 import {map} from '../core/types/object';
 import {parseQueryString} from '../core/types/string/url';
@@ -273,7 +271,8 @@ export class AmpDoc {
 
     const paramsVisibilityState = this.params_['visibilityState'];
     devAssert(
-      !paramsVisibilityState || isValidVisibilityState(paramsVisibilityState)
+      !paramsVisibilityState ||
+        isEnumValue(VisibilityState, paramsVisibilityState)
     );
 
     /** @private {?VisibilityState} */

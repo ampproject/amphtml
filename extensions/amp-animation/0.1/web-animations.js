@@ -29,8 +29,6 @@ import {
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
   isAllowlistedProp,
-  userAssertIsWebAnimationTimingDirection,
-  userAssertIsWebAnimationTimingFill,
 } from './web-animation-types';
 import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
@@ -48,9 +46,9 @@ import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/core/types/array';
+import {isEnumValue, isObject} from '../../../src/core/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
-import {isObject} from '../../../src/core/types';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/core/types/object';
 import {parseCss} from './parsers/css-expr';
@@ -795,8 +793,15 @@ export class MeasureScanner extends Scanner {
       newTiming.iterationStart
     );
 
-    userAssertIsWebAnimationTimingDirection(direction);
-    userAssertIsWebAnimationTimingFill(fill);
+    userAssert(
+      isEnumValue(WebAnimationTimingDirection, direction),
+      `Unknown direction: ${direction}`
+    );
+
+    userAssert(
+      isEnumValue(WebAnimationTimingFill, fill),
+      `Unknown fill: ${fill}`
+    );
 
     return {
       duration,

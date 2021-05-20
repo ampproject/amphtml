@@ -16,7 +16,7 @@
 
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
-import {AnalyticsEventType, isAnalyticsEventType} from './events';
+import {AnalyticsEventType} from './events';
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {CookieWriter} from './cookie-writer';
 import {Deferred} from '../../../src/core/data-structures/promise';
@@ -40,7 +40,7 @@ import {dict, hasOwn} from '../../../src/core/types/object';
 import {expandTemplate} from '../../../src/core/types/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
-import {isArray} from '../../../src/core/types';
+import {isArray, isEnumValue} from '../../../src/core/types';
 import {rethrowAsync} from '../../../src/core/error';
 
 import {isIframed} from '../../../src/dom';
@@ -346,7 +346,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (this.isSandbox_) {
           const eventType = trigger['on'];
           if (
-            isAnalyticsEventType(eventType) &&
+            isEnumValue(eventType) &&
             !ALLOWLIST_EVENT_IN_SANDBOX.includes(eventType)
           ) {
             this.user().error(
