@@ -183,9 +183,7 @@ export class AmpRender extends BaseElement {
     return dict({
       'getJson': this.getFetchJsonFn(),
       'onLoading': () => {
-        if (!this.element.hasAttribute('noloading')) {
-          this.toggleLoading(true);
-        }
+        this.toggleLoading(true);
       },
       'onReady': () => {
         this.toggleLoading(false);
