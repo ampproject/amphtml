@@ -48,10 +48,10 @@ export const VisibilityState = {
 };
 
 /**
- * @param {function():!../../log.Log} dev
+ * @param {function():{assertEnumValue: function()}} dev
  *   ./log path is restricted. Inject dev as imported here.
  * @param {string} visibilityState
- * @return {boolean}
+ * @return {string}
  */
 export function devAssertValidVisibilityState(dev, visibilityState) {
   return dev().assertEnumValue(
