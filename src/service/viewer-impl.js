@@ -532,7 +532,7 @@ export class ViewerImpl {
     if (!state) {
       return;
     }
-    state = devAssertValidVisibilityState(state);
+    state = devAssertValidVisibilityState(dev, state);
 
     // The viewer is informing us we are not currently active because we are
     // being pre-rendered, or the user swiped to another doc (or closed the
