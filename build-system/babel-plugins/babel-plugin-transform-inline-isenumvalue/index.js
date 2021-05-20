@@ -48,7 +48,7 @@ module.exports = function (babel) {
           importDeclaration.node.source.value
         );
         let code;
-        for (const suffix of ['.js', '/index.js']) {
+        for (const suffix of ['.js', '/index.js', '.mjs', '/index.mjs']) {
           try {
             code = readFileSync(importPath + suffix, 'utf8');
             break;

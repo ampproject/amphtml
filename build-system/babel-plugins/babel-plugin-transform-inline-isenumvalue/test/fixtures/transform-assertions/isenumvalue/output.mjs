@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-isEnumValue(notResolvable, subject);
-const resolvable = {
+import { exportedEnum } from './exported';
+subject === "A" || subject === "B" || subject === "C";
+const enumInFile = {
   FOO: 1,
   BAR: 100,
   BAZ: 2
 };
 x === 1 || x === 100 || x === 2;
 y === "FOO" || y === 100 || y === 2;
-ignoreMe(resolvable, x);
+ignoreMe(enumInFile, x);

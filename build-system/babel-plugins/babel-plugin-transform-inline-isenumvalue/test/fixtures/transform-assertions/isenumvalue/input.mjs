@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-isEnumValue(notResolvable, subject);
+import {exportedEnum} from './exported';
 
-const resolvable = {
+isEnumValue(exportedEnum, subject);
+
+const enumInFile = {
   FOO: 1,
   BAR: 100,
   BAZ: 2,
 };
 
-isEnumValue(resolvable, x);
+isEnumValue(enumInFile, x);
 isEnumValue({
   FOO: 'FOO',
   BAR: 100,
   BAZ: 2,
 }, y);
 
-ignoreMe(resolvable, x);
+ignoreMe(enumInFile, x);
