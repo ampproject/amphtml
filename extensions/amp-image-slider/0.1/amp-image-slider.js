@@ -49,7 +49,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {?Element} */
     this.rightImage_ = null;
     /** @private {boolean} */
-    this.containsAMPImages_ = false;
+    this.containsAmpImages_ = false;
 
     /** @private {?Element} */
     this.leftLabelWrapper_ = null;
@@ -151,11 +151,11 @@ export class AmpImageSlider extends AMP.BaseElement {
     const owners = Services.ownersForDoc(this.element);
     if (this.leftImage_.tagName === 'AMP-IMG') {
       owners.setOwner(dev().assertElement(this.leftImage_), this.element);
-      this.containsAMPImages_ = true;
+      this.containsAmpImages_ = true;
     }
     if (this.rightImage_.tagName === 'AMP-IMG') {
       owners.setOwner(dev().assertElement(this.rightImage_), this.element);
-      this.containsAMPImages_ = true;
+      this.containsAmpImages_ = true;
     }
 
     this.container_ = htmlFor(
@@ -296,7 +296,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   checkARIA_() {
-    if (!this.containsAMPImages_) {
+    if (!this.containsAmpImages_) {
       return;
     }
 
@@ -722,7 +722,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.registerEvents_();
 
-    if (this.containsAMPImages_) {
+    if (this.containsAmpImages_) {
       // Extensions such as amp-carousel still uses .setOwner()
       // This would break the rendering of the images as carousel
       // will call .scheduleLayout on the slider but not the contents
