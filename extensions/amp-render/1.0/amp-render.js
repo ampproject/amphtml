@@ -269,7 +269,8 @@ export class AmpRender extends BaseElement {
                     // 1. no binding is specified (default is binding=always) or
                     // 2. binding=always is specified or
                     // 3. binding=refresh and is not the initial render
-                    !bindingAttrValue || bindingAttrValue === 'always' ||
+                    !bindingAttrValue ||
+                    bindingAttrValue === 'always' ||
                     (bindingAttrValue === 'refresh' &&
                       // bind.signals().get('FIRST_MUTATE') gives the timestamp (in ms) when mutation
                       // occured, which is null for the initial render
@@ -278,7 +279,7 @@ export class AmpRender extends BaseElement {
               })
               .then(() => {
                 return dict({__html: element.innerHTML}); // or outerHTML?
-              };
+              });
           },
         })
       );
