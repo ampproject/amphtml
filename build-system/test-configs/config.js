@@ -173,10 +173,11 @@ const prettifyGlobs = [
 ];
 
 /**
- * List of markdown files that may be checked by `amp check-links` (using
- * markdown-link-check).
+ * List of markdown and yaml files that may be checked by `amp check-links`
+ * (using markdown-link-check).
  */
 const linkCheckGlobs = [
+  '.github/ISSUE_TEMPLATE/*.yml',
   '**/*.md',
   '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
