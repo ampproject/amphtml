@@ -605,5 +605,111 @@ describes.realWin(
 
       expect(fallback.textContent).to.equal('Failed');
     });
+
+    it('should default to binding="always" when nothing is specified', async () => {
+      const rescanSpy = env.sandbox.spy();
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanSpy,
+      });
+
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchStub.resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+      await waitRendered();
+
+      expect(rescanSpy).to.be.calledTwice; // TODO: investigate why its called twice?
+      const args = rescanSpy.getCall(0).args[2];
+      expect(args.fast).to.be.true;
+      expect(args.update).to.be.true;
+    });
+
+    it('should binding="refresh"', async () => {
+      const rescanSpy = env.sandbox.spy();
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanSpy,
+        signals: () => {
+          return {
+            get: () => null,
+          };
+        },
+      });
+
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchStub.resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="refresh"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+      await waitRendered();
+
+      expect(rescanSpy).to.be.calledTwice; // TODO: investigate why its called twice?
+      const args = rescanSpy.getCall(0).args[2];
+      expect(args.fast).to.be.true;
+      expect(args.update).to.be.false;
+    });
+
+    it('should not perform any updates when binding="no"', async () => {
+      const rescanSpy = env.sandbox.spy();
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanSpy,
+      });
+
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchStub.resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+      await waitRendered();
+
+      expect(rescanSpy).not.to.be.called;
+    });
   }
 );
