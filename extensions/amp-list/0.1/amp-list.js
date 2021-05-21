@@ -322,12 +322,12 @@ export class AmpList extends AMP.BaseElement {
   /**
    * A "diffable placeholder" is the child container <div> (which is usually created by the amp-list
    * to hold the rendered children). It serves the same purpose as a placeholder, except it can be diffed.
-   * 
+   *
    * For example:
    * <amp-list>
    *   <div placeholder>I'm displayed before render.</div>
    * </amp-list>
-   * 
+   *
    * <amp-list diffable>
    *   <div role=list>I'm displayed before render.</div>
    * </amp-list>
@@ -336,12 +336,12 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   queryDiffablePlaceholder_() {
-    const roleSelector = this.element.hasAttribute('single-item') ? '' : '[role=list]'
-    return scopedQuerySelector(
-      this.element,
-      // Don't select other special <div> children used for placeholders/fallback/etc.
-      `> div${roleSelector}:not([placeholder]):not([fallback]):not([fetch-error])`
-    );
+    let selector = this.element.hasAttribute('single-item')
+      ? '> div'
+      : '> div[role=list]';
+    // Don't select other special <div> children used for placeholders/fallback/etc.
+    selector += ':not([placeholder]):not([fallback]):not([fetch-error])';
+    return scopedQuerySelector(this.element, selector);
   }
 
   /**
