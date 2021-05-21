@@ -14,12 +14,12 @@
   },
   "transport": {
     "beacon": false,
-    "xhrpost": false,
-    "image": true
+    "xhrpost": true,
+    "image": false
   },
   "triggers": {
     "trackPageview": {
-      "on": "visible",
+      "on": "ini-load",
       "request": "pageview"
     }
   }
