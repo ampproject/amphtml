@@ -33,7 +33,7 @@ import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */

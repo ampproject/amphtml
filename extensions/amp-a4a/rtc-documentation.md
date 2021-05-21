@@ -179,7 +179,7 @@ The RTC callout endpoint must use HTTPS. HTTP requests are forbidden.
 The RTC Response to a GET request must meet the following requirements:
 
 -   Status Code = 200
--   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
+-   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
 -   Body of response is a JSON object of targeting information such as:
     -   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
     -   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).

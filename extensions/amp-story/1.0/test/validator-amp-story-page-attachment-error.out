@@ -65,11 +65,6 @@ amp-story/1.0/test/validator-amp-story-page-attachment-error.html:44:6 Tag 'amp-
 |            <h1>fill</h1>
 |          </amp-story-grid-layer>
 |
-|          <amp-story-bookend src="bookendv1.json" layout="nodisplay">
->>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-page-attachment-error.html:57:8 Tag 'amp-story-bookend', if present, must be the last child of tag 'amp-story-page-attachment'.
-|          </amp-story-bookend>
-|
 |          <amp-youtube
 |              id="myLiveChannel"
 |              data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"

@@ -344,8 +344,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
  * @param {string} destFilename
  */
 function handleBundleError(err, continueOnError, destFilename) {
-  /** @type {Error|string} */
-  let message = err;
+  let message = err.toString();
   if (err.stack) {
     // Drop the node_modules call stack, which begins with '    at'.
     message = err.stack.replace(/    at[^]*/, '').trim();

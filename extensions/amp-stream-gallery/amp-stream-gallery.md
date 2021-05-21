@@ -254,7 +254,7 @@ wrapping element, and use that to center the content.
 ### Media Queries
 
 The attributes for `<amp-stream-gallery>` can be configured to use different
-options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
+options based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
 ### Behavior
 

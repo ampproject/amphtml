@@ -24,7 +24,7 @@ import {
 } from './amp-story-dev-tools-tab-preview';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '../../../src/static-template';
-import {parseQueryString} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {toggle} from '../../../src/style';
 import {updateHash} from './utils';
 

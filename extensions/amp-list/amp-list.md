@@ -45,7 +45,7 @@ You can specify a template in one of two ways:
 When using `<amp-list>` in tandem with another templating AMP component, such as `<amp-form>`, note that templates may not nest in valid AMP documents. In this case a valid workaround is to provide the template by `id` via the `template` attribute. Learn more about [nested templates in `<amp-mustache>`](../amp-mustache/amp-mustache.md).
 [/tip]
 
-For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
+For more details on templates, see [AMP HTML Templates](../../docs/spec/amp-html-templates.md).
 
 ### Displaying a dynamic list
 
@@ -481,7 +481,7 @@ This element is not provided by default, but if a `<amp-list-load-more>` element
 ### Substitutions
 
 The `<amp-list>` allows all standard URL variable substitutions.
-See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+See the [Substitutions Guide](../../docs/spec/amp-var-substitutions.md) for more info.
 
 For example:
 
