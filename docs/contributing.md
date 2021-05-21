@@ -21,7 +21,7 @@ How would you like to help?
 -   [Get started with open source](#get-started-with-open-source)
 -   [Ongoing participation](#ongoing-participation)
 
-If you have questions about _using_ AMP or are _encountering problems using AMP_ on your site please visit our [support page](SUPPORT.md) for help.
+If you have questions about _using_ AMP or are _encountering problems using AMP_ on your site please visit our [support page](./support.md) for help.
 
 ## Report a bug
 
@@ -39,7 +39,7 @@ If you are suggesting a feature that you are intending to implement, please see 
 
 We'd love to have your help contributing code and features to AMP!
 
-See the [Contributing code and features](docs/contributing-code.md) document for details on the process you can use to add code/features.
+See the [Contributing code and features](./contributing-code.md) document for details on the process you can use to add code/features.
 
 ## Get started with open source
 

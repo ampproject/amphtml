@@ -312,7 +312,7 @@ Certain ID names are disallowed in AMP HTML, such as IDs prefixed with `-amp-` a
 
 Consult the AMP documentation for specific extensions before using `amp-` and `AMP` IDs to avoid conflict with the features provided by these extensions, such as `amp-access`.
 
-View the full list of disallowed ID names by searching for `mandatory-id-attr` [here](../validator/validator-main.protoascii).
+View the full list of disallowed ID names by searching for `mandatory-id-attr` [here](../../validator/validator-main.protoascii).
 
 ### Links
 

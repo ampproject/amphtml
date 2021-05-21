@@ -52,7 +52,7 @@ For example, these are some of the features that justify specific players:
 
 ### Understand the contribution process
 
-You'll need to go through [the standard AMP contribution process](../docs/contributing.md) when creating and submitting your component. For large features, such as a video player, you need to file an [I2I (intent-to-implement) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement.yml) that describes the overall workings of your component.
+You'll need to go through [the standard AMP contribution process](../contributing.md) when creating and submitting your component. For large features, such as a video player, you need to file an [I2I (intent-to-implement) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement.yml) that describes the overall workings of your component.
 
 Your player component is also shipped as an extension, so you should [become familiar with the process of building one.](https://github.com/ampproject/amphtml/blob/main/docs/building-an-amp-extension.md)
 
@@ -60,7 +60,7 @@ Your player component is also shipped as an extension, so you should [become fam
 
 #### The `VideoManager`
 
-Every player component talks to a single [`VideoManager`](../src/service/video-manager-impl.js) via standard methods (`VideoInterface`) and events (`VideoEvents`) defined in the [AMP video interface](../src/video-interface.js).
+Every player component talks to a single [`VideoManager`](../../src/service/video-manager-impl.js) via standard methods (`VideoInterface`) and events (`VideoEvents`) defined in the [AMP video interface](../../src/video-interface.js).
 
 This manager performs standard responsibilities for all videos, regardless of type:
 
@@ -72,14 +72,14 @@ This manager performs standard responsibilities for all videos, regardless of ty
 
 #### Interface support
 
-Component classes should implement the [`VideoInterface`](../src/video-interface.js).
+Component classes should implement the [`VideoInterface`](../../src/video-interface.js).
 You can implement this interface entirely or partially, depending on [the video integration features you'd like to support](./amp-video-interface.md).
 
 At the very least, you should implement `play()` and `pause()`. Likewise, playback
 [actions](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/) (like `my-element.play`) will not work when unimplemented.
 
-Read through [the `VideoInterface` code to understand the individual effects of leaving each method unimplemented.](../src/video-interface.js)
+Read through [the `VideoInterface` code to understand the individual effects of leaving each method unimplemented.](../../src/video-interface.js)
 
 #### Reference
 
-Existing implementations for [`amp-youtube.js`](../extensions/amp-youtube/0.1/amp-youtube.js) and [`amp-video-iframe.js`](../extensions/amp-video-iframe/0.1/amp-video-iframe.js) are good starter examples for implementation details. They use several standard utilities for creating the video frame and communicating with the `VideoManager`.
+Existing implementations for [`amp-youtube.js`](../../extensions/amp-youtube/0.1/amp-youtube.js) and [`amp-video-iframe.js`](../../extensions/amp-video-iframe/0.1/amp-video-iframe.js) are good starter examples for implementation details. They use several standard utilities for creating the video frame and communicating with the `VideoManager`.
