@@ -268,7 +268,7 @@ export class AmpRender extends BaseElement {
               })
               .then((bind) => {
                 if (!bind) {
-                  throw new Error();
+                  throw new Error('bind unavailable');
                 }
                 const bindingValue = this.element.getAttribute('binding');
                 return bind.rescan([element], [], {
@@ -287,9 +287,10 @@ export class AmpRender extends BaseElement {
                 });
               })
               .then(() => {
-                return dict({__html: element.innerHTML})// or outerHTML?
+                return dict({__html: element.innerHTML});
               })
-              .catch(() => {
+              .catch((e) => {
+                user().error(TAG, e.message);
                 return templates
                   .renderTemplateAsString(template, data)
                   .then((html) => dict({'__html': html}));
