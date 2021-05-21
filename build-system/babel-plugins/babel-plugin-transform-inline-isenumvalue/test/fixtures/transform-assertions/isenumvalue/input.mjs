@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {exportedEnum} from './exported';
+import {exportedEnum} from './exported.mjs';
 
 isEnumValue(exportedEnum, subject);
 

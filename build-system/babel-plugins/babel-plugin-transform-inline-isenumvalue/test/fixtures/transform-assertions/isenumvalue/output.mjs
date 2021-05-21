@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { exportedEnum } from './exported';
+import { exportedEnum } from './exported.mjs';
 subject === "A" || subject === "B" || subject === "C";
 const enumInFile = {
   FOO: 1,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {dirname, join: joinPath} = require('path');
+const {dirname, join: joinPath, relative} = require('path');
 const {readFileSync} = require('fs');
 
 /**
@@ -32,46 +32,44 @@ module.exports = function (babel) {
   const {types: t, parseSync, traverse} = babel;
 
   function resolveImportEvaluate(path, filename) {
-    const evaluated = path.evaluate();
-    if (evaluated.confident) {
+    let evaluated = path.evaluate();
+    if (evaluated.confident || !path.isIdentifier()) {
       return evaluated;
     }
-    if (path.isIdentifier()) {
-      const importDeclaration = path.scope.getBinding(path.node.name).path
-        .parentPath;
-      if (importDeclaration.isImportDeclaration()) {
-        const importPath = joinPath(
-          dirname(filename),
-          importDeclaration.node.source.value
-        );
-        let code;
-        for (const suffix of ['.js', '/index.js', '.mjs', '/index.mjs']) {
-          try {
-            code = readFileSync(importPath + suffix, 'utf8');
-            break;
-          } catch (_) {}
-        }
-        if (code) {
-          const specifier = importDeclaration.node.specifiers.find(
-            ({local}) => local.name === path.node.name
-          );
-          let evaluated;
-          traverse(parseSync(code), {
-            Identifier(path) {
-              if (path.node.name === specifier.imported.name) {
-                if (path.parentPath.isVariableDeclarator()) {
-                  evaluated = path.parentPath.get('init').evaluate();
-                }
-              }
-            },
-          });
-          if (evaluated) {
-            return evaluated;
-          }
-        }
-      }
+    const importDeclaration = path.scope.getBinding(path.node.name).path
+      .parentPath;
+    if (!importDeclaration.isImportDeclaration()) {
+      return evaluated;
     }
-    return {confident: false};
+
+    let code;
+    try {
+      const importPath = relative(
+        __dirname,
+        joinPath(dirname(filename), importDeclaration.node.source.value)
+      );
+      const importPathResolved = require.resolve(
+        importPath.replace(/^[^.]/, './$&')
+      );
+      code = readFileSync(importPathResolved, 'utf8');
+    } catch (_) {}
+
+    if (code) {
+      const {imported} = importDeclaration.node.specifiers.find(
+        ({local}) => local.name === path.node.name
+      );
+      traverse(parseSync(code), {
+        Program(path) {
+          path.stop(); // prevent a full walk
+
+          evaluated = path.scope
+            .getBinding(imported.name)
+            .path.get('init')
+            ?.evaluate();
+        },
+      });
+    }
+    return evaluated;
   }
 
   return {
