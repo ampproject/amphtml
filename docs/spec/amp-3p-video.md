@@ -5,7 +5,7 @@ The generic [`amp-video`](https://go.amp.dev/c/amp-video) component plays videos
 Unfortunately, not all videos can be embedded this way. For these specialized cases, AMP provides vendor-optimized components like [`amp-youtube`](https://go.amp.dev/c/amp-youtube), [`amp-ima-video`](https://go.amp.dev/c/amp-ima-video), and [others](./amp-video-interface.md).
 Internally these players load an iframe whose page communicates with the outer document to coordinate playback.
 
-**We would prefer to not have additional custom video implementations.** Instead we believe, [`amp-video-iframe`](https://go.amp.dev/c/amp-video-iframe) should be used instead, since it is a generic component that can load any video document to coordinate playback. Instead, new integrations should come in the form of [`amp-video-iframe` configurations](https://go.amp.dev/c/amp-video-iframe#vendors). _If you believe you're unable to integrate with `amp-video-iframe`, please [file an issue](https://github.com/ampproject/amphtml/issues/new/choose) mentioning `@alanorozco` and `@wassgha`._
+**We would prefer to not have additional custom video implementations.** Instead we believe, [`amp-video-iframe`](https://go.amp.dev/c/amp-video-iframe) should be used instead, since it is a generic component that can load any video document to coordinate playback. Instead, new integrations should come in the form of [`amp-video-iframe` configurations](https://go.amp.dev/c/amp-video-iframe#vendors). _If you believe you're unable to integrate with `amp-video-iframe`, please [file a bug report](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.yml) mentioning `@alanorozco` and `@wassgha`._
 
 ## I want to contribute my vendor-specific player
 
@@ -52,7 +52,7 @@ For example, these are some of the features that justify specific players:
 
 ### Understand the contribution process
 
-You'll need to go through [the standard AMP contribution process](../docs/contributing.md) when creating and submitting your component. For large features, such as a video player, you need to file an [I2I (intent-to-implement) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) that describes the overall workings of your component.
+You'll need to go through [the standard AMP contribution process](../docs/contributing.md) when creating and submitting your component. For large features, such as a video player, you need to file an [I2I (intent-to-implement) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement.yml) that describes the overall workings of your component.
 
 Your player component is also shipped as an extension, so you should [become familiar with the process of building one.](https://github.com/ampproject/amphtml/blob/main/docs/building-an-amp-extension.md)
 

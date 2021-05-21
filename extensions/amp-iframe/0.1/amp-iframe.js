@@ -398,7 +398,7 @@ export class AmpIframe extends AMP.BaseElement {
             'Only 1 analytics/tracking iframe allowed per ' +
               'page. Please use amp-analytics instead or file a GitHub issue ' +
               'for your use case: ' +
-              'https://github.com/ampproject/amphtml/issues/new'
+              'https://github.com/ampproject/amphtml/issues/new/choose'
           );
         return Promise.resolve();
       }
