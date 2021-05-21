@@ -361,38 +361,14 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Triggers a remote attachment opening animation, and redirects to the
-   * specified URL.
+   * Redirects to the specified URL.
    * @private
    */
   openRemoteV2_() {
     const clickTarget = this.element.parentElement
       .querySelector('.i-amphtml-story-page-open-attachment-host')
       .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
-
-    const isMobileUI =
-      this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
-    // Shows outlink url preview on mobile only.
-    if (!isMobileUI) {
-      triggerClickFromLightDom(clickTarget, this.element);
-    } else {
-      const animationEl = this.win.document.createElement('div');
-      const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
-
-      this.mutateElement(() => {
-        clickTarget.classList.add(
-          'i-amphtml-story-page-open-attachment-opening'
-        );
-      });
-      // Play post-tap animation before opening link.
-      this.win.setTimeout(() => {
-        this.mutateElement(() => {
-          animationEl.classList.add('i-amphtml-story-page-attachment-expand');
-          storyEl.appendChild(animationEl);
-        });
-        triggerClickFromLightDom(clickTarget, this.element);
-      }, 1000);
-    }
+    triggerClickFromLightDom(clickTarget, this.element);
   }
 
   /**
