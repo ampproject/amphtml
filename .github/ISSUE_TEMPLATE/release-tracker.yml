@@ -11,17 +11,10 @@ body:
       This is AMP's release tracker form, meant to be used by on-duty engineers.
       - See AMP's [release schedule](https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md) to learn about how releases work.
       - See AMP's [release calendar](https://amp-release-calendar.appspot.com) for information about past releases (e.g. versions, dates, submission times, notes).
-      - Use this form to track a release through the following stages:
-        - Initial promotion to Nightly channel
-        - Promotion to Experimental and Beta opt-in channels
-        - Promotion to Experimental and Beta 1% traffic channels
-        - Promotion to Stable channel
-        - Promotion to LTS channel (if applicable)
-      - See AMP's pre-release [documentation](https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md#beta-and-experimental-channels) to learn how to test changes in the Experimental channel.
+      - See AMP's [pre-release documentation](https://github.com/ampproject/amphtml/blob/main/docs/release-schedule.md#beta-and-experimental-channels) to learn how to test changes in the Experimental channel.
       - If you find a bug in this release, file a [bug report](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.yml).
       - If you believe a bug should be fixed as part of this release, request a [cherry-pick](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md#Cherry-picks).
       - For updates that may be of interest to the community (e.g. bug fixes, delayed releases), post a comment to this issue.
-      - The community uses this issue to keep track of releases, so please keep it up to date.
 - type: input
   id: release_version
   attributes:

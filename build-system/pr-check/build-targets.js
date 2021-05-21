@@ -37,9 +37,10 @@ let buildTargets;
 /**
  * Used to prevent the repeated expansion of globs during PR jobs.
  */
-let lintFiles;
 let htmlFixtureFiles;
 let invalidWhitespaceFiles;
+let linkCheckFiles;
+let lintFiles;
 let presubmitFiles;
 let prettifyFiles;
 
@@ -176,9 +177,9 @@ const targetMatchers = {
       return false;
     }
     return (
+      linkCheckFiles.includes(file) ||
       file == 'build-system/tasks/check-links.js' ||
-      file.startsWith('build-system/tasks/markdown-toc/') ||
-      (path.extname(file) == '.md' && !file.startsWith('examples/'))
+      file.startsWith('build-system/tasks/markdown-toc/')
     );
   },
   [Targets.E2E_TEST]: (file) => {
@@ -330,9 +331,10 @@ function determineBuildTargets() {
     return buildTargets;
   }
   buildTargets = new Set();
-  lintFiles = globby.sync(config.lintGlobs);
   htmlFixtureFiles = globby.sync(config.htmlFixtureGlobs);
   invalidWhitespaceFiles = globby.sync(config.invalidWhitespaceGlobs);
+  linkCheckFiles = globby.sync(config.linkCheckGlobs);
+  lintFiles = globby.sync(config.lintGlobs);
   presubmitFiles = globby.sync(config.presubmitGlobs);
   prettifyFiles = globby.sync(config.prettifyGlobs);
   const filesChanged = gitDiffNameOnlyMain();

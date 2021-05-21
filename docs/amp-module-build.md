@@ -75,4 +75,4 @@ We Also remove the following polyfills:
 
 ## Report a bug
 
-[File an issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.md&title=) if you find a bug in AMP. Provide a detailed description and steps for reproducing the bug; screenshots and working examples that demonstrate the problem are appreciated!
+[File an issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.yml) if you find a bug in AMP. Provide a detailed description and steps for reproducing the bug; screenshots and working examples that demonstrate the problem are appreciated!

@@ -548,7 +548,7 @@ Using `AMP.pushState()` sets the current state to the most recent pushed state.
 -   Only `amp-bind` [allowlisted functions](#allowlisted-functions) and operators are usable. are usable. Use of arrow functions are allowed as function parameters, e.g. `[1, 2, 3].map(x => x + 1)`.
     -   Custom functions, classes and loops are disallowed.
 -   Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
--   A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
+-   A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new/choose) if this is insufficient for your use case.
 
 The following are all valid expressions:
 
