@@ -25,16 +25,6 @@
     {
       "files": [".prettierrc", ".renovaterc.json", "*.json"],
       "options": {"parser": "json"}
-    },
-    {
-      "files": [
-        ".circleci/config.yml",
-        ".codecov.yml",
-        ".github/workflows/continuous-integration-workflow.yml",
-        ".lando.yml",
-        ".lgtm.yml"
-      ],
-      "options": {"parser": "yaml"}
     }
   ]
 }
