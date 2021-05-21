@@ -226,6 +226,17 @@ export class AmpRender extends BaseElement {
   }
 
   /**
+   * @param {!JsonObject} data
+   * @return {!Promise<!Element>}
+   * @private
+   */
+  renderTemplateAsString_(data) {
+    return this.templates_
+      .renderTemplateAsString(dev().assertElement(this.template_), data)
+      .then((html) => dict({'__html': html}));
+  }
+
+  /**
    * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
    *
@@ -244,6 +255,7 @@ export class AmpRender extends BaseElement {
       this.mutateProps(dict({'render': null}));
       return;
     }
+
     // Only overwrite `render` when template is ready to minimize FOUC.
     templates.whenReady(template).then(() => {
       if (template != this.template_) {
@@ -254,23 +266,24 @@ export class AmpRender extends BaseElement {
         dict({
           'render': (data) => {
             if (this.element.getAttribute('binding') === 'no') {
-              return templates
-                .renderTemplateAsString(dev().assertElement(template), data)
-                .then((html) => dict({'__html': html}));
+              return this.renderTemplateAsString_(data);
             }
 
-            let element;
-            return templates
-              .renderTemplate(dev().assertElement(template), data)
-              .then((el) => {
-                element = el;
-                return Services.bindForDocOrNull(this.element);
-              })
-              .then((bind) => {
+            let bind, element;
+            return Services.bindForDocOrNull(this.element)
+              .then((b) => {
+                bind = b;
                 if (!bind) {
                   throw new Error('bind unavailable');
                 }
-                const bindingValue = this.element.getAttribute('binding');
+                return templates.renderTemplate(
+                  dev().assertElement(template),
+                  data
+                );
+              })
+              .then((el) => {
+                element = el;
+                const bindingAttrValue = this.element.getAttribute('binding');
                 return bind.rescan([element], [], {
                   'fast': true,
                   'update':
@@ -278,22 +291,19 @@ export class AmpRender extends BaseElement {
                     // 1. no binding is specified (default is binding=always) or
                     // 2. binding=always is specified or
                     // 3. binding=refresh and is not the initial render
-                    !bindingValue ||
-                    bindingValue === 'always' ||
-                    (bindingValue === 'refresh' &&
-                      // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
-                      // mutation occured, which is null for the initial render
+                    !bindingAttrValue ||
+                    bindingAttrValue === 'always' ||
+                    (bindingAttrValue === 'refresh' &&
+                      // bind.signals().get('FIRST_MUTATE') gives the timestamp (in ms) when mutation
+                      // occured, which is null for the initial render
                       bind.signals().get('FIRST_MUTATE') !== null),
                 });
+                // return element;
               })
-              .then(() => {
-                return dict({__html: element.innerHTML});
-              })
+              .then(() => dict({'__html': element./* OK */ innerHTML}))
               .catch((e) => {
                 user().error(TAG, e.message);
-                return templates
-                  .renderTemplateAsString(template, data)
-                  .then((html) => dict({'__html': html}));
+                return this.renderTemplateAsString_(data);
               });
           },
         })

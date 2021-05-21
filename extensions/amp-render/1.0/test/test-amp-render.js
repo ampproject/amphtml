@@ -640,7 +640,7 @@ describes.realWin(
       expect(args.update).to.be.true;
     });
 
-    it('should binding="refresh"', async () => {
+    it('should work with binding="refresh"', async () => {
       const rescanSpy = env.sandbox.spy();
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
         rescan: rescanSpy,
