@@ -65,10 +65,55 @@ For more details on templates, see [AMP HTML Templates](../../spec/amp-html-temp
   * [Read more about executable code samples](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#preview-code-samples)
  -->
 
+### XHR batching
+
+AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `<amp-render>` elements) on an AMP page. For example, if your `<amp-render>` makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
+
+### Placeholder and fallback
+
+Optionally, `<amp-render>` supports a placeholder and/or fallback.
+
+-   A _placeholder_ is a child element with the `placeholder` attribute. This element is shown until the `<amp-render>` loads successfully. If a fallback is also provided, the placeholder is hidden when the `<amp-render>` fails to load.
+-   A _fallback_ is a child element with the `fallback` attribute. This element is shown if the `<amp-render>` fails to load.
+
+Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders). Note that a child element cannot be both a placeholder and a fallback.
+
+```html
+<amp-render src="https://example.com/data.json">
+  <div placeholder>Loading ...</div>
+  <div fallback>Failed to load data.</div>
+</amp-render>
+```
+
+### Refreshing data
+
+The `<amp-render>` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes.
+
+```html
+<button on="tap:myList.refresh">Refresh List</button>
+<amp-render id="myList" src="https://example.com/data.json">
+  <template type="amp-mustache">
+    <div>{{title}}</div>
+  </template>
+</amp-render>
+```
+
+### Substitutions
+
+`<amp-render>` allows all standard URL variable substitutions.
+See the [Substitutions Guide](../../docs/spec/amp-var-substitutions.md) for more info.
+
+For example:
+
+```html
+<amp-render src="https://foo.com/list.json?RANDOM"></amp-render>
+```
+
+may make a request to something like `https://foo.com/list.json?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
+
 ## Attributes
 
 ### `src` (required)
-
 
 The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-render>`. There are three valid protocols for the `src` attribute.
