@@ -635,9 +635,9 @@ describes.realWin(
       await waitRendered();
 
       expect(rescanSpy).to.be.calledTwice; // TODO: investigate why its called twice?
-      const args = rescanSpy.getCall(0).args[2];
-      expect(args.fast).to.be.true;
-      expect(args.update).to.be.true;
+      const {fast, update} = rescanSpy.getCall(0).args[2];
+      expect(fast).to.be.true;
+      expect(update).to.be.true;
     });
 
     it('should work with binding="refresh"', async () => {
@@ -675,9 +675,9 @@ describes.realWin(
       await waitRendered();
 
       expect(rescanSpy).to.be.calledTwice; // TODO: investigate why its called twice?
-      const args = rescanSpy.getCall(0).args[2];
-      expect(args.fast).to.be.true;
-      expect(args.update).to.be.false;
+      const {fast, update} = rescanSpy.getCall(0).args[2];
+      expect(fast).to.be.true;
+      expect(update).to.be.false;
     });
 
     it('should not perform any updates when binding="no"', async () => {
