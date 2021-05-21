@@ -286,8 +286,8 @@ document is served directly from their origin while retaining dynamic
 configuration when served from a cache.
 
 Caches that wish to pre-render `amp-geo` should
-[open an issue](https://github.com/ampproject/amphtml/issues/new) requesting to
-be removed from the pre-render override.
+[open an issue](https://github.com/ampproject/amphtml/issues/new/choose)
+requesting to be removed from the pre-render override.
 
 ### Self Hosting
 

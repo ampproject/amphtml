@@ -78,6 +78,6 @@ Please also note that AMP Viewers may have their own size limitation and impleme
 
 ## Use localStorage in AMP
 
-To use localStorage in AMP. Please [file](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I%3A+%3Cyour+feature%2Fchange%3E) a Github issue. Explaning the localStorage usage case as well as how will the storage entry be calculated. Then ask @ampproject/wg-approvers for review.
+To use localStorage in AMP, please [file an I2I issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement.yml) and explain the localStorage usage case and how the storage entry will be calculated. Then ask @ampproject/wg-approvers for a review.
 
 When a usage gets approved and implemented, please update the [Current Usage session](#current-usage) for future reference.

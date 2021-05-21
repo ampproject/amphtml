@@ -109,7 +109,7 @@ To opt your browser into the a pre-release channel, go to [the AMP experiments p
 
 **If you find an issue that appears to only occur in the _Experimental/Beta Channel_ version of AMP**:
 
--   please [file an issue](https://github.com/ampproject/amphtml/issues/new) with a description of the problem
+-   please [file a bug report](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.yml) with a description of the problem
     -   include a note that the problem is new to the _Experimental/Beta Channel_ build so that it can be properly prioritized
     -   include a URL to a page that reproduces the problem
 -   ping the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)) with the issue you filed so we can delay the push of the _Experimental/Beta Channel_ version to production if needed
