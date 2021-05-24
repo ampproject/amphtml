@@ -304,6 +304,8 @@ const forbiddenTermsGlobal = {
       'extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
+      'extensions/amp-form/0.1/amp-form.js', // References service defined in amp-form.
+      'extensions/amp-form/0.1/form-dirtiness.js', // References service defined in amp-form.
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',
@@ -460,7 +462,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-story/1.0/history.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
-      'src/experiments.js',
+      'src/experiments/index.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'testing/init-tests.js',
@@ -625,7 +627,8 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
       'src/config.js',
-      'src/experiments.js',
+      'src/experiments/index.js',
+      'src/experiments/shame.extern.js',
       'src/mode.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'testing/init-tests.js',
@@ -806,7 +809,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/js/engine/validator.js',
       'validator/js/webui/webui.js',
       'src/url.js',
-      'src/url-try-decode-uri-component.js',
+      'src/core/types/string/url.js',
       'src/core/types/string/bytes.js',
     ],
   },
@@ -867,6 +870,8 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/transport.js',
       'extensions/amp-web-push/0.1/iframehost.js',
       'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
+      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
+      'extensions/amp-image-slider/0.1/amp-image-slider.js',
     ],
   },
   '\\.getTime\\(\\)': {
@@ -947,14 +952,6 @@ const forbiddenTermsSrcInclusive = {
   },
   '\\.indexOf\\(.*===?.*\\.length':
     'use endsWith helper in src/core/types/string',
-  '/url-parse-query-string': {
-    message: 'Import parseQueryString from `src/url.js`',
-    allowlist: [
-      'build-system/tasks/check-types.js',
-      'src/mode.js',
-      'src/url.js',
-    ],
-  },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],

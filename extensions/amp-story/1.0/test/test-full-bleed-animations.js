@@ -45,9 +45,6 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
 
-      // Required by the bookend code.
-      win.document.title = 'Story';
-
       env.sandbox.stub(win.history, 'replaceState');
 
       const viewer = Services.viewerForDoc(env.ampdoc);

@@ -7,7 +7,7 @@ besides 1 or 0.
 
 # experiments-config.json
 
-This config is used to run server side diverted experiments. Please review the instruction [here](../../contributing/running-server-side-experiment.md) beforehand.
+This config is used to run server side diverted experiments. Please review the instruction [here](../../docs/running-server-side-experiment.md) beforehand.
 
 -   `name`: Experiment name
 -   `environment`: Specify the type of environment the experiment runs. Only support `AMP` and `INABOX`.

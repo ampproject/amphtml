@@ -340,7 +340,6 @@ const VIEWER_CONTROL_DEFAULTS = {
  * Chrome contains:
  *   - mute/unmute button
  *   - story progress bar
- *   - bookend close button
  *   - share button
  *   - domain info button
  *   - sidebar
@@ -559,10 +558,6 @@ export class SystemLayer {
       this.onAdStateUpdate_(isAd);
     });
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.onBookendStateUpdate_(isActive);
-    });
-
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_AUDIO_UI,
       (show) => {
@@ -711,18 +706,6 @@ export class SystemLayer {
     isAd
       ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
       : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
-  }
-
-  /**
-   * Reacts to the bookend state updates and updates the UI accordingly.
-   * @param {boolean} isActive
-   * @private
-   */
-  onBookendStateUpdate_(isActive) {
-    this.getShadowRoot().classList.toggle(
-      'i-amphtml-story-bookend-active',
-      isActive
-    );
   }
 
   /**

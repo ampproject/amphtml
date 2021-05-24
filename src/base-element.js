@@ -241,8 +241,8 @@ export class BaseElement {
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
     Any private property for BaseElement MUST be wrapped with quotes. We cannot
-    allow Closure Compiler to mangle privates in this class, becasue it can
-    reuse the same mangled name for a different property in, ie., amp-youtube's
+    allow Closure Compiler to mangle privates in this class, because it can
+    reuse the same mangled name for a different property in, i.e., amp-youtube's
     BaseElement subclass (which lives in a different binary).
     */
 
@@ -739,29 +739,6 @@ export class BaseElement {
     const {handler, minTrust} = holder;
     if (invocation.satisfiesTrust(minTrust)) {
       return handler(invocation);
-    }
-  }
-
-  /**
-   * Utility method that propagates attributes from this element
-   * to the given element.
-   * If `opt_removeMissingAttrs` is true, then also removes any specified
-   * attributes that are missing on this element from the target element.
-   * @param {string|!Array<string>} attributes
-   * @param {!Element} element
-   * @param {boolean=} opt_removeMissingAttrs
-   * @public @final
-   */
-  propagateAttributes(attributes, element, opt_removeMissingAttrs) {
-    attributes = isArray(attributes) ? attributes : [attributes];
-    for (let i = 0; i < attributes.length; i++) {
-      const attr = attributes[i];
-      const val = this.element.getAttribute(attr);
-      if (null !== val) {
-        element.setAttribute(attr, val);
-      } else if (opt_removeMissingAttrs) {
-        element.removeAttribute(attr);
-      }
     }
   }
 

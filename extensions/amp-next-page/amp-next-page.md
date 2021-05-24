@@ -133,7 +133,7 @@ Remote configurations require the server to return a JSON object with the `pages
 
 ##### URL substitutions
 
-The `amp-next-page` `src` allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info. For example:
+The `amp-next-page` `src` allows all standard URL variable substitutions. See the [Substitutions Guide](../../docs/spec/amp-var-substitutions.md) for more info. For example:
 
 ```html
 <amp-next-page src="https://foo.com/config.json?RANDOM"></amp-next-page>
