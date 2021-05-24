@@ -158,25 +158,22 @@ const presubmitGlobs = [
  * 2. Make sure it is listed in .vscode/settings.json (for auto-fix-on-save)
  */
 const prettifyGlobs = [
-  '.circleci/config.yml',
-  '.codecov.yml',
-  '.lando.yml',
-  '.lgtm.yml',
   '.prettierrc',
   '.renovaterc.json',
-  '.circleci/config.yml',
   '.vscode/settings.json',
   '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
+  '**/*.yml',
 ];
 
 /**
- * List of markdown files that may be checked by `amp check-links` (using
- * markdown-link-check).
+ * List of markdown and yaml files that may be checked by `amp check-links`
+ * (using markdown-link-check).
  */
 const linkCheckGlobs = [
+  '.github/ISSUE_TEMPLATE/*.yml',
   '**/*.md',
   '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
