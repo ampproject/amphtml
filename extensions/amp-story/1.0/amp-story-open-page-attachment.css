@@ -318,16 +318,6 @@
   animation: tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
-.i-amphtml-story-page-open-attachment.i-amphtml-story-page-open-attachment-opening {
-  animation: fade-out 0.3s both !important;
-}
-
-@keyframes fade-out {
-  100% {
-    opacity: 0;
-  }
-}
-
 .i-amphtml-story-outlink-page-attachment-arrow {
   display: block !important;
   cursor: pointer !important;
