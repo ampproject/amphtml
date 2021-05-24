@@ -3600,6 +3600,10 @@ void ValidateSsrLayout(const TagSpec& spec,
       // i-amphtml-layout-size-defined
       valid_internal_classes.push_back(
           amp::validator::parse_layout::GetLayoutSizeDefinedClass());
+    if (amp::validator::parse_layout::IsLayoutAwaitingSize(layout))
+      // i-amphtml-layout-awaiting-size
+      valid_internal_classes.push_back(
+          amp::validator::parse_layout::GetLayoutAwaitingSizeClass());
     for (const string_view class_token :
          StrSplit(class_attr.value(), ByAnyChar("\t\n\f\r "))) {
       if (StartsWith(class_token, "i-amphtml-") &&
