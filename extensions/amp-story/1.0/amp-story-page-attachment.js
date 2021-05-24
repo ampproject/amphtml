@@ -54,6 +54,14 @@ const DRAG_CAP_PX = 48;
 const DRAG_CAP_PX_V2 = 56;
 
 /**
+ * Duration of post-tap URL preview progress bar animation minus 100ms.
+ * The minus 100ms roughly accounts for the small system delay in opening a link.
+ * Used for the amp-story-outlink-page-attachment-v2 experiment.
+ * @const {number}
+ */
+const POST_TAP_ANIMATION_DURATION = 500;
+
+/**
  * @enum {string}
  */
 export const AttachmentTheme = {
@@ -361,8 +369,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Triggers a remote attachment opening animation, and redirects to the
-   * specified URL.
+   * Triggers a remote attachment preview URL animation, and redirects
+   * to the specified URL.
    * @private
    */
   openRemoteV2_() {
@@ -376,22 +384,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     if (!isMobileUI) {
       triggerClickFromLightDom(clickTarget, this.element);
     } else {
-      const animationEl = this.win.document.createElement('div');
-      const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
-
-      this.mutateElement(() => {
-        clickTarget.classList.add(
-          'i-amphtml-story-page-open-attachment-opening'
-        );
-      });
-      // Play post-tap animation before opening link.
       this.win.setTimeout(() => {
-        this.mutateElement(() => {
-          animationEl.classList.add('i-amphtml-story-page-attachment-expand');
-          storyEl.appendChild(animationEl);
-        });
         triggerClickFromLightDom(clickTarget, this.element);
-      }, 1000);
+      }, POST_TAP_ANIMATION_DURATION);
     }
   }
 
