@@ -17,7 +17,7 @@
 import {DateDisplay} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 export class BaseElement extends PreactBaseElement {}
 

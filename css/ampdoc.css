@@ -44,7 +44,7 @@ html:not([amp4ads]) body {
 /**
  * Margin:0 is currently needed for iOS viewer embeds.
  * See:
- * https://github.com/ampproject/amphtml/blob/main/spec/amp-html-layout.md
+ * https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md
  */
 html:not([amp4ads]) body {
   margin: 0 !important;
@@ -345,7 +345,7 @@ amp-autocomplete > textarea,
 /**
  * amp-script[nodom] is an element with no UI, similar to amp-analytics.
  */
-amp-script[nodom] {
+amp-script[nodom], amp-script[sandboxed] {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;

@@ -32,7 +32,8 @@ import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {openWindowDialog} from '../../../src/dom';
-import {parseQueryString, parseUrlDeprecated} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
+import {parseUrlDeprecated} from '../../../src/url';
 
 /** @typedef {{
  *    isControllingFrame: boolean,

@@ -22,7 +22,7 @@ import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {getStyle, setStyles} from '../../../src/style';
 import {parseUrlDeprecated} from '../../../src/url';
 import {throttle} from '../../../src/core/types/function';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /**
  * Used to manage messages for different Safeframe ad slots.

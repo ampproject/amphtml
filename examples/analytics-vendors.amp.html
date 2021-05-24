@@ -55,6 +55,7 @@
       <option>baiduanalytics</option>
       <option>blackcrowai</option>
       <option>blueconic</option>
+      <option>bluetriangle</option>
       <option>browsi</option>
       <option>burt</option>
       <option>byside</option>
@@ -381,6 +382,20 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- End BlueConic analytics example -->
+
+<!-- Blue Triangle example -->
+<amp-analytics type="bluetriangle" id="bluetriangle">
+  <script type="application/json">
+    {
+      "vars": {
+        "prefix": "testsite1",
+        "pageName": "AMP Test",
+        "trafficSegment": "ampTestSite1",
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Blue Triangle example -->
 
 <!-- Browsi prediction tracking example -->
 <amp-analytics type="browsi" id="browsi">
@@ -1373,19 +1388,15 @@ For complete documentation and additional examples please see: https://marketing
 <!-- End PPAS analytics example -->
 
 <!-- Pressboard tracking. Ensure you replace &media value with a valid media-id, and &ref value with an html-encoded URL of a pressboard sponsored story related to the used media-id -->
-<amp-analytics type="pressboard" id="pressboard" config="https://adserver.pressboard.ca/amp/config?media=5&ref=http%3A%2F%2Fwww.pressboardmedia.com%2Fnative-advertising-advice-from-the-co-founder-of-stackadapt%2F">
+<amp-analytics type="pressboard" id="pressboard" config="https://sr.studiostack.com/amp/config?media=5&ref=http%3A%2F%2Fwww.pressboardmedia.com%2Fnative-advertising-advice-from-the-co-founder-of-stackadapt%2F">
   <script type="application/json">
   {
     "vars": {
       "mediaId": "",
-      "campaignId": "",
-      "storyRequestId": "",
       "geoNameId": "",
       "country": "",
       "region": "",
-      "city": "",
-      "dbInstance": "",
-      "timeZoneOffset": ""
+      "city": ""
     }
   }
   </script>

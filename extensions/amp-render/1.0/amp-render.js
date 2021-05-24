@@ -182,6 +182,28 @@ export class AmpRender extends BaseElement {
 
     return dict({
       'getJson': this.getFetchJsonFn(),
+      'onLoading': () => {
+        this.toggleLoading(true);
+      },
+      'onReady': () => {
+        this.toggleLoading(false);
+        this.togglePlaceholder(false);
+      },
+      'onRefresh': () => {
+        this.togglePlaceholder(true);
+        this.toggleFallback(false);
+      },
+      'onError': () => {
+        this.toggleLoading(false);
+        // If the content fails to load and there's a fallback element, display the fallback.
+        // Otherwise, continue displaying the placeholder.
+        if (this.getFallback()) {
+          this.togglePlaceholder(false);
+          this.toggleFallback(true);
+        } else {
+          this.togglePlaceholder(true);
+        }
+      },
     });
   }
 

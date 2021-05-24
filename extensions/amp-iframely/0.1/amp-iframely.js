@@ -20,7 +20,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {measureIntersection} from '../../../src/utils/intersection';
 import {omit} from '../../../src/core/types/object';
 import {setStyle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -122,15 +122,17 @@ export class AmpIframely extends AMP.BaseElement {
         this.constructSrc_('/thumbnail'),
         this.options_
       );
-      return createElementWithAttributes(
+      const element = createElementWithAttributes(
         this.element.ownerDocument,
-        'amp-img',
+        'img',
         {
           'src': src,
+          'loading': 'lazy',
           'placeholder': '',
-          'layout': 'fill',
         }
       );
+      this.applyFillContent(element);
+      return element;
     }
     return null;
   }
