@@ -16,8 +16,13 @@
 
 const fs = require('fs');
 const selenium = require('selenium-webdriver');
+const {
+  DOMRectDef,
+  ScrollToOptionsDef,
+  ElementHandle,
+  Key,
+} = require('./e2e-types');
 const {ControllerPromise} = require('./controller-promise');
-const {DOMRectDef, ElementHandle, Key} = require('./e2e-types');
 const {expect} = require('chai');
 const {NetworkLogger} = require('./network-logger');
 
@@ -266,7 +271,7 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @return {!ControllerPromise<string>}
+   * @return {!ControllerPromise<string|null|function>}
    * @override
    */
   getCurrentUrl() {
@@ -553,7 +558,7 @@ class SeleniumWebDriverController {
 
   /**
    * @param {!ElementHandle<!selenium.WebElement>} handle
-   * @param {!selenium.ScrollToOptionsDef=} opt_scrollToOptions
+   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
    * @return {!Promise}
    * @override
    */
@@ -568,7 +573,7 @@ class SeleniumWebDriverController {
 
   /**
    * @param {!ElementHandle<!selenium.WebElement>} handle
-   * @param {!selenium.ScrollToOptionsDef=} opt_scrollToOptions
+   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
    * @return {!Promise}
    * @override
    */

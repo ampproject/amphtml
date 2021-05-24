@@ -66,8 +66,9 @@ async function collectCoverage() {
 
 /**
  * Source: https://github.com/chenxiaochun/blog/issues/38s
- *
- * @param {puppeteer.Page} page
+ * TODO(#28387) change the first parameter to puppeteer.Page once puppeteer is consistently
+ * imported.
+ * @param {*} page
  * @return {Promise<void>}
  */
 async function autoScroll(page) {
@@ -98,6 +99,7 @@ async function autoScroll(page) {
 async function htmlTransform() {
   const {
     transform,
+    // @ts-ignore
   } = require('../../server/new-server/transforms/dist/transform');
   log('Transforming', cyan(`${inputHtml}`) + '...');
   const transformed = await transform(`examples/${inputHtml}`);
