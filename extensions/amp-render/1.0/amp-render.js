@@ -216,7 +216,13 @@ export class AmpRender extends BaseElement {
   }
 
   /** @override */
-  mutationObserverCallback() {
+  mutatedAttributesCallback(mutations) {
+    console.log({mutations});
+  }
+
+  /** @override */
+  mutationObserverCallback(records) {
+    console.log({records});
     const src = this.element.getAttribute('src');
     if (src === this.src_) {
       return;

@@ -1,0 +1,160 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind: amp-render</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <script async custom-element="amp-render" src="https://cdn.ampproject.org/v0/amp-render-1.0.js"></script>
+  <style amp-custom>
+    amp-render {
+      font-family: monospace;
+      font-size: 11pt;
+    }
+    button {
+      font-family: monospace;
+      font-size: 9pt;
+      border: solid 1px black;
+    }
+  </style>
+</head>
+<body>
+  <amp-state id="otherFoods">
+    <script type="application/json">
+      {
+      "items": [
+      {
+        "name": "pizza",
+        "quantity": 1976,
+        "unitPrice": 3.50
+      },
+      {
+        "name": "ice cream",
+        "quantity": 108,
+        "unitPrice": 6.50
+      }
+      ]
+    }
+    </script>
+  </amp-state>
+
+  <h3>setState() for amp-render[src]: Remote (URL)</h3>
+  <button on="tap:AMP.setState({src:'/list/fruit-data/get'})">Show Fruit</button>
+  <button on="tap:AMP.setState({src:'/list/vegetable-data/get'})">Show Vegetables</button>
+  <button on="tap:AMP.setState({src: 'otherFoods'})">Show Other Foods</button>
+
+  <h3>setState() for amp-render[src]: Local (JSON)</h3>
+  <button on="tap:AMP.setState({
+    src: {
+      items: [{
+      name: 'pizza',
+      quantity: 54,
+      unitPrice: 2.0
+    }, {
+      name: 'burger',
+      quantity: 2387,
+      unitPrice: 4.50
+    }]
+  }})">Show Junk Food</button>
+
+  <button on="tap:AMP.setState({
+    src: {
+      items:[{
+      name: 'cake',
+      quantity: 424,
+      unitPrice: 14.2
+    }, {
+      name: 'ice cream',
+      quantity: 23,
+      unitPrice: 0.78
+    }]
+  }})">Show Desserts</button>
+
+  <button on="tap:AMP.setState({src: (src || []).concat([{name: 'burger', quantity: 1, unitPrice: random()}])})">Add burger</button>
+
+  <h3>setState() for children of amp-render</h3>
+  <button on="tap:AMP.setState({foo: foo+1})">Increment foo</button>
+
+  <hr>
+<!--
+  <amp-state id="one">
+    <script type="application/json">
+      {
+        "name": "Barrack Obama"
+      }
+    </script>
+  </amp-state>
+
+  <amp-render src="amp-state:one" [src]="src">
+    <template id="render-template" type="amp-mustache">
+      {{name}}
+      <strong>1+1</strong>=<span [text]="1+1">?</span>
+    </template>
+  </amp-render>
+  <br>
+  <button on="tap:AMP.setState({src: {'name': 'Joe Biden'}})">Update to Biden</button> -->
+
+  <template id="render-template" type="amp-mustache">
+    {{#items}}
+      <li>
+      <strong>name</strong> {{name}}
+      <strong>#</strong> {{quantity}}
+      <strong>$</strong> {{unitPrice}}
+      <strong>1+1</strong>=<span [text]="1+1">?</span>
+      <strong>foo</strong>=<span data-amp-bind-text="foo">?</span>
+      </li>
+    {{/items}}
+  </template>
+
+  <h3>Amp Render with binding=always (default)</h3>
+  <amp-render
+    binding="always"
+    layout="fixed-height"
+    height="200"
+    src="/list/fruit-data/get" [src]="src"
+    template="render-template">
+  </amp-render>
+
+
+  <!-- <h3>Amp Render with binding=refresh</h3>
+    <amp-render
+      binding="refresh"
+      layout="fixed-height"
+      height="200"
+      src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'"
+      template="render-template">
+    </amp-render>
+
+
+    <h3>Amp Render with binding=no</h3>
+    <amp-render
+      binding="no"
+      layout="fixed-height"
+      height="200"
+      src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'"
+      template="render-template">
+    </amp-render> -->
+
+  <!-- <h3>amp-render[binding=no]</h3>
+  <h4>Expected: Tapping "Increment foo" should have no effect.</h4>
+  <amp-render binding="no" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="360" height="60" template="my-template">
+    <div placeholder>(Placeholder)</div>
+  </amp-render> -->
+
+  <!-- <hr style="margin: 2400px 0">
+
+  <p>Due to viewport position, this amp-render will be laid out after amp-bind's initial DOM scan.</p>
+  <ol>
+    <li>Scroll down so that this amp-render enters viewport and is laid out.</li>
+    <li>Tap the "Increment foo" button.</li>
+  </ol>
+  <p>Expected: The amp-render's children should update their "Foo:" values.</p>
+  <h3>amp-render vs. amp-bind race condition test</h3>
+  <amp-render binding="refresh" layout="responsive" src="/list/fruit-data/get" width="360" height="60" template="my-template">
+    <div placeholder>(Placeholder)</div>
+  </amp-render> -->
+</body>
