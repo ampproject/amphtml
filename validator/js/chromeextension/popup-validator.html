@@ -126,25 +126,27 @@ limitations under the License.
         </paper-listbox>
       </template>
       <script>
-        Polymer({
-          is: 'results-page',
-          getIssue: function(item) {
-            return amp.validator.renderErrorMessage(item);
-          },
-          hasResults: function(results) {
-            return results.length > 0;
-          },
-          properties: {
-            emptyResultsText: {
-              type: String,
-              value: chrome.i18n.getMessage("emptyResultsText"),
+        amp.validator.init().then(function() {
+          Polymer({
+            is: 'results-page',
+            getIssue: function(item) {
+              return amp.validator.renderErrorMessage(item);
             },
-            results: {
-              type: Array,
-              value: function() { return []; },
-              notify: true,
+            hasResults: function(results) {
+              return results.length > 0;
             },
-          },
+            properties: {
+              emptyResultsText: {
+                type: String,
+                value: chrome.i18n.getMessage("emptyResultsText"),
+              },
+              results: {
+                type: Array,
+                value: function() { return []; },
+                notify: true,
+              },
+            },
+          });
         });
       </script>
     </dom-module>
