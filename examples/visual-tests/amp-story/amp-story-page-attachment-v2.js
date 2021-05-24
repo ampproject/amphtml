@@ -21,22 +21,24 @@ const {
 
 module.exports = {
   'custom text - inline CTA pre-tap UI should display': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-    await page.waitForTimeout(400); // For animations to finish.
+    const pageID = 'inline-custom-text';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
   'dark theme - inline CTA pre-tap UI should display': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
-    await page.waitForTimeout(400); // For animations to finish.
+    const pageID = 'inline-dark-theme';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
@@ -46,16 +48,12 @@ module.exports = {
     page,
     name
   ) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
-    await screen.tap(200, 240);
+    const pageID = 'inline-dark-theme-1-image';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-1-image[active]'
+      `amp-story-page#${pageID}[active][distance="0"]`
     );
-    await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
@@ -65,20 +63,12 @@ module.exports = {
     page,
     name
   ) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
-    await screen.tap(200, 240);
+    const pageID = 'inline-dark-theme-2-images';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-1-image[active]'
+      `amp-story-page#${pageID}[active][distance="0"]`
     );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-2-images[active]'
-    );
-    await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
@@ -88,174 +78,72 @@ module.exports = {
     page,
     name
   ) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
-    await screen.tap(200, 240);
+    const pageID = 'inline-light-theme-2-images';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-1-image[active]'
+      `amp-story-page#${pageID}[active][distance="0"]`
     );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-light-theme-2-images[active]'
-    );
-    await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
   'outlink CTA pre-tap UI should display': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
-    await screen.tap(200, 240);
+    const pageID = 'outlink-default';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-1-image[active]'
+      `amp-story-page#${pageID}[active][distance="0"]`
     );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-light-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-default[active]');
-    await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
   'custom text - outlink CTA pre-tap UI should display': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
-    await screen.tap(200, 240);
+    const pageID = 'outlink-custom-text';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-1-image[active]'
+      `amp-story-page#${pageID}[active][distance="0"]`
     );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-light-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-default[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-custom-text[active]');
-    await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
   'no img - outlink CTA pre-tap UI should display': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
-    await screen.tap(200, 240);
+    const pageID = 'outlink-no-image';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-1-image[active]'
+      `amp-story-page#${pageID}[active][distance="0"]`
     );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-light-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-default[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-no-image[active]');
-    await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
   'custom img - outlink CTA pre-tap UI should display': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
-    await screen.tap(200, 240);
+    const pageID = 'outlink-custom-image';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-1-image[active]'
+      `amp-story-page#${pageID}[active][distance="0"]`
     );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-light-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-default[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-no-image[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-custom-image[active]');
-    await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
   'dark theme - outlink CTA pre-tap UI should display': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
-    await screen.tap(200, 240);
+    const pageID = 'outlink-dark-theme';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-1-image[active]'
+      `amp-story-page#${pageID}[active][distance="0"]`
     );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-light-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-default[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-no-image[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-custom-image[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-dark-theme[active]');
-    await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
@@ -265,80 +153,24 @@ module.exports = {
     page,
     name
   ) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
-    await screen.tap(200, 240);
+    const pageID = 'outlink-custom-background-color';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-1-image[active]'
+      `amp-story-page#${pageID}[active][distance="0"]`
     );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-light-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-default[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-no-image[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-custom-image[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-dark-theme[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#outlink-custom-background-color[active]'
-    );
-    await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
 
   'pink text - outlink CTA pre-tap UI should display': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#inline-dark-theme[active]');
-    await screen.tap(200, 240);
+    const url = await page.url();
+    const pageID = 'outlink-custom-text-color';
+    await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-1-image[active]'
+      `amp-story-page#${pageID}[active][distance="0"]`
     );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-dark-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#inline-light-theme-2-images[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-default[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-custom-text[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-no-image[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-custom-image[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector('amp-story-page#outlink-dark-theme[active]');
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#outlink-custom-background-color[active]'
-    );
-    await screen.tap(200, 240);
-    await page.waitForSelector(
-      'amp-story-page#outlink-custom-text-color[active]'
-    );
-    await page.waitForTimeout(400); // For animations to finish.
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
