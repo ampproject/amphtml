@@ -172,7 +172,7 @@ amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-pa
   background-color: var(--i-amphtml-outlink-cta-text-color) !important;
   opacity: .6 !important;
   transform-origin: left !important;
-  animation: progress-bar-animation both 1s !important;
+  animation: progress-bar-animation .6s both cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
 [dir="rtl"] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:after {

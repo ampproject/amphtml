@@ -3810,11 +3810,13 @@ tags: {
   mandatory_parent: "amp-img (transformed)"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  attrs: { name: "height" }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "referrerpolicy" }
   attrs: { name: "sizes" }
   attrs: { name: "title" }
+  attrs: { name: "width" }
   attr_lists: "mandatory-src-or-srcset"
   # SSR requires these explicit attributes
   attrs: {
