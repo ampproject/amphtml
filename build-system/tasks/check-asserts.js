@@ -27,7 +27,7 @@ const MINIFIED_JS = './dist/v0.js';
 /**
  * Checks that a provided sentinel is/is not contained in a file.
  * @param {string} filePath JS binary to check
- * @param {Map<string, boolean>} sentinels map from sentinels to whether or not
+ * @param {Record<string, boolean>} sentinels map from sentinels to whether or not
  *                               they should be present
  * @throws if a sentinel isn't/is present when it should/shouldn't be
  */

@@ -84,9 +84,10 @@ async function postClosureBabel(file) {
   }
 
   debug(CompilationLifecycles['closured-pre-babel'], file);
+  /** @type {?babel.TransformOptions} */
   const babelOptions = babel.loadOptions({caller: {name: 'post-closure'}});
   const {code, map: babelMap} =
-    (await babel.transformFileAsync(file, babelOptions)) || {};
+    (await babel.transformFileAsync(file, babelOptions ?? undefined)) || {};
   if (!code || !babelMap) {
     throw new Error(`Error transforming contents of ${file}`);
   }
@@ -101,8 +102,12 @@ async function postClosureBabel(file) {
     () => null,
     !argv.full_sourcemaps
   );
-
-  debug(CompilationLifecycles['complete'], file, compressed, sourceMap);
+  debug(
+    CompilationLifecycles['complete'],
+    file,
+    compressed?.toString(),
+    sourceMap
+  );
   await fs.writeJson(`${file}.map`, sourceMap);
 }
 

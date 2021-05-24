@@ -472,8 +472,11 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
         const time = Date.now();
-        const buildPromise = buildResult
-          .rebuild()
+        const {rebuild} = /** @type {Required<esbuild.BuildResult>} */ (
+          buildResult
+        );
+
+        const buildPromise = rebuild()
           .then(() =>
             finishBundle(srcFilename, destDir, destFilename, options, time)
           )
@@ -847,7 +850,7 @@ async function getDependencies(entryPoint, options) {
     metafile: true,
     plugins: [babelPlugin],
   });
-  return Object.keys(result.metafile?.inputs);
+  return Object.keys(result.metafile?.inputs ?? {});
 }
 
 module.exports = {

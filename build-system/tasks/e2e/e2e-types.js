@@ -80,13 +80,8 @@ let WindowRectDef;
  */
 let DOMRectDef;
 
-/** @enum {string} */
-// export let ScrollBehavior = {
-//   AUTO: 'auto',
-//   SMOOTH: 'smooth',
-// }
-
-/** @typedef {{
+/**
+ * @typedef {{
  *   left: number,
  *   top: number,
  *   behavior: ScrollBehavior

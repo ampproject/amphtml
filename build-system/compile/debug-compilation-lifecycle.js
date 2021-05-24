@@ -42,7 +42,7 @@ const LIFECYCLES = {
  *
  * @param {string} lifecycle
  * @param {string} fullpath
- * @param {string=} content
+ * @param {?string=} content
  * @param {Object=} sourcemap
  */
 function debug(lifecycle, fullpath, content, sourcemap) {
