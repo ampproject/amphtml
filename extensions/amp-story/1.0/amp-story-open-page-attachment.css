@@ -401,7 +401,7 @@
 }
 
 .i-amphtml-story-page-open-attachment-link-icon {
-  width: 24px;
-  height: 24px;
+  width: 24px !important;
+  height: 24px !important;
   fill: var(--i-amphtml-outlink-cta-text-color) !important;
 }
