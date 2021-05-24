@@ -68,7 +68,7 @@
 
 .i-amphtml-layout-responsive,
 [layout=responsive][width][height]:not(.i-amphtml-layout-responsive),
-[width][height][sizes]:not([layout]):not(.i-amphtml-layout-responsive),
+[width][height][sizes]:not(img):not([layout]):not(.i-amphtml-layout-responsive),
 [width][height][heights]:not([layout]):not(.i-amphtml-layout-responsive)
 {
   display: block;
@@ -282,7 +282,7 @@ i-amphtml-sizer {
  */
 .i-amphtml-notbuilt,
 [layout]:not(.i-amphtml-element),
-[width][height][sizes]:not([layout]):not(.i-amphtml-element),
+[width][height][sizes]:not(img):not([layout]):not(.i-amphtml-element),
 [width][height][heights]:not([layout]):not(.i-amphtml-element)
 {
   position: relative;
@@ -317,7 +317,7 @@ amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
 /** Hide all text node children of non-container elements. */
 .i-amphtml-notbuilt:not(.i-amphtml-layout-container),
 [layout]:not([layout='container']):not(.i-amphtml-element),
-[width][height][sizes]:not([layout]):not(.i-amphtml-element),
+[width][height][sizes]:not(img):not([layout]):not(.i-amphtml-element),
 [width][height][heights]:not([layout]):not(.i-amphtml-element) {
   color: transparent !important;
   line-height: 0 !important;
