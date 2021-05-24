@@ -33,7 +33,7 @@ export function maybeValidate(win) {
     return;
   }
   let validator = false;
-  if (isModeDevelopment(this.win)) {
+  if (isModeDevelopment(win)) {
     const hash = parseQueryString(
       win.location['originalHash'] || win.location.hash
     );
