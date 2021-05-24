@@ -28,6 +28,5 @@ validator/**/dist
 validator/export
 
 # Files and directories explicitly ignored by prettier
-.github/ISSUE_TEMPLATE/**
 **/package*.json
 **/node_modules/**
