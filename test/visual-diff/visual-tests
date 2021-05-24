@@ -859,7 +859,7 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
       ],
-      "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-v2-desktop.js"
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.js"
     }
   ]
 }
