@@ -149,6 +149,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 -   Rubicon
 -   Salesforce
 -   T13
+-   Tail
 -   The Ozone Project
 -   Yieldbot
 -   Yieldlab

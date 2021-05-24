@@ -243,6 +243,11 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['TAG_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
+  tail: {
+    url: 'https://ACCOUNT_ID.seg.t.tailtarget.com/amp',
+    macros: ['ACCOUNT_ID'],
+    disableKeyAppend: true,
+  },
 });
 
 // DO NOT MODIFY: Setup for tests
