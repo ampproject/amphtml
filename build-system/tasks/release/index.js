@@ -22,7 +22,7 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const tar = require('tar');
-const {cyan, green} = require('../../common/colors');;
+const {cyan, green} = require('../../common/colors');
 const {execOrDie} = require('../../common/exec');
 const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../helpers');
@@ -105,6 +105,17 @@ function logSeparator_() {
 }
 
 /**
+ * @typedef {{
+ *  name: string,
+ *  environment: string,
+ *  issue: string,
+ *  expiration_date_utc: string,
+ *  define_experiment_constant: string,
+ * }}
+ */
+let ExperimentConfigDef;
+
+/**
  * Prepares output and temp directories.
  *
  * @param {string} outputDir full directory path to emplace artifacts in.
@@ -125,9 +136,10 @@ async function prepareEnvironment_(outputDir, tempDir) {
  * @return {!Array<!Object>} list of AMP flavors to build.
  */
 function discoverDistFlavors_() {
+  const experimentConfigDefs = /** @type {[string, ExperimentConfigDef][]} */ (Object.entries(experimentsConfig));
   const distFlavors = [
     BASE_FLAVOR_CONFIG,
-    ...Object.entries(experimentsConfig)
+    ...experimentConfigDefs
       .filter(
         // Only include experiments that have a `define_experiment_constant` field.
         ([, experimentConfig]) => experimentConfig.define_experiment_constant
@@ -203,6 +215,7 @@ async function compileDistFlavors_(distFlavors, tempDir) {
         )
       ),
     ]);
+    /** @type {Promise} */
     const postBuildMovesPromise = !argv.esm
       ? Promise.all([
           // Individual files to copy from the resulting build artifacts.
@@ -291,7 +304,8 @@ async function populateOrgCdn_(distFlavors, tempDir, outputDir) {
     // INABOX experiments need to have their control population be created from
     // the base flavor.
     if (flavorType == 'base') {
-      Object.entries(experimentsConfig)
+      /** @type {[string, ExperimentConfigDef][]} */
+      (Object.entries(experimentsConfig))
         .filter(([, {environment}]) => environment == 'INABOX')
         .forEach(([experimentFlavor]) => {
           const rtvPrefix =

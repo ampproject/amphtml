@@ -49,7 +49,7 @@
     "common/check-package-manager.js",
     "server/app-index/test/test-html.js",
     "server/app-index/test/test-amphtml-helpers.js",
-    "server/new-server/transforms/dist",
+    "server/new-server/**/*",
     "server/typescript-compile.js",
     "test-configs/dep-check-config.js",
     "tasks/e2e/helper.js",
