@@ -19,7 +19,7 @@ limitations under the License.
     <script src="./bower_components/webcomponentsjs/CustomElements.min.js"></script>
     <link href="polymer.html" rel="import">
     <link href="polymer-extension-toolbar.html" rel="import">
-    <script src="https://cdn.ampproject.org/v0/validator.js"></script>
+    <script src="https://cdn.ampproject.org/v0/validator_wasm.js"></script>
     <style is="custom-style">
       body {
         background-color: #fff;
@@ -126,25 +126,27 @@ limitations under the License.
         </paper-listbox>
       </template>
       <script>
-        Polymer({
-          is: 'results-page',
-          getIssue: function(item) {
-            return amp.validator.renderErrorMessage(item);
-          },
-          hasResults: function(results) {
-            return results.length > 0;
-          },
-          properties: {
-            emptyResultsText: {
-              type: String,
-              value: chrome.i18n.getMessage("emptyResultsText"),
+        amp.validator.init().then(function() {
+          Polymer({
+            is: 'results-page',
+            getIssue: function(item) {
+              return amp.validator.renderErrorMessage(item);
             },
-            results: {
-              type: Array,
-              value: function() { return []; },
-              notify: true,
+            hasResults: function(results) {
+              return results.length > 0;
             },
-          },
+            properties: {
+              emptyResultsText: {
+                type: String,
+                value: chrome.i18n.getMessage("emptyResultsText"),
+              },
+              results: {
+                type: Array,
+                value: function() { return []; },
+                notify: true,
+              },
+            },
+          });
         });
       </script>
     </dom-module>
@@ -224,9 +226,11 @@ limitations under the License.
               xhr.open('GET', url, true);
               xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
-                  validationResult =
-                    amp.validator.validateString(xhr.responseText);
-                  processResult(validationResult, toolbar, content, url);
+                  amp.validator.init().then(function() {
+                    validationResult =
+                      amp.validator.validateString(xhr.responseText);
+                    processResult(validationResult, toolbar, content, url);
+                  });
                 }
               };
               xhr.send();

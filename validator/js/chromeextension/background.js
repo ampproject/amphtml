@@ -315,12 +315,13 @@ function validateUrlFromTab(tab, userAgent) {
   // Add the temporary header to the request
   xhr.setRequestHeader(globals.userAgentHeader, userAgent);
 
-  xhr.onreadystatechange = function() {
+  xhr.onreadystatechange = async function() {
     if (xhr.readyState === 4) {
       // The request is complete; remove our temporary listener.
       chrome.webRequest.onBeforeSendHeaders.removeListener(
           updateSendHeadersUserAgent);
       const doc = xhr.responseText;
+      await amp.validator.init();
       const validationResult = amp.validator.validateString(doc);
       window.sessionStorage.setItem(url, JSON.stringify(validationResult));
       if (validationResult.status == 'PASS') {
