@@ -16,25 +16,32 @@
 'use strict';
 
 /**
- * Lazily instantiate the transformer.
+ * Creates a lazy sync-rpc function.
+ * @param {string} path
+ * @return {function(...*):T}
+ * @template T
  */
-let syncTransformer;
+function lazySyncRpc(path) {
+  let fn;
+  return (...args) => (fn || (fn = require('sync-rpc')(path)))(...args);
+}
 
 /**
  * Synchronously transforms a css string using postcss.
-
  * @param {string} cssStr the css text to transform
  * @param {!Object=} opt_cssnano cssnano options
  * @param {!Object=} opt_filename the filename of the file being transformed. Used for sourcemaps generation.
  * @return {Object} The transformation result
  */
-function transformCssSync(cssStr, opt_cssnano, opt_filename) {
-  if (!syncTransformer) {
-    syncTransformer = require('sync-rpc')(__dirname + '/init-sync.js');
-  }
-  return syncTransformer(cssStr, opt_cssnano, opt_filename);
-}
+const transformCssSync = lazySyncRpc(__dirname + '/init-sync.js');
+
+/**
+ * @param {!Object=} filename the filename of the file being transformed. Used for sourcemaps generation.
+ * @return {string}
+ */
+const jsifyCssSync = lazySyncRpc(__dirname + '/init-jsify-sync.js');
 
 module.exports = {
   transformCssSync,
+  jsifyCssSync,
 };
