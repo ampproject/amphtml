@@ -154,7 +154,7 @@ function installWrappers(chai, utils) {
         Assertion.overwriteMethod(name, overwrite);
         break;
       case PROPERTY:
-        // TODO(28387) cleanup this type.
+        // TODO(#28387) cleanup this type.
         Assertion.overwriteProperty(name, /** @type {*} */ (overwrite));
         break;
       case CHAINABLE_METHOD:

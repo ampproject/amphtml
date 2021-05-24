@@ -80,7 +80,7 @@ function createMocha_() {
   if (argv.testnames || argv.watch) {
     reporter = '';
   } else if (argv.report || isCircleciBuild()) {
-    // TODO(28387) clean up this typing.
+    // TODO(#28387) clean up this typing.
     reporter = /** @type {*} */ (ciReporter);
   } else {
     reporter = dotsReporter;
