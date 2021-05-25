@@ -50,6 +50,7 @@ You can specify a template in one of two ways:
 ```
 
 -   a templating element nested directly inside the `amp-render` element.
+
 ```html
 <amp-render src="https://example.com/data.json">
   <template type="amp-mustache">
@@ -121,7 +122,6 @@ within this `<amp-render>`. There are three valid protocols for the `src` attrib
 1. **https**: This must refer to a CORS HTTP service. Insecure HTTP is not supported.
 2. **amp-state**: For initializing from `<amp-state>` data. See [Initialization from `<amp-state>`](#initialization-from-amp-state) for more details.
 3. **amp-script**: For using `<amp-script>` functions as the data source. See [Using `<amp-script>` as a data source](#using-amp-script-as-a-data-source) for more details.
-
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
@@ -197,6 +197,7 @@ If we just want to display the German cars from the response, we can use the `ke
   </template>
 </amp-render>
 ```
+
 ### `binding`
 
 Controls wheather to render on binding evaluations (e.g. `[text]`) in children on pages using `amp-render` and `amp-bind`.
@@ -205,7 +206,6 @@ Controls wheather to render on binding evaluations (e.g. `[text]`) in children o
 -   `binding="refresh"`: Don't block render on initial load **(slower)**.
 
 If `binding` attribute is not provided, default is `refresh`.
-
 
 ### Common attributes
 
@@ -226,7 +226,7 @@ The `<amp-render>` element exposes a `refresh` action that other elements can re
 
 ## Accessibility
 
-For `amp-render` instances that do not have an aria-live attribute,  `aria-live="polite"` will be added so any changes to the content are announced by screen readers. To override the addition of `aria-live="polite"`, add `aria-live="off"`.
+For `amp-render` instances that do not have an aria-live attribute, `aria-live="polite"` will be added so any changes to the content are announced by screen readers. To override the addition of `aria-live="polite"`, add `aria-live="off"`.
 
 ## Validation
 
