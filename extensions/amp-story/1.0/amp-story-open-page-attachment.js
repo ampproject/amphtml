@@ -163,6 +163,13 @@ const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
     openAttachmentEl.setAttribute('href', attachmentHref);
   }
 
+  // Copy title to the element.
+  const attachmentTitle =
+    attachmentEl.getAttribute('title') || anchorChild?.getAttribute('title');
+  if (attachmentTitle) {
+    openAttachmentEl.setAttribute('title', attachmentTitle);
+  }
+
   // Get elements.
   const {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
 
