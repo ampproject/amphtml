@@ -15,7 +15,7 @@
  */
 import {DomBasedWeakRef} from '../../../../src/core/dom/weakref';
 
-describes.realWin('DOM - DomBasedWeakRef', {}, (env) => {
+describes.realWin('DOM - DOM-based weakref', {}, (env) => {
   let element;
   beforeEach(() => {
     element = document.createElement('div');

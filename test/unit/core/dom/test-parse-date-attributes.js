@@ -16,7 +16,7 @@
 
 import {parseDateAttrs as parseDateAttrsBase} from '../../../../src/core/dom/parse-date-attributes';
 
-describes.sandboxed('utils/date', {}, (env) => {
+describes.sandboxed('DOM - parse date attributes', {}, (env) => {
   describe('parseDateAttrs', () => {
     const DATE = new Date(1514793600000);
     const DATE_STRING = DATE.toISOString();
