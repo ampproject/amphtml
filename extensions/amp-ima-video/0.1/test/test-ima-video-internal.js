@@ -99,32 +99,24 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const bigPlayDivMock = {
-      setAttribute: env.sandbox.spy(),
-    };
     const adDisplayContainerMock = {initialize() {}};
     const initSpy = env.sandbox.spy(adDisplayContainerMock, 'initialize');
     const videoPlayerMock = getVideoPlayerMock();
     const loadSpy = env.sandbox.spy(videoPlayerMock, 'load');
     const mockAdsLoader = {requestAds() {}};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
-    //const playAdsSpy = env.sandbox.spy(imaVideoObj, 'playAds');
-    //const playAdsFunc = imaVideoObj.playAds;
-    //const playAdsSpy = env.sandbox.spy(playAdsFunc);
-    imaVideoObj.setBigPlayDivForTesting(bigPlayDivMock);
     imaVideoObj.setAdDisplayContainerForTesting(adDisplayContainerMock);
     imaVideoObj.setVideoPlayerForTesting(videoPlayerMock);
 
     imaVideoObj.onBigPlayClick();
 
-    const properties = imaVideoObj.getPropertiesForTesting();
-    expect(properties.playbackStarted).to.be.true;
-    expect(properties.uiTicker).to.exist;
-    expect(bigPlayDivMock.setAttribute.withArgs('hidden', '')).to.be.calledOnce;
+    const {elements, playbackStarted, uiTicker} =
+      imaVideoObj.getPropertiesForTesting();
+    expect(playbackStarted).to.be.true;
+    expect(uiTicker).to.exist;
+    expect(elements.overlayButton).to.have.attribute('hidden');
     expect(initSpy).to.be.called;
     expect(loadSpy).to.be.called;
-    // TODO - Fix one I figure out how to spy on internals.
-    //expect(playAdsSpy).to.be.called;
   });
 
   it('updates ad countdown timer', () => {
@@ -193,13 +185,13 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
         defaults = Object.assign(defaults, {adLabel: label});
       }
       imaVideoObj.imaVideo(win, defaults);
-      const {countdownDiv} = imaVideoObj.getPropertiesForTesting();
+      const {elements} = imaVideoObj.getPropertiesForTesting();
       const adsManagerMock = getAdsManagerMock({remainingTime});
       adPodInfo.getTotalAds = () => totalAds;
       adPodInfo.getAdPosition = () => adPosition;
       imaVideoObj.setAdsManagerForTesting(adsManagerMock);
       imaVideoObj.onAdProgress({});
-      expect(countdownDiv.textContent).to.eql(expected);
+      expect(elements.countdown.textContent).to.eql(expected);
     });
   });
 
@@ -464,7 +456,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     expect(removeEventListenerSpy).to.have.been.calledWith(
       properties.interactEvent
     );
-    expect(properties.adContainerDiv).not.to.have.attribute('hidden');
+    expect(properties.elements.adContainer).not.to.have.attribute('hidden');
     expect(removeEventListenerSpy).to.have.been.calledWith('ended');
     // TODO - Fix when I can spy on internals.
     //expect(hideControlsSpy).to.have.been.called;
@@ -516,7 +508,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     expect(removeEventListenerSpy).to.have.been.calledWith(
       properties.interactEvent
     );
-    expect(properties.adContainerDiv).not.to.have.attribute('hidden');
+    expect(properties.elements.adContainer).not.to.have.attribute('hidden');
     expect(removeEventListenerSpy).to.have.been.calledWith('ended');
     // TODO - Fix when I can spy on internals.
     //expect(hideControlsSpy).to.have.been.called;
@@ -547,22 +539,18 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.setVideoPlayerForTesting(videoMock);
     imaVideoObj.setAdsManagerDimensionsOnLoadForTesting(100, 200);
     imaVideoObj.setAdsManagerForTesting(adsManagerMock);
-    const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
-    expect(controlsDiv).not.to.be.null;
-    const {playPauseDiv} = imaVideoObj.getPropertiesForTesting();
-    expect(playPauseDiv).not.to.be.null;
-    const {timeDiv} = imaVideoObj.getPropertiesForTesting();
-    expect(timeDiv).not.to.be.null;
-    const {muteUnmuteDiv} = imaVideoObj.getPropertiesForTesting();
-    expect(muteUnmuteDiv).not.to.be.null;
-    const {fullscreenDiv} = imaVideoObj.getPropertiesForTesting();
-    expect(fullscreenDiv).not.to.be.null;
+    const {elements} = imaVideoObj.getPropertiesForTesting();
+    expect(elements.controls).not.to.be.null;
+    expect(elements.playButton).not.to.be.null;
+    expect(elements.time).not.to.be.null;
+    expect(elements.muteButton).not.to.be.null;
+    expect(elements.fullscreenButton).not.to.be.null;
     // expect controls to be hidden initially
-    expect(controlsDiv).to.have.attribute('hidden');
+    expect(elements.controls).to.have.attribute('hidden');
     // call pause function to display ads
     imaVideoObj.onContentPauseRequested(mockGlobal);
     // expect controls to now be shown
-    expect(controlsDiv).not.to.have.attribute('hidden');
+    expect(elements.controls).not.to.have.attribute('hidden');
   });
 
   it('resumes content', () => {
@@ -672,19 +660,18 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.setVideoPlayerForTesting(getVideoPlayerMock());
     imaVideoObj.setContentCompleteForTesting(true);
     // expect a subset of controls to be hidden / displayed during ad
-    const {controlsDiv, playPauseDiv, timeDiv, muteUnmuteDiv, fullscreenDiv} =
-      imaVideoObj.getPropertiesForTesting();
-    expect(controlsDiv).not.to.be.null;
-    expect(playPauseDiv).not.to.be.null;
-    expect(timeDiv).not.to.be.null;
-    expect(muteUnmuteDiv).not.to.be.null;
-    expect(fullscreenDiv).not.to.be.null;
+    const {elements} = imaVideoObj.getPropertiesForTesting();
+    expect(elements.controls).not.to.be.null;
+    expect(elements.playButton).not.to.be.null;
+    expect(elements.time).not.to.be.null;
+    expect(elements.muteButton).not.to.be.null;
+    expect(elements.fullscreenButton).not.to.be.null;
     imaVideoObj.showAdControls();
-    expect(fullscreenDiv).not.to.have.attribute('hidden');
+    expect(elements.fullscreenButton).not.to.have.attribute('hidden');
     // resume content after ad finishes
     imaVideoObj.onContentResumeRequested();
     // expect default control buttons to be displayed again
-    expect(controlsDiv).not.to.have.attribute('hidden');
+    expect(elements.controls).not.to.have.attribute('hidden');
   });
 
   it('ad controls are smaller when skippable on mobile', () => {
@@ -725,40 +712,32 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     });
   });
 
-  it(
-    'shows bigPlayDiv with content complete, ' +
-      'when content resume is called',
-    () => {
-      const div = doc.createElement('div');
-      div.setAttribute('id', 'c');
-      doc.body.appendChild(div);
+  it('shows bigPlayDiv with content complete, when content resume is called', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
 
-      imaVideoObj.imaVideo(win, {
-        width: 640,
-        height: 360,
-        src: srcUrl,
-        tag: adTagUrl,
-      });
-      const videoMock = getVideoPlayerMock();
-      const addEventListenerSpy = env.sandbox.spy(
-        videoMock,
-        'addEventListener'
-      );
-      imaVideoObj.setVideoPlayerForTesting(videoMock);
-      imaVideoObj.setContentCompleteForTesting(true);
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = getVideoPlayerMock();
+    const addEventListenerSpy = env.sandbox.spy(videoMock, 'addEventListener');
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+    imaVideoObj.setContentCompleteForTesting(true);
 
-      imaVideoObj.onContentResumeRequested();
+    imaVideoObj.onContentResumeRequested();
 
-      const imaVideoProperties = imaVideoObj.getPropertiesForTesting();
+    const {elements, adsActive, interactEvent} =
+      imaVideoObj.getPropertiesForTesting();
 
-      expect(imaVideoProperties.adsActive).to.be.false;
-      expect(addEventListenerSpy).to.have.been.calledWith(
-        imaVideoProperties.interactEvent
-      );
-      expect(addEventListenerSpy).to.have.been.calledWith('ended');
-      expect(imaVideoProperties.bigPlayDiv).not.to.have.attribute('hidden');
-    }
-  );
+    expect(adsActive).to.be.false;
+    expect(addEventListenerSpy).to.have.been.calledWith(interactEvent);
+    expect(addEventListenerSpy).to.have.been.calledWith('ended');
+    expect(elements.overlayButton).not.to.have.attribute('hidden');
+  });
 
   it('shows bigPlayDiv with allAdsCompleted, and content ended', () => {
     const div = doc.createElement('div');
@@ -775,45 +754,36 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
 
     imaVideoObj.onContentEnded();
 
-    const imaVideoProperties = imaVideoObj.getPropertiesForTesting();
-
-    expect(imaVideoProperties.bigPlayDiv).not.to.have.attribute('hidden');
+    const {elements} = imaVideoObj.getPropertiesForTesting();
+    expect(elements.overlayButton).not.to.have.attribute('hidden');
   });
 
-  it(
-    'does not show bigPlayDiv when content is resumed, ' +
-      'and not content complete',
-    () => {
-      const div = doc.createElement('div');
-      div.setAttribute('id', 'c');
-      doc.body.appendChild(div);
+  it('does not show bigPlayDiv when content is resumed, and not content complete', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
 
-      imaVideoObj.imaVideo(win, {
-        width: 640,
-        height: 360,
-        src: srcUrl,
-        tag: adTagUrl,
-      });
-      const videoMock = getVideoPlayerMock();
-      const addEventListenerSpy = env.sandbox.spy(
-        videoMock,
-        'addEventListener'
-      );
-      imaVideoObj.setVideoPlayerForTesting(videoMock);
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = getVideoPlayerMock();
+    const addEventListenerSpy = env.sandbox.spy(videoMock, 'addEventListener');
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
 
-      imaVideoObj.onBigPlayClick();
-      imaVideoObj.onContentResumeRequested();
+    imaVideoObj.onBigPlayClick();
+    imaVideoObj.onContentResumeRequested();
 
-      const imaVideoProperties = imaVideoObj.getPropertiesForTesting();
+    const {elements, adsActive, interactEvent} =
+      imaVideoObj.getPropertiesForTesting();
 
-      expect(imaVideoProperties.adsActive).to.be.false;
-      expect(addEventListenerSpy).to.have.been.calledWith(
-        imaVideoProperties.interactEvent
-      );
-      expect(addEventListenerSpy).to.have.been.calledWith('ended');
-      expect(imaVideoProperties.bigPlayDiv).to.have.attribute('hidden');
-    }
-  );
+    expect(adsActive).to.be.false;
+    expect(addEventListenerSpy).to.have.been.calledWith(interactEvent);
+    expect(addEventListenerSpy).to.have.been.calledWith('ended');
+    expect(elements.overlayButton).to.have.attribute('hidden');
+  });
 
   it('updates playing time', () => {
     const div = doc.createElement('div');
@@ -827,36 +797,25 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       tag: adTagUrl,
     });
 
+    const {elements} = imaVideoObj.getPropertiesForTesting();
+
     imaVideoObj.updateTime(0, 60);
-    expect(imaVideoObj.getPropertiesForTesting().timeDiv.textContent).to.eql(
-      '0:00 / 1:00'
-    );
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressLine.style.width
-    ).to.eql('0%');
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left
-    ).to.eql('-1%');
+
+    expect(elements.time.textContent).to.eql('0:00 / 1:00');
+    expect(elements.progressLine.style.width).to.eql('0%');
+    expect(elements.progressMarker.style.left).to.eql('-1%');
+
     imaVideoObj.updateTime(30, 60);
-    expect(imaVideoObj.getPropertiesForTesting().timeDiv.textContent).to.eql(
-      '0:30 / 1:00'
-    );
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressLine.style.width
-    ).to.eql('50%');
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left
-    ).to.eql('49%');
+
+    expect(elements.time.textContent).to.eql('0:30 / 1:00');
+    expect(elements.progressLine.style.width).to.eql('50%');
+    expect(elements.progressMarker.style.left).to.eql('49%');
+
     imaVideoObj.updateTime(60, 60);
-    expect(imaVideoObj.getPropertiesForTesting().timeDiv.textContent).to.eql(
-      '1:00 / 1:00'
-    );
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressLine.style.width
-    ).to.eql('100%');
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left
-    ).to.eql('99%');
+
+    expect(elements.time.textContent).to.eql('1:00 / 1:00');
+    expect(elements.progressLine.style.width).to.eql('100%');
+    expect(elements.progressMarker.style.left).to.eql('99%');
   });
 
   it('formats time', () => {
@@ -917,9 +876,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       src: srcUrl,
       tag: adTagUrl,
     });
-    imaVideoObj.setPlayerStateForTesting(
-      imaVideoObj.getPropertiesForTesting().PlayerStates.PAUSED
-    );
+    imaVideoObj.setPlayerStateForTesting(imaVideoObj.PlayerStates.PAUSED);
     //const playVideoSpy = env.sandbox.spy(imaVideoObj, 'playVideo');
 
     imaVideoObj.onPlayPauseClick();
@@ -940,9 +897,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       src: srcUrl,
       tag: adTagUrl,
     });
-    imaVideoObj.setPlayerStateForTesting(
-      imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING
-    );
+    imaVideoObj.setPlayerStateForTesting(imaVideoObj.PlayerStates.PLAYING);
     //const pauseVideoSpy = env.sandbox.spy(imaVideoObj, 'pauseVideo');
 
     imaVideoObj.onPlayPauseClick();
@@ -968,12 +923,9 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
 
     imaVideoObj.playVideo();
 
-    expect(
-      imaVideoObj.getPropertiesForTesting().adContainerDiv
-    ).to.have.attribute('hidden');
-    expect(imaVideoObj.getPropertiesForTesting().playerState).to.eql(
-      imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING
-    );
+    const {elements, playerState} = imaVideoObj.getPropertiesForTesting();
+    expect(elements.adContainer).to.have.attribute('hidden');
+    expect(playerState).to.equal(imaVideoObj.PlayerStates.PLAYING);
     // TODO - Why doesn't this work?
     //expect(showControlsSpy).to.have.been.called;
     expect(playSpy).to.have.been.called;
@@ -995,16 +947,14 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.setVideoPlayerForTesting(videoMock);
     //const showControlsSpy = env.sandbox.spy(imaVideoObj, 'showControls');
     imaVideoObj.getPropertiesForTesting().playerState =
-      imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING;
+      imaVideoObj.PlayerStates.PLAYING;
 
     imaVideoObj.pauseVideo({});
 
     expect(pauseSpy).to.have.been.called;
     expect(imaVideoObj.getPropertiesForTesting().playerState).to.eql(
-      imaVideoObj.getPropertiesForTesting().PlayerStates.PAUSED
+      imaVideoObj.PlayerStates.PAUSED
     );
-    // TODO - Why doesn't this work?
-    //expect(showControlsSpy).to.have.been.called;
   });
 
   it('mutes on click', () => {
@@ -1022,15 +972,13 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.setVideoPlayerForTesting(videoMock);
     const adsManagerMock = getAdsManagerMock();
     imaVideoObj.setAdsManagerForTesting(adsManagerMock);
-    imaVideoObj.setVideoPlayerMutedForTesting(false);
-    //const pauseVideoSpy = env.sandbox.spy(imaVideoObj, 'pauseVideo');
+
+    const {elements} = imaVideoObj.getPropertiesForTesting();
+    elements.video.muted = false;
 
     imaVideoObj.onMuteUnmuteClick();
 
-    const isMuted = imaVideoObj.getPropertiesForTesting().videoPlayer.muted;
-
-    //expect(pauseVideoSpy).to.have.been.called;
-    expect(isMuted).to.be.true;
+    expect(elements.video.muted).to.be.true;
   });
 
   it('unmutes on click', () => {
@@ -1048,15 +996,13 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.setVideoPlayerForTesting(videoMock);
     const adsManagerMock = getAdsManagerMock();
     imaVideoObj.setAdsManagerForTesting(adsManagerMock);
-    imaVideoObj.setVideoPlayerMutedForTesting(true);
-    //const pauseVideoSpy = env.sandbox.spy(imaVideoObj, 'pauseVideo');
+
+    const {elements} = imaVideoObj.getPropertiesForTesting();
+    elements.video.muted = true;
 
     imaVideoObj.onMuteUnmuteClick();
 
-    const isMuted = imaVideoObj.getPropertiesForTesting().videoPlayer.muted;
-
-    //expect(pauseVideoSpy).to.have.been.called;
-    expect(isMuted).to.be.false;
+    expect(elements.video.muted).to.be.false;
   });
 
   it('pauses video after webkit end fullscreen', () => {
@@ -1079,13 +1025,13 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.setVideoPlayerForTesting(videoMock);
     //const showControlsSpy = env.sandbox.spy(imaVideoObj, 'showControls');
     imaVideoObj.getPropertiesForTesting().playerState =
-      imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING;
+      imaVideoObj.PlayerStates.PLAYING;
 
     imaVideoObj.pauseVideo({type: 'webkitendfullscreen'});
 
     expect(pauseSpy).to.have.been.called;
     expect(imaVideoObj.getPropertiesForTesting().playerState).to.eql(
-      imaVideoObj.getPropertiesForTesting().PlayerStates.PAUSED
+      imaVideoObj.PlayerStates.PAUSED
     );
     // TODO - Why doesn't this work?
     //expect(showControlsSpy).to.have.been.called;
@@ -1104,16 +1050,15 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       tag: adTagUrl,
     });
     imaVideoObj.getPropertiesForTesting().playerState =
-      imaVideoObj.getPropertiesForTesting().PlayerStates.PAUSED;
+      imaVideoObj.PlayerStates.PAUSED;
     imaVideoObj.setHideControlsTimeoutForTesting(null);
 
     imaVideoObj.showControls();
 
-    expect(
-      imaVideoObj.getPropertiesForTesting().controlsDiv
-    ).not.to.have.attribute('hidden');
-    expect(imaVideoObj.getPropertiesForTesting().hideControlsTimeout).to.be
-      .null;
+    const {elements, hideControlsTimeout} =
+      imaVideoObj.getPropertiesForTesting();
+    expect(elements.controls).not.to.have.attribute('hidden');
+    expect(hideControlsTimeout).to.be.null;
   });
 
   it('shows controls when playing', () => {
@@ -1127,17 +1072,14 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       src: srcUrl,
       tag: adTagUrl,
     });
-    imaVideoObj.setPlayerStateForTesting(
-      imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING
-    );
+    imaVideoObj.setPlayerStateForTesting(imaVideoObj.PlayerStates.PLAYING);
 
     imaVideoObj.showControls();
 
-    expect(
-      imaVideoObj.getPropertiesForTesting().controlsDiv
-    ).not.to.have.attribute('hidden');
-    expect(imaVideoObj.getPropertiesForTesting().hideControlsTimeout).not.to.be
-      .undefined;
+    const {elements, hideControlsTimeout} =
+      imaVideoObj.getPropertiesForTesting();
+    expect(elements.controls).to.not.have.attribute('hidden');
+    expect(hideControlsTimeout).to.not.to.be.undefined;
   });
 
   it('hides controls', () => {
@@ -1154,9 +1096,8 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
 
     imaVideoObj.hideControls();
 
-    expect(imaVideoObj.getPropertiesForTesting().controlsDiv).to.have.attribute(
-      'hidden'
-    );
+    const {elements} = imaVideoObj.getPropertiesForTesting();
+    expect(elements.controls).to.have.attribute('hidden');
   });
 
   // Case when autoplay signal is sent before play signal is sent.
@@ -1174,15 +1115,12 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.adsActive = false;
 
     imaVideoObj.hideControls();
-    expect(imaVideoObj.getPropertiesForTesting().controlsDiv).to.have.attribute(
-      'hidden'
-    );
+    const {elements} = imaVideoObj.getPropertiesForTesting();
+    expect(elements.controls).to.have.attribute('hidden');
     expect(imaVideoObj.getPropertiesForTesting().hideControlsQueued).to.be.true;
 
     imaVideoObj.playVideo();
-    expect(imaVideoObj.getPropertiesForTesting().controlsDiv).to.have.attribute(
-      'hidden'
-    );
+    expect(elements.controls).to.have.attribute('hidden');
     expect(imaVideoObj.getPropertiesForTesting().hideControlsQueued).to.be
       .false;
   });
@@ -1201,16 +1139,13 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.adsActive = false;
 
     imaVideoObj.hideControls();
-    expect(imaVideoObj.getPropertiesForTesting().controlsDiv).to.have.attribute(
-      'hidden'
-    );
+    const {elements} = imaVideoObj.getPropertiesForTesting();
+    expect(elements.controls).to.have.attribute('hidden');
     expect(imaVideoObj.getPropertiesForTesting().hideControlsQueued).to.be.true;
 
     // Fake the ad starting to play
     imaVideoObj.showAdControls();
-    expect(
-      imaVideoObj.getPropertiesForTesting().controlsDiv
-    ).not.to.have.attribute('hidden');
+    expect(elements.controls).not.to.have.attribute('hidden');
     expect(imaVideoObj.getPropertiesForTesting().hideControlsQueued).to.be.true;
   });
 
@@ -1230,28 +1165,21 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
 
       imaVideoObj.hideControls();
 
+      const {elements} = imaVideoObj.getPropertiesForTesting();
       expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be.false;
-      expect(
-        imaVideoObj.getPropertiesForTesting().controlsDiv
-      ).to.have.attribute('hidden');
+      expect(elements.controls).to.have.attribute('hidden');
 
       const interactEvent = new Event(hoverEvent);
-      const videoPlayerElement =
-        imaVideoObj.getPropertiesForTesting().videoPlayer;
 
-      imaVideoObj.setPlayerStateForTesting(
-        imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING
-      );
+      imaVideoObj.setPlayerStateForTesting(imaVideoObj.PlayerStates.PLAYING);
       imaVideoObj.addHoverEventToElement(
-        videoPlayerElement,
+        elements.video,
         imaVideoObj.getShowControlsThrottledForTesting()
       );
-      videoPlayerElement.dispatchEvent(interactEvent);
+      elements.video.dispatchEvent(interactEvent);
 
       expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be.true;
-      expect(
-        imaVideoObj.getPropertiesForTesting().controlsDiv
-      ).not.to.have.attribute('hidden');
+      expect(elements.controls).not.to.have.attribute('hidden');
       expect(imaVideoObj.getPropertiesForTesting().hideControlsTimeout).not.to
         .be.undefined;
     });
@@ -1269,50 +1197,39 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       });
 
       imaVideoObj.hideControls();
+
+      const {elements} = imaVideoObj.getPropertiesForTesting();
+
       expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be.false;
-      expect(
-        imaVideoObj.getPropertiesForTesting().controlsDiv
-      ).to.have.attribute('hidden');
+      expect(elements.controls).to.have.attribute('hidden');
 
       const interactEvent = new Event(hoverEvent);
-      const videoPlayerElement =
-        imaVideoObj.getPropertiesForTesting().videoPlayer;
 
-      imaVideoObj.setPlayerStateForTesting(
-        imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING
-      );
+      imaVideoObj.setPlayerStateForTesting(imaVideoObj.PlayerStates.PLAYING);
       imaVideoObj.addHoverEventToElement(
-        videoPlayerElement,
+        elements.video,
         imaVideoObj.getShowControlsThrottledForTesting()
       );
-      videoPlayerElement.dispatchEvent(interactEvent);
+      elements.video.dispatchEvent(interactEvent);
 
       expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be.true;
-      expect(
-        imaVideoObj.getPropertiesForTesting().controlsDiv
-      ).not.to.have.attribute('hidden');
+      expect(elements.controls).not.to.have.attribute('hidden');
 
       imaVideoObj.hideControls();
       expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be.false;
-      expect(
-        imaVideoObj.getPropertiesForTesting().controlsDiv
-      ).to.have.attribute('hidden');
+      expect(elements.controls).to.have.attribute('hidden');
 
       clock.tick(100);
-      videoPlayerElement.dispatchEvent(interactEvent);
+      elements.video.dispatchEvent(interactEvent);
 
       expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be.false;
-      expect(
-        imaVideoObj.getPropertiesForTesting().controlsDiv
-      ).to.have.attribute('hidden');
+      expect(elements.controls).to.have.attribute('hidden');
 
       clock.tick(950);
-      videoPlayerElement.dispatchEvent(interactEvent);
+      elements.video.dispatchEvent(interactEvent);
 
       expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be.true;
-      expect(
-        imaVideoObj.getPropertiesForTesting().controlsDiv
-      ).not.to.have.attribute('hidden');
+      expect(elements.controls).not.to.have.attribute('hidden');
     });
   });
 
