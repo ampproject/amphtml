@@ -3852,6 +3852,13 @@ function getLayoutSizeDefinedClass() {
 }
 
 /**
+ * @return {string}
+ */
+function getLayoutAwaitingSizeClass() {
+  return "i-amphtml-layout-awaiting-size";
+}
+
+/**
  * @param {!generated.AmpLayout.Layout} layout
  * @return {boolean}
  */
@@ -3864,6 +3871,14 @@ function isLayoutSizeDefined(layout) {
       layout === generated.AmpLayout.Layout.FLUID ||
       layout === generated.AmpLayout.Layout.INTRINSIC ||
       layout === generated.AmpLayout.Layout.RESPONSIVE);
+}
+
+/**
+ * @param {!generated.AmpLayout.Layout} layout
+ * @return {boolean}
+ */
+function isLayoutAwaitingSize(layout) {
+  return layout === generated.AmpLayout.Layout.FLUID;
 }
 
 /**
@@ -4438,6 +4453,10 @@ function validateSsrLayout(
     if (isLayoutSizeDefined(layout)) {
       // i-amphtml-layout-size-defined
       validInternalClasses[getLayoutSizeDefinedClass()] = 0;
+    }
+    if (isLayoutAwaitingSize(layout)) {
+      // i-amphtml-layout-awaiting-size
+      validInternalClasses[getLayoutAwaitingSizeClass()] = 0;
     }
     const classes = classAttr.split(/[\s+]/);
     for (const classToken of classes) {
