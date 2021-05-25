@@ -199,15 +199,12 @@ If we just want to display the German cars from the response, we can use the `ke
 ```
 ### `binding`
 
-Controls wheather to render on binding evaluations (e.g. `[text]`) in children on pages using `amp-render` and `amp-bind`. 
+Controls wheather to render on binding evaluations (e.g. `[text]`) in children on pages using `amp-render` and `amp-bind`.
 
-We recommend using `binding="no"` or `binding="refresh"` for faster performance.
+-   `binding="no"`: Never block render **(faster)**.
+-   `binding="refresh"`: Don't block render on initial load **(slower)**.
 
--   `binding="no"`: Never block render **(fastest)**.
--   `binding="refresh"`: Don't block render on initial load **(faster)**.
--   `binding="always"`: Always block render **(slow)**.
-
-If `binding` attribute is not provided, default is `always`.
+If `binding` attribute is not provided, default is `refresh`.
 
 
 ### Common attributes
