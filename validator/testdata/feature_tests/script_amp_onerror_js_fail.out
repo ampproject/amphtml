@@ -30,7 +30,7 @@ FAIL
 |    <!-- Invalid: cdata does not match exactly -->
 |    <script amp-onerror>document.querySelector("script[src*='/v0.js']").onerror=function(){document.querySelector('style[amp-boilerplate]').textContent=' '}</script>
 >>   ^~~~~~~~~
-feature_tests/script_amp_onerror_fail.html:30:2 The mandatory text inside tag 'script amp-onerror' is missing or incorrect.
+feature_tests/script_amp_onerror_js_fail.html:30:2 The mandatory text inside tag 'script amp-onerror' is missing or incorrect.
 |  </head>
 |  <body>
 |  Hello, world.

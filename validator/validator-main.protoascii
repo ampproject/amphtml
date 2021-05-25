@@ -3367,11 +3367,30 @@ tags: {
     }
   }
 }
+# Enables early styling on fast failure to load v0.js or v0.mjs. See GitHub #22543.
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "script amp-onerror (v0.js or v0.mjs)"
+  descriptive_name: "script amp-onerror"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-onerror"
+    value: ""
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    mandatory_cdata: "[].slice.call(document.querySelectorAll(\"script[src*='/v0.js'],script[src*='/v0.mjs']\")).forEach(function(s){s.onerror=function(){document.querySelector('style[amp-boilerplate]').textContent=''}})"
+  }
+}
 # Enables early styling on fast failure to load v0.js. See GitHub #22543.
 tags: {
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "script amp-onerror"
+  spec_name: "script amp-onerror (v0.js)"
   descriptive_name: "script amp-onerror"
   unique: true
   mandatory_parent: "HEAD"
