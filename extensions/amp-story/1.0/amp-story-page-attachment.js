@@ -375,9 +375,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   openRemoteV2_() {
-    const clickTarget = this.element.parentElement
-      .querySelector('.i-amphtml-story-page-open-attachment-host')
-      .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
+    const clickTarget =
+      this.element.parentElement
+        .querySelector('amp-story-open-attachment')
+        ?.querySelector('a') ||
+      this.element.parentElement
+        .querySelector('.i-amphtml-story-page-open-attachment-host')
+        .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
 
     const isMobileUI =
       this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;

@@ -99,7 +99,8 @@ export const buildOpenAttachmentElementLinkIcon = (element) =>
 export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
   if (isPageAttachmentUiV2ExperimentOn(pageEl.getAmpDoc().win)) {
     const isOutlink =
-      attachmentEl.getAttribute('href') || attachmentEl.querySelector('a');
+      attachmentEl.nodeName === 'AMP-STORY-PAGE-OUTLINK' ||
+      attachmentEl.getAttribute('href');
     if (isOutlink) {
       return renderOutlinkPageAttachmentUI(pageEl, attachmentEl);
     } else {
