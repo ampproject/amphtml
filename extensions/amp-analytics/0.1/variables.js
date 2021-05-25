@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {SESSION_VALUES, sessionServiceFor} from './session-manager';
 import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/core/constants/enums';
 import {asyncStringReplace} from '../../../src/core/types/string';
@@ -253,6 +254,9 @@ export class VariableService {
     /** @const @private {!./linker-reader.LinkerReader} */
     this.linkerReader_ = linkerReaderServiceFor(this.ampdoc_.win);
 
+    /** @const @private {!./session-manager.SessionManager} */
+    this.sessionManager_ = sessionServiceFor(this.ampdoc_.win);
+
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
     this.register_('$TRIM', (value) => value.trim());
@@ -315,6 +319,7 @@ export class VariableService {
    * @return {!JsonObject} contains all registered macros
    */
   getMacros(element) {
+    const type = element.getAttribute('type');
     const elementMacros = {
       'COOKIE': (name) =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
@@ -325,6 +330,12 @@ export class VariableService {
           element,
           userAssert(key, 'CONSENT_METADATA macro must contain a key')
         ),
+      'SESSION_ID': () => {
+        return this.sessionManager_.getSessionValue(
+          type,
+          SESSION_VALUES.SESSION_ID
+        );
+      },
     };
     const perfMacros = isInFie(element)
       ? {}
@@ -354,7 +365,11 @@ export class VariableService {
               TickLabel.CUMULATIVE_LAYOUT_SHIFT
             ),
         };
-    const merged = {...this.macros_, ...elementMacros, ...perfMacros};
+    const merged = {
+      ...this.macros_,
+      ...elementMacros,
+      ...perfMacros,
+    };
     return /** @type {!JsonObject} */ (merged);
   }
 

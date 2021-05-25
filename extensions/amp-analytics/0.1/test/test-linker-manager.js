@@ -26,6 +26,7 @@ import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
+import {installSessionService} from '../session-manager';
 import {installVariableServiceForTesting} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
 
@@ -79,6 +80,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
     windowInterface.getHostname.returns('amp-source-com.cdn.ampproject.org');
     installVariableServiceForTesting(env.ampdoc);
     installLinkerReaderService(win);
+    installSessionService(win);
   });
 
   it('registers anchor mutator if given valid linkers config', () => {

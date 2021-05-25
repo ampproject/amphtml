@@ -16,6 +16,7 @@
 
 import {getResourceTiming} from '../resource-timing';
 import {installLinkerReaderService} from '../linker-reader';
+import {installSessionService} from '../session-manager';
 import {installVariableServiceForTesting} from '../variables';
 
 /**
@@ -123,6 +124,7 @@ describes.realWin('resourceTiming', {amp: true}, (env) => {
     env.win.document.body.appendChild(element);
     installVariableServiceForTesting(ampdoc);
     installLinkerReaderService(win);
+    installSessionService(win);
   });
 
   it('should return empty if the performance API is not supported', () => {

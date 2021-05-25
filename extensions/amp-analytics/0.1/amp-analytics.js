@@ -40,6 +40,7 @@ import {dict, hasOwn} from '../../../src/core/types/object';
 import {expandTemplate} from '../../../src/core/types/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
+import {installSessionService} from './session-manager';
 import {isArray, isEnumValue} from '../../../src/core/types';
 import {rethrowAsync} from '../../../src/core/error';
 
@@ -844,6 +845,7 @@ AMP.extension(TAG, '0.1', (AMP) => {
   );
   AMP.registerServiceForDoc('activity', Activity);
   installLinkerReaderService(AMP.win);
+  installSessionService(AMP.win);
   AMP.registerServiceForDoc('amp-analytics-variables', VariableService);
   // Register the element.
   AMP.registerElement(TAG, AmpAnalytics);

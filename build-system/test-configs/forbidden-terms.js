@@ -449,6 +449,7 @@ const forbiddenTermsGlobal = {
       'src/services.js',
       'src/service/cid-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
+      'extensions/amp-analytics/0.1/session-manager.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
@@ -909,6 +910,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/session-manager.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },

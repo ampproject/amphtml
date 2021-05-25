@@ -28,6 +28,7 @@ import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
+import {installSessionService} from '../session-manager';
 
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
   let fakeElement;
@@ -36,6 +37,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
   beforeEach(() => {
     fakeElement = env.win.document.documentElement;
     installLinkerReaderService(env.win);
+    installSessionService(env.win);
     variables = new VariableService(env.ampdoc);
   });
 
@@ -269,6 +271,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       win = env.win;
       doc = win.document;
       installLinkerReaderService(win);
+      installSessionService(win);
       installVariableServiceForTesting(doc);
       variables = variableServiceForDoc(doc);
       const {documentElement} = win.document;
