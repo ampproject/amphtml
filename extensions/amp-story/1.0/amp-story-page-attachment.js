@@ -404,20 +404,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.mutateElement(() => {
       storyEl.appendChild(animationEl);
     }).then(() => {
-      // Give some time for the 120ms CSS animation to run (cf
-      // amp-story-page-attachment.css). The navigation itself will take some
-      // time, depending on the target and network conditions.
-      // this.win.setTimeout(() => {
-      //   const navigationService = Services.navigationForDoc(this.getAmpDoc());
-      //   navigationService.navigateTo(
-      //     this.win,
-      //     this.element.getAttribute('href')
-      //   );
-      // }, 50);
-      this.element.parentElement
+      const clickTarget = this.element.parentElement
         .querySelector('.i-amphtml-story-page-open-attachment-host')
-        .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment')
-        .click();
+        .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
+      triggerClickFromLightDom(clickTarget, this.element);
     });
   }
 
