@@ -842,7 +842,7 @@ descendant_tag_list: {
   tag: "VKERN"
   tag: "WBR"
 }
-tags: {  # <amp-story-page-attachment> with href
+tags: {  # <amp-story-page-attachment> with href. Legacy version of <amp-story-page-outlink>
   html_format: AMP
   tag_name: "AMP-STORY-PAGE-ATTACHMENT"
   spec_name: "amp-story-page-attachment[href]"
@@ -930,7 +930,7 @@ tags: {  # <amp-story-page-attachment> with no href
     value: "light"
   }
 }
-tags: {  # Same validation rules as `<amp-story-page-attachment> with href`
+tags: {
   html_format: AMP
   tag_name: "AMP-STORY-PAGE-OUTLINK"
   spec_name: "amp-story-page-outlink"
@@ -952,17 +952,6 @@ tags: {  # Same validation rules as `<amp-story-page-attachment> with href`
     }
   }
   attrs: {
-    name: "cta-text"
-  }
-  attrs: {
-    name: "href"
-    mandatory: true
-    value_url: {
-      protocol: "http"
-      protocol: "https"
-    }
-  }
-  attrs: {
     name: "layout"
     mandatory: true
     value: "nodisplay"
@@ -973,12 +962,10 @@ tags: {  # Same validation rules as `<amp-story-page-attachment> with href`
     value: "dark"
     value: "light"
   }
-  attrs: {
-    name: "title"
-  }
   child_tags: {
-    mandatory_num_child_tags: 0
-  }
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "A"
+  }  
 }
 tags: {  # <amp-story-animation> <script>
   html_format: AMP
