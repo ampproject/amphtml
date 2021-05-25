@@ -212,7 +212,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   getMaxBounds_() {
     // Calculations to clamp image to edge of container.
-    const {width: containerWidth, height: containerHeight} = this.pageSize_;
+    const {height: containerHeight, width: containerWidth} = this.pageSize_;
 
     const ampImgWidth = this.ampImgEl_.getAttribute('width');
     const ampImgHeight = this.ampImgEl_.getAttribute('height');

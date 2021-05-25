@@ -58,9 +58,9 @@ function LightboxWithRef(
     animation = 'fade-in',
     children,
     closeButtonAs,
-    onBeforeOpen,
     onAfterClose,
     onAfterOpen,
+    onBeforeOpen,
     ...rest
   },
   ref

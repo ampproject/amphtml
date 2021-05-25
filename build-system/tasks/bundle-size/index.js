@@ -21,23 +21,23 @@ const globby = require('globby');
 const path = require('path');
 const url = require('url');
 const {
-  gitCommitHash,
-  gitCiMainBaseline,
-  shortSha,
-} = require('../../common/git');
-const {
+  ciPushBranch,
+  ciRepoSlug,
+  circleciPrMergeCommit,
   isPullRequestBuild,
   isPushBuild,
-  ciPushBranch,
-  circleciPrMergeCommit,
-  ciRepoSlug,
 } = require('../../common/ci');
+const {
+  gitCiMainBaseline,
+  gitCommitHash,
+  shortSha,
+} = require('../../common/git');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
 const {cyan, red, yellow} = require('../../common/colors');
 const {log, logWithoutTimestamp} = require('../../common/logging');
-const {report, NoTTYReport} = require('@ampproject/filesize');
+const {NoTTYReport, report} = require('@ampproject/filesize');
 
 const filesizeConfigPath = require.resolve('./filesize.json');
 const fileGlobs = require(filesizeConfigPath).filesize.track;

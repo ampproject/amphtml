@@ -457,7 +457,7 @@ export class AmpForm {
     if (!this.ssrTemplateHelper_.isEnabled()) {
       this.ampFormService_.addFormEventListener(this.form_, 'change', (e) => {
         this.verifier_.onCommit().then((updatedErrors) => {
-          const {updatedElements, errors} = updatedErrors;
+          const {errors, updatedElements} = updatedErrors;
           updatedElements.forEach(checkUserValidityAfterInteraction_);
           // Tell the validation to reveal any input.validationMessage added
           // by the form verifier.

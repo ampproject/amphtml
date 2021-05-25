@@ -135,7 +135,7 @@ export class BindEvaluator {
         errors[expressionString] = {message: error.message, stack: error.stack};
         return;
       }
-      const {result, error} = this.evaluate_(expression, scope);
+      const {error, result} = this.evaluate_(expression, scope);
       if (error) {
         errors[expressionString] = error;
         return;
@@ -145,7 +145,7 @@ export class BindEvaluator {
 
     // Then, validate each binding and delete invalid expression results.
     this.bindings_.forEach((binding) => {
-      const {tagName, property, expressionString} = binding;
+      const {expressionString, property, tagName} = binding;
       const result = cache[expressionString];
       if (result === undefined) {
         return;

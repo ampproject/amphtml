@@ -72,7 +72,7 @@ describes.realWin(
 
     function notifyIntersection(rootMargin, isIntersecting) {
       for (let i = 0; i < observers.length; i++) {
-        const {elements, callback, options} = observers[i];
+        const {callback, elements, options} = observers[i];
         if (
           elements.includes(element) &&
           options.root === doc &&

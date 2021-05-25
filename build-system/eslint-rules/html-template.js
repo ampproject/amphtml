@@ -17,8 +17,8 @@
 
 const {
   staticTemplateFactories,
-  staticTemplateTags,
   staticTemplateFactoryFns,
+  staticTemplateTags,
 } = require('../babel-plugins/static-template-metadata');
 
 /**
@@ -125,7 +125,7 @@ module.exports = function (context) {
       const {start} = template;
 
       for (let i = 0; i < invalids.length; i++) {
-        const {tag, offset} = invalids[i];
+        const {offset, tag} = invalids[i];
         context.report({
           node: template,
           loc: sourceCode.getLocFromIndex(start + offset),

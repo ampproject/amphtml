@@ -340,7 +340,7 @@ export class Controls {
 
   /** @private */
   onPlay_() {
-    const {playButton_, pauseButton_} = this;
+    const {pauseButton_, playButton_} = this;
     this.isSticky_ = false;
     swap(playButton_, pauseButton_);
   }
@@ -360,7 +360,7 @@ export class Controls {
 
   /** @private */
   onUnmute_() {
-    const {unmuteButton_, muteButton_} = this;
+    const {muteButton_, unmuteButton_} = this;
     swap(unmuteButton_, muteButton_);
   }
 
@@ -529,7 +529,7 @@ export class Controls {
       devAssert(this.area_);
 
       const {x, y} = pointerCoords(/** @type {!MouseEvent} */ (e));
-      const {left, top, right, bottom} = this.area_;
+      const {bottom, left, right, top} = this.area_;
 
       // check bounding box as not to trigger this while mouse hovers over
       // buttons
@@ -556,7 +556,7 @@ export class Controls {
 
   /** @public */
   reset() {
-    const {overlay, container} = this;
+    const {container, overlay} = this;
     const els = [overlay, container];
 
     toggle(overlay, false);

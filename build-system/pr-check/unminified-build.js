@@ -21,11 +21,11 @@
 
 const {
   skipDependentJobs,
-  timedExecOrDie,
   storeUnminifiedBuildToWorkspace,
+  timedExecOrDie,
 } = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'unminified-build.js';
 

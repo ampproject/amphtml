@@ -35,7 +35,7 @@ export function streamResponseToWriter(win, response, writer) {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
 
-    reader.read().then(function handleChunk({value, done}) {
+    reader.read().then(function handleChunk({done, value}) {
       if (firstRead) {
         hasContentDeferred.resolve(!done);
         firstRead = false;

@@ -46,7 +46,7 @@ describes.realWin(
 
     it.skip('test-get-data', () => {
       return getViqeo().then((p) => {
-        const {viqeoElement, entry, viqeo} = p;
+        const {entry, viqeo, viqeoElement} = p;
         expect(entry.video.element).to.equal(viqeoElement);
         expect(entry.video instanceof AmpViqeoPlayer).to.equal(true);
         expect(entry.video).to.equal(viqeo);
@@ -177,7 +177,7 @@ describes.realWin(
     });
 
     function getViqeo(params) {
-      const {id, viqeoProfileId, viqeoId, width, height, opt_params} = {
+      const {height, id, opt_params, viqeoId, viqeoProfileId, width} = {
         id: 'myVideo',
         viqeoProfileId: 184,
         viqeoId: '922d04f30b66f1a32eb2',

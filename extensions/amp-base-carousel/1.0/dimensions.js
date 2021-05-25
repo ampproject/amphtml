@@ -55,7 +55,7 @@ let BaseCarouselDimensionDef;
  * @return {!BaseCarouselDimensionDef} The dimension for the Element along the given Axis.
  */
 export function getDimension(axis, el) {
-  const {top, bottom, height, left, right, width} =
+  const {bottom, height, left, right, top, width} =
     el./*OK*/ getBoundingClientRect();
 
   return {
@@ -71,7 +71,7 @@ export function getDimension(axis, el) {
  * @return {number} The center point.
  */
 export function getCenter(axis, el) {
-  const {start, end} = getDimension(axis, el);
+  const {end, start} = getDimension(axis, el);
   return (start + end) / 2;
 }
 
@@ -105,7 +105,7 @@ export function getPosition(axis, alignment, el) {
  * @return {boolean} If the element overlaps the position along the given axis.
  */
 export function overlaps(axis, el, position) {
-  const {start, end} = getDimension(axis, el);
+  const {end, start} = getDimension(axis, el);
   // Ignore the end point, since that is shared with the adjacent Element.
   return start <= position && position < end;
 }

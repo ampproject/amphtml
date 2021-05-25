@@ -25,7 +25,7 @@ export function vmfive(global, data) {
   const mandatory_fields = ['appKey', 'placementId', 'adType'];
   const optional_fields = [];
 
-  const {appKey, placementId, adType} = data;
+  const {adType, appKey, placementId} = data;
 
   global._vmfive_amp = {appKey, placementId, adType};
 

@@ -25,7 +25,7 @@ const {log} = require('../../common/logging');
 
 const exec = util.promisify(childProcess.exec);
 
-const {red, cyan} = colors;
+const {cyan, red} = colors;
 
 // custom-config.json overlays the active config. It is not part of checked-in
 // source (.gitignore'd). See:

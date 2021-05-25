@@ -19,9 +19,9 @@
  * @fileoverview Script that runs various checks during CI.
  */
 
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 const {timedExecOrDie} = require('./utils');
 
 const jobName = 'checks.js';

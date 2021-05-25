@@ -329,7 +329,7 @@ export class HighlightHandler {
       // top and bottom returned by getLayoutRect includes the header padding
       // size. We need to cancel the padding to calculate the positions in
       // document.body like Viewport.animateScrollIntoView does.
-      const {top, bottom} = moveLayoutRect(
+      const {bottom, top} = moveLayoutRect(
         viewport.getLayoutRect(nodes[i]),
         0,
         -paddingTop

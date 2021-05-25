@@ -89,7 +89,7 @@ describes.realWin('Doubleclick SRA', config, (env) => {
     return el;
   }
 
-  function setElementRect(el, {top, left, width, height}) {
+  function setElementRect(el, {height, left, top, width}) {
     env.sandbox.stub(el, 'offsetParent').value(null);
     env.sandbox.stub(el, 'offsetLeft').value(left);
     env.sandbox.stub(el, 'offsetTop').value(top);
@@ -866,7 +866,7 @@ describes.realWin('Doubleclick SRA', config, (env) => {
       const promises = [];
       const resolvers = blocks.map((block) => block.deferred.resolve);
       for (let i = 1; i <= blocks.length; i++) {
-        const {creative, headers, deferred} = blocks[i - 1];
+        const {creative, deferred, headers} = blocks[i - 1];
         sraBlockCallbackHandler(
           creative,
           headers,

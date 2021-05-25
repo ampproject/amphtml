@@ -76,8 +76,8 @@ let AtConfigDef;
  * @return {!JsonObject}
  */
 export function getLojsonData(jsonData) {
-  const {loc, title, pubId, atConfig, referrer, ampDoc} = jsonData;
-  const {href, hostname, host, search, pathname, hash, protocol, port} = loc;
+  const {ampDoc, atConfig, loc, pubId, referrer, title} = jsonData;
+  const {hash, host, hostname, href, pathname, port, protocol, search} = loc;
   const pageInfo = {
     du: href.split('#').shift(),
     hostname,

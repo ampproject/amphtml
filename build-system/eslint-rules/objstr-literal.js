@@ -30,7 +30,7 @@ module.exports = function objstrLiteral(context) {
         });
         return;
       }
-      for (const {key, type, argument} of node.arguments[0].properties) {
+      for (const {argument, key, type} of node.arguments[0].properties) {
         if (!key) {
           context.report({
             node,

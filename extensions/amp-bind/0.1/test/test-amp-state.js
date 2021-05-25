@@ -48,7 +48,7 @@ describes.realWin(
     }
 
     beforeEach(async () => {
-      ({win, ampdoc} = env);
+      ({ampdoc, win} = env);
 
       whenFirstVisiblePromise = new Promise((resolve, reject) => {
         whenFirstVisiblePromiseResolve = resolve;

@@ -657,7 +657,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           const uiState = this.storeService_.get(StateProperty.UI_STATE);
           // The desktop panels UI uses CSS scale. Retrieving clientHeight/Width
           // ensures we are getting the raw size, ignoring the scale.
-          const {width, height} =
+          const {height, width} =
             uiState === UIType.DESKTOP_PANELS
               ? {
                   height: this.element./*OK*/ clientHeight,

@@ -95,7 +95,7 @@ module.exports = {
           return;
         }
 
-        const {variadic, messageArgPos} = metadata;
+        const {messageArgPos, variadic} = metadata;
         // If method is not variadic we don't need to check.
         if (!variadic) {
           return;

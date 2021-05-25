@@ -230,7 +230,7 @@ module.exports = {
           return;
         }
 
-        const {used, declared} = stack.pop();
+        const {declared, used} = stack.pop();
 
         declared.forEach((node, name) => {
           const checker = checkerForAnnotation(node);

@@ -38,7 +38,7 @@ export function fetchCachedSources(videoEl, win) {
     user().error('AMP-VIDEO', 'Video cache not properly configured');
     return Promise.resolve();
   }
-  const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(win.document);
+  const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
   const servicePromise = Services.cacheUrlServicePromiseForDoc(videoEl);
   const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
   return servicePromise

@@ -150,7 +150,7 @@ export class SwipeToDismiss {
    * }} config
    */
   startSwipe(config) {
-    const {swipeElement, mask, direction, orientation} = config;
+    const {direction, mask, orientation, swipeElement} = config;
     this.swipeElement_ = swipeElement;
     this.mask_ = mask;
     this.direction_ = direction;

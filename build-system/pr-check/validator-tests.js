@@ -19,9 +19,9 @@
  * @fileoverview Script that runs the validator tests during CI.
  */
 
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
 const {skipDependentJobs, timedExecOrDie} = require('./utils');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'validator-tests.js';
 

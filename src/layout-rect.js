@@ -297,6 +297,6 @@ export function cloneLayoutMarginsChangeDef(marginsChange) {
  * @return {!LayoutSizeDef}
  */
 export function layoutSizeFromRect(rect) {
-  const {width, height} = rect;
+  const {height, width} = rect;
   return {width, height};
 }

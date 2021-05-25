@@ -52,7 +52,7 @@ export function getFormAsObject(form) {
 
   for (let i = 0; i < elements.length; i++) {
     const input = elements[i];
-    const {checked, name, multiple, options, tagName, type, value} = input;
+    const {checked, multiple, name, options, tagName, type, value} = input;
     if (
       !name ||
       isDisabled(input) ||

@@ -50,7 +50,7 @@ module.exports = function (context) {
         return;
       }
 
-      const {value, type} = arg;
+      const {type, value} = arg;
       if (type !== 'Literal' || typeof value !== 'string') {
         return;
       }

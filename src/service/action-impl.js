@@ -627,7 +627,7 @@ export class ActionService {
     /** @type {?Promise} */
     let currentPromise = null;
     action.actionInfos.forEach((actionInfo) => {
-      const {target, args, method, str} = actionInfo;
+      const {args, method, str, target} = actionInfo;
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
       const invokeAction = () => {
         const node = this.getActionNode_(target);

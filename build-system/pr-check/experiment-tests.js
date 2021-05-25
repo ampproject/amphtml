@@ -24,11 +24,11 @@ const {
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
 const {getExperimentConfig} = require('../common/utils');
 const {isPushBuild} = require('../common/ci');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = `${experiment}-tests.js`;
 

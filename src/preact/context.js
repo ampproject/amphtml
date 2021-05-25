@@ -50,11 +50,11 @@ function getAmpContext() {
  * @return {!PreactDef.VNode}
  */
 export function WithAmpContext({
-  renderable: renderableProp = true,
-  playable: playableProp = true,
+  children,
   loading: loadingProp = 'auto',
   notify: notifyProp,
-  children,
+  playable: playableProp = true,
+  renderable: renderableProp = true,
 }) {
   const parent = useAmpContext();
   const renderable = renderableProp && parent.renderable;

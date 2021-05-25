@@ -61,7 +61,7 @@ self.addEventListener('error', errorHandler_);
 
 self.addEventListener('message', function (event) {
   const messageEvent = /** @type {!MessageEvent} */ (event);
-  const {method, args, id, scope} = /** @type {ToWorkerMessageDef} */ (
+  const {args, id, method, scope} = /** @type {ToWorkerMessageDef} */ (
     messageEvent.data
   );
   let returnValue;

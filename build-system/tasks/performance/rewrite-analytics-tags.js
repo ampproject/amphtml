@@ -98,7 +98,7 @@ async function alterAnalyticsTags(url, version, extraUrlParams) {
 async function rewriteAnalyticsConfig(handlers) {
   const handlerPromises = [];
   handlers.forEach((handler) => {
-    const {handlerName, adsUrls, urls, extraUrlParam} = handler;
+    const {adsUrls, extraUrlParam, handlerName, urls} = handler;
     if (handlerName !== 'analyticsHandler' && handlerName !== 'adsHandler') {
       return;
     }

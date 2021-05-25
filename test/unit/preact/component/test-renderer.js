@@ -19,7 +19,7 @@ import {mount} from 'enzyme';
 import {useRenderer} from '../../../../src/preact/component';
 
 describes.sandboxed('useRenderer', {}, (env) => {
-  function Component({render, data}) {
+  function Component({data, render}) {
     const value = useRenderer(render, data);
     return <div>{value}</div>;
   }

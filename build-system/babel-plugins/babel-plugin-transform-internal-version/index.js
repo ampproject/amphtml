@@ -44,7 +44,7 @@ module.exports = function (babel, options = {}) {
 
       TemplateElement(path) {
         const {node} = path;
-        const {raw, cooked} = node.value;
+        const {cooked, raw} = node.value;
         if (!raw.includes('$internalRuntimeVersion$')) {
           return;
         }

@@ -63,7 +63,7 @@ function makeMethodMessage(method) {
  * @template T
  */
 export function VimeoWithRef(
-  {videoid, autoplay = false, doNotTrack = false, ...rest},
+  {autoplay = false, doNotTrack = false, videoid, ...rest},
   ref
 ) {
   const origin = useMemo(getVimeoOriginRegExp, []);

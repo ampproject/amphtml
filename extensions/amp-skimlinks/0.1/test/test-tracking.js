@@ -25,9 +25,9 @@ import {
 } from '../constants';
 
 const {
-  pageTrackingUrl: PAGE_IMPRESSION_TRACKING_URL,
   linksTrackingUrl: LINKS_IMPRESSIONS_TRACKING_URL,
   nonAffiliateTrackingUrl: NA_CLICK_TRACKING_URL,
+  pageTrackingUrl: PAGE_IMPRESSION_TRACKING_URL,
 } = DEFAULT_CONFIG;
 
 describes.fakeWin(

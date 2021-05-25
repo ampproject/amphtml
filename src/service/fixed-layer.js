@@ -463,8 +463,8 @@ export class FixedLayer {
               const {element, forceTransfer} = fe;
               const style = computedStyle(win, element);
 
-              const {offsetWidth, offsetHeight, offsetTop} = element;
-              const {position = '', display = '', bottom, zIndex} = style;
+              const {offsetHeight, offsetTop, offsetWidth} = element;
+              const {bottom, display = '', position = '', zIndex} = style;
               const opacity = parseFloat(style.opacity);
               const transform =
                 style[getVendorJsPropertyName(style, 'transform')];

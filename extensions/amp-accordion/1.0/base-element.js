@@ -132,7 +132,7 @@ function getState(element, mu, getExpandStateTrigger) {
  * @param {!AccordionDef.SectionShimProps} props
  * @return {PreactDef.Renderable}
  */
-function SectionShim(sectionElement, {expanded, children}) {
+function SectionShim(sectionElement, {children, expanded}) {
   useLayoutEffect(() => {
     toggleAttribute(sectionElement, 'expanded', expanded);
     if (sectionElement[SECTION_POST_RENDER]) {
@@ -156,11 +156,11 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
 function HeaderShim(
   sectionElement,
   {
-    id,
-    role,
-    onClick,
     'aria-controls': ariaControls,
     'aria-expanded': ariaExpanded,
+    id,
+    onClick,
+    role,
   }
 ) {
   const headerElement = sectionElement.firstElementChild;
@@ -209,7 +209,7 @@ const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
  */
 function ContentShimWithRef(
   sectionElement,
-  {id, role, 'aria-labelledby': ariaLabelledBy},
+  {'aria-labelledby': ariaLabelledBy, id, role},
   ref
 ) {
   const contentElement = sectionElement.lastElementChild;

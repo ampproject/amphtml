@@ -31,8 +31,8 @@ const {
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
+const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
-const {green, red, cyan} = require('../common/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
@@ -788,7 +788,7 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
  * @return {!Promise}
  */
 async function thirdPartyBootstrap(input, outputName, options) {
-  const {minify, fortesting} = options;
+  const {fortesting, minify} = options;
   const destDir = `dist.3p/${minify ? internalRuntimeVersion : 'current'}`;
   await fs.ensureDir(destDir);
 

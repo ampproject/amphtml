@@ -103,7 +103,7 @@ module.exports = function ({types: t}) {
    * @return {ReturnType<t['arrowFunctionExpression']>}
    */
   function createArrowFunctionExpression(node) {
-    const {params, body, async} = t.cloneNode(node);
+    const {async, body, params} = t.cloneNode(node);
     return t.arrowFunctionExpression(params, body.body[0].argument, async);
   }
 

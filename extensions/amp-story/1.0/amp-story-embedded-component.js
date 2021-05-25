@@ -1421,7 +1421,7 @@ export class AmpStoryEmbeddedComponent {
       </section>
     `;
     const overlayEls = htmlRefs(tooltipOverlay);
-    const {tooltip, buttonLeft, buttonRight, arrow} =
+    const {arrow, buttonLeft, buttonRight, tooltip} =
       /** @type {!tooltipElementsDef} */ (overlayEls);
 
     this.tooltip_ = tooltip;

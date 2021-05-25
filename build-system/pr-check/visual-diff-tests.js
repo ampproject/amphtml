@@ -20,9 +20,9 @@
  */
 
 const atob = require('atob');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
 const {skipDependentJobs, timedExecOrDie} = require('./utils');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'visual-diff-tests.js';
 

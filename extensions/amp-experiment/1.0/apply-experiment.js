@@ -147,7 +147,7 @@ export function createMutationsFromMutationRecordsAndElements(
 ) {
   const mutations = [];
   mutationRecordsAndElements.forEach((mutationRecordAndElements) => {
-    const {mutationRecord, elements} = mutationRecordAndElements;
+    const {elements, mutationRecord} = mutationRecordAndElements;
 
     let mutation = undefined;
     if (mutationRecord['type'] === 'characterData') {

@@ -142,7 +142,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       const {screen} = this.win;
 
       const {alpha} = event;
-      let {gamma, beta} = event;
+      let {beta, gamma} = event;
 
       // Detect the implementation of orientation angle
       const angle =

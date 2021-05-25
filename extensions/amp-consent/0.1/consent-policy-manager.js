@@ -196,8 +196,8 @@ export class ConsentPolicyManager {
     const consentMetadata = info['consentMetadata'];
     const purposeConsents = info['purposeConsents'];
     const {
-      consentString_: prevConsentStr,
       consentMetadata_: prevConsentMetadata,
+      consentString_: prevConsentStr,
       purposeConsents_: prevPurposeConsents,
     } = this;
 

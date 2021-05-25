@@ -104,7 +104,7 @@ function reportStats(data, code) {
     if (typeof window.context.location.href !== 'undefined') {
       pageLocation = encodeURIComponent(window.context.location.href);
     }
-    const {subId, pid} = data,
+    const {pid, subId} = data,
       trackId = 'AMP',
       notFirst = true,
       cid = '',

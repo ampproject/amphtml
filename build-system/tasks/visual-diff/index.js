@@ -26,15 +26,15 @@ const {
 const {
   escapeHtml,
   log,
-  waitForPageLoad,
+  sleep,
   verifySelectorsInvisible,
   verifySelectorsVisible,
-  sleep,
+  waitForPageLoad,
 } = require('./helpers');
 const {
   gitBranchName,
-  gitCommitterEmail,
   gitCiMainBaseline,
+  gitCommitterEmail,
   shortSha,
 } = require('../../common/git');
 const {buildRuntime} = require('../../common/utils');
@@ -460,7 +460,7 @@ async function snapshotWebpages(browser, webpages) {
   const testErrors = [];
   let testNumber = 0;
   for (const webpage of webpages) {
-    const {viewport, name: pageName} = webpage;
+    const {name: pageName, viewport} = webpage;
     let hasWarnings = false;
     for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
       // Chrome supports redirecting <anything>.localhost to localhost, while

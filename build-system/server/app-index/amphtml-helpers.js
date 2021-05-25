@@ -32,7 +32,7 @@ const containsByRegex = (str, re) => str.search(re) > -1;
 // TODO(alanorozco): Expand
 const formTypes = ['input', 'select', 'form'];
 
-const ExtensionScript = ({name, version, isTemplate}) =>
+const ExtensionScript = ({isTemplate, name, version}) =>
   html`
     <script
       async
@@ -67,7 +67,7 @@ const ampStateKey = (...keys) => keys.join('.');
  * }} param0
  * @return {string}
  */
-const AmpDoc = ({body, css, head, canonical}) => {
+const AmpDoc = ({body, canonical, css, head}) => {
   assert(canonical);
   return html`
     <!DOCTYPE html>

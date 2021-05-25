@@ -423,10 +423,10 @@ export class MeasureScanner extends Scanner {
     });
     this.with_(spec, () => {
       const {
-        target_: target,
         index_: index,
-        vars_: vars,
+        target_: target,
         timing_: timing,
+        vars_: vars,
       } = this;
       const promise = otherSpecPromise
         .then((otherSpec) => {
@@ -593,10 +593,10 @@ export class MeasureScanner extends Scanner {
   with_(spec, callback) {
     // Save context.
     const {
-      target_: prevTarget,
       index_: prevIndex,
-      vars_: prevVars,
+      target_: prevTarget,
       timing_: prevTiming,
+      vars_: prevVars,
     } = this;
 
     // Push new context and perform calculations.
@@ -852,7 +852,7 @@ class CssContextImpl {
    * @param {!./web-animation-types.WebAnimationBuilderOptionsDef} options
    */
   constructor(win, rootNode, baseUrl, options) {
-    const {scope = null, scaleByScope = false} = options;
+    const {scaleByScope = false, scope = null} = options;
 
     /** @const @private */
     this.win_ = win;
@@ -993,7 +993,7 @@ class CssContextImpl {
    * @protected
    */
   withTarget(target, index, callback) {
-    const {currentTarget_: prev, currentIndex_: prevIndex} = this;
+    const {currentIndex_: prevIndex, currentTarget_: prev} = this;
     this.currentTarget_ = target;
     this.currentIndex_ = index;
     const result = callback(target);
@@ -1198,7 +1198,7 @@ class CssContextImpl {
     if (!this.viewportParams_) {
       if (this.scope_ && this.scaleByScope_) {
         const rect = this.scope_./*OK*/ getBoundingClientRect();
-        const {offsetWidth, offsetHeight} = this.scope_;
+        const {offsetHeight, offsetWidth} = this.scope_;
         this.viewportParams_ = {
           offset: {x: rect.x, y: rect.y},
           size: {width: offsetWidth, height: offsetHeight},
@@ -1206,7 +1206,7 @@ class CssContextImpl {
           scaleFactorY: offsetHeight / (rect.height || 1),
         };
       } else {
-        const {innerWidth, innerHeight} = this.win_;
+        const {innerHeight, innerWidth} = this.win_;
         this.viewportParams_ = {
           offset: {x: 0, y: 0},
           size: {width: innerWidth, height: innerHeight},
@@ -1300,7 +1300,7 @@ class CssContextImpl {
    */
   getElementRect_(target) {
     const {offset, scaleFactorX, scaleFactorY} = this.getViewportParams_();
-    const {x, y, width, height} = target./*OK*/ getBoundingClientRect();
+    const {height, width, x, y} = target./*OK*/ getBoundingClientRect();
 
     // This assumes default `transform-origin: center center`
     return layoutRectLtwh(

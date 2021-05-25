@@ -22,12 +22,12 @@ const Postcss = require('postcss');
 const prettier = require('prettier');
 const textTable = require('text-table');
 const {
-  jscodeshiftAsync,
   getJscodeshiftReport,
+  jscodeshiftAsync,
 } = require('../../test-configs/jscodeshift');
 const {getStdout} = require('../../common/process');
 const {gray, magenta} = require('../../common/colors');
-const {logOnSameLineLocalDev, logLocalDev} = require('../../common/logging');
+const {logLocalDev, logOnSameLineLocalDev} = require('../../common/logging');
 const {writeDiffOrFail} = require('../../common/diff');
 
 /** @type {Postcss.default} */
@@ -155,7 +155,7 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
     const result = {};
 
-    const {stdout, stderr} = jscodeshiftAsync([
+    const {stderr, stdout} = jscodeshiftAsync([
       '--dry',
       '--no-babel',
       `--transform=${__dirname}/jscodeshift/collect-zindex.js`,

@@ -59,7 +59,7 @@ function createObserver(win, viewportNum) {
 
   const callback = (records) => {
     for (let i = 0; i < records.length; i++) {
-      const {target: element, isIntersecting} = records[i];
+      const {isIntersecting, target: element} = records[i];
       const deferred = elements.get(element);
       if (deferred && isIntersecting) {
         deferred.resolve();

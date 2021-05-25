@@ -17,8 +17,8 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  RuntimeTestRunner,
   RuntimeTestConfig,
+  RuntimeTestRunner,
 } = require('./runtime-test/runtime-test-base');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');

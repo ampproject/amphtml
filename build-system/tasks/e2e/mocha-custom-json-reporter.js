@@ -21,12 +21,12 @@ const {Base} = require('mocha').reporters;
 const {inherits} = require('mocha').utils;
 
 const {
-  EVENT_TEST_PASS,
-  EVENT_TEST_FAIL,
   EVENT_RUN_END,
-  EVENT_TEST_PENDING,
   EVENT_SUITE_BEGIN,
   EVENT_SUITE_END,
+  EVENT_TEST_FAIL,
+  EVENT_TEST_PASS,
+  EVENT_TEST_PENDING,
 } = mocha.Runner.constants;
 /**
  * @param {Object} output
@@ -75,7 +75,7 @@ function JsonReporter(runner) {
   });
 
   runner.on(EVENT_RUN_END, async function () {
-    const results = testEvents.map(({test, suiteList, event}) => ({
+    const results = testEvents.map(({event, suiteList, test}) => ({
       description: test.title,
       suite: suiteList,
       success: event === EVENT_TEST_PASS,

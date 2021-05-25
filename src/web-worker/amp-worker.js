@@ -176,7 +176,7 @@ class AmpWorker {
    * @private
    */
   receiveMessage_(event) {
-    const {method, returnValue, id} = /** @type {FromWorkerMessageDef} */ (
+    const {id, method, returnValue} = /** @type {FromWorkerMessageDef} */ (
       event.data
     );
 

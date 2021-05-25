@@ -301,7 +301,7 @@ export function googlePageParameters(a4a, startTime) {
   ]).then((promiseResults) => {
     const clientId = promiseResults[0];
     const referrer = promiseResults[1];
-    const {pageViewId, canonicalUrl} = Services.documentInfoForDoc(ampDoc);
+    const {canonicalUrl, pageViewId} = Services.documentInfoForDoc(ampDoc);
     // Read by GPT for GA/GPT integration.
     win.gaGlobal = win.gaGlobal || {cid: clientId, hid: pageViewId};
     const {screen} = win;

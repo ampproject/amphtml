@@ -34,7 +34,7 @@ const serveModes = [
   },
 ];
 
-const SelectorBlock = ({id, value, selected, children}) => html`
+const SelectorBlock = ({children, id, selected, value}) => html`
   <div
     class="selector-block"
     ${selected ? ' selected' : ''}
@@ -58,7 +58,7 @@ const ServeModeSelector = ({serveMode}) => html`
       on="select:serve-mode-form.submit"
       name="mode"
     >
-      ${joinFragments(serveModes, ({value, description}) =>
+      ${joinFragments(serveModes, ({description, value}) =>
         SelectorBlock({
           id: `serve_mode_${value}`,
           value,

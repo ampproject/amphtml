@@ -390,7 +390,7 @@ function showConfirmation_(message, callback) {
  */
 function getAmpConfig() {
   const deferred = new Deferred();
-  const {promise, resolve, reject} = deferred;
+  const {promise, reject, resolve} = deferred;
   const xhr = new XMLHttpRequest();
   xhr.addEventListener('load', () => {
     resolve(xhr.responseText);

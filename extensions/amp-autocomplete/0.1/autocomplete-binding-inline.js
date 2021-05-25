@@ -83,7 +83,7 @@ export class AutocompleteBindingInline {
       return null;
     }
 
-    const {value, selectionStart: cursor} = inputEl;
+    const {selectionStart: cursor, value} = inputEl;
     let match, lastMatch;
 
     while ((match = regex.exec(value)) !== null) {

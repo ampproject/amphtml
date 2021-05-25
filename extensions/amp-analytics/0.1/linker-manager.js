@@ -324,7 +324,7 @@ export class LinkerManager {
     }
 
     // Fallback to default behavior
-    const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.ampdoc_);
+    const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(this.ampdoc_);
     const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
     const isFriendlyCanonicalOrigin = areFriendlyDomains(
       canonicalOrigin,
@@ -403,7 +403,7 @@ export class LinkerManager {
    * @param {!../../amp-form/0.1/form-submit-service.FormSubmitEventDef} event
    */
   handleFormSubmit_(event) {
-    const {form, actionXhrMutator} = event;
+    const {actionXhrMutator, form} = event;
 
     for (const linkerName in this.config_) {
       const config = this.config_[linkerName];

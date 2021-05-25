@@ -42,10 +42,10 @@ import {toArray} from '../../../../../src/core/types/array';
  */
 function createElement(env, container, binding, opts = {}) {
   const {
-    tag = 'p',
     amp = false,
     insertInHead = false,
     insertQuerySelectorAttr = false,
+    tag = 'p',
   } = opts;
   const div = env.win.document.createElement('div');
   div.innerHTML = `<${tag} ${binding}></${tag}>`;

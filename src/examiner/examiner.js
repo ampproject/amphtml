@@ -22,7 +22,7 @@ function detectLongTasks(win) {
     /** @type {!Array<!PerformanceLongTaskTiming>} */
     const entries = entryList.getEntries();
     for (const entry of entries) {
-      const {entryType, name, attribution, duration} = entry;
+      const {attribution, duration, entryType, name} = entry;
 
       if (entryType != 'longtask' || name != 'cross-origin-descendant') {
         continue;

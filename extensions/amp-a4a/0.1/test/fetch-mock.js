@@ -120,7 +120,7 @@ export class FetchMock {
       if (data === null || typeof data == 'string') {
         return new Response(data);
       } else {
-        const {body, status, headers} = data;
+        const {body, headers, status} = data;
         return new Response(
           body,
           /** @type {!ResponseInit} */ ({status, headers})

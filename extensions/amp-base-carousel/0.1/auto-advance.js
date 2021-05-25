@@ -48,7 +48,7 @@ export class AutoAdvance {
    * }} config
    */
   constructor(config) {
-    const {win, element, scrollContainer, advanceable} = config;
+    const {advanceable, element, scrollContainer, win} = config;
     /** @private @const */
     this.win_ = win;
 

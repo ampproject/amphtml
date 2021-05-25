@@ -1865,7 +1865,7 @@ export class AmpStoryPlayer {
       return null;
     }
 
-    const {screenX, screenY, clientX, clientY} = touches[0];
+    const {clientX, clientY, screenX, screenY} = touches[0];
     return {screenX, screenY, clientX, clientY};
   }
 }

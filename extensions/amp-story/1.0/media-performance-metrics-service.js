@@ -405,7 +405,7 @@ export class MediaPerformanceMetricsService {
    */
   onPlaying_(event) {
     const mediaEntry = this.mediaMap_.get(event.target);
-    const {timeStamps, metrics} = mediaEntry;
+    const {metrics, timeStamps} = mediaEntry;
 
     if (!metrics.jointLatency) {
       metrics.jointLatency = Date.now() - timeStamps.start;

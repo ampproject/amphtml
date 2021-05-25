@@ -17,16 +17,16 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  buildTargetsInclude,
-  determineBuildTargets,
-  Targets,
-} = require('../pr-check/build-targets');
-const {
   printChangeSummary,
   startTimer,
   stopTimer,
   timedExec,
 } = require('../pr-check/utils');
+const {
+  Targets,
+  buildTargetsInclude,
+  determineBuildTargets,
+} = require('../pr-check/build-targets');
 const {runNpmChecks} = require('../common/npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
 

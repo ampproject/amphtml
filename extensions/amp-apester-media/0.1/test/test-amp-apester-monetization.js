@@ -114,10 +114,10 @@ describes.realWin('amp-apester-media-monetization', {}, (env) => {
 });
 
 function createCampaignData({
+  disabledAmpCompanionAds,
   display,
   srAbove,
   srBelow,
-  disabledAmpCompanionAds,
 }) {
   const media = {};
   const campaignData = {

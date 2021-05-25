@@ -339,7 +339,7 @@ export class ContextNode {
    */
   addGroup(name, match, weight) {
     const groups = this.groups || (this.groups = new Map());
-    const {node, children} = this;
+    const {children, node} = this;
     const cn = new ContextNode(node, name);
     groups.set(name, {cn, match, weight});
     cn.setParent(this);

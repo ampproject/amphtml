@@ -18,7 +18,7 @@
 
 const {html} = require('./html');
 
-const Option = ({value, name}) =>
+const Option = ({name, value}) =>
   html` <option value=${value}>${name}</option> `;
 
 const KeyValueOptions = (options) =>

@@ -406,7 +406,7 @@ export class Vsync {
     this.backupPass_.cancel();
     this.scheduled_ = false;
 
-    const {tasks_: tasks, states_: states, nextFrameResolver_: resolver} = this;
+    const {nextFrameResolver_: resolver, states_: states, tasks_: tasks} = this;
     this.nextFrameResolver_ = null;
     this.nextFramePromise_ = null;
     // Double buffering

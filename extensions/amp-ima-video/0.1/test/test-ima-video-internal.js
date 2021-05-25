@@ -186,8 +186,8 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       getAd: () => ({getAdPodInfo: () => adPodInfo}),
     });
 
-    tests.forEach(({mock, label, expected}) => {
-      const {remainingTime, totalAds, adPosition} = mock;
+    tests.forEach(({expected, label, mock}) => {
+      const {adPosition, remainingTime, totalAds} = mock;
       let defaults = videoDefaults;
       if (label) {
         defaults = Object.assign(defaults, {adLabel: label});
@@ -672,7 +672,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.setVideoPlayerForTesting(getVideoPlayerMock());
     imaVideoObj.setContentCompleteForTesting(true);
     // expect a subset of controls to be hidden / displayed during ad
-    const {controlsDiv, playPauseDiv, timeDiv, muteUnmuteDiv, fullscreenDiv} =
+    const {controlsDiv, fullscreenDiv, muteUnmuteDiv, playPauseDiv, timeDiv} =
       imaVideoObj.getPropertiesForTesting();
     expect(controlsDiv).not.to.be.null;
     expect(playPauseDiv).not.to.be.null;

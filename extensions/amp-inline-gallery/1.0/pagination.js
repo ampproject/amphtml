@@ -26,7 +26,7 @@ import {useStyles} from './pagination.jss';
  */
 export function Pagination({inset, ...rest}) {
   const classes = useStyles();
-  const {slides, currentSlide, setCurrentSlide} = useContext(CarouselContext);
+  const {currentSlide, setCurrentSlide, slides} = useContext(CarouselContext);
   const slideCount = slides ? slides.length : 0;
   const Comp = slideCount <= 8 ? Dots : Numbers;
   return (

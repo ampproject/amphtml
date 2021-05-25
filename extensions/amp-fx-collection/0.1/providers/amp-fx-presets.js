@@ -258,7 +258,7 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      const {viewportHeight, marginStart} = fxElement;
+      const {marginStart, viewportHeight} = fxElement;
       devAssert(fxElement.adjustedViewportHeight);
 
       if (

@@ -349,7 +349,7 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
     win = new FakeWindow();
     el = win.document.createElement('div');
 
-    getSanitizer = ({byUserGesture, byFixedSize}) =>
+    getSanitizer = ({byFixedSize, byUserGesture}) =>
       new SanitizerImpl(
         {
           win,

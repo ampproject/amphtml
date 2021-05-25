@@ -58,7 +58,7 @@ const INFO_STYLE = {
  * @return {!Object}
  */
 export function AnimationTemplate(props) {
-  const {spec, children} = props;
+  const {children, spec} = props;
   const duration = text('Duration', '1s');
   const iterations = number('Iterations', 2);
   const fill = select('Fill', FILL_OPTIONS, 'both');

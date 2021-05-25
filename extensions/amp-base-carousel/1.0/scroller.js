@@ -55,6 +55,7 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  */
 function ScrollerWithRef(
   {
+    _thumbnails,
     advanceCount,
     alignment,
     axis,
@@ -67,7 +68,6 @@ function ScrollerWithRef(
     snap,
     snapBy = 1,
     visibleCount,
-    _thumbnails,
     ...rest
   },
   ref
@@ -340,18 +340,18 @@ export {Scroller};
  */
 function renderSlides(
   {
+    _thumbnails,
     alignment,
     children,
     loop,
     mixedLength,
-    restingIndex,
     offsetRef,
     openLightbox,
     pivotIndex,
+    restingIndex,
     snap,
     snapBy,
     visibleCount,
-    _thumbnails,
   },
   classes
 ) {

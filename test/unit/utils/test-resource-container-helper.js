@@ -52,7 +52,7 @@ describes.realWin('resource-container-helper', {}, (env) => {
     ampChild2 = createAmpElement({id: 'child2', parent: ampParent});
   });
 
-  function createAmpElement({id, parent, createPlaceholder = true}) {
+  function createAmpElement({createPlaceholder = true, id, parent}) {
     const element = doc.createElement('div');
     element.id = id;
     element.classList.add('i-amphtml-element');

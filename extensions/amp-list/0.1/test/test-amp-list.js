@@ -1527,7 +1527,7 @@ describes.repeated(
             });
 
             it('should render a list using async data', async () => {
-              const {resolve, promise} = new Deferred();
+              const {promise, resolve} = new Deferred();
               bind.getStateAsync = () => promise;
 
               const ampStateEl = doc.createElement('amp-state');

@@ -104,7 +104,7 @@ describes.realWin('size-observer', {}, (env) => {
       observer.notify([
         {target: element, contentRect: {width: 101, height: 102}},
       ]);
-      const {width, height} = await promise;
+      const {height, width} = await promise;
       expect(width).to.equal(101);
       expect(height).to.equal(102);
       expect(observer.elements).to.not.include(element);
@@ -187,7 +187,7 @@ describes.realWin('size-observer', {}, (env) => {
       observer.notify([
         {target: element, borderBoxSize: [{inlineSize: 101, blockSize: 102}]},
       ]);
-      const {inlineSize, blockSize} = await promise;
+      const {blockSize, inlineSize} = await promise;
       expect(inlineSize).to.equal(101);
       expect(blockSize).to.equal(102);
       expect(observer.elements).to.not.include(element);
@@ -198,7 +198,7 @@ describes.realWin('size-observer', {}, (env) => {
       env.sandbox.stub(element, 'offsetHeight').value(102);
       const promise = measureBorderBoxSize(element);
       observer.notify([{target: element}]);
-      const {inlineSize, blockSize} = await promise;
+      const {blockSize, inlineSize} = await promise;
       expect(inlineSize).to.equal(101);
       expect(blockSize).to.equal(102);
       expect(observer.elements).to.not.include(element);
@@ -210,7 +210,7 @@ describes.realWin('size-observer', {}, (env) => {
       env.sandbox.stub(element, 'offsetHeight').value(102);
       const promise = measureBorderBoxSize(element);
       observer.notify([{target: element}]);
-      const {inlineSize, blockSize} = await promise;
+      const {blockSize, inlineSize} = await promise;
       expect(inlineSize).to.equal(102);
       expect(blockSize).to.equal(101);
       expect(observer.elements).to.not.include(element);

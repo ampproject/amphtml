@@ -82,7 +82,7 @@ export function getStoryAdMetadataFromDoc(doc) {
   const storyMetaTags = getStoryAdMetaTags(doc);
   const vars = map();
   iterateCursor(storyMetaTags, (tag) => {
-    const {name, content} = tag;
+    const {content, name} = tag;
     if (name.startsWith(CTA_META_PREFIX)) {
       const key = name.split('amp-')[1];
       vars[key] = content;

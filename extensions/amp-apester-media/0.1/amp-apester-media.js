@@ -161,11 +161,11 @@ class AmpApesterMedia extends AMP.BaseElement {
    **/
   buildUrl_() {
     const {
-      idOrToken,
-      playlist,
-      inative,
       distributionChannelId,
       fallback,
+      idOrToken,
+      inative,
+      playlist,
       tags,
     } = this.embedOptions_;
     const encodedMediaAttribute = encodeURIComponent(

@@ -46,7 +46,7 @@ export function WithLightbox({
   ...rest
 }) {
   const [genKey] = useState(generateLightboxItemKey);
-  const {open, register, deregister} = useContext(LightboxGalleryContext);
+  const {deregister, open, register} = useContext(LightboxGalleryContext);
   useLayoutEffect(() => {
     register(genKey, render);
     return () => deregister(genKey);

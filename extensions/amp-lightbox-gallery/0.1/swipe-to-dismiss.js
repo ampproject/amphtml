@@ -163,7 +163,7 @@ export class SwipeToDismiss {
    * }} config
    */
   startSwipe(config) {
-    const {swipeElement, hiddenElement, mask, overlay} = config;
+    const {hiddenElement, mask, overlay, swipeElement} = config;
     this.swipeElement_ = swipeElement;
     this.hiddenElement_ = hiddenElement;
     this.mask_ = mask;
@@ -343,7 +343,7 @@ export class SwipeToDismiss {
    * @param {!SwipeDef} data The data for the swipe.
    */
   swipeMove(data) {
-    const {deltaX, deltaY, velocityX, velocityY, last} = data;
+    const {deltaX, deltaY, last, velocityX, velocityY} = data;
     const wasSwiping = this.isSwiping_;
     if (last) {
       this.isSwiping_ = false;

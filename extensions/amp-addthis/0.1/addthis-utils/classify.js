@@ -202,7 +202,7 @@ export const classifyPage = (pageInfo, metaElements) => {
     classifyString(pageInfo.title) | classifyString(pageInfo.hostname, true);
 
   metaElements.forEach((metaElement) => {
-    const {name, content} = getDetailsForMeta(metaElement);
+    const {content, name} = getDetailsForMeta(metaElement);
 
     if (name === 'description' || name === 'keywords') {
       bitmask |= classifyString(content);
@@ -270,7 +270,7 @@ export const isProductPage = (doc, metaElements) => {
 
   // see if 'og:type' meta tag === 'product'
   const ogTags = metaElements.reduce((tags, metaElement) => {
-    const {name, content} = getDetailsForMeta(metaElement);
+    const {content, name} = getDetailsForMeta(metaElement);
 
     if (name.startsWith('og:')) {
       const ogProperty = name.split(':').pop();

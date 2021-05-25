@@ -123,7 +123,7 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
       return null;
     }
-    const {node, method, args} = invocation;
+    const {args, method, node} = invocation;
     const win = getWin(node);
     switch (method) {
       case 'pushState':
@@ -178,7 +178,7 @@ export class StandardActions {
    * @private Visible to tests only.
    */
   handleNavigateTo_(invocation) {
-    const {node, caller, method, args} = invocation;
+    const {args, caller, method, node} = invocation;
     const win = getWin(node);
     // Some components have additional constraints on allowing navigation.
     let permission = Promise.resolve();

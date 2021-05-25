@@ -133,7 +133,7 @@ function BaseCarouselWithRef(
     setCurrentSlide(globalCurrentSlide);
   }, [globalCurrentSlide, setCurrentSlide]);
 
-  const {slides, setSlides} = carouselContext;
+  const {setSlides, slides} = carouselContext;
 
   const scrollRef = useRef(null);
   const containRef = useRef(null);

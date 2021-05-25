@@ -21,13 +21,13 @@
 
 const {
   skipDependentJobs: skipDependentJobs,
-  timedExecOrDie,
   storeExperimentBuildToWorkspace,
+  timedExecOrDie,
 } = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
 const {getExperimentConfig} = require('../common/utils');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = `${experiment}-build.js`;
 

@@ -21,8 +21,8 @@ const minimist = require('minimist');
 const argv = minimist(process.argv.slice(2));
 const path = require('path');
 const upload = require('multer')();
+const {getServeMode, replaceUrls} = require('./app-utils');
 const {renderShadowViewer} = require('./shadow-viewer');
-const {replaceUrls, getServeMode} = require('./app-utils');
 
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const SERVE_MODE = getServeMode();
@@ -235,7 +235,7 @@ app.get('/a4a/:bid', (req, res) => {
  * @return {string}
  */
 function composeDocument(config) {
-  const {body, css, extensions, head, spec, mode} = config;
+  const {body, css, extensions, head, mode, spec} = config;
 
   const m = mode || SERVE_MODE;
   const cdn = m === 'cdn';

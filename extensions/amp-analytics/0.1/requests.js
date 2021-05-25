@@ -244,9 +244,9 @@ export class RequestHandler {
    */
   fire_() {
     const {
-      requestOriginPromise_: requestOriginPromise,
       baseUrlPromise_: baseUrlPromise,
       batchSegmentPromises_: segmentPromises,
+      requestOriginPromise_: requestOriginPromise,
     } = this;
     const trigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();

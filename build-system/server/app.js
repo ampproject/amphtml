@@ -46,11 +46,11 @@ const {
   recaptchaRouter,
 } = require('./recaptcha-router');
 const {getServeMode} = require('./app-utils');
+const {isRtvMode, replaceUrls} = require('./app-utils');
 const {logWithoutTimestamp} = require('../common/logging');
 const {log} = require('../common/logging');
 const {red} = require('../common/colors');
 const {renderShadowViewer} = require('./shadow-viewer');
-const {replaceUrls, isRtvMode} = require('./app-utils');
 
 /**
  * Respond with content received from a URL when SERVE_MODE is "cdn".

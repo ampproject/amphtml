@@ -111,7 +111,7 @@ describes.realWin(
       (name, variant) => {
         describe('static states', () => {
           it('should start in the static state', async () => {
-            const {picker, layoutCallback} = createDatePicker({
+            const {layoutCallback, picker} = createDatePicker({
               'layout': 'fixed-height',
               'height': '360',
               'type': variant.type,
@@ -124,7 +124,7 @@ describes.realWin(
           });
 
           it('should remain in the static state after a transition', async () => {
-            const {element, picker, layoutCallback} = createDatePicker({
+            const {element, layoutCallback, picker} = createDatePicker({
               'layout': 'fixed-height',
               'height': '360',
               'type': variant.type,
@@ -154,7 +154,7 @@ describes.realWin(
 
         describe('overlay states', () => {
           it('should start in the unopened state', async () => {
-            const {picker, layoutCallback} = createDatePicker({
+            const {layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -166,7 +166,7 @@ describes.realWin(
           });
 
           it('should transition to the opened state on focus', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -180,7 +180,7 @@ describes.realWin(
           });
 
           it('should transition to the closed state on blur', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -200,7 +200,7 @@ describes.realWin(
           });
 
           it('should transition to the closed state on esc', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -224,7 +224,7 @@ describes.realWin(
           });
 
           it('should transition to picker state on arrow', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -248,7 +248,7 @@ describes.realWin(
           });
 
           it('should transition directly to picker state on arrow from closed', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -270,7 +270,7 @@ describes.realWin(
           });
 
           it('should transition to closed state from picker on esc', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -303,7 +303,7 @@ describes.realWin(
           });
 
           it('should transition to closed state from picker on document click', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -335,7 +335,7 @@ describes.realWin(
           });
 
           it('should remain in picker state on click in picker', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -367,7 +367,7 @@ describes.realWin(
           });
 
           it('should transition to input state from picker on focus', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -396,7 +396,7 @@ describes.realWin(
           });
 
           it('should remain in open picker on clear', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -425,7 +425,7 @@ describes.realWin(
           });
 
           it('should transition from open picker to open input on clear with open-after-clear', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -454,7 +454,7 @@ describes.realWin(
           });
 
           it('should transition to closed after date change', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
             });
@@ -473,7 +473,7 @@ describes.realWin(
           });
 
           it('should not transition to closed with open-after-select', async () => {
-            const {input, picker, layoutCallback} = createDatePicker({
+            const {input, layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'open-after-select': '',
               'type': variant.type,
@@ -493,7 +493,7 @@ describes.realWin(
           });
 
           it('should transition from closed to open input in on clear with open-after-clear', async () => {
-            const {picker, layoutCallback} = createDatePicker({
+            const {layoutCallback, picker} = createDatePicker({
               'mode': 'overlay',
               'type': variant.type,
               'open-after-clear': '',

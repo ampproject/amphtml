@@ -77,7 +77,7 @@ describes.fakeWin(
     }
 
     beforeEach(() => {
-      const {win, sandbox} = env;
+      const {sandbox, win} = env;
 
       mockTimer = {
         delay: sandbox.stub().callsFake((fn) => {

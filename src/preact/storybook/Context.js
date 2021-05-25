@@ -65,8 +65,8 @@ function Composite() {
  * @param {{title: string, loading: string}} props
  * @return {PreactDef.Renderable}
  */
-function Info({title, loading: loadingProp, ...rest}) {
-  const {renderable, playable, loading: loadingContext} = useAmpContext();
+function Info({loading: loadingProp, title, ...rest}) {
+  const {loading: loadingContext, playable, renderable} = useAmpContext();
   const loading = useLoading(loadingProp);
   const load = loading != 'unload';
   const infoStyle = {border: '1px dotted gray', margin: 8};

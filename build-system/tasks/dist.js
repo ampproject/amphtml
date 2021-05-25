@@ -47,7 +47,7 @@ const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
 const {VERSION} = require('../compile/internal-version');
 
-const {green, cyan} = colors;
+const {cyan, green} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
 /**

@@ -67,7 +67,7 @@ module.exports = {
           message: 'Nesting an object under an object spread is not useful',
 
           fix(fixer) {
-            const {properties, parent} = node;
+            const {parent, properties} = node;
             const texts = properties.map((prop) => sourceCode.getText(prop));
 
             if (texts.length > 0) {
