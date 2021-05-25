@@ -606,10 +606,15 @@ describes.realWin(
       expect(fallback.textContent).to.equal('Failed');
     });
 
-    it('should default to binding="always" when nothing is specified', async () => {
+    it('should default to binding="refresh" when nothing is specified', async () => {
       const rescanSpy = env.sandbox.spy();
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
         rescan: rescanSpy,
+        signals: () => {
+          return {
+            get: () => null,
+          };
+        },
       });
 
       const fetchStub = env.sandbox.stub(
@@ -637,7 +642,7 @@ describes.realWin(
       expect(rescanSpy).to.be.calledTwice; // TODO: investigate why its called twice?
       const {fast, update} = rescanSpy.getCall(0).args[2];
       expect(fast).to.be.true;
-      expect(update).to.be.true;
+      expect(update).to.be.false;
     });
 
     it('should work with binding="refresh"', async () => {

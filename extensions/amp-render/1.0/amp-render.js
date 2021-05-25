@@ -283,20 +283,11 @@ export class AmpRender extends BaseElement {
               })
               .then((el) => {
                 element = el;
-                const bindingValue = this.element.getAttribute('binding');
                 return bind.rescan([element], [], {
                   'fast': true,
-                  'update':
-                    // update should be true if:
-                    // 1. no binding is specified (default is binding=always) or
-                    // 2. binding=always is specified or
-                    // 3. binding=refresh and is not the initial render
-                    !bindingValue ||
-                    bindingValue === 'always' ||
-                    (bindingValue === 'refresh' &&
-                      // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
-                      // mutation occured, which is null for the initial render
-                      bind.signals().get('FIRST_MUTATE') !== null),
+                  // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
+                  // mutation occured, which is null for the initial render
+                  'update': bind.signals().get('FIRST_MUTATE') !== null,
                 });
               })
               .then(() => dict({'__html': element./* OK */ innerHTML}))
