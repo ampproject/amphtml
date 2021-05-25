@@ -25,16 +25,16 @@ const open = require('open');
 const os = require('os');
 const path = require('path');
 const {
-  buildNewServer,
-  SERVER_TRANSFORM_PATH,
-} = require('../server/typescript-compile');
-const {
+  lazyBuild3pVendor,
   lazyBuildExtensions,
   lazyBuildJs,
-  lazyBuild3pVendor,
-  preBuildRuntimeFiles,
   preBuildExtensions,
+  preBuildRuntimeFiles,
 } = require('../server/lazy-build');
+const {
+  SERVER_TRANSFORM_PATH,
+  buildNewServer,
+} = require('../server/typescript-compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('../common/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');

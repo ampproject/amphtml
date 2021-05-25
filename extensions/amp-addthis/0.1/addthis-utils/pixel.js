@@ -134,7 +134,7 @@ const dropPixelatorPixel = (url, ampDoc) => {
  * @param  {{sid: string, ampDoc: *}} options
  */
 const dropPixelGroups = (pixels, options) => {
-  const {sid, ampDoc} = options;
+  const {ampDoc, sid} = options;
   const pixelGroups = groupPixelsByTime(pixels);
   pixelGroups.forEach((pixelGroup) => {
     const {delay, pixels} = pixelGroup;

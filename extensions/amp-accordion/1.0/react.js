@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview
- * Builds npm binaries for specified Bento components.
- */
-
-const [extension] = process.argv.slice(2);
-const {timedExecOrDie} = require('../../../build-system/pr-check/utils');
-const {updatePackages} = require('../../../build-system/common/update-packages');
-
-updatePackages();
-timedExecOrDie(`amp build --extensions=${extension} --core_runtime_only`);
-timedExecOrDie(`amp dist --extensions=${extension} --core_runtime_only`);
+/* eslint-env node */
+// eslint-disable-next-line local/no-module-exports
+module.exports = require('./dist/component-react');

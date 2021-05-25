@@ -645,7 +645,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
-    const {consentString, gdprApplies, consentStringType, additionalConsent} =
+    const {additionalConsent, consentString, consentStringType, gdprApplies} =
       consentTuple;
 
     return {
@@ -702,7 +702,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.win,
       this.element.parentElement
     );
-    const {fwSignal, slotWidth, parentWidth} = this.flexibleAdSlotData_;
+    const {fwSignal, parentWidth, slotWidth} = this.flexibleAdSlotData_;
     // If slotWidth is -1, that means its width must be determined by its
     // parent container, and so should have the same value as parentWidth.
     msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
@@ -1140,7 +1140,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!LayoutRectOrDimsDef}
    */
   getSlotSize() {
-    const {width, height} = this.getDeclaredSlotSize_();
+    const {height, width} = this.getDeclaredSlotSize_();
     return width && height
       ? {width, height}
       : // width/height could be 'auto' in which case we fallback to measured.
@@ -1465,7 +1465,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               'Attempt to change size failed on fluid ' +
                 'creative. Will re-attempt when slot is out of the viewport.'
             );
-            const {width, height} = this.getSlotSize();
+            const {height, width} = this.getSlotSize();
             if (width && height) {
               // This call is idempotent, so it's okay to make it multiple
               // times.
@@ -1518,7 +1518,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       newWidth &&
       newHeight
     );
-    const {width, height} = this.getDeclaredSlotSize_();
+    const {height, width} = this.getDeclaredSlotSize_();
     const returnedSizeDifferent = newWidth != width || newHeight != height;
     const heightNotIncreased = newHeight <= height;
     if (
@@ -1555,7 +1555,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     ) {
       return;
     }
-    const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
+    const {parentStyle, parentWidth} = this.flexibleAdSlotData_;
     const isRtl = isRTL(this.win.document);
     const dirStr = isRtl ? 'Right' : 'Left';
     const /** !Object<string, string> */ style = this.inZIndexHoldBack_

@@ -31,7 +31,7 @@ const hosts = {
 export function onnetwork(global, data) {
   validateData(data, [['src', 'sid', 'mid']]);
   global.onnetwork = {ampData: data};
-  const {src, sid, mid} = data;
+  const {mid, sid, src} = data;
   let url;
 
   // Custom movie url using "data-src" attribute

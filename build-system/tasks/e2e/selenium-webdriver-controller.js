@@ -16,8 +16,13 @@
 
 const fs = require('fs');
 const selenium = require('selenium-webdriver');
+const {
+  DOMRectDef,
+  ElementHandle,
+  Key,
+  ScrollToOptionsDef,
+} = require('./e2e-types');
 const {ControllerPromise} = require('./controller-promise');
-const {DOMRectDef, ElementHandle, Key} = require('./e2e-types');
 const {expect} = require('chai');
 const {NetworkLogger} = require('./network-logger');
 
@@ -266,7 +271,7 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @return {!ControllerPromise<string>}
+   * @return {!ControllerPromise<string|null|function>}
    * @override
    */
   getCurrentUrl() {
@@ -393,7 +398,7 @@ class SeleniumWebDriverController {
       // Extracting the values seems to perform better than returning
       // the raw ClientRect from the element, in terms of flakiness.
       // The raw ClientRect also has hundredths of a pixel. We round to int.
-      const {width, height, top, bottom, left, right} =
+      const {bottom, height, left, right, top, width} =
         element./*OK*/ getBoundingClientRect();
       return {
         x: Math.round(left),
@@ -466,7 +471,7 @@ class SeleniumWebDriverController {
    * @override
    */
   async setWindowRect(rect) {
-    const {width, height} = rect;
+    const {height, width} = rect;
 
     await this.driver.manage().window().setRect({
       x: 0,
@@ -553,7 +558,7 @@ class SeleniumWebDriverController {
 
   /**
    * @param {!ElementHandle<!selenium.WebElement>} handle
-   * @param {!selenium.ScrollToOptionsDef=} opt_scrollToOptions
+   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
    * @return {!Promise}
    * @override
    */
@@ -568,7 +573,7 @@ class SeleniumWebDriverController {
 
   /**
    * @param {!ElementHandle<!selenium.WebElement>} handle
-   * @param {!selenium.ScrollToOptionsDef=} opt_scrollToOptions
+   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
    * @return {!Promise}
    * @override
    */

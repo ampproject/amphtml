@@ -241,7 +241,7 @@ class AmpBridPlayer extends AMP.BaseElement {
       return;
     }
 
-    const {partnerID_: partnerID, feedID_: feedID} = this;
+    const {feedID_: feedID, partnerID_: partnerID} = this;
 
     const html = htmlFor(element);
     const placeholder = html`
