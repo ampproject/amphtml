@@ -25,7 +25,7 @@ import {dev, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';
 import {installWebAnimationsIfNecessary} from './install-polyfill';
-import {isFiniteNumber} from '../../../src/types';
+import {isFiniteNumber} from '../../../src/core/types';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-animation';

@@ -22,8 +22,8 @@ import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {isArray} from '../../../src/core/types';
-import {isFiniteNumber} from '../../../src/types';
+import {isArray, isFiniteNumber} from '../../../src/core/types';
+
 import {
   layoutPositionRelativeToScrolledViewport,
   layoutRectLtwh,

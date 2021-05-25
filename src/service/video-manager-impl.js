@@ -44,7 +44,7 @@ import {dict, map} from '../core/types/object';
 import {dispatchCustomEvent, removeElement} from '../dom';
 import {getInternalVideoElementFor, isAutoplaySupported} from '../utils/video';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
-import {isFiniteNumber} from '../types';
+import {isFiniteNumber} from '../core/types';
 import {measureIntersection} from '../utils/intersection';
 import {once} from '../core/types/function';
 import {registerServiceBuilderForDoc} from '../service';
