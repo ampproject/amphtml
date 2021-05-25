@@ -157,7 +157,7 @@ describes.realWin(
     });
 
     describe('show/hide', () => {
-      it('toggle display', () => {
+      it.skip('toggle display', () => {
         const config = dict({
           'promptUI': 'test1',
         });
@@ -175,7 +175,7 @@ describes.realWin(
         expect(ownersStubs.schedulePause).to.be.calledOnce;
       });
 
-      it('should support pause/resume lifecycle', () => {
+      it.skip('should support pause/resume lifecycle', () => {
         const config = dict({
           'promptUI': 'test1',
         });
