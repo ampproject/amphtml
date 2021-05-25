@@ -32,12 +32,12 @@ describes.endtoend(
       const video = await controller.findElement('#video');
 
       await expect(controller.getElementAttribute(video, 'src')).to.equal(
-        'https://www.google.com/unbound.webm'
+        'https://test.cache/test-cache/https://www.google.com/unbound.webm'
       );
 
       await controller.click(button);
       await expect(controller.getElementAttribute(video, 'src')).to.equal(
-        'https://www.google.com/bound.webm'
+        'https://test.cache/test-cache/https://www.google.com/bound.webm'
       );
     });
 
@@ -46,12 +46,12 @@ describes.endtoend(
       const video = await controller.findElement('#video');
 
       await expect(controller.getElementAttribute(video, 'src')).to.equal(
-        'https://www.google.com/unbound.webm'
+        'https://test.cache/test-cache/https://www.google.com/unbound.webm'
       );
 
       await controller.click(button);
       await expect(controller.getElementAttribute(video, 'src')).to.equal(
-        'https://www.google.com/unbound.webm'
+        'https://test.cache/test-cache/https://www.google.com/unbound.webm'
       );
     });
 
@@ -60,13 +60,13 @@ describes.endtoend(
       const video = await controller.findElement('#video');
 
       await expect(controller.getElementAttribute(video, 'src')).to.equal(
-        'https://www.google.com/unbound.webm'
+        'https://test.cache/test-cache/https://www.google.com/unbound.webm'
       );
 
       await controller.click(button);
       // Only HTTPS is allowed
       await expect(controller.getElementAttribute(video, 'src')).to.equal(
-        'https://www.google.com/unbound.webm'
+        'https://test.cache/test-cache/https://www.google.com/unbound.webm'
       );
     });
 

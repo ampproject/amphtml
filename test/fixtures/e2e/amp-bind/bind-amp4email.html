@@ -11,13 +11,13 @@
 </head>
 <body>
   <!-- href -->
-  <button on="tap:AMP.setState({boundHref: 'https://bar.com'})" id="changeHrefButton"></button>
-  <a id="anchorElement" href="https://foo.com" [href]="boundHref">Link</a>
+  <button on="tap:AMP.setState({boundHref: 'https://test.cache/test-cache/https://bar.com'})" id="changeHrefButton"></button>
+  <a id="anchorElement" href="https://test.cache/test-cache/https://foo.com" [href]="boundHref">Link</a>
 
   <!-- amp-img -->
-  <button on="tap:AMP.setState({imageSrc: 'https://bar.com/bar.jpg'})" id="changeImgSrcButton"></button>
+  <button on="tap:AMP.setState({imageSrc: 'https://test.cache/test-cache/https://bar.com/bar.jpg'})" id="changeImgSrcButton"></button>
   <amp-img id="image"
-    src="https://foo.com/foo.jpg" [src]="imageSrc"
+    src="https://test.cache/test-cache/https://foo.com/foo.jpg" [src]="imageSrc"
     width="200" height="200" layout="responsive"></amp-img>
 </body>
 </html>

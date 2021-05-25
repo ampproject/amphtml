@@ -12,15 +12,15 @@
 </head>
 <body>
   <!-- amp-video -->
-  <button on="tap:AMP.setState({videoSrc: 'https://www.google.com/bound.webm'})" id="changeVidSrcButton"></button>
-  <button on="tap:AMP.setState({videoSrc: 'http://www.google.com/justhttp.ogg'})" id="httpVidSrcButton"></button>
+  <button on="tap:AMP.setState({videoSrc: 'https://test.cache/test-cache/https://www.google.com/bound.webm'})" id="changeVidSrcButton"></button>
+  <button on="tap:AMP.setState({videoSrc: 'http://test.cache/test-cache/http://www.google.com/justhttp.ogg'})" id="httpVidSrcButton"></button>
   <button on="tap:AMP.setState({videoSrc: '?__amp_source_origin'})" id="disallowedVidUrlButton"></button>
   <button on="tap:AMP.setState({videoAlt: 'hello world'})" id="changeVidAltButton"></button>
   <button on="tap:AMP.setState({videoWidth: 300, videoHeight: 300})" id="changeVidDimensButton"></button>
   <button on="tap:AMP.setState({videoControls: true})" id="showVidControlsButton"></button>
   <button on="tap:AMP.setState({videoControls: false})" id="hideVidControlsButton"></button>
   <amp-video layout="responsive" id="video"
-    src="https://www.google.com/unbound.webm" [src]="videoSrc"
+    src="https://test.cache/test-cache/https://www.google.com/unbound.webm" [src]="videoSrc"
     alt="unbound" [alt]="videoAlt"
     width="200" [width]="videoWidth"
     height="200" [height]="videoHeight"

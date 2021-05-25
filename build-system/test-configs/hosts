@@ -10,3 +10,6 @@
 # Used by integration tests for amp-recaptcha-input.
 # The hash is the cURL subdomain for localhost:9876.
 127.0.0.1 jgla3zmib2ggq5buc4hwi5taloh6jlvzukddfr4zltz3vay5s5rq.recaptcha.localhost
+
+# Used as a way to easily and explicitly cache a network request response.
+127.0.0.1 test.cache

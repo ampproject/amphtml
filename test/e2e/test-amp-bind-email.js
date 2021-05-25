@@ -36,12 +36,12 @@ describes.endtoend(
           const a = await controller.findElement('#anchorElement');
 
           await expect(controller.getElementAttribute(a, 'href')).to.equal(
-            'https://foo.com'
+            'https://test.cache/test-cache/https://foo.com'
           );
 
           await controller.click(button);
           await expect(controller.getElementAttribute(a, 'href')).to.equal(
-            'https://foo.com'
+            'https://test.cache/test-cache/https://foo.com'
           );
         });
 
@@ -52,12 +52,12 @@ describes.endtoend(
           const image = await controller.findElement('#image');
 
           await expect(controller.getElementAttribute(image, 'src')).to.equal(
-            'https://foo.com/foo.jpg'
+            'https://test.cache/test-cache/https://foo.com/foo.jpg'
           );
 
           await controller.click(button);
           await expect(controller.getElementAttribute(image, 'src')).to.equal(
-            'https://foo.com/foo.jpg'
+            'https://test.cache/test-cache/https://foo.com/foo.jpg'
           );
         });
     });
