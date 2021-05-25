@@ -316,8 +316,16 @@ bool IsLayoutSizeDefined(AmpLayout::Layout layout) {
           layout == AmpLayout::INTRINSIC);
 }
 
+bool IsLayoutAwaitingSize(AmpLayout::Layout layout) {
+  return layout == AmpLayout::FLUID;
+}
+
 std::string GetLayoutSizeDefinedClass() {
   return "i-amphtml-layout-size-defined";
+}
+
+std::string GetLayoutAwaitingSizeClass() {
+  return "i-amphtml-layout-awaiting-size";
 }
 
 }  // namespace amp::validator::parse_layout
