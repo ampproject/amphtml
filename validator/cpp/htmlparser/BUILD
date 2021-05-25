@@ -433,6 +433,7 @@ cc_library(
         ":defer",
         ":strings",
         ":token",
+        "@com_google_absl//absl/flags:flag",
     ],
     copts = ["-std=c++17"],
 )
