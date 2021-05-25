@@ -329,8 +329,8 @@ describes.fakeWin(
         it('Should update tracking info with the guid', () => {
           return ampSkimlinks.onPageScanned_().then(() => {
             const {
-              setTrackingInfo: setTrackingInfoStub,
               sendImpressionTracking: sendImpressionTrackingStub,
+              setTrackingInfo: setTrackingInfoStub,
             } = ampSkimlinks.trackingService_;
             expect(setTrackingInfoStub.withArgs({guid}).calledOnce).to.be.true;
             expect(setTrackingInfoStub.calledBefore(sendImpressionTrackingStub))
@@ -385,8 +385,8 @@ describes.fakeWin(
         it('Should update tracking info with the guid', () => {
           return ampSkimlinks.onPageScanned_().then(() => {
             const {
-              setTrackingInfo: setTrackingInfoStub,
               sendImpressionTracking: sendImpressionTrackingStub,
+              setTrackingInfo: setTrackingInfoStub,
             } = ampSkimlinks.trackingService_;
             expect(setTrackingInfoStub.withArgs({guid}).calledOnce).to.be.true;
             expect(setTrackingInfoStub.calledBefore(sendImpressionTrackingStub))

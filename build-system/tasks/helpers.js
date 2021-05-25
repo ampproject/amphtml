@@ -31,8 +31,8 @@ const {
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
+const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
-const {green, red, cyan} = require('../common/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
@@ -472,8 +472,11 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
         const time = Date.now();
-        const buildPromise = buildResult
-          .rebuild()
+        const {rebuild} = /** @type {Required<esbuild.BuildResult>} */ (
+          buildResult
+        );
+
+        const buildPromise = rebuild()
           .then(() =>
             finishBundle(srcFilename, destDir, destFilename, options, time)
           )
@@ -785,7 +788,7 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
  * @return {!Promise}
  */
 async function thirdPartyBootstrap(input, outputName, options) {
-  const {minify, fortesting} = options;
+  const {fortesting, minify} = options;
   const destDir = `dist.3p/${minify ? internalRuntimeVersion : 'current'}`;
   await fs.ensureDir(destDir);
 
@@ -847,7 +850,7 @@ async function getDependencies(entryPoint, options) {
     metafile: true,
     plugins: [babelPlugin],
   });
-  return Object.keys(result.metafile?.inputs);
+  return Object.keys(result.metafile?.inputs ?? {});
 }
 
 module.exports = {

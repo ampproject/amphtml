@@ -657,7 +657,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           const uiState = this.storeService_.get(StateProperty.UI_STATE);
           // The desktop panels UI uses CSS scale. Retrieving clientHeight/Width
           // ensures we are getting the raw size, ignoring the scale.
-          const {width, height} =
+          const {height, width} =
             uiState === UIType.DESKTOP_PANELS
               ? {
                   height: this.element./*OK*/ clientHeight,
@@ -1804,6 +1804,12 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.element,
         attachmentEl
       );
+
+      // This ensures `active` is set on first render.
+      // Otherwise setState may be called before this.openAttachmentEl_ exists.
+      if (this.element.hasAttribute('active')) {
+        this.openAttachmentEl_.setAttribute('active', '');
+      }
 
       const container = this.win.document.createElement('div');
       container.classList.add('i-amphtml-story-page-open-attachment-host');

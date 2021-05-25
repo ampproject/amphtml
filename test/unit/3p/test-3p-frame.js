@@ -85,7 +85,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           return Services.ampdoc(window.document);
         };
 
-        const {innerWidth: width, innerHeight: height} = window;
+        const {innerHeight: height, innerWidth: width} = window;
         div.getIntersectionChangeEntry = function () {
           return {
             time: 1234567888,

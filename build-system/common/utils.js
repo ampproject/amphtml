@@ -19,11 +19,11 @@ const experimentsConfig = require('../global-configs/experiments-config.json');
 const fs = require('fs-extra');
 const globby = require('globby');
 const {clean} = require('../tasks/clean');
+const {cyan, green, red, yellow} = require('./colors');
 const {default: ignore} = require('ignore');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
 const {gitDiffNameOnlyMain} = require('./git');
-const {green, cyan, red, yellow} = require('./colors');
 const {log, logLocalDev} = require('./logging');
 
 /**

@@ -26,7 +26,7 @@ const {
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {cyan, green, yellow, red} = require('../common/colors');
+const {cyan, green, red, yellow} = require('../common/colors');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');

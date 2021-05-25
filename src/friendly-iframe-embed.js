@@ -618,7 +618,7 @@ export class FriendlyIframeEmbed {
 
         // Offset by scroll top as iframe will be position: fixed.
         const dy = -Services.viewportForDoc(this.iframe).getScrollTop();
-        const {top, left, width, height} = moveLayoutRect(rect, /* dx */ 0, dy);
+        const {height, left, top, width} = moveLayoutRect(rect, /* dx */ 0, dy);
 
         // Offset body by header height to prevent visual jump.
         bodyStyle = {

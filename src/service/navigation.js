@@ -249,7 +249,7 @@ export class Navigation {
    * }=} options
    */
   navigateTo(win, url, opt_requestedBy, options = {}) {
-    const {target = '_top', opener = false} = options;
+    const {opener = false, target = '_top'} = options;
     url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {

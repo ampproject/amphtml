@@ -49,7 +49,7 @@ const hash = require('./create-hash');
 const {addNamed} = require('@babel/helper-module-imports');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
-const {relative, join} = require('path');
+const {join, relative} = require('path');
 const {transformCssSync} = require('../../tasks/css/jsify-css-sync');
 
 module.exports = function ({template, types: t}) {

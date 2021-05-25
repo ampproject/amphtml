@@ -49,11 +49,11 @@ describes.realWin('form-validators', {amp: true}, (env) => {
     form.setAttribute('method', 'POST');
     doc.body.appendChild(form);
 
-    const {name, email, text, submit} = getInputs(doc);
+    const {email, name, submit, text} = getInputs(doc);
     [name, email, text, submit].forEach((c) => form.appendChild(c));
 
     if (isCustomValidations) {
-      const {noName, noEmail, invalidEmail, invalidText} =
+      const {invalidEmail, invalidText, noEmail, noName} =
         getCustomValidations(doc);
       [noName, noEmail, invalidEmail, invalidText].forEach((c) =>
         doc.body.appendChild(c)
@@ -723,14 +723,14 @@ describes.realWin('form-validators', {amp: true}, (env) => {
       expect(validations[3].className).to.not.contain('visible');
 
       // Simulate a dynamic content event e.g. amp-list re-render.
-      const {name, email, submit} = getInputs(doc);
+      const {email, name, submit} = getInputs(doc);
       while (form.firstChild) {
         form.removeChild(form.firstChild);
       }
       [name, email, submit].forEach((c) => form.appendChild(c));
 
       validations.forEach((v) => v.parentNode.removeChild(v));
-      const {noName, noEmail, invalidEmail, invalidText} =
+      const {invalidEmail, invalidText, noEmail, noName} =
         getCustomValidations(doc);
       [noName, noEmail, invalidEmail, invalidText].forEach((c) =>
         doc.body.appendChild(c)

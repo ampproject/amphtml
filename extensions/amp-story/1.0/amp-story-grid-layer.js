@@ -185,7 +185,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     if (!pageSize) {
       return;
     }
-    const {width: vw, height: vh} = pageSize;
+    const {height: vh, width: vw} = pageSize;
     const {horiz, vert} = this.aspectRatio_;
     const width = Math.min(vw, (vh * horiz) / vert);
     const height = Math.min(vh, (vw * vert) / horiz);

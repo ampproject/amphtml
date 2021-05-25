@@ -48,16 +48,16 @@ describes.realWin('Resources', {amp: true}, (env) => {
   function createResource(opts) {
     const {
       id,
-      isBuilt,
+      idleRenderOutsideViewport,
       isBuilding,
-      state,
+      isBuilt,
       isDisplayed,
       isFixed,
       isInViewport,
+      layoutPriority,
       prerenderAllowed,
       renderOutsideViewport,
-      idleRenderOutsideViewport,
-      layoutPriority,
+      state,
       taskId,
     } = {
       id: '1',
