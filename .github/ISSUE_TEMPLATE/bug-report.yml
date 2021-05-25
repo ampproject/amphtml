@@ -53,7 +53,7 @@ body:
     id: operating_systems
     attributes:
       label: OS(s) Affected
-      description: If applicable, specify which operating system(s) are affected. Otherwise just put down 'all'.
+      description: If applicable, specify which operating system(s) are affected. Otherwise just put down 'n/a'.
       placeholder: e.g. Android 11
     validations:
       required: true
@@ -61,7 +61,7 @@ body:
     id: devices
     attributes:
       label: Device(s) Affected
-      description: If applicable, specify which device(s) are affected. Otherwise just put down 'all'.
+      description: If applicable, specify which device(s) are affected. Otherwise just put down 'n/a'.
       placeholder: e.g. Pixel 3
     validations:
       required: true
