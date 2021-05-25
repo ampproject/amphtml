@@ -49,6 +49,7 @@ module.exports = {
     'prettier',
     'react',
     'react-hooks',
+    'sort-destructure-keys',
     'sort-imports-es6-autofix',
     'sort-requires',
   ],
@@ -251,6 +252,7 @@ module.exports = {
         },
       },
     ],
+    'sort-destructure-keys/sort-destructure-keys': 2,
     'sort-imports-es6-autofix/sort-imports-es6': [
       2,
       {
