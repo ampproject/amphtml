@@ -15,4 +15,5 @@
  */
 
 /* eslint-env node */
+// eslint-disable-next-line local/no-module-exports
 module.exports = require('./dist/component-react');
