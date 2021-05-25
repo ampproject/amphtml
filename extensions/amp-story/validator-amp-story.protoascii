@@ -152,6 +152,7 @@ tags: {  # <amp-story-page>
     child_tag_name_oneof: "AMP-STORY-CTA-LAYER"
     child_tag_name_oneof: "AMP-STORY-GRID-LAYER"
     child_tag_name_oneof: "AMP-STORY-PAGE-ATTACHMENT"
+    child_tag_name_oneof: "AMP-STORY-PAGE-OUTLINK"
     mandatory_min_num_child_tags: 1
   }
 }
@@ -848,7 +849,6 @@ tags: {  # <amp-story-page-attachment> with href. Legacy version of <amp-story-p
   spec_name: "amp-story-page-attachment[href]"
   mandatory_ancestor: "AMP-STORY-PAGE"
   mandatory_last_child: true
-  attrs: {
   attrs: {
     name: "cta-text"
   }
