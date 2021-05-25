@@ -98,7 +98,9 @@ export const buildOpenAttachmentElementLinkIcon = (element) =>
  */
 export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
   if (isPageAttachmentUiV2ExperimentOn(pageEl.getAmpDoc().win)) {
-    if (attachmentEl.getAttribute('href')) {
+    const isOutlink =
+      attachmentEl.getAttribute('href') || attachmentEl.querySelector('a');
+    if (isOutlink) {
       return renderOutlinkPageAttachmentUI(pageEl, attachmentEl);
     } else {
       return renderInlinePageAttachmentUi(pageEl, attachmentEl);
@@ -149,8 +151,14 @@ const renderOldPageAttachmentUI = (pageEl, attachmentEl) => {
 const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
 
+  // amp-story-page-outlink requires an anchor element child. We can remove after we get a reference to it.
+  // amp-story-page-attachment uses this same codepath and allows an href attribute.
+  const anchorChild = attachmentEl.querySelector('a');
+  anchorChild && attachmentEl.removeChild(anchorChild);
+
   // Copy href to the element so it can be previewed on hover and long press.
-  const attachmentHref = attachmentEl.getAttribute('href');
+  const attachmentHref =
+    attachmentEl.getAttribute('href') || anchorChild?.getAttribute('href');
   if (attachmentHref) {
     openAttachmentEl.setAttribute('href', attachmentHref);
   }
@@ -171,6 +179,7 @@ const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
 
   // Append text & aria-label.
   const openLabelAttr =
+    anchorChild?.textContent ||
     attachmentEl.getAttribute('cta-text') ||
     attachmentEl.getAttribute('data-cta-text');
   const openLabel = openLabelAttr

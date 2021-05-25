@@ -115,7 +115,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     // URL will be validated and resolved based on the canonical URL if relative
     // when navigating.
-    const href = this.element.getAttribute('href');
+    const href =
+      this.element.getAttribute('href') || this.element.querySelector('a');
     this.type_ = href ? AttachmentType.REMOTE : AttachmentType.INLINE;
 
     if (this.type_ === AttachmentType.INLINE) {
@@ -144,7 +145,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Builds inline page attachment's UI.
+   * Builds inline page attachment's drawer UI.
    * @private
    */
   buildInline_() {
@@ -194,7 +195,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Builds remote page attachment's UI.
+   * Builds remote page attachment's drawer UI.
    * @private
    */
   buildRemote_() {
@@ -224,7 +225,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Builds remote V2 page attachment's UI.
+   * Builds remote V2 page attachment's drawer UI.
    * @private
    */
   buildRemoteV2_() {
@@ -241,7 +242,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         <span class="i-amphtml-story-page-attachment-remote-title"><span ref="openStringEl"></span><span ref="urlStringEl"></span></span>
         <svg class="i-amphtml-story-page-attachment-remote-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"></path></svg>
       </a>`;
-    const hrefAttr = this.element.getAttribute('href');
+    const hrefAttr = this.element.querySelector('a').getAttribute('href');
     link.setAttribute('href', hrefAttr);
     const {openStringEl, urlStringEl} = htmlRefs(link);
 
