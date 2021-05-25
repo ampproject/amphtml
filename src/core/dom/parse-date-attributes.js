@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
+import {TimestampDef, parseDate} from '../types/date';
 import {devAssert, userAssert} from '../assert';
-import {parseDate} from '../types/date';
 
-/** Map from attribute names to their parsers. */
+/** @typedef {function(string):!TimestampDef} */
+let DateParserDef;
+
+/**
+ * Map from attribute names to their parsers.
+ * @type {Object<string, !DateParserDef>}
+ */
 const dateAttrParsers = {
   'datetime': (datetime) =>
     userAssert(parseDate(datetime), 'Invalid date: %s', datetime),
@@ -31,7 +37,7 @@ const dateAttrParsers = {
 /**
  * @param {!Element} element
  * @param {!Array<string>} dateAttrs list of attribute names
- * @return {?number}
+ * @return {?TimestampDef}
  */
 export function parseDateAttrs(element, dateAttrs) {
   const epoch = userAssert(
@@ -50,12 +56,13 @@ export function parseDateAttrs(element, dateAttrs) {
  * that is truthy.
  * @param {!Element} element
  * @param {!Array<string>} dateAttrs list of attribute names
- * @return {?number}
+ * @return {?TimestampDef}
  */
 function parseEpoch(element, dateAttrs) {
   // Validate provided dateAttrs outside the loop so it will fail when an
   // invalid attr is provided, even if that attribute isn't present on the
   // element.
+  /** @type {!Array<!DateParserDef>} */
   const parsers = dateAttrs.map((attrName) =>
     devAssert(
       dateAttrParsers[attrName],
