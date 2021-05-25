@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as docready from '../../src/document-ready';
+import * as docready from '../../src/core/document-ready';
 import * as dom from '../../src/dom';
 import {
   AmpDocFie,

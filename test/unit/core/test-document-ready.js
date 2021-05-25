@@ -20,7 +20,7 @@ import {
   onDocumentReady,
   whenDocumentComplete,
   whenDocumentReady,
-} from '../../../src/document-ready';
+} from '../../../src/core/document-ready';
 
 describes.sandboxed('documentReady', {}, (env) => {
   let testDoc;

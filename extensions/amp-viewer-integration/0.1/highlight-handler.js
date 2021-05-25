@@ -24,7 +24,7 @@ import {once} from '../../../src/core/types/function';
 import {parseJson} from '../../../src/core/types/object/json';
 import {parseQueryString} from '../../../src/core/types/string/url';
 import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
-import {whenDocumentReady} from '../../../src/document-ready';
+import {whenDocumentReady} from '../../../src/core/document-ready';
 
 /**
  * The message name sent by viewers to dismiss highlights.
