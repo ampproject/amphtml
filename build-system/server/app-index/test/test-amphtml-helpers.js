@@ -49,7 +49,7 @@ describe('devdash', () => {
         expectValidAmphtml(await amphtmlValidator.getInstance(), AmpDoc({
           canonical: '/',
         }));
-      })
+      }).timeout(5000);
 
       it('creates valid doc with set fields', async() => {
         expectValidAmphtml(await amphtmlValidator.getInstance(), AmpDoc({
@@ -89,7 +89,7 @@ describe('devdash', () => {
             </script>`,
           body: html`<div>Hola</div>`,
         }));
-      });
+      }).timeout(5000);
     });
 
     describe('ampStateKey', () => {
