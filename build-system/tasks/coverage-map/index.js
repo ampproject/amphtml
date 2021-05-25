@@ -98,8 +98,8 @@ async function autoScroll(page) {
  */
 async function htmlTransform() {
   const {
-    transform,
     // @ts-ignore
+    transform,
   } = require('../../server/new-server/transforms/dist/transform');
   log('Transforming', cyan(`${inputHtml}`) + '...');
   const transformed = await transform(`examples/${inputHtml}`);
