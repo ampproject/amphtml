@@ -100,6 +100,7 @@ async function htmlTransform() {
   const {
     // @ts-ignore
     transform,
+    // @ts-ignore
   } = require('../../server/new-server/transforms/dist/transform');
   log('Transforming', cyan(`${inputHtml}`) + '...');
   const transformed = await transform(`examples/${inputHtml}`);
