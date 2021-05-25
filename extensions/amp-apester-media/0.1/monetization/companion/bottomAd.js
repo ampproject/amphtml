@@ -67,7 +67,7 @@ function constructCompanionBottomAd(slot, bannerSizes, apesterElement) {
       'data-multi-size-validation': 'false',
     })
   );
-  ampAd.classList.add('amp-apester-companion');
+  ampAd.classList.add('i-amphtml-amp-apester-companion');
   apesterElement.appendChild(ampAd);
   Services.mutatorForDoc(apesterElement).requestChangeSize(ampAd, height);
   return ampAd;

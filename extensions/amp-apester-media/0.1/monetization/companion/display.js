@@ -82,7 +82,7 @@ function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
       'data-multi-size': multiSizeData,
     })
   );
-  ampAd.classList.add('amp-apester-companion');
+  ampAd.classList.add('i-amphtml-amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
   Services.mutatorForDoc(apesterElement).requestChangeSize(
     ampAd,

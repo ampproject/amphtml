@@ -105,7 +105,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
     })
   );
 
-  ampBladeAd.classList.add('amp-apester-companion');
+  ampBladeAd.classList.add('i-amphtml-amp-apester-companion');
 
   const relativeElement =
     position === 'below' ? apesterElement.nextSibling : apesterElement;
