@@ -59,7 +59,7 @@ You can specify a template in one of two ways:
 </amp-render>
 ```
 
-For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
+For more details on templates, see [AMP HTML Templates](../../docs/spec/amp-html-templates.md).
 
 <!--
   * [Read more about filtering sections](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#filtering-sections)
