@@ -15,7 +15,7 @@
  */
 
 import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {DomFingerprint} from '../../../src/core/dom/fingerprint';
 import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {buildUrl} from './shared/url-builder';
