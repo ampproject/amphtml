@@ -35,12 +35,6 @@ const DEFAULT_DATETIME_OPTIONS = {
   'minute': 'numeric',
 };
 
-/** @const {!Object<string, *>} */
-const DEFAULT_DATETIME_OPTIONS_UTC = {
-  ...DEFAULT_DATETIME_OPTIONS,
-  timeZone: 'UTC',
-};
-
 /**
  * @param {!JsonObject} data
  * @return {string}
@@ -95,12 +89,11 @@ export function DateDisplay({
   datetime,
   displayIn = DEFAULT_DISPLAY_IN,
   locale = DEFAULT_LOCALE,
-  additionalOptions = {},
+  localeOptions,
   render = DEFAULT_RENDER,
   ...rest
 }) {
   const date = getDate(datetime);
-  const {localeOptions} = additionalOptions;
   const data = useMemo(
     () => getDataForTemplate(new Date(date), displayIn, locale, localeOptions),
     [date, displayIn, locale, localeOptions]
@@ -214,7 +207,7 @@ function getVariablesInLocal(
 function getVariablesInUTC(
   date,
   locale,
-  localeOptions = DEFAULT_DATETIME_OPTIONS_UTC
+  localeOptions = DEFAULT_DATETIME_OPTIONS
 ) {
   const localeOptionsInUTC = {
     ...localeOptions,

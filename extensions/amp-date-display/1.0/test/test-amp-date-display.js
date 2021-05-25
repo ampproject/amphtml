@@ -140,22 +140,29 @@ describes.realWin(
       expect(data.localeString).to.equal('Feb 3, 2001, 4:05 AM');
     });
 
-    it('render localeString with "localeOptions" from json script', async () => {
-      const options = {localeOptions: {timeStyle: 'short'}};
-      const script = win.document.createElement('script');
-      script.setAttribute('type', 'application/json');
-      script.textContent = JSON.stringify(options);
-
+    it('render localeString with data-options-time-style', async () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
       element.setAttribute('display-in', 'UTC');
       element.setAttribute('locale', 'zh-TW');
-      element.appendChild(script);
-
+      element.setAttribute('data-options-time-style', 'short');
       win.document.body.appendChild(element);
 
       const data = await getRenderedData();
 
       expect(data.localeString).to.equal('上午4:05');
+    });
+
+    it('render localeString with data-options-date-style & data-options-time-style', async () => {
+      element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+      element.setAttribute('display-in', 'UTC');
+      element.setAttribute('locale', 'zh-TW');
+      element.setAttribute('data-options-date-style', 'full');
+      element.setAttribute('data-options-time-style', 'medium');
+      win.document.body.appendChild(element);
+
+      const data = await getRenderedData();
+
+      expect(data.localeString).to.equal('2001年2月3日 星期六 上午4:05:06');
     });
 
     it('renders default template into element', async () => {

@@ -79,6 +79,7 @@ This table lists the format you can specify in your Mustache template:
 | secondTwoDigit | 00, 01, 02, ..., 58, 59                                       |
 | year           | 0, 1, 2, ..., 1999, 2000, 2001, etc.                          |
 | yearTwoDigit   | 00, 01, 02, ..., 17, 18, 19, ..., 98, 99                      |
+| localeString   | A string with a language sensitive representation.            |
 
 ### Standalone use outside valid AMP documents
 
@@ -193,3 +194,9 @@ date to UTC.
 
 The `offset-seconds` attribute specifies an integer number of seconds to shift
 the given date.
+
+### data-options-\* (optional)
+
+The `data-options-*` supports all the options under [Intl.DateTimeFormat.options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#parameters)
+parameter that specifies the formatting style to use for `localeString` format.
+Valid attributes include: `data-options-date-style`, `data-options-time-style`, etc.

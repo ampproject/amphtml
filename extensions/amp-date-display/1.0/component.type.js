@@ -24,7 +24,7 @@ var DateDisplayDef = {};
  *   datetime: (!Date|number|string),
  *   displayIn: (string|undefined),
  *   locale: (string|undefined),
- *   additionalOptions: (?Object<string, *>|undefined),
+ *   localeOptions: (Object<string, *>),
  *   render: (?RendererFunctionType|undefined),
  * }}
  */

@@ -17,7 +17,6 @@
 import {DateDisplay} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
-import {tryParseJson} from '../../../src/core/types/object/json';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -32,10 +31,7 @@ BaseElement['props'] = {
   },
   'displayIn': {attr: 'display-in'},
   'locale': {attr: 'locale'},
-  'additionalOptions': {
-    attrs: ['json'],
-    parseAttrs: parseJsonStr,
-  },
+  'localeOptions': {attrPrefix: 'data-options-'},
 };
 
 /** @override */
@@ -59,19 +55,4 @@ export function parseDateAttrs(element) {
     'timestamp-ms',
     'timestamp-seconds',
   ]);
-}
-
-/**
- * @param {!Element} element
- * @return {?JsonObject} May be extend to parse arrays.
- * @throws {Error} Parsing fails error.
- */
-function parseJsonStr(element) {
-  const jsonStr = element.getAttribute('json');
-  if (!jsonStr) {
-    return;
-  }
-  return tryParseJson(jsonStr, (error) => {
-    throw error;
-  });
 }

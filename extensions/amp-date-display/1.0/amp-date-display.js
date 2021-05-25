@@ -16,7 +16,6 @@
 
 import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
-import {childElementsByTag, isJsonScriptTag} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
@@ -34,16 +33,6 @@ class AmpDateDisplay extends BaseElement {
 
     /** @private {?Element} */
     this.template_ = null;
-  }
-
-  /** @override */
-  buildCallback() {
-    super.buildCallback();
-    // Handle additional JSON
-    const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
-    if (scriptElement && isJsonScriptTag(scriptElement)) {
-      this.element.setAttribute('json', scriptElement.textContent);
-    }
   }
 
   /** @override */

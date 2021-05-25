@@ -30,6 +30,39 @@ const DEFAULT_LOCALE = 'en';
 /** @const {number} */
 const DEFAULT_OFFSET_SECONDS = 0;
 
+/** @const {!Array<string>} */
+const SUPPORTED_LOCALE_OPTIONS_ATTRS = [
+  'date-style',
+  'time-style',
+  'calendar',
+  'day-period',
+  'numbering-system',
+  'locale-matcher',
+  'time-zone',
+  'hour12',
+  'hour-cycle',
+  'format-matcher',
+  'weekday',
+  'era',
+  'year',
+  'month',
+  'day',
+  'hour',
+  'minute',
+  'second',
+  'fractional-second-digits',
+  'time-zone-name',
+];
+
+/** @const {!Object<string, *>} */
+const DEFAULT_DATETIME_OPTIONS = {
+  'year': 'numeric',
+  'month': 'short',
+  'day': 'numeric',
+  'hour': 'numeric',
+  'minute': 'numeric',
+};
+
 /** @typedef {{
   year: number,
   month: number,
@@ -66,6 +99,7 @@ let VariablesDef;
   minuteTwoDigit: string,
   secondTwoDigit: string,
   dayPeriod: string,
+  localeString: string,
  }} */
 let EnhancedVariablesDef;
 
@@ -94,6 +128,9 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
     /** @private {string} */
     this.locale_ = '';
+
+    /** @private {Object<string, *>} */
+    this.localeOptions_ = null;
 
     /** @private {?../../../src/service/template-impl.Templates} */
     this.templates_ = null;
@@ -129,6 +166,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
     this.locale_ = this.element.getAttribute('locale') || DEFAULT_LOCALE;
 
+    this.localeOptions_ = this.parseLocalOptionsAttrs_(this.element);
+
     const data = /** @type {!JsonObject} */ (this.getDataForTemplate_());
     this.templates_
       .findAndRenderTemplate(this.element, data)
@@ -152,8 +191,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
     const date = new Date(epoch + offset);
     const inUTC = this.displayIn_.toLowerCase() === 'utc';
     const basicData = inUTC
-      ? this.getVariablesInUTC_(date, this.locale_)
-      : this.getVariablesInLocal_(date, this.locale_);
+      ? this.getVariablesInUTC_(date, this.locale_, this.localeOptions_)
+      : this.getVariablesInLocal_(date, this.locale_, this.localeOptions_);
 
     return this.enhanceBasicVariables_(basicData);
   }
@@ -186,12 +225,43 @@ export class AmpDateDisplay extends AMP.BaseElement {
   }
 
   /**
+   * @param {!Element} element
+   * @return {Object<string, *>|undefined}
+   * @private
+   */
+  parseLocalOptionsAttrs_(element) {
+    const getCamelCase = (kebabCase) =>
+      kebabCase
+        .split('-')
+        .map((str, index) =>
+          index === 0 ? str : str[0].toUpperCase() + str.substring(1)
+        )
+        .join('');
+
+    const localeOptions = SUPPORTED_LOCALE_OPTIONS_ATTRS.filter((attr) =>
+      element.hasAttribute(`data-options-${attr}`)
+    );
+    if (localeOptions.length === 0) {
+      return undefined;
+    }
+
+    return localeOptions.reduce(
+      (options, attr) => ({
+        ...options,
+        [getCamelCase(attr)]: element.getAttribute(`data-options-${attr}`),
+      }),
+      {}
+    );
+  }
+
+  /**
    * @param {!Date} date
    * @param {string} locale
+   * @param {?Object<string, *>} localeOptions
    * @return {!VariablesDef}
    * @private
    */
-  getVariablesInLocal_(date, locale) {
+  getVariablesInLocal_(date, locale, localeOptions = DEFAULT_DATETIME_OPTIONS) {
     return {
       year: date.getFullYear(),
       month: date.getMonth() + 1,
@@ -208,16 +278,22 @@ export class AmpDateDisplay extends AMP.BaseElement {
       minute: date.getMinutes(),
       second: date.getSeconds(),
       iso: date.toISOString(),
+      localeString: date.toLocaleString(locale, localeOptions),
     };
   }
 
   /**
    * @param {!Date} date
    * @param {string} locale
+   * @param {?Object<string, *>} localeOptions
    * @return {!VariablesDef}
    * @private
    */
-  getVariablesInUTC_(date, locale) {
+  getVariablesInUTC_(date, locale, localeOptions = DEFAULT_DATETIME_OPTIONS) {
+    const localeOptionsInUTC = {
+      ...localeOptions,
+      timeZone: 'UTC',
+    };
     return {
       year: date.getUTCFullYear(),
       month: date.getUTCMonth() + 1,
@@ -242,6 +318,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
       minute: date.getUTCMinutes(),
       second: date.getUTCSeconds(),
       iso: date.toISOString(),
+      localeString: date.toLocaleString(locale, localeOptionsInUTC),
     };
   }
 

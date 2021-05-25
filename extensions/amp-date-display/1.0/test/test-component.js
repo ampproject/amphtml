@@ -209,13 +209,12 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
   });
 
   it('shows custom locale string when localeOptions is passed', () => {
-    const additionalOptions = {localeOptions: {timeStyle: 'short'}};
     const props = {
       render,
       datetime: Date.parse('2001-02-03T04:05:06.007Z'),
       displayIn: 'UTC',
       locale: 'zh-TW',
-      additionalOptions,
+      localeOptions: {timeStyle: 'short'},
     };
     const jsx = <DateDisplay {...props} />;
 

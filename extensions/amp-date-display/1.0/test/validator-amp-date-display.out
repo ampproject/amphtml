@@ -193,23 +193,8 @@ amp-date-display/1.0/test/validator-amp-date-display.html:173:2 The attribute 'd
 |      <template type="amp-mustache">{{iso}}</template>
 |    </amp-date-display>
 |
-|    <!-- valid, with localeOptions json -->
-|    <amp-date-display datetime="now" layout="fixed" width="360" height="20">
-|      <script type="application/json">
-|        { "localeOptions": { "timeStyle": "short" } }
-|      </script>
-|      <template type="amp-mustache">{{localeString}}</template>
-|    </amp-date-display>
-|
-|    <!-- invalid: AMP Runtime can't parse json with comments. -->
-|    <amp-date-display datetime="now" layout="fixed" width="360" height="20">
-|      <script type="application/json">
->>     ^~~~~~~~~
-amp-date-display/1.0/test/validator-amp-date-display.html:187:4 The script tag contains invalid JSON that cannot be parsed.
-|        {
-|          // Comment, should break parsing and result in a warning.
-|        }
-|      </script>
+|    <!-- valid, with data-options-time-style -->
+|    <amp-date-display datetime="now" layout="fixed" width="360" height="20" data-options-time-style="short">
 |      <template type="amp-mustache">{{localeString}}</template>
 |    </amp-date-display>
 |  </body>

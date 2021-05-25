@@ -104,10 +104,7 @@
         en-GB: {{dayName}} {{day}} {{monthName}} {{year}}
       </template>
     </amp-date-display>
-    <amp-date-display datetime="now" locale="zh-TW" layout="fixed" width="360" height="20">
-      <script type="application/json">
-        { "localeOptions": { "timeStyle": "short" } }
-      </script>
+    <amp-date-display datetime="now" locale="zh-TW" layout="fixed" width="360" height="20" data-options-time-style="short">
       <template type="amp-mustache">
         zh-TW: {{localeString}}
       </template>
