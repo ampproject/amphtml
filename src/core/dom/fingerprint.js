@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {isElement} from '../core/types';
-import {stringHash32} from '../core/types/string';
+import {isElement} from '../types';
+import {stringHash32} from '../types/string';
 
 /**
  * Gets a string of concatenated element names and relative positions
