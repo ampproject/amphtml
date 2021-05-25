@@ -97,11 +97,8 @@ async function autoScroll(page) {
  * @return {Promise<void>}
  */
 async function htmlTransform() {
-  const {
-    // @ts-ignore
-    transform,
-    // @ts-ignore
-  } = require('../../server/new-server/transforms/dist/transform');
+  // @ts-ignore
+  const {transform} = require('../../server/new-server/transforms/dist/transform'); // prettier-ignore
   log('Transforming', cyan(`${inputHtml}`) + '...');
   const transformed = await transform(`examples/${inputHtml}`);
   const transformedName = `transformed.${inputHtml}`;
