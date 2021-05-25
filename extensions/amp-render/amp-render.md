@@ -31,7 +31,7 @@ limitations under the License.
 
 ## Usage
 
-The amp-render component renders content in a specified template. It can fetch content from a CORS JSON endpoint or inline from `amp-state` or `amp-script`.
+The `amp-render` component renders content in a specified template. It can fetch content from a CORS JSON endpoint or inline from `amp-state` or `amp-script`.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
@@ -67,11 +67,11 @@ For more details on templates, see [AMP HTML Templates](../../spec/amp-html-temp
 
 ### XHR batching
 
-AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `<amp-render>` elements) on an AMP page. For example, if your `<amp-render>` makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
+AMP batches XMLHttpRequests (XHRs) to JSON endpoints. This lets you use a single JSON request as a data source for multiple elements on an AMP page. For example, if your `<amp-render>` makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
 
 ### Placeholder and fallback
 
-Optionally, `<amp-render>` supports a placeholder and/or fallback.
+`<amp-render>` supports an optional placeholder and/or fallback.
 
 -   A _placeholder_ is a child element with the `placeholder` attribute. This element is shown until the `<amp-render>` loads successfully. If a fallback is also provided, the placeholder is hidden when the `<amp-render>` fails to load.
 -   A _fallback_ is a child element with the `fallback` attribute. This element is shown if the `<amp-render>` fails to load.
@@ -199,7 +199,7 @@ If we just want to display the German cars from the response, we can use the `ke
 ```
 ### `binding`
 
-For pages using `<amp-render>` that also use `amp-bind`, controls whether or not to block render on the evaluation of bindings (e.g. `[text]`) in rendered children.
+Controls wheather to render on binding evaluations (e.g. `[text]`) in children on pages using `amp-render` and `amp-bind`. 
 
 We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
