@@ -360,6 +360,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.mutateElement(() => {
       const {length} = this.elementsMetadata_[lightboxGroupId];
       this.maybeEnableMultipleItemControls_(length);
+      // Before showing a carousel, ensure it has been unlayed out first to
+      // prevent unintentional additional entries in Map<CustomElement, IntersectionObserver>.
       dev()
         .assertElement(this.carousel_)
         .getImpl()
