@@ -430,6 +430,12 @@ export class AmpStory extends AMP.BaseElement {
       this.element.removeChild(node);
     });
 
+    if (isExperimentOn(this.win, 'flexible-bitrate')) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'flexible-bitrate'
+      );
+    }
+
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.registerAction('goToPage', (invocation) => {
         const {args} = invocation;
