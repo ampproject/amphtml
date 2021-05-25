@@ -99,7 +99,7 @@ let BoundPropertyDef;
 
 /**
  * A tuple containing a single element and all of its bound properties.
- * @typedef {{boundProperties: !Array<BoundPropertyDef>, element: !Element}}
+ * @typedef {{boundProperties: !Array<BoundPropertyDef>, element: !Element, defaultClasses: !Array<string>}}
  */
 let BoundElementDef;
 
@@ -437,9 +437,9 @@ export class Bind {
     }
     // Only pass state for history updates to trusted viewers, since they
     // may contain user data e.g. form input.
-    return this.viewer_.isTrustedViewer().then((trusted) => {
-      return trusted ? data : null;
-    });
+    return this.viewer_
+      .isTrustedViewer()
+      .then((trusted) => (trusted ? data : null));
   }
 
   /**
@@ -966,12 +966,14 @@ export class Bind {
   scanElement_(element, quota, outBindings) {
     let quotaExceeded = false;
     const boundProperties = this.boundPropertiesInElement_(element);
+
     if (boundProperties.length > quota) {
       boundProperties.length = quota;
       quotaExceeded = true;
     }
     if (boundProperties.length > 0) {
-      this.boundElements_.push({element, boundProperties});
+      const defaultClasses = toArray(element.classList);
+      this.boundElements_.push({element, boundProperties, defaultClasses});
     }
     const {tagName} = element;
     boundProperties.forEach((boundProperty) => {
@@ -1176,11 +1178,12 @@ export class Bind {
    * will only return properties that need to be updated along with their
    * new value.
    * @param {!Array<!BoundPropertyDef>} boundProperties
+   * @param {!Array<string>} defaultClasses
    * @param {Object<string, BindExpressionResultDef>} results
-   * @return {!Array<{boundProperty: !BoundPropertyDef, newValue: BindExpressionResultDef}>}
+   * @return {!Array<{boundProperty: !BoundPropertyDef, defaultClasses: !Array<string>, newValue: BindExpressionResultDef}>}
    * @private
    */
-  calculateUpdates_(boundProperties, results) {
+  calculateUpdates_(boundProperties, defaultClasses, results) {
     const updates = [];
     boundProperties.forEach((boundProperty) => {
       const {expressionString, previousResult} = boundProperty;
@@ -1193,7 +1196,7 @@ export class Bind {
       ) {
       } else {
         boundProperty.previousResult = newValue;
-        updates.push({boundProperty, newValue});
+        updates.push({boundProperty, defaultClasses, newValue});
       }
     });
     return updates;
@@ -1226,8 +1229,12 @@ export class Bind {
         return;
       }
 
-      const {element, boundProperties} = boundElement;
-      const updates = this.calculateUpdates_(boundProperties, results);
+      const {element, boundProperties, defaultClasses} = boundElement;
+      const updates = this.calculateUpdates_(
+        boundProperties,
+        defaultClasses,
+        results
+      );
       // If this is a "evaluate only" application, skip the DOM mutations.
       if (opts.evaluateOnly) {
         return;
@@ -1241,7 +1248,7 @@ export class Bind {
   /**
    * Applies expression results to a single BoundElementDef.
    * @param {!Element} element
-   * @param {!Array<{boundProperty: !BoundPropertyDef, newValue: BindExpressionResultDef}>} updates
+   * @param {!Array<{boundProperty: !BoundPropertyDef, defaultClasses: !Array<string>, newValue: BindExpressionResultDef}>} updates
    * @return {!Promise}
    */
   applyUpdatesToElement_(element, updates) {
@@ -1253,9 +1260,14 @@ export class Bind {
       let width, height;
 
       updates.forEach((update) => {
-        const {boundProperty, newValue} = update;
+        const {boundProperty, newValue, defaultClasses} = update;
         const {property} = boundProperty;
-        const mutation = this.applyBinding_(boundProperty, element, newValue);
+        const mutation = this.applyBinding_(
+          boundProperty,
+          element,
+          defaultClasses,
+          newValue
+        );
 
         if (mutation) {
           mutations[mutation.name] = mutation.value;
@@ -1327,11 +1339,12 @@ export class Bind {
    * Mutates the bound property of `element` with `newValue`.
    * @param {!BoundPropertyDef} boundProperty
    * @param {!Element} element
+   * @param {!Array<string>} defaultClasses
    * @param {BindExpressionResultDef} newValue
    * @return {?{name: string, value:BindExpressionResultDef}}
    * @private
    */
-  applyBinding_(boundProperty, element, newValue) {
+  applyBinding_(boundProperty, element, defaultClasses, newValue) {
     const {property} = boundProperty;
     const tag = element.tagName;
 
@@ -1359,6 +1372,7 @@ export class Bind {
         break;
 
       case 'class':
+      case 'dynamic-class':
         // Preserve internal AMP classes.
         const ampClasses = [];
         for (let i = 0; i < element.classList.length; i++) {
@@ -1366,6 +1380,9 @@ export class Bind {
           if (AMP_CSS_RE.test(cssClass)) {
             ampClasses.push(cssClass);
           }
+        }
+        if (property === 'dynamic-class') {
+          ampClasses.push(defaultClasses);
         }
         if (Array.isArray(newValue) || typeof newValue === 'string') {
           element.setAttribute('class', ampClasses.concat(newValue).join(' '));

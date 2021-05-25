@@ -867,6 +867,18 @@ chromed.run('Bind', {}, function () {
           });
         });
 
+        it('should support binding to CSS classes with strings, including dynamic-class', () => {
+          const element = createElement(
+            env,
+            container,
+            "class='abc' [dynamic-class]=\"['def']\""
+          );
+          expect(toArray(element.classList)).to.deep.equal(['abc']);
+          return onBindReadyAndSetState(env, bind, {}).then(() => {
+            expect(toArray(element.classList)).to.deep.equal(['abc', 'def']);
+          });
+        });
+
         it('should support binding to CSS classes with arrays', () => {
           const element = createElement(
             env,
@@ -877,6 +889,18 @@ chromed.run('Bind', {}, function () {
           expect(toArray(element.classList)).to.deep.equal([]);
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             expect(toArray(element.classList)).to.deep.equal(['a', 'b']);
+          });
+        });
+
+        it('should support binding to CSS classes with arrays, including dynamic-class', () => {
+          const element = createElement(
+            env,
+            container,
+            "class='a' [dynamic-class]=\"['b','c']\""
+          );
+          expect(toArray(element.classList)).to.deep.equal(['a']);
+          return onBindReadyAndSetState(env, bind, {}).then(() => {
+            expect(toArray(element.classList)).to.deep.equal(['a', 'b', 'c']);
           });
         });
 
