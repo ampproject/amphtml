@@ -25,7 +25,8 @@ const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
 const CONFIG_PATH = `${SERVER_TRANSFORM_PATH}/tsconfig.json`;
 
 /**
- * Builds the new server by converting typescript transforms to JS
+ * Builds the new server by converting typescript transforms to JS. This JS
+ * output is not type-checked as part of `amp check-build-system`.
  * @return {Promise<void>}
  */
 async function buildNewServer() {
@@ -41,6 +42,7 @@ async function buildNewServer() {
     entryPoints,
     outdir: path.join(SERVER_TRANSFORM_PATH, 'dist'),
     bundle: false,
+    banner: {js: '// @ts-nocheck'},
     tsconfig: CONFIG_PATH,
     format: 'cjs',
   });
