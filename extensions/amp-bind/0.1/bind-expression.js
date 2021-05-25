@@ -340,7 +340,7 @@ export class BindExpression {
       return null;
     }
 
-    const {type, args, value} = node;
+    const {args, type, value} = node;
 
     // `value` should always exist for literals.
     if (type === AstNodeType.LITERAL && value !== undefined) {

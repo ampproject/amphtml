@@ -25,9 +25,9 @@ const {
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {MINIFIED_TARGETS} = require('../tasks/helpers');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'nomodule-tests.js';
 

@@ -270,7 +270,7 @@ class AmpImaVideo extends AMP.BaseElement {
    * @param {!../layout-rect.LayoutSizeDef} size
    * @private
    */
-  onResized_({width, height}) {
+  onResized_({height, width}) {
     if (!this.iframe_) {
       return;
     }

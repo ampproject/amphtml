@@ -27,9 +27,9 @@ const path = require('path');
 const {
   ciBuildId,
   ciBuildUrl,
+  ciCommitSha,
   ciJobId,
   ciJobUrl,
-  ciCommitSha,
   ciRepoSlug,
 } = require('../common/ci');
 const {log} = require('../common/logging');

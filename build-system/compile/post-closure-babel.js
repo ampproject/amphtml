@@ -20,7 +20,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
-const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
+const {CompilationLifecycles, debug} = require('./debug-compilation-lifecycle');
 const {jsBundles} = require('./bundles.config.js');
 
 /** @type {Remapping.default} */

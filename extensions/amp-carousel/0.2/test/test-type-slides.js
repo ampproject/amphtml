@@ -98,9 +98,9 @@ describes.realWin(
     });
 
     async function getCarousel({
+      dir = null,
       loop = false,
       slideCount = 5,
-      dir = null,
     } = {}) {
       const imgUrl =
         'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +

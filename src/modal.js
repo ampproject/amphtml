@@ -224,9 +224,9 @@ export function setModalAsOpen(element) {
 export function setModalAsClosed(element) {
   const {
     element: topModalElement,
-    hiddenElementInfos,
     focusableExternalElements,
     focusableInternalElements,
+    hiddenElementInfos,
   } = modalEntryStack.pop();
 
   devAssert(isConnectedNode(element));

@@ -140,7 +140,7 @@ const chaiMethodsAndProperties = [
  * @param {Chai.ChaiUtils} utils
  */
 function installWrappers(chai, utils) {
-  const {METHOD, PROPERTY, CHAINABLE_METHOD} = ChaiType;
+  const {CHAINABLE_METHOD, METHOD, PROPERTY} = ChaiType;
   const {Assertion} = chai;
 
   for (const {name, type, unsupported} of chaiMethodsAndProperties) {

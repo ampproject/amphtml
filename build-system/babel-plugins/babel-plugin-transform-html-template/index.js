@@ -15,8 +15,8 @@
  */
 
 const {
-  staticTemplateTags,
   staticTemplateFactoryFns,
+  staticTemplateTags,
 } = require('../static-template-metadata');
 const {minify} = require('html-minifier');
 
