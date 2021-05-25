@@ -81,6 +81,10 @@ async function prBuildWorkflow() {
     timedExecOrDie('amp ava');
   }
 
+  if (buildTargetsInclude(Targets.BUILD_SYSTEM)) {
+    timedExecOrDie('amp check-build-system');
+  }
+
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
     timedExecOrDie('amp babel-plugin-tests');
   }
