@@ -70,7 +70,7 @@ export function hasTapAction(el) {
  * @return {!ClientRect}
  */
 export function unscaledClientRect(el) {
-  const {width, height, left, top} = el./*OK*/ getBoundingClientRect();
+  const {height, left, top, width} = el./*OK*/ getBoundingClientRect();
 
   const scaleFactorX = width == 0 ? 1 : width / el./*OK*/ offsetWidth;
   const scaleFactorY = height == 0 ? 1 : height / el./*OK*/ offsetHeight;
@@ -149,7 +149,7 @@ export function getRGBFromCssColorValue(cssValue) {
  * @return {string} '#fff' or '#000'
  */
 export function getTextColorForRGB(rgb) {
-  const {r, g, b} = rgb;
+  const {b, g, r} = rgb;
   // Calculates the relative luminance L.
   // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
   const getLinearRGBValue = (x) => {

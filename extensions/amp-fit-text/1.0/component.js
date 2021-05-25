@@ -27,8 +27,8 @@ import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
  */
 export function FitText({
   children,
-  minFontSize = 6,
   maxFontSize = 72,
+  minFontSize = 6,
   ...rest
 }) {
   const classes = useStyles();

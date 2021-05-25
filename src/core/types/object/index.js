@@ -15,7 +15,7 @@
  */
 
 /* @const */
-const {toString: toString_, hasOwnProperty: hasOwn_} = Object.prototype;
+const {hasOwnProperty: hasOwn_, toString: toString_} = Object.prototype;
 
 /**
  * Determines if value is actually an Object.
@@ -108,7 +108,7 @@ export function deepMerge(target, source, depth = 10) {
 
   // BFS to ensure objects don't have recursive references at shallower depths.
   while (queue.length > 0) {
-    const {t, s, d} = queue.shift();
+    const {d, s, t} = queue.shift();
     if (seen.includes(s)) {
       throw new Error('Source object has a circular reference.');
     }

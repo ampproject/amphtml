@@ -1105,10 +1105,10 @@ function matchForbiddenTerms(srcFile, contents, terms) {
   return Object.entries(terms)
     .map(([term, messageOrDef]) => {
       const {
-        message,
         allowlist = null,
         checkInTestFolder = false,
         checkProse = false,
+        message,
       } = typeof messageOrDef === 'string'
         ? {message: messageOrDef}
         : messageOrDef;
