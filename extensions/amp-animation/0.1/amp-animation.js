@@ -20,7 +20,7 @@ import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
 import {WebAnimationPlayState} from './web-animation-types';
 import {WebAnimationService} from './web-animation-service';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {dev, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';

@@ -24,7 +24,7 @@ import {dict, map} from '../core/types/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isStoryDocument} from '../utils/story';
-import {layoutRectLtwh} from '../layout-rect';
+import {layoutRectLtwh} from '../core/math/layout-rect';
 import {throttle} from '../core/types/function';
 import {whenContentIniLoad} from '../ini-load';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';

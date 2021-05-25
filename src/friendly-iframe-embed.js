@@ -39,7 +39,7 @@ import {installForChildWin as installResizeObserver} from './polyfills/resize-ob
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
-import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
+import {layoutRectLtwh, moveLayoutRect} from './core/math/layout-rect';
 import {loadPromise} from './event-helper';
 import {
   px,

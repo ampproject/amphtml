@@ -23,7 +23,7 @@ import {
 import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
-import {layoutRectLtwh} from '../../layout-rect';
+import {layoutRectLtwh} from '../../core/math/layout-rect';
 import {waitForBodyOpen} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
 

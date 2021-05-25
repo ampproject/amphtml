@@ -22,7 +22,7 @@ import {
   mapRange,
   mod,
   sum,
-} from '../../../../src/utils/math';
+} from '../../../../src/core/math';
 
 describes.sandboxed('math', {}, () => {
   describe('mapRange', () => {

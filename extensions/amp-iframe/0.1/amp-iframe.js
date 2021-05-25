@@ -34,7 +34,7 @@ import {
 } from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {moveLayoutRect} from '../../../src/layout-rect';
+import {moveLayoutRect} from '../../../src/core/math/layout-rect';
 import {parseJson} from '../../../src/core/types/object/json';
 import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {removeElement} from '../../../src/dom';

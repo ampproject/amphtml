@@ -36,7 +36,7 @@ import {
 } from '../video-interface';
 import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
-import {clamp} from '../utils/math';
+import {clamp} from '../core/math';
 import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {createViewportObserver} from '../viewport-observer';
 import {dev, devAssert, user, userAssert} from '../log';

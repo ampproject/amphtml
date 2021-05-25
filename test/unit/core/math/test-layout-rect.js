@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lr from '../../src/layout-rect';
+import * as lr from '../../../../src/core/math/layout-rect';
 
 describes.sandboxed('math - LayoutRect', {}, () => {
   it('layoutRectLtwh', () => {

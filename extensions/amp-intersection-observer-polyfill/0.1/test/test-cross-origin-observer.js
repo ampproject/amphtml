@@ -20,7 +20,7 @@ import {
   calculateIntersectionRect,
   maybeSetupCrossOriginObserver,
 } from '../cross-origin-observer';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.sandboxed('calculateIntersectionRect', {}, () => {

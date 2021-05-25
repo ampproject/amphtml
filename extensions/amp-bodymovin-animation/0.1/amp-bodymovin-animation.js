@@ -19,7 +19,7 @@ import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {batchFetchJsonFor} from '../../../src/batched-json';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {dict} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';

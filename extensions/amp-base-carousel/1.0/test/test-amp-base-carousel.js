@@ -20,7 +20,7 @@ import {
   createElementWithAttributes,
   waitForChildPromise,
 } from '../../../../src/dom';
-import {mod} from '../../../../src/utils/math';
+import {mod} from '../../../../src/core/math';
 import {setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/core/types/array';
 import {toggleExperiment} from '../../../../src/experiments';
