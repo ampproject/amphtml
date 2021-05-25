@@ -637,7 +637,7 @@ describes.sandboxed('HistoryBindingNatural', {}, (env) => {
 
   it('should append the fragment parameter to the URL parameter', () => {
     const fragment = 'test';
-    const {href, hash} = document.location;
+    const {hash, href} = document.location;
     return history.replace({url: '/path?query=1', fragment}).then(() => {
       expect(document.location.hash).to.equal(`#${fragment}`);
       return history.replace({url: href, fragment: hash});

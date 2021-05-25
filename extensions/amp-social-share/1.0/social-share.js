@@ -38,17 +38,17 @@ const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
  * @return {PreactDef.Renderable}
  */
 export function SocialShare({
-  type,
-  endpoint,
-  params,
-  target,
-  width,
-  height,
-  color,
   background,
-  tabIndex = 0,
-  style,
   children,
+  color,
+  endpoint,
+  height,
+  params,
+  style,
+  tabIndex = 0,
+  target,
+  type,
+  width,
   ...rest
 }) {
   useResourcesNotify();
@@ -67,7 +67,7 @@ export function SocialShare({
     return null;
   }
 
-  const {finalEndpoint, checkedWidth, checkedHeight, checkedTarget} =
+  const {checkedHeight, checkedTarget, checkedWidth, finalEndpoint} =
     checkPropsReturnValue;
 
   return (

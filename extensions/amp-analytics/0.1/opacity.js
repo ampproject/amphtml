@@ -56,7 +56,7 @@ function getElementOpacity(el) {
   if (!el) {
     return fullyVisibleValue;
   }
-  const {visibility, opacity} = computedStyle(win, el);
+  const {opacity, visibility} = computedStyle(win, el);
 
   if (visibility === 'hidden') {
     return fullyHiddenValue;

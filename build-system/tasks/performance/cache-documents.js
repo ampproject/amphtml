@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {CONTROL, downloadToDisk, EXPERIMENT} = require('./helpers');
+const {CONTROL, EXPERIMENT, downloadToDisk} = require('./helpers');
 const {startServer, stopServer} = require('../serve');
 const HOST = 'localhost';
 const PORT = 8000;
