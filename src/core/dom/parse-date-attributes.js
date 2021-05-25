@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {devAssert, userAssert} from '../core/assert';
-import {parseDate} from '../core/types/date';
+import {devAssert, userAssert} from '../assert';
+import {parseDate} from '../types/date';
 
 /** Map from attribute names to their parsers. */
 const dateAttrParsers = {
