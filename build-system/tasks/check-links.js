@@ -36,7 +36,7 @@ async function checkLinks() {
   if (!usesFilesOrLocalChanges('check-links')) {
     return;
   }
-  const filesToCheck = getFilesToCheck(linkCheckGlobs);
+  const filesToCheck = getFilesToCheck(linkCheckGlobs, {dot: true});
   if (filesToCheck.length == 0) {
     return;
   }
