@@ -469,7 +469,7 @@ describes.realWin(
           eventType: 'tacos al pastor',
           sufix: 'with invalid event name',
         },
-      ].forEach(({sufix, eventType, vars, accept}) => {
+      ].forEach(({accept, eventType, sufix, vars}) => {
         const verb = accept ? 'dispatch' : 'reject';
 
         it(`should ${verb} custom analytics event ${sufix}`, async () => {

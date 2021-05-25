@@ -31,15 +31,15 @@ const {
 const {
   extensionAliasBundles,
   extensionBundles,
-  verifyExtensionBundles,
   jsBundles,
+  verifyExtensionBundles,
 } = require('../compile/bundles.config');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
-const {green, red, cyan} = require('../common/colors');
+const {cyan, green, red} = require('../common/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
@@ -607,7 +607,7 @@ function buildBinaries(extDir, binaries, options) {
   mkdirSync(`${extDir}/dist`);
 
   const promises = binaries.map((binary) => {
-    const {entryPoint, outfile, external, remap} = binary;
+    const {entryPoint, external, outfile, remap} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
     return compileJsWithEsbuild(

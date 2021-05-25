@@ -22,7 +22,7 @@ const objstr = require('obj-str');
 const path = require('path');
 const {cyan, green, red, yellow} = require('../../common/colors');
 const {format} = require('./format');
-const {getStdout, getOutput} = require('../../common/process');
+const {getOutput, getStdout} = require('../../common/process');
 const {log, logLocalDev, logWithoutTimestamp} = require('../../common/logging');
 
 const extensionBundlesJson =
@@ -336,7 +336,7 @@ async function makeExtensionFromTemplates(
 async function affectsWorkingTree(fn) {
   const stashStdout = getStdout(`git stash push --keep-index`);
 
-  const {modified, created} = (await fn()) || {};
+  const {created, modified} = (await fn()) || {};
 
   if (created) {
     await del(created);

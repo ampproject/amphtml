@@ -16,7 +16,7 @@
 const ava = require('ava');
 const path = require('path');
 const tempy = require('tempy');
-const {readFile, writeJson, readJson, writeFile, mkdirp} = require('fs-extra');
+const {mkdirp, readFile, readJson, writeFile, writeJson} = require('fs-extra');
 
 const stubbedCalls = {};
 

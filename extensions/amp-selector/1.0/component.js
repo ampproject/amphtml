@@ -303,8 +303,8 @@ export function Option({
     keyboardSelectMode,
     multiple: selectorMultiple,
     optionsRef,
-    selected,
     selectOption,
+    selected,
   } = useContext(SelectorContext);
 
   const focus = useCallback(

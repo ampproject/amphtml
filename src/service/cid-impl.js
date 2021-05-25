@@ -458,9 +458,9 @@ function maybeGetCidFromCookieOrBackup(cid, getCidStruct) {
  * @return {!Promise<?string>}
  */
 function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
-  const {isBackupCidExpOn, ampdoc} = cid;
+  const {ampdoc, isBackupCidExpOn} = cid;
   const {win} = ampdoc;
-  const {scope, disableBackup} = getCidStruct;
+  const {disableBackup, scope} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
 
   return maybeGetCidFromCookieOrBackup(cid, getCidStruct).then(

@@ -19,15 +19,15 @@ const argv = require('minimist')(process.argv.slice(2));
 const fetch = require('node-fetch');
 const {
   isCircleciBuild,
-  isPullRequestBuild,
   isGithubActionsBuild,
+  isPullRequestBuild,
 } = require('../common/ci');
 const {ciJobUrl} = require('../common/ci');
 const {cyan, yellow} = require('../common/colors');
-const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
 const {getValidExperiments} = require('../common/utils');
 const {gitCommitHash} = require('../common/git');
 const {log} = require('../common/logging');
+const {Targets, determineBuildTargets} = require('../pr-check/build-targets');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 

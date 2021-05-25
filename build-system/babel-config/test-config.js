@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {getReplacePlugin, getReplaceGlobalsPlugin} = require('./helpers');
+const {getReplaceGlobalsPlugin, getReplacePlugin} = require('./helpers');
 
 /**
  * Gets the config for babel transforms run during `amp [unit|integration|e2e]`.

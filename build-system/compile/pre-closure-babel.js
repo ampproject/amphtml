@@ -21,9 +21,9 @@ const globby = require('globby');
 const path = require('path');
 const tempy = require('tempy');
 const {BABEL_SRC_GLOBS} = require('./sources');
-const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
+const {CompilationLifecycles, debug} = require('./debug-compilation-lifecycle');
+const {cyan, red} = require('../common/colors');
 const {log} = require('../common/logging');
-const {red, cyan} = require('../common/colors');
 const {TransformCache, batchedRead, md5} = require('../common/transform-cache');
 
 /**

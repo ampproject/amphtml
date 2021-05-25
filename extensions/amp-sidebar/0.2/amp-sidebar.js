@@ -246,14 +246,14 @@ export class AmpSidebar extends AMP.BaseElement {
     element.appendChild(this.createScreenReaderCloseButton());
 
     this.registerDefaultAction((invocation) => {
-      const {trust, caller} = invocation;
+      const {caller, trust} = invocation;
       this.open_(trust, caller);
     }, 'open');
     this.registerAction('close', (invocation) => {
       this.close_(invocation.trust);
     });
     this.registerAction('toggle', (invocation) => {
-      const {trust, caller} = invocation;
+      const {caller, trust} = invocation;
       if (this.opened_) {
         this.close_(trust);
       } else {

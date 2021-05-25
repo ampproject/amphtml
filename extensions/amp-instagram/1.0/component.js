@@ -32,7 +32,7 @@ const MATCHES_MESSAGING_ORIGIN = (origin) =>
  * @return {PreactDef.Renderable}
  */
 function InstagramWithRef(
-  {captioned, shortcode, requestResize, title = 'Instagram', ...rest},
+  {captioned, requestResize, shortcode, title = 'Instagram', ...rest},
   ref
 ) {
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);

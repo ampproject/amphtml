@@ -253,7 +253,7 @@ function assertStyleOrWarn(computed, prop, expected, element, opt_suffix) {
  * @return {string}
  */
 function elementShorthand(element, depth = 0) {
-  const {tagName, id, classList, parentElement} = element;
+  const {classList, id, parentElement, tagName} = element;
   if (id) {
     return `#${id}`;
   }

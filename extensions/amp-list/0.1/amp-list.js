@@ -728,7 +728,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetchList_(options = {}) {
-    const {refresh = false, append = false} = options;
+    const {append = false, refresh = false} = options;
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
       return Promise.resolve();
@@ -900,7 +900,7 @@ export class AmpList extends AMP.BaseElement {
    */
   scheduleRender_(data, opt_append, opt_payload) {
     const deferred = new Deferred();
-    const {promise, resolve: resolver, reject: rejecter} = deferred;
+    const {promise, reject: rejecter, resolve: resolver} = deferred;
 
     // If there's nothing currently being rendered, schedule a render pass.
     if (!this.renderItems_) {

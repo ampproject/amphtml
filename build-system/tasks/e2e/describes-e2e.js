@@ -623,7 +623,7 @@ class EndToEndFixture {
    * @return {!TestSpec}
    */
   setTestUrl(spec) {
-    const {testUrl, fixture} = spec;
+    const {fixture, testUrl} = spec;
 
     if (testUrl) {
       throw new Error(
@@ -659,7 +659,7 @@ function getDriver({headless = false}, browserName, deviceName) {
  * @return {Promise<void>}
  */
 async function setUpTest(
-  {environment, ampDriver, controller},
+  {ampDriver, controller, environment},
   {testUrl = '', version, experiments = [], initialRect}
 ) {
   const url = new URL(testUrl);
@@ -681,7 +681,7 @@ async function setUpTest(
   }
 
   if (initialRect) {
-    const {width, height} = initialRect;
+    const {height, width} = initialRect;
     await controller.setWindowRect({width, height});
   }
 

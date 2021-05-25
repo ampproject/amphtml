@@ -16,8 +16,8 @@
 'use strict';
 
 const path = require('path');
+const {cyan, green, red} = require('../common/colors');
 const {log, logLocalDev} = require('../common/logging');
-const {red, green, cyan} = require('../common/colors');
 
 const expectedCaches = ['google', 'bing'];
 const cachesJsonPath = '../global-configs/caches.json';

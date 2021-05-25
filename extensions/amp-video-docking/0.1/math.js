@@ -100,8 +100,8 @@ export function interpolatedBoxesTransform(from, to, step = 1) {
  * @return {!RectDef}
  */
 export function letterboxRect(original, container) {
-  const {width, height} = original;
-  const {top, left, width: maxWidth, height: maxHeight} = container;
+  const {height, width} = original;
+  const {height: maxHeight, left, top, width: maxWidth} = container;
 
   const containerAspect = maxWidth / maxHeight;
   const originalAspect = width / height;

@@ -22,18 +22,18 @@
 const atob = require('atob');
 const {
   abortTimedJob,
-  skipDependentJobs,
   processAndStoreBuildToArtifacts,
+  skipDependentJobs,
   startTimer,
-  timedExecWithError,
-  timedExecOrDie,
   storeNomoduleBuildToWorkspace,
+  timedExecOrDie,
+  timedExecWithError,
 } = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
 const {red, yellow} = require('../common/colors');
 const {runCiJob} = require('./ci-job');
 const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'nomodule-build.js';
 

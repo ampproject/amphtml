@@ -31,7 +31,7 @@ function getCallExpressionZIndexValue(node) {
 }
 
 function source(file, node) {
-  const {start, end} = node;
+  const {end, start} = node;
   return file.source.substr(start, end - start);
 }
 

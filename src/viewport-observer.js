@@ -30,7 +30,7 @@ import {toWin} from './types';
  * @return {!IntersectionObserver}
  */
 export function createViewportObserver(ioCallback, win, opts = {}) {
-  const {threshold, needsRootBounds} = opts;
+  const {needsRootBounds, threshold} = opts;
   // The Document -> Element type conversion is necessary to satisfy the
   // `IntersectionObserver` constructor extern that only accepts `Element`.
   const root =

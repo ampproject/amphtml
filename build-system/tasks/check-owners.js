@@ -25,7 +25,7 @@
 const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const JSON5 = require('json5');
-const {cyan, red, green} = require('../common/colors');
+const {cyan, green, red} = require('../common/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {log, logLocalDev} = require('../common/logging');
 
@@ -84,7 +84,7 @@ async function checkFile(file) {
       );
     }
 
-    const {requestErrors, fileErrors, rules} = await response.json();
+    const {fileErrors, requestErrors, rules} = await response.json();
 
     if (requestErrors) {
       requestErrors.forEach((err) => log(red(err)));

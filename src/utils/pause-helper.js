@@ -56,7 +56,7 @@ export class PauseHelper {
    * @param {!ResizeObserverSize} size
    * @private
    */
-  pauseWhenNoSize_({inlineSize, blockSize}) {
+  pauseWhenNoSize_({blockSize, inlineSize}) {
     const hasSize = inlineSize > 0 && blockSize > 0;
     if (hasSize === this.hasSize_) {
       return;

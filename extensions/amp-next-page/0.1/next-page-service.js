@@ -585,7 +585,7 @@ export class NextPageService {
    * @private
    */
   setActiveDocumentInHistory_(documentRef) {
-    const {title, canonicalUrl} = documentRef.amp;
+    const {canonicalUrl, title} = documentRef.amp;
     const {pathname, search} = this.urlService_.parse(documentRef.ampUrl);
     this.history_.replace({title, url: pathname + search, canonicalUrl});
   }

@@ -595,7 +595,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setupStateMachine_(initialState) {
     const sm = new FiniteStateMachine(initialState);
-    const {OVERLAY_OPEN_INPUT, OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, STATIC} =
+    const {OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, STATIC} =
       DatePickerState;
     const noop = () => {};
     sm.addTransition(STATIC, STATIC, noop);
@@ -1221,7 +1221,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       .then((json) => this.parseSrcTemplates_(json))
       .then((parsedTemplates) => {
         if (parsedTemplates) {
-          const {srcTemplates, srcDefaultTemplate} = parsedTemplates;
+          const {srcDefaultTemplate, srcTemplates} = parsedTemplates;
           this.srcTemplates_ = srcTemplates;
           this.srcDefaultTemplate_ = srcDefaultTemplate;
         }

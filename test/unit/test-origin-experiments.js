@@ -35,7 +35,7 @@ describes.fakeWin('OriginExperiments', {amp: true}, (env) => {
   let error;
 
   beforeEach(() => {
-    ({win, ampdoc} = env);
+    ({ampdoc, win} = env);
 
     const crypto = Services.cryptoFor(win);
     isPkcsAvailable = env.sandbox.stub(crypto, 'isPkcsAvailable').returns(true);
@@ -139,7 +139,7 @@ describes.fakeWin('TokenMaster', {amp: true}, (env) => {
         tokenMaster = new TokenMaster(crypto, url);
 
         return tokenMaster.generateKeys().then((keyPair) => {
-          ({publicKey, privateKey} = keyPair);
+          ({privateKey, publicKey} = keyPair);
 
           const config = {
             origin: 'https://origin.com',

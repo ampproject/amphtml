@@ -66,7 +66,7 @@ class MochaDotsReporter extends Base {
       })
       .once(EVENT_RUN_END, () => {
         Base.list(this.failures);
-        const {passes, pending, failures, tests} = runner.stats;
+        const {failures, passes, pending, tests} = runner.stats;
         logWithoutTimestamp(
           `Executed ${failures + passes} of ${tests}`,
           `(Skipped ${pending})`,

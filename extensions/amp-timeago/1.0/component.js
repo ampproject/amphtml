@@ -42,9 +42,9 @@ const DEFAULT_TIME_OPTIONS = {'hour': 'numeric', 'minute': 'numeric'};
  * @return {PreactDef.Renderable}
  */
 export function Timeago({
+  cutoff,
   datetime,
   locale: localeProp,
-  cutoff,
   placeholder,
   ...rest
 }) {

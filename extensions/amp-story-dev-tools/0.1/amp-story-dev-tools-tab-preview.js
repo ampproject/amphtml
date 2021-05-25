@@ -695,7 +695,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @private
    * */
   repositionDevices_() {
-    const {offsetWidth: width, offsetHeight: height} =
+    const {offsetHeight: height, offsetWidth: width} =
       this.element.querySelector(
         '.i-amphtml-story-dev-tools-devices-container'
       );

@@ -28,11 +28,11 @@ import {forwardRef} from '../compat';
 function WrapperWithRef(
   {
     as: Comp = 'div',
-    wrapperClassName,
-    wrapperStyle,
     children,
     'className': className,
     'style': style,
+    wrapperClassName,
+    wrapperStyle,
     ...rest
   },
   ref

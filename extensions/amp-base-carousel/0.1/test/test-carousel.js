@@ -70,10 +70,10 @@ describes.realWin('carousel implementation', {}, (env) => {
    * }} options
    */
   async function createCarousel({
-    slideCount,
-    loop,
     forwards = true,
     initialIndex,
+    loop,
+    slideCount,
   }) {
     const carousel = new Carousel({
       win,

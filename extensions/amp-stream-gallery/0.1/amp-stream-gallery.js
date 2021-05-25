@@ -585,8 +585,8 @@ class AmpStreamGallery extends AMP.BaseElement {
   updateVisibleCount_() {
     const {
       maxItemWidth_,
-      minItemWidth_,
       maxVisibleCount_,
+      minItemWidth_,
       minVisibleCount_,
       slides_,
     } = this;

@@ -179,7 +179,7 @@ export class Url {
       return resourceUrl;
     }
 
-    const {host, hash, pathname, search} = this.parse_(resourceUrl);
+    const {hash, host, pathname, search} = this.parse_(resourceUrl);
     const encodedHost = encodeURIComponent(host);
     return `${urls.cdn}/c/${encodedHost}${pathname}${search}${hash}`;
   }

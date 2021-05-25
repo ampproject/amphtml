@@ -56,7 +56,7 @@ export class FirstImpressionIoConfig {
       }
     );
 
-    const {host, pathname, hash, search} = window.location;
+    const {hash, host, pathname, search} = window.location;
     const hashParams = Object.assign(
       parseQueryString(hash),
       parseQueryString(search)

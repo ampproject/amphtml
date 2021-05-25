@@ -80,7 +80,7 @@ export class StandaloneService {
    * @param {!Element} a
    */
   handleChromeStandalone_(a) {
-    const {target, origin} = a;
+    const {origin, target} = a;
     if (target === '_blank') {
       return;
     }
@@ -100,7 +100,7 @@ export class StandaloneService {
    * @return {boolean}
    */
   handleSafariStandalone_(a) {
-    const {target, href, origin} = a;
+    const {href, origin, target} = a;
     if (target === '_blank') {
       return true; // Allow the link navigate to proceed normally
     }

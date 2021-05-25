@@ -27,7 +27,7 @@ const reports = getReport(Object.keys(urlToHandlers));
 
 reports.forEach((report) => {
   describe(`${report.url}`, () => {
-    report.metrics.forEach(({experiment, control}, name) => {
+    report.metrics.forEach(({control, experiment}, name) => {
       it(`${name}`, () => {
         expect(experiment).to.be.at.most(control * THRESHOLD);
       });

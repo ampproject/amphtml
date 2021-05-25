@@ -19,7 +19,7 @@
  * and getMode().localDev to true.
  * @param {Object} babelTypes
  */
-const {resolve, dirname, join, relative} = require('path').posix;
+const {dirname, join, relative, resolve} = require('path').posix;
 
 let shouldResolveDevelopmentMode = true;
 
@@ -35,7 +35,7 @@ module.exports = function ({types: t}) {
     },
     visitor: {
       ImportDeclaration({node}, state) {
-        const {specifiers, source} = node;
+        const {source, specifiers} = node;
         if (!source.value.endsWith('/mode')) {
           return;
         }

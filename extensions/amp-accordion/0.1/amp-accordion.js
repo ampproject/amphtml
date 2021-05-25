@@ -195,7 +195,7 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   handleAction_(invocation) {
-    const {method, args, trust} = invocation;
+    const {args, method, trust} = invocation;
 
     let toExpand = undefined;
     if (method === 'expand') {

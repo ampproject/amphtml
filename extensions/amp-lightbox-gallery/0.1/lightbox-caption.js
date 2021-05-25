@@ -143,7 +143,7 @@ export class LightboxCaption {
    *    current state is toggled.
    */
   toggleOverflow(requestExpansion) {
-    const {scrollContainer_, overflowMask_} = this;
+    const {overflowMask_, scrollContainer_} = this;
     let descriptionOverflows;
 
     const measureOverflowState = () => {

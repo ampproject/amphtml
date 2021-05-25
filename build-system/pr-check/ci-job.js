@@ -22,9 +22,9 @@ const {
   stopTimer,
 } = require('./utils');
 const {
+  getLoggingPrefix,
   logWithoutTimestamp,
   setLoggingPrefix,
-  getLoggingPrefix,
 } = require('../common/logging');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');

@@ -58,7 +58,7 @@ export const _default = () => {
  * @param {*} props
  * @return {*}
  */
-function WithStateTable({videoid, autoplay, loop, params, credentials, style}) {
+function WithStateTable({autoplay, credentials, loop, params, style, videoid}) {
   const ref = useRef(null);
 
   const [stateTable, setStateTable] = useState(null);

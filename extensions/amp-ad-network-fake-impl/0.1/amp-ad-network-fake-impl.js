@@ -90,7 +90,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       if (!response) {
         return null;
       }
-      const {status, headers} =
+      const {headers, status} =
         /** @type {{status: number, headers: !Headers}} */ (response);
 
       // In the convert creative mode the content is the plain AMP HTML.

@@ -92,7 +92,7 @@ function checkClosureComments(context, closureComment) {
     return;
   }
 
-  const {parsed, node} = closureComment;
+  const {node, parsed} = closureComment;
   traverse(parsed).forEach((astNode) => {
     if (!astNode) {
       return;
@@ -158,7 +158,7 @@ function checkNonNullableNodes(context, node, astNode) {
     return;
   }
 
-  const {type, name} = astNode.expression;
+  const {name, type} = astNode.expression;
   if (type === 'FunctionType') {
     reportNonNullablePrimitive(context, node, 'function');
   } else if (type === 'UndefinedLiteral') {

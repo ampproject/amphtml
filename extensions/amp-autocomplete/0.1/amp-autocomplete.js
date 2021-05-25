@@ -1231,8 +1231,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     return this.measureMutateElement(
       () => {
-        const {offsetTop: itemTop, offsetHeight: itemHeight} = newActiveElement;
-        const {scrollTop: resultTop, offsetHeight: resultHeight} =
+        const {offsetHeight: itemHeight, offsetTop: itemTop} = newActiveElement;
+        const {offsetHeight: resultHeight, scrollTop: resultTop} =
           this.container_;
         shouldScroll =
           resultTop > itemTop ||

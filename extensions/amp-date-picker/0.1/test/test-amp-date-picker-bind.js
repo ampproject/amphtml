@@ -107,7 +107,7 @@ describes.realWin(
 
     describe('bind', () => {
       it('should forward mutations to the date picker state', async () => {
-        const {picker, layoutCallback} = createDatePicker({
+        const {layoutCallback, picker} = createDatePicker({
           src: 'https://localhost:8000/examples/date-picker.json',
         });
         env.sandbox.stub(picker, 'fetchSrc_').resolves();

@@ -975,7 +975,7 @@ export class Bind {
     }
     const {tagName} = element;
     boundProperties.forEach((boundProperty) => {
-      const {property, expressionString} = boundProperty;
+      const {expressionString, property} = boundProperty;
       outBindings.push({tagName, property, expressionString});
       if (!this.expressionToElements_[expressionString]) {
         this.expressionToElements_[expressionString] = [];
@@ -1057,7 +1057,7 @@ export class Bind {
         return this.ww_('bind.evaluateExpression', [expression, scope]);
       })
       .then((returnValue) => {
-        const {result, error} = returnValue;
+        const {error, result} = returnValue;
         if (error) {
           // Throw to reject promise.
           throw this.reportWorkerError_(
@@ -1078,7 +1078,7 @@ export class Bind {
   evaluate_() {
     const evaluatePromise = this.ww_('bind.evaluateBindings', [this.state_]);
     return evaluatePromise.then((returnValue) => {
-      const {results, errors} = returnValue;
+      const {errors, results} = returnValue;
       // Report evaluation errors.
       Object.keys(errors).forEach((expressionString) => {
         const elements = this.expressionToElements_[expressionString];
@@ -1115,7 +1115,7 @@ export class Bind {
     const mismatches = {};
 
     this.boundElements_.forEach((boundElement) => {
-      const {element, boundProperties} = boundElement;
+      const {boundProperties, element} = boundElement;
 
       // If provided, filter elements that are _not_ children of `opt_elements`.
       if (elements && !this.elementsContains_(elements, element)) {
@@ -1132,8 +1132,8 @@ export class Bind {
           return;
         }
         const {tagName} = element;
-        const {property, expressionString} = boundProperty;
-        const {expected, actual} = mismatch;
+        const {expressionString, property} = boundProperty;
+        const {actual, expected} = mismatch;
 
         // Only store unique mismatches (dupes possible when rendering an array
         // of data to a template).
@@ -1226,7 +1226,7 @@ export class Bind {
         return;
       }
 
-      const {element, boundProperties} = boundElement;
+      const {boundProperties, element} = boundElement;
       const updates = this.calculateUpdates_(boundProperties, results);
       // If this is a "evaluate only" application, skip the DOM mutations.
       if (opts.evaluateOnly) {

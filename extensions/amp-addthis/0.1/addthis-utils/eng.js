@@ -27,10 +27,10 @@ import {pixelDrop} from './pixel';
  * @return {{al: (string|undefined), amp: number, dc: number, dp: string, dt: string, fp: string, ict: string, ivh: number, pct: number, pfm: number, ph: number, pub: string, sh: number, sid: string}}
  */
 const getEngData = (params) => {
-  const {monitors, loc, ampDoc, pubId} = params;
-  const {dwellMonitor, scrollMonitor, clickMonitor, activeToolsMonitor} =
+  const {ampDoc, loc, monitors, pubId} = params;
+  const {activeToolsMonitor, clickMonitor, dwellMonitor, scrollMonitor} =
     monitors;
-  const {host, pathname, hash} = loc;
+  const {hash, host, pathname} = loc;
   const viewport = Services.viewportForDoc(ampDoc);
 
   return {

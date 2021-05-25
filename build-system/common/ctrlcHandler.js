@@ -15,10 +15,10 @@
  */
 
 const colors = require('./colors');
-const {execScriptAsync, exec} = require('./exec');
+const {exec, execScriptAsync} = require('./exec');
 const {logLocalDev} = require('./logging');
 
-const {green, cyan} = colors;
+const {cyan, green} = colors;
 
 const killCmd = process.platform == 'win32' ? 'taskkill /f /pid' : 'kill -KILL';
 const killSuffix = process.platform == 'win32' ? '>NUL' : '';

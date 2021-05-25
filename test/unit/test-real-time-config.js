@@ -125,15 +125,15 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
   describe('#execute_', () => {
     function executeTest(args) {
       const {
+        calloutCount,
+        expectedCalloutUrls,
+        expectedRtcArray,
+        failXhr,
+        responseIsString,
+        rtcCalloutResponses,
+        timeoutMillis,
         urls,
         vendors,
-        timeoutMillis,
-        rtcCalloutResponses,
-        expectedCalloutUrls,
-        responseIsString,
-        failXhr,
-        expectedRtcArray,
-        calloutCount,
       } = args;
       setRtcConfig({urls, vendors, timeoutMillis});
       (expectedCalloutUrls || []).forEach((expectedUrl, i) => {

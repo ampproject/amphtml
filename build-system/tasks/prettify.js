@@ -34,9 +34,9 @@ const {
   logOnSameLineLocalDev,
   logWithoutTimestamp,
 } = require('../common/logging');
+const {cyan, green, red, yellow} = require('../common/colors');
 const {exec} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
-const {green, cyan, red, yellow} = require('../common/colors');
 const {prettifyGlobs} = require('../test-configs/config');
 
 const rootDir = path.dirname(path.dirname(__dirname));

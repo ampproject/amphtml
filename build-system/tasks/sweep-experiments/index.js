@@ -17,8 +17,8 @@ const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
 const path = require('path');
 const {
-  jscodeshift,
   getJscodeshiftReport,
+  jscodeshift,
 } = require('../../test-configs/jscodeshift');
 const {cyan, magenta, yellow} = require('../../common/colors');
 const {getOutput} = require('../../common/process');
@@ -54,7 +54,7 @@ const isSpecialCannotBeRemoved = (id) =>
  * @return {string}
  */
 function getStdoutThrowOnError(cmd) {
-  const {stdout, stderr} = getOutput(cmd);
+  const {stderr, stdout} = getOutput(cmd);
   if (!stdout && stderr) {
     throw new Error(`${cmd}\n\n${stderr}`);
   }
@@ -180,7 +180,7 @@ function gitCommitSingleExperiment(id, workItem, modified) {
       `Previous history on ${prodConfigPath.split('/').pop()}:`,
       workItem.previousHistory
         .map(
-          ({hash, authorDate, subject}) =>
+          ({authorDate, hash, subject}) =>
             `- ${hash} - ${authorDate} - ${subject}`
         )
         .join('\n')
@@ -312,11 +312,11 @@ const readmeMdGithubLink = () =>
  * @return {string}
  */
 function summaryCommitMessage({
-  removed,
   cleanupIssues,
   cutoffDateFormatted,
-  modifiedSourceFiles,
   htmlFilesWithReferences,
+  modifiedSourceFiles,
+  removed,
 }) {
   const paragraphs = [
     `🚮 Sweep experiments older than ${cutoffDateFormatted}`,
@@ -331,7 +331,7 @@ function summaryCommitMessage({
       "Close these once they've been addressed and this PR has been merged:",
       checklistMarkdown(
         cleanupIssues.map(
-          ({id, cleanupIssue}) =>
+          ({cleanupIssue, id}) =>
             `\`${id}\`: ${issueUrlToNumberOrUrl(cleanupIssue)}`
         )
       )

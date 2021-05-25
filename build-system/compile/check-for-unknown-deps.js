@@ -17,8 +17,8 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
+const {cyan, red, yellow} = require('../common/colors');
 const {log} = require('../common/logging');
-const {red, cyan, yellow} = require('../common/colors');
 
 /**
  * Searches for the identifier "module$", which Closure uses to uniquely

@@ -50,7 +50,7 @@ const expandFrameImpl = function (win, iframe, onFinish) {
         );
       },
       mutate(state) {
-        const {width, height} = state.viewportSize;
+        const {height, width} = state.viewportSize;
         const expandedRect = layoutRectLtwh(0, 0, width, height);
 
         centerFrameUnderVsyncMutate(

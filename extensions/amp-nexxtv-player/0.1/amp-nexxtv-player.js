@@ -110,13 +110,13 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     const {
       client,
+      disableAds,
       domainId,
+      exitMode,
       mediaid,
       mode,
-      streamtype,
-      disableAds,
       streamingFilter,
-      exitMode,
+      streamtype,
     } = el.dataset;
 
     const clientId = userAssert(
