@@ -89,7 +89,7 @@ PASS
 |        </amp-story-grid-layer>
 |        <amp-story-page-outlink
 |          layout="nodisplay"
-|          cta-image="https://website.com/image.png"
+|          cta-image="none"
 |          >
 |          <a href="https://www.google.com" title="Page attachment title">Call To Action</a>
 |        </amp-story-page-outlink>
