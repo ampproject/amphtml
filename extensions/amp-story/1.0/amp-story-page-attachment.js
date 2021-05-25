@@ -115,8 +115,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     // URL will be validated and resolved based on the canonical URL if relative
     // when navigating.
-    const href =
-      this.element.getAttribute('href') || this.element.querySelector('a');
+    const href = this.element.getAttribute('href');
     this.type_ = href ? AttachmentType.REMOTE : AttachmentType.INLINE;
 
     if (this.type_ === AttachmentType.INLINE) {
@@ -145,7 +144,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Builds inline page attachment's drawer UI.
+   * Builds inline page attachment's UI.
    * @private
    */
   buildInline_() {
@@ -195,7 +194,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Builds remote page attachment's drawer UI.
+   * Builds remote page attachment's UI.
    * @private
    */
   buildRemote_() {
@@ -225,7 +224,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Builds remote V2 page attachment's drawer UI.
+   * Builds remote V2 page attachment's UI.
    * @private
    */
   buildRemoteV2_() {
