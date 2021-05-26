@@ -2,8 +2,14 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "#3p/*": ["./3p/*"],
+      "#ads/*": ["./ads/*"],
+      "#third_party/*": ["./third_party/*"],
+
       "#core/*": ["./src/core/*"],
-      "#third_party/*": ["./third_party/*"]
+      "#polyfills/*": ["./src/polyfills/*"],
+      "#preact/*": ["./src/preact/*"],
+      "#service/*": ["./src/service/*"]
     }
   }
 }
