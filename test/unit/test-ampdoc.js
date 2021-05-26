@@ -27,7 +27,7 @@ import {
   getShadowDomSupportedVersion,
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
-} from '../../src/web-components';
+} from '../../src/core/dom/web-components';
 import {Signals} from '../../src/core/data-structures/signals';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {
