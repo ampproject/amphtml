@@ -109,7 +109,7 @@ export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
       return renderInlinePageAttachmentUi(pageEl, attachmentEl);
     }
   }
-  // This codepath can be removed after 'amp-story-page-attachment-ui-v2' is launched.
+  // This codepath can be removed after amp-story-page-attachment-ui-v2 is launched.
   return renderOldPageAttachmentUI(pageEl, attachmentEl);
 };
 

@@ -113,9 +113,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       }
     }
 
-    // URL will be validated and resolved based on the canonical URL if relative
-    // when navigating.
-
     // Outlinks can be an amp-story-page-outlink or the legacy version,
     // an amp-story-page-attachment with an href.
     const isOutlink =
@@ -216,6 +213,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       <span class="i-amphtml-story-page-attachment-remote-title"></span>
       <span class="i-amphtml-story-page-attachment-remote-icon"></span>
     </a>`;
+    // URL will be validated and resolved based on the canonical URL if relative
+    // when navigating.
     link.setAttribute('href', this.element.getAttribute('href'));
     this.contentEl_.appendChild(link);
 
@@ -230,6 +229,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
   /**
    * Builds remote V2 page attachment's drawer UI.
+   * Used for the amp-story-page-attachment-ui-v2 experiment.
    * @private
    */
   buildRemoteV2_() {
@@ -246,6 +246,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         <span class="i-amphtml-story-page-attachment-remote-title"><span ref="openStringEl"></span><span ref="urlStringEl"></span></span>
         <svg class="i-amphtml-story-page-attachment-remote-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"></path></svg>
       </a>`;
+    // URL will be validated and resolved based on the canonical URL if relative
+    // when navigating.
     const hrefAttr = this.element.querySelector('a').getAttribute('href');
     link.setAttribute('href', hrefAttr);
     const {openStringEl, urlStringEl} = htmlRefs(link);
