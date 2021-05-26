@@ -1270,7 +1270,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @return {!Promise}
    */
   maybeApplyFirstAnimationFrameOrFinish() {
-    console.log('applyFirstFrameOrFinish');
     return Promise.resolve(this.animationManager_?.applyFirstFrameOrFinish());
   }
 

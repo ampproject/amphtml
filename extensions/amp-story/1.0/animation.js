@@ -298,7 +298,6 @@ export class AnimationRunner {
       prefersReducedMotion(this.page_.ownerDocument.defaultView) &&
       this.page_.querySelector('amp-story-animation')
     ) {
-      console.log('applyFirstFrameORrFinish', this.presetTarget_);
       if (this.presetTarget_) {
         return Promise.resolve();
       }
