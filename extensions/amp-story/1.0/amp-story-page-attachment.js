@@ -197,6 +197,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
   /**
    * Builds remote page attachment's drawer UI.
+   * Can be removed when amp-story-page-attachment-ui-v2 is laumched.
    * @private
    */
   buildRemote_() {
@@ -224,6 +225,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.element.getAttribute('data-title') ||
       Services.urlForDoc(this.element).getSourceOrigin(
         this.element.getAttribute('href') ||
+          // Used if amp-story-page-attachment-ui-v2 is off and
+          // this.elmement is an amp-story-page-outlink.
           this.element.querySelector('a').getAttribute('href')
       );
   }
