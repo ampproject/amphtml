@@ -168,7 +168,8 @@ export class AmpRender extends BaseElement {
     this.initialSrc_ = this.element.getAttribute('src');
     this.src_ = this.initialSrc_;
 
-    if (!this.element.hasAttribute('aria-live')) {
+    const hasAriaLive = this.element.hasAttribute('aria-live');
+    if (!hasAriaLive) {
       this.element.setAttribute('aria-live', 'polite');
     }
 
@@ -185,6 +186,9 @@ export class AmpRender extends BaseElement {
     });
 
     return dict({
+      'ariaLiveValue': hasAriaLive
+        ? this.element.getAttribute('aria-live')
+        : 'polite',
       'getJson': this.getFetchJsonFn(),
       'onLoading': () => {
         this.toggleLoading(true);

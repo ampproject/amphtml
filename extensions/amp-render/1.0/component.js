@@ -49,11 +49,11 @@ export function RenderWithRef(
     src = '',
     getJson = DEFAULT_GET_JSON,
     render = DEFAULT_RENDER,
+    ariaLiveValue = 'polite',
     onLoading,
     onReady,
     onRefresh,
     onError,
-    ariaLiveValue = 'polite',
     ...rest
   },
   ref
