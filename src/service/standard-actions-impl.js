@@ -20,7 +20,8 @@ import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, user, userAssert} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
-import {isFiniteNumber, toWin} from '../types';
+import {isFiniteNumber} from '../core/types';
+import {toWin} from '../types';
 import {tryFocus} from '../dom';
 
 /**

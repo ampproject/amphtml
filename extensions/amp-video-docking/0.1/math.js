@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import {DirectionX, RectDef} from './def';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {mapRange} from '../../../src/utils/math.js';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
+import {mapRange} from '../../../src/core/math';
 
 /**
  * @param {number} containerWidth
