@@ -32,7 +32,6 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/core/dom/query';
-
 import {toArray} from '../../../src/core/types/array';
 
 /**

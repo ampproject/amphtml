@@ -28,7 +28,6 @@ import {
   childElementsByTag,
   scopedQuerySelector,
 } from '../../../src/core/dom/query';
-
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {findIndex, toArray} from '../../../src/core/types/array';

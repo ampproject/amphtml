@@ -46,6 +46,7 @@ import {
   closestAncestorElementBySelector,
   matches,
 } from '../../../src/core/dom/query';
+import {createCustomEvent} from '../../../src/event-helper';
 import {
   createElementWithAttributes,
   iterateCursor,
@@ -73,7 +74,6 @@ import {
   setupInit,
   setupInput,
 } from '../../../src/utils/xhr-utils';
-
 import {toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/core/types/object/json';

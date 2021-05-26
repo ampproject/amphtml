@@ -31,7 +31,6 @@ import {
   closestAncestorElementBySelector,
   matches,
 } from '../../../src/core/dom/query';
-
 import {computedStyle, setImportantStyles} from '../../../src/style';
 import {
   createShadowRootWithStyle,

@@ -23,7 +23,6 @@ import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
 } from '../../../src/core/dom/query';
-
 import {dev, userAssert} from '../../../src/log';
 import {isRTL, tryFocus} from '../../../src/dom';
 

@@ -29,7 +29,6 @@ import {
   childElementsByTag,
   elementByTag,
 } from '../../../src/core/dom/query';
-
 import {dev, user, userAssert} from '../../../src/log';
 
 import {fetchDocument} from '../../../src/document-fetcher';

@@ -41,7 +41,6 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/core/dom/query';
-
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 const TAG = 'AMP-STORY';

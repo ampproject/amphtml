@@ -32,7 +32,6 @@ import {
   closestAncestorElementBySelector,
   elementByTag,
 } from '../../../../src/core/dom/query';
-
 import {dev, devAssert, userAssert} from '../../../../src/log';
 
 import {iterateCursor} from '../../../../src/dom';

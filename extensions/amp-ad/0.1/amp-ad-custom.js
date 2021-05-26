@@ -23,7 +23,6 @@ import {
   childElementByTag,
   closestAncestorElementBySelector,
 } from '../../../src/core/dom/query';
-
 import {hasOwn} from '../../../src/core/types/object';
 import {removeChildren} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
