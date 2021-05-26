@@ -223,7 +223,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     ).textContent =
       this.element.getAttribute('data-title') ||
       Services.urlForDoc(this.element).getSourceOrigin(
-        this.element.getAttribute('href')
+        this.element.getAttribute('href') ||
+          this.element.querySelector('a').getAttribute('href')
       );
   }
 
