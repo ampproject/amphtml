@@ -39,39 +39,42 @@ const options = {
  * @param {Array<string>} filesToLint
  */
 async function runLinter(filesToLint) {
-  logLocalDev(green('Starting linter...'));
-  const eslint = new ESLint(options);
-  const results = {
-    errorCount: 0,
-    warningCount: 0,
-  };
-  const fixedFiles = {};
-  for (const file of filesToLint) {
-    const text = fs.readFileSync(file, 'utf-8');
-    const lintResult = await eslint.lintText(text, {filePath: file});
-    const result = lintResult[0];
-    results.errorCount += result.errorCount;
-    results.warningCount += result.warningCount;
-    const formatter = await eslint.loadFormatter('stylish');
-    const resultText = formatter
-      .format(lintResult)
-      .replace(`${process.cwd()}/`, '')
-      .trim();
-    if (resultText.length) {
-      logOnSameLine(resultText);
-    }
-    if (argv.fix) {
-      await ESLint.outputFixes(lintResult);
-    }
-    logOnSameLineLocalDev(green('Linted: ') + file);
-    if (options.fix && result.output) {
-      const status =
-        result.errorCount == 0 ? green('Fixed: ') : yellow('Partially fixed: ');
-      logOnSameLine(status + cyan(file));
-      fixedFiles[file] = status;
-    }
-  }
-  summarizeResults(results, fixedFiles);
+  // DO_NOT_SUBMIT
+  log(red('Triggering fast fail'));
+  process.exitCode = 1;
+  // logLocalDev(green('Starting linter...'));
+  // const eslint = new ESLint(options);
+  // const results = {
+  //   errorCount: 0,
+  //   warningCount: 0,
+  // };
+  // const fixedFiles = {};
+  // for (const file of filesToLint) {
+  //   const text = fs.readFileSync(file, 'utf-8');
+  //   const lintResult = await eslint.lintText(text, {filePath: file});
+  //   const result = lintResult[0];
+  //   results.errorCount += result.errorCount;
+  //   results.warningCount += result.warningCount;
+  //   const formatter = await eslint.loadFormatter('stylish');
+  //   const resultText = formatter
+  //     .format(lintResult)
+  //     .replace(`${process.cwd()}/`, '')
+  //     .trim();
+  //   if (resultText.length) {
+  //     logOnSameLine(resultText);
+  //   }
+  //   if (argv.fix) {
+  //     await ESLint.outputFixes(lintResult);
+  //   }
+  //   logOnSameLineLocalDev(green('Linted: ') + file);
+  //   if (options.fix && result.output) {
+  //     const status =
+  //       result.errorCount == 0 ? green('Fixed: ') : yellow('Partially fixed: ');
+  //     logOnSameLine(status + cyan(file));
+  //     fixedFiles[file] = status;
+  //   }
+  // }
+  // summarizeResults(results, fixedFiles);
 }
 
 /**
