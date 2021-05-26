@@ -46,6 +46,11 @@ export class AnimationRunner {
   init() {}
 
   /**
+   * @return {boolean}
+   */
+  isInitialized() {}
+
+  /**
    * Initializes the players if not already initialized,
    * and starts playing the animations.
    */
@@ -57,7 +62,15 @@ export class AnimationRunner {
 
   /**
    */
+  maybePause() {}
+
+  /**
+   */
   resume() {}
+
+  /**
+   */
+  maybeResume() {}
 
   /**
    */

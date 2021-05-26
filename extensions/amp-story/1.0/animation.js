@@ -350,7 +350,7 @@ export class AnimationRunner {
    */
   applyLastFrame() {
     this.runnerPromise_.then((runner) => {
-      runner.init();
+      runner.isInitialized() || runner.init();
       runner.finish();
     });
   }
@@ -380,6 +380,7 @@ export class AnimationRunner {
    * @private
    */
   startWhenReady_(runner) {
+    runner.isInitialized() || runner.init();
     runner.start();
   }
 
@@ -410,7 +411,7 @@ export class AnimationRunner {
 
     if (this.runner_) {
       try {
-        this.runner_.pause();
+        this.runner_.maybePause();
       } catch (e) {
         // This fails when the animation is finished explicitly
         // (runner.finish()) since this destroys internal players. This is fine.
@@ -427,7 +428,7 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      devAssert(this.runner_).resume();
+      this.runner_.maybeResume();
     }
   }
 
