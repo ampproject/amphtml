@@ -19,6 +19,9 @@ const {
   forbiddenTermsGlobal,
   forbiddenTermsSrcInclusive,
 } = require('./build-system/test-configs/forbidden-terms');
+const {
+  getImportResolver,
+} = require('./build-system/babel-config/import-resolver');
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -84,6 +87,9 @@ module.exports = {
     },
     'react': {
       'pragma': 'Preact',
+    },
+    'import/resolver': {
+      'babel-module': getImportResolver(),
     },
   },
   'reportUnusedDisableDirectives': true,
