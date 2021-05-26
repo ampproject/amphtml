@@ -3,8 +3,11 @@
     "baseUrl": ".",
     "paths": {
       "#third_party/*": ["./third_party/*"],
+      "#builtins/*": ["./builtins/*"],
 
       "#core/*": ["./src/core/*"],
+      "#inabox/*": ["./src/inabox/*"],
+      "#experiments/*": ["./src/experiments/*"],
       "#polyfills/*": ["./src/polyfills/*"],
       "#preact/*": ["./src/preact/*"],
       "#service/*": ["./src/service/*"]
