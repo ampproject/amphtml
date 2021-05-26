@@ -292,6 +292,14 @@ function maybeToEsmName(name) {
 }
 
 /**
+ * @param {string} name
+ * @return {string}
+ */
+function maybeToNpmEsmName(name) {
+  return argv.esm ? name.replace(/\.js$/, '.module.js') : name;
+}
+
+/**
  * Minifies a given JavaScript file entry point.
  * @param {string} srcDir
  * @param {string} srcFilename
@@ -503,9 +511,8 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
 async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
-  const destFilename = maybeToEsmName(
-    options.minify ? options.minifiedName : options.toName
-  );
+  const fileName = options.minify ? options.minifiedName : options.toName;
+  const destFilename = options.npm ? fileName : maybeToEsmName(fileName);
   const destFile = path.join(destDir, destFilename);
 
   if (watchedTargets.has(entryPoint)) {
@@ -866,6 +873,7 @@ module.exports = {
   compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
+  maybeToNpmEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,

@@ -20,25 +20,26 @@ const {expectValidAmphtml} = require('./helpers');
 const {renderTemplate} = require('../template');
 
 describe('template', () => {
-
   describe('renderTemplate', () => {
-
-    it('renders valid doc', async() => {
-      expectValidAmphtml(await amphtmlValidator.getInstance(), renderTemplate({
-        basepath: '/examples/',
-        css: 'body{}',
-        isMainPage: true,
-        fileSet: ['tacos.al.pastor'],
-        serveMode: 'default',
-        selectModePrefix: '/',
-      }));
+    it('renders valid doc', async () => {
+      expectValidAmphtml(
+        await amphtmlValidator.getInstance(),
+        renderTemplate({
+          basepath: '/examples/',
+          css: 'body{}',
+          isMainPage: true,
+          fileSet: ['tacos.al.pastor'],
+          serveMode: 'default',
+          selectModePrefix: '/',
+        })
+      );
     });
 
-    it('renders valid doc with empty/default values', async() => {
-      expectValidAmphtml(await amphtmlValidator.getInstance(),
-          renderTemplate());
+    it('renders valid doc with empty/default values', async () => {
+      expectValidAmphtml(
+        await amphtmlValidator.getInstance(),
+        renderTemplate()
+      );
     });
-
   });
-
 });

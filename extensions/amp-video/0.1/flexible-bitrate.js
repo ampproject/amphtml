@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
+import {DomBasedWeakRef} from '../../../src/core/dom/weakref';
+import {Services} from '../../../src/services';
 import {childElement, childElementsByTag} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
@@ -53,6 +54,11 @@ export function getBitrateManager(win) {
   if (instance) {
     return instance;
   }
+
+  if (isExperimentOn(win, 'flexible-bitrate')) {
+    Services.performanceFor(win).addEnabledExperiment('flexible-bitrate');
+  }
+
   return (instance = new BitrateManager(win));
 }
 
