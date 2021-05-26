@@ -19,6 +19,10 @@ import {Wrapper, useRenderer} from '../../../src/preact/component';
 import {getDate} from '../../../src/core/types/date';
 import {useMemo} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
+import {user} from '../../../src/log';
+
+/** @const {string} */
+const TAG = 'amp-date-display';
 
 /** @const {string} */
 const DEFAULT_DISPLAY_IN = 'local';
@@ -171,6 +175,21 @@ function enhanceBasicVariables(data) {
  * @param {!Date} date
  * @param {string} locale
  * @param {?Object<string, *>} localeOptions
+ * @return {string}
+ * @private
+ */
+function getLocaleString_(date, locale, localeOptions) {
+  try {
+    return date.toLocaleString(locale, localeOptions);
+  } catch (e) {
+    user().error(TAG, 'localeOptions', e);
+  }
+}
+
+/**
+ * @param {!Date} date
+ * @param {string} locale
+ * @param {?Object<string, *>} localeOptions
  * @return {!VariablesV2Def}
  */
 function getVariablesInLocal(
@@ -194,7 +213,7 @@ function getVariablesInLocal(
     'minute': date.getMinutes(),
     'second': date.getSeconds(),
     'iso': date.toISOString(),
-    'localeString': date.toLocaleString(locale, localeOptions),
+    'localeString': getLocaleString_(date, locale, localeOptions),
   };
 }
 
@@ -237,6 +256,6 @@ function getVariablesInUTC(
     'minute': date.getUTCMinutes(),
     'second': date.getUTCSeconds(),
     'iso': date.toISOString(),
-    'localeString': date.toLocaleString(locale, localeOptionsInUTC),
+    'localeString': getLocaleString_(date, locale, localeOptionsInUTC),
   };
 }

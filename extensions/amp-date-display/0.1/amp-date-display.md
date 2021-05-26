@@ -122,6 +122,9 @@ The `data-options-*` supports all the options under [Intl.DateTimeFormat.options
 parameter that specifies the formatting style to use for `localeString` format.
 Valid attributes include: `data-options-date-style`, `data-options-time-style`, etc.
 
+Note that if `display-in` attrubute is set to `utc`, the value of
+`data-options-time-zone` will automatically be converted to `UTC`.
+
 ## Validation
 
 See [amp-date-display rules](../validator-amp-date-display.protoascii) in the AMP validator specification.

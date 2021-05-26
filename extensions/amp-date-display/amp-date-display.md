@@ -200,3 +200,6 @@ the given date.
 The `data-options-*` supports all the options under [Intl.DateTimeFormat.options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#parameters)
 parameter that specifies the formatting style to use for `localeString` format.
 Valid attributes include: `data-options-date-style`, `data-options-time-style`, etc.
+
+Note that if `display-in` attrubute is set to `utc`, the value of
+`data-options-time-zone` will automatically be converted to `UTC`.

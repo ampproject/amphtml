@@ -17,7 +17,8 @@
 import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dashToCamelCase} from '../../../src/core/types/string/index.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 
@@ -29,30 +30,6 @@ const DEFAULT_LOCALE = 'en';
 
 /** @const {number} */
 const DEFAULT_OFFSET_SECONDS = 0;
-
-/** @const {!Array<string>} */
-const SUPPORTED_LOCALE_OPTIONS_ATTRS = [
-  'date-style',
-  'time-style',
-  'calendar',
-  'day-period',
-  'numbering-system',
-  'locale-matcher',
-  'time-zone',
-  'hour12',
-  'hour-cycle',
-  'format-matcher',
-  'weekday',
-  'era',
-  'year',
-  'month',
-  'day',
-  'hour',
-  'minute',
-  'second',
-  'fractional-second-digits',
-  'time-zone-name',
-];
 
 /** @const {!Object<string, *>} */
 const DEFAULT_DATETIME_OPTIONS = {
@@ -166,7 +143,10 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
     this.locale_ = this.element.getAttribute('locale') || DEFAULT_LOCALE;
 
-    this.localeOptions_ = this.parseLocalOptionsAttrs_(this.element);
+    this.localeOptions_ = this.parseLocaleOptionsAttrs_(
+      this.element,
+      'data-options-'
+    );
 
     const data = /** @type {!JsonObject} */ (this.getDataForTemplate_());
     this.templates_
@@ -225,33 +205,56 @@ export class AmpDateDisplay extends AMP.BaseElement {
   }
 
   /**
+   * @param {null|string} attributeName
+   * @param {string|undefined} attributePrefix
+   * @return {boolean}
+   * @private
+   */
+  matchesAttrPrefix_(attributeName, attributePrefix) {
+    return (
+      attributeName !== null &&
+      attributePrefix !== undefined &&
+      attributeName.startsWith(attributePrefix) &&
+      attributeName !== attributePrefix
+    );
+  }
+
+  /**
    * @param {!Element} element
+   * @param {string} attrPrefix
    * @return {Object<string, *>|undefined}
    * @private
    */
-  parseLocalOptionsAttrs_(element) {
-    const getCamelCase = (kebabCase) =>
-      kebabCase
-        .split('-')
-        .map((str, index) =>
-          index === 0 ? str : str[0].toUpperCase() + str.substring(1)
-        )
-        .join('');
-
-    const localeOptions = SUPPORTED_LOCALE_OPTIONS_ATTRS.filter((attr) =>
-      element.hasAttribute(`data-options-${attr}`)
-    );
-    if (localeOptions.length === 0) {
-      return undefined;
+  parseLocaleOptionsAttrs_(element, attrPrefix) {
+    const currObj = {};
+    let objContains = false;
+    const attrs = element.attributes;
+    for (let i = 0; i < attrs.length; i++) {
+      const attrib = attrs[i];
+      if (this.matchesAttrPrefix_(attrib.name, attrPrefix)) {
+        currObj[dashToCamelCase(attrib.name.slice(attrPrefix.length))] =
+          attrib.value;
+        objContains = true;
+      }
     }
+    if (objContains) {
+      return currObj;
+    }
+  }
 
-    return localeOptions.reduce(
-      (options, attr) => ({
-        ...options,
-        [getCamelCase(attr)]: element.getAttribute(`data-options-${attr}`),
-      }),
-      {}
-    );
+  /**
+   * @param {!Date} date
+   * @param {string} locale
+   * @param {?Object<string, *>} localeOptions
+   * @return {string}
+   * @private
+   */
+  getLocaleString_(date, locale, localeOptions) {
+    try {
+      return date.toLocaleString(locale, localeOptions);
+    } catch (e) {
+      user().error(TAG, 'localeOptions', e);
+    }
   }
 
   /**
@@ -278,7 +281,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
       minute: date.getMinutes(),
       second: date.getSeconds(),
       iso: date.toISOString(),
-      localeString: date.toLocaleString(locale, localeOptions),
+      localeString: this.getLocaleString_(date, locale, localeOptions),
     };
   }
 
@@ -318,7 +321,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
       minute: date.getUTCMinutes(),
       second: date.getUTCSeconds(),
       iso: date.toISOString(),
-      localeString: date.toLocaleString(locale, localeOptionsInUTC),
+      localeString: this.getLocaleString_(date, locale, localeOptionsInUTC),
     };
   }
 

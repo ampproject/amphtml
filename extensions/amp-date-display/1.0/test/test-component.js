@@ -17,6 +17,7 @@
 import * as Preact from '../../../../src/preact';
 import {DateDisplay} from '../component';
 import {mount} from 'enzyme';
+import {user} from '../../../../src/log';
 
 describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
   let sandbox;
@@ -222,5 +223,42 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     const data = JSON.parse(wrapper.text());
 
     expect(data.localeString).to.equal('上午4:05');
+  });
+
+  describe('invalid data-options-* settings', () => {
+    it('throws error when invalid localeOptions is passed', () => {
+      const spy = env.sandbox.stub(user(), 'error');
+      const props = {
+        render,
+        datetime: Date.parse('2001-02-03T04:05:06.007Z'),
+        displayIn: 'UTC',
+        locale: 'zh-TW',
+        localeOptions: {timeStyle: 'invalid'},
+      };
+      const jsx = <DateDisplay {...props} />;
+
+      const wrapper = mount(jsx);
+      const data = JSON.parse(wrapper.text());
+
+      expect(spy.args[0][1]).to.equal('localeOptions');
+      expect(spy.args[0][2]).to.match(/RangeError/);
+      expect(data.localeString).to.be.undefined;
+    });
+
+    it('ignores the attr when invalid data-options-attr is provided', () => {
+      const props = {
+        render,
+        datetime: Date.parse('2001-02-03T04:05:06.007Z'),
+        displayIn: 'UTC',
+        locale: 'zh-TW',
+        localeOptions: {invalid: 'invalid'},
+      };
+      const jsx = <DateDisplay {...props} />;
+
+      const wrapper = mount(jsx);
+      const data = JSON.parse(wrapper.text());
+
+      expect(data.localeString).to.equal('2001/2/3 上午4:05:06');
+    });
   });
 });

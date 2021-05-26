@@ -16,6 +16,8 @@
 
 import '../../../amp-mustache/0.2/amp-mustache';
 import '../amp-date-display';
+import {expect} from 'chai';
+import {user} from '../../../../src/log';
 import {waitFor} from '../../../../testing/test-helper.js';
 import {whenUpgradedToCustomElement} from '../../../../src/dom';
 
@@ -163,6 +165,35 @@ describes.realWin(
       const data = await getRenderedData();
 
       expect(data.localeString).to.equal('2001年2月3日 星期六 上午4:05:06');
+    });
+
+    describe('invalid data-options-* settings', () => {
+      it('throws error when provided invalid data-options', async () => {
+        const spy = env.sandbox.stub(user(), 'error');
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('display-in', 'UTC');
+        element.setAttribute('locale', 'zh-TW');
+        element.setAttribute('data-options-date-style', 'invalid');
+        win.document.body.appendChild(element);
+
+        const wrapper = await getRenderedData();
+
+        expect(spy.args[0][1]).to.equal('localeOptions');
+        expect(spy.args[0][2]).to.match(/RangeError/);
+        expect(wrapper.localeString).to.be.empty;
+      });
+
+      it('ignores the attr when invalid data-options-attr is provided', async () => {
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('display-in', 'UTC');
+        element.setAttribute('locale', 'zh-TW');
+        element.setAttribute('data-options-invalid', 'invalid');
+        win.document.body.appendChild(element);
+
+        const wrapper = await getRenderedData();
+
+        expect(wrapper.localeString).to.equal('2001/2/3 上午4:05:06');
+      });
     });
 
     it('renders default template into element', async () => {
