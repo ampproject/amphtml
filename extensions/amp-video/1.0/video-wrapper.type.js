@@ -1,77 +1,42 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/** This file was automatically generated from video-wrapper.d.ts **/
 
 /** @externs */
 
 /** @const */
 var VideoWrapperDef = {};
-
 /**
- * @typedef {{
- *   play: function():!Promise,
- *   pause: function():void,
- *   requestFullscreen: function():!Promise,
- *   currentTime: number,
- *   duration: number,
- *   autoplay: boolean,
- *   controls: boolean,
- *   loop: boolean,
- *
- *   mute: function(),
- *   unmute: function(),
- *   userInteracted: function(),
- * }}
+ * @record
+ * @struct
  */
-VideoWrapperDef.Api;
+VideoWrapperDef.Api = function () {};
+/** @type {function(): (void|!Promise<void>)} */
+VideoWrapperDef.Api.prototype.play;
+/** @type {function(): void} */
+VideoWrapperDef.Api.prototype.pause;
+/** @type {function(): (void|!Promise<void>)} */
+VideoWrapperDef.Api.prototype.requestFullscreen;
+/** @type {number} */
+VideoWrapperDef.Api.prototype.currentTime;
+/** @type {number} */
+VideoWrapperDef.Api.prototype.duration;
+/** @type {boolean} */
+VideoWrapperDef.Api.prototype.autoplay;
+/** @type {boolean} */
+VideoWrapperDef.Api.prototype.controls;
+/** @type {boolean} */
+VideoWrapperDef.Api.prototype.loop;
+/** @type {function(): void} */
+VideoWrapperDef.Api.prototype.mute;
+/** @type {function(): void} */
+VideoWrapperDef.Api.prototype.unmute;
+/** @type {function(): void} */
+VideoWrapperDef.Api.prototype.userInteracted;
 
-/**
- * @typedef {function():PreactDef.Renderable|string}
- */
+/** @typedef {function(): (string|number|boolean|void|function(...?): ?|!Array<(string|number|boolean|void)>|!Array<?>|!Array<!Array<(string|number|boolean|void|?)>>)} */
 VideoWrapperDef.PlayerComponent;
 
-/**
- * @typedef {{
- *   component: (!VideoWrapperDef.PlayerComponent|undefined),
- *   loading: (string|undefined),
- *   src: (string|undefined),
- *   sources: (?PreactDef.Renderable|undefined),
- *   autoplay: (boolean|undefined),
- *   controls: (boolean|undefined),
- *   noaudio: (boolean|undefined),
- *   poster: (string|undefined),
- *   mediasession: (boolean|undefined),
- *   title: (string|undefined),
- *   artist: (string|undefined),
- *   album: (string|undefined),
- *   artwork: (string|undefined),
- *   onReadyState: (function(string, *=)|undefined),
- * }}
- */
+/** @typedef {{component: function(): (string|number|boolean|void|function(...?): ?|!Array<(string|number|boolean|void)>|!Array<?>|!Array<!Array<(string|number|boolean|void|?)>>), loading: string, src: string, sources: (string|number|boolean|void|?|!Array<(string|number|boolean|void)>|!Array<?>|!Array<!Array<(string|number|boolean|void|?)>>), autoplay: boolean, controls: boolean, noaudio: boolean, poster: string, mediasession: boolean, title: string, artist: string, album: string, artwork: string, onReadyState: function(?, ?=): void}} */
 VideoWrapperDef.Props;
 
-/**
- * @typedef {{
- *   metadata: ?Object,
- *   displayIcon: boolean,
- *   playing: boolean,
- *   displayOverlay: boolean,
- *   onOverlayClick: !Function,
- *   wrapperRef: {current: !Element},
- *   play: !Function,
- *   pause: !Function,
- * }}
- */
+/** @typedef {{metadata: !Object, displayIcon: boolean, playing: boolean, displayOverlay: boolean, onOverlayClick: function(...?): ?, wrapperRef: {current: !Element}, play: function(...?): ?, pause: function(...?): ?}} */
 VideoWrapperDef.AutoplayProps;
