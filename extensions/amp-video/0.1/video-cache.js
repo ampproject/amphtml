@@ -39,7 +39,7 @@ export function fetchCachedSources(videoEl, win) {
     !extensionScriptInNode(win, 'amp-cache-url', '0.1') ||
     !(
       videoEl.getAttribute('src') ||
-      videoEl.querySelector('source[src]').getAttribute('src')
+      videoEl.querySelector('source[src]')?.getAttribute('src')
     )
   ) {
     user().error('AMP-VIDEO', 'Video cache not properly configured');
