@@ -872,7 +872,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
       'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
       'extensions/amp-image-slider/0.1/amp-image-slider.js',
-      'extensions/amp-image-viewer/0.1/amp-image-viewer.js',
     ],
   },
   '\\.getTime\\(\\)': {

@@ -34,7 +34,7 @@ import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
-import {createCustomEvent, loadPromise} from '../../../src/event-helper';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {
   expandLayoutRect,
@@ -61,8 +61,6 @@ export class AmpImageViewer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    console.log('AMPImageViewer constructor called', {element});
 
     /** @private {?Element} */
     this.image_ = null;
@@ -181,8 +179,6 @@ export class AmpImageViewer extends AMP.BaseElement {
     const haveImg = !!this.image_;
     const laidOutPromise = haveImg
       ? Promise.resolve()
-      : img.tagName === 'IMG'
-      ? loadPromise(img)
       : img.signals().whenSignal(CommonSignals.LOAD_END);
 
     if (!haveImg) {
@@ -305,8 +301,6 @@ export class AmpImageViewer extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    console.log('AMPImageViewer.init_');
-
     this.image_ = this.element.ownerDocument.createElement('img');
     this.image_.classList.add('i-amphtml-image-viewer-image');
     const img = dev().assertElement(this.sourceImage_);
@@ -325,10 +319,6 @@ export class AmpImageViewer extends AMP.BaseElement {
       st.toggle(img, false);
       this.element.appendChild(this.image_);
 
-      if (img.tagName === 'IMG') {
-        propagateAttributes(ARIA_ATTRIBUTES, img, this.image_);
-        return Promise.resolve();
-      }
       return img.getImpl().then((impl) => {
         propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_);
       });

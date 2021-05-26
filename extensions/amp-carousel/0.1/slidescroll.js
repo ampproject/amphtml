@@ -342,7 +342,6 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   layoutCallback() {
-    console.log('layout carousel', {element: this.element});
     observeWithSharedInOb(this.element, (inViewport) =>
       this.viewportCallbackTemp(inViewport)
     );
@@ -389,7 +388,6 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   unlayoutCallback() {
-    console.log('unlayout carousel', {element: this.element});
     unobserveWithSharedInOb(this.element);
     this.slideIndex_ = null;
     return super.unlayoutCallback();

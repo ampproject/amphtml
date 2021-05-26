@@ -360,14 +360,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.mutateElement(() => {
       const {length} = this.elementsMetadata_[lightboxGroupId];
       this.maybeEnableMultipleItemControls_(length);
-      // toggle(dev().assertElement(this.carousel_), true);
-      dev()
-        .assertElement(this.carousel_)
-        .getImpl()
-        .then((implementation) => {
-          implementation.unlayoutCallback();
-          toggle(dev().assertElement(this.carousel_), true);
-        });
+      toggle(dev().assertElement(this.carousel_), true);
     });
   }
 
