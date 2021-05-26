@@ -17,6 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
+const globby = require('globby');
 const {
   log,
   logLocalDev,
@@ -24,8 +25,11 @@ const {
   logOnSameLineLocalDev,
 } = require('../common/logging');
 const {cyan, green, red, yellow} = require('../common/colors');
+const {default: ignore} = require('ignore');
 const {ESLint} = require('eslint');
 const {getFilesToCheck} = require('../common/utils');
+const {gitDiffNameOnlyMain} = require('../common/git');
+const {isCiBuild} = require('../common/ci');
 const {lintGlobs} = require('../test-configs/config');
 
 /** @type {ESLint.Options} */
@@ -50,6 +54,9 @@ async function runLinter(filesToLint) {
     const text = fs.readFileSync(file, 'utf-8');
     const lintResult = await eslint.lintText(text, {filePath: file});
     const result = lintResult[0];
+    if (!result) {
+      continue; // File was ignored
+    }
     results.errorCount += result.errorCount;
     results.warningCount += result.warningCount;
     const formatter = await eslint.loadFormatter('stylish');
@@ -82,7 +89,7 @@ async function runLinter(filesToLint) {
 function summarizeResults(results, fixedFiles) {
   const {errorCount, warningCount} = results;
   if (errorCount == 0 && warningCount == 0) {
-    logOnSameLineLocalDev(green('SUCCESS: ') + 'No linter warnings or errors.');
+    logOnSameLineLocalDev(green('SUCCESS:'), 'No linter warnings or errors.');
   } else {
     const prefix = errorCount == 0 ? yellow('WARNING: ') : red('ERROR: ');
     logOnSameLine(
@@ -119,7 +126,7 @@ function summarizeResults(results, fixedFiles) {
     process.exitCode = 1;
   }
   if (options.fix && Object.keys(fixedFiles).length > 0) {
-    log(green('INFO: ') + 'Summary of fixes:');
+    log(green('INFO:'), 'Summary of fixes:');
     Object.keys(fixedFiles).forEach((file) => {
       log(fixedFiles[file] + cyan(file));
     });
@@ -127,19 +134,39 @@ function summarizeResults(results, fixedFiles) {
 }
 
 /**
+ * Computes the set of files to lint based on command line args / changed files.
+ * - If lint rules were changed or if packages were upgraded, lint all files.
+ * - Otherwise, use the `getFilesToCheck()` util to parse command line args.
+ * @return {!Array<string>}
+ */
+function getFilesToLint() {
+  const options = {gitignore: true};
+  const filesChanged = gitDiffNameOnlyMain();
+  const ruleChangeOrPackageUpgrade = filesChanged.some(
+    (file) => file.endsWith('.eslintrc.js') || file == 'package.json'
+  );
+  const overrideLocalChanges =
+    isCiBuild() && argv.local_changes && ruleChangeOrPackageUpgrade;
+  if (overrideLocalChanges) {
+    log(
+      green('INFO:'),
+      'Detected changes to lint rules / packages. Linting all files...'
+    );
+    return ignore().filter(globby.sync(lintGlobs, options));
+  }
+  return getFilesToCheck(lintGlobs, options, '.eslintignore');
+}
+
+/**
  * Checks files for formatting (and optionally fixes them) with Eslint.
  * Explicitly makes sure the API doesn't check files in `.eslintignore`.
  */
 async function lint() {
-  const filesToCheck = getFilesToCheck(
-    lintGlobs,
-    {gitignore: true},
-    '.eslintignore'
-  );
-  if (filesToCheck.length == 0) {
+  const filesToLint = getFilesToLint();
+  if (filesToLint.length == 0) {
     return;
   }
-  await runLinter(filesToCheck);
+  await runLinter(filesToLint);
 }
 
 module.exports = {

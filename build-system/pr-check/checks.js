@@ -71,7 +71,7 @@ async function prBuildWorkflow() {
   }
 
   if (buildTargetsInclude(Targets.LINT)) {
-    timedExecOrDie('amp lint');
+    timedExecOrDie('amp lint --local_changes');
   }
 
   if (buildTargetsInclude(Targets.PRETTIFY)) {
