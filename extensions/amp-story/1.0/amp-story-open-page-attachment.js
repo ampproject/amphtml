@@ -155,18 +155,17 @@ const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
   // amp-story-page-outlink requires an anchor element child. We can remove after we get a reference to it.
   // amp-story-page-attachment uses this same codepath and allows an href attribute.
   const anchorChild = attachmentEl.querySelector('a');
-  anchorChild && attachmentEl.removeChild(anchorChild);
 
   // Copy href to the element so it can be previewed on hover and long press.
   const attachmentHref =
-    attachmentEl.getAttribute('href') || anchorChild?.getAttribute('href');
+    anchorChild?.getAttribute('href') || attachmentEl.getAttribute('href');
   if (attachmentHref) {
     openAttachmentEl.setAttribute('href', attachmentHref);
   }
 
-  // Copy title to the element.
+  // Copy title to the element if it exists.
   const attachmentTitle =
-    attachmentEl.getAttribute('title') || anchorChild?.getAttribute('title');
+    anchorChild?.getAttribute('title') || attachmentEl.getAttribute('title');
   if (attachmentTitle) {
     openAttachmentEl.setAttribute('title', attachmentTitle);
   }

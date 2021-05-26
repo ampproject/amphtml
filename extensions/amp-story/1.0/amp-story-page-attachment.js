@@ -379,6 +379,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   openRemoteV2_() {
+    // If the element is an amp-story-page-outlink the click target is its anchor element child.
+    // This is for SEO and analytics optimisation.
+    // Otherwise the element is the legacy version, amp-story-page-attachment with an href,
+    // and a click click target is the button built by the component.
     const clickTarget =
       this.element.parentElement
         .querySelector('amp-story-page-outlink')
@@ -387,7 +391,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         .querySelector('.i-amphtml-story-page-open-attachment-host')
         .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
 
-    console.log(clickTarget);
     const isMobileUI =
       this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
     // Shows outlink url preview on mobile only.
