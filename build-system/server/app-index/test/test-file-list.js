@@ -18,17 +18,16 @@ const {expect} = require('chai');
 const {FileList} = require('../file-list');
 const {getBoundAttr, parseHtmlChunk} = require('./helpers');
 
-
 describe('devdash', () => {
-
   describe('FileList', () => {
-
     it('wraps', () => {
-      const root = parseHtmlChunk(FileList({
-        basepath: 'basepath',
-        fileSet: [],
-        selectModePrefix: '/',
-      }));
+      const root = parseHtmlChunk(
+        FileList({
+          basepath: 'basepath',
+          fileSet: [],
+          selectModePrefix: '/',
+        })
+      );
 
       expect(root.className).to.equal('file-list-container');
 
@@ -38,11 +37,13 @@ describe('devdash', () => {
     });
 
     it('creates amp-list', () => {
-      const root = parseHtmlChunk(FileList({
-        basepath: 'basepath',
-        fileSet: [],
-        selectModePrefix: '/',
-      }));
+      const root = parseHtmlChunk(
+        FileList({
+          basepath: 'basepath',
+          fileSet: [],
+          selectModePrefix: '/',
+        })
+      );
 
       const {length} = root.getElementsByTagName('amp-list');
       expect(length).to.equal(1);
@@ -51,11 +52,13 @@ describe('devdash', () => {
     it('creates placeholder inside amp-list with rendered data', () => {
       const fileSet = ['foo.bar', 'tacos.al.pastor'];
 
-      const root = parseHtmlChunk(FileList({
-        fileSet,
-        basepath: 'basepath',
-        selectModePrefix: '/',
-      }));
+      const root = parseHtmlChunk(
+        FileList({
+          fileSet,
+          basepath: 'basepath',
+          selectModePrefix: '/',
+        })
+      );
 
       const els = root.querySelectorAll('amp-list > [placeholder]');
 
@@ -75,11 +78,13 @@ describe('devdash', () => {
       const fileSet = ['asada.html', 'adobada.html', 'pastor.html'];
       const basepath = '/examples/';
 
-      const root = parseHtmlChunk(FileList({
-        fileSet,
-        basepath,
-        selectModePrefix: '/',
-      }));
+      const root = parseHtmlChunk(
+        FileList({
+          fileSet,
+          basepath,
+          selectModePrefix: '/',
+        })
+      );
 
       const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
 
@@ -95,11 +100,13 @@ describe('devdash', () => {
       const fileSet = ['asada.html', 'adobada.html', 'pastor.html'];
       const basepath = '/potato/';
 
-      const root = parseHtmlChunk(FileList({
-        fileSet,
-        basepath,
-        selectModePrefix: '/',
-      }));
+      const root = parseHtmlChunk(
+        FileList({
+          fileSet,
+          basepath,
+          selectModePrefix: '/',
+        })
+      );
 
       const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
 
@@ -116,11 +123,13 @@ describe('devdash', () => {
       const notBound = ['chabbuddy.g', 'dj.beats', 'mc.grindah'];
       const basepath = '/examples/';
 
-      const root = parseHtmlChunk(FileList({
-        fileSet: [...bound, ...notBound],
-        basepath,
-        selectModePrefix: '/',
-      }));
+      const root = parseHtmlChunk(
+        FileList({
+          fileSet: [...bound, ...notBound],
+          basepath,
+          selectModePrefix: '/',
+        })
+      );
 
       const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
 
@@ -138,7 +147,5 @@ describe('devdash', () => {
         expect(el.getAttribute('href')).to.equal(basepath + expectedHref);
       });
     });
-
   });
-
 });

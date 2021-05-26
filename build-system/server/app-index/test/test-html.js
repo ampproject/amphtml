@@ -17,18 +17,15 @@
 const {expect} = require('chai');
 const {html, joinFragments} = require('../html');
 
-
 describe('devdash', () => {
   describe('html helpers', () => {
     describe('joinFragments', () => {
-
       it('joins simple fragments', () => {
         expect(joinFragments(['a', 'b', 'c'])).to.equal('abc');
       });
       it('joins mapped fragments', () => {
-        expect(joinFragments([1, 2, 3], a => a + 1)).to.equal('234');
+        expect(joinFragments([1, 2, 3], (a) => a + 1)).to.equal('234');
       });
-
     });
 
     describe('html', () => {
@@ -37,8 +34,9 @@ describe('devdash', () => {
       });
 
       it('concatenates interpolated args', () => {
-        expect(html`quesadilla ${'de'} chicharrón ${'con'} queso`)
-            .to.equal('quesadilla de chicharrón con queso');
+        // eslint-disable-next-line local/html-template
+        const interpolated = html`quesadilla ${'de'} chicharrón ${'con'} queso`;
+        expect(interpolated).to.equal('quesadilla de chicharrón con queso');
       });
     });
   });
