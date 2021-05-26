@@ -57,7 +57,7 @@ function queryXpath(xpathString, context) {
   // Add an ID to every element in the tree so we can reference them later.
   // This allows us to correlate nodes from the cloned tree to the
   // original tree.
-  for (const {item, index} of createIndexedInterator(
+  for (const {index, item} of createIndexedInterator(
     createElementIterator(context)
   )) {
     setData(item, index);

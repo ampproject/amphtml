@@ -38,7 +38,7 @@ import {
   scopedQuerySelectorAll,
   toggleAttribute,
 } from '../../../src/dom';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
@@ -848,7 +848,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.getCurrentElement_()
       .imageViewer.getImpl()
       .then((imageViewer) => {
-        const {width, height} = imageViewer.getImageBoxWithOffset() || {};
+        const {height, width} = imageViewer.getImageBoxWithOffset() || {};
 
         // Check if our imageBox has a width or height. We may be in the
         // gallery view if not, and we do not want to animate.

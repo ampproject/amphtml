@@ -100,7 +100,7 @@ function buildEnv(env) {
  * @return {Promise<void>}
  */
 async function storybook() {
-  const {'storybook_env': env = 'amp,preact', build = false} = argv;
+  const {build = false, 'storybook_env': env = 'amp,preact'} = argv;
   const envs = env.split(',');
   if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();

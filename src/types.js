@@ -15,17 +15,6 @@
  */
 
 /**
- * Determines if value is of number type and finite.
- * NaN and Infinity are not considered a finite number.
- * String numbers are not considered numbers.
- * @param {*} value
- * @return {boolean}
- */
-export function isFiniteNumber(value) {
-  return typeof value === 'number' && isFinite(value);
-}
-
-/**
  * Externs declare that access `defaultView` from `document` or
  * `ownerDocument` is of type `(Window|null)` but most of our parameter types
  * assume that it is never null. This is OK in practice as we ever only get

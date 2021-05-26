@@ -34,7 +34,7 @@ import {
 } from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {moveLayoutRect} from '../../../src/layout-rect';
+import {moveLayoutRect} from '../../../src/core/math/layout-rect';
 import {parseJson} from '../../../src/core/types/object/json';
 import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {removeElement} from '../../../src/dom';
@@ -149,7 +149,7 @@ export class AmpIframe extends AMP.BaseElement {
     const {element} = this;
     const urlService = Services.urlForDoc(element);
     const url = urlService.parse(src);
-    const {hostname, protocol, origin} = url;
+    const {hostname, origin, protocol} = url;
     // Some of these can be easily circumvented with redirects.
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
@@ -219,7 +219,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (!src) {
       return;
     }
-    const {protocol, hash} = Services.urlForDoc(this.element).parse(src);
+    const {hash, protocol} = Services.urlForDoc(this.element).parse(src);
     // data-URLs are not modified.
     if (protocol == 'data:') {
       return src;

@@ -15,7 +15,7 @@
  */
 
 import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {DomFingerprint} from '../../../src/core/dom/fingerprint';
 import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {buildUrl} from './shared/url-builder';
@@ -301,7 +301,7 @@ export function googlePageParameters(a4a, startTime) {
   ]).then((promiseResults) => {
     const clientId = promiseResults[0];
     const referrer = promiseResults[1];
-    const {pageViewId, canonicalUrl} = Services.documentInfoForDoc(ampDoc);
+    const {canonicalUrl, pageViewId} = Services.documentInfoForDoc(ampDoc);
     // Read by GPT for GA/GPT integration.
     win.gaGlobal = win.gaGlobal || {cid: clientId, hid: pageViewId};
     const {screen} = win;

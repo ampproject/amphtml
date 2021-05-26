@@ -23,7 +23,7 @@ import {Deferred} from '../../../../src/core/data-structures/promise';
 import {Services} from '../../../../src/services';
 import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';
 import {htmlFor, htmlRefs} from '../../../../src/static-template';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 import {presets} from '../animation-presets';
 import {scopedQuerySelectorAll} from '../../../../src/dom';
 import {toArray} from '../../../../src/core/types/array';
@@ -335,7 +335,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       webAnimationBuilder.createRunner = () => webAnimationRunner;
 
-      const {resolve: resolveWaitFor, promise} = new Deferred();
+      const {promise, resolve: resolveWaitFor} = new Deferred();
       sequence.waitFor = env.sandbox.spy(() => promise);
 
       const runner = new AnimationRunner(
@@ -591,7 +591,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       const animationManager = new AnimationManager(page, ampdoc);
       await animationManager.applyFirstFrame();
 
-      targetsWithOptions.forEach(({target, expectedOptions}) => {
+      targetsWithOptions.forEach(({expectedOptions, target}) => {
         expect(
           createAnimationRunner.withArgs(
             page,
@@ -713,7 +713,7 @@ describes.realWin('amp-story animations', {}, (env) => {
           </amp-story-animation>
         </div>
       `;
-      const {animatedFirst, animatedSecond, animatedThird, animatedFourth} =
+      const {animatedFirst, animatedFourth, animatedSecond, animatedThird} =
         htmlRefs(page);
 
       env.win.document.body.appendChild(page);

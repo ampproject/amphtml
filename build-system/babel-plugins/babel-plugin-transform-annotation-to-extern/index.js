@@ -43,7 +43,7 @@ module.exports = function (babel) {
   let shouldEmitTypedefs;
   return {
     pre() {
-      const {writeToFile = false, emitTypedefs = false} = this.opts;
+      const {emitTypedefs = false, writeToFile = false} = this.opts;
       shouldWriteToFile = writeToFile;
       shouldEmitTypedefs = emitTypedefs;
     },

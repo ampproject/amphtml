@@ -186,7 +186,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    const {win, playlistItem_} = this;
+    const {playlistItem_, win} = this;
     if (win.MediaMetadata && playlistItem_['meta']) {
       try {
         return new win.MediaMetadata(playlistItem_['meta']);
@@ -447,7 +447,7 @@ class AmpJWPlayer extends AMP.BaseElement {
           }
           break;
         case 'meta':
-          const {metadataType, duration} = detail;
+          const {duration, metadataType} = detail;
           if (metadataType === 'media') {
             this.duration_ = duration;
           }
