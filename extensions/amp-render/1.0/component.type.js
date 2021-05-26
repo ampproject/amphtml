@@ -28,6 +28,7 @@ var RenderDef = {};
  *   onReady: (Function),
  *   onRefresh: (Function),
  *   onError: (Function),
+ *   ariaLiveValue: (!string)
  * }}
  */
 RenderDef.Props;

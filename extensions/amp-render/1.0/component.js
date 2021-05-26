@@ -53,6 +53,7 @@ export function RenderWithRef(
     onReady,
     onRefresh,
     onError,
+    ariaLiveValue = 'polite',
     ...rest
   },
   ref
@@ -110,7 +111,7 @@ export function RenderWithRef(
     rendered && typeof rendered == 'object' && '__html' in rendered;
 
   return (
-    <Wrapper {...rest} dangerouslySetInnerHTML={isHtml ? rendered : null} aria-live="polite">
+    <Wrapper {...rest} dangerouslySetInnerHTML={isHtml ? rendered : null} aria-live={ariaLiveValue}>
       {isHtml ? null : rendered}
     </Wrapper>
   );
