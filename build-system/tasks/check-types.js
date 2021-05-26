@@ -115,30 +115,20 @@ const TYPE_CHECK_TARGETS = {
     srcGlobs: ['src/amp-story-player/**/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-context': {
-    srcGlobs: ['src/context/**/*.js', ...CORE_SRCS_GLOBS],
-  },
-  'src-core': {
-    srcGlobs: CORE_SRCS_GLOBS,
-  },
-  'src-examiner': {
-    srcGlobs: ['src/examiner/**/*.js'],
-  },
-  'src-experiments': {
-    srcGlobs: ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
-  },
+  'src-context': ['src/context/**/*.js', ...CORE_SRCS_GLOBS],
+  'src-core': CORE_SRCS_GLOBS,
+  'src-examiner': ['src/examiner/**/*.js'],
+  'src-experiments': ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
   'src-inabox': {
     srcGlobs: ['src/inabox/**/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-polyfills': {
-    srcGlobs: [
-      'src/polyfills/**/*.js',
-      // Exclude fetch its dependencies are cleaned up/extracted to core.
-      '!src/polyfills/fetch.js',
-      ...CORE_SRCS_GLOBS,
-    ],
-  },
+  'src-polyfills': [
+    'src/polyfills/**/*.js',
+    // Exclude fetch its dependencies are cleaned up/extracted to core.
+    '!src/polyfills/fetch.js',
+    ...CORE_SRCS_GLOBS,
+  ],
   'src-preact': {
     srcGlobs: ['src/preact/**/*.js', 'src/context/**/*.js', ...CORE_SRCS_GLOBS],
     warningLevel: 'QUIET',
@@ -254,6 +244,9 @@ async function typeCheck(targetName) {
   let target = TYPE_CHECK_TARGETS[targetName];
   if (typeof target == 'function') {
     target = target();
+  }
+  if (Array.isArray(target)) {
+    target = {srcGlobs: target};
   }
 
   if (!target) {
