@@ -863,7 +863,7 @@ tags: {  # <amp-story-page-attachment> with href. Legacy version of <amp-story-p
       protocol: "http"
       protocol: "https"
     }
-  }  
+  }
   attrs: {
     name: "cta-text"
   }
