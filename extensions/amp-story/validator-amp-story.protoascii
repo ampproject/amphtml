@@ -966,7 +966,7 @@ tags: {
   child_tags: {
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "A"
-  }  
+  }
 }
 tags: {  # <amp-story-animation> <script>
   html_format: AMP
