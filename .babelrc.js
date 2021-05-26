@@ -23,4 +23,4 @@
 const {
   getImportResolverPlugin
 } = require('./build-system/babel-config/import-resolver');
-module.exports.plugins = [getImportResolverPlugin()];
+module.exports.plugins = [getImportResolverPlugin(true)];

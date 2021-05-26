@@ -19,7 +19,7 @@ const fs = require('fs');
 const path = require('path');
 
 const JSCONFIG_PATH = path.join(__dirname, '../../jsconfig.json');
-let aliases = null;
+let aliasPaths = null;
 
 /**
  * Reads import paths from jsconfig.json. This file is used by VSCode for
@@ -32,45 +32,51 @@ let aliases = null;
  * This method outputs the necessary alias object for the module-resolver Babel
  * plugin, which excludes the "/*" for each. The above paths would result in:
  * {
- *   '#foo': './src/foo',
- *   '#bar': './bar',
+ *   '#foo/': './src/foo/',
+ *   '#bar/': './bar/',
  * }
+ * @param forEslint
  * @return {!Object<string, string>}
  */
-function readJsconfigPaths() {
-  if (!aliases) {
+function readJsconfigPaths(forEslint) {
+  if (!aliasPaths) {
     const jsConfig = JSON.parse(fs.readFileSync(JSCONFIG_PATH, 'utf8'));
-    const {paths} = jsConfig.compilerOptions;
-
-    const stripSuffix = (s) => s.replace(/\/\*$/, '');
-    aliases = Object.fromEntries(
-      Object.entries(paths).map(([alias, [dest]]) => [
-        stripSuffix(alias),
-        stripSuffix(dest),
-      ])
-    );
+    aliasPaths = jsConfig.compilerOptions.paths;
   }
 
-  return aliases;
+  // ESLint module-resolver autofix needs "/" to avoid false-positives:
+  // src/services != #service/s
+  // TODO(rcebulko): Fork and fix path matching in plugin
+  // Impact: import * from '#preact' works fine, but `eslint --fix` will not
+  // replace '../../src/preact' with '#preact'
+  const stripSuffix = (s) => s.replace(/\/\*$/, forEslint ? '/' : '');
+  const aliases = Object.entries(aliasPaths).map(([alias, [dest]]) => [
+    stripSuffix(alias),
+    stripSuffix(dest),
+  ]);
+
+  return Object.fromEntries(aliases);
 }
 
 /**
  * Import map configuration.
+ * @param forEslint
  * @return {!Object}
  */
-function getImportResolver() {
+function getImportResolver(forEslint) {
   return {
     'root': ['.'],
-    'alias': readJsconfigPaths(),
+    'alias': readJsconfigPaths(forEslint),
   };
 }
 
 /**
  * Import resolver Babel plugin configuration.
+ * @param forEslint
  * @return {!Array}
  */
-function getImportResolverPlugin() {
-  return ['module-resolver', getImportResolver()];
+function getImportResolverPlugin(forEslint) {
+  return ['module-resolver', getImportResolver(forEslint)];
 }
 
 module.exports = {getImportResolver, getImportResolverPlugin};
