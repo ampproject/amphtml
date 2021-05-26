@@ -9,6 +9,7 @@
   "dfp-render-on-idle-cwv-exp": 1,
   "expand-json-targeting": 1,
   "flexAdSlots": 0.05,
+  "flexible-bitrate": 0.1,
   "ios-fixed-no-transfer": 1,
   "visibility-trigger-improvements": 1,
   "ads-initialIntersection": 1,
