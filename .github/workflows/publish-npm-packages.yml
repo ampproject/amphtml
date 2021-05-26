@@ -1,4 +1,4 @@
-name: Publish Bento Packages on NPM
+name: Publish Bento Packages on npm
 on:
   workflow_dispatch:
     inputs:
@@ -6,7 +6,7 @@ on:
         description: 'AMP version'
         required: true
       tag:
-        description: 'NPM package tag (latest | nightly)'
+        description: 'npm package tag (latest | nightly)'
         required: true
 jobs:
   setup:
