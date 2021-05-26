@@ -157,7 +157,9 @@ const targetMatchers = {
     return (
       file == 'build-system/tsconfig.json' ||
       (file.startsWith('build-system') &&
-        (file.endsWith('.js') || file.endsWith('.ts')))
+        (file.endsWith('.js') ||
+          file.endsWith('.ts') ||
+          file.endsWith('.json')))
     );
   },
   [Targets.CACHES_JSON]: (file) => {
