@@ -25,8 +25,8 @@ const {
   doBuildJs,
   endBuildStep,
   maybeToEsmName,
-  npmMaybeToEsmName,
   mkdirSync,
+  npmMaybeToEsmName,
   watchDebounceDelay,
 } = require('./helpers');
 const {

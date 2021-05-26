@@ -480,9 +480,9 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
         const time = Date.now();
-        const {
-          rebuild,
-        } = /** @type {Required<esbuild.BuildResult>} */ (buildResult);
+        const {rebuild} = /** @type {Required<esbuild.BuildResult>} */ (
+          buildResult
+        );
 
         const buildPromise = rebuild()
           .then(() =>
@@ -873,8 +873,8 @@ module.exports = {
   compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
-  npmMaybeToEsmName,
   mkdirSync,
+  npmMaybeToEsmName,
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,
