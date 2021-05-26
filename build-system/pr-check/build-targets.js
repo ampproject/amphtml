@@ -47,6 +47,7 @@ const fileLists = {};
 const Targets = {
   AVA: 'AVA',
   BABEL_PLUGIN: 'BABEL_PLUGIN',
+  BUILD_SYSTEM: 'BUILD_SYSTEM',
   CACHES_JSON: 'CACHES_JSON',
   DEV_DASHBOARD: 'DEV_DASHBOARD',
   DOCS: 'DOCS',
@@ -146,6 +147,19 @@ const targetMatchers = {
       file == 'babel.config.js' ||
       file.startsWith('build-system/babel-plugins/') ||
       file.startsWith('build-system/babel-config/')
+    );
+  },
+  [Targets.BUILD_SYSTEM]: (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file == 'build-system/tasks/check-build-system.js' ||
+      file == 'build-system/tsconfig.json' ||
+      (file.startsWith('build-system') &&
+        (file.endsWith('.js') ||
+          file.endsWith('.ts') ||
+          file.endsWith('.json')))
     );
   },
   [Targets.CACHES_JSON]: (file) => {

@@ -16,7 +16,7 @@
     "strictNullChecks": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
-    "incremental": true,
+    "incremental": false,
     "esModuleInterop": true,
     "declaration": true
   },
