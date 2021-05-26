@@ -377,12 +377,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   openRemoteV2_() {
     const clickTarget =
       this.element.parentElement
-        .querySelector('amp-story-open-attachment')
+        .querySelector('amp-story-page-outlink')
         ?.querySelector('a') ||
       this.element.parentElement
         .querySelector('.i-amphtml-story-page-open-attachment-host')
         .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
 
+    console.log(clickTarget);
     const isMobileUI =
       this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
     // Shows outlink url preview on mobile only.

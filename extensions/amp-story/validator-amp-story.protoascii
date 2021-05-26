@@ -850,6 +850,21 @@ tags: {  # <amp-story-page-attachment> with href. Legacy version of <amp-story-p
   mandatory_ancestor: "AMP-STORY-PAGE"
   mandatory_last_child: true
   attrs: {
+    name: "cta-accent-color"
+  }
+  attrs: {
+    name: "cta-accent-element"
+    value: "background"
+    value: "text"
+  }
+  attrs: {
+    name: "cta-image"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }  
+  attrs: {
     name: "cta-text"
   }
   attrs: {
@@ -867,6 +882,7 @@ tags: {  # <amp-story-page-attachment> with href. Legacy version of <amp-story-p
   }
   attrs: {
     name: "theme"
+    value: "custom"
     value: "dark"
     value: "light"
   }
