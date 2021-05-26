@@ -20,13 +20,10 @@ const {serveIndexForTesting} = require('../index');
 const NOOP = () => {};
 
 describe('devdash', () => {
-
   describe('express middleware', () => {
-
-    it('renders HTML', async() => {
+    it('renders HTML', async () => {
       const renderedHtml = await serveIndexForTesting({url: '/'}, {end: NOOP});
       expect(renderedHtml).to.be.ok;
     });
-
   });
 });
