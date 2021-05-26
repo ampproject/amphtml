@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../../src/dom';
 import '../flexible-bitrate';
 import {BitrateManager} from '../flexible-bitrate';
 import {childElementsByTag} from '../../../../src/core/dom/query';

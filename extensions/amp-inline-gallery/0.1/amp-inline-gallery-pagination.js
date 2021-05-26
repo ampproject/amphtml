@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/dom';
 import {InlineGalleryEvents} from './inline-gallery-events';
 import {Layout} from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';

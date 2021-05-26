@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,

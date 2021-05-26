@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../../src/dom';
 import {childElementByAttr} from '../../../../src/core/dom/query';
 import {dev} from '../../../../src/log';
 import {htmlFor} from '../../../../src/static-template';

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../dom';
 import {FocusHistory} from '../focus-history';
 import {MutatorInterface} from './mutator-interface';
 import {Resource} from './resource';

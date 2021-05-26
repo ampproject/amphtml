@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../../src/dom';
 import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
 import {Services} from '../../../../src/services';

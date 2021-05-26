@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/dom';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,

@@ -17,7 +17,6 @@
 // compiler does not output types for enums, but we want to distinguish between
 // LocalizedStringId enum values and any other strings.
 // eslint-disable-next-line no-unused-vars
-import {} from '../dom';
 import {LocalizedStringId} from '../localized-strings';
 import {Services} from '../services';
 import {closest} from '../core/dom/query';

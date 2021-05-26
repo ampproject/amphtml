@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../../src/dom';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   CONSENT_ITEM_STATE,

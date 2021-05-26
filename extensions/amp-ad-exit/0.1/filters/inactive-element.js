@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../../src/dom';
 import {Filter, FilterType} from './filter';
 import {dev, userAssert} from '../../../../src/log';
 import {matches} from '../../../../src/core/dom/query';

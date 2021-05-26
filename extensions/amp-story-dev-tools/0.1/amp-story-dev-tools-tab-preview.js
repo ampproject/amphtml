@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/dom';
 import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   addAttributeAfterTimeout,

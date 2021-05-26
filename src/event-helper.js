@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from './dom';
 import {internalListenImplementation} from './event-helper-listen';
 import {lastChildElement} from './core/dom/query';
 import {user} from './log';

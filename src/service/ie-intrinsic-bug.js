@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../dom';
 import {Services} from '../services';
 import {closestAncestorElementBySelector} from '../core/dom/query';
 import {getLengthNumeral} from '../layout';

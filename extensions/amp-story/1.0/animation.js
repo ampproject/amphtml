@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/dom';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   PRESET_OPTION_ATTRIBUTES,

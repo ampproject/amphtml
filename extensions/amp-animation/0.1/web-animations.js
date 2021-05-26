@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/dom';
 import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
 import {
   InternalWebAnimationRequestDef,

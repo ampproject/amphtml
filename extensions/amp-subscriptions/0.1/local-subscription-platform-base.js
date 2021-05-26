@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/dom';
 import {Action} from './analytics';
 import {Actions} from './actions';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';

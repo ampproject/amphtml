@@ -26,7 +26,6 @@
  * </code>
  */
 
-import {} from '../../../src/dom';
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
