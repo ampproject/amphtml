@@ -43,7 +43,7 @@ import {
 } from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 

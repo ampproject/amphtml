@@ -15,7 +15,7 @@
  */
 
 import {devAssert} from '../assert';
-import {isScopeSelectorSupported, prependSelectorsWith} from './css';
+import {isScopeSelectorSupported, prependSelectorsWith} from './css-selectors';
 
 /** @fileoverview Helper functions for DOM queries. */
 

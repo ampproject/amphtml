@@ -17,7 +17,7 @@
 import * as query from '../../../../src/core/dom/query';
 import {isElement} from '../../../../src/core/types';
 import {loadPromise} from '../../../../src/event-helper';
-import {setScopeSelectorSupportedForTesting} from '../../../../src/core/dom/css';
+import {setScopeSelectorSupportedForTesting} from '../../../../src/core/dom/css-selectors';
 import {toArray} from '../../../../src/core/types/array';
 
 /** Helper to execute test cases with and without the polyfills. */

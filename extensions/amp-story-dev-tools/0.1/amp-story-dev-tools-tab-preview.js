@@ -22,7 +22,7 @@ import {
   updateHash,
 } from './utils';
 import {closest} from '../../../src/core/dom/query';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {htmlFor} from '../../../src/static-template';
 import {observeContentSize} from '../../../src/utils/size-observer';
 import {setStyles} from '../../../src/style';

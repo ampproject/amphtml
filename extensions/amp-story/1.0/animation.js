@@ -35,7 +35,7 @@ import {
 } from './animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '../../../src/core/types/object';
 import {

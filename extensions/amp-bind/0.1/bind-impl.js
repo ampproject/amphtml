@@ -33,7 +33,7 @@ import {
   map,
 } from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {
   findIndex,
   isArray,

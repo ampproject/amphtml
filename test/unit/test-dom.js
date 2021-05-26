@@ -18,9 +18,8 @@ import * as dom from '../../src/dom';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
-import {setScopeSelectorSupportedForTesting} from '../../src/core/dom/css';
+import {setScopeSelectorSupportedForTesting} from '../../src/core/dom/css-selectors';
 import {setShadowDomSupportedVersionForTesting} from '../../src/core/dom/web-components';
-import {toArray} from '../../src/core/types/array';
 
 describes.sandboxed('DOM', {}, (env) => {
   afterEach(() => {

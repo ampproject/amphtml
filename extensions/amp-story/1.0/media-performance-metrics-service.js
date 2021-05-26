@@ -22,7 +22,7 @@ import {
 import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/core/constants/enums';
 import {dev} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {lastChildElement, matches} from '../../../src/core/dom/query';
 
 import {registerServiceBuilder} from '../../../src/service';

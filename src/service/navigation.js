@@ -18,7 +18,7 @@ import {Services} from '../services';
 import {closestAncestorElementBySelector} from '../core/dom/query';
 import {dev, user, userAssert} from '../log';
 import {dict} from '../core/types/object';
-import {escapeCssSelectorIdent} from '../core/dom/css';
+import {escapeCssSelectorIdent} from '../core/dom/css-selectors';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
 import {isIframed, openWindowDialog, tryFocus} from '../dom';
