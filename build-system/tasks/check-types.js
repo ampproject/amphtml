@@ -235,6 +235,7 @@ const TYPE_CHECK_TARGETS = {
 
 /**
  * Produces a list of extern glob patterns from a list of source glob patterns.
+ * ex. ['src/core/** /*.js'] => ['src/core/** /*.extern.js']
  * @param {!Array<string>} srcGlobs
  * @return {!Array<string>}
  */
