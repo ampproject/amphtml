@@ -15,7 +15,7 @@
  */
 
 import {macroTask} from '../../../../../testing/yield';
-import {streamResponseToWriter} from '../../../../..src/utils/stream-response';
+import {streamResponseToWriter} from '../../../../../src/core/dom/stream';
 
 const chunk1 = `
  <!doctype html>

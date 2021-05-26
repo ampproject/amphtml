@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DetachedDomStream} from '../../../../../src/utils/detached-dom-stream';
+import {DetachedDomStream} from '../../../../../src/core/dom/stream';
 
 describes.fakeWin('DOM - stream - DetachedDomStream', {amp: true}, (env) => {
   let win;
