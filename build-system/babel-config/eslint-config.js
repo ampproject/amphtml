@@ -29,6 +29,7 @@ function getEslintConfig() {
       targets: {esmodules: true},
     },
   ];
+
   return {
     compact: false,
     presets: [presetEnv],
