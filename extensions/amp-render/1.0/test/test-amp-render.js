@@ -538,7 +538,6 @@ describes.realWin(
       `;
       doc.body.appendChild(element);
 
-      await element.buildInternal();
       await waitFor(() => {
         const div = element.querySelector(`[placeholder]`);
         return div && div.textContent;
@@ -547,9 +546,9 @@ describes.realWin(
 
       expect(placeholder.textContent).to.equal('Loading data');
 
+      await element.buildInternal();
       fetchStub.resolves({name: 'Joe'});
-      const text = await getRenderedData();
-      expect(text).to.equal('Hello Joe');
+      await waitForText(element, 'Hello Joe');
       expect(fetchStub).to.be.calledOnce;
     });
 
