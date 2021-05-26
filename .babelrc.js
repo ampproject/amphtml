@@ -18,6 +18,7 @@
  * @fileoverview This is consumed only by the linter, which relies on plugins
  * that read from `./.babelrc` without option to override. It is not used in
  * compilation directly; see `build-system/babel-config`.
+ * See https://github.com/HeroProtagonist/eslint-plugin-module-resolver/pull/172
  */
 
 const {
