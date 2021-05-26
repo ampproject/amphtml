@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {mod} from '../../../src/utils/math';
+import {mod} from '../../../src/core/math';
 
 /**
  * @enum {number}

@@ -29,7 +29,7 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
-import {mod} from '../../../src/utils/math';
+import {mod} from '../../../src/core/math';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {toArray} from '../../../src/core/types/array';
 

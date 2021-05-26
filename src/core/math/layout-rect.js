@@ -15,6 +15,15 @@
  */
 
 /**
+ * TODO(rcebulko): Migrate the actual ViewportInterface into core or an extern.
+ * @typedef {{
+ *   getHeight: function(this:ViewportInterfaceDef):number,
+ *   getWidth: function(this:ViewportInterfaceDef):number,
+ * }}
+ */
+let ViewportInterfaceDef;
+
+/**
  * The structure that combines position and size for an element. The exact
  * interpretation of position and size depends on the use case.
  *
@@ -166,7 +175,7 @@ export function rectIntersection(var_args) {
  * Returns the position of r2 relative to r1
  * @param {!LayoutRectDef} r1
  * @param {!LayoutRectDef} r2
- * @return {RelativePositions}
+ * @return {!RelativePositions}
  */
 export function layoutRectsRelativePos(r1, r2) {
   if (r1.top < r2.top) {
@@ -182,9 +191,9 @@ export function layoutRectsRelativePos(r1, r2) {
  * Determines if any portion of a layoutBox would be onscreen in the given
  * viewport, when scrolled to the specified position.
  * @param {!LayoutRectDef} layoutBox
- * @param {!./service/viewport/viewport-interface.ViewportInterface} viewport
+ * @param {!ViewportInterfaceDef} viewport
  * @param {number} scrollPos
- * @return {RelativePositions}
+ * @return {!RelativePositions}
  */
 export function layoutPositionRelativeToScrolledViewport(
   layoutBox,

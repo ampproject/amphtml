@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpStoryComponentManager} from './amp-story-component-manager';
-import {AmpStoryPlayer} from './amp-story-player-impl';
-import {onDocumentReady} from '../core/document-ready';
-
-onDocumentReady(self.document, () => {
-  const manager = new AmpStoryComponentManager(self);
-  manager.loadPlayers();
-});
-
-globalThis.AmpStoryPlayer = AmpStoryPlayer;
+export {DetachedDomStream} from './detached';
+export {streamResponseToWriter} from './response';
+// TODO(#32693): Migrate DomTransformStream into core to finish the trio
