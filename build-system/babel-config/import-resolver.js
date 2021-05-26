@@ -29,8 +29,15 @@ function getImportResolver() {
       'alias': {
         // DO NOT ADD TO THIS
         '#core': './src/core',
-        '#extensions': './extensions',
-        '#polyfills': './src/polyfills',
+        '#third_party': './third_party',
+        // Below include paths slated to be updated. Leaving them commented for
+        // now so that each one can be added and its imports updated.
+        // '#polyfills': './src/polyfills',
+        // '#3p': './3p',
+        // '#ads': './ads',
+        // '#context': './src/context',
+        // '#preact': './src/preact',
+        // '#service': './src/service',
       },
     },
   ];
