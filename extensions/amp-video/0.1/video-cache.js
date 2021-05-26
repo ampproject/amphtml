@@ -16,7 +16,11 @@
 
 import {Services} from '../../../src/services';
 import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
-import {createElementWithAttributes, matches} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  matches,
+  removeElement,
+} from '../../../src/dom';
 import {extensionScriptInNode} from '../../../src/service/extension-script';
 import {toArray} from '../../../src/core/types/array';
 import {user} from '../../../src/log';
@@ -33,13 +37,17 @@ import {user} from '../../../src/log';
 export function fetchCachedSources(videoEl, win) {
   if (
     !extensionScriptInNode(win, 'amp-cache-url', '0.1') ||
-    !videoEl.querySelector('source[src]').getAttribute('src')
+    !(
+      videoEl.getAttribute('src') ||
+      videoEl.querySelector('source[src]').getAttribute('src')
+    )
   ) {
     user().error('AMP-VIDEO', 'Video cache not properly configured');
     return Promise.resolve();
   }
   const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
   const servicePromise = Services.cacheUrlServicePromiseForDoc(videoEl);
+  replaceSrcWithSourceElement(videoEl, win);
   const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
   return servicePromise
     .then((service) => service.createCacheUrl(videoUrl))
@@ -94,4 +102,35 @@ function applySourcesToVideo(videoEl, sources) {
       );
       videoEl.insertBefore(sourceEl, videoEl.firstChild);
     });
+}
+
+/**
+ * Moves the src attribute to a source element to enable playing from multiple
+ * sources: the cached ones and the fallback initial src.
+ * @param {!Element} videoEl
+ * @param {!Window} win
+ * @return {!Promise}
+ */
+function replaceSrcWithSourceElement(videoEl, win) {
+  if (!videoEl.hasAttribute('src')) {
+    return;
+  }
+  const sourceEl = win.document.createElement('source');
+  const srcAttr = videoEl.getAttribute('src');
+  sourceEl.setAttribute('src', srcAttr);
+
+  const typeAttr = videoEl.getAttribute('type');
+  if (typeAttr) {
+    sourceEl.setAttribute('type', typeAttr);
+  }
+
+  // Remove the src attr so the source children can play.
+  videoEl.removeAttribute('src');
+
+  // Remove all existing sources as they are never supposed to play for a video
+  // that has a src, cf https://html.spec.whatwg.org/#concept-media-load-algorithm
+  const sourceEls = toArray(videoEl.querySelectorAll('source'));
+  sourceEls.forEach((el) => removeElement(el));
+
+  videoEl.insertBefore(sourceEl, videoEl.firstChild);
 }
