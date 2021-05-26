@@ -18,6 +18,7 @@ import {Services} from '../../../src/services';
 import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 import {
   createElementWithAttributes,
+  iterateCursor,
   matches,
   removeElement,
 } from '../../../src/dom';
