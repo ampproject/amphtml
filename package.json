@@ -99,7 +99,7 @@
     "eslint-plugin-jasmine": "4.1.2",
     "eslint-plugin-jsdoc": "35.0.0",
     "eslint-plugin-local": "1.0.0",
-    "eslint-plugin-module-resolver": "1.2.0",
+    "eslint-plugin-module-resolver": "git+https://github.com/rcebulko/eslint-plugin-module-resolver.git",
     "eslint-plugin-notice": "0.9.10",
     "eslint-plugin-prettier": "3.4.0",
     "eslint-plugin-react": "7.23.2",

@@ -187,7 +187,10 @@ module.exports = {
     'local/unused-private-field': 2,
     'local/vsync': 0,
     'local/window-property-name': 2,
-    'module-resolver/use-alias': 2,
+    'module-resolver/use-alias': [
+      'error',
+      {'alias': getImportResolver().alias},
+    ],
     'no-alert': 2,
     'no-cond-assign': 2,
     'no-debugger': 2,

@@ -35,10 +35,9 @@ let aliasPaths = null;
  *   '#foo/': './src/foo/',
  *   '#bar/': './bar/',
  * }
- * @param forEslint
  * @return {!Object<string, string>}
  */
-function readJsconfigPaths(forEslint) {
+function readJsconfigPaths() {
   if (!aliasPaths) {
     const jsConfig = JSON.parse(fs.readFileSync(JSCONFIG_PATH, 'utf8'));
     aliasPaths = jsConfig.compilerOptions.paths;
@@ -49,7 +48,7 @@ function readJsconfigPaths(forEslint) {
   // TODO(rcebulko): Fork and fix path matching in plugin
   // Impact: import * from '#preact' works fine, but `eslint --fix` will not
   // replace '../../src/preact' with '#preact'
-  const stripSuffix = (s) => s.replace(/\/\*$/, forEslint ? '/' : '');
+  const stripSuffix = (s) => s.replace(/\/\*$/, '');
   const aliases = Object.entries(aliasPaths).map(([alias, [dest]]) => [
     stripSuffix(alias),
     stripSuffix(dest),
@@ -60,23 +59,21 @@ function readJsconfigPaths(forEslint) {
 
 /**
  * Import map configuration.
- * @param forEslint
  * @return {!Object}
  */
-function getImportResolver(forEslint) {
+function getImportResolver() {
   return {
     'root': ['.'],
-    'alias': readJsconfigPaths(forEslint),
+    'alias': readJsconfigPaths(),
   };
 }
 
 /**
  * Import resolver Babel plugin configuration.
- * @param forEslint
  * @return {!Array}
  */
-function getImportResolverPlugin(forEslint) {
-  return ['module-resolver', getImportResolver(forEslint)];
+function getImportResolverPlugin() {
+  return ['module-resolver', getImportResolver()];
 }
 
 module.exports = {getImportResolver, getImportResolverPlugin};
