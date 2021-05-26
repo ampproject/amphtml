@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {devAssert} from '../assert';
 import {isScopeSelectorSupported, prependSelectorsWith} from './css';
 
 /** @fileoverview Helper functions for DOM queries. */
@@ -150,8 +151,8 @@ export function closestNode(node, callback) {
  */
 export function closestAncestorElementBySelector(element, selector) {
   return element.closest
-    ? element.closest(selector);
-    : closest(element, (el) => matches(el, selector))
+    ? element.closest(selector)
+    : closest(element, (el) => matches(el, selector));
 }
 
 /**
@@ -185,7 +186,6 @@ export function ancestorElementsByTag(child, tagName) {
   tagName = tagName.toUpperCase();
   return ancestorElements(child, (el) => el.tagName == tagName);
 }
-
 
 /**
  * Finds the first child element that satisfies the callback.
@@ -263,7 +263,6 @@ export function childNodes(parent, callback) {
   }
   return nodes;
 }
-
 
 /**
  * Finds the first child element that has the specified attribute.
