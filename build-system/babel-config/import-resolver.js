@@ -15,7 +15,43 @@
  */
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
+
+let aliases = null;
+
+/**
+ * Reads import paths from jsconfig.json. This file is used by VSCode for
+ * Intellisense/auto-import. Rather than duplicate and require updating both
+ * files, we can read from it directly. JSConfig format looks like:
+ * { compilerOptions: { paths: {
+ *   '#foo/*': ['./src/foo/*'],
+ *   '#bar/*': ['./bar/*'],
+ * } } }
+ * This method outputs the necessary alias object for the module-resolver Babel
+ * plugin, which excludes the "/*" for each. The above paths would result in:
+ * {
+ *   '#foo': './src/foo',
+ *   '#bar': './bar',
+ * }
+ * @return {!Object<string, string>}
+ */
+function readJsconfigPaths() {
+  if (!aliases) {
+    const jsConfig = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../../jsconfig.json'), 'utf8')
+    );
+    const {paths} = jsConfig.compilerOptions;
+    console.log(paths);
+    console.log(Object.entries(paths));
+    aliases = {};
+    Object.entries(paths).forEach(([alias, [dest]]) => {
+      aliases[alias.replace(/\/\*$/, '')] = dest.replace(/\/\*$/, '');
+    });
+  }
+
+  return aliases;
+}
 
 /**
  * Plugin config for import mapping (in compilation only, not browser).
@@ -26,19 +62,15 @@ function getImportResolver() {
     'module-resolver',
     {
       'root': ['.'],
-      'alias': {
-        // DO NOT ADD TO THIS
-        '#core': './src/core',
-        '#third_party': './third_party',
-        // Below include paths slated to be updated. Leaving them commented for
-        // now so that each one can be added and its imports updated.
-        // '#polyfills': './src/polyfills',
-        // '#3p': './3p',
-        // '#ads': './ads',
-        // '#context': './src/context',
-        // '#preact': './src/preact',
-        // '#service': './src/service',
-      },
+      'alias': readJsconfigPaths(),
+      // Below include paths slated to be updated. Leaving them commented for
+      // now so that each one can be added and its imports updated.
+      // '#polyfills': './src/polyfills',
+      // '#3p': './3p',
+      // '#ads': './ads',
+      // '#context': './src/context',
+      // '#preact': './src/preact',
+      // '#service': './src/service',
     },
   ];
 }
