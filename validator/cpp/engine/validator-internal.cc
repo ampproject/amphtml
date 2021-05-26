@@ -115,7 +115,6 @@ ABSL_FLAG(bool, allow_module_nomodule, true,
 
 namespace amp::validator {
 
-constexpr char kAmpCacheRootUrl[] = "https://cdn.ampproject.org/";
 // Examples (note these are the same as kNomoduleLtsScriptSrcRe):
 // https://cdn.ampproject.org/lts/v0.js
 // https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
@@ -343,6 +342,10 @@ class ParsedHtmlTag {
     return !ExtensionScriptNameAttribute().empty();
   }
 
+  bool IsAmpCacheDomain(string_view src) const {
+    return StartsWith(src, "https://cdn.ampproject.org");
+  }
+
   bool IsAsyncScriptTag() const {
     return UpperName() == "SCRIPT" && GetAttr("async").has_value() &&
            GetAttr("src").has_value();
@@ -351,7 +354,7 @@ class ParsedHtmlTag {
   bool IsAmpRuntimeScript() const {
     const string_view src = GetAttr("src").value_or("");
     return IsAsyncScriptTag() && !IsExtensionScript() &&
-           StartsWith(src, kAmpCacheRootUrl) &&
+           IsAmpCacheDomain(src) &&
            (EndsWith(src, "/v0.js") || EndsWith(src, "/v0.mjs") ||
             EndsWith(src, "/v0.mjs?f=sxg"));
   }
