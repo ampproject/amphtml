@@ -155,9 +155,11 @@ const renderOldPageAttachmentUI = (pageEl, attachmentEl) => {
 const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
 
-  // amp-story-page-outlink requires an anchor element child. We can remove after we get a reference to it.
+  // amp-story-page-outlink requires an anchor element child for SEO and analytics optimisations.
   // amp-story-page-attachment uses this same codepath and allows an href attribute.
   const anchorChild = attachmentEl.querySelector('a');
+  // This is hidden and clicks are simulated from it when a remote attachment is clicked.
+  anchorChild && anchorChild.setAttribute('hidden', '');
 
   // Copy href to the element so it can be previewed on hover and long press.
   const attachmentHref =
