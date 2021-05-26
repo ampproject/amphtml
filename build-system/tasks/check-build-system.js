@@ -22,11 +22,13 @@ const {updateSubpackages} = require('../common/update-packages');
 
 /**
  * Helper that updates build-system subpackages so their types can be verified.
+ * Skips NPM checks during CI (already done while running each task).
  */
 async function updateBuildSystemSubpackages() {
   const packageFiles = globby.sync('build-system/tasks/*/package.json');
   for (const packageFile of packageFiles) {
-    await updateSubpackages(path.dirname(packageFile));
+    const packageDir = path.dirname(packageFile);
+    await updateSubpackages(packageDir, /* skipNpmChecks */ true);
   }
 }
 
