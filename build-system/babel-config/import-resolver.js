@@ -56,7 +56,7 @@ function readJsconfigPaths() {
 
 /**
  * Import map configuration.
- * @return {!Array<string|Object>}
+ * @return {!Object}
  */
 function getImportResolver() {
   return {
@@ -65,6 +65,10 @@ function getImportResolver() {
   };
 }
 
+/**
+ * Import resolver Babel plugin configuration.
+ * @return {!Array}
+ */
 function getImportResolverPlugin() {
   return ['module-resolver', getImportResolver()];
 }
