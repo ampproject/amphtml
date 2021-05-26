@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../../src/dom';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   CONSENT_ITEM_STATE,
@@ -25,7 +26,7 @@ import {CONSENT_STRING_TYPE} from '../../../../src/core/constants/consent-state'
 import {ConsentUI, consentUiClasses} from '../consent-ui';
 import {Services} from '../../../../src/services';
 import {dict} from '../../../../src/core/types/object';
-import {elementByTag} from '../../../../src/dom';
+import {elementByTag} from '../../../../src/core/dom/query';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,

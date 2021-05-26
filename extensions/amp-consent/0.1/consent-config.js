@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/dom';
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
-import {childElementByTag} from '../../../src/dom';
+import {childElementByTag} from '../../../src/core/dom/query';
 import {deepMerge, hasOwn, map} from '../../../src/core/types/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';

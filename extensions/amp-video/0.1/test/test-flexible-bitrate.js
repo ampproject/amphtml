@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {} from '../../../../src/dom';
 import '../flexible-bitrate';
 import {BitrateManager} from '../flexible-bitrate';
-import {childElementsByTag} from '../../../../src/dom';
+import {childElementsByTag} from '../../../../src/core/dom/query';
 import {toArray} from '../../../../src/core/types/array';
 import {toggleExperiment} from '../../../../src/experiments';
 

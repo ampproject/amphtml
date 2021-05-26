@@ -43,12 +43,15 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   ancestorElementsByTag,
   childElementByAttr,
+  closestAncestorElementBySelector,
+  matches,
+} from '../../../src/core/dom/query';
+import {
   createElementWithAttributes,
   iterateCursor,
   removeElement,
   tryFocus,
 } from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';

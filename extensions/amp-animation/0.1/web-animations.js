@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/dom';
 import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
 import {
   InternalWebAnimationRequestDef,
@@ -38,7 +39,7 @@ import {
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
@@ -51,6 +52,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
 import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 import {map} from '../../../src/core/types/object';
+
 import {parseCss} from './parsers/css-expr';
 
 /** @const {string} */

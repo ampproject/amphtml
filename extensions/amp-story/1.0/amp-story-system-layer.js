@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {} from '../../../src/dom';
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,
@@ -29,7 +30,11 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {closest, matches, scopedQuerySelector} from '../../../src/dom';
+import {
+  closest,
+  matches,
+  scopedQuerySelector,
+} from '../../../src/core/dom/query';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
@@ -41,7 +46,9 @@ import {dict} from '../../../src/core/types/object';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
+
 import {renderAsElement} from './simple-template';
+
 import {setImportantStyles} from '../../../src/style';
 import {toArray} from '../../../src/core/types/array';
 

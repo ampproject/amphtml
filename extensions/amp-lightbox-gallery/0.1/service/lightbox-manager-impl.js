@@ -31,9 +31,11 @@ import {
   childElementByAttr,
   closestAncestorElementBySelector,
   elementByTag,
-  iterateCursor,
-} from '../../../../src/dom';
+} from '../../../../src/core/dom/query';
+
 import {dev, devAssert, userAssert} from '../../../../src/log';
+
+import {iterateCursor} from '../../../../src/dom';
 import {map} from '../../../../src/core/types/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/core/types/array';

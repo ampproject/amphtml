@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/dom';
 import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   addAttributeAfterTimeout,
   removeAfterTimeout,
   updateHash,
 } from './utils';
-import {closest} from '../../../src/dom';
+import {closest} from '../../../src/core/dom/query';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {htmlFor} from '../../../src/static-template';
 import {observeContentSize} from '../../../src/utils/size-observer';

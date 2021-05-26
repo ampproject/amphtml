@@ -78,12 +78,11 @@ import {
   childElements,
   childNodes,
   closest,
-  isRTL,
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
+
 import {computedStyle, setImportantStyles, toggle} from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/core/types/function';
@@ -100,6 +99,8 @@ import {getMode, isModeDevelopment} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
+import {isRTL, whenUpgradedToCustomElement} from '../../../src/dom';
+
 import {parseQueryString} from '../../../src/core/types/string/url';
 import {
   removeAttributeInMutate,

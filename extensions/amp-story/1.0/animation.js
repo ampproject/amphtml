@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/dom';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   PRESET_OPTION_ATTRIBUTES,
@@ -37,7 +38,11 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '../../../src/core/types/object';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/core/dom/query';
+
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 const TAG = 'AMP-STORY';

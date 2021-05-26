@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/dom';
 import {
   MEDIA_LOAD_FAILURE_SRC_PROPERTY,
   listen,
@@ -22,7 +23,8 @@ import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/core/constants/enums';
 import {dev} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {lastChildElement, matches} from '../../../src/dom';
+import {lastChildElement, matches} from '../../../src/core/dom/query';
+
 import {registerServiceBuilder} from '../../../src/service';
 import {urls} from '../../../src/config';
 

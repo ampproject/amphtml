@@ -28,14 +28,15 @@ import {
   childElementsByAttr,
   childElementsByTag,
   elementByTag,
-  isJsonScriptTag,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
+
 import {dev, user, userAssert} from '../../../src/log';
+
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
+import {isJsonScriptTag, removeElement} from '../../../src/dom';
 import {parseJson, tryParseJson} from '../../../src/core/types/object/json';
 
 const TAG = 'amp-next-page';

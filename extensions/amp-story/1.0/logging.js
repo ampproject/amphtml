@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {} from '../../../src/dom';
 import {LogLevel, devAssert} from '../../../src/log';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {scopedQuerySelectorAll} from '../../../src/core/dom/query';
 import {tryResolve} from '../../../src/core/data-structures/promise';
 
 /** @typedef {function(!Element): (boolean|!Promise<boolean>)} */

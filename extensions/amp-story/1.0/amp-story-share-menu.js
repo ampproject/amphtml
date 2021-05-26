@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/dom';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -30,7 +31,7 @@ import {Keys} from '../../../src/core/constants/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './amp-story-share';
-import {closest} from '../../../src/dom';
+import {closest} from '../../../src/core/dom/query';
 import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';

@@ -26,11 +26,12 @@
  * </code>
  */
 
+import {} from '../../../src/dom';
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {isPrerenderActivePage} from './prerender-active-page';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {scopedQuerySelectorAll} from '../../../src/core/dom/query';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid

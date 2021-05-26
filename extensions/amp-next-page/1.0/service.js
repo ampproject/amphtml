@@ -26,22 +26,26 @@ import {VisibilityState} from '../../../src/core/constants/visibility-state';
 import {
   childElementByAttr,
   childElementsByTag,
-  insertAtStart,
-  isJsonScriptTag,
-  removeChildren,
-  removeElement,
   scopedQuerySelector,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
+
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {findIndex, toArray} from '../../../src/core/types/array';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {
+  insertAtStart,
+  isJsonScriptTag,
+  removeChildren,
+  removeElement,
+} from '../../../src/dom';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
+
 import {setStyles, toggle} from '../../../src/style';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';

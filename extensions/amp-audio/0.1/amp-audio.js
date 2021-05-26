@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/dom';
 import {
   EMPTY_METADATA,
   parseFavicon,
@@ -24,7 +25,7 @@ import {
 } from '../../../src/mediasession-helper';
 import {Layout, isLayoutSizeFixed} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';

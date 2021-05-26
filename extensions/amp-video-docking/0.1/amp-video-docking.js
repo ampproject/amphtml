@@ -46,7 +46,7 @@ import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
+import {isRTL, removeElement} from '../../../src/dom';
 import {
   layoutRectEquals,
   rectIntersection,
@@ -59,6 +59,7 @@ import {
   setStyles,
   toggle,
 } from '../../../src/style';
+import {scopedQuerySelector} from '../../../src/core/dom/query';
 
 const TAG = 'amp-video-docking';
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {} from '../../../src/dom';
 import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
 import {
   Action,
@@ -26,7 +27,7 @@ import {AdvancementMode} from './story-analytics';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, matches} from '../../../src/dom';
+import {closest, matches} from '../../../src/core/dom/query';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getAmpdoc} from '../../../src/service';

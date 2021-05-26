@@ -17,8 +17,8 @@
 import * as Preact from '../../../src/preact';
 import {Option, Selector} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {
-  closestAncestorElementBySelector,
   createElementWithAttributes,
   toggleAttribute,
   tryFocus,

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
@@ -24,10 +25,11 @@ import {
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+
 import {setStyle, toggle} from '../../../src/style';
 
 /**

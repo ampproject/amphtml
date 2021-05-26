@@ -24,6 +24,11 @@ import {
   childElement,
   childElementByTag,
   childElementsByTag,
+} from '../../../src/core/dom/query';
+
+import {descendsFromStory} from '../../../src/utils/story';
+import {dev, devAssert, user} from '../../../src/log';
+import {
   dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
@@ -31,8 +36,6 @@ import {
   isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
-import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert, user} from '../../../src/log';
 import {fetchCachedSources} from './video-cache';
 import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';

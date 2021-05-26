@@ -26,8 +26,9 @@ import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Services} from '../../../src/services';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
+import {dev} from '../../../src/log';
 import {
-  closestAncestorElementBySelector,
   dispatchCustomEvent,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';

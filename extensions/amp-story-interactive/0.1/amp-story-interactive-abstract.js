@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/dom';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -35,7 +36,7 @@ import {
   buildInteractiveDisclaimer,
   tryCloseDisclaimer,
 } from './interactive-disclaimer';
-import {closest} from '../../../src/dom';
+import {closest} from '../../../src/core/dom/query';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';

@@ -23,11 +23,7 @@ import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
-import {
-  closestAncestorElementBySelector,
-  isRTL,
-  tryFocus,
-} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/core/types/function';
 import {descendsFromStory} from '../../../src/utils/story';
@@ -35,6 +31,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {handleAutoscroll} from './autoscroll';
 import {isExperimentOn} from '../../../src/experiments';
+import {isRTL, tryFocus} from '../../../src/dom';
 import {
   observeContentSize,
   unobserveContentSize,

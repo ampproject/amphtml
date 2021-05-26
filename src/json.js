@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {childElementsByTag, isJsonScriptTag} from './dom';
+import {childElementsByTag} from './core/dom/query';
+import {isJsonScriptTag} from './dom';
 import {parseJson} from './core/types/object/json';
 
 /**

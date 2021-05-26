@@ -22,11 +22,7 @@ import {Deferred} from '../../../src/core/data-structures/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/core/constants/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/core/data-structures/signals';
-import {
-  closestAncestorElementBySelector,
-  iterateCursor,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {debounce} from '../../../src/core/types/function';
 import {deepEquals, parseJson} from '../../../src/core/types/object/json';
@@ -45,6 +41,7 @@ import {
   toArray,
 } from '../../../src/core/types/array';
 import {getMode} from '../../../src/mode';
+import {iterateCursor, whenUpgradedToCustomElement} from '../../../src/dom';
 
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';

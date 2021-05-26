@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/dom';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -28,7 +29,7 @@ import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {closest, matches} from '../../../src/dom';
+import {closest, matches} from '../../../src/core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
