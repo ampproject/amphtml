@@ -160,9 +160,8 @@ const TYPE_CHECK_TARGETS = {
     externGlobs: ['build-system/externs/*.extern.js'],
   },
 
-  /*
-   * Ensures that all files in src and extensions pass the specified set of errors.
-   */
+  // Ensures that all files in src and extensions pass the specified set of
+  // errors.
   'low-bar': {
     entryPoints: ['src/amp.js'],
     extraGlobs: ['{src,extensions}/**/*.js'],
@@ -242,9 +241,11 @@ function externGlobsFromSrcGlobs(srcGlobs) {
  */
 async function typeCheck(targetName) {
   let target = TYPE_CHECK_TARGETS[targetName];
+  // Allow targets to be dynamically evaluated
   if (typeof target == 'function') {
     target = target();
   }
+  // Allow targets to be specified as just an array of source globs
   if (Array.isArray(target)) {
     target = {srcGlobs: target};
   }
