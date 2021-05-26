@@ -98,6 +98,8 @@ export const buildOpenAttachmentElementLinkIcon = (element) =>
  */
 export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
   if (isPageAttachmentUiV2ExperimentOn(pageEl.getAmpDoc().win)) {
+    // Outlinks can be an amp-story-page-outlink or the legacy version,
+    // an amp-story-page-attachment with an href.
     const isOutlink =
       attachmentEl.nodeName === 'AMP-STORY-PAGE-OUTLINK' ||
       attachmentEl.getAttribute('href');
@@ -107,6 +109,7 @@ export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
       return renderInlinePageAttachmentUi(pageEl, attachmentEl);
     }
   }
+  // This codepath can be removed after 'amp-story-page-attachment-ui-v2' is launched.
   return renderOldPageAttachmentUI(pageEl, attachmentEl);
 };
 
