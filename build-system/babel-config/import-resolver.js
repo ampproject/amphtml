@@ -18,6 +18,7 @@
 const fs = require('fs');
 const path = require('path');
 
+const JSCONFIG_PATH = path.join(__dirname, '../../jsconfig.json');
 let aliases = null;
 
 /**
@@ -38,16 +39,16 @@ let aliases = null;
  */
 function readJsconfigPaths() {
   if (!aliases) {
-    const jsConfig = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '../../jsconfig.json'), 'utf8')
-    );
+    const jsConfig = JSON.parse(fs.readFileSync(JSCONFIG_PATH, 'utf8'));
     const {paths} = jsConfig.compilerOptions;
-    console.log(paths);
-    console.log(Object.entries(paths));
-    aliases = {};
-    Object.entries(paths).forEach(([alias, [dest]]) => {
-      aliases[alias.replace(/\/\*$/, '')] = dest.replace(/\/\*$/, '');
-    });
+
+    const stripSuffix = (s) => s.replace(/\/\*$/, '');
+    aliases = Object.fromEntries(
+      Object.entries(paths).map(([alias, [dest]]) => [
+        stripSuffix(alias),
+        stripSuffix(dest),
+      ])
+    );
   }
 
   return aliases;
