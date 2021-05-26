@@ -343,7 +343,7 @@ class ParsedHtmlTag {
   }
 
   bool IsAmpCacheDomain(string_view src) const {
-    return StartsWith(src, "https://cdn.ampproject.org");
+    return StartsWith(src, "https://cdn.ampproject.org/");
   }
 
   bool IsAsyncScriptTag() const {
