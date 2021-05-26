@@ -150,7 +150,6 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
       })
       .catch((error) => {
         user().error(TAG, error);
-        return [];
       });
   }
 

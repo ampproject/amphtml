@@ -298,7 +298,8 @@ export class AnimationRunner {
       prefersReducedMotion(this.page_.ownerDocument.defaultView) &&
       this.page_.querySelector('amp-story-animation')
     ) {
-      if (this.isPreset_) {
+      console.log('applyFirstFrameORrFinish', this.presetTarget_);
+      if (this.presetTarget_) {
         return Promise.resolve();
       }
       return this.applyLastFrame();
@@ -350,6 +351,7 @@ export class AnimationRunner {
    */
   applyLastFrame() {
     this.runnerPromise_.then((runner) => {
+      runner.init();
       runner.finish();
     });
   }
@@ -609,6 +611,9 @@ export class AnimationManager {
 
   /** Starts all entrance animations for the page. */
   animateIn() {
+    if (prefersReducedMotion(this.ampdoc_.win)) {
+      return;
+    }
     this.getRunners_().forEach((runner) => runner.start());
   }
 
