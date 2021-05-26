@@ -55,25 +55,26 @@ function readJsconfigPaths() {
 }
 
 /**
- * Plugin config for import mapping (in compilation only, not browser).
+ * Import map configuration.
  * @return {!Array<string|Object>}
  */
 function getImportResolver() {
-  return [
-    'module-resolver',
-    {
-      'root': ['.'],
-      'alias': readJsconfigPaths(),
-      // Below include paths slated to be updated. Leaving them commented for
-      // now so that each one can be added and its imports updated.
-      // '#polyfills': './src/polyfills',
-      // '#3p': './3p',
-      // '#ads': './ads',
-      // '#context': './src/context',
-      // '#preact': './src/preact',
-      // '#service': './src/service',
-    },
-  ];
+  return {
+    'root': ['.'],
+    'alias': readJsconfigPaths(),
+    // Below include paths slated to be updated. Leaving them commented for
+    // now so that each one can be added and its imports updated.
+    // '#polyfills': './src/polyfills',
+    // '#3p': './3p',
+    // '#ads': './ads',
+    // '#context': './src/context',
+    // '#preact': './src/preact',
+    // '#service': './src/service',
+  };
 }
 
-module.exports = {getImportResolver};
+function getImportResolverPlugin() {
+  return ['module-resolver', getImportResolver()];
+}
+
+module.exports = {getImportResolver, getImportResolverPlugin};
