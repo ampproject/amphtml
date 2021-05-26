@@ -75,7 +75,7 @@ export const AttachmentTheme = {
  */
 const AttachmentType = {
   INLINE: 0,
-  REMOTE: 1,
+  OUTLINK: 1,
 };
 
 /**
@@ -115,15 +115,19 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     // URL will be validated and resolved based on the canonical URL if relative
     // when navigating.
-    const href =
-      this.element.getAttribute('href') || this.element.querySelector('a');
-    this.type_ = href ? AttachmentType.REMOTE : AttachmentType.INLINE;
+
+    // Outlinks can be an amp-story-page-outlink or the legacy version,
+    // amp-story-page-attachment with an href.
+    const isOutlink =
+      attachmentEl.nodeName === 'AMP-STORY-PAGE-OUTLINK' ||
+      attachmentEl.getAttribute('href');
+    this.type_ = isOutlink ? AttachmentType.OUTLINK : AttachmentType.INLINE;
 
     if (this.type_ === AttachmentType.INLINE) {
       this.buildInline_();
     }
 
-    if (this.type_ === AttachmentType.REMOTE) {
+    if (this.type_ === AttachmentType.OUTLINK) {
       if (isPageAttachmentUiV2ExperimentOn(this.win)) {
         this.buildRemoteV2_();
       } else {
@@ -317,7 +321,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
 
     // Closes the remote attachment drawer when navigation deeplinked to an app.
-    if (this.type_ === AttachmentType.REMOTE) {
+    if (this.type_ === AttachmentType.OUTLINK) {
       const ampdoc = this.getAmpDoc();
       ampdoc.onVisibilityChanged(() => {
         if (ampdoc.isVisible() && this.state_ === DrawerState.OPEN) {
@@ -342,7 +346,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     // Don't create a new history entry for remote attachment as user is
     // navigating away.
-    if (this.type_ !== AttachmentType.REMOTE) {
+    if (this.type_ !== AttachmentType.OUTLINK) {
       const currentHistoryState = /** @type {!Object} */ (
         getState(this.win.history)
       );
@@ -360,7 +364,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
     );
 
-    if (this.type_ === AttachmentType.REMOTE) {
+    if (this.type_ === AttachmentType.OUTLINK) {
       if (isPageAttachmentUiV2ExperimentOn(this.win)) {
         this.openRemoteV2_();
       } else {
