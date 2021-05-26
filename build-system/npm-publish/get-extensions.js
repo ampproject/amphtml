@@ -16,13 +16,12 @@
 
 /**
  * @fileoverview
- * Builds npm binaries for specified Bento components.
+ * Gets Bento components to publish.
  */
 
-const [extension] = process.argv.slice(2);
-const {timedExecOrDie} = require('../../../build-system/pr-check/utils');
-const {updatePackages} = require('../../../build-system/common/update-packages');
-
-updatePackages();
-timedExecOrDie(`amp build --extensions=${extension} --core_runtime_only`);
-timedExecOrDie(`amp dist --extensions=${extension} --core_runtime_only`);
+const bundles = require('../compile/bundles.config.extensions.json');
+const extensions = bundles
+  .filter((bundle) => bundle.options?.npm)
+  .map((bundle) => ({'extension': bundle.name}));
+console /*OK*/
+  .log(JSON.stringify(extensions));
