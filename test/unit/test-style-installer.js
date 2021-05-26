@@ -23,7 +23,7 @@ import {getStyle} from '../../src/style';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {isAnimationNone} from '../../testing/test-helper';
-import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
+import {setShadowDomSupportedVersionForTesting} from '../../src/core/dom/web-components';
 
 describes.sandboxed('Styles', {}, () => {
   describes.realWin('makeBodyVisible', {amp: true}, (env) => {

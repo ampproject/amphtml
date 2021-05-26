@@ -38,7 +38,7 @@ import {
   scopedQuerySelectorAll,
   toggleAttribute,
 } from '../../../src/dom';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,

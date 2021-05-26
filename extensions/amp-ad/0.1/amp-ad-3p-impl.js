@@ -31,7 +31,7 @@ import {
 } from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {computedStyle, setStyle} from '../../../src/style';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
@@ -54,7 +54,7 @@ import {
   intersectionEntryToJson,
   measureIntersection,
 } from '../../../src/utils/intersection';
-import {moveLayoutRect} from '../../../src/layout-rect';
+import {moveLayoutRect} from '../../../src/core/math/layout-rect';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,

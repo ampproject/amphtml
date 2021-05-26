@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {DomFingerprint} from './utils/dom-fingerprint';
+import {DomFingerprint} from './core/dom/fingerprint';
 import {Services} from './services';
 import {dict} from './core/types/object';
 import {experimentToggles, isCanary} from './experiments';

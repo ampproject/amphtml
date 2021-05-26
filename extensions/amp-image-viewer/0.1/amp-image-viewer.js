@@ -31,7 +31,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {boundValue, distance, magnitude} from '../../../src/utils/math';
+import {boundValue, distance, magnitude} from '../../../src/core/math';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -41,7 +41,7 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../../src/layout-rect';
+} from '../../../src/core/math/layout-rect';
 import {
   observeContentSize,
   unobserveContentSize,

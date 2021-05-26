@@ -19,8 +19,20 @@
  * @externs
  */
 
-/** @type {undefined} */
+/**
+ * Never exists; used as part of post-compilation checks to verify DCE.
+ * @type {undefined}
+ */
 window.__AMP_ASSERTION_CHECK;
 
-/** @type {undefined|function(this:Window,!Error,Element=)} */
+/**
+ * Global error reporting handler; only present in AMP pages
+ * @type {undefined|function(this:Window,!Error,Element=)}
+ */
 window.__AMP_REPORT_ERROR;
+
+/**
+ * Counter for the DomBaseWeakRef polyfill.
+ * @type {undefined|number}
+ */
+window.__AMP_WEAKREF_ID;

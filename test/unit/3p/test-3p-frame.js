@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {DomFingerprint} from '../../../src/core/dom/fingerprint';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {

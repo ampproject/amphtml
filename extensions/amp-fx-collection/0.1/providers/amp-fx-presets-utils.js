@@ -21,7 +21,7 @@
 
 import {FxType} from '../fx-type';
 import {Services} from '../../../../src/services';
-import {mapRange} from '../../../../src/utils/math';
+import {mapRange} from '../../../../src/core/math';
 import {userAssert} from '../../../../src/log';
 
 const MAX_MOBILE_WIDTH = 480;

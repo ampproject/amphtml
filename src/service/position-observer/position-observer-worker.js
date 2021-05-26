@@ -21,7 +21,7 @@ import {
   layoutRectLtwh,
   layoutRectsRelativePos,
   rectsOverlap,
-} from '../../layout-rect';
+} from '../../core/math/layout-rect';
 
 /** @enum {number} */
 export const PositionObserverFidelity = {

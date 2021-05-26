@@ -28,7 +28,7 @@ import {
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getData} from '../../../src/event-helper';
-import {getHtml} from '../../../src/get-html';
+import {getHtml} from '../../../src/core/dom/get-html';
 import {isExperimentOn} from '../../../src/experiments';
 import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 import {removeElement} from '../../../src/dom';

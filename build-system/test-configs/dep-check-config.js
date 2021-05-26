@@ -120,7 +120,7 @@ exports.rules = [
     filesMatching: 'ads/**/*.js',
     mustNotDependOn: 'src/**/*.js',
     allowlist: [
-      'ads/**->src/utils/dom-fingerprint.js',
+      'ads/**->src/core/dom/fingerprint.js',
       'ads/**->src/core/constants/consent-state.js',
       'ads/**->src/core/error/index.js',
       'ads/**->src/core/types/array.js',

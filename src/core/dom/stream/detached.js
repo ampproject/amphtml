@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert} from '../core/assert';
+import {devAssert} from '../../assert';
 
 export class DetachedDomStream {
   /**

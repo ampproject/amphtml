@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {LightboxGalleryContext} from './context';
-import {sequentialIdGenerator} from '../../../src/utils/id-generator';
+import {sequentialIdGenerator} from '../../../src/core/math/id-generator';
 import {
   useContext,
   useLayoutEffect,

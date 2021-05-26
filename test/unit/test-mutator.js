@@ -25,7 +25,7 @@ import {Signals} from '../../src/core/data-structures/signals';
 import {VisibilityState} from '../../src/core/constants/visibility-state';
 import {installInputService} from '../../src/input';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {layoutRectLtwh} from '../../src/core/math/layout-rect';
 
 /** @type {?Event|undefined} */
 const NO_EVENT = undefined;

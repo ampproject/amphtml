@@ -24,10 +24,10 @@ import {dict, map} from '../core/types/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isStoryDocument} from '../utils/story';
-import {layoutRectLtwh} from '../layout-rect';
+import {layoutRectLtwh} from '../core/math/layout-rect';
 import {throttle} from '../core/types/function';
 import {whenContentIniLoad} from '../ini-load';
-import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
+import {whenDocumentComplete, whenDocumentReady} from '../core/document-ready';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance

@@ -21,7 +21,7 @@ import {
   getExistingAds,
 } from '../ad-tracker';
 import {Services} from '../../../../src/services';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 
 describes.realWin('ad-tracker', {amp: true}, (env) => {
   let win, doc;

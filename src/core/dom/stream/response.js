@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
+import {Deferred} from '../../data-structures/promise';
 
 /**
  * Decodes readable stream from response and writes to given writeable stream.
@@ -23,7 +23,7 @@ import {Deferred} from '../core/data-structures/promise';
  * This function should be replaced with transform stream when well supported.
  * @param {!Window} win
  * @param {!Response} response
- * @param {!./detached-dom-stream.DetachedDomStream} writer
+ * @param {!./detached.DetachedDomStream} writer
  * @return {!Promise<boolean>} true if response has content, false if
  * the response is empty.
  */

@@ -20,7 +20,7 @@ import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';

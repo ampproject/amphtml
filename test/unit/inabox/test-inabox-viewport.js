@@ -26,7 +26,7 @@ import {
 } from '../../../src/inabox/inabox-viewport';
 import {installIframeMessagingClient} from '../../../src/inabox/inabox-iframe-messaging-client';
 import {installPlatformService} from '../../../src/service/platform-impl';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 
 const NOOP = () => {};
 

@@ -57,7 +57,7 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {computedStyle, setStyles} from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
 import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 import {getData} from '../../../src/event-helper';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';

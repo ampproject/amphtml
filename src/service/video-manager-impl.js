@@ -36,7 +36,7 @@ import {
 } from '../video-interface';
 import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
-import {clamp} from '../utils/math';
+import {clamp} from '../core/math';
 import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {createViewportObserver} from '../viewport-observer';
 import {dev, devAssert, user, userAssert} from '../log';
@@ -44,7 +44,7 @@ import {dict, map} from '../core/types/object';
 import {dispatchCustomEvent, removeElement} from '../dom';
 import {getInternalVideoElementFor, isAutoplaySupported} from '../utils/video';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
-import {isFiniteNumber} from '../types';
+import {isFiniteNumber} from '../core/types';
 import {measureIntersection} from '../utils/intersection';
 import {once} from '../core/types/function';
 import {registerServiceBuilderForDoc} from '../service';

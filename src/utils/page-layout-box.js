@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {layoutRectLtwh} from '../layout-rect';
+import {layoutRectLtwh} from '../core/math/layout-rect';
 import {toWin} from '../types';
 
 /**

@@ -21,7 +21,7 @@ import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {dev} from '../../../src/log';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';

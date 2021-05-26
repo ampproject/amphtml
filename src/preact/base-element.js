@@ -49,7 +49,7 @@ import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
 import {isElement} from '../core/types';
-import {sequentialIdGenerator} from '../utils/id-generator';
+import {sequentialIdGenerator} from '../core/math/id-generator';
 import {toArray} from '../core/types/array';
 
 /**

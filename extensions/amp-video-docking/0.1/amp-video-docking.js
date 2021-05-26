@@ -47,7 +47,10 @@ import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
-import {layoutRectEquals, rectIntersection} from '../../../src/layout-rect';
+import {
+  layoutRectEquals,
+  rectIntersection,
+} from '../../../src/core/math/layout-rect';
 import {once} from '../../../src/core/types/function';
 import {
   px,

@@ -28,7 +28,7 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {mod} from '../../../src/utils/math';
+import {mod} from '../../../src/core/math';
 
 const TAG = 'amp-selector';
 
