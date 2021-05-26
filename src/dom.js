@@ -49,16 +49,6 @@ export let CustomEventOptionsDef;
 const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
 
 /**
- * Asserts that name is just an alphanumeric word, and does not contain
- * advanced CSS selector features like attributes, psuedo-classes, class names,
- * nor ids.
- * @param {string} name
- */
-function assertIsName(name) {
-  devAssert(/^[\w-]+$/.test(name));
-}
-
-/**
  * Waits until the child element is constructed. Once the child is found, the
  * callback is executed.
  * @param {!Element} parent
