@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
+import {DetachedDomStream} from '../../../../../src/utils/detached-dom-stream';
 
-describes.fakeWin('DetachedDomStream', {amp: true}, (env) => {
+describes.fakeWin('DOM - stream - DetachedDomStream', {amp: true}, (env) => {
   let win;
   let chunkSpy;
   let endSpy;
