@@ -19,7 +19,7 @@ describes.endtoend(
   {
     fixture: 'amp-auto-lightbox/amp-auto-lightbox.html',
     initialRect: {width: 600, height: 600},
-    environments: ['single'],
+    environments: ['single', 'a4a-fie'],
     browsers: ['chrome'],
   },
   async (env) => {
