@@ -157,9 +157,8 @@ const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
 
   // amp-story-page-outlink requires an anchor element child for SEO and analytics optimisations.
   // amp-story-page-attachment uses this same codepath and allows an href attribute.
+  // This is hidden with css. Clicks are simulated from it when a remote attachment is clicked.
   const anchorChild = attachmentEl.querySelector('a');
-  // This is hidden and clicks are simulated from it when a remote attachment is clicked.
-  anchorChild && anchorChild.setAttribute('hidden', '');
 
   // Copy href to the element so it can be previewed on hover and long press.
   const attachmentHref =
