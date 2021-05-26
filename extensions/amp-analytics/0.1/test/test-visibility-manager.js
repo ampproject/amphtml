@@ -22,7 +22,10 @@ import {
   provideVisibilityManager,
 } from '../visibility-manager';
 import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
+import {
+  layoutRectLtwh,
+  rectIntersection,
+} from '../../../../src/core/math/layout-rect';
 import {setParentWindow} from '../../../../src/service';
 
 class IntersectionObserverStub {

@@ -49,7 +49,7 @@ import {isArray, toArray} from '../../../src/core/types/array';
 import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
 import {isObject} from '../../../src/core/types';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 import {map} from '../../../src/core/types/object';
 import {parseCss} from './parsers/css-expr';
 

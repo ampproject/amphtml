@@ -23,7 +23,7 @@ import {devAssert, initLogConstructor, setReportError} from '../../src/log';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
-import {onDocumentReady} from '../../src/document-ready';
+import {onDocumentReady} from '../../src/core/document-ready';
 import {parseUrlDeprecated} from '../../src/url';
 //TODO(@cramforce): For type. Replace with forward declaration.
 import {reportError} from '../../src/error-reporting';

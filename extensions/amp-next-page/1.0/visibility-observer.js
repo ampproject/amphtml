@@ -22,7 +22,7 @@ import {
   PositionObserver, // eslint-disable-line no-unused-vars
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
-import {RelativePositions} from '../../../src/layout-rect';
+import {RelativePositions} from '../../../src/core/math/layout-rect';
 import {Services} from '../../../src/services';
 import {devAssert} from '../../../src/log';
 import {throttle} from '../../../src/core/types/function';

@@ -16,7 +16,6 @@
 
 /**
  * Possible versions of Shadow DOM spec
- * @const
  * @enum {string}
  */
 export const ShadowDomVersion = {
@@ -26,7 +25,7 @@ export const ShadowDomVersion = {
 };
 
 /**
- * @type {ShadowDomVersion|undefined}
+ * @type {!ShadowDomVersion|undefined}
  * @visibleForTesting
  */
 let shadowDomSupportedVersion;
@@ -38,7 +37,7 @@ let shadowDomSupportedVersion;
 let shadowCssSupported;
 
 /**
- * @param {ShadowDomVersion|undefined} val
+ * @param {!ShadowDomVersion|undefined} val
  * @visibleForTesting
  */
 export function setShadowDomSupportedVersionForTesting(val) {
@@ -88,8 +87,8 @@ function isNative(func) {
 
 /**
  * Returns the supported version of Shadow DOM spec.
- * @param {?typeof Element=} opt_elementClass optional for testing
- * @return {ShadowDomVersion}
+ * @param {typeof Element=} opt_elementClass optional for testing
+ * @return {!ShadowDomVersion}
  */
 export function getShadowDomSupportedVersion(opt_elementClass) {
   if (shadowDomSupportedVersion === undefined) {
@@ -103,8 +102,8 @@ export function getShadowDomSupportedVersion(opt_elementClass) {
 /**
  * Returns shadow dom version.
  *
- * @param {?typeof Element=} element
- * @return {ShadowDomVersion}
+ * @param {!typeof Element} element
+ * @return {!ShadowDomVersion}
  */
 function getShadowDomVersion(element) {
   if (!!element.prototype.attachShadow) {

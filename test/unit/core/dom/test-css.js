@@ -19,7 +19,7 @@ import {
   prependSelectorsWith,
 } from '../../../../src/core/dom/css';
 
-describes.sandboxed('CSS', {}, () => {
+describes.sandboxed('DOM - CSS selectors', {}, () => {
   describe('escapeCssSelectorIdent', () => {
     it('should escape', () => {
       expect(escapeCssSelectorIdent('a b')).to.equal('a\\ b');

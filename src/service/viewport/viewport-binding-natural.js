@@ -22,7 +22,7 @@ import {
 } from './viewport-binding-def';
 import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
-import {layoutRectLtwh} from '../../layout-rect';
+import {layoutRectLtwh} from '../../core/math/layout-rect';
 
 const TAG_ = 'Viewport';
 

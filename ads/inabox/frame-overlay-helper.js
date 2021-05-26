@@ -17,7 +17,7 @@ import {
   LayoutRectDef,
   layoutRectFromDomRect,
   layoutRectLtwh,
-} from '../../src/layout-rect';
+} from '../../src/core/math/layout-rect';
 import {
   centerFrameUnderVsyncMutate,
   collapseFrameUnderVsyncMutate,

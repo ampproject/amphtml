@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as docready from '../../src/document-ready';
+import * as docready from '../../src/core/document-ready';
 import * as dom from '../../src/dom';
 import {
   AmpDocFie,
@@ -27,7 +27,7 @@ import {
   getShadowDomSupportedVersion,
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
-} from '../../src/web-components';
+} from '../../src/core/dom/web-components';
 import {Signals} from '../../src/core/data-structures/signals';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {

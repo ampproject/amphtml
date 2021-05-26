@@ -20,7 +20,7 @@ import {
   VisibilityDataDef,
   VisibilityInterface,
 } from '../../../src/inabox/host-services';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 
 /**
  * Translates between the AMP HostServices APIs and MRAID.

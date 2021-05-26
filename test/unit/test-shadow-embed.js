@@ -20,7 +20,7 @@ import {
   ShadowDomVersion,
   setShadowCssSupportedForTesting,
   setShadowDomSupportedVersionForTesting,
-} from '../../src/web-components';
+} from '../../src/core/dom/web-components';
 import {
   createShadowDomWriter,
   createShadowRoot,

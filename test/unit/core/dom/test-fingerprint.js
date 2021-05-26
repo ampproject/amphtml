@@ -17,9 +17,9 @@
 import {
   DomFingerprint,
   domFingerprintPlain,
-} from '../../../src/utils/dom-fingerprint';
+} from '../../../../src/core/dom/fingerprint';
 
-describes.realWin('domFingerprint', {}, (env) => {
+describes.realWin('DOM - fingerprint', {}, (env) => {
   let body;
   let div1;
   let ampAd;

@@ -820,8 +820,8 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
+      'src/core/dom/stream/response.js',
       'src/core/types/string/bytes.js',
-      'src/utils/stream-response.js',
     ],
   },
   'contentHeightChanged': {

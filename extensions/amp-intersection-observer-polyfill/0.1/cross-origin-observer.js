@@ -18,7 +18,7 @@ import {MessageType} from '../../../src/3p-frame-messaging';
 import {WindowInterface} from '../../../src/window-interface';
 import {getMode} from '../../../src/mode';
 import {iframeMessagingClientFor} from '../../../src/inabox/inabox-iframe-messaging-client';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 
 /**
  * Setup cross-origin iframe polyfill for AMP iframes, such as inabox.

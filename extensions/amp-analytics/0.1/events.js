@@ -26,9 +26,7 @@ import {deepMerge, dict, hasOwn} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
-import {isArray, isEnumValue} from '../../../src/core/types';
-
-import {isFiniteNumber} from '../../../src/types';
+import {isArray, isEnumValue, isFiniteNumber} from '../../../src/core/types';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';

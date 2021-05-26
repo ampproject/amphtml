@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {macroTask} from '../../../testing/yield';
-import {streamResponseToWriter} from '../../../src/utils/stream-response';
+import {macroTask} from '../../../../../testing/yield';
+import {streamResponseToWriter} from '../../../../../src/core/dom/stream';
 
 const chunk1 = `
  <!doctype html>
@@ -33,7 +33,7 @@ const chunk2 = `
  </html>
 `;
 
-describes.fakeWin('streamResponseToWriter', {}, (env) => {
+describes.fakeWin('DOM - stream - streamResponseToWriter', {}, (env) => {
   let writeSpy;
   let closeSpy;
   let mockWriter;

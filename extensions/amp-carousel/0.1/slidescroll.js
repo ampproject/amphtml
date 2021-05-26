@@ -29,7 +29,7 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getStyle, setStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber} from '../../../src/types';
+import {isFiniteNumber} from '../../../src/core/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
 import {

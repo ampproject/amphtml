@@ -26,7 +26,7 @@ import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../core/constants/visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../core/types/object';
-import {expandLayoutRect} from '../layout-rect';
+import {expandLayoutRect} from '../core/math/layout-rect';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';

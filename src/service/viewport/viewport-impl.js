@@ -22,7 +22,7 @@ import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrap
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
 import {VisibilityState} from '../../core/constants/visibility-state';
-import {clamp} from '../../utils/math';
+import {clamp} from '../../core/math';
 import {
   closestAncestorElementBySelector,
   getVerticalScrollbarWidth,
@@ -42,7 +42,7 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../layout-rect';
+} from '../../core/math/layout-rect';
 import {numeric} from '../../transition';
 import {tryResolve} from '../../core/data-structures/promise';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as DocumentReady from '../../../../src/document-ready';
+import * as DocumentReady from '../../../../src/core/document-ready';
 import {AmpSmartlinks} from '../amp-smartlinks';
 import {Linkmate} from '../linkmate';
 import {Services} from '../../../../src/services';

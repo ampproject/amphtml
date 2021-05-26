@@ -28,7 +28,7 @@ import {Xhr} from '../../src/service/xhr-impl';
 import {cancellation} from '../../src/error-reporting';
 import {createElementWithAttributes} from '../../src/dom';
 import {dev, user} from '../../src/log';
-import {isFiniteNumber} from '../../src/types';
+import {isFiniteNumber} from '../../src/core/types';
 
 describes.realWin('real-time-config service', {amp: true}, (env) => {
   let element;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
+import {DomBasedWeakRef} from '../../../src/core/dom/weakref';
 import {childElement, childElementsByTag} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';

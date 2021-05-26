@@ -16,7 +16,7 @@
 import {Deferred} from '../core/data-structures/promise';
 import {createViewportObserver} from '../viewport-observer';
 import {dict} from '../core/types/object';
-import {layoutRectFromDomRect} from '../layout-rect';
+import {layoutRectFromDomRect} from '../core/math/layout-rect';
 import {toWin} from '../types';
 
 /** @type {!WeakMap<!Element, !Deferred>|undefined} */

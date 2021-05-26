@@ -27,14 +27,17 @@ import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {boundValue, distance, magnitude} from '../../../src/utils/math';
+import {boundValue, distance, magnitude} from '../../../src/core/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
-import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
+import {
+  layoutRectFromDomRect,
+  layoutRectLtwh,
+} from '../../../src/core/math/layout-rect';
 import {numeric} from '../../../src/transition';
 import {
   observeContentSize,

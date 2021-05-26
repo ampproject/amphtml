@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isElement} from './core/types';
+import {isElement, isString} from '../types';
 
 /** @type {!Array<string>} */
 const excludedTags = ['script', 'style'];
@@ -76,14 +76,12 @@ export function getHtml(win, selector, attrs) {
  */
 function appendToResult(node, attrs, result) {
   const stack = [node];
-  const allowedAttrs = attrs.filter((attr) => {
-    return allowedAttributes.includes(attr);
-  });
+  const allowedAttrs = attrs.filter((attr) => allowedAttributes.includes(attr));
 
   while (stack.length > 0) {
     node = stack.pop();
 
-    if (typeof node === 'string') {
+    if (isString(node)) {
       result.push(node);
     } else if (node.nodeType === Node.TEXT_NODE) {
       result.push(node.textContent);
@@ -99,7 +97,7 @@ function appendToResult(node, attrs, result) {
 }
 
 /**
- *
+ * Returns true for allowed AMP tags and non-AMP tags except <script>/<style>
  * @param {!Element} node
  * @return {boolean}
  */
@@ -114,7 +112,7 @@ function isApplicableNode(node) {
 }
 
 /**
- *
+ * Constructs an open-tag with the provided attributes.
  * @param {!Element} node
  * @param {!Array<string>} attrs
  * @param {Array<string>} result
@@ -122,7 +120,7 @@ function isApplicableNode(node) {
 function appendOpenTag(node, attrs, result) {
   result.push(`<${node.tagName.toLowerCase()}`);
 
-  attrs.forEach(function (attr) {
+  attrs.forEach((attr) => {
     if (node.hasAttribute(attr)) {
       result.push(` ${attr}="${node.getAttribute(attr)}"`);
     }
