@@ -716,7 +716,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   beforeVisible() {
-    return this.maybeApplyFirstAnimationFrame();
+    return this.maybeApplyFirstAnimationFrameOrFinish();
   }
 
   /**
@@ -1276,8 +1276,8 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * @return {!Promise}
    */
-  maybeApplyFirstAnimationFrame() {
-    return Promise.resolve(this.animationManager_?.applyFirstFrame());
+  maybeApplyFirstAnimationFrameOrFinish() {
+    return Promise.resolve(this.animationManager_?.applyFirstFrameOrFinish());
   }
 
   /**

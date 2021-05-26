@@ -37,6 +37,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '../../../src/core/types/object';
+import {prefersReducedMotion} from '../../../src/utils/media-query-props';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
@@ -285,6 +286,24 @@ export class AnimationRunner {
         fill: 'forwards',
       })
     );
+  }
+
+  /**
+   * Applies the first animation frame if the animation will be played,
+   * or finishes if prefers-reduced-motion.
+   * @return {!Promise}
+   */
+  applyFirstFrameOrFinish() {
+    if (
+      prefersReducedMotion(this.page_.ownerDocument.defaultView) &&
+      this.page_.querySelector('amp-story-animation')
+    ) {
+      if (this.isPreset_) {
+        return Promise.resolve();
+      }
+      return this.applyLastFrame();
+    }
+    return this.applyFirstFrame();
   }
 
   /**
@@ -570,14 +589,16 @@ export class AnimationManager {
    * Applies first frame to target element before starting animation.
    * @return {!Promise}
    */
-  applyFirstFrame() {
+  applyFirstFrameOrFinish() {
     return Promise.all(
-      this.getOrCreateRunners_().map((runner) => runner.applyFirstFrame())
+      this.getOrCreateRunners_().map((runner) =>
+        runner.applyFirstFrameOrFinish()
+      )
     );
   }
 
   /**
-   * Applies first frame to target element before starting animation.
+   * Applies last frame to target element before starting animation.
    * @return {!Promise}
    */
   applyLastFrame() {
@@ -634,7 +655,7 @@ export class AnimationManager {
    * @private
    */
   getRunners_() {
-    return devAssert(this.runners_, 'Executed before applyFirstFrame');
+    return devAssert(this.runners_, 'Executed before applyFirstFrameOrFinish');
   }
 
   /**
