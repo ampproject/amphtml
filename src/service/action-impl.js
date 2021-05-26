@@ -30,9 +30,10 @@ import {getMode} from '../mode';
 import {isAmp4Email} from '../format';
 import {isArray, toArray} from '../core/types/array';
 import {isEnabled} from '../dom';
-import {isFiniteNumber, toWin} from '../types';
+import {isFiniteNumber} from '../core/types';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error-reporting';
+import {toWin} from '../types';
 
 /** @const {string} */
 const TAG_ = 'Action';

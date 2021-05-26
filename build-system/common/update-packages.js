@@ -269,12 +269,13 @@ function updatePackages() {
  * 2. During local development, do an incremental install if necessary.
  * 3. Since install scripts can be async, `await` the process object.
  * 4. Since script output is noisy, capture and print the stderr if needed.
- * 5. During CI, make sure that the package files were correctly updated.
+ * 5. During CI, if not skipped, ensure package files were correctly updated.
  *
  * @param {string} dir
+ * @param {boolean=} skipNpmChecks
  * @return {Promise<void>}
  */
-async function updateSubpackages(dir) {
+async function updateSubpackages(dir, skipNpmChecks = false) {
   const results = checkDependencies.sync({packageDir: dir});
   const relativeDir = path.relative(process.cwd(), dir);
   if (results.depsWereOk) {
@@ -289,7 +290,7 @@ async function updateSubpackages(dir) {
       throw new Error('Installation failed');
     }
   }
-  if (isCiBuild()) {
+  if (isCiBuild() && !skipNpmChecks) {
     runNpmChecks(dir);
   }
 }

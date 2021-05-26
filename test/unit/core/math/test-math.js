@@ -22,9 +22,9 @@ import {
   mapRange,
   mod,
   sum,
-} from '../../../src/utils/math';
+} from '../../../../src/core/math';
 
-describes.sandboxed('utils/math', {}, () => {
+describes.sandboxed('math', {}, () => {
   describe('mapRange', () => {
     it('should map a number to the current value', () => {
       expect(mapRange(5, 0, 10, 40, 80)).to.equal(60);

@@ -23,7 +23,7 @@ import {
   createIframeWithMessageStub,
   expectPostMessage,
 } from '../../../../testing/iframe';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {

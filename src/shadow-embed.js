@@ -21,7 +21,7 @@ import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
-} from './web-components';
+} from './core/dom/web-components';
 import {dev, devAssert} from './log';
 import {escapeCssSelectorIdent} from './core/dom/css';
 import {installCssTransformer} from './style-installer';
