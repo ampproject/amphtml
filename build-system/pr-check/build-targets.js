@@ -153,7 +153,6 @@ const targetMatchers = {
     if (isOwnersFile(file)) {
       return false;
     }
-
     return (
       file == 'build-system/tasks/check-build-system.js' ||
       file == 'build-system/tsconfig.json' ||
