@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-// src/polyfills.js must be the first import.
-import '../polyfills';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 
-import {draw3p, init} from '../integration-lib';
-import {register} from '../3p';
+export class AmpAdNetworkDianomiImpl extends AmpA4A {
+  /** @override */
+  getAdUrl() {
+    const id = this.element.getAttribute('data-request-param-id');
+    return `https://www.dianomi.com/smartads.pl?format=a4a&id=${id}`;
+  }
+}
 
-import {dianomi} from '../../ads/vendors/dianomi';
-
-init(window);
-register('dianomi', dianomi);
-
-window.draw3p = draw3p;
+AMP.extension('amp-ad-network-dianomi-impl', '0.1', (AMP) => {
+  AMP.registerElement('amp-ad-network-dianomi-impl', AmpAdNetworkDianomiImpl);
+});

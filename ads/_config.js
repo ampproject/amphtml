@@ -423,8 +423,6 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'dianomi': {},
-
   'digiteka': {
     renderStartImplemented: true,
   },

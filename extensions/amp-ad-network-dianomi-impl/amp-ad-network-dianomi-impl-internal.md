@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,28 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Dianomi
+# amp-ad-network-dianomi-impl
 
-## Example
+The Dianomi fast fetch implementation for serving AMP ads.
+
+#### Example configuration:
 
 ```html
 <amp-ad
   width="400"
   height="450"
   type="dianomi"
-  data-width="400"
-  data-height="450"
-  data-request-param-id="5512"
->
+  data-request-param-id="5519">
 </amp-ad>
 ```
-
-## Configuration
-
-For configuration semantics, please [contact Dianomi](https://www.dianomi.com).
-
-Supported parameters:
-
--   `data-request-param-id`
--   `data-width`
--   `data-height`
