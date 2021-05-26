@@ -101,7 +101,8 @@ const getExtensionSrcPaths = () =>
  * about. This is a list of source files to include in type-checking. For any
  * glob pattern ending in *.js, externs are picked up following the same pattern
  * but ending in *.extern.js. Note this only applies to *.js globs, and not
- * specific filenames.
+ * specific filenames. If just an array of strings is provided instead of an
+ * object, it is treated as srcGlobs.
  *
  * @type {Object<string, Array<string>|Object|function():Object>}
  */
