@@ -33,6 +33,7 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp lint');
   timedExecOrDie('amp prettify');
   timedExecOrDie('amp ava');
+  timedExecOrDie('amp check-build-system');
   timedExecOrDie('amp babel-plugin-tests');
   timedExecOrDie('amp caches-json');
   timedExecOrDie('amp dev-dashboard-tests');
