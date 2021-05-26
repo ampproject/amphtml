@@ -573,7 +573,6 @@ describes.realWin(
       doc.body.appendChild(element);
 
       await whenUpgradedToCustomElement(element);
-      await element.buildInternal();
 
       fetchStub.rejects();
       await element.buildInternal();
