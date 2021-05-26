@@ -129,8 +129,8 @@ function replaceSrcWithSourceElement(videoEl, win) {
 
   // Remove all existing sources as they are never supposed to play for a video
   // that has a src, cf https://html.spec.whatwg.org/#concept-media-load-algorithm
-  const sourceEls = toArray(videoEl.querySelectorAll('source'));
-  sourceEls.forEach((el) => removeElement(el));
+  const sourceEls = videoEl.querySelectorAll('source');
+  iterateCursor(sourceEls, (el) => removeElement(el));
 
   videoEl.insertBefore(sourceEl, videoEl.firstChild);
 }
