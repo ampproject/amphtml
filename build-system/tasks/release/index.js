@@ -295,31 +295,24 @@ async function fetchAmpSw_(flavorType, tempDir) {
  * @param {string} outputDir full directory path to emplace artifacts in.
  */
 async function populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir) {
-  const rtvCopyingPromise = async (rtvPrefix) => {
+  const rtvCopyingPromise = async (/** @type {string} */ rtvPrefix) => {
     const rtvNumber = `${rtvPrefix}${VERSION}`;
     const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
     await fs.ensureDir(rtvPath);
     return fs.copy(path.join(tempDir, flavorType, 'dist'), rtvPath);
   };
 
-  const rtvCopyingPromises = [];
-  rtvCopyingPromises.push(
-    ...rtvPrefixes.map((rtvPrefix) =>
-      rtvCopyingPromise(rtvPrefix)
-    )
-  );
+  const rtvCopyingPromises = rtvPrefixes.map(rtvCopyingPromise);
 
   // Special handling for INABOX experiments when compiling the base flavor.
   // INABOX experiments need to have their control population be created from
   // the base flavor.
   if (flavorType == 'base') {
-    Object.entries(experimentsConfig)
-      .filter(([, {environment}]) => environment == 'INABOX')
-      .forEach(([experimentFlavor]) => {
-        const rtvPrefix =
-          EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${experimentFlavor}-control`];
-        rtvCopyingPromises.push(rtvCopyingPromise(rtvPrefix));
-      });
+    rtvCopyingPromises.push(
+      ...Object.entries(experimentsConfig)
+        .filter(([, {environment}]) => environment == 'INABOX')
+        .map(([experimentFlavor]) => EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${experimentFlavor}-control`])
+        .map(rtvCopyingPromise));
   }
   await Promise.all(rtvCopyingPromises);
 
