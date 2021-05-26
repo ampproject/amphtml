@@ -843,8 +843,9 @@ descendant_tag_list: {
   tag: "VKERN"
   tag: "WBR"
 }
-tags: {  # <amp-story-page-attachment> with href. 
-  # Legacy version of <amp-story-page-outlink>
+# <amp-story-page-attachment> with href.
+# Legacy version of <amp-story-page-outlink>.
+tags: {
   html_format: AMP
   tag_name: "AMP-STORY-PAGE-ATTACHMENT"
   spec_name: "amp-story-page-attachment[href]"
