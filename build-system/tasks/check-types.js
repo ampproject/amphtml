@@ -103,7 +103,7 @@ const getExtensionSrcPaths = () =>
  * but ending in *.extern.js. Note this only applies to *.js globs, and not
  * specific filenames.
  *
- * @type {Object<string, Object|function():Object>}
+ * @type {Object<string, Array<string>|Object|function():Object>}
  */
 const TYPE_CHECK_TARGETS = {
   // Below are targets containing individual directories which are fully passing
