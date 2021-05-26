@@ -295,7 +295,7 @@ function maybeToEsmName(name) {
  * @param {string} name
  * @return {string}
  */
-function npmMaybeToEsmName(name) {
+function maybeToNpmEsmName(name) {
   return argv.esm ? name.replace(/\.js$/, '.module.js') : name;
 }
 
@@ -873,8 +873,8 @@ module.exports = {
   compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
+  maybeToNpmEsmName,
   mkdirSync,
-  npmMaybeToEsmName,
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,

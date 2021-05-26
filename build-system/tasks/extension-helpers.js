@@ -25,8 +25,8 @@ const {
   doBuildJs,
   endBuildStep,
   maybeToEsmName,
+  maybeToNpmEsmName,
   mkdirSync,
-  npmMaybeToEsmName,
   watchDebounceDelay,
 } = require('./helpers');
 const {
@@ -616,8 +616,8 @@ function buildBinaries(extDir, binaries, options) {
       entryPoint,
       `${extDir}/dist`,
       Object.assign(options, {
-        toName: npmMaybeToEsmName(`${name}.max.js`),
-        minifiedName: npmMaybeToEsmName(`${name}.js`),
+        toName: maybeToNpmEsmName(`${name}.max.js`),
+        minifiedName: maybeToNpmEsmName(`${name}.js`),
         latestName: '',
         outputFormat: esm ? 'esm' : 'cjs',
         wrapper: '',
