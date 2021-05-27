@@ -72,9 +72,9 @@ const getAmpStateJson = (element, src) => {
 };
 
 /**
- * @param {?string} bindingValue
- * @param {!boolean} isFirstMutation
- * @returns {!boolean} Whether bind should evaluate and apply changes.
+ * @param {string} bindingValue
+ * @param {boolean} isFirstMutation
+ * @return {boolean} Whether bind should evaluate and apply changes.
  */
 const getUpdateValue = (bindingValue, isFirstMutation) => {
   if (!bindingValue || bindingValue === 'refresh') {
