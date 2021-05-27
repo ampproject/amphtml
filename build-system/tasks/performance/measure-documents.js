@@ -38,6 +38,9 @@ const {setupAdRequestHandler} = require('./ads-handler');
 // Require Puppeteer dynamically to prevent throwing error during CI
 let puppeteer;
 
+/**
+ * Lazy-requires the puppeteer module.
+ */
 function requirePuppeteer_() {
   puppeteer = require('puppeteer');
 }

@@ -29,7 +29,7 @@
     "./tasks/coverage-map/*",
     "./tasks/create-golden-css/*",
     "./tasks/css/*",
-    "./tasks/e2e/*", // 152 remaining type errors.
+    "./tasks/e2e/*",
     "./tasks/get-zindex/*",
     "./tasks/markdown-toc/*",
     // "./tasks/performance/*", // 35 remaining type errors.
@@ -44,15 +44,11 @@
   "exclude": [
     "**/node_modules",
     "**/*.test.js",
-    "tasks/dep-check.js", // JSDoc private used inside a function confuses TS.
-    "tasks/runtime-test/runtime-test-base.js", // TS does not like Object.assign.
     "common/check-package-manager.js",
     "server/app-index/test/test-html.js",
     "server/app-index/test/test-amphtml-helpers.js",
     "server/new-server/**/*",
-    "server/typescript-compile.js",
-    "test-configs/dep-check-config.js",
-    "tasks/e2e/helper.js",
+    "tasks/dep-check.js", // JSDoc private used inside a function confuses TS.
     "tasks/get-zindex/*"
   ]
 }

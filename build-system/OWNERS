@@ -10,5 +10,9 @@
       pattern: '{package.json,package-lock.json}',
       owners: [{name: 'ampproject/wg-infra', requestReviews: false}],
     },
+    {
+      pattern: 'tsconfig.json',
+      owners: [{name: 'rileyajones', notify: true}],
+    },
   ],
 }

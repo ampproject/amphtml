@@ -25,12 +25,18 @@ const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'validator-tests.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   timedExecOrDie('amp validator-webui');
   timedExecOrDie('amp validator');
   timedExecOrDie('amp validator-cpp');
 }
 
+/**
+ * Steps to run during PR builds.
+ */
 function prBuildWorkflow() {
   if (
     !buildTargetsInclude(

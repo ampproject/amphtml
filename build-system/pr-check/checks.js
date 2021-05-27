@@ -26,6 +26,9 @@ const {timedExecOrDie} = require('./utils');
 
 const jobName = 'checks.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   timedExecOrDie('amp presubmit');
   timedExecOrDie('amp check-invalid-whitespaces');
@@ -53,6 +56,7 @@ function pushBuildWorkflow() {
 }
 
 /**
+ * Steps to run during PR builds.
  * @return {Promise<void>}
  */
 async function prBuildWorkflow() {
