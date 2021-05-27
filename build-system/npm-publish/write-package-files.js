@@ -108,14 +108,13 @@ async function writePackageJson(extensionVersion) {
 }
 
 async function writeReactJs(extensionVersion) {
-  const content = 'module.exports = require(\'./dist/component-react\');'
+  const content = "module.exports = require('./dist/component-react');";
   try {
-    await writeFile(`extensions/${extension}/${extensionVersion}/react.js`, content);
-    log(
-      extension,
-      extensionVersion,
-      ': created react.js',
+    await writeFile(
+      `extensions/${extension}/${extensionVersion}/react.js`,
+      content
     );
+    log(extension, extensionVersion, ': created react.js');
   } catch (e) {
     log(e);
     process.exitCode = 1;
@@ -123,7 +122,7 @@ async function writeReactJs(extensionVersion) {
   }
 }
 async function main() {
-  for (const version of ['1.0', '2.0']) {    
+  for (const version of ['1.0', '2.0']) {
     if (await skip(version)) {
       continue;
     }
