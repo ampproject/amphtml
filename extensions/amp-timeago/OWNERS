@@ -4,7 +4,13 @@
 {
   rules: [
     {
-      owners: [{name: 'edhollinghurst'}],
+      owners: [{name: 'edhollinghurst'}, {name: 'wg-components'}],
+    },
+    {
+      pattern: 'validator-*.protoascii',
+      owners: [
+        {name: 'ampproject/wg-amp4email', notify: true, requestReviews: false},
+      ],
     },
   ],
 }
