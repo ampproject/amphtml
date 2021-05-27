@@ -377,7 +377,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
 
     if (this.type_ === AttachmentType.OUTLINK) {
-      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      if (
+        isPageAttachmentUiV2ExperimentOn(this.win) ||
+        this.element.parentElement.querySelector('amp-story-page-outlink')
+      ) {
         this.openRemoteV2_();
       } else {
         this.openRemote_();
@@ -400,14 +403,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         .querySelector('amp-story-page-outlink')
         ?.querySelector('a');
 
-      if (pageOutLinkChild) {
-        pageOutLinkChild.click();
-      }
       const pageAttachmentChild = this.element.parentElement
         ?.querySelector('.i-amphtml-story-page-open-attachment-host')
         .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
 
-      if (pageAttachmentChild) {
+      if (pageOutLinkChild) {
+        pageOutLinkChild.click();
+      } else if (pageAttachmentChild) {
         triggerClickFromLightDom(pageAttachmentChild, this.element);
       }
     };
