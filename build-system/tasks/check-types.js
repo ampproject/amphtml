@@ -78,7 +78,6 @@ const CORE_SRCS_GLOBS = [
   // Needed for CSS escape polyfill
   'third_party/css-escape/css-escape.js',
 ];
-const CORE_EXTERNS_GLOBS = ['src/core/**/*.extern.js'];
 
 /**
  * Generates a list of source file paths for extensions to type-check
@@ -97,7 +96,15 @@ const getExtensionSrcPaths = () =>
  * Properties besides `entryPoints` are passed on to `closureCompile` as
  * options. * Values may be objects or functions, as some require initialization
  * or filesystem access and shouldn't be run until needed.
- * @type {Object<string, Object|function():Object>}
+ *
+ * When updating type-check targets, `srcGlobs` is the primary value you care
+ * about. This is a list of source files to include in type-checking. For any
+ * glob pattern ending in *.js, externs are picked up following the same pattern
+ * but ending in *.extern.js. Note this only applies to *.js globs, and not
+ * specific filenames. If just an array of strings is provided instead of an
+ * object, it is treated as srcGlobs.
+ *
+ * @type {Object<string, Array<string>|Object|function():Object>}
  */
 const TYPE_CHECK_TARGETS = {
   // Below are targets containing individual directories which are fully passing
@@ -109,36 +116,22 @@ const TYPE_CHECK_TARGETS = {
     srcGlobs: ['src/amp-story-player/**/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-context': {
-    srcGlobs: ['src/context/**/*.js', ...CORE_SRCS_GLOBS],
-    externGlobs: ['src/context/**/*.extern.js', ...CORE_EXTERNS_GLOBS],
-  },
-  'src-core': {
-    srcGlobs: CORE_SRCS_GLOBS,
-    externGlobs: CORE_EXTERNS_GLOBS,
-  },
-  'src-examiner': {
-    srcGlobs: ['src/examiner/**/*.js'],
-  },
-  'src-experiments': {
-    srcGlobs: ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
-    externGlobs: ['src/experiments/**/*.extern.js', ...CORE_EXTERNS_GLOBS],
-  },
+  'src-context': ['src/context/**/*.js', ...CORE_SRCS_GLOBS],
+  'src-core': CORE_SRCS_GLOBS,
+  'src-examiner': ['src/examiner/**/*.js'],
+  'src-experiments': ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
   'src-inabox': {
     srcGlobs: ['src/inabox/**/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-polyfills': {
-    srcGlobs: [
-      'src/polyfills/**/*.js',
-      // Exclude fetch its dependencies are cleaned up/extracted to core.
-      '!src/polyfills/fetch.js',
-      ...CORE_SRCS_GLOBS,
-    ],
-    externGlobs: ['src/polyfills/**/*.extern.js', ...CORE_EXTERNS_GLOBS],
-  },
+  'src-polyfills': [
+    'src/polyfills/**/*.js',
+    // Exclude fetch its dependencies are cleaned up/extracted to core.
+    '!src/polyfills/fetch.js',
+    ...CORE_SRCS_GLOBS,
+  ],
   'src-preact': {
-    srcGlobs: ['src/preact/**/*.js'],
+    srcGlobs: ['src/preact/**/*.js', 'src/context/**/*.js', ...CORE_SRCS_GLOBS],
     warningLevel: 'QUIET',
   },
   'src-purifier': {
@@ -165,12 +158,11 @@ const TYPE_CHECK_TARGETS = {
   // bug for cherry-pick.
   'pride': {
     srcGlobs: PRIDE_FILES_GLOBS,
-    externGlobs: ['build-system/externs/*.extern.js', ...CORE_EXTERNS_GLOBS],
+    externGlobs: ['build-system/externs/*.extern.js'],
   },
 
-  /*
-   * Ensures that all files in src and extensions pass the specified set of errors.
-   */
+  // Ensures that all files in src and extensions pass the specified set of
+  // errors.
   'low-bar': {
     entryPoints: ['src/amp.js'],
     extraGlobs: ['{src,extensions}/**/*.js'],
@@ -232,14 +224,31 @@ const TYPE_CHECK_TARGETS = {
 };
 
 /**
+ * Produces a list of extern glob patterns from a list of source glob patterns.
+ * ex. ['src/core/** /*.js'] => ['src/core/** /*.extern.js']
+ * @param {!Array<string>} srcGlobs
+ * @return {!Array<string>}
+ */
+function externGlobsFromSrcGlobs(srcGlobs) {
+  return srcGlobs
+    .filter((glob) => glob.endsWith('*.js'))
+    .map((glob) => glob.replace(/\*\.js$/, '*.extern.js'));
+}
+
+/**
  * Performs closure type-checking on the target provided.
  * @param {string} targetName key in TYPE_CHECK_TARGETS
  * @return {!Promise<void>}
  */
 async function typeCheck(targetName) {
   let target = TYPE_CHECK_TARGETS[targetName];
+  // Allow targets to be dynamically evaluated
   if (typeof target == 'function') {
     target = target();
+  }
+  // Allow targets to be specified as just an array of source globs
+  if (Array.isArray(target)) {
+    target = {srcGlobs: target};
   }
 
   if (!target) {
@@ -254,6 +263,7 @@ async function typeCheck(targetName) {
   }
 
   const {entryPoints = [], srcGlobs = [], externGlobs = [], ...opts} = target;
+  externGlobs.push(...externGlobsFromSrcGlobs(srcGlobs));
 
   // If srcGlobs and externGlobs are defined, determine the externs/extraGlobs
   if (srcGlobs.length || externGlobs.length) {
