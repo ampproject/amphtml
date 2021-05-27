@@ -304,6 +304,8 @@ const forbiddenTermsGlobal = {
       'extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
+      'extensions/amp-form/0.1/amp-form.js', // References service defined in amp-form.
+      'extensions/amp-form/0.1/form-dirtiness.js', // References service defined in amp-form.
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',
@@ -818,8 +820,8 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
+      'src/core/dom/stream/response.js',
       'src/core/types/string/bytes.js',
-      'src/utils/stream-response.js',
     ],
   },
   'contentHeightChanged': {
@@ -868,6 +870,8 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/transport.js',
       'extensions/amp-web-push/0.1/iframehost.js',
       'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
+      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
+      'extensions/amp-image-slider/0.1/amp-image-slider.js',
     ],
   },
   '\\.getTime\\(\\)': {
@@ -1101,10 +1105,10 @@ function matchForbiddenTerms(srcFile, contents, terms) {
   return Object.entries(terms)
     .map(([term, messageOrDef]) => {
       const {
-        message,
         allowlist = null,
         checkInTestFolder = false,
         checkProse = false,
+        message,
       } = typeof messageOrDef === 'string'
         ? {message: messageOrDef}
         : messageOrDef;

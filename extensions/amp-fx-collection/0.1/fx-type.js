@@ -150,14 +150,14 @@ export function isValidTypeCombination(fxTypeA, fxTypeB) {
 
   const {
     observes: observesA,
-    translates: translatesA,
     opacity: opacityA,
+    translates: translatesA,
   } = FxBindings[fxTypeA];
 
   const {
     observes: observesB,
-    translates: translatesB,
     opacity: opacityB,
+    translates: translatesB,
   } = FxBindings[fxTypeB];
 
   // If they observe different signals, they're restricted.

@@ -36,7 +36,7 @@ function getLastExpectError() {
 /**
  * @param {*} actual
  * @param {string=} opt_message
- * @return {!chai.ExpectStatic}
+ * @return {!Chai.Assertion}
  */
 function expect(actual, opt_message) {
   if (!installed) {
@@ -136,14 +136,15 @@ const chaiMethodsAndProperties = [
 ];
 
 /**
- * @param {chai.ChaiStatic} chai
- * @param {chai.ChaiUtils} utils
+ * @param {Chai.ChaiStatic} chai
+ * @param {Chai.ChaiUtils} utils
  */
 function installWrappers(chai, utils) {
-  const {METHOD, PROPERTY, CHAINABLE_METHOD} = ChaiType;
+  const {CHAINABLE_METHOD, METHOD, PROPERTY} = ChaiType;
   const {Assertion} = chai;
 
   for (const {name, type, unsupported} of chaiMethodsAndProperties) {
+    /** @type {function(Chai.AssertionStatic): void} */
     const overwrite = unsupported
       ? overwriteUnsupported
       : overwriteAlwaysUseSuper(utils);
@@ -153,13 +154,14 @@ function installWrappers(chai, utils) {
         Assertion.overwriteMethod(name, overwrite);
         break;
       case PROPERTY:
-        Assertion.overwriteProperty(name, overwrite);
+        // TODO(#28387) cleanup this type.
+        Assertion.overwriteProperty(name, /** @type {*} */ (overwrite));
         break;
       case CHAINABLE_METHOD:
         Assertion.overwriteChainableMethod(
           name,
           overwrite,
-          inheritChainingBehavior
+          /** @type {() => any} */ (inheritChainingBehavior)
         );
         break;
       default:
@@ -169,24 +171,30 @@ function installWrappers(chai, utils) {
 }
 
 /**
- * @param {chai.ChaiUtils} utils
- * @return {function(chai.AssertionStatic): function(): any}
+ * @param {Chai.ChaiUtils} utils
+ * @return {function(Chai.AssertionStatic): function(): any}
  */
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
 
+  /**
+   * @param {Chai.AssertionStatic} _super
+   * @return {function(): ReturnType<Chai.AssertionStatic>}
+   */
   return function (_super) {
     return function () {
-      const obj = this._obj;
+      // @ts-ignore
+      const that = this;
+      const obj = that._obj;
       const isControllerPromise = obj instanceof ControllerPromise;
       if (!isControllerPromise) {
-        return _super.apply(this, arguments);
+        return _super.apply(that, arguments);
       }
       const {waitForValue} = obj;
       if (!waitForValue) {
         return obj.then((result) => {
-          flag(this, 'object', result);
-          return _super.apply(this, arguments);
+          flag(that, 'object', result);
+          return _super.apply(that, arguments);
         });
       }
 
@@ -201,10 +209,10 @@ function overwriteAlwaysUseSuper(utils) {
       const valueSatisfiesExpectation = (value) => {
         try {
           // Tell chai to use value as the subject of the expect chain.
-          flag(this, 'object', value);
+          flag(that, 'object', value);
 
           // Run the code that checks the condition.
-          _super.apply(this, arguments);
+          _super.apply(that, arguments);
 
           clearLastExpectError();
           // Let waitForValue know we are done.
@@ -216,41 +224,44 @@ function overwriteAlwaysUseSuper(utils) {
           lastExpectError = e;
           return false;
         } finally {
-          flag(this, 'object', resultPromise);
+          flag(that, 'object', resultPromise);
         }
       };
 
       const resultPromise = waitForValue(valueSatisfiesExpectation);
-      flag(this, 'object', resultPromise);
+      flag(that, 'object', resultPromise);
       return resultPromise;
     };
   };
 }
 
 /**
- * @param {chai.AssertionStatic} _super
+ * @param {Chai.AssertionStatic} _super
  * @return {function(): *}
  */
 function inheritChainingBehavior(_super) {
   return function () {
+    // @ts-ignore
     _super.apply(this, arguments);
   };
 }
 
 /**
- * @param {chai.AssertionStatic} _super
+ * @param {Chai.AssertionStatic} _super
  * @return {function(): *}
  */
 function overwriteUnsupported(_super) {
   return function () {
-    const obj = this._obj;
+    // @ts-ignore
+    const that = this;
+    const obj = that._obj;
     const isControllerPromise = obj instanceof ControllerPromise;
     if (isControllerPromise) {
       throw new Error(
         'ControllerPromise used with unsupported expectation. Await the Promise and expect the value.'
       );
     }
-    return _super.apply(this, arguments);
+    return _super.apply(that, arguments);
   };
 }
 
@@ -263,8 +274,8 @@ function installBrowserAssertions(_networkLogger) {
 }
 
 /**
- * @param {chai.ChaiStatic} chai
- * @param {chai.ChaiUtils} utils
+ * @param {Chai.ChaiStatic} chai
+ * @param {Chai.ChaiUtils} utils
  */
 function installBrowserWrappers(chai, utils) {
   const {Assertion} = chai;
@@ -272,18 +283,25 @@ function installBrowserWrappers(chai, utils) {
   // Assert that a request with a testUrl was sent
   // Example usage: await expect(testUrl).to.have.been.sent;
   utils.addProperty(Assertion.prototype, 'sent', async function () {
-    const url = this._obj;
+    // @ts-ignore
+    const that = this;
+    const url = that._obj;
     const requests = await networkLogger.getSentRequests(url);
-    this.assert(0 < requests.length, 'expected #{this} to have been sent');
+    that.assert(0 < requests.length, 'expected #{this} to have been sent');
   });
-  Assertion.overwriteProperty('sent', overwriteAlwaysUseSuper(utils));
+  Assertion.overwriteProperty(
+    'sent',
+    /** @type {any} */ (overwriteAlwaysUseSuper(utils))
+  );
 
   // Assert that a request was sent n number of times
   // Example usage: await expect(testUrl).to.have.sentCount(n);
   utils.addMethod(Assertion.prototype, 'sentCount', async function (count) {
-    const url = this._obj;
+    // @ts-ignore
+    const that = this;
+    const url = that._obj;
     const requests = await networkLogger.getSentRequests(url);
-    this.assert(
+    that.assert(
       count === requests.length,
       `expected #{this} to have been sent ${
         count == 1 ? 'once' : count + ' times'

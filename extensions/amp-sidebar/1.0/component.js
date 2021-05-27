@@ -41,13 +41,13 @@ import objstr from 'obj-str';
 function SidebarWithRef(
   {
     as: Comp = 'div',
-    side: sideProp,
-    onBeforeOpen,
-    onAfterOpen,
-    onAfterClose,
-    backdropStyle,
     backdropClassName,
+    backdropStyle,
     children,
+    onAfterClose,
+    onAfterOpen,
+    onBeforeOpen,
+    side: sideProp,
     ...rest
   },
   ref
@@ -185,9 +185,9 @@ export {Sidebar};
  * @return {PreactDef.Renderable}
  */
 export function SidebarToolbar({
+  children,
   toolbar: mediaQueryProp,
   toolbarTarget: toolbarTargetProp,
-  children,
   ...rest
 }) {
   const ref = useRef(null);

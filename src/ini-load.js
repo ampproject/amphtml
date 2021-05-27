@@ -132,7 +132,7 @@ export function whenContentIniLoadInOb(elementOrAmpDoc, opt_prerenderableOnly) {
           io.disconnect();
           const intersecting = [];
           for (let i = 0; i < entries.length; i++) {
-            const {target, isIntersecting} = entries[i];
+            const {isIntersecting, target} = entries[i];
             if (isIntersecting) {
               intersecting.push(target);
             }

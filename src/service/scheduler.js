@@ -244,7 +244,7 @@ export class Scheduler {
    */
   observed_(entries) {
     for (let i = 0; i < entries.length; i++) {
-      const {target, isIntersecting: isThisIntersecting} = entries[i];
+      const {isIntersecting: isThisIntersecting, target} = entries[i];
       const ampTarget = /** @type {!AmpElement} */ (target);
 
       const current = this.targets_.get(ampTarget);

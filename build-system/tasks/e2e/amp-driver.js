@@ -33,7 +33,7 @@ const HOST = 'http://localhost:8000';
 
 const EnvironmentBehaviorMap = {
   [AmpdocEnvironment.SINGLE]: {
-    ready(unusedController) {
+    ready() {
       return Promise.resolve();
     },
 
