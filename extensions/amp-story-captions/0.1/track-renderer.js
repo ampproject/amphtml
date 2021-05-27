@@ -18,7 +18,7 @@ import {toArray} from '../../../src/core/types/array';
 import {listen} from '../../../src/event-helper';
 
 // Class used for sections of text that is in the future (for ASR-style captions).
-const FUTURE_CUE_SECTION_CLASS = 'amp-video-captions-future';
+const FUTURE_CUE_SECTION_CLASS = 'amp-story-captions-future';
 
 /**
  * Parses WebVTT timestamps and returns the timestamp in seconds (from the start of the video).

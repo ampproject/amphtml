@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-amp-video-captions {
+amp-story-captions {
   white-space: pre-wrap;
 }
 
-.amp-video-captions-future {
+.amp-story-captions-future {
   color: gray;
 }

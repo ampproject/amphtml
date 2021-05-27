@@ -14,22 +14,22 @@
 # limitations under the license.
 #
 
-tags: {  # amp-video-captions
+tags: {  # amp-story-captions
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-video-captions"
+    name: "amp-story-captions"
     version: "0.1"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-video-captions>
+tags: {  # <amp-story-captions>
   html_format: AMP
-  tag_name: "AMP-VIDEO-CAPTIONS"
-  requires_extension: "amp-video-captions"
+  tag_name: "AMP-STORY-CAPTIONS"
+  requires_extension: "amp-story-captions"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-video-captions"
+  spec_url: "https://amp.dev/documentation/components/amp-story-captions"
   amp_layout: {
     supported_layouts: RESPONSIVE
   }
