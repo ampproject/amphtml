@@ -604,9 +604,9 @@ describes.realWin(
       expect(fallback.textContent).to.equal('Failed');
     });
 
-    it.only('should work with binding="always"', async () => {
+    it('should work with binding="always"', async () => {
       const rescanSpy = env.sandbox.spy();
-      const stub = env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
         rescan: rescanSpy,
         signals: () => {
           return {
@@ -639,8 +639,6 @@ describes.realWin(
       const {fast, update} = rescanSpy.getCall(0).args[2];
       expect(fast).to.be.true;
       expect(update).to.be.true;
-
-      // stub.restore();
     });
 
     it('should default to binding="refresh" when nothing is specified', async () => {
@@ -675,13 +673,13 @@ describes.realWin(
       await whenUpgradedToCustomElement(element);
       await element.buildInternal();
 
-      expect(rescanSpy).to.be.called;
+      expect(rescanSpy).to.be.calledOnce;
       const {fast, update} = rescanSpy.getCall(0).args[2];
       expect(fast).to.be.true;
       expect(update).to.be.false;
     });
 
-    it.only('should work with binding="refresh"', async () => {
+    it('should work with binding="refresh"', async () => {
       const rescanSpy = env.sandbox.spy();
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
         rescan: rescanSpy,
@@ -720,16 +718,7 @@ describes.realWin(
       expect(update).to.be.true;
     });
 
-    it.only('should not perform any updates when binding="no"', async () => {
-      // const rescanSpy = env.sandbox.spy();
-      // env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
-      //   rescan: rescanSpy,
-      // });
-
-      // const bindStub = env.sandbox
-      //   .stub(Services, 'bindForDocOrNull')
-      //   .callThrough();
-
+    it('should not perform any updates when binding="no"', async () => {
       env.sandbox
         .stub(BatchedJsonModule, 'batchFetchJsonFor')
         .resolves({name: 'Joe'});
@@ -751,42 +740,6 @@ describes.realWin(
 
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe 1+1=?');
-    });
-
-    it.skip('should work with binding="always"', async () => {
-      // const rescanSpy = env.sandbox.spy();
-      // env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
-      //   rescan: rescanSpy,
-      // });
-
-      // const bindStub = env.sandbox
-      //   .stub(Services, 'bindForDocOrNull')
-      //   .callThrough();
-
-      env.sandbox
-        .stub(BatchedJsonModule, 'batchFetchJsonFor')
-        .resolves({name: 'Joe'});
-
-      element = html`
-        <amp-render
-          binding="always"
-          src="https://example.com/data.json"
-          width="auto"
-          height="140"
-          layout="fixed-height"
-        >
-          <template type="amp-mustache">Hello {{name}}</template>
-        </amp-render>
-      `;
-      doc.body.appendChild(element);
-
-      await whenUpgradedToCustomElement(element);
-      await element.buildInternal();
-
-      // const text = await getRenderedData();
-      // await waitForText(element, 'Hello Joe');
-      // console.log(text);
-      // expect(text).to.equal('Hello Joe 1+1=2');
     });
   }
 );
