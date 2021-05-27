@@ -33,7 +33,7 @@ const {log, logLocalDev} = require('../common/logging');
 /**
  * @typedef {{
  *   name: string,
- *   deps: ?Array<!Object<string, !ModuleDef>>
+ *   deps: !Array<string>
  * }}
  */
 let ModuleDef;
@@ -69,22 +69,22 @@ let RuleConfigDef;
  * @param {!RuleConfigDef} config
  */
 function Rule(config) {
-  /** @private @const {!RuleConfigDef} */
+  /** @const {!RuleConfigDef} */
   this.config_ = config;
 
-  /** @private @const {string} */
+  /** @const {string} */
   this.type_ = config.type || 'forbidden';
 
   /**
    * Default to all files if none given.
-   * @private @const {!GlobsDef}
+   * @const {!GlobsDef}
    */
   this.filesMatching_ = toArrayOrDefault(config.filesMatching, ['**/*.js']);
 
-  /** @private @const {!GlobsDef} */
+  /** @const {!GlobsDef} */
   this.mustNotDependOn_ = toArrayOrDefault(config.mustNotDependOn, []);
 
-  /** @private @const {!Array<string>} */
+  /** @const {!Array<string>} */
   this.allowlist_ = toArrayOrDefault(config.allowlist, []);
 
   /** @const {!Set<string>} */
@@ -202,7 +202,7 @@ async function getModuleGraph(entryPointModule) {
     plugins: [plugin],
   });
 
-  const entryPoints = result.metafile.inputs;
+  const entryPoints = result.metafile?.inputs || [];
   const moduleGraph = Object.create(null);
   moduleGraph.name = entryPointModule;
   moduleGraph.deps = [];
@@ -257,9 +257,11 @@ function flattenGraph(entryPoints) {
  */
 function runRules(moduleGraph) {
   const errors = [];
-  Object.entries(moduleGraph).forEach(([moduleName, deps]) => {
+  Object.keys(moduleGraph).forEach((moduleName) => {
     // Run Rules against the modules and flatten for reporting.
-    const results = rules.flatMap((rule) => rule.run(moduleName, deps));
+    const results = rules.flatMap((rule) =>
+      rule.run(moduleName, moduleGraph[moduleName])
+    );
     errors.push(...results);
   });
 
@@ -303,8 +305,8 @@ async function depCheck() {
 /**
  * Put value in Array context.
  *
- * @param {!GlobsDef|string} value
- * @param {!Array<string>} defaultValue
+ * @param {GlobsDef|string|undefined} value
+ * @param {!GlobsDef} defaultValue
  * @return {!GlobsDef}
  */
 function toArrayOrDefault(value, defaultValue) {
@@ -318,9 +320,9 @@ function toArrayOrDefault(value, defaultValue) {
 }
 
 /**
- * Flatten array of arrays.
+ * Flatten array of arrays if necessary.
  *
- * @param {!Array<!Array>} arr
+ * @param {Array<Array>|Array} arr
  * @return {!Array}
  */
 function flatten(arr) {
