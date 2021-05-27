@@ -13,9 +13,20 @@ PASS
 |      }
 |    </style>
 |    <script async custom-element="amp-story-captions" src="https://cdn.ampproject.org/v0/amp-story-captions-0.1.js"></script>
+|    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <amp-story-captions layout="responsive" width="150" height="80"></amp-story-captions>
+|    <amp-story standalone title="Foo" publisher="AMP" publisher-logo-src="http://example.com/foo.png" poster-portrait-src="http://example.com/foo.png">
+|      <amp-story-page id="fill-template-title">
+|        <amp-story-grid-layer template="vertical">
+|          <amp-video src="https://example.com/video.mp4" poster="https://example.com/poster.png" width="1080" height="1920" layout="responsive" crossorigin autoplay captions-id="captions">
+|            <track kind="subtitles" src="https://example.com/captions.vtt" srclang="en" default>
+|          </amp-video>
+|          <amp-story-captions id="captions" layout="fixed-height" height="300"></amp-story-captions>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|    </amp-story>
 |  </body>
 |  </html>

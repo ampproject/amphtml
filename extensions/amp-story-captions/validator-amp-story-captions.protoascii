@@ -30,7 +30,10 @@ tags: {  # <amp-story-captions>
   requires_extension: "amp-story-captions"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-story-captions"
+  mandatory_ancestor: "AMP-STORY"
   amp_layout: {
-    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
   }
 }
