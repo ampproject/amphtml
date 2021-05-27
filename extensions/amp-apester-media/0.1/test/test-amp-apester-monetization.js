@@ -21,100 +21,118 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
-describes.realWin('amp-apester-media-monetization', {}, (env) => {
-  let win, doc;
-  let baseElement;
-  let docInfo;
-  const queryAmpAdBladeSelector = (myDoc) =>
-    myDoc.querySelector('amp-ad[type=blade]');
-  const queryAmpAdDisplaySelector = (myDoc) =>
-    myDoc.querySelector('amp-ad[type=doubleclick]');
+describes.realWin(
+  'amp-apester-media-monetization',
+  {
+    amp: {
+      extensions: ['amp-apester-media'],
+    },
+  },
+  (env) => {
+    let win, doc;
+    let baseElement;
+    let docInfo;
+    const queryAmpAdBladeSelector = (myDoc) =>
+      myDoc.querySelector('amp-ad[type=blade]');
+    const queryAmpAdDisplaySelector = (myDoc) =>
+      myDoc.querySelector('amp-ad[type=doubleclick]');
 
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
 
-    baseElement = doc.createElement('amp-apester-media');
+      baseElement = doc.createElement('amp-apester-media');
+      baseElement.setAttribute('layout', 'fixed-height');
 
-    const mutator = {
-      requestChangeSize: () => env.sandbox.stub(),
-    };
-    env.sandbox.stub(Services, 'mutatorForDoc').returns(mutator);
-
-    doc.body.appendChild(baseElement);
-    docInfo = {
-      canonicalUrl: 'https://www.example.com/path',
-      sourceUrl: 'https://source.example.com/path',
-    };
-    installDocService(win, /* isSingleDoc */ true);
-    resetServiceForTesting(win, 'documentInfo');
-    return registerServiceBuilderForDoc(doc, 'documentInfo', function () {
-      return {
-        get: () => docInfo,
+      const mutator = {
+        requestChangeSize: () => env.sandbox.stub(),
       };
-    });
-  });
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(mutator);
 
-  it('Should show a companion display ad', async () => {
-    const media = createCampaignData({display: true});
-    await handleCompanionAds(media, baseElement);
-    const displayAd = queryAmpAdDisplaySelector(doc);
-    expect(displayAd).to.exist;
-    expect(baseElement.nextSibling).to.be.equal(displayAd);
-  });
-  it('Should show an SR companion ad below', async () => {
-    const media = createCampaignData({
-      display: false,
-      srAbove: false,
-      srBelow: true,
+      doc.body.appendChild(baseElement);
+      docInfo = {
+        canonicalUrl: 'https://www.example.com/path',
+        sourceUrl: 'https://source.example.com/path',
+      };
+      installDocService(win, /* isSingleDoc */ true);
+      resetServiceForTesting(win, 'documentInfo');
+      return registerServiceBuilderForDoc(doc, 'documentInfo', function () {
+        return {
+          get: () => docInfo,
+        };
+      });
     });
-    await handleCompanionAds(media, baseElement);
-    const srAdBelow = queryAmpAdBladeSelector(doc);
-    expect(srAdBelow).to.exist;
-    expect(baseElement.nextSibling).to.be.equal(srAdBelow);
-  });
-  it('Should show an SR companion ad above', async () => {
-    const media = createCampaignData({
-      display: false,
-      srAbove: true,
-      srBelow: false,
+
+    it('Should show a companion display ad', async () => {
+      const media = createCampaignData({display: true});
+      await handleCompanionAds(media, baseElement);
+      const displayAd = queryAmpAdDisplaySelector(doc);
+      expect(displayAd).to.exist;
+      expect(baseElement.nextSibling).to.be.equal(displayAd);
     });
-    await handleCompanionAds(media, baseElement);
-    const srAboveAd = queryAmpAdBladeSelector(doc);
-    expect(srAboveAd).to.exist;
-    expect(baseElement.previousSibling).to.be.equal(srAboveAd);
-  });
-  it('Should show an SR companion above with display companion', async () => {
-    const media = createCampaignData({
-      display: true,
-      srAbove: true,
-      srBelow: false,
+    it('Should show a companion bottom ad', async () => {
+      const media = createCampaignData({display: false, bottomAd: true});
+      await handleCompanionAds(media, baseElement);
+      const bottomAd = queryAmpAdDisplaySelector(doc);
+      expect(bottomAd).to.exist;
+      expect(baseElement.lastChild).to.be.equal(bottomAd);
     });
-    await handleCompanionAds(media, baseElement);
-    const displayAd = queryAmpAdDisplaySelector(doc);
-    expect(displayAd).to.exist;
-    expect(baseElement.nextSibling).to.be.equal(displayAd);
-    const srAboveAd = queryAmpAdBladeSelector(doc);
-    expect(srAboveAd).to.exist;
-    expect(baseElement.previousSibling).to.be.equal(srAboveAd);
-  });
-  it('Should not show ads if disabled amp companion ads', async () => {
-    const media = createCampaignData({
-      display: true,
-      srAbove: true,
-      srBelow: false,
-      disabledAmpCompanionAds: true,
+    it('Should show an SR companion ad below', async () => {
+      const media = createCampaignData({
+        display: false,
+        srAbove: false,
+        srBelow: true,
+      });
+      await handleCompanionAds(media, baseElement);
+      const srAdBelow = queryAmpAdBladeSelector(doc);
+      expect(srAdBelow).to.exist;
+      expect(baseElement.nextSibling).to.be.equal(srAdBelow);
     });
-    await handleCompanionAds(media, baseElement);
-    const displayAd = queryAmpAdDisplaySelector(doc);
-    expect(displayAd).to.not.exist;
-    const srAboveAd = queryAmpAdBladeSelector(doc);
-    expect(srAboveAd).to.not.exist;
-  });
-});
+    it('Should show an SR companion ad above', async () => {
+      const media = createCampaignData({
+        display: false,
+        srAbove: true,
+        srBelow: false,
+      });
+      await handleCompanionAds(media, baseElement);
+      const srAboveAd = queryAmpAdBladeSelector(doc);
+      expect(srAboveAd).to.exist;
+      expect(baseElement.previousSibling).to.be.equal(srAboveAd);
+    });
+    it('Should show an SR companion above with display companion', async () => {
+      const media = createCampaignData({
+        display: true,
+        srAbove: true,
+        srBelow: false,
+      });
+      await handleCompanionAds(media, baseElement);
+      const displayAd = queryAmpAdDisplaySelector(doc);
+      expect(displayAd).to.exist;
+      expect(baseElement.nextSibling).to.be.equal(displayAd);
+      const srAboveAd = queryAmpAdBladeSelector(doc);
+      expect(srAboveAd).to.exist;
+      expect(baseElement.previousSibling).to.be.equal(srAboveAd);
+    });
+    it('Should not show ads if disabled amp companion ads', async () => {
+      const media = createCampaignData({
+        display: true,
+        bottomAd: true,
+        srAbove: true,
+        srBelow: false,
+        disabledAmpCompanionAds: true,
+      });
+      await handleCompanionAds(media, baseElement);
+      const displayAd = queryAmpAdDisplaySelector(doc);
+      expect(displayAd).to.not.exist;
+      const srAboveAd = queryAmpAdBladeSelector(doc);
+      expect(srAboveAd).to.not.exist;
+    });
+  }
+);
 
 function createCampaignData({
   display,
+  bottomAd,
   srAbove,
   srBelow,
   disabledAmpCompanionAds,
@@ -147,12 +165,27 @@ function createCampaignData({
         'provider': 'sr',
       },
     },
+    'bottomAdOptions': {
+      'idleAds': {
+        'timeout': null,
+      },
+      'enabled': false,
+      'videoPlayer': 'gpt',
+      'tag': '/6355419/Travel/Europe/France/Paris',
+      'playerProps': {
+        'auctionCode': 'aR1s',
+        'dfp': true,
+      },
+    },
     'companionCampaignOptions': {
       'companionCampaignId': '5d8b267a50bf9482f458d2ca',
     },
   };
   if (display) {
     campaignData.companionOptions.enabled = true;
+  }
+  if (bottomAd) {
+    campaignData.bottomAdOptions.enabled = true;
   }
   if (srAbove) {
     campaignData.companionOptions.video.enabled = true;
