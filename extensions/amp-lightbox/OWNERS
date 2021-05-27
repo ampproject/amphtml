@@ -8,9 +8,7 @@
     },
     {
       pattern: 'validator-*.protoascii',
-      owners: [
-        {name: 'ampproject/wg-amp4email', notify: true, requestReviews: false},
-      ],
+      owners: [{name: 'ampproject/wg-amp4email', notify: true}],
     },
   ],
 }
