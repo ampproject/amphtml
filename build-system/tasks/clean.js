@@ -63,7 +63,9 @@ async function clean() {
   }
   if (argv.exclude) {
     const excludes = argv.exclude.split(',');
-    pathsToDelete = pathsToDelete.filter((path) => !excludes.includes(path));
+    for (const exclude of excludes) {
+      pathsToDelete.push(`!${exclude}`);
+    }
   }
   const deletedPaths = await del(pathsToDelete, {
     expandDirectories: false,
