@@ -98,7 +98,9 @@ function runUnitTestsForPlatform() {
       );
   }
 }
-
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   runUnitTestsForPlatform();
   timedExecOrDie('amp dist --fortesting');
@@ -106,6 +108,7 @@ function pushBuildWorkflow() {
 }
 
 /**
+ * Steps to run during PR builds.
  * @return {Promise<void>}
  */
 async function prBuildWorkflow() {

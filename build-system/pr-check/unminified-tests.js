@@ -29,6 +29,9 @@ const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'unminified-tests.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   try {
     timedExecOrThrow(
@@ -48,6 +51,9 @@ function pushBuildWorkflow() {
   }
 }
 
+/**
+ * Steps to run during PR builds.
+ */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     timedExecOrDie('amp integration --nobuild --headless --coverage');

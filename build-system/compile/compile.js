@@ -79,6 +79,9 @@ async function closureCompile(
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function (resolve, reject) {
+    /**
+     * Kicks off the first closure invocation.
+     */
     function start() {
       inProgress++;
       compile(
@@ -97,6 +100,9 @@ async function closureCompile(
       );
     }
 
+    /**
+     * Keeps track of the invocation count.
+     */
     function next() {
       if (!queue.length) {
         return;
@@ -110,6 +116,9 @@ async function closureCompile(
   });
 }
 
+/**
+ * Cleans up the placeholder directories for fake build modules.
+ */
 function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
@@ -441,6 +450,9 @@ async function compile(
   }
 }
 
+/**
+ * Indicates the current closure concurrency and how to override it.
+ */
 function printClosureConcurrency() {
   log(
     green('Using up to'),

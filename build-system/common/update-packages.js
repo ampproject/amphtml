@@ -201,7 +201,9 @@ function patchShadowDom() {
 
   writeIfUpdated(patchedName, file);
 }
-
+/**
+ * Adds a missing export statement to the preact module.
+ */
 function patchPreact() {
   fs.ensureDirSync('node_modules/preact/dom');
   const file = `export { render, hydrate } from 'preact';`;

@@ -271,6 +271,7 @@ module.exports = {
         'extensions/**/test-e2e/*.js',
         'ads/**/test/**/*.js',
         'testing/**/*.js',
+        'build-system/**/test/*.js',
       ],
       'rules': {
         'require-jsdoc': 0,

@@ -49,6 +49,9 @@ async function buildNewServer() {
   endBuildStep('Built', 'AMP Server', startTime);
 }
 
+/**
+ * Checks all types in the generated output after running server transforms.
+ */
 function typecheckNewServer() {
   const cmd = `npx -p typescript tsc --noEmit -p ${CONFIG_PATH}`;
   const result = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});

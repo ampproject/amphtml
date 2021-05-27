@@ -34,11 +34,11 @@ describe('devdash', () => {
   describe('AMPHTML helpers', () => {
     describe('AmpDoc', () => {
       it('fails without args', () => {
-        expect(() => AmpDoc()).to.throw;
+        expect(() => AmpDoc()).to.throw();
       });
 
       it('fails without min required fields', () => {
-        expect(() => AmpDoc({})).to.throw;
+        expect(() => AmpDoc({})).to.throw();
       });
 
       it('creates valid doc with min required fields', async () => {

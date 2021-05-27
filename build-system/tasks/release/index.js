@@ -130,6 +130,9 @@ const CHANNEL_CONFIGS = {
   '25': {type: 'experimentC', configBase: 'prod'}, // Spec name: 'inabox-experimentC'
 };
 
+/**
+ * Prints a separator line so logs are easy to read.
+ */
 function logSeparator_() {
   log('---\n\n');
 }
