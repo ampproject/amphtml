@@ -162,7 +162,7 @@ amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-pa
   background: none !important;
 }
 
-.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote >a:first-child {
+.i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote > a:first-child {
   /* Hides the element child in outlink attachments which is always the first direct child a element. */
   display: none !important;
 }
