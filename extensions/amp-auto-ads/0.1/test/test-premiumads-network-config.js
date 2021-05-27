@@ -87,11 +87,9 @@ describes.realWin(
         expect(adNetwork.getAttributes()).to.deep.equal({
           'type': 'doubleclick',
           'data-ad': 'premiumads',
-          'width': 336,
-          'height': 280,
-          'layout': Layout.RESPONSIVE,
-          'sizes': '(min-width: 320px) 320px, 100vw',
-          'style': 'position:relative!important',
+          'layout': Layout.FIXED,
+          'style':
+            'margin: 15px auto; position: relative !important; display: block !important;',
         });
       });
 
@@ -117,7 +115,7 @@ describes.realWin(
 
       it('should be responsive-enabled', () => {
         const adNetwork = getAdNetworkConfig('premiumads', ampAutoAdsElem);
-        expect(adNetwork.isResponsiveEnabled()).to.be.true;
+        expect(adNetwork.isResponsiveEnabled()).to.be.false;
       });
     });
   }
