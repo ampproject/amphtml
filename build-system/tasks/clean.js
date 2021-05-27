@@ -28,7 +28,7 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  * node_modules package directories, or excludes some directories from deletion.
  */
 async function clean() {
-  let pathsToDelete = [
+  const pathsToDelete = [
     // Local cache directories
     // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
     '.babel-cache',
