@@ -19,7 +19,6 @@ import {dev} from './log';
 import {dispatchCustomEvent} from './dom';
 import {htmlFor} from './static-template';
 import {isArray, isObject} from './core/types';
-import {propagateAttributes} from './core/dom/propagate-attributes';
 import {tryParseJson} from './core/types/object/json';
 
 /** @enum {string} */
@@ -91,7 +90,7 @@ export function createFrameFor(video, src, opt_name, opt_sandbox) {
 
   // Will propagate for every component, but only validation rules will actually
   // allow the attribute to be set.
-  propagateAttributes(['referrerpolicy'], video.element, frame);
+  video.propagateAttributes(['referrerpolicy'], frame);
 
   frame.src = Services.urlForDoc(element).assertHttpsUrl(src, element);
 
