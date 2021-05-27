@@ -151,12 +151,53 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
         // Simulate a pause after 1 second.
         advancement.start();
         advancement.startTimeMs_ -= 1000;
-        advancement.stop();
+        advancement.stop(true /** canResume */);
         expect(advancement.remainingDelayMs_).to.be.above(1500).and.below(2500);
 
         advancement.updateTimeDelay('5s');
 
         expect(advancement.remainingDelayMs_).to.be.above(3500).and.below(4500);
+      });
+
+      it('should not keep a remainingDelayMs_ if will not resume', () => {
+        const pageEl = html`
+          <amp-story-page auto-advance-after="3s"> </amp-story-page>
+        `;
+        const advancement = AdvancementConfig.forElement(win, pageEl);
+        // Simulate a pause after 1 second.
+        advancement.start();
+        advancement.startTimeMs_ -= 1000;
+        advancement.stop(false /** canResume */);
+        expect(advancement.remainingDelayMs_).to.be.null;
+      });
+
+      it('should return progress 0 if stopped and will not resume, then start again', () => {
+        const pageEl = html`
+          <amp-story-page auto-advance-after="3s"> </amp-story-page>
+        `;
+        const advancement = AdvancementConfig.forElement(win, pageEl);
+        // Simulate a pause after 1 second.
+        advancement.start();
+        advancement.startTimeMs_ -= 1000;
+        advancement.stop(false /** canResume */);
+        advancement.start();
+        // Progress of ~0
+        expect(advancement.getProgress()).to.be.below(0.1);
+      });
+
+      it('should return progress > 0 if stopped and will resume', () => {
+        const pageEl = html`
+          <amp-story-page auto-advance-after="3s"> </amp-story-page>
+        `;
+        const advancement = AdvancementConfig.forElement(win, pageEl);
+        // Simulate a pause after 1 second.
+        advancement.start();
+        advancement.startTimeMs_ -= 1000;
+        advancement.stop(true /** canResume */);
+        advancement.start();
+        // Progress of ~0.33
+        expect(advancement.getProgress()).to.be.above(0.3);
+        expect(advancement.getProgress()).to.be.below(0.4);
       });
     });
 
