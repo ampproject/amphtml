@@ -48,7 +48,7 @@ export function fetchCachedSources(videoEl, win) {
   }
   const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
   const servicePromise = Services.cacheUrlServicePromiseForDoc(videoEl);
-  replaceSrcWithSourceElement(videoEl, win);
+  maybeReplaceSrcWithSourceElement(videoEl, win);
   const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
   return servicePromise
     .then((service) => service.createCacheUrl(videoUrl))
@@ -106,13 +106,12 @@ function applySourcesToVideo(videoEl, sources) {
 }
 
 /**
- * Moves the src attribute to a source element to enable playing from multiple
- * sources: the cached ones and the fallback initial src.
+ * If present, moves the src attribute to a source element to enable playing
+ * from multiple sources: the cached ones and the fallback initial src.
  * @param {!Element} videoEl
  * @param {!Window} win
- * @return {!Promise}
  */
-function replaceSrcWithSourceElement(videoEl, win) {
+function maybeReplaceSrcWithSourceElement(videoEl, win) {
   if (!videoEl.hasAttribute('src')) {
     return;
   }
@@ -127,6 +126,7 @@ function replaceSrcWithSourceElement(videoEl, win) {
 
   // Remove the src attr so the source children can play.
   videoEl.removeAttribute('src');
+  videoEl.removeAttribute('type');
 
   // Remove all existing sources as they are never supposed to play for a video
   // that has a src, cf https://html.spec.whatwg.org/#concept-media-load-algorithm
