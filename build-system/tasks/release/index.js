@@ -33,16 +33,16 @@ let ExperimentConfigDef;
  *  experimentC: ExperimentConfigDef,
  * }}
  */
- let ExperimentsConfigDef;
+let ExperimentsConfigDef;
 
- /**
-  * @typedef {ExperimentConfigDef & {
-  *  flavorType: string;
-  *  rtvPrefixes: string[];
-  *  command: string;
-  * }}
-  */
- let DistFlavorDef;
+/**
+ * @typedef {ExperimentConfigDef & {
+ *  flavorType: string;
+ *  rtvPrefixes: string[];
+ *  command: string;
+ * }}
+ */
+let DistFlavorDef;
 
 const argv = require('minimist')(process.argv.slice(2));
 /** @type {ExperimentsConfigDef} */
@@ -183,7 +183,7 @@ function discoverDistFlavors_() {
     'commands will be executed to compile each',
     `${green('flavor')}:`
   );
-  distFlavors.forEach(({flavorType, name, command}) => {
+  distFlavors.forEach(({command, flavorType, name}) => {
     log('-', `(${green(flavorType)}, ${green(name)})`, cyan(command));
   });
 
@@ -311,8 +311,12 @@ async function populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir) {
     rtvCopyingPromises.push(
       ...Object.entries(experimentsConfig)
         .filter(([, {environment}]) => environment == 'INABOX')
-        .map(([experimentFlavor]) => EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${experimentFlavor}-control`])
-        .map(rtvCopyingPromise));
+        .map(
+          ([experimentFlavor]) =>
+            EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${experimentFlavor}-control`]
+        )
+        .map(rtvCopyingPromise)
+    );
   }
   await Promise.all(rtvCopyingPromises);
 
@@ -458,7 +462,7 @@ async function release() {
     log('Compiling all', `${green('flavors')}...`);
   }
 
-  for (const {flavorType, command, rtvPrefixes} of distFlavors) {
+  for (const {command, flavorType, rtvPrefixes} of distFlavors) {
     await compileDistFlavors_(flavorType, command, tempDir);
 
     log('Fetching npm package', `${cyan('@ampproject/amp-sw')}...`);
