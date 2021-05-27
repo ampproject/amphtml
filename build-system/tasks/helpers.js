@@ -556,6 +556,10 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
     await finishBundle(srcFilename, destDir, destFilename, options, time);
   }
 
+  /**
+   * Generates a plugin to remap the dependencies of a JS bundle.
+   * @return {Object}
+   */
   function remapDependenciesPlugin() {
     const remapDependencies = {__proto__: null, ...options.remapDependencies};
     const external = options.externalDependencies;
@@ -666,6 +670,11 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     watch(deps).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
+  /**
+   * Actually performs the steps to compile the entry point.
+   * @param {Object} options
+   * @return {Promise<void>}
+   */
   async function doCompileJs(options) {
     const buildResult = options.minify
       ? compileMinifiedJs(srcDir, srcFilename, destDir, options)

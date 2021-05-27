@@ -61,6 +61,10 @@ module.exports = function ({template, types: t}) {
     return filename.endsWith('.jss.js');
   }
 
+  /**
+   * @param {string} name
+   * @return {string>}
+   */
   function classnameId(name) {
     return `\$${name}`;
   }
@@ -238,6 +242,11 @@ module.exports = function ({template, types: t}) {
     );
   }
 
+  /**
+   * @param {Path} importDeclaration
+   * @param {string} name
+   * @return {string}
+   */
   function getImportIdentifier(importDeclaration, name) {
     return addNamed(
       importDeclaration,

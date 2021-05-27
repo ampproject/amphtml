@@ -396,7 +396,8 @@ async function doBuildExtension(extensions, extension, options) {
 }
 
 /**
- * Watches for non-JS changes within an extensions directory to trigger recompilation.
+ * Watches for non-JS changes within an extensions directory to trigger
+ * recompilation.
  *
  * @param {string} extDir
  * @param {string} name
@@ -413,6 +414,9 @@ async function watchExtension(
   hasCss,
   options
 ) {
+  /**
+   * Steps to run when a watched file is modified.
+   */
   function watchFunc() {
     buildExtension(name, version, latestVersion, hasCss, {
       ...options,

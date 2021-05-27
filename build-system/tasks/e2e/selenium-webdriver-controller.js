@@ -655,6 +655,9 @@ class SeleniumWebDriverController {
     this.shadowRoot_ = shadowRootBody;
   }
 
+  /**
+   * @return {Promise<void>}
+   */
   async switchToLight() {
     this.shadowRoot_ = null;
   }
@@ -671,6 +674,9 @@ class SeleniumWebDriverController {
     return this.evaluate(() => document.documentElement);
   }
 
+  /**
+   * @return {void}
+   */
   dispose() {
     return this.driver.quit();
   }
