@@ -46,9 +46,8 @@ export class AnimationRunner {
   init() {}
 
   /**
-   * @return {boolean}
    */
-  isInitialized() {}
+  maybeInit() {}
 
   /**
    * Initializes the players if not already initialized,
@@ -91,6 +90,10 @@ export class AnimationRunner {
   /**
    */
   finish() {}
+
+  /**
+   */
+  finishOrPause() {}
 
   /**
    */
