@@ -1235,14 +1235,6 @@ tags: {
   attrs: { name: "align" }
   attr_lists: "cite-attr"
 }
-tags: {
-  html_format: AMP
-  tag_name: "BLOCKQUOTE"
-  spec_name: "BLOCKQUOTE with TikTok"
-  attrs: { name: "align" }
-  attr_lists: "cite-attr"
-  mandatory_ancestor: "AMP-TIKTOK blockquote" 
-}
 # 4.4.5 The ol element
 tags: {
   html_format: AMP

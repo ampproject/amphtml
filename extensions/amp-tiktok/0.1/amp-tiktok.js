@@ -48,12 +48,6 @@ export class AmpTiktok extends AMP.BaseElement {
     /** @private {?Function}*/
     this.unlistenMessage_ = null;
 
-    /** @private {string} */
-    this.oEmbedRequestUrl_ = null;
-
-    /** @private {Promise} */
-    this.oEmbedResponsePromise_ = null;
-
     /** @private {?Promise} */
     this.resolveReceivedFirstMessage_ = null;
 
@@ -114,7 +108,6 @@ export class AmpTiktok extends AMP.BaseElement {
       // If the user provides a src attribute extract the video id from the src
       const videoIdRegex = /^((.+\/)?)(\d+)\/?$/;
       this.videoId_ = src.replace(videoIdRegex, '$3');
-      this.oEmbedRequestUrl_ = this.videoId_ !== src ? src : null;
     } else {
       // If the user provides a blockquote element use the blockquote videoId as video id
       const blockquoteOrNull = childElementByTag(this.element, 'blockquote');
@@ -128,7 +121,6 @@ export class AmpTiktok extends AMP.BaseElement {
         return;
       }
       this.videoId_ = blockquoteOrNull.dataset.videoId;
-      this.oEmbedRequestUrl_ = blockquoteOrNull.dataset.cite;
     }
   }
 
@@ -157,12 +149,6 @@ export class AmpTiktok extends AMP.BaseElement {
       'message',
       this.handleTiktokMessages_.bind(this)
     );
-
-    Promise.resolve(this.oEmbedResponsePromise_).then((data) => {
-      if (data && data.title) {
-        iframe.setAttribute('aria-title', `TikTok: ${data.title}`);
-      }
-    });
 
     this.element.appendChild(iframe);
     return this.loadPromise(iframe).then(() => {
@@ -208,48 +194,6 @@ export class AmpTiktok extends AMP.BaseElement {
         'height': px(data['height']),
       });
     }
-  }
-
-  /** @override */
-  createPlaceholderCallback() {
-    if (!this.oEmbedRequestUrl_) {
-      return null;
-    }
-
-    const placeholder = document.createElement('div');
-    placeholder.setAttribute('placeholder', '');
-    const imageContainer = document.createElement('div');
-    imageContainer.setAttribute(
-      'class',
-      'i-amphtml-tiktok-placeholder-image-container'
-    );
-
-    const oEmbedRequestUrl = encodeURIComponent(this.oEmbedRequestUrl_);
-    this.oEmbedResponsePromise_ = Services.xhrFor(this.win)
-      .fetchJson(`https://www.tiktok.com/oembed?url=${oEmbedRequestUrl}`)
-      .then((response) => response.json())
-      .then((data) => {
-        const {'thumbnail_url': thumbnailUrl} = data;
-        if (thumbnailUrl) {
-          const img = createElementWithAttributes(
-            this.element.ownerDocument,
-            'img',
-            {
-              'src': thumbnailUrl,
-              'placeholder': thumbnailUrl,
-              'class': 'i-amphtml-tiktok-placeholder-image',
-            }
-          );
-
-          if (placeholder.parentElement) {
-            imageContainer.appendChild(img);
-            placeholder.appendChild(imageContainer);
-          }
-        }
-        return data;
-      });
-
-    return placeholder;
   }
 
   /** @override */
