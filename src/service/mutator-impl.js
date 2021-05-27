@@ -18,7 +18,7 @@ import {FocusHistory} from '../focus-history';
 import {MutatorInterface} from './mutator-interface';
 import {Resource} from './resource';
 import {Services} from '../services';
-import {areMarginsChanged} from '../layout-rect';
+import {areMarginsChanged} from '../core/math/layout-rect';
 import {closest} from '../dom';
 import {computedStyle} from '../style';
 import {dev} from '../log';

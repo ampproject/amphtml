@@ -201,7 +201,7 @@ function handleScript(extensions, script) {
  * @param {!Element} link
  */
 function handleLink(fonts, images, link) {
-  const {href, as, rel} = link;
+  const {as, href, rel} = link;
   if (rel === 'preload' && as === 'image') {
     images.push(href);
     return;

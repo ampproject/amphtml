@@ -291,7 +291,7 @@ function renderElements(elementOrDoc) {
 
   // Buttons toggle SVGs by including two each, one is displayed at a time.
   // See CSS selectors for buttons under .root[data-*].
-  const {'playButton': playButton, 'muteButton': muteButton} = elements;
+  const {'muteButton': muteButton, 'playButton': playButton} = elements;
 
   playButton.appendChild(icons.play(svg));
   playButton.appendChild(icons.pause(svg));
@@ -388,10 +388,10 @@ export function imaVideo(global, data) {
   imaLoadAllowed = true;
 
   const {
+    'fullscreenButton': fullscreenButton,
+    'muteButton': muteButton,
     'playButton': playButton,
     'progress': progress,
-    'muteButton': muteButton,
-    'fullscreenButton': fullscreenButton,
   } = elements;
 
   let mobileBrowser = false;
@@ -592,7 +592,7 @@ function onImaLoadFail() {
  * @visibleForTesting
  */
 export function onOverlayButtonInteract(global) {
-  const {'video': video, 'overlayButton': overlayButton} = elements;
+  const {'overlayButton': overlayButton, 'video': video} = elements;
   if (playbackStarted) {
     // Resart the video
     playVideo();
@@ -842,6 +842,7 @@ export function onContentPauseRequested(global) {
     adsManagerHeightOnLoad = null;
   }
   adsActive = true;
+  playerState = PlayerStates.PLAYING;
   postMessage({event: VideoEvents.AD_START});
   toggle(elements['adContainer'], true);
   showAdControls();
@@ -861,7 +862,7 @@ export function onContentPauseRequested(global) {
  * @visibleForTesting
  */
 export function onContentResumeRequested() {
-  const {'video': video, 'overlayButton': overlayButton} = elements;
+  const {'overlayButton': overlayButton, 'video': video} = elements;
   adsActive = false;
   addHoverEventToElement(
     /** @type {!Element} */ (video),
@@ -889,6 +890,7 @@ export function onContentResumeRequested() {
  */
 export function onAdPaused() {
   toggleRootDataAttribute('playing', false);
+  playerState = PlayerStates.PAUSE;
 }
 
 /**
@@ -900,6 +902,7 @@ export function onAdPaused() {
  */
 export function onAdResumed() {
   toggleRootDataAttribute('playing', true);
+  playerState = PlayerStates.PLAYING;
 }
 
 /**
@@ -946,9 +949,9 @@ function playerDataTick() {
  */
 export function updateTime(currentTime, duration) {
   const {
-    'time': time,
     'progressLine': progressLine,
     'progressMarker': progressMarker,
+    'time': time,
   } = elements;
   time.textContent = formatTime(currentTime) + ' / ' + formatTime(duration);
   const progressPercent = Math.floor((currentTime / duration) * 100);
@@ -1028,7 +1031,7 @@ function onProgressClickEnd() {
  * @param {!Event} event
  */
 function onProgressMove(event) {
-  const {'video': video, 'progress': progress} = elements;
+  const {'progress': progress, 'video': video} = elements;
   const progressWrapperPosition = getPagePosition(progress);
   const progressListStart = progressWrapperPosition.x;
   const progressListWidth = progress./*OK*/ offsetWidth;

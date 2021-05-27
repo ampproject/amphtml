@@ -42,7 +42,7 @@ describes.sandboxed('type helpers - strings - base64', {}, () => {
 
       scenarios.forEach((scenario) => {
         describe(scenario, () => {
-          const {TextEncoder: oldTextEncoder, TextDecoder: oldTextDecoder} =
+          const {TextDecoder: oldTextDecoder, TextEncoder: oldTextEncoder} =
             window;
           beforeEach(() => {
             // Forces use of the TextEncoding polyfill

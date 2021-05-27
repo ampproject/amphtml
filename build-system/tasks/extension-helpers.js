@@ -25,21 +25,22 @@ const {
   doBuildJs,
   endBuildStep,
   maybeToEsmName,
+  maybeToNpmEsmName,
   mkdirSync,
   watchDebounceDelay,
 } = require('./helpers');
 const {
   extensionAliasBundles,
   extensionBundles,
-  verifyExtensionBundles,
   jsBundles,
+  verifyExtensionBundles,
 } = require('../compile/bundles.config');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
-const {green, red, cyan} = require('../common/colors');
+const {cyan, green, red} = require('../common/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
@@ -90,29 +91,21 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   loadPriority?: string,
  *   cssBinaries?: Array<string>,
  *   extraGlobs?: Array<string>,
- *   binaries?: Array<ExtensionBinary>,
- *   npm?: Map<string, NpmBinaries>,
+ *   binaries?: Array<ExtensionBinaryDef>,
+ *   npm?: boolean,
  * }}
  */
-const ExtensionOption = {}; // eslint-disable-line no-unused-vars
-
-/**
- * @typedef {{
- *   preact?: string,
- *   react?: string,
- * }}
- */
-const NpmBinaries = {}; // eslint-disable-line no-unused-vars
+const ExtensionOptionDef = {};
 
 /**
  * @typedef {{
  *   entryPoint: string,
  *   outfile: string,
  *   external?: Array<string>
- *   remap?: Map<string, string>
+ *   remap?: Record<string, string>
  * }}
  */
-const ExtensionBinary = {}; // eslint-disable-line no-unused-vars
+const ExtensionBinaryDef = {};
 
 // All declared extensions.
 const extensions = {};
@@ -127,7 +120,7 @@ const adVendors = [];
  * @param {string} name
  * @param {string|!Array<string>} version E.g. 0.1 or [0.1, 0.2]
  * @param {string} latestVersion E.g. 0.1
- * @param {!ExtensionOption|undefined} options extension options object.
+ * @param {!ExtensionOptionDef|undefined} options extension options object.
  * @param {!Object} extensionsObject
  * @param {boolean} includeLatest
  */
@@ -607,7 +600,7 @@ function buildNpmBinaries(extDir, options) {
 
 /**
  * @param {string} extDir
- * @param {!Array<ExtensionBinary>} binaries
+ * @param {!Array<ExtensionBinaryDef>} binaries
  * @param {!Object} options
  * @return {!Promise}
  */
@@ -615,7 +608,7 @@ function buildBinaries(extDir, binaries, options) {
   mkdirSync(`${extDir}/dist`);
 
   const promises = binaries.map((binary) => {
-    const {entryPoint, outfile, external, remap} = binary;
+    const {entryPoint, external, outfile, remap} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
     return compileJsWithEsbuild(
@@ -623,8 +616,8 @@ function buildBinaries(extDir, binaries, options) {
       entryPoint,
       `${extDir}/dist`,
       Object.assign(options, {
-        toName: maybeToEsmName(`${name}.max.js`),
-        minifiedName: maybeToEsmName(`${name}.js`),
+        toName: maybeToNpmEsmName(`${name}.max.js`),
+        minifiedName: maybeToNpmEsmName(`${name}.js`),
         latestName: '',
         outputFormat: esm ? 'esm' : 'cjs',
         wrapper: '',

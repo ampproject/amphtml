@@ -50,6 +50,9 @@ async function runLinter(filesToLint) {
     const text = fs.readFileSync(file, 'utf-8');
     const lintResult = await eslint.lintText(text, {filePath: file});
     const result = lintResult[0];
+    if (!result) {
+      continue; // File was ignored
+    }
     results.errorCount += result.errorCount;
     results.warningCount += result.warningCount;
     const formatter = await eslint.loadFormatter('stylish');
@@ -82,7 +85,7 @@ async function runLinter(filesToLint) {
 function summarizeResults(results, fixedFiles) {
   const {errorCount, warningCount} = results;
   if (errorCount == 0 && warningCount == 0) {
-    logOnSameLineLocalDev(green('SUCCESS: ') + 'No linter warnings or errors.');
+    logOnSameLineLocalDev(green('SUCCESS:'), 'No linter warnings or errors.');
   } else {
     const prefix = errorCount == 0 ? yellow('WARNING: ') : red('ERROR: ');
     logOnSameLine(
@@ -112,14 +115,14 @@ function summarizeResults(results, fixedFiles) {
         cyan('prettier/prettier'),
         'errors, read',
         cyan(
-          'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#code-quality-and-style'
+          'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md#code-quality-and-style'
         )
       );
     }
     process.exitCode = 1;
   }
   if (options.fix && Object.keys(fixedFiles).length > 0) {
-    log(green('INFO: ') + 'Summary of fixes:');
+    log(green('INFO:'), 'Summary of fixes:');
     Object.keys(fixedFiles).forEach((file) => {
       log(fixedFiles[file] + cyan(file));
     });

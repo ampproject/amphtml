@@ -15,7 +15,7 @@
  */
 
 import {escapeCssSelectorIdent} from './core/dom/css';
-import {onDocumentReady} from './document-ready';
+import {onDocumentReady} from './core/document-ready';
 import {urls} from './config';
 
 /**

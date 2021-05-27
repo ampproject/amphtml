@@ -495,7 +495,7 @@ export class NextPageService {
    * @return {!HostPage}
    */
   createHostPage() {
-    const {title, location} = this.doc_;
+    const {location, title} = this.doc_;
     const {href: url} = location;
     const image =
       parseSchemaImage(this.doc_) ||

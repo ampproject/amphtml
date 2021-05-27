@@ -171,8 +171,8 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   getMetadata_() {
-    const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
-    const {title, documentElement} = this.getAmpDoc().getRootNode();
+    const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(this.element);
+    const {documentElement, title} = this.getAmpDoc().getRootNode();
 
     return dict({
       'sourceUrl': sourceUrl,
@@ -198,6 +198,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
     const img = new Image();
     img.src = addDataParamsToUrl(poster, element);
+    img.setAttribute('loading', 'lazy');
     img.setAttribute('placeholder', '');
     this.applyFillContent(img);
     return img;

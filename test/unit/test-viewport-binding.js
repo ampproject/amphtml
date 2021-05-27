@@ -21,7 +21,7 @@ import {installDocService} from '../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {toggleExperiment} from '../../src/experiments';
-import {whenDocumentReady} from '../../src/document-ready';
+import {whenDocumentReady} from '../../src/core/document-ready';
 
 describes.realWin('ViewportBindingNatural', {ampCss: true}, (env) => {
   let binding;

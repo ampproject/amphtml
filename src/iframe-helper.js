@@ -511,7 +511,7 @@ export class SubscriptionApi {
  * @return {boolean}
  */
 export function looksLikeTrackingIframe(element) {
-  const {width, height} = element.getLayoutSize();
+  const {height, width} = element.getLayoutSize();
   // This heuristic is subject to change.
   if (width > 10 || height > 10) {
     return false;
@@ -536,7 +536,7 @@ const adSizes = [
  * @visibleForTesting
  */
 export function isAdLike(element) {
-  const {width, height} = element.getLayoutSize();
+  const {height, width} = element.getLayoutSize();
   for (let i = 0; i < adSizes.length; i++) {
     const refWidth = adSizes[i][0];
     const refHeight = adSizes[i][1];

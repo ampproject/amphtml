@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
+import {getMode, isModeDevelopment} from './mode';
 import {loadPromise} from './event-helper';
-import {parseQueryString} from './url';
+import {parseQueryString} from './core/types/string/url';
 import {urls} from './config';
 
 /**
@@ -33,7 +33,7 @@ export function maybeValidate(win) {
     return;
   }
   let validator = false;
-  if (getMode().development) {
+  if (isModeDevelopment(win)) {
     const hash = parseQueryString(
       win.location['originalHash'] || win.location.hash
     );

@@ -28,7 +28,7 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {mod} from '../../../src/utils/math';
+import {mod} from '../../../src/core/math';
 
 const TAG = 'amp-selector';
 
@@ -710,7 +710,7 @@ export class AmpSelector extends AMP.BaseElement {
  * @return {boolean}
  */
 function isElementHidden(element, rect) {
-  const {width, height} = rect;
+  const {height, width} = rect;
   return element.hidden || width == 0 || height == 0;
 }
 

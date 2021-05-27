@@ -23,7 +23,7 @@ import {validateData, writeScript} from '../../3p/3p';
 export function ketshwa(global, data) {
   validateData(data, ['widgetid', 'externalid'], []);
 
-  const {widgetid, externalid} = data;
+  const {externalid, widgetid} = data;
   const skey = `widget_${widgetid}`;
 
   const dv = global.document.createElement('div');
