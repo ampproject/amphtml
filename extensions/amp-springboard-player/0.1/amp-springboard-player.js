@@ -17,7 +17,6 @@
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
@@ -155,7 +154,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('img');
-    propagateAttributes(['aria-label'], this.element, placeholder);
+    this.propagateAttributes(['aria-label'], placeholder);
     this.applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');

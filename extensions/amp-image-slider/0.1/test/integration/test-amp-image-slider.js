@@ -25,30 +25,18 @@ t.run('amp-image-slider', {}, function () {
   // We have 2 sliders, #s1 and #s2
   // #s2 has attribute `disable-hint-reappear` set
   // A huge padding is added to the bottom to allow room for scrolling
-  const sliderBody = /* HTML */ `
-    <amp-image-slider
-      tabindex="0"
-      id="s1"
-      layout="responsive"
-      width="1000"
-      height="500"
-    >
+  const sliderBody = `
+    <amp-image-slider tabindex="0" id="s1"
+        layout="responsive" width="1000" height="500">
       <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
       <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
       <div first class="label">BEFORE</div>
       <div second class="label">AFTER</div>
     </amp-image-slider>
     <button id="b1" on="tap:s1.seekTo(percent=0.4)">seekTo 10%</button>
-    <amp-image-slider
-      tabindex="0"
-      id="s2"
-      layout="responsive"
-      width="1000"
-      height="500"
-      disable-hint-reappear
-      initial-slider-position="0.6"
-      step-size="0.2"
-    >
+    <amp-image-slider tabindex="0" id="s2"
+        layout="responsive" width="1000" height="500" disable-hint-reappear
+        initial-slider-position="0.6" step-size="0.2">
       <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
       <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
       <div first class="label">BEFORE</div>
@@ -57,32 +45,6 @@ t.run('amp-image-slider', {}, function () {
     <button id="b2" on="tap:s2.seekTo(percent=0.4)">seekTo 10%</button>
 
     <p id="pad">HUGE PADDING</p>
-
-    <amp-image-slider
-      tabindex="0"
-      id="s3"
-      layout="responsive"
-      width="1000"
-      height="500"
-    >
-      <img
-        src="/examples/img/sea@2x.jpg"
-        width="1000"
-        height="500"
-        class="custom-fill"
-        loading="lazy"
-      />
-      <img
-        src="/examples/img/hero@2x.jpg"
-        width="1000"
-        height="500"
-        class="custom-fill"
-        loading="lazy"
-      />
-      <div first class="label">BEFORE</div>
-      <div second class="label">AFTER</div>
-    </amp-image-slider>
-    <button id="b3" on="tap:s3.seekTo(percent=0.4)">seekTo 10%</button>
   `;
 
   const css = `
@@ -98,11 +60,6 @@ t.run('amp-image-slider', {}, function () {
     padding: 16px;
     font-family: Arial, Helvetica, sans-serif;
     box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.75);
-  }
-  img.custom-fill {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
   }
   `;
 
@@ -122,7 +79,6 @@ t.run('amp-image-slider', {}, function () {
       let observerTimeout;
       let s1; // sliderInfo of slider 1
       let s2; // sliderInfo of slider 2
-      let s3; // sliderInfo of slider 3
 
       beforeEach(() => {
         win = env.win;
@@ -712,24 +668,6 @@ t.run('amp-image-slider', {}, function () {
           );
         });
 
-        it('should hide hint on user interaction (e.g. mousedown) with images', () => {
-          const dispatchMouseDownEventFunction = () =>
-            s3.slider.dispatchEvent(createMouseDownEvent(s3.pos.percent40));
-          const isHintHiddenCallback = () =>
-            s3.leftHint.classList.contains(
-              'i-amphtml-image-slider-hint-hidden'
-            );
-          // Initially hint should be displayed
-          expect(isHintHiddenCallback()).to.be.false;
-          // Make sure hint is hidden after interaction
-          return invokeAndObserve(
-            /*invokeFunc*/ dispatchMouseDownEventFunction,
-            /*target*/ s3.slider,
-            /*cb*/ isHintHiddenCallback,
-            /*opt_errorMessage*/ 'Hint failed to be hidden'
-          );
-        });
-
         // TODO: (#17581)
         // This test flakes. May require events/signals to help solve the issue.
         it.skip(
@@ -872,17 +810,15 @@ t.run('amp-image-slider', {}, function () {
         // Guaranteed that sliders are both here
         const slider1 = doc.getElementById('s1');
         const slider2 = doc.getElementById('s2');
-        const slider3 = doc.getElementById('s3');
 
         // Check if signals have been installed
         const areSignalsInstalled = () =>
-          !!slider1.signals && !!slider2.signals && !!slider3.signals;
+          !!slider1.signals && !!slider2.signals;
         // LOAD_END promises of sliders
         const haveSlidersLoadEnded = () => {
           return Promise.all([
             slider1.signals().whenSignal('load-end'),
             slider2.signals().whenSignal('load-end'),
-            slider3.signals().whenSignal('load-end'),
           ]);
         };
         // Start observer first to capture signal
@@ -908,7 +844,6 @@ t.run('amp-image-slider', {}, function () {
       function setup() {
         const slider1 = doc.getElementById('s1');
         const slider2 = doc.getElementById('s2');
-        const slider3 = doc.getElementById('s3');
 
         // Creates a sliderInfo of slider
         // sliderInfo is a collection of information of the slider
@@ -962,7 +897,6 @@ t.run('amp-image-slider', {}, function () {
 
         s1 = createSliderInfo(slider1);
         s2 = createSliderInfo(slider2);
-        s3 = createSliderInfo(slider3);
 
         // The viewport test has been flaky for quite a while
         // A possibility is that the viewport might be high enough to keep

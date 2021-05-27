@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as propagateAttributeObject from '../../src/core/dom/propagate-attributes';
 import {AmpImg, installImg} from '../../builtins/amp-img/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {Layout, LayoutPriority} from '../../src/layout';
@@ -407,10 +406,7 @@ describes.sandboxed('amp-img', {}, (env) => {
     el.getLayoutSize = () => ({width: 300, height: 200});
 
     const impl = new AmpImg(el);
-    const propagateAttributesSpy = sandbox.spy(
-      propagateAttributeObject,
-      'propagateAttributes'
-    );
+    const propagateAttributesSpy = sandbox.spy(impl, 'propagateAttributes');
     impl.buildCallback();
     impl.layoutCallback();
 
