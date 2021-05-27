@@ -24,7 +24,12 @@ const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
 
-async function skip(extensionVersion) {
+/**
+ * Determines whether to skip
+ * @param {string} extensionVersion 
+ * @returns {Promise<boolean>}
+ */
+async function shouldSkip(extensionVersion) {
   try {
     await stat(`extensions/${extension}/${extensionVersion}`);
     return false;
@@ -34,6 +39,10 @@ async function skip(extensionVersion) {
   }
 }
 
+/**
+ * Write package.json
+ * @param {string} extensionVersion 
+ */
 async function writePackageJson(extensionVersion) {
   const extensionVersionArr = extensionVersion.split('.', 2);
   const major = extensionVersionArr[0];
@@ -107,6 +116,10 @@ async function writePackageJson(extensionVersion) {
   }
 }
 
+/**
+ * Write react.js
+ * @param {string} extensionVersion 
+ */
 async function writeReactJs(extensionVersion) {
   const content = "module.exports = require('./dist/component-react');";
   try {
@@ -121,9 +134,13 @@ async function writeReactJs(extensionVersion) {
     return;
   }
 }
+
+/**
+ * Main
+ */
 async function main() {
   for (const version of ['1.0', '2.0']) {
-    if (await skip(version)) {
+    if (await shouldSkip(version)) {
       continue;
     }
     writePackageJson(version);
