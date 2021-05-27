@@ -80,6 +80,7 @@ class AmpFacebookPage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.element.setAttribute('data-embed-as', 'page');
     const iframe = getIframe(this.win, this.element, TYPE);
     iframe.title = this.element.title || 'Facebook page';
     this.applyFillContent(iframe);

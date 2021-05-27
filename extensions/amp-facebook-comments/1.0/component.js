@@ -30,6 +30,7 @@ const TYPE = 'facebook';
 const FULL_HEIGHT = '100%';
 const MATCHES_MESSAGING_ORIGIN = () => true;
 const DEFAULT_TITLE = 'Facebook comments';
+const EMBED_AS = 'comments';
 
 /**
  * @param {!FacebookCommentsDef.Props} props
@@ -85,8 +86,14 @@ function FacebookCommentsWithRef(
 
   return (
     <ProxyIframeEmbed
-      contextOptions={{tagName: 'AMP-FACEBOOK-COMMENTS'}}
-      options={{colorScheme, href, locale, numPosts, orderBy}}
+      options={{
+        colorScheme,
+        href,
+        locale,
+        numPosts,
+        orderBy,
+        embedAs: EMBED_AS,
+      }}
       ref={ref}
       title={title}
       {...rest}

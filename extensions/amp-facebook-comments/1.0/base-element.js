@@ -37,13 +37,6 @@ BaseElement['props'] = {
 };
 
 /** @override */
-BaseElement['staticProps'] = {
-  'contextOptions': {
-    'tagName': 'AMP-FACEBOOK-COMMENTS',
-  },
-};
-
-/** @override */
 BaseElement['layoutSizeDefined'] = true;
 
 /** @override */

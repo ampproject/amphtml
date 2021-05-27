@@ -80,6 +80,7 @@ class AmpFacebookComments extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.element.setAttribute('data-embed-as', 'comments');
     const iframe = getIframe(this.win, this.element, TYPE);
     iframe.title = this.element.title || 'Facebook comments';
     this.applyFillContent(iframe);
