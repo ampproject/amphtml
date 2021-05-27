@@ -63,7 +63,9 @@ async function prCheck() {
     runCheck('amp validate-html-fixtures --local_changes');
   }
 
-  if (buildTargetsInclude(Targets.LINT)) {
+  if (buildTargetsInclude(Targets.LINT_RULES)) {
+    runCheck('amp lint');
+  } else if (buildTargetsInclude(Targets.LINT)) {
     runCheck('amp lint --local_changes');
   }
 

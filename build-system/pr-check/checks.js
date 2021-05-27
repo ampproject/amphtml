@@ -70,8 +70,10 @@ async function prBuildWorkflow() {
     timedExecOrDie('amp validate-html-fixtures');
   }
 
-  if (buildTargetsInclude(Targets.LINT)) {
+  if (buildTargetsInclude(Targets.LINT_RULES)) {
     timedExecOrDie('amp lint');
+  } else if (buildTargetsInclude(Targets.LINT)) {
+    timedExecOrDie('amp lint --local_changes');
   }
 
   if (buildTargetsInclude(Targets.PRETTIFY)) {

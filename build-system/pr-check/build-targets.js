@@ -56,6 +56,7 @@ const Targets = {
   INTEGRATION_TEST: 'INTEGRATION_TEST',
   INVALID_WHITESPACES: 'INVALID_WHITESPACES',
   LINT: 'LINT',
+  LINT_RULES: 'LINT_RULES',
   OWNERS: 'OWNERS',
   PACKAGE_UPGRADE: 'PACKAGE_UPGRADE',
   PRESUBMIT: 'PRESUBMIT',
@@ -238,6 +239,9 @@ const targetMatchers = {
       file == 'build-system/tasks/lint.js' ||
       file.startsWith('build-system/test-configs')
     );
+  },
+  [Targets.LINT_RULES]: (file) => {
+    return file.endsWith('.eslintrc.js') || file == 'package.json';
   },
   [Targets.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
