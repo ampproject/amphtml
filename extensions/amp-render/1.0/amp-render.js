@@ -269,32 +269,25 @@ export class AmpRender extends BaseElement {
               return this.renderTemplateAsString_(data);
             }
 
-            let bind, element;
-            return Services.bindForDocOrNull(this.element)
-              .then((b) => {
-                bind = b;
-                if (!bind) {
-                  throw new Error('bind unavailable');
-                }
-                return templates.renderTemplate(
-                  dev().assertElement(template),
-                  data
-                );
-              })
-              .then((el) => {
-                element = el;
-                return bind.rescan([element], [], {
-                  'fast': true,
-                  // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
-                  // mutation occured, which is null for the initial render
-                  'update': bind.signals().get('FIRST_MUTATE') !== null,
-                });
-              })
-              .then(() => dict({'__html': element./* OK */ innerHTML}))
-              .catch((e) => {
-                user().error(TAG, e.message);
+            return Services.bindForDocOrNull(this.element).then((bind) => {
+              if (!bind) {
                 return this.renderTemplateAsString_(data);
-              });
+              }
+              return templates
+                .renderTemplate(dev().assertElement(template), data)
+                .then((element) => {
+                  bind.rescan([element], [], {
+                    'fast': true,
+                    // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
+                    // mutation occured, which is null for the initial render
+                    'update': bind.signals().get('FIRST_MUTATE') !== null,
+                  });
+                  return element;
+                })
+                .then((element) =>
+                  dict({'__html': element./* OK */ innerHTML})
+                );
+            });
           },
         })
       );
