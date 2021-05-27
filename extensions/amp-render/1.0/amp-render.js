@@ -286,7 +286,6 @@ export class AmpRender extends BaseElement {
             if (this.element.getAttribute('binding') === 'no') {
               return this.renderTemplateAsString_(data);
             }
-            let el;
             return Services.bindForDocOrNull(this.element).then((bind) => {
               if (!bind) {
                 return this.renderTemplateAsString_(data);
@@ -294,21 +293,18 @@ export class AmpRender extends BaseElement {
               return templates
                 .renderTemplate(dev().assertElement(template), data)
                 .then((element) => {
-                  el = element;
-                  return bind.rescan([element], [], {
-                    'fast': true,
-                    'update': getUpdateValue(
-                      this.element.getAttribute('binding'),
-                      // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
-                      // mutation occured, which is null for the initial render
-                      bind.signals().get('FIRST_MUTATE') === null
-                    ),
-                  });
-                  // return element;
-                })
-                .then((element) =>
-                  dict({'__html': el./* OK */ innerHTML})
-                );
+                  return bind
+                    .rescan([element], [], {
+                      'fast': true,
+                      'update': getUpdateValue(
+                        this.element.getAttribute('binding'),
+                        // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
+                        // mutation occured, which is null for the initial render
+                        bind.signals().get('FIRST_MUTATE') === null
+                      ),
+                    })
+                    .then(() => dict({'__html': element./* OK */ innerHTML}));
+                });
             });
           },
         })
