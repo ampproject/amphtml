@@ -735,6 +735,13 @@ export class AmpStoryPage extends AMP.BaseElement {
           case 'amp-anim':
           case 'amp-img':
           case 'amp-story-360':
+            // Don't block media layout on a fallback element that will likely
+            // never build/load.
+            if (mediaEl.hasAttribute('fallback')) {
+              resolve();
+              return;
+            }
+
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
               .then(resolve, resolve);
