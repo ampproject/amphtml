@@ -18,7 +18,6 @@ import {Deferred} from '../../../src/core/data-structures/promise';
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 import {
   createFrameFor,
   mutedOrUnmutedEvent,
@@ -34,6 +33,7 @@ import {
   getDataParamsFromAttributes,
   isFullscreenElement,
 } from '../../../src/dom';
+import {getDailymotionIframeSrc} from '../dailymotion-api';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -278,32 +278,25 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @private */
   getIframeSrc_() {
-    let iframeSrc =
-      'https://www.dailymotion.com/embed/video/' +
-      encodeURIComponent(this.videoid_ || '') +
-      '?api=1&html=1&app=amp';
+    const mute = this.element.getAttribute(`data-mute`);
+    const endscreenEnable = this.element.getAttribute(`data-endscreen-enable`);
+    const sharingEnable = this.element.getAttribute(`data-sharing-enable`);
+    const start = this.element.getAttribute(`data-start`);
+    const uiHighlight = this.element.getAttribute(`data-ui-highlight`);
+    const uiLogo = this.element.getAttribute(`data-ui-logo`);
+    const info = this.element.getAttribute(`data-info`);
 
-    const explicitParamsAttributes = [
-      'mute',
-      'endscreen-enable',
-      'sharing-enable',
-      'start',
-      'ui-highlight',
-      'ui-logo',
-      'info',
-    ];
-
-    explicitParamsAttributes.forEach((explicitParam) => {
-      const val = this.element.getAttribute(`data-${explicitParam}`);
-      if (val) {
-        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
-      }
-    });
-
-    const implicitParams = getDataParamsFromAttributes(this.element);
-    iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
-
-    return iframeSrc;
+    return getDailymotionIframeSrc(
+      this.videoid_,
+      mute,
+      endscreenEnable,
+      sharingEnable,
+      start,
+      uiHighlight,
+      uiLogo,
+      info,
+      getDataParamsFromAttributes(this.element)
+    );
   }
 
   /** @override */
