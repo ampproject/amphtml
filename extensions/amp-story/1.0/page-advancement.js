@@ -63,6 +63,9 @@ const PROTECTED_SCREEN_EDGE_PERCENT = 12;
  */
 const MINIMUM_PROTECTED_SCREEN_EDGE_PX = 48;
 
+/** @private @const {number} */
+const MINIMUM_TIME_BASED_AUTO_ADVANCE_MS = 500;
+
 /**
  * Maximum percent of screen that can be occupied by a single link
  * before the link is considered navigation blocking and ignored.
@@ -809,6 +812,14 @@ export class TimeBasedAdvancement extends AdvancementConfig {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
+    if (delayMs < MINIMUM_TIME_BASED_AUTO_ADVANCE_MS) {
+      user().warn(
+        'AMP-STORY-PAGE',
+        `${element.id} has an auto advance duration that is too short. ` +
+          `${MINIMUM_TIME_BASED_AUTO_ADVANCE_MS}ms is used instead.`
+      );
+      delayMs = MINIMUM_TIME_BASED_AUTO_ADVANCE_MS;
+    }
     /** @private @const {number} */
     this.delayMs_ = delayMs;
 
