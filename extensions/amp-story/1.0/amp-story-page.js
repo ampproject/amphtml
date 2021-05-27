@@ -1260,10 +1260,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
     this.signals()
       .whenSignal(CommonSignals.LOAD_END)
-      .then(() => this.animationManager_?.applyLastFrame())
-      .then(() => {
-        this.animationManager_.finishAll();
-      });
+      .then(() => this.animationManager_.applyLastFrame());
   }
 
   /**
