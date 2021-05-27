@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {layoutRectLtwh} from '../layout-rect';
+import {layoutRectLtwh} from '../core/math/layout-rect';
 import {toWin} from '../types';
 
 /**
@@ -30,7 +30,7 @@ export function getPageLayoutBoxBlocking(element) {
     left += n./*OK*/ offsetLeft;
     top += n./*OK*/ offsetTop;
   }
-  const {offsetWidth, offsetHeight} = /** @type {!HTMLElement} */ (element);
+  const {offsetHeight, offsetWidth} = /** @type {!HTMLElement} */ (element);
   return layoutRectLtwh(left, top, offsetWidth, offsetHeight);
 }
 

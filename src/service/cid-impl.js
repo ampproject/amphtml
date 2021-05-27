@@ -35,7 +35,7 @@ import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
 import {isExperimentOn} from '../../src/experiments';
 import {isIframed} from '../dom';
-import {parseJson, tryParseJson} from '../json';
+import {parseJson, tryParseJson} from '../core/types/object/json';
 import {rethrowAsync} from '../core/error';
 import {tryResolve} from '../core/data-structures/promise';
 
@@ -458,9 +458,9 @@ function maybeGetCidFromCookieOrBackup(cid, getCidStruct) {
  * @return {!Promise<?string>}
  */
 function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
-  const {isBackupCidExpOn, ampdoc} = cid;
+  const {ampdoc, isBackupCidExpOn} = cid;
   const {win} = ampdoc;
-  const {scope, disableBackup} = getCidStruct;
+  const {disableBackup, scope} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
 
   return maybeGetCidFromCookieOrBackup(cid, getCidStruct).then(

@@ -98,7 +98,20 @@ export function createCustomElementClass(win, elementConnectedCallback) {
   );
   // It's necessary to create a subclass, because the same "base" class cannot
   // be registered to multiple custom elements.
-  class CustomAmpElement extends BaseCustomElement {}
+  class CustomAmpElement extends BaseCustomElement {
+    /**
+     * adoptedCallback is only called when using a Native implementation of Custom Elements V1.
+     * Our polyfill does not call this method.
+     */
+    adoptedCallback() {
+      // Work around an issue with Firefox changing the prototype of our
+      // already constructed element to the new document's HTMLElement.
+      if (Object.getPrototypeOf(this) !== customAmpElementProto) {
+        Object.setPrototypeOf(this, customAmpElementProto);
+      }
+    }
+  }
+  const customAmpElementProto = CustomAmpElement.prototype;
   return /** @type {typeof AmpElement} */ (CustomAmpElement);
 }
 
@@ -1964,6 +1977,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       const resourceState = this.getResource_().getState();
       // Do not show fallback before layout
       if (
+        !this.R1() &&
         show &&
         (resourceState == ResourceState.NOT_BUILT ||
           resourceState == ResourceState.NOT_LAID_OUT ||

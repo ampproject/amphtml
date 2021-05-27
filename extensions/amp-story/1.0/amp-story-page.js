@@ -77,6 +77,7 @@ import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {prefersReducedMotion} from '../../../src/utils/media-query-props';
+import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {px, toggle} from '../../../src/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
@@ -533,11 +534,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.state_ = state;
         break;
       case PageState.PAUSED:
-        // canResume keeps the time advancement timer if set to true, and resets
-        // it when set to false. If the bookend if open, reset the timer. If
-        // user is long pressing, don't reset it.
-        const canResume = !this.storeService_.get(StateProperty.BOOKEND_STATE);
-        this.advancement_.stop(canResume);
+        this.advancement_.stop();
         this.pauseAllMedia_(false /** rewindToBeginning */);
         this.animationManager_?.pauseAll();
         this.state_ = state;
@@ -660,7 +657,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           const uiState = this.storeService_.get(StateProperty.UI_STATE);
           // The desktop panels UI uses CSS scale. Retrieving clientHeight/Width
           // ensures we are getting the raw size, ignoring the scale.
-          const {width, height} =
+          const {height, width} =
             uiState === UIType.DESKTOP_PANELS
               ? {
                   height: this.element./*OK*/ clientHeight,
@@ -1808,6 +1805,12 @@ export class AmpStoryPage extends AMP.BaseElement {
         attachmentEl
       );
 
+      // This ensures `active` is set on first render.
+      // Otherwise setState may be called before this.openAttachmentEl_ exists.
+      if (this.element.hasAttribute('active')) {
+        this.openAttachmentEl_.setAttribute('active', '');
+      }
+
       const container = this.win.document.createElement('div');
       container.classList.add('i-amphtml-story-page-open-attachment-host');
       container.setAttribute('role', 'button');
@@ -1901,7 +1904,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         childImgNode &&
           ampImgNode
             .getImpl()
-            .then((ampImg) => ampImg.propagateAttributes('alt', childImgNode));
+            .then((impl) =>
+              propagateAttributes('alt', impl.element, childImgNode)
+            );
       }
     });
   }

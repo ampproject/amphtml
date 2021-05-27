@@ -28,7 +28,7 @@
  * @return {number} -1 indicates an error has occurred
  */
 export function getAddThisMode(_) {
-  const {hasPubId, hasWidgetId, hasProductCode} = getAddThisModeObject(_);
+  const {hasProductCode, hasPubId, hasWidgetId} = getAddThisModeObject(_);
   if (hasPubId) {
     if (hasWidgetId && !hasProductCode) {
       return 1;
@@ -50,7 +50,7 @@ export function getAddThisMode(_) {
  * }}
  */
 export function getAddThisModeObject(mode) {
-  const {pubId, widgetId, productCode} = mode;
+  const {productCode, pubId, widgetId} = mode;
   const hasPubId = isPubId(pubId);
   // widget ids are 4-character strings with lower-case letters and numbers only
   const hasWidgetId = isWidgetId(widgetId);

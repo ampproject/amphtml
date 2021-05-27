@@ -30,10 +30,10 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilder,
 } from '../service';
-import {isDocumentReady, whenDocumentReady} from '../document-ready';
+import {isDocumentReady, whenDocumentReady} from '../core/document-ready';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
 import {map} from '../core/types/object';
-import {parseQueryString} from '../url';
+import {parseQueryString} from '../core/types/string/url';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';

@@ -2061,6 +2061,33 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
     expect(element).to.not.have.class('amp-notsupported');
   });
 
+  it('toggleFallback should toggle unsupported class on R1 elements', () => {
+    element.resource = {
+      getState: () => {
+        return ResourceState.NOT_LAID_OUT;
+      },
+    };
+    element.resources_ = {
+      getResourceForElement: (element) => {
+        return element.resource;
+      },
+    };
+    element.R1 = () => {
+      return true;
+    };
+    element.getAmpDoc = () => doc;
+    const owners = Services.ownersForDoc(doc);
+    owners.scheduleLayout = env.sandbox.mock();
+    const fallback = element.appendChild(createWithAttr('fallback'));
+    element.toggleFallback(true);
+    expect(element).to.have.class('amp-notsupported');
+    expect(owners.scheduleLayout).to.be.calledOnce;
+    expect(owners.scheduleLayout).to.have.been.calledWith(element, fallback);
+
+    element.toggleFallback(false);
+    expect(element).to.not.have.class('amp-notsupported');
+  });
+
   it('toggleFallback should not display fallback before element layout', () => {
     let resourceState = ResourceState.NOT_LAID_OUT;
     element.resource = {

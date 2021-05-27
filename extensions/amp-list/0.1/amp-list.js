@@ -48,10 +48,10 @@ import {
 } from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {getValueForExpr} from '../../../src/json';
+
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/core/types/array';
 import {isExperimentOn} from '../../../src/experiments';
@@ -195,9 +195,7 @@ export class AmpList extends AMP.BaseElement {
       const doc = this.element.ownerDocument;
       const isEmail = doc && isAmp4Email(doc);
       const hasPlaceholder =
-        this.getPlaceholder() ||
-        (this.element.hasAttribute('diffable') &&
-          this.queryDiffablePlaceholder_());
+        this.getPlaceholder() || this.element.hasAttribute('diffable');
       if (isEmail) {
         if (!hasPlaceholder) {
           user().warn(
@@ -264,11 +262,7 @@ export class AmpList extends AMP.BaseElement {
       if (this.diffablePlaceholder_) {
         this.container_ = this.diffablePlaceholder_;
       } else {
-        user().warn(
-          TAG,
-          'Could not find child div[role=list] for diffing.',
-          this.element
-        );
+        user().warn(TAG, 'Could not find child div for diffing.', this.element);
       }
     }
     if (!this.container_) {
@@ -326,20 +320,28 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * A "diffable placeholder" is just a div[role=list] child without the
-   * [placeholder] attribute.
+   * A "diffable placeholder" is the child container <div> (which is usually created by the amp-list
+   * to hold the rendered children). It serves the same purpose as a placeholder, except it can be diffed.
    *
-   * It's used to display pre-fetch (stale) list content that can be
-   * DOM diffed with the fetched (fresh) content later.
+   * For example:
+   * <amp-list>
+   *   <div placeholder>I'm displayed before render.</div>
+   * </amp-list>
+   *
+   * <amp-list diffable>
+   *   <div role=list>I'm displayed before render.</div>
+   * </amp-list>
    *
    * @return {?Element}
    * @private
    */
   queryDiffablePlaceholder_() {
-    return scopedQuerySelector(
-      this.element,
-      '> div[role=list]:not([placeholder]):not([fallback]):not([fetch-error])'
-    );
+    let selector = this.element.hasAttribute('single-item')
+      ? '> div'
+      : '> div[role=list]';
+    // Don't select other special <div> children used for placeholders/fallback/etc.
+    selector += ':not([placeholder]):not([fallback]):not([fetch-error])';
+    return scopedQuerySelector(this.element, selector);
   }
 
   /**
@@ -726,7 +728,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetchList_(options = {}) {
-    const {refresh = false, append = false} = options;
+    const {append = false, refresh = false} = options;
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
       return Promise.resolve();
@@ -898,7 +900,7 @@ export class AmpList extends AMP.BaseElement {
    */
   scheduleRender_(data, opt_append, opt_payload) {
     const deferred = new Deferred();
-    const {promise, resolve: resolver, reject: rejecter} = deferred;
+    const {promise, reject: rejecter, resolve: resolver} = deferred;
 
     // If there's nothing currently being rendered, schedule a render pass.
     if (!this.renderItems_) {
@@ -1066,21 +1068,19 @@ export class AmpList extends AMP.BaseElement {
 
     // binding=refresh: Only do render-blocking update after initial render.
     if (binding && binding.startsWith('refresh')) {
-      // Bind service must be available after first mutation, so don't
-      // wait on the async service getter.
-      if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
+      // Don't bother using bindForDocOrNull() since the Bind service must be available after first mutate.
+      const afterFirstMutate =
+        this.bind_ && this.bind_.signals().get('FIRST_MUTATE');
+      if (afterFirstMutate) {
         return updateWith(this.bind_);
       } else {
-        // On initial render, do a non-blocking scan and don't update.
-        Services.bindForDocOrNull(this.element).then((bind) => {
-          if (bind) {
-            const evaluate = binding == 'refresh-evaluate';
-            bind.rescan(elements, [], {
-              'fast': true,
-              'update': evaluate ? 'evaluate' : false,
-            });
-          }
-        });
+        // This must be initial render, so do a non-blocking scan for bindings only.
+        // [diffable] is a special case that is handled later in render_(), see comment there.
+        if (!this.element.hasAttribute('diffable')) {
+          this.scanForBindings_(elements, []);
+        }
+
+        // Don't block render and return synchronously.
         return Promise.resolve(elements);
       }
     }
@@ -1091,6 +1091,32 @@ export class AmpList extends AMP.BaseElement {
         return updateWith(bind);
       } else {
         return Promise.resolve(elements);
+      }
+    });
+  }
+
+  /**
+   * Scans for bindings in `addedElements` and removes bindings in `removedElements`.
+   * Unlike updateBindings(), does NOT apply bindings or update DOM.
+   * Should only be used for binding="refresh" or binding="refresh-evaluate".
+   * @param {!Array<!Element>} addedElements
+   * @param {!Array<!Element>} removedElements
+   * @private
+   */
+  scanForBindings_(addedElements, removedElements) {
+    const binding = this.element.getAttribute('binding');
+    if (!binding || !binding.startsWith('refresh')) {
+      return;
+    }
+    Services.bindForDocOrNull(this.element).then((bind) => {
+      if (bind) {
+        // For binding="refresh-evaluate", we scan for bindings, evaluate+cache expressions, but skip DOM update.
+        // For binding="refresh", we only scan for bindings.
+        const update = binding == 'refresh-evaluate' ? 'evaluate' : false;
+        bind.rescan(addedElements, removedElements, {
+          'fast': true,
+          'update': update,
+        });
       }
     });
   }
@@ -1107,10 +1133,18 @@ export class AmpList extends AMP.BaseElement {
     const renderAndResize = () => {
       this.hideFallbackAndPlaceholder_();
 
-      if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
+      if (this.element.hasAttribute('diffable')) {
         // TODO:(wg-performance)(#28781) Ensure owners_.scheduleUnlayout() is
         // called for diff elements that are removed
         this.diff_(container, elements);
+
+        // For diffable amp-list, we have to wait until DOM diffing is done here to scan for new bindings
+        // (vs. asynchronously in updateBindings()), and scan the entire container (vs. just `elements`).
+        //
+        // This is because instead of replacing the entire DOM subtree, the diffing process removes
+        // select children from `elements` and inserts them into the container. This results in a race
+        // between diff_() and Bind.rescan(), which we avoid by delaying the latter until now.
+        this.scanForBindings_([container], [container]);
       } else {
         if (!opt_append) {
           this.owners_./*OK*/ scheduleUnlayout(this.element, container);

@@ -57,7 +57,10 @@ import {
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
 import {installRealTimeConfigServiceForDoc} from '../../../../src/service/real-time-config/real-time-config-impl';
-import {layoutRectLtwh, layoutSizeFromRect} from '../../../../src/layout-rect';
+import {
+  layoutRectLtwh,
+  layoutSizeFromRect,
+} from '../../../../src/core/math/layout-rect';
 import {macroTask} from '../../../../testing/yield';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
@@ -3471,7 +3474,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
       {type: 'otherNetwork', prefVal: true},
     ].forEach((test) =>
       it(JSON.stringify(test), () => {
-        const {type, prefVal, expected} = test;
+        const {expected, prefVal, type} = test;
         if (type) {
           a4a.element.setAttribute('type', type);
         }

@@ -16,7 +16,7 @@
     "strictNullChecks": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
-    "incremental": true,
+    "incremental": false,
     "esModuleInterop": true,
     "declaration": true
   },
@@ -49,10 +49,10 @@
     "common/check-package-manager.js",
     "server/app-index/test/test-html.js",
     "server/app-index/test/test-amphtml-helpers.js",
-    "server/new-server/transforms/dist",
+    "server/new-server/**/*",
     "server/typescript-compile.js",
     "test-configs/dep-check-config.js",
     "tasks/e2e/helper.js",
-    "tasks/get-zindex/test-1.js"
+    "tasks/get-zindex/*"
   ]
 }

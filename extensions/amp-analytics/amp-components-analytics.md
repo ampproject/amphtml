@@ -64,7 +64,7 @@ Note: With the use of **`customEventReporter`**, AMP assumes all custom events a
 
 ### useAnalyticsInSandbox API
 
-Third-party AMP components can contain an amp-analytics [configuration](amp-analytics.md#sending-analytics-to-a-vendor-or-in-house) to collect analytics events. Currently, only the `visible` and `hidden` events are supported. To request other existing analytics [events](amp-analytics.md#triggers) (e.g., `ini-load`, `click`) to support analytics in third-party AMP components, please submit a [feature request in Github](https://github.com/ampproject/amphtml/issues/new).
+Third-party AMP components can contain an amp-analytics [configuration](amp-analytics.md#sending-analytics-to-a-vendor-or-in-house) to collect analytics events. Currently, only the `visible` and `hidden` events are supported. To request other existing analytics [events](amp-analytics.md#triggers) (e.g., `ini-load`, `click`) to support analytics in third-party AMP components, please submit a [feature request](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Feature+Request&template=feature-request.yml) on GitHub.
 
 To send analytics pings, third-party AMP components must call the `useAnalyticsInSandbox()` API function and provide a promise that resolves with their analytics configuration when it is ready. The analytics configuration should be a JSON object specified in accordance with the amp-analytics [spec](amp-analytics.md#triggers).
 
@@ -80,7 +80,7 @@ Both APIs will insert an `<amp-analytics>` element into the DOM when the third-p
 
 ## Restrictions
 
-An inserted amp-analytics element is sandboxed within its parent third-party AMP component. This means its selector cannot access elements outside of its parent scope, and the [URL variable substitution](../../spec/amp-var-substitutions.md) only works if variable is included in the [allowlist](./0.1/sandbox-vars-allowlist.js).
+An inserted amp-analytics element is sandboxed within its parent third-party AMP component. This means its selector cannot access elements outside of its parent scope, and the [URL variable substitution](../../docs/spec/amp-var-substitutions.md) only works if variable is included in the [allowlist](./0.1/sandbox-vars-allowlist.js).
 
 ## Documentation requirements
 

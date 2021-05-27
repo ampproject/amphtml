@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import {DirectionX, RectDef} from './def';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {mapRange} from '../../../src/utils/math.js';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
+import {mapRange} from '../../../src/core/math';
 
 /**
  * @param {number} containerWidth
@@ -100,8 +100,8 @@ export function interpolatedBoxesTransform(from, to, step = 1) {
  * @return {!RectDef}
  */
 export function letterboxRect(original, container) {
-  const {width, height} = original;
-  const {top, left, width: maxWidth, height: maxHeight} = container;
+  const {height, width} = original;
+  const {height: maxHeight, left, top, width: maxWidth} = container;
 
   const containerAspect = maxWidth / maxHeight;
   const originalAspect = width / height;

@@ -168,6 +168,11 @@ export class AmpRender extends BaseElement {
     this.initialSrc_ = this.element.getAttribute('src');
     this.src_ = this.initialSrc_;
 
+    const hasAriaLive = this.element.hasAttribute('aria-live');
+    if (!hasAriaLive) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
+
     this.registerApiAction('refresh', (api) => {
       const src = this.element.getAttribute('src');
       // There is an alternative way to do this using `mutationObserverCallback` while using a boolean
@@ -181,16 +186,33 @@ export class AmpRender extends BaseElement {
     });
 
     return dict({
+      'ariaLiveValue': hasAriaLive
+        ? this.element.getAttribute('aria-live')
+        : 'polite',
       'getJson': this.getFetchJsonFn(),
+      'onLoading': () => {
+        this.toggleLoading(true);
+      },
+      'onReady': () => {
+        this.toggleLoading(false);
+        this.togglePlaceholder(false);
+      },
+      'onRefresh': () => {
+        this.togglePlaceholder(true);
+        this.toggleFallback(false);
+      },
+      'onError': () => {
+        this.toggleLoading(false);
+        // If the content fails to load and there's a fallback element, display the fallback.
+        // Otherwise, continue displaying the placeholder.
+        if (this.getFallback()) {
+          this.togglePlaceholder(false);
+          this.toggleFallback(true);
+        } else {
+          this.togglePlaceholder(true);
+        }
+      },
     });
-  }
-
-  /** @override */
-  buildCallback() {
-    super.buildCallback();
-    if (!this.element.hasAttribute('aria-live')) {
-      this.element.setAttribute('aria-live', 'polite');
-    }
   }
 
   /** @override */

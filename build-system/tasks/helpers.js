@@ -31,8 +31,8 @@ const {
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
+const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
-const {green, red, cyan} = require('../common/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
@@ -292,6 +292,14 @@ function maybeToEsmName(name) {
 }
 
 /**
+ * @param {string} name
+ * @return {string}
+ */
+function maybeToNpmEsmName(name) {
+  return argv.esm ? name.replace(/\.js$/, '.module.js') : name;
+}
+
+/**
  * Minifies a given JavaScript file entry point.
  * @param {string} srcDir
  * @param {string} srcFilename
@@ -344,8 +352,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
  * @param {string} destFilename
  */
 function handleBundleError(err, continueOnError, destFilename) {
-  /** @type {Error|string} */
-  let message = err;
+  let message = err.toString();
   if (err.stack) {
     // Drop the node_modules call stack, which begins with '    at'.
     message = err.stack.replace(/    at[^]*/, '').trim();
@@ -473,8 +480,11 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
         const time = Date.now();
-        const buildPromise = buildResult
-          .rebuild()
+        const {rebuild} = /** @type {Required<esbuild.BuildResult>} */ (
+          buildResult
+        );
+
+        const buildPromise = rebuild()
           .then(() =>
             finishBundle(srcFilename, destDir, destFilename, options, time)
           )
@@ -501,9 +511,8 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
 async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
-  const destFilename = maybeToEsmName(
-    options.minify ? options.minifiedName : options.toName
-  );
+  const fileName = options.minify ? options.minifiedName : options.toName;
+  const destFilename = options.npm ? fileName : maybeToEsmName(fileName);
   const destFile = path.join(destDir, destFilename);
 
   if (watchedTargets.has(entryPoint)) {
@@ -786,7 +795,7 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
  * @return {!Promise}
  */
 async function thirdPartyBootstrap(input, outputName, options) {
-  const {minify, fortesting} = options;
+  const {fortesting, minify} = options;
   const destDir = `dist.3p/${minify ? internalRuntimeVersion : 'current'}`;
   await fs.ensureDir(destDir);
 
@@ -848,7 +857,7 @@ async function getDependencies(entryPoint, options) {
     metafile: true,
     plugins: [babelPlugin],
   });
-  return Object.keys(result.metafile?.inputs);
+  return Object.keys(result.metafile?.inputs ?? {});
 }
 
 module.exports = {
@@ -864,6 +873,7 @@ module.exports = {
   compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
+  maybeToNpmEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,

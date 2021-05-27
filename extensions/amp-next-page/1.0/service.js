@@ -45,7 +45,7 @@ import {
 import {setStyles, toggle} from '../../../src/style';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
@@ -495,7 +495,7 @@ export class NextPageService {
    * @return {!HostPage}
    */
   createHostPage() {
-    const {title, location} = this.doc_;
+    const {location, title} = this.doc_;
     const {href: url} = location;
     const image =
       parseSchemaImage(this.doc_) ||

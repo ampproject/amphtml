@@ -20,9 +20,9 @@
  */
 
 const atob = require('atob');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
 const {skipDependentJobs, timedExecOrDie} = require('./utils');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'visual-diff-tests.js';
 
@@ -36,6 +36,7 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
     timedExecOrDie('amp visual-diff --nobuild');
   } else {
+    timedExecOrDie('amp visual-diff --empty');
     skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or visual diff tests'

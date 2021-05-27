@@ -37,7 +37,7 @@ import {
 } from '../../../src/utils/size-observer';
 import {removeElement} from '../../../src/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {userAssert} from '../../../src/log';
 
 /**
@@ -318,7 +318,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
    * @param {!../layout-rect.LayoutSizeDef} size
    * @private
    */
-  onResized_({width, height}) {
+  onResized_({height, width}) {
     if (!this.iframe_) {
       return;
     }

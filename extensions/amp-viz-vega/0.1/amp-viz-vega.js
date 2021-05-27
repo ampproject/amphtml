@@ -21,14 +21,14 @@ import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber} from '../../../src/types';
+import {isFiniteNumber, isObject} from '../../../src/core/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/core/types';
+
 import {
   observeContentSize,
   unobserveContentSize,
 } from '../../../src/utils/size-observer';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 export class AmpVizVega extends AMP.BaseElement {
   /** @param {!AmpElement} element */

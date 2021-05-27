@@ -22,7 +22,7 @@ import {omit} from '../../../src/core/types/object';
 import {
   randomIdGenerator,
   sequentialIdGenerator,
-} from '../../../src/utils/id-generator';
+} from '../../../src/core/math/id-generator';
 import {
   useCallback,
   useContext,
@@ -60,10 +60,10 @@ const generateRandomId = randomIdGenerator(100000);
  */
 function AccordionWithRef(
   {
-    as: Comp = 'section',
-    expandSingleSection = false,
     animate = false,
+    as: Comp = 'section',
     children,
+    expandSingleSection = false,
     id,
     ...rest
   },
@@ -260,11 +260,11 @@ function setExpanded(id, value, expandedMap, expandSingleSection) {
  * @return {PreactDef.Renderable}
  */
 export function AccordionSection({
-  as: Comp = 'section',
-  expanded: defaultExpanded = false,
   animate: defaultAnimate = false,
-  id: propId,
+  as: Comp = 'section',
   children,
+  expanded: defaultExpanded = false,
+  id: propId,
   onExpandStateChange,
   ...rest
 }) {
@@ -276,11 +276,11 @@ export function AccordionSection({
   const [headerIdState, setHeaderIdState] = useState(null);
 
   const {
-    registerSection,
     animate: contextAnimate,
     isExpanded,
-    toggleExpanded,
     prefix,
+    registerSection,
+    toggleExpanded,
   } = useContext(AccordionContext);
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
@@ -351,14 +351,14 @@ export function AccordionSection({
  */
 export function AccordionHeader({
   as: Comp = 'div',
-  role = 'button',
-  className = '',
-  tabIndex = 0,
-  id,
   children,
+  className = '',
+  id,
+  role = 'button',
+  tabIndex = 0,
   ...rest
 }) {
-  const {contentId, headerId, expanded, toggleHandler, setHeaderId} =
+  const {contentId, expanded, headerId, setHeaderId, toggleHandler} =
     useContext(SectionContext);
   const classes = useStyles();
 
@@ -390,15 +390,15 @@ export function AccordionHeader({
  */
 export function AccordionContent({
   as: Comp = 'div',
-  role = 'region',
+  children,
   className = '',
   id,
-  children,
+  role = 'region',
   ...rest
 }) {
   const ref = useRef(null);
   const hasMountedRef = useRef(false);
-  const {contentId, headerId, expanded, animate, setContentId} =
+  const {animate, contentId, expanded, headerId, setContentId} =
     useContext(SectionContext);
   const classes = useStyles();
 

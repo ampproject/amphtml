@@ -24,7 +24,7 @@ import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
-import {deepEquals} from '../../../src/json';
+import {deepEquals} from '../../../src/core/types/object/json';
 import {dev, user} from '../../../src/log';
 import {prefersReducedMotion} from '../../../src/utils/media-query-props';
 import {setImportantStyles} from '../../../src/style';
@@ -212,7 +212,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   getMaxBounds_() {
     // Calculations to clamp image to edge of container.
-    const {width: containerWidth, height: containerHeight} = this.pageSize_;
+    const {height: containerHeight, width: containerWidth} = this.pageSize_;
 
     const ampImgWidth = this.ampImgEl_.getAttribute('width');
     const ampImgHeight = this.ampImgEl_.getAttribute('height');

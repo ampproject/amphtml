@@ -109,7 +109,7 @@ export class AnimationRunner {
    * @param {!AnimationSequence} sequence
    */
   constructor(page, config, webAnimationBuilderPromise, vsync, sequence) {
-    const {source, preset, startAfterId, spec} = config;
+    const {preset, source, spec, startAfterId} = config;
 
     /** @private @const */
     this.page_ = page;

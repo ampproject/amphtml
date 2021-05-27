@@ -80,7 +80,8 @@ function createMocha_() {
   if (argv.testnames || argv.watch) {
     reporter = '';
   } else if (argv.report || isCircleciBuild()) {
-    reporter = ciReporter;
+    // TODO(#28387) clean up this typing.
+    reporter = /** @type {*} */ (ciReporter);
   } else {
     reporter = dotsReporter;
   }
@@ -128,27 +129,29 @@ async function fetchCoverage_(outDir) {
   const zipFilename = path.join(outDir, 'coverage.zip');
   const zipFile = fs.createWriteStream(zipFilename);
 
-  await new Promise((resolve, reject) => {
-    http
-      .get(
-        {
-          host: HOST,
-          port: PORT,
-          path: COV_DOWNLOAD_PATH,
-        },
-        (response) => {
-          response.pipe(zipFile);
-          zipFile.on('finish', () => {
-            zipFile.close();
-            resolve();
-          });
-        }
-      )
-      .on('error', (err) => {
-        fs.unlinkSync(zipFilename);
-        reject(err);
-      });
-  });
+  await /** @type {Promise<void>} */ (
+    new Promise((resolve, reject) => {
+      http
+        .get(
+          {
+            host: HOST,
+            port: PORT,
+            path: COV_DOWNLOAD_PATH,
+          },
+          (response) => {
+            response.pipe(zipFile);
+            zipFile.on('finish', () => {
+              zipFile.close();
+              resolve();
+            });
+          }
+        )
+        .on('error', (err) => {
+          fs.unlinkSync(zipFilename);
+          reject(err);
+        });
+    })
+  );
   execOrDie(`unzip -o ${zipFilename} -d ${outDir}`);
 }
 
