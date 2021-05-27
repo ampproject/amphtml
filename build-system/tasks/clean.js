@@ -28,7 +28,7 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  * node_modules package directories.
  */
 async function clean() {
-  const pathsToDelete = [
+  let pathsToDelete = [
     // Local cache directories
     // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
     '.babel-cache',
@@ -61,6 +61,10 @@ async function clean() {
   if (argv.include_subpackages) {
     pathsToDelete.push('**/node_modules', '!node_modules');
   }
+  if (argv.exclude) {
+    const excludes = argv.exclude.split(',');
+    pathsToDelete = pathsToDelete.filter((path) => !excludes.includes(path));
+  }
   const deletedPaths = await del(pathsToDelete, {
     expandDirectories: false,
     dryRun: argv.dry_run,
@@ -82,4 +86,5 @@ clean.flags = {
   'dry_run': 'Does a dry run without actually deleting anything',
   'include_subpackages':
     'Also cleans up inner node_modules package directories',
+  'exclude': 'Comma separated list of directories to exclude from deletion',
 };

@@ -141,6 +141,7 @@ function logSeparator_() {
  * @param {string} tempDir full directory path to temporary working directory.
  */
 async function prepareEnvironment_(outputDir, tempDir) {
+  execOrDie('amp clean');
   await fs.emptyDir(outputDir);
   await fs.emptyDir(tempDir);
   logSeparator_();
@@ -208,7 +209,7 @@ async function compileDistFlavors_(flavorType, command, tempDir) {
   }
   log('Compiling flavor', green(flavorType), 'using', cyan(command));
 
-  execOrDie('amp clean');
+  execOrDie('amp clean --exclude release');
   execOrDie(command);
 
   const flavorTempDistDir = path.join(tempDir, flavorType);
