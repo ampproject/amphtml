@@ -116,7 +116,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Outlinks can be an amp-story-page-outlink or the legacy version,
     // an amp-story-page-attachment with an href.
     const isOutlink =
-      this.element.nodeName === 'AMP-STORY-PAGE-OUTLINK' ||
+      this.element.tagName === 'AMP-STORY-PAGE-OUTLINK' ||
       this.element.getAttribute('href');
     this.type_ = isOutlink ? AttachmentType.OUTLINK : AttachmentType.INLINE;
 
