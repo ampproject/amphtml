@@ -318,6 +318,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       });
       st.toggle(img, false);
       this.element.appendChild(this.image_);
+
       return img.getImpl().then((impl) => {
         propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_);
       });
