@@ -675,6 +675,7 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * Shutdown the driver.
    * @return {void}
    */
   dispose() {

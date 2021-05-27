@@ -67,7 +67,6 @@ function installRepl(global, env) {
 
   /**
    * Continues execution while debugging.
-   * @return {void}
    */
   function replContinue() {
     if (!replResolve) {

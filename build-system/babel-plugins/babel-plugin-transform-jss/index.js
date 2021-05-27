@@ -63,7 +63,7 @@ module.exports = function ({template, types: t}) {
 
   /**
    * @param {string} name
-   * @return {string>}
+   * @return {string}
    */
   function classnameId(name) {
     return `\$${name}`;
