@@ -93,7 +93,7 @@ import {
 } from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {
   getAmpAdRenderOutsideViewport,

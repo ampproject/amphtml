@@ -33,6 +33,7 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp lint');
   timedExecOrDie('amp prettify');
   timedExecOrDie('amp ava');
+  timedExecOrDie('amp check-build-system');
   timedExecOrDie('amp babel-plugin-tests');
   timedExecOrDie('amp caches-json');
   timedExecOrDie('amp dev-dashboard-tests');
@@ -69,8 +70,10 @@ async function prBuildWorkflow() {
     timedExecOrDie('amp validate-html-fixtures');
   }
 
-  if (buildTargetsInclude(Targets.LINT)) {
+  if (buildTargetsInclude(Targets.LINT_RULES)) {
     timedExecOrDie('amp lint');
+  } else if (buildTargetsInclude(Targets.LINT)) {
+    timedExecOrDie('amp lint --local_changes');
   }
 
   if (buildTargetsInclude(Targets.PRETTIFY)) {
@@ -79,6 +82,10 @@ async function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.AVA)) {
     timedExecOrDie('amp ava');
+  }
+
+  if (buildTargetsInclude(Targets.BUILD_SYSTEM)) {
+    timedExecOrDie('amp check-build-system');
   }
 
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {

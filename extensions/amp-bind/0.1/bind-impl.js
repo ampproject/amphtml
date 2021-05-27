@@ -49,8 +49,8 @@ import {getMode} from '../../../src/mode';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';
 
-import {isFiniteNumber} from '../../../src/types';
-import {isObject} from '../../../src/core/types';
+import {isFiniteNumber, isObject} from '../../../src/core/types';
+
 import {reportError} from '../../../src/error-reporting';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 

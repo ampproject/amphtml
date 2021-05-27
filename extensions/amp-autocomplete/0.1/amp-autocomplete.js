@@ -44,7 +44,7 @@ import {isAmp4Email} from '../../../src/format';
 import {isArray, isEnumValue} from '../../../src/core/types';
 import {tryParseJson} from '../../../src/core/types/object/json';
 
-import {mod} from '../../../src/utils/math';
+import {mod} from '../../../src/core/math';
 import {once} from '../../../src/core/types/function';
 import {removeChildren, tryFocus} from '../../../src/dom';
 import {

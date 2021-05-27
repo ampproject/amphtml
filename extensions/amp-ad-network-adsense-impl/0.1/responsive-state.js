@@ -22,7 +22,7 @@ import {
 } from '../../../ads/google/utils';
 import {Services} from '../../../src/services';
 import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {computedStyle, getStyle, setStyle} from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';

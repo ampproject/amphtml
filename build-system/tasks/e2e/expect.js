@@ -178,7 +178,7 @@ function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
 
   /**
-   * @param {chai.AssertionStatic} _super
+   * @param {Chai.AssertionStatic} _super
    * @return {function(): ReturnType<Chai.AssertionStatic>}
    */
   return function (_super) {

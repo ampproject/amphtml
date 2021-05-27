@@ -29,7 +29,7 @@ import {
 } from '../../core/3p-frame';
 import {includes} from '../../core/types/string';
 import {parseUrlDeprecated} from '../../url';
-import {sequentialIdGenerator} from '../../utils/id-generator';
+import {sequentialIdGenerator} from '../../core/math/id-generator';
 import {
   useEffect,
   useImperativeHandle,
