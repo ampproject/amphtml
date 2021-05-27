@@ -39,14 +39,16 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setStyles, toggle} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
 
 const TAG = 'amp-image-lightbox';
 
-/** @private @const {!Set<string>} */
-const SUPPORTED_ELEMENTS_ = new Set(['amp-img', 'amp-anim', 'img']);
+/** @private @const {!Object<string, boolean>} */
+const SUPPORTED_ELEMENTS_ = {
+  'amp-img': true,
+  'amp-anim': true,
+};
 
 /** @private @const */
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby', 'aria-labelledby'];
@@ -251,15 +253,9 @@ export class ImageViewer {
     this.setSourceDimensions_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    if (sourceElement.tagName.toLowerCase() === 'img') {
-      propagateAttributes(ARIA_ATTRIBUTES, sourceElement, this.image_);
-    } else {
-      sourceElement
-        .getImpl()
-        .then((impl) =>
-          propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_)
-        );
-    }
+    sourceElement.getImpl().then((elem) => {
+      elem.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
+    });
 
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
       // Set src provisionally to the known loaded value for fast display.
@@ -612,9 +608,12 @@ export class ImageViewer {
 
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
-    return /** @type {!Promise|undefined} */ (
-      this.set_(newScale, newPosX, newPosY, animate)
-    );
+    return /** @type {!Promise|undefined} */ (this.set_(
+      newScale,
+      newPosX,
+      newPosY,
+      animate
+    ));
   }
 
   /**
@@ -787,11 +786,9 @@ class AmpImageLightbox extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     /** If the element is in an email document, allow its `open` action. */
-    Services.actionServiceForDoc(this.element).addToAllowlist(
-      'AMP-IMAGE-LIGHTBOX',
-      'open',
-      ['email']
-    );
+    Services.actionServiceForDoc(
+      this.element
+    ).addToAllowlist('AMP-IMAGE-LIGHTBOX', 'open', ['email']);
   }
 
   /**
@@ -827,8 +824,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.container_.appendChild(this.captionElement_);
 
     // Invisible close button at the end of lightbox for screen-readers.
-    const screenReaderCloseButton =
-      this.element.ownerDocument.createElement('button');
+    const screenReaderCloseButton = this.element.ownerDocument.createElement(
+      'button'
+    );
     // TODO(aghassemi, #4146) i18n
     const ariaLabel =
       this.element.getAttribute('data-close-button-aria-label') ||
@@ -873,9 +871,8 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.buildLightbox_();
 
     const source = invocation.caller;
-    const tagName = source.tagName.toLowerCase();
     userAssert(
-      source && SUPPORTED_ELEMENTS_.has(tagName),
+      source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
       'Unsupported element: %s',
       source.tagName
     );
