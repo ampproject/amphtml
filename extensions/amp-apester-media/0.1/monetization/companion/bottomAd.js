@@ -23,16 +23,9 @@ const ALLOWED_AD_PROVIDER = 'gpt';
  * @param {!AmpElement} apesterElement
  */
 export function handleCompanionBottomAd(media, apesterElement) {
-  const bottomAdOptions = getValueForExpr(
-    /**@type {!JsonObject}*/ (media),
-    'campaignData.bottomAdOptions'
-  );
-  if (!bottomAdOptions) {
-    return;
-  }
   const enabledBottomAd = getValueForExpr(
-    /**@type {!JsonObject}*/ (bottomAdOptions),
-    'enabled'
+    /**@type {!JsonObject}*/ (media),
+    'campaignData.bottomAdOptions.enabled'
   );
   if (
     enabledBottomAd &&
