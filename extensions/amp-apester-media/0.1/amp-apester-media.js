@@ -37,8 +37,9 @@ import {setStyles} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-apester-media';
-const BOTTOM_AD_HEIGHT = 50;
-const HAS_BOTTOM_AD_EVENT = 'has_bottom_ad';
+const AD_TAG = 'amp-ad';
+/** @const {!JsonObject} */
+const BOTTOM_AD_MESSAGE = dict({'type': 'has_bottom_ad', 'adHeight': 50});
 /**
  * @enum {string}
  */
@@ -158,6 +159,11 @@ class AmpApesterMedia extends AMP.BaseElement {
       renderer: true,
       tags: extractTags(this.getAmpDoc(), this.element),
     };
+    const ampdoc = this.getAmpDoc();
+    Services.extensionsFor(this.win)./*OK*/ installExtensionForDoc(
+      ampdoc,
+      AD_TAG
+    );
   }
 
   /**
@@ -327,10 +333,7 @@ class AmpApesterMedia extends AMP.BaseElement {
                     if (bottomAdOptions && bottomAdOptions.enabled) {
                       this.hasBottomAd_ = true;
                       this.iframe_.contentWindow./*OK*/ postMessage(
-                        /** @type {JsonObject} */ ({
-                          type: HAS_BOTTOM_AD_EVENT,
-                          adHeight: BOTTOM_AD_HEIGHT,
-                        }),
+                        BOTTOM_AD_MESSAGE,
                         '*'
                       );
                     }
@@ -457,10 +460,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           this.attemptChangeHeight(data.height);
           if (this.hasBottomAd_) {
             this.iframe_.contentWindow./*OK*/ postMessage(
-              /** @type {JsonObject} */ ({
-                type: HAS_BOTTOM_AD_EVENT,
-                adHeight: BOTTOM_AD_HEIGHT,
-              }),
+              BOTTOM_AD_MESSAGE,
               '*'
             );
           }
