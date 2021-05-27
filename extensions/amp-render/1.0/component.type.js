@@ -24,6 +24,11 @@ var RenderDef = {};
  *   src: (!string),
  *   getJson: (!Function),
  *   render: (?RendererFunctionType|undefined),
+ *   onLoading: (Function),
+ *   onReady: (Function),
+ *   onRefresh: (Function),
+ *   onError: (Function),
+ *   ariaLiveValue: (!string)
  * }}
  */
 RenderDef.Props;

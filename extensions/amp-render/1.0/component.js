@@ -49,6 +49,7 @@ export function RenderWithRef(
     src = '',
     getJson = DEFAULT_GET_JSON,
     render = DEFAULT_RENDER,
+    ariaLiveValue = 'polite',
     onLoading,
     onReady,
     onRefresh,
@@ -110,7 +111,11 @@ export function RenderWithRef(
     rendered && typeof rendered == 'object' && '__html' in rendered;
 
   return (
-    <Wrapper {...rest} dangerouslySetInnerHTML={isHtml ? rendered : null}>
+    <Wrapper
+      {...rest}
+      dangerouslySetInnerHTML={isHtml ? rendered : null}
+      aria-live={ariaLiveValue}
+    >
       {isHtml ? null : rendered}
     </Wrapper>
   );
