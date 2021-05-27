@@ -74,6 +74,7 @@ class AmpFacebookLike extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.element.setAttribute('data-embed-as', 'like');
     const iframe = getIframe(this.win, this.element, TYPE);
     iframe.title = this.element.title || 'Facebook like button';
     this.applyFillContent(iframe);
