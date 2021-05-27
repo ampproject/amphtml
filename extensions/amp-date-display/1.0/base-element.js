@@ -31,6 +31,7 @@ BaseElement['props'] = {
   },
   'displayIn': {attr: 'display-in'},
   'locale': {attr: 'locale'},
+  'localeOptions': {attrPrefix: 'data-options-'},
 };
 
 /** @override */
