@@ -67,6 +67,8 @@ describes.sandboxed('Render 1.0 preact component', {}, () => {
     // the promise to resolve.
     await macroTask();
 
-    expect(wrapper.getDOMNode().getAttribute('aria-live')).to.equal('assertive');
+    expect(wrapper.getDOMNode().getAttribute('aria-live')).to.equal(
+      'assertive'
+    );
   });
 });
