@@ -25,7 +25,7 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
 
 /**
  * Cleans up various cache and output directories. Optionally cleans up inner
- * node_modules package directories.
+ * node_modules package directories, or excludes some directories from deletion.
  */
 async function clean() {
   let pathsToDelete = [
