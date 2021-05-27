@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-video-captions-0.1.css';
+import {CSS} from '../../../build/amp-story-captions-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {toArray} from '../../../src/core/types/array';
 import {listen} from '../../../src/event-helper';
 import {TrackRenderer} from './track-renderer';
 
-export class AmpVideoCaptions extends AMP.BaseElement {
+export class AmpStoryCaptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -78,6 +78,6 @@ export class AmpVideoCaptions extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-video-captions', '0.1', (AMP) => {
-  AMP.registerElement('amp-video-captions', AmpVideoCaptions, CSS);
+AMP.extension('amp-story-captions', '0.1', (AMP) => {
+  AMP.registerElement('amp-story-captions', AmpStoryCaptions, CSS);
 });

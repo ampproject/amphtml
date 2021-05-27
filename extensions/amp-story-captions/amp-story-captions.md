@@ -31,7 +31,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# amp-video-captions
+# amp-story-captions
 
 <!--
   If the component is relevant for more than one format and operates differently between these
@@ -46,12 +46,12 @@ One to three paragraphs explaining the component usage. List important functiona
 
 Below is an example for websites.
 
-[example preview="inline" playground="true" imports="amp-video-captions"]
+[example preview="inline" playground="true" imports="amp-story-captions"]
 
 ```html
-<amp-video-captions required-attribute>
+<amp-story-captions required-attribute>
   I am a hello world inline executable code sample for websites!
-</amp-video-captions>
+</amp-story-captions>
 ```
 
 [/example][/filter]
@@ -65,12 +65,12 @@ Below is an example for websites.
 
 Below is an example for ads.
 
-[example preview=“inline” playground=“true” imports="amp-video-captions"]
+[example preview=“inline” playground=“true” imports="amp-story-captions"]
 
 ```html
-<amp-video-captions required-attribute>
+<amp-story-captions required-attribute>
   I am a hello world inline executable code sample for ads!
-</amp-video-captions>
+</amp-story-captions>
 ```
 
 [/example][/filter]
@@ -83,7 +83,7 @@ Bento AMP allows you to use AMP components in non-AMP pages without needing to c
 
 #### Example
 
-The example below demonstrates `amp-video-captions` component in standalone use.
+The example below demonstrates `amp-story-captions` component in standalone use.
 
 [example preview="top-frame" playground="false"]
 
@@ -91,8 +91,8 @@ The example below demonstrates `amp-video-captions` component in standalone use.
 <head>
 ...
 <script async src="https://cdn.ampproject.org/v0.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-video-captions-__component_version__.css">
-<script async custom-element="amp-video-captions" src="https://cdn.ampproject.org/v0/amp-video-captions-__component_version__.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-story-captions-__component_version__.css">
+<script async custom-element="amp-story-captions" src="https://cdn.ampproject.org/v0/amp-story-captions-__component_version__.js"></script>
 ...
 </head>
 <amp-bento-component>
@@ -112,14 +112,14 @@ The example below demonstrates `amp-video-captions` component in standalone use.
 
 Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
 
-The `amp-video-captions` component API is accessible by including the following script tag in your document:
+The `amp-story-captions` component API is accessible by including the following script tag in your document:
 
 ```
-await customElements.whenDefined('amp-video-captions-component');
+await customElements.whenDefined('amp-story-captions-component');
 const api = await __component_name_pascalcase__.getApi();
 ```
 
-The `amp-video-captions` API allows you to register and respond to the following events:
+The `amp-story-captions` API allows you to register and respond to the following events:
 
 **event 1**
 Explanation of event, proper syntax/arguments.
@@ -147,14 +147,14 @@ example
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-video-captions-__component_version__.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-story-captions-__component_version__.css">
 ```
 
 Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
 
 **Container type**
 
-The `amp-video-captions` component has a container/non-container layout type. To ensure the component renders correctly, apply the following styles:
+The `amp-story-captions` component has a container/non-container layout type. To ensure the component renders correctly, apply the following styles:
 
 ```css
 example
@@ -162,7 +162,7 @@ example
 
 **style/layout guidelines 2 (optional)**
 
-Information on how to layout and style `amp-video-captions`.
+Information on how to layout and style `amp-story-captions`.
 
 ```
 example
@@ -173,9 +173,9 @@ example
 What to do if they want behavior. How to work around it.
 
 ```html
-<amp-video-captions required-attribute>
+<amp-story-captions required-attribute>
   Code sample of behavior or behavior workaround.
-</amp-video-captions>
+</amp-story-captions>
 ```
 
 ### Behavior restrictions
@@ -188,24 +188,24 @@ What is allowed, what isn't.
 
 Description of attribute. Use cases for this attribute.
 
--   `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-video-captions`.
--   `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-video-captions`.
+-   `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-story-captions`.
+-   `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-story-captions`.
 
 ### `optional-attribute-name` (optional)
 
-Here, I write what `optional-attribute-name` will do to `amp-video-captions`.
+Here, I write what `optional-attribute-name` will do to `amp-story-captions`.
 
 ## Actions (optional)
 
 ### `action-name`
 
-Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-video-captions` needs to be identified with an `id` to work.
+Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-story-captions` needs to be identified with an `id` to work.
 
 ## Events (optional)
 
 ### `event-name`
 
-Description of event. Use cases of event-name. Include all the nuances, such as: `amp-video-captions` needs to be identified with an `id` to work.
+Description of event. Use cases of event-name. Include all the nuances, such as: `amp-story-captions` needs to be identified with an `id` to work.
 
 #### Valid AMP
 
@@ -216,18 +216,18 @@ Syntax and argument details for use in fully valid AMP pages.
 ```html
 <head>
   <script
-    custom-element="amp-video-captions"
+    custom-element="amp-story-captions"
     async
-    src="https://cdn.ampproject.org/v0/amp-video-captions-latest.js"
+    src="https://cdn.ampproject.org/v0/amp-story-captions-latest.js"
   ></script>
 </head>
 <body>
-  <amp-video-captions
+  <amp-story-captions
     required-attribute
     on="event-name: my-button.show"
   >
     Hello World!
-  </amp-video-captions>
+  </amp-story-captions>
   <button id="my-button" hidden>
     Here I am!
   </button>
@@ -258,7 +258,7 @@ Explain analytics.
 
 ## Accessibility (optional)
 
-Accessibility information related to `amp-video-captions`.
+Accessibility information related to `amp-story-captions`.
 
 ## Version notes (optional)
 
@@ -266,4 +266,4 @@ Information on version differences and migration notes.
 
 ## Validation
 
-See [amp-video-captions rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-captions/validator-amp-video-captions.protoascii) in the AMP validator specification.
+See [amp-story-captions rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story-captions/validator-amp-story-captions.protoascii) in the AMP validator specification.

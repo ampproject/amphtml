@@ -690,7 +690,7 @@ export class AmpVideo extends AMP.BaseElement {
     this.setUpCaptions_();
   }
 
-  /** Connects to amp-video-captions component. */
+  /** Connects to amp-story-captions component. */
   setUpCaptions_() {
     const captionsId = this.element.getAttribute('captions-id');
     if (!captionsId) {

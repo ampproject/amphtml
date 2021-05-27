@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import '../amp-video-captions';
+import '../amp-story-captions';
 import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.realWin(
-  'amp-video-captions',
+  'amp-story-captions',
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-video-captions'],
+      extensions: ['amp-story-captions'],
     },
   },
   (env) => {
@@ -33,7 +33,7 @@ describes.realWin(
       win = env.win;
       element = createElementWithAttributes(
         win.document,
-        'amp-video-captions',
+        'amp-story-captions',
         {
           layout: 'responsive',
         }
