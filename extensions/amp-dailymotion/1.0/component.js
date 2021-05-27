@@ -25,6 +25,7 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
+import { getDailymotionIframeSrc } from '../dailymotion-api';
 /**
  * @param {!DailymotionDef.Props} props
  * @param ref
@@ -33,9 +34,7 @@ import {
 export function DailymotionWithRef({videoId, ...rest}, ref) {
   const src = useMemo(
     () =>
-      'https://www.dailymotion.com/embed/video/' +
-      encodeURIComponent(videoId || '') +
-      '?api=1&html=1&app=amp',
+      getDailymotionIframeSrc(videoId, mute, endscreenEnable, sharingEnable, start, uiHighlight, uiLog, info);
     [videoId]
   );
   const makeMethodMessage = useCallback(() => '{}', []);

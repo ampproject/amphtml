@@ -2,7 +2,6 @@ import {Deferred} from '#core/data-structures/promise';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
-import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 import {
   createFrameFor,
   mutedOrUnmutedEvent,
@@ -17,11 +16,11 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
+import {getDailymotionIframeSrc} from '../dailymotion-api';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {parseQueryString} from '#core/types/string/url';
-import {isAutoplaySupported} from '#core/dom/video';
 
 const TAG = 'amp-dailymotion';
 
@@ -262,40 +261,25 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @private */
   getIframeSrc_() {
-    let iframeSrc =
-      'https://www.dailymotion.com/embed/video/' +
-      encodeURIComponent(this.videoid_ || '') +
-      '?api=1&html=1&app=amp';
+    const mute = this.element.getAttribute(`data-mute`);
+    const endscreenEnable = this.element.getAttribute(`data-endscreen-enable`);
+    const sharingEnable = this.element.getAttribute(`data-sharing-enable`);
+    const start = this.element.getAttribute(`data-start`);
+    const uiHighlight = this.element.getAttribute(`data-ui-highlight`);
+    const uiLogo = this.element.getAttribute(`data-ui-logo`);
+    const info = this.element.getAttribute(`data-info`);
 
-    const explicitParamsAttributes = [
-      'mute',
-      'endscreen-enable',
-      'sharing-enable',
-      'start',
-      'ui-highlight',
-      'ui-logo',
-      'info',
-    ];
-
-    explicitParamsAttributes.forEach((explicitParam) => {
-      const val = this.element.getAttribute(`data-${explicitParam}`);
-      if (val) {
-        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
-      }
-    });
-
-    const implicitParams = getDataParamsFromAttributes(this.element);
-    iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
-
-    // In order to support autoplay the video needs to be muted on load so we
-    // dont receive an unmute event which prevents the video from autoplay.
-    if (
-      this.element.hasAttribute('autoplay') &&
-      isAutoplaySupported(this.win)
-    ) {
-      iframeSrc = addParamsToUrl(iframeSrc, {'mute': 1});
-    }
-    return iframeSrc;
+    return getDailymotionIframeSrc(
+      this.videoid_,
+      mute,
+      endscreenEnable,
+      sharingEnable,
+      start,
+      uiHighlight,
+      uiLogo,
+      info,
+      getDataParamsFromAttributes(this.element)
+    );
   }
 
   /** @override */
