@@ -604,6 +604,45 @@ describes.realWin(
       expect(fallback.textContent).to.equal('Failed');
     });
 
+    it('should work with binding="always"', async () => {
+      const rescanSpy = env.sandbox.spy();
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanSpy,
+        signals: () => {
+          return {
+            get: () => null,
+          };
+        },
+      });
+
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchStub.resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="always"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+
+      expect(rescanSpy).to.be.calledOnce;
+      const {fast, update} = rescanSpy.getCall(0).args[2];
+      expect(fast).to.be.true;
+      expect(update).to.be.true;
+    });
+
     it('should default to binding="refresh" when nothing is specified', async () => {
       const rescanSpy = env.sandbox.spy();
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
@@ -635,9 +674,8 @@ describes.realWin(
 
       await whenUpgradedToCustomElement(element);
       await element.buildInternal();
-      await waitRendered();
 
-      expect(rescanSpy).to.be.calledTwice; // TODO: investigate why its called twice?
+      expect(rescanSpy).to.be.called;
       const {fast, update} = rescanSpy.getCall(0).args[2];
       expect(fast).to.be.true;
       expect(update).to.be.false;
@@ -675,9 +713,8 @@ describes.realWin(
 
       await whenUpgradedToCustomElement(element);
       await element.buildInternal();
-      await waitRendered();
 
-      expect(rescanSpy).to.be.calledTwice; // TODO: investigate why its called twice?
+      expect(rescanSpy).to.be.calledOnce;
       const {fast, update} = rescanSpy.getCall(0).args[2];
       expect(fast).to.be.true;
       expect(update).to.be.false;
@@ -710,7 +747,6 @@ describes.realWin(
 
       await whenUpgradedToCustomElement(element);
       await element.buildInternal();
-      await waitRendered();
 
       expect(rescanSpy).not.to.be.called;
     });
