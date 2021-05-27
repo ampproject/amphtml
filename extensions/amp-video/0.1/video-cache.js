@@ -22,7 +22,6 @@ import {
   matches,
   removeElement,
 } from '../../../src/dom';
-import {extensionScriptInNode} from '../../../src/service/extension-script';
 import {toArray} from '../../../src/core/types/array';
 import {user} from '../../../src/log';
 
@@ -32,12 +31,12 @@ import {user} from '../../../src/log';
  * and appends the document canonical url as the queryParam `amp_video_host_url`.
  *
  * @param {!Element} videoEl
- * @param {!Window} win
+ * @param {!AmpDoc} ampdoc
  * @return {!Promise}
  */
-export function fetchCachedSources(videoEl, win) {
+export function fetchCachedSources(videoEl, ampdoc) {
+  const {win} = ampdoc;
   if (
-    !extensionScriptInNode(win, 'amp-cache-url', '0.1') ||
     !(
       videoEl.getAttribute('src') ||
       videoEl.querySelector('source[src]')?.getAttribute('src')
@@ -47,10 +46,9 @@ export function fetchCachedSources(videoEl, win) {
     return Promise.resolve();
   }
   const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
-  const servicePromise = Services.cacheUrlServicePromiseForDoc(videoEl);
   maybeReplaceSrcWithSourceElement(videoEl, win);
   const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
-  return servicePromise
+  return getCacheUrlService(videoEl, ampdoc)
     .then((service) => service.createCacheUrl(videoUrl))
     .then((cacheUrl) => {
       const requestUrl = addParamsToUrl(cacheUrl.replace('/c/', '/mbv/'), {
@@ -134,4 +132,16 @@ function maybeReplaceSrcWithSourceElement(videoEl, win) {
   iterateCursor(sourceEls, (el) => removeElement(el));
 
   videoEl.insertBefore(sourceEl, videoEl.firstChild);
+}
+
+/**
+ * Lazy loads the amp-cache-url extension if needed and retrieves its service.
+ * @param {!Element} videoEl
+ * @param {!AmpDoc} ampdoc
+ * @return {!Promise<../../../amp-cache-url/amp-cache-url.AmpCacheUrlService>}
+ */
+function getCacheUrlService(videoEl, ampdoc) {
+  return Services.extensionsFor(ampdoc.win)
+    .installExtensionForDoc(ampdoc, 'amp-cache-url')
+    .then(() => Services.cacheUrlServicePromiseForDoc(videoEl));
 }
