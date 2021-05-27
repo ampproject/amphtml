@@ -101,7 +101,7 @@ export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
     // Outlinks can be an amp-story-page-outlink or the legacy version,
     // an amp-story-page-attachment with an href.
     const isOutlink =
-      attachmentEl.nodeName === 'AMP-STORY-PAGE-OUTLINK' ||
+      attachmentEl.tagName === 'AMP-STORY-PAGE-OUTLINK' ||
       attachmentEl.getAttribute('href');
     if (isOutlink) {
       return renderOutlinkPageAttachmentUI(pageEl, attachmentEl);
