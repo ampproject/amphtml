@@ -250,9 +250,15 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         <span class="i-amphtml-story-page-attachment-remote-title"><span ref="openStringEl"></span><span ref="urlStringEl"></span></span>
         <svg class="i-amphtml-story-page-attachment-remote-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"></path></svg>
       </a>`;
+
+    // For backwards compatibility if element is amp-story-page-outlink.
+    const hrefAttr =
+      this.element.nodeName === 'AMP-STORY-PAGE-OUTLINK'
+        ? this.element.querySelector('a').getAttribute('href')
+        : this.element.getAttribute('href');
+
     // URL will be validated and resolved based on the canonical URL if relative
     // when navigating.
-    const hrefAttr = this.element.querySelector('a').getAttribute('href');
     link.setAttribute('href', hrefAttr);
     const {openStringEl, urlStringEl} = htmlRefs(link);
 
@@ -380,31 +386,40 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Triggers a remote attachment preview URL animation, and redirects
-   * to the specified URL.
+   * Triggers a remote attachment preview URL animation on mobile,
+   * and redirects to the specified URL.
    * @private
    */
   openRemoteV2_() {
     // If the element is an amp-story-page-outlink the click target is its anchor element child.
     // This is for SEO and analytics optimisation.
     // Otherwise the element is the legacy version, amp-story-page-attachment with an href,
-    // and a click click target is the button built by the component.
-    const clickTarget =
-      this.element.parentElement
+    // and a click target is the button built by the component.
+    const programaticallyClickOnTarget = () => {
+      const pageOutLinkChild = this.element.parentElement
         .querySelector('amp-story-page-outlink')
-        ?.querySelector('a') ||
-      this.element.parentElement
-        .querySelector('.i-amphtml-story-page-open-attachment-host')
+        ?.querySelector('a');
+
+      if (pageOutLinkChild) {
+        pageOutLinkChild.click();
+      }
+      const pageAttachmentChild = this.element.parentElement
+        ?.querySelector('.i-amphtml-story-page-open-attachment-host')
         .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
+
+      if (pageAttachmentChild) {
+        triggerClickFromLightDom(pageAttachmentChild, this.element);
+      }
+    };
 
     const isMobileUI =
       this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
-    // Shows outlink url preview on mobile only.
     if (!isMobileUI) {
-      triggerClickFromLightDom(clickTarget, this.element);
+      programaticallyClickOnTarget();
     } else {
-      this.win.setTimeout(() => {
-        triggerClickFromLightDom(clickTarget, this.element);
+      // Timeout to shows post-tap animation on mobile only.
+      Services.timerFor(this.win).delay(() => {
+        programaticallyClickOnTarget();
       }, POST_TAP_ANIMATION_DURATION);
     }
   }

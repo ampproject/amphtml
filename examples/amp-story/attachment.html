@@ -308,15 +308,17 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="center">
           <p>
-            <span data-text-background-color="crimson">Using title, data-title, cta-text, and data-cta-text attributes.</span></br></br>
+            <span data-text-background-color="crimson">Legacy outlink, amp-story-page-attachment using title, data-title, cta-text, and data-cta-text attributes.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
-        <amp-story-page-outlink
+        <amp-story-page-attachment
           layout="nodisplay"
-          cta-image="img/logo.jpg">
-          <a href="https://www.google.com" title="title">Shop at Forbes</a>
-        </amp-story-page-outlink>
+          href="https://www.google.com"
+          cta-text="CTA Text"
+          title="title"
+          data-title="data-title">
+        </amp-story-page-attachment>
       </amp-story-page>
 
       <amp-story-page id="last-page-no-cta">
