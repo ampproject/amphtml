@@ -71,6 +71,24 @@ const getAmpStateJson = (element, src) => {
     });
 };
 
+/**
+ * @param {?string} bindingValue
+ * @param {!boolean} isFirstMutation
+ * @returns {!boolean} Whether bind should evaluate and apply changes.
+ */
+const getUpdateValue = (bindingValue, isFirstMutation) => {
+  if (!bindingValue || bindingValue === 'refresh') {
+    // default is 'refresh', so check that its not the first mutation
+    return !isFirstMutation;
+  }
+  if (bindingValue === 'always') {
+    // TODO(dmanek): add link to amp-render docs that elaborates on performance implications of "always"
+    user().warn('AMP-RENDER', 'binding="always" has performance implications.');
+    return true;
+  }
+  return false;
+};
+
 export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -278,9 +296,12 @@ export class AmpRender extends BaseElement {
                 .then((element) => {
                   bind.rescan([element], [], {
                     'fast': true,
-                    // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
-                    // mutation occured, which is null for the initial render
-                    'update': bind.signals().get('FIRST_MUTATE') !== null,
+                    'update': getUpdateValue(
+                      this.element.getAttribute('binding'),
+                      // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
+                      // mutation occured, which is null for the initial render
+                      bind.signals().get('FIRST_MUTATE') === null
+                    ),
                   });
                   return element;
                 })
