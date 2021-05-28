@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {SESSION_VALUES, sessionServiceFor} from './session-manager';
+import {SESSION_VALUES, sessionServicePromiseForDoc} from './session-manager';
 import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/core/constants/enums';
 import {asyncStringReplace} from '../../../src/core/types/string';
@@ -254,8 +254,8 @@ export class VariableService {
     /** @const @private {!./linker-reader.LinkerReader} */
     this.linkerReader_ = linkerReaderServiceFor(this.ampdoc_.win);
 
-    /** @const @private {!./session-manager.SessionManager} */
-    this.sessionManager_ = sessionServiceFor(this.ampdoc_.win);
+    /** @const @private {!Promise<SessionManager>} */
+    this.sessionManagerPromise_ = sessionServicePromiseForDoc(this.ampdoc_);
 
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
@@ -331,10 +331,12 @@ export class VariableService {
           userAssert(key, 'CONSENT_METADATA macro must contain a key')
         ),
       'SESSION_ID': () => {
-        return this.sessionManager_.getSessionValue(
-          type,
-          SESSION_VALUES.SESSION_ID
-        );
+        return this.sessionManagerPromise_.then((sessionManager) => {
+          return sessionManager.getSessionValue(
+            type,
+            SESSION_VALUES.SESSION_ID
+          );
+        });
       },
     };
     const perfMacros = isInFie(element)

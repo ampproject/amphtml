@@ -17,9 +17,8 @@
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {
-  getAmpdoc,
-  getService,
-  registerServiceBuilder,
+  getServicePromiseForDoc,
+  registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {hasOwn, map} from '../../../src/core/types/object';
 import {isObject} from '../../../src/core/types';
@@ -67,14 +66,11 @@ export let SessionInfoDef;
 
 export class SessionManager {
   /**
-   * @param {!Window} win
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(win) {
-    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = getAmpdoc(win.document);
-
+  constructor(ampdoc) {
     /** @private {!Promise<!../../../src/service/storage-impl.Storage>} */
-    this.storagePromise_ = Services.storageForDoc(this.ampdoc_);
+    this.storagePromise_ = Services.storageForDoc(ampdoc);
 
     /** @private {!Object<string, ?SessionInfoDef>} */
     this.sessions_ = {};
@@ -139,8 +135,6 @@ export class SessionManager {
           : constructSessionFromStoredValue(session);
       })
       .then((session) => {
-        if (!session) {
-        }
         this.setSession_(type, session);
         session.lastAccessTimestamp = Date.now();
         this.sessions_[type] = session;
@@ -237,16 +231,18 @@ function constructSessionInfo(
 }
 
 /**
- * @param {!Window} win
+ * @param {!Element|!ShadowRoot|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @return {!Promise<!SessionManager>}
  */
-export function installSessionService(win) {
-  registerServiceBuilder(win, 'amp-analytics-session-manager', SessionManager);
+export function sessionServicePromiseForDoc(elementOrAmpDoc) {
+  return /** @type {!Promise<!SessionManager>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, 'amp-analytics-session')
+  );
 }
 
 /**
- * @param {!Window} win
- * @return {!SessionManager}
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function sessionServiceFor(win) {
-  return getService(win, 'amp-analytics-session-manager');
+export function installSessionServiceForTesting(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'amp-analytics-session', SessionManager);
 }

@@ -17,9 +17,9 @@
 import {
   SESSION_MAX_AGE_MILLIS,
   SESSION_VALUES,
+  SessionManager,
   composeStorageSessionValue,
-  installSessionService,
-  sessionServiceFor,
+  installSessionServiceForTesting,
 } from '../session-manager';
 import {expect} from 'chai';
 import {installVariableServiceForTesting} from '../variables';
@@ -69,8 +69,8 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
     });
 
     installVariableServiceForTesting(env.ampdoc);
-    installSessionService(win);
-    sessionManager = sessionServiceFor(win);
+    installSessionServiceForTesting(env.ampdoc);
+    sessionManager = new SessionManager(env.ampdoc);
   });
 
   describe('get', () => {

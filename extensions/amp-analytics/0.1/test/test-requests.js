@@ -21,7 +21,7 @@ import {ExpansionOptions, installVariableServiceForTesting} from '../variables';
 import {RequestHandler, expandPostMessage} from '../requests';
 import {Services} from '../../../../src/services';
 import {installLinkerReaderService} from '../linker-reader';
-import {installSessionService} from '../session-manager';
+import {installSessionServiceForTesting} from '../session-manager';
 import {macroTask} from '../../../../testing/yield';
 
 describes.realWin('Requests', {amp: 1}, (env) => {
@@ -33,9 +33,9 @@ describes.realWin('Requests', {amp: 1}, (env) => {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    installSessionService(env.win);
     installLinkerReaderService(env.win);
     installVariableServiceForTesting(ampdoc);
+    installSessionServiceForTesting(ampdoc);
     ampdoc.defaultView = env.win;
     clock = fakeTimers.withGlobal(ampdoc.win).install();
     preconnectSpy = env.sandbox.spy();
