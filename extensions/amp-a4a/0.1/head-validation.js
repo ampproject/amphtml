@@ -63,6 +63,7 @@ const EXTENSION_ALLOWLIST = map({
   'amp-fit-text': true,
   'amp-font': true,
   'amp-form': true,
+  'amp-gwd-animation': true,
   'amp-img': true,
   'amp-layout': true,
   'amp-lightbox': true,
