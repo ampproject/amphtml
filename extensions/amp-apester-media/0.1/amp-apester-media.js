@@ -159,11 +159,6 @@ class AmpApesterMedia extends AMP.BaseElement {
       renderer: true,
       tags: extractTags(this.getAmpDoc(), this.element),
     };
-    const ampdoc = this.getAmpDoc();
-    Services.extensionsFor(this.win)./*OK*/ installExtensionForDoc(
-      ampdoc,
-      AD_TAG
-    );
   }
 
   /**
@@ -332,6 +327,10 @@ class AmpApesterMedia extends AMP.BaseElement {
                     const bottomAdOptions = campaignData['bottomAdOptions'];
                     if (bottomAdOptions && bottomAdOptions.enabled) {
                       this.hasBottomAd_ = true;
+                      const ampdoc = this.getAmpDoc();
+                      Services.extensionsFor(
+                        this.win
+                      )./*OK*/ installExtensionForDoc(ampdoc, AD_TAG);
                       this.iframe_.contentWindow./*OK*/ postMessage(
                         BOTTOM_AD_MESSAGE,
                         '*'
