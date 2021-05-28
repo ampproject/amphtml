@@ -15,10 +15,10 @@
  */
 
 import {CSS} from '../../../build/amp-story-captions-0.1.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {toArray} from '../../../src/core/types/array';
-import {listen} from '../../../src/event-helper';
 import {TrackRenderer} from './track-renderer';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {listen} from '../../../src/event-helper';
+import {toArray} from '../../../src/core/types/array';
 
 export class AmpStoryCaptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -27,6 +27,9 @@ export class AmpStoryCaptions extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.container_ = null;
+
+    /** @private {?HTMLVideoElement} */
+    this.video_ = null;
 
     /** @private {?UnlistenDef} */
     this.textTracksChangeUnlistener_ = null;
@@ -47,7 +50,10 @@ export class AmpStoryCaptions extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** Attaches caption rendering to a video element. Called from amp-video. */
+  /**
+   * Attaches caption rendering to a video element. Called from amp-video.
+   * @param {!HTMLVideoElement} video
+   */
   setVideoElement(video) {
     if (this.textTracksChangeUnlistener_) {
       this.textTracksChangeUnlistener_();
@@ -56,9 +62,13 @@ export class AmpStoryCaptions extends AMP.BaseElement {
     this.video_ = video;
 
     this.updateTracks_();
-    this.textTracksChangeUnlistener_ = listen(video.textTracks, 'change', () => {
-      this.updateTracks_();
-    });
+    this.textTracksChangeUnlistener_ = listen(
+      video.textTracks,
+      'change',
+      () => {
+        this.updateTracks_();
+      }
+    );
   }
 
   /** Creates new track renderers for current textTracks. */
@@ -72,7 +82,9 @@ export class AmpStoryCaptions extends AMP.BaseElement {
       // Disabled tracks are ignored.
       if (track.mode === 'showing' || track.mode === 'hidden') {
         track.mode = 'hidden';
-        this.trackRenderers_.push(new TrackRenderer(this.video_, track, this.container_));
+        this.trackRenderers_.push(
+          new TrackRenderer(this.video_, track, this.container_)
+        );
       }
     });
   }
