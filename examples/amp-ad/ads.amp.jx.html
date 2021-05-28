@@ -1,0 +1,166 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Ad examples</title>
+  <link rel="canonical" href="http://nonblocking.io/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    .broken {
+      color: red;
+    }
+
+    amp-ad {
+      border: 1px solid #ccc;
+      max-width: 500px;
+    }
+
+    .red {
+      background-color: red;
+    }
+
+    .filterBar {
+      background: #eee;
+      padding: 3px;
+      font-size: 1.2em;
+    }
+
+    select {
+      border: 1px solid #999;
+    }
+
+    input[type=submit] {
+      font-size: 14px;
+      border: 1px solid #999;
+      border-radius: 3px;
+      margin-left: 10px;
+    }
+
+    amp-ad[type="revcontent"] {
+      width: 100%;
+      max-width: 1280px;
+      margin: 18px 0;
+      padding: 0;
+    }
+
+    amp-ad[type="nativo"] {
+      width: 100%;
+      max-width: 1280px;
+      margin: 18px 0;
+      padding: 0;
+      height: 100px;
+    }
+
+    amp-ad[type="adsloom"] {
+      width: 100%;
+      max-width: 980px;
+      margin: 18px auto;
+      padding: 0;
+    }
+    amp-ad[type="digiteka"] {
+      width: 300px;
+      height: 250px;
+      max-width: 980px;
+      margin: 18px auto;
+      padding: 0;
+    }
+  </style>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <style amp-boilerplate>
+    body {
+      -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      animation: -amp-start 8s steps(1, end) 0s 1 normal both
+    }
+
+    @-webkit-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+
+    @-moz-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+
+    @-ms-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+
+    @-o-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+
+    @keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+
+      to {
+        visibility: visible
+      }
+    }
+  </style><noscript>
+    <style amp-boilerplate>
+      body {
+        -webkit-animation: none;
+        -moz-animation: none;
+        -ms-animation: none;
+        animation: none
+      }
+    </style>
+  </noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+
+<body>
+ 
+  <h2>A8</h2>
+  <amp-ad width="300" height="250"
+    type="a8"
+    data-aid="170223075073"
+    data-wid="001"
+    data-eno="01"
+    data-mid="s00000016751001031000"
+    data-mat="2TCGYR-17GNXU-3L92-64Z8X"
+    data-type="static">
+  </amp-ad>
+
+  <!-- the pid one is id of another vendor only temporarily so that we can SEE something initially . For us we use jixie unit of course -->
+
+  <h2>Jixie</h2>
+  <amp-ad width="300" height="600" 
+      type="jixie" 
+      layout="responsive" 
+      data-unit="xyz" 
+      data-pid="42266">
+  </amp-ad>
+</body>
+
+</html>

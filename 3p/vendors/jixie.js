@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../../3p/3p';
+// src/polyfills.js must be the first import.
+import '../polyfills';
 
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-export function a8(global, data) {
-  console.log("a8 is run!!!");
-  validateData(data, ['aid'], ['wid', 'eno', 'mid', 'mat', 'type']);
-  global.a8Param = data;
-  writeScript(global, 'https://statics.a8.net/amp/ad.js');
-}
+import {draw3p, init} from '../integration-lib';
+import {register} from '../3p';
+
+import {jixie} from '../../ads/vendors/jixie';
+init(window);
+register('jixie', jixie);
+
+window.draw3p = draw3p;
