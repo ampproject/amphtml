@@ -16,7 +16,13 @@ limitations under the License.
 
 # amp-ad-network-dianomi-impl
 
-The Dianomi fast fetch implementation for serving AMP ads.
+The Dianomi fast fetch implementation for serving AMP ads, using `<amp-ad>`.
+
+[https://amp.dev/documentation/components/amp-ad/?format=websites](https://amp.dev/documentation/components/amp-ad/?format=websites)
+
+### Required parameters
+
+-   `data-request-param-id` : A Dianomi provided smart ad ID.
 
 #### Example configuration:
 
