@@ -24,6 +24,8 @@ const knownHelpers = new Set([
   'objectWithoutPropertiesLoose',
 ]);
 
+const importNamesPerFile = new WeakMap();
+
 module.exports = function ({types: t}) {
   return {
     name: 'external-helpers',
@@ -34,17 +36,19 @@ module.exports = function ({types: t}) {
           return;
         }
 
-        if (!this.importNames) {
-          this.importNames = {};
+        if (!importNamesPerFile.has(file)) {
+          importNamesPerFile.set(file, Object.create(null));
         }
 
-        if (!this.importNames[name]) {
+        const importNames = importNamesPerFile.get(file);
+
+        if (!importNames[name]) {
           const local = relative(process.cwd(), file.opts.filename);
           const source = relative(dirname(local), helperModule);
-          this.importNames[name] = addNamed(file.path, name, source);
+          importNames[name] = addNamed(file.path, name, source);
         }
 
-        return t.cloneNode(this.importNames[name]);
+        return t.cloneNode(importNames[name]);
       });
     },
   };
