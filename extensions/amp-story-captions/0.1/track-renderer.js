@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import {toArray} from '../../../src/core/types/array';
 import {listen} from '../../../src/event-helper';
+import {removeChildren, removeElement} from '../../../src/dom';
+import {setStyles} from '../../../src/style';
+import {toArray} from '../../../src/core/types/array';
 
 // Class used for sections of text that is in the future (for ASR-style captions).
 const FUTURE_CUE_SECTION_CLASS = 'amp-story-captions-future';
 
 /**
- * Parses WebVTT timestamps and returns the timestamp in seconds (from the start of the video).
+ * Parses a WebVTT timestamp and returns the time in seconds from the start of the video.
  * https://www.w3.org/TR/webvtt1/#webvtt-timestamp
- * @param {string} text
+ * @param {string} timestamp
  * @return {?number}
  */
 function parseTimestamp(timestamp) {
@@ -31,7 +33,7 @@ function parseTimestamp(timestamp) {
   if (!match) {
     return null;
   }
-  const hours = parseInt(match[1], 10) || 0;
+  const hours = match[1] ? parseInt(match[1], 10) : 0;
   const minutes = parseInt(match[2], 10);
   const seconds = parseInt(match[3], 10);
   const milliseconds = parseInt(match[4], 10);
@@ -39,42 +41,57 @@ function parseTimestamp(timestamp) {
 }
 
 export class TrackRenderer {
+  /**
+   *
+   * @param {!HTMLVideoElement} video
+   * @param {!TextTrack} track
+   * @param {!Element} container
+   */
   constructor(video, track, container) {
+    /** @private {!HTMLVideoElement} */
     this.video_ = video;
 
+    /** @private {?TextTrack} */
     this.track_ = track;
 
+    /** @private {!Element} */
     this.element_ = container.ownerDocument.createElement('div');
     container.appendChild(this.element_);
 
+    /** @private {!Array<number>} */
     this.cueTimestamps_ = [];
 
     this.render_();
     this.cueChangeUnlistener_ = listen(track, 'cuechange', () => {
       this.render_();
     });
-
     this.timeUpdateUnlistener_ = listen(video, 'timeupdate', () => {
       this.updateTime_();
-    })
+    });
   }
 
+  /** Cleans up listeners and DOM elements. */
   dispose() {
     this.cueChangeUnlistener_();
     this.timeUpdateUnlistener_();
-    this.element_.parentNode.removeChild(this.element_);
+    removeElement(this.element_);
   }
 
-  /** Render currently active cues. */
+  /**
+   * Render currently active cues.
+   * @private
+   */
   render_() {
-    this.element_.innerHTML = '';
-    this.cueTimestamps_ = [];
+    removeChildren(this.element_);
+    this.cueTimestamps_.length = 0;
     toArray(this.track_.activeCues).forEach((cue) => {
       const cueElement = this.element_.ownerDocument.createElement('div');
-      cueElement.style.position = 'absolute';
-      cueElement.style.left = '0';
-      cueElement.style.right = '0';
-      cueElement.style.bottom = '0';
+      setStyles(cueElement, {
+        'position': 'absolute',
+        'bottom': 0,
+        'left': 0,
+        'right': 0,
+      });
 
       const html = cue.getCueAsHTML();
       let section = this.element_.ownerDocument.createElement('span');
@@ -100,7 +117,10 @@ export class TrackRenderer {
     this.updateTime_();
   }
 
-  /** Update cue style based on the current video time (for ASR-style captions). */
+  /**
+   * Update cue style based on the current video time (for ASR-style captions).
+   * @private
+   */
   updateTime_() {
     const videoTime = this.video_.currentTime;
     toArray(this.element_.childNodes).forEach((cue, i) => {
