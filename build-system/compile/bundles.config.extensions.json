@@ -244,6 +244,7 @@
   },
   {"name": "amp-hulu", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-iframe", "version": "0.1", "latestVersion": "0.1"},
+  {"name": "amp-iframely", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-ima-video", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-image-lightbox",
