@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {rethrowAsync} from '../log';
-
+/** @typedef {function(function())} */
+let SchedulerDef;
 /**
  * Creates a scheduling function that executes the callback based on the
  * scheduler, but only one task at a time.
  *
  * @param {function()} handler
- * @param {?function(!Function)} defaultScheduler
- * @return {function(function(!Function)=)}
+ * @param {?SchedulerDef} defaultScheduler
+ * @return {function(!SchedulerDef=)}
  */
 export function throttleTail(handler, defaultScheduler = null) {
   let scheduled = false;
@@ -30,9 +30,7 @@ export function throttleTail(handler, defaultScheduler = null) {
     scheduled = false;
     handler();
   };
-  /**
-   * @param {function(!Function)=} opt_scheduler
-   */
+  /** @param {!SchedulerDef=} opt_scheduler */
   const scheduleIfNotScheduled = (opt_scheduler) => {
     if (!scheduled) {
       scheduled = true;
@@ -41,20 +39,4 @@ export function throttleTail(handler, defaultScheduler = null) {
     }
   };
   return scheduleIfNotScheduled;
-}
-
-/**
- * Executes the provided callback in a try/catch and rethrows any errors
- * asynchronously. To be used by schedules to avoid errors interrupting
- * queues.
- *
- * @param {function():*} callback
- * @return {*}
- */
-export function protectedNoInline(callback) {
-  try {
-    return callback();
-  } catch (e) {
-    rethrowAsync(e);
-  }
 }

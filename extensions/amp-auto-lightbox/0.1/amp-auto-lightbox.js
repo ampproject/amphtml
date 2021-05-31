@@ -22,9 +22,9 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
@@ -32,8 +32,10 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {toArray} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+import {loadPromise} from '../../../src/event-helper';
+import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
+import {toArray} from '../../../src/core/types/array';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -113,23 +115,23 @@ const META_OG_TYPE = 'meta[property="og:type"]';
 
 const NOOP = () => {};
 
-/**
- * For better minification.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @return {!Document|!ShadowRoot}
- */
-const getRootNode = (ampdoc) => ampdoc.getRootNode();
-
 /** @visibleForTesting */
 export class Criteria {
   /**
    * @param {!Element} element
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {number} renderWidth
+   * @param {number} renderHeight
    * @return {boolean}
    */
-  static meetsAll(element) {
+  static meetsAll(element, ampdoc, renderWidth, renderHeight) {
     return (
-      Criteria.meetsSizingCriteria(element) &&
-      Criteria.meetsTreeShapeCriteria(element)
+      Criteria.meetsSizingCriteria(
+        element,
+        ampdoc,
+        renderWidth,
+        renderHeight
+      ) && Criteria.meetsTreeShapeCriteria(element)
     );
   }
 
@@ -152,16 +154,17 @@ export class Criteria {
 
   /**
    * @param {!Element} element
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {number} renderWidth
+   * @param {number} renderHeight
    * @return {boolean}
    */
-  static meetsSizingCriteria(element) {
+  static meetsSizingCriteria(element, ampdoc, renderWidth, renderHeight) {
     const {naturalWidth, naturalHeight} = getMaxNaturalDimensions(
-      dev().assertElement(element.querySelector('img'))
+      dev().assertElement(element.querySelector('img') || element)
     );
 
-    const {width: renderWidth, height: renderHeight} = element.getLayoutBox();
-
-    const viewport = Services.viewportForDoc(element);
+    const viewport = Services.viewportForDoc(ampdoc);
     const {width: vw, height: vh} = viewport.getSize();
 
     return meetsSizingCriteria(
@@ -270,11 +273,16 @@ function markAsVisited(candidate) {
 }
 
 /**
- * @param {string} tagName
+ * @param {!Array<string>} tagNames
  * @return {string}
  */
-function candidateSelector(tagName) {
-  return `${tagName}:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`;
+function candidateSelector(tagNames) {
+  return tagNames
+    .map(
+      (tagName) =>
+        `${tagName}:not([${LIGHTBOXABLE_ATTR}]):not([${VISITED_ATTR}])`
+    )
+    .join(',');
 }
 
 /**
@@ -282,6 +290,9 @@ function candidateSelector(tagName) {
  * @return {!Promise}
  */
 function whenLoaded(element) {
+  if (element.tagName === 'IMG') {
+    return loadPromise(element);
+  }
   return whenUpgradedToCustomElement(element).then((element) =>
     element.signals().whenSignal(CommonSignals.LOAD_END)
   );
@@ -295,7 +306,7 @@ export class Scanner {
    * @return {!Array<!Element>}
    */
   static getCandidates(root) {
-    const selector = candidateSelector('amp-img');
+    const selector = candidateSelector(['amp-img', 'img']);
     const candidates = toArray(root.querySelectorAll(selector));
     // TODO(alanorozco): DOM mutations should be wrapped in mutate contexts.
     // Alternatively, use in-memory "visited" marker instead of attribute.
@@ -315,7 +326,7 @@ export class DocMetaAnnotations {
    * @return {string|undefined}
    */
   static getOgType(ampdoc) {
-    const tag = getRootNode(ampdoc).querySelector(META_OG_TYPE);
+    const tag = ampdoc.getRootNode().querySelector(META_OG_TYPE);
     if (tag) {
       return tag.getAttribute('content');
     }
@@ -336,12 +347,12 @@ export class DocMetaAnnotations {
    * @return {!Array<string>}
    */
   static getAllLdJsonTypes(ampdoc) {
-    return toArray(getRootNode(ampdoc).querySelectorAll(SCRIPT_LD_JSON))
+    return toArray(ampdoc.getRootNode().querySelectorAll(SCRIPT_LD_JSON))
       .map((el) => {
         const {textContent} = el;
         return (tryParseJson(textContent) || {})['@type'];
       })
-      .filter((typeOrUndefined) => typeOrUndefined);
+      .filter(Boolean);
   }
 
   /**
@@ -366,10 +377,8 @@ export class DocMetaAnnotations {
 function usesLightboxExplicitly(ampdoc) {
   // TODO(alanorozco): Backport into Extensions service.
   const requiredExtensionSelector = `script[custom-element="${REQUIRED_EXTENSION}"]`;
-
   const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]:not([${VISITED_ATTR}])`;
-
-  const exists = (selector) => !!getRootNode(ampdoc).querySelector(selector);
+  const exists = (selector) => !!ampdoc.getRootNode().querySelector(selector);
 
   return (
     exists(requiredExtensionSelector) && exists(lightboxedElementsSelector)
@@ -435,16 +444,25 @@ export function apply(ampdoc, element) {
 export function runCandidates(ampdoc, candidates) {
   return candidates.map((candidate) =>
     whenLoaded(candidate).then(() => {
-      // <amp-img> will change the img's src inline data on unlayout and remove
-      // it from DOM, but a LOAD_END event would still be triggered afterwards.
-      if (candidate.signals().get(CommonSignals.UNLOAD)) {
-        return;
-      }
-      if (!Criteria.meetsAll(candidate)) {
-        return;
-      }
-      dev().info(TAG, 'apply', candidate);
-      return apply(ampdoc, candidate);
+      return measureIntersectionNoRoot(candidate).then(
+        ({boundingClientRect}) => {
+          if (
+            !candidate.tagName === 'IMG' &&
+            !candidate.signals().get(CommonSignals.LOAD_END)
+          ) {
+            // <amp-img> will change the img's src inline data on unlayout and
+            // remove it from DOM.
+            return;
+          }
+
+          const {width, height} = boundingClientRect;
+          if (!Criteria.meetsAll(candidate, ampdoc, width, height)) {
+            return;
+          }
+          dev().info(TAG, 'apply', candidate);
+          return apply(ampdoc, candidate);
+        }
+      );
     }, NOOP)
   );
 }
@@ -467,7 +485,7 @@ export function scan(ampdoc, opt_root) {
 AMP.extension(TAG, '0.1', (AMP) => {
   const {ampdoc} = AMP;
   ampdoc.whenReady().then(() => {
-    getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, (e) => {
+    ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, (e) => {
       const {target} = e;
       scan(ampdoc, dev().assertElement(target));
     });

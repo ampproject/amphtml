@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getState} from '../../../src/history';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 
 const EXPIRATION_DURATION_MILLIS = 10 * 60 * 1000; // 10 Minutes
 const CREATION_TIME = 'time';
@@ -27,7 +27,6 @@ export const LOCAL_STORAGE_KEY = 'amp-story-state';
 /** @enum {string} */
 export const HistoryState = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
-  BOOKEND_ACTIVE: 'ampStoryBookendActive',
   NAVIGATION_PATH: 'ampStoryNavigationPath',
 };
 
@@ -68,8 +67,9 @@ export function getHistoryState(win, stateName) {
     state = getLocalStorageState(win);
   }
   if (state) {
-    return /** @type {string|boolean|Array<string>|null} */ (state[stateName] ||
-      null);
+    return /** @type {string|boolean|Array<string>|null} */ (
+      state[stateName] || null
+    );
   }
   return null;
 }

@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-import {
-  getProxyServingType,
-  getSourceUrl,
-  parseQueryString,
-  parseUrlDeprecated,
-} from '../url';
-
+import {getProxyServingType, getSourceUrl, parseUrlDeprecated} from '../url';
 import {getRandomString64} from './cid-impl';
-import {isArray} from '../types';
-import {map} from '../utils/object';
+import {isArray} from '../core/types';
+import {map} from '../core/types/object';
+import {parseQueryString} from '../core/types/string/url';
 import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */

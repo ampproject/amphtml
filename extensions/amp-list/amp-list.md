@@ -38,14 +38,14 @@ Your endpoint must implement the requirements specified in the [CORS Requests in
 
 You can specify a template in one of two ways:
 
-- a `template` attribute that references an ID of an existing templating element.
-- a templating element nested directly inside the `amp-list` element.
+-   a `template` attribute that references an ID of an existing templating element.
+-   a templating element nested directly inside the `amp-list` element.
 
 [tip type="note"]
 When using `<amp-list>` in tandem with another templating AMP component, such as `<amp-form>`, note that templates may not nest in valid AMP documents. In this case a valid workaround is to provide the template by `id` via the `template` attribute. Learn more about [nested templates in `<amp-mustache>`](../amp-mustache/amp-mustache.md).
 [/tip]
 
-For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
+For more details on templates, see [AMP HTML Templates](../../docs/spec/amp-html-templates.md).
 
 ### Displaying a dynamic list
 
@@ -149,15 +149,15 @@ Would most predictably be applied and rendered if instead provided as follows:
 
 AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `<amp-list>` elements) on an AMP page. For example, if your `<amp-list>` makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
 
-In `<amp-list>`, you can use the [`items`](#items-optional) attribute to render a subset of the JSON response, allowing you to have multiple `<amp-list>` elements rendering different content but sharing a single XHR.
+In `<amp-list>`, you can use the [`items`](#items) attribute to render a subset of the JSON response, allowing you to have multiple `<amp-list>` elements rendering different content but sharing a single XHR.
 
 ### Specifying an overflow
 
-Optionally, the `<amp-list>` component can contain an element with the `overflow` attribute. Add an element with the AMP `overflow` attribute to `amp-list` if the AMP framework is unable to size it as requested. If you include a child element of `amp-list` with the `overflow` attribute, it will appear if one of the following conditions are met:
+Optionally, the `<amp-list>` component can contain an element with the `overflow` attribute. AMP will display this element if all of the following conditions are met:
 
-- The bottom of `amp-list` is below the viewport.
-
-- The bottom of `amp-list` is within 15% of the height of the entire page and within 1000px of the end of the page.
+-   The contents rendered into the `amp-list` exceed its specified size.
+-   The bottom of `amp-list` is within the viewport.
+-   The bottom of `amp-list` is not near the bottom of the page (defined as the minimum of either the bottom 15% of the document or the bottom 1000px)
 
 If `amp-list` is outside the viewport, it will be automatically expanded.
 
@@ -205,8 +205,8 @@ AMP applies the following CSS to elements with the `overflow` attribute:
 
 Optionally, `<amp-list>` supports a placeholder and/or fallback.
 
-- A _placeholder_ is a child element with the `placeholder` attribute. This element is shown until the `<amp-list>` loads successfully. If a fallback is also provided, the placeholder is hidden when the `<amp-list>` fails to load.
-- A _fallback_ is a child element with the `fallback` attribute. This element is shown if the `<amp-list>` fails to load.
+-   A _placeholder_ is a child element with the `placeholder` attribute. This element is shown until the `<amp-list>` loads successfully. If a fallback is also provided, the placeholder is hidden when the `<amp-list>` fails to load.
+-   A _fallback_ is a child element with the `fallback` attribute. This element is shown if the `<amp-list>` fails to load.
 
 Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders). Note that a child element cannot be both a placeholder and a fallback.
 
@@ -481,7 +481,7 @@ This element is not provided by default, but if a `<amp-list-load-more>` element
 ### Substitutions
 
 The `<amp-list>` allows all standard URL variable substitutions.
-See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+See the [Substitutions Guide](../../docs/spec/amp-var-substitutions.md) for more info.
 
 For example:
 
@@ -497,12 +497,21 @@ may make a request to something like `https://foo.com/list.json?0.8390278471201`
 
 ### `src` (required)
 
+[filter formats="websites, stories"]
+
 The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-list>`. There are three valid protocols for the `src` attribute.
 
 1. **https**: This must refer to a CORS HTTP service. Insecure HTTP is not supported.
 2. **amp-state**: For initializing from `<amp-state>` data. See [Initialization from `<amp-state>`](#initialization-from-amp-state) for more details.
 3. **amp-script**: For using `<amp-script>` functions as the data source. See [Using `<amp-script>` as a data source](#using-amp-script-as-a-data-source) for more details.
+   [/filter]<!-- formats="websites, stories" -->
+
+[filter formats="email"]
+
+The URL of the remote endpoint that returns the JSON for amp-list to render. This must refer to a CORS HTTP service and Insecure HTTP is not supported.
+
+[/filter]<!-- formats="email" -->
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
@@ -520,8 +529,8 @@ The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supp
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
 
-- Supported values: `omit`, `include`
-- Default: `omit`
+-   Supported values: `omit`, `include`
+-   Default: `omit`
 
 To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
 
@@ -545,9 +554,9 @@ Here's an example that specifies including credentials to display personalized c
 Defines the expression to locate the array to be rendered within the response. This is a dot-notated expression that navigates via fields of the JSON response.
 By defaut `<amp-list>` expects an array, the `single-item` attribute may be used to load data from an object.
 
-- The default value is `"items"`. The expected response: `{items: [...]}`.
-- If the response itself is the desired array, use the value of `"."`. The expected response is: `[...]`.
-- Nested navigation is permitted (e.g., `"field1.field2"`). The expected response is: `{field1: {field2: [...]}}`.
+-   The default value is `"items"`. The expected response: `{items: [...]}`.
+-   If the response itself is the desired array, use the value of `"."`. The expected response is: `[...]`.
+-   Nested navigation is permitted (e.g., `"field1.field2"`). The expected response is: `{field1: {field2: [...]}}`.
 
 When `items="items"` is specified (which, is the default) the response must be a JSON object that contains an array property called `"items"`:
 
@@ -602,9 +611,9 @@ For pages using `<amp-list>` that also use `amp-bind`, controls whether or not t
 
 We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
-- `binding="no"`: Never block render **(fastest)**.
-- `binding="refresh"`: Don't block render on initial load **(faster)**.
-- `binding="always"`: Always block render **(slow)**.
+-   `binding="no"`: Never block render **(fastest)**.
+-   `binding="refresh"`: Don't block render on initial load **(faster)**.
+-   `binding="always"`: Always block render **(slow)**.
 
 If `binding` attribute is not provided, default is `always`.
 
@@ -645,19 +654,19 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 The AMP for Email spec disallows the use of the following attributes on the AMP email format.
 
-- `[src]`
-- `[state]`
-- `[is-layout-container]`
-- `auto-resize`
-- `credentials`
-- `data-amp-bind-src`
-- `load-more`
-- `load-more-bookmark`
-- `reset-on-refresh`
-- `xssi-prefix`
+-   `[src]`
+-   `[state]`
+-   `[is-layout-container]`
+-   `auto-resize`
+-   `credentials`
+-   `data-amp-bind-src`
+-   `load-more`
+-   `load-more-bookmark`
+-   `reset-on-refresh`
+-   `xssi-prefix`
 
 [/filter] <!-- formats="email" -->
 
 ## Validation
 
-See [amp-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/validator-amp-list.protoascii) in the AMP validator specification.
+See [amp-list rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-list/validator-amp-list.protoascii) in the AMP validator specification.

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
@@ -38,6 +40,9 @@ class AmpKaltura extends AMP.BaseElement {
 
     /** @private {string} */
     this.entryId_ = '';
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -101,13 +106,39 @@ class AmpKaltura extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
+
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
   }
 
   /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
+  }
+
+  /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
-    this.propagateAttributes(['aria-label'], placeholder);
+    const placeholder = this.win.document.createElement('img');
+    propagateAttributes(['aria-label'], this.element, placeholder);
+    this.applyFillContent(placeholder);
+    placeholder.setAttribute('loading', 'lazy');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    if (placeholder.hasAttribute('aria-label')) {
+      placeholder.setAttribute(
+        'alt',
+        'Loading video - ' + placeholder.getAttribute('aria-label')
+      );
+    } else {
+      placeholder.setAttribute('alt', 'Loading video');
+    }
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
     let src = `https://${encodeURIComponent(
@@ -122,17 +153,6 @@ class AmpKaltura extends AMP.BaseElement {
       src += `/height/${height}`;
     }
     placeholder.setAttribute('src', src);
-    placeholder.setAttribute('layout', 'fill');
-    placeholder.setAttribute('placeholder', '');
-    placeholder.setAttribute('referrerpolicy', 'origin');
-    if (placeholder.hasAttribute('aria-label')) {
-      placeholder.setAttribute(
-        'alt',
-        'Loading video - ' + placeholder.getAttribute('aria-label')
-      );
-    } else {
-      placeholder.setAttribute('alt', 'Loading video');
-    }
     return placeholder;
   }
 

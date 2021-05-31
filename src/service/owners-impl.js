@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-// TODO(powerivq)
-// Resource.setOwner, Resource.getOwner should be moved here.
-// ResourceState.NOT_BUILT might not be needed here.
 import {OwnersInterface} from './owners-interface';
-import {Resource, ResourceState} from './resource';
+import {Resource} from './resource';
 import {Services} from '../services';
 import {devAssert} from '../log';
-import {isArray} from '../types';
+import {isArray} from '../core/types';
 import {registerServiceBuilderForDoc} from '../service';
 
 /**
@@ -29,9 +26,9 @@ import {registerServiceBuilderForDoc} from '../service';
  * @return {!Array<!Element>}
  */
 function elements(elements) {
-  return /** @type {!Array<!Element>} */ (isArray(elements)
-    ? elements
-    : [elements]);
+  return /** @type {!Array<!Element>} */ (
+    isArray(elements) ? elements : [elements]
+  );
 }
 
 /**
@@ -104,28 +101,7 @@ export class OwnersImpl {
   requireLayout(element, opt_parentPriority) {
     const promises = [];
     this.discoverResourcesForElement_(element, (resource) => {
-      if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
-        return;
-      }
-      if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
-        promises.push(
-          resource.whenBuilt().then(() => {
-            resource.measure();
-            if (!resource.isDisplayed()) {
-              return;
-            }
-            this.resources_.scheduleLayoutOrPreload(
-              resource,
-              /* layout */ true,
-              opt_parentPriority,
-              /* forceOutsideViewport */ true
-            );
-            return resource.loadedOnce();
-          })
-        );
-      } else if (resource.isDisplayed()) {
-        promises.push(resource.loadedOnce());
-      }
+      promises.push(resource.element.ensureLoaded());
     });
     return Promise.all(promises);
   }
@@ -138,10 +114,10 @@ export class OwnersImpl {
    * @private
    */
   findResourcesInElements_(parentResource, elements, callback) {
-    elements.forEach((element) => {
+    for (const element of elements) {
       devAssert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
-    });
+    }
   }
 
   /**
@@ -187,42 +163,8 @@ export class OwnersImpl {
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
     this.findResourcesInElements_(parentResource, subElements, (resource) => {
-      if (resource.getState() === ResourceState.NOT_BUILT) {
-        resource.whenBuilt().then(() => {
-          this.measureAndTryScheduleLayout_(
-            resource,
-            /* isPreload */ !layout,
-            parentResource.getLayoutPriority()
-          );
-        });
-      } else {
-        this.measureAndTryScheduleLayout_(
-          resource,
-          /* isPreload */ !layout,
-          parentResource.getLayoutPriority()
-        );
-      }
+      resource.element.ensureLoaded(parentResource.getLayoutPriority());
     });
-  }
-
-  /**
-   * @param {!Resource} resource
-   * @param {boolean} isPreload
-   * @param {number=} opt_parentPriority
-   * @private
-   */
-  measureAndTryScheduleLayout_(resource, isPreload, opt_parentPriority) {
-    resource.measure();
-    if (
-      resource.getState() === ResourceState.READY_FOR_LAYOUT &&
-      resource.isDisplayed()
-    ) {
-      this.resources_.scheduleLayoutOrPreload(
-        resource,
-        /* layout */ !isPreload,
-        opt_parentPriority
-      );
-    }
   }
 }
 

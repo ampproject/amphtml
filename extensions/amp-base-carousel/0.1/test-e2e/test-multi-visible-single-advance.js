@@ -17,11 +17,10 @@
 import {getNextArrow, getPrevArrow, getSlides, sleep} from './helpers';
 
 describes.endtoend(
-  'AMP carousel advancing with multiple visible',
+  'amp-base-carousel - advancing with multiple visible slides',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-carousel/0.1/multi-visible-single-advance.amp.html',
-    experiments: ['amp-base-carousel'],
+    version: '0.1',
+    fixture: 'amp-base-carousel/multi-visible-single-advance.amp.html',
     environments: ['single'],
   },
   async function (env) {
@@ -44,8 +43,8 @@ describes.endtoend(
       const slidesInView = 3;
       const slides = await getSlides(controller);
 
-      // Click `next` more than necessary
-      for (let i = 0; i < 7; i++) {
+      // Click `next` to get to the end
+      for (let i = 0; i < slideCount - slidesInView; i++) {
         await controller.click(nextArrow);
         // Need to sleep due to amp-base-carousel buffering clicks
         await sleep(1000);
@@ -53,7 +52,7 @@ describes.endtoend(
 
       let slideRect = await rect(slides[slideCount - slidesInView]);
       // Check that last 3 slides are in view
-      // Less than 5 for flakiness that comes from `controll.getElementRect()`
+      // Less than 5 for flakiness that comes from `controller.getElementRect()`
       await expect(slideRect['x']).to.be.lessThan(5);
 
       // Check that arrows are correctly enabled/disabled
@@ -70,7 +69,7 @@ describes.endtoend(
 
       slideRect = await rect(slides[0]);
       // Check that last 3 slides are in view
-      // Less than 5 for flakiness that comes from `controll.getElementRect()`
+      // Less than 5 for flakiness that comes from `controller.getElementRect()`
       await expect(slideRect['x']).to.be.lessThan(5);
 
       // Check that arrows are correctly enabled/disabled

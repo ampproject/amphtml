@@ -13,26 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {
   A4AVarNames,
+  START_CTA_ANIMATION_ATTR,
   createCta,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
-  localizeCtaText,
   maybeCreateAttribution,
   validateCtaMetadata,
 } from './story-ad-ui';
+import {
+  AdvanceExpToTime,
+  StoryAdAutoAdvance,
+} from '../../../src/experiments/story-ad-auto-advance';
 import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {Gestures} from '../../../src/gesture';
 import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   createElementWithAttributes,
@@ -41,11 +46,12 @@ import {
   toggleAttribute,
 } from '../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict, map} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
-import {getFrameDoc} from './utils';
+import {getExperimentBranch} from '../../../src/experiments';
+import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {setStyle} from '../../../src/style';
 
 /** @const {string} */
@@ -111,6 +117,9 @@ export class StoryAdPage {
 
     /** @private {?Element} */
     this.adChoicesIcon_ = null;
+
+    /** @private {?Element} */
+    this.ctaAnchor_ = null;
 
     /** @private {?Document} */
     this.adDoc_ = null;
@@ -180,6 +189,9 @@ export class StoryAdPage {
    */
   toggleVisibility() {
     this.viewed_ = true;
+    this.ctaAnchor_ &&
+      toggleAttribute(this.ctaAnchor_, START_CTA_ANIMATION_ATTR);
+
     // TODO(calebcordry): Properly handle visible attribute for custom ads.
     if (this.adDoc_) {
       toggleAttribute(
@@ -216,6 +228,7 @@ export class StoryAdPage {
     this.pageElement_.appendChild(paneGridLayer);
 
     this.listenForAdLoadSignals_();
+    this.listenForSwipes_();
 
     this.analyticsEvent_(AnalyticsEvents.AD_REQUESTED, {
       [AnalyticsVars.AD_REQUESTED]: Date.now(),
@@ -304,6 +317,17 @@ export class StoryAdPage {
       'id': this.id_,
     });
 
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win_,
+      StoryAdAutoAdvance.ID
+    );
+    if (
+      autoAdvanceExpBranch &&
+      autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
+    ) {
+      attributes['auto-advance-after'] = AdvanceExpToTime[autoAdvanceExpBranch];
+    }
+
     const page = createElementWithAttributes(
       this.doc_,
       'amp-story-page',
@@ -353,6 +377,23 @@ export class StoryAdPage {
   }
 
   /**
+   * Listen for any horizontal swipes, and fire an analytics event if it happens.
+   */
+  listenForSwipes_() {
+    const gestures = Gestures.get(
+      this.pageElement_,
+      true /* shouldNotPreventDefault */,
+      false /* shouldStopPropogation */
+    );
+    gestures.onGesture(SwipeXRecognizer, () => {
+      this.analyticsEvent_(AnalyticsEvents.AD_SWIPED, {
+        [AnalyticsVars.AD_SWIPED]: Date.now(),
+      });
+      gestures.cleanup();
+    });
+  }
+
+  /**
    * Returns the iframe containing the creative if it exists.
    * @return {?HTMLIFrameElement}
    */
@@ -360,10 +401,9 @@ export class StoryAdPage {
     if (this.adFrame_) {
       return this.adFrame_;
     }
-    return (this.adFrame_ = /** @type {?HTMLIFrameElement} */ (elementByTag(
-      devAssert(this.pageElement_),
-      'iframe'
-    )));
+    return (this.adFrame_ = /** @type {?HTMLIFrameElement} */ (
+      elementByTag(devAssert(this.pageElement_), 'iframe')
+    ));
   }
 
   /**
@@ -374,6 +414,7 @@ export class StoryAdPage {
     // Ensures the video-manager does not follow the autoplay attribute on
     // amp-video tags, which would play the ad in the background before it is
     // displayed.
+    // TODO(ccordry): do we still need this? Its a pain to always stub in tests.
     this.pageElement_.getImpl().then((impl) => impl.delegateVideoAutoplay());
 
     // Remove loading attribute once loaded so that desktop CSS will position
@@ -408,6 +449,7 @@ export class StoryAdPage {
       uiMetadata
     ).then((anchor) => {
       if (anchor) {
+        this.ctaAnchor_ = anchor;
         // Click listener so that we can fire `story-ad-click` analytics trigger at
         // the appropriate time.
         anchor.addEventListener('click', () => {

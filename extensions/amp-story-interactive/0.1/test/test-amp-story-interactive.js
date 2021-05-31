@@ -27,11 +27,15 @@ import {
   AmpStoryVariableService,
   AnalyticsVariable,
 } from '../../../amp-story/1.0/variable-service';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
+import {getBackendSpecs} from '../interactive-disclaimer';
 import {htmlFor} from '../../../../src/static-template';
+import {measureMutateElementStub} from '../../../../testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 
 /**
  * Returns mock interactive data.
@@ -170,6 +174,10 @@ describes.realWin(
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationServiceForOrNull')
+        .returns(Promise.resolve(localizationService));
 
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
@@ -185,6 +193,9 @@ describes.realWin(
       env.sandbox
         .stub(ampStoryInteractive, 'mutateElement')
         .callsFake((fn) => fn());
+      env.sandbox
+        .stub(ampStoryInteractive, 'measureMutateElement')
+        .callsFake(measureMutateElementStub);
     });
 
     it('should parse the attributes properly into an options list', async () => {
@@ -281,36 +292,32 @@ describes.realWin(
     it('should preprocess percentages properly', () => {
       const responseData1 = getMockInteractiveData()['options'];
 
-      const percentages1 = ampStoryInteractive.preprocessPercentages_(
-        responseData1
-      );
+      const percentages1 =
+        ampStoryInteractive.preprocessPercentages_(responseData1);
 
       expect(percentages1).to.deep.equal([30, 30, 30, 10]);
     });
 
     it('should preprocess percentages preserving ties', () => {
       const responseData2 = generateResponseDataFor([3, 3, 3]);
-      const percentages2 = ampStoryInteractive.preprocessPercentages_(
-        responseData2
-      );
+      const percentages2 =
+        ampStoryInteractive.preprocessPercentages_(responseData2);
 
       expect(percentages2).to.deep.equal([33, 33, 33]);
     });
 
     it('should preprocess percentages preserving order', () => {
       const responseData3 = generateResponseDataFor([255, 255, 245, 245]);
-      const percentages3 = ampStoryInteractive.preprocessPercentages_(
-        responseData3
-      );
+      const percentages3 =
+        ampStoryInteractive.preprocessPercentages_(responseData3);
 
       expect(percentages3).to.deep.equal([26, 26, 24, 24]);
     });
 
     it('should preprocess percentages handling rounding edge cases', () => {
       const responseData4 = generateResponseDataFor([335, 335, 330]);
-      const percentages4 = ampStoryInteractive.preprocessPercentages_(
-        responseData4
-      );
+      const percentages4 =
+        ampStoryInteractive.preprocessPercentages_(responseData4);
 
       expect(percentages4).to.deep.equal([33, 33, 33]);
     });
@@ -333,6 +340,68 @@ describes.realWin(
         interactiveId: 'id',
         type: InteractiveType.QUIZ,
       });
+    });
+
+    it('should set the url of the disclaimer to the backend url', async () => {
+      toggleExperiment(win, 'amp-story-interactive-disclaimer', true);
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockInteractiveData());
+
+      addConfigToInteractive(ampStoryInteractive);
+      ampStoryInteractive.element.setAttribute(
+        'endpoint',
+        'https://notabackend.com'
+      );
+      await ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+
+      expect(
+        ampStoryInteractive.element.querySelector(
+          '.i-amphtml-story-interactive-disclaimer-url'
+        ).textContent
+      ).to.be.equal('notabackend.com');
+    });
+
+    it('should remove learn more link when backend is not on list', async () => {
+      toggleExperiment(win, 'amp-story-interactive-disclaimer', true);
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockInteractiveData());
+
+      addConfigToInteractive(ampStoryInteractive);
+      ampStoryInteractive.element.setAttribute(
+        'endpoint',
+        'https://notabackend.com'
+      );
+
+      await ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+      expect(
+        ampStoryInteractive.element.querySelector(
+          '.i-amphtml-story-interactive-disclaimer-link'
+        )
+      ).to.be.null;
+    });
+
+    it('should properly find backend from url in list of backends', async () => {
+      expect(
+        getBackendSpecs('notabackend.com/api/v1', {
+          'wrongbackend.com': {learnMoreUrl: 'url0', 'entity': 'WrongBackend'},
+          'notabackend.com': {learnMoreUrl: 'url1', 'entity': 'NotABackend'},
+        })
+      ).to.be.deep.equals([
+        'notabackend.com',
+        {learnMoreUrl: 'url1', entity: 'NotABackend'},
+      ]);
+    });
+
+    it('should not find backend from url in list of backends that does not include url passed', async () => {
+      expect(
+        getBackendSpecs('notabackend.com/api/v1', {
+          'wrongbackend.com': {learnMoreUrl: 'url0', 'entity': 'WrongBackend'},
+        })
+      ).to.be.undefined;
     });
   }
 );

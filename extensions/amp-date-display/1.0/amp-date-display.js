@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import {DateDisplay} from './date-display';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {parseDate} from '../../../src/utils/date';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
 
-class AmpDateDisplay extends PreactBaseElement {
+class AmpDateDisplay extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -40,8 +38,9 @@ class AmpDateDisplay extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-date-display-bento'),
-      'expected amp-date-display-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-date-display'),
+      'expected global "bento" or specific "bento-date-display" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
   }
@@ -49,7 +48,8 @@ class AmpDateDisplay extends PreactBaseElement {
   /** @override */
   checkPropsPostMutations() {
     const templates =
-      this.templates_ || (this.templates_ = Services.templatesFor(this.win));
+      this.templates_ ||
+      (this.templates_ = Services.templatesForDoc(this.element));
     const template = templates.maybeFindTemplate(this.element);
     if (template != this.template_) {
       this.template_ = template;
@@ -84,64 +84,6 @@ class AmpDateDisplay extends PreactBaseElement {
     }
     return true;
   }
-}
-
-/** @override */
-AmpDateDisplay['Component'] = DateDisplay;
-
-/** @override */
-AmpDateDisplay['props'] = {
-  'datetime': {
-    attrs: ['datetime', 'timestamp-ms', 'timestamp-seconds', 'offset-seconds'],
-    parseAttrs: parseDateAttrs,
-  },
-  'displayIn': {attr: 'display-in'},
-  'locale': {attr: 'locale'},
-};
-
-/** @override */
-AmpDateDisplay['layoutSizeDefined'] = true;
-
-/** @override */
-AmpDateDisplay['lightDomTag'] = 'div';
-
-/** @override */
-AmpDateDisplay['usesTemplate'] = true;
-
-/**
- * @param {!Element} element
- * @return {?number}
- * @visibleForTesting
- */
-export function parseDateAttrs(element) {
-  const epoch = userAssert(
-    parseEpoch(element),
-    'One of datetime, timestamp-ms, or timestamp-seconds is required'
-  );
-
-  const offsetSeconds =
-    (Number(element.getAttribute('offset-seconds')) || 0) * 1000;
-  return epoch + offsetSeconds;
-}
-
-/**
- * @param {!Element} element
- * @return {?number}
- */
-function parseEpoch(element) {
-  const datetime = element.getAttribute('datetime');
-  if (datetime) {
-    return userAssert(parseDate(datetime), 'Invalid date: %s', datetime);
-  }
-  const timestampMs = element.getAttribute('timestamp-ms');
-  if (timestampMs) {
-    return Number(timestampMs);
-  }
-  const timestampSeconds = element.getAttribute('timestamp-seconds');
-  if (timestampSeconds) {
-    return Number(timestampSeconds) * 1000;
-  }
-  return null;
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {

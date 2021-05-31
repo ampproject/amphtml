@@ -28,7 +28,7 @@ import {
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
 } from '../../src/web-components';
-import {Signals} from '../../src/utils/signals';
+import {Signals} from '../../src/core/data-structures/signals';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {
   getServiceForDoc,
@@ -910,26 +910,34 @@ describes.realWin('AmpDocSingle', {}, (env) => {
 
   it('should declare extension', () => {
     expect(ampdoc.declaresExtension('ext1')).to.be.false;
+    expect(ampdoc.declaresExtension('ext1', '0.2')).to.be.false;
     expect(ampdoc.declaresExtension('ext2')).to.be.false;
-    ampdoc.declareExtension('ext1');
+    ampdoc.declareExtension('ext1', '0.2');
     expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaresExtension('ext1', '0.2')).to.be.true;
+    expect(ampdoc.declaresExtension('ext1', '0.1')).to.be.false;
     expect(ampdoc.declaresExtension('ext2')).to.be.false;
 
-    ampdoc.declareExtension('ext2');
+    ampdoc.declareExtension('ext2', '0.3');
     expect(ampdoc.declaresExtension('ext1')).to.be.true;
     expect(ampdoc.declaresExtension('ext2')).to.be.true;
+    expect(ampdoc.declaresExtension('ext2', '0.3')).to.be.true;
+    expect(ampdoc.declaresExtension('ext2', '0.1')).to.be.false;
   });
 
   it('should ignore duplicate extensions', () => {
     expect(ampdoc.declaresExtension('ext1')).to.be.false;
-    ampdoc.declareExtension('ext1');
+    ampdoc.declareExtension('ext1', '0.2');
     expect(ampdoc.declaresExtension('ext1')).to.be.true;
-    expect(ampdoc.declaredExtensions_).to.have.length(1);
+    expect(ampdoc.declaresExtension('ext1', '0.2')).to.be.true;
 
     // Repeat.
-    ampdoc.declareExtension('ext1');
-    expect(ampdoc.declaredExtensions_).to.have.length(1);
+    ampdoc.declareExtension('ext1', '0.2');
     expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaresExtension('ext1', '0.2')).to.be.true;
+
+    // A different version is not allowed.
+    expect(() => ampdoc.declareExtension('ext1', '0.1')).to.throw();
   });
 });
 

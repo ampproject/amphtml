@@ -30,9 +30,9 @@ import {
 } from '../style';
 import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
-import {endsWith} from '../string';
+import {endsWith} from '../core/types/string';
 import {getMode} from '../mode';
-import {remove} from '../utils/array';
+import {remove} from '../core/types/array';
 
 const TAG = 'FixedLayer';
 
@@ -574,7 +574,6 @@ export class FixedLayer {
    * @param {!Node} root
    * @param {boolean=} opt_lightboxMode
    * @private
-   * @noinline
    */
   trySetupSelectors_(root, opt_lightboxMode) {
     try {
@@ -1098,9 +1097,8 @@ class TransferLayerBody {
     if (!fe.placeholder) {
       // Never been transfered before: ensure that it's properly configured.
       setStyle(element, 'pointer-events', 'initial');
-      const placeholder = (fe.placeholder = this.doc_.createElement(
-        'i-amphtml-fpa'
-      ));
+      const placeholder = (fe.placeholder =
+        this.doc_.createElement('i-amphtml-fpa'));
       toggle(placeholder, false);
       placeholder.setAttribute('i-amphtml-fixedid', fe.id);
     }

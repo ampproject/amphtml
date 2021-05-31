@@ -803,6 +803,28 @@ describes.sandboxed('Navigation', {}, () => {
           expect(event.defaultPrevented).to.be.false;
         });
 
+        it('should not intercept requests a shadow doc', () => {
+          handler.isTrustedViewer_ = true;
+          handler.ampdoc.isSingleDoc = () => false;
+          // isSingleDoc affects where the services get stored. So stub the getters.
+          env.sandbox
+            .stub(Services, 'urlForDoc')
+            .returns(handler.ampdoc.win.__AMP_SERVICES.url.obj);
+          env.sandbox
+            .stub(Services, 'viewerForDoc')
+            .returns(handler.ampdoc.win.__AMP_SERVICES.viewer.obj);
+
+          handler.handle_(event);
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+          expect(sendMessageStub).to.not.be.called;
+          expect(event.defaultPrevented).to.be.false;
+        });
+
         it('should require opted in ampdoc', () => {
           ampdoc
             .getRootNode()
@@ -875,9 +897,8 @@ describes.sandboxed('Navigation', {}, () => {
             // Navigation uses the UrlReplacements service scoped to the event
             // target, but for testing stub in the top-level service for simplicity.
             const {documentElement} = parentWin.document;
-            const urlReplacements = Services.urlReplacementsForDoc(
-              documentElement
-            );
+            const urlReplacements =
+              Services.urlReplacementsForDoc(documentElement);
             env.sandbox
               .stub(Services, 'urlReplacementsForDoc')
               .withArgs(anchor)

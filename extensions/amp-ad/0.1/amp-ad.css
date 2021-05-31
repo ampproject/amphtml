@@ -50,6 +50,11 @@ amp-embed iframe {
   border: 1px, solid, #696969;
 }
 
+amp-ad[sticky] {
+  visibility: hidden;
+  align-items: center;
+}
+
 amp-ad[type='adsense'],
 amp-ad[type='doubleclick'] {
   direction: ltr;
@@ -70,10 +75,6 @@ amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'][height='fluid']
 
 amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'][height='fluid'] {
   width: 100% !important;
-}
-
-amp-ad.i-amphtml-amp-ad-sticky-layout {
-  overflow: visible !important;
 }
 
 amp-ad .amp-ad-close-button {
@@ -114,4 +115,43 @@ amp-ad .amp-ad-close-button:before {
 [dir='rtl'] amp-ad .amp-ad-close-button:before {
   right: -20px;
   left: 0;
+}
+
+amp-ad-sticky-padding {
+  display: block;
+  width: 100% !important;
+  background: #fff;
+  height: 4px;
+  max-height: 5px !important;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  /** Must be above the dismiss button to cover bottom shadow */
+  z-index: 12;
+}
+
+amp-ad[sticky] {
+  z-index: 11;
+  position: fixed;
+  overflow: visible !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2) !important;
+  display: flex;
+  flex-direction: column;
+}
+
+amp-ad[sticky='top'] {
+  width: 100% !important;
+  background: #fff;
+  top: 0;
+}
+
+amp-ad[sticky='bottom'] {
+  width: 100% !important;
+  background: #fff;
+  bottom: 0;
+}
+
+amp-ad[sticky='bottom-right'] {
+  bottom: 0;
+  right: 0;
 }

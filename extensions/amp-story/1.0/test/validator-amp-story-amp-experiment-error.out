@@ -63,7 +63,7 @@ amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:48:8 Custom Jav
 |        <!-- Invalid: amp-experiment not allowed as a child of amp-story-page -->
 |        <amp-experiment>
 >>       ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:61:6 Tag 'amp-experiment' is disallowed as child of tag 'amp-story-page'. Child tag must be one of ['amp-analytics', 'amp-pixel', 'amp-story-animation', 'amp-story-cta-layer', 'amp-story-grid-layer', 'amp-story-page-attachment']. (see https://amp.dev/documentation/components/amp-story)
+amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:61:6 Tag 'amp-experiment' is disallowed as child of tag 'amp-story-page'. Child tag must be one of ['amp-analytics', 'amp-pixel', 'amp-story-animation', 'amp-story-auto-analytics', 'amp-story-cta-layer', 'amp-story-grid-layer', 'amp-story-page-attachment']. (see https://amp.dev/documentation/components/amp-story)
 |            <script type="application/json">
 |              {
 |                "background-color-test": {
@@ -81,7 +81,7 @@ amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:61:6 Tag 'amp-e
 |      <!-- Invalid: amp-experiment not allowed as a child of amp-story -->
 |      <amp-experiment>
 >>     ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:77:4 Tag 'amp-experiment' is disallowed as child of tag 'amp-story'. Child tag must be one of ['amp-analytics', 'amp-consent', 'amp-geo', 'amp-pixel', 'amp-sidebar', 'amp-story-auto-ads', 'amp-story-bookend', 'amp-story-page']. (see https://amp.dev/documentation/components/amp-story)
+amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:77:4 Tag 'amp-experiment' is disallowed as child of tag 'amp-story'. Child tag must be one of ['amp-analytics', 'amp-consent', 'amp-geo', 'amp-pixel', 'amp-sidebar', 'amp-story-auto-ads', 'amp-story-auto-analytics', 'amp-story-bookend', 'amp-story-page', 'amp-story-social-share']. (see https://amp.dev/documentation/components/amp-story)
 |          <script type="application/json">
 |            {
 |              "background-color-test": {

@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
+import {Deferred} from './core/data-structures/promise';
 import {Services} from './services';
 import {WindowInterface} from './window-interface';
-import {
-  addParamsToUrl,
-  isProxyOrigin,
-  parseQueryString,
-  parseUrlDeprecated,
-} from './url';
+import {addParamsToUrl, isProxyOrigin, parseUrlDeprecated} from './url';
 import {dev, user, userAssert} from './log';
 import {getMode} from './mode';
 import {isExperimentOn} from './experiments';
+import {parseQueryString} from './core/types/string/url';
 
 const TIMEOUT_VALUE = 8000;
 
@@ -38,9 +34,9 @@ const DEFAULT_APPEND_URL_PARAM = ['gclid', 'gclsrc'];
  * sending impression requests. If you believe your domain should be here,
  * file the issue on GitHub to discuss. The process will be similar
  * (but somewhat more stringent) to the one described in the [3p/README.md](
- * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+ * https://github.com/ampproject/amphtml/blob/main/3p/README.md)
  *
- * @export {!Array<!RegExp>}
+ * @type {!Array<!RegExp>}
  */
 const TRUSTED_REFERRER_HOSTS = [
   /**

@@ -15,14 +15,19 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionSection,
+} from '../../../amp-accordion/1.0/component';
 import {VideoWrapper} from '../video-wrapper';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'Video Wrapper',
   component: VideoWrapper,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 const VideoTagPlayer = ({i}) => {
@@ -52,8 +57,7 @@ const VideoTagPlayer = ({i}) => {
     'sources',
     [
       {
-        src:
-          'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
+        src: 'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
         type: 'video/webm',
       },
       {
@@ -118,5 +122,50 @@ export const Default = () => {
       {players}
       {spaceBelow && <Spacer height={spacerHeight} />}
     </>
+  );
+};
+
+export const InsideAccordion = () => {
+  const width = text('width', '320px');
+  const height = text('height', '180px');
+  return (
+    <Accordion expandSingleSection>
+      <AccordionSection key={1} expanded>
+        <AccordionHeader>
+          <h2>Controls</h2>
+        </AccordionHeader>
+        <AccordionContent>
+          <VideoWrapper
+            component="video"
+            controls={true}
+            loop={true}
+            style={{width, height}}
+            src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
+            poster="https://amp.dev/static/inline-examples/images/kitten-playing.png"
+          />
+        </AccordionContent>
+      </AccordionSection>
+      <AccordionSection key={2}>
+        <AccordionHeader>
+          <h2>Autoplay</h2>
+        </AccordionHeader>
+        <AccordionContent>
+          <VideoWrapper
+            component="video"
+            autoplay={true}
+            loop={true}
+            style={{width, height}}
+            src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
+            poster="https://amp.dev/static/inline-examples/images/kitten-playing.png"
+            sources={[
+              <source
+                type="video/mp4"
+                src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
+              />,
+            ]}
+          />
+        </AccordionContent>
+      </AccordionSection>
+    </Accordion>
   );
 };

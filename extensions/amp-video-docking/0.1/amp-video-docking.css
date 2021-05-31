@@ -116,6 +116,7 @@
 
 .amp-video-docked-shadow {
   box-shadow: 0px 0 20px 6px rgba(0, 0, 0, 0.2);
+  transition-property: transform, opacity !important;
 }
 
 .amp-video-docked-controls-bg {
@@ -153,7 +154,7 @@
 
 .amp-rtl .amp-video-docked-scroll-back {
   /* opposite direction of icon arrow */
-  /* TODO(alanorozco): Might not be worth it to keep a horizontally asymmetrical 
+  /* TODO(alanorozco): Might not be worth it to keep a horizontally asymmetrical
      icon for a simple drop shadow, consider removing drop shadow and use a
      horizontal flip CSS transform instead of another SVG definition here. */
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpath d='M-4-4h48v48H-4z'/%3E%3Cpath d='M36 0c2.2 0 4 1.8 4 4v24c0 2.2-1.8 4-4 4H12c-2.2 0-4-1.8-4-4V4c0-2.2 1.8-4 4-4h24zM16 11.868l12.618 12.618 2.829-2.828L18.789 9H27V5H12v15h4v-8.132zM4 8H0v28c0 2.2 1.8 4 4 4h28v-4H4V8z' fill='%23000' fill-rule='nonzero'/%3E%3C/g%3E%3C/svg%3E");
@@ -194,6 +195,9 @@
   transform-origin: left top !important;
 
   will-change: width, height, transition, transform, opacity;
+
+  /* Needs an arbitrary transition by default so browser won't glitch/jump. */
+  transition: 0.05s transform;
 }
 
 .i-amphtml-video-docked-overlay {

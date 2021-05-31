@@ -16,7 +16,7 @@
 
 import '../amp-o2-player';
 import * as iframeHelper from '../../../../src/iframe-helper';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
 import {MessageType} from '../../../../src/3p-frame-messaging';
 
 describes.realWin(
@@ -46,10 +46,12 @@ describes.realWin(
       }
       doc.body.appendChild(o2);
 
+      const impl = await o2.getImpl(false);
+
       if (implExtends) {
-        implExtends(o2);
+        implExtends(o2, impl);
       }
-      await o2.build();
+      await o2.buildInternal();
       await o2.layoutCallback();
       return o2;
     }
@@ -151,6 +153,22 @@ describes.realWin(
       );
     });
 
+    it('unlayout and relayout', async () => {
+      const o2 = await getO2player({
+        'data-pid': '123',
+        'data-bcid': '456',
+        'data-env': 'stage',
+      });
+      expect(o2.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = o2.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(o2.querySelector('iframe')).to.not.exist;
+
+      await o2.layoutCallback();
+      expect(o2.querySelector('iframe')).to.exist;
+    });
+
     describe('sends a consent-data', () => {
       let sendConsentDataToIframe;
       const resSource = 'my source';
@@ -169,17 +187,17 @@ describes.realWin(
       it('sends a consent-data CONSENT_POLICY_STATE.SUFFICIENT message', async function () {
         resData.consentData = consentData;
 
-        const implExtends = function (o2) {
+        const implExtends = function (o2, impl) {
           env.sandbox
-            .stub(o2.implementation_, 'getConsentString_')
+            .stub(impl, 'getConsentString_')
             .resolves(resConsentString);
 
           env.sandbox
-            .stub(o2.implementation_, 'getConsentPolicyState_')
+            .stub(impl, 'getConsentPolicyState_')
             .resolves(CONSENT_POLICY_STATE.SUFFICIENT);
 
           sendConsentDataToIframe = env.sandbox.spy(
-            o2.implementation_,
+            impl,
             'sendConsentDataToIframe_'
           );
         };
@@ -211,17 +229,17 @@ describes.realWin(
         consentData['user_consent'] = 0;
         resData.consentData = consentData;
 
-        const implExtends = function (o2) {
+        const implExtends = function (o2, impl) {
           env.sandbox
-            .stub(o2.implementation_, 'getConsentString_')
+            .stub(impl, 'getConsentString_')
             .resolves(resConsentString);
 
           env.sandbox
-            .stub(o2.implementation_, 'getConsentPolicyState_')
+            .stub(impl, 'getConsentPolicyState_')
             .resolves(CONSENT_POLICY_STATE.INSUFFICIENT);
 
           sendConsentDataToIframe = env.sandbox.spy(
-            o2.implementation_,
+            impl,
             'sendConsentDataToIframe_'
           );
         };
@@ -256,17 +274,17 @@ describes.realWin(
 
         resData.consentData = consentData;
 
-        const implExtends = function (o2) {
+        const implExtends = function (o2, impl) {
           env.sandbox
-            .stub(o2.implementation_, 'getConsentString_')
+            .stub(impl, 'getConsentString_')
             .resolves(resConsentString);
 
           env.sandbox
-            .stub(o2.implementation_, 'getConsentPolicyState_')
+            .stub(impl, 'getConsentPolicyState_')
             .resolves(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED);
 
           sendConsentDataToIframe = env.sandbox.spy(
-            o2.implementation_,
+            impl,
             'sendConsentDataToIframe_'
           );
         };

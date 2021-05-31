@@ -17,7 +17,7 @@
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -44,9 +44,9 @@ export class PremiumadsNetworkConfig {
 
   /** @override */
   getConfigUrl() {
+    const data = this.autoAmpAdsElement_.dataset;
     return buildUrl(
-      'https://tags.premiumads.com.br/autoads/' +
-        this.autoAmpAdsElement_.getAttribute('data-publisher'),
+      data.host || 'https://tags.premiumads.com.br/autoads/' + data.publisher,
       {},
       4096
     );
@@ -54,14 +54,15 @@ export class PremiumadsNetworkConfig {
 
   /** @override */
   getAttributes() {
+    const data = this.autoAmpAdsElement_.dataset;
     const attributesObj = dict({
       'type': 'doubleclick',
       'data-ad': 'premiumads',
-      'width': 336,
-      'height': 280,
-      'layout': Layout.RESPONSIVE,
-      'sizes': '(min-width: 320px) 320px, 100vw',
-      'style': 'position:relative!important',
+      'width': data.width || 336,
+      'height': data.height || 280,
+      'layout': data.layout || Layout.RESPONSIVE,
+      'sizes': data.sizes || '(min-width: 320px) 320px, 100vw',
+      'style': data['style'] || 'position:relative!important',
     });
     return attributesObj;
   }

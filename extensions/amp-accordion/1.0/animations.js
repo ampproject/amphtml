@@ -39,7 +39,6 @@ export function animateExpand(content) {
       opacity: 0,
       overflowY: 'auto',
     });
-    content.hidden = false;
     const targetHeight = content./*OK*/ scrollHeight;
 
     // Reset back. The animation will take care of these properties
@@ -78,43 +77,29 @@ export function animateExpand(content) {
  * @return {!UnlistenDef}
  */
 export function animateCollapse(content) {
-  return animate(
-    content,
-    () => {
-      // Measure the starting height.
-      // This looks ugly, but avoids weird `hidden` state management in the
-      // component itself. Most importantly, this has no performance issues
-      // by itself b/c flipping `hidden` back and forth before measure has
-      // no effect - the `useLayoutEffect` assures this.
-      content.hidden = false;
-      const startHeight = content./*OK*/ offsetHeight;
+  return animate(content, () => {
+    const startHeight = content./*OK*/ offsetHeight;
+    const duration = getTransitionDuration(startHeight);
 
-      const duration = getTransitionDuration(startHeight);
-
-      return content.animate(
-        [
-          {
-            height: startHeight + 'px',
-            opacity: 1,
-            overflowY: 'hidden',
-          },
-          {
-            height: '0',
-            opacity: 0,
-            overflowY: 'hidden',
-          },
-        ],
+    return content.animate(
+      [
         {
-          easing: COLLAPSE_CURVE,
-          duration,
-        }
-      );
-    },
-    () => {
-      // Undo the `content.hidden = true` above.
-      content.hidden = true;
-    }
-  );
+          height: startHeight + 'px',
+          opacity: 1,
+          overflowY: 'hidden',
+        },
+        {
+          height: '0',
+          opacity: 0,
+          overflowY: 'hidden',
+        },
+      ],
+      {
+        easing: COLLAPSE_CURVE,
+        duration,
+      }
+    );
+  });
 }
 
 /**
@@ -124,12 +109,14 @@ export function animateCollapse(content) {
  * @return {!UnlistenDef}
  */
 function animate(element, prepare, cleanup = undefined) {
+  element.classList.add('i-amphtml-animating');
   let player = prepare();
   player.onfinish = player.oncancel = () => {
     player = null;
     if (cleanup) {
       cleanup();
     }
+    element.classList.remove('i-amphtml-animating');
   };
   return () => {
     if (player) {

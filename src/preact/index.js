@@ -16,6 +16,8 @@
 
 import * as hooks from /*OK*/ 'preact/hooks';
 import * as preact from /*OK*/ 'preact';
+// The preactDOM name is explicit, so we can remap to react-dom.
+import * as preactDOM from /*OK*/ 'preact/dom';
 
 // Defines the type interfaces for the approved Preact APIs.
 // TODO: isValidElement, Component
@@ -46,7 +48,7 @@ export function cloneElement(unusedElement, unusedProps, unusedChildren) {
  * @param {?Node=} opt_replaceNode
  */
 export function render(vnode, container, opt_replaceNode) {
-  preact.render(vnode, container, opt_replaceNode);
+  preactDOM.render(vnode, container, opt_replaceNode);
 }
 
 /**
@@ -54,7 +56,7 @@ export function render(vnode, container, opt_replaceNode) {
  * @param {Node} container
  */
 export function hydrate(vnode, container) {
-  preact.hydrate(vnode, container);
+  preactDOM.hydrate(vnode, container);
 }
 
 /**
@@ -66,7 +68,7 @@ export function Fragment(props) {
 }
 
 /**
- * @return {{current: (T|null)}}
+ * @return {{current: ?T}}
  * @template T
  */
 export function createRef() {
@@ -79,11 +81,12 @@ export function createRef() {
  * @template T
  */
 export function createContext(value) {
-  return preact.createContext(value);
+  // TODO(preactjs/preact#2736): Remove once Preact's API is fixed.
+  return preact.createContext(value, undefined);
 }
 
 // Defines the type interfaces for the approved Preact Hooks APIs.
-// TODO: useReducer, useImperativeHandle, useDebugValue, useErrorBoundary
+// TODO: useReducer, useDebugValue, useErrorBoundary
 
 /**
  * @param {S|function():S} initial
@@ -95,8 +98,8 @@ export function useState(initial) {
 }
 
 /**
- * @param {T|null} initial
- * @return {{current: (T|null)}}
+ * @param {?T} initial
+ * @return {{current: ?T}}
  * @template T
  */
 export function useRef(initial) {
@@ -149,7 +152,7 @@ export function useCallback(cb, opt_deps) {
 }
 
 /**
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @param {function():T} create
  * @param {!Array<*>=} opt_deps
  * @return {undefined}
@@ -157,12 +160,4 @@ export function useCallback(cb, opt_deps) {
  */
 export function useImperativeHandle(ref, create, opt_deps) {
   return hooks.useImperativeHandle(ref, create, opt_deps);
-}
-
-/**
- * @param {!PreactDef.Renderable} unusedChildren
- * @return {!Array<PreactDef.Renderable>}
- */
-export function toChildArray(unusedChildren) {
-  return preact.toChildArray.apply(undefined, arguments);
 }

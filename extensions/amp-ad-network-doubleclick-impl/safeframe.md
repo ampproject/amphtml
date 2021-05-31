@@ -75,10 +75,10 @@ This API call requests that the SafeFrame be expanded. The parameter passed in i
 
 **Important Caveats:**
 
-- **A request to expand is not guaranteed to succeed**. You should register a callback with \$sf.ext.register() that will execute on geometry changes, including from the results of expansion and collapse.
-- **AMP does not support expansion left or up.** However, the majority of ad slots are centered in the page, which means an expansion to the right will in effect end up expanding to both the left and right. For instance, expanding by 100px to the right for a centered SafeFrame, would in effect appear as expanding by 50px to both the left and right.
-- **Expand by overlay is only allowed within the confines of amp-ad; expand by push is allowed for any size.** Within the confines of the amp-ad, creatives may expand by overlay or push. Creatives attempting to expand to a size greater than that of the amp-ad may only use push.
-- **Publisher may disallow expand by push or overlay.** The publisher may set an attribute called **data-safeframe-config** on the amp-ad element, using a JSON object like the following: **{"expandByPush": true, "expandByOverlay": false}**
+-   **A request to expand is not guaranteed to succeed**. You should register a callback with \$sf.ext.register() that will execute on geometry changes, including from the results of expansion and collapse.
+-   **AMP does not support expansion left or up.** However, the majority of ad slots are centered in the page, which means an expansion to the right will in effect end up expanding to both the left and right. For instance, expanding by 100px to the right for a centered SafeFrame, would in effect appear as expanding by 50px to both the left and right.
+-   **Expand by overlay is only allowed within the confines of amp-ad; expand by push is allowed for any size.** Within the confines of the amp-ad, creatives may expand by overlay or push. Creatives attempting to expand to a size greater than that of the amp-ad may only use push.
+-   **Publisher may disallow expand by push or overlay.** The publisher may set an attribute called **data-safeframe-config** on the amp-ad element, using a JSON object like the following: **{"expandByPush": true, "expandByOverlay": false}**
 
 **Expansion Successes and Failures**
 
@@ -105,11 +105,11 @@ For AMP's implementation of SafeFrame, a collapse() request impacts two separate
 
 ### Examples
 
-- Expand is called while out of viewport and succeeds for both the amp-ad and the SafeFrame. The user scrolls the page such that the SafeFrame is in the viewport. The ad calls collapse(). The amp-ad element can not be resized without causing reflow, so only the SafeFrame is resized, as in the image below:
+-   Expand is called while out of viewport and succeeds for both the amp-ad and the SafeFrame. The user scrolls the page such that the SafeFrame is in the viewport. The ad calls collapse(). The amp-ad element can not be resized without causing reflow, so only the SafeFrame is resized, as in the image below:
 
 ![alt_text](images/sf_example_3.png 'image_tooltip')
 
-- Expand is called while out of viewport and succeeds for both the amp-ad and the SafeFrame. Collapse is then called either while out of viewport, or during a user-interaction. The amp-ad element and the SafeFrame are both collapsed to **the original size of the SafeFrame. Important to note that even if the amp-ad was originally a different size than the SafeFrame, collapsing the SafeFrame will attempt to collapse the amp-ad to the same size as the SafeFrame. **See picture below:
+-   Expand is called while out of viewport and succeeds for both the amp-ad and the SafeFrame. Collapse is then called either while out of viewport, or during a user-interaction. The amp-ad element and the SafeFrame are both collapsed to **the original size of the SafeFrame. Important to note that even if the amp-ad was originally a different size than the SafeFrame, collapsing the SafeFrame will attempt to collapse the amp-ad to the same size as the SafeFrame. **See picture below:
 
 ![alt_text](images/sf_example_4.png 'image_tooltip')
 
@@ -117,13 +117,13 @@ For AMP's implementation of SafeFrame, a collapse() request impacts two separate
 
 These methods all work the same as they do on non-AMP pages, so please see [standard SafeFrame documentation](https://www.iab.com/wp-content/uploads/2014/08/SafeFrames_v1.1_final.pdf) for details
 
-- \$sf.ext.register()
-- \$sf.ext.supports()
-- \$sf.ext.status()
-- \$sf.ext.meta()
-- \$sf.ext.inViewPercentage()
+-   \$sf.ext.register()
+-   \$sf.ext.supports()
+-   \$sf.ext.status()
+-   \$sf.ext.meta()
+-   \$sf.ext.inViewPercentage()
 
 # Unsupported methods
 
-- \$sf.ext.winHasFocus()
-- \$sf.ext.cookie()
+-   \$sf.ext.winHasFocus()
+-   \$sf.ext.cookie()

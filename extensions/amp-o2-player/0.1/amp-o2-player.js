@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {MessageType} from '../../../src/3p-frame-messaging';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
@@ -46,6 +47,9 @@ class AmpO2Player extends AMP.BaseElement {
 
     /** @private {string} */
     this.src_ = '';
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -135,8 +139,21 @@ class AmpO2Player extends AMP.BaseElement {
       this.sendConsentData_(source, origin);
     });
 
+    this.pauseHelper_.updatePlaying(true);
+
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
   }
 
   /**
@@ -149,9 +166,8 @@ class AmpO2Player extends AMP.BaseElement {
   sendConsentData_(source, origin) {
     const consentPolicyId = super.getConsentPolicy() || 'default';
     const consentStringPromise = this.getConsentString_(consentPolicyId);
-    const consentPolicyStatePromise = this.getConsentPolicyState_(
-      consentPolicyId
-    );
+    const consentPolicyStatePromise =
+      this.getConsentPolicyState_(consentPolicyId);
 
     Promise.all([consentPolicyStatePromise, consentStringPromise]).then(
       (consents) => {

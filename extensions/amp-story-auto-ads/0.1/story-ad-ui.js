@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {CtaTypes} from './story-ad-localization';
 import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {
@@ -23,8 +22,9 @@ import {
   openWindowDialog,
 } from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
 import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict, map} from '../../../src/core/types/object';
 
 /**
  * @typedef {{
@@ -45,6 +45,8 @@ const CTA_META_PREFIX = 'amp-cta-';
 
 /** @const {string} */
 const A4A_VARS_META_PREFIX = 'amp4ads-vars-';
+
+export const START_CTA_ANIMATION_ATTR = 'cta-active';
 
 /** @enum {string} */
 export const A4AVarNames = {
@@ -107,25 +109,9 @@ export function getStoryAdMetadataFromElement(adElement) {
 }
 
 /**
- * Localizes CTA text if it is chosen from our predefined types.a
- * @param {string} ctaType
- * @param {!./story-ad-localization.StoryAdLocalization} localizationService
- * @return {string|null}
- */
-export function localizeCtaText(ctaType, localizationService) {
-  // CTA picked from predefined choices.
-  if (CtaTypes[ctaType]) {
-    const ctaLocalizedStringId = CtaTypes[ctaType];
-    return localizationService.getLocalizedString(ctaLocalizedStringId);
-  }
-  // Custom CTA text - Should already be localized.
-  return ctaType;
-}
-
-/**
  * Returns a boolean indicating if there is sufficent metadata to render CTA.
  * @param {!StoryAdUIMetadata} metadata
- * @param {=boolean} opt_inabox
+ * @param {boolean=} opt_inabox
  * @return {boolean}
  */
 export function validateCtaMetadata(metadata, opt_inabox) {
@@ -225,7 +211,6 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
   const ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
   const ctaText = uiMetadata[A4AVarNames.CTA_TYPE];
 
-  // TODO(ccordry): Move button to shadow root.
   const a = createElementWithAttributes(
     doc,
     'a',
@@ -258,7 +243,19 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
 
     const ctaLayer = doc.createElement('amp-story-cta-layer');
     ctaLayer.className = 'i-amphtml-cta-container';
-    ctaLayer.appendChild(a);
+
+    const linkRoot = createElementWithAttributes(
+      doc,
+      'div',
+      dict({
+        'class': 'i-amphtml-story-ad-link-root',
+        'role': 'button',
+      })
+    );
+
+    createShadowRootWithStyle(linkRoot, a, ctaButtonCSS);
+
+    ctaLayer.appendChild(linkRoot);
     container.appendChild(ctaLayer);
     return a;
   });

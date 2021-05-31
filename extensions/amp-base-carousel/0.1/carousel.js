@@ -32,8 +32,9 @@ import {CarouselEvents} from './carousel-events';
 import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
 import {clamp, mod} from '../../../src/utils/math';
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
-import {dict} from '../../../src/utils/object';
+import {debounce} from '../../../src/core/types/function';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/core/types/object';
 import {
   getStyle,
   setImportantStyles,
@@ -51,6 +52,8 @@ import {iterateCursor} from '../../../src/dom';
  * this value on Android / iOS.
  */
 const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
+
+const SPACER_CLASS = 'i-amphtml-carousel-spacer';
 
 /**
  * Runs a callback while disabling smooth scrolling by temporarily setting
@@ -152,7 +155,7 @@ export class Carousel {
    * }} config
    */
   constructor(config) {
-    const {win, element, scrollContainer, runMutate} = config;
+    const {win, element, scrollContainer, runMutate, initialIndex} = config;
     /** @private @const */
     this.win_ = win;
 
@@ -310,7 +313,7 @@ export class Carousel {
      * restingIndex to currentIndex.
      * @private {number}
      */
-    this.currentIndex_ = 0;
+    this.currentIndex_ = initialIndex || 0;
 
     /**
      * Whether or not looping is requested. Do not use directly, but rather use
@@ -610,9 +613,19 @@ export class Carousel {
    * @param {!Array<!Element>} slides
    */
   updateSlides(slides) {
+    const {length} = slides;
+    if (!length) {
+      const TAG = this.element_.tagName.toUpperCase();
+      dev().warn(TAG, 'No slides were found.');
+      return;
+    }
     this.slides_ = slides;
+    // Normalize current index to updated slide length.
+    this.currentIndex_ = this.isLooping()
+      ? mod(this.currentIndex_, length)
+      : clamp(this.currentIndex_, 0, length - 1) || 0;
     this.carouselAccessibility_.updateSlides(slides);
-    // TODO(sparhami) Should need to call `this.updateUi()` here.
+    this.updateUi();
   }
 
   /**
@@ -962,7 +975,7 @@ export class Carousel {
     const spacers = [];
     for (let i = 0; i < count; i++) {
       const spacer = document.createElement('div');
-      spacer.className = 'i-amphtml-carousel-spacer';
+      spacer.className = SPACER_CLASS;
       spacers.push(spacer);
     }
     return spacers;
@@ -1045,13 +1058,17 @@ export class Carousel {
       // If an item is at the start of the group, it gets an aligned.
       const shouldSnap = mod(slideIndex, this.snapBy_) === 0;
 
-      // If it's a slide, make sure to set the alignment of the element
-      // with the content and not the wrapping div.
-      const element = child.children.length ? child.children[0] : child;
-      setStyles(element, {
-        'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
-        'scroll-snap-coordinate': shouldSnap ? coordinate : 'none',
-      });
+      // Only apply `snap` feature on non-looping carousels
+      // or only the spacers of the looping carousels.
+      // Adding `snap` feature to non-spacers in a looping carousel
+      // causes all weird behaviors due to non-homogenous siblings,
+      // i.e. <amp-img> with lots of non-fixed sized children, etc.
+      if (child.classList.contains(SPACER_CLASS) || !this.isLooping()) {
+        setStyles(child, {
+          'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
+          'scroll-snap-coordinate': shouldSnap ? coordinate : 'none',
+        });
+      }
     });
   }
 

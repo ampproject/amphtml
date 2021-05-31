@@ -17,11 +17,12 @@
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
+} from '../../../src/core/constants/consent-state';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -30,9 +31,13 @@ import {
 } from '../../../src/consent';
 import {getData} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
 import {removeElement} from '../../../src/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {userAssert} from '../../../src/log';
 
 /**
@@ -88,6 +93,11 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    this.onResized_ = this.onResized_.bind(this);
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -271,6 +281,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     const urlParams = dict({
       'playerId': this.playerId_ || undefined,
       'mediaId': this.mediaId_ || undefined,
+      'url': Services.documentInfoForDoc(element).sourceUrl,
     });
     const iframeUrl = this.iframeDomain_ + '/amp-embed/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);
@@ -292,6 +303,9 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     // bind to amp consent and send consent info to the iframe content and propagate to player
     this.bindToAmpConsent_();
 
+    observeContentSize(this.element, this.onResized_);
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }
 
@@ -300,18 +314,25 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @override */
-  onLayoutMeasure() {
+  /**
+   * @param {!../layout-rect.LayoutSizeDef} size
+   * @private
+   */
+  onResized_({width, height}) {
     if (!this.iframe_) {
       return;
     }
-    const {width, height} = this.getLayoutBox();
     this.sendCommand_('ampResize', {'width': width, 'height': height});
   }
 
   /** @override */
   pauseCallback() {
+    if (!this.iframe_) {
+      return;
+    }
     this.sendCommand_('ampPause');
+    // The player doesn't appear to respect "ampPause" message.
+    this.iframe_.src = this.iframe_.src;
   }
 
   /** @override */
@@ -321,6 +342,9 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    unobserveContentSize(this.element, this.onResized_);
+    this.pauseHelper_.updatePlaying(false);
 
     return true;
   }

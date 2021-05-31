@@ -16,64 +16,37 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script builds the esm minified AMP runtime.
- * This is run during the CI stage = build; job = Module Build.
+ * @fileoverview Script that builds the module AMP runtime during CI.
  */
 
-const colors = require('ansi-colors');
-const log = require('fancy-log');
 const {
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
-  uploadEsmDistOutput,
+  skipDependentJobs,
+  timedExecOrDie,
+  storeModuleBuildToWorkspace,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
-const {runNpmChecks} = require('./npm-checks');
+const {buildTargetsInclude, Targets} = require('./build-targets');
+const {runCiJob} = require('./ci-job');
 
-const FILENAME = 'module-build.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'module-build.js';
 
-function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
-  }
-
-  if (!isTravisPullRequestBuild()) {
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --esm --fortesting');
-    uploadEsmDistOutput(FILENAME);
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    // TODO(#31102): This list must eventually match the same buildTargets check
-    // found in pr-check/nomodule-build.js as we turn on the systems that
-    // run against the module build. (ex. visual diffs, e2e, etc.)
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp dist --esm --fortesting');
-      uploadEsmDistOutput(FILENAME);
-    } else {
-      log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Module Build'),
-        'because this commit does not affect the runtime or flag configs.'
-      );
-    }
-  }
-
-  stopTimer(FILENAME, FILENAME, startTime);
+function pushBuildWorkflow() {
+  timedExecOrDie('amp dist --esm --fortesting');
+  storeModuleBuildToWorkspace();
 }
 
-main();
+function prBuildWorkflow() {
+  // TODO(#31102): This list must eventually match the same buildTargets check
+  // found in pr-check/nomodule-build.js as we turn on the systems that
+  // run against the module build. (ex. visual diffs, e2e, etc.)
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
+    timedExecOrDie('amp dist --esm --fortesting');
+    storeModuleBuildToWorkspace();
+  } else {
+    skipDependentJobs(
+      jobName,
+      'this PR does not affect the runtime or integration tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

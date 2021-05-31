@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/cord.h"
+#include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
@@ -55,16 +56,19 @@ TestCase FindOrDie(std::map<std::string, TestCase> cases,
 #define EXPECT_NULL(p) EXPECT_TRUE((p) == nullptr)
 #define EXPECT_NOT_NULL(p) EXPECT_FALSE((p) == nullptr)
 
-void MaybeGenerateFailuresFor(const std::string& output,
+void MaybeGenerateFailuresFor(const std::string& actual,
                               const std::string& expected,
-                              const std::string& test_case_name) {
-  if (output == expected) return;
-  auto path = fs::path(test_case_name);
-  path.replace_extension(".out");
-  std::string out_file = path.string();
-  ADD_FAILURE_AT(out_file.c_str(), 1) << "expected:\n"
-                                      << expected << "\nsaw:\n"
-                                      << output;
+                              const std::string& test_case_output_file) {
+  if (actual == expected) return;
+  std::string out_file =
+      StrReplaceAll(test_case_output_file,
+                    {{"external/validator/testdata/", "validator/testdata/"},
+                     {"external/amphtml-extensions/", "extensions/"}});
+  ADD_FAILURE_AT(out_file.c_str(), 1)
+      << "Please use the following command to overwrite the output file by the "
+         "actual output of AMP validator.\n"
+      << "echo " << absl::Base64Escape(actual) << " | base64 --decode > "
+      << out_file;
 }
 
 TEST(ValidatorTest, Testdata_ValidatorTest_TestCases) {
@@ -74,13 +78,13 @@ TEST(ValidatorTest, Testdata_ValidatorTest_TestCases) {
                                                        test_case.html_format);
     std::string output;
     output = RenderInlineResult(
-        /*filename=*/test_case.name, test_case.input_content,
-        /*include_revisions=*/false, result);
+        /*filename=*/test_case.name, test_case.input_content, result);
 
     // If this fails, then an integrate command into a branch probably
     // went wrong.
     EXPECT_LE(55, result.spec_file_revision());
-    MaybeGenerateFailuresFor(output, test_case.output_content, test_case.name);
+    MaybeGenerateFailuresFor(output, test_case.output_content,
+                             test_case.output_file);
   }
 }
 
@@ -99,7 +103,7 @@ TEST(ValidatorTest, TestVariousMaxErrorsSettings) {
     ValidationResult result = amp::validator::Validate(test_case.input_content,
                                                        test_case.html_format);
     test_case.output_content = RenderResult(
-        /*filename=*/test_case.name, /*include_revisions=*/false, result);
+        /*filename=*/test_case.name, result);
   }
 
   struct MaxErrorsAndOutput {
@@ -118,7 +122,7 @@ TEST(ValidatorTest, TestVariousMaxErrorsSettings) {
                                                        test_case.html_format,
                                                        entry.max_errors);
     std::string output = RenderResult(
-        /*filename=*/test_case.name, /*include_revisions=*/false, result);
+        /*filename=*/test_case.name, result);
     SCOPED_TRACE(StrCat("max_errors=", entry.max_errors));
     MaybeGenerateFailuresFor(output, entry.output, test_case.name);
   }
@@ -185,7 +189,7 @@ TEST(ValidatorTest, TestDocSizeAmpEmail) {
   // 200000 bytes in the tested document.
   {
     std::string test_case_name = StrCat(test_case.name, "[MaxBytesTest]");
-    std::string body = RepeatString(valid_body_content, /*n_times=*/9945);
+    std::string body = RepeatString(valid_body_content, /*n_times=*/9944);
     std::string test_html = TestWithDocSize(test_case.input_content, body);
     EXPECT_EQ(200000, test_html.length());
     EXPECT_EQ(
@@ -198,15 +202,15 @@ TEST(ValidatorTest, TestDocSizeAmpEmail) {
   {
     std::string test_case_name = StrCat(test_case.name, "[OffByOneTest]");
     std::string body =
-        StrCat(RepeatString(valid_body_content, /*n_times=*/9945), " ");
+        StrCat(RepeatString(valid_body_content, /*n_times=*/9944), " ");
     std::string test_html = TestWithDocSize(test_case.input_content, body);
     EXPECT_EQ(200001, test_html.length());
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":9978:6 "
+        ":9977:6 "
         "Document exceeded 200000 bytes limit. Actual size 200001 bytes. "
         "(see https://amp.dev/documentation/guides-and-tutorials/learn/"
         "email-spec/amp-email-format/?format=email)");
@@ -237,7 +241,7 @@ TEST(ValidatorTest, TestScriptLengthAmp) {
     std::string test_html =
         TestWithScript(test_case.input_content, inline_script);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -252,7 +256,7 @@ TEST(ValidatorTest, TestScriptLengthAmp) {
     std::string test_html =
         TestWithScript(test_case.input_content, inline_script);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -279,7 +283,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const std::string valid_style_blob = "h1 {a: b}\n";
+  const std::string valid_style_blob = "h1{top:0}\n";
   ASSERT_EQ(10, valid_style_blob.length());
   // This string is 10 bytes of inline style inside a B tag.
   const std::string inline_10_bytes = "<b style='width:1px;'></b>";
@@ -292,7 +296,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -307,7 +311,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -322,12 +326,12 @@ TEST(ValidatorTest, TestCssLengthAmp) {
   {
     std::string test_case_name = StrCat(test_case.name, "[UTF8Test]");
     std::string stylesheet =
-        StrCat(RepeatString(valid_style_blob, /*n_times=*/7499), "h1 {a: 😺}");
+        StrCat(RepeatString(valid_style_blob, /*n_times=*/7499), "h1{top:😺}");
     EXPECT_EQ(75002, stylesheet.length());
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -345,7 +349,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -359,7 +363,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -379,7 +383,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, inline_10_bytes);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -398,7 +402,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -413,7 +417,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output =
         StrCat("FAIL\n", test_case_name,
@@ -432,7 +436,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const std::string valid_style_blob = "h1 {a: b}\n";
+  const std::string valid_style_blob = "h1{top:0}\n";
   ASSERT_EQ(10, valid_style_blob.length());
   // This string is 10 bytes of inline style inside a B tag.
   const std::string inline_10_bytes = "<b style='width:1px;'></b>";
@@ -445,9 +449,14 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
-    std::string expected_output = "PASS";
+    std::string expected_output = StrCat(
+        "PASS\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -460,10 +469,15 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)\n",
+        test_case_name,
         ":28:2 The author stylesheet specified in tag 'style amp-custom' "
         "is too long - document contains 75001 bytes whereas the "
         "limit is 75000 "
@@ -479,9 +493,14 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
-    std::string expected_output = "PASS";
+    std::string expected_output = StrCat(
+        "PASS\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -493,13 +512,18 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     // TODO(b/153099987): This should not pass as we have more than 75,000 bytes
     // of inline style. Right now, it is a warning until we have sorted out how
     // to make the transition.
     std::string expected_output = StrCat(
         "PASS\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)\n",
+        test_case_name,
         ":34:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75010 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
@@ -516,13 +540,18 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     std::string test_html = TestWithCSS(test_case.input_content, stylesheet,
                                         "<b style='display:block;'></b>");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     // TODO(b/153099987): This should not pass as we have more than 75,000 bytes
     // of inline style. Right now, it is a warning until we have sorted out how
     // to make the transition.
     std::string expected_output = StrCat(
         "PASS\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)\n",
+        test_case_name,
         ":7534:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75014 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
@@ -538,9 +567,14 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
-    std::string expected_output = "PASS";
+    std::string expected_output = StrCat(
+        "PASS\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -553,17 +587,22 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     // TODO(b/153679479): Email per-inline-style limits are currently enforced
     // only as a warning due to this bug until we sort out what the correct
     // value should be.
-    std::string expected_output =
-        StrCat("PASS\n", test_case_name,
-               ":32:2 The inline style specified in tag 'div' is too long - it "
-               "contains 1001 bytes whereas the limit is 1000 bytes. (see "
-               "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
-               "amphtml/#maximum-size)");
+    std::string expected_output = StrCat(
+        "PASS\n", test_case_name,
+        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        "corresponding attribute 'data-css-strict' for enabling strict "
+        "CSS validation. This may become an error in the future. "
+        "(see https://github.com/ampproject/amphtml/issues/32587)\n",
+        test_case_name,
+        ":32:2 The inline style specified in tag 'div' is too long - it "
+        "contains 1001 bytes whereas the limit is 1000 bytes. (see "
+        "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
+        "amphtml/#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 }
@@ -588,7 +627,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -603,7 +642,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -622,7 +661,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -635,7 +674,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -655,7 +694,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
     std::string test_html = TestWithCSS(test_case.input_content, stylesheet,
                                         "<b style='display:block;'></b>");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -674,7 +713,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -689,7 +728,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output =
         StrCat("FAIL\n", test_case_name,
@@ -708,7 +747,7 @@ TEST(ValidatorTest, TestCssLengthAmpAds) {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const std::string valid_style_blob = "h1 {a: b}\n";
+  const std::string valid_style_blob = "h1{top:0}\n";
   ASSERT_EQ(10, valid_style_blob.length());
   // This string is 10 bytes of inline style inside a B tag.
   const std::string inline_10_bytes = "<b style='width:1px;'></b>";
@@ -722,7 +761,7 @@ TEST(ValidatorTest, TestCssLengthAmpAds) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4ADS));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -741,7 +780,7 @@ TEST(ValidatorTest, TestCssLengthAmpAds) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4ADS));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -756,7 +795,7 @@ TEST(ValidatorTest, TestCssLengthAmpAds) {
     std::string test_html = TestWithCSS(test_case.input_content, stylesheet,
                                         "<b style='display:block;'></b>");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4ADS));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -770,7 +809,7 @@ TEST(ValidatorTest, TestCssLengthAmpAds) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html, HtmlFormat::AMP4ADS));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -787,7 +826,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const std::string valid_style_blob = "h1 {a: b}\n";
+  const std::string valid_style_blob = "h1{top:0}\n";
   ASSERT_EQ(10, valid_style_blob.length());
 
   // 75010 bytes in the author stylesheet, but includes a URL of 19 bytes.
@@ -806,7 +845,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
         TestWithCSS(test_case.input_content, stylesheet, "");
 
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -832,7 +871,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -858,7 +897,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -881,7 +920,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -905,7 +944,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -924,7 +963,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const std::string valid_style_blob = "h1 {a: b}\n";
+  const std::string valid_style_blob = "h1{top:0}\n";
   ASSERT_EQ(10, valid_style_blob.length());
 
   // 75010 bytes in the stylesheet, but includes an absolute URL of 19 bytes.
@@ -942,7 +981,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -963,7 +1002,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -984,7 +1023,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     std::string test_html =
         TestWithCSS(test_case.input_content, stylesheet, "");
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
@@ -996,43 +1035,43 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
-  // 0 bytes in the stylesheet, 75009 bytes inline style with a relative URL.
+  // 0 bytes in the stylesheet, 112530 bytes inline style with a relative URL.
   {
     std::string test_case_name =
         StrCat(test_case.name, "[ExtraInlineBytesUrlTest]");
     // This string is 33 bytes of inline style inside a B tag.
     const std::string inline_33_bytes =
         "<b style=\"color: url('a-relative-url.html')\"></b>";
-    // 2273 x 33 = 75009
-    std::string inline_style = RepeatString(inline_33_bytes, /*n_times=*/2273);
+    // 3410 x 33 = 112530
+    std::string inline_style = RepeatString(inline_33_bytes, /*n_times=*/3510);
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
-  // 0 bytes in the stylesheet, 75009 bytes inline style with a data URL.
+  // 0 bytes in the stylesheet, 112530 bytes inline style with a data URL.
   {
     std::string test_case_name =
         StrCat(test_case.name, "[ExtraInlineBytesUrlTest]");
     // This string is 33 bytes of inline style inside a B tag.
     const std::string inline_33_bytes =
         "<b style=\"color: url('data:nineteen-bytes')\"></b>";
-    // 2273 x 33 = 75009
-    std::string inline_style = RepeatString(inline_33_bytes, /*n_times=*/2273);
+    // 3410 x 33 = 112530
+    std::string inline_style = RepeatString(inline_33_bytes, /*n_times=*/3410);
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
-        /*filename=*/test_case_name, /*include_revisions*/ false,
+        /*filename=*/test_case_name,
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
         ":36:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains "
-        "75009 bytes whereas the limit is 75000 bytes. (see "
+        "112530 bytes whereas the limit is 112500 bytes. (see "
         "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
         "amphtml/#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -1047,14 +1086,14 @@ TEST(ValidatorTest, ConsidersDifferentNewlines) {
   {
     std::string test_html = "\ninvalid doc";
     std::string output = RenderResult(
-        /*filename=*/"newline_test", /*include_revisions*/ false,
+        /*filename=*/"newline_test",
         amp::validator::Validate(test_html));
     EXPECT_TRUE(StartsWith(output, "FAIL\nnewline_test:1:0")) << output;
   }
   {
     std::string test_html = "\rinvalid doc";
     std::string output = RenderResult(
-        /*filename=*/"newline_test", /*include_revisions*/ false,
+        /*filename=*/"newline_test",
         amp::validator::Validate(test_html));
     EXPECT_TRUE(StartsWith(output, "FAIL\nnewline_test:1:0")) << output;
   }
@@ -1065,7 +1104,7 @@ TEST(ValidatorTest, ConsidersDifferentNewlines) {
     // before the newline which avoids this issue.
     std::string test_html = " \r\ninvalid doc";
     std::string output = RenderResult(
-        /*filename=*/"newline_test", /*include_revisions*/ false,
+        /*filename=*/"newline_test",
         amp::validator::Validate(test_html));
     EXPECT_TRUE(StartsWith(output, "FAIL\nnewline_test:1:1")) << output;
   }

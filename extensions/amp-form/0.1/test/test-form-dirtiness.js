@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../src/amp-events';
+import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
 import {Services} from '../../../../src/services';
 import {closestAncestorElementBySelector} from '../../../../src/dom';
 import {createCustomEvent, getDetail} from '../../../../src/event-helper';
+import {macroTask} from '../../../../testing/yield';
 
 function getForm(doc) {
   const form = doc.createElement('form');
@@ -83,397 +84,410 @@ function captureEventDispatched(eventName, element, dispatchEventFunction) {
   return eventCaptured;
 }
 
-describes.realWin('form-dirtiness', {}, (env) => {
-  let doc, form, dirtinessHandler;
+describes.realWin(
+  'form-dirtiness',
+  {
+    amp: {
+      runtimeOn: true,
+      extensions: ['amp-form'], // amp-form is installed as service.
+    },
+  },
+  (env) => {
+    let doc, form, dirtinessHandler;
 
-  beforeEach(() => {
-    doc = env.win.document;
-    form = getForm(doc);
-    env.sandbox.stub(Services, 'platformFor').returns({
-      isIos() {
-        return false;
-      },
-    });
-    dirtinessHandler = new FormDirtiness(form, env.win);
-  });
-
-  describe('ignored elements', () => {
-    it('does not add dirtiness class if a nameless element changes', () => {
-      const nameless = doc.createElement('input');
-      form.appendChild(nameless);
-
-      changeInput(nameless, 'changed');
-
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-
-    it('does not add dirtiness class if a hidden element changes', () => {
-      const hidden = doc.createElement('input');
-      hidden.name = 'name';
-      hidden.hidden = true;
-      form.appendChild(hidden);
-
-      changeInput(hidden, 'changed');
-
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-
-    it('does not add dirtiness class if a disabled element changes', () => {
-      const disabled = doc.createElement('input');
-      disabled.name = 'name';
-      disabled.disabled = true;
-      form.appendChild(disabled);
-
-      changeInput(disabled, 'changed');
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-  });
-
-  describe('amp-bind changes', () => {
-    let input;
-
-    beforeEach(() => {
-      input = doc.createElement('input');
-      input.name = 'name';
-      form.appendChild(input);
-    });
-
-    it('adds dirtiness class if an element is changed with amp-bind', () => {
-      input.value = 'changed';
-      dispatchFormValueChangeEvent(input, env.win);
-
-      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-
-    it('removes dirtiness class if a dirty element is cleared with amp-bind', () => {
-      changeInput(input, 'changed');
-      input.value = '';
-      dispatchFormValueChangeEvent(input, env.win);
-
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-  });
-
-  describe('text field changes', () => {
-    let textField;
-
-    beforeEach(() => {
-      // Element is inserted as HTML so that the `defaultValue` property is
-      // generated correctly, since it returns "the default value as
-      // **originally specified in the HTML** that created this object."
-      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
-      const html = '<input name="name" type="text" value="default">';
-      form.insertAdjacentHTML('afterbegin', html);
-      textField = form.querySelector('input');
-    });
-
-    it('removes dirtiness class when text field is in default state', () => {
-      changeInput(textField, textField.defaultValue);
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-
-    it('removes dirtiness class when text field is empty', () => {
-      changeInput(textField, '');
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-
-    it('adds dirtiness class when text field is changed', () => {
-      changeInput(textField, 'changed');
-      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-
-    it('removes dirtiness class when its value matches the submitted value', () => {
-      changeInput(textField, 'submitted');
-      dirtinessHandler.onSubmitting();
-      dirtinessHandler.onSubmitSuccess();
-      changeInput(textField, 'submitted');
-
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-  });
-
-  describe('textarea changes', () => {
-    let textarea;
-
-    beforeEach(() => {
-      const html = '<textarea name="comment">default</textarea>';
-      form.insertAdjacentHTML('afterbegin', html);
-      textarea = form.querySelector('textarea');
-    });
-
-    it('removes dirtiness class when textarea is in default state', () => {
-      changeInput(textarea, textarea.defaultValue);
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-
-    it('removes dirtiness class when textarea is empty', () => {
-      changeInput(textarea, '');
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-
-    it('adds dirtiness class when textarea is changed', () => {
-      changeInput(textarea, 'changed');
-      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-
-    it('removes dirtiness class when its value matches the submitted value', () => {
-      changeInput(textarea, 'submitted');
-      dirtinessHandler.onSubmitting();
-      dirtinessHandler.onSubmitSuccess();
-      changeInput(textarea, 'submitted');
-
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-  });
-
-  describe('checkbox changes', () => {
-    let checkbox;
-
-    beforeEach(() => {
-      checkbox = createElement(doc, 'input', {
-        type: 'checkbox',
-        name: 'checkbox',
+    beforeEach(async () => {
+      doc = env.win.document;
+      form = getForm(doc);
+      env.sandbox.stub(Services, 'platformFor').returns({
+        isIos() {
+          return false;
+        },
       });
-      form.appendChild(checkbox);
+      dirtinessHandler = new FormDirtiness(form, env.win);
+      await macroTask();
     });
 
-    it('clears dirtiness class when checkbox is in default state', () => {
-      checkbox.setAttribute('checked', 'checked');
-      checkInput(checkbox, true);
+    describe('ignored elements', () => {
+      it('does not add dirtiness class if a nameless element changes', () => {
+        const nameless = doc.createElement('input');
+        form.appendChild(nameless);
 
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+        changeInput(nameless, 'changed');
+
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
+
+      it('does not add dirtiness class if a hidden element changes', () => {
+        const hidden = doc.createElement('input');
+        hidden.name = 'name';
+        hidden.hidden = true;
+        form.appendChild(hidden);
+
+        changeInput(hidden, 'changed');
+
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
+
+      it('does not add dirtiness class if a disabled element changes', () => {
+        const disabled = doc.createElement('input');
+        disabled.name = 'name';
+        disabled.disabled = true;
+        form.appendChild(disabled);
+
+        changeInput(disabled, 'changed');
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
     });
 
-    it('clears dirtiness class when checkbox is not checked', () => {
-      checkInput(checkbox, false);
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    describe('amp-bind changes', () => {
+      let input;
+
+      beforeEach(() => {
+        input = doc.createElement('input');
+        input.name = 'name';
+        form.appendChild(input);
+      });
+
+      it('adds dirtiness class if an element is changed with amp-bind', () => {
+        input.value = 'changed';
+        dispatchFormValueChangeEvent(input, env.win);
+
+        expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
+
+      it('removes dirtiness class if a dirty element is cleared with amp-bind', () => {
+        changeInput(input, 'changed');
+        input.value = '';
+        dispatchFormValueChangeEvent(input, env.win);
+
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
     });
 
-    it('adds dirtiness class when checkbox state has changed', () => {
-      checkInput(checkbox, true);
-      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+    describe('text field changes', () => {
+      let textField;
+
+      beforeEach(() => {
+        // Element is inserted as HTML so that the `defaultValue` property is
+        // generated correctly, since it returns "the default value as
+        // **originally specified in the HTML** that created this object."
+        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
+        const html = '<input name="name" type="text" value="default">';
+        form.insertAdjacentHTML('afterbegin', html);
+        textField = form.querySelector('input');
+      });
+
+      it('removes dirtiness class when text field is in default state', () => {
+        changeInput(textField, textField.defaultValue);
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
+
+      it('removes dirtiness class when text field is empty', () => {
+        changeInput(textField, '');
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
+
+      it('adds dirtiness class when text field is changed', () => {
+        changeInput(textField, 'changed');
+        expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
+
+      it('removes dirtiness class when its value matches the submitted value', () => {
+        changeInput(textField, 'submitted');
+        dirtinessHandler.onSubmitting();
+        dirtinessHandler.onSubmitSuccess();
+        changeInput(textField, 'submitted');
+
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
     });
 
-    it('clears dirtiness class when checkbox matches its submitted state', () => {
-      checkInput(checkbox, true);
-      dirtinessHandler.onSubmitting();
-      dirtinessHandler.onSubmitSuccess();
-      checkInput(checkbox, true);
+    describe('textarea changes', () => {
+      let textarea;
 
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-  });
+      beforeEach(() => {
+        const html = '<textarea name="comment">default</textarea>';
+        form.insertAdjacentHTML('afterbegin', html);
+        textarea = form.querySelector('textarea');
+      });
 
-  describe('radio button changes', () => {
-    let optionA, optionB;
+      it('removes dirtiness class when textarea is in default state', () => {
+        changeInput(textarea, textarea.defaultValue);
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
 
-    beforeEach(() => {
-      optionA = createElement(doc, 'input', {type: 'radio', name: 'radio'});
-      optionB = createElement(doc, 'input', {type: 'radio', name: 'radio'});
-      form.appendChild(optionA);
-      form.appendChild(optionB);
-    });
+      it('removes dirtiness class when textarea is empty', () => {
+        changeInput(textarea, '');
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
 
-    it('clears dirtiness class when radio button is in default state', () => {
-      optionA.setAttribute('checked', 'checked');
-      checkInput(optionA, true);
+      it('adds dirtiness class when textarea is changed', () => {
+        changeInput(textarea, 'changed');
+        expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
 
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
+      it('removes dirtiness class when its value matches the submitted value', () => {
+        changeInput(textarea, 'submitted');
+        dirtinessHandler.onSubmitting();
+        dirtinessHandler.onSubmitSuccess();
+        changeInput(textarea, 'submitted');
 
-    it('clears dirtiness class when no radio button is checked', () => {
-      checkInput(optionA, false);
-      checkInput(optionB, false);
-
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-
-    it('adds dirtiness class when radio button state has changed', () => {
-      checkInput(optionB, true);
-      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
     });
 
-    it('clears dirtiness class when radio button state matches its submitted state', () => {
-      checkInput(optionB, true);
-      dirtinessHandler.onSubmitting();
-      dirtinessHandler.onSubmitSuccess();
-      checkInput(optionB, true);
+    describe('checkbox changes', () => {
+      let checkbox;
 
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-  });
+      beforeEach(() => {
+        checkbox = createElement(doc, 'input', {
+          type: 'checkbox',
+          name: 'checkbox',
+        });
+        form.appendChild(checkbox);
+      });
 
-  describe('dropdown selection changes', () => {
-    let dropdown, optionA, optionB;
+      it('clears dirtiness class when checkbox is in default state', () => {
+        checkbox.setAttribute('checked', 'checked');
+        checkInput(checkbox, true);
 
-    beforeEach(() => {
-      dropdown = createElement(doc, 'select', {name: 'select'});
-      optionA = createElement(doc, 'option', {value: 'A'});
-      optionB = createElement(doc, 'option', {value: 'B'});
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
 
-      dropdown.appendChild(optionA);
-      dropdown.appendChild(optionB);
-      form.appendChild(dropdown);
-    });
+      it('clears dirtiness class when checkbox is not checked', () => {
+        checkInput(checkbox, false);
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
 
-    it('clears dirtiness class when dropdown is in its default state', () => {
-      optionA.setAttribute('selected', 'selected');
-      selectOption(optionA, true);
+      it('adds dirtiness class when checkbox state has changed', () => {
+        checkInput(checkbox, true);
+        expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
 
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
+      it('clears dirtiness class when checkbox matches its submitted state', () => {
+        checkInput(checkbox, true);
+        dirtinessHandler.onSubmitting();
+        dirtinessHandler.onSubmitSuccess();
+        checkInput(checkbox, true);
 
-    it('adds dirtiness class when dropdown is not in its default state', () => {
-      selectOption(optionB, true);
-      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-
-    it('clears dirtiness class when dropdown selection matches its submitted state', () => {
-      selectOption(optionA, true);
-      dirtinessHandler.onSubmitting();
-      dirtinessHandler.onSubmitSuccess();
-      selectOption(optionA, true);
-
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-  });
-
-  describe('#onSubmitting', () => {
-    it('clears the dirtiness class', () => {
-      const input = doc.createElement('input');
-      input.type = 'text';
-      input.name = 'text';
-      form.appendChild(input);
-
-      changeInput(input, 'changed');
-      dirtinessHandler.onSubmitting();
-
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-  });
-
-  describe('#onSubmitError', () => {
-    let input;
-
-    beforeEach(() => {
-      input = doc.createElement('input');
-      input.type = 'text';
-      input.name = 'text';
-      form.appendChild(input);
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
     });
 
-    it('adds the dirtiness class if the form was dirty before submitting', () => {
-      changeInput(input, 'changed');
-      dirtinessHandler.onSubmitting();
-      dirtinessHandler.onSubmitError();
+    describe('radio button changes', () => {
+      let optionA, optionB;
 
-      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+      beforeEach(() => {
+        optionA = createElement(doc, 'input', {type: 'radio', name: 'radio'});
+        optionB = createElement(doc, 'input', {type: 'radio', name: 'radio'});
+        form.appendChild(optionA);
+        form.appendChild(optionB);
+      });
+
+      it('clears dirtiness class when radio button is in default state', () => {
+        optionA.setAttribute('checked', 'checked');
+        checkInput(optionA, true);
+
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
+
+      it('clears dirtiness class when no radio button is checked', () => {
+        checkInput(optionA, false);
+        checkInput(optionB, false);
+
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
+
+      it('adds dirtiness class when radio button state has changed', () => {
+        checkInput(optionB, true);
+        expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
+
+      it('clears dirtiness class when radio button state matches its submitted state', () => {
+        checkInput(optionB, true);
+        dirtinessHandler.onSubmitting();
+        dirtinessHandler.onSubmitSuccess();
+        checkInput(optionB, true);
+
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
     });
 
-    it('does not add the dirtiness class if the form was clean before submitting', () => {
-      changeInput(input, '');
-      dirtinessHandler.onSubmitting();
-      dirtinessHandler.onSubmitError();
+    describe('dropdown selection changes', () => {
+      let dropdown, optionA, optionB;
 
-      expect(form).to.have.not.class(DIRTINESS_INDICATOR_CLASS);
-    });
-  });
+      beforeEach(() => {
+        dropdown = createElement(doc, 'select', {name: 'select'});
+        optionA = createElement(doc, 'option', {value: 'A'});
+        optionB = createElement(doc, 'option', {value: 'B'});
 
-  describe('#onSubmitSuccess', () => {
-    let input;
+        dropdown.appendChild(optionA);
+        dropdown.appendChild(optionB);
+        form.appendChild(dropdown);
+      });
 
-    beforeEach(() => {
-      input = doc.createElement('input');
-      input.type = 'text';
-      input.name = 'text';
-      form.appendChild(input);
-    });
+      it('clears dirtiness class when dropdown is in its default state', () => {
+        optionA.setAttribute('selected', 'selected');
+        selectOption(optionA, true);
 
-    it('clears the dirtiness class', () => {
-      changeInput(input, 'changed');
-      dirtinessHandler.onSubmitting();
-      dirtinessHandler.onSubmitSuccess();
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
 
-      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
+      it('adds dirtiness class when dropdown is not in its default state', () => {
+        selectOption(optionB, true);
+        expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
 
-    it('tracks new changes after the form has been submitted', () => {
-      changeInput(input, 'changed');
-      dirtinessHandler.onSubmitting();
-      dirtinessHandler.onSubmitSuccess();
-      changeInput(input, 'changed again');
+      it('clears dirtiness class when dropdown selection matches its submitted state', () => {
+        selectOption(optionA, true);
+        dirtinessHandler.onSubmitting();
+        dirtinessHandler.onSubmitSuccess();
+        selectOption(optionA, true);
 
-      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
-    });
-  });
-
-  describe('AmpEvents.FORM_DIRTINESS_CHANGE', () => {
-    let input;
-
-    beforeEach(() => {
-      input = createElement(doc, 'input', {type: 'text', name: 'text'});
-      form.appendChild(input);
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
     });
 
-    it('dispatches an event when the form transitions from clean to dirty', () => {
-      const changeToDirty = () => changeInput(input, 'changed');
-      const eventDispatched = captureEventDispatched(
-        AmpEvents.FORM_DIRTINESS_CHANGE,
-        form,
-        changeToDirty
-      );
+    describe('#onSubmitting', () => {
+      it('clears the dirtiness class', () => {
+        const input = doc.createElement('input');
+        input.type = 'text';
+        input.name = 'text';
+        form.appendChild(input);
 
-      expect(eventDispatched).to.exist;
-      expect(getDetail(eventDispatched).isDirty).to.be.true;
+        changeInput(input, 'changed');
+        dirtinessHandler.onSubmitting();
+
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
     });
 
-    it('dispatches an event when the form transitions from dirty to clean', () => {
-      changeInput(input, 'changed');
+    describe('#onSubmitError', () => {
+      let input;
 
-      const changeToClean = () => changeInput(input, '');
-      const eventDispatched = captureEventDispatched(
-        AmpEvents.FORM_DIRTINESS_CHANGE,
-        form,
-        changeToClean
-      );
+      beforeEach(() => {
+        input = doc.createElement('input');
+        input.type = 'text';
+        input.name = 'text';
+        form.appendChild(input);
+      });
 
-      expect(eventDispatched).to.exist;
-      expect(getDetail(eventDispatched).isDirty).to.be.false;
+      it('adds the dirtiness class if the form was dirty before submitting', () => {
+        changeInput(input, 'changed');
+        dirtinessHandler.onSubmitting();
+        dirtinessHandler.onSubmitError();
+
+        expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
+
+      it('does not add the dirtiness class if the form was clean before submitting', () => {
+        changeInput(input, '');
+        dirtinessHandler.onSubmitting();
+        dirtinessHandler.onSubmitError();
+
+        expect(form).to.have.not.class(DIRTINESS_INDICATOR_CLASS);
+      });
     });
 
-    it('does not dispatch an event when the dirtiness state does not change', () => {
-      changeInput(input, 'changed');
+    describe('#onSubmitSuccess', () => {
+      let input;
 
-      const remainDirty = () => changeInput(input, 'still dirty');
-      const eventDispatched = captureEventDispatched(
-        AmpEvents.FORM_DIRTINESS_CHANGE,
-        form,
-        remainDirty
-      );
+      beforeEach(() => {
+        input = doc.createElement('input');
+        input.type = 'text';
+        input.name = 'text';
+        form.appendChild(input);
+      });
 
-      expect(eventDispatched).to.not.exist;
-    });
-  });
+      it('clears the dirtiness class', () => {
+        changeInput(input, 'changed');
+        dirtinessHandler.onSubmitting();
+        dirtinessHandler.onSubmitSuccess();
 
-  describe('initial dirtiness', () => {
-    let newForm, input;
+        expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
 
-    beforeEach(() => {
-      newForm = getForm(doc);
-      input = createElement(doc, 'input', {type: 'text', name: 'text'});
-      newForm.appendChild(input);
-    });
+      it('tracks new changes after the form has been submitted', () => {
+        changeInput(input, 'changed');
+        dirtinessHandler.onSubmitting();
+        dirtinessHandler.onSubmitSuccess();
+        changeInput(input, 'changed again');
 
-    it('adds the dirtiness class if the form already has dirty fields', () => {
-      changeInput(input, 'changed');
-      dirtinessHandler = new FormDirtiness(newForm, env.win);
-
-      expect(newForm).to.have.class(DIRTINESS_INDICATOR_CLASS);
+        expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
     });
 
-    it('does not add the dirtiness class if the form does not have dirty fields', () => {
-      dirtinessHandler = new FormDirtiness(newForm, env.win);
-      expect(newForm).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    describe('AmpEvents.FORM_DIRTINESS_CHANGE', () => {
+      let input;
+
+      beforeEach(() => {
+        input = createElement(doc, 'input', {type: 'text', name: 'text'});
+        form.appendChild(input);
+      });
+
+      it('dispatches an event when the form transitions from clean to dirty', () => {
+        const changeToDirty = () => changeInput(input, 'changed');
+        const eventDispatched = captureEventDispatched(
+          AmpEvents.FORM_DIRTINESS_CHANGE,
+          form,
+          changeToDirty
+        );
+
+        expect(eventDispatched).to.exist;
+        expect(getDetail(eventDispatched).isDirty).to.be.true;
+      });
+
+      it('dispatches an event when the form transitions from dirty to clean', () => {
+        changeInput(input, 'changed');
+
+        const changeToClean = () => changeInput(input, '');
+        const eventDispatched = captureEventDispatched(
+          AmpEvents.FORM_DIRTINESS_CHANGE,
+          form,
+          changeToClean
+        );
+
+        expect(eventDispatched).to.exist;
+        expect(getDetail(eventDispatched).isDirty).to.be.false;
+      });
+
+      it('does not dispatch an event when the dirtiness state does not change', () => {
+        changeInput(input, 'changed');
+
+        const remainDirty = () => changeInput(input, 'still dirty');
+        const eventDispatched = captureEventDispatched(
+          AmpEvents.FORM_DIRTINESS_CHANGE,
+          form,
+          remainDirty
+        );
+
+        expect(eventDispatched).to.not.exist;
+      });
     });
-  });
-});
+
+    describe('initial dirtiness', () => {
+      let newForm, input;
+
+      beforeEach(() => {
+        newForm = getForm(doc);
+        input = createElement(doc, 'input', {type: 'text', name: 'text'});
+        newForm.appendChild(input);
+      });
+
+      it('adds the dirtiness class if the form already has dirty fields', async () => {
+        changeInput(input, 'changed');
+        dirtinessHandler = new FormDirtiness(newForm, env.win);
+        await macroTask();
+
+        expect(newForm).to.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
+
+      it('does not add the dirtiness class if the form does not have dirty fields', async () => {
+        dirtinessHandler = new FormDirtiness(newForm, env.win);
+        await macroTask();
+
+        expect(newForm).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+      });
+    });
+  }
+);

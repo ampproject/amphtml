@@ -60,4 +60,4 @@ limitations under the License.
 
 ## Validation
 
-See [amp-redbull-player rules]`(https://github.com/ampproject/amphtml/blob/master/extensions/amp-redbull-player/validator-amp-player-player.protoascii)` in the AMP validator specification.
+See [amp-redbull-player rules]`(https://github.com/ampproject/amphtml/blob/main/extensions/amp-redbull-player/validator-amp-player-player.protoascii)` in the AMP validator specification.

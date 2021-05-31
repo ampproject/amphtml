@@ -55,13 +55,23 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
   pointer-events: none !important;
 }
 
-.i-amphtml-story-button-container.prev-container.i-amphtml-story-back-close-bookend {
+/* A11y pagination element. Focusable by screen readers. Visibly Hidden on mobile unless navigating with keyboard. */
+amp-story:not([desktop]) .i-amphtml-story-button-move,
+[dir=rtl] amp-story:not([desktop]) .i-amphtml-story-button-move {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  padding: 0 !important;
   pointer-events: none !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
+  /* Contrast protection. Make icons white. */
+  filter: invert(100%) drop-shadow(0 0 3px rgba(0, 0, 0, 0.5)) !important;
 }
 
-/* Navigation buttons. These are only displayed on desktop. */
-.i-amphtml-story-button-move {
-  display: none !important;
+body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-story-button-move {
+  /* Hides background unless navigating with keyboard. */
+  background: none !important;
 }
 
 [desktop] .i-amphtml-story-button-move {
@@ -168,8 +178,6 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
 }
 
 .i-amphtml-story-desktop-panels.i-amphtml-story-prev-hover > .i-amphtml-story-back-prev >
-    .i-amphtml-story-button-move,
-.i-amphtml-story-desktop-panels.i-amphtml-story-prev-hover > .i-amphtml-story-back-close-bookend  >
     .i-amphtml-story-button-move {
   transform: translateX(-8px)!important;
   opacity: 1!important;

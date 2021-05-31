@@ -59,7 +59,7 @@ component will render a maximum of three documents (total) on screen at one sing
 
 [tip type="important"]
 **Important** [`<amp-analytics>`](../../amp-analytics/amp-analytics.md) is [currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on pages users land on through `<amp-next-page>`.
-Tracking page views is supported through [`<amp-pixel>`](../../../builtins/amp-pixel.md) or `<amp-analytics>` on the host page.
+Tracking page views is supported through [`<amp-pixel>`](../../../builtins/amp-pixel/amp-pixel.md) or `<amp-analytics>` on the host page.
 [/tip]
 
 ### Configuration spec
@@ -90,10 +90,10 @@ have been rendered.
 The appearance of these links can be customized by styling the following
 classes:
 
-- `.amp-next-page-links` for the containing element
-- `.amp-next-page-link` for an individual link
-- `.amp-next-page-image` for the link image
-- `.amp-next-page-text` for the link text
+-   `.amp-next-page-links` for the containing element
+-   `.amp-next-page-link` for an individual link
+-   `.amp-next-page-image` for the link image
+-   `.amp-next-page-text` for the link text
 
 ### Separator
 
@@ -140,7 +140,7 @@ selectors will be set to `display: none` in all child documents.
 ### Substitutions
 
 The `amp-next-page` src allows all standard URL variable substitutions. See
-the [Substitutions Guide](../../../spec/amp-var-substitutions.md) for more info.
+the [Substitutions Guide](../../../docs/spec/amp-var-substitutions.md) for more info.
 
 For example:
 
@@ -223,5 +223,5 @@ Both of the `triggers` provide the variables `fromUrl` and `toUrl` referring to 
 ## Validation
 
 See
-[amp-next-page rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-next-page/validator-amp-next-page.protoascii)
+[amp-next-page rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-next-page/validator-amp-next-page.protoascii)
 in the AMP validator specification.

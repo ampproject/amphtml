@@ -18,6 +18,7 @@ import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
   ConsentMetadataDef,
+  PURPOSE_CONSENT_STATE,
   calculateLegacyStateValue,
   composeStoreValue,
   constructConsentInfo,
@@ -27,17 +28,14 @@ import {
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
 } from './consent-info';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dev, devAssert} from '../../../src/log';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
+import {hasOwn} from '../../../src/core/types/object';
 
 const TAG = 'CONSENT-STATE-MANAGER';
-
-/** @visibleForTesting */
-export const CONSENT_STORAGE_MAX = 1200;
 
 export class ConsentStateManager {
   /**
@@ -62,6 +60,17 @@ export class ConsentStateManager {
 
     /** @private {?function()} */
     this.consentReadyResolver_ = null;
+
+    /** @private {Object<string, PURPOSE_CONSENT_STATE>|undefined} */
+    this.purposeConsents_ = undefined;
+
+    const allPurposeConsentsDeferred = new Deferred();
+
+    /** @private {?function()} */
+    this.hasAllPurposeConsentsResolver_ = allPurposeConsentsDeferred.resolve;
+
+    /** @private {!Promise} */
+    this.hasAllPurposeConsentsPromise_ = allPurposeConsentsDeferred.promise;
   }
 
   /**
@@ -102,13 +111,49 @@ export class ConsentStateManager {
       dev().error(TAG, 'instance not registered');
       return;
     }
-    this.instance_.update(state, consentStr, opt_consentMetadata, false);
+    this.instance_.update(
+      state,
+      consentStr,
+      this.purposeConsents_,
+      opt_consentMetadata,
+      false
+    );
 
     if (this.consentChangeHandler_) {
       this.consentChangeHandler_(
-        constructConsentInfo(state, consentStr, opt_consentMetadata)
+        constructConsentInfo(
+          state,
+          consentStr,
+          opt_consentMetadata,
+          this.purposeConsents_
+        )
       );
+      // Need to be called after handler.
+      this.hasAllPurposeConsents();
     }
+  }
+
+  /**
+   * Update our current purposeConsents, that will be
+   * used in subsequent calls to update().
+   * @param {!Object<string, boolean>} purposeMap
+   * @param {boolean} defaultsOnly
+   */
+  updateConsentInstancePurposes(purposeMap, defaultsOnly = false) {
+    if (!this.purposeConsents_) {
+      this.purposeConsents_ = {};
+    }
+    const purposes = Object.keys(purposeMap);
+    purposes.forEach((purpose) => {
+      // If defaults only, then only update if it doesn't exist.
+      if (defaultsOnly && hasOwn(this.purposeConsents_, purpose)) {
+        return;
+      }
+      const value = !!purposeMap[purpose]
+        ? PURPOSE_CONSENT_STATE.ACCEPTED
+        : PURPOSE_CONSENT_STATE.REJECTED;
+      this.purposeConsents_[purpose] = value;
+    });
   }
 
   /**
@@ -164,6 +209,24 @@ export class ConsentStateManager {
   setConsentInstanceSharedData(sharedDataPromise) {
     devAssert(this.instance_, '%s: cannot find the instance', TAG);
     this.instance_.sharedDataPromise = sharedDataPromise;
+  }
+
+  /**
+   * Signifies that we collected all the purpose consents
+   * from our source of truth (i.e locally stored or updated)
+   */
+  hasAllPurposeConsents() {
+    this.hasAllPurposeConsentsResolver_();
+  }
+
+  /**
+   * Wait for our purpose consents to be collected,
+   * either locally or from update. Let amp-consent handle
+   * when to resolve the promis (via update() or directly).
+   * @return {!Promise}
+   */
+  whenHasAllPurposeConsents() {
+    return this.hasAllPurposeConsentsPromise_;
   }
 
   /**
@@ -232,7 +295,7 @@ export class ConsentInstance {
     this.sharedDataPromise = null;
 
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
-    this.storagePromise_ = Services.storageForDoc(ampdoc);
+    this.storagePromise_ = Services.storageForTopLevelDoc(ampdoc);
 
     /** @private {?ConsentInfoDef}*/
     this.localConsentInfo_ = null;
@@ -271,6 +334,7 @@ export class ConsentInstance {
       this.update(
         info['consentState'],
         info['consentString'],
+        info['purposeConsents'],
         info['consentMetadata'],
         true
       );
@@ -281,24 +345,29 @@ export class ConsentInstance {
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
+   * @param {Object<string, PURPOSE_CONSENT_STATE>=} purposeConsents
    * @param {ConsentMetadataDef=} opt_consentMetadata
    * @param {boolean=} opt_systemUpdate
    */
-  update(state, consentString, opt_consentMetadata, opt_systemUpdate) {
+  update(
+    state,
+    consentString,
+    purposeConsents,
+    opt_consentMetadata,
+    opt_systemUpdate
+  ) {
     const localState =
       this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const calculatedState = recalculateConsentStateValue(state, localState);
 
     if (state === CONSENT_ITEM_STATE.DISMISSED) {
-      const localConsentStr =
-        this.localConsentInfo_ && this.localConsentInfo_['consentString'];
-      const localConsentMetadata =
-        this.localConsentInfo_ && this.localConsentInfo_['consentMetadata'];
-      // If state is dismissed, use the old consent string and metadata.
+      // If state is dismissed, use the old consent string, metadata,
+      // and puporse consents.
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
-        localConsentStr,
-        localConsentMetadata
+        this.localConsentInfo_?.consentString,
+        this.localConsentInfo_?.consentMetadata,
+        this.localConsentInfo_?.purposeConsents
       );
       return;
     }
@@ -311,6 +380,7 @@ export class ConsentInstance {
         calculatedState,
         consentString,
         opt_consentMetadata,
+        purposeConsents,
         true
       );
     } else {
@@ -319,7 +389,8 @@ export class ConsentInstance {
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
         consentString,
-        opt_consentMetadata
+        opt_consentMetadata,
+        purposeConsents
       );
     }
 
@@ -327,6 +398,7 @@ export class ConsentInstance {
       calculatedState,
       consentString,
       opt_consentMetadata,
+      purposeConsents,
       this.hasDirtyBitNext_
     );
 
@@ -372,39 +444,6 @@ export class ConsentInstance {
         return;
       }
 
-      // Check size
-      const size = JSON.stringify(
-        dict({
-          [this.storageKey_]: value,
-        })
-      ).length;
-
-      if (size > CONSENT_STORAGE_MAX) {
-        // Size restriction only applies to documents servered from a viewer
-        // that implements the storage API.
-        const usesViewerStorage = storage.isViewerStorage();
-        if (usesViewerStorage) {
-          // 1200 * 4/3 (base64) = 1600 bytes
-          user().error(
-            TAG,
-            'Cannot store consent information which length exceeds %s. ' +
-              'Previous stored consentInfo will be cleared',
-            CONSENT_STORAGE_MAX
-          );
-          // If new consentInfo value cannot be stored, need to remove previous
-          // value
-          storage.remove(this.storageKey_);
-          // TODO: Good to have a way to inform CMP service in this case
-          return;
-        }
-        user().info(
-          TAG,
-          'Current consent information length exceeds %s ' +
-            'and will not be stored when the page is served ' +
-            'from a viewer that supports the Local Storage API.',
-          CONSENT_STORAGE_MAX
-        );
-      }
       this.savedConsentInfo_ = consentInfo;
       storage.setNonBoolean(this.storageKey_, value);
       this.sendUpdateHrefRequest_(consentInfo);
@@ -489,6 +528,9 @@ export class ConsentInstance {
       }
       if (consentInfo['consentMetadata']) {
         request['consentMetadata'] = consentInfo['consentMetadata'];
+      }
+      if (consentInfo['purposeConsents']) {
+        request['purposeConsents'] = consentInfo['purposeConsents'];
       }
       const init = {
         credentials: 'include',

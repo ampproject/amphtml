@@ -15,14 +15,19 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Instagram} from '../instagram';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionSection,
+} from '../../../amp-accordion/1.0/component';
+import {Instagram} from '../component';
 import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'Instagram',
   component: Instagram,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 export const _default = () => {
@@ -38,5 +43,27 @@ export const _default = () => {
       captioned={captioned}
       alt="AMP Instagram Storybook Preact Example"
     ></Instagram>
+  );
+};
+
+export const InsideAccordion = () => {
+  const shortcode = text('shortcode', 'Bp4I3hRhd_v');
+  const width = number('width', 500);
+  const height = number('height', 600);
+  return (
+    <Accordion expandSingleSection>
+      <AccordionSection key={1} expanded={true}>
+        <AccordionHeader>
+          <h2>Post</h2>
+        </AccordionHeader>
+        <AccordionContent>
+          <Instagram
+            shortcode={shortcode}
+            style={{width, height}}
+            alt="AMP Instagram Storybook Preact Example"
+          ></Instagram>
+        </AccordionContent>
+      </AccordionSection>
+    </Accordion>
   );
 };

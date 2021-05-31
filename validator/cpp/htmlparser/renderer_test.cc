@@ -135,7 +135,7 @@ TEST(RendererTest, NullCharsTest) {
       "<!DOCTYPE potato SYSTEM 'taco\"'><html><head></head><body>Hello</body>"
           "</html>",
       "<!DOCTYPE potato><html><head></head><body>Hello</body></html>",
-      "<!--<?xml version--><html><head></head><body></body></html>",
+      "<!--?xml version--><html><head></head><body></body></html>",
       "<html><head></head><body><b>1<i>2</i></b><i><p><b>3</b>4</p></i></body>"
           "</html>",
       "<html><head></head><body><a>1</a><a>3</a><table><tbody><tr><td>2</td>"
@@ -149,7 +149,7 @@ TEST(RendererTest, NullCharsTest) {
       "<html><head></head><body><p>1<s id=\"A\">2<b id=\"B\">3</b></s></p><s "
           "id=\"A\"><b id=\"B\">4</b></s><b id=\"B\">5</b></body></html>",
       "<html><head></head><body><a>1</a><p><a>2</a>3</p></body></html>",
-      "<!--<?xml version=\"1.0\"--><html><head></head><body>Hi</body></html>",
+      "<!--?xml version=\"1.0\"--><html><head></head><body>Hi</body></html>",
       "<!DOCTYPE potato><html><head></head><body>Hello</body></html>",
       "<html><head></head><body><math><template><mn><b></b></mn></template>"
           "</math></body></html>",
@@ -162,8 +162,7 @@ TEST(RendererTest, NullCharsTest) {
           "<postfield><missing_glyph><missing_glyph><missing_glyph>"
           "<missing_glyph><hkern></hkern></missing_glyph></missing_glyph>"
           "</missing_glyph></missing_glyph></postfield></postfield></postfield>"
-          "</postfield></dcell></em></b><aside><em><b></b></em></aside></body>"
-          "</html>",
+          "</postfield></dcell></em></b><aside><b></b></aside></body></html>",
       "<html><head></head><body><svg><template><desc><t><svg></svg></t></desc>"
           "</template></svg></body></html>",
       "<html><head></head><body>A<table><tbody><tr><td></td></tr></tbody>"

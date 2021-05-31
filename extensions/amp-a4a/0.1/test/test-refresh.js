@@ -23,7 +23,7 @@ import {
 } from '../refresh-manager';
 import {Services} from '../../../../src/services';
 
-describe('refresh', () => {
+describes.sandboxed('refresh', {}, (env) => {
   let mockA4a;
   const config = {
     visiblePercentageMin: 50,
@@ -36,7 +36,7 @@ describe('refresh', () => {
     div.setAttribute('style', 'width:1px; height:1px;');
     div.setAttribute('type', 'doubleclick');
     div.setAttribute(DATA_ATTR_NAME, '35');
-    window.sandbox.replaceGetter(div, 'isConnected', () => true);
+    env.sandbox.replaceGetter(div, 'isConnected', () => true);
     div.getAmpDoc = () => {
       return {
         getMetaByName: (name) => {
@@ -61,6 +61,17 @@ describe('refresh', () => {
   describe('refresh-manager', () => {
     it('should get null refreshInterval', () => {
       mockA4a.element.removeAttribute(DATA_ATTR_NAME);
+      expect(
+        getPublisherSpecifiedRefreshInterval(
+          mockA4a.element,
+          window,
+          'doubleclick'
+        )
+      ).to.be.null;
+    });
+
+    it('should get null refreshInterval when disabled via data attr', () => {
+      mockA4a.element.setAttribute(DATA_ATTR_NAME, false);
       expect(
         getPublisherSpecifiedRefreshInterval(
           mockA4a.element,
@@ -96,7 +107,7 @@ describe('refresh', () => {
     });
 
     it('should call convertConfiguration_ and set proper units', () => {
-      const getConfigurationSpy = window.sandbox.spy(
+      const getConfigurationSpy = env.sandbox.spy(
         RefreshManager.prototype,
         'convertAndSanitizeConfiguration_'
       );
@@ -160,7 +171,7 @@ describe('refresh', () => {
     it('should execute the refresh event correctly', () => {
       // Attach element to DOM, as is necessary for request ampdoc.
       window.document.body.appendChild(mockA4a.element);
-      const refreshSpy = window.sandbox.spy(mockA4a, 'refresh');
+      const refreshSpy = env.sandbox.spy(mockA4a, 'refresh');
 
       // Ensure initial call to initiateRefreshCycle doesn't trigger refresh, as
       // this can have flaky results.

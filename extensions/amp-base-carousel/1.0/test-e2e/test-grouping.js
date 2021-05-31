@@ -15,7 +15,7 @@
  */
 
 import {getCarousel, getScrollingElement, getSlide} from './helpers';
-import {useStyles} from '../base-carousel.jss';
+import {useStyles} from '../component.jss';
 
 const pageWidth = 800;
 const pageHeight = 600;
@@ -25,12 +25,11 @@ const pivotIndex = Math.floor(slideCount / 2);
 const expectedScrollPosition = (pageWidth / advanceCount) * pivotIndex;
 
 describes.endtoend(
-  'AMP carousel grouping',
+  'amp-base-carousel - grouping',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/' +
-      'grouping-move-by-2.amp.html',
-    experiments: ['amp-base-carousel-bento'],
+    version: '1.0',
+    fixture: 'amp-base-carousel/1.0/grouping-move-by-2.amp.html',
+    experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single'],
   },
@@ -72,7 +71,7 @@ describes.endtoend(
       await expect(prop(slide6, 'offsetLeft')).to.equal(expectedScrollPosition);
     });
 
-    it('should move backwards by the advance-count', async () => {
+    it.skip('should move backwards by the advance-count', async () => {
       const el = await getScrollingElement(styles, controller);
       await expect(prop(el, 'scrollLeft')).to.equal(expectedScrollPosition);
 

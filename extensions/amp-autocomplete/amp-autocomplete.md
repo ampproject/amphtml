@@ -72,10 +72,10 @@ When using the `src` attribute with `amp-autocomplete`, the response from the en
 
 You can specify a template in one of two ways:
 
-- a `template` attribute that references an ID of an existing templating element.
-- a templating element nested directly inside the `amp-autocomplete` element.
+-   a `template` attribute that references an ID of an existing templating element.
+-   a templating element nested directly inside the `amp-autocomplete` element.
 
-For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
+For more details on templates, see [AMP HTML Templates](../../docs/spec/amp-html-templates.md).
 
 [tip type="note"]
 Note also that a good practice is to provide templates a single top-level element to prevent unintended side effects. This also guarantees control of the [`data-value` or `data-disabled`](https://amp.dev/documentation/examples/components/amp-autocomplete/#suggesting-rich-content) attribute on the delimiting element. As an example, the following input:
@@ -114,12 +114,12 @@ Would most predictably be applied and rendered if instead provided as follows:
 
 The filtering mechanism applied to source data to produce filtered results for user input. In all cases the filtered results will be displayed in array order of data retrieved. If filtering is being done (<code>filter != none</code>), it is done client side. The following are supported values:
 
-- `substring`: if the user input is a substring of an item, then the item is suggested
-- `prefix`: if the user input is a prefix of an item, then the item gets suggested
-- `token-prefix`: if the user input is a prefix of any word in a multi-worded item, then the item gets suggested; example “je” is a token-prefix in “blue jeans”
-- `fuzzy`: typos in the input field can result in partial match items appearing in the filtered results—need further research
-- `none`: no client-side filter; renders retrieved data based on bound <code>[src]</code> attribute; truncates to <code>max-items</code> attribute if provided
-- `custom`: a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including <code>amp-bind</code> if <code>filter==custom</code>, an additional attribute <code>filter-expr</code> is required to specify a boolean expression by which to perform the custom filter
+-   `substring`: if the user input is a substring of an item, then the item is suggested
+-   `prefix`: if the user input is a prefix of an item, then the item gets suggested
+-   `token-prefix`: if the user input is a prefix of any word in a multi-worded item, then the item gets suggested; example “je” is a token-prefix in “blue jeans”
+-   `fuzzy`: typos in the input field can result in partial match items appearing in the filtered results—need further research
+-   `none`: no client-side filter; renders retrieved data based on bound <code>[src]</code> attribute; truncates to <code>max-items</code> attribute if provided
+-   `custom`: a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including <code>amp-bind</code> if <code>filter==custom</code>, an additional attribute <code>filter-expr</code> is required to specify a boolean expression by which to perform the custom filter
 
 ### `filter-expr`
 

@@ -16,7 +16,6 @@
 
 import {CSS} from './pagination.jss';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
-import {Layout} from '../../../src/layout';
 import {Pagination} from './pagination';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {isExperimentOn} from '../../../src/experiments';
@@ -30,10 +29,13 @@ export class AmpInlineGalleryPagination extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-inline-gallery-bento'),
-      'expected amp-inline-gallery-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-inline-gallery'),
+      'expected global "bento" or specific "bento-inline-gallery" experiment to be enabled'
     );
-    return layout == Layout.FIXED_HEIGHT;
+    // Any layout is allowed for Bento, but "fixed-height" is the recommend
+    // layout for AMP.
+    return super.isLayoutSupported(layout);
   }
 }
 
@@ -46,13 +48,13 @@ AmpInlineGalleryPagination['props'] = {
 };
 
 /** @override */
-AmpInlineGalleryPagination['children'] = {};
-
-/** @override */
 AmpInlineGalleryPagination['layoutSizeDefined'] = true;
 
 /** @override */
 AmpInlineGalleryPagination['shadowCss'] = CSS;
+
+/** @override */
+AmpInlineGalleryPagination['usesShadowDom'] = true;
 
 /** @override */
 AmpInlineGalleryPagination['useContexts'] = [CarouselContextProp];

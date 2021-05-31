@@ -18,7 +18,7 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
 import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
 import {forceExperimentBranch} from '../../../src/experiments';
-import {includes} from '../../../src/string';
+import {includes} from '../../../src/core/types/string';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
@@ -90,14 +90,12 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       if (!response) {
         return null;
       }
-      const {
-        status,
-        headers,
-      } = /** @type {{status: number, headers: !Headers}} */ (response);
+      const {status, headers} =
+        /** @type {{status: number, headers: !Headers}} */ (response);
 
       // In the convert creative mode the content is the plain AMP HTML.
       // This mode is primarily used for A4A Envelope for testing.
-      // See DEVELOPING.md for more info.
+      // See developing.md for more info.
       if (this.element.getAttribute('a4a-conversion') == 'true') {
         return response.text().then((responseText) => {
           // When using data: url the legacy amp cors param is interpreted as

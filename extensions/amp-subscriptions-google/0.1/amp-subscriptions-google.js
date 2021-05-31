@@ -33,26 +33,31 @@ import {
   Entitlement,
   GrantReason,
 } from '../../amp-subscriptions/0.1/entitlement';
+import {GaaMeteringRegwall} from '../../../third_party/subscriptions-project/swg-gaa';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
 import {WindowInterface} from '../../../src/window-interface';
-import {
-  assertHttpsUrl,
-  parseQueryString,
-  parseUrlDeprecated,
-} from '../../../src/url';
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {getValueForExpr} from '../../../src/json';
+import {getValueForExpr} from '../../../src/core/types/object';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {parseQueryString} from '../../../src/core/types/string/url';
 
 import {devAssert, user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
-const PLATFORM_ID = 'subscribe.google.com';
+const PLATFORM_KEY = 'subscribe.google.com';
 const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
+
+/** @enum {number} */
+const ShowcaseStrategy = {
+  NONE: 1,
+  LEAD_ARTICLE: 2,
+  EXTENDED_ACCESS: 3,
+};
 
 /** @const */
 const SERVICE_TIMEOUT = 3000;
@@ -185,14 +190,14 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.setOnLinkComplete(() => {
       this.onLinkComplete_();
       this.subscriptionAnalytics_.actionEvent(
-        this.getServiceId(),
+        this.getPlatformKey(),
         Action.LINK,
         ActionStatus.SUCCESS
       );
       // TODO(dvoytenko): deprecate separate "link" events.
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.LINK_COMPLETE,
-        this.getServiceId()
+        this.getPlatformKey()
       );
     });
     this.runtime_.setOnFlowStarted((e) => {
@@ -218,7 +223,7 @@ export class GoogleSubscriptionsPlatform {
         e.flow == Action.SHOW_OFFERS
       ) {
         this.subscriptionAnalytics_.actionEvent(
-          this.getServiceId(),
+          this.getPlatformKey(),
           e.flow,
           ActionStatus.STARTED,
           params
@@ -229,14 +234,14 @@ export class GoogleSubscriptionsPlatform {
       if (e.flow == 'linkAccount') {
         this.onLinkComplete_();
         this.subscriptionAnalytics_.actionEvent(
-          this.getServiceId(),
+          this.getPlatformKey(),
           Action.LINK,
           ActionStatus.REJECTED
         );
         // TODO(dvoytenko): deprecate separate "link" events.
         this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.LINK_CANCELED,
-          this.getServiceId()
+          this.getPlatformKey()
         );
       } else if (
         e.flow == Action.SUBSCRIBE ||
@@ -245,7 +250,7 @@ export class GoogleSubscriptionsPlatform {
         e.flow == Action.SHOW_OFFERS
       ) {
         this.subscriptionAnalytics_.actionEvent(
-          this.getServiceId(),
+          this.getPlatformKey(),
           e.flow,
           ActionStatus.REJECTED
         );
@@ -287,10 +292,12 @@ export class GoogleSubscriptionsPlatform {
     /** @private @const {boolean} */
     this.enableLAA_ = !!this.serviceConfig_['enableLAA'];
 
-    // Allow a publisher to turn off the entitlments check, needed
-    // in the case where LAA is in use but no other Google service is configured
-    // defaults true for backward compatibility
-    /** @private @const {boolean} */
+    /**
+     * Allows publishers to turn off SwG entitlement checks.
+     * Some publishers just use LAA entitlements.
+     * SwG entitlement checks are enabled by default, for backward compatibility.
+     * @private @const {boolean}
+     */
     this.enableEntitlements_ =
       this.serviceConfig_['enableEntitlements'] === false ? false : true;
 
@@ -360,14 +367,14 @@ export class GoogleSubscriptionsPlatform {
     if (linkRequested && this.isGoogleViewer_) {
       this.loginWithAmpReaderId_();
       this.subscriptionAnalytics_.actionEvent(
-        this.getServiceId(),
+        this.getPlatformKey(),
         Action.LINK,
         ActionStatus.STARTED
       );
       // TODO(dvoytenko): deprecate separate "link" events.
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.LINK_REQUESTED,
-        this.getServiceId()
+        this.getPlatformKey()
       );
     } else {
       this.maybeComplete_(
@@ -459,7 +466,7 @@ export class GoogleSubscriptionsPlatform {
       })
       .catch((reason) => {
         throw user().createError(
-          `fetch skuMap failed for ${PLATFORM_ID}`,
+          `fetch skuMap failed for ${PLATFORM_KEY}`,
           reason
         );
       });
@@ -488,7 +495,7 @@ export class GoogleSubscriptionsPlatform {
     });
 
     this.subscriptionAnalytics_.actionEvent(
-      this.getServiceId(),
+      this.getPlatformKey(),
       eventType,
       ActionStatus.SUCCESS,
       params
@@ -496,53 +503,89 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /**
-   * get LAA params - in it's own method so we can stub it for test.
+   * Returns URL params - in its own method so we can stub it for testing.
    * @return {Object<string>}
    * @private
    */
-  getLAAParams_() {
+  getUrlParams_() {
     return parseQueryString(this.ampdoc_.win.location.search);
   }
 
   /**
-   * Checks enableLAA flag and LAA header params and if present
-   * and unexpired generates an LAA entitlement.
+   * Returns a LAA entitlement for this article, if it's appropriate.
    * @return {!Promise<?Entitlement>}
    * @private
    */
   maybeGetLAAEntitlement_() {
-    if (this.enableLAA_) {
-      return this.viewerPromise_.getReferrerUrl().then((referrer) => {
-        const parsedQuery = this.getLAAParams_();
-        const parsedReferrer = parseUrlDeprecated(referrer);
-        if (
-          // Note we don't use the more generic this.isDev_ flag because that can be triggered
-          // by a hash value which would allow non gooogle hostnames to construct LAA urls.
-          ((parsedReferrer.protocol === 'https' &&
-            GOOGLE_DOMAIN_RE.test(parsedReferrer.hostname)) ||
-            getMode(this.ampdoc_.win).localDev) &&
-          parsedQuery[`gaa_at`] == 'laa' &&
-          parsedQuery[`gaa_n`] &&
-          parsedQuery[`gaa_sig`] &&
-          parsedQuery[`gaa_ts`] &&
-          parseInt(parsedQuery[`gaa_ts`], 16) > Date.now() / 1000
-        ) {
-          // All the criteria are met to return an LAA entitlement
-          return Promise.resolve(
-            new Entitlement({
-              source: 'google:laa',
-              raw: '',
-              service: PLATFORM_ID,
-              granted: true,
-              grantReason: GrantReason.LAA,
-              dataObject: {},
-              decryptedDocumentKey: null,
-            })
-          );
-        }
+    return this.getShowcaseStrategy_().then((strategy) => {
+      // Verify Google's Showcase strategy for this article.
+      if (strategy !== ShowcaseStrategy.LEAD_ARTICLE) {
+        return null;
+      }
+
+      // All the criteria are met to return an LAA entitlement
+      return new Entitlement({
+        source: 'google:laa',
+        raw: '',
+        service: PLATFORM_KEY,
+        granted: true,
+        grantReason: GrantReason.LAA,
+        dataObject: {},
+        decryptedDocumentKey: null,
       });
+    });
+  }
+
+  /**
+   * Returns Google's Showcase strategy for this article.
+   * @private
+   * @return {!Promise<!ShowcaseStrategy>}
+   */
+  getShowcaseStrategy_() {
+    // Verify the service config enables a Google Showcase strategy.
+    if (!this.enableLAA_ && !this.enableMetering_) {
+      return Promise.resolve(ShowcaseStrategy.NONE);
     }
-    return Promise.resolve(null);
+
+    return this.viewerPromise_.getReferrerUrl().then((referrer) => {
+      // Check referrer.
+      const parsedReferrer = parseUrlDeprecated(referrer);
+      if (
+        (parsedReferrer.protocol !== 'https:' ||
+          !GOOGLE_DOMAIN_RE.test(parsedReferrer.hostname)) &&
+        // Note we don't use the more generic this.isDev_ flag because that can be
+        // triggered by a hash value which would allow non google hostnames to
+        // construct LAA urls.
+        !getMode(this.ampdoc_.win).localDev
+      ) {
+        return ShowcaseStrategy.NONE;
+      }
+
+      // Parse URL params.
+      const urlParams = this.getUrlParams_();
+
+      // Verify timestamp.
+      if (parseInt(urlParams[`gaa_ts`], 16) < Date.now() / 1000) {
+        return ShowcaseStrategy.NONE;
+      }
+
+      // Verify a few params exist.
+      if (!urlParams[`gaa_n`] || !urlParams[`gaa_sig`]) {
+        return ShowcaseStrategy.NONE;
+      }
+
+      // Determine Google's Showcase strategy.
+      if (urlParams[`gaa_at`] === 'la' && this.enableLAA_) {
+        return ShowcaseStrategy.LEAD_ARTICLE;
+      } else if (
+        (urlParams[`gaa_at`] === 'la' || urlParams[`gaa_at`] === 'g') &&
+        this.enableMetering_
+      ) {
+        return ShowcaseStrategy.EXTENDED_ACCESS;
+      } else {
+        return ShowcaseStrategy.NONE;
+      }
+    });
   }
 
   /** @override */
@@ -552,16 +595,18 @@ export class GoogleSubscriptionsPlatform {
      * entitlement at prerender time does not leak any private
      * information.  If it's not a google viewer then we wait
      * for the page to be visible to avoid leaking that the
-     * page was prerendered
+     * page was prerendered.
+     *
+     * If this article enables Showcase metering, then it's not prerender safe.
+     * This extension could load a publisher URL to render a Google Sign-In button.
      */
-    return this.isGoogleViewer_;
+    return this.isGoogleViewer_ && !this.enableMetering_;
   }
 
   /** @override */
   getEntitlements() {
-    const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
-      'google.com'
-    );
+    const encryptedDocumentKey =
+      this.serviceAdapter_.getEncryptedDocumentKey('google.com');
     userAssert(
       !(this.enableLAA_ && encryptedDocumentKey),
       `enableLAA cannot be used when the document is encrypted`
@@ -571,70 +616,205 @@ export class GoogleSubscriptionsPlatform {
       if (laaEntitlement) {
         return laaEntitlement;
       }
+
+      // Allow publishers to disable SwG entitlement checks.
+      // Some publishers just want LAA entitlements.
       if (!this.enableEntitlements_) {
         return null;
       }
-      let params = {};
-      if (encryptedDocumentKey) {
-        params = {
-          encryption: {encryptedDocumentKey},
-        };
-      }
-      return this.runtime_.getEntitlements(params).then((swgEntitlements) => {
-        // Get and store the isReadyToPay signal which is independent of
-        // any entitlments existing.
-        if (swgEntitlements.isReadyToPay) {
-          this.isReadyToPay_ = true;
+
+      const showcaseStrategyPromise = this.getShowcaseStrategy_();
+      const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
+      const promises = Promise.all([
+        showcaseStrategyPromise,
+        meteringStatePromise,
+      ]);
+
+      return promises.then((results) => {
+        const showcaseStrategy = results[0];
+        const meteringState = results[1];
+
+        const entitlementsParams = {};
+
+        // Add encryption param.
+        if (encryptedDocumentKey) {
+          entitlementsParams.encryption = {encryptedDocumentKey};
         }
 
-        // Get the specifc entitlement we're looking for
-        let swgEntitlement = swgEntitlements.getEntitlementForThis();
-        let granted = false;
-        if (swgEntitlement && swgEntitlement.source) {
-          granted = true;
-        } else if (
-          swgEntitlements.entitlements.length &&
-          swgEntitlements.entitlements[0].products.length
+        // Add metering param.
+        if (
+          showcaseStrategy === ShowcaseStrategy.EXTENDED_ACCESS &&
+          meteringState
         ) {
-          // We didn't find a grant so see if there is a non granting
-          // and return that. Note if we start returning multiple non
-          // granting we'll need to refactor to handle returning an
-          // array of Entitlement objects.
-          // #TODO(jpettitt) - refactor to handle multi entitlement case
-          swgEntitlement = swgEntitlements.entitlements[0];
-        } else {
-          return null;
+          // Make sure SwG sends a fresh request, instead of using cache.
+          this.runtime_.clear();
+
+          entitlementsParams.metering = {state: meteringState};
+
+          // Remember we requested metering entitlements.
+          // This helps avoid redundant fetches for metering entitlements.
+          this.serviceAdapter_.rememberMeteringEntitlementsWereFetched();
         }
-        swgEntitlements.ack();
-        return new Entitlement({
-          source: swgEntitlement.source,
-          raw: swgEntitlements.raw,
-          service: PLATFORM_ID,
-          granted,
-          // if it's granted it must be a subscriber
-          grantReason: granted ? GrantReason.SUBSCRIBER : null,
-          dataObject: swgEntitlement.json(),
-          decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
-        });
+
+        return this.runtime_
+          .getEntitlements(entitlementsParams)
+          .then((swgEntitlements) =>
+            this.createAmpEntitlement(swgEntitlements)
+          );
       });
     });
   }
 
-  /** @override */
-  getServiceId() {
-    return PLATFORM_ID;
+  /**
+   * Returns an AMP entitlement based on SwG entitlements.
+   * @param {!Entitlements} swgEntitlements
+   * @return {Entitlement}
+   */
+  createAmpEntitlement(swgEntitlements) {
+    // Get and store the isReadyToPay signal which is independent of
+    // any entitlments existing.
+    if (swgEntitlements.isReadyToPay) {
+      this.isReadyToPay_ = true;
+    }
+
+    let swgEntitlement = swgEntitlements.getEntitlementForThis();
+    let granted = false;
+    if (swgEntitlement && swgEntitlement.source) {
+      granted = true;
+    } else if (
+      swgEntitlements.entitlements.length &&
+      swgEntitlements.entitlements[0].products.length
+    ) {
+      // We didn't find a grant so see if there is a non granting
+      // and return that. Note if we start returning multiple non
+      // granting we'll need to refactor to handle returning an
+      // array of Entitlement objects.
+      // #TODO(jpettitt) - refactor to handle multi entitlement case
+      swgEntitlement = swgEntitlements.entitlements[0];
+    } else {
+      return null;
+    }
+    swgEntitlements.ack();
+
+    // Determine grant reason.
+    let grantReason;
+    if (granted) {
+      if (swgEntitlement.source === 'google:metering') {
+        grantReason = GrantReason.METERING;
+      } else {
+        grantReason = GrantReason.SUBSCRIBER;
+      }
+    } else {
+      grantReason = null;
+    }
+
+    return new Entitlement({
+      source: swgEntitlement.source,
+      raw: swgEntitlements.raw,
+      service: PLATFORM_KEY,
+      granted,
+      // if it's granted it must be a subscriber
+      grantReason,
+      dataObject: swgEntitlement.json(),
+      decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
+    });
   }
 
   /** @override */
-  activate(entitlement, grantEntitlement) {
+  getPlatformKey() {
+    return PLATFORM_KEY;
+  }
+
+  /** @override */
+  activate(entitlement, grantEntitlement, continueAuthorizationFlow) {
     const best = grantEntitlement || entitlement;
-    // Offers or abbreviated offers may need to be shown depending on
-    // whether the access has been granted and whether user is a subscriber.
-    if (!best.granted) {
-      this.runtime_.showOffers({list: 'amp'});
-    } else if (!best.isSubscriber()) {
-      this.runtime_.showAbbrvOffer({list: 'amp'});
-    }
+
+    const showcaseStrategyPromise = this.getShowcaseStrategy_();
+    const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
+    const promises = Promise.all([
+      showcaseStrategyPromise,
+      meteringStatePromise,
+    ]);
+
+    promises.then((results) => {
+      const showcaseStrategy = results[0];
+      const meteringState = results[1];
+
+      if (showcaseStrategy === ShowcaseStrategy.EXTENDED_ACCESS) {
+        // Show the Regwall, so the user can get
+        // a metering state that leads to a
+        // granting entitlement.
+        // After the Regwall flow completes, then continue authorization flow.
+        if (!best.granted && !meteringState) {
+          this.showMeteringRegwall_().then(continueAuthorizationFlow);
+          return;
+        }
+
+        // Consume the metering entitlement.
+        if (best.granted && !best.isSubscriber()) {
+          this.runtime_.consumeShowcaseEntitlementJwt(
+            best.raw,
+            continueAuthorizationFlow
+          );
+          return;
+        }
+      }
+
+      // Offers or abbreviated offers may need to be shown depending on
+      // whether the access has been granted and whether user is a subscriber.
+      if (!best.granted) {
+        this.runtime_.showOffers({list: 'amp'});
+      } else if (!best.isSubscriber()) {
+        this.runtime_.showAbbrvOffer({list: 'amp'});
+      }
+    });
+  }
+
+  /**
+   * Asks user to register an account with the publisher.
+   * Returns a promise that resolves when the process completes.
+   * @return {!Promise}
+   */
+  showMeteringRegwall_() {
+    // Show the Showcase Regwall.
+    const googleSignInDetailsPromise = GaaMeteringRegwall.show({
+      // Specify a URL that renders a Google Sign-In button.
+      iframeUrl: this.serviceConfig_['googleSignInHelperUrl'],
+    });
+    const ampReaderIdPromise = this.serviceAdapter_.getReaderId('local');
+
+    // Register the user with the publisher.
+    const registerUserPromise = Promise.all([
+      googleSignInDetailsPromise,
+      ampReaderIdPromise,
+    ]).then((results) => {
+      const googleSignInDetails = results[0];
+      const ampReaderId = results[1];
+
+      const url = this.serviceConfig_['extendedAccessRegistrationUrl'];
+      const postBody = {
+        googleSignInDetails,
+        ampReaderId,
+      };
+
+      return this.fetcher_.sendPostToPublisher(url, postBody);
+    });
+
+    // The publisher responds with a metering state.
+    // Let's save it.
+    const saveMeteringStatePromise = registerUserPromise.then(
+      (publisherResponse) => {
+        const meteringState =
+          publisherResponse &&
+          publisherResponse['metering'] &&
+          publisherResponse['metering']['state'];
+
+        return this.serviceAdapter_.saveMeteringState(meteringState);
+      }
+    );
+
+    // That's all.
+    return saveMeteringStatePromise;
   }
 
   /** @override */
@@ -913,6 +1093,31 @@ export class AmpFetcher {
     };
     this.fetch(url, init);
   }
+
+  /**
+   * Sends POST request, with a JSON payload, to a publisher URL.
+   * @param {string} url
+   * @param {!JsonObject} payload
+   * @return {!Promise<!JsonObject>}
+   */
+  sendPostToPublisher(url, payload) {
+    const init = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      ampCors: true,
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    };
+
+    const fetchPromise = this.fetch(url, init);
+    const responsePromise = fetchPromise.then(
+      (response) => (response && response.json()) || {}
+    );
+
+    return responsePromise;
+  }
 }
 
 // Register the extension services.
@@ -928,7 +1133,7 @@ AMP.extension(TAG, '0.1', function (AMP) {
       const element = ampdoc.getHeadNode();
       Services.subscriptionsServiceForDoc(element).then((service) => {
         service.registerPlatform(
-          PLATFORM_ID,
+          PLATFORM_KEY,
           (platformConfig, serviceAdapter) => {
             return platformService.createPlatform(
               platformConfig,

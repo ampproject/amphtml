@@ -22,7 +22,7 @@ import {
 import {VerificationStatus} from '../signature-verifier';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 import {user} from '../../../../src/log';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Encode} from '../../../../src/core/types/string/bytes';
 
 const realWinConfig = {
   amp: {},
@@ -34,10 +34,14 @@ describes.realWin('CryptographicValidator', realWinConfig, (env) => {
   const headers = {'Content-Type': 'application/jwk-set+json'};
   let userErrorStub;
   let validator;
+  let containerElement;
 
   beforeEach(() => {
     validator = new CryptographicValidator();
     userErrorStub = env.sandbox.stub(user(), 'error');
+
+    containerElement = env.win.document.createElement('div');
+    env.win.document.body.appendChild(containerElement);
   });
 
   it('should have AMP validator result', () => {
@@ -47,7 +51,12 @@ describes.realWin('CryptographicValidator', realWinConfig, (env) => {
       verify: () => Promise.resolve(VerificationStatus.OK),
     };
     return validator
-      .validate({win: env.win}, utf8Encode(data.reserialized), headers)
+      .validate(
+        {win: env.win},
+        containerElement,
+        utf8Encode(data.reserialized),
+        headers
+      )
       .then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
@@ -66,7 +75,12 @@ describes.realWin('CryptographicValidator', realWinConfig, (env) => {
       verify: () => Promise.resolve(VerificationStatus.UNVERIFIED),
     };
     return validator
-      .validate({win: env.win}, utf8Encode(data.reserialized), headers)
+      .validate(
+        {win: env.win},
+        containerElement,
+        utf8Encode(data.reserialized),
+        headers
+      )
       .then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
@@ -88,6 +102,7 @@ describes.realWin('CryptographicValidator', realWinConfig, (env) => {
     return validator
       .validate(
         {win: env.win},
+        containerElement,
         utf8Encode(data.reserializedInvalidOffset),
         headers
       )

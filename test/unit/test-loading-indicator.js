@@ -16,7 +16,7 @@
 
 import {LoadingIndicatorImpl} from '../../src/service/loading-indicator';
 import {Services} from '../../src/services';
-import {pushIfNotExist, removeItem} from '../../src/utils/array';
+import {pushIfNotExist, removeItem} from '../../src/core/types/array';
 
 describes.realWin('LoadingIndicatorImpl', {amp: true}, (env) => {
   let ampdoc;
@@ -169,5 +169,18 @@ describes.realWin('LoadingIndicatorImpl', {amp: true}, (env) => {
     // Untrack.
     service.untrack(el);
     expect(getLoader()).to.not.exist;
+  });
+
+  it('should configure loader as a service element', async () => {
+    // Ensure loader is created.
+    io.record({
+      target: el,
+      isIntersecting: true,
+      boundingClientRect: {width: 100, height: 100},
+    });
+
+    const loader = getLoader();
+    expect(loader.getAttribute('slot')).to.equal('i-amphtml-svc');
+    expect(loader).to.have.class('i-amphtml-svc');
   });
 });

@@ -22,7 +22,7 @@ import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpA4A} from '../amp-a4a';
 import {htmlFor} from '../../../../src/static-template';
-import {pushIfNotExist, removeItem} from '../../../../src/utils/array';
+import {pushIfNotExist, removeItem} from '../../../../src/core/types/array';
 import {upgradeOrRegisterElement} from '../../../../src/service/custom-element-registry';
 
 describes.realWin(
@@ -66,7 +66,7 @@ describes.realWin(
         <amp-a4a layout="fixed" width="100" height="100"></amp-a4a>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       impl = await element.getImpl();
     });
 

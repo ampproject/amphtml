@@ -1,8 +1,8 @@
 ## Debugging AMP E2E tests
 
 ```sh
-node --inspect-brk $(which gulp) e2e
-node --inspect-brk $(which gulp) e2e --nobuild # ... etc
+node --inspect-brk $(which amp) e2e
+node --inspect-brk $(which amp) e2e --nobuild # ... etc
 ```
 
 Include any flags after `e2e` like normal.

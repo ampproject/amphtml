@@ -15,9 +15,9 @@
  */
 
 import {Services} from '../services';
-import {devAssert, user, userAssert} from '../log';
-import {dict, map} from './object';
-import {fromIterator} from './array';
+import {devAssert, userAssert} from '../core/assert';
+import {dict, isObject, map} from '../core/types/object';
+import {fromIterator, isArray} from '../core/types/array';
 import {
   getCorsUrl,
   getWinOrigin,
@@ -26,7 +26,8 @@ import {
   serializeQueryString,
 } from '../url';
 import {getMode} from '../mode';
-import {isArray, isObject} from '../types';
+import {user} from '../log';
+
 import {isExperimentOn} from '../experiments';
 import {isFormDataWrapper} from '../form-data-wrapper';
 
@@ -79,7 +80,7 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  *     cloneable request.
  */
 export function toStructuredCloneable(input, init) {
-  const newInit = {...init};
+  const newInit = /** @type {!FetchInitDef} */ ({...init});
   if (isFormDataWrapper(init.body)) {
     const wrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
@@ -157,9 +158,8 @@ export function fromStructuredCloneable(response, responseType) {
       /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
-        lowercasedHeaders[String(headerName).toLowerCase()] = String(
-          headerValue
-        );
+        lowercasedHeaders[String(headerName).toLowerCase()] =
+          String(headerValue);
       });
     }
     if (init.status) {
@@ -382,10 +382,10 @@ export function assertSuccess(response) {
 
     const {status} = response;
     const err = user().createError(`HTTP error ${status}`);
-    err.retriable = isRetriable(status);
+    err['retriable'] = isRetriable(status);
     // TODO(@jridgewell, #9448): Callers who need the response should
     // skip processing.
-    err.response = response;
+    err['response'] = response;
     throw err;
   });
 }

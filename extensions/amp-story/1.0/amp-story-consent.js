@@ -19,7 +19,7 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -27,19 +27,22 @@ import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
   childElementByTag,
+  closest,
   closestAncestorElementBySelector,
   isJsonScriptTag,
+  matches,
 } from '../../../src/dom';
 import {computedStyle, setImportantStyles} from '../../../src/style';
 import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,
   getTextColorForRGB,
+  triggerClickFromLightDom,
 } from './utils';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {isArray} from '../../../src/types';
-import {parseJson} from '../../../src/json';
+import {dict} from './../../../src/core/types/object';
+import {isArray} from '../../../src/core/types';
+import {parseJson} from '../../../src/core/types/object/json';
 import {renderAsElement} from './simple-template';
 
 /** @const {string} */
@@ -184,8 +187,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(this.element);
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.actions_ = null;
 
     /** @private {?Object} */
     this.consentConfig_ = null;
@@ -202,6 +205,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.actions_ = Services.actionServiceForDoc(this.element);
+
     this.assertAndParseConfig_();
 
     const storyEl = dev().assertElement(
@@ -281,9 +286,17 @@ export class AmpStoryConsent extends AMP.BaseElement {
    * @private
    */
   onClick_(event) {
-    if (event.target && event.target.hasAttribute('on')) {
+    if (!event.target) {
+      return;
+    }
+    if (event.target.hasAttribute('on')) {
       const targetEl = dev().assertElement(event.target);
       this.actions_.trigger(targetEl, 'tap', event, ActionTrust.HIGH);
+    }
+    const anchorClicked = closest(event.target, (e) => matches(e, 'a[href]'));
+    if (anchorClicked) {
+      triggerClickFromLightDom(anchorClicked, this.element);
+      event.preventDefault();
     }
   }
 
@@ -404,7 +417,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
     const geoGroup = this.consentConfig_.promptIfUnknownForGeoGroup;
     if (geoGroup) {
       Services.geoForDocOrNull(this.element).then((geo) => {
-        const matchedGeoGroups = /** @type {!Array<string>} */ (geo.matchedISOCountryGroups);
+        const matchedGeoGroups = /** @type {!Array<string>} */ (
+          geo.matchedISOCountryGroups
+        );
         if (geo && !matchedGeoGroups.includes(geoGroup)) {
           return;
         }

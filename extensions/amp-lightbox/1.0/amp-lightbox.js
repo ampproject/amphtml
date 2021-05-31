@@ -14,80 +14,63 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {CSS as COMPONENT_CSS} from './lightbox.jss';
+import {
+  ActionTrust,
+  DEFAULT_ACTION,
+} from '../../../src/core/constants/action-constants';
+import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
-import {Lightbox} from './lightbox';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {dict} from '../../../src/utils/object';
+import {Services} from '../../../src/services';
+import {createCustomEvent} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
+import {toWin} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
 
 /** @extends {PreactBaseElement<LightboxDef.Api>} */
-class AmpLightbox extends PreactBaseElement {
+class AmpLightbox extends BaseElement {
   /** @override */
   init() {
+    this.registerApiAction(
+      DEFAULT_ACTION,
+      (api) => api.open(),
+      ActionTrust.LOW
+    );
     this.registerApiAction('open', (api) => api.open(), ActionTrust.LOW);
     this.registerApiAction('close', (api) => api.close(), ActionTrust.LOW);
-    this.element.setAttribute('class', 'amp-lightbox');
-    return dict({
-      'initialOpen': false,
-      'onBeforeOpen': this.beforeOpen_.bind(this),
-      'onAfterClose': this.afterClose_.bind(this),
-    });
+
+    return super.init();
   }
 
-  /**
-   * Setting hidden to false
-   * @private
-   */
-  beforeOpen_() {
-    toggle(this.element, true);
-  }
+  /** @override */
+  triggerEvent(element, eventName, detail) {
+    const event = createCustomEvent(
+      toWin(element.ownerDocument.defaultView),
+      `amp-lightbox.${eventName}`,
+      detail
+    );
+    Services.actionServiceForDoc(element).trigger(
+      element,
+      eventName,
+      event,
+      ActionTrust.HIGH
+    );
 
-  /**
-   * Setting hidden to true
-   * @private
-   */
-  afterClose_() {
-    toggle(this.element, false);
+    super.triggerEvent(element, eventName, detail);
   }
 
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-lightbox-bento'),
-      'expected amp-lightbox-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-lightbox'),
+      'expected global "bento" or specific "bento-lightbox" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
   }
 }
-
-/** @override */
-AmpLightbox['Component'] = Lightbox;
-
-/** @override */
-AmpLightbox['props'] = {
-  'animateIn': {attr: 'animate-in'},
-  'scrollable': {attr: 'scrollable', type: 'boolean'},
-  'id': {attr: 'id'},
-  'initialOpen': {attr: 'initial-open', type: 'boolean'},
-  'closeButtonAriaLabel': {attr: 'data-close-button-aria-label'},
-  'enableAnimation': {attr: 'enable-animation', type: 'boolean'},
-};
-
-/** @override */
-AmpLightbox['passthrough'] = true;
-
-/** @override */
-AmpLightbox['layoutSizeDefined'] = true;
-
-/** @override */
-AmpLightbox['shadowCss'] = COMPONENT_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpLightbox, CSS);

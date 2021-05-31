@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {isAmp4Email} from '../../../src/format';
 import {
@@ -28,6 +28,11 @@ const _HAS_CONTROL_CLASS = 'i-amphtml-carousel-has-controls';
  * @abstract
  */
 export class BaseCarousel extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -133,11 +138,6 @@ export class BaseCarousel extends AMP.BaseElement {
     });
     this.updateButtonTitles();
     this.element.appendChild(this.nextButton_);
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

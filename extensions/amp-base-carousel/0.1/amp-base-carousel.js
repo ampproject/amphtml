@@ -15,12 +15,12 @@
  */
 
 import {ActionSource} from './action-source';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from '../../../build/amp-base-carousel-0.1.css';
 import {Carousel} from './carousel.js';
 import {CarouselEvents} from './carousel-events';
 import {ChildLayoutManager} from './child-layout-manager';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
@@ -28,7 +28,7 @@ import {
 import {Services} from '../../../src/services';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   dispatchCustomEvent,
   isRTL,
@@ -38,7 +38,7 @@ import {
 } from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /**
  * @enum {number}
@@ -58,6 +58,11 @@ function isSizer(el) {
 }
 
 class AmpCarousel extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -158,11 +163,6 @@ class AmpCarousel extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */
@@ -450,7 +450,7 @@ class AmpCarousel extends AMP.BaseElement {
       'goToSlide',
       (actionInvocation) => {
         const {args, trust} = actionInvocation;
-        this.carousel_.goToSlide(args['index'] ?? -1, {
+        this.carousel_.goToSlide(Number(args['index'] ?? -1), {
           actionSource: this.getActionSource_(trust),
         });
       },
@@ -540,14 +540,17 @@ class AmpCarousel extends AMP.BaseElement {
     const index = this.carousel_.getCurrentIndex();
     const loop = this.carousel_.isLooping();
     const visibleCount = this.carousel_.getVisibleCount();
+    const isAtEnd = this.carousel_.isAtEnd();
+    const isAtStart = this.carousel_.isAtStart();
     // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
     // instead.
     iterateCursor(this.prevArrowSlot_.children, (child) => {
-      const disabled = !loop && index === 0;
+      const disabled = (!loop && index === 0) || isAtStart;
       toggleAttribute(child, 'disabled', disabled);
     });
     iterateCursor(this.nextArrowSlot_.children, (child) => {
-      const disabled = !loop && index >= this.slides_.length - visibleCount;
+      const disabled =
+        (!loop && index >= this.slides_.length - visibleCount) || isAtEnd;
       toggleAttribute(child, 'disabled', disabled);
     });
     toggleAttribute(

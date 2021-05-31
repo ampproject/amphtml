@@ -19,7 +19,7 @@ FAIL
 |    This checks that "latest" versions of extensions are not valid.
 |  -->
 |  <!doctype html>
-|  <html ⚡4email>
+|  <html ⚡4email data-css-strict>
 |  <head>
 |    <meta charset="utf-8">
 |    <style amp4email-boilerplate>body{visibility:hidden}</style>
@@ -29,7 +29,7 @@ FAIL
 amp4email_feature_tests/no_latest_extensions.html:26:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-accordion] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-accordion-latest.js'. (see https://amp.dev/documentation/components/amp-accordion)
 |    <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-latest.js"></script>
 >>   ^~~~~~~~~
-amp4email_feature_tests/no_latest_extensions.html:27:2 The attribute 'src' in tag 'amp-anim extension .js script (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-anim-latest.js'. (see https://amp.dev/documentation/components/amp-anim)
+amp4email_feature_tests/no_latest_extensions.html:27:2 The attribute 'src' in tag 'amp-anim extension script (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-anim-latest.js'. (see https://amp.dev/documentation/components/amp-anim)
 |    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-latest.js"></script>
 >>   ^~~~~~~~~
 amp4email_feature_tests/no_latest_extensions.html:28:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-bind] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-bind-latest.js'. (see https://amp.dev/documentation/components/amp-bind)

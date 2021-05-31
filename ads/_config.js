@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonConfiguration} from '../src/json';
+import {jsonConfiguration} from '../src/core/types/object/json';
 
 /**
  * @typedef {{
@@ -24,7 +24,6 @@ import {jsonConfiguration} from '../src/json';
  *   clientIdScope: (string|undefined),
  *   clientIdCookieName: (string|undefined),
  *   consentHandlingOverride: (boolean|undefined),
- *   remoteHTMLDisabled: (boolean|undefined),
  *   fullWidthHeightRatio: (number|undefined),
  * }}
  */
@@ -150,6 +149,11 @@ const adConfig = jsonConfiguration({
     preconnect: ['https://inv-nets.admixer.net', 'https://cdn.admixer.net'],
   },
 
+  'adnuntius': {
+    prefetch: 'https://cdn.adnuntius.com/adn.js',
+    renderStartImplemented: true,
+  },
+
   'adocean': {
     consentHandlingOverride: true,
   },
@@ -168,6 +172,11 @@ const adConfig = jsonConfiguration({
   'adpon': {
     prefetch: 'https://ad.adpon.jp/amp.js',
     clientIdScope: 'AMP_ECID_ADPON',
+  },
+
+  'adpushup': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn.adpushup.com',
   },
 
   'adreactor': {},
@@ -208,6 +217,11 @@ const adConfig = jsonConfiguration({
   'adtech': {
     prefetch: 'https://s.aolcdn.com/os/ads/adsWrapper3.js',
     preconnect: ['https://mads.at.atwola.com', 'https://aka-cdn.adtechus.com'],
+  },
+
+  'adtelligent': {
+    preconnect: ['https://s.adtelligent.com'],
+    renderStartImplemented: true,
   },
 
   'adthrive': {
@@ -409,6 +423,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'digiteka': {
+    renderStartImplemented: true,
+  },
+
   'directadvert': {
     renderStartImplemented: true,
   },
@@ -436,11 +454,6 @@ const adConfig = jsonConfiguration({
       'https://www.eadv.it/track/esr.min.js',
       'https://www.eadv.it/track/ead.min.js',
     ],
-  },
-
-  'eas': {
-    prefetch: 'https://amp.emediate.eu/amp.v0.js',
-    renderStartImplemented: true,
   },
 
   'empower': {
@@ -480,10 +493,20 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'feedad': {
+    clientIdScope: '__fa_amp',
+    prefetch: 'https://web.feedad.com/sdk/feedad-async.js',
+    renderStartImplemented: true,
+    fullWidthHeightRatio: 16 / 9,
+    consentHandlingOverride: true,
+  },
+
   'felmat': {
     prefetch: 'https://t.felmat.net/js/fmamp.js',
     renderStartImplemented: true,
   },
+
+  'finative': {},
 
   'firstimpression': {
     prefetch: 'https://ecdn.firstimpression.io/static/js/fiamp.js',
@@ -495,9 +518,10 @@ const adConfig = jsonConfiguration({
   'flite': {},
 
   'fluct': {
+    prefetch: ['https://pdn.adingo.jp/p.js'],
     preconnect: [
       'https://cdn-fluct.sh.adingo.jp',
-      'https://s.sh.adingo.jp',
+      'https://sh.adingo.jp',
       'https://i.adingo.jp',
     ],
   },
@@ -612,6 +636,8 @@ const adConfig = jsonConfiguration({
 
   'kargo': {},
 
+  'ketshwa': {},
+
   'kiosked': {
     renderStartImplemented: true,
   },
@@ -678,8 +704,20 @@ const adConfig = jsonConfiguration({
   },
 
   'marfeel': {
-    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
-    preconnect: 'https://live.mrf.io',
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: [
+      'https://live.mrf.io',
+      'https://tpc.googlesyndication.com',
+      'https://fastlane.rubiconproject.com',
+      'https://htlb.casalemedia.com',
+      'https://prg.smartadserver.com',
+      'https://ib.adnxs.com',
+      'https://bidder.criteo.com',
+      'https://marfeel-d.openx.net',
+      'https://ice.360yield.com',
+      'https://mbid.marfeelrev.com',
+      'https://adservice.google.com',
+    ],
     consentHandlingOverride: true,
   },
 
@@ -760,6 +798,16 @@ const adConfig = jsonConfiguration({
 
   'my6sense': {
     renderStartImplemented: true,
+  },
+
+  'myfinance': {
+    preconnect: [
+      'https://a.myfidevs.io',
+      'https://static.myfinance.com',
+      'https://www.myfinance.com',
+    ],
+    renderStartImplemented: true,
+    clientIdScope: 'AMP_ECID_GOOGLE',
   },
 
   'myoffrz': {
@@ -908,13 +956,18 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'pulse': {
+    prefetch: 'https://static.pulse.mail.ru/pulse-widget-amp.js',
+    renderStartImplemented: true,
+  },
+
   'pulsepoint': {
     prefetch: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
     preconnect: 'https://tag.contextweb.com',
   },
 
   'purch': {
-    prefetch: 'https://ads.servebom.com/serve/creative_amp.js',
+    prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
     renderStartImplemented: true,
   },
 
@@ -930,6 +983,11 @@ const adConfig = jsonConfiguration({
   },
 
   'rbinfox': {
+    renderStartImplemented: true,
+  },
+
+  'rcmwidget': {
+    prefetch: 'https://rcmjs.rambler.ru/static/rcmw/rcmw-amp.js',
     renderStartImplemented: true,
   },
 
@@ -1202,6 +1260,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'verizonmedia': {
+    prefetch: 'https://jac.yahoosandbox.com/amp/jac.js',
+    preconnect: ['https://jill.fc.yahoo.com'],
+    renderStartImplemented: true,
+  },
+
   'videointelligence': {
     preconnect: 'https://s.vi-serve.com',
     renderStartImplemented: true,
@@ -1294,6 +1358,8 @@ const adConfig = jsonConfiguration({
       'https://rfetch.yektanet.net',
       'https://scrapper.yektanet.com',
       'https://ua.yektanet.com',
+      'https://bfetch.yektanet.com',
+      'https://mostatil.cdn.yektanet.com',
     ],
     renderStartImplemented: true,
   },

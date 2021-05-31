@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
@@ -73,8 +73,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /** @const {function(!Element)} */
     this.boundRendered_ = this.rendered_.bind(this);
@@ -103,7 +103,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     /** @private {string} */
     this.biggestUnit_ = '';
 
-    /** @private {!Object|null} */
+    /** @private {?Object} */
     this.localeWordList_ = null;
 
     /** @private {?number} */
@@ -115,6 +115,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
+
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
 
@@ -154,7 +156,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
       this.element.getAttribute('biggest-unit') || DEFAULT_BIGGEST_UNIT
     ).toUpperCase();
 
-    /** @private {!Object|null} */
+    /** @private {?Object} */
     this.localeWordList_ = this.getLocaleWord_(this.locale_);
 
     /** @private {boolean} */

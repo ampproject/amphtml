@@ -23,11 +23,9 @@ import {
   mockWindowInterface,
 } from '../../../../testing/test-helper';
 import {Services} from '../../../../src/services';
-import {hasOwn} from '../../../../src/utils/object';
+import {hasOwn} from '../../../../src/core/types/object';
 import {macroTask} from '../../../../testing/yield';
-
-/* global require: false */
-const VENDOR_REQUESTS = require('./vendor-requests.json');
+import VENDOR_REQUESTS from './vendor-requests.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 
 describes.realWin(
   'amp-analytics',
@@ -86,7 +84,7 @@ describes.realWin(
             const urlReplacements = Services.urlReplacementsForDoc(
               doc.documentElement
             );
-            window.sandbox
+            env.sandbox
               .stub(urlReplacements.getVariableSource(), 'get')
               .callsFake(function (name) {
                 expect(this.replacements_).to.have.property(name);
@@ -95,7 +93,7 @@ describes.realWin(
                 };
               });
 
-            window.sandbox
+            env.sandbox
               .stub(ExpansionOptions.prototype, 'getVar')
               .callsFake(function (name) {
                 let val = this.vars[name];
@@ -114,7 +112,7 @@ describes.realWin(
             // Have to get service after analytics element is created
             const variableService = variableServiceForDoc(doc);
 
-            window.sandbox
+            env.sandbox
               .stub(variableService, 'getMacros')
               .callsFake(function () {
                 // Add all the macros in amp-analytics
@@ -137,7 +135,7 @@ describes.realWin(
                 'Request for ' +
                   vendor +
                   ' not found. Please make sure you run ' +
-                  '"gulp vendor-configs" or build amp-analytics ' +
+                  '"amp analytics-vendor-configs" or build amp-analytics ' +
                   'before running the test'
               );
             }

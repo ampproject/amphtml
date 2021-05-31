@@ -23,24 +23,24 @@ const dotsReporter = require('./mocha-dots-reporter');
 const fs = require('fs');
 const glob = require('glob');
 const http = require('http');
-const log = require('fancy-log');
 const Mocha = require('mocha');
 const path = require('path');
 const {
-  buildRuntime,
-  getFilesFromArgv,
-  installPackages,
-} = require('../../common/utils');
-const {cyan} = require('ansi-colors');
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../../common/ctrlcHandler');
+const {buildRuntime, getFilesFromArgv} = require('../../common/utils');
+const {cyan} = require('../../common/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
-const {isTravisBuild} = require('../../common/travis');
+const {isCiBuild, isCircleciBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestStarted} = require('../report-test-status');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 const SLOW_TEST_THRESHOLD_MS = 2500;
-const TEST_RETRIES = isTravisBuild() ? 2 : 0;
+const TEST_RETRIES = isCiBuild() ? 2 : 0;
 
 const COV_DOWNLOAD_PATH = '/coverage/download';
 const COV_OUTPUT_DIR = './test/coverage-e2e';
@@ -48,17 +48,13 @@ const COV_OUTPUT_HTML = path.resolve(COV_OUTPUT_DIR, 'lcov-report/index.html');
 
 /**
  * Set up the e2e testing environment.
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function setUpTesting_() {
-  // install e2e-specific modules
-  installPackages(__dirname);
-
   require('@babel/register')({caller: {name: 'test'}});
   const {describes} = require('./helper');
   describes.configure({
     browsers: argv.browsers,
-    engine: argv.engine,
     headless: argv.headless,
   });
 
@@ -83,7 +79,7 @@ function createMocha_() {
   let reporter;
   if (argv.testnames || argv.watch) {
     reporter = '';
-  } else if (argv.report) {
+  } else if (argv.report || isCircleciBuild()) {
     reporter = ciReporter;
   } else {
     reporter = dotsReporter;
@@ -96,6 +92,11 @@ function createMocha_() {
     reporter,
     retries: TEST_RETRIES,
     fullStackTrace: true,
+    reporterOptions: isCiBuild()
+      ? {
+          mochaFile: 'result-reports/e2e.xml',
+        }
+      : null,
   });
 }
 
@@ -112,6 +113,7 @@ function addMochaFile_(mocha, file) {
 /**
  * Fetch aggregated coverage data from server.
  * @param {string} outDir relative path to coverage files directory.
+ * @return {Promise<void>}
  */
 async function fetchCoverage_(outDir) {
   // Note: We could access the coverage UI directly through the server started
@@ -125,30 +127,36 @@ async function fetchCoverage_(outDir) {
 
   const zipFilename = path.join(outDir, 'coverage.zip');
   const zipFile = fs.createWriteStream(zipFilename);
-  await new Promise((resolve, reject) => {
-    http
-      .get(
-        {
-          host: HOST,
-          port: PORT,
-          path: COV_DOWNLOAD_PATH,
-        },
-        (response) => {
-          response.pipe(zipFile);
-          zipFile.on('finish', () => zipFile.close(resolve));
-        }
-      )
-      .on('error', (err) => {
-        fs.unlinkSync(zipFilename);
-        reject(err);
-      });
-  });
+
+  await /** @type {Promise<void>} */ (
+    new Promise((resolve, reject) => {
+      http
+        .get(
+          {
+            host: HOST,
+            port: PORT,
+            path: COV_DOWNLOAD_PATH,
+          },
+          (response) => {
+            response.pipe(zipFile);
+            zipFile.on('finish', () => {
+              zipFile.close();
+              resolve();
+            });
+          }
+        )
+        .on('error', (err) => {
+          fs.unlinkSync(zipFilename);
+          reject(err);
+        });
+    })
+  );
   execOrDie(`unzip -o ${zipFilename} -d ${outDir}`);
 }
 
 /**
  * Runs e2e tests on all files under test.
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function runTests_() {
   const mocha = createMocha_();
@@ -163,10 +171,9 @@ async function runTests_() {
     });
   }
 
-  log('Running tests...');
   await reportTestStarted();
 
-  // return promise to gulp that resolves when there's an error.
+  // return promise to amp that resolves when there's an error.
   return new Promise((resolve) => {
     mocha.run(async (failures) => {
       if (argv.coverage) {
@@ -182,7 +189,7 @@ async function runTests_() {
 
 /**
  * Watches files a under test, running affected e2e tests on changes.
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function runWatch_() {
   const filesToWatch = argv.files ? getFilesFromArgv() : config.e2eTestPaths;
@@ -190,23 +197,23 @@ async function runWatch_() {
   log('Watching', cyan(filesToWatch), 'for changes...');
   watch(filesToWatch).on('change', (file) => {
     log('Detected a change in', cyan(file));
-    log('Running tests...');
     const mocha = createMocha_();
     addMochaFile_(mocha, file);
     mocha.run();
   });
 
-  // return non-resolving promise to gulp.
-  return new Promise();
+  // return non-resolving promise to amp.
+  return new Promise(() => {});
 }
 
 /**
  * Entry-point to run e2e tests.
- * @return {!Promise}
  */
 async function e2e() {
+  const handlerProcess = createCtrlcHandler('e2e');
   await setUpTesting_();
-  return argv.watch ? runWatch_() : runTests_();
+  argv.watch ? await runWatch_() : await runTests_();
+  exitCtrlcHandler(handlerProcess);
 }
 
 module.exports = {
@@ -216,23 +223,22 @@ module.exports = {
 e2e.description = 'Runs e2e tests';
 e2e.flags = {
   'browsers':
-    '  Run only the specified browser tests. Options are ' +
+    'Run only the specified browser tests. Options are ' +
     '`chrome`, `firefox`, `safari`.',
   'config':
-    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
-  'core_runtime_only': '  Builds only the core runtime.',
-  'nobuild':
-    '  Skips building the runtime via `gulp (build|dist) --fortesting`',
-  'extensions': '  Builds only the listed extensions.',
-  'compiled': '  Runs tests against minified JS',
-  'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
-  'testnames': '  Lists the name of each test being run',
-  'watch': '  Watches for changes in files, runs corresponding test(s)',
-  'engine':
-    '  The automation engine that orchestrates the browser. ' +
-    'Options are `puppeteer` or `selenium`. Default: `selenium`',
-  'headless': '  Runs the browser in headless mode',
-  'debug': '  Prints debugging information while running tests',
-  'report': '  Write test result report to a local file',
-  'coverage': '  Collect coverage data from instrumented code',
+    'Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
+  'core_runtime_only': 'Builds only the core runtime.',
+  'nobuild': 'Skips building the runtime via `amp (build|dist) --fortesting`',
+  'define_experiment_constant':
+    'Transforms tests with the EXPERIMENT constant set to true',
+  'experiment': 'Experiment being tested (used for status reporting)',
+  'extensions': 'Builds only the listed extensions.',
+  'compiled': 'Runs tests against minified JS',
+  'files': 'Run tests found in a specific path (ex: **/test-e2e/*.js)',
+  'testnames': 'Lists the name of each test being run',
+  'watch': 'Watches for changes in files, runs corresponding test(s)',
+  'headless': 'Runs the browser in headless mode',
+  'debug': 'Prints debugging information while running tests',
+  'report': 'Write test result report to a local file',
+  'coverage': 'Collect coverage data from instrumented code',
 };

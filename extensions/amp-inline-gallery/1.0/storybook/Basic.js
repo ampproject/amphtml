@@ -15,17 +15,16 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
-import {InlineGallery} from '../inline-gallery';
+import {BaseCarousel} from '../../../amp-base-carousel/1.0/component';
+import {InlineGallery} from '../component';
 import {Pagination} from '../pagination';
 import {Thumbnails} from '../thumbnails';
-import {boolean, number, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
+import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'InlineGallery',
   component: InlineGallery,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 export const _default = () => {
@@ -34,24 +33,38 @@ export const _default = () => {
   const paginationHeight = number('top indicator height', 20);
   const topInset = boolean('top indicator inset?', false);
   const bottomInset = boolean('bottom indicator inset?', false);
-  const autoAdvance = boolean('auto advance', true);
+  const autoAdvance = boolean('auto advance', false);
   const autoAdvanceCount = number('auto advance count', 1);
   const autoAdvanceInterval = number('auto advance interval', 1000);
   const autoAdvanceLoops = number('auto advance loops', 3);
   const thumbnailHeight = number('thumbnail height', 50);
   const loop = boolean('thumbnail loop', false);
   const aspectRatio = number('thumbnail aspect ratio (w/h)', 3 / 2);
+  const orientation = select(
+    'orientation',
+    ['horizontal', 'vertical'],
+    'vertical'
+  );
 
   return (
     <>
       <InlineGallery style={{width}}>
-        <Pagination inset={topInset} style={{height: paginationHeight}} />
+        <Pagination style={{height: paginationHeight}} inset={topInset} />
+        <Thumbnails
+          aspectRatio={aspectRatio}
+          loop={loop}
+          style={{height: thumbnailHeight}}
+        />
+        <br />
+        <Thumbnails />
+        <br />
         <BaseCarousel
           style={{height}}
           autoAdvanceCount={autoAdvanceCount}
           autoAdvanceInterval={autoAdvanceInterval}
           autoAdvanceLoops={autoAdvanceLoops}
           autoAdvance={autoAdvance}
+          orientation={orientation}
         >
           <img
             src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
@@ -79,13 +92,6 @@ export const _default = () => {
           />
         </BaseCarousel>
         <Pagination inset={bottomInset} />
-        <Thumbnails
-          aspectRatio={aspectRatio}
-          loop={loop}
-          style={{height: thumbnailHeight}}
-        />
-        <br />
-        <Thumbnails />
       </InlineGallery>
       Content below carousel
     </>

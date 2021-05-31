@@ -15,7 +15,7 @@
  */
 
 import * as IniLoad from '../../../src/ini-load';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom.js';
 import {getA4AId, registerIniLoadListener} from '../../../src/inabox/utils';

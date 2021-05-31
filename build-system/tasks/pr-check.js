@@ -17,121 +17,130 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
+  buildTargetsInclude,
+  determineBuildTargets,
+  Targets,
+} = require('../pr-check/build-targets');
+const {
   printChangeSummary,
   startTimer,
   stopTimer,
-  stopTimedJob,
   timedExec,
 } = require('../pr-check/utils');
-const {determineBuildTargets} = require('../pr-check/build-targets');
-const {runNpmChecks} = require('../pr-check/npm-checks');
+const {runNpmChecks} = require('../common/npm-checks');
+const {setLoggingPrefix} = require('../common/logging');
 
-const FILENAME = 'pr-check.js';
+const jobName = 'pr-check.js';
 
 /**
  * This file runs tests against the local workspace to mimic the CI build as
  * closely as possible.
- * @param {Function} cb
  */
-async function prCheck(cb) {
-  const failTask = () => {
-    stopTimer(FILENAME, FILENAME, startTime);
-    const err = new Error('Local PR check failed. See logs above.');
-    err.showStack = false;
-    cb(err);
-  };
-
+async function prCheck() {
   const runCheck = (cmd) => {
-    const {status} = timedExec(cmd, FILENAME);
+    const {status} = timedExec(cmd);
     if (status != 0) {
-      failTask();
+      stopTimer(jobName, startTime);
+      throw new Error('Local PR check failed. See logs above.');
     }
   };
 
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
+  runNpmChecks();
+  printChangeSummary();
+  determineBuildTargets();
+
+  if (buildTargetsInclude(Targets.PRESUBMIT)) {
+    runCheck('amp presubmit');
   }
 
-  printChangeSummary(FILENAME);
-  const buildTargets = determineBuildTargets(FILENAME);
-  runCheck('gulp lint --local_changes');
-  runCheck('gulp prettify --local_changes');
-  runCheck('gulp presubmit');
-  runCheck('gulp check-exact-versions');
-
-  if (buildTargets.has('AVA')) {
-    runCheck('gulp ava');
+  if (buildTargetsInclude(Targets.INVALID_WHITESPACES)) {
+    runCheck('amp check-invalid-whitespaces --local_changes');
   }
 
-  if (buildTargets.has('BABEL_PLUGIN')) {
-    runCheck('gulp babel-plugin-tests');
+  if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
+    runCheck('amp validate-html-fixtures --local_changes');
   }
 
-  if (buildTargets.has('CACHES_JSON')) {
-    runCheck('gulp caches-json');
+  if (buildTargetsInclude(Targets.LINT)) {
+    runCheck('amp lint --local_changes');
   }
 
-  if (buildTargets.has('DOCS')) {
-    runCheck('gulp check-links --local_changes');
+  if (buildTargetsInclude(Targets.PRETTIFY)) {
+    runCheck('amp prettify --local_changes');
   }
 
-  if (buildTargets.has('DEV_DASHBOARD')) {
-    runCheck('gulp dev-dashboard-tests');
+  if (buildTargetsInclude(Targets.AVA)) {
+    runCheck('amp ava');
   }
 
-  if (buildTargets.has('OWNERS')) {
-    runCheck('gulp check-owners');
+  if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
+    runCheck('amp babel-plugin-tests');
   }
 
-  if (buildTargets.has('RENOVATE_CONFIG')) {
-    runCheck('gulp check-renovate-config');
+  if (buildTargetsInclude(Targets.CACHES_JSON)) {
+    runCheck('amp caches-json');
   }
 
-  if (buildTargets.has('SERVER')) {
-    runCheck('gulp server-tests');
+  if (buildTargetsInclude(Targets.DOCS)) {
+    runCheck('amp check-links --local_changes');
   }
 
-  if (buildTargets.has('RUNTIME')) {
-    runCheck('gulp dep-check');
-    runCheck('gulp check-types');
-    runCheck('gulp check-sourcemaps');
+  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
+    runCheck('amp dev-dashboard-tests');
   }
 
-  if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-    runCheck('gulp unit --local_changes --headless');
+  if (buildTargetsInclude(Targets.OWNERS)) {
+    runCheck('amp check-owners');
   }
 
-  if (
-    buildTargets.has('RUNTIME') ||
-    buildTargets.has('FLAG_CONFIG') ||
-    buildTargets.has('INTEGRATION_TEST')
-  ) {
+  if (buildTargetsInclude(Targets.PACKAGE_UPGRADE)) {
+    runCheck('amp check-exact-versions');
+  }
+
+  if (buildTargetsInclude(Targets.RENOVATE_CONFIG)) {
+    runCheck('amp check-renovate-config');
+  }
+
+  if (buildTargetsInclude(Targets.SERVER)) {
+    runCheck('amp server-tests');
+  }
+
+  if (buildTargetsInclude(Targets.RUNTIME)) {
+    runCheck('amp dep-check');
+    runCheck('amp check-types');
+    runCheck('amp check-sourcemaps');
+  }
+
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
+    runCheck('amp unit --local_changes --headless');
+  }
+
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     if (!argv.nobuild) {
-      runCheck('gulp clean');
-      runCheck('gulp dist --fortesting');
+      runCheck('amp clean');
+      runCheck('amp dist --fortesting');
     }
-    runCheck('gulp integration --nobuild --compiled --headless');
+    runCheck('amp integration --nobuild --compiled --headless');
   }
 
-  if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
-    runCheck('gulp validator');
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
+    runCheck('amp validator');
   }
 
-  if (buildTargets.has('VALIDATOR_WEBUI')) {
-    runCheck('gulp validator-webui');
+  if (buildTargetsInclude(Targets.VALIDATOR_WEBUI)) {
+    runCheck('amp validator-webui');
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 module.exports = {
   prCheck,
 };
 
-prCheck.description =
-  'Runs a subset of the Travis CI checks against local changes.';
+prCheck.description = 'Runs a subset of the CI checks against local changes.';
 prCheck.flags = {
-  'nobuild': '  Skips building the runtime via `gulp dist`.',
+  'nobuild': 'Skips building the runtime via `amp dist`.',
 };

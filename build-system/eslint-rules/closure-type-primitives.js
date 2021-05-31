@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const doctrine = require('doctrine');
+const doctrine = require('@jridgewell/doctrine');
 const traverse = require('traverse');
 
 /** @typedef {!Object} */
@@ -40,7 +40,9 @@ module.exports = function (context) {
       fixable: 'code',
     },
     Program: function () {
-      const comments = /** @type {!Array<!EslintNodeDef>} */ (sourceCode.getAllComments());
+      const comments = /** @type {!Array<!EslintNodeDef>} */ (
+        sourceCode.getAllComments()
+      );
       comments
         .map((node) => parseClosureComments(context, node))
         .forEach((comment) => checkClosureComments(context, comment));

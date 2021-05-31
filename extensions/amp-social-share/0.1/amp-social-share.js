@@ -15,18 +15,24 @@
  */
 
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
-import {addParamsToUrl, parseQueryString} from '../../../src/url';
+import {addParamsToUrl} from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-social-share';
 
 class AmpSocialShare extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -51,11 +57,6 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported() {
-    return true;
-  }
-
-  /** @override */
-  prerenderAllowed() {
     return true;
   }
 
@@ -200,7 +201,9 @@ class AmpSocialShare extends AMP.BaseElement {
       devAssert(navigator.share);
       const dataStr = href.substr(href.indexOf('?'));
       const data = parseQueryString(dataStr);
-      navigator.share(data).catch((e) => {
+      // Spreading data into an Object since Chrome uses the Object prototype.
+      // TODO:(crbug.com/1123689): Remove this workaround once WebKit fix is released.
+      navigator.share({...data}).catch((e) => {
         user().warn(TAG, e.message, dataStr);
       });
     } else {

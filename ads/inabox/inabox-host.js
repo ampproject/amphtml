@@ -22,7 +22,7 @@
 import {InaboxMessagingHost} from './inabox-messaging-host';
 import {dev, initLogConstructor, setReportError, user} from '../../src/log';
 import {getData} from '../../src/event-helper';
-import {reportError} from '../../src/error';
+import {reportError} from '../../src/error-reporting';
 
 /** @const {string} */
 const TAG = 'inabox-host';
@@ -69,13 +69,15 @@ export class InaboxHost {
       win.AMP[INABOX_UNREGISTER_IFRAME] = host.unregisterIframe.bind(host);
     }
     const queuedMsgs = win[PENDING_MESSAGES];
-    const processMessageFn = /** @type {function(Event)} */ ((evt) => {
-      try {
-        host.processMessage(evt);
-      } catch (err) {
-        dev().error(TAG, 'Error processing inabox message', evt, err);
+    const processMessageFn = /** @type {function(Event)} */ (
+      (evt) => {
+        try {
+          host.processMessage(evt);
+        } catch (err) {
+          dev().error(TAG, 'Error processing inabox message', evt, err);
+        }
       }
-    });
+    );
     if (queuedMsgs) {
       if (Array.isArray(queuedMsgs)) {
         /** @type {!Array} */ (queuedMsgs).forEach((message) => {

@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {evaluateExpr} from './expr';
 
 /**
@@ -39,7 +39,7 @@ export class LocalSubscriptionPlatformRenderer {
     this.dialog_ = dialog;
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(ampdoc.win);
+    this.templates_ = Services.templatesForDoc(ampdoc);
 
     /** @private @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;

@@ -16,7 +16,7 @@
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-inline-gallery';
 import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {CarouselContextProp} from '../../../amp-base-carousel/1.0/carousel-props';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {setStyles} from '../../../../src/style';
@@ -38,8 +38,8 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-      toggleExperiment(win, 'amp-inline-gallery-bento', true, true);
-      toggleExperiment(win, 'amp-base-carousel-bento', true, true);
+      toggleExperiment(win, 'bento-inline-gallery', true, true);
+      toggleExperiment(win, 'bento-carousel', true, true);
       carousel = createElementWithAttributes(
         win.document,
         'amp-base-carousel',
@@ -74,9 +74,9 @@ describes.realWin(
 
       // Wait until ready.
       win.document.body.appendChild(element);
-      await element.build();
-      await carousel.build();
-      await pagination.build();
+      await element.buildInternal();
+      await carousel.buildInternal();
+      await pagination.buildInternal();
 
       lastContext = null;
       subscribe(element, [CarouselContextProp], (context) => {
@@ -92,8 +92,8 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-inline-gallery-bento', false, true);
-      toggleExperiment(win, 'amp-base-carousel-bento', false, true);
+      toggleExperiment(win, 'bento-inline-gallery', false, true);
+      toggleExperiment(win, 'bento-carousel', false, true);
     });
 
     function newSlide(id) {

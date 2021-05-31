@@ -17,96 +17,8 @@
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {SubscriptionApi} from '../../../src/iframe-helper';
-import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {
-  layoutRectLtwh,
-  moveLayoutRect,
-  rectIntersection,
-} from '../../../src/layout-rect';
-
-/**
- * The structure that defines the rectangle used in intersection observers.
- *
- * @typedef {{
- *   top: number,
- *   bottom: number,
- *   left: number,
- *   right: number,
- *   width: number,
- *   height: number,
- *   x: number,
- *   y: number,
- * }}
- */
-export let DOMRect;
-
-/**
- * Returns the ratio of the smaller box's area to the larger box's area.
- * @param {!../../../src/layout-rect.LayoutRectDef} smaller
- * @param {!../../../src/layout-rect.LayoutRectDef} larger
- * @return {number}
- */
-function intersectionRatio(smaller, larger) {
-  return (smaller.width * smaller.height) / (larger.width * larger.height);
-}
-
-/**
- * Produces a change entry for that should be compatible with
- * IntersectionObserverEntry.
- *
- * Mutates passed in rootBounds to have x and y according to spec.
- *
- * @param {!../../../src/layout-rect.LayoutRectDef} element The element's layout rectangle
- * @param {?../../../src/layout-rect.LayoutRectDef} owner The owner's layout rect, if
- *     there is an owner.
- * @param {!../../../src/layout-rect.LayoutRectDef} viewport The viewport's layout rect.
- * @return {!IntersectionObserverEntry} A change entry.
- * @private
- * @visibleForTesting
- */
-export function getIntersectionChangeEntry(element, owner, viewport) {
-  devAssert(
-    element.width >= 0 && element.height >= 0,
-    'Negative dimensions in element.'
-  );
-  // Building an IntersectionObserverEntry.
-
-  let intersectionRect = element;
-  if (owner) {
-    intersectionRect =
-      rectIntersection(owner, element) ||
-      // No intersection.
-      layoutRectLtwh(0, 0, 0, 0);
-  }
-  intersectionRect =
-    rectIntersection(viewport, intersectionRect) ||
-    // No intersection.
-    layoutRectLtwh(0, 0, 0, 0);
-
-  // The element is relative to (0, 0), while the viewport moves. So, we must
-  // adjust.
-  const boundingClientRect = moveLayoutRect(
-    element,
-    -viewport.left,
-    -viewport.top
-  );
-  intersectionRect = moveLayoutRect(
-    intersectionRect,
-    -viewport.left,
-    -viewport.top
-  );
-  // Now, move the viewport to (0, 0)
-  const rootBounds = moveLayoutRect(viewport, -viewport.left, -viewport.top);
-
-  return /** @type {!IntersectionObserverEntry} */ ({
-    time: Date.now(),
-    rootBounds,
-    boundingClientRect,
-    intersectionRect,
-    intersectionRatio: intersectionRatio(intersectionRect, element),
-  });
-}
+import {dict} from '../../../src/core/types/object';
+import {intersectionEntryToJson} from '../../../src/utils/intersection';
 
 /**
  * LegacyAdIntersectionObserverHost exists for backward compatibility to support
@@ -145,6 +57,9 @@ export class LegacyAdIntersectionObserverHost {
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
+    /** @private {?IntersectionObserver} */
+    this.fireInOb_ = null;
+
     /** @private {boolean} */
     this.inViewport_ = false;
 
@@ -181,7 +96,11 @@ export class LegacyAdIntersectionObserverHost {
    * Fires element intersection
    */
   fire() {
-    this.sendElementIntersection_();
+    if (!this.fireInOb_) {
+      return;
+    }
+    this.fireInOb_.unobserve(this.baseElement_.element);
+    this.fireInOb_.observe(this.baseElement_.element);
   }
 
   /**
@@ -208,24 +127,33 @@ export class LegacyAdIntersectionObserverHost {
     if (!this.intersectionObserver_) {
       this.intersectionObserver_ = new IntersectionObserver((entries) => {
         const lastEntry = entries[entries.length - 1];
-        this.onViewportCallback_(lastEntry.intersectionRatio != 0);
+        this.onViewportCallback_(lastEntry);
       });
       this.intersectionObserver_.observe(this.baseElement_.element);
+    }
+    if (!this.fireInOb_) {
+      this.fireInOb_ = new IntersectionObserver((entries) => {
+        const lastEntry = entries[entries.length - 1];
+        this.sendElementIntersection_(lastEntry);
+      });
     }
     this.fire();
   }
 
   /**
    * Triggered when the ad either enters or exits the visible viewport.
-   * @param {boolean} inViewport true if the element is in viewport.
+   * @param {!IntersectionObserverEntry} entry handed over by the IntersectionObserver.
    */
-  onViewportCallback_(inViewport) {
+  onViewportCallback_(entry) {
+    const inViewport = entry.intersectionRatio != 0;
     if (this.inViewport_ == inViewport) {
       return;
     }
     this.inViewport_ = inViewport;
+
     // Lets the ad know that it became visible or no longer is.
-    this.fire();
+    this.sendElementIntersection_(entry);
+
     // And update the ad about its position in the viewport while
     // it is visible.
     if (inViewport) {
@@ -247,13 +175,21 @@ export class LegacyAdIntersectionObserverHost {
    * Sends 'intersection' message to ad/iframe with intersection change records
    * if this has been activated and we measured the layout box of the iframe
    * at least once.
+   * @param {!IntersectionObserverEntry} entry - handed over by the IntersectionObserver.
    * @private
    */
-  sendElementIntersection_() {
-    if (!this.intersectionObserver_) {
-      return;
+  sendElementIntersection_(entry) {
+    const change = intersectionEntryToJson(entry);
+    // rootBounds is always null in 3p iframe (e.g. Viewer).
+    // See https://github.com/w3c/IntersectionObserver/issues/79
+    //
+    // Since before using a real InOb we used to provide rootBounds,
+    // we are temporarily continuing to do so now.
+    // TODO: determine if consumers rely on this functionality and remove if not.
+    if (change.rootBounds === null) {
+      change.rootBounds = this.baseElement_.getViewport().getRect();
     }
-    const change = this.baseElement_.element.getIntersectionChangeEntry();
+
     if (
       this.pendingChanges_.length > 0 &&
       this.pendingChanges_[this.pendingChanges_.length - 1].time == change.time
@@ -294,6 +230,10 @@ export class LegacyAdIntersectionObserverHost {
     if (this.intersectionObserver_) {
       this.intersectionObserver_.disconnect();
       this.intersectionObserver_ = null;
+    }
+    if (this.fireInOb_) {
+      this.fireInOb_.disconnect();
+      this.fireInOb_ = null;
     }
     this.timer_.cancel(this.flushTimeout_);
     this.unlistenOnOutViewport_();

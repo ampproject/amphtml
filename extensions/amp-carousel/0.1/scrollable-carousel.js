@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {isLayoutSizeFixed} from '../../../src/layout';
@@ -255,29 +255,29 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   waitForScroll_(startingScrollLeft) {
-    this.scrollTimerId_ = /** @type {number} */ (Services.timerFor(
-      this.win
-    ).delay(() => {
-      // TODO(yuxichen): test out the threshold for identifying fast scrolling
-      if (Math.abs(startingScrollLeft - this.pos_) < 30) {
-        dev().fine(
-          TAG,
-          'slow scrolling: %s - %s',
-          startingScrollLeft,
-          this.pos_
-        );
-        this.scrollTimerId_ = null;
-        this.commitSwitch_(this.pos_);
-      } else {
-        dev().fine(
-          TAG,
-          'fast scrolling: %s - %s',
-          startingScrollLeft,
-          this.pos_
-        );
-        this.waitForScroll_(this.pos_);
-      }
-    }, 100));
+    this.scrollTimerId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(() => {
+        // TODO(yuxichen): test out the threshold for identifying fast scrolling
+        if (Math.abs(startingScrollLeft - this.pos_) < 30) {
+          dev().fine(
+            TAG,
+            'slow scrolling: %s - %s',
+            startingScrollLeft,
+            this.pos_
+          );
+          this.scrollTimerId_ = null;
+          this.commitSwitch_(this.pos_);
+        } else {
+          dev().fine(
+            TAG,
+            'fast scrolling: %s - %s',
+            startingScrollLeft,
+            this.pos_
+          );
+          this.waitForScroll_(this.pos_);
+        }
+      }, 100)
+    );
   }
 
   /**
@@ -321,7 +321,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   withinWindow_(pos, callback) {
-    const containerWidth = this.element.getLayoutWidth();
+    const containerWidth = this.element./*OK*/ offsetWidth;
     for (let i = 0; i < this.cells_.length; i++) {
       const cell = this.cells_[i];
       if (
@@ -384,7 +384,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   hasNext() {
-    const containerWidth = this.element.getLayoutWidth();
+    const containerWidth = this.element./*OK*/ offsetWidth;
     const scrollWidth = this.container_./*OK*/ scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;

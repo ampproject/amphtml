@@ -15,13 +15,12 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {boolean, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
+import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-inline-gallery-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [
@@ -29,31 +28,43 @@ export default {
       {name: 'amp-base-carousel', version: '1.0'},
     ],
 
-    experiments: ['amp-inline-gallery-bento', 'amp-base-carousel-bento'],
+    experiments: ['bento'],
   },
 };
 
 export const Default = () => {
   const topInset = boolean('top indicator inset?', false);
-  const bottomInset = boolean('bottom indicator inset?', false);
-  const autoAdvance = boolean('auto advance', true);
+  const bottomInset = boolean('bottom indicator inset?', true);
+  const autoAdvance = boolean('auto advance', false);
   const autoAdvanceCount = text('auto advance count', 1);
   const autoAdvanceInterval = text('auto advance interval', 1000);
   const autoAdvanceLoops = text('auto advance loops', 3);
   const loop = boolean('loop thumbnails', false);
   const aspectRatio = text('thumbnails aspect ratio', undefined);
+  const orientation = select(
+    'orientation',
+    ['horizontal', 'vertical'],
+    'vertical'
+  );
   return (
     <amp-inline-gallery style={{maxWidth: '360px'}} layout="container">
       <amp-inline-gallery-pagination
+        layout={topInset ? 'nodisplay' : 'fixed-height'}
+        height={topInset ? undefined : '24'}
         inset={topInset}
+      />
+      <amp-inline-gallery-thumbnails
+        aspectRatio={aspectRatio}
+        loop={loop}
         layout="fixed-height"
-        height="24"
+        height="50"
       />
       <amp-base-carousel
         auto-advance={autoAdvance}
         auto-advance-count={autoAdvanceCount}
         auto-advance-interval={autoAdvanceInterval}
         auto-advance-loops={autoAdvanceLoops}
+        orientation={orientation}
         width="360"
         height="240"
       >
@@ -95,20 +106,12 @@ export const Default = () => {
         ></amp-img>
       </amp-base-carousel>
       <amp-inline-gallery-pagination
+        layout={bottomInset ? 'nodisplay' : 'fixed-height'}
+        height={bottomInset ? undefined : '24'}
         inset={bottomInset}
-        layout="fixed-height"
-        height="24"
-      />
-      <amp-inline-gallery-thumbnails
-        aspectRatio={aspectRatio}
-        loop={loop}
-        layout="fixed-height"
-        height="50"
       />
     </amp-inline-gallery>
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';

@@ -16,60 +16,30 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script downloads the module and nomodule builds then runs the bundle
- * size check.
- * This is run during the CI stage = test; job = Bundle Size.
+ * @fileoverview Script that runs the bundle-size checks during CI.
  */
 
-const colors = require('ansi-colors');
-const log = require('fancy-log');
-const {
-  downloadEsmDistOutput,
-  downloadDistOutput,
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
-} = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
-const {runNpmChecks} = require('./npm-checks');
+const {buildTargetsInclude, Targets} = require('./build-targets');
+const {runCiJob} = require('./ci-job');
+const {skipDependentJobs, timedExecOrDie} = require('./utils');
 
-const FILENAME = 'bundle-size.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'bundle-size.js';
 
-async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
-  }
-
-  if (!isTravisPullRequestBuild()) {
-    downloadDistOutput(FILENAME);
-    downloadEsmDistOutput(FILENAME);
-    timedExecOrDie('gulp bundle-size --on_push_build');
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
-      downloadDistOutput(FILENAME);
-      downloadEsmDistOutput(FILENAME);
-      timedExecOrDie('gulp bundle-size --on_pr_build');
-    } else {
-      timedExecOrDie('gulp bundle-size --on_skipped_build');
-      log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Bundle Size'),
-        'because this commit does not affect the runtime or flag configs.'
-      );
-    }
-  }
-
-  stopTimer(FILENAME, FILENAME, startTime);
+function pushBuildWorkflow() {
+  timedExecOrDie('amp dist --noconfig --esm');
+  timedExecOrDie('amp dist --noconfig');
+  timedExecOrDie('amp bundle-size --on_push_build');
 }
 
-main();
+function prBuildWorkflow() {
+  if (buildTargetsInclude(Targets.RUNTIME)) {
+    timedExecOrDie('amp dist --noconfig --esm');
+    timedExecOrDie('amp dist --noconfig');
+    timedExecOrDie('amp bundle-size --on_pr_build');
+  } else {
+    timedExecOrDie('amp bundle-size --on_skipped_build');
+    skipDependentJobs(jobName, 'this PR does not affect the runtime');
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

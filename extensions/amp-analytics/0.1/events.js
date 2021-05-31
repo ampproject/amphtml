@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
-import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
+import {deepMerge, dict, hasOwn} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
-import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
+import {isArray, isEnumValue} from '../../../src/core/types';
+
+import {isFiniteNumber} from '../../../src/types';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -581,7 +583,7 @@ export class ScrollEventTracker extends EventTracker {
     /** @private {!./analytics-root.AnalyticsRoot} root */
     this.root_ = root;
 
-    /** @private {function(!Object)|null} */
+    /** @private {?function(!Object)} */
     this.boundScrollHandler_ = null;
   }
 
@@ -1473,13 +1475,11 @@ export class VisibilityTracker extends EventTracker {
     const visibilityManager = this.root.getVisibilityManager();
 
     if (reportWhenSpec == 'documentHidden') {
-      createReportReadyPromiseFunc = this.createReportReadyPromiseForDocumentHidden_.bind(
-        this
-      );
+      createReportReadyPromiseFunc =
+        this.createReportReadyPromiseForDocumentHidden_.bind(this);
     } else if (reportWhenSpec == 'documentExit') {
-      createReportReadyPromiseFunc = this.createReportReadyPromiseForDocumentExit_.bind(
-        this
-      );
+      createReportReadyPromiseFunc =
+        this.createReportReadyPromiseForDocumentExit_.bind(this);
     } else {
       userAssert(
         !reportWhenSpec,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import * as service from '../../src/service';
 import {createIframePromise} from '../../testing/iframe';
 import {
@@ -23,7 +23,7 @@ import {
 } from '../../src/render-delaying-services';
 import {macroTask} from '../../testing/yield';
 
-describe('waitForServices', () => {
+describes.sandboxed('waitForServices', {}, (env) => {
   let win;
   let clock;
   let dynamicCssResolve;
@@ -33,23 +33,27 @@ describe('waitForServices', () => {
   let variantStub;
 
   beforeEach(() => {
-    const getService = window.sandbox.stub(service, 'getServicePromise');
-    dynamicCssResolve = waitForService(getService, 'amp-dynamic-css-classes');
-    experimentResolve = waitForService(getService, 'amp-experiment');
+    const getService = env.sandbox.stub(service, 'getServicePromise');
+    dynamicCssResolve = waitForService(
+      env,
+      getService,
+      'amp-dynamic-css-classes'
+    );
+    experimentResolve = waitForService(env, getService, 'amp-experiment');
 
     variantService = {
       whenReady: () => {
         throw new Error('whenReady should be stubbed');
       },
     };
-    variantResolve = waitForService(getService, 'variant', variantService);
-    variantStub = window.sandbox
+    variantResolve = waitForService(env, getService, 'variant', variantService);
+    variantStub = env.sandbox
       .stub(variantService, 'whenReady')
       .returns(Promise.resolve());
 
     return createIframePromise().then((iframe) => {
       win = iframe.win;
-      clock = lolex.install({target: win});
+      clock = fakeTimers.withGlobal(win).install();
     });
   });
 
@@ -123,9 +127,9 @@ describe('waitForServices', () => {
   });
 });
 
-function waitForService(getService, serviceId, service) {
+function waitForService(env, getService, serviceId, service) {
   let resolve = null;
-  getService.withArgs(window.sandbox.match.any, serviceId).returns(
+  getService.withArgs(env.sandbox.match.any, serviceId).returns(
     new Promise((r) => {
       resolve = r.bind(this, service);
     })

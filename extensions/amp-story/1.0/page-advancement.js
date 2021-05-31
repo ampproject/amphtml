@@ -28,7 +28,7 @@ import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {getAmpdoc} from '../../../src/service';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
@@ -47,12 +47,21 @@ const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 const TOP_REGION = 0.8;
 
 /**
- * Protected edges of the screen in pixels. When tapped on these areas, we will
+ * Protected edges of the screen as a percent of page width. When tapped on these areas, we will
  * always perform navigation. Even if a clickable element is there.
  * @const {number}
  * @private
  */
-const PROTECTED_SCREEN_EDGE_PX = 48;
+const PROTECTED_SCREEN_EDGE_PERCENT = 12;
+
+/**
+ * Minimum protected edges of the screen in pixels.
+ * If PROTECTED_SCREEN_EDGE_PERCENT results in a protected edge value less than MINIMUM_PROTECTED_SCREEN_EDGE_PX,
+ * we will use MINIMUM_PROTECTED_SCREEN_EDGE_PX.
+ * @const {number}
+ * @private
+ */
+const MINIMUM_PROTECTED_SCREEN_EDGE_PX = 48;
 
 /**
  * Maximum percent of screen that can be occupied by a single link
@@ -144,9 +153,8 @@ export class AdvancementConfig {
 
   /**
    * Invoked when the advancement configuration should cease taking effect.
-   * @param {boolean=} unusedCanResume
    */
-  stop(unusedCanResume) {
+  stop() {
     this.isRunning_ = false;
   }
 
@@ -356,9 +364,9 @@ export class ManualAdvancement extends AdvancementConfig {
       return;
     }
     this.touchstartTimestamp_ = Date.now();
-    this.pausedState_ = /** @type {boolean} */ (this.storeService_.get(
-      StateProperty.PAUSED_STATE
-    ));
+    this.pausedState_ = /** @type {boolean} */ (
+      this.storeService_.get(StateProperty.PAUSED_STATE)
+    );
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
@@ -401,9 +409,9 @@ export class ManualAdvancement extends AdvancementConfig {
     this.timeoutId_ = null;
     if (
       !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
-      /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-        StateProperty.INTERACTIVE_COMPONENT_STATE
-      )).state !== EmbeddedComponentState.EXPANDED
+      /** @type {InteractiveComponentDef} */ (
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+      ).state !== EmbeddedComponentState.EXPANDED
     ) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
@@ -465,7 +473,10 @@ export class ManualAdvancement extends AdvancementConfig {
       (el) => {
         tagName = el.tagName.toLowerCase();
 
-        if (tagName === 'amp-story-page-attachment') {
+        if (
+          tagName === 'amp-story-page-attachment' ||
+          tagName === 'amp-story-page-outlink'
+        ) {
           shouldHandleEvent = false;
           return true;
         }
@@ -493,7 +504,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
   /**
    * For an element to trigger a tooltip it has to be descendant of
-   * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
+   * amp-story-page but not of amp-story-cta-layer, amp-story-page-attachment or amp-story-page-outlink.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
@@ -511,7 +522,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
     if (
       this.isInStoryPageSideEdge_(event, pageRect) ||
-      this.isTooLargeOnPage_(target, pageRect)
+      this.isTooLargeOnPage_(event, pageRect)
     ) {
       event.preventDefault();
       return false;
@@ -533,7 +544,8 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName === 'amp-story-cta-layer' ||
-          tagName === 'amp-story-page-attachment'
+          tagName === 'amp-story-page-attachment' ||
+          tagName === 'amp-story-page-outlink'
         ) {
           valid = false;
           return false;
@@ -565,21 +577,41 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isInStoryPageSideEdge_(event, pageRect) {
+    // Clicks with coordinates (0,0) are assumed to be from keyboard or Talkback.
+    // These clicks should never be overriden for navigation.
+    if (event.clientX === 0 && event.clientY === 0) {
+      return false;
+    }
+
+    const sideEdgeWidthFromPercent =
+      pageRect.width * (PROTECTED_SCREEN_EDGE_PERCENT / 100);
+    const sideEdgeLimit = Math.max(
+      sideEdgeWidthFromPercent,
+      MINIMUM_PROTECTED_SCREEN_EDGE_PX
+    );
+
     return (
-      event.clientX <= pageRect.x + PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= pageRect.x + pageRect.width - PROTECTED_SCREEN_EDGE_PX
+      event.clientX <= pageRect.x + sideEdgeLimit ||
+      event.clientX >= pageRect.x + pageRect.width - sideEdgeLimit
     );
   }
 
   /**
    * Checks if click target is too large on the page and preventing navigation.
    * If yes, the link is ignored & logged.
-   * @param {!Element} target
+   * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  isTooLargeOnPage_(target, pageRect) {
+  isTooLargeOnPage_(event, pageRect) {
+    // Clicks with coordinates (0,0) are assumed to be from keyboard or Talkback.
+    // These clicks should never be overriden for navigation.
+    if (event.clientX === 0 && event.clientY === 0) {
+      return false;
+    }
+
+    const target = dev().assertElement(event.target);
     const targetRect = target./*OK*/ getBoundingClientRect();
     if (
       (targetRect.height * targetRect.width) /
@@ -605,9 +637,9 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   isHandledByEmbeddedComponent_(event, pageRect) {
     const target = dev().assertElement(event.target);
-    const stored = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-      StateProperty.INTERACTIVE_COMPONENT_STATE
-    ));
+    const stored = /** @type {InteractiveComponentDef} */ (
+      this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+    );
     const inExpandedMode = stored.state === EmbeddedComponentState.EXPANDED;
 
     return (
@@ -652,9 +684,9 @@ export class ManualAdvancement extends AdvancementConfig {
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
       event.preventDefault();
-      const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-        StateProperty.INTERACTIVE_COMPONENT_STATE
-      ));
+      const embedComponent = /** @type {InteractiveComponentDef} */ (
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+      );
       this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
         element: target,
         state: embedComponent.state || EmbeddedComponentState.FOCUSED,
@@ -829,7 +861,7 @@ export class TimeBasedAdvancement extends AdvancementConfig {
   }
 
   /** @override */
-  stop(canResume = false) {
+  stop() {
     super.stop();
 
     if (this.timeoutId_ !== null) {
@@ -838,9 +870,8 @@ export class TimeBasedAdvancement extends AdvancementConfig {
 
     // Store the remaining time if the advancement can be resume, ie: if it is
     // paused.
-    this.remainingDelayMs_ = canResume
-      ? this.startTimeMs_ + this.delayMs_ - this.getCurrentTimestampMs_()
-      : null;
+    this.remainingDelayMs_ =
+      this.startTimeMs_ + this.delayMs_ - this.getCurrentTimestampMs_();
   }
 
   /**
@@ -869,6 +900,21 @@ export class TimeBasedAdvancement extends AdvancementConfig {
       AdvancementMode.AUTO_ADVANCE_TIME
     );
     super.onAdvance();
+  }
+
+  /**
+   * Updates the delay (and derived values) from the given auto-advance string.
+   * @param {string} autoAdvanceStr The value of the updated auto-advance-after attribute.
+   */
+  updateTimeDelay(autoAdvanceStr) {
+    const newDelayMs = timeStrToMillis(autoAdvanceStr);
+    if (newDelayMs === undefined || isNaN(newDelayMs)) {
+      return;
+    }
+    if (this.remainingDelayMs_) {
+      this.remainingDelayMs_ += newDelayMs - this.delayMs_;
+    }
+    this.delayMs_ = newDelayMs;
   }
 
   /**
@@ -978,10 +1024,9 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     super.start();
 
     // Prevents race condition when checking for video interface classname.
-    (this.element_.whenBuilt
-      ? this.element_.whenBuilt()
-      : Promise.resolve()
-    ).then(() => this.startWhenBuilt_());
+    (this.element_.build ? this.element_.build() : Promise.resolve()).then(() =>
+      this.startWhenBuilt_()
+    );
   }
 
   /** @private */

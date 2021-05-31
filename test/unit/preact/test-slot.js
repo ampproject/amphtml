@@ -15,9 +15,17 @@
  */
 
 import * as Preact from '../../../src/preact/index';
-import {CanPlay, CanRender, LoadingProp} from '../../../src/contextprops';
-import {Slot} from '../../../src/preact/slot';
+import * as fakeTimers from '@sinonjs/fake-timers';
+import {
+  CanPlay,
+  CanRender,
+  LoadingProp,
+} from '../../../src/context/contextprops';
+import {Slot, createSlot, useSlotContext} from '../../../src/preact/slot';
 import {WithAmpContext} from '../../../src/preact/context';
+import {createElementWithAttributes} from '../../../src/dom';
+import {createRef, useLayoutEffect, useRef} from '../../../src/preact';
+import {forwardRef} from '../../../src/preact/compat';
 import {mount} from 'enzyme';
 import {setIsRoot, subscribe} from '../../../src/context';
 
@@ -83,5 +91,345 @@ describes.sandboxed('Slot', {}, () => {
 
     wrapper.unmount();
     await expect(getProp(slot, CanRender)).to.be.eventually.true;
+  });
+});
+
+describes.realWin('Slot mount/unmount', {}, (env) => {
+  let win, doc, clock;
+  let host;
+  let wrapper;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+    delete win.requestIdleCallback;
+    clock = fakeTimers.withGlobal(win).install();
+
+    host = doc.createElement('div');
+    doc.body.appendChild(host);
+  });
+
+  afterEach(() => {
+    clock.uninstall();
+  });
+
+  function stubAmpElement(element) {
+    element.classList.add('i-amphtml-element');
+
+    element.ensureLoaded = env.sandbox.stub();
+    element.pause = env.sandbox.stub();
+    element.unmount = env.sandbox.stub();
+    element.getPlaceholder = () => null;
+
+    return element;
+  }
+
+  describe('with Shadow DOM', () => {
+    let shadowRoot;
+    let child1, child2;
+
+    before(function () {
+      if (!Element.prototype.attachShadow) {
+        this.skipTest();
+      }
+    });
+
+    beforeEach(() => {
+      child1 = createAmpElement({slot: 'slot1'});
+      child2 = createAmpElement({slot: 'slot1'});
+      host.append(child1, child2);
+
+      shadowRoot = host.attachShadow({mode: 'open'});
+      setIsRoot(shadowRoot, true);
+
+      wrapper = mount(
+        <WithAmpContext>
+          <div>
+            <Slot name="slot1" />
+          </div>
+        </WithAmpContext>,
+        {attachTo: shadowRoot}
+      );
+    });
+
+    function createAmpElement(attrs) {
+      const element = createElementWithAttributes(doc, 'amp-element', attrs);
+      return stubAmpElement(element);
+    }
+
+    it('should load AMP elements on mount', () => {
+      clock.runAll();
+      expect(child1.ensureLoaded).to.be.calledOnce;
+      expect(child2.ensureLoaded).to.be.calledOnce;
+      expect(child1.unmount).to.not.be.called;
+      expect(child2.unmount).to.not.be.called;
+      expect(child1.pause).to.not.be.called;
+      expect(child2.pause).to.not.be.called;
+    });
+
+    it('should unmount AMP elements on unmount', () => {
+      wrapper.unmount();
+      clock.runAll();
+      expect(child1.unmount).to.be.calledOnce;
+      expect(child2.unmount).to.be.calledOnce;
+      expect(child1.pause).to.not.be.called;
+      expect(child2.pause).to.not.be.called;
+    });
+
+    it('should pause AMP elements when playable changes', () => {
+      wrapper.setProps({playable: false});
+      clock.runAll();
+      expect(child1.pause).to.be.calledOnce;
+      expect(child2.pause).to.be.calledOnce;
+      expect(child1.unmount).to.not.be.called;
+      expect(child2.unmount).to.not.be.called;
+    });
+
+    it('should pause before mount', () => {
+      wrapper.unmount();
+      clock.runAll();
+      child1.ensureLoaded.resetHistory();
+      child1.pause.resetHistory();
+      child1.unmount.resetHistory();
+
+      const order = [];
+      child1.ensureLoaded.callsFake(() => order.push('ensureLoaded'));
+      child1.pause.callsFake(() => order.push('pause'));
+
+      // Mount in non-playable mode.
+      wrapper.setProps({playable: false});
+      wrapper.mount();
+      clock.runAll();
+      expect(child1.pause).to.be.calledOnce;
+      expect(child1.ensureLoaded).to.be.calledOnce;
+      expect(child1.unmount).to.not.be.called;
+      expect(order).to.deep.equal(['pause', 'ensureLoaded']);
+    });
+  });
+
+  describe('with Shadow DOM and loading=lazy slot', () => {
+    let shadowRoot;
+    let child1, child2;
+
+    before(function () {
+      if (!Element.prototype.attachShadow) {
+        this.skipTest();
+      }
+    });
+
+    beforeEach(() => {
+      child1 = createAmpElement({slot: 'slot1'});
+      child2 = createAmpElement({slot: 'slot1'});
+      host.append(child1, child2);
+
+      shadowRoot = host.attachShadow({mode: 'open'});
+      setIsRoot(shadowRoot, true);
+
+      wrapper = mount(
+        <WithAmpContext>
+          <div>
+            <Slot name="slot1" loading="lazy" />
+          </div>
+        </WithAmpContext>,
+        {attachTo: shadowRoot}
+      );
+    });
+
+    function createAmpElement(attrs) {
+      const element = createElementWithAttributes(doc, 'amp-element', attrs);
+      return stubAmpElement(element);
+    }
+
+    it('should load AMP elements on mount', () => {
+      clock.runAll();
+      expect(child1.ensureLoaded).to.not.be.called;
+      expect(child2.ensureLoaded).to.not.be.called;
+      expect(child1.unmount).to.not.be.called;
+      expect(child2.unmount).to.not.be.called;
+      expect(child1.pause).to.not.be.called;
+      expect(child2.pause).to.not.be.called;
+    });
+
+    it('should unmount AMP elements on unmount', () => {
+      wrapper.unmount();
+      clock.runAll();
+      expect(child1.unmount).to.be.calledOnce;
+      expect(child2.unmount).to.be.calledOnce;
+      expect(child1.pause).to.not.be.called;
+      expect(child2.pause).to.not.be.called;
+    });
+
+    it('should pause AMP elements when playable changes', () => {
+      wrapper.setProps({playable: false});
+      clock.runAll();
+      expect(child1.pause).to.be.calledOnce;
+      expect(child2.pause).to.be.calledOnce;
+      expect(child1.unmount).to.not.be.called;
+      expect(child2.unmount).to.not.be.called;
+    });
+  });
+
+  describe('with Light DOM', () => {
+    let child1Ref, child2Ref;
+
+    beforeEach(() => {
+      setIsRoot(host, true);
+
+      child1Ref = createRef();
+      child2Ref = createRef();
+      const AmpElement = forwardRef(AmpElementWithRef);
+      wrapper = mount(
+        <WithAmpContext>
+          <div>
+            <Container>
+              <AmpElement key="1" ref={child1Ref} />
+              <AmpElement key="2" ref={child2Ref} />
+            </Container>
+          </div>
+        </WithAmpContext>,
+        {attachTo: host}
+      );
+    });
+
+    function Container({children, ...rest}) {
+      const ref = useRef();
+      useSlotContext(ref);
+      return (
+        <div ref={ref} {...rest}>
+          {children}
+        </div>
+      );
+    }
+
+    function AmpElementWithRef(props, ref) {
+      useLayoutEffect(() => {
+        const element = ref.current;
+        stubAmpElement(element);
+      }, [ref]);
+      return <amp-element ref={ref} {...props} />;
+    }
+
+    it('should load AMP elements on mount', () => {
+      const child1 = child1Ref.current;
+      const child2 = child2Ref.current;
+      clock.runAll();
+      expect(child1.ensureLoaded).to.be.calledOnce;
+      expect(child2.ensureLoaded).to.be.calledOnce;
+      expect(child1.unmount).to.not.be.called;
+      expect(child2.unmount).to.not.be.called;
+      expect(child1.pause).to.not.be.called;
+      expect(child2.pause).to.not.be.called;
+    });
+
+    it('should unmount AMP elements on unmount', () => {
+      const child1 = child1Ref.current;
+      const child2 = child2Ref.current;
+      wrapper.unmount();
+      clock.runAll();
+      expect(child1.unmount).to.be.calledOnce;
+      expect(child2.unmount).to.be.calledOnce;
+      expect(child1.pause).to.not.be.called;
+      expect(child2.pause).to.not.be.called;
+    });
+
+    it('should pause AMP elements when playable changes', () => {
+      const child1 = child1Ref.current;
+      const child2 = child2Ref.current;
+      wrapper.setProps({playable: false});
+      clock.runAll();
+      expect(child1.pause).to.be.calledOnce;
+      expect(child2.pause).to.be.calledOnce;
+      expect(child1.unmount).to.not.be.called;
+      expect(child2.unmount).to.not.be.called;
+    });
+  });
+});
+
+describes.realWin('createSlot', {}, (env) => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
+  it('should create slot and set corresponding slot attr', () => {
+    const element = doc.createElement('div');
+    const slot = createSlot(element, 'element');
+    expect(element.getAttribute('slot')).to.equal('element');
+    expect(slot.type).to.equal(Slot);
+    expect(slot.props).to.deep.equal({'name': 'element'});
+  });
+
+  it('should create slot with props', () => {
+    const element = doc.createElement('div');
+    const slot = createSlot(element, 'element', {'propA': true});
+    expect(element.getAttribute('slot')).to.equal('element');
+    expect(slot.type).to.equal(Slot);
+    expect(slot.props).to.deep.equal({'name': 'element', 'propA': true});
+  });
+
+  it('should create slot function and set corresponding slot attr', () => {
+    const element = doc.createElement('div');
+    const slotComp = createSlot(element, 'element', {}, /* as */ true);
+    expect(element.getAttribute('slot')).to.equal('element');
+
+    expect(typeof slotComp).to.equal('function');
+    expect(slotComp.name).to.equal('SlotWithProps');
+
+    const slot = slotComp();
+    expect(slot.type).to.equal(Slot);
+    expect(slot.props).to.deep.equal({'name': 'element'});
+  });
+
+  it('should create slot function with props', () => {
+    const element = doc.createElement('div');
+    const slotComp = createSlot(
+      element,
+      'element',
+      {'propA': true},
+      /* as */ true
+    );
+    expect(element.getAttribute('slot')).to.equal('element');
+
+    expect(typeof slotComp).to.equal('function');
+    expect(slotComp.name).to.equal('SlotWithProps');
+
+    const slot = slotComp();
+    expect(slot.type).to.equal(Slot);
+    expect(slot.props).to.deep.equal({'name': 'element', 'propA': true});
+  });
+
+  it('should return cached slot function', () => {
+    const element = doc.createElement('div');
+    const slotComp = createSlot(element, 'element', {}, /* as */ true);
+    const slotComp2 = createSlot(element, 'element', {}, /* as */ true);
+    expect(slotComp2).to.deep.equal(slotComp);
+  });
+
+  it('should update cached slot function with new defaultProps', () => {
+    const element = doc.createElement('div');
+    const slotComp = createSlot(
+      element,
+      'element',
+      {'propA': false},
+      /* as */ true
+    );
+    const slotComp2 = createSlot(
+      element,
+      'element',
+      {'propA': true},
+      /* as */ true
+    );
+    expect(slotComp2).not.to.deep.equal(slotComp);
+  });
+
+  it('should return unique slot functions for unique elements', () => {
+    const element = doc.createElement('div');
+    const slotComp = createSlot(element, 'element', {}, /* as */ true);
+
+    const element2 = doc.createElement('div');
+    const slotComp2 = createSlot(element2, 'element', {}, /* as */ true);
+    expect(slotComp2).not.to.deep.equal(slotComp);
   });
 });

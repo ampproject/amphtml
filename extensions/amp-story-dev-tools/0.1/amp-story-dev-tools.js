@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-import {AmpStoryDevToolsTab, createTabElement} from './amp-story-dev-tools-tab';
+import {
+  AmpStoryDevToolsTabDebug,
+  createTabDebugElement,
+} from './amp-story-dev-tools-tab-debug';
+import {
+  AmpStoryDevToolsTabPreview,
+  createTabPreviewElement,
+} from './amp-story-dev-tools-tab-preview';
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '../../../src/static-template';
-import {parseQueryString} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
+import {toggle} from '../../../src/style';
 import {updateHash} from './utils';
 
-/** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
+/** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&amp;display=swap */
 const fontsToLoad = [
   {
     family: 'Poppins',
     weight: '400',
-    src:
-      "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
+    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
   },
   {
     family: 'Poppins',
-    weight: '700',
-    src:
-      "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
+    weight: '600',
+    src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
 
@@ -91,8 +97,7 @@ const buildContainerTemplate = (element) => {
 /** @enum {string} */
 const DevToolsTab = {
   PREVIEW: 'Preview',
-  PAGE_EXPERIENCE: 'Page Experience',
-  LOGS: 'Logs',
+  DEBUG: 'Debug',
 };
 
 export class AmpStoryDevTools extends AMP.BaseElement {
@@ -100,19 +105,22 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    const hashParams = parseQueryString(this.win.location.hash);
+    /** @private {!Object<string, string>} */
+    this.hashParams_ = parseQueryString(this.win.location.hash);
 
     this.win.document.title = `Story Dev-Tools (${this.win.document.title})`;
 
     // TODO: Remove support for url queryParam when widely available.
     /** @private {string} */
-    this.storyUrl_ = hashParams['url'] || this.win.location.href.split('#')[0];
+    this.storyUrl_ =
+      this.hashParams_['url'] || this.win.location.href.split('#')[0];
 
     /** @private {!DevToolsTab} get URL param for tab (eg: #tab=page-experience) or default to PREVIEW*/
     this.currentTab_ =
-      (hashParams['tab']
+      (this.hashParams_['tab']
         ? Object.values(DevToolsTab).find(
-            (tab) => tab.toLowerCase().replace(' ', '-') === hashParams['tab']
+            (tab) =>
+              tab.toLowerCase().replace(' ', '-') === this.hashParams_['tab']
           )
         : null) || DevToolsTab.PREVIEW;
 
@@ -124,8 +132,14 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   }
 
   /** @override */
+  isLayoutSupported() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.loadFonts_();
+    this.removeCustomCSS_();
     this.buildLayout_();
     this.initializeListeners_();
 
@@ -139,9 +153,8 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   buildLayout_() {
     const container = buildContainerTemplate(this.element);
     this.element.appendChild(container);
-    this.element.querySelector(
-      '.i-amphtml-story-dev-tools-close'
-    ).href = this.storyUrl_;
+    this.element.querySelector('.i-amphtml-story-dev-tools-close').href =
+      this.storyUrl_;
 
     // Create tabs on top
     const tabsContainer = container.querySelector(
@@ -189,13 +202,23 @@ export class AmpStoryDevTools extends AMP.BaseElement {
    * @private
    */
   buildTabs_() {
-    this.tabContents_ = Object.values(DevToolsTab).reduce(
-      (tabContents, tab) => {
-        tabContents[tab] = createTabElement(this.win, this.storyUrl_, tab);
-        return tabContents;
-      },
-      {}
+    const container = this.element.querySelector(
+      '.i-amphtml-story-dev-tools-container'
     );
+    this.tabContents_[DevToolsTab.PREVIEW] = createTabPreviewElement(
+      this.win,
+      this.storyUrl_,
+      this.hashParams_['devices']
+    );
+    this.tabContents_[DevToolsTab.DEBUG] = createTabDebugElement(
+      this.win,
+      this.storyUrl_
+    );
+    Object.values(this.tabContents_).forEach((tabContent) => {
+      tabContent.setAttribute('layout', 'container');
+      toggle(tabContent, false);
+      container.appendChild(tabContent);
+    });
   }
 
   /**
@@ -203,12 +226,9 @@ export class AmpStoryDevTools extends AMP.BaseElement {
    * @param {!DevToolsTab} tab
    */
   switchTab_(tab) {
-    const container = this.element.querySelector(
-      '.i-amphtml-story-dev-tools-container'
-    );
     this.mutateElement(() => {
-      this.tabContents_[this.currentTab_].remove();
-      container.appendChild(this.tabContents_[tab]);
+      toggle(this.tabContents_[this.currentTab_], false);
+      toggle(this.tabContents_[tab], true);
       this.tabSelectors_.forEach((tabSelector) => {
         return tabSelector.toggleAttribute(
           'active',
@@ -235,9 +255,23 @@ export class AmpStoryDevTools extends AMP.BaseElement {
       });
     }
   }
+
+  /** @private */
+  removeCustomCSS_() {
+    this.element.ownerDocument
+      .querySelectorAll('style[amp-custom]')
+      .forEach((e) => e.remove());
+  }
 }
 
 AMP.extension('amp-story-dev-tools', '0.1', (AMP) => {
   AMP.registerElement('amp-story-dev-tools', AmpStoryDevTools, CSS);
-  AMP.registerElement('amp-story-dev-tools-tab', AmpStoryDevToolsTab, CSS);
+  AMP.registerElement(
+    'amp-story-dev-tools-tab-debug',
+    AmpStoryDevToolsTabDebug
+  );
+  AMP.registerElement(
+    'amp-story-dev-tools-tab-preview',
+    AmpStoryDevToolsTabPreview
+  );
 });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {endsWith} from '../../../../src/string';
+import {endsWith} from '../../../../src/core/types/string';
 import {toWin} from '../../../../src/types';
 
 /**
@@ -137,8 +137,9 @@ function isEnabled(win, rule) {
 function buildKeyframes(keyframesRule) {
   const array = [];
   for (let i = 0; i < keyframesRule.cssRules.length; i++) {
-    const keyframeRule = /** @type {!CSSKeyframeRule} */ (keyframesRule
-      .cssRules[i]);
+    const keyframeRule = /** @type {!CSSKeyframeRule} */ (
+      keyframesRule.cssRules[i]
+    );
     const keyframe = {};
     keyframe['offset'] =
       keyframeRule.keyText == 'from'

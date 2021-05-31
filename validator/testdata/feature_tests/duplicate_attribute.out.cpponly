@@ -35,7 +35,7 @@ feature_tests/duplicate_attribute.html:30:2 The tag 'script' contains the attrib
 >>   ^~~~~~~~~
 feature_tests/duplicate_attribute.html:31:2 The tag 'script' contains the attribute 'custom-element' repeated multiple times.
 >>   ^~~~~~~~~
-feature_tests/duplicate_attribute.html:31:2 The attribute 'custom-element' may not appear in tag 'amp-youtube extension .js script'. (see https://amp.dev/documentation/components/amp-youtube)
+feature_tests/duplicate_attribute.html:31:2 The attribute 'custom-element' may not appear in tag 'amp-youtube v0.1 extension script'. (see https://amp.dev/documentation/components/amp-youtube)
 |
 |  </head>
 |  <body>
@@ -51,10 +51,10 @@ feature_tests/duplicate_attribute.html:37:3 The attribute 'width' in tag 'amp-im
 feature_tests/duplicate_attribute.html:38:3 The tag 'amp-img' contains the attribute 'width' repeated multiple times.
 |
 |     <!-- Let's make sure the script type can't be overridden -->
-|     <script type="application/ld+json" type="text/javascript"></script>
+|     <script type="application/ld+json" type="text/javascript">{}</script>
 >>    ^~~~~~~~~
 feature_tests/duplicate_attribute.html:41:3 The tag 'script' contains the attribute 'type' repeated multiple times.
-|     <script type="text/javascript" type="application/ld+json"></script>
+|     <script type="text/javascript" type="application/ld+json">{}</script>
 >>    ^~~~~~~~~
 feature_tests/duplicate_attribute.html:42:3 The tag 'script' contains the attribute 'type' repeated multiple times.
 >>    ^~~~~~~~~

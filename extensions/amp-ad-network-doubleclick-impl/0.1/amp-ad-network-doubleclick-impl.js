@@ -21,6 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../../src/service/real-time-config/real-time-config-impl';
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {
   AmpA4A,
   ConsentTupleDef,
@@ -39,6 +40,7 @@ import {
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
+  getServeNpaPromise,
   googleAdUrl,
   googleBlockParameters,
   googlePageParameters,
@@ -48,13 +50,15 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../src/core/constants/consent-state';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
-import {INTERSECT_RESOURCES_EXP} from '../../../src/experiments/intersect-resources-exp';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
@@ -73,6 +77,7 @@ import {
 import {WindowInterface} from '../../../src/window-interface';
 import {
   addAmpExperimentIdToElement,
+  addExperimentIdToElement,
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -86,17 +91,20 @@ import {
   isRTL,
   removeElement,
 } from '../../../src/dom';
-import {deepMerge, dict} from '../../../src/utils/object';
+import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
-import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
+import {
+  getCryptoRandomBytesArray,
+  utf8Decode,
+} from '../../../src/core/types/string/bytes';
 import {
   getExperimentBranch,
   isExperimentOn,
@@ -104,18 +112,23 @@ import {
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
+
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
+import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
+import {StoryAdAutoAdvance} from '../../../src/experiments/story-ad-auto-advance';
+import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
+import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {isArray} from '../../../src/types';
-import {isCancellation} from '../../../src/error';
+import {isArray} from '../../../src/core/types';
+import {isCancellation} from '../../../src/error-reporting';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
-import {parseQueryString} from '../../../src/url';
-import {stringHash32} from '../../../src/string';
-import {tryParseJson} from '../../../src/json';
+import {parseQueryString} from '../../../src/core/types/string/url';
+import {stringHash32} from '../../../src/core/types/string';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -147,12 +160,12 @@ const ZINDEX_EXP_BRANCHES = {
 };
 
 /** @const {string} */
-const PTT_EXP = 'doubleclick-ptt-exp';
+const IDLE_CWV_EXP = 'dfp-render-on-idle-cwv-exp';
 
 /** @const @enum{string} */
-const PTT_EXP_BRANCHES = {
-  CONTROL: '21068093',
-  EXPERIMENT: '21068094',
+const IDLE_CWV_EXP_BRANCHES = {
+  CONTROL: '20208860',
+  EXPERIMENT: '20208859',
 };
 
 /**
@@ -223,6 +236,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = Services.extensionsFor(this.win);
+
+    /** @private @const {?../../../src/service/performance-impl.Performance} */
+    this.performance_ = Services.performanceForOrNull(this.win);
 
     /** @private {?string} */
     this.qqid_ = null;
@@ -344,6 +360,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {boolean}
      */
     this.inZIndexHoldBack_ = false;
+
+    /**
+     * A signal from publishers to serve NPA through ad url.
+     * @private {boolean}
+     */
+    this.serveNpaSignal_ = false;
   }
 
   /**
@@ -365,7 +387,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // holdback branch sends non-numeric value.
       return false;
     }
-    return vpRange || 12;
+
+    if (vpRange) {
+      return vpRange;
+    }
+
+    let fallbackRange = 12;
+    if (!this.performance_) {
+      return fallbackRange;
+    }
+
+    const idleCwvExpSelectedBranch = getExperimentBranch(
+      this.win,
+      IDLE_CWV_EXP
+    );
+    if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.CONTROL) {
+      this.performance_.addEnabledExperiment('dfp-idle-cwv-control');
+    } else if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.EXPERIMENT) {
+      fallbackRange = 3;
+      this.performance_.addEnabledExperiment('dfp-idle-cwv-exp');
+    }
+    return fallbackRange;
   }
 
   /** @override */
@@ -422,31 +464,45 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.experimentIds.push(forcedExperimentId);
       }
     }
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: DOUBLECLICK_SRA_EXP,
-        isTrafficEligible: () =>
-          !forcedExperimentId &&
-          !this.win.document./*OK*/ querySelector(
-            'meta[name=amp-ad-enable-refresh], ' +
-              'amp-ad[type=doubleclick][data-enable-refresh], ' +
-              'meta[name=amp-ad-doubleclick-sra]'
+    const experimentInfoList =
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+        {
+          experimentId: DOUBLECLICK_SRA_EXP,
+          isTrafficEligible: () =>
+            !forcedExperimentId &&
+            !this.win.document./*OK*/ querySelector(
+              'meta[name=amp-ad-enable-refresh], ' +
+                'amp-ad[type=doubleclick][data-enable-refresh], ' +
+                'meta[name=amp-ad-doubleclick-sra]'
+            ),
+          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
+            (key) => DOUBLECLICK_SRA_EXP_BRANCHES[key]
           ),
-        branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
-          (key) => DOUBLECLICK_SRA_EXP_BRANCHES[key]
-        ),
-      },
-      {
-        experimentId: ZINDEX_EXP,
-        isTrafficEligible: () => true,
-        branches: Object.values(ZINDEX_EXP_BRANCHES),
-      },
-      {
-        experimentId: PTT_EXP,
-        isTrafficEligible: () => true,
-        branches: Object.values(PTT_EXP_BRANCHES),
-      },
-    ]);
+        },
+        {
+          experimentId: ZINDEX_EXP,
+          isTrafficEligible: () => true,
+          branches: Object.values(ZINDEX_EXP_BRANCHES),
+        },
+        {
+          experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
+          isTrafficEligible: () => true,
+          branches: [
+            ADS_INITIAL_INTERSECTION_EXP.control,
+            ADS_INITIAL_INTERSECTION_EXP.experiment,
+          ],
+        },
+        {
+          experimentId: IDLE_CWV_EXP,
+          isTrafficEligible: () => {
+            return (
+              !!this.performance_ &&
+              !this.element.getAttribute('data-loading-strategy')
+            );
+          },
+          branches: Object.values(IDLE_CWV_EXP_BRANCHES),
+        },
+      ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
       (expName) => setExps[expName] && this.experimentIds.push(setExps[expName])
@@ -456,21 +512,28 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.experimentIds.push(moduleNomoduleExpId);
     }
 
-    const intersectResourcesExpId = getExperimentBranch(
-      this.win,
-      INTERSECT_RESOURCES_EXP.id
-    );
-
-    if (intersectResourcesExpId) {
-      this.experimentIds.push(intersectResourcesExpId);
-    }
-
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
       addAmpExperimentIdToElement(ssrExpIds[i], this.element);
     }
     if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
       this.inZIndexHoldBack_ = true;
+    }
+
+    const storyAdPlacementsExpId = getExperimentBranch(
+      this.win,
+      StoryAdPlacements.ID
+    );
+    if (storyAdPlacementsExpId) {
+      addExperimentIdToElement(storyAdPlacementsExpId, this.element);
+    }
+
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win,
+      StoryAdAutoAdvance.ID
+    );
+    if (autoAdvanceExpBranch) {
+      addExperimentIdToElement(autoAdvanceExpBranch, this.element);
     }
   }
 
@@ -582,15 +645,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
-    const {consentString, gdprApplies} = consentTuple;
+    const {consentString, gdprApplies, consentStringType, additionalConsent} =
+      consentTuple;
 
     return {
-      'ptt': this.experimentIds.includes(PTT_EXP_BRANCHES.EXPERIMENT)
-        ? 13
-        : null,
+      'ptt': 13,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN
+        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN ||
+        this.serveNpaSignal_
           ? 1
           : null,
       'gdfp_req': '1',
@@ -599,8 +662,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
-      'gdpr_consent': consentString,
+      'gdpr_consent':
+        consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
+      'addtl_consent': additionalConsent,
+      'us_privacy':
+        consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
     };
+  }
+
+  /**
+   * @override
+   */
+  skipClientSideValidation(headers) {
+    return headers && !headers.has(AMP_SIGNATURE_HEADER);
   }
 
   /**
@@ -615,7 +693,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ifi_ =
       (this.isRefreshing && this.ifi_) || this.win['ampAdGoogleIfiCounter']++;
     const pageLayoutBox = this.isSinglePageStoryAd
-      ? this.element.getPageLayoutBox()
+      ? getPageLayoutBoxBlocking(this.element)
       : null;
     let msz = null;
     let psz = null;
@@ -696,10 +774,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
+  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise, opt_serveNpaSignal) {
     if (this.useSra) {
       this.sraDeferred = this.sraDeferred || new Deferred();
     }
+    this.serveNpaSignal_ = !!opt_serveNpaSignal;
     const consentTuple = opt_consentTuple || {};
     if (
       consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -767,6 +846,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
     this.troubleshootData_.adUrl = this.getAdUrlDeferred.promise;
     return this.getAdUrlDeferred.promise;
+  }
+
+  /** @override */
+  getServeNpaSignal() {
+    return getServeNpaPromise(this.element);
   }
 
   /**
@@ -872,16 +956,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           if (!exclusions) {
             exclusions = {};
             if (this.jsonTargeting['categoryExclusions']) {
-              /** @type {!Array} */ (this.jsonTargeting[
-                'categoryExclusions'
-              ]).forEach((exclusion) => {
+              /** @type {!Array} */ (
+                this.jsonTargeting['categoryExclusions']
+              ).forEach((exclusion) => {
                 exclusions[exclusion] = true;
               });
             }
           }
-          /** @type {!Array} */ (rtcResponse.response[
-            'categoryExclusions'
-          ]).forEach((exclusion) => {
+          /** @type {!Array} */ (
+            rtcResponse.response['categoryExclusions']
+          ).forEach((exclusion) => {
             exclusions[exclusion] = true;
           });
         }
@@ -903,6 +987,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const allowlist = {
       'height': true,
       'width': true,
+      'json': true,
       'data-slot': true,
       'data-multi-size': true,
       'data-multi-size-validation': true,
@@ -929,12 +1014,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         ),
       ATTR: (name) => {
         if (!allowlist[name.toLowerCase()]) {
-          dev().warn('TAG', `Invalid attribute ${name}`);
+          dev().warn(TAG, `Invalid attribute ${name}`);
         } else {
           return this.element.getAttribute(name);
         }
       },
-      ELEMENT_POS: () => this.element.getPageLayoutBox().top,
+      ELEMENT_POS: () => getPageLayoutBoxBlocking(this.element).top,
       SCROLL_TOP: () =>
         Services.viewportForDoc(this.getAmpDoc()).getScrollTop(),
       PAGE_HEIGHT: () =>
@@ -1493,7 +1578,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       } else {
         // Must center creative within the viewport
         const viewportWidth = this.getViewport().getRect().width;
-        const pageLayoutBox = this.element.getPageLayoutBox();
+        const pageLayoutBox = getPageLayoutBoxBlocking(this.element);
         const whitespace = (viewportWidth - newWidth) / 2;
         if (isRtl) {
           style['margin-right'] = getMarginStr(
@@ -1635,8 +1720,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               checkStillCurrent();
               // Exclude any instances that do not have an adPromise_ as this
               // indicates they were invalid.
-              const typeInstances = /** @type {!Array<!AmpAdNetworkDoubleclickImpl>}*/ (instances).filter(
-                (instance) => {
+              const typeInstances =
+                /** @type {!Array<!AmpAdNetworkDoubleclickImpl>}*/ (
+                  instances
+                ).filter((instance) => {
                   const isValid = instance.hasAdPromise();
                   if (!isValid) {
                     dev().info(
@@ -1647,8 +1734,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     );
                   }
                   return isValid;
-                }
-              );
+                });
               if (!typeInstances.length) {
                 // Only contained invalid elements.
                 return;

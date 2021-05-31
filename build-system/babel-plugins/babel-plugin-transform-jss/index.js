@@ -26,6 +26,9 @@
  *
  * const jss = { button: { fontSize: 12 }}
  * export const useStyles = createUseStyles(jss);
+ *
+ * import {useStyles} from './imported.jss';
+ * useStyles().button;
  * ```
  *
  * Out:
@@ -33,22 +36,228 @@
  * const jss = { button: { fontSize: 12 }}
  * const _classes = {button: 'button-1'}
  * export const useStyles = () => _classes;
- * export const CSS = 'button-1 { font-size: 12px }'
+ * export const CSS = '.button-1 { font-size: 12px }'
+ * export const $button = 'button-1';
+ *
+ * import {useStyles} from './imported.jss';
+ * import {$button as _$button} from './imported.jss';
+ * _$button
  * ```
  */
 
 const hash = require('./create-hash');
+const {addNamed} = require('@babel/helper-module-imports');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
 const {relative, join} = require('path');
-const {spawnSync} = require('child_process');
+const {transformCssSync} = require('../../tasks/css/jsify-css-sync');
 
 module.exports = function ({template, types: t}) {
+  /**
+   * @param {string} filename
+   * @return {boolean}
+   */
   function isJssFile(filename) {
     return filename.endsWith('.jss.js');
   }
 
+  function classnameId(name) {
+    return `\$${name}`;
+  }
+
+  /**
+   * @param {Path} reference
+   * @param {string} importedName
+   * @return {?Path}
+   */
+  function findImportDeclaration(reference, importedName) {
+    if (!reference.isIdentifier()) {
+      return null;
+    }
+
+    const binding = reference.scope.getBinding(reference.node.name);
+    if (!binding || binding.kind !== 'module') {
+      return null;
+    }
+
+    const {path} = binding;
+    const {parentPath} = path;
+
+    if (
+      !parentPath.isImportDeclaration() ||
+      !path.isImportSpecifier() ||
+      !t.isIdentifier(path.node.imported, {name: importedName})
+    ) {
+      return null;
+    }
+
+    return parentPath;
+  }
+
+  /**
+   * Replacess MemberExpressions.
+   * @example
+   * In:
+   * ```
+   *   import {useStyles} from 'foo';
+   *   const a = useStyles();
+   *   a.b;
+   *   useStyles().c;
+   * ```
+   * Out:
+   * ```
+   *   import {useStyles} from 'foo';
+   *   import {$b as _$b} from 'foo';
+   *   import {$c as _$c} from 'foo';
+   *   $_b;
+   *   $_c;
+   * ```
+   * @param {Path} importDeclaration
+   * @param {Path} memberExpression
+   * @return {boolean}
+   */
+  function replaceMemberExpression(importDeclaration, memberExpression) {
+    if (!memberExpression.isMemberExpression({computed: false})) {
+      return false;
+    }
+    const {property} = memberExpression.node;
+    if (!t.isIdentifier(property)) {
+      return false;
+    }
+
+    const localId = getImportIdentifier(importDeclaration, property.name);
+    memberExpression.replaceWith(t.cloneNode(localId));
+
+    return true;
+  }
+
+  /**
+   * Replaces VariableDeclarations that use ObjectPatterns (destructuring).
+   * @example
+   * In:
+   * ```
+   *   import {useStyles} from 'foo';
+   *   const {a, ...rest} = useStyles();
+   * ```
+   * Out:
+   * ```
+   *   import {useStyles} from 'foo';
+   *   import {$a as _$a} from 'foo';
+   *   const {a: _unused, ...rest} = useStyles();
+   *   const a = $_a;
+   * ```
+   * @param {Path} importDeclaration
+   * @param {Path} variableDeclarator
+   * @return {boolean}
+   */
+  function replaceObjectPattern(importDeclaration, variableDeclarator) {
+    if (
+      !variableDeclarator.isVariableDeclarator() ||
+      !t.isObjectPattern(variableDeclarator.node.id)
+    ) {
+      return false;
+    }
+    const {properties} = variableDeclarator.node.id;
+    const replacedPropertyCount = properties.reduce((count, property) => {
+      const {computed, key, value} = property;
+      if (computed || !t.isIdentifier(value) || !t.isIdentifier(key)) {
+        return count;
+      }
+      const importId = getImportIdentifier(importDeclaration, key.name);
+      const declaration = variableDeclarator.parentPath;
+      declaration.insertAfter(
+        template.statement.ast(
+          `${declaration.node.kind} ${value.name} = ${importId.name}`
+        )
+      );
+      // Unused props are required to allow ...rest:
+      // const {a: _unused, ...rest} = useStyles();
+      // const a = _$a;
+      property.value = variableDeclarator.scope.generateUidIdentifier('unused');
+      return count + 1;
+    }, 0);
+    if (properties.length === replacedPropertyCount) {
+      variableDeclarator.remove();
+    }
+    return true;
+  }
+
+  /**
+   * Replaces VariableDeclarators by following their references.
+   * @example
+   * In:
+   * ```
+   *   import {useStyles} from 'foo';
+   *   const a = useStyles();
+   *   a.b;
+   * ```
+   * Out:
+   * ```
+   *   import {useStyles} from 'foo';
+   *   import {$b as _$b} from 'foo';
+   *   $_b;
+   * ```
+   * @param {Path} importDeclaration
+   * @param {Path} variableDeclarator
+   * @return {boolean}
+   */
+  function replaceVariableDeclaratorRefs(
+    importDeclaration,
+    variableDeclarator
+  ) {
+    if (
+      !variableDeclarator.isVariableDeclarator() ||
+      !t.isIdentifier(variableDeclarator.node.id)
+    ) {
+      return false;
+    }
+    const {referencePaths} =
+      variableDeclarator.scope.bindings[variableDeclarator.node.id.name];
+    const replacedReferenceCount = referencePaths.reduce(
+      (count, identifier) =>
+        replaceExpression(importDeclaration, identifier) ? count + 1 : count,
+      0
+    );
+    if (referencePaths.length === replacedReferenceCount) {
+      variableDeclarator.remove();
+    }
+    return true;
+  }
+
+  /**
+   * @param {Path} importDeclaration
+   * @param {Path} callExpressionOrIdentifier
+   * @return {boolean}
+   */
+  function replaceExpression(importDeclaration, callExpressionOrIdentifier) {
+    const {parentPath} = callExpressionOrIdentifier;
+    return (
+      replaceMemberExpression(importDeclaration, parentPath) ||
+      replaceObjectPattern(importDeclaration, parentPath) ||
+      replaceVariableDeclaratorRefs(importDeclaration, parentPath)
+    );
+  }
+
+  function getImportIdentifier(importDeclaration, name) {
+    return addNamed(
+      importDeclaration,
+      classnameId(name),
+      importDeclaration.node.source.value
+    );
+  }
+
   const seen = new Map();
+  /**
+   * @param {string} JSS
+   * @param {string} filename
+   * @return {{
+   *   visitor: {
+   *     Program: {Function(path: string, state: *): void},
+   *     CallExpression: {Function(path: string, state: *): void},
+   *     ImportDeclaration: {Function(path: string, state: *): void},
+   *   }
+   * }}
+   */
   function compileJss(JSS, filename) {
     const relativeFilepath = relative(join(__dirname, '../../..'), filename);
     const filehash = hash.createHash(relativeFilepath);
@@ -76,7 +285,7 @@ module.exports = function ({template, types: t}) {
 
   return {
     visitor: {
-      Program(path, state) {
+      Program(_path, state) {
         const {filename} = state.file.opts;
         seen.forEach((file, key) => {
           if (file === filename) {
@@ -86,12 +295,21 @@ module.exports = function ({template, types: t}) {
       },
 
       CallExpression(path, state) {
+        const callee = path.get('callee');
+
+        // Replace users that import JSS.
+        const importDeclaration = findImportDeclaration(callee, 'useStyles');
+        if (importDeclaration) {
+          replaceExpression(importDeclaration, path);
+          return;
+        }
+
+        // Replace JSS exporter
         const {filename} = state.file.opts;
         if (!isJssFile(filename)) {
           return;
         }
 
-        const callee = path.get('callee');
         if (!callee.isIdentifier({name: 'createUseStyles'})) {
           return;
         }
@@ -110,6 +328,8 @@ module.exports = function ({template, types: t}) {
         }
 
         // Create the classes var.
+        // This is required for compatibility when a useStyles() result is
+        // passed around.
         const id = path.scope.generateUidIdentifier('classes');
         const init = t.valueToNode(sheet.classes);
         path.scope.push({id, init});
@@ -121,13 +341,23 @@ module.exports = function ({template, types: t}) {
         // Replace useStyles with a getter for the new `classes` var.
         path.replaceWith(template.expression.ast`(() => ${t.cloneNode(id)})`);
 
+        // Export each classname.
+        const exportDeclaration = path.findParent(
+          (p) => p.type === 'ExportNamedDeclaration'
+        );
+        for (const key in sheet.classes) {
+          const id = t.identifier(classnameId(key));
+          const init = t.valueToNode(sheet.classes[key]);
+          exportDeclaration.insertBefore(
+            template.statement.ast`export const ${id} = ${init}`
+          );
+        }
+
         // Export a variable named CSS with the compiled CSS.
-        const cssExport = template.ast`export const CSS = ${t.stringLiteral(
-          transformCssSync(sheet.toString())
-        )}`;
-        path
-          .findParent((p) => p.type === 'ExportNamedDeclaration')
-          .insertAfter(cssExport);
+        const {css} = transformCssSync(sheet.toString());
+        const cssStr = t.stringLiteral(css);
+        const cssExport = template.ast`export const CSS = ${cssStr}`;
+        exportDeclaration.insertAfter(cssExport);
       },
 
       // Remove the import for react-jss
@@ -144,26 +374,3 @@ module.exports = function ({template, types: t}) {
     },
   };
 };
-
-// Abuses spawnSync to let us run an async function sync.
-function transformCssSync(cssText) {
-  const programText = `
-    const {transformCss} = require('../../../build-system/tasks/jsify-css');
-    transformCss(\`${cssText}\`).then((css) => console./* OK */log(css.toString()));
-  `;
-
-  // TODO: migrate to the helpers in build-system exec.js
-  // after adding args support.
-  const spawnedProcess = spawnSync('node', ['-e', programText], {
-    cwd: __dirname,
-    env: process.env,
-    encoding: 'utf-8',
-    stdio: 'pipe',
-  });
-  if (spawnedProcess.status !== 0) {
-    throw new Error(
-      `Transforming CSS returned status code: ${spawnedProcess.status}. stderr: "${spawnedProcess.stderr}".`
-    );
-  }
-  return spawnedProcess.stdout;
-}

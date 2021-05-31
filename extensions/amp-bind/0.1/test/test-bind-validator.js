@@ -16,7 +16,7 @@
 
 import {BindValidator} from '../bind-validator';
 
-describe('BindValidator (allowUrlProperties=true)', () => {
+describes.sandboxed('BindValidator (allowUrlProperties=true)', {}, () => {
   let val;
 
   beforeEach(() => {
@@ -258,6 +258,10 @@ describe('BindValidator (allowUrlProperties=true)', () => {
       expect(val.canBind('AMP-LIST', 'is-layout-container')).to.be.true;
     });
 
+    it('should support <amp-render>', () => {
+      expect(val.canBind('AMP-RENDER', 'src')).to.be.true;
+    });
+
     it('should support <amp-selector>', () => {
       expect(val.canBind('AMP-SELECTOR', 'disabled')).to.be.true;
       expect(val.canBind('AMP-SELECTOR', 'selected')).to.be.true;
@@ -310,7 +314,7 @@ describe('BindValidator (allowUrlProperties=true)', () => {
   });
 });
 
-describe('BindValidator (allowUrlProperties=false)', () => {
+describes.sandboxed('BindValidator (allowUrlProperties=false)', {}, () => {
   let val;
 
   beforeEach(() => {

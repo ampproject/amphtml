@@ -33,34 +33,34 @@ If this attribute is present and the video is playing manually, the video will
 be "docked" and float on a corner or a custom position when the user scrolls out of the video
 component's visual area. If the user scrolls back, the video reverts to its original static position.
 
-- The video can be docked to a default corner or to a custom fixed position.
-- The video can be dragged and repositioned by the user on a different corner.
-- The video can be flicked to be dismissed from its docked position.
-- Multiple videos on the same page can be docked, but only one at a time will be docked and fixed.
+-   The video can be docked to a default corner or to a custom fixed position.
+-   The video can be dragged and repositioned by the user on a different corner.
+-   The video can be flicked to be dismissed from its docked position.
+-   Multiple videos on the same page can be docked, but only one at a time will be docked and fixed.
 
-### <a id="support"></a> Support
+### Support
 
-This extension is used in conjunction with a [supported video player](../../spec/amp-video-interface.md).
+This extension is used in conjunction with a [supported video player](../../docs/spec/amp-video-interface.md).
 Currently, the supported players are:
 
-- [`amp-brid-player`](https://amp.dev/documentation/components/amp-brid-player)
-- [`amp-brightcove`](https://amp.dev/documentation/components/amp-brightcove)
-- [`amp-dailymotion`](https://amp.dev/documentation/components/amp-dailymotion)
-- [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/amp-delight-player.md)
-- [`amp-ima-video`](https://amp.dev/documentation/components/amp-ima-video)
-- [`amp-video`](https://amp.dev/documentation/components/amp-video)
-- [`amp-video-iframe`](https://amp.dev/documentation/components/amp-video-iframe)
-- [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube)
+-   [`amp-brid-player`](https://amp.dev/documentation/components/amp-brid-player)
+-   [`amp-brightcove`](https://amp.dev/documentation/components/amp-brightcove)
+-   [`amp-dailymotion`](https://amp.dev/documentation/components/amp-dailymotion)
+-   [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-delight-player/amp-delight-player.md)
+-   [`amp-ima-video`](https://amp.dev/documentation/components/amp-ima-video)
+-   [`amp-video`](https://amp.dev/documentation/components/amp-video)
+-   [`amp-video-iframe`](https://amp.dev/documentation/components/amp-video-iframe)
+-   [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube)
 
 ### Triggering conditions
 
 Note that the video won't be docked unless it's playing _manually_. This means:
 
-- If the video has `autoplay`, the feature will not be triggered unless the user clicks on the video first.
-- If the video does not have `autoplay`, the feature will not be triggered unless the user plays the video.
-- If the video is paused while scrolling, it will not be docked.
+-   If the video has `autoplay`, the feature will not be triggered unless the user clicks on the video first.
+-   If the video does not have `autoplay`, the feature will not be triggered unless the user plays the video.
+-   If the video is paused while scrolling, it will not be docked.
 
-### <a id="target"></a> Docking target
+### Docking target
 
 On scroll, the video will minimize to an automatically calculated corner or to a custom defined position.
 
@@ -107,10 +107,10 @@ These can, for example, trigger an [`amp-animation`](https://amp.dev/documentati
 
 ### Event source
 
-Depending on the [docking target](#target), the corresponding event will be triggered from different source elements:
+Depending on the [docking target](#docking-target), the corresponding event will be triggered from different source elements:
 
-- **From the video element itself**, when the video is docked to a corner.
-- **From the slot element**, when the video is docked to the slot element.
+-   **From the video element itself**, when the video is docked to a corner.
+-   **From the slot element**, when the video is docked to the slot element.
 
 You can set `dock`/`undock` action triggers on either the video or the slot to alter your layout differently when combining target types.
 
@@ -143,12 +143,12 @@ background can be overridden or removed.
 A controls group that contains a set of buttons. Only one of these elements are
 displayed at a time depending on the state of the video:
 
-- The **playback** set is displayed on most scenarios and contains play/pause,
-  mute/unmute and fullscreen buttons.
+-   The **playback** set is displayed on most scenarios and contains play/pause,
+    mute/unmute and fullscreen buttons.
 
-- The **scroll back** set only contains a button to scroll the document back
-  to the video's inline position. This is displayed during ad playback in order
-  to allow user interaction.
+-   The **scroll back** set only contains a button to scroll the document back
+    to the video's inline position. This is displayed during ad playback in order
+    to allow user interaction.
 
 The dismiss button is **not** part of a controls set and is always displayed.
 

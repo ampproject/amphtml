@@ -16,9 +16,16 @@
 
 import * as _3p from '../../../3p/3p';
 import {createIframePromise} from '../../../testing/iframe';
-import {ssp} from '../../../ads/ssp';
+import {
+  handlePosition,
+  handlePositionResponsive,
+  keyBy,
+  runWhenFetchingSettled,
+  sizeAgainstWindow,
+  ssp,
+} from '../../../ads/vendors/ssp';
 
-describes.fakeWin('amp-ad-ssp', {}, () => {
+describes.fakeWin('amp-ad-ssp', {}, (env) => {
   let sandbox;
   let win;
   let commonData;
@@ -28,7 +35,7 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
    * Set up our test environment.
    */
   beforeEach(() => {
-    sandbox = window.sandbox;
+    sandbox = env.sandbox;
 
     commonData = {
       width: '200',
@@ -244,8 +251,101 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
     ssp(win, commonData);
 
     expect(sssp.getAds).to.have.been.calledOnce;
-    expect(sssp.getAds).to.have.been.calledWith([
-      {id: 'id-1', width: '200', height: '200', zoneId: '1234'},
-    ]);
+    expect(sssp.getAds).to.have.been.calledWith(
+      [{id: 'id-1', width: '200', height: '200', zoneId: '1234'}],
+      {AMPcallback: sandbox.match.func}
+    );
+  });
+
+  it('sizeAgainstWindow() should generate sizing object', () => {
+    const sizing = sizeAgainstWindow(100, {
+      width: 200,
+      height: 100,
+    });
+
+    expect(sizing).to.eql({width: 100, height: 50});
+  });
+
+  it('sizeAgainstWindow() should not generate sizing object', () => {
+    const sizing = sizeAgainstWindow(100, {
+      width: 100,
+      height: 100,
+    });
+
+    expect(sizing).to.be.undefined;
+  });
+
+  it('handlePosition() should center and size element', () => {
+    const div = win.document.createElement('div');
+    win.document.body.appendChild(div);
+    handlePosition(div, true, {width: '100%', height: '100%'});
+
+    const divStyles = {
+      width: div.style.width,
+      height: div.style.height,
+      position: div.style.position,
+      top: div.style.top,
+      left: div.style.left,
+      transform: div.style.transform,
+      maxWidth: div.style.maxWidth,
+    };
+    expect(divStyles).to.eql({
+      width: '100%',
+      height: '100%',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      maxWidth: '100%',
+    });
+  });
+
+  it('handlePositionResponsive() should center element', () => {
+    const div = win.document.createElement('div');
+    win.document.body.appendChild(div);
+    const e = {data: JSON.stringify({height: 200})};
+    handlePositionResponsive(e, div);
+
+    const divStyles = {
+      height: div.style.height,
+      position: div.style.position,
+      top: div.style.top,
+      left: div.style.left,
+      transform: div.style.transform,
+      maxWidth: div.style.maxWidth,
+    };
+    expect(divStyles).to.eql({
+      height: '200px',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      maxWidth: '100%',
+    });
+  });
+
+  it('keyBy() should return object from array with specified keys', () => {
+    const data = [{id: 'id-1', key1: 'value1', key2: 'value2'}];
+    const dataById = keyBy(data, (item) => item.id);
+
+    expect(dataById['id-1']).to.eql(data[0]);
+  });
+
+  it('runWhenFetchingSettled() should run callbeck only if no registered XHR running', () => {
+    win.fetchingSSPs = {xhr1: true, xhr2: true};
+    const cbSpy = sandbox.spy();
+    const clock = sandbox.useFakeTimers();
+    runWhenFetchingSettled(win.fetchingSSPs, cbSpy);
+
+    clock.tick(100);
+
+    expect(cbSpy).to.not.have.been.called;
+
+    delete win.fetchingSSPs.xhr1;
+    delete win.fetchingSSPs.xhr2;
+
+    clock.tick(200);
+
+    expect(cbSpy).to.have.been.calledOnce;
   });
 });

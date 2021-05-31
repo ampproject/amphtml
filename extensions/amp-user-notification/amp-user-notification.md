@@ -76,22 +76,22 @@ When notification is dismissed:
 
 ### JSON Fields
 
-- `elementId` (string): The HTML ID used on the `amp-user-notification` element.
-- `ampUserId` (string): This ID is passed to both the `data-show-if-href` GET request
-  (as a query string field) and the `data-dismiss-href` POST request (as a json field).
-  The ID will be the same for this user going forward, but no other requests
-  in AMP send the same ID.
-  You can use the ID on your side to lookup/store whether the user has
-  dismissed the notification before.
-- `showNotification` (boolean): Indicates whether the notification should be shown. If `false`, the promise associated to the element is resolved right away.
+-   `elementId` (string): The HTML ID used on the `amp-user-notification` element.
+-   `ampUserId` (string): This ID is passed to both the `data-show-if-href` GET request
+    (as a query string field) and the `data-dismiss-href` POST request (as a json field).
+    The ID will be the same for this user going forward, but no other requests
+    in AMP send the same ID.
+    You can use the ID on your side to lookup/store whether the user has
+    dismissed the notification before.
+-   `showNotification` (boolean): Indicates whether the notification should be shown. If `false`, the promise associated to the element is resolved right away.
 
 ### Delaying Client ID generation until the notification is acknowledged
 
 Optionally, you can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 
-- [CLIENT_ID URL substitution](../../spec/amp-var-substitutions.md#client-id)
-- [`amp-ad`](https://amp.dev/documentation/components/amp-ad)
-- [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
+-   [CLIENT_ID URL substitution](../../docs/spec/amp-var-substitutions.md#client-id)
+-   [`amp-ad`](https://amp.dev/documentation/components/amp-ad)
+-   [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
 
 ## Attributes
 
@@ -101,7 +101,7 @@ When specified, AMP will make a CORS GET request with credentials to the specifi
 on the `data-show-if-href` attribute (see [#1228](https://github.com/ampproject/amphtml/issues/1228) on why this is a GET instead of a POST).
 
 As a best practice to not let the browser cache the GET response values, you should add
-a [`TIMESTAMP` url replacement](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) value to the `data-show-if-href` attribute value.
+a [`TIMESTAMP` url replacement](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md) value to the `data-show-if-href` attribute value.
 You can add it as a query string field (e.g.,
 `data-show-if-href="https://foo.com/api/show-api?timestamp=TIMESTAMP"`).
 
@@ -303,4 +303,4 @@ amp-user-notification.amp-active {
 
 ## Validation
 
-See [amp-user-notification rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/validator-amp-user-notification.protoascii) in the AMP validator specification.
+See [amp-user-notification rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-user-notification/validator-amp-user-notification.protoascii) in the AMP validator specification.

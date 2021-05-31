@@ -17,7 +17,7 @@ import {API_SERVER} from '../constants';
 import {Services} from '../../../../src/services';
 
 import {addParamsToUrl} from '../../../../src/url';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {getSessionId} from './session';
 import {pixelDrop} from './pixel';
 
@@ -28,12 +28,8 @@ import {pixelDrop} from './pixel';
  */
 const getEngData = (params) => {
   const {monitors, loc, ampDoc, pubId} = params;
-  const {
-    dwellMonitor,
-    scrollMonitor,
-    clickMonitor,
-    activeToolsMonitor,
-  } = monitors;
+  const {dwellMonitor, scrollMonitor, clickMonitor, activeToolsMonitor} =
+    monitors;
   const {host, pathname, hash} = loc;
   const viewport = Services.viewportForDoc(ampDoc);
 

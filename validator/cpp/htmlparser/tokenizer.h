@@ -35,6 +35,8 @@ class Tokenizer {
   // as "div" or "iframe".
   explicit Tokenizer(std::string_view html, std::string context_tag = "");
 
+  Tokenizer() = delete;
+
   // Span is a range of bytes in a Tokenizer's buffer. The start is inclusive,
   // the end is exclusive.
   struct Span {
@@ -131,17 +133,10 @@ class Tokenizer {
 
  private:
   // Fragment tokenization is allowed from these parent elements only.
-  inline static constexpr std::array<Atom, 10> kAllowedFragmentContainers {
-      Atom::IFRAME,
-      Atom::NOEMBED,
-      Atom::NOFRAMES,
-      Atom::NOSCRIPT,
-      Atom::PLAINTEXT,
-      Atom::SCRIPT,
-      Atom::STYLE,
-      Atom::TEXTAREA,
-      Atom::TITLE,
-      Atom::XMP,
+  inline static constexpr std::array<Atom, 10> kAllowedFragmentContainers{
+      Atom::IFRAME,    Atom::NOEMBED, Atom::NOFRAMES, Atom::NOSCRIPT,
+      Atom::PLAINTEXT, Atom::SCRIPT,  Atom::STYLE,    Atom::TEXTAREA,
+      Atom::TITLE,     Atom::XMP,
   };
 
   // Returns the next byte from the input stream, doing a buffered read
@@ -153,8 +148,6 @@ class Tokenizer {
   char ReadByte();
 
   // Moves cursor back past one byte.
-  // TODO: Consider implementing peek after checking performance
-  // impact.
   void UnreadByte();
 
   // Reads until next ">".
@@ -218,7 +211,7 @@ class Tokenizer {
 
   // Returns whether the start tag in buffer[data.start:data.end]
   // case-insensitively matches any element of ss.
-  template<typename... Args>
+  template <typename... Args>
   bool StartTagIn(Args... ss);
 
   std::string_view buffer_;
@@ -237,7 +230,7 @@ class Tokenizer {
   // Attribute key and value currently being tokenized.
   RawAttribute pending_attribute_;
 
-  std::vector<RawAttribute> attributes_;
+  std::vector<RawAttribute> attributes_{};
 
   int n_attributes_returned_ = 0;
 
@@ -268,7 +261,8 @@ class Tokenizer {
   // these are manufactured during parsing, not tokenization.
   // This field accounts for only special cases where illegal characters leads
   // to  manufacturing of comments token.
-  // Eg: https://html.spec.whatwg.org/multipage/parsing.html#parse-error-unexpected-question-mark-instead-of-tag-name
+  // Eg:
+  // https://html.spec.whatwg.org/multipage/parsing.html#parse-error-unexpected-question-mark-instead-of-tag-name
   bool is_token_manufactured_ = false;
 
   // Keeps track of all the lines and columns in HTML source.

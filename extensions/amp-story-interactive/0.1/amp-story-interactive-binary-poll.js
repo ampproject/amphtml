@@ -22,7 +22,7 @@ import {CSS} from '../../../build/amp-story-interactive-binary-poll-0.1.css';
 import {computedStyle, setStyle} from '../../../src/style';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /** @const @enum {number} */
 export const FontSize = {
@@ -65,17 +65,19 @@ const buildBinaryPollTemplate = (element) => {
 const buildOptionTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-story-interactive-option">
+    <button class="i-amphtml-story-interactive-option" aria-live="polite">
       <span class="i-amphtml-story-interactive-option-percent-bar"></span>
       <span class="i-amphtml-story-interactive-option-text-container">
         <span class="i-amphtml-story-interactive-option-title"
           ><span class="i-amphtml-story-interactive-option-title-text"></span
         ></span>
-        <span class="i-amphtml-story-interactive-option-percentage-text"
+        <span
+          class="i-amphtml-story-interactive-option-percentage-text"
+          aria-hidden="true"
           >0%</span
         >
       </span>
-    </div>
+    </button>
   `;
 };
 
@@ -220,29 +222,29 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
   /**
    * @override
    */
-  updateOptionPercentages_(responseData) {
+  displayOptionsData(responseData) {
     if (!responseData) {
       return;
     }
 
     const percentages = this.preprocessPercentages_(responseData);
 
-    percentages.forEach((percentage, index) => {
+    this.getOptionElements().forEach((el, index) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
-      const currOption = this.getOptionElements()[index];
-      currOption.querySelector(
+      const percentage = percentages[index];
+      const percentageEl = el.querySelector(
         '.i-amphtml-story-interactive-option-percentage-text'
-      ).textContent = `${percentage}%`;
+      );
+      percentageEl.textContent = `${percentage}%`;
+      percentageEl.removeAttribute('aria-hidden');
 
       setStyle(
-        currOption.querySelector(
-          '.i-amphtml-story-interactive-option-percent-bar'
-        ),
+        el.querySelector('.i-amphtml-story-interactive-option-percent-bar'),
         'transform',
         `scaleX(${percentage * 0.01 * 2})`
       );
 
-      const textContainer = currOption.querySelector(
+      const textContainer = el.querySelector(
         '.i-amphtml-story-interactive-option-text-container'
       );
 
@@ -252,6 +254,12 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
           this.getTransformVal_(percentage) * (index === 0 ? 1 : -1)
         }%) !important`
       );
+      if (responseData[index].selected) {
+        textContainer.setAttribute(
+          'aria-label',
+          'selected ' + textContainer.textContent
+        );
+      }
 
       if (percentage === 0) {
         setStyle(textContainer, 'opacity', '0');

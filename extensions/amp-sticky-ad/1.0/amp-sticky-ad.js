@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Services} from '../../../src/services';
 import {
   computedStyle,
@@ -71,7 +71,7 @@ class AmpStickyAd extends AMP.BaseElement {
       dev().assertElement(this.ad_)
     )
       .then((ad) => {
-        return ad.whenBuilt();
+        return ad.build();
       })
       .then(() => {
         return this.mutateElement(() => {
@@ -188,7 +188,7 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   scheduleLayoutForAd_() {
     whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then((ad) => {
-      ad.whenBuilt().then(this.layoutAd_.bind(this));
+      ad.build().then(() => this.layoutAd_());
     });
   }
 

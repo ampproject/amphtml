@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events';
+import {AmpEvents} from '../../src/core/constants/amp-events';
 import {createCustomEvent} from '../../src/event-helper';
 import {
   createFixtureIframe,
@@ -22,10 +22,10 @@ import {
   poll,
 } from '../../testing/iframe.js';
 
-describe
+describes.sandboxed
   .configure()
   .enableIe()
-  .run('Rendering of amp-img', () => {
+  .run('Rendering of amp-img', {}, () => {
     const timeout = window.ampTestRuntimeConfig.mochaTimeout;
 
     let fixture;
@@ -77,12 +77,13 @@ describe
       expect(largeScreen.className).to.match(/i-amphtml-hidden-by-media-query/);
       expect(smallScreen.offsetHeight).to.not.equal(0);
       expect(largeScreen.offsetHeight).to.equal(0);
+      expect(smallScreen.querySelector('img')).to.exist;
+      expect(largeScreen.querySelector('img')).to.not.exist;
 
       fixture.iframe.width = 600;
       fixture.win.dispatchEvent(createCustomEvent(fixture.win, 'resize', null));
 
-      await fixture.awaitEvent(AmpEvents.LOAD_START, 4);
-      await fixture.awaitEvent(AmpEvents.UNLOAD, 1);
+      await largeScreen.whenLoaded();
 
       expect(smallScreen.className).to.match(/i-amphtml-hidden-by-media-query/);
       expect(largeScreen.className).to.not.match(
@@ -90,6 +91,7 @@ describe
       );
       expect(smallScreen.offsetHeight).to.equal(0);
       expect(largeScreen.offsetHeight).to.not.equal(0);
+      expect(largeScreen.querySelector('img')).to.exist;
     });
 
     it('should not load image if already present (inabox)', async () => {
@@ -103,10 +105,10 @@ describe
 
 // Move IE tests into its own `describe()`
 // so that we can load a different fixture.
-describe
+describes.sandboxed
   .configure()
   .enableIe()
-  .run('Rendering of amp-img', () => {
+  .run('Rendering of amp-img', {}, () => {
     let fixture;
     beforeEach(async () => {
       fixture = await createFixtureIframe('test/fixtures/images-ie.html', 500);

@@ -17,14 +17,15 @@
 const assert = require('assert');
 const fs = require('fs');
 const globby = require('globby');
-const gulp = require('gulp');
-const log = require('fancy-log');
 const path = require('path');
 const posthtml = require('posthtml');
-const through = require('through2');
+const {
+  log,
+  logWithoutTimestamp,
+  logWithoutTimestampLocalDev,
+} = require('../common/logging');
 const {buildNewServer} = require('../server/typescript-compile');
-const {cyan, green, red} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {cyan, green, red} = require('../common/colors');
 
 const transformsDir = path.resolve('build-system/server/new-server/transforms');
 const inputPaths = [`${transformsDir}/**/input.html`];
@@ -36,7 +37,7 @@ let failed = 0;
  * Extracts the input for a test from its input file.
  *
  * @param {string} inputFile
- * @return {string}
+ * @return {Promise<string>}
  */
 async function getInput(inputFile) {
   return fs.promises.readFile(inputFile, 'utf8');
@@ -89,7 +90,7 @@ function getTestPath(inputFile) {
  * Extracts the expected output for a test from its output file.
  *
  * @param {string} inputFile
- * @return {string}
+ * @return {Promise<string>}
  */
 async function getExpectedOutput(inputFile) {
   const expectedOutputFile = inputFile.replace('input.html', 'output.html');
@@ -100,15 +101,14 @@ async function getExpectedOutput(inputFile) {
  * Extracts the JS transform for a test from its transform file.
  * @param {string} inputFile
  * @param {!Object} extraOptions
- * @return {string}
+ * @return {Promise<string>}
  */
 async function getTransform(inputFile, extraOptions) {
   const transformDir = getTransformerDir(inputFile);
   const parsed = path.parse(transformDir);
   const transformPath = path.join(parsed.dir, 'dist', parsed.base);
   const transformFile = (await globby(path.resolve(transformPath, '*.js')))[0];
-  // TODO(rsimha): Change require to import when node v14 is the active LTS.
-  return require(transformFile).default(extraOptions);
+  return (await import(transformFile)).default.default(extraOptions);
 }
 
 /**
@@ -116,7 +116,7 @@ async function getTransform(inputFile, extraOptions) {
  *
  * @param {string} transform
  * @param {string} input
- * @return {string}
+ * @return {Promise<string>}
  */
 async function getOutput(transform, input) {
   return (await posthtml(transform).process(input)).html;
@@ -145,10 +145,12 @@ function loadOptions(inputFile) {
  */
 function logError(testName, err) {
   const {message} = err;
-  console.log(red('✖'), 'Failed', cyan(testName));
-  console.group();
-  console.log(message.split('\n').splice(3).join('\n'));
-  console.groupEnd();
+  logWithoutTimestamp(red('✖'), 'Failed', cyan(testName));
+  console /*OK*/
+    .group();
+  logWithoutTimestamp(message.split('\n').splice(3).join('\n'));
+  console /*OK*/
+    .groupEnd();
 }
 
 /**
@@ -160,9 +162,7 @@ function reportResult() {
     `(${cyan(passed)} passed, ${cyan(failed)} failed).`;
   if (failed > 0) {
     log(red('ERROR:'), result);
-    const err = new Error('Tests failed');
-    err.showStack = false;
-    throw err;
+    throw new Error('Tests failed');
   } else {
     log(green('SUCCESS:'), result);
   }
@@ -171,41 +171,37 @@ function reportResult() {
 /**
  * Runs the test in a single input file
  *
- * @return {!ReadableStream}
+ * @param {string} inputFile
  */
-function runTest() {
-  return through.obj(async (file, enc, cb) => {
-    const inputFile = file.path;
-    const input = await getInput(inputFile);
-    const testName = getTestName(inputFile);
-    const expectedOutput = await getExpectedOutput(inputFile);
-    const extraOptions = loadOptions(inputFile);
-    const transform = await getTransform(inputFile, extraOptions);
-    const output = await getOutput(transform, input);
-    try {
-      assert.strictEqual(output, expectedOutput);
-    } catch (err) {
-      ++failed;
-      logError(testName, err);
-      cb();
-      return;
-    }
-    ++passed;
-    if (!isTravisBuild()) {
-      console.log(green('✔'), 'Passed', cyan(testName));
-    }
-    cb();
-  });
+async function runTest(inputFile) {
+  const testName = getTestName(inputFile);
+  const [input, expectedOutput, transform] = await Promise.all([
+    getInput(inputFile),
+    getExpectedOutput(inputFile),
+    getTransform(inputFile, loadOptions(inputFile)),
+  ]);
+  const output = await getOutput(transform, input);
+  try {
+    assert.strictEqual(output, expectedOutput);
+  } catch (err) {
+    ++failed;
+    logError(testName, err);
+    return;
+  }
+  ++passed;
+  logWithoutTimestampLocalDev(green('✔'), 'Passed', cyan(testName));
 }
 
 /**
- * Tests for AMP server custom transforms. Entry point for `gulp server-tests`.
- *
- * @return {!Vinyl}
+ * Tests for AMP server custom transforms. Entry point for `amp server-tests`.
  */
-function serverTests() {
-  buildNewServer();
-  return gulp.src(inputPaths).pipe(runTest()).on('end', reportResult);
+async function serverTests() {
+  await buildNewServer();
+  const inputFiles = globby.sync(inputPaths);
+  for (const inputFile of inputFiles) {
+    await runTest(inputFile);
+  }
+  reportResult();
 }
 
 module.exports = {

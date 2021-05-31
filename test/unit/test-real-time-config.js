@@ -18,14 +18,14 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import {CONSENT_POLICY_STATE} from '../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../src/core/constants/consent-state';
 import {
   RTC_ERROR_ENUM,
   RealTimeConfigManager,
 } from '../../src/service/real-time-config/real-time-config-impl';
 import {Services} from '../../src/services';
 import {Xhr} from '../../src/service/xhr-impl';
-import {cancellation} from '../../src/error';
+import {cancellation} from '../../src/error-reporting';
 import {createElementWithAttributes} from '../../src/dom';
 import {dev, user} from '../../src/log';
 import {isFiniteNumber} from '../../src/types';
@@ -33,7 +33,7 @@ import {isFiniteNumber} from '../../src/types';
 describes.realWin('real-time-config service', {amp: true}, (env) => {
   let element;
   let fetchJsonStub;
-  let getCalloutParam_, maybeExecuteRealTimeConfig_, validateRtcConfig_;
+  let getCalloutParam_, execute_, validateRtcConfig_;
   let truncUrl_, inflateAndSendRtc_, sendErrorMessage;
   let rtc;
 
@@ -61,7 +61,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       .returns(urlReplacements);
 
     rtc = new RealTimeConfigManager(doc);
-    maybeExecuteRealTimeConfig_ = rtc.maybeExecuteRealTimeConfig.bind(rtc);
+    execute_ = rtc.execute.bind(rtc);
     getCalloutParam_ = rtc.getCalloutParam_.bind(rtc);
     validateRtcConfig_ = rtc.validateRtcConfig_.bind(rtc);
     truncUrl_ = rtc.truncUrl_.bind(rtc);
@@ -122,7 +122,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     });
   });
 
-  describe('#maybeExecuteRealTimeConfig_', () => {
+  describe('#execute_', () => {
     function executeTest(args) {
       const {
         urls,
@@ -145,7 +145,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         );
       });
       const customMacros = args['customMacros'] || {};
-      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(
+      const rtcResponsePromiseArray = execute_(
         element,
         customMacros,
         /* consentState */ undefined,
@@ -302,6 +302,30 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         expectedRtcArray,
       });
     });
+
+    it('should fetch RTC from amp-script URIs', async () => {
+      const ampScriptFetch = env.sandbox.stub();
+      ampScriptFetch.returns(Promise.resolve({targeting: ['sports']}));
+      env.sandbox
+        .stub(Services, 'scriptForDocOrNull')
+        .returns(Promise.resolve({fetch: ampScriptFetch}));
+
+      const urls = ['amp-script:scriptId.functionName'];
+      setRtcConfig({urls, vendors: {}, timeoutMillis: 500});
+      const rtcResponse = await execute_(
+        element,
+        /* customMacros */ {},
+        /* consentState */ undefined,
+        /* consentString */ undefined,
+        /* consentMetadata */ undefined,
+        () => {}
+      );
+      expect(ampScriptFetch).calledWithExactly(
+        'amp-script:scriptId.functionName'
+      );
+      expect(rtcResponse[0].response).deep.equal({targeting: ['sports']});
+    });
+
     it('should send RTC callouts to inflated vendor URLs', () => {
       const vendors = {
         'fAkeVeNdOR': {SLOT_ID: 1, PAGE_ID: 2},
@@ -608,7 +632,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     for (const consentState in CONSENT_POLICY_STATE) {
       it(`should handle consentState ${consentState}`, () => {
         setRtcConfig({urls: ['https://foo.com']});
-        const rtcResult = maybeExecuteRealTimeConfig_(
+        const rtcResult = execute_(
           element,
           {},
           CONSENT_POLICY_STATE[consentState],
@@ -776,6 +800,27 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       return rtc.promiseArray_[0].then((errorResponse) => {
         expect(errorResponse).to.be.undefined;
       });
+    });
+
+    it('should expand globally allowed macros', async () => {
+      const url = 'https://www.foo.example/?cid=CLIENT_ID(foo)';
+      rtc.rtcConfig_ = {
+        timeoutMillis: 1000,
+      };
+      const macros = {};
+      inflateAndSendRtc_(
+        url,
+        macros,
+        /* errorReportingUrl */ undefined,
+        () => {} // checkStillCurrent
+      );
+      await rtc.promiseArray_[0];
+      expect(fetchJsonStub).to.be.called;
+      expect(
+        fetchJsonStub.calledWithMatch(
+          /https:\/\/www.foo.example\/\?cid=amp-\S+$/
+        )
+      ).to.be.true;
     });
   });
 

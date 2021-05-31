@@ -17,10 +17,21 @@
 const pathmodule = require('path');
 const {addNamed} = require('@babel/helper-module-imports');
 
+/**
+ * @param {*} babel
+ * @param {{
+ *  importFrom?: string,
+ * }=} options
+ * @return {{
+ *   visitor: {
+ *     CallExpression: {Funcion(path: string): void}
+ *  }
+ * }}
+ */
 module.exports = function (babel, options = {}) {
   const {types: t} = babel;
   const promiseResolveMatcher = t.buildMatchMemberExpression('Promise.resolve');
-  const {importFrom = 'src/resolved-promise'} = options;
+  const {importFrom = 'src/core/data-structures/promise'} = options;
 
   return {
     visitor: {
@@ -54,8 +65,12 @@ module.exports = function (babel, options = {}) {
   };
 };
 
-// Even though we are using the path module, JS Modules should never have
-// their paths specified in Windows format.
+/**
+ * Even though we are using the path module, JS Modules should never have
+ * their paths specified in Windows format.
+ * @param {string} path
+ * @return {string}
+ */
 function toPosix(path) {
   return path.replace(/\\\\?/g, '/');
 }

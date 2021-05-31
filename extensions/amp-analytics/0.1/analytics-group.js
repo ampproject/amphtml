@@ -15,11 +15,10 @@
  */
 
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {dev, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
-import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 
 /**
@@ -106,7 +105,7 @@ export class AnalyticsGroup {
     };
     if (
       this.triggerCount_ < IMMEDIATE_TRIGGER_THRES ||
-      !isAnalyticsChunksExperimentOn(this.win_)
+      getMode(this.win_).runtime == 'inabox'
     ) {
       task();
     } else {
@@ -119,16 +118,4 @@ export class AnalyticsGroup {
     this.triggerCount_++;
     return deferred.promise;
   }
-}
-
-/**
- * Determine if the analytics-chunks experiment should be applied
- * @param {!Window} win
- * @return {boolean}
- */
-export function isAnalyticsChunksExperimentOn(win) {
-  if (getMode(win).runtime == 'inabox') {
-    return isExperimentOn(win, 'analytics-chunks-inabox');
-  }
-  return true;
 }

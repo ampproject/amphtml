@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-nested-menu-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
@@ -26,7 +26,7 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 const TAG = 'amp-nested-menu';
 
@@ -40,6 +40,11 @@ const Side = {
 const ANIMATION_TIMEOUT = 350;
 
 export class AmpNestedMenu extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -118,11 +123,6 @@ export class AmpNestedMenu extends AMP.BaseElement {
     // If support is added for other layouts, we should ensure that
     // lazy loading by sidebar does not cause FOUC when sidebar first opens.
     return layout == Layout.FILL;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /**

@@ -22,18 +22,17 @@ import {
   StateProperty,
   UIType,
 } from '../amp-story-store-service';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
-import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
-import {CommonSignals} from '../../../../src/common-signals';
-import {Keys} from '../../../../src/utils/key-codes';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
+import {Keys} from '../../../../src/core/constants/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/visibility-state';
+import {VisibilityState} from '../../../../src/core/constants/visibility-state';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -67,7 +66,7 @@ describes.realWin(
     async function createStoryWithPages(count, ids = [], autoAdvance = false) {
       element = win.document.createElement('amp-story');
 
-      Array(count)
+      const pageArray = Array(count)
         .fill(undefined)
         .map((unused, i) => {
           const page = win.document.createElement('amp-story-page');
@@ -81,6 +80,8 @@ describes.realWin(
 
       win.document.body.appendChild(element);
       story = await element.getImpl();
+
+      return pageArray;
     }
 
     /**
@@ -102,9 +103,6 @@ describes.realWin(
       ampdoc = env.ampdoc;
 
       replaceStateStub = env.sandbox.stub(win.history, 'replaceState');
-      // Required by the bookend code.
-      win.document.title = 'Story';
-      env.ampdoc.defaultView = env.win;
 
       const localizationService = new LocalizationService(win.document.body);
       env.sandbox
@@ -172,28 +170,6 @@ describes.realWin(
       expect(story.element.innerText).to.not.have.string(textToRemove);
     });
 
-    it('should preload the bookend if navigating to the last page', async () => {
-      await createStoryWithPages(1, ['cover']);
-
-      const buildBookendStub = env.sandbox.stub(
-        story,
-        'buildAndPreloadBookend_'
-      );
-      await story.layoutCallback();
-      expect(buildBookendStub).to.have.been.calledOnce;
-    });
-
-    it('should not preload the bookend if not on the last page', async () => {
-      await createStoryWithPages(2, ['cover']);
-
-      const buildBookendStub = env.sandbox.stub(
-        story,
-        'buildAndPreloadBookend_'
-      );
-      await story.layoutCallback();
-      expect(buildBookendStub).to.not.have.been.called;
-    });
-
     it('should prerender/load the share menu', async () => {
       await createStoryWithPages(2);
 
@@ -220,7 +196,6 @@ describes.realWin(
 
     it('should pause/resume pages when switching pages', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
-      env.sandbox.stub(story, 'maybePreloadBookend_').returns();
 
       await story.layoutCallback();
       // Getting all the AmpStoryPage objects.
@@ -247,18 +222,17 @@ describes.realWin(
       await createStoryWithPages();
       const pages = story.element.querySelectorAll('amp-story-page');
 
-      element.build();
+      element.buildInternal();
 
       expect(pages[0].hasAttribute('active')).to.be.true;
       expect(pages[1].hasAttribute('active')).to.be.false;
 
       // Stubbing because we need to assert synchronously
-      env.sandbox
-        .stub(element.implementation_, 'mutateElement')
-        .callsFake((mutator) => {
-          mutator();
-          return Promise.resolve();
-        });
+      const impl = await element.getImpl(false);
+      env.sandbox.stub(impl, 'mutateElement').callsFake((mutator) => {
+        mutator();
+        return Promise.resolve();
+      });
 
       const eventObj = createEvent('keydown');
       eventObj.key = Keys.RIGHT_ARROW;
@@ -346,26 +320,6 @@ describes.realWin(
         {ampStoryNavigationPath: [firstPageId]},
         ''
       );
-    });
-
-    it('should not block layoutCallback when bookend xhr fails', async () => {
-      await createStoryWithPages(1, ['page-1']);
-      env.sandbox.stub(AmpStoryBookend.prototype, 'build');
-
-      const bookendXhr = env.sandbox
-        .stub(AmpStoryBookend.prototype, 'loadConfigAndMaybeRenderBookend')
-        .returns(Promise.reject());
-
-      story.buildCallback();
-
-      return story
-        .layoutCallback()
-        .then(() => {
-          expect(bookendXhr).to.have.been.calledOnce;
-        })
-        .catch((error) => {
-          expect(error).to.be.undefined;
-        });
     });
 
     it('should NOT update page id in browser history if ad', async () => {
@@ -717,7 +671,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
         expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
           PageState.NOT_ACTIVE
@@ -736,7 +690,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.HIDDEN);
         expect(setStateStub).to.have.been.calledOnceWithExactly(
           PageState.PAUSED
@@ -755,7 +709,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
         expect(setStateStub).to.have.been.calledOnceWithExactly(
           PageState.PAUSED
@@ -775,7 +729,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
         story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
         expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
@@ -787,7 +741,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
         story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
         story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
@@ -959,7 +913,6 @@ describes.realWin(
       });
 
       it('should add previous visited attribute', async () => {
-        env.sandbox.stub(story, 'maybePreloadBookend_').returns();
         env.sandbox
           .stub(utils, 'setAttributeInMutate')
           .callsFake((el, attr) => el.element.setAttribute(attr, ''));
@@ -1145,21 +1098,41 @@ describes.realWin(
         });
       });
 
-      describe('amp-story NO_NEXT_PAGE', () => {
-        describe('without #cap=swipe', () => {
-          it('should open the bookend when tapping on the last page', async () => {
-            await createStoryWithPages(1, ['cover']);
-
-            await story.layoutCallback();
-            // Click on right side of the screen to trigger page advancement.
-            const clickEvent = new MouseEvent('click', {clientX: 200});
-            story.activePage_.element.dispatchEvent(clickEvent);
-            await waitFor(() => {
-              return !!story.storeService_.get(StateProperty.BOOKEND_STATE);
-            }, 'BOOKEND_STATE should be true');
-          });
+      describe('#getElementDistance', () => {
+        it('should return -1 for elements without a page', async () => {
+          await createStoryWithPages(3);
+          await story.layoutCallback();
+          const elToFind = win.document.createElement('video');
+          const distance = story.getElementDistance(elToFind);
+          expect(distance).to.equal(-1);
         });
 
+        it('should find elements inside organic pages', async () => {
+          const pageArray = await createStoryWithPages(3);
+          await story.layoutCallback();
+          const elToFind = win.document.createElement('video');
+          const hostPage = pageArray[1];
+          hostPage.setAttribute('distance', '4');
+          hostPage.appendChild(elToFind);
+          const distance = story.getElementDistance(elToFind);
+          expect(distance).to.equal(4);
+        });
+
+        it('should find elements inside ad pages / FIE', async () => {
+          const pageArray = await createStoryWithPages(3);
+          await story.layoutCallback();
+          const elToFind = win.document.createElement('video');
+          const hostPage = pageArray[1];
+          hostPage.setAttribute('distance', '4');
+          const iframe = win.document.createElement('iframe');
+          hostPage.appendChild(iframe);
+          iframe.contentDocument.body.appendChild(elToFind);
+          const distance = story.getElementDistance(elToFind);
+          expect(distance).to.equal(4);
+        });
+      });
+
+      describe('amp-story NO_NEXT_PAGE', () => {
         describe('with #cap=swipe', () => {
           before(() => {
             hasSwipeCapability = true;
@@ -1207,42 +1180,15 @@ describes.realWin(
 
             story.activePage_.advancement_.onAdvance();
 
-            await waitFor(() => {
-              if (sendMessageStub.calledOnce) {
-                expect(sendMessageStub).to.be.calledWithExactly(
-                  'selectDocument',
-                  {
-                    next: true,
-                    advancementMode: AdvancementMode.AUTO_ADVANCE_TIME,
-                  }
-                );
-                return true;
-              }
-              return false;
-            }, 'sendMessageStub should be called');
+            expect(sendMessageStub).to.be.calledWithExactly('selectDocument', {
+              next: true,
+              advancementMode: AdvancementMode.AUTO_ADVANCE_TIME,
+            });
           });
         });
       });
 
       describe('amp-story NO_PREVIOUS_PAGE', () => {
-        describe('without #cap=swipe', () => {
-          it('should open the bookend when tapping on the last page', async () => {
-            await createStoryWithPages(1, ['cover']);
-            const showPageHintStub = env.sandbox.stub(
-              story.ampStoryHint_,
-              'showFirstPageHintOverlay'
-            );
-
-            await story.layoutCallback();
-            // Click on left side of the screen to trigger page advancement.
-            const clickEvent = new MouseEvent('click', {clientX: 10});
-            story.activePage_.element.dispatchEvent(clickEvent);
-            await waitFor(() => {
-              return showPageHintStub.calledOnce;
-            }, 'showPageHintStub should be called');
-          });
-        });
-
         describe('with #cap=swipe', () => {
           before(() => {
             hasSwipeCapability = true;
@@ -1656,14 +1602,6 @@ describes.realWin(
       });
 
       describe('amp-story rewriteStyles', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-story-responsive-units', true);
-        });
-
-        afterEach(() => {
-          toggleExperiment(win, 'amp-story-responsive-units', false);
-        });
-
         it('should rewrite vw styles', async () => {
           await createStoryWithPages(1, ['cover']);
           const styleEl = win.document.createElement('style');

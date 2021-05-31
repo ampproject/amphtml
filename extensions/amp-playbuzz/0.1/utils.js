@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {dict} from './../../../src/utils/object';
+import {dict} from './../../../src/core/types/object';
 import {getData} from './../../../src/event-helper';
-import {parseJson} from './../../../src/json';
+import {parseJson} from './../../../src/core/types/object/json';
 import {
   parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
-import {rethrowAsync} from './../../../src/log';
+import {rethrowAsync} from './../../../src/core/error';
 
 /**
  * Returns a function, that, as long as it continues to be invoked, will not
@@ -54,7 +54,6 @@ export function debounce(func, wait, immediate) {
 /**
  *
  * Gets an element creator using a given document to create elements.
- * @export getElementCreator
  * @param {Document} document
  * @return {!Function}
  */

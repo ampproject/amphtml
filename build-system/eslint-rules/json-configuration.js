@@ -16,8 +16,8 @@
 'use strict';
 
 /**
- * Finds the jsonConfiguration helper function from src/json.js, and performs
- * validation on its input.
+ * Finds the jsonConfiguration helper function from src/core/types/object/json,
+ * and performs validation on its input.
  */
 
 module.exports = function (context) {
@@ -25,6 +25,10 @@ module.exports = function (context) {
     (name) => `CallExpression[callee.name=${name}]`
   );
 
+  /**
+   * @param {*} node
+   * @return {Object}
+   */
   function verifyPath(node) {
     for (let n = node; n; n = n.parent) {
       const {parent} = n;

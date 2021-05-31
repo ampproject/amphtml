@@ -107,6 +107,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
   'AMP-PLAYBUZZ': true,
+  'AMP-RENDER': true,
   'AMP-TWITTER': true,
 };
 /**
@@ -115,7 +116,8 @@ export const LOADING_ELEMENTS_ = {
  * reasons, so they are listed individually.
  * @private @const {!RegExp}
  */
-const videoPlayerTagNameRe = /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO|AMP-IMA-VIDEO/i;
+const videoPlayerTagNameRe =
+  /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO|AMP-IMA-VIDEO/i;
 
 /**
  * Whether aspect-ratio CSS can be used to implement responsive layouts.
@@ -351,9 +353,9 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
   // making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
-    const layout = /** @type {!Layout} */ (devAssert(
-      parseLayout(completedLayoutAttr)
-    ));
+    const layout = /** @type {!Layout} */ (
+      devAssert(parseLayout(completedLayoutAttr))
+    );
     if (
       (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) &&
       element.firstElementChild

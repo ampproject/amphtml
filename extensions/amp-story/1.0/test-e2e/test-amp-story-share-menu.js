@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller';
-import sleep from 'sleep-promise';
+import {Key} from '../../../../build-system/tasks/e2e/e2e-types';
 
 describes.endtoend(
   'amp story share menu',
   {
-    testUrl: 'http://localhost:8000/test/manual/amp-story/amp-story.amp.html',
+    fixture: 'amp-story/amp-story.amp.html',
     browsers: ['chrome'],
     environments: ['single'],
     deviceName: 'iPhone X',
@@ -28,6 +27,10 @@ describes.endtoend(
   async (env) => {
     /** @type {SeleniumWebDriverController} */
     let controller;
+
+    function sleep(ms) {
+      return new Promise((res) => setTimeout(res, ms));
+    }
 
     beforeEach(() => {
       controller = env.controller;

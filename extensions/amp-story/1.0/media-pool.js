@@ -32,7 +32,7 @@ import {Services} from '../../../src/services';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
-import {findIndex} from '../../../src/utils/array';
+import {findIndex} from '../../../src/core/types/array';
 import {isConnectedNode, matches} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 import {userInteractedWith} from '../../../src/video-interface';
@@ -256,9 +256,9 @@ export class MediaPool {
       // comparison with the itervar below, so we have to roll it by hand.
       for (let i = count; i > 0; i--) {
         // Use seed element at end of set to prevent wasting it.
-        const mediaEl = /** @type {!PoolBoundElementDef} */ (i == 1
-          ? mediaElSeed
-          : mediaElSeed.cloneNode(/* deep */ true));
+        const mediaEl = /** @type {!PoolBoundElementDef} */ (
+          i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true)
+        );
         mediaEl.addEventListener('error', this.onMediaError_, {capture: true});
         mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
         // In Firefox, cloneNode() does not properly copy the muted property
@@ -514,38 +514,41 @@ export class MediaPool {
     return this.enqueueMediaElementTask_(
       poolMediaEl,
       new SwapIntoDomTask(placeholderEl)
-    ).then(
-      () => {
+    )
+      .then(() =>
+        Promise.all([
+          this.maybeResetAmpMedia_(ampMediaForPoolEl),
+          this.maybeResetAmpMedia_(ampMediaForDomEl),
+        ])
+      )
+      .then(() =>
         this.enqueueMediaElementTask_(
           poolMediaEl,
           new UpdateSourcesTask(this.win_, sources)
-        );
-        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(() => {
-          this.maybeResetAmpMedia_(ampMediaForPoolEl);
-          this.maybeResetAmpMedia_(ampMediaForDomEl);
-        });
-      },
-      () => {
+        )
+      )
+      .then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()))
+      .catch(() => {
         this.forceDeallocateMediaElement_(poolMediaEl);
-      }
-    );
+      });
   }
 
   /**
    * @param {?Element} componentEl
+   * @return {!Promise}
    * @private
    */
   maybeResetAmpMedia_(componentEl) {
     if (!componentEl) {
-      return;
+      return Promise.resolve();
     }
 
     if (componentEl.tagName.toLowerCase() == 'amp-audio') {
       // TODO(alanorozco): Implement reset for amp-audio
-      return;
+      return Promise.resolve();
     }
 
-    componentEl.getImpl().then((impl) => {
+    return componentEl.getImpl().then((impl) => {
       if (impl.resetOnDomChange) {
         impl.resetOnDomChange();
       }
@@ -578,11 +581,13 @@ export class MediaPool {
    */
   swapPoolMediaElementOutOfDom_(poolMediaEl) {
     const placeholderElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
-    const placeholderEl = /** @type {!PlaceholderElementDef} */ (dev().assertElement(
-      this.placeholderEls_[placeholderElId],
-      `No media element ${placeholderElId} to put back into DOM after` +
-        'eviction.'
-    ));
+    const placeholderEl = /** @type {!PlaceholderElementDef} */ (
+      dev().assertElement(
+        this.placeholderEls_[placeholderElId],
+        `No media element ${placeholderElId} to put back into DOM after` +
+          'eviction.'
+      )
+    );
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
 
     const swapOutOfDom = this.enqueueMediaElementTask_(

@@ -15,7 +15,7 @@
  */
 
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from '../../../build/amp-stream-gallery-0.1.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
@@ -27,7 +27,7 @@ import {
 import {Services} from '../../../src/services';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   dispatchCustomEvent,
   isRTL,
@@ -38,7 +38,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /** @enum {number} */
 const InsetArrowVisibility = {
@@ -78,6 +78,11 @@ const TAG = 'amp-stream-gallery';
  * - Does not support autoplay
  */
 class AmpStreamGallery extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -271,11 +276,6 @@ class AmpStreamGallery extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

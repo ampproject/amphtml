@@ -15,7 +15,7 @@
  */
 
 import {DayPickerPhrases} from './defaultPhrases';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {requireExternal} from '../../../src/module';
 import {withDatePickerCommon} from './date-picker-common';
 import {wrap as withMaximumNights} from './wrappers/maximum-nights';
@@ -25,14 +25,14 @@ import {wrap as withMaximumNights} from './wrappers/maximum-nights';
  * @return {typeof React.Component} A date range picker component class
  */
 function createDateRangePickerBase() {
-  const constants = /** @type {JsonObject} */ (requireExternal(
-    'react-dates/constants'
-  ));
+  const constants = /** @type {JsonObject} */ (
+    requireExternal('react-dates/constants')
+  );
   const DAY_SIZE = constants['DAY_SIZE'];
   const HORIZONTAL_ORIENTATION = constants['HORIZONTAL_ORIENTATION'];
-  const DayPickerRangeController = /** @type {typeof  React.Component} */ (requireExternal(
-    'react-dates'
-  )['DayPickerRangeController']);
+  const DayPickerRangeController = /** @type {typeof  React.Component} */ (
+    requireExternal('react-dates')['DayPickerRangeController']
+  );
 
   const defaultProps = dict({
     'startDate': null, // TODO: use null

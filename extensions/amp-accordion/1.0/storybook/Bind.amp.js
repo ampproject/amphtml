@@ -16,19 +16,18 @@
 
 import * as Preact from '../../../../src/preact';
 import {boolean, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-accordion-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [
       {name: 'amp-bind', version: '0.1'},
       {name: 'amp-accordion', version: '1.0'},
     ],
-    experiments: ['amp-accordion-bento'],
+    experiments: ['bento'],
   },
 };
 
@@ -43,15 +42,15 @@ export const withAmpBind = () => {
       >
         <section data-amp-bind-expanded="section1">
           <h2>Section 1</h2>
-          <p>Content in section 1.</p>
+          <div>Puppies are cute.</div>
         </section>
         <section data-amp-bind-expanded="section2">
           <h2>Section 2</h2>
-          <div>Content in section 2.</div>
+          <div>Kittens are furry.</div>
         </section>
-        <section expanded data-amp-bind-expanded="section3">
+        <section data-amp-bind-expanded="section3">
           <h2>Section 3</h2>
-          <div>Content in section 3.</div>
+          <div>Elephants have great memory.</div>
         </section>
       </amp-accordion>
 

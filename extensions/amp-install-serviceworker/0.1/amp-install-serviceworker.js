@@ -20,7 +20,7 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeFragment} from '../../../src/url';

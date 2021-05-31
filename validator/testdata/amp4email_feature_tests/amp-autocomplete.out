@@ -20,7 +20,7 @@ FAIL
 |  -->
 |  <!DOCTYPE html>
 |  <!-- "data-amp-autocomplete-opt-in" is disallowed by the validator -->
-|  <html ⚡4email data-amp-autocomplete-opt-in>
+|  <html ⚡4email data-amp-autocomplete-opt-in data-css-strict>
 >> ^~~~~~~~~
 amp4email_feature_tests/amp-autocomplete.html:22:0 The attribute 'data-amp-autocomplete-opt-in' in tag 'html' is set to the invalid value ''. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |    <head>

@@ -24,7 +24,7 @@ getConsentPolicy() {
 }
 ```
 
-**Note**: Currently, only the 'default' consent policy is supported.
+Note: Currently, only the `default` consent policy is supported.
 
 ## Advanced blocking behaviors
 
@@ -32,30 +32,39 @@ getConsentPolicy() {
 
 AMP provides the consent state information for vendors to customize their behavior based on user control.
 
-The state has the following valid values.
+This is `null` when no `<amp-consent>` tag is included. Otherwise, its value is one of [`CONSENT_POLICY_STATE`](../../src/core/constants/consent-state.js):
 
-- `null` : no `<amp-consent>` is included
-- `CONSENT_POLICY_STATE.UNKNOWN` : The consent state is unknown
-- `CONSENT_POLICY_STATE.SUFFICIENT` : The consent is accepted
-- `CONSENT_POLICY_STATE.INSUFFICIENT` : The consent is rejected
-- `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED` : The consent state is unknown, and `<amp-consent>` is informed to not prompt UI.
+-   `SUFFICIENT` (`1`): Consent is granted
+-   `INSUFFICIENT` (`2`): Consent is not granted
+-   `UNKNOWN_NOT_REQUIRED` (`3`): Consent is unknown, and `<amp-consent>` is informed to not prompt UI.
+-   `UNKNOWN` (`4`): Consent is unknown
 
 #### If you integrate with AMP as a first party AMP extension
 
-Use the `getConsentPolicyState` API. It returns a promise with one of the `CONSENT_POLICY_STATE` value.
+Use the `getConsentPolicyState` API. It returns a promise with one of the valid `CONSENT_POLICY_STATE` values.
 
 #### If you integrate with AMP as a third party ad vendor
 
-Access the value within the ad iframe using `window.context.initialConsentState`. Check [this](https://github.com/ampproject/amphtml/blob/master/ads/README.md#amp-consent-integration) for more details.
+Access the value within the ad iframe using `window.context.initialConsentState`. Check [this](https://github.com/ampproject/amphtml/blob/main/ads/README.md#amp-consent-integration) for more details.
 
 #### If you integrate with AMP as an analytics vendor
 
-Get the value using `CONSENT_STATE` macro, or `${consentState}`. A request with the varaible will only be sent out after the state has resolved to one of the above state.
+Get the value using `CONSENT_STATE` macro, or `${consentState}`. A request with the variable will only be sent out after the state has resolved to one of the above state.
+
+#### If you integrate with AMP through an iframe.
+
+To get consent data from the host:
+
+-   Documents loaded by `<amp-iframe>` [may post a `send-consent-data` message](https://amp.dev/documentation/components/amp-iframe/#iframe-&-consent-data).
+
+-   Documents loaded by `<amp-video-iframe>` [may use the `getConsentData` method](<https://amp.dev/documentation/components/amp-video-iframe/#getconsentdata()>).
+
+-   Third party video extensions (like `<amp-youtube>`) can use utilities like `getConsentPolicyInfo`.
 
 ### On Consent String
 
 AMP collects raw consent string value from `checkConsentHref` endpoint or from the CMP. The it passes the raw consent string to vendors without modification.
-It is then up to the vendor to intepret the string and customize behavior accordingly. AMP recommends handling the string on the server side.
+It is then up to the vendor to interpret the string and customize behavior accordingly. AMP recommends handling the string on the server side.
 
 AMP will always pass the local stored consent string if there's one. Update to the string will only be reflected the next page load.
 
@@ -65,13 +74,13 @@ Use the `getConsentPolicyInfo` API. `getConsentPolicyInfo` returns a promise wit
 
 #### If you integrate with AMP as an analytics vendor
 
-Get the value using `CONSENT_STRING` macro, or `${consentString}`. A request with the varaible will only be sent out after the consent policy has resolved and the stored consent string (if any) will be returned.
+Get the value using `CONSENT_STRING` macro, or `${consentString}`. A request with the variable will only be sent out after the consent policy has resolved and the stored consent string (if any) will be returned.
 
 ### On Related Information
 
 In addition to the consent state and consent string, AMP extensions can also use the
 `getConsentPolicySharedData` API to receive additional consent related information about
-the user from the page owner. See [this](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#response) for details about the `shareData`.
+the user from the page owner. See [this](https://github.com/ampproject/amphtml/blob/main/extensions/amp-consent/amp-consent.md#response) for details about the `shareData`.
 
 ### On Consent Metadata
 

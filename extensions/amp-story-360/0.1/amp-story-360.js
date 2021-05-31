@@ -16,7 +16,7 @@
 
 /**
  * Must be served over https for permissions API to work.
- * For local development, run gulp --host="192.168.44.47" --https --extensions=amp-story-360
+ * For local development, run amp --host="192.168.44.47" --https --extensions=amp-story-360
  */
 
 import {
@@ -24,7 +24,7 @@ import {
   StateProperty,
 } from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-360-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
@@ -111,9 +111,7 @@ const buildActivateButtonTemplate = (element) => htmlFor(element)`
 const buildDiscoveryTemplate = (element) => htmlFor(element)`
     <div class="i-amphtml-story-360-discovery" aria-live="polite">
       <div class="i-amphtml-story-360-discovery-animation"></div>
-      <span class="i-amphtml-story-360-discovery-text" aria-hidden="true">
-        Move device to explore
-      </span>
+      <span class="i-amphtml-story-360-discovery-text"></span>
     </div>
   `;
 
@@ -562,6 +560,14 @@ export class AmpStory360 extends AMP.BaseElement {
     ) {
       const page = this.getPage_();
       const discoveryTemplate = page && buildDiscoveryTemplate(page);
+      // Support translation of discovery dialogue text.
+      this.mutateElement(() => {
+        discoveryTemplate.querySelector(
+          '.i-amphtml-story-360-discovery-text'
+        ).textContent = this.localizationService_.getLocalizedString(
+          LocalizedStringId.AMP_STORY_DISCOVERY_DIALOG_TEXT
+        );
+      });
       this.mutateElement(() => page.appendChild(discoveryTemplate));
     }
   }
@@ -674,16 +680,36 @@ export class AmpStory360 extends AMP.BaseElement {
     // Used to update the video in animate_.
     this.ampVideoEl_ = this.element.querySelector('amp-video');
 
+    const mediaEl = ampImgEl || this.ampVideoEl_;
     userAssert(
-      ampImgEl || this.ampVideoEl_,
+      mediaEl,
       'amp-story-360 must contain an amp-img or amp-video element.'
     );
+    if (mediaEl) {
+      this.setAccessibleText_(mediaEl);
+    }
 
     if (ampImgEl) {
       return this.setupAmpImgRenderer_(ampImgEl);
     }
     if (this.ampVideoEl_) {
       return this.setupAmpVideoRenderer_();
+    }
+  }
+
+  /**
+   * Puts a11y text on canvas element so it can be read by screen readers.
+   * The media element is hidden by CSS it no longer can read it.
+   * @param {!Element} mediaEl Either an amp-img or amp-video
+   * @private
+   */
+  setAccessibleText_(mediaEl) {
+    const altTags = ['alt', 'title', 'aria-label']; /** In order of priority. */
+    const altTag = altTags.find((attr) => mediaEl.getAttribute(attr));
+    if (altTag) {
+      const altText = mediaEl.getAttribute(altTag);
+      this.canvas_.setAttribute('role', 'img');
+      this.canvas_.setAttribute('aria-label', altText);
     }
   }
 
@@ -697,9 +723,7 @@ export class AmpStory360 extends AMP.BaseElement {
     owners.setOwner(ampImgEl, this.element);
     owners.scheduleLayout(this.element, ampImgEl);
     return whenUpgradedToCustomElement(ampImgEl)
-      .then(() => {
-        return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
-      })
+      .then(() => ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
@@ -721,9 +745,7 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   setupAmpVideoRenderer_() {
     return whenUpgradedToCustomElement(dev().assertElement(this.ampVideoEl_))
-      .then(() => {
-        return this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END);
-      })
+      .then(() => this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END))
       .then(() => {
         const alreadyHasData =
           dev().assertElement(this.ampVideoEl_.querySelector('video'))
@@ -780,6 +802,14 @@ export class AmpStory360 extends AMP.BaseElement {
     if (this.isPlaying_) {
       this.animate_();
     }
+    this.markAsLoaded_();
+  }
+
+  /** @private */
+  markAsLoaded_() {
+    this.mutateElement(() => {
+      this.element.classList.add('i-amphtml-story-360-loaded');
+    });
   }
 
   /** @private */

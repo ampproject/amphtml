@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../src/amp-events';
+import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {
   AutoLightboxEvents,
   isActionableByTap,
 } from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {
   LIGHTBOX_THUMBNAIL_AD,
   LIGHTBOX_THUMBNAIL_UNKNOWN,
@@ -34,25 +34,20 @@ import {
   iterateCursor,
 } from '../../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../../src/log';
-import {map} from '../../../../src/utils/object';
+import {map} from '../../../../src/core/types/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
-import {toArray} from '../../../../src/types';
+import {toArray} from '../../../../src/core/types/array';
 
-const LIGHTBOX_ELIGIBLE_TAGS = {
-  'AMP-IMG': true,
-};
+const LIGHTBOX_ELIGIBLE_TAGS = new Set(['AMP-IMG', 'IMG']);
 
-export const ELIGIBLE_TAP_TAGS = {
-  'AMP-IMG': true,
-};
+// eslint-disable-next-line local/no-export-side-effect
+export const ELIGIBLE_TAP_TAGS = new Set(['AMP-IMG', 'IMG']);
 
-export const VIDEO_TAGS = {
-  'AMP-YOUTUBE': true,
-  'AMP-VIDEO': true,
-};
+// eslint-disable-next-line local/no-export-side-effect
+export const VIDEO_TAGS = new Set(['AMP-YOUTUBE', 'AMP-VIDEO']);
 
 const GALLERY_TAG = 'amp-lightbox-gallery';
-const CAROUSEL_TAGS = ['AMP-CAROUSEL', 'AMP-BASE-CAROUSEL'];
+const CAROUSEL_TAGS = new Set(['AMP-CAROUSEL', 'AMP-BASE-CAROUSEL']);
 const FIGURE_TAG = 'FIGURE';
 const SLIDE_SELECTOR = '.amp-carousel-slide, .i-amphtml-carousel-slotted';
 
@@ -126,9 +121,9 @@ export class LightboxManager {
     // mapped unique ids.
     /**
      * List of lightbox elements that have already been scanned.
-     * @private {!Array<!Element>}
+     * @private {!Set<!Element>}
      */
-    this.seen_ = [];
+    this.seen_ = new Set();
   }
 
   /**
@@ -166,7 +161,9 @@ export class LightboxManager {
    */
   scanLightboxables_() {
     return this.ampdoc_.whenReady().then(() => {
-      const matches = this.ampdoc_.getRootNode().querySelectorAll('[lightbox]');
+      const matches = this.ampdoc_
+        .getRootNode()
+        .querySelectorAll('[lightbox],[data-lightbox]');
       const processLightboxElement = this.processLightboxElement_.bind(this);
       iterateCursor(matches, processLightboxElement);
     });
@@ -179,7 +176,7 @@ export class LightboxManager {
    * @private
    */
   baseElementIsSupported_(element) {
-    return LIGHTBOX_ELIGIBLE_TAGS[element.tagName];
+    return LIGHTBOX_ELIGIBLE_TAGS.has(element.tagName);
   }
 
   /**
@@ -203,11 +200,11 @@ export class LightboxManager {
           return;
         }
         const baseElement = getBaseElementForSlide(slide);
-        if (this.seen_.includes(baseElement)) {
+        if (this.seen_.has(baseElement)) {
           return;
         }
         baseElement.setAttribute('lightbox', lightboxGroupId);
-        this.seen_.push(baseElement);
+        this.seen_.add(baseElement);
         this.processBaseLightboxElement_(baseElement, lightboxGroupId);
       });
     });
@@ -218,11 +215,11 @@ export class LightboxManager {
    * @private
    */
   processLightboxElement_(element) {
-    if (this.seen_.includes(element)) {
+    if (this.seen_.has(element)) {
       return;
     }
-    this.seen_.push(element);
-    if (CAROUSEL_TAGS.includes(element.tagName)) {
+    this.seen_.add(element);
+    if (CAROUSEL_TAGS.has(element.tagName)) {
       this.processLightboxCarousel_(element);
     } else {
       const lightboxGroupId = element.getAttribute('lightbox') || 'default';
@@ -244,10 +241,19 @@ export class LightboxManager {
       figure,
       (child) => child.tagName !== 'FIGCAPTION'
     );
-    if (element) {
-      element.setAttribute('lightbox', lightboxGroupId);
+    const isGallerySlide = element.classList.contains(
+      'i-amphtml-inline-gallery-slide-content-slot'
+    );
+    // Special handling for gallery slides, needed since they require a
+    // wrapping div inside of the figure for the content.
+    const unwrappedElement = isGallerySlide
+      ? isGallerySlide.firstChild
+      : element;
+
+    if (unwrappedElement) {
+      unwrappedElement.setAttribute('lightbox', lightboxGroupId);
     }
-    return element;
+    return unwrappedElement;
   }
 
   /**
@@ -396,7 +402,7 @@ export class LightboxManager {
     if (element.hasAttribute('lightbox-thumbnail-id')) {
       const thumbnailId = element.getAttribute('lightbox-thumbnail-id');
       const thumbnailImage = this.ampdoc_.getElementById(thumbnailId);
-      if (thumbnailImage && thumbnailImage.tagName == 'AMP-IMG') {
+      if (LIGHTBOX_ELIGIBLE_TAGS.has(thumbnailImage?.tagName)) {
         return srcsetFromElement(thumbnailImage);
       }
     }
@@ -410,7 +416,7 @@ export class LightboxManager {
    * @private
    */
   getUserPlaceholderSrcset_(element) {
-    if (element.tagName == 'AMP-IMG') {
+    if (LIGHTBOX_ELIGIBLE_TAGS.has(element.tagName)) {
       return srcsetFromElement(element);
     }
     if (element.tagName == 'AMP-VIDEO') {

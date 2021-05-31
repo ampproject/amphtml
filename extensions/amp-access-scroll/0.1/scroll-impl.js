@@ -22,11 +22,12 @@ import {Relay} from './scroll-relay';
 import {ScrollBar} from './scroll-bar';
 import {Services} from '../../../src/services';
 import {Sheet} from './scroll-sheet';
-import {addParamToUrl, isProxyOrigin, parseQueryString} from '../../../src/url';
+import {addParamToUrl, isProxyOrigin} from '../../../src/url';
 import {buildUrl, connectHostname} from './scroll-url';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {parseQueryString} from '../../../src/core/types/string/url';
 
 const TAG = 'amp-access-scroll-elt';
 /**

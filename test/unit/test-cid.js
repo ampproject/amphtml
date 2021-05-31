@@ -15,7 +15,7 @@
  */
 
 import * as cookie from '../../src/cookies';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import * as url from '../../src/url';
 import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
 import {Services} from '../../src/services';
@@ -803,7 +803,7 @@ describes.sandboxed('cid', {}, (env) => {
   }
 });
 
-describe('getProxySourceOrigin', () => {
+describes.sandboxed('getProxySourceOrigin', {}, () => {
   it('should fail on non-proxy origin', () => {
     allowConsoleError(() => {
       expect(() => {
@@ -826,8 +826,7 @@ describes.realWin('cid', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    clock = lolex.install({
-      target: win,
+    clock = fakeTimers.withGlobal(win).install({
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
     cid = cidServiceForDocForTesting(ampdoc);

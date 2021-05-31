@@ -16,66 +16,47 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script runs validator tests.
- * This is run during the CI stage = build; job = validator.
+ * @fileoverview Script that runs the validator tests during CI.
  */
 
-const colors = require('ansi-colors');
-const {
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
-} = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
-const {runNpmChecks} = require('./npm-checks');
+const {buildTargetsInclude, Targets} = require('./build-targets');
+const {runCiJob} = require('./ci-job');
+const {skipDependentJobs, timedExecOrDie} = require('./utils');
 
-const FILENAME = 'validator-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'validator-tests.js';
 
-function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
+function pushBuildWorkflow() {
+  timedExecOrDie('amp validator-webui');
+  timedExecOrDie('amp validator');
+  timedExecOrDie('amp validator-cpp');
+}
+
+function prBuildWorkflow() {
+  if (
+    !buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.VALIDATOR,
+      Targets.VALIDATOR_WEBUI
+    )
+  ) {
+    skipDependentJobs(
+      jobName,
+      'this PR does not affect the runtime, validator, or validator web UI'
+    );
     return;
   }
 
-  if (!isTravisPullRequestBuild()) {
-    timedExecOrDie('gulp validator');
-    timedExecOrDie('gulp validator-webui');
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      !buildTargets.has('RUNTIME') &&
-      !buildTargets.has('VALIDATOR') &&
-      !buildTargets.has('VALIDATOR_WEBUI') &&
-      !buildTargets.has('VALIDATOR_JAVA')
-    ) {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Validator Tests'),
-        'because this commit does not affect the runtime, validator,',
-        'or validator web UI.'
-      );
-      stopTimer(FILENAME, FILENAME, startTime);
-      return;
-    }
-
-    if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
-      timedExecOrDie('gulp validator');
-    }
-
-    if (buildTargets.has('VALIDATOR_WEBUI')) {
-      timedExecOrDie('gulp validator-webui');
-    }
+  if (buildTargetsInclude(Targets.VALIDATOR_WEBUI)) {
+    timedExecOrDie('amp validator-webui');
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
+    timedExecOrDie('amp validator');
+  }
+
+  if (buildTargetsInclude(Targets.VALIDATOR)) {
+    timedExecOrDie('amp validator-cpp');
+  }
 }
 
-main();
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

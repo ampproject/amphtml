@@ -1,10 +1,10 @@
 {
   "private": true,
-  "name": "gulp-coverage-map",
+  "name": "amp-coverage-map",
   "version": "0.1.0",
-  "description": "Gulp coverage map.",
-  "dependencies": {
-    "puppeteer": "5.2.1",
-    "source-map-explorer": "2.4.2"
+  "description": "amp coverage map.",
+  "devDependencies": {
+    "puppeteer": "9.1.1",
+    "source-map-explorer": "2.5.2"
   }
 }

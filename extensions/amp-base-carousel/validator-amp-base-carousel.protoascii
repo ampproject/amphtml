@@ -20,6 +20,7 @@ tags: {  # amp-base-carousel
   extension_spec: {
     name: "amp-base-carousel"
     version: "0.1"
+    version: "1.0"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
@@ -57,7 +58,12 @@ attr_lists: {
     value_regex: "([^,]+\\s+(\\d+),\\s*)*(\\d+)"
   }
   attrs: {
-    name: "horizontal"
+    name: "controls"
+    # Media query / (always|auto|never)
+    value_regex: "([^,]+\\s+(always|auto|never),\\s*)*(always|auto|never)"
+  }
+  attrs: {
+    name: "horizontal" # 0.1 only
     # Media query / boolean pairs
     value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"
   }
@@ -70,6 +76,11 @@ attr_lists: {
     name: "mixed-length"
     # Media query / boolean pairs
     value_regex: "([^,]+\\s+(true|false),\\s*)*(true|false)"
+  }
+  attrs: {
+    name: "orientation" # 1.0 only
+    # Media query / boolean pairs
+    value_regex: "([^,]+\\s+(horizontal|vertical),\\s*)*(horizontal|vertical)"
   }
   attrs: {
     name: "slide"
@@ -103,9 +114,10 @@ attr_lists: {
   attrs: { name: "[auto-advance-count]" }
   attrs: { name: "[auto-advance-interval]" }
   attrs: { name: "[auto-advance-loops]" }
-  attrs: { name: "[horizontal]" }
+  attrs: { name: "[horizontal]" } # 0.1 only
   attrs: { name: "[loop]" }
   attrs: { name: "[mixed-length]" }
+  attrs: { name: "[orientation]" } # 1.0 only
   attrs: { name: "[slide]" }
   attrs: { name: "[snap]" }
   attrs: { name: "[snap-align]" }

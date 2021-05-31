@@ -16,12 +16,11 @@
 
 import * as Preact from '../../../../src/preact';
 import {text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'Youtube',
-  decorators: [withKnobs, withA11y, withAmp],
+  title: 'amp-youtube-0_1',
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-youtube', version: 0.1}],
@@ -40,9 +39,7 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';
 
 export const Responsive = () => {
   const videoId = text('Video ID', 'mGENRKrdoGY');
@@ -56,9 +53,7 @@ export const Responsive = () => {
   );
 };
 
-Responsive.story = {
-  name: 'responsive',
-};
+Responsive.storyName = 'responsive';
 
 export const Autoplay = () => {
   const videoId = text('Video ID', 'mGENRKrdoGY');
@@ -73,6 +68,4 @@ export const Autoplay = () => {
   );
 };
 
-Autoplay.story = {
-  name: 'autoplay',
-};
+Autoplay.storyName = 'autoplay';

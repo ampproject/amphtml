@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {parseJson} from './json';
+import {parseJson} from './core/types/object/json';
 
 /**
  * A unique identifier for each localized string.  Localized string IDs should:
@@ -24,7 +24,7 @@ import {parseJson} from './json';
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 89
+ * Next ID: 98
  *
  * @const @enum {string}
  */
@@ -36,13 +36,11 @@ export const LocalizedStringId = {
   AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL: '67',
   AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT: '33',
   AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT: '32',
-  AMP_STORY_BOOKEND_MORE_TO_READ_LABEL: '30',
-  AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE: '29',
-  AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL: '28',
   AMP_STORY_CLOSE_BUTTON_LABEL: '87',
   AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL: '22',
   AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL: '23',
   AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL: '27',
+  AMP_STORY_DISCOVERY_DIALOG_TEXT: '96',
   AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL: '25',
   AMP_STORY_DOMAIN_DIALOG_HEADING_LINK: '26',
   AMP_STORY_EDUCATION_NAVIGATION_SWIPE_PROGRESS: '78',
@@ -56,12 +54,17 @@ export const LocalizedStringId = {
   AMP_STORY_HINT_UI_NEXT_LABEL: '2',
   AMP_STORY_HINT_UI_PREVIOUS_LABEL: '3',
   AMP_STORY_INFO_BUTTON_LABEL: '68',
+  AMP_STORY_NEXT_PAGE: '91',
+  AMP_STORY_NEXT_STORY: '90',
+  AMP_STORY_OPEN_OUTLINK_TEXT: '97',
   AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL: '35',
   AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL: '82',
   AMP_STORY_PAGE_ERROR_VIDEO: '65',
   AMP_STORY_PAGE_PLAY_VIDEO: '34',
   AMP_STORY_PAUSE_BUTTON_LABEL: '85',
   AMP_STORY_PLAY_BUTTON_LABEL: '86',
+  AMP_STORY_PREVIOUS_PAGE: '93',
+  AMP_STORY_REPLAY: '92',
   AMP_STORY_SHARE_BUTTON_LABEL: '69',
   AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT: '4',
   AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT: '5',
@@ -79,7 +82,7 @@ export const LocalizedStringId = {
   AMP_STORY_SHARING_PROVIDER_NAME_TWITTER: '15',
   AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP: '16',
   AMP_STORY_SIDEBAR_BUTTON_LABEL: '70',
-  AMP_STORY_SKIP_NEXT_BUTTON_LABEL: '88',
+  AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL: '88',
   AMP_STORY_TOOLTIP_EXPAND_TWEET: '36',
   AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT: '37',
   AMP_STORY_WARNING_DESKTOP_SIZE_TEXT: '18',
@@ -114,6 +117,7 @@ export const LocalizedStringId = {
   AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE: '61',
 
   // amp-story-interactive
+  AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE: '89',
   AMP_STORY_INTERACTIVE_RESULTS_SCORE: '84',
   AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A: '71',
   AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B: '72',
@@ -145,9 +149,11 @@ export let LocalizedStringBundleDef;
  * @return {!LocalizedStringBundleDef}
  */
 function cloneLocalizedStringBundle(localizedStringBundle) {
-  return /** @type {!LocalizedStringBundleDef} */ (parseJson(
-    JSON.stringify(/** @type {!JsonObject} */ (localizedStringBundle))
-  ));
+  return /** @type {!LocalizedStringBundleDef} */ (
+    parseJson(
+      JSON.stringify(/** @type {!JsonObject} */ (localizedStringBundle))
+    )
+  );
 }
 
 /**
@@ -166,7 +172,9 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
   );
 
   Object.keys(pseudoLocaleStringBundle).forEach((localizedStringIdAsStr) => {
-    const localizedStringId = /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
+    const localizedStringId = /** @type {!LocalizedStringId} */ (
+      localizedStringIdAsStr
+    );
     pseudoLocaleStringBundle[localizedStringId].string = localizationFn(
       localizedStringBundle[localizedStringId].string
     );

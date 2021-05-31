@@ -40,16 +40,17 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
-import {dashToCamelCase} from '../../../src/string';
+import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject, toArray} from '../../../src/types';
+import {isArray, toArray} from '../../../src/core/types/array';
 import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
+import {isObject} from '../../../src/core/types';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/utils/object';
+import {map} from '../../../src/core/types/object';
 import {parseCss} from './parsers/css-expr';
 
 /** @const {string} */
@@ -770,14 +771,12 @@ export class MeasureScanner extends Scanner {
 
     // Identifier CSS values.
     const easing = this.css_.resolveIdent(newTiming.easing, prevTiming.easing);
-    const direction = /** @type {!WebAnimationTimingDirection} */ (this.css_.resolveIdent(
-      newTiming.direction,
-      prevTiming.direction
-    ));
-    const fill = /** @type {!WebAnimationTimingFill} */ (this.css_.resolveIdent(
-      newTiming.fill,
-      prevTiming.fill
-    ));
+    const direction = /** @type {!WebAnimationTimingDirection} */ (
+      this.css_.resolveIdent(newTiming.direction, prevTiming.direction)
+    );
+    const fill = /** @type {!WebAnimationTimingFill} */ (
+      this.css_.resolveIdent(newTiming.fill, prevTiming.fill)
+    );
 
     // Validate.
     this.validateTime_(duration, newTiming.duration, 'duration');
@@ -966,9 +965,9 @@ class CssContextImpl {
     let styles = this.computedStyleCache_[targetId];
     if (!styles) {
       styles = computedStyle(this.win_, target);
-      this.computedStyleCache_[
-        targetId
-      ] = /** @type {!CSSStyleDeclaration} */ (styles);
+      this.computedStyleCache_[targetId] = /** @type {!CSSStyleDeclaration} */ (
+        styles
+      );
     }
 
     // Resolve a var or a property.

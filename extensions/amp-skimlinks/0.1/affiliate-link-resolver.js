@@ -15,7 +15,7 @@
  */
 
 import {TwoStepsResponse} from './link-rewriter/two-steps-response';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getNormalizedHostnameFromAnchor, isExcludedDomain} from './utils';
 
 /**
@@ -128,9 +128,8 @@ export class AffiliateLinkResolver {
    * @public
    */
   resolveUnknownAnchors(anchorList) {
-    const alreadyResolvedResponse = this.associateWithReplacementUrl_(
-      anchorList
-    );
+    const alreadyResolvedResponse =
+      this.associateWithReplacementUrl_(anchorList);
     let willBeResolvedPromise = null;
 
     const domainsToAsk = this.getNewDomains_(anchorList);

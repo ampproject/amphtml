@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
@@ -148,7 +148,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       this.initialPositionChecked_ = true;
     }
 
-    const width = this.element.getLayoutWidth();
+    const {width} = this.element.getLayoutSize();
     setStyle(this.container_, 'width', width, 'px');
     Services.ownersForDoc(this.element).scheduleLayout(
       this.element,

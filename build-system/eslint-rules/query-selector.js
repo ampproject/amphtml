@@ -18,6 +18,9 @@
 const cssWhat = require('css-what');
 
 module.exports = function (context) {
+  /**
+   * @param {CompilerNode} node
+   */
   function callQuerySelector(node) {
     const {callee} = node;
 
@@ -30,22 +33,22 @@ module.exports = function (context) {
       return;
     }
 
-    if (property.leadingComments) {
-      const ok = property.leadingComments.some((comment) => {
-        return comment.value === 'OK';
-      });
-      if (ok) {
-        return;
-      }
+    const leadingComments = context.getCommentsBefore(property);
+    const ok = leadingComments.some((comment) => {
+      return comment.value === 'OK';
+    });
+    if (ok) {
+      return;
     }
 
     const selector = getSelector(node, 0);
 
     if (!isValidSelector(selector)) {
-      return context.report({
+      context.report({
         node,
         message: 'Failed to parse CSS Selector `' + selector + '`',
       });
+      return;
     }
 
     // What are we calling querySelector on?
@@ -79,28 +82,31 @@ module.exports = function (context) {
     });
   }
 
+  /**
+   * @param {CompilerNode} node
+   */
   function callScopedQuerySelector(node) {
     const {callee} = node;
     if (!callee.name.startsWith('scopedQuerySelector')) {
       return;
     }
 
-    if (node.leadingComments) {
-      const ok = node.leadingComments.some((comment) => {
-        return comment.value === 'OK';
-      });
-      if (ok) {
-        return;
-      }
+    const leadingComments = context.getCommentsBefore(node);
+    const ok = leadingComments.some((comment) => {
+      return comment.value === 'OK';
+    });
+    if (ok) {
+      return;
     }
 
     const selector = getSelector(node, 1);
 
     if (!isValidSelector(selector)) {
-      return context.report({
+      context.report({
         node,
         message: 'Failed to parse CSS Selector `' + selector + '`',
       });
+      return;
     }
 
     if (selectorNeedsScope(selector)) {
@@ -115,6 +121,11 @@ module.exports = function (context) {
     });
   }
 
+  /**
+   * @param {CompilerNode} node
+   * @param {number} argIndex
+   * @return {string}
+   */
   function getSelector(node, argIndex) {
     const arg = node.arguments[argIndex];
     let selector;
@@ -188,6 +199,10 @@ module.exports = function (context) {
     return selector;
   }
 
+  /**
+   * @param {string} selector
+   * @return {boolean}
+   */
   function isValidSelector(selector) {
     try {
       cssWhat.parse(selector);
@@ -197,9 +212,13 @@ module.exports = function (context) {
     }
   }
 
-  // Checks if the selector is using grandchild selector semantics
-  // `node.querySelector('child grandchild')` or `'child>grandchild'` But,
-  // specifically allow multi-selectors `'div, span'`.
+  /**
+   * Checks if the selector is using grandchild selector semantics
+   * `node.querySelector('child grandchild')` or `'child>grandchild'` But,
+   * specifically allow multi-selectors `'div, span'`.
+   * @param {string} selector
+   * @return {boolean}
+   */
   function selectorNeedsScope(selector) {
     // strip out things that can't affect children selection
     selector = selector.replace(/\(.*\)|\[.*\]/, function (match) {

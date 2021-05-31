@@ -36,7 +36,7 @@ function getLastExpectError() {
 /**
  * @param {*} actual
  * @param {string=} opt_message
- * @return {!ExpectStatic}
+ * @return {!chai.ExpectStatic}
  */
 function expect(actual, opt_message) {
   if (!installed) {
@@ -62,7 +62,7 @@ const ChaiType = {
  * Not all chai properties need to be overwritten, like those that set
  * flags or are only language chains e.g. `not` or 'to'
  * See the Chai implementation for the original definitions:
- * {@link https://github.com/chaijs/chai/blob/master/lib/chai/core/assertions.js}
+ * {@link https://github.com/chaijs/chai/blob/main/lib/chai/core/assertions.js}
  */
 const chaiMethodsAndProperties = [
   {name: 'a', type: ChaiType.CHAINABLE_METHOD},
@@ -135,6 +135,10 @@ const chaiMethodsAndProperties = [
   {name: 'within', type: ChaiType.METHOD},
 ];
 
+/**
+ * @param {chai.ChaiStatic} chai
+ * @param {chai.ChaiUtils} utils
+ */
 function installWrappers(chai, utils) {
   const {METHOD, PROPERTY, CHAINABLE_METHOD} = ChaiType;
   const {Assertion} = chai;
@@ -164,6 +168,10 @@ function installWrappers(chai, utils) {
   }
 }
 
+/**
+ * @param {chai.ChaiUtils} utils
+ * @return {function(chai.AssertionStatic): function(): any}
+ */
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
 
@@ -219,12 +227,20 @@ function overwriteAlwaysUseSuper(utils) {
   };
 }
 
+/**
+ * @param {chai.AssertionStatic} _super
+ * @return {function(): *}
+ */
 function inheritChainingBehavior(_super) {
   return function () {
     _super.apply(this, arguments);
   };
 }
 
+/**
+ * @param {chai.AssertionStatic} _super
+ * @return {function(): *}
+ */
 function overwriteUnsupported(_super) {
   return function () {
     const obj = this._obj;
@@ -238,11 +254,18 @@ function overwriteUnsupported(_super) {
   };
 }
 
+/**
+ * @param {*} _networkLogger
+ */
 function installBrowserAssertions(_networkLogger) {
   networkLogger = _networkLogger;
   chai.use(installBrowserWrappers);
 }
 
+/**
+ * @param {chai.ChaiStatic} chai
+ * @param {chai.ChaiUtils} utils
+ */
 function installBrowserWrappers(chai, utils) {
   const {Assertion} = chai;
 

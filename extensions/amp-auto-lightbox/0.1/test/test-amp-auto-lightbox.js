@@ -15,7 +15,7 @@
  */
 
 import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {
   Criteria,
   DocMetaAnnotations,
@@ -33,11 +33,11 @@ import {
   scan,
 } from '../amp-auto-lightbox';
 import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
+import {Signals} from '../../../../src/core/data-structures/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
-import {isArray} from '../../../../src/types';
-import {tryResolve} from '../../../../src/utils/promise';
+import {isArray} from '../../../../src/core/types';
+import {tryResolve} from '../../../../src/core/data-structures/promise';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -140,29 +140,62 @@ describes.realWin(
 
           it(`${accepts ? 'accepts' : 'rejects'} ${accepts || rejects}`, () => {
             [
-              html` <amp-img src="asada.png" layout="flex-item"></amp-img> `,
-              html`
-                <div>
-                  <amp-img src="adobada.png" layout="flex-item"></amp-img>
-                </div>
-              `,
-              html`
-                <div>
+              {
+                markup: html`
+                  <amp-img src="asada.png" layout="flex-item"></amp-img>
+                `,
+                tagName: 'AMP-IMG',
+              },
+              {
+                markup: html`
                   <div>
-                    <amp-img src="carnitas.png" layout="flex-item"></amp-img>
+                    <amp-img src="adobada.png" layout="flex-item"></amp-img>
                   </div>
-                </div>
-              `,
+                `,
+                tagName: 'AMP-IMG',
+              },
+              {
+                markup: html`
+                  <div>
+                    <div>
+                      <amp-img src="carnitas.png" layout="flex-item"></amp-img>
+                    </div>
+                  </div>
+                `,
+                tagName: 'AMP-IMG',
+              },
+              {
+                markup: html` <img src="asada.png" layout="flex-item" /> `,
+                tagName: 'IMG',
+              },
+              {
+                markup: html`
+                  <div>
+                    <img src="adobada.png" layout="flex-item" />
+                  </div>
+                `,
+                tagName: 'IMG',
+              },
+              {
+                markup: html`
+                  <div>
+                    <div>
+                      <img src="carnitas.png" layout="flex-item" />
+                    </div>
+                  </div>
+                `,
+                tagName: 'IMG',
+              },
             ].forEach((unwrapped) => {
-              maybeMutate(unwrapped);
+              maybeMutate(unwrapped.markup);
 
-              const scenario = maybeWrap(unwrapped);
+              const scenario = maybeWrap(unwrapped.markup);
               const candidate = firstElementLeaf(scenario);
 
               env.win.document.body.appendChild(scenario);
 
               expect(candidate).to.be.ok;
-              expect(candidate.tagName).to.equal('AMP-IMG');
+              expect(candidate.tagName).to.equal(unwrapped.tagName);
 
               expect(
                 Criteria.meetsTreeShapeCriteria(candidate),
@@ -517,10 +550,16 @@ describes.realWin(
         const signals = new Signals();
         img.signals = () => signals;
 
-        signals.signal(CommonSignals.UNLOAD);
         signals.signal(CommonSignals.LOAD_END);
 
-        const elected = await Promise.all(runCandidates(env.ampdoc, [img]));
+        const candidatePromise = Promise.all(runCandidates(env.ampdoc, [img]));
+
+        // Skip microtask and reset LOAD_END to emulate unloading in the middle
+        // of the candidate's measurement.
+        await new Promise((resolve) => resolve());
+        signals.reset(CommonSignals.LOAD_END);
+
+        const elected = await candidatePromise;
         expect(elected[0]).to.be.undefined;
       });
 

@@ -18,7 +18,7 @@ import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-viewer-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {
   DoubletapRecognizer,
   PinchRecognizer,
@@ -30,7 +30,7 @@ import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
-import {bezierCurve} from '../../../src/curve';
+import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
@@ -42,6 +42,11 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
+import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setStyles} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
 
@@ -50,10 +55,7 @@ const TAG = 'amp-image-viewer';
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby', 'aria-labelledby'];
 const DEFAULT_MAX_SCALE = 2;
 
-const ELIGIBLE_TAGS = {
-  'amp-img': true,
-  'amp-anim': true,
-};
+const ELIGIBLE_TAGS = new Set(['AMP-IMG', 'AMP-ANIM', 'IMG']);
 
 export class AmpImageViewer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -118,10 +120,12 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.motion_ = null;
 
     /** @private {?Element} */
-    this.sourceAmpImage_ = null;
+    this.sourceImage_ = null;
 
     /** @private {?Promise} */
     this.loadPromise_ = null;
+
+    this.onResize_ = this.onResize_.bind(this);
   }
 
   /** @override */
@@ -141,28 +145,11 @@ export class AmpImageViewer extends AMP.BaseElement {
       TAG
     );
 
-    this.sourceAmpImage_ = children[0];
+    this.sourceImage_ = children[0];
     Services.ownersForDoc(this.element).setOwner(
-      this.sourceAmpImage_,
+      this.sourceImage_,
       this.element
     );
-  }
-
-  /** @override */
-  onMeasureChanged() {
-    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
-    // we have something better.
-    const isScaled = closestAncestorElementBySelector(
-      this.element,
-      '[i-amphtml-scale-animation]'
-    );
-    if (isScaled) {
-      return;
-    }
-
-    if (this.loadPromise_) {
-      this.loadPromise_.then(() => this.resetImageDimensions_());
-    }
   }
 
   /** @override */
@@ -188,14 +175,14 @@ export class AmpImageViewer extends AMP.BaseElement {
     // TODO(sparhami, cathyxz) Refactor image viewer once auto sizes lands to
     // use the amp-img as-is, which means we can simplify this logic to just
     // wait for the layout signal.
-    const ampImg = dev().assertElement(this.sourceAmpImage_);
+    const img = dev().assertElement(this.sourceImage_);
     const haveImg = !!this.image_;
     const laidOutPromise = haveImg
       ? Promise.resolve()
-      : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
+      : img.signals().whenSignal(CommonSignals.LOAD_END);
 
     if (!haveImg) {
-      Services.ownersForDoc(this.element).scheduleLayout(this.element, ampImg);
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, img);
     }
 
     this.loadPromise_ = laidOutPromise
@@ -231,6 +218,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   unlayoutCallback() {
     this.cleanupGestures_();
     this.loadPromise_ = null;
+    unobserveContentSize(this.element, this.onResize_);
     return true;
   }
 
@@ -279,7 +267,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   elementIsSupported_(element) {
-    return ELIGIBLE_TAGS[element.tagName.toLowerCase()];
+    return ELIGIBLE_TAGS.has(element.tagName);
   }
 
   /**
@@ -315,9 +303,11 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     this.image_ = this.element.ownerDocument.createElement('img');
     this.image_.classList.add('i-amphtml-image-viewer-image');
-    const ampImg = dev().assertElement(this.sourceAmpImage_);
-    this.setSourceDimensions_(ampImg);
-    this.srcset_ = srcsetFromElement(ampImg);
+    const img = dev().assertElement(this.sourceImage_);
+    this.setSourceDimensions_(img);
+    this.srcset_ = srcsetFromElement(img);
+
+    observeContentSize(this.element, this.onResize_);
 
     return this.mutateElement(() => {
       setStyles(dev().assertElement(this.image_), {
@@ -326,12 +316,27 @@ export class AmpImageViewer extends AMP.BaseElement {
         width: 0,
         height: 0,
       });
-      st.toggle(ampImg, false);
+      st.toggle(img, false);
       this.element.appendChild(this.image_);
-      return ampImg.getImpl().then((ampImg) => {
-        ampImg.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
+      return img.getImpl().then((impl) => {
+        propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_);
       });
     });
+  }
+
+  /** @private */
+  onResize_() {
+    // TODO(#19259): Tracks a more generic way to do this. Remove once
+    // we have something better.
+    const isScaled = closestAncestorElementBySelector(
+      this.element,
+      '[i-amphtml-scale-animation]'
+    );
+    if (isScaled) {
+      return;
+    }
+
+    this.resetImageDimensions_();
   }
 
   /**
@@ -766,12 +771,9 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
-    return /** @type {!Promise|undefined} */ (this.set_(
-      newScale,
-      newPosX,
-      newPosY,
-      animate
-    ));
+    return /** @type {!Promise|undefined} */ (
+      this.set_(newScale, newPosX, newPosY, animate)
+    );
   }
 
   /**

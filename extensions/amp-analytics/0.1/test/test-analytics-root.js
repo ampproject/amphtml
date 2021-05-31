@@ -356,9 +356,9 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         ]);
         // Check that non-experiment works
         toggleExperiment(win, 'visibility-trigger-improvements', false);
-        expect(
-          await root.getElements(body, '.notMyClass', null)
-        ).to.deep.equal([child3]);
+        expect(await root.getElements(body, '.notMyClass', null)).to.deep.equal(
+          [child3]
+        );
       });
 
       it('should only find elements with data-vars-*', async () => {
@@ -754,11 +754,7 @@ describes.realWin(
         child2.setAttribute('data-vars-id', '456');
         child3.setAttribute('data-vars-id', '789');
 
-        toggleExperiment(
-          parentRoot.ampdoc.win,
-          'visibility-trigger-improvements',
-          true
-        );
+        toggleExperiment(win, 'visibility-trigger-improvements', true);
       });
 
       afterEach(() => {

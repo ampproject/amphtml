@@ -15,7 +15,8 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {VideoWrapper} from './video-wrapper';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   useCallback,
@@ -45,29 +46,24 @@ function usePropRef(prop) {
 }
 
 /**
- * Goes inside a VideoWrapper.
- *
- *    import {VideoIframe} from '.../video-iframe';
- *    import {VideoWrapper} from '.../video-wrapper';
- *    render(<VideoWrapper component={VideoIframe} ... />)
- *
- * Usable on the AMP layer through VideoBaseElement.
- *
  * @param {!VideoIframeDef.Props} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
-function VideoIframeWithRef(
+function VideoIframeInternalWithRef(
   {
-    loading = 'lazy',
+    loading,
+    unloadOnPause = false,
     sandbox = DEFAULT_SANDBOX,
     muted = false,
     controls = false,
     origin,
     onCanPlay,
     onMessage,
-    makeMethodMessage,
+    playerStateRef,
+    makeMethodMessage: makeMethodMessageProp,
+    onIframeLoad,
     ...rest
   },
   ref
@@ -76,26 +72,45 @@ function VideoIframeWithRef(
 
   const readyDeferred = useMemo(() => new Deferred(), []);
 
+  // Only use the first instance of `makeMethodMessage` to avoid resetting this
+  // callback all the time.
+  const makeMethodMessageRef = useRef(makeMethodMessageProp);
   const postMethodMessage = useCallback(
     (method) => {
       if (!iframeRef.current || !iframeRef.current.contentWindow) {
         return;
       }
+      const makeMethodMessage = makeMethodMessageRef.current;
       readyDeferred.promise.then(() => {
         const message = makeMethodMessage(method);
         iframeRef.current.contentWindow./*OK*/ postMessage(message, '*');
       });
     },
-    [readyDeferred.promise, makeMethodMessage]
+    [readyDeferred.promise]
   );
 
   useImperativeHandle(
     ref,
     () => ({
+      get currentTime() {
+        return playerStateRef?.current?.['currentTime'] ?? NaN;
+      },
+      get duration() {
+        return playerStateRef?.current?.['duration'] ?? NaN;
+      },
       play: () => postMethodMessage('play'),
-      pause: () => postMethodMessage('pause'),
+      pause: () => {
+        if (unloadOnPause) {
+          const iframe = iframeRef.current;
+          if (iframe) {
+            iframe.src = iframe.src;
+          }
+        } else {
+          postMethodMessage('pause');
+        }
+      },
     }),
-    [postMethodMessage]
+    [playerStateRef, postMethodMessage, unloadOnPause]
   );
 
   // Keep `onMessage` in a ref to prevent re-listening on every render.
@@ -103,6 +118,10 @@ function VideoIframeWithRef(
   const onMessageRef = usePropRef(onMessage);
 
   useLayoutEffect(() => {
+    if (!iframeRef.current) {
+      return;
+    }
+
     /** @param {Event} event */
     function handleMessage(event) {
       if (!onMessageRef.current) {
@@ -156,10 +175,38 @@ function VideoIframeWithRef(
         }
         readyDeferred.resolve();
       }}
+      onLoad={(event) => {
+        if (onIframeLoad) {
+          onIframeLoad(event);
+        }
+      }}
     />
   );
 }
 
+/** @visibleForTesting */
+const VideoIframeInternal = forwardRef(VideoIframeInternalWithRef);
+VideoIframeInternal.displayName = 'VideoIframeInternal';
+export {VideoIframeInternal};
+
+/**
+ * VideoWrapper using an <iframe> for implementation.
+ * Usable on the AMP layer through VideoBaseElement.
+ * @param {VideoIframeDef.Props} props
+ * @param {{current: (?T)}} ref
+ * @return {PreactDef.Renderable}
+ * @template T
+ */
+function VideoIframeWithRef(props, ref) {
+  return <VideoWrapper ref={ref} {...props} component={VideoIframeInternal} />;
+}
+
+/**
+ * VideoWrapper using an <iframe> for implementation.
+ * Usable on the AMP layer through VideoBaseElement.
+ * @param {VideoIframeDef.Props} props
+ * @return {PreactDef.Renderable}=
+ */
 const VideoIframe = forwardRef(VideoIframeWithRef);
-VideoIframe.displayName = 'VideoIframe'; // Make findable for tests.
+VideoIframe.displayName = 'VideoIframe';
 export {VideoIframe};

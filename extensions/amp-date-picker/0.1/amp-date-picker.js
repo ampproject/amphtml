@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
 import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
 import {DatesList} from './dates-list';
-import {Deferred} from '../../../src/utils/promise';
-import {FiniteStateMachine} from '../../../src/finite-state-machine';
-import {Keys} from '../../../src/utils/key-codes';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {FiniteStateMachine} from '../../../src/core/data-structures/finite-state-machine';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
@@ -37,11 +37,11 @@ import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
-import {dashToCamelCase} from '../../../src/string';
+import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {once} from '../../../src/utils/function';
+import {dict, map} from '../../../src/core/types/object';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {once} from '../../../src/core/types/function';
 import {requireExternal} from '../../../src/module';
 
 /**
@@ -216,24 +216,24 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.reactRender_ = requireExternal('react-dom').render;
 
     /** @private @const */
-    this.ReactDates_ = /** @type {!JsonObject} */ (requireExternal(
-      'react-dates'
-    ));
+    this.ReactDates_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates')
+    );
 
     /**
      * @private
      * @const
      * @dict
      */
-    this.ReactDatesConstants_ = /** @type {!JsonObject} */ (requireExternal(
-      'react-dates/constants'
-    ));
+    this.ReactDatesConstants_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates/constants')
+    );
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private @const */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /** @private @const */
     this.input_ = Services.inputFor(this.win);
@@ -373,6 +373,8 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
+
     const format = this.element.getAttribute('format');
     if (format) {
       this.format_ = format;
@@ -593,12 +595,8 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setupStateMachine_(initialState) {
     const sm = new FiniteStateMachine(initialState);
-    const {
-      OVERLAY_OPEN_INPUT,
-      OVERLAY_CLOSED,
-      OVERLAY_OPEN_PICKER,
-      STATIC,
-    } = DatePickerState;
+    const {OVERLAY_OPEN_INPUT, OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, STATIC} =
+      DatePickerState;
     const noop = () => {};
     sm.addTransition(STATIC, STATIC, noop);
 
@@ -877,10 +875,9 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setState_(newState) {
     return this.render(
-      /** @type {!JsonObject} */ (Object.assign(
-        /** @type {!Object} */ (this.state_),
-        newState
-      ))
+      /** @type {!JsonObject} */ (
+        Object.assign(/** @type {!Object} */ (this.state_), newState)
+      )
     );
   }
 

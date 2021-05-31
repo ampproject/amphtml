@@ -49,9 +49,8 @@ export class LocalSubscriptionBasePlatform {
     this.serviceConfig_ = platformConfig;
 
     /** @private @const {boolean} */
-    this.pingbackAllEntitlements_ = !!this.serviceConfig_[
-      'pingbackAllEntitlements'
-    ];
+    this.pingbackAllEntitlements_ =
+      !!this.serviceConfig_['pingbackAllEntitlements'];
 
     /** @protected @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
@@ -89,7 +88,7 @@ export class LocalSubscriptionBasePlatform {
   /**
    * @override
    */
-  getServiceId() {
+  getPlatformKey() {
     return 'local';
   }
 
@@ -154,7 +153,7 @@ export class LocalSubscriptionBasePlatform {
           const platform = this.serviceAdapter_.selectPlatformForLogin();
           this.serviceAdapter_.delegateActionToService(
             action,
-            platform.getServiceId(),
+            platform.getPlatformKey(),
             element.id
           );
         } else {

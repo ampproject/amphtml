@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {BaseCarousel} from './base-carousel';
 import {Services} from '../../../src/services';
 import {isFiniteNumber} from '../../../src/types';
@@ -168,12 +168,17 @@ export class BaseSlides extends BaseCarousel {
       return;
     }
     this.clearAutoplay();
-    this.autoplayTimeoutId_ = /** @type {number} */ (Services.timerFor(
-      this.win
-    ).delay(
-      this.go.bind(this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
-      this.autoplayDelay_
-    ));
+    this.autoplayTimeoutId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(
+        this.go.bind(
+          this,
+          /* dir */ 1,
+          /* animate */ true,
+          /* autoplay */ true
+        ),
+        this.autoplayDelay_
+      )
+    );
   }
 
   /**

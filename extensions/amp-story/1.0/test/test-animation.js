@@ -19,14 +19,14 @@ import {
   AnimationRunner,
   AnimationSequence,
 } from '../animation';
-import {Deferred} from '../../../../src/utils/promise';
+import {Deferred} from '../../../../src/core/data-structures/promise';
 import {Services} from '../../../../src/services';
 import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';
 import {htmlFor, htmlRefs} from '../../../../src/static-template';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {presets} from '../animation-presets';
 import {scopedQuerySelectorAll} from '../../../../src/dom';
-import {toArray} from '../../../../src/types';
+import {toArray} from '../../../../src/core/types/array';
 
 const querySelectorAllAnimateIn = (element) =>
   toArray(scopedQuerySelectorAll(element, '[animate-in]'));
@@ -713,12 +713,8 @@ describes.realWin('amp-story animations', {}, (env) => {
           </amp-story-animation>
         </div>
       `;
-      const {
-        animatedFirst,
-        animatedSecond,
-        animatedThird,
-        animatedFourth,
-      } = htmlRefs(page);
+      const {animatedFirst, animatedSecond, animatedThird, animatedFourth} =
+        htmlRefs(page);
 
       env.win.document.body.appendChild(page);
 

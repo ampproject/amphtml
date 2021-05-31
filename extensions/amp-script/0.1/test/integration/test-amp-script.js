@@ -23,10 +23,10 @@ function poll(description, condition, opt_onError) {
   return classicPoll(description, condition, opt_onError, TIMEOUT);
 }
 
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('amp-script', function () {
+  .run('amp-script', {}, function () {
     this.timeout(TIMEOUT);
 
     let browser, doc, element;
@@ -179,6 +179,27 @@ describe
 
           const scripts = element.querySelectorAll('img');
           expect(scripts.length).to.equal(0);
+        });
+      }
+    );
+
+    describes.integration(
+      'sandboxed',
+      {
+        body: `<amp-script sandboxed src="/examples/amp-script/export-functions.js"></amp-script>`,
+        extensions: ['amp-script'],
+      },
+      (env) => {
+        beforeEach(() => {
+          browser = new BrowserController(env.win);
+          doc = env.win.document;
+          element = doc.querySelector('amp-script');
+        });
+
+        it('should let you call functions on it', async () => {
+          const impl = await element.getImpl(true);
+          const result = await impl.callFunction('getData');
+          expect(result).deep.equal({data: true});
         });
       }
     );

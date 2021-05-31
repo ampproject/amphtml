@@ -16,13 +16,14 @@
 
 import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
+import {getExtensionsFromMetadata} from './amp-ad-utils';
 import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {setStyle} from '../../../src/style';
 
 /**
- * Renders a creative into a "NameFrame" iframe.
+ * Renders a creative into a friendly iframe.
  *
  * @param {string} adUrl The ad request URL.
  * @param {!./amp-ad-type-defs.LayoutInfoDef} size The size and layout of the
@@ -40,20 +41,22 @@ export function renderCreativeIntoFriendlyFrame(
   creativeMetadata
 ) {
   // Create and setup friendly iframe.
-  const iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
-    /** @type {!Document} */ (element.ownerDocument),
-    'iframe',
-    dict({
-      // NOTE: It is possible for either width or height to be 'auto',
-      // a non-numeric value.
-      'height': size.height,
-      'width': size.width,
-      'frameborder': '0',
-      'allowfullscreen': '',
-      'allowtransparency': '',
-      'scrolling': 'no',
-    })
-  ));
+  const iframe = /** @type {!HTMLIFrameElement} */ (
+    createElementWithAttributes(
+      /** @type {!Document} */ (element.ownerDocument),
+      'iframe',
+      dict({
+        // NOTE: It is possible for either width or height to be 'auto',
+        // a non-numeric value.
+        'height': size.height,
+        'width': size.width,
+        'frameborder': '0',
+        'allowfullscreen': '',
+        'allowtransparency': '',
+        'scrolling': 'no',
+      })
+    )
+  );
   iframe.classList.add('i-amphtml-fill-content');
 
   const fontsArray = [];
@@ -66,6 +69,7 @@ export function renderCreativeIntoFriendlyFrame(
     });
   }
 
+  const extensions = getExtensionsFromMetadata(creativeMetadata);
   return installFriendlyIframeEmbed(
     iframe,
     element,
@@ -73,15 +77,13 @@ export function renderCreativeIntoFriendlyFrame(
       host: element,
       url: /** @type {string} */ (adUrl),
       html: creativeMetadata.minifiedCreative,
-      extensionIds: creativeMetadata.customElementExtensions || [],
+      extensions,
       fonts: fontsArray,
     },
     (embedWin, ampdoc) => {
       const parentAmpdoc = element.getAmpDoc();
       installUrlReplacementsForEmbed(
-        // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
-        ampdoc || parentAmpdoc,
-        embedWin,
+        ampdoc,
         new A4AVariableSource(parentAmpdoc, embedWin)
       );
     }

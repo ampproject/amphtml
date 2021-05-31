@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-constants';
+import {ActionTrust} from '../core/constants/action-constants';
 import {
   EMPTY_METADATA,
   parseFavicon,
@@ -36,17 +36,17 @@ import {
 } from '../video-interface';
 import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
-import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {clamp} from '../utils/math';
 import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {createViewportObserver} from '../viewport-observer';
 import {dev, devAssert, user, userAssert} from '../log';
-import {dict, map} from '../utils/object';
+import {dict, map} from '../core/types/object';
 import {dispatchCustomEvent, removeElement} from '../dom';
-import {getMode} from '../mode';
+import {getInternalVideoElementFor, isAutoplaySupported} from '../utils/video';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
-import {once} from '../utils/function';
+import {measureIntersection} from '../utils/intersection';
+import {once} from '../core/types/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {toggle} from '../style';
@@ -187,6 +187,12 @@ export class VideoManager {
     if (!video.supportsPlatform()) {
       return;
     }
+
+    if (this.getEntryOrNull_(video)) {
+      // already registered
+      return;
+    }
+
     if (!this.viewportObserver_) {
       const viewportCallback = (
         /** @type {!Array<!IntersectionObserverEntry>} */ records
@@ -199,7 +205,7 @@ export class VideoManager {
       this.viewportObserver_ = createViewportObserver(
         viewportCallback,
         this.ampdoc.win,
-        /* threshold */ MIN_VISIBILITY_RATIO_FOR_AUTOPLAY
+        {threshold: MIN_VISIBILITY_RATIO_FOR_AUTOPLAY}
       );
     }
     this.viewportObserver_.observe(videoBE.element);
@@ -217,7 +223,9 @@ export class VideoManager {
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
     // appropriately each time.
-    const signals = /** @type {!../base-element.BaseElement} */ (video).signals();
+    const signals = /** @type {!../base-element.BaseElement} */ (
+      video
+    ).signals();
 
     signals.signal(VideoEvents.REGISTERED);
 
@@ -256,7 +264,8 @@ export class VideoManager {
      * @param {function()} fn
      */
     function registerAction(action, fn) {
-      video.registerAction(
+      const videoBE = /** @type {!AMP.BaseElement} */ (video);
+      videoBE.registerAction(
         action,
         () => {
           userInteractedWith(video);
@@ -269,16 +278,16 @@ export class VideoManager {
 
   /**
    * Returns the entry in the video manager corresponding to the video or
-   * element provided
+   * element provided, or null if unavailable.
    * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
-   * @return {VideoEntry} entry
+   * @return {?VideoEntry} entry
    */
-  getEntry_(videoOrElement) {
+  getEntryOrNull_(videoOrElement) {
     if (isEntryFor(this.lastFoundEntry_, videoOrElement)) {
       return this.lastFoundEntry_;
     }
 
-    for (let i = 0; i < this.entries_.length; i++) {
+    for (let i = 0; this.entries_ && i < this.entries_.length; i++) {
       const entry = this.entries_[i];
       if (isEntryFor(entry, videoOrElement)) {
         this.lastFoundEntry_ = entry;
@@ -286,8 +295,18 @@ export class VideoManager {
       }
     }
 
+    return null;
+  }
+
+  /**
+   * Returns the entry in the video manager corresponding to the video or
+   * element provided
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
+   * @return {VideoEntry} entry
+   */
+  getEntry_(videoOrElement) {
     return devAssert(
-      null,
+      this.getEntryOrNull_(videoOrElement),
       '%s not registered to VideoManager',
       videoOrElement.element || videoOrElement
     );
@@ -320,10 +339,9 @@ export class VideoManager {
       `Could not find an element with id="${id}" for VIDEO_STATE`
     );
     const entry = this.getEntry_(videoElement);
-    return (entry
-      ? entry.getAnalyticsDetails()
-      : Promise.resolve()
-    ).then((details) => (details ? details[property] : ''));
+    return (entry ? entry.getAnalyticsDetails() : Promise.resolve()).then(
+      (details) => (details ? details[property] : '')
+    );
   }
 
   // TODO(go.amp.dev/issue/27010): For getters below, let's expose VideoEntry
@@ -438,13 +456,6 @@ class VideoEntry {
     this.visibilitySessionManager_.onSessionEnd(() =>
       analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE)
     );
-
-    // eslint-disable-next-line jsdoc/require-returns
-    /** @private @const {function(): !Promise<boolean>} */
-    this.supportsAutoplay_ = () => {
-      const {win} = this.ampdoc_;
-      return VideoUtils.isAutoplaySupported(win, getMode(win).lite);
-    };
 
     /** @private @const {function(): !AnalyticsPercentageTracker} */
     this.getAnalyticsPercentageTracker_ = once(
@@ -765,10 +776,10 @@ class VideoEntry {
     if (!this.ampdoc_.isVisible()) {
       return;
     }
-    this.supportsAutoplay_().then((supportsAutoplay) => {
+    isAutoplaySupported(this.ampdoc_.win).then((isAutoplaySupported) => {
       const canAutoplay = this.hasAutoplay && !this.userInteracted();
 
-      if (canAutoplay && supportsAutoplay) {
+      if (canAutoplay && isAutoplaySupported) {
         this.autoplayLoadedVideoVisibilityChanged_();
       } else {
         this.nonAutoplayLoadedVideoVisibilityChanged_();
@@ -790,8 +801,8 @@ class VideoEntry {
       this.video.hideControls();
     }
 
-    this.supportsAutoplay_().then((supportsAutoplay) => {
-      if (!supportsAutoplay && this.video.isInteractive()) {
+    isAutoplaySupported(this.ampdoc_.win).then((isAutoplaySupported) => {
+      if (!isAutoplaySupported && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
         this.video.showControls();
@@ -979,9 +990,16 @@ class VideoEntry {
    */
   getAnalyticsDetails() {
     const {video} = this;
-    return this.supportsAutoplay_().then((supportsAutoplay) => {
-      const {width, height} = video.element.getLayoutBox();
-      const autoplay = this.hasAutoplay && supportsAutoplay;
+    return Promise.all([
+      isAutoplaySupported(this.ampdoc_.win),
+      measureIntersection(video.element),
+    ]).then((responses) => {
+      const isAutoplaySupported = /** @type {boolean} */ (responses[0]);
+      const intersection = /** @type {!IntersectionObserverEntry} */ (
+        responses[1]
+      );
+      const {width, height} = intersection.boundingClientRect;
+      const autoplay = this.hasAutoplay && isAutoplaySupported;
       const playedRanges = video.getPlayedRanges();
       const playedTotal = playedRanges.reduce(
         (acc, range) => acc + range[1] - range[0],
@@ -1058,8 +1076,8 @@ export class AutoFullscreenManager {
       this.getPlayingState_(video) == PlayingStates.PLAYING_MANUAL;
 
     /**
-     * @param {!../video-interface.VideoOrBaseElementDef} a
-     * @param {!../video-interface.VideoOrBaseElementDef} b
+     * @param {!IntersectionObserverEntry} a
+     * @param {!IntersectionObserverEntry} b
      * @return {number}
      */
     this.boundCompareEntries_ = (a, b) => this.compareEntries_(a, b);
@@ -1214,33 +1232,34 @@ export class AutoFullscreenManager {
    * Scrolls to a video if it's not in view.
    * @param {!../video-interface.VideoOrBaseElementDef} video
    * @param {?string=} optPos
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Promise}
    * @private
    */
   scrollIntoIfNotVisible_(video, optPos = null) {
     const {element} = video;
     const viewport = this.getViewport_();
 
-    return this.onceOrientationChanges_().then(() => {
-      const {boundingClientRect} = element.getIntersectionChangeEntry();
-      const {top, bottom} = boundingClientRect;
-      const vh = viewport.getSize().height;
-      const fullyVisible = top >= 0 && bottom <= vh;
-      if (fullyVisible) {
-        return Promise.resolve();
-      }
-      const pos = optPos
-        ? dev().assertString(optPos)
-        : bottom > vh
-        ? 'bottom'
-        : 'top';
-      return viewport.animateScrollIntoView(element, pos);
-    });
+    return this.onceOrientationChanges_()
+      .then(() => measureIntersection(element))
+      .then(({boundingClientRect}) => {
+        const {top, bottom} = boundingClientRect;
+        const vh = viewport.getSize().height;
+        const fullyVisible = top >= 0 && bottom <= vh;
+        if (fullyVisible) {
+          return Promise.resolve();
+        }
+        const pos = optPos
+          ? dev().assertString(optPos)
+          : bottom > vh
+          ? 'bottom'
+          : 'top';
+        return viewport.animateScrollIntoView(element, pos);
+      });
   }
 
   /**
    * @private
-   * @return {*} TODO(#23582): Specify return type
+   * @return {./viewport/viewport-interface.ViewportInterface}
    */
   getViewport_() {
     return Services.viewportForDoc(this.ampdoc_);
@@ -1257,44 +1276,44 @@ export class AutoFullscreenManager {
 
   /**
    * @private
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Promise<?../video-interface.VideoOrBaseElementDef>}
    */
   selectBestCenteredInPortrait_() {
     if (this.isInLandscape()) {
-      return this.currentlyCentered_;
+      return Promise.resolve(this.currentlyCentered_);
     }
 
     this.currentlyCentered_ = null;
 
-    const selected = this.entries_
+    const intersectionsPromise = this.entries_
       .filter(this.boundIncludeOnlyPlaying_)
-      .sort(this.boundCompareEntries_)[0];
+      .map((e) => measureIntersection(e.element));
 
-    if (selected) {
-      const {intersectionRatio} = selected.element.getIntersectionChangeEntry();
-      if (intersectionRatio >= MIN_VISIBILITY_RATIO_FOR_AUTOPLAY) {
-        this.currentlyCentered_ = selected;
+    return Promise.all(intersectionsPromise).then((intersections) => {
+      const selected = intersections.sort(this.boundCompareEntries_)[0];
+
+      if (
+        selected &&
+        selected.intersectionRatio > MIN_VISIBILITY_RATIO_FOR_AUTOPLAY
+      ) {
+        return selected.target
+          .getImpl()
+          .then((video) => (this.currentlyCentered_ = video));
       }
-    }
 
-    return this.currentlyCentered_;
+      return this.currentlyCentered_;
+    });
   }
 
   /**
    * Compares two videos in order to sort them by "best centered".
-   * @param {!../video-interface.VideoOrBaseElementDef} a
-   * @param {!../video-interface.VideoOrBaseElementDef} b
+   * @param {!IntersectionObserverEntry} a
+   * @param {!IntersectionObserverEntry} b
    * @return {number}
    */
   compareEntries_(a, b) {
-    const {
-      intersectionRatio: ratioA,
-      boundingClientRect: rectA,
-    } = a.element.getIntersectionChangeEntry();
-    const {
-      intersectionRatio: ratioB,
-      boundingClientRect: rectB,
-    } = b.element.getIntersectionChangeEntry();
+    const {intersectionRatio: ratioA, boundingClientRect: rectA} = a;
+    const {intersectionRatio: ratioB, boundingClientRect: rectB} = b;
 
     // Prioritize by how visible they are, with a tolerance of 10%
     const ratioTolerance = 0.1;

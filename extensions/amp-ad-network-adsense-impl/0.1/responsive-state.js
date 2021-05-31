@@ -26,10 +26,10 @@ import {clamp} from '../../../src/utils/math';
 import {computedStyle, getStyle, setStyle} from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 const TAG = 'amp-ad-network-adsense-impl';
 
@@ -109,9 +109,6 @@ export class ResponsiveState {
    * @return {!Promise<?ResponsiveState>} a promise that resolves when any upgrade is complete.
    */
   static maybeUpgradeToResponsive(element, adClientId) {
-    if (!ResponsiveState.isInAdSizeOptimizationExperimentBranch_(element)) {
-      return Promise.resolve(null);
-    }
     // If the ad unit is already responsive we don't upgrade again.
     if (element.hasAttribute('data-auto-format')) {
       return Promise.resolve(null);
@@ -385,45 +382,19 @@ export class ResponsiveState {
   }
 
   /**
-   * Selects into the ad size optimization experiment.
-   * @param {!Element} element
-   * @return {boolean}
-   */
-  static isInAdSizeOptimizationExperimentBranch_(element) {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: AD_SIZE_OPTIMIZATION_EXP.branch,
-        isTrafficEligible: () => true,
-        branches: [
-          AD_SIZE_OPTIMIZATION_EXP.control,
-          AD_SIZE_OPTIMIZATION_EXP.experiment,
-        ],
-      },
-    ]);
-    const win = toWin(element.ownerDocument.defaultView);
-    const setExps = randomlySelectUnsetExperiments(win, experimentInfoList);
-    Object.keys(setExps).forEach((expName) =>
-      addExperimentIdToElement(setExps[expName], element)
-    );
-    return (
-      setExps[AD_SIZE_OPTIMIZATION_EXP.branch] ==
-      AD_SIZE_OPTIMIZATION_EXP.experiment
-    );
-  }
-
-  /**
    * Selects into the inconsistent responsive height fix experiment.
    * @return {boolean}
    * @private
    */
   isInResponsiveHeightFixExperimentBranch_() {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: MAX_HEIGHT_EXP.branch,
-        isTrafficEligible: () => true,
-        branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
-      },
-    ]);
+    const experimentInfoList =
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+        {
+          experimentId: MAX_HEIGHT_EXP.branch,
+          isTrafficEligible: () => true,
+          branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
+        },
+      ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win_,
       experimentInfoList

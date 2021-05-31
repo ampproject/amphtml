@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
@@ -24,11 +24,11 @@ import {
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict, map} from '../../../src/core/types/object';
 import {getSourceOrigin} from '../../../src/url';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 export class AmpState extends AMP.BaseElement {
   /**

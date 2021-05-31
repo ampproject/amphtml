@@ -14,23 +14,35 @@
  * limitations under the License.
  */
 
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../src/experiments/ads-initial-intersection-exp';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
 import {createFixtureIframe, poll} from '../../testing/iframe';
+import {forceExperimentBranch} from '../../src/experiments';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
+const IFRAME_HEIGHT = 3000;
 function createFixture() {
-  return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
+  return createFixtureIframe(
+    'test/fixtures/3p-ad.html',
+    IFRAME_HEIGHT,
+    () => {}
+  );
 }
 
-describe('amp-ad 3P', () => {
+describes.sandboxed('amp-ad 3P', {}, () => {
   let fixture;
 
   beforeEach(() => {
     return createFixture().then((f) => {
       fixture = f;
       installPlatformService(fixture.win);
+      forceExperimentBranch(
+        fixture.win,
+        ADS_INITIAL_INTERSECTION_EXP.id,
+        ADS_INITIAL_INTERSECTION_EXP.experiment
+      );
     });
   });
 
@@ -40,25 +52,16 @@ describe('amp-ad 3P', () => {
     let lastIO = null;
     const platform = Services.platformFor(fixture.win);
     return poll(
-      'frame to be in DOM',
+      'frame to be in DOM and context is available',
       () => {
-        return fixture.doc.querySelector('amp-ad > iframe');
+        iframe = fixture.doc.querySelector('amp-ad > iframe');
+        if (iframe) {
+          return iframe.contentWindow.context;
+        }
       },
       undefined,
       5000
     )
-      .then((iframeElement) => {
-        iframe = iframeElement;
-        return new Promise((resolve) => {
-          if (iframe.contentWindow.context) {
-            resolve(iframe.contentWindow.context);
-          }
-          iframe.onload = () => {
-            expect(iframe.contentWindow.document.getElementById('c')).to.exist;
-            resolve(iframe.contentWindow.context);
-          };
-        });
-      })
       .then((context) => {
         expect(context.canary).to.be.a('boolean');
         expect(context.canonicalUrl).to.equal(
@@ -95,19 +98,26 @@ describe('amp-ad 3P', () => {
         });
         const {initialIntersection} = context;
         expect(initialIntersection.rootBounds).to.deep.equal(
-          layoutRectLtwh(0, 0, 500, 3000)
+          layoutRectLtwh(
+            0,
+            0,
+            Math.min(
+              iframe.ownerDocument.body.clientWidth,
+              iframe.ownerDocument.defaultView.innerWidth
+            ),
+            Math.min(
+              iframe.ownerDocument.body.clientHeight,
+              iframe.ownerDocument.defaultView.innerHeight
+            )
+          )
         );
+
         expect(initialIntersection.boundingClientRect).to.deep.equal(
           layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250)
         );
-        expect(initialIntersection.intersectionRect).to.deep.equal(
-          layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250)
-        );
-        expect(initialIntersection.intersectionRatio).to.equal(1);
-        expect(initialIntersection.time).to.be.a('number');
         expect(context.isMaster).to.exist;
         expect(context.computeInMasterFrame).to.exist;
-        expect(context.location).to.deep.equal({
+        expect(context.location).to.deep.include({
           hash: '',
           host: 'localhost:9876',
           hostname: 'localhost',
@@ -168,9 +178,8 @@ describe('amp-ad 3P', () => {
       .then(() => {
         // The userActivation feature is known to be available on Chrome 74+
         if (platform.isChrome() && platform.getMajorVersion() >= 74) {
-          const event = fixture.messages.getFirstMessageEventOfType(
-            'embed-size'
-          );
+          const event =
+            fixture.messages.getFirstMessageEventOfType('embed-size');
           expect(event.userActivation).to.be.ok;
           expect(event.userActivation.isActive).to.be.a('boolean');
         }
@@ -182,11 +191,7 @@ describe('amp-ad 3P', () => {
           lastIO = changes[changes.length - 1];
         });
         await poll('wait for initial IO entry', () => {
-          return (
-            lastIO != null &&
-            lastIO.boundingClientRect.top == 1000 &&
-            lastIO.intersectionRatio == 1
-          );
+          return lastIO != null && lastIO.boundingClientRect.top == 1000;
         });
         await new Promise((resolve) => {
           setTimeout(resolve, 110);

@@ -15,7 +15,8 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {VideoIframe} from '../video-iframe';
+import {VideoIframeInternal} from '../video-iframe';
+import {createRef} from '../../../../src/preact';
 import {mount} from 'enzyme';
 
 function dispatchMessage(window, opt_event) {
@@ -24,13 +25,42 @@ function dispatchMessage(window, opt_event) {
   window.dispatchEvent(Object.assign(event, opt_event));
 }
 
-describes.sandboxed('VideoIframe Preact component', {}, (env) => {
-  beforeEach(() => {});
+describes.realWin('VideoIframeInternal Preact component', {}, (env) => {
+  let window;
+  let document;
+
+  beforeEach(() => {
+    window = env.win;
+    document = window.document;
+  });
+
+  it('calls `onIframeLoad` once loaded', async () => {
+    const onIframeLoad = env.sandbox.spy();
+    const onCanPlay = env.sandbox.spy();
+    const makeMethodMessage = env.sandbox.spy();
+    const videoIframe = mount(
+      <VideoIframeInternal
+        src="about:blank"
+        makeMethodMessage={makeMethodMessage}
+        onIframeLoad={onIframeLoad}
+        onCanPlay={onCanPlay}
+      />,
+      {attachTo: document.body}
+    );
+
+    await videoIframe.find('iframe').invoke('onCanPlay')();
+
+    expect(onCanPlay).to.be.calledOnce;
+    expect(onIframeLoad).to.be.calledOnce;
+  });
 
   it('unmutes per lack of `muted` prop', async () => {
     const makeMethodMessage = env.sandbox.spy();
     const videoIframe = mount(
-      <VideoIframe src="about:blank" makeMethodMessage={makeMethodMessage} />,
+      <VideoIframeInternal
+        src="about:blank"
+        makeMethodMessage={makeMethodMessage}
+      />,
       {attachTo: document.body}
     );
 
@@ -42,7 +72,7 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
   it('mutes per `muted` prop', async () => {
     const makeMethodMessage = env.sandbox.spy();
     const videoIframe = mount(
-      <VideoIframe
+      <VideoIframeInternal
         src="about:blank"
         makeMethodMessage={makeMethodMessage}
         muted
@@ -58,7 +88,10 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
   it('hides controls per lack of `controls` prop', async () => {
     const makeMethodMessage = env.sandbox.spy();
     const videoIframe = mount(
-      <VideoIframe src="about:blank" makeMethodMessage={makeMethodMessage} />,
+      <VideoIframeInternal
+        src="about:blank"
+        makeMethodMessage={makeMethodMessage}
+      />,
       {attachTo: document.body}
     );
 
@@ -70,7 +103,7 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
   it('shows controls per `controls` prop', async () => {
     const makeMethodMessage = env.sandbox.spy();
     const videoIframe = mount(
-      <VideoIframe
+      <VideoIframeInternal
         src="about:blank"
         makeMethodMessage={makeMethodMessage}
         controls
@@ -86,7 +119,7 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
   it('passes messages to onMessage', async () => {
     const onMessage = env.sandbox.spy();
     const videoIframe = mount(
-      <VideoIframe src="about:blank" onMessage={onMessage} controls />,
+      <VideoIframeInternal src="about:blank" onMessage={onMessage} controls />,
       {attachTo: document.body}
     );
 
@@ -108,9 +141,12 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
 
   it("ignores messages if source doesn't match iframe", async () => {
     const onMessage = env.sandbox.spy();
-    mount(<VideoIframe src="about:blank" onMessage={onMessage} controls />, {
-      attachTo: document.body,
-    });
+    mount(
+      <VideoIframeInternal src="about:blank" onMessage={onMessage} controls />,
+      {
+        attachTo: document.body,
+      }
+    );
     dispatchMessage(window, {source: null, data: 'whatever'});
     expect(onMessage).to.not.have.been.called;
   });
@@ -118,7 +154,7 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
   it('stops listening to messages on unmount', async () => {
     const onMessage = env.sandbox.spy();
     const videoIframe = mount(
-      <VideoIframe src="about:blank" onMessage={onMessage} />,
+      <VideoIframeInternal src="about:blank" onMessage={onMessage} />,
       {attachTo: document.body}
     );
     const iframe = videoIframe.getDOMNode();
@@ -132,7 +168,7 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
     const removeEventListener = env.sandbox.stub(window, 'removeEventListener');
 
     const videoIframe = mount(
-      <VideoIframe src="about:blank" onMessage={() => {}} />,
+      <VideoIframeInternal src="about:blank" onMessage={() => {}} />,
       {attachTo: document.body}
     );
 
@@ -151,7 +187,105 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
     expect(removeEventListener.withArgs('message')).to.have.been.calledOnce;
   });
 
-  describe('uses makeMethodMessage to posts imperative handle methods', () => {
+  it('should reset an unloadOnPause-iframe on pause', () => {
+    const ref = createRef();
+
+    const makeMethodMessageStub = env.sandbox.stub();
+
+    const videoIframe = mount(
+      <VideoIframeInternal
+        ref={ref}
+        src="about:blank"
+        makeMethodMessage={makeMethodMessageStub}
+        unloadOnPause={true}
+      />
+    );
+
+    const iframe = videoIframe.getDOMNode();
+    let iframeSrc = iframe.src;
+    const iframeSrcSetterSpy = env.sandbox.spy();
+    Object.defineProperty(iframe, 'src', {
+      get() {
+        return iframeSrc;
+      },
+      set(value) {
+        iframeSrc = value;
+        iframeSrcSetterSpy(value);
+      },
+    });
+
+    ref.current.pause();
+    expect(iframeSrcSetterSpy).to.be.calledOnce;
+    expect(makeMethodMessageStub).to.not.be.calledWith('pause');
+  });
+
+  describe('uses playerStateRef to read the imperative state', () => {
+    const makeMethodMessage = (method) => ({makeMethodMessageFor: method});
+
+    it('should NOT fail when player state is not available', () => {
+      const ref = createRef();
+
+      // no value.
+      mount(
+        <VideoIframeInternal
+          ref={ref}
+          src="about:blank"
+          makeMethodMessage={makeMethodMessage}
+        />
+      );
+      expect(ref.current.currentTime).to.be.NaN;
+      expect(ref.current.duration).to.be.NaN;
+
+      // null value.
+      const playerStateRef = createRef();
+      mount(
+        <VideoIframeInternal
+          ref={ref}
+          src="about:blank"
+          makeMethodMessage={makeMethodMessage}
+          playerStateRef={playerStateRef}
+        />
+      );
+      expect(ref.current.currentTime).to.be.NaN;
+      expect(ref.current.duration).to.be.NaN;
+
+      // empty value.
+      playerStateRef.current = {};
+      mount(
+        <VideoIframeInternal
+          ref={ref}
+          src="about:blank"
+          makeMethodMessage={makeMethodMessage}
+          playerStateRef={playerStateRef}
+        />
+      );
+      expect(ref.current.currentTime).to.be.NaN;
+      expect(ref.current.duration).to.be.NaN;
+    });
+
+    it('should return the provided player state', () => {
+      const ref = createRef();
+      const playerStateRef = createRef();
+      playerStateRef.current = {duration: 111, currentTime: 11};
+      mount(
+        <VideoIframeInternal
+          ref={ref}
+          src="about:blank"
+          makeMethodMessage={makeMethodMessage}
+          playerStateRef={playerStateRef}
+        />
+      );
+      expect(ref.current.currentTime).to.equal(11);
+      expect(ref.current.duration).to.equal(111);
+
+      // 0-values are ok.
+      playerStateRef.current = {duration: 0, currentTime: 0};
+      expect(ref.current.currentTime).to.equal(0);
+      expect(ref.current.duration).to.equal(0);
+    });
+  });
+
+  describe('uses makeMethodMessage to post imperative handle methods', () => {
     ['play', 'pause'].forEach((method) => {
       it(`with \`${method}\``, async () => {
         let videoIframeRef;
@@ -161,7 +295,7 @@ describes.sandboxed('VideoIframe Preact component', {}, (env) => {
         const makeMethodMessageSpy = env.sandbox.spy(makeMethodMessage);
 
         const videoIframe = mount(
-          <VideoIframe
+          <VideoIframeInternal
             ref={(ref) => (videoIframeRef = ref)}
             src="about:blank"
             makeMethodMessage={makeMethodMessageSpy}

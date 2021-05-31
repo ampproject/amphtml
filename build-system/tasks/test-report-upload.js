@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp test-report-upload` task, which POSTs test result reports
+ * @fileoverview This file implements the `amp test-report-upload` task, which POSTs test result reports
  * to an API endpoint that stores them in the database.
  */
 
@@ -23,29 +23,31 @@
 
 const fetch = require('node-fetch');
 const fs = require('fs').promises;
-const log = require('fancy-log');
 const path = require('path');
 const {
-  travisBuildNumber,
-  travisBuildUrl,
-  travisJobNumber,
-  travisJobUrl,
-  travisCommitSha,
-} = require('../common/travis');
-const {cyan, green, red, yellow} = require('ansi-colors');
+  ciBuildId,
+  ciBuildUrl,
+  ciJobId,
+  ciJobUrl,
+  ciCommitSha,
+  ciRepoSlug,
+} = require('../common/ci');
+const {log} = require('../common/logging');
+
+const {cyan, green, red, yellow} = require('../common/colors');
 
 const REPORTING_API_URL = 'https://amp-test-cases.appspot.com/report';
 
 /**
  * Parses a test report file and adds build & job info to it.
  * @param {('unit' | 'integration' | 'e2e')} testType The type of the tests whose result we want to report.
- * @return {Object.<string,Object>|null} Object containing the build, job, and test results.
+ * @return {Promise<Object.<string,Object>|null>} Object containing the build, job, and test results.
  */
 async function getReport(testType) {
   try {
-    const report = await fs
-      .readFile(`result-reports/${testType}.json`)
-      .then(JSON.parse);
+    const report = JSON.parse(
+      await fs.readFile(`result-reports/${testType}.json`, 'utf-8')
+    );
 
     return addJobAndBuildInfo(testType, report);
   } catch (e) {
@@ -62,25 +64,27 @@ async function getReport(testType) {
  * @return {Object.<string,Object>} Object containing the build, job, and test results.
  */
 function addJobAndBuildInfo(testType, reportJson) {
-  const buildNumber = travisBuildNumber();
-  const commitSha = travisCommitSha();
-  const jobNumber = travisJobNumber();
+  const buildId = ciBuildId();
+  const commitSha = ciCommitSha();
+  const jobId = ciJobId();
 
-  if (!buildNumber || !commitSha || !jobNumber) {
-    throw new ReferenceError('Travis fields are not defined.');
+  if (!buildId || !commitSha || !jobId) {
+    throw new ReferenceError('CI fields are not defined.');
   }
 
+  // (TODO ampproject/amp-github-apps/pull:1194) Update field names in database.
   return {
+    repository: ciRepoSlug(),
     results: reportJson,
     build: {
-      buildNumber,
+      buildId,
       commitSha,
-      url: travisBuildUrl(),
+      url: ciBuildUrl(),
     },
     job: {
-      jobNumber,
+      jobId,
       testSuiteType: testType,
-      url: travisJobUrl(),
+      url: ciJobUrl(),
     },
   };
 }
@@ -89,7 +93,7 @@ function addJobAndBuildInfo(testType, reportJson) {
  * Sends a single report to the API endpoint for storage.
  * @param {('unit' | 'integration' | 'e2e')} testType The type of the tests whose result we want to report.
  */
-async function sendTravisKarmaReport(testType) {
+async function sendCiKarmaReport(testType) {
   const body = await getReport(testType);
 
   if (!body) {
@@ -116,7 +120,7 @@ async function sendTravisKarmaReport(testType) {
       'failed to report results of type',
       cyan(testType),
       ': \n',
-      yellow(response.statusText)
+      yellow(/** @type {string} */ (await response.text()))
     );
   }
 }
@@ -128,7 +132,7 @@ async function testReportUpload() {
   const filenames = await fs.readdir('result-reports/');
   const testTypes = filenames.map((filename) => path.parse(filename).name);
 
-  await Promise.all(testTypes.map(sendTravisKarmaReport));
+  await Promise.all(testTypes.map(sendCiKarmaReport));
 }
 
 module.exports = {

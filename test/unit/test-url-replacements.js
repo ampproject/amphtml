@@ -29,7 +29,7 @@ import {
   stubServiceForDoc,
 } from '../../testing/test-helper';
 
-import {Observable} from '../../src/observable';
+import {Observable} from '../../src/core/data-structures/observable';
 import {Services} from '../../src/services';
 import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {createIframePromise} from '../../testing/iframe';
@@ -170,7 +170,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
             },
           },
           __AMP_SERVICES: {
-            'viewport': {obj: {}},
+            'viewport': {obj: {}, ctor: Object},
             'cid': {
               promise: Promise.resolve({
                 get: (config) =>
@@ -890,9 +890,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
 
         it('is replaced if PAGE_LOAD_TIME is available within a delay', () => {
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           const validMetric = urlReplacements.expandUrlAsync(
             '?sh=PAGE_LOAD_TIME&s'
           );
@@ -1441,9 +1440,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         element.setAttribute('data-amp-replace', 'QUERY_PARAM');
         const {documentElement} = win.document;
         const urlReplacements = Services.urlReplacementsForDoc(documentElement);
-        const unallowlisted = urlReplacements.collectDisallowedVarsSync(
-          element
-        );
+        const unallowlisted =
+          urlReplacements.collectDisallowedVarsSync(element);
         expect(unallowlisted).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
       });
 
@@ -1470,9 +1468,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should expand w/ collect vars (skip async macro)', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           urlReplacements.ampdoc.win.performance.timing.loadEventStart = 109;
           const expanded = urlReplacements.expandUrlSync(
             'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
@@ -1495,9 +1492,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should reject protocol changes', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           let expanded = urlReplacements.expandUrlSync(
             'PROTOCOL://example.com/?r=RANDOM',
             {
@@ -1519,9 +1515,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should reject javascript protocol', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           allowConsoleError(() => {
             expect(() => {
               /*eslint no-script-url: 0*/
@@ -1586,9 +1581,9 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
             link.setAttribute('rel', 'canonical');
             iframe.doc.head.appendChild(link);
             const {documentElement} = iframe.doc;
-            const replacements = Services.urlReplacementsForDoc(
-              documentElement
-            );
+            Services.ampdoc(documentElement).setExtensionsKnown();
+            const replacements =
+              Services.urlReplacementsForDoc(documentElement);
             return replacements.expandUrlAsync(url);
           });
         }
@@ -1629,29 +1624,29 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
       });
 
       describe('access values via amp-subscriptions', () => {
-        let accessService;
-        let accessServiceMock;
+        let subscriptionsService;
+        let subscriptionsServiceMock;
 
         beforeEach(() => {
-          accessService = {
+          subscriptionsService = {
             getAccessReaderId: () => {},
             getAuthdataField: () => {},
           };
-          accessServiceMock = env.sandbox.mock(accessService);
+          subscriptionsServiceMock = env.sandbox.mock(subscriptionsService);
           env.sandbox
             .stub(Services, 'subscriptionsServiceForDocOrNull')
             .callsFake(() => {
-              return Promise.resolve(accessService);
+              return Promise.resolve(subscriptionsService);
             });
         });
 
         afterEach(() => {
-          accessServiceMock.verify();
+          subscriptionsServiceMock.verify();
         });
 
         function expandUrlAsync(url, opt_disabled) {
           if (opt_disabled) {
-            accessService = null;
+            subscriptionsService = null;
           }
           return createIframePromise().then((iframe) => {
             iframe.doc.title = 'Pixel Test';
@@ -1660,15 +1655,15 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
             link.setAttribute('rel', 'canonical');
             iframe.doc.head.appendChild(link);
             const {documentElement} = iframe.doc;
-            const replacements = Services.urlReplacementsForDoc(
-              documentElement
-            );
+            Services.ampdoc(documentElement).setExtensionsKnown();
+            const replacements =
+              Services.urlReplacementsForDoc(documentElement);
             return replacements.expandUrlAsync(url);
           });
         }
 
         it('should replace ACCESS_READER_ID', () => {
-          accessServiceMock
+          subscriptionsServiceMock
             .expects('getAccessReaderId')
             .returns(Promise.resolve('reader1'))
             .once();
@@ -1679,7 +1674,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         });
 
         it('should replace AUTHDATA', () => {
-          accessServiceMock
+          subscriptionsServiceMock
             .expects('getAuthdataField')
             .withExactArgs('field1')
             .returns(Promise.resolve('value1'))
@@ -1691,13 +1686,38 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         });
 
         it('should report error if not available', () => {
-          accessServiceMock.expects('getAccessReaderId').never();
+          subscriptionsServiceMock.expects('getAccessReaderId').never();
           return expandUrlAsync(
             '?a=ACCESS_READER_ID;',
             /* disabled */ true
           ).then((res) => {
             expect(res).to.match(/a=;/);
             expect(userErrorStub).to.be.calledOnce;
+          });
+        });
+
+        it('should prefer amp-subscriptions if amp-access also available', () => {
+          const accessService = {
+            getAccessReaderId: () => {},
+            getAuthdataField: () => {},
+          };
+          const accessServiceMock = env.sandbox.mock(accessService);
+          env.sandbox
+            .stub(Services, 'accessServiceForDocOrNull')
+            .callsFake(() => {
+              return Promise.resolve(accessService);
+            });
+          accessServiceMock.expects('getAuthdataField').never();
+
+          subscriptionsServiceMock
+            .expects('getAuthdataField')
+            .withExactArgs('field1')
+            .returns(Promise.resolve('value1'))
+            .once();
+          return expandUrlAsync('?a=AUTHDATA(field1)').then((res) => {
+            expect(res).to.match(/a=value1/);
+            expect(userErrorStub).to.have.not.been.called;
+            accessServiceMock.verify();
           });
         });
       });
@@ -1934,9 +1954,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should not reject protocol changes with expandStringSync', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           let expanded = urlReplacements.expandStringSync(
             'PROTOCOL://example.com/?r=RANDOM',
             {
@@ -1958,9 +1977,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should not encode values returned by expandStringSync', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           const expanded = urlReplacements.expandStringSync('title=TITLE', {
             'TITLE': 'test with spaces',
           });
@@ -1970,9 +1988,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should not check protocol changes with expandStringAsync', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           return urlReplacements
             .expandStringAsync('RANDOM:X:Y', {
               'RANDOM': Promise.resolve('abc'),
@@ -1985,9 +2002,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should not encode values returned by expandStringAsync', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           return urlReplacements
             .expandStringAsync('title=TITLE', {
               'TITLE': Promise.resolve('test with spaces'),
@@ -2002,9 +2018,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should fail for non-inputs', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           const input = document.createElement('textarea');
           input.value = 'RANDOM';
           input.setAttribute('data-amp-replace', 'RANDOM');
@@ -2019,9 +2034,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should fail for non-hidden inputs', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           const input = document.createElement('input');
           input.value = 'RANDOM';
           input.setAttribute('data-amp-replace', 'RANDOM');
@@ -2036,9 +2050,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should not replace not allowlisted vars', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           const input = document.createElement('input');
           input.value = 'RANDOM';
           input.type = 'hidden';
@@ -2055,9 +2068,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should replace input value with var subs - sync', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           const input = document.createElement('input');
           input.value = 'RANDOM';
           input.type = 'hidden';
@@ -2081,9 +2093,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should replace input value with var subs - sync', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
-          const urlReplacements = Services.urlReplacementsForDoc(
-            documentElement
-          );
+          const urlReplacements =
+            Services.urlReplacementsForDoc(documentElement);
           const input = document.createElement('input');
           input.value = 'RANDOM';
           input.type = 'hidden';

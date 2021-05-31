@@ -116,9 +116,13 @@
   position: relative;
 }
 
+/* Fill layout requires higher specificity than i-amp-html-notbuilt
+ * so that the correct width/height can be applied before build.
+ */
 .i-amphtml-layout-fill,
 .i-amphtml-layout-fill.i-amphtml-notbuilt,
-[layout=fill]:not(.i-amphtml-layout-fill)
+[layout=fill]:not(.i-amphtml-layout-fill),
+body noscript > *
 {
   display: block;
   overflow: hidden !important;
@@ -127,6 +131,22 @@
   left: 0;
   bottom: 0;
   right: 0;
+}
+
+/* In previous rule and in this one, make sure noscript fallbacks get fill layout as if they are placeholders */
+body noscript > * {
+  position: absolute !important;
+
+  /* Override width/height attributes defined on HTML elements in noscript. */
+  width: 100%;
+  height: 100%;
+
+  /* Supersede sibling [placeholder]/[fallback] z-index:1 */
+  z-index: 2;
+}
+
+body noscript {
+  display: inline !important;
 }
 
 .i-amphtml-layout-flex-item,
@@ -160,7 +180,7 @@ i-amphtml-sizer {
  * borwser and the optimizer.
  */
 @supports (aspect-ratio: 1 / 1) {
-  i-amphtml-sizer.i-amphtml-disable-for-ar {
+  i-amphtml-sizer.i-amphtml-disable-ar {
     display: none !important;
   }
 }
@@ -322,9 +342,12 @@ amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
 .i-amphtml-element > [placeholder],
 [layout]:not(.i-amphtml-element) > [placeholder],
 [width][height][sizes]:not([layout]):not(.i-amphtml-element) > [placeholder],
-[width][height][heights]:not([layout]):not(.i-amphtml-element) > [placeholder]
-{
+[width][height][heights]:not([layout]):not(.i-amphtml-element) > [placeholder] {
   display: block;
+  /* line-height:normal overrides line-height:0 from the "hide all children of
+     non-container text node children" rule. This avoids a minor content jump during
+     element build since placeholders should be fully visible. */
+  line-height: normal;
 }
 
 .i-amphtml-element > [placeholder].hidden,
@@ -352,6 +375,14 @@ amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
   right: 0 !important;
   bottom: 0 !important;
   z-index: 1;
+}
+
+/* We reset the z-index of blurry image placeholders for images that are
+   rendered by the server and are not (yet) controlled by JS to speed up
+   display of the real image. This conveniently also fixes the display of
+   the image when JS fails to load. */
+amp-img.i-amphtml-ssr:not(.i-amphtml-element) > [placeholder] {
+  z-index: auto;
 }
 
 .i-amphtml-notbuilt > [placeholder] {
@@ -431,6 +462,13 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   line-height: normal;
 }
 
+/**
+ * "overflow" element must not contribute space to a size-defined element.
+ */
+.i-amphtml-layout-size-defined > [overflow] {
+  position: absolute;
+}
+
 .i-amphtml-element > [overflow].amp-visible {
   visibility: visible;
 }
@@ -499,6 +537,27 @@ form [submit-error] {
 /* Non-overridable properties */
 amp-accordion {
   display: block !important;
+}
+
+/**
+ * This media query is used instead of @supports due to low compatibility.
+ * At the time of this change (4/6/2021) no version of Webkit support @supports queries.
+
+ * These provide low-specificity UI styles to prevent CLS for the header and content
+ * segments of accordions. The same styles are later set and extended with interactive
+ * styles for older browsers via the `i-amphtml-accordion-header` class in both 0.1 and
+ * the 1.0 version of accordion.
+ */
+@media (min-width: 1px) {
+  :where(amp-accordion > section) > :first-child {
+    margin: 0;
+    background-color: #efefef;
+    padding-right: 20px;
+    border: 1px solid #dfdfdf;
+  }
+  :where(amp-accordion > section) > :last-child {
+    margin: 0;
+  }
 }
 
 /* Make sections non-floatable */

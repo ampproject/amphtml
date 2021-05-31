@@ -60,8 +60,8 @@ the new element will be placed after that `<p>`.
 
 An `amp-script` element can load JavaScript in two ways:
 
-- remotely, from a URL
-- locally, from a `<script>` element on the page
+-   remotely, from a URL
+-   locally, from a `<script>` element on the page
 
 #### From a remote URL
 
@@ -77,9 +77,9 @@ Use the `src` attribute to load JavaScript from a URL:
 
 You can also include your JavaScript inline, in a `script` tag. You must:
 
-- Set the `script` attribute of your `amp-script` to the local `script` element's `id`.
-- Include `target="amp-script"` in your `amp-script`.
-- Include `type="text/plain"` in your `script`. This way, the browser won't execute your script, allowing amp-script to control it.
+-   Set the `script` attribute of your `amp-script` to the local `script` element's `id`.
+-   Include `target="amp-script"` in your `amp-script`.
+-   Include `type="text/plain"` in your `script`. This way, the browser won't execute your script, allowing amp-script to control it.
 
 ```html
 <!-- To use inline JavaScript, you must add a script hash to the document head. -->
@@ -106,7 +106,9 @@ You can also include your JavaScript inline, in a `script` tag. You must:
 ```
 
 [tip type="default"]
-For security reasons, `amp-script` elements with a `script` or cross-origin `src` attribute require a [script hash](#script-hash) in a `<meta name="amp-script-src" content="...">` tag. Also, same-origin `src` files must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
+For security reasons, `amp-script` elements with a `script` or cross-origin `src` attribute require a [script hash](#calculating-the-script-hash) in a `<meta name="amp-script-src" content="...">` tag. Also, same-origin `src` files must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
+
+If your page contains multiple `amp-script` elements, each requiring a [script hash](#calculating-the-script-hash), include each as a whitespace-delimited list in a single `<meta name="amp-script-src" content="...">` tag (see [examples/amp-script/example.amp.html](https://github.com/ampproject/amphtml/blob/main/examples/amp-script/example.amp.html) for an example with multiple script hashes).
 [/tip]
 
 ### How does it work?
@@ -135,21 +137,21 @@ button.addEventListener('click', () => {
 
 Supported DOM APIs include:
 
-- Element getters like `getElementByName()`, `getElementsByClassName()`, `getElementsByTagName()`, `childNodes()`, `parentNode()`, and `lastChild()`
-- Mutators like `createTextNode()`, `appendChild()`, `insertBefore()`, `removeChild()`, and `replaceChild()`
-- Methods involving events like `addEventListener()`, `removeEventListener()`, and `createEvent()`
-- Property and attribute getters like `getAttribute()`, `hasAttribute()`
-- Event properties like `Event.target`, `Event.type`, and `Event.bubbles`
-- Element properties like `attributes`, `id`, `outerHTML`, `textContent`, `value`, `classList`, and `className`
-- And many more.
+-   Element getters like `getElementByName()`, `getElementsByClassName()`, `getElementsByTagName()`, `childNodes()`, `parentNode()`, and `lastChild()`
+-   Mutators like `createTextNode()`, `appendChild()`, `insertBefore()`, `removeChild()`, and `replaceChild()`
+-   Methods involving events like `addEventListener()`, `removeEventListener()`, and `createEvent()`
+-   Property and attribute getters like `getAttribute()`, `hasAttribute()`
+-   Event properties like `Event.target`, `Event.type`, and `Event.bubbles`
+-   Element properties like `attributes`, `id`, `outerHTML`, `textContent`, `value`, `classList`, and `className`
+-   And many more.
 
-For a complete list of supported DOM APIs, see the [API compatibility table](https://github.com/ampproject/worker-dom/blob/master/web_compat_table.md).
+For a complete list of supported DOM APIs, see the [API compatibility table](https://github.com/ampproject/worker-dom/blob/main/web_compat_table.md).
 
 `querySelector()` is supported for simple selectors - element, id, class, and attribute. So, `document.querySelector('.class')` will work, but `document.querySelector('.class1 .class2')` will not. [See the code](https://github.com/ampproject/worker-dom/blob/main/src/worker-thread/dom/Element.ts#L159) for details.
 
 `amp-script` supports common Web APIs like `Fetch`, `WebSockets`, `localStorage`, `sessionStorage`, and `Canvas`. Presently, the `History` API is not implemented, and neither are cookies.
 
-`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md).
+`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new/choose) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md).
 
 [tip type="default"]
 For a set of samples showing `amp-script` in use, [see here](https://amp.dev/documentation/examples/components/amp-script/).
@@ -254,8 +256,8 @@ In order to maintain AMP's guarantees of performance and layout stability, `amp-
 
 `amp-script` has standards for the size of code:
 
-- Each inline script can contain up to 10,000 bytes
-- The scripts on a page can contain a total of up to 150,000 bytes
+-   Each inline script can contain up to 10,000 bytes
+-   The scripts on a page can contain a total of up to 150,000 bytes
 
 ### User gestures
 
@@ -285,8 +287,8 @@ Here are some examples of variable-sized containers:
 
 DOM changes are permitted as follows:
 
-- in **fixed-size containers**, your code can make any change at any time.
-- in **variable-size containers**, your code can only make a change after a user gesture. It then has 5 seconds to make changes. If your code makes one or more `fetch()`'s, it can continue to make changes until 5 seconds after the last `fetch()` completes.
+-   in **fixed-size containers**, your code can make any change at any time.
+-   in **variable-size containers**, your code can only make a change after a user gesture. It then has 5 seconds to make changes. If your code makes one or more `fetch()`'s, it can continue to make changes until 5 seconds after the last `fetch()` completes.
 
 <table>
   <tr>
@@ -310,14 +312,14 @@ DOM changes are permitted as follows:
 
 Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), you need to add a script hash:
 
-- for inline JavaScript
-- for JavaScript loaded from a cross-origin source
+-   for inline JavaScript
+-   for JavaScript loaded from a cross-origin source
 
 Include the script hash in a `meta[name=amp-script-src]` element in the document head. You need a hash for each script that's used by an `<amp-script>` component. Here are a few ways to build the hash:
 
-- If you omit the `<meta>` tag, AMP will output a console error containing the expected hash string. You can copy this to create the appropriate `<meta>` tag.
-- The [AMP Optimizer node module](https://www.npmjs.com/package/@ampproject/toolbox-optimizer) generates this hash and inserts the `<meta>` tag automatically.
-- Build it yourself, using the following steps:
+-   If you omit the `<meta>` tag, AMP will output a console error containing the expected hash string. You can copy this to create the appropriate `<meta>` tag.
+-   The [AMP Optimizer node module](https://www.npmjs.com/package/@ampproject/toolbox-optimizer) generates this hash and inserts the `<meta>` tag automatically.
+-   Build it yourself, using the following steps:
 
 1. Compute the SHA384 hash sum of the script's contents. This sum should be expressed in hexadecimal.
 2. base64url-encode the result.
@@ -330,7 +332,7 @@ const crypto = require('crypto');
 const hash = crypto.createHash('sha384');
 
 function generateCSPHash(script) {
-  const data = hash.update(script, 'utf-8');
+  const data = hash.update(script, 'utf8');
   return (
     'sha384-' +
     data
@@ -405,7 +407,7 @@ The `id` of a `script[type=text/plain][target=amp-script]` element whose text co
 
 Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Similar to the `iframe[sandbox]` attribute, the value of the attribute can either be empty to apply all restrictions, or space-separated tokens to lift particular restrictions:
 
-- `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
+-   `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
 
 ### max-age
 
@@ -415,9 +417,9 @@ The `max-age` attribute specifies the maximum lifetime in seconds the local scri
 
 The value of `max-age` should be chosen carefully:
 
-- A longer `max-age` increases the potential security impact of a [SXG downgrade](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#seccons-downgrades).
+-   A longer `max-age` increases the potential security impact of a [SXG downgrade](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#seccons-downgrades).
 
-- A shorter `max-age` may prevent inclusion in AMP Caches that have a minimum SXG lifetime. For instance, the Google AMP Cache requires at least [4 days](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache) (345600 seconds). Note that there's currently no reason to select `max-age` longer than 7 days (604800 seconds), due to the [maximum](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#name-signature-validity) set by the SXG spec.
+-   A shorter `max-age` may prevent inclusion in AMP Caches that have a minimum SXG lifetime. For instance, the Google AMP Cache requires at least [4 days](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache) (345600 seconds). Note that there's currently no reason to select `max-age` longer than 7 days (604800 seconds), due to the [maximum](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#name-signature-validity) set by the SXG spec.
 
 If you don't publish signed exchanges, `max-age` does nothing.
 
@@ -443,15 +445,15 @@ The total of all scripts used by a page cannot exceed 150,000 bytes. See [Size o
 
 **Script hash not found.**
 
-For local scripts and cross-origin scripts, you need to add a [script hash](#script-hash) for security.
+For local scripts and cross-origin scripts, you need to add a [script hash](#calculating-the-script-hash) for security.
 
 **(...) must have "sha384-(...)" in meta[name="amp-script-src"]**
 
-Again, you need the [script hash](#script-hash). Simply copy the value in this error into your `<meta>` tag.
+Again, you need the [script hash](#calculating-the-script-hash). Simply copy the value in this error into your `<meta>` tag.
 
 **JavaScript size and script hash requirements are disabled in development mode.**
 
-If your `<amp-script>` includes the `data-ampdevmode` attribute, AMP won't check your [script hash](#script-hash) or the size of your code.
+If your `<amp-script>` includes the `data-ampdevmode` attribute, AMP won't check your [script hash](#calculating-the-script-hash) or the size of your code.
 
 **Blocked (...) attempts to modify (...)**
 

@@ -16,16 +16,15 @@
 
 import * as Preact from '../../../../src/preact';
 import {select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'amp-selector',
-  decorators: [withKnobs, withA11y, withAmp],
+  title: 'amp-selector-1_0',
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [{name: 'amp-selector', version: '1.0'}],
-    experiments: ['amp-selector-bento'],
+    experiments: ['bento'],
   },
 };
 
@@ -71,9 +70,7 @@ export const WithAmpImg = () => {
   );
 };
 
-WithAmpImg.story = {
-  name: 'with <amp-img>',
-};
+WithAmpImg.storyName = 'with <amp-img>';
 
 export const WithUl = () => {
   return (
@@ -88,9 +85,7 @@ export const WithUl = () => {
   );
 };
 
-WithUl.story = {
-  name: 'with <ul>',
-};
+WithUl.storyName = 'with <ul>';
 
 export const Actions = () => {
   const keyboardSelectMode = select(
@@ -135,9 +130,7 @@ export const Actions = () => {
   );
 };
 
-Actions.story = {
-  name: 'actions',
-};
+Actions.storyName = 'actions';
 
 export const Responsive = () => {
   return (
@@ -152,6 +145,4 @@ export const Responsive = () => {
   );
 };
 
-Responsive.story = {
-  name: 'responsive',
-};
+Responsive.storyName = 'responsive';

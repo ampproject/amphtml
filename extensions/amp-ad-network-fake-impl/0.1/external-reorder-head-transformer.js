@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {endsWith} from '../../../src/string';
+import {endsWith} from '../../../src/core/types/string';
 import {urls} from '../../../src/config';
 
 export class ExternalReorderHeadTransformer {
@@ -164,10 +164,7 @@ export class ExternalReorderHeadTransformer {
     if (
       isAsync &&
       ((src.startsWith(urls.cdn) &&
-        (endsWith(src, '/v0.js') ||
-          endsWith(src, '/v0.js.br') ||
-          endsWith(src, '/amp4ads-v0.js') ||
-          endsWith(src, '/amp4ads-v0.js.br'))) ||
+        (endsWith(src, '/v0.js') || endsWith(src, '/amp4ads-v0.js'))) ||
         endsWith(src, '/dist/amp.js') ||
         endsWith(src, '/dist/amp-inabox.js') ||
         endsWith(src, '/dist/v0.js') ||

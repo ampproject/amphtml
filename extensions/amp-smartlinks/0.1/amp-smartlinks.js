@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
 import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getData} from './../../../src/event-helper';
 
 import {ENDPOINTS} from './constants';
@@ -102,7 +102,9 @@ export class AmpSmartlinks extends AMP.BaseElement {
         /** @type {!../../../src/service/xhr-impl.Xhr} */
         (this.xhr_),
         /** @type {!Object} */
-        (this.linkmateOptions_)
+        (this.linkmateOptions_),
+        /** @type {!Object} */
+        (this.win)
       );
       this.smartLinkRewriter_ = this.initLinkRewriter_();
 
@@ -197,17 +199,28 @@ export class AmpSmartlinks extends AMP.BaseElement {
    * @private
    */
   buildPageImpressionPayload_() {
-    return /** @type {!JsonObject} */ (dict({
-      'events': [{'is_amp': true}],
-      'organization_id': this.linkmateOptions_.publisherID,
-      'organization_type': 'publisher',
-      'user': {
-        'page_session_uuid': this.generateUUID_(),
-        'source_url': this.ampDoc_.getUrl(),
-        'previous_url': this.referrer_,
-        'user_agent': this.ampDoc_.win.navigator.userAgent,
-      },
-    }));
+    return /** @type {!JsonObject} */ (
+      dict({
+        'events': [{'is_amp': true}],
+        'organization_id': this.linkmateOptions_.publisherID,
+        'organization_type': 'publisher',
+        'user': {
+          'page_session_uuid': this.generateUUID_(),
+          'source_url': this.getLocationHref_(),
+          'previous_url': this.referrer_,
+          'user_agent': this.ampDoc_.win.navigator.userAgent,
+        },
+      })
+    );
+  }
+
+  /**
+   * Retrieve url of the current doc.
+   * @return {string}
+   * @private
+   */
+  getLocationHref_() {
+    return this.win.location.href;
   }
 
   /**

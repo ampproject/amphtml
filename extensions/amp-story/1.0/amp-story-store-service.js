@@ -15,11 +15,11 @@
  */
 
 import {EmbedMode, parseEmbedMode} from './embed-mode';
-import {Observable} from '../../../src/observable';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {Services} from '../../../src/services';
-import {deepEquals} from '../../../src/json';
+import {deepEquals} from '../../../src/core/types/object/json';
 import {dev} from '../../../src/log';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {registerServiceBuilder} from '../../../src/service';
 
 /** @type {string} */
@@ -88,7 +88,6 @@ export let InteractiveReactData;
 /**
  * @typedef {{
  *    canInsertAutomaticAd: boolean,
- *    canShowBookend: boolean,
  *    canShowAudioUi: boolean,
  *    canShowNavigationOverlayHint: boolean,
  *    canShowPaginationButtons: boolean,
@@ -100,7 +99,6 @@ export let InteractiveReactData;
  *    adState: boolean,
  *    pageAttachmentState: boolean,
  *    affiliateLinkState: !Element,
- *    bookendState: boolean,
  *    desktopState: boolean,
  *    educationState: boolean,
  *    gyroscopeEnabledState: string,
@@ -108,9 +106,11 @@ export let InteractiveReactData;
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    interactiveReactState: !Map<string, !InteractiveReactData>,
+ *    keyboardActiveState: boolean,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
+ *    panningMediaState: !Map<string, ../../amp-story-panning-media/0.1/amp-story-panning-media.panningMediaPositionDef> ,
  *    pausedState: boolean,
  *    previewState: boolean,
  *    rtlState: boolean,
@@ -138,7 +138,6 @@ export let State;
 export const StateProperty = {
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
-  CAN_SHOW_BOOKEND: 'canShowBookend',
   CAN_SHOW_AUDIO_UI: 'canShowAudioUi',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canShowNavigationOverlayHint',
   CAN_SHOW_PAGINATION_BUTTONS: 'canShowPaginationButtons',
@@ -151,7 +150,6 @@ export const StateProperty = {
   ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
   PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
-  BOOKEND_STATE: 'bookendState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
   EDUCATION_STATE: 'educationState',
@@ -161,9 +159,11 @@ export const StateProperty = {
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   // State of interactive components (polls, quizzes) on the story.
   INTERACTIVE_REACT_STATE: 'interactiveReactState',
+  KEYBOARD_ACTIVE_STATE: 'keyboardActiveState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
+  PANNING_MEDIA_STATE: 'panningMediaState',
   PAUSED_STATE: 'pausedState',
   // Story preview state.
   PREVIEW_STATE: 'previewState',
@@ -205,12 +205,11 @@ export const Action = {
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
-  TOGGLE_BOOKEND: 'toggleBookend',
-  TOGGLE_CAN_SHOW_BOOKEND: 'toggleCanShowBookend',
   TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
+  TOGGLE_KEYBOARD_ACTIVE_STATE: 'toggleKeyboardActiveState',
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_ATTACHMENT_STATE: 'togglePageAttachmentState',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
@@ -229,6 +228,7 @@ export const Action = {
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
+  ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
 };
 
@@ -252,6 +252,8 @@ const stateComparisonFunctions = {
     curr === null ||
     old.width !== curr.width ||
     old.height !== curr.height,
+  [StateProperty.PANNING_MEDIA_STATE]: (old, curr) =>
+    old === null || curr === null || !deepEquals(old, curr, 2),
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
@@ -277,6 +279,15 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
+      });
+    case Action.ADD_PANNING_MEDIA_STATE:
+      const updatedState = {
+        ...state[StateProperty.PANNING_MEDIA_STATE],
+        ...data,
+      };
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PANNING_MEDIA_STATE]: updatedState,
       });
     case Action.ADD_TO_ACTIONS_ALLOWLIST:
       const newActionsAllowlist = [].concat(
@@ -315,21 +326,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.AFFILIATE_LINK_STATE]: data,
-      });
-    // Shows or hides the bookend.
-    case Action.TOGGLE_BOOKEND:
-      if (!state[StateProperty.CAN_SHOW_BOOKEND]) {
-        return state;
-      }
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.BOOKEND_STATE]: !!data,
-        [StateProperty.PAUSED_STATE]: !!data,
-      });
-    case Action.TOGGLE_CAN_SHOW_BOOKEND:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.CAN_SHOW_BOOKEND]: !!data,
       });
     case Action.TOGGLE_EDUCATION:
       return /** @type {!State} */ ({
@@ -397,6 +393,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.RTL_STATE]: !!data,
+      });
+    case Action.TOGGLE_KEYBOARD_ACTIVE_STATE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.KEYBOARD_ACTIVE_STATE]: !!data,
       });
     case Action.TOGGLE_SIDEBAR:
       // Don't change the PAUSED_STATE if SIDEBAR_STATE is not changed.
@@ -583,7 +584,6 @@ export class AmpStoryStoreService {
     // properties, so we have to force the type.
     return /** @type {!State} */ ({
       [StateProperty.CAN_INSERT_AUTOMATIC_AD]: true,
-      [StateProperty.CAN_SHOW_BOOKEND]: true,
       [StateProperty.CAN_SHOW_AUDIO_UI]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
@@ -594,7 +594,6 @@ export class AmpStoryStoreService {
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,
-      [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.GYROSCOPE_PERMISSION_STATE]: '',
@@ -604,10 +603,12 @@ export class AmpStoryStoreService {
         state: EmbeddedComponentState.HIDDEN,
       },
       [StateProperty.INTERACTIVE_REACT_STATE]: {},
+      [StateProperty.KEYBOARD_ACTIVE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_ATTACHMENT_STATE]: false,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
+      [StateProperty.PANNING_MEDIA_STATE]: {},
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
@@ -646,7 +647,6 @@ export class AmpStoryStoreService {
       case EmbedMode.NAME_TBD:
         return {
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-          [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
           [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
@@ -661,7 +661,6 @@ export class AmpStoryStoreService {
         return {
           [StateProperty.PREVIEW_STATE]: true,
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-          [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
           [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,

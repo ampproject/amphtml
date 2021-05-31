@@ -15,29 +15,46 @@
  */
 'use strict';
 
+const babel = require('@babel/core');
+const fs = require('fs-extra');
 const globby = require('globby');
-const gulpBabel = require('gulp-babel');
-const log = require('fancy-log');
 const path = require('path');
-const through = require('through2');
-const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
+const tempy = require('tempy');
+const {BABEL_SRC_GLOBS} = require('./sources');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
-const {EventEmitter} = require('events');
-const {red, cyan} = require('ansi-colors');
+const {log} = require('../common/logging');
+const {red, cyan} = require('../common/colors');
+const {TransformCache, batchedRead, md5} = require('../common/transform-cache');
 
 /**
  * Files on which to run pre-closure babel transforms.
  *
  * @private @const {!Array<string>}
  */
-const filesToTransform = getFilesToTransform();
+let filesToTransform;
 
 /**
- * Used to cache babel transforms.
+ * Directory used to output babel transformed files for closure compilation.
  *
- * @private @const {!Map<string, File>}
+ * @private @const {string}
  */
-const cache = new Map();
+let outputDir;
+
+/**
+ * Used to cache pre-closure babel transforms.
+ *
+ * @const {TransformCache}
+ */
+let transformCache;
+
+/**
+ * Returns the name of the babel output directory if it has been created.
+ *
+ * @return {string}
+ */
+function getBabelOutputDir() {
+  return outputDir || '';
+}
 
 /**
  * Computes the set of files on which to run pre-closure babel transforms.
@@ -45,94 +62,97 @@ const cache = new Map();
  * @return {!Array<string>}
  */
 function getFilesToTransform() {
-  return globby
-    .sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/'])
-    .concat(globby.sync(THIRD_PARTY_TRANSFORM_GLOBS))
-    .map(path.normalize);
+  return globby.sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/']);
 }
 
 /**
- * Apply babel transforms prior to closure compiler pass.
+ * Apply babel transforms prior to closure compiler pass, store the transformed
+ * file in an output directory (used by closure compiler), and return the path
+ * of the transformed file.
  *
- * When a source file is transformed for the first time, it is written to an
- * in-memory cache from where it is retrieved every subsequent time without
- * invoking babel.
+ * When a source file is transformed for the first time, it is written to a
+ * persistent transform cache from where it is retrieved every subsequent time
+ * without invoking babel. A change to the file contents or to the invocation
+ * arguments will invalidate the cached result and re-transform the file.
  *
- * @return {!Promise}
+ * @param {string} file
+ * @param {string} outputFilename
+ * @param {!Object} options
+ * @return {Promise<string>}
  */
-function preClosureBabel() {
-  const babel = gulpBabel({caller: {name: 'pre-closure'}});
-
-  return through.obj((file, enc, next) => {
-    if (!filesToTransform.includes(file.relative)) {
-      return next(null, file);
+async function preClosureBabel(file, outputFilename, options) {
+  if (!outputDir) {
+    outputDir = tempy.directory();
+  }
+  if (!transformCache) {
+    transformCache = new TransformCache('.pre-closure-cache', '.js');
+  }
+  if (!filesToTransform) {
+    filesToTransform = getFilesToTransform();
+  }
+  const transformedFile = path.join(outputDir, file);
+  if (!filesToTransform.includes(file)) {
+    if (!(await fs.exists(transformedFile))) {
+      await fs.copy(file, transformedFile);
     }
-
-    if (cache.has(file.path)) {
-      return next(null, cache.get(file.path));
-    }
-
-    let data, err;
-    debug(
-      CompilationLifecycles['pre-babel'],
-      file.path,
-      file.contents,
-      file.sourceMap
+    return transformedFile;
+  }
+  try {
+    debug(CompilationLifecycles['pre-babel'], file);
+    const babelOptions =
+      babel.loadOptions({caller: {name: 'pre-closure'}}) || {};
+    const optionsHash = md5(
+      JSON.stringify({babelOptions, argv: process.argv.slice(2)})
     );
-    function onData(d) {
-      babel.off('error', onError);
-      data = d;
-    }
-    function onError(e) {
-      babel.off('data', onData);
-      err = e;
-    }
-    babel.once('data', onData);
-    babel.once('error', onError);
-    babel.write(file, enc, () => {
-      if (err) {
-        return next(err);
+    const {contents, hash} = await batchedRead(file, optionsHash);
+    const cachedPromise = transformCache.get(hash);
+    if (cachedPromise) {
+      if (!(await fs.exists(transformedFile))) {
+        await fs.outputFile(transformedFile, await cachedPromise);
       }
-
-      debug(
-        CompilationLifecycles['pre-closure'],
-        file.path,
-        data.contents,
-        data.sourceMap
-      );
-      cache.set(file.path, data);
-      next(null, data);
-    });
-  });
+    } else {
+      const transformPromise = babel
+        .transformAsync(contents, {
+          ...babelOptions,
+          filename: file,
+          filenameRelative: path.basename(file),
+          sourceFileName: path.relative(process.cwd(), file),
+        })
+        .then((result) => result?.code);
+      transformCache.set(hash, transformPromise);
+      await fs.outputFile(transformedFile, await transformPromise);
+      debug(CompilationLifecycles['pre-closure'], transformedFile);
+    }
+  } catch (err) {
+    const reason = handlePreClosureError(err, outputFilename, options);
+    if (reason) {
+      throw reason;
+    }
+  }
+  return transformedFile;
 }
 
 /**
- * Handles a pre-closure babel error. Optionally doesn't emit a fatal error when
- * compilation fails and signals the error so subsequent operations can be
- * skipped (used in watch mode).
+ * Handles a pre-closure babel error. Returns an error when transformation fails
+ * except except in watch mode, where we want to print a message and continue.
  *
  * @param {Error} err
  * @param {string} outputFilename
- * @param {?Object} options
- * @param {?Function} resolve
+ * @param {?Object=} options
+ * @return {Error|undefined}
  */
-function handlePreClosureError(err, outputFilename, options, resolve) {
+function handlePreClosureError(err, outputFilename, options) {
   log(red('ERROR:'), err.message, '\n');
-  const reasonMessage = `Could not compile ${cyan(outputFilename)}`;
+  const reasonMessage = `Could not transform ${cyan(outputFilename)}`;
   if (options && options.continueOnError) {
     log(red('ERROR:'), reasonMessage);
     options.errored = true;
-    if (resolve) {
-      resolve();
-    }
-  } else {
-    const reason = new Error(reasonMessage);
-    reason.showStack = false;
-    new EventEmitter().emit('error', reason);
+    return;
   }
+  return new Error(reasonMessage);
 }
 
 module.exports = {
-  handlePreClosureError,
+  getBabelOutputDir,
   preClosureBabel,
 };

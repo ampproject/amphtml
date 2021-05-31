@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {dev} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dev, devAssert} from '../../../src/log';
+import {dict, map} from '../../../src/core/types/object';
+import {getServiceForDocOrNull} from '../../../src/service';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
@@ -29,6 +31,9 @@ const SUPPORTED_TAG_NAMES = {
   'SELECT': true,
   'TEXTAREA': true,
 };
+
+/** @const {string} */
+const TAG = 'amp-form';
 
 export class FormDirtiness {
   /**
@@ -41,6 +46,12 @@ export class FormDirtiness {
 
     /** @private @const {!Window} */
     this.win_ = win;
+
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc}  */
+    const ampdoc = Services.ampdoc(this.form_);
+
+    /** @const @private {?AmpFormService} */
+    this.ampFormService_ = getServiceForDocOrNull(ampdoc, TAG);
 
     /** @private {number} */
     this.dirtyFieldCount_ = 0;
@@ -130,12 +141,22 @@ export class FormDirtiness {
    * @private
    */
   installEventHandlers_() {
-    this.form_.addEventListener('input', this.onInput_.bind(this));
-    this.form_.addEventListener('reset', this.onReset_.bind(this));
+    devAssert(this.ampFormService_);
+    this.ampFormService_.addFormEventListener(
+      this.form_,
+      'input',
+      this.onInput_.bind(this)
+    );
+    this.ampFormService_.addFormEventListener(
+      this.form_,
+      'reset',
+      this.onReset_.bind(this)
+    );
 
     // `amp-bind` dispatches the custom event `FORM_VALUE_CHANGE` when it
     // mutates the value of a form field (e.g. textarea, input, etc)
-    this.form_.addEventListener(
+    this.ampFormService_.addFormEventListener(
+      this.form_,
       AmpEvents.FORM_VALUE_CHANGE,
       this.onInput_.bind(this)
     );

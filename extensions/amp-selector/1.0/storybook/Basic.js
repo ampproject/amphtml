@@ -15,14 +15,13 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Option, Selector} from '../selector';
+import {Option, Selector} from '../component';
 import {select, withKnobs} from '@storybook/addon-knobs';
 import {useState} from '../../../../src/preact';
-import {withA11y} from '@storybook/addon-a11y';
 export default {
   title: 'Selector',
   component: Selector,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 const imgStyle = {
@@ -89,10 +88,11 @@ export const actionsAndOrder = () => {
     'select'
   );
   return (
-    <>
+    <form>
       <SelectorWithActions
         keyboardSelectMode={keyboardSelectMode}
         multiple
+        name="poll"
         aria-label="Image menu"
       >
         <Option
@@ -130,7 +130,7 @@ export const actionsAndOrder = () => {
           index={4}
         ></Option>
       </SelectorWithActions>
-    </>
+    </form>
   );
 };
 
@@ -147,7 +147,12 @@ export const optionItems = () => {
 
 export const multiselect = () => {
   return (
-    <Selector as="ul" multiple aria-label="Multiselect menu">
+    <Selector
+      as="ul"
+      multiple
+      aria-label="Multiselect menu"
+      defaultValue={['2']}
+    >
       <Option as="li" option="1">
         Option 1
       </Option>

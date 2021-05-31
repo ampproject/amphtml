@@ -20,17 +20,12 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {Layout} from '../../../src/layout';
-import {assertHttpsUrl} from '../../../src/url';
-import {
-  closest,
-  closestAncestorElementBySelector,
-  copyChildren,
-  removeChildren,
-} from '../../../src/dom';
+import {closest, copyChildren, removeChildren} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {getStoryAttributeSrc} from './utils';
 import {htmlFor} from '../../../src/static-template';
-import {isArray, isObject} from '../../../src/types';
-import {parseJson} from '../../../src/json';
+import {isArray, isObject} from '../../../src/core/types';
+import {parseJson} from '../../../src/core/types/object/json';
 import {setImportantStyles} from '../../../src/style';
 
 /** @const {string} */
@@ -220,7 +215,11 @@ export class AmpStoryAccess extends AMP.BaseElement {
       case Type.BLOCKING:
         const drawerEl = getBlockingTemplate(this.element);
 
-        const logoSrc = this.getLogoSrc_();
+        const logoSrc = getStoryAttributeSrc(
+          this.element,
+          'publisher-logo-src',
+          /* warn */ true
+        );
 
         if (logoSrc) {
           const logoEl = dev().assertElement(
@@ -244,30 +243,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
   }
 
   /**
-   * Retrieves the publisher-logo-src set on the <amp-story> element, and
-   * validates it's a valid https or relative URL.
-   * @return {?string}
-   * @private
-   */
-  getLogoSrc_() {
-    const storyEl = dev().assertElement(
-      closestAncestorElementBySelector(this.element, 'AMP-STORY')
-    );
-    const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
-
-    if (logoSrc) {
-      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src');
-    } else {
-      user().warn(
-        TAG,
-        'Expected "publisher-logo-src" attribute on <amp-story>'
-      );
-    }
-
-    return logoSrc;
-  }
-
-  /**
    * Allowlists the <amp-access> actions.
    * Depending on the publisher configuration, actions can be:
    *   - login
@@ -287,9 +262,9 @@ export class AmpStoryAccess extends AMP.BaseElement {
     );
 
     // Configuration validation is handled by the amp-access extension.
-    let accessConfig = /** @type {!Array|!Object} */ (parseJson(
-      accessEl.textContent
-    ));
+    let accessConfig = /** @type {!Array|!Object} */ (
+      parseJson(accessEl.textContent)
+    );
 
     if (!isArray(accessConfig)) {
       accessConfig = [accessConfig];
@@ -327,7 +302,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   getActionObject_(namespace = undefined, type = undefined) {
-    const method = ['login', namespace, type].filter((s) => !!s).join('-');
+    const method = ['login', namespace, type].filter(Boolean).join('-');
     return {tagOrTarget: 'SCRIPT', method};
   }
 }

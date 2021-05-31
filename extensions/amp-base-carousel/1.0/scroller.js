@@ -15,25 +15,27 @@
  */
 import * as Preact from '../../../src/preact';
 import {
+  Alignment,
   Axis,
   findOverlappingIndex,
   getPercentageOffsetFromAlignment,
   scrollContainerToElement,
 } from './dimensions';
-import {debounce} from '../../../src/utils/rate-limit';
+import {LightboxGalleryContext} from '../../amp-lightbox-gallery/1.0/context';
+import {debounce} from '../../../src/core/types/function';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
 import {toWin} from '../../../src/types';
 import {
   useCallback,
+  useContext,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
-  useState,
 } from '../../../src/preact';
-import {useStyles} from './base-carousel.jss';
+import {useStyles} from './component.jss';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -47,7 +49,7 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 
 /**
  * @param {!BaseCarouselDef.ScrollerProps} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
@@ -55,8 +57,9 @@ function ScrollerWithRef(
   {
     advanceCount,
     alignment,
-    autoAdvanceCount,
+    axis,
     children,
+    lightbox,
     loop,
     mixedLength,
     restingIndex,
@@ -71,7 +74,6 @@ function ScrollerWithRef(
 ) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
-  const [axis] = useState(Axis.X);
 
   /**
    * The number of slides we want to place before the reference or resting index.
@@ -96,6 +98,7 @@ function ScrollerWithRef(
       // Smooth scrolling is preferred to `setRestingIndex` whenever possible.
       // Note: `setRestingIndex` will still be called on debounce by scroll handler.
       currentIndex.current = mod(currentIndex.current + by, children.length);
+      scrollOffset.current = 0;
       const didScroll = scrollContainerToElement(
         axis,
         alignment,
@@ -115,6 +118,9 @@ function ScrollerWithRef(
       advance,
       next: () => advance(advanceCount),
       prev: () => advance(-advanceCount),
+      get node() {
+        return containerRef.current;
+      },
     }),
     [advance, advanceCount]
   );
@@ -132,12 +138,15 @@ function ScrollerWithRef(
    */
   const scrollOffset = useRef(0);
 
+  const {open: openLightbox} = useContext(LightboxGalleryContext);
   const slides = renderSlides(
     {
+      alignment,
       children,
       loop,
       mixedLength,
       offsetRef,
+      openLightbox: lightbox && openLightbox,
       pivotIndex,
       restingIndex,
       snap,
@@ -149,15 +158,11 @@ function ScrollerWithRef(
   );
   const currentIndex = useRef(restingIndex);
 
-  // useLayoutEffect needed to avoid FOUC while scrolling
-  useLayoutEffect(() => {
-    if (!containerRef.current) {
+  const scrollToActiveSlide = useCallback(() => {
+    if (!containerRef.current || !containerRef.current.children.length) {
       return;
     }
     const container = containerRef.current;
-    if (!container.children.length) {
-      return;
-    }
     setStyle(container, 'scrollBehavior', 'auto');
     ignoreProgrammaticScrollRef.current = true;
     scrollContainerToElement(
@@ -168,7 +173,38 @@ function ScrollerWithRef(
       scrollOffset.current
     );
     setStyle(container, 'scrollBehavior', 'smooth');
-  }, [axis, alignment, loop, pivotIndex, restingIndex]);
+  }, [alignment, axis, pivotIndex]);
+
+  // useLayoutEffect to avoid FOUC while scrolling for looping layouts.
+  useLayoutEffect(() => {
+    if (!containerRef.current || !loop) {
+      return;
+    }
+    const container = containerRef.current;
+    if (!container.children.length) {
+      return;
+    }
+    scrollToActiveSlide();
+  }, [loop, restingIndex, scrollToActiveSlide]);
+
+  // Adjust slide position when container size changes.
+  useLayoutEffect(() => {
+    if (!containerRef.current) {
+      return;
+    }
+    const node = containerRef.current;
+    if (!node) {
+      return;
+    }
+    // Use local window.
+    const win = toWin(node.ownerDocument.defaultView);
+    if (!win) {
+      return undefined;
+    }
+    const observer = new win.ResizeObserver(scrollToActiveSlide);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [scrollToActiveSlide]);
 
   // Trigger render by setting the resting index to the current scroll state.
   const debouncedResetScrollReferencePoint = useMemo(() => {
@@ -231,21 +267,17 @@ function ScrollerWithRef(
     debouncedResetScrollReferencePoint();
   };
 
-  const incrementCount = Math.max(advanceCount, autoAdvanceCount);
-  const needMoreSlidesToScroll =
-    loop &&
-    incrementCount > 1 &&
-    children.length - pivotIndex - visibleCount < incrementCount;
   return (
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
+      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${
+        axis === Axis.X ? classes.horizontalScroll : classes.verticalScroll
+      }`}
       tabindex={0}
       {...rest}
     >
       {slides}
-      {needMoreSlidesToScroll && slides}
     </div>
   );
 }
@@ -308,11 +340,13 @@ export {Scroller};
  */
 function renderSlides(
   {
+    alignment,
     children,
     loop,
     mixedLength,
     restingIndex,
     offsetRef,
+    openLightbox,
     pivotIndex,
     snap,
     snapBy,
@@ -322,6 +356,11 @@ function renderSlides(
   classes
 ) {
   const {length} = children;
+  const lightboxProps = openLightbox && {
+    role: 'button',
+    tabindex: '0',
+    onClick: () => openLightbox(),
+  };
   const slides = children.map((child, index) => {
     const key = `slide-${child.key || index}`;
     return (
@@ -332,8 +371,16 @@ function renderSlides(
           snap && mod(index, snapBy) === 0
             ? classes.enableSnap
             : classes.disableSnap
-        } ${_thumbnails ? classes.thumbnails : ''}`}
-        style={{flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`}}
+        } ${
+          alignment === Alignment.CENTER
+            ? classes.centerAlign
+            : classes.startAlign
+        } ${_thumbnails ? classes.thumbnails : ''} `}
+        part="slide"
+        style={{
+          flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`,
+        }}
+        {...lightboxProps}
       >
         {child}
       </div>

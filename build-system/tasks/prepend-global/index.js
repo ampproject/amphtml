@@ -17,11 +17,11 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const childProcess = require('child_process');
-const colors = require('ansi-colors');
+const colors = require('../../common/colors');
 const fs = require('fs');
-const log = require('fancy-log');
 const path = require('path');
 const util = require('util');
+const {log} = require('../../common/logging');
 
 const exec = util.promisify(childProcess.exec);
 
@@ -29,7 +29,7 @@ const {red, cyan} = colors;
 
 // custom-config.json overlays the active config. It is not part of checked-in
 // source (.gitignore'd). See:
-// https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/README.md#custom-configjson
+// https://github.com/ampproject/amphtml/blob/main/build-system/global-configs/README.md#custom-configjson
 const customConfigFile = 'build-system/global-configs/custom-config.json';
 
 /**
@@ -60,26 +60,16 @@ function sanityCheck(str) {
 
 /**
  * @param {string} filename File containing the config
- * @param {string=} opt_localBranch Whether to use the local branch version
+ * @param {boolean=} opt_localBranch Whether to use the local branch version
  * @param {string=} opt_branch If not the local branch, which branch to use
- * @return {!Promise}
+ * @return {!Promise<string>}
  */
-async function checkoutBranchConfigs(filename, opt_localBranch, opt_branch) {
+async function fetchConfigFromBranch_(filename, opt_localBranch, opt_branch) {
   if (opt_localBranch) {
-    return;
+    return fs.promises.readFile(filename, 'utf8');
   }
-  const branch = opt_branch || 'origin/master';
-
-  try {
-    return await exec(`git checkout ${branch} ${filename}`);
-  } catch (e) {
-    // This means the files don't exist in master. Assume that it exists
-    // in the current branch.
-    if (/did not match any file/.test(e.message)) {
-      return;
-    }
-    throw e;
-  }
+  const branch = opt_branch || 'origin/main';
+  return (await exec(`git show ${branch}:${filename}`)).stdout;
 }
 
 /**
@@ -98,9 +88,9 @@ function prependConfig(configString, fileString) {
  * @param {string} filename Destination filename
  * @param {string} fileString String to write
  * @param {boolean=} opt_dryrun If true, print the contents without writing them
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
-async function writeTarget(filename, fileString, opt_dryrun) {
+async function writeTarget_(filename, fileString, opt_dryrun) {
   if (opt_dryrun) {
     log(cyan(`overwriting: ${filename}`));
     log(fileString);
@@ -129,7 +119,8 @@ function valueOrDefault(value, defaultValue) {
  * @param {boolean=} opt_localBranch Whether to use the local branch version
  * @param {string=} opt_branch If not the local branch, which branch to use
  * @param {boolean=} opt_fortesting Whether to force getMode().test to be true
- * @return {!Promise}
+ * @param {boolean=} opt_derandomize Whether to remove experiment randomization
+ * @return {!Promise<void>}
  */
 async function applyConfig(
   config,
@@ -138,11 +129,14 @@ async function applyConfig(
   opt_localDev,
   opt_localBranch,
   opt_branch,
-  opt_fortesting
+  opt_fortesting,
+  opt_derandomize
 ) {
-  await checkoutBranchConfigs(filename, opt_localBranch, opt_branch);
-
-  let configString = await fs.promises.readFile(filename, 'utf8');
+  const configString = await fetchConfigFromBranch_(
+    filename,
+    opt_localBranch,
+    opt_branch
+  );
   const [targetString, overlayString] = await Promise.all([
     fs.promises.readFile(target, 'utf8'),
     fs.promises.readFile(customConfigFile, 'utf8').catch(() => {}),
@@ -168,31 +162,36 @@ async function applyConfig(
     }
   }
   if (opt_localDev) {
-    configJson = enableLocalDev(config, target, configJson);
+    configJson = enableLocalDev_(target, configJson);
   }
   if (opt_fortesting) {
     configJson = {test: true, ...configJson};
   }
-  configString = JSON.stringify(configJson);
-  const fileString = await prependConfig(configString, targetString);
+  if (opt_derandomize) {
+    configJson = derandomize_(target, configJson);
+  }
+  const fileString = await prependConfig(
+    JSON.stringify(configJson),
+    targetString
+  );
   sanityCheck(fileString);
-  await writeTarget(target, fileString, argv.dryrun);
+  await writeTarget_(target, fileString, argv.dryrun);
   const details =
     '(' +
     cyan(config) +
     (opt_localDev ? ', ' + cyan('localDev') : '') +
     (opt_fortesting ? ', ' + cyan('test') : '') +
+    (opt_derandomize ? ', ' + cyan('derandomized') : '') +
     ')';
   log('Applied AMP config', details, 'to', cyan(path.basename(target)));
 }
 
 /**
- * @param {string} config Prod or canary
  * @param {string} target File containing the AMP runtime (amp.js or v0.js)
- * @param {string} configJson The json object in which to enable local dev
- * @return {string}
+ * @param {!JSON} configJson The json object in which to enable local dev
+ * @return {!JSON}
  */
-function enableLocalDev(config, target, configJson) {
+function enableLocalDev_(target, configJson) {
   let LOCAL_DEV_AMP_CONFIG = {localDev: true};
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (typeof TESTING_HOST == 'string') {
@@ -219,8 +218,23 @@ function enableLocalDev(config, target, configJson) {
 }
 
 /**
+ * @param {string} target File containing the AMP runtime (amp.js or v0.js)
+ * @param {!JSON} configJson The json object in which to enable local dev
+ * @return {!JSON}
+ */
+function derandomize_(target, configJson) {
+  for (const [key, value] of Object.entries(configJson)) {
+    if (typeof value == 'number') {
+      configJson[key] = Math.round(value);
+    }
+  }
+  log('Derandomized experiements in', cyan(target));
+  return configJson;
+}
+
+/**
  * @param {string} target Target file from which to remove the AMP config
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function removeConfig(target) {
   const file = await fs.promises.readFile(target);
@@ -231,25 +245,22 @@ async function removeConfig(target) {
   sanityCheck(contents);
   const config = /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
   contents = contents.replace(config, '');
-  await writeTarget(target, contents, argv.dryrun);
+  await writeTarget_(target, contents, argv.dryrun);
   log('Removed existing config from', cyan(target));
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function prependGlobal() {
-  const TESTING_HOST = process.env.AMP_TESTING_HOST;
-  const target = argv.target || TESTING_HOST;
-
-  if (!target) {
+  if (!argv.target) {
     log(red('Missing --target.'));
     return;
   }
+  const targets = argv.target.split(',');
 
-  if (argv.remove) {
-    return removeConfig(target);
-  }
-
-  if (!(argv.prod || argv.canary)) {
-    log(red('One of --prod or --canary should be provided.'));
+  if (Boolean(argv.prod) == Boolean(argv.canary)) {
+    log(red('Exactly one of --prod or --canary should be provided.'));
     return;
   }
 
@@ -268,47 +279,48 @@ async function prependGlobal() {
       'build-system/global-configs/prod-config.json'
     );
   }
-  await removeConfig(target);
-  return applyConfig(
-    config,
-    target,
-    filename,
-    argv.local_dev,
-    argv.local_branch,
-    argv.branch,
-    argv.fortesting
-  );
+  await Promise.all([...targets.map(removeConfig)]);
+  await Promise.all([
+    ...targets.map((target) =>
+      applyConfig(
+        config,
+        target,
+        filename,
+        argv.local_dev,
+        argv.local_branch,
+        argv.branch,
+        argv.fortesting,
+        argv.derandomize
+      )
+    ),
+  ]);
 }
 
 module.exports = {
   applyConfig,
-  checkoutBranchConfigs,
   numConfigs,
   prependConfig,
   prependGlobal,
   removeConfig,
   sanityCheck,
   valueOrDefault,
-  writeTarget,
 };
 
 prependGlobal.description = 'Prepends a json config to a target file';
 prependGlobal.flags = {
-  'target': '  The file to prepend the json config to.',
+  'target': 'Comma separated list of files to prepend the json config to.',
   'canary':
-    '  Prepend the default canary config. ' +
+    'Prepend the default canary config. ' +
     'Takes in an optional value for a custom canary config source.',
   'prod':
-    '  Prepend the default prod config. ' +
+    'Prepend the default prod config. ' +
     'Takes in an optional value for a custom prod config source.',
-  'local_dev': '  Enables runtime to be used for local development.',
+  'local_dev': 'Enables runtime to be used for local development.',
   'branch':
-    '  Switch to a git branch to get config source from. ' +
-    'Uses master by default.',
+    'Get config source from the given branch. Uses the main branch by default.',
   'local_branch':
-    "  Don't switch branches and use the config from the local branch.",
-  'fortesting': '  Force the config to return true for getMode().test',
-  'remove':
-    '  Removes previously prepended json config from the target ' +
-    'file (if present).',
+    "Don't switch branches and use the config from the local branch.",
+  'fortesting': 'Force the config to return true for getMode().test',
+  'derandomize':
+    'Rounds all experiment percentages to 0 or 1, whichever is closest.',
 };

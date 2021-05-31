@@ -16,9 +16,8 @@
 
 import {Services} from '../../../../../src/services';
 import {createElementWithAttributes} from '../../../../../src/dom';
-import {getValueForExpr} from '../../../../../src/json';
+import {dict, getValueForExpr} from '../../../../../src/core/types/object';
 const ALLOWED_AD_PROVIDER = 'gdt';
-import {dict} from '../../../../../src/utils/object';
 
 /**
  * @param {!JsonObject} media

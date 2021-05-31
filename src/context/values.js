@@ -15,16 +15,18 @@
  */
 
 import {deepScan, findParent} from './scan';
-import {devAssert, rethrowAsync} from '../log';
-import {pushIfNotExist, removeItem} from '../utils/array';
+import {devAssert} from '../core/assert';
+import {pushIfNotExist, removeItem} from '../core/types/array';
+import {rethrowAsync} from '../core/error';
 import {throttleTail} from './scheduler';
+
+// typedef imports
+import {ContextPropDef} from './prop.type';
 
 const EMPTY_ARRAY = [];
 const EMPTY_FUNC = () => {};
 
-/**
- * @enum {number}
- */
+/** @enum {number} */
 const Pending = {
   NOT_PENDING: 0,
   PENDING: 1,
@@ -36,35 +38,48 @@ const Pending = {
  * easily available as an array to pass them to the `recursive` and
  * `compute` callbacks without reallocation.
  *
- * @typedef {{
- *   values: !Array,
- *   setters: !Array,
- * }}
+ * @interface
+ * @template T
  */
-let InputDef;
+function InputDef() {}
+/** @type {!Array<T>} */
+InputDef.prototype.values;
+/** @type {!Array<function(T)>} */
+InputDef.prototype.setters;
 
 /**
  * The structure for a property's computed values and subscribers.
- *
- * @typedef {{
- *   prop: !ContextProp,
- *   subscribers: !Array<!Function>,
- *   value: *,
- *   pending: !Pending,
- *   counter: number,
- *   depsValues: !Array,
- *   parentValue: *,
- *   parentContextNode: ?./node.ContextNode,
- *   ping: function(boolean),
- *   pingDep: !Array<function(*)>,
- *   pingParent: ?function(*),
- * }}
+ * @interface
+ * @template T
+ * @template DEP
  */
-let UsedDef;
+function UsedDef() {}
+/** @type {!ContextPropDef<T, DEP>} */
+UsedDef.prototype.prop;
+/** @type {!Array<function(!T)>} */
+UsedDef.prototype.subscribers;
+/** @type {T} */
+UsedDef.prototype.value;
+/** @type {!Pending} */
+UsedDef.prototype.pending;
+/** @type {number} */
+UsedDef.prototype.counter;
+/** @type {!Array<DEP>} */
+UsedDef.prototype.depValues;
+/** @type {!T} */
+UsedDef.prototype.parentValue;
+/** @type {?./node.ContextNode} */
+UsedDef.prototype.parentContextNode;
+/** @type {function(boolean)} */
+UsedDef.prototype.ping;
+/** @type {!Array<function(DEP)>} */
+UsedDef.prototype.pingDep;
+/** @type {?function(T)} */
+UsedDef.prototype.pingParent;
 
 /**
  * Propagates context property values in the context tree. The key APIs are
- * `set()` and `subscribe()`. See `ContextProp` type for details on how
+ * `set()` and `subscribe()`. See `ContextPropDef` type for details on how
  * values are declared and propagated.
  */
 export class Values {
@@ -103,8 +118,8 @@ export class Values {
    * Once the input is set, the recalculation is rescheduled asynchronously.
    * All dependent properties are also recalculated.
    *
-   * @param {!ContextProp<T>} prop
-   * @param {*} setter
+   * @param {!ContextPropDef<T>} prop
+   * @param {function(T)} setter
    * @param {T} value
    * @template T
    */
@@ -140,7 +155,13 @@ export class Values {
       // deepscan can be avoided.
       this.ping(prop, false);
       if (isRecursive(prop)) {
-        deepScan(this.contextNode_, scan, prop, true, false);
+        deepScan(
+          this.contextNode_,
+          scan,
+          prop,
+          /*state=*/ true,
+          /*includeSelf=*/ false
+        );
       }
     }
   }
@@ -148,15 +169,16 @@ export class Values {
   /**
    * Unsets the input value for the specified property and setter.
    * See `set()` for more info.
-   * @param {!ContextProp} prop
-   * @param {*} setter
+   * @param {!ContextPropDef<T>} prop
+   * @param {function(T)} setter
+   * @template T
    */
   remove(prop, setter) {
     devAssert(setter);
 
     const {key} = prop;
     const inputsByKey = this.inputsByKey_;
-    const inputs = inputsByKey && inputsByKey.get(key);
+    const inputs = inputsByKey?.get(key);
     if (inputs) {
       const index = inputs.setters.indexOf(setter);
       if (index != -1) {
@@ -173,12 +195,11 @@ export class Values {
   /**
    * Whether this node has inputs for the specified property.
    *
-   * @param {!ContextProp} prop
+   * @param {!ContextPropDef} prop
    * @return {boolean}
    */
   has(prop) {
-    const inputsByKey = this.inputsByKey_;
-    return !!inputsByKey && inputsByKey.has(prop.key);
+    return !!this.inputsByKey_?.has(prop.key);
   }
 
   /**
@@ -188,7 +209,7 @@ export class Values {
    * only called if a valid used value is available and only if this value
    * has changed since the last handler call.
    *
-   * @param {!ContextProp<T>} prop
+   * @param {!ContextPropDef<T>} prop
    * @param {function(T)} handler
    * @template T
    */
@@ -211,13 +232,12 @@ export class Values {
    * Unsubscribes a previously added handler. If there are no other subscribers
    * the property tracking is stopped and the used value is removed.
    *
-   * @param {!ContextProp} prop
-   * @param {function(?)} handler
+   * @param {!ContextPropDef<T>} prop
+   * @param {function(T)} handler
+   * @template T
    */
   unsubscribe(prop, handler) {
-    const {key} = prop;
-    const usedByKey = this.usedByKey_;
-    const used = usedByKey && usedByKey.get(key);
+    const used = this.usedByKey_?.get(prop.key);
     if (!used || !removeItem(used.subscribers, handler)) {
       // Not a subscriber.
       return;
@@ -231,18 +251,13 @@ export class Values {
    * Schedules a recalculation of the specified property, but only if this
    * property is tracked by this node.
    *
-   * @param {!ContextProp} prop
+   * @param {!ContextPropDef} prop
    * @param {boolean} refreshParent Whether the parent node needs to be looked
    * up again.
    * @protected
    */
   ping(prop, refreshParent) {
-    const {key} = prop;
-    const usedByKey = this.usedByKey_;
-    const used = usedByKey && usedByKey.get(key);
-    if (used) {
-      used.ping(refreshParent);
-    }
+    this.usedByKey_?.get(prop.key)?.ping(refreshParent);
   }
 
   /**
@@ -257,7 +272,12 @@ export class Values {
       // a few specific props or even only specific nodes. E.g. when a single
       // intermediary parent is inserted between a parent and a child, the amount
       // of refreshes only depends on the inputs already set on this parent.
-      deepScan(this.contextNode_, scanAll, /* arg */ undefined, EMPTY_ARRAY);
+      deepScan(
+        this.contextNode_,
+        scanAll,
+        /*arg=*/ undefined,
+        /*state=*/ EMPTY_ARRAY
+      );
     }
   }
 
@@ -299,7 +319,7 @@ export class Values {
    * Scans are relatively common and this method exists (as opposed to be
    * inlined) only to avoid frequent function allocation.
    *
-   * @param {!ContextProp} prop
+   * @param {!ContextPropDef} prop
    * @return {boolean}
    * @protected Necessary for cross-binary access.
    */
@@ -333,8 +353,9 @@ export class Values {
     if (usedByKey) {
       usedByKey.forEach((used) => {
         const {prop} = used;
+        const {key} = prop;
         // Only ping unhandled props.
-        if ((newScheduled || scheduled).indexOf(prop.key) == -1) {
+        if ((newScheduled || scheduled).indexOf(key) == -1) {
           this.ping(prop, true);
 
           if (this.contextNode_.children && this.has(prop)) {
@@ -343,7 +364,7 @@ export class Values {
             }
             // Stop the deepscan for this value. It will be propagated
             // by the responsible node.
-            newScheduled.push(prop.key);
+            newScheduled.push(key);
           }
         }
       });
@@ -362,9 +383,11 @@ export class Values {
   /**
    * Start the used value tracker if it hasn't started yet.
    *
-   * @param {!ContextProp} prop
-   * @return {!UsedDef}
+   * @param {!ContextPropDef<T, DEF>} prop
+   * @return {!UsedDef<T, DEF>}
    * @private
+   * @template T
+   * @template DEF
    */
   startUsed_(prop) {
     const {key, deps} = prop;
@@ -475,7 +498,7 @@ export class Values {
           used.counter++;
           if (used.counter > 5) {
             // A simple protection from infinte loops.
-            rethrowAsync(new Error('cyclical prop: ' + key));
+            rethrowAsync(`cyclical prop: ${key}`);
             used.pending = Pending.NOT_PENDING;
             return;
           }
@@ -501,7 +524,7 @@ export class Values {
     } catch (e) {
       // This is the narrowest catch to avoid unrelated values breaking each
       // other. The only exposure to the user-code are `recursive` and
-      // `compute` methods in the `ContextProp`.
+      // `compute` methods in the `ContextPropDef`.
       rethrowAsync(e);
     }
 
@@ -514,9 +537,10 @@ export class Values {
   }
 
   /**
-   * @param {!UsedDef} used
-   * @param {*} value
+   * @param {!UsedDef<T>} used
+   * @param {T} value
    * @private
+   * @template T
    */
   maybeUpdated_(used, value) {
     const {prop, value: oldValue} = used;
@@ -524,7 +548,7 @@ export class Values {
     const usedByKey = this.usedByKey_;
     if (
       oldValue === value ||
-      used !== (usedByKey && usedByKey.get(key)) ||
+      used !== usedByKey?.get(key) ||
       !this.isConnected_()
     ) {
       // Either the value didn't change, or no one needs this value anymore.
@@ -535,18 +559,19 @@ export class Values {
 
     // Notify subscribers.
     const {subscribers} = used;
-    subscribers.forEach((handler) => {
+    for (const handler of subscribers) {
       handler(value);
-    });
+    }
   }
 
   /**
    * The used value calculation algorithm.
    *
-   * @param {!UsedDef} used
+   * @param {!UsedDef<T>} used
    * @param {boolean} refreshParent
-   * @return {*|undefined} The used value.
+   * @return {T|undefined} The used value.
    * @private
+   * @template T
    */
   calc_(used, refreshParent) {
     devAssert(this.isConnected_());
@@ -554,9 +579,7 @@ export class Values {
     const {prop, depValues} = used;
     const {key, compute, defaultValue} = prop;
 
-    const inputsByKey = this.inputsByKey_;
-    const inputs = inputsByKey && inputsByKey.get(key);
-    const inputValues = inputs && inputs.values;
+    const inputValues = this.inputsByKey_?.get(key)?.values;
 
     // Calculate parent value.
     const recursive = calcRecursive(prop, inputValues);
@@ -641,7 +664,7 @@ export class Values {
  * See `Values.scan()` method.
  *
  * @param {!./node.ContextNode} contextNode
- * @param {!ContextProp} prop
+ * @param {!ContextPropDef} prop
  * @return {boolean}
  */
 function scan(contextNode, prop) {
@@ -652,7 +675,7 @@ function scan(contextNode, prop) {
  * See `Values.scanAll()` method.
  *
  * @param {!./node.ContextNode} contextNode
- * @param {*} unusedArg
+ * @param {?} unusedArg
  * @param {!Array<string>} state
  * @return {!Array<string>}
  */
@@ -664,7 +687,7 @@ function scanAll(contextNode, unusedArg, state) {
  * See `Values.has()` method.
  *
  * @param {!./node.ContextNode} contextNode
- * @param {!ContextProp} prop
+ * @param {!ContextPropDef} prop
  * @return {boolean}
  */
 function hasInput(contextNode, prop) {
@@ -674,7 +697,7 @@ function hasInput(contextNode, prop) {
 /**
  * Whether the property is recursive.
  *
- * @param {!ContextProp} prop
+ * @param {!ContextPropDef} prop
  * @return {boolean}
  */
 function isRecursive(prop) {
@@ -686,9 +709,10 @@ function isRecursive(prop) {
 /**
  * Whether the parent value is required to calculate the used value.
  *
- * @param {!ContextProp} prop
- * @param {?Array} inputs
+ * @param {!ContextPropDef<T>} prop
+ * @param {?Array<T>} inputs
  * @return {boolean}
+ * @template T
  */
 function calcRecursive(prop, inputs) {
   const {recursive, compute} = prop;
@@ -707,11 +731,13 @@ function calcRecursive(prop, inputs) {
 /**
  * A substitute for `compute(...deps)`, but faster.
  *
- * @param {function(!Node, !Array, ...*):*} compute See `ContextProp.compute()`.
+ * @param {function(!Node, !Array<T>, ...DEP):T} compute See `ContextPropDef.compute()`.
  * @param {!Node} node
- * @param {!Array} inputValues
- * @param {!Array} deps
- * @return {*}
+ * @param {!Array<T>} inputValues
+ * @param {!Array<DEP>} deps
+ * @return {T}
+ * @template T
+ * @template DEP
  */
 function callCompute(compute, node, inputValues, deps) {
   switch (deps.length) {
@@ -731,12 +757,14 @@ function callCompute(compute, node, inputValues, deps) {
 /**
  * A substitute for `compute(parentValue, ...deps)`, but faster.
  *
- * @param {function(!Node, !Array, ...*):*} compute See `ContextProp.compute()`.
+ * @param {function(!Node, !Array<T>, ...DEP):T} compute See `ContextPropDef.compute()`.
  * @param {!Node} node
- * @param {!Array} inputValues
- * @param {*} parentValue
- * @param {!Array} deps
- * @return {*}
+ * @param {!Array<T>} inputValues
+ * @param {T} parentValue
+ * @param {!Array<DEP>} deps
+ * @return {T}
+ * @template T
+ * @template DEP
  */
 function callRecursiveCompute(compute, node, inputValues, parentValue, deps) {
   switch (deps.length) {

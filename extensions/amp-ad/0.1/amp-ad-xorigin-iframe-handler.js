@@ -15,8 +15,8 @@
  */
 
 import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
 import {Services} from '../../../src/services';
 import {
@@ -26,15 +26,15 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getData} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
 import {isExperimentOn} from '../../../src/experiments';
 import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 import {removeElement} from '../../../src/dom';
-import {reportErrorToAnalytics} from '../../../src/error';
+import {reportErrorToAnalytics} from '../../../src/error-reporting';
 import {setStyle} from '../../../src/style';
-import {throttle} from '../../../src/utils/rate-limit';
+import {throttle} from '../../../src/core/types/function';
 
 const VISIBILITY_TIMEOUT = 10000;
 
@@ -100,15 +100,15 @@ export class AmpAdXOriginIframeHandler {
     devAssert(!this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
-    this.baseInstance_.applyFillContent(this.iframe);
+    if (!this.uiHandler_.isStickyAd()) {
+      this.baseInstance_.applyFillContent(this.iframe);
+    }
     const timer = Services.timerFor(this.baseInstance_.win);
 
     // Init the legacy observeInterection API service.
     // (Behave like position observer)
-    this.legacyIntersectionObserverApiHost_ = new LegacyAdIntersectionObserverHost(
-      this.baseInstance_,
-      this.iframe
-    );
+    this.legacyIntersectionObserverApiHost_ =
+      new LegacyAdIntersectionObserverHost(this.baseInstance_, this.iframe);
 
     this.embedStateApi_ = new SubscriptionApi(
       this.iframe,
@@ -183,7 +183,7 @@ export class AmpAdXOriginIframeHandler {
       )
     );
 
-    if (this.baseInstance_.isStickyAd()) {
+    if (this.uiHandler_.isStickyAd()) {
       setStyle(iframe, 'pointer-events', 'none');
       this.unlisteners_.push(
         listenFor(
@@ -232,14 +232,10 @@ export class AmpAdXOriginIframeHandler {
       });
 
     // Calculate render-start and no-content signals.
-    const {
-      promise: renderStartPromise,
-      resolve: renderStartResolve,
-    } = new Deferred();
-    const {
-      promise: noContentPromise,
-      resolve: noContentResolve,
-    } = new Deferred();
+    const {promise: renderStartPromise, resolve: renderStartResolve} =
+      new Deferred();
+    const {promise: noContentPromise, resolve: noContentResolve} =
+      new Deferred();
 
     if (
       this.baseInstance_.config &&
@@ -458,9 +454,7 @@ export class AmpAdXOriginIframeHandler {
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
           (info) => {
-            if (this.baseInstance_.onResizeSuccess) {
-              this.baseInstance_.onResizeSuccess();
-            }
+            this.uiHandler_.onResizeSuccess();
             this.sendEmbedSizeResponse_(
               info.success,
               id,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
 
@@ -316,6 +316,15 @@ export class LoadTask extends MediaTask {
   executeInternal(mediaEl) {
     mediaEl.load();
     return Promise.resolve();
+  }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    // When recycling a media pool element, its sources are removed and the
+    // LoadTask runs to reset it (buffered data, readyState, etc). It needs to
+    // run synchronously so the media element can't be used in a new context
+    // but with old data.
+    return true;
   }
 }
 

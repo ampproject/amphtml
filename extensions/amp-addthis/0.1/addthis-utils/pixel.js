@@ -17,10 +17,10 @@ import {COOKIELESS_API_SERVER} from '../constants';
 import {Services} from '../../../../src/services';
 import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {getData} from '../../../../src/event-helper';
-import {isObject} from '../../../../src/types';
-import {parseJson} from '../../../../src/json';
+import {isObject} from '../../../../src/core/types';
+import {parseJson} from '../../../../src/core/types/object/json';
 
 import {setStyles, toggle} from '../../../../src/style';
 

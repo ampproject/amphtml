@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
+import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {px} from '../../../src/style';
 import {
@@ -72,10 +72,11 @@ export function Thumbnails({
       className={`${className} ${classes.thumbnails}`}
       mixedLength={true}
       snap={false}
-      snapAlign="center"
+      snapAlign={loop ? 'center' : 'start'}
       controls={pointerFine ? 'always' : 'never'}
       loop={loop}
       ref={ref}
+      outsetArrows={true}
       _thumbnails={true}
       {...rest}
     >
@@ -88,7 +89,7 @@ export function Thumbnails({
               onClick={() => setCurrentSlide(i)}
               loading="lazy"
               role="button"
-              src={thumbnailSrc || ''}
+              src={thumbnailSrc || undefined}
               style={{
                 height: px(height),
                 width: aspectRatio ? px(aspectRatio * height) : '',

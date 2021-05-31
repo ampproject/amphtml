@@ -15,20 +15,23 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers';
 import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'amp-youtube',
-  decorators: [withKnobs, withA11y, withAmp],
-
+  title: 'amp-youtube-1_0',
+  decorators: [withKnobs, withAmp],
   parameters: {
-    extensions: [{name: 'amp-youtube', version: '1.0'}],
+    extensions: [
+      {name: 'amp-youtube', version: '1.0'},
+      {name: 'amp-accordion', version: '1.0'},
+    ],
+    experiments: ['bento'],
   },
 };
 
-export const Default = () => {
+export const Default = ({id}) => {
   const videoid = text('videoid', 'IAvf-rkzNck');
   const layout = text('layout', 'responsive');
   const autoplay = boolean('autoplay', false);
@@ -38,6 +41,7 @@ export const Default = () => {
   const credentials = text('credentials', 'include');
   return (
     <amp-youtube
+      id={id}
       width={width}
       height={height}
       data-videoid={videoid}
@@ -49,6 +53,55 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'Default',
+export const Actions = () => {
+  const id = 'my-amp-youtube';
+  return (
+    <VideoElementWithActions id={id}>
+      <Default id={id} />
+    </VideoElementWithActions>
+  );
 };
+
+export const InsideAccordion = () => {
+  const videoid = text('videoid', 'IAvf-rkzNck');
+  const width = number('width', 300);
+  const height = number('height', 200);
+  const autoplay = boolean('autoplay', false);
+  return (
+    <amp-accordion expand-single-section>
+      <section expanded>
+        <h2>YouTube Video</h2>
+        <div>
+          <amp-youtube
+            width={width}
+            height={height}
+            data-videoid={videoid}
+            autoplay={autoplay}
+            loop
+          ></amp-youtube>
+        </div>
+      </section>
+    </amp-accordion>
+  );
+};
+
+export const InsideDetails = () => {
+  const videoid = text('videoid', 'IAvf-rkzNck');
+  const width = number('width', 300);
+  const height = number('height', 200);
+  const autoplay = boolean('autoplay', false);
+  return (
+    <details open>
+      <summary>YouTube Video</summary>
+      <amp-youtube
+        width={width}
+        height={height}
+        data-videoid={videoid}
+        autoplay={autoplay}
+        loop
+      ></amp-youtube>
+    </details>
+  );
+};
+
+Default.storyName = 'Default';

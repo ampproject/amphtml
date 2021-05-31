@@ -19,7 +19,7 @@ import {dev} from './log';
 import {getData} from './event-helper';
 import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
 import {makeBodyVisibleRecovery} from './style-installer';
-import PriorityQueue from './utils/priority-queue';
+import PriorityQueue from './core/data-structures/priority-queue';
 
 /**
  * @const {string}
@@ -462,8 +462,9 @@ class Chunks {
       !allowLongTasks &&
       this.bodyIsVisible_ &&
       (this.supportsInputPending_
-        ? /** @type {!{scheduling: {isInputPending: Function}}} */ (this.win_
-            .navigator).scheduling.isInputPending()
+        ? /** @type {!{scheduling: {isInputPending: Function}}} */ (
+            this.win_.navigator
+          ).scheduling.isInputPending()
         : this.durationOfLastExecution_ > 5)
     ) {
       this.durationOfLastExecution_ = 0;

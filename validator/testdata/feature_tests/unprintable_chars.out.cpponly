@@ -50,7 +50,7 @@ feature_tests/unprintable_chars.html:35:2 The parent tag of tag 'style amp-custo
 feature_tests/unprintable_chars.html:35:641 The tag 'noscript > style[amp-boilerplate]' may only appear as a descendant of tag 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 >>   ^~~~~~~~~
-feature_tests/unprintable_chars.html:36:2 The parent tag of tag 'amphtml engine v0.js script' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+feature_tests/unprintable_chars.html:36:2 The parent tag of tag 'amphtml engine script' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  </head>
 |  <body data-foo>
 |  Hello, world.

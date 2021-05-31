@@ -52,8 +52,8 @@ The `width` and `height` attributes determine the aspect ratio of the embedded B
 
 [BySide](http://www.byside.com) is committed to respect and protect your privacy and developing technology that gives you the most powerful and safe online experience. BySide privacy statement and cookies policy can be found on the following url's:
 
-- [http://www.byside.com/privacy.html](http://www.byside.com/privacy.html)
-- [http://www.byside.com/cookies.html](http://www.byside.com/cookies.html)
+-   [http://www.byside.com/privacy.html](http://www.byside.com/privacy.html)
+-   [http://www.byside.com/cookies.html](http://www.byside.com/cookies.html)
 
 ## Attributes
 
@@ -92,4 +92,4 @@ extended to AMP components.
 
 ## Validation
 
-See [amp-byside-content rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-byside-content/validator-amp-byside-content.protoascii) in the AMP validator specification.
+See [amp-byside-content rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-byside-content/validator-amp-byside-content.protoascii) in the AMP validator specification.
