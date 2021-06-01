@@ -1,4 +1,4 @@
-import { objectWithoutProperties as _objectWithoutProperties } from "../../../../../../../src/babel-helpers";
+import _objectWithoutPropertiesLoose from "@babel/runtime/helpers/esm/objectWithoutPropertiesLoose";
 
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
@@ -19,4 +19,4 @@ const {
   a,
   b
 } = foo,
-      c = _objectWithoutProperties(foo, ["a", "b"]);
+      c = _objectWithoutPropertiesLoose(foo, ["a", "b"]);

@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-const {addNamed} = require('@babel/helper-module-imports');
-const {dirname, relative} = require('path');
+const {addDefault} = require('@babel/helper-module-imports');
 
-const helperModule = 'src/babel-helpers';
-
-const knownHelpers = new Set([
-  'objectWithoutProperties',
-  'objectWithoutPropertiesLoose',
-]);
+const helperMap = {
+  // We don't care about symbols, so we treat both as objectWithoutPropertiesLoose.
+  objectWithoutProperties: 'objectWithoutPropertiesLoose',
+};
 
 const importNamesPerFile = new WeakMap();
 
 module.exports = function ({types: t}) {
   return {
-    name: 'external-helpers',
+    name: 'imported-helpers',
     pre(file) {
-      file.set('helperGenerator', (name) => {
-        if (!knownHelpers.has(name)) {
-          // Babel will inject any others.
-          return;
-        }
+      file.set('helperGenerator', (unmappedName) => {
+        const name = helperMap[unmappedName] || unmappedName;
 
         if (!importNamesPerFile.has(file)) {
           importNamesPerFile.set(file, Object.create(null));
@@ -43,9 +37,8 @@ module.exports = function ({types: t}) {
         const importNames = importNamesPerFile.get(file);
 
         if (!importNames[name]) {
-          const local = relative(process.cwd(), file.opts.filename);
-          const source = relative(dirname(local), helperModule);
-          importNames[name] = addNamed(file.path, name, source);
+          const source = `@babel/runtime/helpers/esm/${name}`;
+          importNames[name] = addDefault(file.path, source, {nameHint: name});
         }
 
         return t.cloneNode(importNames[name]);
