@@ -19,7 +19,7 @@ import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
-import {deepMerge, hasOwn, map} from '../../../src/core/types/object';
+import {deepMerge, dict, hasOwn, map} from '../../../src/core/types/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 
@@ -294,24 +294,11 @@ export class ConsentConfig {
     }
     userAssert(CMP_CONFIG[type], '%s: invalid CMP type %s', TAG, type);
     const importConfig = CMP_CONFIG[type];
-    this.validateCMPConfig_(importConfig);
-    return importConfig;
-  }
-
-  /**
-   * Check if the CMP config is valid
-   * @param {!JsonObject} config
-   */
-  validateCMPConfig_(config) {
-    const assertValues = [
-      'consentInstanceId',
-      'checkConsentHref',
-      'promptUISrc',
-    ];
-    for (let i = 0; i < assertValues.length; i++) {
-      const attribute = assertValues[i];
-      devAssert(config[attribute], 'CMP config must specify %s', attribute);
-    }
+    return dict({
+      'consentInstanceId': type,
+      'checkConsentHref': importConfig[0],
+      'promptUISrc': importConfig[1],
+    });
   }
 }
 
