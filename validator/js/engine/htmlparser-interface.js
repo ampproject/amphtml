@@ -256,7 +256,7 @@ const ParsedHtmlTag = class {
    * @return {boolean}
    */
   isAmpCacheDomain_(src) {
-    return src.startsWith('https://cdn.ampproject.org');
+    return src.startsWith('https://cdn.ampproject.org/');
   }
 
   /**
