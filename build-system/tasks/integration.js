@@ -39,6 +39,10 @@ class Runner extends RuntimeTestRunner {
   }
 }
 
+/**
+ * Entry point for the `amp integration` task.
+ * @return {Promise<void>}
+ */
 async function integration() {
   maybePrintArgvMessages();
 

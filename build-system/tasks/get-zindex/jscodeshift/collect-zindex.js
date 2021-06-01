@@ -16,6 +16,10 @@
 
 const zIndexRegExp = /^z-?index$/i;
 
+/**
+ * @param {Node} node
+ * @return {string}
+ */
 function getCallExpressionZIndexValue(node) {
   for (let i = 1; i < node.arguments.length; i++) {
     const argument = node.arguments[i];
@@ -30,11 +34,21 @@ function getCallExpressionZIndexValue(node) {
   }
 }
 
+/**
+ * @param {string} file
+ * @param {Node} node
+ * @return {string}
+ */
 function source(file, node) {
   const {end, start} = node;
   return file.source.substr(start, end - start);
 }
 
+/**
+ * @param {string} file
+ * @param {string} path
+ * @return {string}
+ */
 function chainId(file, path) {
   let propertyChain = '';
   let at = path;
