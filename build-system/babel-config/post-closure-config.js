@@ -24,16 +24,17 @@ const argv = require('minimist')(process.argv.slice(2));
  */
 function getPostClosureConfig() {
   const postClosurePlugins = [
+    argv.esm || argv.sxg
+      ? './build-system/babel-plugins/babel-plugin-const-transformer'
+      : null,
+    argv.esm || argv.sxg
+      ? './build-system/babel-plugins/babel-plugin-transform-remove-directives'
+      : null,
+    argv.esm || argv.sxg
+      ? './build-system/babel-plugins/babel-plugin-transform-stringish-literals'
+      : null,
     './build-system/babel-plugins/babel-plugin-transform-minified-comments',
-  ];
-
-  if (argv.esm || argv.sxg) {
-    postClosurePlugins.push(
-      './build-system/babel-plugins/babel-plugin-const-transformer',
-      './build-system/babel-plugins/babel-plugin-transform-remove-directives',
-      './build-system/babel-plugins/babel-plugin-transform-stringish-literals'
-    );
-  }
+  ].filter(Boolean);
 
   return {
     compact: false,

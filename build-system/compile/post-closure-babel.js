@@ -78,6 +78,11 @@ async function terserMinify(code, filename) {
  * @return {Promise<void>}
  */
 async function postClosureBabel(file) {
+  if (path.extname(file) === '.map') {
+    debug(CompilationLifecycles['complete'], file);
+    return;
+  }
+
   debug(CompilationLifecycles['closured-pre-babel'], file);
   /** @type {?babel.TransformOptions} */
   const babelOptions = babel.loadOptions({caller: {name: 'post-closure'}});
