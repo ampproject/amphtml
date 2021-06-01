@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const Gd = {
-  PRERENDER: "prerender",
-  VISIBLE: "visible",
-  HIDDEN: "hidden",
-  PAUSED: "paused",
-  INACTIVE: "inactive"
-};
-/* Copyright (c) 2014 The Polymer Project Authors. All rights reserved. Use of this source code is governed by a BSD-style license that can be found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd */
 
-let Hd;
+export const exportedEnum = {
+  FOO: 'A',
+  BAR: 'B',
+  BAZ: 'C',
+};
