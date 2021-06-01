@@ -46,9 +46,9 @@ import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/core/types/array';
+import {isEnumValue, isObject} from '../../../src/core/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
-import {isObject} from '../../../src/core/types';
 import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 import {map} from '../../../src/core/types/object';
 import {parseCss} from './parsers/css-expr';
@@ -792,16 +792,17 @@ export class MeasureScanner extends Scanner {
       '"iterationStart" is invalid: %s',
       newTiming.iterationStart
     );
-    user().assertEnumValue(
-      WebAnimationTimingDirection,
-      /** @type {string} */ (direction),
-      'direction'
+
+    userAssert(
+      isEnumValue(WebAnimationTimingDirection, direction),
+      `Unknown direction: ${direction}`
     );
-    user().assertEnumValue(
-      WebAnimationTimingFill,
-      /** @type {string} */ (fill),
-      'fill'
+
+    userAssert(
+      isEnumValue(WebAnimationTimingFill, fill),
+      `Unknown fill: ${fill}`
     );
+
     return {
       duration,
       delay,
