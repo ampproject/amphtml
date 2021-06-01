@@ -353,6 +353,20 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /** @override */
+  createPlaceholderCallback() {
+    const {poster} = this.element.dataset;
+    if (!poster) {
+      return null;
+    }
+    const img = new Image();
+    img.src = poster;
+    img.setAttribute('placeholder', '');
+    img.setAttribute('loading', 'lazy');
+    this.applyFillContent(img);
+    return img;
+  }
+
+  /** @override */
   pauseCallback() {
     this.pause();
   }
