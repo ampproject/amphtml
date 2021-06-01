@@ -399,7 +399,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Otherwise the element is the legacy version, amp-story-page-attachment with an href,
     // and a click target is the button built by the component.
     const programaticallyClickOnTarget = () => {
-      const pageOutLinkChild = this.element.parentElement
+      const pageOutlinkChild = this.element.parentElement
         .querySelector('amp-story-page-outlink')
         ?.querySelector('a');
 
@@ -407,8 +407,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         ?.querySelector('.i-amphtml-story-page-open-attachment-host')
         .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
 
-      if (pageOutLinkChild) {
-        pageOutLinkChild.click();
+      if (pageOutlinkChild) {
+        pageOutlinkChild.click();
       } else if (pageAttachmentChild) {
         triggerClickFromLightDom(pageAttachmentChild, this.element);
       }
