@@ -251,7 +251,7 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
     );
     allowConsoleError(() => {
       expect(() => scanTiming({direction: 'invalid'})).to.throw(
-        /Unknown direction value/
+        /Unknown direction/
       );
     });
   });
@@ -263,9 +263,7 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
       'backwards'
     );
     allowConsoleError(() => {
-      expect(() => scanTiming({fill: 'invalid'})).to.throw(
-        /Unknown fill value/
-      );
+      expect(() => scanTiming({fill: 'invalid'})).to.throw(/Unknown fill/);
     });
   });
 

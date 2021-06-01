@@ -26,8 +26,8 @@ import {assertHttpsUrl} from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
+import {isEnumValue, isObject} from '../../../src/core/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {isObject} from '../../../src/core/types';
 import {parseQueryString} from '../../../src/core/types/string/url';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -209,9 +209,11 @@ export class AccessSource {
    * @return {!AccessType}
    */
   buildConfigType_(configJson) {
-    let type = configJson['type']
-      ? user().assertEnumValue(AccessType, configJson['type'], 'access type')
-      : null;
+    let {'type': type} = configJson;
+    userAssert(
+      !type || isEnumValue(AccessType, type),
+      `Unknown access type: ${type}`
+    );
     if (!type) {
       if (configJson['vendor']) {
         type = AccessType.VENDOR;
