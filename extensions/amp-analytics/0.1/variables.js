@@ -338,6 +338,14 @@ export class VariableService {
           );
         });
       },
+      'SESSION_TIMESTAMP': () => {
+        return this.sessionManagerPromise_.then((sessionManager) => {
+          return sessionManager.getSessionValue(
+            type,
+            SESSION_VALUES.TIMESTAMP
+          );
+        });
+      },
     };
     const perfMacros = isInFie(element)
       ? {}

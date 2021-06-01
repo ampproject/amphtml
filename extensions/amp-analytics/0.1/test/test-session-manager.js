@@ -130,6 +130,30 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       );
     });
 
+    it('should not change creationTimestamp on update', async () => {
+      const vendorType = 'myVendorType';
+      const session = {
+        'sessionId': 5000,
+        'creationTimestamp': 1555555555555,
+        'lastAccessTimestamp': 1555555555555,
+      };
+      await sessionManager.get(vendorType)
+
+      clock.tick(1);
+      session.lastAccessTimestamp = 1555555555556;
+      
+      storageSetSpy.resetHistory();
+      const storedSession = await sessionManager.get(vendorType)
+      expect(storedSession['creationTimestamp']).to.equal(session.creationTimestamp);
+      expect(sessionManager.sessions_[vendorType]['creationTimestamp']).to.equal(session.creationTimestamp);
+
+      expect(storageSetSpy).to.be.calledOnce;
+      expect(storageSetSpy).to.be.calledWith(
+        'amp-session:' + vendorType,
+        composeStorageSessionValue(session)
+      );
+    });
+
     it('should create a new session for an expired session', async () => {
       const vendorType = 'myVendorType';
       let session = {
@@ -201,6 +225,14 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         SESSION_VALUES.SESSION_ID
       );
       expect(id).to.equal(5000);
+    });
+
+    it('should return SESSION_VALUE.TIMESTAMP', async () => {
+      const timestamp = await sessionManager.getSessionValue(
+        'myVendorType',
+        SESSION_VALUES.TIMESTAMP
+      );
+      expect(timestamp).to.equal(1555555555555);
     });
   });
 });
