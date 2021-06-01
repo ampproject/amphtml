@@ -836,11 +836,11 @@ class VideoEntry {
     const animation = renderIcon(win, element);
     const children = [animation];
 
-    /** @param {boolean} display */
-    function toggleElements(display) {
+    /** @param {boolean} shouldDisplay */
+    function toggleElements(shouldDisplay) {
       video.mutateElementSkipRemeasure(() => {
         children.forEach((child) => {
-          toggle(child, display);
+          toggle(child, shouldDisplay);
         });
       });
     }
