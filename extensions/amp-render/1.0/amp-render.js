@@ -87,7 +87,7 @@ function getUpdateValue(bindingValue, isFirstMutation) {
     return true;
   }
   return false;
-};
+}
 
 export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
