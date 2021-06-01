@@ -115,31 +115,31 @@ ABSL_FLAG(bool, allow_module_nomodule, true,
 
 namespace amp::validator {
 
-// Examples (note these are the same as kNomoduleLtsScriptSrcRe):
-// https://cdn.ampproject.org/lts/v0.js
-// https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
-static const LazyRE2 kLtsScriptSrcRe = {
-    R"re(https://cdn\.ampproject\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
+// Examples (note these are the same as kNomoduleLtsScriptPathRe):
+// /lts/v0.js
+// /lts/v0/amp-ad-0.1.js
+static const LazyRE2 kLtsScriptPathRe = {
+    R"re(/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
 // Examples:
-// https://cdn.ampproject.org/v0.mjs
-// https://cdn.ampproject.org/v0/amp-ad-0.1.mjs
-static const LazyRE2 kModuleScriptSrcRe = {
-    R"re(https://cdn\.ampproject\.org/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
+// /v0.mjs
+// /v0/amp-ad-0.1.mjs
+static const LazyRE2 kModuleScriptPathRe = {
+    R"re(/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
 // Examples:
-// https://cdn.ampproject.org/v0.js
-// https://cdn.ampproject.org/v0/amp-ad-0.1.js
-static const LazyRE2 kNomoduleScriptSrcRe = {
-    R"re(https://cdn\.ampproject\.org/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
+// /v0.js
+// /v0/amp-ad-0.1.js
+static const LazyRE2 kNomoduleScriptPathRe = {
+    R"re(/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
 // Examples:
-// https://cdn.ampproject.org/lts/v0.mjs
-// https://cdn.ampproject.org/lts/v0/amp-ad-0.1.mjs
-static const LazyRE2 kModuleLtsScriptSrcRe = {
-    R"re(https://cdn\.ampproject\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
-// Examples (note these are the same as kLtsScriptSrcRe):
-// https://cdn.ampproject.org/lts/v0.js
-// https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
-static const LazyRE2 kNomoduleLtsScriptSrcRe = {
-    R"re(https://cdn\.ampproject\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
+// /lts/v0.mjs
+// /lts/v0/amp-ad-0.1.mjs
+static const LazyRE2 kModuleLtsScriptPathRe = {
+    R"re(/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
+// Examples (note these are the same as kLtsScriptPathRe):
+// /lts/v0.js
+// /lts/v0/amp-ad-0.1.js
+static const LazyRE2 kNomoduleLtsScriptPathRe = {
+    R"re(/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
 
 namespace {
 
@@ -346,51 +346,72 @@ class ParsedHtmlTag {
     return StartsWith(src, "https://cdn.ampproject.org/");
   }
 
-  bool IsAsyncScriptTag() const {
+  bool IsAsyncScriptTag(string_view src) const {
     return UpperName() == "SCRIPT" && GetAttr("async").has_value() &&
-           GetAttr("src").has_value();
+           !src.empty();
   }
 
   bool IsAmpRuntimeScript() const {
     const string_view src = GetAttr("src").value_or("");
-    return IsAsyncScriptTag() && !IsExtensionScript() &&
+    return IsAsyncScriptTag(src) && !IsExtensionScript() &&
            IsAmpCacheDomain(src) &&
            (EndsWith(src, "/v0.js") || EndsWith(src, "/v0.mjs") ||
             EndsWith(src, "/v0.mjs?f=sxg"));
   }
 
-  bool IsLtsScriptTag() const {
-    return IsAsyncScriptTag() &&
-           RE2::FullMatch(GetAttr("src").value_or(""), *kLtsScriptSrcRe);
+  // This does not validate the script src, that is handled in the tagspec.
+  // This is checking if the script src is an LTS script.
+  bool IsLtsScriptTag(string_view src) const {
+    return IsAsyncScriptTag(src) && IsAmpCacheDomain(src) &&
+           RE2::PartialMatch(GetAttr("src").value_or(""), *kLtsScriptPathRe);
   }
 
-  bool IsModuleScriptTag() const {
-    return IsAsyncScriptTag() && (GetAttr("type").value_or("") == "module") &&
-           RE2::FullMatch(GetAttr("src").value_or(""), *kModuleScriptSrcRe);
+  // This does not validate the script src, that is handled in the tagspec.
+  // This is checking if the script src is a module script.
+  bool IsModuleScriptTag(string_view src) const {
+    return IsAsyncScriptTag(src) &&
+           (GetAttr("type").value_or("") == "module") &&
+           IsAmpCacheDomain(src) &&
+           RE2::PartialMatch(GetAttr("src").value_or(""), *kModuleScriptPathRe);
   }
 
-  bool IsNomoduleScriptTag() const {
-    return IsAsyncScriptTag() && GetAttr("nomodule").has_value() &&
-           RE2::FullMatch(GetAttr("src").value_or(""), *kNomoduleScriptSrcRe);
+  // This does not validate the script src, that is handled in the tagspec.
+  // This is checking if the script src is a nomodule script.
+  bool IsNomoduleScriptTag(string_view src) const {
+    return IsAsyncScriptTag(src) && GetAttr("nomodule").has_value() &&
+           IsAmpCacheDomain(src) &&
+           RE2::PartialMatch(GetAttr("src").value_or(""),
+                             *kNomoduleScriptPathRe);
   }
 
-  bool IsModuleLtsScriptTag() const {
-    return IsAsyncScriptTag() && (GetAttr("type").value_or("") == "module") &&
-           RE2::FullMatch(GetAttr("src").value_or(""), *kModuleLtsScriptSrcRe);
+  // This does not validate the script src, that is handled in the tagspec.
+  // This is checking if the script src is a module LTS script.
+  bool IsModuleLtsScriptTag(string_view src) const {
+    return IsAsyncScriptTag(src) &&
+           (GetAttr("type").value_or("") == "module") &&
+           IsAmpCacheDomain(src) &&
+           RE2::PartialMatch(GetAttr("src").value_or(""),
+                             *kModuleLtsScriptPathRe);
   }
 
-  bool IsNomoduleLtsScriptTag() const {
-    return IsAsyncScriptTag() && GetAttr("nomodule").has_value() &&
-           RE2::FullMatch(GetAttr("src").value_or(""),
-                          *kNomoduleLtsScriptSrcRe);
+  // This does not validate the script src, that is handled in the tagspec.
+  // This is checking if the script src is a nomodule LTS script.
+  bool IsNomoduleLtsScriptTag(string_view src) const {
+    return IsAsyncScriptTag(src) && GetAttr("nomodule").has_value() &&
+           IsAmpCacheDomain(src) &&
+           RE2::PartialMatch(GetAttr("src").value_or(""),
+                             *kNomoduleLtsScriptPathRe);
   }
 
+  // Inspects the separately validated src attribute to select its script
+  // release version: module/nomodule LTS, module/nomodule, LTS or standard.
   ScriptReleaseVersion GetScriptReleaseVersion() const {
-    if (IsModuleLtsScriptTag() || IsNomoduleLtsScriptTag())
+    const string_view src = GetAttr("src").value_or("");
+    if (IsModuleLtsScriptTag(src) || IsNomoduleLtsScriptTag(src))
       return ScriptReleaseVersion::MODULE_NOMODULE_LTS;
-    if (IsModuleScriptTag() || IsNomoduleScriptTag())
+    if (IsModuleScriptTag(src) || IsNomoduleScriptTag(src))
       return ScriptReleaseVersion::MODULE_NOMODULE;
-    if (IsLtsScriptTag()) return ScriptReleaseVersion::LTS;
+    if (IsLtsScriptTag(src)) return ScriptReleaseVersion::LTS;
     return ScriptReleaseVersion::STANDARD;
   }
 
