@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import * as dom from '../../src/dom';
 import {BaseElement} from '../../src/base-element';
-import {Layout, isLayoutSizeDefined} from '../../src/layout';
+import {Layout, isLayoutSizeDefined, parseLayout} from '../../src/layout';
 import {registerElement} from '../../src/service/custom-element-registry';
 
 class AmpLayout extends BaseElement {
@@ -31,16 +32,30 @@ class AmpLayout extends BaseElement {
 
   /** @override */
   buildCallback() {
-    if (this.getLayout() == Layout.CONTAINER) {
-      return;
+    if (!this.element.hasAttribute('i-amphtml-ssr')) {
+      buildDOM(this.win.document, this.element);
     }
-    const container = this.win.document.createElement('div');
-    this.applyFillContent(container);
-    this.getRealChildNodes().forEach((child) => {
-      container.appendChild(child);
-    });
-    this.element.appendChild(container);
   }
+}
+
+/**
+ *
+ * @param {!Document} document
+ * @param {!Element} element
+ */
+export function buildDOM(document, element) {
+  const layout = parseLayout(element.getAttribute('layout'));
+  if (layout == Layout.CONTAINER) {
+    return;
+  }
+
+  const container = document.createElement('div');
+  dom.applyFillContent(container);
+
+  dom.getRealChildNodes(element).forEach((child) => {
+    container.appendChild(child);
+  });
+  element.appendChild(container);
 }
 
 /**

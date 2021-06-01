@@ -1899,7 +1899,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @package @final
      */
     getRealChildNodes() {
-      return dom.childNodes(this, (node) => !isInternalOrServiceNode(node));
+      return dom.getRealChildNodes(this);
     }
 
     /**
