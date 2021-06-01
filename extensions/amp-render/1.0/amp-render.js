@@ -83,7 +83,7 @@ const getUpdateValue = (bindingValue, isFirstMutation) => {
   }
   if (bindingValue === 'always') {
     // TODO(dmanek): add link to amp-render docs that elaborates on performance implications of "always"
-    user().warn('AMP-RENDER', 'binding="always" has performance implications.');
+    user().warn(TAG, 'binding="always" has performance implications.');
     return true;
   }
   return false;

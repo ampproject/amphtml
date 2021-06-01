@@ -604,7 +604,7 @@ describes.realWin(
       expect(fallback.textContent).to.equal('Failed');
     });
 
-    it.skip('should work with binding="always"', async () => {
+    it('should work with binding="always"', async () => {
       const rescanSpy = env.sandbox.spy();
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
         rescan: rescanSpy,
@@ -641,7 +641,7 @@ describes.realWin(
       expect(update).to.be.true;
     });
 
-    it.skip('should work with binding="refresh"', async () => {
+    it('should work with binding="refresh"', async () => {
       const rescanSpy = env.sandbox.spy();
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
         rescan: rescanSpy,
@@ -680,7 +680,7 @@ describes.realWin(
       expect(update).to.be.true;
     });
 
-    it.skip('should default to binding="refresh" when nothing is specified', async () => {
+    it('should default to binding="refresh" when nothing is specified', async () => {
       const rescanSpy = env.sandbox.spy();
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
         rescan: rescanSpy,
