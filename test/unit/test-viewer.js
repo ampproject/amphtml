@@ -532,7 +532,7 @@ describes.sandboxed('Viewer', {}, (env) => {
           viewer.receiveMessage('visibilitychange', {
             state: 'what is this',
           });
-        }).to.throw('Unknown VisibilityState value');
+        }).to.throw('Assertion failed');
       });
       expect(ampdoc.getVisibilityState()).to.equal('paused');
     });

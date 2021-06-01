@@ -38,6 +38,7 @@ import {reportError} from '../error-reporting';
 import {urls} from '../config';
 
 import {ViewerInterface} from './viewer-interface';
+import {isEnumValue} from '../core/types';
 
 const TAG_ = 'Viewer';
 
@@ -529,7 +530,8 @@ export class ViewerImpl {
     if (!state) {
       return;
     }
-    state = dev().assertEnumValue(VisibilityState, state, 'VisibilityState');
+
+    devAssert(isEnumValue(VisibilityState, state));
 
     // The viewer is informing us we are not currently active because we are
     // being pre-rendered, or the user swiped to another doc (or closed the

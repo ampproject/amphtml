@@ -26,8 +26,9 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
+import {isEnumValue} from '../../../src/core/types';
 import {mod} from '../../../src/core/math';
 
 const TAG = 'amp-selector';
@@ -105,7 +106,10 @@ export class AmpSelector extends AMP.BaseElement {
     let kbSelectMode = this.element.getAttribute('keyboard-select-mode');
     if (kbSelectMode) {
       kbSelectMode = kbSelectMode.toLowerCase();
-      user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
+      userAssert(
+        isEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode),
+        `Unknown keyboard-select-mode: ${kbSelectMode}`
+      );
       userAssert(
         !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
         '[keyboard-select-mode=select] not supported for multiple ' +
