@@ -352,6 +352,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
+   * Show an existing carousel. Ensure it's been unlayed out before displaying again.
    * @param {string} lightboxGroupId
    * @return {!Promise}
    * @private
@@ -360,11 +361,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.mutateElement(() => {
       const {length} = this.elementsMetadata_[lightboxGroupId];
       this.maybeEnableMultipleItemControls_(length);
-      // Before showing a carousel, ensure it has been unlayed out first to
-      // prevent unintentional additional entries in Map<CustomElement, IntersectionObserver>.
-      dev()
-        .assertElement(this.carousel_)
-        .getImpl()
+      this.carousel_.getImpl()
         .then((implementation) => {
           implementation.unlayoutCallback();
           toggle(this.carousel_, true);
