@@ -5,10 +5,6 @@
   rules: [
     {
       owners: [
-        {
-          name: 'enriqe',
-          notify: true,
-        },
         {name: 'gmajoulet'},
         {name: 'newmuis'},
       ],
