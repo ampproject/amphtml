@@ -254,12 +254,7 @@ export class AmpRender extends BaseElement {
       .then((html) => dict({'__html': html}));
   }
 
-  /**
-   * TODO: this implementation is identical to one in amp-date-display &
-   * amp-date-countdown. Move it to a common file and import it.
-   *
-   * @override
-   */
+  /** @override */
   checkPropsPostMutations() {
     const templates =
       this.templates_ ||

@@ -605,9 +605,10 @@ describes.realWin(
     });
 
     it('should work with binding="always"', async () => {
-      const rescanSpy = env.sandbox.spy();
+      const rescanStub = env.sandbox.stub();
+      rescanStub.resolves({});
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
-        rescan: rescanSpy,
+        rescan: rescanStub,
         signals: () => {
           return {
             get: () => null,
@@ -635,16 +636,17 @@ describes.realWin(
       await whenUpgradedToCustomElement(element);
       await element.buildInternal();
 
-      expect(rescanSpy).to.be.calledOnce;
-      const {fast, update} = rescanSpy.getCall(0).args[2];
+      expect(rescanStub).to.be.calledOnce;
+      const {fast, update} = rescanStub.getCall(0).args[2];
       expect(fast).to.be.true;
       expect(update).to.be.true;
     });
 
     it('should work with binding="refresh"', async () => {
-      const rescanSpy = env.sandbox.spy();
+      const rescanStub = env.sandbox.stub();
+      rescanStub.resolves({});
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
-        rescan: rescanSpy,
+        rescan: rescanStub,
         signals: () => {
           return {
             get: () => 123,
@@ -674,16 +676,17 @@ describes.realWin(
       await whenUpgradedToCustomElement(element);
       await element.buildInternal();
 
-      expect(rescanSpy).to.be.calledOnce;
-      const {fast, update} = rescanSpy.getCall(0).args[2];
+      expect(rescanStub).to.be.calledOnce;
+      const {fast, update} = rescanStub.getCall(0).args[2];
       expect(fast).to.be.true;
       expect(update).to.be.true;
     });
 
     it('should default to binding="refresh" when nothing is specified', async () => {
-      const rescanSpy = env.sandbox.spy();
+      const rescanStub = env.sandbox.stub();
+      rescanStub.resolves({});
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
-        rescan: rescanSpy,
+        rescan: rescanStub,
         signals: () => {
           return {
             get: () => null,
@@ -712,8 +715,8 @@ describes.realWin(
       await whenUpgradedToCustomElement(element);
       await element.buildInternal();
 
-      expect(rescanSpy).to.be.calledOnce;
-      const {fast, update} = rescanSpy.getCall(0).args[2];
+      expect(rescanStub).to.be.calledOnce;
+      const {fast, update} = rescanStub.getCall(0).args[2];
       expect(fast).to.be.true;
       expect(update).to.be.false;
     });
