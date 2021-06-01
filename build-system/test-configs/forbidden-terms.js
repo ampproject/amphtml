@@ -820,8 +820,8 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
+      'src/core/dom/stream/response.js',
       'src/core/types/string/bytes.js',
-      'src/utils/stream-response.js',
     ],
   },
   'contentHeightChanged': {
@@ -870,8 +870,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/transport.js',
       'extensions/amp-web-push/0.1/iframehost.js',
       'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
-      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
-      'extensions/amp-image-slider/0.1/amp-image-slider.js',
     ],
   },
   '\\.getTime\\(\\)': {

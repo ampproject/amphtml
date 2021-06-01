@@ -63,7 +63,9 @@ async function prCheck() {
     runCheck('amp validate-html-fixtures --local_changes');
   }
 
-  if (buildTargetsInclude(Targets.LINT)) {
+  if (buildTargetsInclude(Targets.LINT_RULES)) {
+    runCheck('amp lint');
+  } else if (buildTargetsInclude(Targets.LINT)) {
     runCheck('amp lint --local_changes');
   }
 
@@ -73,6 +75,10 @@ async function prCheck() {
 
   if (buildTargetsInclude(Targets.AVA)) {
     runCheck('amp ava');
+  }
+
+  if (buildTargetsInclude(Targets.BUILD_SYSTEM)) {
+    runCheck('amp check-build-system');
   }
 
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {

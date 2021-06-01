@@ -38,7 +38,7 @@ import {
   scopedQuerySelectorAll,
   toggleAttribute,
 } from '../../../src/dom';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
@@ -275,11 +275,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   cloneLightboxableElement_(element) {
-    if (element.classList.contains('amp-notsupported')) {
-      const fallback = element.getFallback();
-      if (!!fallback) {
-        element = fallback;
-      }
+    const fallback = element.getFallback();
+    const shouldCloneFallback =
+      element.classList.contains('amp-notsupported') && !!fallback;
+    if (shouldCloneFallback) {
+      element = fallback;
     }
     const deepClone = !element.classList.contains('i-amphtml-element');
     const clonedNode = element.cloneNode(deepClone);
@@ -308,7 +308,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         element: dev().assertElement(clonedNode),
       };
       let slide = clonedNode;
-      if (ELIGIBLE_TAP_TAGS.has(clonedNode.tagName)) {
+      if (ELIGIBLE_TAP_TAGS[clonedNode.tagName]) {
         const container = this.doc_.createElement('div');
         const imageViewer = htmlFor(this.doc_)`
           <amp-image-viewer layout="fill"></amp-image-viewer>`;
@@ -819,7 +819,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (!element || !isLoaded(element)) {
       return false;
     }
-    if (!ELIGIBLE_TAP_TAGS.has(element.tagName)) {
+    if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
       return false;
     }
     const img = elementByTag(dev().assertElement(element), 'img');
@@ -1340,11 +1340,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         const thumbnailElement = this.createThumbnailElement_(thumbnail);
         thumbnails.push(thumbnailElement);
       });
-    this.mutateElement(() =>
-      thumbnails.forEach((thumbnailElement) =>
-        this.gallery_.appendChild(thumbnailElement)
-      )
-    );
+    this.mutateElement(() => {
+      thumbnails.forEach((thumbnailElement) => {
+        this.gallery_.appendChild(thumbnailElement);
+      });
+    });
   }
 
   /**

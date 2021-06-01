@@ -168,6 +168,11 @@ export class AmpRender extends BaseElement {
     this.initialSrc_ = this.element.getAttribute('src');
     this.src_ = this.initialSrc_;
 
+    const hasAriaLive = this.element.hasAttribute('aria-live');
+    if (!hasAriaLive) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
+
     this.registerApiAction('refresh', (api) => {
       const src = this.element.getAttribute('src');
       // There is an alternative way to do this using `mutationObserverCallback` while using a boolean
@@ -181,6 +186,9 @@ export class AmpRender extends BaseElement {
     });
 
     return dict({
+      'ariaLiveValue': hasAriaLive
+        ? this.element.getAttribute('aria-live')
+        : 'polite',
       'getJson': this.getFetchJsonFn(),
       'onLoading': () => {
         this.toggleLoading(true);
@@ -205,14 +213,6 @@ export class AmpRender extends BaseElement {
         }
       },
     });
-  }
-
-  /** @override */
-  buildCallback() {
-    super.buildCallback();
-    if (!this.element.hasAttribute('aria-live')) {
-      this.element.setAttribute('aria-live', 'polite');
-    }
   }
 
   /** @override */

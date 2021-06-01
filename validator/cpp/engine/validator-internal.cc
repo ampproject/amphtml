@@ -115,7 +115,6 @@ ABSL_FLAG(bool, allow_module_nomodule, true,
 
 namespace amp::validator {
 
-constexpr char kAmpCacheRootUrl[] = "https://cdn.ampproject.org/";
 // Examples (note these are the same as kNomoduleLtsScriptSrcRe):
 // https://cdn.ampproject.org/lts/v0.js
 // https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
@@ -343,6 +342,10 @@ class ParsedHtmlTag {
     return !ExtensionScriptNameAttribute().empty();
   }
 
+  bool IsAmpCacheDomain(string_view src) const {
+    return StartsWith(src, "https://cdn.ampproject.org");
+  }
+
   bool IsAsyncScriptTag() const {
     return UpperName() == "SCRIPT" && GetAttr("async").has_value() &&
            GetAttr("src").has_value();
@@ -351,7 +354,7 @@ class ParsedHtmlTag {
   bool IsAmpRuntimeScript() const {
     const string_view src = GetAttr("src").value_or("");
     return IsAsyncScriptTag() && !IsExtensionScript() &&
-           StartsWith(src, kAmpCacheRootUrl) &&
+           IsAmpCacheDomain(src) &&
            (EndsWith(src, "/v0.js") || EndsWith(src, "/v0.mjs") ||
             EndsWith(src, "/v0.mjs?f=sxg"));
   }
@@ -1448,8 +1451,6 @@ class ParsedValidatorRules {
     return rules_.descendant_tag_list();
   }
   const vector<ParsedDocCssSpec>& css() const { return parsed_css_; }
-
-  int32_t SpecFileRevision() const { return rules_.spec_file_revision(); }
 
   const ParsedTagSpec* GetTagSpec(int id) const { return &tagspec_by_id_[id]; }
 
@@ -3602,6 +3603,10 @@ void ValidateSsrLayout(const TagSpec& spec,
       // i-amphtml-layout-size-defined
       valid_internal_classes.push_back(
           amp::validator::parse_layout::GetLayoutSizeDefinedClass());
+    if (amp::validator::parse_layout::IsLayoutAwaitingSize(layout))
+      // i-amphtml-layout-awaiting-size
+      valid_internal_classes.push_back(
+          amp::validator::parse_layout::GetLayoutAwaitingSizeClass());
     for (const string_view class_token :
          StrSplit(class_attr.value(), ByAnyChar("\t\n\f\r "))) {
       if (StartsWith(class_token, "i-amphtml-") &&
@@ -5575,14 +5580,6 @@ void ReferencePointMatcher::ExitParentTag(const Context& context,
   }
 }
 
-// This is a prototype from which new validation result messages get
-// copied from for initialization.
-ValidationResult CreateResultPrototype(const ParsedValidatorRules& rules) {
-  ValidationResult prototype;
-  prototype.set_spec_file_revision(rules.SpecFileRevision());
-  return prototype;
-}
-
 // Makes Singleton ParsedValidatorRules non destructible.
 // TSAN throw race condition errors when ~ParsedValidatorRules destructor is
 // called.
@@ -5626,8 +5623,7 @@ class Validator {
   Validator(const ParsedValidatorRules* rules, int max_errors = -1)
       : rules_(rules),
         max_errors_(max_errors),
-        context_(rules_, max_errors_),
-        result_prototype_(CreateResultPrototype(*rules_)) {}
+        context_(rules_, max_errors_) {}
 
   ValidationResult Validate(std::string_view html) {
     Clear();
@@ -5853,7 +5849,7 @@ class Validator {
   // to parse multiple documents, so in case a new document arrives
   // we clear out the state.
   void Clear() {
-    result_ = result_prototype_;
+    result_.Clear();
     context_ = Context(rules_, max_errors_);
   }
 
@@ -5969,7 +5965,6 @@ class Validator {
   Context context_;
   htmlparser::ParseAccounting parse_accounting_;
   ValidationResult result_;
-  const ValidationResult result_prototype_;
   Validator(const Validator&) = delete;
   Validator& operator=(const Validator&) = delete;
 };
@@ -5981,11 +5976,6 @@ ValidationResult Validate(std::string_view html, HtmlFormat_Code html_format,
   Validator validator(ParsedValidatorRulesProvider::Get(html_format),
                       max_errors);
   return validator.Validate(html);
-}
-
-int RulesSpecVersion() {
-  auto rules = ParsedValidatorRulesProvider::Get(HtmlFormat::AMP);
-  return rules->SpecFileRevision();
 }
 
 }  // namespace amp::validator

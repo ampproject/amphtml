@@ -22,11 +22,15 @@ let installed;
 let lastExpectError;
 let networkLogger;
 
+/**
+ * Clears previous expected error state.
+ */
 function clearLastExpectError() {
   lastExpectError = null;
 }
 
 /**
+ * Retrieves the expected error state.
  * @return {?Error}
  */
 function getLastExpectError() {
@@ -178,7 +182,7 @@ function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
 
   /**
-   * @param {chai.AssertionStatic} _super
+   * @param {Chai.AssertionStatic} _super
    * @return {function(): ReturnType<Chai.AssertionStatic>}
    */
   return function (_super) {

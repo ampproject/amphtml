@@ -47,6 +47,7 @@ const fileLists = {};
 const Targets = {
   AVA: 'AVA',
   BABEL_PLUGIN: 'BABEL_PLUGIN',
+  BUILD_SYSTEM: 'BUILD_SYSTEM',
   CACHES_JSON: 'CACHES_JSON',
   DEV_DASHBOARD: 'DEV_DASHBOARD',
   DOCS: 'DOCS',
@@ -55,6 +56,7 @@ const Targets = {
   INTEGRATION_TEST: 'INTEGRATION_TEST',
   INVALID_WHITESPACES: 'INVALID_WHITESPACES',
   LINT: 'LINT',
+  LINT_RULES: 'LINT_RULES',
   OWNERS: 'OWNERS',
   PACKAGE_UPGRADE: 'PACKAGE_UPGRADE',
   PRESUBMIT: 'PRESUBMIT',
@@ -148,6 +150,19 @@ const targetMatchers = {
       file.startsWith('build-system/babel-config/')
     );
   },
+  [Targets.BUILD_SYSTEM]: (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file == 'build-system/tasks/check-build-system.js' ||
+      file == 'build-system/tsconfig.json' ||
+      (file.startsWith('build-system') &&
+        (file.endsWith('.js') ||
+          file.endsWith('.ts') ||
+          file.endsWith('.json')))
+    );
+  },
   [Targets.CACHES_JSON]: (file) => {
     if (isOwnersFile(file)) {
       return false;
@@ -224,6 +239,9 @@ const targetMatchers = {
       file == 'build-system/tasks/lint.js' ||
       file.startsWith('build-system/test-configs')
     );
+  },
+  [Targets.LINT_RULES]: (file) => {
+    return file.endsWith('.eslintrc.js') || file == 'package.json';
   },
   [Targets.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';

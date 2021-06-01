@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.166 */
+/** Version: 0.1.22.167 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -43,7 +43,7 @@ const I18N_STRINGS = {
     'fr': 'Plus de contenus avec Google',
     'hi': 'Google की मदद से ज़्यादा मुफ़्त लेख पाएं',
     'it': 'Con Google puoi avere di più',
-    'ja': 'Google を活用しよう',
+    'ja': 'Google からのプレゼント',
     'kn': 'Google ನಿಂದ ಹೆಚ್ಚಿನ ಪ್ರಯೋಜನ ಪಡೆಯಿರಿ',
     'ml': 'Google ഉപയോഗിച്ച് കൂടുതൽ പ്രയോജനങ്ങൾ നേടൂ',
     'mr': 'Google वापरून बरेच काही मिळवा',
@@ -62,7 +62,7 @@ const I18N_STRINGS = {
     'fr': '<strong></strong>Ce contenu est généralement payant, mais vous pouvez lire cet article et d\'autres contenus gratuitement grâce à Google en vous inscrivant sur <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> avec votre compte Google.',
     'hi': '<strong></strong>इस कॉन्टेंट को पढ़ने के लिए पैसे चुकाने पड़ते हैं, लेकिन आप Google की मदद से इस लेख और अन्य कॉन्टेंट को मुफ़्त में पढ़ सकते हैं. इसके लिए, आपको Google खाते का इस्तेमाल करके, <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> में रजिस्टर करना होगा.',
     'it': '<strong></strong>Generalmente questi contenuti sono a pagamento, ma Google ti offre accesso gratuito a questo articolo e ad altri articoli se ti registri a <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando il tuo Account Google.',
-    'ja': '<strong></strong>通常、このコンテンツをお読みいただくにはお支払いが必要ですが、お使いの Google アカウントで <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> に登録すると、この記事や他の記事を無料でお読みいただけます（購読料は Google が負担します）。',
+    'ja': '<strong></strong>通常、この記事をお読みいただくにはお支払いが必要ですが、お使いの Google アカウントで <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> に登録すると、この記事を無料でお読みいただけます。',
     'kn': '<strong></strong>ಸಾಮಾನ್ಯವಾಗಿ ಈ ವಿಷಯಕ್ಕಾಗಿ ಹಣ ಪಾವತಿಸಬೇಕಾಗುತ್ತದೆ, ಆದರೆ ನೀವು <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> ಗೆ ನಿಮ್ಮ Google ಖಾತೆಯ ಮೂಲಕ ನೋಂದಾಯಿಸಿಕೊಂಡಾಗ Google ಈ ಲೇಖನ ಮತ್ತು ಇನ್ನಷ್ಟು ವಿಷಯಗಳಿಗೆ ನಿಮಗೆ ಉಚಿತವಾದ ಪ್ರವೇಶವನ್ನು ನೀಡುತ್ತದೆ.',
     'ml': '<strong></strong>സാധാരണ ഈ ഉള്ളടക്കത്തിന് പണം നൽകേണ്ടതുണ്ട്, എന്നാൽ Google അക്കൗണ്ട് ഉപയോഗിച്ച് <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> എന്നതിൽ രജിസ്‌റ്റർ ചെയ്യുമ്പോൾ, ഈ ലേഖനത്തിലേക്കും മറ്റും Google നിങ്ങൾക്ക് സൗജന്യ ആക്‌സസ് നൽകുന്നു.',
     'mr': '<strong></strong>या आशयासाठी सामान्यतः पेमेंट आवश्यक असते पण तुम्ही तुमचे Google खाते वापरून <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> मध्ये नोंदणी करता तेव्हा, Google तुम्हाला या लेखाचा आणि आणखी बऱ्याच आशयाचा विनामूल्य ॲक्सेस देते.',
@@ -125,71 +125,96 @@ const I18N_STRINGS = {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/** English is the default language. */
-const DEFAULT_LANGUAGE_CODE = 'en';
-
-/**
- * Gets a message for a given language code, from a map of messages.
- * @param {!Object<string, string>} map
- * @param {?string|?Element} languageCodeOrElement
- * @return {?string}
- */
-function msg(map, languageCodeOrElement) {
-  const defaultMsg = map[DEFAULT_LANGUAGE_CODE];
-
-  // Verify params.
-  if (typeof map !== 'object' || !languageCodeOrElement) {
-    return defaultMsg;
-  }
-
-  // Get language code.
-  let languageCode =
-    typeof languageCodeOrElement === 'string'
-      ? languageCodeOrElement
-      : getLanguageCodeFromElement(languageCodeOrElement);
-
-  // Normalize language code.
-  languageCode = languageCode.toLowerCase();
-  languageCode = languageCode.replace(/_/g, '-');
-
-  // Search for a message matching the language code.
-  // If a message can't be found, try again with a less specific language code.
-  const languageCodeSegments = languageCode.split('-');
-  while (languageCodeSegments.length) {
-    const key = languageCodeSegments.join('-');
-    if (key in map) {
-      return map[key];
-    }
-
-    // Simplify language code.
-    // Ex: "en-US-SF" => "en-US"
-    languageCodeSegments.pop();
-  }
-
-  // There was an attempt.
-  return defaultMsg;
-}
-
-/**
- * Gets a language code (ex: "en-US") from a given Element.
- * @param {!Element} element
- * @return {string}
- */
-function getLanguageCodeFromElement(element) {
-  if (element.lang) {
-    // Get language from element itself.
-    return element.lang;
-  }
-
-  if (element.ownerDocument && element.ownerDocument.documentElement.lang) {
-    // Get language from element's document.
-    return element.ownerDocument.documentElement.lang;
-  }
-
-  // There was an attempt.
-  return DEFAULT_LANGUAGE_CODE;
-}
+/** @enum {number} */
+const AnalyticsEvent = {
+  UNKNOWN: 0,
+  IMPRESSION_PAYWALL: 1,
+  IMPRESSION_AD: 2,
+  IMPRESSION_OFFERS: 3,
+  IMPRESSION_SUBSCRIBE_BUTTON: 4,
+  IMPRESSION_SMARTBOX: 5,
+  IMPRESSION_SWG_BUTTON: 6,
+  IMPRESSION_CLICK_TO_SHOW_OFFERS: 7,
+  IMPRESSION_CLICK_TO_SHOW_OFFERS_OR_ALREADY_SUBSCRIBED: 8,
+  IMPRESSION_SUBSCRIPTION_COMPLETE: 9,
+  IMPRESSION_ACCOUNT_CHANGED: 10,
+  IMPRESSION_PAGE_LOAD: 11,
+  IMPRESSION_LINK: 12,
+  IMPRESSION_SAVE_SUBSCR_TO_GOOGLE: 13,
+  IMPRESSION_GOOGLE_UPDATED: 14,
+  IMPRESSION_SHOW_OFFERS_SMARTBOX: 15,
+  IMPRESSION_SHOW_OFFERS_SWG_BUTTON: 16,
+  IMPRESSION_SELECT_OFFER_SMARTBOX: 17,
+  IMPRESSION_SELECT_OFFER_SWG_BUTTON: 18,
+  IMPRESSION_SHOW_CONTRIBUTIONS_SWG_BUTTON: 19,
+  IMPRESSION_SELECT_CONTRIBUTION_SWG_BUTTON: 20,
+  IMPRESSION_METER_TOAST: 21,
+  IMPRESSION_REGWALL: 22,
+  IMPRESSION_SHOWCASE_REGWALL: 23,
+  IMPRESSION_SWG_SUBSCRIPTION_MINI_PROMPT: 24,
+  IMPRESSION_SWG_CONTRIBUTION_MINI_PROMPT: 25,
+  IMPRESSION_CONTRIBUTION_OFFERS: 26,
+  ACTION_SUBSCRIBE: 1000,
+  ACTION_PAYMENT_COMPLETE: 1001,
+  ACTION_ACCOUNT_CREATED: 1002,
+  ACTION_ACCOUNT_ACKNOWLEDGED: 1003,
+  ACTION_SUBSCRIPTIONS_LANDING_PAGE: 1004,
+  ACTION_PAYMENT_FLOW_STARTED: 1005,
+  ACTION_OFFER_SELECTED: 1006,
+  ACTION_SWG_BUTTON_CLICK: 1007,
+  ACTION_VIEW_OFFERS: 1008,
+  ACTION_ALREADY_SUBSCRIBED: 1009,
+  ACTION_NEW_DEFERRED_ACCOUNT: 1010,
+  ACTION_LINK_CONTINUE: 1011,
+  ACTION_LINK_CANCEL: 1012,
+  ACTION_GOOGLE_UPDATED_CLOSE: 1013,
+  ACTION_USER_CANCELED_PAYFLOW: 1014,
+  ACTION_SAVE_SUBSCR_TO_GOOGLE_CONTINUE: 1015,
+  ACTION_SAVE_SUBSCR_TO_GOOGLE_CANCEL: 1016,
+  ACTION_SWG_BUTTON_SHOW_OFFERS_CLICK: 1017,
+  ACTION_SWG_BUTTON_SELECT_OFFER_CLICK: 1018,
+  ACTION_SWG_BUTTON_SHOW_CONTRIBUTIONS_CLICK: 1019,
+  ACTION_SWG_BUTTON_SELECT_CONTRIBUTION_CLICK: 1020,
+  ACTION_USER_CONSENT_DEFERRED_ACCOUNT: 1021,
+  ACTION_USER_DENY_DEFERRED_ACCOUNT: 1022,
+  ACTION_DEFERRED_ACCOUNT_REDIRECT: 1023,
+  ACTION_GET_ENTITLEMENTS: 1024,
+  ACTION_METER_TOAST_SUBSCRIBE_CLICK: 1025,
+  ACTION_METER_TOAST_EXPANDED: 1026,
+  ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION: 1027,
+  ACTION_METER_TOAST_CLOSED_BY_SWIPE_DOWN: 1028,
+  ACTION_METER_TOAST_CLOSED_BY_X_CLICKED: 1029,
+  ACTION_SWG_SUBSCRIPTION_MINI_PROMPT_CLICK: 1030,
+  ACTION_SWG_CONTRIBUTION_MINI_PROMPT_CLICK: 1031,
+  ACTION_SWG_SUBSCRIPTION_MINI_PROMPT_CLOSE: 1032,
+  ACTION_SWG_CONTRIBUTION_MINI_PROMPT_CLOSE: 1033,
+  ACTION_CONTRIBUTION_OFFER_SELECTED: 1034,
+  EVENT_PAYMENT_FAILED: 2000,
+  EVENT_CUSTOM: 3000,
+  EVENT_CONFIRM_TX_ID: 3001,
+  EVENT_CHANGED_TX_ID: 3002,
+  EVENT_GPAY_NO_TX_ID: 3003,
+  EVENT_GPAY_CANNOT_CONFIRM_TX_ID: 3004,
+  EVENT_GOOGLE_UPDATED: 3005,
+  EVENT_NEW_TX_ID: 3006,
+  EVENT_UNLOCKED_BY_SUBSCRIPTION: 3007,
+  EVENT_UNLOCKED_BY_METER: 3008,
+  EVENT_NO_ENTITLEMENTS: 3009,
+  EVENT_HAS_METERING_ENTITLEMENTS: 3010,
+  EVENT_OFFERED_METER: 3011,
+  EVENT_UNLOCKED_FREE_PAGE: 3012,
+  EVENT_SUBSCRIPTION_STATE: 4000,
+};
+/** @enum {number} */
+const EventOriginator = {
+  UNKNOWN_CLIENT: 0,
+  SWG_CLIENT: 1,
+  AMP_CLIENT: 2,
+  PROPENSITY_CLIENT: 3,
+  SWG_SERVER: 4,
+  PUBLISHER_CLIENT: 5,
+  SHOWCASE_CLIENT: 6,
+};
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -277,6 +302,44 @@ function parseJson(json) {
 function warn(var_args) {
   console.warn.apply(console, arguments);
 }
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/* eslint-enable no-unused-vars */
+
+/** @enum {string} */
+const ShowcaseEvent = {
+  // Events indicating content could potentially be unlocked
+  EVENT_SHOWCASE_METER_OFFERED: 'EVENT_SHOWCASE_METER_OFFERED', // This event is only required if the user can choose not to use a publisher meter
+
+  // Events indicating content was unlocked
+  EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION:
+    'EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION', // Publisher managed subscriptions only
+  EVENT_SHOWCASE_UNLOCKED_BY_METER: 'EVENT_SHOWCASE_UNLOCKED_BY_METER', // Publisher managed meters only
+  EVENT_SHOWCASE_UNLOCKED_FREE_PAGE: 'EVENT_SHOWCASE_UNLOCKED_FREE_PAGE', // When the article is free for any reason (lead article, etc)
+
+  // Events indicating the user must take action to view content
+  EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL:
+    'EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL', // When the user must register (or log in) to view the article
+
+  // Events indicating the user must subscribe to view content
+  EVENT_SHOWCASE_INELIGIBLE_PAYWALL: 'EVENT_SHOWCASE_INELIGIBLE_PAYWALL', // When the user is not eligible for showcase entitlements
+  EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL:
+    'EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL', // When the user has no remaining showcase entitlements
+};
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -459,6 +522,87 @@ parseUrl(self.document.referrer);
  * limitations under the License.
  */
 
+/** English is the default language. */
+const DEFAULT_LANGUAGE_CODE = 'en';
+
+/**
+ * Gets a message for a given language code, from a map of messages.
+ * @param {!Object<string, string>} map
+ * @param {?string|?Element} languageCodeOrElement
+ * @return {?string}
+ */
+function msg(map, languageCodeOrElement) {
+  const defaultMsg = map[DEFAULT_LANGUAGE_CODE];
+
+  // Verify params.
+  if (typeof map !== 'object' || !languageCodeOrElement) {
+    return defaultMsg;
+  }
+
+  // Get language code.
+  let languageCode =
+    typeof languageCodeOrElement === 'string'
+      ? languageCodeOrElement
+      : getLanguageCodeFromElement(languageCodeOrElement);
+
+  // Normalize language code.
+  languageCode = languageCode.toLowerCase();
+  languageCode = languageCode.replace(/_/g, '-');
+
+  // Search for a message matching the language code.
+  // If a message can't be found, try again with a less specific language code.
+  const languageCodeSegments = languageCode.split('-');
+  while (languageCodeSegments.length) {
+    const key = languageCodeSegments.join('-');
+    if (key in map) {
+      return map[key];
+    }
+
+    // Simplify language code.
+    // Ex: "en-US-SF" => "en-US"
+    languageCodeSegments.pop();
+  }
+
+  // There was an attempt.
+  return defaultMsg;
+}
+
+/**
+ * Gets a language code (ex: "en-US") from a given Element.
+ * @param {!Element} element
+ * @return {string}
+ */
+function getLanguageCodeFromElement(element) {
+  if (element.lang) {
+    // Get language from element itself.
+    return element.lang;
+  }
+
+  if (element.ownerDocument && element.ownerDocument.documentElement.lang) {
+    // Get language from element's document.
+    return element.ownerDocument.documentElement.lang;
+  }
+
+  // There was an attempt.
+  return DEFAULT_LANGUAGE_CODE;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Polyfill for String.prototype.startsWith.
  * @param {string} string
@@ -570,6 +714,69 @@ function setImportantStyles(element, styles) {
       'important'
     );
   }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string,?Array<AnalyticsEvent>>} */
+const ShowcaseEvents = {
+  // Events related to content being potentially unlockable
+  [ShowcaseEvent.EVENT_SHOWCASE_METER_OFFERED]: [
+    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
+    AnalyticsEvent.EVENT_OFFERED_METER,
+  ],
+
+  // Events related to content being unlocked
+  [ShowcaseEvent.EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION]: [
+    AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
+  ],
+  [ShowcaseEvent.EVENT_SHOWCASE_UNLOCKED_BY_METER]: [
+    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
+    AnalyticsEvent.EVENT_UNLOCKED_BY_METER,
+  ],
+  [ShowcaseEvent.EVENT_SHOWCASE_UNLOCKED_FREE_PAGE]: [
+    AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE,
+  ],
+
+  // Events requiring user action to unlock content
+  [ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL]: [
+    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
+    AnalyticsEvent.IMPRESSION_REGWALL,
+    AnalyticsEvent.IMPRESSION_SHOWCASE_REGWALL,
+  ],
+
+  // Events requiring subscription to unlock content
+  [ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL]: [
+    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
+    AnalyticsEvent.IMPRESSION_PAYWALL,
+  ],
+  [ShowcaseEvent.EVENT_SHOWCASE_INELIGIBLE_PAYWALL]: [
+    // TODO(b/181690059): Create showcase ineligible AnalyticsEvent
+    AnalyticsEvent.IMPRESSION_PAYWALL,
+  ],
+};
+
+/**
+ * Converts a publisher entitlement event enum into an array analytics events.
+ * @param {!ShowcaseEvent} event
+ * @returns {!Array<AnalyticsEvent>}
+ */
+function showcaseEventToAnalyticsEvents(event) {
+  return ShowcaseEvents[event] || [];
 }
 
 /**
@@ -895,6 +1102,8 @@ class GaaMeteringRegwall {
       return Promise.reject(errorMessage);
     }
 
+    logEvent(ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL);
+
     GaaMeteringRegwall.render_({iframeUrl});
     GaaMeteringRegwall.sendIntroMessageToGsiIframe_({iframeUrl});
     return GaaMeteringRegwall.getGaaUser_()
@@ -1009,8 +1218,9 @@ class GaaMeteringRegwall {
       const ldJson = /** @type {?{ publisher: ?{ name: string } }} */ (
         parseJson(ldJsonElement.textContent)
       );
-      if (ldJson?.publisher?.name) {
-        return ldJson.publisher.name;
+      const publisherName = ldJson?.publisher?.name;
+      if (publisherName) {
+        return publisherName;
       }
     }
 
@@ -1027,11 +1237,8 @@ class GaaMeteringRegwall {
       .getElementById(PUBLISHER_SIGN_IN_BUTTON_ID)
       .addEventListener('click', (e) => {
         e.preventDefault();
-        (self.SWG = self.SWG || []).push((subscriptions) => {
-          /** @type {!Subscriptions} */ (subscriptions).triggerLoginRequest({
-            linkRequested: false,
-          });
-        });
+
+        callSwg((swg) => swg.triggerLoginRequest({linkRequested: false}));
       });
   }
 
@@ -1242,6 +1449,38 @@ function configureGoogleSignIn() {
           self.gapi.auth2.getAuthInstance() || self.gapi.auth2.init()
       )
   );
+}
+
+/**
+ * Calls Swgjs.
+ * @param { function(!SubscriptionsDef) } callback
+ */
+function callSwg(callback) {
+  (self.SWG = self.SWG || []).push(callback);
+}
+
+/**
+ * Logs Showcase events.
+ * @param {!ShowcaseEvent} showcaseEvent
+ */
+function logEvent(showcaseEvent) {
+  callSwg((swg) => {
+    // Get reference to event manager.
+    swg.getEventManager().then((eventManager) => {
+      // Get individual analytics events from Showcase event.
+      const eventTypes = showcaseEventToAnalyticsEvents(showcaseEvent);
+
+      // Log each analytics event.
+      eventTypes.forEach((eventType) => {
+        eventManager.logEvent({
+          eventType,
+          eventOriginator: EventOriginator.SWG_CLIENT,
+          isFromUserAction: null,
+          additionalParameters: null,
+        });
+      });
+    });
+  });
 }
 
 class GaaUtils {

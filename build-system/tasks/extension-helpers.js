@@ -25,6 +25,7 @@ const {
   doBuildJs,
   endBuildStep,
   maybeToEsmName,
+  maybeToNpmEsmName,
   mkdirSync,
   watchDebounceDelay,
 } = require('./helpers');
@@ -395,7 +396,8 @@ async function doBuildExtension(extensions, extension, options) {
 }
 
 /**
- * Watches for non-JS changes within an extensions directory to trigger recompilation.
+ * Watches for non-JS changes within an extensions directory to trigger
+ * recompilation.
  *
  * @param {string} extDir
  * @param {string} name
@@ -412,6 +414,9 @@ async function watchExtension(
   hasCss,
   options
 ) {
+  /**
+   * Steps to run when a watched file is modified.
+   */
   function watchFunc() {
     buildExtension(name, version, latestVersion, hasCss, {
       ...options,
@@ -615,8 +620,8 @@ function buildBinaries(extDir, binaries, options) {
       entryPoint,
       `${extDir}/dist`,
       Object.assign(options, {
-        toName: maybeToEsmName(`${name}.max.js`),
-        minifiedName: maybeToEsmName(`${name}.js`),
+        toName: maybeToNpmEsmName(`${name}.max.js`),
+        minifiedName: maybeToNpmEsmName(`${name}.js`),
         latestName: '',
         outputFormat: esm ? 'esm' : 'cjs',
         wrapper: '',
