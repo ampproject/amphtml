@@ -15,7 +15,7 @@
  */
 
 import '../amp-minute-media-player';
-import * as dom from '../../../../src/dom';
+import * as fullscreen from '../../../../src/core/dom/fullscreen';
 
 const WIDTH = '16';
 const HEIGHT = '9';
@@ -159,13 +159,13 @@ describes.realWin(
       });
 
       it('can enter fullscreen', () => {
-        const spy = env.sandbox.spy(dom, 'fullscreenEnter');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenEnter');
         impl.fullscreenEnter();
         expect(spy).calledWith(impl.iframe_);
       });
 
       it('can exit fullscreen', () => {
-        const spy = env.sandbox.spy(dom, 'fullscreenExit');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenExit');
         impl.fullscreenExit();
         expect(spy).calledWith(impl.iframe_);
         expect(impl.isFullscreen()).to.be.false;

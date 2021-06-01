@@ -23,7 +23,7 @@ import {
   isShadowCssSupported,
 } from './core/dom/web-components';
 import {dev, devAssert} from './log';
-import {escapeCssSelectorIdent} from './core/dom/css';
+import {escapeCssSelectorIdent} from './core/dom/css-selectors';
 import {installCssTransformer} from './style-installer';
 import {iterateCursor} from './dom';
 import {setInitialDisplay, setStyle} from './style';

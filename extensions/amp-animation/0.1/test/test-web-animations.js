@@ -17,7 +17,7 @@ import {Builder} from '../web-animations';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
 import {Services} from '../../../../src/services';
 import {WebAnimationPlayState} from '../web-animation-types';
-import {closestAncestorElementBySelector} from '../../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../../src/core/dom/query';
 import {htmlFor, htmlRefs} from '../../../../src/static-template';
 import {isArray, isObject} from '../../../../src/core/types';
 

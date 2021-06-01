@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {addAttributesToElement, closestAncestorElementBySelector} from './dom';
+import {addAttributesToElement} from './dom';
+import {closestAncestorElementBySelector} from './core/dom/query';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev, devAssert} from './log';
 import {dict} from './core/types/object';

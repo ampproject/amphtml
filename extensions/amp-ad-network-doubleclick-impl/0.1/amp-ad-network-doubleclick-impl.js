@@ -94,7 +94,7 @@ import {
 import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,

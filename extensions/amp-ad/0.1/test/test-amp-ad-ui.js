@@ -15,7 +15,7 @@
  */
 
 import * as adHelper from '../../../../src/ad-helper';
-import * as dom from '../../../../src/dom';
+import * as domQuery from '../../../../src/core/dom/query';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -67,7 +67,7 @@ describes.realWin(
             .stub(adImpl, 'collapse')
             .callsFake(() => {});
 
-          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(domQuery, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -98,7 +98,7 @@ describes.realWin(
 
           const otherElement = env.win.document.createElement('div');
 
-          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(domQuery, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -131,7 +131,7 @@ describes.realWin(
           adElement.remove();
           otherElement.appendChild(adElement);
 
-          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(domQuery, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>

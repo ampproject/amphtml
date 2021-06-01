@@ -32,12 +32,14 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {
   dispatchCustomEvent,
-  fullscreenEnter,
-  fullscreenExit,
   getDataParamsFromAttributes,
-  isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';

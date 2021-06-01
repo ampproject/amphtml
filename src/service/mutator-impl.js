@@ -19,7 +19,7 @@ import {MutatorInterface} from './mutator-interface';
 import {Resource} from './resource';
 import {Services} from '../services';
 import {areMarginsChanged} from '../core/math/layout-rect';
-import {closest} from '../dom';
+import {closest} from '../core/dom/query';
 import {computedStyle} from '../style';
 import {dev} from '../log';
 import {isExperimentOn} from '../experiments';

@@ -20,7 +20,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {matches, scopedQuerySelector} from '../../../src/dom';
+import {matches, scopedQuerySelector} from '../../../src/core/dom/query';
 import {setStyle} from '../../../src/style';
 
 /**

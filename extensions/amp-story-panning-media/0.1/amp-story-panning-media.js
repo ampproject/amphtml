@@ -23,11 +23,12 @@ import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
+import {closest} from '../../../src/core/dom/query';
 import {deepEquals} from '../../../src/core/types/object/json';
 import {dev, user} from '../../../src/log';
 import {prefersReducedMotion} from '../../../src/utils/media-query-props';
 import {setImportantStyles} from '../../../src/style';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_PANNING_MEDIA';

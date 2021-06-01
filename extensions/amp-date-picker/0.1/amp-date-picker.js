@@ -27,11 +27,8 @@ import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {
   closestAncestorElementBySelector,
-  isRTL,
-  iterateCursor,
   scopedQuerySelector,
-  tryFocus,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {computedStyle} from '../../../src/style';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
@@ -40,7 +37,8 @@ import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {isRTL, iterateCursor, tryFocus} from '../../../src/dom';
 import {once} from '../../../src/core/types/function';
 import {requireExternal} from '../../../src/module';
 

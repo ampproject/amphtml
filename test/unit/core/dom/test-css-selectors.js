@@ -17,7 +17,7 @@
 import {
   escapeCssSelectorIdent,
   prependSelectorsWith,
-} from '../../../../src/core/dom/css';
+} from '../../../../src/core/dom/css-selectors';
 
 describes.sandboxed('DOM - CSS selectors', {}, () => {
   describe('escapeCssSelectorIdent', () => {

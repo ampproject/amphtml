@@ -22,8 +22,10 @@ import {
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
-  createElementWithAttributes,
   scopedQuerySelectorAll,
+} from '../../../src/core/dom/query';
+import {
+  createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
