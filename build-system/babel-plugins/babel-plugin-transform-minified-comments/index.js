@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * Shortens a comment block by removing line breaks and consecutive whitespaces.
+ * @param {Array<Object>} comments
+ * @return {Array<Object>}
+ */
+function formatComments(comments) {
+  return comments.map((comment) => ({
+    ...comment,
+    value: comment.value.replace(/\n/g, ' ').replace(/\s+/g, ' '),
+  }));
+}
+
 // Ensure comments in minified build output is minimal.
 module.exports = function () {
   return {
@@ -21,21 +33,13 @@ module.exports = function () {
       Statement(path) {
         const {node} = path;
         const {trailingComments} = node;
-        if (!trailingComments || trailingComments.length <= 0) {
-          return;
+        if (trailingComments?.length) {
+          node.trailingComments = formatComments(trailingComments);
+          const next = path.getNextSibling();
+          if (next.node) {
+            next.node.leadingComments = null;
+          }
         }
-
-        const next = path.getNextSibling();
-        if (!next) {
-          return;
-        }
-
-        node.trailingComments = null;
-        const formattedComments = (trailingComments || []).map((comment) => ({
-          ...comment,
-          value: comment.value.replace(/\n +/g, `\n`),
-        }));
-        next.addComments('leading', formattedComments);
       },
     },
   };

@@ -18,20 +18,23 @@
 const argv = require('minimist')(process.argv.slice(2));
 
 /**
- * Gets the config for post-closure babel transforms run during `amp dist --esm`.
+ * Gets the config for post-closure babel transforms run during `amp dist`.
  *
  * @return {!Object}
  */
 function getPostClosureConfig() {
-  if (!argv.esm && !argv.sxg) {
-    return {};
+  const postClosurePlugins = [
+    './build-system/babel-plugins/babel-plugin-transform-minified-comments',
+  ];
+
+  if (argv.esm || argv.sxg) {
+    postClosurePlugins.push(
+      './build-system/babel-plugins/babel-plugin-const-transformer',
+      './build-system/babel-plugins/babel-plugin-transform-remove-directives',
+      './build-system/babel-plugins/babel-plugin-transform-stringish-literals'
+    );
   }
 
-  const postClosurePlugins = [
-    './build-system/babel-plugins/babel-plugin-const-transformer',
-    './build-system/babel-plugins/babel-plugin-transform-remove-directives',
-    './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
-  ];
   return {
     compact: false,
     inputSourceMap: false,
