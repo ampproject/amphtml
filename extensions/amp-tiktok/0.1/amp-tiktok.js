@@ -27,6 +27,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {px, resetStyles, setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/core/types/object/json';
+import { addParamsToUrl } from '../../../src/url';
 
 let id = 0;
 const NAME_PREFIX = '__tt_embed__v';
@@ -76,9 +77,7 @@ export class AmpTiktok extends AMP.BaseElement {
         'pointer-events',
       ]);
       this.iframe_.removeAttribute('aria-hidden');
-      if (!this.iframe_.getAttribute('aria-title')) {
-        this.iframe_.setAttribute('aria-title', 'TikTok');
-      }
+      this.iframe_.title = this.element.title || 'TikTok';
       this.iframe_.classList.remove('i-amphtml-tiktok-unresolved');
       this.iframe_.classList.add('i-amphtml-tiktok-centered');
       this.forceChangeHeight(height);
@@ -115,7 +114,8 @@ export class AmpTiktok extends AMP.BaseElement {
       // If the user provides a src attribute extract the video id from the src
       const videoIdRegex = /^((.+\/)?)(\d+)\/?$/;
       this.videoId_ = src.replace(videoIdRegex, '$3');
-      this.oEmbedRequestUrl_ = this.videoId_ !== src ? src : null;
+      // If the src attribute is equal to just the videoId set the request URL to be null, otherwise set the URL to be the src URL.
+      this.oEmbedRequestUrl_ = this.videoId_ === src ? null : src;
     } else {
       // If the user provides a blockquote element use the blockquote videoId as video id
       const blockquoteOrNull = childElementByTag(this.element, 'blockquote');
@@ -128,8 +128,8 @@ export class AmpTiktok extends AMP.BaseElement {
         // exit early and do not set this.videoId to this value.
         return;
       }
-      this.videoId_ = blockquoteOrNull.dataset.videoId;
-      this.oEmbedRequestUrl_ = blockquoteOrNull.dataset.cite;
+      this.videoId_ = blockquoteOrNull?.dataset?.videoId;
+      this.oEmbedRequestUrl_ = blockquoteOrNull?.dataset?.cite;
     }
   }
 
@@ -160,8 +160,8 @@ export class AmpTiktok extends AMP.BaseElement {
     );
 
     Promise.resolve(this.oEmbedResponsePromise_).then((data) => {
-      if (data && data['title']) {
-        iframe.setAttribute('aria-title', `TikTok: ${data['title']}`);
+      if (data?.['title']) {
+        iframe.title = `TikTok: ${data['title']}`;
       }
     });
 
@@ -214,7 +214,7 @@ export class AmpTiktok extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     if (!this.oEmbedRequestUrl_) {
-      return null;
+      return;
     }
 
     const placeholder = createElementWithAttributes(
