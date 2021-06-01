@@ -807,7 +807,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/js/engine/validator.js',
       'validator/js/webui/webui.js',
       'src/url.js',
-      'src/url-try-decode-uri-component.js',
+      'src/core/types/string/url.js',
       'src/core/types/string/bytes.js',
     ],
   },
@@ -818,8 +818,8 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
+      'src/core/dom/stream/response.js',
       'src/core/types/string/bytes.js',
-      'src/utils/stream-response.js',
     ],
   },
   'contentHeightChanged': {
@@ -948,14 +948,6 @@ const forbiddenTermsSrcInclusive = {
   },
   '\\.indexOf\\(.*===?.*\\.length':
     'use endsWith helper in src/core/types/string',
-  '/url-parse-query-string': {
-    message: 'Import parseQueryString from `src/url.js`',
-    allowlist: [
-      'build-system/tasks/check-types.js',
-      'src/mode.js',
-      'src/url.js',
-    ],
-  },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
@@ -1109,10 +1101,10 @@ function matchForbiddenTerms(srcFile, contents, terms) {
   return Object.entries(terms)
     .map(([term, messageOrDef]) => {
       const {
-        message,
         allowlist = null,
         checkInTestFolder = false,
         checkProse = false,
+        message,
       } = typeof messageOrDef === 'string'
         ? {message: messageOrDef}
         : messageOrDef;

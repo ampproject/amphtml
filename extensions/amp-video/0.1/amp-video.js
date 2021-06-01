@@ -269,7 +269,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     // Fetch and add cached sources URLs if opted-in, and if the sources don't already contained cached URLs from the AMP Cache.
     if (this.element.hasAttribute('cache') && !this.hasAnyCachedSources_()) {
-      return fetchCachedSources(this.element, this.win);
+      return fetchCachedSources(this.element, this.getAmpDoc());
     }
   }
 

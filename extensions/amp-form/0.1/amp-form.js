@@ -36,7 +36,6 @@ import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
   isProxyOrigin,
-  parseQueryString,
   serializeQueryString,
 } from '../../../src/url';
 import {Services} from '../../../src/services';
@@ -65,6 +64,7 @@ import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/core/types/array';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {
   setupAMPCors,
   setupInit,
@@ -445,7 +445,7 @@ export class AmpForm {
     if (!this.ssrTemplateHelper_.isEnabled()) {
       this.form_.addEventListener('change', (e) => {
         this.verifier_.onCommit().then((updatedErrors) => {
-          const {updatedElements, errors} = updatedErrors;
+          const {errors, updatedElements} = updatedErrors;
           updatedElements.forEach(checkUserValidityAfterInteraction_);
           // Tell the validation to reveal any input.validationMessage added
           // by the form verifier.

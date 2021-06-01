@@ -30,8 +30,8 @@ let transformCache;
  * caching to speed up transforms.
  * @param {string} callerName
  * @param {boolean} enableCache
- * @param {function()} preSetup
- * @param {function()} postLoad
+ * @param {function(): void} preSetup
+ * @param {function(): void} postLoad
  * @return {!Object}
  */
 function getEsbuildBabelPlugin(
@@ -44,6 +44,13 @@ function getEsbuildBabelPlugin(
     transformCache = new TransformCache('.babel-cache', '.js');
   }
 
+  /**
+   * @param {string} filename
+   * @param {string} contents
+   * @param {string} hash
+   * @param {Object} babelOptions
+   * @return {Promise}
+   */
   async function transformContents(filename, contents, hash, babelOptions) {
     if (enableCache) {
       const cached = transformCache.get(hash);
@@ -56,7 +63,7 @@ function getEsbuildBabelPlugin(
     const promise = babel
       .transformAsync(contents, babelOptions)
       .then((result) => {
-        const {code, map} = result;
+        const {code, map} = result || {};
         debug('post-babel', filename, code, map);
         return code;
       });

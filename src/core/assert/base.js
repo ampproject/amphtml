@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {elementStringOrPassThru} from '../error-message-helpers';
+import {elementStringOrPassThru} from '../error/message-helpers';
 import {includes} from '../types/string';
-import {isArray, isElement, isEnumValue, isString} from '../types';
+import {isArray, isElement, isString} from '../types';
 import {remove} from '../types/array';
 
 /**
@@ -249,31 +249,5 @@ export function assertBoolean(assertFn, shouldBeBoolean, opt_message) {
       'Boolean expected',
       opt_message
     )
-  );
-}
-
-/**
- * Asserts and returns the enum value. If the enum doesn't contain such a
- * value, the error is thrown.
- *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
- * @param {!Object<T>} enumObj
- * @param {*} shouldBeEnum
- * @param {string=} opt_enumName
- * @return {T}
- * @template T
- * @closurePrimitive {asserts.matchesReturn}
- */
-export function assertEnumValue(
-  assertFn,
-  enumObj,
-  shouldBeEnum,
-  opt_enumName = 'enum'
-) {
-  return assertType_(
-    assertFn,
-    shouldBeEnum,
-    isEnumValue(enumObj, shouldBeEnum),
-    `Unknown ${opt_enumName} value: "${shouldBeEnum}"`
   );
 }

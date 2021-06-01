@@ -133,7 +133,7 @@ describes.realWin(
         `Criteria.meetsTreeShapeCriteria(html\`${outerHtml}\`)`;
 
       function itAcceptsOrRejects(scenarios) {
-        scenarios.forEach(({rejects, accepts, mutate, wrapWith}) => {
+        scenarios.forEach(({accepts, mutate, rejects, wrapWith}) => {
           const maybeWrap = (root) =>
             wrapWith ? wrap(root, wrapWith()) : root;
           const maybeMutate = (root) => mutate && mutate(root);
@@ -259,7 +259,7 @@ describes.realWin(
 
     describe('meetsSizingCriteria', () => {
       const areaDeltaPerc = RENDER_AREA_RATIO * 100;
-      const {vw, vh} = {vw: 1000, vh: 600};
+      const {vh, vw} = {vw: 1000, vh: 600};
 
       const expectMeetsSizingCriteria = (
         renderWidth,

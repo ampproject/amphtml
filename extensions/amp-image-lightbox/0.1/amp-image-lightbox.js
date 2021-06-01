@@ -30,7 +30,7 @@ import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {boundValue, clamp, distance, magnitude} from '../../../src/utils/math';
+import {boundValue, clamp, distance, magnitude} from '../../../src/core/math';
 import {continueMotion} from '../../../src/motion';
 import {dev, userAssert} from '../../../src/log';
 import {isLoaded} from '../../../src/event-helper';
@@ -38,7 +38,7 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../../src/layout-rect';
+} from '../../../src/core/math/layout-rect';
 import {setStyles, toggle} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
 

@@ -15,7 +15,10 @@
  */
 
 import {AmpVisibilityObserver} from '../amp-position-observer';
-import {RelativePositions, layoutRectLtwh} from '../../../../src/layout-rect';
+import {
+  RelativePositions,
+  layoutRectLtwh,
+} from '../../../../src/core/math/layout-rect';
 
 /**
  * Functional tests that create:

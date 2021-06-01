@@ -132,7 +132,7 @@ function YoutubeWithRef(
     playerStateRef.current = createDefaultInfo();
   }
 
-  const onMessage = ({data, currentTarget}) => {
+  const onMessage = ({currentTarget, data}) => {
     const parsedData = objOrParseJson(data);
     if (!parsedData) {
       return;

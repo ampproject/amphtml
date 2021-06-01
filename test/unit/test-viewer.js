@@ -21,11 +21,8 @@ import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {
-  parseQueryString,
-  parseUrlDeprecated,
-  removeFragment,
-} from '../../src/url';
+import {parseQueryString} from '../../src/core/types/string/url';
+import {parseUrlDeprecated, removeFragment} from '../../src/url';
 
 describes.sandboxed('Viewer', {}, (env) => {
   let windowMock;
@@ -535,7 +532,7 @@ describes.sandboxed('Viewer', {}, (env) => {
           viewer.receiveMessage('visibilitychange', {
             state: 'what is this',
           });
-        }).to.throw('Unknown VisibilityState value');
+        }).to.throw('Assertion failed');
       });
       expect(ampdoc.getVisibilityState()).to.equal('paused');
     });

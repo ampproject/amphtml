@@ -244,6 +244,7 @@
   },
   {"name": "amp-hulu", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-iframe", "version": "0.1", "latestVersion": "0.1"},
+  {"name": "amp-iframely", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-ima-video", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-image-lightbox",
@@ -511,7 +512,6 @@
     "options": {
       "hasCss": true,
       "cssBinaries": [
-        "amp-story-bookend",
         "amp-story-consent",
         "amp-story-draggable-drawer-header",
         "amp-story-hint",
@@ -677,7 +677,7 @@
     "name": "amp-video-iframe",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {"hasCss": true}
+    "options": {"hasCss": true, "npm": true}
   },
   {
     "name": "amp-viewer-integration",
@@ -696,7 +696,7 @@
     "name": "amp-vimeo",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {"hasCss": true}
+    "options": {"hasCss": true, "npm": true}
   },
   {"name": "amp-vine", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-viqeo-player", "version": "0.1", "latestVersion": "0.1"},

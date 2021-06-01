@@ -274,6 +274,7 @@ describes.realWin(
         expect(placeholder).to.have.attribute('placeholder');
         expect(placeholder.tagName.toLowerCase()).to.equal('img');
         expect(placeholder).to.have.class('i-amphtml-fill-content');
+        expect(placeholder.getAttribute('loading')).to.equal('lazy');
         expect(placeholder.getAttribute('src')).to.equal(poster);
       });
 
@@ -468,7 +469,7 @@ describes.realWin(
           eventType: 'tacos al pastor',
           sufix: 'with invalid event name',
         },
-      ].forEach(({sufix, eventType, vars, accept}) => {
+      ].forEach(({accept, eventType, sufix, vars}) => {
         const verb = accept ? 'dispatch' : 'reject';
 
         it(`should ${verb} custom analytics event ${sufix}`, async () => {

@@ -36,7 +36,7 @@ import {
 } from '../video-interface';
 import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
-import {clamp} from '../utils/math';
+import {clamp} from '../core/math';
 import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {createViewportObserver} from '../viewport-observer';
 import {dev, devAssert, user, userAssert} from '../log';
@@ -44,7 +44,7 @@ import {dict, map} from '../core/types/object';
 import {dispatchCustomEvent, removeElement} from '../dom';
 import {getInternalVideoElementFor, isAutoplaySupported} from '../utils/video';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
-import {isFiniteNumber} from '../types';
+import {isFiniteNumber} from '../core/types';
 import {measureIntersection} from '../utils/intersection';
 import {once} from '../core/types/function';
 import {registerServiceBuilderForDoc} from '../service';
@@ -197,7 +197,7 @@ export class VideoManager {
       const viewportCallback = (
         /** @type {!Array<!IntersectionObserverEntry>} */ records
       ) =>
-        records.forEach(({target, isIntersecting}) => {
+        records.forEach(({isIntersecting, target}) => {
           this.getEntry_(target).updateVisibility(
             /* isVisible */ isIntersecting
           );
@@ -1000,7 +1000,7 @@ class VideoEntry {
       const intersection = /** @type {!IntersectionObserverEntry} */ (
         responses[1]
       );
-      const {width, height} = intersection.boundingClientRect;
+      const {height, width} = intersection.boundingClientRect;
       const autoplay = this.hasAutoplay && isAutoplaySupported;
       const playedRanges = video.getPlayedRanges();
       const playedTotal = playedRanges.reduce(
@@ -1244,7 +1244,7 @@ export class AutoFullscreenManager {
     return this.onceOrientationChanges_()
       .then(() => measureIntersection(element))
       .then(({boundingClientRect}) => {
-        const {top, bottom} = boundingClientRect;
+        const {bottom, top} = boundingClientRect;
         const vh = viewport.getSize().height;
         const fullyVisible = top >= 0 && bottom <= vh;
         if (fullyVisible) {
@@ -1314,8 +1314,8 @@ export class AutoFullscreenManager {
    * @return {number}
    */
   compareEntries_(a, b) {
-    const {intersectionRatio: ratioA, boundingClientRect: rectA} = a;
-    const {intersectionRatio: ratioB, boundingClientRect: rectB} = b;
+    const {boundingClientRect: rectA, intersectionRatio: ratioA} = a;
+    const {boundingClientRect: rectB, intersectionRatio: ratioB} = b;
 
     // Prioritize by how visible they are, with a tolerance of 10%
     const ratioTolerance = 0.1;

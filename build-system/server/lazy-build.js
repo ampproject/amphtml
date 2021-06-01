@@ -22,10 +22,10 @@ const {
 } = require('../tasks/3p-vendor-helpers');
 const {
   doBuildExtension,
-  maybeInitializeExtensions,
   getExtensionsToBuild,
+  maybeInitializeExtensions,
 } = require('../tasks/extension-helpers');
-const {doBuildJs, compileCoreRuntime} = require('../tasks/helpers');
+const {compileCoreRuntime, doBuildJs} = require('../tasks/helpers');
 const {jsBundles} = require('../compile/bundles.config');
 const {VERSION} = require('../compile/internal-version');
 
