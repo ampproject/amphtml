@@ -125,13 +125,6 @@
   <form method="post" action-xhr="https://example/subscribe" target="_new">
     <input type="submit" value="Subscribe">
   </form>
-  <!-- Valid: input with form attribute can be outside the form. -->
-  <input form="my-form3" type="text" name="name">
-  <input form="my-form3" type="hidden" data-amp-replace="RANDOM">
-  <form id="my-form3" method="post" action-xhr="https://example-cdn.ampproject.org/subscribe" target="_blank">
-    <input type="submit" value="Subscribe">
-  </form>
-  <textarea name="comment"></textarea>
   <!-- Invalid: input, select, option and textarea must be children of form. -->
   <input type="text" name="name">
   <select name="language">
