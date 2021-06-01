@@ -28,10 +28,12 @@ import {
   setStyles,
   toggle,
 } from '../style';
-import {closest, domOrderComparator, matches} from '../dom';
+import {closest, matches} from '../core/dom/query';
 import {dev, user} from '../log';
+import {domOrderComparator} from '../dom';
 import {endsWith} from '../core/types/string';
 import {getMode} from '../mode';
+
 import {remove} from '../core/types/array';
 
 const TAG = 'FixedLayer';

@@ -19,18 +19,17 @@ import {Deferred} from '../../../src/core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
-import {redispatch} from '../../../src/iframe-video';
-
 import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {redispatch} from '../../../src/iframe-video';
+import {removeElement} from '../../../src/dom';
 
 const TAG = 'amp-viqeo-player';
 

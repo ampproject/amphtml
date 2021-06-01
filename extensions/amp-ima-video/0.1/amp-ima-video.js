@@ -21,13 +21,13 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
+import {childElementsByTag} from '../../../src/core/dom/query';
+import {dict} from '../../../src/core/types/object';
 import {
-  childElementsByTag,
   dispatchCustomEvent,
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {dict} from '../../../src/core/types/object';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';

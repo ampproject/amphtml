@@ -38,11 +38,11 @@ import {
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, toArray} from '../../../src/core/types/array';
@@ -51,6 +51,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
 import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 import {map} from '../../../src/core/types/object';
+
 import {parseCss} from './parsers/css-expr';
 
 /** @const {string} */

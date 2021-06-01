@@ -43,16 +43,18 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   ancestorElementsByTag,
   childElementByAttr,
+} from '../../../src/core/dom/query';
+import {createCustomEvent} from '../../../src/event-helper';
+import {
   createElementWithAttributes,
   iterateCursor,
   removeElement,
   tryFocus,
 } from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {
   formOrNullForElement,
   getFormAsObject,
@@ -70,7 +72,6 @@ import {
   setupInit,
   setupInput,
 } from '../../../src/utils/xhr-utils';
-
 import {toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/core/types/object/json';

@@ -25,9 +25,9 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'Use closestAncestorElementBySelector in src/dom.js'
+  error_message: 'Use closestAncestorElementBySelector in src/core/dom/query.js'
   value: 'Element.prototype.closest'
-  allowlist: 'src/dom.js'
+  allowlist: 'src/core/dom/query.js'
 }
 
 # CSSStyleDeclaration
