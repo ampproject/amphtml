@@ -6,5 +6,9 @@
     {
       owners: [{name: 'ampproject/wg-performance'}],
     },
+    {
+      pattern: 'validator-*.protoascii',
+      owners: [{name: 'ampproject/wg-amp4email', notify: true}],
+    },
   ],
 }
