@@ -21,7 +21,7 @@ const {addDefault} = require('@babel/helper-module-imports');
  * Imports runtime helpers from @babel/runtime/helpers
  *
  * This is similar to @babel/plugin-external-helpers, except we import the
- * helper's ESM module instead of injecting a reference to a globally accessible
+ * helper's module instead of injecting a reference to a globally accessible
  * object (`babelHelpers`).
  */
 
@@ -47,6 +47,12 @@ module.exports = function ({types: t}) {
       file.set('helperGenerator', (unmappedName) => {
         const name = helperMap[unmappedName] || unmappedName;
 
+        if (name.startsWith('interopRequire')) {
+          // You can't import interopRequireDefault/interopRequireWildcard,
+          // they must be local functions.
+          return;
+        }
+
         if (!importNamesPerFile.has(file)) {
           importNamesPerFile.set(file, Object.create(null));
         }
@@ -54,7 +60,7 @@ module.exports = function ({types: t}) {
         const importNames = importNamesPerFile.get(file);
 
         if (!importNames[name]) {
-          const source = `@babel/runtime/helpers/esm/${name}`;
+          const source = `@babel/runtime/helpers/${name}`;
           importNames[name] = addDefault(file.path, source, {nameHint: name});
         }
 
