@@ -29,6 +29,7 @@ import {isExperimentOn} from '../../../src/experiments';
 /** @const {string} */
 const TAG = 'amp-render';
 
+/** @const {string} */
 const AMP_STATE_URI_SCHEME = 'amp-state:';
 
 /**
@@ -278,7 +279,8 @@ export class AmpRender extends BaseElement {
       this.mutateProps(
         dict({
           'render': (data) => {
-            if (this.element.getAttribute('binding') === 'no') {
+            const bindingValue = this.element.getAttribute('binding');
+            if (bindingValue === 'no' || bindingValue === 'never') {
               return this.renderTemplateAsString_(data);
             }
             return Services.bindForDocOrNull(this.element).then((bind) => {
@@ -292,7 +294,7 @@ export class AmpRender extends BaseElement {
                     .rescan([element], [], {
                       'fast': true,
                       'update': getUpdateValue(
-                        this.element.getAttribute('binding'),
+                        bindingValue,
                         // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
                         // mutation occured, which is null for the initial render
                         bind.signals().get('FIRST_MUTATE') === null
