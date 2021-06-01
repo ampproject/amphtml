@@ -15,8 +15,7 @@ import _objectWithoutPropertiesLoose from "@babel/runtime/helpers/esm/objectWith
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {
-  a,
-  b
-} = foo,
-      c = _objectWithoutPropertiesLoose(foo, ["a", "b"]);
+const _foo = foo,
+      a = _foo.a,
+      b = _foo.b,
+      c = _objectWithoutPropertiesLoose(_foo, ["a", "b"]);
