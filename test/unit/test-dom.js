@@ -18,6 +18,7 @@ import * as dom from '../../src/dom';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
+import {matches} from '../../src/core/dom/query';
 import {setScopeSelectorSupportedForTesting} from '../../src/core/dom/css-selectors';
 import {setShadowDomSupportedVersionForTesting} from '../../src/core/dom/web-components';
 
@@ -703,16 +704,16 @@ describes.sandboxed('DOM', {}, (env) => {
     });
 
     it('finds element by id', () => {
-      expect(dom.matches(ampEl, '#ampEl')).to.be.true;
+      expect(matches(ampEl, '#ampEl')).to.be.true;
       [div, img1, iframe].map((el) => {
-        expect(dom.matches(el, '#ampEl')).to.be.false;
+        expect(matches(el, '#ampEl')).to.be.false;
       });
     });
 
     it('finds element by tagname', () => {
-      expect(dom.matches(div, 'div')).to.be.true;
+      expect(matches(div, 'div')).to.be.true;
       [ampEl, img1, iframe].map((el) => {
-        expect(dom.matches(el, 'div')).to.be.false;
+        expect(matches(el, 'div')).to.be.false;
       });
     });
   });
