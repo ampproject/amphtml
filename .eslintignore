@@ -19,7 +19,7 @@ dist.tools
 export
 examples/storybook
 extensions/**/dist
-release
+/release
 result-reports
 src/purifier/dist
 test/coverage
