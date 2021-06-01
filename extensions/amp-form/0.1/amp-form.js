@@ -43,8 +43,6 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   ancestorElementsByTag,
   childElementByAttr,
-  closestAncestorElementBySelector,
-  matches,
 } from '../../../src/core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
 import {
