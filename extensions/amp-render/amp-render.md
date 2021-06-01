@@ -203,7 +203,7 @@ If we just want to display the German cars from the response, we can use the `ke
 Controls whether to block render to evaluate bindings (e.g. `[text]`) in children on pages using `amp-render` and `amp-bind`.
 
 -   `binding="never"` or `binding="no"`: Never block render **(fastest)**.
--   `binding="refresh"` (default): Don't block render on initial load **(faster)**.
+-   `binding="refresh"` **(default)**: Don't block render on initial load **(faster)**.
 -   `binding="always"`: Always block render **(slow)**.
 
 Essentially, `binding="always"` is `binding="refresh"` that also blocks to evaluate bindings on the initial load of `amp-render`.
