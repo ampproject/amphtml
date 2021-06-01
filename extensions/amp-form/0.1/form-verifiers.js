@@ -15,7 +15,6 @@
  */
 
 import {LastAddedResolver} from '../../../src/core/data-structures/promise';
-import {formElementsQuerySelector} from './amp-form.js';
 import {isFieldDefault} from '../../../src/form';
 import {iterateCursor} from '../../../src/dom';
 import {user} from '../../../src/log';
@@ -248,7 +247,7 @@ export class AsyncVerifier extends FormVerifier {
       errors.every((error) => previousError.name !== error.name);
     const fixedElements = previousErrors
       .filter(isFixed)
-      .map((e) => formElementsQuerySelector(this.form_, `[name="${e.name}"]`));
+      .map((e) => this.form_./*OK*/ querySelector(`[name="${e.name}"]`));
 
     return /** @type {!UpdatedErrorsDef} */ ({
       updatedElements: errorElements.concat(fixedElements),
