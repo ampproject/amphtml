@@ -12,11 +12,14 @@ declare global {
   }
 
   interface EslintContext {
-    report: (val: any) => void;
+    report: Function;
   }
 
   interface Window {
-    queryXpath: (xpath: string, root: unknown /** Puppeteer.ElementHandle */) => unknown[] | null;
+    queryXpath: Function;
+    wgxpath: {
+      install: Function;
+    };
     AMP: Function[];
     viewer?: {
       receivedMessages?: number;
