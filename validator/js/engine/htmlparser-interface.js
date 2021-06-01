@@ -261,12 +261,13 @@ const ParsedHtmlTag = class {
 
   /**
    * Tests if this is an async script tag.
+   * @param {string} src
    * @return {boolean}
    * @private
    */
-  isAsyncScriptTag_() {
+  isAsyncScriptTag_(src) {
     return this.upperName() == 'SCRIPT' && 'async' in this.attrsByKey() &&
-        'src' in this.attrsByKey();
+        src !== null;
   }
 
   /**
@@ -276,7 +277,7 @@ const ParsedHtmlTag = class {
   isAmpRuntimeScript() {
     const src = this.getAttrValueOrNull_('src');
     if (src === null) return false;
-    return this.isAsyncScriptTag_() && !this.isExtensionScript() &&
+    return this.isAsyncScriptTag_(src) && !this.isExtensionScript() &&
         this.isAmpCacheDomain_(src) &&
         (src.endsWith('/v0.js') || src.endsWith('/v0.mjs') ||
          src.endsWith('/v0.mjs?f=sxg'));
@@ -292,10 +293,10 @@ const ParsedHtmlTag = class {
     // https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
     const src = this.getAttrValueOrNull_('src');
     if (src === null) return false;
-    const ltsScriptSrcRegex = new RegExp(
-        '^https://cdn\\.ampproject\\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$',
-        'i');
-    return this.isAsyncScriptTag_() && ltsScriptSrcRegex.test(src);
+    const ltsScriptPathRegex =
+        new RegExp('/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
+    return this.isAsyncScriptTag_(src) && this.isAmpCacheDomain_(src) &&
+        ltsScriptPathRegex.test(src);
   }
 
   /**
@@ -310,11 +311,10 @@ const ParsedHtmlTag = class {
     if (type === null) return false;
     const src = this.getAttrValueOrNull_('src');
     if (src === null) return false;
-    const moduleScriptSrcRegex = new RegExp(
-        '^https://cdn\\.ampproject\\.org/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$',
-        'i');
-    return this.isAsyncScriptTag_() && (type == 'module') &&
-        moduleScriptSrcRegex.test(src);
+    const moduleScriptPathRegex =
+        new RegExp('/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
+    return this.isAsyncScriptTag_(src) && (type == 'module') &&
+        this.isAmpCacheDomain_(src) && moduleScriptPathRegex.test(src);
   }
 
   /**
@@ -327,11 +327,10 @@ const ParsedHtmlTag = class {
     // https://cdn.ampproject.org/v0/amp-ad-0.1.js
     const src = this.getAttrValueOrNull_('src');
     if (src === null) return false;
-    const nomoduleScriptSrcRegex = new RegExp(
-        '^https://cdn\\.ampproject\\.org/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$',
-        'i');
-    return this.isAsyncScriptTag_() && 'nomodule' in this.attrsByKey() &&
-        nomoduleScriptSrcRegex.test(src);
+    const nomoduleScriptPathRegex =
+        new RegExp('/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
+    return this.isAsyncScriptTag_(src) && 'nomodule' in this.attrsByKey() &&
+        this.isAmpCacheDomain_(src) && nomoduleScriptPathRegex.test(src);
   }
 
   /**
@@ -346,11 +345,10 @@ const ParsedHtmlTag = class {
     if (type === null) return false;
     const src = this.getAttrValueOrNull_('src');
     if (src === null) return false;
-    const moduleLtsScriptSrcRegex = new RegExp(
-        '^https://cdn\\.ampproject\\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$',
-        'i');
-    return this.isAsyncScriptTag_() && (type == 'module') &&
-        moduleLtsScriptSrcRegex.test(src);
+    const moduleLtsScriptPathRegex =
+        new RegExp('lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
+    return this.isAsyncScriptTag_(src) && (type == 'module') &&
+        this.isAmpCacheDomain_(src) && moduleLtsScriptPathRegex.test(src);
   }
 
   /**
@@ -363,11 +361,10 @@ const ParsedHtmlTag = class {
     // https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
     const src = this.getAttrValueOrNull_('src');
     if (src === null) return false;
-    const nomoduleLtsScriptSrcRegex = new RegExp(
-        '^https://cdn\\.ampproject\\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$',
-        'i');
-    return this.isAsyncScriptTag_() && 'nomodule' in this.attrsByKey() &&
-        nomoduleLtsScriptSrcRegex.test(src);
+    const nomoduleLtsScriptPathRegex =
+        new RegExp('/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
+    return this.isAsyncScriptTag_(src) && 'nomodule' in this.attrsByKey() &&
+        this.isAmpCacheDomain_(src) && nomoduleLtsScriptPathRegex.test(src);
   }
 };
 exports.ParsedHtmlTag = ParsedHtmlTag;
