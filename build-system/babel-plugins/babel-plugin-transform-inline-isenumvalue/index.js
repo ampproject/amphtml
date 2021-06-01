@@ -29,8 +29,13 @@ const {readFileSync} = require('fs');
  */
 
 module.exports = function (babel) {
-  const {types: t, parseSync, traverse} = babel;
+  const {parseSync, traverse, types: t} = babel;
 
+  /**
+   * @param {import('@babel/core').NodePath} path
+   * @param {string} filename
+   * @return {{confident: boolean, value: *}}
+   */
   function resolveImportEvaluate(path, filename) {
     let evaluated = path.evaluate();
     if (evaluated.confident || !path.isIdentifier()) {
