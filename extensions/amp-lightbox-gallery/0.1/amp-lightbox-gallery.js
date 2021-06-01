@@ -35,7 +35,6 @@ import {
   closestAncestorElementBySelector,
   elementByTag,
   scopedQuerySelectorAll,
-  toggleAttribute,
 } from '../../../src/core/dom/query';
 import {clamp} from '../../../src/core/math';
 import {

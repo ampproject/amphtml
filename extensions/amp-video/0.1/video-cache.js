@@ -21,7 +21,6 @@ import {
   iterateCursor,
   removeElement,
 } from '../../../src/dom';
-import {extensionScriptInNode} from '../../../src/service/extension-script';
 import {matches} from '../../../src/core/dom/query';
 import {toArray} from '../../../src/core/types/array';
 import {user} from '../../../src/log';
