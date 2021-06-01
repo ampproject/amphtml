@@ -23,11 +23,7 @@ import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
 import {VisibilityState} from '../../core/constants/visibility-state';
 import {clamp} from '../../core/math';
-import {
-  closestAncestorElementBySelector,
-  getVerticalScrollbarWidth,
-  isIframed,
-} from '../../dom';
+import {closestAncestorElementBySelector} from '../../core/dom/query';
 import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../core/types/object';
@@ -37,6 +33,7 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../../service';
+import {getVerticalScrollbarWidth, isIframed} from '../../dom';
 import {isExperimentOn} from '../../experiments';
 import {
   layoutRectFromDomRect,

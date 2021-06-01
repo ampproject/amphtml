@@ -22,9 +22,9 @@ import {addParamToUrl} from '../../../src/url';
 import {
   childElementByTag,
   closestAncestorElementBySelector,
-  removeChildren,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {hasOwn} from '../../../src/core/types/object';
+import {removeChildren} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} Tag name for custom ad implementation. */

@@ -20,7 +20,8 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {Layout} from '../../../src/layout';
-import {closest, copyChildren, removeChildren} from '../../../src/dom';
+import {closest} from '../../../src/core/dom/query';
+import {copyChildren, removeChildren} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getStoryAttributeSrc} from './utils';
 import {htmlFor} from '../../../src/static-template';

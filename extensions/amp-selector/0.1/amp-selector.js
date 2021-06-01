@@ -20,15 +20,12 @@ import {CSS} from '../../../build/amp-selector-0.1.css';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {areEqualOrdered, toArray} from '../../../src/core/types/array';
-import {
-  closestAncestorElementBySelector,
-  isRTL,
-  tryFocus,
-} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {isEnumValue} from '../../../src/core/types';
+import {isRTL, tryFocus} from '../../../src/dom';
 import {mod} from '../../../src/core/math';
 
 const TAG = 'amp-selector';

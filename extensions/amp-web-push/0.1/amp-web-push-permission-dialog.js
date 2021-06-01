@@ -16,7 +16,7 @@
 
 import {NotificationPermission, StorageKeys} from './vars';
 import {WindowMessenger} from './window-messenger';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
 import {
   parseQueryString,

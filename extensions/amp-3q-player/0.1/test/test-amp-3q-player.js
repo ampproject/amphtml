@@ -15,7 +15,7 @@
  */
 
 import '../amp-3q-player';
-import * as dom from '../../../../src/dom';
+import * as fullscreen from '../../../../src/core/dom/fullscreen';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -208,13 +208,13 @@ describes.realWin(
       });
 
       it('can enter fullscreen', () => {
-        const spy = env.sandbox.spy(dom, 'fullscreenEnter');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenEnter');
         impl.fullscreenEnter();
         expect(spy).calledWith(impl.iframe_);
       });
 
       it('can exit fullscreen', () => {
-        const spy = env.sandbox.spy(dom, 'fullscreenExit');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenExit');
         impl.fullscreenExit();
         expect(spy).calledWith(impl.iframe_);
         expect(impl.isFullscreen()).to.be.false;

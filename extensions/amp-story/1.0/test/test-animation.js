@@ -25,7 +25,7 @@ import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-ty
 import {htmlFor, htmlRefs} from '../../../../src/static-template';
 import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 import {presets} from '../animation-presets';
-import {scopedQuerySelectorAll} from '../../../../src/dom';
+import {scopedQuerySelectorAll} from '../../../../src/core/dom/query';
 import {toArray} from '../../../../src/core/types/array';
 
 const querySelectorAllAnimateIn = (element) =>

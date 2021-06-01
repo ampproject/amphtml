@@ -36,9 +36,11 @@ import {
 import {
   childElementByAttr,
   childElementByTag,
+  matches,
+} from '../core/dom/query';
+import {
   createElementWithAttributes,
   dispatchCustomEvent,
-  matches,
   parseBooleanAttribute,
 } from '../dom';
 import {dashToCamelCase} from '../core/types/string';

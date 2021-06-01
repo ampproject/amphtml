@@ -30,12 +30,14 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {
   dispatchCustomEvent,
-  fullscreenEnter,
-  fullscreenExit,
   getDataParamsFromAttributes,
-  isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/core/dom/fullscreen';
 import {
   getConsentPolicyInfo,
   getConsentPolicySharedData,

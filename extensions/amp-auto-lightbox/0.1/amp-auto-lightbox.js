@@ -26,12 +26,12 @@ import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Services} from '../../../src/services';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
+import {dev} from '../../../src/log';
 import {
-  closestAncestorElementBySelector,
   dispatchCustomEvent,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
-import {dev} from '../../../src/log';
 import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
 import {toArray} from '../../../src/core/types/array';
 import {tryParseJson} from '../../../src/core/types/object/json';

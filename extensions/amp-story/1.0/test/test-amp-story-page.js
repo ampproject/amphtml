@@ -28,11 +28,11 @@ import {Signals} from '../../../../src/core/data-structures/signals';
 import {
   addAttributesToElement,
   createElementWithAttributes,
-  scopedQuerySelectorAll,
 } from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';
+import {scopedQuerySelectorAll} from '../../../../src/core/dom/query';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];

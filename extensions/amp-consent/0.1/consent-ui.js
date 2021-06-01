@@ -19,19 +19,19 @@ import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
+import {elementByTag} from '../../../src/core/dom/query';
+import {expandConsentEndpointUrl} from './consent-config';
+import {getConsentStateValue} from './consent-info';
+import {getData} from '../../../src/event-helper';
+import {getServicePromiseForDoc} from '../../../src/service';
+import {htmlFor} from '../../../src/static-template';
 import {
-  elementByTag,
   insertAtStart,
   isAmpElement,
   removeElement,
   tryFocus,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
-import {expandConsentEndpointUrl} from './consent-config';
-import {getConsentStateValue} from './consent-info';
-import {getData} from '../../../src/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 
