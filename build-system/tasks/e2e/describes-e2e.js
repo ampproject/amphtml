@@ -407,9 +407,11 @@ function describeEnv(factory) {
       spec.browsers = ['chrome'];
     }
 
+    /**
+     * Initializes the describe object for all applicable browsers.
+     */
     function createBrowserDescribe() {
       const allowedBrowsers = getAllowedBrowsers();
-
       spec.browsers
         .filter((x) => allowedBrowsers.has(x))
         .forEach((browserName) => {

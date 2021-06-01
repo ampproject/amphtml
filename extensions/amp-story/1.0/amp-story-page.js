@@ -77,7 +77,6 @@ import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {prefersReducedMotion} from '../../../src/utils/media-query-props';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {px, toggle} from '../../../src/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
@@ -534,7 +533,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.state_ = state;
         break;
       case PageState.PAUSED:
-        this.advancement_.stop();
+        this.advancement_.stop(true /** canResume */);
         this.pauseAllMedia_(false /** rewindToBeginning */);
         this.animationManager_?.pauseAll();
         this.state_ = state;
@@ -549,7 +548,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   pause_() {
-    this.advancement_.stop();
+    this.advancement_.stop(false /** canResume */);
 
     this.stopMeasuringAllVideoPerformance_();
     this.stopListeningToVideoEvents_();
@@ -735,6 +734,13 @@ export class AmpStoryPage extends AMP.BaseElement {
           case 'amp-anim':
           case 'amp-img':
           case 'amp-story-360':
+            // Don't block media layout on a fallback element that will likely
+            // never build/load.
+            if (mediaEl.hasAttribute('fallback')) {
+              resolve();
+              return;
+            }
+
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
               .then(resolve, resolve);
@@ -1904,9 +1910,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         childImgNode &&
           ampImgNode
             .getImpl()
-            .then((impl) =>
-              propagateAttributes('alt', impl.element, childImgNode)
-            );
+            .then((ampImg) => ampImg.propagateAttributes('alt', childImgNode));
       }
     });
   }

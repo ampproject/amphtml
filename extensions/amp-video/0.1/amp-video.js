@@ -41,7 +41,6 @@ import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {
   propagateObjectFitStyles,
   setImportantStyles,
@@ -235,9 +234,8 @@ export class AmpVideo extends AMP.BaseElement {
     // Disable video preload in prerender mode.
     this.video_.setAttribute('preload', 'none');
     this.checkA11yAttributeText_();
-    propagateAttributes(
+    this.propagateAttributes(
       ATTRS_TO_PROPAGATE_ON_BUILD,
-      this.element,
       this.video_,
       /* opt_removeMissingAttrs */ true
     );
@@ -271,7 +269,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     // Fetch and add cached sources URLs if opted-in, and if the sources don't already contained cached URLs from the AMP Cache.
     if (this.element.hasAttribute('cache') && !this.hasAnyCachedSources_()) {
-      return fetchCachedSources(this.element, this.win);
+      return fetchCachedSources(this.element, this.getAmpDoc());
     }
   }
 
@@ -315,18 +313,13 @@ export class AmpVideo extends AMP.BaseElement {
     if (mutations['src']) {
       const urlService = this.getUrlService_();
       urlService.assertHttpsUrl(element.getAttribute('src'), element);
-      propagateAttributes(
-        ['src'],
-        this.element,
-        dev().assertElement(this.video_)
-      );
+      this.propagateAttributes(['src'], dev().assertElement(this.video_));
     }
     const attrs = ATTRS_TO_PROPAGATE.filter(
       (value) => mutations[value] !== undefined
     );
-    propagateAttributes(
+    this.propagateAttributes(
       attrs,
-      this.element,
       dev().assertElement(this.video_),
       /* opt_removeMissingAttrs */ true
     );
@@ -364,9 +357,8 @@ export class AmpVideo extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    propagateAttributes(
+    this.propagateAttributes(
       ATTRS_TO_PROPAGATE_ON_LAYOUT,
-      this.element,
       dev().assertElement(this.video_),
       /* opt_removeMissingAttrs */ true
     );
@@ -547,11 +539,7 @@ export class AmpVideo extends AMP.BaseElement {
     // If the `src` of `amp-video` itself is NOT cached, set it on video
     if (element.hasAttribute('src') && !isCachedByCdn(element)) {
       urlService.assertHttpsUrl(element.getAttribute('src'), element);
-      propagateAttributes(
-        ['src'],
-        this.element,
-        dev().assertElement(this.video_)
-      );
+      this.propagateAttributes(['src'], dev().assertElement(this.video_));
     }
 
     sources.forEach((source) => {
