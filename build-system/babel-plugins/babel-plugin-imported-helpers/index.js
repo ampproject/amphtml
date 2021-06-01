@@ -16,11 +16,28 @@
 
 const {addDefault} = require('@babel/helper-module-imports');
 
+/**
+ * @fileoverview
+ * Imports runtime helpers from @babel/runtime/helpers
+ *
+ * This is similar to @babel/plugin-external-helpers, except we import the
+ * helper's ESM module instead of injecting a reference to a globally accessible
+ * object (`babelHelpers`).
+ */
+
+/** Optionally maps a helper's name to an equivalent one. */
 const helperMap = {
   // We don't care about symbols, so we treat both as objectWithoutPropertiesLoose.
   objectWithoutProperties: 'objectWithoutPropertiesLoose',
 };
 
+/**
+ * Cache of identifiers to each helper's ImportDeclaration, per file.
+ * @const {!WeakMap<
+ *   import('@babel/core').BabelFileResult,
+ *   Object<string, import('@babel/core').types.Identifier>
+ * >}
+ */
 const importNamesPerFile = new WeakMap();
 
 module.exports = function ({types: t}) {
