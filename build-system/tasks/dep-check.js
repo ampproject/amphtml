@@ -322,7 +322,7 @@ function toArrayOrDefault(value, defaultValue) {
 /**
  * Flatten array of arrays if necessary.
  *
- * @param {Array<Array>|Array} arr
+ * @param {Array} arr
  * @return {!Array}
  */
 function flatten(arr) {

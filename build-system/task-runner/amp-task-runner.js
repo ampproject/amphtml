@@ -116,7 +116,7 @@ async function runTask(taskName, taskSourceFileName, taskFunc) {
  * @param {string} taskSourceFileName
  * @param {string=} taskFuncName
  */
-function handleInvalidTaskError(taskSourceFileName, taskFuncName = undefined) {
+function handleInvalidTaskError(taskSourceFileName, taskFuncName) {
   log(
     red('ERROR:'),
     'Could not find' + (taskFuncName ? ` ${cyan(taskFuncName + '()')} in` : ''),
