@@ -63,6 +63,7 @@ const EXTENSION_ALLOWLIST = map({
   'amp-fit-text': true,
   'amp-font': true,
   'amp-form': true,
+  'amp-gwd-animation': true,
   'amp-img': true,
   'amp-layout': true,
   'amp-lightbox': true,
@@ -201,7 +202,7 @@ function handleScript(extensions, script) {
  * @param {!Element} link
  */
 function handleLink(fonts, images, link) {
-  const {href, as, rel} = link;
+  const {as, href, rel} = link;
   if (rel === 'preload' && as === 'image') {
     images.push(href);
     return;

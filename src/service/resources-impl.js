@@ -26,7 +26,7 @@ import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../core/constants/visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../core/types/object';
-import {expandLayoutRect} from '../layout-rect';
+import {expandLayoutRect} from '../core/math/layout-rect';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
@@ -634,6 +634,18 @@ export class ResourcesImpl {
       dev().fine(TAG_, 'document height on load: %s', this.contentHeight_);
     }
 
+    // Once we know the document is fully parsed, we check to see if every AMP Element has been built
+    const firstPassAfterAllBuilt =
+      !this.firstPassAfterDocumentReady_ &&
+      this.firstPassAfterAllBuilt_ &&
+      this.resources_.every(
+        (r) => r.getState() != Resource.NOT_BUILT || r.element.R1()
+      );
+    if (firstPassAfterAllBuilt) {
+      this.firstPassAfterAllBuilt_ = false;
+      this.maybeChangeHeight_ = true;
+    }
+
     const viewportSize = this.viewport_.getSize();
     dev().fine(
       TAG_,
@@ -748,7 +760,7 @@ export class ResourcesImpl {
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
-        const {resource, event} =
+        const {event, resource} =
           /** @type {!./resources-interface.ChangeSizeRequestDef} */ (request);
         const box = resource.getLayoutBox();
 
@@ -756,7 +768,7 @@ export class ResourcesImpl {
         let bottomMarginDiff = 0;
         let leftMarginDiff = 0;
         let rightMarginDiff = 0;
-        let {top: topUnchangedBoundary, bottom: bottomDisplacedBoundary} = box;
+        let {bottom: bottomDisplacedBoundary, top: topUnchangedBoundary} = box;
         let newMargins = undefined;
         if (request.marginChange) {
           newMargins = request.marginChange.newMargins;
@@ -1055,9 +1067,9 @@ export class ResourcesImpl {
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
     const {
+      elementsThatScrolled_: elementsThatScrolled,
       relayoutAll_: relayoutAll,
       relayoutTop_: relayoutTop,
-      elementsThatScrolled_: elementsThatScrolled,
     } = this;
     this.relayoutAll_ = false;
     this.relayoutTop_ = -1;
@@ -1634,11 +1646,11 @@ export class ResourcesImpl {
    */
   setupVisibilityStateMachine_(vsm) {
     const {
+      HIDDEN: hidden,
+      INACTIVE: inactive,
+      PAUSED: paused,
       PRERENDER: prerender,
       VISIBLE: visible,
-      HIDDEN: hidden,
-      PAUSED: paused,
-      INACTIVE: inactive,
     } = VisibilityState;
     const doWork = () => {
       // If viewport size is 0, the manager will wait for the resize event.

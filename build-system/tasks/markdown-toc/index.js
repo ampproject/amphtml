@@ -164,6 +164,10 @@ async function overrideTocGlob(cwd) {
   return result;
 }
 
+/**
+ * Entry point for the `amp markdown-toc` task.
+ * @return {Promise<void>}
+ */
 async function markdownToc() {
   const result = await overrideTocGlob('.');
   let errored = false;

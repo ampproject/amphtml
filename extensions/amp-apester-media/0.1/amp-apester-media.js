@@ -32,8 +32,8 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
+import {px, setStyles} from '../../../src/style';
 import {removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-apester-media';
@@ -161,11 +161,11 @@ class AmpApesterMedia extends AMP.BaseElement {
    **/
   buildUrl_() {
     const {
-      idOrToken,
-      playlist,
-      inative,
       distributionChannelId,
       fallback,
+      idOrToken,
+      inative,
+      playlist,
       tags,
     } = this.embedOptions_;
     const encodedMediaAttribute = encodeURIComponent(
@@ -253,11 +253,10 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @return {!Element}
    */
   constructLoaderImg_() {
-    const img = this.element.ownerDocument.createElement('amp-img');
+    const img = this.element.ownerDocument.createElement('img');
+    img.setAttribute('loading', 'lazy');
     img.setAttribute('src', this.loaderUrl_);
-    img.setAttribute('layout', 'fixed');
-    img.setAttribute('width', '100');
-    img.setAttribute('height', '100');
+    setStyles(img, {'width': px(100), 'height': px(100)});
     return img;
   }
 

@@ -21,7 +21,7 @@
   },
   "triggers": {
     "trackPageview": {
-      "on": "visible",
+      "on": "ini-load",
       "request": "pageview"
     }
   }

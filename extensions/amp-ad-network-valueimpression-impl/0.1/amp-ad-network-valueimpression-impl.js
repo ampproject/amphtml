@@ -21,7 +21,7 @@ import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {dev} from '../../../src/log';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -284,14 +284,14 @@ export class AmpAdNetworkValueimpressionImpl extends AmpA4A {
         this.win,
         this.element.parentElement
       );
-      const {fwSignal, slotWidth, parentWidth} = this.flexibleAdSlotData_;
+      const {fwSignal, parentWidth, slotWidth} = this.flexibleAdSlotData_;
       // If slotWidth is -1, that means its width must be determined by its
       // parent container, and so should have the same value as parentWidth.
       msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
       psz = `${parentWidth}x-1`;
       fws = fwSignal ? fwSignal : '0';
 
-      const {pageViewId, canonicalUrl} = Services.documentInfoForDoc(ampDoc);
+      const {canonicalUrl, pageViewId} = Services.documentInfoForDoc(ampDoc);
       const domLoading = ampDoc.getParam('visibilityState')
         ? ampDoc.getLastVisibleTime()
         : getNavigationTiming(win, 'domLoading');
