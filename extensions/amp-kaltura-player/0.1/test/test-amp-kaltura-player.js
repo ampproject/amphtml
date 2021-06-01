@@ -144,13 +144,15 @@ describes.realWin(
           'data-entryid': '1_3ts1ms9c',
           'data-uiconf': '33502051',
         }).then((kp) => {
-          const img = kp.querySelector('amp-img');
+          const img = kp.querySelector('img');
           expect(img).to.not.be.null;
+          expect(img).to.have.attribute('placeholder');
+          expect(img).to.have.class('i-amphtml-fill-content');
+          expect(img.getAttribute('loading')).to.equal('lazy');
           expect(img.getAttribute('src')).to.equal(
             'https://cdnapisec.kaltura.com/p/1281471/thumbnail/entry_id/' +
               '1_3ts1ms9c/width/111/height/222'
           );
-          expect(img.getAttribute('layout')).to.equal('fill');
           expect(img.hasAttribute('placeholder')).to.be.true;
           expect(img.getAttribute('referrerpolicy')).to.equal('origin');
           expect(img.getAttribute('alt')).to.equal('Loading video');
@@ -163,9 +165,8 @@ describes.realWin(
           'data-uiconf': '33502051',
           'aria-label': 'great video',
         }).then((kp) => {
-          const img = kp.querySelector('amp-img');
+          const img = kp.querySelector('img');
           expect(img).to.not.be.null;
-          expect(img.hasAttribute('placeholder')).to.be.true;
           expect(img.getAttribute('aria-label')).to.equal('great video');
           expect(img.getAttribute('alt')).to.equal(
             'Loading video - great video'

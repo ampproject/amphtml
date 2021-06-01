@@ -344,7 +344,7 @@ class AmpLightbox extends AMP.BaseElement {
   finalizeOpen_(callback, trust) {
     const {element} = this;
 
-    const {durationSeconds, openStyle, closedStyle} =
+    const {closedStyle, durationSeconds, openStyle} =
       this.getAnimationPresetDef_();
 
     const props = Object.keys(openStyle);
@@ -893,7 +893,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   maybeSetTransparentBody_() {
-    const {win, element} = this;
+    const {element, win} = this;
     if (!isInFie(element)) {
       return;
     }

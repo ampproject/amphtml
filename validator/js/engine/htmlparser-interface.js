@@ -251,6 +251,15 @@ const ParsedHtmlTag = class {
   }
 
   /**
+   * Tests if this is an AMP Cache domain.
+   * @param {string} src
+   * @return {boolean}
+   */
+  isAmpCacheDomain_(src) {
+    return src.startsWith('https://cdn.ampproject.org/');
+  }
+
+  /**
    * Tests if this is an async script tag.
    * @return {boolean}
    * @private
@@ -268,7 +277,7 @@ const ParsedHtmlTag = class {
     const src = this.getAttrValueOrNull_('src');
     if (src === null) return false;
     return this.isAsyncScriptTag_() && !this.isExtensionScript() &&
-        src.startsWith('https://cdn.ampproject.org/') &&
+        this.isAmpCacheDomain_(src) &&
         (src.endsWith('/v0.js') || src.endsWith('/v0.mjs') ||
          src.endsWith('/v0.mjs?f=sxg'));
   }

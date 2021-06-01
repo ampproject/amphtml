@@ -714,7 +714,7 @@ export class AmpSelector extends AMP.BaseElement {
  * @return {boolean}
  */
 function isElementHidden(element, rect) {
-  const {width, height} = rect;
+  const {height, width} = rect;
   return element.hidden || width == 0 || height == 0;
 }
 

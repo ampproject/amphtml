@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.165 */
+/** Version: 0.1.22.167 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4130,7 +4130,7 @@ const PropensityType = {
 /* eslint-enable no-unused-vars */
 
 /** @enum {string} */
-const PublisherEntitlementEvent = {
+const ShowcaseEvent = {
   // Events indicating content could potentially be unlocked
   EVENT_SHOWCASE_METER_OFFERED: 'EVENT_SHOWCASE_METER_OFFERED', // This event is only required if the user can choose not to use a publisher meter
 
@@ -4511,7 +4511,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.165',
+    '_client': 'SwG 0.1.22.167',
   });
 }
 
@@ -5309,7 +5309,7 @@ class OffersFlow {
   }
 
   /**
-   * Shows "no subscription/contribution found" on activity iFrame view.
+   * Shows "no subscription found" on activity iFrame view.
    */
   showNoEntitlementFoundToast() {
     if (this.activityIframeView_) {
@@ -5725,7 +5725,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.165',
+        '_client': 'SwG 0.1.22.167',
         'supportsEventManager': true,
       },
       args || {}
@@ -6571,7 +6571,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.165');
+    context.setClientVersion('SwG 0.1.22.167');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -6864,7 +6864,7 @@ const SWG_I18N_STRINGS = {
     'hi': 'Google खाते की मदद से योगदान करें',
     'id': 'Berkontribusi dengan Google',
     'it': 'Contribuisci con Google',
-    'jp': 'Google を介して資金提供',
+    'jp': 'Google で寄付',
     'ko': 'Google을 통해 참여하기',
     'ms': 'Sumbangkan dengan Google',
     'nl': 'Bijdragen met Google',
@@ -7214,6 +7214,9 @@ class ButtonApi {
     if (options['lang']) {
       button.setAttribute('lang', options['lang']);
     }
+    if (!options['enable']) {
+      button.disabled = true;
+    }
     button./*OK*/ innerHTML = BUTTON_INNER_HTML.replace(
       '$theme$',
       theme
@@ -7246,6 +7249,9 @@ class ButtonApi {
     button.setAttribute('role', 'button');
     if (options['lang']) {
       button.setAttribute('lang', options['lang']);
+    }
+    if (!options['enable']) {
+      button.disabled = true;
     }
     button./*OK*/ innerHTML = BUTTON_INNER_HTML.replace(
       '$theme$',
@@ -7764,6 +7770,23 @@ class ExplicitDismissalConfig {
 }
 
 /**
+ * Predicates of whether or not to show button and prompt.
+ */
+class UiPredicates {
+  /**
+   * @param {boolean|undefined} canDisplayAutoPrompt
+   * @param {boolean|undefined} canDisplayButton
+   */
+  constructor(canDisplayAutoPrompt, canDisplayButton) {
+    /** @const {boolean|undefined} */
+    this.canDisplayAutoPrompt = canDisplayAutoPrompt;
+
+    /** @const {boolean|undefined} */
+    this.canDisplayButton = canDisplayButton;
+  }
+}
+
+/**
  * Copyright 2021 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -7787,8 +7810,14 @@ class ClientConfig {
    * @param {!./auto-prompt-config.AutoPromptConfig=} autoPromptConfig
    * @param {string=} paySwgVersion
    * @param {boolean=} useUpdatedOfferFlows
+   * @param {./auto-prompt-config.UiPredicates=} uiPredicates
    */
-  constructor(autoPromptConfig, paySwgVersion, useUpdatedOfferFlows) {
+  constructor(
+    autoPromptConfig,
+    paySwgVersion,
+    useUpdatedOfferFlows,
+    uiPredicates
+  ) {
     /** @const {!./auto-prompt-config.AutoPromptConfig|undefined} */
     this.autoPromptConfig = autoPromptConfig;
 
@@ -7797,6 +7826,9 @@ class ClientConfig {
 
     /** @const {boolean} */
     this.useUpdatedOfferFlows = useUpdatedOfferFlows || false;
+
+    /** @const {./auto-prompt-config.UiPredicates|undefined} */
+    this.uiPredicates = uiPredicates;
   }
 }
 
@@ -7918,6 +7950,31 @@ class ClientConfigManager {
   }
 
   /**
+   * Determines whether a subscription or contribution button should be disabled.
+   * @returns {!Promise<boolean|undefined>}
+   */
+  shouldEnableButton() {
+    // Disable button if disableButton is set to be true in clientOptions.
+    // If disableButton is set to be false or not set, then always enable button.
+    // This is for testing purpose.
+    if (this.clientOptions_.disableButton) {
+      return Promise.resolve(false);
+    }
+
+    if (!this.responsePromise_) {
+      this.fetchClientConfig();
+    }
+    // UI predicates decides whether to enable button.
+    return this.responsePromise_.then((clientConfig) => {
+      if (clientConfig.uiPredicates?.canDisplayButton) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+
+  /**
    * Fetches the client config from the server.
    * @return {!Promise<!ClientConfig>}
    */
@@ -7955,10 +8012,21 @@ class ClientConfigManager {
         autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsResultingHideSeconds
       );
     }
+
+    const uiPredicatesJson = json['uiPredicates'];
+    let uiPredicates = undefined;
+    if (uiPredicatesJson) {
+      uiPredicates = new UiPredicates(
+        uiPredicatesJson.canDisplayAutoPrompt,
+        uiPredicatesJson.canDisplayButton
+      );
+    }
+
     return new ClientConfig(
       autoPromptConfig,
       paySwgVersion,
-      json['useUpdatedOfferFlows']
+      json['useUpdatedOfferFlows'],
+      uiPredicates
     );
   }
 }
@@ -8005,6 +8073,8 @@ class ContributionsFlow {
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
+
+    this.activityIframeView_ = null;
 
     const isClosable = (options && options.isClosable) || true;
 
@@ -8083,8 +8153,8 @@ class ContributionsFlow {
         this.handleLinkRequest_.bind(this)
       );
       activityIframeView.on(SkuSelectedResponse, this.startPayFlow_.bind(this));
-
-      return this.dialogManager_.openView(activityIframeView);
+      this.activityIframeView_ = activityIframeView;
+      return this.dialogManager_.openView(this.activityIframeView_);
     });
   }
 
@@ -8101,6 +8171,15 @@ class ContributionsFlow {
         return '/contributionsiframe';
       }
     });
+  }
+
+  /**
+   * Shows "no contribution found" on activity iFrame view.
+   */
+  showNoEntitlementFoundToast() {
+    if (this.activityIframeView_) {
+      this.activityIframeView_.execute(new EntitlementsResponse());
+    }
   }
 }
 
@@ -8274,7 +8353,7 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;animation:mspin-rotate 1568.63ms linear infinite}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;animation:swg-loading-film 5332ms steps(324) infinite}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:35px!important;width:560px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(#324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -9890,38 +9969,38 @@ const AnalyticsEventToPublisherEvent = {
 };
 
 /** @const {!Object<string,?Array<AnalyticsEvent>>} */
-const ShowcaseEntitlemenntToAnalyticsEvents = {
+const ShowcaseEvents = {
   // Events related to content being potentially unlockable
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_METER_OFFERED]: [
+  [ShowcaseEvent.EVENT_SHOWCASE_METER_OFFERED]: [
     AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
     AnalyticsEvent.EVENT_OFFERED_METER,
   ],
 
   // Events related to content being unlocked
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION]: [
+  [ShowcaseEvent.EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION]: [
     AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
   ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_METER]: [
+  [ShowcaseEvent.EVENT_SHOWCASE_UNLOCKED_BY_METER]: [
     AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
     AnalyticsEvent.EVENT_UNLOCKED_BY_METER,
   ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_FREE_PAGE]: [
+  [ShowcaseEvent.EVENT_SHOWCASE_UNLOCKED_FREE_PAGE]: [
     AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE,
   ],
 
   // Events requiring user action to unlock content
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL]: [
+  [ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL]: [
     AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
     AnalyticsEvent.IMPRESSION_REGWALL,
     AnalyticsEvent.IMPRESSION_SHOWCASE_REGWALL,
   ],
 
   // Events requiring subscription to unlock content
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL]: [
+  [ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL]: [
     AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
     AnalyticsEvent.IMPRESSION_PAYWALL,
   ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_INELIGIBLE_PAYWALL]: [
+  [ShowcaseEvent.EVENT_SHOWCASE_INELIGIBLE_PAYWALL]: [
     // TODO(b/181690059): Create showcase ineligible AnalyticsEvent
     AnalyticsEvent.IMPRESSION_PAYWALL,
   ],
@@ -10047,11 +10126,11 @@ function analyticsEventToPublisherEvent(analyticsEvent) {
 
 /**
  * Converts a publisher entitlement event enum into an array analytics events.
- * @param {!PublisherEntitlementEvent|string} event
+ * @param {!ShowcaseEvent} event
  * @returns {!Array<AnalyticsEvent>}
  */
-function publisherEntitlementEventToAnalyticsEvents(event) {
-  return ShowcaseEntitlemenntToAnalyticsEvents[event] || [];
+function showcaseEventToAnalyticsEvents(event) {
+  return ShowcaseEvents[event] || [];
 }
 
 function analyticsEventToEntitlementResult(event) {
@@ -16145,7 +16224,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -16424,6 +16503,9 @@ class ConfiguredRuntime {
 
     /** @private {?OffersFlow} */
     this.lastOffersFlow_ = null;
+
+    /** @private {?ContributionsFlow} */
+    this.lastContributionsFlow_ = null;
 
     // Start listening to Google Analytics events, if applicable.
     if (integr.enableGoogleAnalytics) {
@@ -16730,9 +16812,17 @@ class ConfiguredRuntime {
   /** @override */
   showContributionOptions(options) {
     return this.documentParsed_.then(() => {
-      const flow = new ContributionsFlow(this, options);
-      return flow.start();
+      this.lastContributionsFlow_ = new ContributionsFlow(this, options);
+      return this.lastContributionsFlow_.start();
     });
+  }
+
+  /**
+   * Get the last contribution offers flow.
+   * @return {?ContributionsFlow}
+   */
+  getLastContributionsFlow() {
+    return this.lastContributionsFlow_;
   }
 
   /** @override */
@@ -16908,7 +16998,7 @@ class ConfiguredRuntime {
   }
 
   /**
-   * Get the last offers flow.
+   * Get the last subscription offers flow.
    * @return {?OffersFlow}
    */
   getLastOffersFlow() {
@@ -16939,7 +17029,7 @@ class ConfiguredRuntime {
     }
 
     const eventsToLog =
-      publisherEntitlementEventToAnalyticsEvents(entitlement.entitlement) || [];
+      showcaseEventToAnalyticsEvents(entitlement.entitlement) || [];
     const params = new EventParams();
     params.setIsUserRegistered(entitlement.isUserRegistered);
 

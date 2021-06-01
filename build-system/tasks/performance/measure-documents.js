@@ -22,14 +22,14 @@ const {
   DEFAULT_EXTENSIONS,
   EXPERIMENT,
   RESULTS_PATH,
-  urlToCachePath,
   getFileFromAbsolutePath,
   getLocalPathFromExtension,
   localFileToCachePath,
+  urlToCachePath,
 } = require('./helpers');
 const {
-  setupAnalyticsHandler,
   getAnalyticsMetrics,
+  setupAnalyticsHandler,
 } = require('./analytics-handler');
 const {cyan, green} = require('../../common/colors');
 const {log} = require('../../common/logging');
@@ -38,6 +38,9 @@ const {setupAdRequestHandler} = require('./ads-handler');
 // Require Puppeteer dynamically to prevent throwing error during CI
 let puppeteer;
 
+/**
+ * Lazy-requires the puppeteer module.
+ */
 function requirePuppeteer_() {
   puppeteer = require('puppeteer');
 }
@@ -310,7 +313,7 @@ async function measureDocument(url, version, config) {
   const page = await browser.newPage();
   const handlerOptionsForUrl = {...config.urlToHandlers[url]};
   const handlersList = [];
-  const {timeoutPromise, resolve} =
+  const {resolve, timeoutPromise} =
     setupDelayBasedOnHandlerOptions(handlerOptionsForUrl);
   await page.setCacheEnabled(false);
   await page.setRequestInterception(true);

@@ -22,7 +22,7 @@ import {
 
 describes.sandboxed('binarySearch', {}, () => {
   const {NEXT, PREV} = BinarySearchPreference;
-  const {RIGHT, LEFT} = BinarySearchStop;
+  const {LEFT, RIGHT} = BinarySearchStop;
 
   /**
    * @param {!Array<number>} arr

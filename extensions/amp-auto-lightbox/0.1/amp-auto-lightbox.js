@@ -160,12 +160,12 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsSizingCriteria(element, renderWidth, renderHeight) {
-    const {naturalWidth, naturalHeight} = getMaxNaturalDimensions(
+    const {naturalHeight, naturalWidth} = getMaxNaturalDimensions(
       dev().assertElement(element.querySelector('img'))
     );
 
     const viewport = Services.viewportForDoc(element);
-    const {width: vw, height: vh} = viewport.getSize();
+    const {height: vh, width: vw} = viewport.getSize();
 
     return meetsSizingCriteria(
       renderWidth,
@@ -217,7 +217,7 @@ export function getMaxWidthFromSrcset(img) {
  * @return {{naturalWidth: number, naturalHeight: number}}
  */
 export function getMaxNaturalDimensions(img) {
-  const {naturalWidth, naturalHeight} = img;
+  const {naturalHeight, naturalWidth} = img;
   const ratio = naturalWidth / naturalHeight;
   const maxWidthFromSrcset = getMaxWidthFromSrcset(img);
   if (maxWidthFromSrcset > naturalWidth) {
@@ -445,7 +445,7 @@ export function runCandidates(ampdoc, candidates) {
           if (!candidate.signals().get(CommonSignals.LOAD_END)) {
             return;
           }
-          const {width, height} = boundingClientRect;
+          const {height, width} = boundingClientRect;
           if (!Criteria.meetsAll(candidate, width, height)) {
             return;
           }

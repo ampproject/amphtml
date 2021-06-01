@@ -86,7 +86,8 @@ exports.rules = [
       '3p/**->src/core/constants/amp-events.js',
       '3p/**->src/core/data-structures/observable.js',
       '3p/**->src/core/data-structures/promise.js',
-      '3p/**->src/core/error.js',
+      '3p/**->src/core/error/index.js',
+      '3p/**->src/core/types/enum.js',
       '3p/**->src/core/types/function/index.js',
       '3p/**->src/core/types/index.js',
       '3p/**->src/core/types/object/index.js',
@@ -120,9 +121,9 @@ exports.rules = [
     filesMatching: 'ads/**/*.js',
     mustNotDependOn: 'src/**/*.js',
     allowlist: [
-      'ads/**->src/utils/dom-fingerprint.js',
+      'ads/**->src/core/dom/fingerprint.js',
       'ads/**->src/core/constants/consent-state.js',
-      'ads/**->src/core/error.js',
+      'ads/**->src/core/error/index.js',
       'ads/**->src/core/types/array.js',
       'ads/**->src/core/types/function/index.js',
       'ads/**->src/core/types/index.js',
@@ -330,8 +331,6 @@ exports.rules = [
         'src/service/extension-script.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
-      'extensions/amp-video/0.1/video-cache.js->' +
-        'src/service/extension-script.js',
       'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +

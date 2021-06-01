@@ -15,6 +15,14 @@
 //
 syntax = "proto2";
 
+// TODO(b/188065554) Deprecate automatic generation of validator.pb.go.
+option go_package = "./validator.proto;amp_validator";
+
+// Package defines Validator protobuffers. This is a package comment required by
+// Golint for validator.pb.go, but Golint still fails with an error "Package
+// amp_validator (defined in [validator.pb.go]) should have a package comment".
+// This happens because protoc adds an extra line after the comment. Ignore the
+// error.
 package amp.validator;
 
 // Used for validating attributes that require another attribute for some
