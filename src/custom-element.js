@@ -47,7 +47,7 @@ import {rethrowAsync} from './core/error';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
-import {toWin} from './types';
+import {toWin} from './core/window';
 import {tryResolve} from './core/data-structures/promise';
 
 const TAG = 'CustomElement';

@@ -28,7 +28,7 @@ import {installCssTransformer} from './style-installer';
 import {iterateCursor} from './dom';
 import {setInitialDisplay, setStyle} from './style';
 import {toArray} from './core/types/array';
-import {toWin} from './types';
+import {toWin} from './core/window';
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;

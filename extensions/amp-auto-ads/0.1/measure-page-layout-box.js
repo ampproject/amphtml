@@ -15,7 +15,7 @@
  */
 import {Services} from '.../../../src/services';
 import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 
 /**
  * @param {!Element} element
