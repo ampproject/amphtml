@@ -70,6 +70,8 @@ When attending a design review please read through the designs _before_ the desi
 We rotate our design review between times that work better for different parts of the world as described in our [design review documentation](https://github.com/ampproject/amphtml/blob/main/docs/design-reviews.md), but you are welcome to attend any design review. If you cannot make any of the design reviews but have a design to discuss please let mrjoro@ know on [Slack](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) and we will find a time that works for you.
 `.trim();
 
+const isDryRun = process.argv.includes('--dry-run');
+
 function leadingZero(number) {
   return number.toString().padStart(2, '0');
 }
@@ -117,24 +119,28 @@ function httpsRequest(url, options, data) {
     req.on('error', (error) => {
       reject(error);
     });
-    req.write(data);
+    if (data) {
+      req.write(data);
+    }
     req.end();
   });
 }
 
-async function postGithub(token, url, data) {
+async function requestGithub(token, path, data, options = {}) {
   const {res, body} = await httpsRequest(
-    url,
+    `https://api.github.com/${path.replace(/^\//, '')}`,
     {
-      method: 'POST',
+      ...options,
+      method: options.method || 'GET',
       headers: {
+        ...options.headers,
         'Authorization': `token ${token}`,
         'Content-Type': 'application/json',
         'User-Agent': 'amphtml',
         'Accept': 'application/vnd.github.v3+json',
       },
     },
-    JSON.stringify(data)
+    data ? JSON.stringify(data) : undefined
   );
 
   if (res.statusCode < 200 || res.statusCode > 299) {
@@ -145,9 +151,79 @@ async function postGithub(token, url, data) {
   return JSON.parse(body);
 }
 
+async function graphqlQueryGithub(token, query) {
+  const {data} = await postGithub(token, '/graphql', {query});
+  return data;
+}
+
+async function postGithub(token, url, data) {
+  return requestGithub(token, url, data, {method: 'POST'});
+}
+
 function postGithubIssue(token, repo, data) {
-  const url = `https://api.github.com/repos/${repo}/issues`;
+  const url = `/repos/${repo}/issues`;
   return postGithub(token, url, data);
+}
+
+function closeGithubIssue(token, repo, number) {
+  return requestGithub(
+    token,
+    `/repos/${repo}/issues/${number}`,
+    {state: 'closed'},
+    {method: 'PATCH'}
+  );
+}
+
+async function getGithubIssues(token, repo, labels) {
+  const url = `/repos/${repo}/issues?state=open&labels=${encodeURIComponent(
+    labels.join(',')
+  )}`;
+  return requestGithub(token, url);
+}
+
+async function getGraphqlIssueId(token, repo, number) {
+  const [owner, name] = repo.split('/');
+  const query = `
+    query {
+      repository(owner:"${owner}", name:"${name}") {
+        issue(number:${number}) {
+          id
+        }
+      }
+    }
+  `;
+  const {repository} = await graphqlQueryGithub(token, query);
+  return repository.issue.id;
+}
+
+async function pinIssue(token, repo, number) {
+  const issueId = await getGraphqlIssueId(token, repo, number);
+  const clientMutationId = 'create-design-review-pin';
+  const mutation = `
+    mutation {
+      pinIssue(input: { clientMutationId: "${clientMutationId}", issueId:"${issueId}" }) {
+        issue {
+          title
+        }
+      }
+    }
+  `;
+  return graphqlQueryGithub(token, mutation);
+}
+
+async function unpinIssue(token, repo, number) {
+  const issueId = await getGraphqlIssueId(token, repo, number);
+  const clientMutationId = 'create-design-review-unpin';
+  const mutation = `
+    mutation {
+      unpinIssue(input: { clientMutationId: "${clientMutationId}", issueId:"${issueId}" }) {
+        issue {
+          title
+        }
+      }
+    }
+  `;
+  return graphqlQueryGithub(token, mutation);
 }
 
 function getNextDayOfWeek(date, dayOfWeek, weeks = 1) {
@@ -233,24 +309,106 @@ function env(key) {
   return process.env[key];
 }
 
-async function createDesignReviewIssue() {
-  const nextIssueData = getNextIssueData();
+const datetimeFromTitleRegexp = /(\d{4}-\d{2}-\d{2}) (\d{1,2}[:]\d{2})/;
 
-  if (process.argv.includes('--dry-run')) {
-    console./*OK*/ log(nextIssueData);
+function getSessionDateFromTitle(title) {
+  const [unusedFullMatch, day, time] = title.match(datetimeFromTitleRegexp);
+  // ISO 860 is parsed as UTC
+  return Date.parse(`${day}T${time}:00`);
+}
+
+async function getExistingIssuesWithSessionDate(token, repo) {
+  const issues = await getGithubIssues(token, repo, labels);
+  return issues
+    .map((issue) => ({
+      sessionDate: getSessionDateFromTitle(issue.title),
+      issue,
+    }))
+    .sort((a, b) => a.sessionDate - b.sessionDate);
+}
+
+async function closeStaleIssues(token, repo, issuesWithSessionDate) {
+  const now = new Date();
+
+  // Compensate duration so that we swap only once the session has ended.
+  now.setHours(now.getHours() - sessionDurationHours);
+
+  const issues = issuesWithSessionDate.filter(
+    ({sessionDate}) => sessionDate < now
+  );
+  for (const {issue} of issues) {
+    const {number, title} = issue;
+    if (!isDryRun) {
+      await unpinIssue(token, repo, number);
+      await closeGithubIssue(token, repo, number);
+    }
+    console./*OK*/ log('Unpinned & closed: ', title, '\n');
+  }
+  return issues;
+}
+
+async function closeStalePinNextIssue(token, repo, existing) {
+  const staleIssues = closeStaleIssues(token, repo, existing);
+  if (!staleIssues.length) {
+    // If there aren't any open stale issues, the newer issue has been pinned.
+    console./*OK*/ log('(Zero issues to close, pin or unpin.)');
     return;
   }
 
+  const mostRecentStaleIssue = staleIssues[staleIssues.length - 1];
+  const nextIssue = existing.find(
+    ({sessionDate}) => sessionDate > mostRecentStaleIssue.sessionDate
+  );
+  if (!nextIssue) {
+    throw new Error(
+      "Could not find next session issue to pin. If it's created later, it will NOT be pinned."
+    );
+  }
+
+  const {number, title} = nextIssue.issue;
+  if (!isDryRun) {
+    await pinIssue(token, repo, number);
+  }
+  console./*OK*/ log('Pinned: ', title, '\n');
+}
+
+async function createNextDesignReviewIssue(token, repo, existing) {
+  const nextIssueData = getNextIssueData();
+  const nextIssueDateFromTitle = getSessionDateFromTitle(nextIssueData.title);
+
+  const existingIssue = existing.find(
+    ({sessionDate}) => sessionDate == nextIssueDateFromTitle
+  );
+  if (existingIssue) {
+    const {title, 'html_url': htmlUrl} = existingIssue.issue;
+    console./*OK*/ log(
+      '(Skipping creation of next issue since it exists.)\n' + `- ${title}\n  ${htmlUrl}`
+    );
+    return;
+  }
+
+  if (isDryRun) {
+    console./*OK*/ log(nextIssueData);
+    return;
+  }
   const {title, 'html_url': htmlUrl} = await postGithubIssue(
-    env('GITHUB_TOKEN'),
-    env('GITHUB_REPOSITORY'),
+    token,
+    repo,
     nextIssueData
   );
   console./*OK*/ log(title);
   console./*OK*/ log(htmlUrl);
 }
 
-createDesignReviewIssue().catch((e) => {
-  console./*OK*/ error(e);
-  process.exit(1);
-});
+async function createDesignReviewIssue(token, repo) {
+  const existing = await getExistingIssuesWithSessionDate(token, repo);
+  await createNextDesignReviewIssue(token, repo, existing);
+  await closeStalePinNextIssue(token, repo, existing);
+}
+
+createDesignReviewIssue(env('GITHUB_TOKEN'), env('GITHUB_REPOSITORY')).catch(
+  (e) => {
+    console./*OK*/ error(e);
+    process.exit(1);
+  }
+);

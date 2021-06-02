@@ -2,8 +2,8 @@ name: Create Design Review Issue
 
 on:
   schedule:
-    # Every Wednesday at 00:00:00
-    - cron: '0 0 * * 3'
+    # At minute 1 (every hour).
+    - cron: '1 * * * *'
 
 jobs:
   create-design-review-issue:
