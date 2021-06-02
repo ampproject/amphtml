@@ -25,8 +25,7 @@ import {isExperimentOn} from './experiments';
 import {isFiniteNumber} from './core/types';
 import {setStyle, setStyles, toggle} from './style';
 import {toWin} from './types';
-
-import {transparentPng} from './utils/img';
+import {transparentPng} from './core/dom/img';
 
 /**
  * @enum {string}
