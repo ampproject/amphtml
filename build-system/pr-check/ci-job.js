@@ -27,9 +27,32 @@ const {
   setLoggingPrefix,
 } = require('../common/logging');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
+const {isCircleciBuild, isPullRequestBuild} = require('../common/ci');
 const {red} = require('../common/colors');
 const {updatePackages} = require('../common/update-packages');
+const {Worker} = require('worker_threads');
+
+/**
+ * Starts the fast fail background polling service as a worker.
+ * @return {Promise<void>}
+ */
+function startFastFailPollingWorker() {
+  return new Promise((resolve) => {
+    const worker = new Worker('./build-system/common/fast_fail.js', {
+      workerData: {pid: process.pid},
+    });
+    worker.on('message', (message) => {
+      logWithoutTimestamp(message);
+      resolve();
+    });
+    worker.on('exit', (code) => {
+      if (code !== 0) {
+        logWithoutTimestamp(red('Worker Exited with'), `${code}`);
+        process.exit(1);
+      }
+    });
+  });
+}
 
 /**
  * Helper used by all CI job scripts. Runs the PR / push build workflow.
@@ -38,6 +61,11 @@ const {updatePackages} = require('../common/update-packages');
  * @param {function} prBuildWorkflow
  */
 async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
+  if (isCircleciBuild()) {
+    logWithoutTimestamp(red('PID: '), `${process.pid}`);
+    // Ideally this would not need to be awaited but this should result in simpler debugging.
+    await startFastFailPollingWorker();
+  }
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
   try {
