@@ -22,7 +22,7 @@ The Dianomi fast fetch implementation for serving AMP ads, using `<amp-ad>`.
 
 ### Required parameters
 
--   `data-request-param-id` : A Dianomi provided smart ad ID.
+-   `data-request-param-id` : A Dianomi provided SmartAd ID.
 
 #### Example configuration:
 
