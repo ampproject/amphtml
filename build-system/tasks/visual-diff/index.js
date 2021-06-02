@@ -19,7 +19,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const JSON5 = require('json5');
 const path = require('path');
-const Percy = require('@percy/core');
 const percySnapshot = require('@percy/puppeteer');
 const puppeteer = require('puppeteer');
 const {
@@ -42,6 +41,7 @@ const {
 } = require('../../common/git');
 const {buildRuntime} = require('../../common/utils');
 const {cyan, yellow} = require('../../common/colors');
+const {default: Percy} = require('@percy/core');
 const {isCiBuild} = require('../../common/ci');
 const {startServer, stopServer} = require('../serve');
 
@@ -133,7 +133,7 @@ let TestErrorDef;
  *  interactive_tests: string,
  *  no_base_test: boolean,
  *  flaky: boolean,
- *  tests_: Object<string,Function>,
+ *  tests_: Object<string, Function>,
  * }}
  */
 let WebpageDef;
@@ -190,7 +190,6 @@ async function launchPercyAgent(browserFetcher) {
     return;
   }
 
-  // @ts-ignore Type mismatch in library
   const percy = await Percy.start({
     token: process.env.PERCY_TOKEN,
     loglevel: argv.percy_agent_debug ? 'debug' : 'info',
@@ -774,7 +773,6 @@ async function visualDiff() {
   try {
     await performVisualTests(browserFetcher);
   } finally {
-    // @ts-ignore Type mismatch in library
     await percy?.stop();
   }
   exitCtrlcHandler(handlerProcess);
