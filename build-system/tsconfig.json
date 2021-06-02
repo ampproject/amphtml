@@ -34,7 +34,6 @@
 
     // Directories that need code fixes before type-checking can be enabled.
     "./tasks/get-zindex/**/*.js",
-    "./tasks/performance/**/*.js",
-    "./tasks/visual-diff/**/*.js"
+    "./tasks/performance/**/*.js"
   ]
 }
