@@ -1271,13 +1271,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise}
-   */
-  maybeApplyLastAnimationFrame() {
-    return Promise.resolve(this.animationManager_?.applyLastFrame());
-  }
-
-  /**
    * @return {number} The distance from the current page to the active page.
    */
   getDistance() {

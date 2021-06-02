@@ -129,9 +129,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    * @override
    */
   pause() {
-    if (!this.isInitialized_()) {
-      return;
-    }
+    devAssert(this.isInitialized_());
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach((player) => {
       if (player.playState == WebAnimationPlayState.RUNNING) {
