@@ -14,7 +14,7 @@
           notify: true,
         },
         {
-           name: 'enriqe',
+          name: 'enriqe',
         },
       ],
     },
