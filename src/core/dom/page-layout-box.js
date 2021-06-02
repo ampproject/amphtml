@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {layoutRectLtwh} from '../math/layout-rect';
+import {LayoutRectDef, layoutRectLtwh} from '../math/layout-rect';
 
 /**
  * @param {!Element} element
- * @return {!../layout-rect.LayoutRectDef}
+ * @return {!LayoutRectDef}
  */
 export function getPageLayoutBoxBlocking(element) {
   const stop = element.ownerDocument.body;
