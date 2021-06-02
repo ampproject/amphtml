@@ -28,9 +28,17 @@ const {
   updatePackages,
   updateSubpackages,
 } = require('../common/update-packages');
-const {cyan, red, green, magenta} = require('../common/colors');
+const {cyan, green, magenta, red} = require('../common/colors');
 const {isCiBuild} = require('../common/ci');
 const {log} = require('../common/logging');
+
+/**
+ * @function {{
+ *  description: string,
+ *  flags?: Object,
+ * }}
+ */
+let TaskFuncDef;
 
 /**
  * Special-case constant that indicates if `amp --help` was invoked.
@@ -84,7 +92,7 @@ async function maybeUpdateSubpackages(taskSourceFilePath) {
  * Runs an AMP task with logging and timing after installing its subpackages.
  * @param {string} taskName
  * @param {string} taskSourceFileName
- * @param {Function()} taskFunc
+ * @param {TaskFuncDef} taskFunc
  * @return {Promise<void>}
  */
 async function runTask(taskName, taskSourceFileName, taskFunc) {
@@ -106,7 +114,7 @@ async function runTask(taskName, taskSourceFileName, taskFunc) {
 /**
  * Prints an error if the task file and / or function are invalid, and exits.
  * @param {string} taskSourceFileName
- * @param {string?} taskFuncName
+ * @param {string=} taskFuncName
  */
 function handleInvalidTaskError(taskSourceFileName, taskFuncName) {
   log(
@@ -145,7 +153,7 @@ function getTaskSourceFilePath(taskSourceFileName) {
  * Returns a task function after making sure it is valid.
  * @param {string} taskSourceFileName
  * @param {string} taskFuncName
- * @return {Function():any}
+ * @return {TaskFuncDef}
  */
 function getTaskFunc(taskSourceFileName, taskFuncName) {
   const taskSourceFilePath = getTaskSourceFilePath(taskSourceFileName);
@@ -208,7 +216,7 @@ function createTask(
  * Validates usage by examining task and flag invocation.
  * @param {Object} task
  * @param {string} taskName
- * @param {function} taskFunc
+ * @param {TaskFuncDef} taskFunc
  */
 function validateUsage(task, taskName, taskFunc) {
   const tasks = argv._;

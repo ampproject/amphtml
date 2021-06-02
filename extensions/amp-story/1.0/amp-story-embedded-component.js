@@ -32,12 +32,8 @@ import {EventType, dispatch} from './events';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
-import {
-  addAttributesToElement,
-  closest,
-  matches,
-  tryFocus,
-} from '../../../src/dom';
+import {addAttributesToElement, tryFocus} from '../../../src/dom';
+import {closest, matches} from '../../../src/core/dom/query';
 import {
   createShadowRootWithStyle,
   getSourceOriginForElement,
@@ -49,6 +45,7 @@ import {getAmpdoc} from '../../../src/service';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
+
 import {px, resetStyles, setImportantStyles, toggle} from '../../../src/style';
 
 /**
@@ -1421,7 +1418,7 @@ export class AmpStoryEmbeddedComponent {
       </section>
     `;
     const overlayEls = htmlRefs(tooltipOverlay);
-    const {tooltip, buttonLeft, buttonRight, arrow} =
+    const {arrow, buttonLeft, buttonRight, tooltip} =
       /** @type {!tooltipElementsDef} */ (overlayEls);
 
     this.tooltip_ = tooltip;

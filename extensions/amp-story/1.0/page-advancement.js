@@ -26,9 +26,9 @@ import {AdvancementMode} from './story-analytics';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, matches} from '../../../src/dom';
+import {closest, matches} from '../../../src/core/dom/query';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getAmpdoc} from '../../../src/service';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
@@ -62,6 +62,9 @@ const PROTECTED_SCREEN_EDGE_PERCENT = 12;
  * @private
  */
 const MINIMUM_PROTECTED_SCREEN_EDGE_PX = 48;
+
+/** @private @const {number} */
+const MINIMUM_TIME_BASED_AUTO_ADVANCE_MS = 500;
 
 /**
  * Maximum percent of screen that can be occupied by a single link
@@ -153,8 +156,9 @@ export class AdvancementConfig {
 
   /**
    * Invoked when the advancement configuration should cease taking effect.
+   * @param {boolean=} unusedCanResume
    */
-  stop() {
+  stop(unusedCanResume) {
     this.isRunning_ = false;
   }
 
@@ -809,6 +813,14 @@ export class TimeBasedAdvancement extends AdvancementConfig {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
+    if (delayMs < MINIMUM_TIME_BASED_AUTO_ADVANCE_MS) {
+      user().warn(
+        'AMP-STORY-PAGE',
+        `${element.id} has an auto advance duration that is too short. ` +
+          `${MINIMUM_TIME_BASED_AUTO_ADVANCE_MS}ms is used instead.`
+      );
+      delayMs = MINIMUM_TIME_BASED_AUTO_ADVANCE_MS;
+    }
     /** @private @const {number} */
     this.delayMs_ = delayMs;
 
@@ -861,7 +873,7 @@ export class TimeBasedAdvancement extends AdvancementConfig {
   }
 
   /** @override */
-  stop() {
+  stop(canResume = false) {
     super.stop();
 
     if (this.timeoutId_ !== null) {
@@ -870,8 +882,9 @@ export class TimeBasedAdvancement extends AdvancementConfig {
 
     // Store the remaining time if the advancement can be resume, ie: if it is
     // paused.
-    this.remainingDelayMs_ =
-      this.startTimeMs_ + this.delayMs_ - this.getCurrentTimestampMs_();
+    this.remainingDelayMs_ = canResume
+      ? this.startTimeMs_ + this.delayMs_ - this.getCurrentTimestampMs_()
+      : null;
   }
 
   /**

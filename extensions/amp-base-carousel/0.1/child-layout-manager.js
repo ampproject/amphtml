@@ -298,7 +298,7 @@ export class ChildLayoutManager {
    */
   processInViewportChanges_(entries) {
     entries.forEach((entry) => {
-      const {target, isIntersecting} = entry;
+      const {isIntersecting, target} = entry;
       target[IN_VIEWPORT_FLAG] = isIntersecting
         ? ViewportChangeState.ENTER
         : ViewportChangeState.LEAVE;

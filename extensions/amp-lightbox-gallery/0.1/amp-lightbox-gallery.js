@@ -34,20 +34,19 @@ import {
   closest,
   closestAncestorElementBySelector,
   elementByTag,
-  getVerticalScrollbarWidth,
   scopedQuerySelectorAll,
-  toggleAttribute,
-} from '../../../src/dom';
-import {clamp} from '../../../src/utils/math';
+} from '../../../src/core/dom/query';
+import {clamp} from '../../../src/core/math';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
 } from './utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
+import {getVerticalScrollbarWidth, toggleAttribute} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {prepareImageAnimation} from '@ampproject/animations';
@@ -275,11 +274,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   cloneLightboxableElement_(element) {
-    if (element.classList.contains('amp-notsupported')) {
-      const fallback = element.getFallback();
-      if (!!fallback) {
-        element = fallback;
-      }
+    const fallback = element.getFallback();
+    const shouldCloneFallback =
+      element.classList.contains('amp-notsupported') && !!fallback;
+    if (shouldCloneFallback) {
+      element = fallback;
     }
     const deepClone = !element.classList.contains('i-amphtml-element');
     const clonedNode = element.cloneNode(deepClone);
@@ -308,7 +307,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         element: dev().assertElement(clonedNode),
       };
       let slide = clonedNode;
-      if (ELIGIBLE_TAP_TAGS.has(clonedNode.tagName)) {
+      if (ELIGIBLE_TAP_TAGS[clonedNode.tagName]) {
         const container = this.doc_.createElement('div');
         const imageViewer = htmlFor(this.doc_)`
           <amp-image-viewer layout="fill"></amp-image-viewer>`;
@@ -352,6 +351,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
+   * Show an existing carousel. Ensure it's been unlayed out before displaying again.
    * @param {string} lightboxGroupId
    * @return {!Promise}
    * @private
@@ -360,7 +360,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.mutateElement(() => {
       const {length} = this.elementsMetadata_[lightboxGroupId];
       this.maybeEnableMultipleItemControls_(length);
-      toggle(dev().assertElement(this.carousel_), true);
+      this.carousel_.getImpl().then((implementation) => {
+        implementation.unlayoutCallback();
+        toggle(this.carousel_, true);
+      });
     });
   }
 
@@ -811,7 +814,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (!element || !isLoaded(element)) {
       return false;
     }
-    if (!ELIGIBLE_TAP_TAGS.has(element.tagName)) {
+    if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
       return false;
     }
     const img = elementByTag(dev().assertElement(element), 'img');
@@ -848,7 +851,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.getCurrentElement_()
       .imageViewer.getImpl()
       .then((imageViewer) => {
-        const {width, height} = imageViewer.getImageBoxWithOffset() || {};
+        const {height, width} = imageViewer.getImageBoxWithOffset() || {};
 
         // Check if our imageBox has a width or height. We may be in the
         // gallery view if not, and we do not want to animate.
@@ -1332,11 +1335,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         const thumbnailElement = this.createThumbnailElement_(thumbnail);
         thumbnails.push(thumbnailElement);
       });
-    this.mutateElement(() =>
-      thumbnails.forEach((thumbnailElement) =>
-        this.gallery_.appendChild(thumbnailElement)
-      )
-    );
+    this.mutateElement(() => {
+      thumbnails.forEach((thumbnailElement) => {
+        this.gallery_.appendChild(thumbnailElement);
+      });
+    });
   }
 
   /**

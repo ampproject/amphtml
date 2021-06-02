@@ -30,7 +30,7 @@ import {AutoAdvance} from './auto-advance';
 import {CarouselAccessibility} from './carousel-accessibility';
 import {CarouselEvents} from './carousel-events';
 import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
-import {clamp, mod} from '../../../src/utils/math';
+import {clamp, mod} from '../../../src/core/math';
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/core/types/function';
 import {dev} from '../../../src/log';
@@ -155,7 +155,7 @@ export class Carousel {
    * }} config
    */
   constructor(config) {
-    const {win, element, scrollContainer, runMutate, initialIndex} = config;
+    const {element, initialIndex, runMutate, scrollContainer, win} = config;
     /** @private @const */
     this.win_ = win;
 
@@ -395,7 +395,7 @@ export class Carousel {
    * }=} options
    */
   advance(delta, options = {}) {
-    const {slides_, currentIndex_, requestedIndex_} = this;
+    const {currentIndex_, requestedIndex_, slides_} = this;
     const {actionSource, allowWrap = false} = options;
 
     // If we have a requested index, use that as the reference point. The
@@ -486,7 +486,7 @@ export class Carousel {
    * }=} options
    */
   goToSlide(index, options = {}) {
-    const {smoothScroll = true, actionSource} = options;
+    const {actionSource, smoothScroll = true} = options;
     if (index < 0 || index > this.slides_.length - 1 || isNaN(index)) {
       return;
     }
@@ -1113,8 +1113,8 @@ export class Carousel {
    */
   updateCurrent_() {
     const {
-      allSpacers_,
       alignment_,
+      allSpacers_,
       axis_,
       currentIndex_,
       scrollContainer_,

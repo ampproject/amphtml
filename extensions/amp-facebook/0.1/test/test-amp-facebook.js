@@ -15,6 +15,7 @@
  */
 
 import '../amp-facebook';
+import {expect} from 'chai';
 import {facebook} from '../../../../3p/facebook';
 import {resetServiceForTesting} from '../../../../src/service';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
@@ -84,12 +85,51 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
+
+      const context = JSON.parse(iframe.getAttribute('name'));
+      expect(context.attributes.embedAs).to.equal('video');
+    });
+
+    it('renders iframe in amp-facebook with comment', async () => {
+      const ampFB = await getAmpFacebook(fbVideoHref, 'comment');
+      const iframe = ampFB.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
+
+      const context = JSON.parse(iframe.getAttribute('name'));
+      expect(context.attributes.embedAs).to.equal('comment');
+    });
+
+    it('rejects other supported and unsupported data-embed-as types', async () => {
+      expectAsyncConsoleError();
+      await expect(getAmpFacebook(fbVideoHref, 'comments')).to.be.rejectedWith(
+        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: comments/
+      );
+      await expect(getAmpFacebook(fbVideoHref, 'like')).to.be.rejectedWith(
+        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: like/
+      );
+      await expect(getAmpFacebook(fbVideoHref, 'page')).to.be.rejectedWith(
+        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: page/
+      );
+      await expect(
+        getAmpFacebook(fbVideoHref, 'unsupported')
+      ).to.be.rejectedWith(
+        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: unsupported/
+      );
     });
 
     it('renders amp-facebook with detected locale', async () => {
       const ampFB = await getAmpFacebook(fbVideoHref, 'post');
       expect(ampFB).not.to.be.undefined;
       expect(ampFB.getAttribute('data-locale')).to.equal('en_US');
+
+      const iframe = ampFB.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+
+      const context = JSON.parse(iframe.getAttribute('name'));
+      expect(context.attributes.embedAs).to.equal('post');
     });
 
     it('renders amp-facebook with specified locale', async () => {
@@ -108,9 +148,6 @@ describes.realWin(
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK',
-      };
 
       facebook(win, {
         href: fbPostHref,
@@ -126,9 +163,6 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK',
-      };
 
       facebook(win, {
         href: fbVideoHref,
@@ -148,9 +182,6 @@ describes.realWin(
         const div = doc.createElement('div');
         div.setAttribute('id', 'c');
         doc.body.appendChild(div);
-        win.context = {
-          tagName: 'AMP-FACEBOOK',
-        };
 
         facebook(win, {
           href: fbVideoHref,
@@ -169,9 +200,6 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK',
-      };
 
       facebook(win, {
         embedAs: 'video',
@@ -188,9 +216,6 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK',
-      };
 
       facebook(win, {
         embedAs: 'post',

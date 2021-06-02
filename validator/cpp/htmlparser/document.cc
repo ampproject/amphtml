@@ -36,6 +36,7 @@ Node* Document::CloneNode(const Node* from) {
   Node* clone = NewNode(from->Type());
   clone->atom_ = from->atom_;
   clone->data_ = from->data_;
+  clone->attributes_.reserve(from->Attributes().size());
   std::copy(from->Attributes().begin(), from->Attributes().end(),
             std::back_inserter(clone->attributes_));
   return clone;

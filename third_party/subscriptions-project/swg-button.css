@@ -302,6 +302,11 @@
   border: 1px solid #DADCE0;
 }
 
+.swg-button-v2-light:disabled {
+  opacity: 0.38;
+  pointer-events: none;
+}
+
 .swg-button-v2-light:hover {
   box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
   background: linear-gradient(0deg, rgba(26, 115, 232, 0.04), rgba(26, 115, 232, 0.04)), #FFFFFF;
@@ -323,6 +328,11 @@
 .swg-button-v2-dark {
   color: #FFFFFF;
   background-color: #3C4043;
+}
+
+.swg-button-v2-dark:disabled {
+  opacity: 0.38;
+  pointer-events: none;
 }
 
 .swg-button-v2-dark:hover, .swg-button-v2-dark:active {

@@ -844,15 +844,22 @@
       "loading_complete_selectors": [".i-amphtml-story-360-loaded"]
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-inline-page-attachment-dark-theme.html",
-      "name": "amp-story-inline-page-attachment-dark-theme: displays new inline CTA button with dark theme",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html",
+      "name": "amp-story-page-attachment-v2: new inline & outlink CTA buttons",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#cover[active]"
       ],
-      // for page navigation
-      "loading_complete_delay_ms": 500
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html",
+      "name": "amp-story-page-attachment-v2: page attachment desktop",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.js"
     }
   ]
 }

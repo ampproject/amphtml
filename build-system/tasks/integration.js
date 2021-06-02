@@ -17,8 +17,8 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  RuntimeTestRunner,
   RuntimeTestConfig,
+  RuntimeTestRunner,
 } = require('./runtime-test/runtime-test-base');
 const {buildRuntime} = require('../common/utils');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
@@ -39,6 +39,10 @@ class Runner extends RuntimeTestRunner {
   }
 }
 
+/**
+ * Entry point for the `amp integration` task.
+ * @return {Promise<void>}
+ */
 async function integration() {
   maybePrintArgvMessages();
 

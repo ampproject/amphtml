@@ -25,7 +25,7 @@ const {FileList} = require('./file-list');
 const {html, joinFragments} = require('./html');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
 
-const HeaderLink = ({name, href, divider}) => html`
+const HeaderLink = ({divider, href, name}) => html`
   <li class="${divider ? 'divider' : ''}">
     <a target="_blank" rel="noopener noreferrer" href="${href}"> ${name} </a>
   </li>
@@ -38,7 +38,7 @@ const Header = ({isMainPage, links}) => html`
       ${!isMainPage ? HeaderBackToMainLink() : ''}
     </div>
     <ul class="right-nav">
-      ${joinFragments(links, ({name, href, divider}, i) =>
+      ${joinFragments(links, ({divider, href, name}, i) =>
         HeaderLink({
           divider: divider || i == links.length - 1,
           name,

@@ -122,8 +122,14 @@ std::string GetSizerStyle(amp::validator::AmpLayout::Layout layout,
 // https://github.com/ampproject/amphtml/blob/main/src/layout.js.
 bool IsLayoutSizeDefined(amp::validator::AmpLayout::Layout layout);
 
+// Returns whether the given AmpLayout waits on a runtime size.
+bool IsLayoutAwaitingSize(amp::validator::AmpLayout::Layout layout);
+
 // Returns the CSS class name for AmpLayouts with defined sizes.
 std::string GetLayoutSizeDefinedClass();
+
+// Returns the CSS class name for AmpLayouts which wait on a runtime size.
+std::string GetLayoutAwaitingSizeClass();
 
 }  // namespace amp::validator::parse_layout
 

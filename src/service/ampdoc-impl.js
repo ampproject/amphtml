@@ -30,7 +30,8 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilder,
 } from '../service';
-import {isDocumentReady, whenDocumentReady} from '../document-ready';
+import {isDocumentReady, whenDocumentReady} from '../core/document-ready';
+import {isEnumValue} from '../core/types';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
 import {map} from '../core/types/object';
 import {parseQueryString} from '../core/types/string/url';
@@ -268,15 +269,16 @@ export class AmpDoc {
     /** @private @const {!Object<string, string>} */
     this.declaredExtensions_ = {};
 
+    const paramsVisibilityState = this.params_['visibilityState'];
+    devAssert(
+      !paramsVisibilityState ||
+        isEnumValue(VisibilityState, paramsVisibilityState)
+    );
+
     /** @private {?VisibilityState} */
     this.visibilityStateOverride_ =
       (opt_options && opt_options.visibilityState) ||
-      (this.params_['visibilityState'] &&
-        dev().assertEnumValue(
-          VisibilityState,
-          this.params_['visibilityState'],
-          'VisibilityState'
-        )) ||
+      paramsVisibilityState ||
       null;
 
     // Start with `null` to be updated by updateVisibilityState_ in the end

@@ -39,7 +39,7 @@ body:
     id: browsers
     attributes:
       label: Browser(s) Affected
-      description: Select one or more browser(s).
+      description: If applicable, specify which browser(s) are affected. Select one or more options below.
       multiple: true
       options:
         - Chrome
@@ -47,13 +47,21 @@ body:
         - Safari
         - Edge
         - UC Browser
-    validations:
-      required: true
+  - type: input
+    id: operating_systems
+    attributes:
+      label: OS(s) Affected
+      description: If applicable, specify which operating system(s) are affected.
+      placeholder: e.g. Android 11
+  - type: input
+    id: devices
+    attributes:
+      label: Device(s) Affected
+      description: If applicable, specify which device(s) are affected.
+      placeholder: e.g. Pixel 3
   - type: input
     id: version
     attributes:
       label: AMP Version Affected
-      description: If applicable, indicate a version in the format YYMMDDHHMMXXX. Otherwise just put down 'latest'.
+      description: If applicable, specify which version is affected, in the format YYMMDDHHMMXXX.
       placeholder: e.g. 2101280515000
-    validations:
-      required: true

@@ -146,7 +146,7 @@ async function compileCss(options = {}) {
 
   const startTime = Date.now();
   // Must be in order because some iterations write while others append.
-  for (const {path, outJs, outCss, append} of cssEntryPoints) {
+  for (const {append, outCss, outJs, path} of cssEntryPoints) {
     await writeCssEntryPoint(path, outJs, outCss, append);
   }
   await buildExtensions({compileOnlyCss: true});
