@@ -49,8 +49,8 @@ const generateWeeksFromNow = 3;
 
 const labels = ['Type: Design Review'];
 
-const createTitle = ({region, timeUtc, yyyyMmDd}) =>
-  `Design Review ${yyyyMmDd} ${timeUtc} UTC (${region})`;
+const createTitle = ({datetimeUtc, region}) =>
+  `Design Review ${datetimeUtc} UTC (${region})`;
 
 const vcUrl = 'https://bit.ly/amp-dr';
 const calendarEventTitle = 'AMP Project Design Review';
@@ -384,7 +384,7 @@ function getNextIssueData() {
   )}`;
 
   const templateData = {
-    yyyyMmDd: `${yyyy}-${mm}-${dd}`,
+    datetimeUtc: getParseableDatetimeUtc(yyyy, mm, dd, timeUtc),
     timeUtc,
     region,
     timeUrl,
@@ -411,6 +411,21 @@ function env(key) {
 const datetimeFromTitleRegexp = /(\d{4}-\d{2}-\d{2}) (\d{1,2}[:]\d{2})/;
 
 /**
+ * @param {string|number} yyyy
+ * @param {string|number} mm
+ * @param {string|number} dd
+ * @param {string} time
+ * @return {string}
+ */
+function getParseableDatetimeUtc(yyyy, mm, dd, time) {
+  // Keep this uniform with datetimeFromTitleRegexp, since it needs to be parsed
+  // on future runs.
+  // If you update it, make sure you update the titles of existing open issues
+  // to match.
+  return `${yyyy}-${mm}-${dd} ${time}`;
+}
+
+/**
  * @param {string} title
  * @return {number}
  */
@@ -420,8 +435,8 @@ function getSessionDateFromTitle(title) {
     throw new Error(`Could not get date from title: ${title}`);
   }
   const [
-    // eslint-disable-next-line no-unused-vars
-    unusedFullMatch,
+    // @ts-ignore
+    unusedFullMatch, // eslint-disable-line no-unused-vars
     day,
     time,
   ] = match;
@@ -463,12 +478,12 @@ async function closeStaleIssues(token, repo, issuesWithSessionDate) {
     ({sessionDate}) => sessionDate < now.getTime()
   );
   for (const {issue} of issues) {
-    const {number, title} = issue;
+    const {'html_url': htmlUrl, number, title} = issue;
     if (!isDryRun) {
       await unpinGithubIssue(token, repo, number);
       await closeGithubIssue(token, repo, number);
     }
-    console./*OK*/ log('Unpinned & closed: ', title, '\n');
+    console./*OK*/ log('Unpinned & closed: ', title, `(${htmlUrl})`);
   }
   return issues;
 }
@@ -496,11 +511,11 @@ async function closeStalePinUpcoming(token, repo, existing) {
     );
   }
 
-  const {number, title} = upcoming.issue;
+  const {'html_url': htmlUrl, number, title} = upcoming.issue;
   if (!isDryRun) {
     await pinGithubIssue(token, repo, number);
   }
-  console./*OK*/ log('Pinned: ', title, '\n');
+  console./*OK*/ log('Pinned: ', title, `(${htmlUrl})`);
 }
 
 /**
