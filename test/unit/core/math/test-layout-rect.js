@@ -118,7 +118,7 @@ describes.sandboxed('math - LayoutRect', {}, () => {
     expect(lr.rectIntersection(rect1, rect2, rect3, rect4)).to.be.null;
   });
 
-  describe('cloneLayoutMarginsChangeDef', {}, () => {
+  describe('cloneLayoutMarginsChangeDef', () => {
     it('should clone margins change correctly into new object', () => {
       const marginsChange = {
         top: 1,
@@ -134,7 +134,7 @@ describes.sandboxed('math - LayoutRect', {}, () => {
     });
   });
 
-  describe('layoutRectSizeEquals', {}, () => {
+  describe('layoutRectSizeEquals', () => {
     it('should detect changes', () => {
       const from = lr.layoutRectLtwh(10, 20, 1, 1);
       const to = lr.layoutRectLtwh(10, 20, 40, 50);
@@ -148,7 +148,7 @@ describes.sandboxed('math - LayoutRect', {}, () => {
     });
   });
 
-  describe('areMarginsChanged', {}, () => {
+  describe('areMarginsChanged', () => {
     it('should find margins are not changed when values the same', () => {
       const margins = {
         top: 1,
