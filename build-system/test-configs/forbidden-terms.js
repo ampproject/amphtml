@@ -532,7 +532,7 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
-      'src/event-helper-listen.js',
+      'src/core/dom/event-helper-listen.js',
     ],
   },
   'setTimeout.*throw': {
