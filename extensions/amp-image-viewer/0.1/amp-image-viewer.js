@@ -50,7 +50,7 @@ import {
   unobserveContentSize,
 } from '../../../src/utils/size-observer';
 import {setStyles} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
+import {srcsetFromElement} from '../../../src/core/dom/srcset';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';

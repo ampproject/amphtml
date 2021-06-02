@@ -41,7 +41,7 @@ import {
   moveLayoutRect,
 } from '../../../src/core/math/layout-rect';
 import {setStyles, toggle} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
+import {srcsetFromElement} from '../../../src/core/dom/srcset';
 
 const TAG = 'amp-image-lightbox';
 
