@@ -1,5 +1,5 @@
-import _objectSpread from "@babel/runtime/helpers/esm/objectSpread2";
-import _objectWithoutPropertiesLoose from "@babel/runtime/helpers/esm/objectWithoutPropertiesLoose";
+import _objectSpread from "@babel/runtime/helpers/objectSpread2";
+import _objectWithoutPropertiesLoose from "@babel/runtime/helpers/objectWithoutPropertiesLoose";
 
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
