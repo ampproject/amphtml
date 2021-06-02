@@ -19,7 +19,7 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {dev} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';

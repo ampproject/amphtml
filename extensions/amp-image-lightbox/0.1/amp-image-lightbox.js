@@ -29,7 +29,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, clamp, distance, magnitude} from '../../../src/core/math';
 import {continueMotion} from '../../../src/motion';

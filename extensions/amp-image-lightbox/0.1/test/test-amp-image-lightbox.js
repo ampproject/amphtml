@@ -22,7 +22,7 @@ import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {ImageViewer} from '../amp-image-lightbox';
 import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
-import {WindowInterface} from '../../../../src/window-interface';
+import {WindowInterface} from '../../../../src/core/window/interface';
 import {parseSrcset} from '../../../../src/srcset';
 
 describes.realWin(
