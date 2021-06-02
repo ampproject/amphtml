@@ -41,12 +41,12 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   createElementWithAttributes,
-  elementByTag,
   isJsonScriptTag,
   toggleAttribute,
 } from '../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
+import {elementByTag} from '../../../src/core/dom/query';
 import {getData, listen} from '../../../src/event-helper';
 import {getExperimentBranch} from '../../../src/experiments';
 import {getFrameDoc, localizeCtaText} from './utils';

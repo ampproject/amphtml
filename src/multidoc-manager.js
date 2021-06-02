@@ -17,7 +17,7 @@
 import {CommonSignals} from './core/constants/common-signals';
 import {Services} from './services';
 import {VisibilityState} from './core/constants/visibility-state';
-import {childElementsByTag, isConnectedNode} from './dom';
+import {childElementsByTag} from './core/dom/query';
 import {
   createShadowDomWriter,
   createShadowRoot,
@@ -28,6 +28,7 @@ import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
 import {isArray, isObject} from './core/types';
+import {isConnectedNode} from './dom';
 
 import {parseExtensionUrl} from './service/extension-script';
 import {parseUrlDeprecated} from './url';

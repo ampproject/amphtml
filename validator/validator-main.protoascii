@@ -2613,7 +2613,6 @@ attr_lists: {
   }
   attrs: { name: "checked" }
   attrs: { name: "disabled" }
-  attrs: { name: "form" }
   attrs: { name: "height" }
   attrs: {
     disabled_by: "amp4email"
@@ -3383,9 +3382,14 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
-    mandatory_cdata: "[].slice.call(document.querySelectorAll(\"script[src*='/v0.js'],script[src*='/v0.mjs']\")).forEach(function(s){s.onerror=function(){document.querySelector('style[amp-boilerplate]').textContent=''}})"
+    # Only valid if contents are exactly either of these:
+    # [].slice.call(document.querySelectorAll("script[src*='/v0.js'],script[src*='/v0.mjs']")).forEach(function(s){s.onerror=function(){document.querySelector('style[amp-boilerplate]').textContent=''}})
+    # document.querySelector("script[src*='/v0.js']").onerror=function(){document.querySelector('style[amp-boilerplate]').textContent=''}
+    cdata_regex: "\\[]\\.slice\\.call\\(document\\.querySelectorAll\\(\"script\\[src\\*='\\/v0\\.js'],script\\[src\\*='\\/v0\\.mjs']\"\\)\\)\\.forEach\\(function\\(s\\){s\\.onerror=function\\(\\){document\\.querySelector\\('style\\[amp-boilerplate]'\\)\\.textContent=''}}\\)|"
+                 "document\\.querySelector\\(\"script\\[src\\*='\\/v0\\.js']\"\\)\\.onerror=function\\(\\){document\\.querySelector\\('style\\[amp-boilerplate]'\\)\\.textContent=''}"
   }
 }
+
 # Enables early styling on fast failure to load v0.js. See GitHub #22543.
 tags: {
   html_format: AMP

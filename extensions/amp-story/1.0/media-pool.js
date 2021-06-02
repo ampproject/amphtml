@@ -33,7 +33,8 @@ import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/core/types/array';
-import {isConnectedNode, matches} from '../../../src/dom';
+import {isConnectedNode} from '../../../src/dom';
+import {matches} from '../../../src/core/dom/query';
 import {toWin} from '../../../src/types';
 import {userInteractedWith} from '../../../src/video-interface';
 

@@ -15,6 +15,7 @@
  */
 
 import * as dom from './dom';
+import * as query from './core/dom/query';
 import {AmpEvents} from './core/constants/amp-events';
 import {CommonSignals} from './core/constants/common-signals';
 import {ElementStub} from './element-stub';
@@ -1145,7 +1146,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      */
     connectedCallback() {
       if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
-        this.isInTemplate_ = !!dom.closestAncestorElementBySelector(
+        this.isInTemplate_ = !!query.closestAncestorElementBySelector(
           this,
           'template'
         );
@@ -1899,7 +1900,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @package @final
      */
     getRealChildNodes() {
-      return dom.childNodes(this, (node) => !isInternalOrServiceNode(node));
+      return query.childNodes(this, (node) => !isInternalOrServiceNode(node));
     }
 
     /**
@@ -1909,7 +1910,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @package @final
      */
     getRealChildren() {
-      return dom.childElements(
+      return query.childElements(
         this,
         (element) => !isInternalOrServiceNode(element)
       );
@@ -1921,7 +1922,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @package @final
      */
     getPlaceholder() {
-      return dom.lastChildElement(this, (el) => {
+      return query.lastChildElement(this, (el) => {
         return (
           el.hasAttribute('placeholder') &&
           // Denylist elements that has a native placeholder property
@@ -1945,7 +1946,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           dev().assertElement(placeholder).classList.remove('amp-hidden');
         }
       } else {
-        const placeholders = dom.childElementsByAttr(this, 'placeholder');
+        const placeholders = query.childElementsByAttr(this, 'placeholder');
         for (let i = 0; i < placeholders.length; i++) {
           // Don't toggle elements with a native placeholder property
           // e.g. input, textarea
@@ -1963,7 +1964,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @package @final
      */
     getFallback() {
-      return dom.childElementByAttr(this, 'fallback');
+      return query.childElementByAttr(this, 'fallback');
     }
 
     /**
@@ -2078,7 +2079,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      */
     getOverflowElement() {
       if (this.overflowElement_ === undefined) {
-        this.overflowElement_ = dom.childElementByAttr(this, 'overflow');
+        this.overflowElement_ = query.childElementByAttr(this, 'overflow');
         if (this.overflowElement_) {
           if (!this.overflowElement_.hasAttribute('tabindex')) {
             this.overflowElement_.setAttribute('tabindex', '0');
