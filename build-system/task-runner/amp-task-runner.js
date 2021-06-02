@@ -76,32 +76,36 @@ function startAtRepoRoot() {
 }
 
 /**
- * Updates task-specific subpackages if there are any.
- * @param {string} taskSourceFilePath
- * @return {Promise<void>}
+ * 1. Updates root-level packages during local development. (Skipped during CI
+ *    because they're guaranteed to be fresh.)
+ * 2. Updates task-level subpackages if a package.json file exists in the task
+ *    directory.
+ * @param {string} taskSourceFileName
  */
-async function maybeUpdateSubpackages(taskSourceFilePath) {
+function ensureUpdatedPackages(taskSourceFileName) {
+  if (!isCiBuild()) {
+    updatePackages();
+  }
+  const taskSourceFilePath = getTaskSourceFilePath(taskSourceFileName);
   const packageFile = path.join(taskSourceFilePath, 'package.json');
-  const hasSubpackages = await fs.pathExists(packageFile);
+  const hasSubpackages = fs.pathExistsSync(packageFile);
   if (hasSubpackages) {
-    await updateSubpackages(taskSourceFilePath);
+    updateSubpackages(taskSourceFilePath);
   }
 }
 
 /**
  * Runs an AMP task with logging and timing after installing its subpackages.
  * @param {string} taskName
- * @param {string} taskSourceFileName
  * @param {TaskFuncDef} taskFunc
  * @return {Promise<void>}
  */
-async function runTask(taskName, taskSourceFileName, taskFunc) {
+async function runTask(taskName, taskFunc) {
   const taskFile = path.relative(os.homedir(), 'amp.js');
   log('Using task file', magenta(taskFile));
   const start = Date.now();
   try {
     log(`Starting '${cyan(taskName)}'...`);
-    await maybeUpdateSubpackages(getTaskSourceFilePath(taskSourceFileName));
     await taskFunc();
     log('Finished', `'${cyan(taskName)}'`, 'after', magenta(getTime(start)));
   } catch (err) {
@@ -183,8 +187,6 @@ function createTask(
   const isInvokedTask = argv._.includes(taskName); // `amp <task>`
   const isDefaultTask =
     argv._.length === 0 && taskName == 'default' && !isHelpTask; // `amp`
-  const isTaskLevelHelp =
-    (isInvokedTask || isDefaultTask) && argv.hasOwnProperty('help'); // `amp <task> --help`
 
   if (isHelpTask) {
     const taskFunc = getTaskFunc(taskSourceFileName, taskFuncName);
@@ -193,9 +195,7 @@ function createTask(
   }
   if (isInvokedTask || isDefaultTask) {
     startAtRepoRoot();
-    if (!isTaskLevelHelp && !isCiBuild()) {
-      updatePackages();
-    }
+    ensureUpdatedPackages(taskSourceFileName);
     const taskFunc = getTaskFunc(taskSourceFileName, taskFuncName);
     const task = commander.command(taskName, {isDefault: isDefaultTask});
     task.description(green(taskFunc.description));
@@ -207,7 +207,7 @@ function createTask(
     }
     task.action(async () => {
       validateUsage(task, taskName, taskFunc);
-      await runTask(taskName, taskSourceFileName, taskFunc);
+      await runTask(taskName, taskFunc);
     });
   }
 }
