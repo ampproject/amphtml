@@ -16,7 +16,6 @@
 'use strict';
 
 const request = require('request');
-const {green, red} = require('./colors');
 const {parentPort, workerData} = require('worker_threads');
 
 const {CIRCLE_TOKEN, CIRCLE_WORKFLOW_ID} = process.env;
@@ -24,20 +23,11 @@ const {CIRCLE_TOKEN, CIRCLE_WORKFLOW_ID} = process.env;
 const POLLING_RATE = parseInt(process.env.POLLING_RATE || '', 10) || 1000;
 
 /**
- * DO_NOT_SUBMIT delete this function after choose the optimal way to get the PID.
+ * Get the id of the process to be killed when a failure is found.
  * @return {number}
  */
 function getPid() {
-  if (workerData && workerData.pid) {
-    return workerData.pid;
-  }
-  if (process.env.JOB_PID) {
-    return parseInt(process.env.JOB_PID, 10);
-  }
-  if (process.argv[2]) {
-    return parseInt(process.argv[2], 10);
-  }
-  return process.pid;
+  return workerData && workerData.pid;
 }
 
 /**
@@ -76,17 +66,16 @@ function getJobs() {
  * Starts the fast fail polling background service.
  */
 function initializeFastFailPolling() {
-  parentPort?./*OK*/ postMessage(`${green('Initialized')} Fail Fast Worker`);
+  parentPort?./*OK*/ postMessage('');
   const interval = setInterval(async () => {
     const jobs = await getJobs();
     const failed = jobs.items.filter((job) => job.status === 'failed');
     if (failed.length) {
       const pid = getPid();
       const failedJobNames = failed.map((job) => job.name).join(', ');
+      const jobOrJobs = `job${failed.length > 1 ? 's' : ''}`;
       parentPort?./*OK*/ postMessage(
-        `${red(
-          `Found failed job${failed.length > 1 ? 's' : ''}`
-        )} ${failedJobNames}, Killing ${pid}.`
+        `Found failed ${jobOrJobs}: ${failedJobNames}`
       );
       clearInterval(interval);
       setTimeout(() => {

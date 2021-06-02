@@ -42,7 +42,9 @@ function startFastFailPollingWorker() {
       workerData: {pid: process.pid},
     });
     worker.on('message', (message) => {
-      logWithoutTimestamp(message);
+      if (message) {
+        logWithoutTimestamp(red(message));
+      }
       resolve();
     });
     worker.on('exit', (code) => {
