@@ -19,6 +19,9 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const JSON5 = require('json5');
 const path = require('path');
+const Percy = require('@percy/core');
+const percySnapshot = require('@percy/puppeteer');
+const puppeteer = require('puppeteer');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -41,11 +44,6 @@ const {buildRuntime} = require('../../common/utils');
 const {cyan, yellow} = require('../../common/colors');
 const {isCiBuild} = require('../../common/ci');
 const {startServer, stopServer} = require('../serve');
-
-// Lazy-loaded dependencies.
-let puppeteer;
-let percySnapshot;
-let Percy;
 
 // CSS injected in every page tested.
 // Normally, as in https://docs.percy.io/docs/percy-specific-css
@@ -107,7 +105,38 @@ const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
   'utf8'
 );
 
+// Browser instance that runs all visual tests.
 let browser_;
+
+/**
+ * @typedef {{
+ *  name: string,
+ *  message: string,
+ *  error: Error,
+ *  consoleMessages: puppeteer.ConsoleMessage[],
+ * }}
+ */
+let TestErrorDef;
+
+/**
+ * @typedef {{
+ *  url: string,
+ *  name: string,
+ *  viewport: {
+ *    width: number,
+ *    height: number,
+ *  },
+ *  loading_incomplete_selectors: string[],
+ *  loading_complete_selectors: string[],
+ *  loading_complete_delay_ms: number,
+ *  enable_percy_javascript: boolean,
+ *  interactive_tests: string,
+ *  no_base_test: boolean,
+ *  flaky: boolean,
+ *  tests_: Object<string,Function>,
+ * }}
+ */
+let WebpageDef;
 
 /**
  * Override PERCY_* environment variables if passed via amp task parameters.
@@ -161,6 +190,7 @@ async function launchPercyAgent(browserFetcher) {
     return;
   }
 
+  // @ts-ignore Type mismatch in library
   const percy = await Percy.start({
     token: process.env.PERCY_TOKEN,
     loglevel: argv.percy_agent_debug ? 'debug' : 'info',
@@ -265,7 +295,10 @@ async function newPage(browser, viewport = null) {
         'with file',
         cyan(mockedFilepath)
       );
-      return interceptedRequest.respond(fs.readFileSync(mockedFilepath));
+      return interceptedRequest.respond({
+        status: 200,
+        body: fs.readFileSync(mockedFilepath),
+      });
     } else {
       log(
         'verbose',
@@ -305,7 +338,7 @@ async function resetPage(page, viewport = null) {
 /**
  * Adds a test error and logs it if running locally (not as part of CI).
  *
- * @param {!Array<!JsonObject>} testErrors array of testError objects.
+ * @param {!Array<!TestErrorDef>} testErrors array of testError objects.
  * @param {string} name full name of the test.
  * @param {string} message extra information about the failure.
  * @param {Error} error error object with stack trace.
@@ -323,7 +356,7 @@ function addTestError(testErrors, name, message, error, consoleMessages) {
 /**
  * Logs a test error (regardless of where it's running).
  *
- * @param {!JsonObject} testError object as created by addTestError.
+ * @param {!TestErrorDef} testError object as created by addTestError.
  */
 function logTestError(testError) {
   log(
@@ -352,8 +385,7 @@ function logTestError(testError) {
  * set of given webpages.
  *
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @param {!Array<JsonObject>} webpages an array of JSON objects containing
- *     details about the pages to snapshot.
+ * @param {!Array<WebpageDef>} webpages details about the pages to snapshot.
  */
 async function runVisualTests(browser, webpages) {
   const numUnfilteredPages = webpages.length;
@@ -427,6 +459,7 @@ async function runVisualTests(browser, webpages) {
     await page.goto(
       `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
     );
+    // @ts-ignore Type mismatch in library
     await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
   }
 
@@ -440,7 +473,7 @@ async function runVisualTests(browser, webpages) {
  * Generates Percy snapshots for a set of given webpages.
  *
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @param {!Array<!JsonObject>} webpages an array of JSON objects containing
+ * @param {!Array<!WebpageDef>} webpages an array of JSON objects containing
  *     details about the webpages to snapshot.
  * @return {!Promise<boolean>} true if all tests passed locally (does not
  *     indicate whether the tests passed on Percy).
@@ -472,7 +505,8 @@ async function snapshotWebpages(browser, webpages) {
       while (availablePages.length == 0) {
         await sleep(WAIT_FOR_TABS_MS);
       }
-      const page = availablePages.shift();
+      const [page] = availablePages;
+      availablePages.shift();
 
       const name = testName ? `${pageName} (${testName})` : pageName;
       log(
@@ -609,6 +643,7 @@ async function snapshotWebpages(browser, webpages) {
               .replace('__TEST_ERROR__', testError)
               .replace('__HTML_SNAPSHOT__', escapeHtml(htmlSnapshot))
           );
+          // @ts-ignore Type mismatch in library
           await percySnapshot(page, name, SNAPSHOT_SINGLE_BUILD_OPTIONS);
         }
 
@@ -629,11 +664,12 @@ async function snapshotWebpages(browser, webpages) {
             }
 
             if (viewport) {
-              snapshotOptions.widths = [viewport.width];
+              const {height, width} = viewport;
+              snapshotOptions.widths = [width];
               log('verbose', 'Wrapping viewport-constrained page in an iframe');
               await page.evaluate(
-                WRAP_IN_IFRAME_SNIPPET.replace(/__WIDTH__/g, viewport.width)
-                  .replace(/__HEIGHT__/g, viewport.height)
+                WRAP_IN_IFRAME_SNIPPET.replace(/__WIDTH__/g, width.toString())
+                  .replace(/__HEIGHT__/g, height.toString())
                   .replace(/__PERCY_CSS__/g, percyCss)
               );
             } else {
@@ -641,6 +677,7 @@ async function snapshotWebpages(browser, webpages) {
             }
 
             // Finally, send the snapshot to percy.
+            // @ts-ignore Type mismatch in library
             await percySnapshot(page, name, snapshotOptions);
           } catch (snapshotError) {
             addTestError(
@@ -709,6 +746,7 @@ async function createEmptyBuild(browser) {
     // Ignore failures
   }
 
+  // @ts-ignore Type mismatch in library
   await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
 }
 
@@ -736,7 +774,8 @@ async function visualDiff() {
   try {
     await performVisualTests(browserFetcher);
   } finally {
-    await percy.stop();
+    // @ts-ignore Type mismatch in library
+    await percy?.stop();
   }
   exitCtrlcHandler(handlerProcess);
 }
@@ -805,10 +844,8 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
  * @return {!Promise<!puppeteer.BrowserFetcher>}
  */
 async function loadBrowserFetcher_() {
-  puppeteer = require('puppeteer');
-  percySnapshot = require('@percy/puppeteer');
-  Percy = require('@percy/core');
-
+  // @ts-ignore Valid method in Puppeteer's nodejs interface.
+  // https://github.com/puppeteer/puppeteer/blob/main/src/node/Puppeteer.ts
   const browserFetcher = puppeteer.createBrowserFetcher();
   const chromiumRevisions = await browserFetcher.localRevisions();
   if (chromiumRevisions.includes(PUPPETEER_CHROMIUM_REVISION)) {
