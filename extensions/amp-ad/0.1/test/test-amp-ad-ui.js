@@ -37,6 +37,7 @@ describes.realWin(
 
     beforeEach(() => {
       adElement = env.win.document.createElement('amp-ad');
+      adElement.ampdoc_ = env.win.document;
       adImpl = new BaseElement(adElement);
       uiHandler = new AmpAdUIHandler(adImpl);
       env.sandbox.stub(adHelper, 'getAdContainer').callsFake(() => {
@@ -330,12 +331,18 @@ describes.realWin(
         uiHandler.stickyAdPosition_ = 'bottom';
         uiHandler.onResizeSuccess();
         expect(uiHandler.closeButtonRendered_).to.be.true;
-        expect(uiHandler.unlisteners_.length).to.equal(1);
+        expect(uiHandler.unlisteners_.length).to.equal(2);
         expect(uiHandler.element_.querySelector('.amp-ad-close-button')).to.be
           .not.null;
 
         uiHandler.onResizeSuccess();
-        expect(uiHandler.unlisteners_.length).to.equal(1);
+        expect(uiHandler.unlisteners_.length).to.equal(2);
+      });
+
+      it('onResizeSuccess top sticky ads shall cause padding top adjustment', () => {
+        uiHandler.stickyAdPosition_ = 'top';
+        uiHandler.onResizeSuccess();
+        expect(uiHandler.topStickyAdScrollListener_).to.not.be.undefined;
       });
     });
   }
