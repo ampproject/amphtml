@@ -32,8 +32,8 @@ let aliasPaths = null;
  * This method outputs the necessary alias object for the module-resolver Babel
  * plugin, which excludes the "/*" for each. The above paths would result in:
  * {
- *   '#foo/': './src/foo/',
- *   '#bar/': './bar/',
+ *   '#foo': './src/foo',
+ *   '#bar': './bar',
  * }
  * @return {!Object<string, string>}
  */
@@ -43,11 +43,6 @@ function readJsconfigPaths() {
     aliasPaths = jsConfig.compilerOptions.paths;
   }
 
-  // ESLint module-resolver autofix needs "/" to avoid false-positives:
-  // src/services != #service/s
-  // TODO(rcebulko): Fork and fix path matching in plugin
-  // Impact: import * from '#preact' works fine, but `eslint --fix` will not
-  // replace '../../src/preact' with '#preact'
   const stripSuffix = (s) => s.replace(/\/\*$/, '');
   const aliases = Object.entries(aliasPaths).map(([alias, [dest]]) => [
     stripSuffix(alias),

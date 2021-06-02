@@ -48,6 +48,7 @@ module.exports = {
     'import',
     'jsdoc',
     'local',
+    'module-resolver',
     'notice',
     'prettier',
     'react',
@@ -89,9 +90,6 @@ module.exports = {
       'pragma': 'Preact',
     },
     'import/resolver': {
-      // This makes it possible to eventually enable the built-in import linting
-      // rules to detect invalid imports, imports of things that aren't
-      // exported, etc.
       'babel-module': getImportResolver(),
     },
   },
@@ -189,6 +187,10 @@ module.exports = {
     'local/unused-private-field': 2,
     'local/vsync': 0,
     'local/window-property-name': 2,
+    'module-resolver/use-alias': [
+      'error',
+      {'alias': getImportResolver().alias},
+    ],
     'no-alert': 2,
     'no-cond-assign': 2,
     'no-debugger': 2,
