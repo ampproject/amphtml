@@ -31,9 +31,9 @@
     "./eslint-rules/**/*.js",
     "./externs/**/*.js",
     "./tasks/make-extension/template/**/*.js",
+    "./tasks/performance/cache/**/*.js",
 
     // Directories that need code fixes before type-checking can be enabled.
-    "./tasks/get-zindex/**/*.js",
-    "./tasks/performance/**/*.js"
+    "./tasks/get-zindex/**/*.js"
   ]
 }
