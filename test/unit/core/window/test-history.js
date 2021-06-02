@@ -307,7 +307,7 @@ describes.fakeWin(
   }
 );
 
-describes.sandboxed('Window - History', {}, () => {
+describes.sandboxed('Window - History', {}, (env) => {
   describe('install', () => {
     let win;
     let ampdoc;
@@ -361,7 +361,7 @@ describes.sandboxed('Window - History', {}, () => {
     });
   });
 
-  describe('HistoryBindingNatural', (env) => {
+  describe('HistoryBindingNatural', () => {
     let clock;
     let onStateUpdated;
     let history;
@@ -646,7 +646,7 @@ describes.sandboxed('Window - History', {}, () => {
     });
   });
 
-  describe('HistoryBindingVirtual', (env) => {
+  describe('HistoryBindingVirtual', () => {
     let history;
     let viewer;
     let capabilityStub;
