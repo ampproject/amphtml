@@ -38,12 +38,12 @@ import {
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
-  isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
 import {getConsentDataToForward} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {isFullscreenElement} from '../../../src/core/dom/fullscreen';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {measureIntersection} from '../../../src/utils/intersection';
 import {once} from '../../../src/core/types/function';

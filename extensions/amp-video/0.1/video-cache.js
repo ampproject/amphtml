@@ -19,9 +19,9 @@ import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 import {
   createElementWithAttributes,
   iterateCursor,
-  matches,
   removeElement,
 } from '../../../src/dom';
+import {matches} from '../../../src/core/dom/query';
 import {toArray} from '../../../src/core/types/array';
 import {user} from '../../../src/log';
 

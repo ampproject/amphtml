@@ -73,7 +73,7 @@ exports.rules = [
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-google-assistant-assistjs/**/*.js->third_party/closure-responding-channel/closure-bundle.js',
-      'src/core/dom/css.js->third_party/css-escape/css-escape.js',
+      'src/core/dom/css-selectors.js->third_party/css-escape/css-escape.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
     ],
@@ -245,9 +245,11 @@ exports.rules = [
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/component.js',
 
       // Facebook components
+      'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/1.0/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-comments/1.0/base-element.js->extensions/amp-facebook/1.0/facebook-base-element.js',
 
       // VideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
       'extensions/**->extensions/amp-video/1.0/base-element.js',

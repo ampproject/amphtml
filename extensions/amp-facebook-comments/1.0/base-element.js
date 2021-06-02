@@ -14,30 +14,19 @@
  * limitations under the License.
  */
 
-import {FacebookComments} from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {dashToUnderline} from '../../../src/core/types/string';
+import {FacebookBaseElement} from '../../amp-facebook/1.0/facebook-base-element';
 
-export class BaseElement extends PreactBaseElement {}
-
-/** @override */
-BaseElement['Component'] = FacebookComments;
+export class BaseElement extends FacebookBaseElement {}
 
 /** @override */
 BaseElement['props'] = {
-  'title': {attr: 'title'}, // Needed for Preact component
-  'href': {attr: 'data-href'},
-  'locale': {
-    attr: 'data-locale',
-    default: dashToUnderline(window.navigator.language),
-  },
+  ...FacebookBaseElement['props'],
   'numPosts': {attr: 'data-numposts'},
   'colorScheme': {attr: 'data-colorscheme'},
   'orderBy': {attr: 'data-order-by'},
 };
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
-
-/** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['staticProps'] = {
+  'embedAs': 'comments',
+};
