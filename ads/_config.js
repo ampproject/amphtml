@@ -888,7 +888,9 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'opinary': {},
+  'opinary': {
+    renderStartImplemented: true,
+  },
 
   'outbrain': {
     renderStartImplemented: true,
