@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,23 @@
  */
 
 /** @const @private {string} */
-const SRC_A4A_PREFIX_ = 'https://www.dianomi.com/smartads.pl?format=a4a';
+const SRC_PREFIX_ = 'https://smart-ads.biz/_amp';
+
+/** @const @private {string} */
+const SRC_A4A_PREFIX_ = 'https://smart-ads.biz/_a4a';
 
 /**
  * @param {!Window} win
  * @param {!Element} element
+ * @param {boolean} useRemoteHtml
  * @return {boolean}
  */
-export function dianomiIsA4AEnabled(win, element) {
+export function smartAdsIsA4AEnabled(win, element, useRemoteHtml) {
   const src = element.getAttribute('src');
   return (
+    !useRemoteHtml &&
     !!src &&
-    src.startsWith(SRC_A4A_PREFIX_)
+    !!element.getAttribute('data-use-a4a') &&
+    (src.startsWith(SRC_PREFIX_) || src.startsWith(SRC_A4A_PREFIX_))
   );
 }
