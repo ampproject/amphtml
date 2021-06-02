@@ -98,7 +98,7 @@ export class MediaQueryProps {
    * @return {string} value
    */
   resolve_(exprString, parser, emptyExprValue) {
-    if (!exprString || !exprString.trim()) {
+    if (!exprString?.trim()) {
       return emptyExprValue;
     }
     let expr = this.exprMap_[exprString] || this.prevExprMap_[exprString];
