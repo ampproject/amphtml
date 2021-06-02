@@ -196,12 +196,15 @@ async function getGraphqlIssueId(token, repo, number) {
   return repository.issue.id;
 }
 
-async function pinIssue(token, repo, number) {
+async function pinOrUnpinGithubIssue(token, repo, number, op = 'pin') {
+  if (op !== 'pin' && op !== 'unpin') {
+    throw new Error(`must be "pin" or "unpin", got "${op}"`);
+  }
   const issueId = await getGraphqlIssueId(token, repo, number);
-  const clientMutationId = 'create-design-review-pin';
+  const clientMutationId = `create-design-review-${op}`;
   const mutation = `
     mutation {
-      pinIssue(input: { clientMutationId: "${clientMutationId}", issueId:"${issueId}" }) {
+      ${op}Issue(input: { clientMutationId: "${clientMutationId}", issueId:"${issueId}" }) {
         issue {
           title
         }
@@ -211,19 +214,12 @@ async function pinIssue(token, repo, number) {
   return graphqlQueryGithub(token, mutation);
 }
 
-async function unpinIssue(token, repo, number) {
-  const issueId = await getGraphqlIssueId(token, repo, number);
-  const clientMutationId = 'create-design-review-unpin';
-  const mutation = `
-    mutation {
-      unpinIssue(input: { clientMutationId: "${clientMutationId}", issueId:"${issueId}" }) {
-        issue {
-          title
-        }
-      }
-    }
-  `;
-  return graphqlQueryGithub(token, mutation);
+function pinGithubIssue(token, repo, number) {
+  return pinOrUnpinGithubIssue(token, repo, number);
+}
+
+function unpinGithubIssue(token, repo, number) {
+  return pinOrUnpinGithubIssue(token, repo, number, 'unpin');
 }
 
 function getNextDayOfWeek(date, dayOfWeek, weeks = 1) {
@@ -339,7 +335,7 @@ async function closeStaleIssues(token, repo, issuesWithSessionDate) {
   for (const {issue} of issues) {
     const {number, title} = issue;
     if (!isDryRun) {
-      await unpinIssue(token, repo, number);
+      await unpinGithubIssue(token, repo, number);
       await closeGithubIssue(token, repo, number);
     }
     console./*OK*/ log('Unpinned & closed: ', title, '\n');
@@ -367,7 +363,7 @@ async function closeStalePinNextIssue(token, repo, existing) {
 
   const {number, title} = nextIssue.issue;
   if (!isDryRun) {
-    await pinIssue(token, repo, number);
+    await pinGithubIssue(token, repo, number);
   }
   console./*OK*/ log('Pinned: ', title, '\n');
 }
@@ -382,7 +378,8 @@ async function createNextDesignReviewIssue(token, repo, existing) {
   if (existingIssue) {
     const {title, 'html_url': htmlUrl} = existingIssue.issue;
     console./*OK*/ log(
-      '(Skipping creation of next issue since it exists.)\n' + `- ${title}\n  ${htmlUrl}`
+      '(Skipping creation of next issue since it exists.)\n' +
+        `- ${title}\n  ${htmlUrl}`
     );
     return;
   }
