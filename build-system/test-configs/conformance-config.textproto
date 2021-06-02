@@ -45,8 +45,7 @@ requirement: {
   type: BANNED_PROPERTY
   error_message: 'History.p.state is broken in IE11. Please use the helper methods provided in src/history.js'
   value: 'History.prototype.state'
-  allowlist: 'src/history.js'
-  allowlist: 'extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js'
+  allowlist: 'src/core/window/history.js'
 }
 
 # Strings

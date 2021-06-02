@@ -512,7 +512,7 @@ const forbiddenTermsGlobal = {
       'src/inabox/inabox-viewer.js',
       'src/service/viewer-impl.js',
       'src/error-reporting.js',
-      'src/window-interface.js',
+      'src/core/window/interface.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
