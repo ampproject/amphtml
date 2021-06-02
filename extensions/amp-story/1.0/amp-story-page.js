@@ -79,7 +79,7 @@ import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {prefersReducedMotion} from '../../../src/utils/media-query-props';
-import {px, toggle} from '../../../src/style';
+import {px, setImportantStyles, toggle} from '../../../src/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 
@@ -713,9 +713,17 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   onUIStateUpdate_(uiState) {
-    // On vertical rendering, render all the animations with their final state.
+    // For bot rendering.
     if (uiState === UIType.VERTICAL) {
+      // Render all animations in their final state.
       this.maybeFinishAnimations_();
+      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+        // Render open attachment element and make it visible so it's visible to bots.
+        this.renderOpenAttachmentUI_();
+        if (this.openAttachmentEl_) {
+          setImportantStyles(this.openAttachmentEl_, {'visibility': 'visible'});
+        }
+      }
     }
   }
 
