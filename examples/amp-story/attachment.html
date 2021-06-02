@@ -60,7 +60,7 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <p>
-            <span data-text-background-color="#00A3DB">Default inline CTA.</span></br></br>
+            <span data-text-background-color="#00A3DB">Default amp-story-page-attachment.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
@@ -81,7 +81,7 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <p>
-            <span data-text-background-color="#00A3DB">Inline CTA: dark theme.</span></br></br>
+            <span data-text-background-color="#00A3DB">amp-story-page-attachment: dark theme.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
@@ -107,7 +107,7 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <p>
-            <span data-text-background-color="#00A3DB">Inline CTA: one image.</span></br></br>
+            <span data-text-background-color="#00A3DB">amp-story-page-attachment: one image.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
@@ -136,7 +136,7 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <p>
-            <span data-text-background-color="#00A3DB">Inline CTA: two images & dark theme.</span></br></br>
+            <span data-text-background-color="#00A3DB">amp-story-page-attachment: two images & dark theme.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
@@ -165,14 +165,13 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="center">
           <p>
-            <span data-text-background-color="crimson">Default outlink CTA.</span></br></br>
+            <span data-text-background-color="crimson">Default amp-story-page-outlink.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
         <amp-story-page-outlink
-          title="Link Description"
-          href="https://www.google.com"
           layout="nodisplay">
+          <a href="https://www.google.com" title="Link Description"></a>
         </amp-story-page-outlink>
       </amp-story-page>
 
@@ -182,16 +181,14 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="center">
           <p>
-            <span data-text-background-color="crimson">Outlink CTA: logo & custom text.</span></br></br>
+            <span data-text-background-color="crimson">amp-story-page-outlink: logo & custom text.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
         <amp-story-page-outlink
-          title="Link Description"
-          href="https://www.google.com"
-          cta-text="Shop at Forbes"
-          cta-image="img/logo.jpg"
-          layout="nodisplay">
+          layout="nodisplay"
+          cta-image="img/logo.jpg">
+          <a href="https://www.google.com" title="Link Description">Shop at Forbes</a>
         </amp-story-page-outlink>
       </amp-story-page>
 
@@ -201,15 +198,14 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="center">
           <p>
-            <span data-text-background-color="crimson">Outlink CTA: no image.</span></br></br>
+            <span data-text-background-color="crimson">amp-story-page-outlink: no image.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
         <amp-story-page-outlink
-          title="Link Description"
-          href="https://www.google.com"
-          cta-image="none"
-          layout="nodisplay">
+          layout="nodisplay"
+          cta-image="none">
+          <a href="https://www.google.com" title="Link Description"></a>
         </amp-story-page-outlink>
       </amp-story-page>
 
@@ -219,15 +215,14 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="center">
           <p>
-            <span data-text-background-color="crimson">Outlink CTA: dark theme.</span></br></br>
+            <span data-text-background-color="crimson">amp-story-page-outlink: dark theme.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
         <amp-story-page-outlink
-          title="Link Description"
-          href="https://www.google.com"
-          theme="dark"
-          layout="nodisplay">
+          layout="nodisplay"
+          theme="dark">
+          <a href="https://www.google.com" title="Link Description"></a>
         </amp-story-page-outlink>
       </amp-story-page>
 
@@ -237,17 +232,16 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="center">
           <p>
-            <span data-text-background-color="crimson">Outlink CTA: custom pink background.</span></br></br>
+            <span data-text-background-color="crimson">amp-story-page-outlink: custom pink background.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
         <amp-story-page-outlink
-          title="Link Description"
-          href="https://www.google.com"
+          layout="nodisplay"
           theme="custom"
           cta-accent-color="pink"
-          cta-accent-element="background"
-          layout="nodisplay">
+          cta-accent-element="background">
+          <a href="https://www.google.com" title="Link Description"></a>
         </amp-story-page-outlink>
       </amp-story-page>
 
@@ -257,17 +251,16 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="center">
           <p>
-            <span data-text-background-color="crimson">Outlink CTA: custom pink text.</span></br></br>
+            <span data-text-background-color="crimson">amp-story-page-outlink: custom pink text.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
         <amp-story-page-outlink
-          title="Link Description"
-          href="https://www.google.com"
+          layout="nodisplay"
           theme="custom"
           cta-accent-color="pink"
-          cta-accent-element="text"
-          layout="nodisplay">
+          cta-accent-element="text">
+          <a href="https://www.google.com" title="Link Description"></a>
         </amp-story-page-outlink>
       </amp-story-page>
 
@@ -277,17 +270,16 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="center">
           <p>
-            <span data-text-background-color="crimson">Outlink CTA: custom navy background.</span></br></br>
+            <span data-text-background-color="crimson">amp-story-page-outlink: custom navy background.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
         <amp-story-page-outlink
-          title="Link Description"
-          href="https://www.google.com"
+          layout="nodisplay"
           theme="custom"
           cta-accent-color="navy"
-          cta-accent-element="background"
-          layout="nodisplay">
+          cta-accent-element="background">
+            <a href="https://www.google.com" title="Link Description"></a>
         </amp-story-page-outlink>
       </amp-story-page>
 
@@ -297,27 +289,26 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="center">
           <p>
-            <span data-text-background-color="crimson">Outlink CTA: custom navy text.</span></br></br>
+            <span data-text-background-color="crimson">amp-story-page-outlink: custom navy text.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
         <amp-story-page-outlink
-          title="Link Description"
-          href="https://www.google.com/search?q=why+do+cats+purr+so+loud"
+          layout="nodisplay"
           theme="custom"
           cta-accent-color="navy"
-          cta-accent-element="text"
-          layout="nodisplay">
+          cta-accent-element="text">
+          <a href="https://www.google.com/search?q=why+do+cats+purr+so+loud" title="Link Description"></a>
         </amp-story-page-outlink>
       </amp-story-page>
 
-      <amp-story-page id="cta-without-data-attributes">
+      <amp-story-page id="legacy-attachment">
         <amp-story-grid-layer template="fill">
           <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat2.jpg"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="center">
           <p>
-            <span data-text-background-color="crimson">Using title, data-title, cta-text, and data-cta-text attributes.</span></br></br>
+            <span data-text-background-color="crimson">Legacy outlink (amp-story-page-attachment with an href) using title, data-title, cta-text, and data-cta-text attributes.</span></br></br>
             <span data-text-background-color="#00A3AB">Enable experiment by pasting AMP.toggleExperiment('amp-story-page-attachment-ui-v2', true) in console and refreshing.</span>
           </p>
         </amp-story-grid-layer>
@@ -327,7 +318,6 @@
           href="https://www.google.com"
           cta-text="Shop at Forbes"
           data-cta-text="Data-CTA-Text"
-          cta-image="img/logo.jpg"
           layout="nodisplay">
         </amp-story-page-attachment>
       </amp-story-page>
