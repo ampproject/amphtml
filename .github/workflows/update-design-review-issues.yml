@@ -13,6 +13,6 @@ jobs:
     steps:
       - name: Update Design Review Issues
         run: |
-          wget -q -O - "https://raw.githubusercontent.com/ampproject/amphtml/main/.github/workflows/update-design-review-issues.js" | node
+          wget -q -O - "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/common/update-design-review-issues.js" | node
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
