@@ -32,6 +32,14 @@ const TAG = 'amp-render';
 /** @const {string} */
 const AMP_STATE_URI_SCHEME = 'amp-state:';
 
+/** @enum {string}  */
+const Binding = {
+  ALWAYS: 'always',
+  REFRESH: 'refresh',
+  NEVER: 'never',
+  NO: 'no',
+};
+
 /**
  * Returns true if element's src points to amp-state.
  * @param {?string} src
@@ -78,11 +86,11 @@ const getAmpStateJson = (element, src) => {
  * @return {boolean} Whether bind should evaluate and apply changes.
  */
 function getUpdateValue(bindingValue, isFirstMutation) {
-  if (!bindingValue || bindingValue === 'refresh') {
+  if (!bindingValue || bindingValue === Binding.REFRESH) {
     // default is 'refresh', so check that its not the first mutation
     return !isFirstMutation;
   }
-  if (bindingValue === 'always') {
+  if (bindingValue === Binding.ALWAYS) {
     // TODO(dmanek): add link to amp-render docs that elaborates on performance implications of "always"
     user().warn(TAG, 'binding="always" has performance implications.');
     return true;
@@ -280,7 +288,7 @@ export class AmpRender extends BaseElement {
         dict({
           'render': (data) => {
             const bindingValue = this.element.getAttribute('binding');
-            if (bindingValue === 'no' || bindingValue === 'never') {
+            if (bindingValue === Binding.NEVER || bindingValue === Binding.NO) {
               return this.renderTemplateAsString_(data);
             }
             return Services.bindForDocOrNull(this.element).then((bind) => {

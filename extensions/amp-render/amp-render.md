@@ -209,7 +209,7 @@ Controls whether to block render to evaluate bindings (e.g. `[text]`) in childre
 Essentially, `binding="always"` is `binding="refresh"` that also blocks to evaluate bindings on the initial load of `amp-render`.
 
 [tip type="important"]
-If `binding` attribute is not provided, default is `refresh`. This is a departure from `amp-list` where the default is `always`. Due to this change, if specifying **only** a bound `src` attribute (`[src]`), it is imperative to include the `binding="always"` attribute on the component to be able to display templated content on the initial load.
+If `binding` attribute is not provided, default is `refresh`. This is a departure from [`amp-list` binding](https://amp.dev/documentation/components/amp-list/?format=websites#binding) where the default is `always`. Due to this change, if specifying **only** a bound `src` attribute (`[src]`), it is imperative to include the `binding="always"` attribute on the component to be able to display templated content on the initial load.
 [/tip]
 
 ### Common attributes
