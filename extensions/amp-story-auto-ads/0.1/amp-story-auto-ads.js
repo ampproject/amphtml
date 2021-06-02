@@ -40,7 +40,8 @@ import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {divertStoryAdPlacements} from '../../../src/experiments/story-ad-placements';
-import {getExperimentBranch} from '../../../src/experiments';
+import {escapeCssSelectorNth} from '../../../src/core/dom/css';
+import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getPlacementAlgo} from './algorithm-utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
@@ -344,6 +345,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /**
    * Create progress bar if auto advance exp is on.
+   * TODO(#33969): Move to only one progress bar type when finalized.
    */
   maybeCreateProgressBar_() {
     const autoAdvanceExpBranch = getExperimentBranch(
@@ -354,7 +356,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
       'storyNextUp'
     );
-    if (
+    if (isExperimentOn(this.win, 'story-ad-progress-chip')) {
+      this.getProgressBarRef_();
+    } else if (
       autoAdvanceExpBranch &&
       autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
     ) {
@@ -362,6 +366,20 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     } else if (storyNextUpParam) {
       this.createProgressBar_(storyNextUpParam);
     }
+  }
+
+  /**
+   * Finds the progress bar created by amp-story and stores a reference to be used
+   * by ad progress bar animation.
+   */
+  getProgressBarRef_() {
+    const systemLayer = this.doc_.querySelector('.i-amphtml-system-layer-host');
+    const systemLayerShadowRoot = systemLayer.shadowRoot;
+    this.storyProgressBar_ = systemLayerShadowRoot.querySelector(
+      '.i-amphtml-story-progress-bar'
+    );
+    devAssert(this.storyProgressBar_, 'Unable to find progress bar reference.');
+    this.storyProgressBar_.setAttribute('i-amphtml-yellow-progress', '');
   }
 
   /**
@@ -458,6 +476,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     // We are transitioning away from an ad
     const adPageId = this.visibleAdPage_.getId();
     const adIndex = this.adPageManager_.getIndexById(adPageId);
+
+    this.visibleProgressChip_?.parentNode.removeChild(
+      this.visibleProgressChip_
+    );
+    this.visibleProgressChip_ = null;
+
     this.removeVisibleAttribute_();
     // Fire the exit event.
     this.analyticsEvent_(AnalyticsEvents.AD_EXITED, {
@@ -478,6 +502,19 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     if (!adPage.hasBeenViewed()) {
       this.placementAlgorithm_.onNewAdView(pageIndex);
     }
+
+    // TODO(#33969): Remove this if yellow bar not chosen.
+    const progressEl = this.storyProgressBar_.querySelector(
+      `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
+        // +2 for zero-index and we want the chip after the ad.
+        pageIndex + 2
+      )})`
+    );
+    const yellow = this.doc_.createElement('div');
+    yellow.className = 'i-amphtml-story-ad-progress-value';
+
+    this.visibleProgressChip_ = yellow;
+    progressEl.appendChild(yellow);
 
     // Tell the iframe that it is visible.
     this.setVisibleAttribute_(adPage);
