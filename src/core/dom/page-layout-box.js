@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {layoutRectLtwh} from '../core/math/layout-rect';
-import {toWin} from '../types';
+import {layoutRectLtwh} from '../math/layout-rect';
 
 /**
  * @param {!Element} element
@@ -32,13 +30,4 @@ export function getPageLayoutBoxBlocking(element) {
   }
   const {offsetHeight, offsetWidth} = /** @type {!HTMLElement} */ (element);
   return layoutRectLtwh(left, top, offsetWidth, offsetHeight);
-}
-
-/**
- * @param {!Element} element
- * @return {!Promise<!../layout-rect.LayoutRectDef>}
- */
-export function measurePageLayoutBox(element) {
-  const vsync = Services.vsyncFor(toWin(element.ownerDocument.defaultView));
-  return vsync.measurePromise(() => getPageLayoutBoxBlocking(element));
 }
