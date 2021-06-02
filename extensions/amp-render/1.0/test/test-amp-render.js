@@ -744,5 +744,29 @@ describes.realWin(
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe 1+1=?');
     });
+
+    it('should not perform any updates when binding="never"', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"
+            >Hello {{name}} 1+1=<span [text]="1+1">?</span></template
+          >
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Hello Joe 1+1=?');
+    });
   }
 );
