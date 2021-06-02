@@ -131,15 +131,16 @@ export class Criteria {
         ampdoc,
         renderWidth,
         renderHeight
-      ) && Criteria.meetsTreeShapeCriteria(element)
+      ) && Criteria.meetsTreeShapeCriteria(element, ampdoc)
     );
   }
 
   /**
    * @param {!Element} element
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {boolean}
    */
-  static meetsTreeShapeCriteria(element) {
+  static meetsTreeShapeCriteria(element, ampdoc) {
     const disabledSelector = `${DISABLED_ANCESTORS},${DISABLED_BY_ATTR}`;
     const disabledAncestor = closestAncestorElementBySelector(
       element,
@@ -148,7 +149,7 @@ export class Criteria {
     if (disabledAncestor) {
       return false;
     }
-    const actions = Services.actionServiceForDoc(element);
+    const actions = Services.actionServiceForDoc(ampdoc || element);
     return !actions.hasResolvableAction(element, 'tap');
   }
 

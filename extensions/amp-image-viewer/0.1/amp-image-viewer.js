@@ -37,7 +37,7 @@ import {
   elementByTag,
 } from '../../../src/core/dom/query';
 import {continueMotion} from '../../../src/motion';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent, loadPromise} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {
   expandLayoutRect,
@@ -182,6 +182,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     const haveImg = !!this.image_;
     const laidOutPromise = haveImg
       ? Promise.resolve()
+      : img.tagName === 'IMG' ? loadPromise(img)
       : img.signals().whenSignal(CommonSignals.LOAD_END);
 
     if (!haveImg) {
@@ -321,6 +322,10 @@ export class AmpImageViewer extends AMP.BaseElement {
       });
       st.toggle(img, false);
       this.element.appendChild(this.image_);
+      if (img.tagName === 'IMG') {
+        propagateAttributes(ARIA_ATTRIBUTES, img, this.image_);
+        return Promise.resolve();
+      }
       return img.getImpl().then((impl) => {
         propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_);
       });
