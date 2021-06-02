@@ -354,7 +354,7 @@ export class AnimationRunner {
   applyLastFrame() {
     this.runnerPromise_.then((runner) => {
       runner.maybeInit();
-      runner.finishOrPause();
+      runner.finish(/* pauseOnError */ true);
     });
   }
 

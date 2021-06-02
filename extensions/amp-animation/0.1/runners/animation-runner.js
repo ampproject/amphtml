@@ -88,12 +88,9 @@ export class AnimationRunner {
   seekToPercent(unusedPercent) {}
 
   /**
+   * @param {bool} unusedPauseOnError
    */
-  finish() {}
-
-  /**
-   */
-  finishOrPause() {}
+  finish(unusedPauseOnError = false) {}
 
   /**
    */
