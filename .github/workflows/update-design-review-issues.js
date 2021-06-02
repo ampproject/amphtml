@@ -201,7 +201,7 @@ async function pinOrUnpinGithubIssue(token, repo, number, op = 'pin') {
     throw new Error(`must be "pin" or "unpin", got "${op}"`);
   }
   const issueId = await getGraphqlIssueId(token, repo, number);
-  const clientMutationId = `create-design-review-${op}`;
+  const clientMutationId = `session-issue-${op}`;
   const mutation = `
     mutation {
       ${op}Issue(input: { clientMutationId: "${clientMutationId}", issueId:"${issueId}" }) {
