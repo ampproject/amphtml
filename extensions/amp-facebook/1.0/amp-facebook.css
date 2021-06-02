@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-/** @externs */
-
-/** @const */
-var FacebookCommentsDef = {};
-
-/**
- * @typedef {{
- *   colorScheme: (string|undefined),
- *   href: (string|undefined),
- *   loading: (string|undefined),
- *   locale: (string|undefined),
- *   numPosts: (number|undefined),
- *   orderBy: (string|undefined),
- *   onReadyState: (function(string, *=)|undefined),
- *   requestResize: (function(number):*|undefined),
- *   title: (string|undefined),
- * }}
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
  */
-FacebookCommentsDef.Props;
+amp-facebook {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
 
-/** @constructor */
-FacebookCommentsDef.Api = function () {};
+/* Pre-upgrade: size-defining element - hide text. */
+amp-facebook:not(.i-amphtml-built) {
+  color: transparent !important;
+}
 
-/** @type {string} */
-FacebookCommentsDef.Api.prototype.readyState;
+/* Pre-upgrade: size-defining element - hide children. */
+amp-facebook:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
+  display: none;
+  content-visibility: hidden;
+}

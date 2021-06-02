@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-import {FacebookBaseElement} from '../../amp-facebook/1.0/facebook-base-element';
+/** @externs */
 
-export class BaseElement extends FacebookBaseElement {}
+/** @const */
+var FacebookDef = {};
 
-/** @override */
-BaseElement['props'] = {
-  ...FacebookBaseElement['props'],
-  'numPosts': {attr: 'data-numposts'},
-  'colorScheme': {attr: 'data-colorscheme'},
-  'orderBy': {attr: 'data-order-by'},
-};
+/**
+ * @typedef {{
+ *   colorScheme: (string|undefined),
+ *   href: (string|undefined),
+ *   loading: (string|undefined),
+ *   locale: (string|undefined),
+ *   numPosts: (number|undefined),
+ *   orderBy: (string|undefined),
+ *   onReadyState: (function(string, *=)|undefined),
+ *   requestResize: (function(number):*|undefined),
+ *   title: (string|undefined),
+ * }}
+ */
+FacebookDef.Props;
 
-/** @override */
-BaseElement['staticProps'] = {
-  'embedAs': 'comments',
-};
+/** @constructor */
+FacebookDef.Api = function () {};
+
+/** @type {string} */
+FacebookDef.Api.prototype.readyState;

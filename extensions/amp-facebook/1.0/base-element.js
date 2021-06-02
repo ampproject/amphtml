@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import {FacebookBaseElement} from '../../amp-facebook/1.0/facebook-base-element';
+import {FacebookBaseElement} from './facebook-base-element';
 
 export class BaseElement extends FacebookBaseElement {}
 
 /** @override */
 BaseElement['props'] = {
   ...FacebookBaseElement['props'],
-  'numPosts': {attr: 'data-numposts'},
-  'colorScheme': {attr: 'data-colorscheme'},
-  'orderBy': {attr: 'data-order-by'},
-};
-
-/** @override */
-BaseElement['staticProps'] = {
-  'embedAs': 'comments',
+  'allowFullScreen': {attr: 'data-allowfullscreen'},
+  'includeCommentParent': {
+    attr: 'data-include-comment-parent',
+    type: 'boolean',
+    default: false,
+  },
+  'showText': {attr: 'data-show-text'},
 };
