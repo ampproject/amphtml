@@ -25,7 +25,7 @@ import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
+import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
 import {internalRuntimeVersion} from '../../../src/internal-version';
 import {stringHash32} from '../../../src/core/types/string';
 
