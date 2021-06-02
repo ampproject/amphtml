@@ -175,4 +175,19 @@ module.exports = {
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
   },
+
+  'Legacy amp-story-page-attachment with href should display': async (
+    page,
+    name
+  ) => {
+    const url = await page.url();
+    const pageID = 'outlink-legacy';
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+  },
 };
