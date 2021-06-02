@@ -343,7 +343,7 @@ async function closeStaleIssues(token, repo, issuesWithSessionDate) {
   return issues;
 }
 
-async function closeStalePinNextIssue(token, repo, existing) {
+async function closeStalePinUpcoming(token, repo, existing) {
   const staleIssues = closeStaleIssues(token, repo, existing);
   if (!staleIssues.length) {
     // If there aren't any open stale issues, the newer issue has been pinned.
@@ -352,28 +352,28 @@ async function closeStalePinNextIssue(token, repo, existing) {
   }
 
   const mostRecentStaleIssue = staleIssues[staleIssues.length - 1];
-  const nextIssue = existing.find(
+  const upcoming = existing.find(
     ({sessionDate}) => sessionDate > mostRecentStaleIssue.sessionDate
   );
-  if (!nextIssue) {
+  if (!upcoming) {
     throw new Error(
       "Could not find next session issue to pin. If it's created later, it will NOT be pinned."
     );
   }
 
-  const {number, title} = nextIssue.issue;
+  const {number, title} = upcoming.issue;
   if (!isDryRun) {
     await pinGithubIssue(token, repo, number);
   }
   console./*OK*/ log('Pinned: ', title, '\n');
 }
 
-async function createNextDesignReviewIssue(token, repo, existing) {
-  const nextIssueData = getNextIssueData();
-  const nextIssueDateFromTitle = getSessionDateFromTitle(nextIssueData.title);
+async function createScheduledIssue(token, repo, existing) {
+  const issueData = getNextIssueData();
+  const dateFromTitle = getSessionDateFromTitle(issueData.title);
 
   const existingIssue = existing.find(
-    ({sessionDate}) => sessionDate == nextIssueDateFromTitle
+    ({sessionDate}) => sessionDate == dateFromTitle
   );
   if (existingIssue) {
     const {title, 'html_url': htmlUrl} = existingIssue.issue;
@@ -385,25 +385,25 @@ async function createNextDesignReviewIssue(token, repo, existing) {
   }
 
   if (isDryRun) {
-    console./*OK*/ log(nextIssueData);
+    console./*OK*/ log(issueData);
     return;
   }
   const {title, 'html_url': htmlUrl} = await postGithubIssue(
     token,
     repo,
-    nextIssueData
+    issueData
   );
   console./*OK*/ log(title);
   console./*OK*/ log(htmlUrl);
 }
 
-async function createDesignReviewIssue(token, repo) {
+async function updateDesignReviewIssues(token, repo) {
   const existing = await getExistingIssuesWithSessionDate(token, repo);
-  await createNextDesignReviewIssue(token, repo, existing);
-  await closeStalePinNextIssue(token, repo, existing);
+  await createScheduledIssue(token, repo, existing);
+  await closeStalePinUpcoming(token, repo, existing);
 }
 
-createDesignReviewIssue(env('GITHUB_TOKEN'), env('GITHUB_REPOSITORY')).catch(
+updateDesignReviewIssues(env('GITHUB_TOKEN'), env('GITHUB_REPOSITORY')).catch(
   (e) => {
     console./*OK*/ error(e);
     process.exit(1);
