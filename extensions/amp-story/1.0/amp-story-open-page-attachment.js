@@ -141,6 +141,12 @@ const renderOldPageAttachmentUI = (pageEl, attachmentEl) => {
       LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
     );
 
+  // Copy title to the element if it exists.
+  const attachmentTitle = attachmentEl.getAttribute('data-title');
+  if (attachmentTitle) {
+    openAttachmentEl.setAttribute('title', attachmentTitle);
+  }
+
   textEl.textContent = openLabel;
 
   return openAttachmentEl;
