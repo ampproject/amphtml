@@ -1185,6 +1185,10 @@ const adConfig = jsonConfiguration({
 
   'taboola': {},
 
+  'tagon': {
+    prefetch: 'https://js.tagon.co/tagon-amp.min.js',
+  },
+
   'tcsemotion': {
     prefetch: 'https://ads.tcsemotion.com/www/delivery/amphb.js',
     renderStartImplemented: true,
