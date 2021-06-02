@@ -26,7 +26,7 @@ import {
   isInternalElement,
   isLoadingAllowed,
 } from './layout';
-import {MediaQueryProps} from './utils/media-query-props';
+import {MediaQueryProps} from './core/dom/media-query-props';
 import {ReadyState} from './core/constants/ready-state';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
