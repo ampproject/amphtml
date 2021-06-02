@@ -51,6 +51,7 @@
     "@babel/plugin-transform-react-constant-elements": "7.13.13",
     "@babel/plugin-transform-react-jsx": "7.14.3",
     "@babel/preset-env": "7.14.4",
+    "@babel/runtime": "7.14.0",
     "@chiragrupani/karma-chromium-edge-launcher": "2.1.1",
     "@jest/core": "26.6.3",
     "@jridgewell/doctrine": "3.0.2",

@@ -60,6 +60,7 @@ function getTestConfig() {
     argv.coverage ? instanbulPlugin : null,
     replacePlugin,
     replaceGlobalsPlugin,
+    './build-system/babel-plugins/babel-plugin-imported-helpers',
     './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
