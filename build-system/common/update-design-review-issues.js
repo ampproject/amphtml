@@ -49,14 +49,14 @@ const generateWeeksFromNow = 3;
 
 const labels = ['Type: Design Review'];
 
-const createTitle = ({yyyyMmDd, timeUtc, region}) =>
+const createTitle = ({region, timeUtc, yyyyMmDd}) =>
   `Design Review ${yyyyMmDd} ${timeUtc} UTC (${region})`;
 
 const vcUrl = 'https://bit.ly/amp-dr';
 const calendarEventTitle = 'AMP Project Design Review';
 const calendarEventDetails = vcUrl;
 
-const createBody = ({timeUtc, timeUrl, calendarUrl}) =>
+const createBody = ({calendarUrl, timeUrl, timeUtc}) =>
   `
 Time: [${timeUtc} UTC](${timeUrl}) ([add to Google Calendar](${calendarUrl}))
 Location: [Video conference via Google Meet](${vcUrl})
@@ -72,10 +72,18 @@ We rotate our design review between times that work better for different parts o
 
 const isDryRun = process.argv.includes('--dry-run');
 
+/**
+ * @param {string|number} number
+ * @return {string}
+ */
 function leadingZero(number) {
   return number.toString().padStart(2, '0');
 }
 
+/**
+ * @param {Date} date
+ * @return {boolean}
+ */
 function isDaylightSavingsUsa(date) {
   // [start, end] ranges of Daylight Savings in (most of) the USA
   // https://www.timeanddate.com/time/dst/2021.html
@@ -99,11 +107,23 @@ function isDaylightSavingsUsa(date) {
   });
 }
 
+/**
+ * @param {string} yyyyMmDd
+ * @param {number} hours
+ * @param {number} minutes
+ * @return {Date}
+ */
 function parseYyyyMmDd(yyyyMmDd, hours = 0, minutes = 0) {
   const [yyyy, mm, dd] = yyyyMmDd.split('/', 3).map(Number);
   return new Date(yyyy, mm - 1, dd, hours, minutes);
 }
 
+/**
+ * @param {string} url
+ * @param {Object} options
+ * @param {string=} data
+ * @return {!Promise<{res: *, body: string}>}
+ */
 function httpsRequest(url, options, data) {
   return new Promise((resolve, reject) => {
     const req = https.request(url, options, (res) => {
@@ -126,8 +146,15 @@ function httpsRequest(url, options, data) {
   });
 }
 
+/**
+ * @param {string} token
+ * @param {string} path
+ * @param {Object=} data
+ * @param {Object=} options
+ * @return {!Promise<Object>}
+ */
 async function requestGithub(token, path, data, options = {}) {
-  const {res, body} = await httpsRequest(
+  const {body, res} = await httpsRequest(
     `https://api.github.com/${path.replace(/^\//, '')}`,
     {
       ...options,
@@ -151,20 +178,43 @@ async function requestGithub(token, path, data, options = {}) {
   return JSON.parse(body);
 }
 
+/**
+ * @param {string} token
+ * @param {string} query
+ * @return {Promise<Object>}
+ */
 async function graphqlQueryGithub(token, query) {
   const {data} = await postGithub(token, '/graphql', {query});
   return data;
 }
 
+/**
+ * @param {string} token
+ * @param {string} url
+ * @param {Object=} data
+ * @return {Promise<Object>}
+ */
 async function postGithub(token, url, data) {
   return requestGithub(token, url, data, {method: 'POST'});
 }
 
+/**
+ * @param {string} token
+ * @param {string} repo
+ * @param {Object} data
+ * @return {Promise<Object>}
+ */
 function postGithubIssue(token, repo, data) {
   const url = `/repos/${repo}/issues`;
   return postGithub(token, url, data);
 }
 
+/**
+ * @param {string} token
+ * @param {string} repo
+ * @param {string|number} number
+ * @return {Promise<Object>}
+ */
 function closeGithubIssue(token, repo, number) {
   return requestGithub(
     token,
@@ -174,6 +224,12 @@ function closeGithubIssue(token, repo, number) {
   );
 }
 
+/**
+ * @param {string} token
+ * @param {string} repo
+ * @param {Array<string>} labels
+ * @return {Promise<Object>}
+ */
 async function getGithubIssues(token, repo, labels) {
   const url = `/repos/${repo}/issues?state=open&labels=${encodeURIComponent(
     labels.join(',')
@@ -181,6 +237,12 @@ async function getGithubIssues(token, repo, labels) {
   return requestGithub(token, url);
 }
 
+/**
+ * @param {string} token
+ * @param {string} repo
+ * @param {number|string} number
+ * @return {Promise<string>}
+ */
 async function getGraphqlIssueId(token, repo, number) {
   const [owner, name] = repo.split('/');
   const query = `
@@ -196,6 +258,16 @@ async function getGraphqlIssueId(token, repo, number) {
   return repository.issue.id;
 }
 
+/** @enum {string} */
+const PinUnpinOpDef = {pin: 'pin', unpin: 'unpin'};
+
+/**
+ * @param {string} token
+ * @param {string} repo
+ * @param {string|number} number
+ * @param {PinUnpinOpDef=} op
+ * @return {Promise<Object>}
+ */
 async function pinOrUnpinGithubIssue(token, repo, number, op = 'pin') {
   if (op !== 'pin' && op !== 'unpin') {
     throw new Error(`must be "pin" or "unpin", got "${op}"`);
@@ -214,14 +286,32 @@ async function pinOrUnpinGithubIssue(token, repo, number, op = 'pin') {
   return graphqlQueryGithub(token, mutation);
 }
 
+/**
+ * @param {string} token
+ * @param {string} repo
+ * @param {string|number} number
+ * @return {Promise<Object>}
+ */
 function pinGithubIssue(token, repo, number) {
   return pinOrUnpinGithubIssue(token, repo, number);
 }
 
+/**
+ * @param {string} token
+ * @param {string} repo
+ * @param {string|number} number
+ * @return {Promise<Object>}
+ */
 function unpinGithubIssue(token, repo, number) {
   return pinOrUnpinGithubIssue(token, repo, number, 'unpin');
 }
 
+/**
+ * @param {Date} date
+ * @param {number} dayOfWeek
+ * @param {number=} weeks
+ * @return {Date}
+ */
 function getNextDayOfWeek(date, dayOfWeek, weeks = 1) {
   const resultDate = new Date(date.getTime());
   resultDate.setDate(
@@ -232,8 +322,15 @@ function getNextDayOfWeek(date, dayOfWeek, weeks = 1) {
   return resultDate;
 }
 
+/**
+ * @param {Date} date
+ * @param {string} startYyyyMmDd
+ * @return {Array<string>}
+ */
 function getRotation(date, startYyyyMmDd) {
-  const [year, month, day] = startYyyyMmDd.split('-');
+  const [year, month, day] = startYyyyMmDd
+    .split('-')
+    .map((n) => parseInt(n, 10));
   const start = new Date(year, month - 1, day);
   const dateBeginningOfDay = new Date(
     date.getFullYear(),
@@ -241,6 +338,7 @@ function getRotation(date, startYyyyMmDd) {
     date.getDate()
   );
   const weeks = Math.round(
+    // @ts-ignore date calc
     (dateBeginningOfDay - start) / (7 * 24 * 60 * 60 * 1000)
   );
   return timeRotationUtc[weeks % timeRotationUtc.length];
@@ -249,6 +347,9 @@ function getRotation(date, startYyyyMmDd) {
 const timeZ = (yyyy, mm, dd, hours, minutes) =>
   `${yyyy + mm + dd}T${leadingZero(hours) + leadingZero(minutes)}Z`;
 
+/**
+ * @return {Object}
+ */
 function getNextIssueData() {
   const today = new Date();
 
@@ -262,10 +363,8 @@ function getNextIssueData() {
     timeRotationStartYyyyMmDd
   );
 
-  let [hours, minutes] = timeUtcNoDst.split(':').map(Number);
-  if (isDaylightSavingsUsa(nextDay)) {
-    hours -= 1;
-  }
+  const [hoursUnadjusted, minutes] = timeUtcNoDst.split(':').map(Number);
+  const hours = hoursUnadjusted - (isDaylightSavingsUsa(nextDay) ? 1 : 0);
 
   const yyyy = nextDay.getFullYear();
   const mm = leadingZero(nextDay.getMonth() + 1);
@@ -298,21 +397,46 @@ function getNextIssueData() {
   return {title, labels, body};
 }
 
+/**
+ * @param {string} key
+ * @return {string}
+ */
 function env(key) {
   if (!(key in process.env)) {
     throw new Error(`Missing env variable: ${key}`);
   }
-  return process.env[key];
+  return /** @type {string} */ (process.env[key]);
 }
 
 const datetimeFromTitleRegexp = /(\d{4}-\d{2}-\d{2}) (\d{1,2}[:]\d{2})/;
 
+/**
+ * @param {string} title
+ * @return {number}
+ */
 function getSessionDateFromTitle(title) {
-  const [unusedFullMatch, day, time] = title.match(datetimeFromTitleRegexp);
+  const match = title.match(datetimeFromTitleRegexp);
+  if (!match) {
+    throw new Error(`Could not get date from title: ${title}`);
+  }
+  const [
+    // eslint-disable-next-line no-unused-vars
+    unusedFullMatch,
+    day,
+    time,
+  ] = match;
   // ISO 860 is parsed as UTC
   return Date.parse(`${day}T${time}:00`);
 }
 
+/** @typedef {{sessionDate: number, issue: Object}} */
+let IssueWithSessionDateDef;
+
+/**
+ * @param {string} token
+ * @param {string} repo
+ * @return {Promise<Array<IssueWithSessionDateDef>>}
+ */
 async function getExistingIssuesWithSessionDate(token, repo) {
   const issues = await getGithubIssues(token, repo, labels);
   return issues
@@ -323,6 +447,12 @@ async function getExistingIssuesWithSessionDate(token, repo) {
     .sort((a, b) => a.sessionDate - b.sessionDate);
 }
 
+/**
+ * @param {string} token
+ * @param {string} repo
+ * @param {Array<IssueWithSessionDateDef>} issuesWithSessionDate
+ * @return {Promise<Array<Object>>}
+ */
 async function closeStaleIssues(token, repo, issuesWithSessionDate) {
   const now = new Date();
 
@@ -330,7 +460,7 @@ async function closeStaleIssues(token, repo, issuesWithSessionDate) {
   now.setHours(now.getHours() - sessionDurationHours);
 
   const issues = issuesWithSessionDate.filter(
-    ({sessionDate}) => sessionDate < now
+    ({sessionDate}) => sessionDate < now.getTime()
   );
   for (const {issue} of issues) {
     const {number, title} = issue;
@@ -343,8 +473,13 @@ async function closeStaleIssues(token, repo, issuesWithSessionDate) {
   return issues;
 }
 
+/**
+ * @param {string} token
+ * @param {string} repo
+ * @param {Array<IssueWithSessionDateDef>} existing
+ */
 async function closeStalePinUpcoming(token, repo, existing) {
-  const staleIssues = closeStaleIssues(token, repo, existing);
+  const staleIssues = await closeStaleIssues(token, repo, existing);
   if (!staleIssues.length) {
     // If there aren't any open stale issues, the newer issue has been pinned.
     console./*OK*/ log('(Zero issues to close, pin or unpin.)');
@@ -368,6 +503,11 @@ async function closeStalePinUpcoming(token, repo, existing) {
   console./*OK*/ log('Pinned: ', title, '\n');
 }
 
+/**
+ * @param {string} token
+ * @param {string} repo
+ * @param {Array<IssueWithSessionDateDef>} existing
+ */
 async function createScheduledIssue(token, repo, existing) {
   const issueData = getNextIssueData();
   const dateFromTitle = getSessionDateFromTitle(issueData.title);
@@ -376,7 +516,7 @@ async function createScheduledIssue(token, repo, existing) {
     ({sessionDate}) => sessionDate == dateFromTitle
   );
   if (existingIssue) {
-    const {title, 'html_url': htmlUrl} = existingIssue.issue;
+    const {'html_url': htmlUrl, title} = existingIssue.issue;
     console./*OK*/ log(
       '(Skipping creation of next issue since it exists.)\n' +
         `- ${title}\n  ${htmlUrl}`
@@ -388,7 +528,7 @@ async function createScheduledIssue(token, repo, existing) {
     console./*OK*/ log(issueData);
     return;
   }
-  const {title, 'html_url': htmlUrl} = await postGithubIssue(
+  const {'html_url': htmlUrl, title} = await postGithubIssue(
     token,
     repo,
     issueData
@@ -397,6 +537,10 @@ async function createScheduledIssue(token, repo, existing) {
   console./*OK*/ log(htmlUrl);
 }
 
+/**
+ * @param {string} token
+ * @param {string} repo
+ */
 async function updateDesignReviewIssues(token, repo) {
   const existing = await getExistingIssuesWithSessionDate(token, repo);
   await createScheduledIssue(token, repo, existing);
