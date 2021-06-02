@@ -13,6 +13,7 @@
           name: 'mszylkowski',
           notify: true,
         },
+        {name: 'enriqe'},
         {name: 'newmuis'},
       ],
     },
