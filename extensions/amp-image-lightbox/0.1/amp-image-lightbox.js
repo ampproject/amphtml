@@ -15,6 +15,7 @@
  */
 
 import * as dom from '../../../src/dom';
+import * as query from '../../../src/core/dom/query';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
@@ -986,19 +987,19 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.sourceElement_ = sourceElement;
 
     // Initialize the viewer.
-    this.sourceImage_ = dom.childElementByTag(sourceElement, 'img');
+    this.sourceImage_ = query.childElementByTag(sourceElement, 'img');
     this.imageViewer_.init(this.sourceElement_, this.sourceImage_);
 
     // Discover caption.
     let caption = null;
 
     // 1. Check <figure> and <figcaption>.
-    const figure = dom.closestAncestorElementBySelector(
+    const figure = query.closestAncestorElementBySelector(
       sourceElement,
       'figure'
     );
     if (figure) {
-      caption = dom.elementByTag(figure, 'figcaption');
+      caption = query.elementByTag(figure, 'figcaption');
     }
 
     // 2. Check "aria-describedby".

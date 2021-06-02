@@ -21,12 +21,13 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {buildOpenAttachmentElementLinkIcon} from './amp-story-open-page-attachment';
-import {closest, removeElement} from '../../../src/dom';
+import {closest} from '../../../src/core/dom/query';
 import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getState} from '../../../src/history';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
+import {removeElement} from '../../../src/dom';
 import {setImportantStyles, toggle} from '../../../src/style';
 
 import {triggerClickFromLightDom} from './utils';

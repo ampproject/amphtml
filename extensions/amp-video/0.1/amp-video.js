@@ -24,16 +24,20 @@ import {
   childElement,
   childElementByTag,
   childElementsByTag,
-  dispatchCustomEvent,
-  fullscreenEnter,
-  fullscreenExit,
-  insertAfterOrAtStart,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
+import {
+  dispatchCustomEvent,
+  insertAfterOrAtStart,
+  removeElement,
+} from '../../../src/dom';
 import {fetchCachedSources} from './video-cache';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/core/dom/fullscreen';
 import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';

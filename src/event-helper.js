@@ -15,7 +15,7 @@
  */
 
 import {internalListenImplementation} from './event-helper-listen';
-import {lastChildElement} from './dom';
+import {lastChildElement} from './core/dom/query';
 import {user} from './log';
 
 /** @const {string}  */

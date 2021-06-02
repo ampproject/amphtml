@@ -20,7 +20,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {matches, scopedQuerySelector} from '../../../src/dom';
+import {matches, scopedQuerySelector} from '../../../src/core/dom/query';
 import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setStyle} from '../../../src/style';
 
@@ -243,7 +243,9 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
       >
       </amp-base-carousel>
     `;
-    thumbnails.forEach((t) => this.carousel_.appendChild(t));
+    for (const thumbnail of thumbnails) {
+      this.carousel_.appendChild(thumbnail);
+    }
 
     // We create with loop defaulting to false above, and allow it to be
     // overwriten.

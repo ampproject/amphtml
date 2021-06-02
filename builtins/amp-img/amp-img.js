@@ -24,7 +24,8 @@ import {listen} from '../../src/event-helper';
 import {propagateAttributes} from '../../src/core/dom/propagate-attributes';
 import {propagateObjectFitStyles, setImportantStyles} from '../../src/style';
 import {registerElement} from '../../src/service/custom-element-registry';
-import {removeElement, scopedQuerySelector} from '../../src/dom';
+import {removeElement} from '../../src/dom';
+import {scopedQuerySelector} from '../../src/core/dom/query';
 
 /** @const {string} */
 const TAG = 'amp-img';

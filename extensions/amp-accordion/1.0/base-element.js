@@ -22,11 +22,12 @@ import {
   AccordionSection,
 } from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {childElementsByTag, toggleAttribute} from '../../../src/dom';
+import {childElementsByTag} from '../../../src/core/dom/query';
 import {devAssert} from '../../../src/log';
 import {dict, memo} from '../../../src/core/types/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {toArray} from '../../../src/core/types/array';
+import {toggleAttribute} from '../../../src/dom';
 import {useDOMHandle} from '../../../src/preact/component';
 import {useLayoutEffect, useRef} from '../../../src/preact';
 import {useSlotContext} from '../../../src/preact/slot';

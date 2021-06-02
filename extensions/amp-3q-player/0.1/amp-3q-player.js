@@ -29,11 +29,11 @@ import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeElement} from '../../../src/dom';
 
 const TAG = 'amp-3q-player';
 
