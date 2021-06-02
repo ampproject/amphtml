@@ -27,7 +27,7 @@ import {listenOncePromise} from '../../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../../src/url';
 
 describes.fakeWin(
-  'History',
+  'Window - History',
   {
     win: {
       location: '#first',
@@ -307,646 +307,648 @@ describes.fakeWin(
   }
 );
 
-describes.sandboxed('History install', {}, () => {
-  let win;
-  let ampdoc;
-  let viewer;
+describes.sandboxed('Window - History', {}, () => {
+  describe('install', () => {
+    let win;
+    let ampdoc;
+    let viewer;
 
-  beforeEach(() => {
-    viewer = {
-      isOvertakeHistory: () => false,
-      onMessage: () => function () {},
-    };
-
-    installTimerService(window);
-    win = {
-      __AMP_SERVICES: {
-        'viewer': {obj: viewer, ctor: Object},
-        'timer': {obj: Services.timerFor(window), ctor: Object},
-      },
-      history: {
-        length: 0,
-      },
-      document: {
-        body: {},
-        querySelector: () => null,
-      },
-      location: parseUrlDeprecated(
-        'https://cdn.ampproject.org/c/s/www.example.com/path'
-      ),
-      addEventListener: () => null,
-    };
-    ampdoc = new AmpDocSingle(win);
-    installHistoryServiceForDoc(ampdoc);
-  });
-
-  it('should create natural binding and make it singleton', () => {
-    const history = Services.historyForDoc(ampdoc);
-    expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
-    expect(win.__AMP_SERVICES.history.obj).to.equal(history);
-    // Ensure that binding is installed as a singleton.
-    expect(win.__AMP_SERVICES['global-history-binding'].obj).to.equal(
-      history.binding_
-    );
-  });
-
-  it('should create virtual binding', () => {
-    viewer.isOvertakeHistory = () => true;
-    const history = Services.historyForDoc(ampdoc);
-    expect(history.binding_).to.be.instanceOf(HistoryBindingVirtual_);
-    expect(win.__AMP_SERVICES.history.obj).to.equal(history);
-    // Ensure that the global singleton has not been created.
-    expect(win.__AMP_SERVICES['global-history-binding']).to.not.exist;
-  });
-});
-
-describes.sandboxed('HistoryBindingNatural', {}, (env) => {
-  let clock;
-  let onStateUpdated;
-  let history;
-
-  beforeEach(() => {
-    clock = env.sandbox.useFakeTimers();
-    onStateUpdated = env.sandbox.spy();
-    history = new HistoryBindingNatural_(window);
-    history.setOnStateUpdated(onStateUpdated);
-  });
-
-  afterEach(() => {
-    history.cleanup();
-  });
-
-  it('should initialize correctly', () => {
-    expect(history.stackIndex_).to.equal(window.history.length - 1);
-    expect(history.startIndex_).to.equal(window.history.length - 1);
-    expect(history.unsupportedState_['AMP.History']).to.equal(
-      window.history.length - 1
-    );
-    expect(onStateUpdated).to.have.not.been.called;
-  });
-
-  it('should initialize correctly with preexisting state', () => {
-    history.origPushState_({'AMP.History': window.history.length}, undefined);
-    history.origReplaceState_(
-      {'AMP.History': window.history.length - 2},
-      undefined
-    );
-    const history2 = new HistoryBindingNatural_(window);
-    expect(history2.stackIndex_).to.equal(window.history.length - 2);
-    expect(history2.startIndex_).to.equal(window.history.length - 2);
-    expect(history.unsupportedState_['AMP.History']).to.equal(
-      window.history.length - 2
-    );
-    history2.cleanup();
-    history.origReplaceState_(
-      {'AMP.History': window.history.length - 1},
-      undefined
-    );
-    expect(onStateUpdated).to.have.not.been.called;
-  });
-
-  it('should preserve the initial state if possible', () => {
-    history.origReplaceState_({'a': 11}, undefined);
-    const history2 = new HistoryBindingNatural_(window);
-    expect(history.getState_()['a']).to.equal(11);
-    history2.cleanup();
-    expect(onStateUpdated).to.have.not.been.called;
-  });
-
-  it('should override history.pushState and set its properties', () => {
-    window.history.pushState({a: 111});
-    expect(history.unsupportedState_.a).to.equal(111);
-    expect(history.unsupportedState_['AMP.History']).to.equal(
-      window.history.length - 1
-    );
-    expect(onStateUpdated).to.be.calledOnce;
-    expect(onStateUpdated.getCall(0).args[0].stackIndex).to.equal(
-      window.history.length - 1
-    );
-  });
-
-  it('should override history.replaceState and set its properties', () => {
-    window.history.replaceState({a: 112});
-    expect(history.unsupportedState_.a).to.equal(112);
-    expect(history.unsupportedState_['AMP.History']).to.equal(
-      window.history.length - 1
-    );
-    expect(onStateUpdated).to.have.not.been.called;
-  });
-
-  // This prevents IE11/Edge from coercing undefined to become the new url
-  it(
-    'should not pass in `url` argument to original replace state if ' +
-      'parameter is undefined',
-    () => {
-      const replaceStateSpy = env.sandbox.spy();
-      const windowStub = {
-        history: {
-          replaceState: replaceStateSpy,
-          pushState: () => {},
-          state: {},
-          length: 11,
-        },
-        addEventListener: () => {},
-        setTimeout: window.setTimeout,
-        clearTimeout: window.clearTimeout,
-        Promise: window.Promise,
+    beforeEach(() => {
+      viewer = {
+        isOvertakeHistory: () => false,
+        onMessage: () => function () {},
       };
-      installTimerService(windowStub);
-      new HistoryBindingNatural_(windowStub);
-      expect(replaceStateSpy.callCount).to.be.greaterThan(0);
-      expect(replaceStateSpy.lastCall.args.length).to.equal(2);
-    }
-  );
 
-  it('should push new state in the window.history and notify', () => {
-    const title = 'title';
-    return history.push({title}).then((historyState) => {
-      expect(history.stackIndex_).to.equal(historyState.stackIndex);
+      installTimerService(window);
+      win = {
+        __AMP_SERVICES: {
+          'viewer': {obj: viewer, ctor: Object},
+          'timer': {obj: Services.timerFor(window), ctor: Object},
+        },
+        history: {
+          length: 0,
+        },
+        document: {
+          body: {},
+          querySelector: () => null,
+        },
+        location: parseUrlDeprecated(
+          'https://cdn.ampproject.org/c/s/www.example.com/path'
+        ),
+        addEventListener: () => null,
+      };
+      ampdoc = new AmpDocSingle(win);
+      installHistoryServiceForDoc(ampdoc);
+    });
+
+    it('should create natural binding and make it singleton', () => {
+      const history = Services.historyForDoc(ampdoc);
+      expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
+      expect(win.__AMP_SERVICES.history.obj).to.equal(history);
+      // Ensure that binding is installed as a singleton.
+      expect(win.__AMP_SERVICES['global-history-binding'].obj).to.equal(
+        history.binding_
+      );
+    });
+
+    it('should create virtual binding', () => {
+      viewer.isOvertakeHistory = () => true;
+      const history = Services.historyForDoc(ampdoc);
+      expect(history.binding_).to.be.instanceOf(HistoryBindingVirtual_);
+      expect(win.__AMP_SERVICES.history.obj).to.equal(history);
+      // Ensure that the global singleton has not been created.
+      expect(win.__AMP_SERVICES['global-history-binding']).to.not.exist;
+    });
+  });
+
+  describe('HistoryBindingNatural', (env) => {
+    let clock;
+    let onStateUpdated;
+    let history;
+
+    beforeEach(() => {
+      clock = env.sandbox.useFakeTimers();
+      onStateUpdated = env.sandbox.spy();
+      history = new HistoryBindingNatural_(window);
+      history.setOnStateUpdated(onStateUpdated);
+    });
+
+    afterEach(() => {
+      history.cleanup();
+    });
+
+    it('should initialize correctly', () => {
       expect(history.stackIndex_).to.equal(window.history.length - 1);
+      expect(history.startIndex_).to.equal(window.history.length - 1);
       expect(history.unsupportedState_['AMP.History']).to.equal(
         window.history.length - 1
       );
-      expect(history.unsupportedState_.title).to.deep.equal(title);
-      expect(onStateUpdated).to.be.calledOnce;
-      expect(onStateUpdated).to.be.calledWithMatch({
-        stackIndex: window.history.length - 1,
-        title,
-      });
+      expect(onStateUpdated).to.have.not.been.called;
     });
-  });
 
-  it('should pop a state from the window.history and notify', () => {
-    const title = 'title';
-    return history.push({title}).then((historyState) => {
-      expect(onStateUpdated).to.be.calledOnce;
-      expect(onStateUpdated).to.be.calledWithMatch({
-        stackIndex: window.history.length - 1,
-        title,
-      });
-
-      const histPromise = listenOncePromise(window, 'popstate').then(() =>
-        clock.tick(100)
+    it('should initialize correctly with preexisting state', () => {
+      history.origPushState_({'AMP.History': window.history.length}, undefined);
+      history.origReplaceState_(
+        {'AMP.History': window.history.length - 2},
+        undefined
       );
-      const popPromise = history.pop(historyState.stackIndex);
+      const history2 = new HistoryBindingNatural_(window);
+      expect(history2.stackIndex_).to.equal(window.history.length - 2);
+      expect(history2.startIndex_).to.equal(window.history.length - 2);
+      expect(history.unsupportedState_['AMP.History']).to.equal(
+        window.history.length - 2
+      );
+      history2.cleanup();
+      history.origReplaceState_(
+        {'AMP.History': window.history.length - 1},
+        undefined
+      );
+      expect(onStateUpdated).to.have.not.been.called;
+    });
 
-      return histPromise.then((unusedHist) => {
-        return popPromise.then((pop) => {
-          expect(pop.stackIndex).to.equal(window.history.length - 2);
-          expect(history.stackIndex_).to.equal(window.history.length - 2);
-          expect(history.unsupportedState_['AMP.History']).to.equal(
-            window.history.length - 2
-          );
-          expect(onStateUpdated).to.have.callCount(2);
-          expect(onStateUpdated.getCall(1).args[0].stackIndex).to.equal(
-            window.history.length - 2
-          );
+    it('should preserve the initial state if possible', () => {
+      history.origReplaceState_({'a': 11}, undefined);
+      const history2 = new HistoryBindingNatural_(window);
+      expect(history.getState_()['a']).to.equal(11);
+      history2.cleanup();
+      expect(onStateUpdated).to.have.not.been.called;
+    });
+
+    it('should override history.pushState and set its properties', () => {
+      window.history.pushState({a: 111});
+      expect(history.unsupportedState_.a).to.equal(111);
+      expect(history.unsupportedState_['AMP.History']).to.equal(
+        window.history.length - 1
+      );
+      expect(onStateUpdated).to.be.calledOnce;
+      expect(onStateUpdated.getCall(0).args[0].stackIndex).to.equal(
+        window.history.length - 1
+      );
+    });
+
+    it('should override history.replaceState and set its properties', () => {
+      window.history.replaceState({a: 112});
+      expect(history.unsupportedState_.a).to.equal(112);
+      expect(history.unsupportedState_['AMP.History']).to.equal(
+        window.history.length - 1
+      );
+      expect(onStateUpdated).to.have.not.been.called;
+    });
+
+    // This prevents IE11/Edge from coercing undefined to become the new url
+    it(
+      'should not pass in `url` argument to original replace state if ' +
+        'parameter is undefined',
+      () => {
+        const replaceStateSpy = env.sandbox.spy();
+        const windowStub = {
+          history: {
+            replaceState: replaceStateSpy,
+            pushState: () => {},
+            state: {},
+            length: 11,
+          },
+          addEventListener: () => {},
+          setTimeout: window.setTimeout,
+          clearTimeout: window.clearTimeout,
+          Promise: window.Promise,
+        };
+        installTimerService(windowStub);
+        new HistoryBindingNatural_(windowStub);
+        expect(replaceStateSpy.callCount).to.be.greaterThan(0);
+        expect(replaceStateSpy.lastCall.args.length).to.equal(2);
+      }
+    );
+
+    it('should push new state in the window.history and notify', () => {
+      const title = 'title';
+      return history.push({title}).then((historyState) => {
+        expect(history.stackIndex_).to.equal(historyState.stackIndex);
+        expect(history.stackIndex_).to.equal(window.history.length - 1);
+        expect(history.unsupportedState_['AMP.History']).to.equal(
+          window.history.length - 1
+        );
+        expect(history.unsupportedState_.title).to.deep.equal(title);
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated).to.be.calledWithMatch({
+          stackIndex: window.history.length - 1,
+          title,
         });
       });
     });
-  });
 
-  it('should restore previous state after pop and notify', () => {
-    return history.push({title: 'foo'}).then((first) => {
-      return history.push({title: 'bar'}).then((second) => {
-        expect(onStateUpdated).to.have.callCount(2);
+    it('should pop a state from the window.history and notify', () => {
+      const title = 'title';
+      return history.push({title}).then((historyState) => {
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated).to.be.calledWithMatch({
+          stackIndex: window.history.length - 1,
+          title,
+        });
 
         const histPromise = listenOncePromise(window, 'popstate').then(() =>
           clock.tick(100)
         );
-        const popPromise = history.pop(second.stackIndex);
+        const popPromise = history.pop(historyState.stackIndex);
 
         return histPromise.then((unusedHist) => {
           return popPromise.then((pop) => {
-            expect(pop.stackIndex).to.equal(first.stackIndex);
-            expect(history.stackIndex_).to.equal(first.stackIndex);
+            expect(pop.stackIndex).to.equal(window.history.length - 2);
+            expect(history.stackIndex_).to.equal(window.history.length - 2);
             expect(history.unsupportedState_['AMP.History']).to.equal(
-              first.stackIndex
+              window.history.length - 2
             );
+            expect(onStateUpdated).to.have.callCount(2);
+            expect(onStateUpdated.getCall(1).args[0].stackIndex).to.equal(
+              window.history.length - 2
+            );
+          });
+        });
+      });
+    });
 
-            expect(onStateUpdated).to.have.callCount(3);
-            expect(onStateUpdated.lastCall).to.be.calledWithMatch({
-              stackIndex: first.stackIndex,
-              title: 'foo',
+    it('should restore previous state after pop and notify', () => {
+      return history.push({title: 'foo'}).then((first) => {
+        return history.push({title: 'bar'}).then((second) => {
+          expect(onStateUpdated).to.have.callCount(2);
+
+          const histPromise = listenOncePromise(window, 'popstate').then(() =>
+            clock.tick(100)
+          );
+          const popPromise = history.pop(second.stackIndex);
+
+          return histPromise.then((unusedHist) => {
+            return popPromise.then((pop) => {
+              expect(pop.stackIndex).to.equal(first.stackIndex);
+              expect(history.stackIndex_).to.equal(first.stackIndex);
+              expect(history.unsupportedState_['AMP.History']).to.equal(
+                first.stackIndex
+              );
+
+              expect(onStateUpdated).to.have.callCount(3);
+              expect(onStateUpdated.lastCall).to.be.calledWithMatch({
+                stackIndex: first.stackIndex,
+                title: 'foo',
+              });
             });
           });
         });
       });
     });
-  });
 
-  it('should get current state', () => {
-    const title = 'title';
-    return history.push({title}).then((historyState) => {
-      expect(history.unsupportedState_).to.deep.include({
-        'AMP.History': historyState.stackIndex,
-        title,
-      });
-
-      return history.get().then((current) => {
-        expect(current).to.deep.include({
+    it('should get current state', () => {
+      const title = 'title';
+      return history.push({title}).then((historyState) => {
+        expect(history.unsupportedState_).to.deep.include({
           'AMP.History': historyState.stackIndex,
           title,
         });
-      });
-    });
-  });
 
-  it('should replace current state', () => {
-    const pushTitle = 'pushTitle';
-    const replaceTitle = 'replaceTitle';
-    return history.push({title: pushTitle}).then((historyState) => {
-      expect(history.unsupportedState_).to.deep.include({
-        'AMP.History': historyState.stackIndex,
-        title: pushTitle,
-      });
-
-      return history.replace({title: replaceTitle}).then(() => {
-        expect(history.unsupportedState_).to.deep.include({
-          'AMP.History': historyState.stackIndex,
-          title: replaceTitle,
-        });
-
-        return history.pop(historyState.stackIndex);
-      });
-    });
-  });
-
-  it('should update its state and notify on history.back', () => {
-    // Push twice.
-    return Promise.all([history.push(), history.push()])
-      .then(() => {
-        const h = window.history.length;
-
-        expect(onStateUpdated).to.be.calledTwice;
-        expect(onStateUpdated.getCall(0).args[0].stackIndex).to.equal(h - 2);
-        expect(onStateUpdated.getCall(1).args[0].stackIndex).to.equal(h - 1);
-
-        // Pop once.
-        const popstate = listenOncePromise(window, 'popstate').then(() => {
-          clock.tick(100);
-        });
-        window.history.go(-1);
-        return popstate;
-      })
-      .then(() => {
-        const h = window.history.length - 2;
-
-        clock.tick(100);
-        expect(history.stackIndex_).to.equal(h);
-        expect(history.unsupportedState_['AMP.History']).to.equal(h);
-        expect(onStateUpdated).to.be.calledThrice;
-        expect(onStateUpdated.getCall(2).args[0].stackIndex).to.equal(h);
-
-        // Pop again.
-        const popstate = listenOncePromise(window, 'popstate').then(() => {
-          clock.tick(100);
-        });
-        window.history.go(-1);
-        return popstate;
-      })
-      .then(() => {
-        const h = window.history.length - 3;
-
-        clock.tick(100);
-        expect(history.stackIndex_).to.equal(h);
-        expect(history.unsupportedState_['AMP.History']).to.equal(h);
-        expect(onStateUpdated).to.have.callCount(4);
-        expect(onStateUpdated.getCall(3).args[0].stackIndex).to.equal(h);
-      });
-  });
-
-  it('should update path from URL parameter', () => {
-    const path = '/path';
-    const query = '?query=1';
-    const prevHref = document.location.href;
-    return history.replace({url: path + query}).then(() => {
-      expect(document.location.pathname).to.equal(path);
-      expect(document.location.search).to.equal(query);
-      return history.replace({url: prevHref});
-    });
-  });
-
-  it('should strip fragment from URL parameter', () => {
-    const prevHref = document.location.href;
-    return history.replace({url: '/path?query=1#fragment'}).then(() => {
-      expect(document.location.hash).to.equal('');
-      return history.replace({url: prevHref});
-    });
-  });
-
-  it('should append the fragment parameter to the URL parameter', () => {
-    const fragment = 'test';
-    const {hash, href} = document.location;
-    return history.replace({url: '/path?query=1', fragment}).then(() => {
-      expect(document.location.hash).to.equal(`#${fragment}`);
-      return history.replace({url: href, fragment: hash});
-    });
-  });
-});
-
-describes.sandboxed('HistoryBindingVirtual', {}, (env) => {
-  let history;
-  let viewer;
-  let capabilityStub;
-
-  let onStateUpdated;
-  let onHistoryPopped;
-
-  beforeEach(() => {
-    onStateUpdated = env.sandbox.spy();
-    capabilityStub = env.sandbox.stub();
-    viewer = {
-      onMessage: env.sandbox.stub().returns(() => {}),
-      sendMessageAwaitResponse: env.sandbox.stub().returns(Promise.resolve()),
-      hasCapability: capabilityStub,
-    };
-    history = new HistoryBindingVirtual_(window, viewer);
-    history.setOnStateUpdated(onStateUpdated);
-
-    onHistoryPopped = viewer.onMessage.firstCall.args[1];
-  });
-
-  afterEach(() => {
-    history.cleanup();
-  });
-
-  it('should initialize correctly', () => {
-    expect(history.stackIndex_).to.equal(0);
-    expect(onStateUpdated).to.have.not.been.called;
-
-    expect(viewer.onMessage).to.be.calledOnce;
-    expect(viewer.onMessage).to.be.calledWith('historyPopped');
-  });
-
-  describe('`pushHistory` API', () => {
-    it('viewer does not support responses', () => {
-      return history.push().then((state) => {
-        expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
-          'pushHistory',
-          {stackIndex: 1}
-        );
-
-        expect(state.stackIndex).to.equal(1);
-        expect(history.stackIndex_).to.equal(1);
-
-        expect(onStateUpdated).to.be.calledOnce;
-        expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1});
-      });
-    });
-
-    it('viewer supports responses', () => {
-      const title = 'title';
-      viewer.sendMessageAwaitResponse
-        .withArgs('pushHistory', {stackIndex: 1, title})
-        .returns(Promise.resolve({stackIndex: 1, title}));
-
-      return history.push({title}).then((state) => {
-        expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
-          'pushHistory',
-          {stackIndex: 1, title}
-        );
-
-        expect(state.stackIndex).to.equal(1);
-        expect(history.stackIndex_).to.equal(1);
-
-        expect(onStateUpdated).to.be.calledOnce;
-        expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1, title});
-      });
-    });
-
-    it('handles bad viewer responses', () => {
-      const title = 'title';
-      viewer.sendMessageAwaitResponse
-        .withArgs('pushHistory', {stackIndex: 1, title})
-        .returns(Promise.resolve(true));
-
-      return history.push({title}).then((state) => {
-        expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
-          'pushHistory',
-          {stackIndex: 1, title}
-        );
-
-        expect(state.stackIndex).to.equal(1);
-        expect(history.stackIndex_).to.equal(1);
-
-        expect(onStateUpdated).to.be.calledOnce;
-        expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1, title});
-      });
-    });
-  });
-
-  describe('`popHistory` API', () => {
-    it('viewer does not support responses', () => {
-      return history.pop(0).then((state) => {
-        expect(state.stackIndex).to.equal(-1);
-        expect(history.stackIndex_).to.equal(-1);
-
-        expect(onStateUpdated).to.be.calledOnce;
-        expect(onStateUpdated).to.be.calledWithMatch({stackIndex: -1});
-      });
-    });
-
-    it('viewer supports responses', () => {
-      viewer.sendMessageAwaitResponse
-        .withArgs('popHistory', env.sandbox.match({stackIndex: 0}))
-        .returns(Promise.resolve({stackIndex: -123, title: 'title'}));
-
-      return history.pop(0).then((state) => {
-        expect(state).to.deep.equal({stackIndex: -123, title: 'title'});
-        expect(history.stackIndex_).to.equal(-123);
-
-        expect(onStateUpdated).to.be.calledOnce;
-        expect(onStateUpdated).to.be.calledWithMatch({
-          stackIndex: -123,
-          title: 'title',
-        });
-      });
-    });
-
-    it('handles bad viewer responses', () => {
-      viewer.sendMessageAwaitResponse
-        .withArgs('popHistory', env.sandbox.match({stackIndex: 0}))
-        .returns(Promise.resolve(true));
-
-      return history.pop(0).then((state) => {
-        expect(state).to.deep.equal({stackIndex: -1});
-        expect(history.stackIndex_).to.equal(-1);
-
-        expect(onStateUpdated).to.be.calledOnce;
-        expect(onStateUpdated).to.be.calledWithMatch({
-          stackIndex: -1,
-        });
-      });
-    });
-  });
-
-  describe('`replaceHistory` API', () => {
-    it('viewer does not support responses', () => {
-      viewer.sendMessageAwaitResponse.withArgs('replaceHistory', {
-        stackIndex: 123,
-        title: 'title',
-      });
-
-      return history.replace({title: 'title'}).then((state) => {
-        expect(history.stackIndex_).to.equal(0);
-        expect(state).to.deep.equal({stackIndex: 0, title: 'title'});
-
-        expect(onStateUpdated).to.not.be.called;
-      });
-    });
-
-    it('viewer supports responses', () => {
-      viewer.sendMessageAwaitResponse
-        .withArgs('replaceHistory', {stackIndex: 123, title: 'title'})
-        .returns(Promise.resolve({stackIndex: 123, title: 'different'}));
-
-      return history
-        .replace({stackIndex: 123, title: 'title'})
-        .then((state) => {
-          expect(history.stackIndex_).to.equal(123);
-          expect(state).to.deep.equal({stackIndex: 123, title: 'different'});
-
-          expect(onStateUpdated).to.be.calledOnce;
-          expect(onStateUpdated).to.be.calledWithMatch({
-            stackIndex: 123,
-            title: 'different',
+        return history.get().then((current) => {
+          expect(current).to.deep.include({
+            'AMP.History': historyState.stackIndex,
+            title,
           });
         });
+      });
     });
 
-    it('handles bad viewer responses', () => {
-      viewer.sendMessageAwaitResponse
-        .withArgs('replaceHistory', {stackIndex: 123, title: 'title'})
-        .returns(Promise.resolve(true));
+    it('should replace current state', () => {
+      const pushTitle = 'pushTitle';
+      const replaceTitle = 'replaceTitle';
+      return history.push({title: pushTitle}).then((historyState) => {
+        expect(history.unsupportedState_).to.deep.include({
+          'AMP.History': historyState.stackIndex,
+          title: pushTitle,
+        });
 
-      return history
-        .replace({stackIndex: 123, title: 'title'})
-        .then((state) => {
-          expect(history.stackIndex_).to.equal(123);
-          expect(state).to.deep.equal({stackIndex: 123, title: 'title'});
+        return history.replace({title: replaceTitle}).then(() => {
+          expect(history.unsupportedState_).to.deep.include({
+            'AMP.History': historyState.stackIndex,
+            title: replaceTitle,
+          });
+
+          return history.pop(historyState.stackIndex);
+        });
+      });
+    });
+
+    it('should update its state and notify on history.back', () => {
+      // Push twice.
+      return Promise.all([history.push(), history.push()])
+        .then(() => {
+          const h = window.history.length;
+
+          expect(onStateUpdated).to.be.calledTwice;
+          expect(onStateUpdated.getCall(0).args[0].stackIndex).to.equal(h - 2);
+          expect(onStateUpdated.getCall(1).args[0].stackIndex).to.equal(h - 1);
+
+          // Pop once.
+          const popstate = listenOncePromise(window, 'popstate').then(() => {
+            clock.tick(100);
+          });
+          window.history.go(-1);
+          return popstate;
+        })
+        .then(() => {
+          const h = window.history.length - 2;
+
+          clock.tick(100);
+          expect(history.stackIndex_).to.equal(h);
+          expect(history.unsupportedState_['AMP.History']).to.equal(h);
+          expect(onStateUpdated).to.be.calledThrice;
+          expect(onStateUpdated.getCall(2).args[0].stackIndex).to.equal(h);
+
+          // Pop again.
+          const popstate = listenOncePromise(window, 'popstate').then(() => {
+            clock.tick(100);
+          });
+          window.history.go(-1);
+          return popstate;
+        })
+        .then(() => {
+          const h = window.history.length - 3;
+
+          clock.tick(100);
+          expect(history.stackIndex_).to.equal(h);
+          expect(history.unsupportedState_['AMP.History']).to.equal(h);
+          expect(onStateUpdated).to.have.callCount(4);
+          expect(onStateUpdated.getCall(3).args[0].stackIndex).to.equal(h);
+        });
+    });
+
+    it('should update path from URL parameter', () => {
+      const path = '/path';
+      const query = '?query=1';
+      const prevHref = document.location.href;
+      return history.replace({url: path + query}).then(() => {
+        expect(document.location.pathname).to.equal(path);
+        expect(document.location.search).to.equal(query);
+        return history.replace({url: prevHref});
+      });
+    });
+
+    it('should strip fragment from URL parameter', () => {
+      const prevHref = document.location.href;
+      return history.replace({url: '/path?query=1#fragment'}).then(() => {
+        expect(document.location.hash).to.equal('');
+        return history.replace({url: prevHref});
+      });
+    });
+
+    it('should append the fragment parameter to the URL parameter', () => {
+      const fragment = 'test';
+      const {hash, href} = document.location;
+      return history.replace({url: '/path?query=1', fragment}).then(() => {
+        expect(document.location.hash).to.equal(`#${fragment}`);
+        return history.replace({url: href, fragment: hash});
+      });
+    });
+  });
+
+  describe('HistoryBindingVirtual', (env) => {
+    let history;
+    let viewer;
+    let capabilityStub;
+
+    let onStateUpdated;
+    let onHistoryPopped;
+
+    beforeEach(() => {
+      onStateUpdated = env.sandbox.spy();
+      capabilityStub = env.sandbox.stub();
+      viewer = {
+        onMessage: env.sandbox.stub().returns(() => {}),
+        sendMessageAwaitResponse: env.sandbox.stub().returns(Promise.resolve()),
+        hasCapability: capabilityStub,
+      };
+      history = new HistoryBindingVirtual_(window, viewer);
+      history.setOnStateUpdated(onStateUpdated);
+
+      onHistoryPopped = viewer.onMessage.firstCall.args[1];
+    });
+
+    afterEach(() => {
+      history.cleanup();
+    });
+
+    it('should initialize correctly', () => {
+      expect(history.stackIndex_).to.equal(0);
+      expect(onStateUpdated).to.have.not.been.called;
+
+      expect(viewer.onMessage).to.be.calledOnce;
+      expect(viewer.onMessage).to.be.calledWith('historyPopped');
+    });
+
+    describe('`pushHistory` API', () => {
+      it('viewer does not support responses', () => {
+        return history.push().then((state) => {
+          expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+          expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
+            'pushHistory',
+            {stackIndex: 1}
+          );
+
+          expect(state.stackIndex).to.equal(1);
+          expect(history.stackIndex_).to.equal(1);
+
+          expect(onStateUpdated).to.be.calledOnce;
+          expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1});
+        });
+      });
+
+      it('viewer supports responses', () => {
+        const title = 'title';
+        viewer.sendMessageAwaitResponse
+          .withArgs('pushHistory', {stackIndex: 1, title})
+          .returns(Promise.resolve({stackIndex: 1, title}));
+
+        return history.push({title}).then((state) => {
+          expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+          expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
+            'pushHistory',
+            {stackIndex: 1, title}
+          );
+
+          expect(state.stackIndex).to.equal(1);
+          expect(history.stackIndex_).to.equal(1);
+
+          expect(onStateUpdated).to.be.calledOnce;
+          expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1, title});
+        });
+      });
+
+      it('handles bad viewer responses', () => {
+        const title = 'title';
+        viewer.sendMessageAwaitResponse
+          .withArgs('pushHistory', {stackIndex: 1, title})
+          .returns(Promise.resolve(true));
+
+        return history.push({title}).then((state) => {
+          expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+          expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
+            'pushHistory',
+            {stackIndex: 1, title}
+          );
+
+          expect(state.stackIndex).to.equal(1);
+          expect(history.stackIndex_).to.equal(1);
+
+          expect(onStateUpdated).to.be.calledOnce;
+          expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1, title});
+        });
+      });
+    });
+
+    describe('`popHistory` API', () => {
+      it('viewer does not support responses', () => {
+        return history.pop(0).then((state) => {
+          expect(state.stackIndex).to.equal(-1);
+          expect(history.stackIndex_).to.equal(-1);
+
+          expect(onStateUpdated).to.be.calledOnce;
+          expect(onStateUpdated).to.be.calledWithMatch({stackIndex: -1});
+        });
+      });
+
+      it('viewer supports responses', () => {
+        viewer.sendMessageAwaitResponse
+          .withArgs('popHistory', env.sandbox.match({stackIndex: 0}))
+          .returns(Promise.resolve({stackIndex: -123, title: 'title'}));
+
+        return history.pop(0).then((state) => {
+          expect(state).to.deep.equal({stackIndex: -123, title: 'title'});
+          expect(history.stackIndex_).to.equal(-123);
 
           expect(onStateUpdated).to.be.calledOnce;
           expect(onStateUpdated).to.be.calledWithMatch({
-            stackIndex: 123,
+            stackIndex: -123,
             title: 'title',
           });
         });
-    });
+      });
 
-    it('supports full URL replacement', () => {
-      capabilityStub.withArgs('fullReplaceHistory').returns(true);
-      viewer.sendMessageAwaitResponse
-        .withArgs('replaceHistory', {
-          stackIndex: 123,
-          title: 'title',
-          url: '/page',
-          fragment: 'fr2',
-        })
-        .returns(
-          Promise.resolve({
-            stackIndex: 123,
-            title: 'different',
-            url: '/otherpage',
-            fragment: 'fr2',
-          })
-        );
+      it('handles bad viewer responses', () => {
+        viewer.sendMessageAwaitResponse
+          .withArgs('popHistory', env.sandbox.match({stackIndex: 0}))
+          .returns(Promise.resolve(true));
 
-      return history
-        .replace({
-          stackIndex: 123,
-          title: 'title',
-          url: '/page#fr1',
-          fragment: 'fr2',
-        })
-        .then((state) => {
-          expect(state).to.deep.equal({
-            fragment: 'fr2',
-            stackIndex: 123,
-            title: 'different',
-            url: '/otherpage',
-          });
+        return history.pop(0).then((state) => {
+          expect(state).to.deep.equal({stackIndex: -1});
+          expect(history.stackIndex_).to.equal(-1);
 
           expect(onStateUpdated).to.be.calledOnce;
           expect(onStateUpdated).to.be.calledWithMatch({
-            fragment: 'fr2',
-            stackIndex: 123,
-            title: 'different',
-            url: '/otherpage',
+            stackIndex: -1,
           });
-        });
-    });
-
-    it('does not support full URL replacement', () => {
-      capabilityStub.withArgs('fullReplaceHistory').returns(false);
-
-      return history
-        .replace({stackIndex: 123, title: 'title', url: '/page'})
-        .then((state) => {
-          expect(state).to.deep.equal({stackIndex: 0});
-
-          expect(viewer.sendMessageAwaitResponse).to.not.be.called;
-          expect(onStateUpdated).to.not.be.called;
-        });
-    });
-  });
-
-  describe('`historyPopped` API', () => {
-    it('pushes and pops', () => {
-      const title = 'title';
-      viewer.sendMessageAwaitResponse
-        .withArgs('pushHistory', {stackIndex: 1, title})
-        .returns(Promise.resolve({stackIndex: 1, title}));
-
-      return history.push({title}).then((state) => {
-        expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
-          'pushHistory',
-          {stackIndex: 1, title}
-        );
-
-        expect(state).to.deep.equal({stackIndex: 1, title});
-        expect(onStateUpdated).to.be.calledOnce;
-        expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1, title});
-
-        onHistoryPopped({stackIndex: 0, title});
-
-        expect(history.stackIndex_).to.equal(0);
-        expect(onStateUpdated).to.be.calledTwice;
-        expect(onStateUpdated.lastCall).to.be.calledWithMatch({
-          stackIndex: 0,
-          title,
         });
       });
     });
 
-    it('sends {stackIndex: <number>, title: <string>}', () => {
-      const title = 'title';
-      onHistoryPopped({stackIndex: 123, title});
-      expect(history.stackIndex_).to.equal(123);
-      expect(onStateUpdated).to.be.calledOnce;
-      expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 123, title});
+    describe('`replaceHistory` API', () => {
+      it('viewer does not support responses', () => {
+        viewer.sendMessageAwaitResponse.withArgs('replaceHistory', {
+          stackIndex: 123,
+          title: 'title',
+        });
+
+        return history.replace({title: 'title'}).then((state) => {
+          expect(history.stackIndex_).to.equal(0);
+          expect(state).to.deep.equal({stackIndex: 0, title: 'title'});
+
+          expect(onStateUpdated).to.not.be.called;
+        });
+      });
+
+      it('viewer supports responses', () => {
+        viewer.sendMessageAwaitResponse
+          .withArgs('replaceHistory', {stackIndex: 123, title: 'title'})
+          .returns(Promise.resolve({stackIndex: 123, title: 'different'}));
+
+        return history
+          .replace({stackIndex: 123, title: 'title'})
+          .then((state) => {
+            expect(history.stackIndex_).to.equal(123);
+            expect(state).to.deep.equal({stackIndex: 123, title: 'different'});
+
+            expect(onStateUpdated).to.be.calledOnce;
+            expect(onStateUpdated).to.be.calledWithMatch({
+              stackIndex: 123,
+              title: 'different',
+            });
+          });
+      });
+
+      it('handles bad viewer responses', () => {
+        viewer.sendMessageAwaitResponse
+          .withArgs('replaceHistory', {stackIndex: 123, title: 'title'})
+          .returns(Promise.resolve(true));
+
+        return history
+          .replace({stackIndex: 123, title: 'title'})
+          .then((state) => {
+            expect(history.stackIndex_).to.equal(123);
+            expect(state).to.deep.equal({stackIndex: 123, title: 'title'});
+
+            expect(onStateUpdated).to.be.calledOnce;
+            expect(onStateUpdated).to.be.calledWithMatch({
+              stackIndex: 123,
+              title: 'title',
+            });
+          });
+      });
+
+      it('supports full URL replacement', () => {
+        capabilityStub.withArgs('fullReplaceHistory').returns(true);
+        viewer.sendMessageAwaitResponse
+          .withArgs('replaceHistory', {
+            stackIndex: 123,
+            title: 'title',
+            url: '/page',
+            fragment: 'fr2',
+          })
+          .returns(
+            Promise.resolve({
+              stackIndex: 123,
+              title: 'different',
+              url: '/otherpage',
+              fragment: 'fr2',
+            })
+          );
+
+        return history
+          .replace({
+            stackIndex: 123,
+            title: 'title',
+            url: '/page#fr1',
+            fragment: 'fr2',
+          })
+          .then((state) => {
+            expect(state).to.deep.equal({
+              fragment: 'fr2',
+              stackIndex: 123,
+              title: 'different',
+              url: '/otherpage',
+            });
+
+            expect(onStateUpdated).to.be.calledOnce;
+            expect(onStateUpdated).to.be.calledWithMatch({
+              fragment: 'fr2',
+              stackIndex: 123,
+              title: 'different',
+              url: '/otherpage',
+            });
+          });
+      });
+
+      it('does not support full URL replacement', () => {
+        capabilityStub.withArgs('fullReplaceHistory').returns(false);
+
+        return history
+          .replace({stackIndex: 123, title: 'title', url: '/page'})
+          .then((state) => {
+            expect(state).to.deep.equal({stackIndex: 0});
+
+            expect(viewer.sendMessageAwaitResponse).to.not.be.called;
+            expect(onStateUpdated).to.not.be.called;
+          });
+      });
     });
 
-    it('sends {newStackIndex: <number>}', () => {
-      onHistoryPopped({newStackIndex: 123});
-      expect(history.stackIndex_).to.equal(123);
-      expect(onStateUpdated).to.be.calledOnce;
-      expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 123});
-    });
+    describe('`historyPopped` API', () => {
+      it('pushes and pops', () => {
+        const title = 'title';
+        viewer.sendMessageAwaitResponse
+          .withArgs('pushHistory', {stackIndex: 1, title})
+          .returns(Promise.resolve({stackIndex: 1, title}));
 
-    it('sends invalid data', () => {
-      onHistoryPopped({invalid: 'data'});
-      expect(onStateUpdated).to.not.be.called;
+        return history.push({title}).then((state) => {
+          expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+          expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
+            'pushHistory',
+            {stackIndex: 1, title}
+          );
+
+          expect(state).to.deep.equal({stackIndex: 1, title});
+          expect(onStateUpdated).to.be.calledOnce;
+          expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1, title});
+
+          onHistoryPopped({stackIndex: 0, title});
+
+          expect(history.stackIndex_).to.equal(0);
+          expect(onStateUpdated).to.be.calledTwice;
+          expect(onStateUpdated.lastCall).to.be.calledWithMatch({
+            stackIndex: 0,
+            title,
+          });
+        });
+      });
+
+      it('sends {stackIndex: <number>, title: <string>}', () => {
+        const title = 'title';
+        onHistoryPopped({stackIndex: 123, title});
+        expect(history.stackIndex_).to.equal(123);
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 123, title});
+      });
+
+      it('sends {newStackIndex: <number>}', () => {
+        onHistoryPopped({newStackIndex: 123});
+        expect(history.stackIndex_).to.equal(123);
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 123});
+      });
+
+      it('sends invalid data', () => {
+        onHistoryPopped({invalid: 'data'});
+        expect(onStateUpdated).to.not.be.called;
+      });
     });
   });
 });
 
 describes.fakeWin(
-  'Local Hash Navigation',
+  'Window - History - Local Hash Navigation',
   {
     win: {
       location: '#first',
@@ -1025,7 +1027,7 @@ describes.fakeWin(
     });
   }
 );
-describes.fakeWin('Get and update fragment', {}, (env) => {
+describes.fakeWin('Window - History - Get and update fragment', {}, (env) => {
   let history;
   let viewer;
   let viewerMock;
