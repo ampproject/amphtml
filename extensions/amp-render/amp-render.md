@@ -200,7 +200,7 @@ If we just want to display the German cars from the response, we can use the `ke
 
 ### `binding`
 
-Controls whether to block render to evaluate bindings (e.g. `[text]`) in children on pages using `amp-render` and `amp-bind`.
+Controls whether to block render to evaluate bindings (e.g. `[text]`) in children on pages using `amp-render` and `amp-bind` together.
 
 -   `binding="never"` or `binding="no"`: Never block render **(fastest)**.
 -   `binding="refresh"` **(default)**: Don't block render on initial load **(faster)**.
@@ -209,7 +209,7 @@ Controls whether to block render to evaluate bindings (e.g. `[text]`) in childre
 Essentially, `binding="always"` is `binding="refresh"` that also blocks to evaluate bindings on the initial load of `amp-render`.
 
 [tip type="important"]
-If `binding` attribute is not provided, default is `refresh`. This is departure from `amp-list` where the default is `always`. Due to this change, if specifying **only** a bound `src` attribute (`[src]`), it is imperative to include the `binding="always"` attribute on the component.
+If `binding` attribute is not provided, default is `refresh`. This is a departure from `amp-list` where the default is `always`. Due to this change, if specifying **only** a bound `src` attribute (`[src]`), it is imperative to include the `binding="always"` attribute on the component to be able to display templated content on the initial load.
 [/tip]
 
 ### Common attributes
