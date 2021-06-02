@@ -187,6 +187,12 @@
   {"name": "amp-experiment", "version": ["0.1", "1.0"], "latestVersion": "0.1"},
   {"name": "amp-facebook", "version": "0.1", "latestVersion": "0.1"},
   {
+    "name": "amp-facebook",
+    "version": "1.0",
+    "options": {"hasCss": true},
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-facebook-comments",
     "version": ["0.1", "1.0"],
     "latestVersion": "0.1"
