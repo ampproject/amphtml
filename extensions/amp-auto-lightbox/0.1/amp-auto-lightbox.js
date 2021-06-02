@@ -141,6 +141,11 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsTreeShapeCriteria(element, ampdoc) {
+    if (element.parentNode?.tagName === 'AMP-IMG') {
+      // Images that are a direct child of an AMP-IMG do not need additional treatment.
+      return false;
+    }
+    
     const disabledSelector = `${DISABLED_ANCESTORS},${DISABLED_BY_ATTR}`;
     const disabledAncestor = closestAncestorElementBySelector(
       element,

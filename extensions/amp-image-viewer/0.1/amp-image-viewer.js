@@ -182,7 +182,8 @@ export class AmpImageViewer extends AMP.BaseElement {
     const haveImg = !!this.image_;
     const laidOutPromise = haveImg
       ? Promise.resolve()
-      : img.tagName === 'IMG' ? loadPromise(img)
+      : img.tagName === 'IMG'
+      ? loadPromise(img)
       : img.signals().whenSignal(CommonSignals.LOAD_END);
 
     if (!haveImg) {
@@ -326,9 +327,11 @@ export class AmpImageViewer extends AMP.BaseElement {
         propagateAttributes(ARIA_ATTRIBUTES, img, this.image_);
         return Promise.resolve();
       }
-      return img.getImpl().then((impl) => {
-        propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_);
-      });
+      return img
+        .getImpl()
+        .then((impl) =>
+          propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_)
+        );
     });
   }
 
