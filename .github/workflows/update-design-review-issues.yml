@@ -2,8 +2,8 @@ name: Update Design Review Issues
 
 on:
   schedule:
-    # At minute 1 (every hour).
-    - cron: '1 * * * *'
+    # At minute 1 on Wednesday (every hour).
+    - cron: '1 * * * 3'
 
 jobs:
   update-design-review-issues:
