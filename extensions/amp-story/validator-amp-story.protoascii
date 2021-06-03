@@ -916,6 +916,11 @@ tags: {  # <amp-story-page-attachment> with no href
     value: "dark"
     value: "light"
   }
+  attrs: {
+    name: "cta-drawer-theme"
+    value: "dark"
+    value: "light"
+  }
 }
 tags: {
   html_format: AMP
