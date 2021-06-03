@@ -2,9 +2,6 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "#third_party/*": ["./third_party/*"],
-      "#builtins/*": ["./builtins/*"],
-
       "#core/*": ["./src/core/*"],
       "#polyfills/*": ["./src/polyfills/*"],
       "#preact/*": ["./src/preact/*"],
