@@ -32,6 +32,7 @@ import {
 import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
 import {Services} from '../../../../src/services';
 import {StoryAdPage} from '../story-ad-page';
+import {SystemLayer} from '../../../amp-story/1.0/amp-story-system-layer';
 import {macroTask} from '../../../../testing/yield';
 import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -282,6 +283,41 @@ describes.realWin(
 
       const progressBar = doc.querySelector('.i-amphtml-story-ad-progress-bar');
       expect(progressBar).to.exist;
+    });
+
+    // TODO(#33969) clean up when launched.
+    describe('progress bar chip variant', () => {
+      it('should create and yellow bar when ad is visible', async () => {
+        // For sync story progress bar chip creation.
+        const mutator = Services.mutatorForDoc(doc);
+        env.sandbox.stub(mutator, 'mutateElement').callsFake((unusedEl, cb) => {
+          cb();
+          return Promise.resolve();
+        });
+
+        toggleExperiment(win, 'story-ad-progress-chip');
+        addStoryAutoAdsConfig(adElement);
+        await story.buildCallback();
+
+        const fakeSystemLayer = new SystemLayer(win, storyElement);
+        const fakeSystemLayerEl = fakeSystemLayer.build('page-1');
+        storyElement.appendChild(fakeSystemLayerEl);
+
+        // Fire these events so that story ads thinks the parent story is ready.
+        story.signals().signal(CommonSignals.BUILT);
+        story.signals().signal(CommonSignals.INI_LOAD);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+
+        expect(doc.querySelector('.i-amphtml-story-ad-progress-value')).not.to
+          .exist;
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: 'i-amphtml-ad-page-1',
+          index: 3,
+        });
+        expect(doc.querySelector('.i-amphtml-story-ad-progress-value')).to
+          .exist;
+      });
     });
 
     describe('system layer', () => {

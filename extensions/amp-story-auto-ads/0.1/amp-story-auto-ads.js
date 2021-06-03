@@ -42,6 +42,7 @@ import {dict} from '../../../src/core/types/object';
 import {divertStoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 import {escapeCssSelectorNth} from '../../../src/core/dom/css';
 import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
 import {getPlacementAlgo} from './algorithm-utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
@@ -374,8 +375,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   getProgressBarRef_() {
     const systemLayer = this.doc_.querySelector('.i-amphtml-system-layer-host');
-    const systemLayerShadowRoot = systemLayer.shadowRoot;
-    this.storyProgressBar_ = systemLayerShadowRoot.querySelector(
+    const shadowRoot = getMode().test ? systemLayer : systemLayer?.shadowRoot;
+    this.storyProgressBar_ = shadowRoot?.querySelector(
       '.i-amphtml-story-progress-bar'
     );
     devAssert(this.storyProgressBar_, 'Unable to find progress bar reference.');
@@ -510,11 +511,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         pageIndex + 2
       )})`
     );
-    const yellow = this.doc_.createElement('div');
-    yellow.className = 'i-amphtml-story-ad-progress-value';
+    const yellowChip = this.doc_.createElement('div');
+    yellowChip.className = 'i-amphtml-story-ad-progress-value';
 
-    this.visibleProgressChip_ = yellow;
-    progressEl.appendChild(yellow);
+    this.visibleProgressChip_ = yellowChip;
+    progressEl.appendChild(yellowChip);
 
     // Tell the iframe that it is visible.
     this.setVisibleAttribute_(adPage);
