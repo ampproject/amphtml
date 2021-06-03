@@ -22,20 +22,22 @@ const loadConfig = require('./load-config');
 const rewriteAnalyticsTags = require('./rewrite-analytics-tags');
 const rewriteScriptTags = require('./rewrite-script-tags');
 const runTests = require('./run-tests');
+const {css} = require('../css');
 const {printReport} = require('./print-report');
 
 /**
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function performance() {
-  let resolver;
+  let resolver = (..._) => {}; // eslint-disable-line no-unused-vars
   const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
-  const config = new loadConfig();
+  const config = loadConfig();
   const urls = Object.keys(config.urlToHandlers);
   const urlsAndAdsUrls = urls.concat(config.adsUrls || []);
+  await css();
   await cacheDocuments(urlsAndAdsUrls);
   await compileScripts(urlsAndAdsUrls);
   await copyLocalImages(urlsAndAdsUrls);

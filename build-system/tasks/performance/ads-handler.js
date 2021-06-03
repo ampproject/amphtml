@@ -26,7 +26,6 @@ const EXAMPLE_AD_URL =
  * instead.
  * @param {!Array<function>} handlersList
  * @param {string} version
- * @return {boolean}
  */
 function setupAdRequestHandler(handlersList, version) {
   handlersList.push((interceptedRequest) => {

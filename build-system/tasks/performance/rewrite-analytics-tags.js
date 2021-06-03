@@ -93,7 +93,7 @@ async function alterAnalyticsTags(url, version, extraUrlParams) {
  * Rewrite analytics configs for each document
  * downloaded from the analytics or ads handler urls
  * @param {?Object} handlers
- * @return {Promise}
+ * @return {Promise<void[]>}
  */
 async function rewriteAnalyticsConfig(handlers) {
   const handlerPromises = [];
