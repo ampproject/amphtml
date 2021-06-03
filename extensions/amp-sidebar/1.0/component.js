@@ -190,10 +190,6 @@ const ToolbarContext = Preact.createContext(
  * @param {!SidebarDef.SidebarToolbarProps} props
  * @return {PreactDef.Renderable}
  */
-<<<<<<< HEAD
-export function SidebarToolbar({
-  children,
-=======
 export function SidebarToolbar(props) {
   const context = useMemo(
     () => ({
@@ -238,7 +234,6 @@ export function AmpSidebarToolbar(props) {
  * @return {PreactDef.Renderable}
  */
 function ToolbarHelper({
->>>>>>> 2b67abd5f (Amp sidebar ssr design)
   toolbar: mediaQueryProp,
   toolbarTarget: toolbarTargetProp,
   ...rest
@@ -248,7 +243,7 @@ function ToolbarHelper({
   const [toolbarTarget, setToolbarTarget] = useState(null);
   const [targetEl, setTargetEl] = useState(null);
 
-  const {preactMode, domElement} = useContext(ToolbarContext);
+  const {domElement, preactMode} = useContext(ToolbarContext);
   if (!preactMode) {
     ref.current = domElement;
   }
