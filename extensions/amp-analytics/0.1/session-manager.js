@@ -73,21 +73,18 @@ export class SessionManager {
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 
     /** @private {!Object<string, ?SessionInfoDef>} */
-    this.sessions_ = {};
+    this.sessions_ = map();
   }
 
   /**
    * Get the value from the session per the vendor.
    * @param {string|undefined} type
    * @param {SESSION_VALUES} value
-   * @return {!Promise<number|null>}
+   * @return {!Promise<number|undefined>}
    */
   getSessionValue(type, value) {
     return this.get(type).then((session) => {
-      if (!session) {
-        return null;
-      }
-      return session[value];
+      return session?.[value];
     });
   }
 
