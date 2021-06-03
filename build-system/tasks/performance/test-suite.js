@@ -22,7 +22,7 @@ const {getReport} = require('./print-report');
 const DEFAULT_THRESHOLD = 1.05;
 const THRESHOLD = argv.threshold ? argv.threshold + 1 : DEFAULT_THRESHOLD;
 
-const {urlToHandlers} = new loadConfig();
+const {urlToHandlers} = loadConfig();
 const reports = getReport(Object.keys(urlToHandlers));
 
 reports.forEach((report) => {

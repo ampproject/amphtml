@@ -33,7 +33,7 @@ const PATH = './config.json';
  */
 function loadConfig() {
   const file = fs.readFileSync(path.join(__dirname, PATH));
-  const config = JSON.parse(file);
+  const config = JSON.parse(file.toString());
   // Create mapping of url to handlers for ease of use later
   config.urlToHandlers = config.handlers.reduce((mapping, handlerOptions) => {
     if (argv.url && handlerOptions.handlerName === 'defaultHandler') {
@@ -41,7 +41,7 @@ function loadConfig() {
     }
     handlerOptions.urls.forEach((url) => {
       if (mapping[url]) {
-        throw new Error('All urls must be unique: %s.', url);
+        throw new Error(`All urls must be unique: ${url}.`);
       }
       mapping[url] = handlerOptions;
     });
