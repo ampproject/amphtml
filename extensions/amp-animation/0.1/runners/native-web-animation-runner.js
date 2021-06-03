@@ -28,9 +28,10 @@ import {
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
 } from '../web-animation-types';
-import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
+import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {devAssert} from '../../../../src/log';
 import {getTotalDuration} from './utils';
+import {setStyles} from '../../../../src/style';
 
 /**
  */

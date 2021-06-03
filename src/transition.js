@@ -15,8 +15,9 @@
  */
 
 import * as st from './style';
-import {assertNotDisplay, setStyle} from './style';
+import {assertNotDisplay} from './assert-display';
 import {getCurve} from './core/data-structures/curve';
+import {setStyle} from './style';
 
 export const NOOP = function (unusedTime) {
   return null;

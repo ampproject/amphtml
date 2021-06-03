@@ -22,8 +22,8 @@ import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
-  assertDoesNotContainDisplay,
   computedStyle,
   px,
   resetStyles,

@@ -16,13 +16,10 @@
 
 import {AnimationRunner} from './animation-runner';
 import {Services} from '../../../../src/services';
-import {
-  assertDoesNotContainDisplay,
-  px,
-  setStyles,
-} from '../../../../src/style';
+import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {dev} from '../../../../src/log';
 import {getTotalDuration} from './utils';
+import {px, setStyles} from '../../../../src/style';
 
 const moduleName = 'amp-animation-worklet';
 let workletModulePromise;

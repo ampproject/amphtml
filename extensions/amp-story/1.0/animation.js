@@ -32,7 +32,7 @@ import {
   WebKeyframesCreateFnDef,
   WebKeyframesDef,
 } from './animation-types';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getChildJsonConfig} from '../../../src/json';
@@ -41,6 +41,7 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/core/dom/query';
+import {setStyles} from '../../../src/style';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 const TAG = 'AMP-STORY';

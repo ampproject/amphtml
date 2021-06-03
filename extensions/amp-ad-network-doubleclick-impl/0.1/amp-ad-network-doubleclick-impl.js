@@ -81,11 +81,7 @@ import {
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {
-  assertDoesNotContainDisplay,
-  setImportantStyles,
-  setStyles,
-} from '../../../src/style';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
   createElementWithAttributes,
   isRTL,
@@ -112,6 +108,7 @@ import {
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {setImportantStyles, setStyles} from '../../../src/style';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
