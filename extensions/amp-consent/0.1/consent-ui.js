@@ -24,7 +24,7 @@ import {expandConsentEndpointUrl} from './consent-config';
 import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {
   insertAtStart,
   isAmpElement,

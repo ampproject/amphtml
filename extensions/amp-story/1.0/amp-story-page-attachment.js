@@ -25,7 +25,7 @@ import {closest} from '../../../src/core/dom/query';
 import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getState} from '../../../src/core/window/history';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {removeElement} from '../../../src/dom';
 import {setImportantStyles, toggle} from '../../../src/core/dom/style';

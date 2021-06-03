@@ -43,7 +43,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 import {

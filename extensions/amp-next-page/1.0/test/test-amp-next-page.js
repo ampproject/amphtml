@@ -18,7 +18,7 @@ import {HostPage, PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {setStyle} from '../../../../src/core/dom/style';
 
 const MOCK_NEXT_PAGE = `<header>Header</header>

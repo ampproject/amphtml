@@ -39,7 +39,7 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 

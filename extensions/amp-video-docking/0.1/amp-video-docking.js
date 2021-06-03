@@ -44,7 +44,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getInternalVideoElementFor} from '../../../src/core/dom/video';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isRTL, removeElement} from '../../../src/dom';
 import {

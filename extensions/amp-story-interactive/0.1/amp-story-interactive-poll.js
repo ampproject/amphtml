@@ -21,7 +21,7 @@ import {
 import {CSS} from '../../../build/amp-story-interactive-poll-0.1.css';
 import {computedStyle, setStyle} from '../../../src/core/dom/style';
 import {dev} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {toArray} from '../../../src/core/types/array';
 
 /**

@@ -25,7 +25,7 @@ import {
   tryFocus,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {poll} from '../../../../testing/iframe';
 
 describes.realWin(

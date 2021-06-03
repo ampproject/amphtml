@@ -38,7 +38,7 @@ import {DirectionX, DirectionY} from '../def.js';
 import {PlayingStates} from '../../../../src/video-interface';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 
 const slotId = 'my-slot-element';

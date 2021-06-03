@@ -17,7 +17,7 @@ import '../amp-sidebar';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor, whenCalled} from '../../../../testing/test-helper';
 

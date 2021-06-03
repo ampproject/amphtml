@@ -15,7 +15,7 @@
  */
 import {computedStyle} from '../core/dom/style';
 import {dev} from '../log';
-import {devAssert, devAssertElement} from '../core/assert/dev';
+import {devAssert, devAssertElement} from '../core/assert';
 
 /** @typedef {
  *    function(!Element, !Object<string, string>): *

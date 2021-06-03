@@ -30,7 +30,7 @@ import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenOncePromise} from '../../../src/event-helper';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';

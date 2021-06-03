@@ -22,7 +22,7 @@ import {
   toggle,
 } from '../../../src/core/dom/style';
 import {getData} from '../../../src/event-helper';
-import {htmlFor, htmlRefs, svgFor} from '../../../src/static-template';
+import {htmlFor, htmlRefs, svgFor} from '../../../src/core/dom/static-template';
 import {isArray, isObject} from '../../../src/core/types';
 import {loadScript} from '../../../3p/3p';
 import {throttle} from '../../../src/core/types/function';

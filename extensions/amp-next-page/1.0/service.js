@@ -31,7 +31,7 @@ import {
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {findIndex, toArray} from '../../../src/core/types/array';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
 import {
   insertAtStart,
   isJsonScriptTag,

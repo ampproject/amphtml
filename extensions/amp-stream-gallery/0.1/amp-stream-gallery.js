@@ -34,7 +34,7 @@ import {
   iterateCursor,
   toggleAttribute,
 } from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyle} from '../../../src/core/dom/style';

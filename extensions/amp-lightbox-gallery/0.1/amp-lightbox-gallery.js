@@ -47,7 +47,7 @@ import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getVerticalScrollbarWidth, toggleAttribute} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error-reporting';

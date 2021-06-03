@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {setStyles} from '../../../src/core/dom/style';
 
 /**

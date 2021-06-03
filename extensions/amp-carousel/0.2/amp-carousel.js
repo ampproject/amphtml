@@ -27,7 +27,7 @@ import {createCustomEvent, getDetail, listen} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 

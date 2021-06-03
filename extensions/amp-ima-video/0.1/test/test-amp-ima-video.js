@@ -15,7 +15,7 @@
  */
 
 import '../amp-ima-video';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {waitForChildPromise} from '../../../../src/dom';
 

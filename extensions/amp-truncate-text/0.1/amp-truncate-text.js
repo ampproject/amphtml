@@ -20,7 +20,7 @@ import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css'
 import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createShadowRoot} from './shadow-utils';
 import {dev} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor} from '../../../src/dom';
 import {toArray} from '../../../src/core/types/array';
