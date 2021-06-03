@@ -40,7 +40,7 @@ import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {divertStoryAdPlacements} from '../../../src/experiments/story-ad-placements';
-import {escapeCssSelectorNth} from '../../../src/core/dom/css';
+import {escapeCssSelectorNth} from '../../../src/core/dom/css-selectors';
 import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getPlacementAlgo} from './algorithm-utils';
