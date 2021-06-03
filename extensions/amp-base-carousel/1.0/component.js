@@ -31,7 +31,7 @@ import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
 import {forwardRef, toChildArray} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {mod} from '../../../src/core/math';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 import {
   useCallback,
   useContext,

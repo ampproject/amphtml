@@ -24,7 +24,7 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 
 /**
  * @enum {string}

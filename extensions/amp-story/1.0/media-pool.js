@@ -35,7 +35,7 @@ import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/core/types/array';
 import {isConnectedNode} from '../../../src/dom';
 import {matches} from '../../../src/core/dom/query';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 import {userInteractedWith} from '../../../src/video-interface';
 
 /** @const @enum {string} */
