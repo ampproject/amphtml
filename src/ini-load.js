@@ -53,7 +53,8 @@ export function whenContentIniLoad(
 }
 
 /**
- * A legacy way using direct measurement. Used by inabox runtime.
+ * A legacy way using direct measurement.
+ * Used by inabox runtime, and will be moved there after #31915.
  *
  * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {!Window} hostWin
