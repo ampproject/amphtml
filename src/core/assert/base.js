@@ -16,7 +16,7 @@
 
 import {elementStringOrPassThru} from '../error/message-helpers';
 import {includes} from '../types/string';
-import {isArray, isElement, isEnumValue, isString} from '../types';
+import {isArray, isElement, isString} from '../types';
 import {remove} from '../types/array';
 
 /**
@@ -86,9 +86,7 @@ export function assert(
   // __AMP_REPORT_ERROR is installed globally per window in the entry point in
   // AMP documents. It may not be present for Bento/Preact elements on non-AMP
   // pages.
-  if (self.__AMP_REPORT_ERROR) {
-    self.__AMP_REPORT_ERROR(error);
-  }
+  self.__AMP_REPORT_ERROR?.(error);
   throw error;
 }
 
@@ -249,31 +247,5 @@ export function assertBoolean(assertFn, shouldBeBoolean, opt_message) {
       'Boolean expected',
       opt_message
     )
-  );
-}
-
-/**
- * Asserts and returns the enum value. If the enum doesn't contain such a
- * value, the error is thrown.
- *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
- * @param {!Object<T>} enumObj
- * @param {*} shouldBeEnum
- * @param {string=} opt_enumName
- * @return {T}
- * @template T
- * @closurePrimitive {asserts.matchesReturn}
- */
-export function assertEnumValue(
-  assertFn,
-  enumObj,
-  shouldBeEnum,
-  opt_enumName = 'enum'
-) {
-  return assertType_(
-    assertFn,
-    shouldBeEnum,
-    isEnumValue(enumObj, shouldBeEnum),
-    `Unknown ${opt_enumName} value: "${shouldBeEnum}"`
   );
 }

@@ -15,7 +15,8 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const fs = require('fs');
+const fs = require('fs-extra');
+const puppeteer = require('puppeteer');
 const {
   CDN_URL,
   CONTROL,
@@ -35,20 +36,13 @@ const {cyan, green} = require('../../common/colors');
 const {log} = require('../../common/logging');
 const {setupAdRequestHandler} = require('./ads-handler');
 
-// Require Puppeteer dynamically to prevent throwing error during CI
-let puppeteer;
-
-function requirePuppeteer_() {
-  puppeteer = require('puppeteer');
-}
-
 /**
  * Setup measurement on page before navigating to the URL. Performance
  * observers need to be initialized before content begins to load to take
  * measurements.
  *
- * @param {puppeteer.page} page
- * @return {Promise} Resolves when script is evaluated
+ * @param {puppeteer.Page} page
+ * @return {Promise<void>} Resolves when script is evaluated
  */
 const setupMeasurement = (page) =>
   page.evaluateOnNewDocument(() => {
@@ -85,7 +79,7 @@ const setupMeasurement = (page) =>
 /**
  * Intecepts requests for default extensions made by runtime and returns a
  * cached version.
- * @param {Request} interceptedRequest
+ * @param {puppeteer.HTTPRequest} interceptedRequest
  * @param {string} version
  * @return {!Promise<boolean>}
  */
@@ -135,7 +129,7 @@ function setupDelayBasedOnHandlerOptions(handlerOptions) {
 /**
  * Evaluate script on the page to collect and calculate metrics
  *
- * @param {Puppeteer.page} page
+ * @param {puppeteer.Page} page
  * @return {Promise<object>} Resolves with page load metrics
  */
 const readMetrics = (page) =>
@@ -145,7 +139,7 @@ const readMetrics = (page) =>
     /**
      *
      * @param {string} name
-     * @return {nuber}
+     * @return {number}
      */
     function getMetric(name) {
       const entry = entries.find((entry) => entry.name === name);
@@ -199,7 +193,7 @@ function setupDefaultHandlers(handlersList, version) {
  *
  * @param {!Array<function>} handlersList
  * @param {?Object} handlerOptions
- * @param {!Puppeteer.page} page
+ * @param {!puppeteer.Page} page
  * @param {!function} resolve
  * @param {string} version
  */
@@ -231,7 +225,7 @@ async function setupAdditionalHandlers(
  * handlers respond/abort the request.
  *
  * @param {!Array<function>} handlersList
- * @param {Puppeteer.page} page
+ * @param {puppeteer.Page} page
  */
 function startRequestListener(handlersList, page) {
   page.on('request', async (interceptedRequest) => {
@@ -250,7 +244,7 @@ function startRequestListener(handlersList, page) {
  * Return metrics based on handler
  *
  * @param {?Object} handlerOptions
- * @param {Puppeteer.page} page
+ * @param {puppeteer.Page} page
  * @return {!Promise<!Object>}
  */
 async function addHandlerMetric(handlerOptions, page) {
@@ -275,7 +269,7 @@ function writeMetrics(url, version, metrics) {
   let results = {};
 
   if (fs.existsSync(RESULTS_PATH)) {
-    results = JSON.parse(fs.readFileSync(RESULTS_PATH));
+    results = fs.readJson(RESULTS_PATH);
   }
 
   if (!results[url]) {
@@ -294,7 +288,7 @@ function writeMetrics(url, version, metrics) {
  * @param {string} url
  * @param {string} version "control" or "experiment"
  * @param {!Object} config
- * @return {Promise}
+ * @return {Promise<void>}
  */
 async function measureDocument(url, version, config) {
   const browser = await puppeteer.launch({
@@ -346,11 +340,9 @@ async function measureDocument(url, version, config) {
  *
  * @param {!Array<string>} urls
  * @param {!Object} config
- * @return {Promise} Fulfills when all URLs have been measured
+ * @return {Promise<void>} Fulfills when all URLs have been measured
  */
 async function measureDocuments(urls, config) {
-  requirePuppeteer_();
-
   try {
     fs.unlinkSync(RESULTS_PATH);
   } catch {} // file does not exist (first run)

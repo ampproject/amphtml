@@ -32,11 +32,10 @@ const path = require('path');
  */
 function getRepoRoot() {
   const repoRootCmd = 'git rev-parse --show-toplevel';
-  const spawnOptions = {
+  const result = childProcess.spawnSync(repoRootCmd, {
     shell: process.platform == 'win32' ? 'cmd' : '/bin/bash',
     encoding: 'utf-8',
-  };
-  const result = childProcess.spawnSync(repoRootCmd, spawnOptions);
+  });
   return result.status == 0 ? result.stdout.trim() : undefined;
 }
 

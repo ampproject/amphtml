@@ -21,7 +21,7 @@ import {computedStyle, toggle} from '../style';
 import {dev, user, userAssert} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
 import {isFiniteNumber} from '../core/types';
-import {toWin} from '../types';
+import {toWin} from '../core/window';
 import {tryFocus} from '../dom';
 
 /**

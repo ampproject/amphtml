@@ -19,9 +19,9 @@ import {
   parseSrcset,
   srcsetFromElement,
   srcsetFromSrc,
-} from '../../src/srcset';
+} from '../../../../src/core/dom/srcset';
 
-describes.sandboxed('Srcset', {}, () => {
+describes.sandboxed('DOM - srcset', {}, () => {
   describe('parseSrcset', () => {
     function test(s, expected) {
       const res = parseSrcset(s);

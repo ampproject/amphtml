@@ -27,13 +27,13 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
+import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {
-  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
+
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
@@ -42,7 +42,6 @@ import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 
 const TAG = 'amp-brid-player';
 
@@ -248,7 +247,7 @@ class AmpBridPlayer extends AMP.BaseElement {
       <img placeholder referrerpolicy="origin" loading="lazy" />
     `;
 
-    propagateAttributes(['aria-label'], this.element, placeholder);
+    this.propagateAttributes(['aria-label'], placeholder);
     this.applyFillContent(placeholder);
 
     const altText = placeholder.hasAttribute('aria-label')

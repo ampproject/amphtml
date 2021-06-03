@@ -31,7 +31,7 @@ import {
   moveLayoutRect,
   rectsOverlap,
 } from '../core/math/layout-rect';
-import {toWin} from '../types';
+import {toWin} from '../core/window';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';

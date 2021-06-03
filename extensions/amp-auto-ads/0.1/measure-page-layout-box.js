@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {Services} from '../services';
-import {layoutRectLtwh} from '../core/math/layout-rect';
-import {toWin} from '../types';
-
-/**
- * @param {!Element} element
- * @return {!../layout-rect.LayoutRectDef}
- */
-export function getPageLayoutBoxBlocking(element) {
-  const stop = element.ownerDocument.body;
-  let left = 0;
-  let top = 0;
-  for (let n = element; n && n != stop; n = n./*OK*/ offsetParent) {
-    left += n./*OK*/ offsetLeft;
-    top += n./*OK*/ offsetTop;
-  }
-  const {offsetHeight, offsetWidth} = /** @type {!HTMLElement} */ (element);
-  return layoutRectLtwh(left, top, offsetWidth, offsetHeight);
-}
+import {Services} from '.../../../src/services';
+import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
+import {toWin} from '../../../src/core/window';
 
 /**
  * @param {!Element} element

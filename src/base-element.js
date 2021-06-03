@@ -22,7 +22,7 @@ import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray} from './core/types';
-import {toWin} from './types';
+import {toWin} from './core/window';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -739,6 +739,29 @@ export class BaseElement {
     const {handler, minTrust} = holder;
     if (invocation.satisfiesTrust(minTrust)) {
       return handler(invocation);
+    }
+  }
+
+  /**
+   * Utility method that propagates attributes from this element
+   * to the given element.
+   * If `opt_removeMissingAttrs` is true, then also removes any specified
+   * attributes that are missing on this element from the target element.
+   * @param {string|!Array<string>} attributes
+   * @param {!Element} element
+   * @param {boolean=} opt_removeMissingAttrs
+   * @public @final
+   */
+  propagateAttributes(attributes, element, opt_removeMissingAttrs) {
+    attributes = isArray(attributes) ? attributes : [attributes];
+    for (let i = 0; i < attributes.length; i++) {
+      const attr = attributes[i];
+      const val = this.element.getAttribute(attr);
+      if (null !== val) {
+        element.setAttribute(attr, val);
+      } else if (opt_removeMissingAttrs) {
+        element.removeAttribute(attr);
+      }
     }
   }
 
