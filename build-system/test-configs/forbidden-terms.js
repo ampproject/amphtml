@@ -1057,7 +1057,7 @@ const forbiddenTermsSrcInclusive = {
       'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',
     allowlist: [
       // The function itself is defined here.
-      'src/utils/video.js',
+      'src/core/dom/video/index.js',
     ],
   },
 };
