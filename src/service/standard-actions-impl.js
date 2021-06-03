@@ -22,7 +22,7 @@ import {dev, user, userAssert} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
 import {isFiniteNumber} from '../core/types';
 import {toWin} from '../core/window';
-import {tryFocus} from '../dom';
+import {tryFocus} from '../core/dom';
 
 /**
  * @param {!Element} element

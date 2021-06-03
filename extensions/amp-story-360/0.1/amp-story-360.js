@@ -34,7 +34,7 @@ import {htmlFor} from '../../../src/core/dom/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenOncePromise} from '../../../src/event-helper';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';

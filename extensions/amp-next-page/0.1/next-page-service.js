@@ -25,7 +25,7 @@ import {getAmpdoc} from '../../../src/service';
 import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {setStyle, toggle} from '../../../src/core/dom/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 

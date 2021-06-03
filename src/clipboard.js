@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {removeElement} from './dom';
+import {removeElement} from './core/dom';
 import {setStyles} from './core/dom/style';
 
 /**

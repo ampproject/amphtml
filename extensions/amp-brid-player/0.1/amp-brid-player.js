@@ -27,7 +27,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dispatchCustomEvent, removeElement} from '../../../src/dom';
+import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,

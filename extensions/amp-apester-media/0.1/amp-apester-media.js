@@ -33,7 +33,7 @@ import {
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
 import {px, setStyles} from '../../../src/core/dom/style';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 
 /** @const */
 const TAG = 'amp-apester-media';

@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {setImportantStyles, toggle} from '../../../src/core/dom/style';
 
 export class Dialog {

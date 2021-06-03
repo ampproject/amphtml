@@ -30,7 +30,7 @@ import {
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
-import {dispatchCustomEvent, removeElement} from '../../../src/dom';
+import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,

@@ -25,7 +25,7 @@ import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth} from '../../../src/core/dom/css-selectors';
 import {hasOwn, map} from '../../../src/core/types/object';
-import {removeChildren} from '../../../src/dom';
+import {removeChildren} from '../../../src/core/dom';
 import {scale, setImportantStyles} from '../../../src/core/dom/style';
 import {scopedQuerySelector} from '../../../src/core/dom/query';
 

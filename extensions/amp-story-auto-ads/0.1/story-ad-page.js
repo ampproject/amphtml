@@ -43,7 +43,7 @@ import {
   createElementWithAttributes,
   isJsonScriptTag,
   toggleAttribute,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
 import {elementByTag} from '../../../src/core/dom/query';

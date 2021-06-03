@@ -32,7 +32,7 @@ import {EventType, dispatch} from './events';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
-import {addAttributesToElement, tryFocus} from '../../../src/dom';
+import {addAttributesToElement, tryFocus} from '../../../src/core/dom';
 import {closest, matches} from '../../../src/core/dom/query';
 import {
   createShadowRootWithStyle,

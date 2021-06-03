@@ -46,7 +46,10 @@ import {dict} from '../../../src/core/types/object';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
-import {getVerticalScrollbarWidth, toggleAttribute} from '../../../src/dom';
+import {
+  getVerticalScrollbarWidth,
+  toggleAttribute,
+} from '../../../src/core/dom';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {prepareImageAnimation} from '@ampproject/animations';

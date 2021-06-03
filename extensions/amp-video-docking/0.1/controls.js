@@ -24,7 +24,7 @@ import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
 import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
-import {iterateCursor} from '../../../src/dom';
+import {iterateCursor} from '../../../src/core/dom';
 import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 import {once} from '../../../src/core/types/function';
 import {

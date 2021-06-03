@@ -15,7 +15,7 @@
  */
 
 import '../amp-video-iframe';
-import {dispatchCustomEvent} from '../../../../src/dom';
+import {dispatchCustomEvent} from '../../../../src/core/dom';
 import {htmlFor} from '../../../../src/core/dom/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';

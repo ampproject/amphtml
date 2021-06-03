@@ -28,7 +28,7 @@ import {
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent, removeElement} from '../../../src/dom';
+import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,

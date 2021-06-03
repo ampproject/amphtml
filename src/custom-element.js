@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as dom from './dom';
+import * as dom from './core/dom';
 import * as query from './core/dom/query';
 import {AmpEvents} from './core/constants/amp-events';
 import {CommonSignals} from './core/constants/common-signals';

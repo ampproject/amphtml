@@ -55,7 +55,10 @@ import {Services} from '../../../src/services';
 import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  removeElement,
+} from '../../../src/core/dom';
 import {dict} from '../../../src/core/types/object';
 import {
   getAddThisMode,

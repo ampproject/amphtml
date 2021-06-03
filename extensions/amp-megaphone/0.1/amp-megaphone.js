@@ -34,7 +34,7 @@ import {dict} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeFixed} from '../../../src/layout';
 import {isObject} from '../../../src/core/types';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {tryParseJson} from '../../../src/core/types/object/json';
 import {userAssert} from '../../../src/log';

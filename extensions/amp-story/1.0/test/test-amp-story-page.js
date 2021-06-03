@@ -28,7 +28,7 @@ import {Signals} from '../../../../src/core/data-structures/signals';
 import {
   addAttributesToElement,
   createElementWithAttributes,
-} from '../../../../src/dom';
+} from '../../../../src/core/dom';
 import {htmlFor} from '../../../../src/core/dom/static-template';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';

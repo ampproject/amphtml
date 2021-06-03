@@ -46,7 +46,7 @@ import {getServicePromiseForDoc} from '../../../src/service';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
 import {setStyle} from '../../../src/core/dom/style';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
-import {toggleAttribute} from '../../../src/dom';
+import {toggleAttribute} from '../../../src/core/dom';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads';

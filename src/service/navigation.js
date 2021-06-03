@@ -21,7 +21,7 @@ import {dict} from '../core/types/object';
 import {escapeCssSelectorIdent} from '../core/dom/css-selectors';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
-import {isIframed, tryFocus} from '../dom';
+import {isIframed, tryFocus} from '../core/dom';
 import {isLocalhostOrigin} from '../url';
 import {openWindowDialog} from '../open-window-dialog';
 import {registerServiceBuilderForDoc} from '../service';

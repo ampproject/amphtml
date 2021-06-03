@@ -49,7 +49,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {removeChildren, tryFocus} from '../../../src/dom';
+import {removeChildren, tryFocus} from '../../../src/core/dom';
 
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/core/types/array';

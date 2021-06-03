@@ -16,7 +16,7 @@
 import {LogLevel, dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {isArray} from '../../../src/core/types';
-import {removeChildren} from '../../../src/dom';
+import {removeChildren} from '../../../src/core/dom';
 import {toggle} from '../../../src/core/dom/style';
 
 /**

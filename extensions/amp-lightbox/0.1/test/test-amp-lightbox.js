@@ -15,7 +15,7 @@
  */
 
 import '../amp-lightbox';
-import * as dom from '../../../../src/dom';
+import * as dom from '../../../../src/core/dom';
 import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Keys} from '../../../../src/core/constants/key-codes';

@@ -30,7 +30,7 @@ import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {handleAutoscroll} from './autoscroll';
-import {isRTL, tryFocus} from '../../../src/dom';
+import {isRTL, tryFocus} from '../../../src/core/dom';
 import {
   observeContentSize,
   unobserveContentSize,

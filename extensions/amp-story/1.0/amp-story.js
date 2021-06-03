@@ -102,7 +102,8 @@ import {getMode, isModeDevelopment} from '../../../src/mode';
 import {getState} from '../../../src/core/window/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
-import {isRTL, whenUpgradedToCustomElement} from '../../../src/dom';
+import {isRTL} from '../../../src/core/dom';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 import {parseQueryString} from '../../../src/core/types/string/url';
 import {

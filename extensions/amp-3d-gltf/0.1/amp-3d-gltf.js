@@ -30,7 +30,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 
 const TAG = 'amp-3d-gltf';
 const TYPE = '3d-gltf';

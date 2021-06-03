@@ -40,7 +40,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {isInFie} from '../../../src/iframe-helper';
 import {toArray} from '../../../src/core/types/array';
-import {tryFocus} from '../../../src/dom';
+import {tryFocus} from '../../../src/core/dom';
 import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 /** @const {string} */

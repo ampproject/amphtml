@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as dom from '../../../src/dom';
+import * as dom from '../../../src/core/dom';
 import {CSS} from '../../../build/amp-viz-vega-0.1.css';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';

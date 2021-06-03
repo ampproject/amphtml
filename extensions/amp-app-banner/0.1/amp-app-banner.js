@@ -19,7 +19,7 @@ import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {openWindowDialog} from '../../../src/open-window-dialog';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {rethrowAsync} from '../../../src/core/error';
 
 const TAG = 'amp-app-banner';

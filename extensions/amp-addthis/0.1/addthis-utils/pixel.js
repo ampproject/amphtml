@@ -16,7 +16,7 @@
 import {COOKIELESS_API_SERVER} from '../constants';
 import {Services} from '../../../../src/services';
 import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {dict} from '../../../../src/core/types/object';
 import {getData} from '../../../../src/event-helper';
 import {isObject} from '../../../../src/core/types';

@@ -37,7 +37,7 @@ import {
   isJsonScriptTag,
   removeChildren,
   removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   parseFavicon,

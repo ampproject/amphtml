@@ -42,7 +42,7 @@ import {
   createElementWithAttributes,
   dispatchCustomEvent,
   parseBooleanAttribute,
-} from '../dom';
+} from '../core/dom';
 import {dashToCamelCase} from '../core/types/string';
 import {devAssert} from '../core/assert';
 import {dict, hasOwn, map} from '../core/types/object';

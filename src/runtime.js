@@ -45,7 +45,7 @@ import {shouldLoadPolyfill as shouldLoadInObPolyfill} from './polyfills/stubs/in
 import {shouldLoadPolyfill as shouldLoadResObPolyfill} from './polyfills/stubs/resize-observer-stub';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {waitForBodyOpenPromise} from './dom';
+import {waitForBodyOpenPromise} from './core/dom';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as dom from '../../../src/dom';
+import * as dom from '../../../src/core/dom';
 import * as query from '../../../src/core/dom/query';
 import * as st from '../../../src/core/dom/style';
 import * as tr from '../../../src/transition';

@@ -18,7 +18,7 @@ import {
   assertMutationRecordFormat,
   getElementsFromMutationRecordSelector,
 } from '../mutation-record';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const TEST_ELEMENT_CLASS = 'experiment-test-element';

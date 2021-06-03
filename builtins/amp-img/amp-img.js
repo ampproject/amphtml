@@ -26,7 +26,7 @@ import {
   setImportantStyles,
 } from '../../src/core/dom/style';
 import {registerElement} from '../../src/service/custom-element-registry';
-import {removeElement} from '../../src/dom';
+import {removeElement} from '../../src/core/dom';
 import {scopedQuerySelector} from '../../src/core/dom/query';
 
 /** @const {string} */

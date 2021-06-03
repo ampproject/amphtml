@@ -36,7 +36,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/core/math/layout-rect';
 import {parseJson} from '../../../src/core/types/object/json';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {removeFragment} from '../../../src/url';
 import {setStyle} from '../../../src/core/dom/style';
 import {urls} from '../../../src/config';

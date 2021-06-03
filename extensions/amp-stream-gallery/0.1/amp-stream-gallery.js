@@ -33,7 +33,7 @@ import {
   isRTL,
   iterateCursor,
   toggleAttribute,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';

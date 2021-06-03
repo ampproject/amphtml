@@ -27,7 +27,7 @@ import {
   dispatchCustomEvent,
   isJsonScriptTag,
   removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';

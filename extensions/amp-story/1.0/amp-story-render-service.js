@@ -16,7 +16,7 @@
 
 import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Services} from '../../../src/services';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /**
  * Maximum milliseconds to wait for service to load.

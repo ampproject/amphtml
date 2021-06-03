@@ -30,7 +30,7 @@ import {dict} from '../../../src/core/types/object';
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,

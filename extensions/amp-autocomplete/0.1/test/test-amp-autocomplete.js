@@ -17,7 +17,7 @@
 import '../amp-autocomplete';
 import {AmpAutocomplete} from '../amp-autocomplete';
 import {Keys} from '../../../../src/core/constants/key-codes';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {htmlFor} from '../../../../src/core/dom/static-template';
 
 describes.realWin(

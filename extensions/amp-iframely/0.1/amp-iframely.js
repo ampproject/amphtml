@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 import {addParamsToUrl} from '../../../src/url';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  removeElement,
+} from '../../../src/core/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {measureIntersection} from '../../../src/utils/intersection';

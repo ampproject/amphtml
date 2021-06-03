@@ -20,7 +20,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {addAttributesToElement} from '../../../src/dom';
+import {addAttributesToElement} from '../../../src/core/dom';
 import {toggle} from '../../../src/core/dom/style';
 
 export class AssistjsFrameService {

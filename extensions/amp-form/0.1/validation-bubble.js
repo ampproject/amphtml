@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {removeChildren} from '../../../src/dom';
+import {removeChildren} from '../../../src/core/dom';
 import {setStyles, toggle} from '../../../src/core/dom/style';
 
 /** @type {string} */

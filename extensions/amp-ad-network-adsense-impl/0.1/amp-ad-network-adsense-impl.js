@@ -67,7 +67,7 @@ import {
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {stringHash32} from '../../../src/core/types/string';
 import {utf8Decode} from '../../../src/core/types/string/bytes';
 

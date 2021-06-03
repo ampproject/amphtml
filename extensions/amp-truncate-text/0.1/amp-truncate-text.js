@@ -22,7 +22,7 @@ import {createShadowRoot} from './shadow-utils';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {iterateCursor} from '../../../src/dom';
+import {iterateCursor} from '../../../src/core/dom';
 import {toArray} from '../../../src/core/types/array';
 import {truncateText} from './truncate-text';
 

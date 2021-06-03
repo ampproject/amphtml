@@ -20,7 +20,7 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 
 const TYPE = 'twitter';
 

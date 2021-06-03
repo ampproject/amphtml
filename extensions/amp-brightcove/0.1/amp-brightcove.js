@@ -32,7 +32,7 @@ import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
   removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,

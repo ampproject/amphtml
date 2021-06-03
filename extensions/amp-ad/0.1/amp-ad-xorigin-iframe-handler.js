@@ -31,7 +31,7 @@ import {getData} from '../../../src/event-helper';
 import {getHtml} from '../../../src/core/dom/get-html';
 import {isExperimentOn} from '../../../src/experiments';
 import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {reportErrorToAnalytics} from '../../../src/error-reporting';
 import {setStyle} from '../../../src/core/dom/style';
 import {throttle} from '../../../src/core/types/function';

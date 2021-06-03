@@ -41,7 +41,7 @@ import {
   setStyle,
   setStyles,
 } from '../../../src/core/dom/style';
-import {iterateCursor} from '../../../src/dom';
+import {iterateCursor} from '../../../src/core/dom';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last

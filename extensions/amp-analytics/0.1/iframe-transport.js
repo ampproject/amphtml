@@ -15,7 +15,7 @@
  */
 
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/core/types/object';

@@ -37,7 +37,7 @@ import {
 import {DirectionX, DirectionY} from '../def.js';
 import {PlayingStates} from '../../../../src/video-interface';
 import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {htmlFor} from '../../../../src/core/dom/static-template';
 import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 

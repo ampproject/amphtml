@@ -31,7 +31,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {handleAutoscroll} from './autoscroll';
 import {isExperimentOn} from '../../../src/experiments';
-import {isRTL, tryFocus} from '../../../src/dom';
+import {isRTL, tryFocus} from '../../../src/core/dom';
 import {
   observeContentSize,
   unobserveContentSize,

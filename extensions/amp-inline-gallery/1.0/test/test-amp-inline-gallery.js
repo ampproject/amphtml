@@ -18,7 +18,7 @@ import '../amp-inline-gallery';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {CarouselContextProp} from '../../../amp-base-carousel/1.0/carousel-props';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {setStyles} from '../../../../src/core/dom/style';
 import {subscribe} from '../../../../src/context';
 import {toggleExperiment} from '../../../../src/experiments';

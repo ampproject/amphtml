@@ -46,7 +46,7 @@ import {tryParseJson} from '../../../src/core/types/object/json';
 
 import {mod} from '../../../src/core/math';
 import {once} from '../../../src/core/types/function';
-import {removeChildren, tryFocus} from '../../../src/dom';
+import {removeChildren, tryFocus} from '../../../src/core/dom';
 import {
   setupAMPCors,
   setupInput,

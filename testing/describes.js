@@ -95,7 +95,7 @@ import {adopt, adoptShadowMode} from '../src/runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {createAmpElementForTesting} from '../src/custom-element';
-import {createElementWithAttributes} from '../src/dom';
+import {createElementWithAttributes} from '../src/core/dom';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {
   installAmpdocServices,

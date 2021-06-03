@@ -16,7 +16,10 @@
 
 import {Services} from '../../../src/services';
 import {ancestorElementsByTag} from '../../../src/core/dom/query';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  removeElement,
+} from '../../../src/core/dom';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 

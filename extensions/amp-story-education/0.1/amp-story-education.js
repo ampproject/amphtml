@@ -28,7 +28,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {htmlFor} from '../../../src/core/dom/static-template';
-import {removeChildren} from '../../../src/dom';
+import {removeChildren} from '../../../src/core/dom';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {toggle} from '../../../src/core/dom/style';
 

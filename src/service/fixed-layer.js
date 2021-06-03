@@ -30,7 +30,7 @@ import {
   toggle,
 } from '../core/dom/style';
 import {dev, user} from '../log';
-import {domOrderComparator} from '../dom';
+import {domOrderComparator} from '../core/dom';
 import {endsWith} from '../core/types/string';
 import {getMode} from '../mode';
 import {remove} from '../core/types/array';

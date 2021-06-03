@@ -32,7 +32,7 @@ import {
 import {applySandbox} from '../3p-frame';
 import {createCustomEvent, listenOnce} from '../event-helper';
 import {dict} from '../core/types/object';
-import {isJsonScriptTag, tryFocus} from '../dom';
+import {isJsonScriptTag, tryFocus} from '../core/dom';
 import {parseQueryString} from '../core/types/string/url';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';

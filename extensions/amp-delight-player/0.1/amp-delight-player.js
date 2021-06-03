@@ -25,7 +25,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent, removeElement} from '../../../src/dom';
+import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,

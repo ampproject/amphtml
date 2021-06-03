@@ -32,7 +32,7 @@ import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent} from '../../../src/dom';
+import {dispatchCustomEvent} from '../../../src/core/dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,

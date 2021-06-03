@@ -15,7 +15,7 @@
  */
 
 import '../amp-image-lightbox';
-import * as dom from '../../../../src/dom';
+import * as dom from '../../../../src/core/dom';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';

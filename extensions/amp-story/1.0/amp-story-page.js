@@ -52,11 +52,7 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
-import {
-  addAttributesToElement,
-  iterateCursor,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {addAttributesToElement, iterateCursor} from '../../../src/core/dom';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
@@ -82,6 +78,7 @@ import {prefersReducedMotion} from '../../../src/core/dom/media-query-props';
 import {px, toggle} from '../../../src/core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 import {toArray} from '../../../src/core/types/array';
 import {upgradeBackgroundAudio} from './audio';

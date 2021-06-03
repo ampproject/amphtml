@@ -15,7 +15,7 @@
  */
 
 import {dev} from './log';
-import {whenUpgradedToCustomElement} from './dom';
+import {whenUpgradedToCustomElement} from './amp-element-helpers';
 
 export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
 

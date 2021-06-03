@@ -25,7 +25,7 @@ import {Services} from '../../../../src/services';
 import {htmlFor} from '../../../../src/core/dom/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
-import {whenUpgradedToCustomElement} from '../../../../src/dom';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(
   'amp-render-v1.0',

@@ -46,7 +46,7 @@ import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getInternalVideoElementFor} from '../../../src/core/dom/video';
 import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isRTL, removeElement} from '../../../src/dom';
+import {isRTL, removeElement} from '../../../src/core/dom';
 import {
   layoutRectEquals,
   rectIntersection,

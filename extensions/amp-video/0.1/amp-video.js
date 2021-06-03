@@ -31,7 +31,7 @@ import {
   dispatchCustomEvent,
   insertAfterOrAtStart,
   removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {fetchCachedSources} from './video-cache';
 import {
   fullscreenEnter,

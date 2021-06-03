@@ -18,7 +18,7 @@ import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/core/constants/visibility-state';
 import {createCustomEvent} from '../../src/event-helper';
 import {getVendorJsPropertyName} from '../../src/core/dom/style';
-import {whenUpgradedToCustomElement} from '../../src/dom';
+import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
 
 const t = describes.sandboxed
   .configure()

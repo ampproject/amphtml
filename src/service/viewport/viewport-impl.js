@@ -33,7 +33,7 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../../service';
-import {getVerticalScrollbarWidth, isIframed} from '../../dom';
+import {getVerticalScrollbarWidth, isIframed} from '../../core/dom';
 import {isExperimentOn} from '../../experiments';
 import {
   layoutRectFromDomRect,

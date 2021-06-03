@@ -25,7 +25,7 @@ import {devAssert, devAssertElement} from '../core/assert';
 import {getFrameOverlayManager} from '../../ads/inabox/frame-overlay-manager.js';
 import {getPositionObserver} from '../../ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {isIframed} from '../dom';
+import {isIframed} from '../core/dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,

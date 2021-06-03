@@ -32,7 +32,7 @@ import {
 } from '../service';
 import {isDocumentReady, whenDocumentReady} from '../core/document-ready';
 import {isEnumValue} from '../core/types';
-import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
+import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../core/dom';
 import {map} from '../core/types/object';
 import {parseQueryString} from '../core/types/string/url';
 
