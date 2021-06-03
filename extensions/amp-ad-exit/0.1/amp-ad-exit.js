@@ -34,7 +34,7 @@ import {isJsonScriptTag} from '../../../src/core/dom';
 import {isObject} from '../../../src/core/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
-import {openWindowDialog} from '../../../src/core/open-window-dialog';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseJson} from '../../../src/core/types/object/json';
 import {parseUrlDeprecated} from '../../../src/url';
 
