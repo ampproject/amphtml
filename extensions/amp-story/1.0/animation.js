@@ -37,7 +37,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '../../../src/core/types/object';
-import {prefersReducedMotion} from '../../../src/utils/media-query-props';
+import {prefersReducedMotion} from '../../../src/core/dom/media-query-props';
 import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
@@ -169,6 +169,11 @@ export class AnimationRunner {
       return omit(keyframes[0], ['offset']);
     });
 
+    /** @private {bool} */
+    this.prefersReducedMotion_ = prefersReducedMotion(
+      this.page_.ownerDocument.defaultView
+    );
+
     /** @private {?../../amp-animation/0.1/runners/animation-runner.AnimationRunner} */
     this.runner_ = null;
 
@@ -292,24 +297,6 @@ export class AnimationRunner {
   }
 
   /**
-   * Applies the first animation frame if the animation will be played,
-   * or finishes if prefers-reduced-motion.
-   * @return {!Promise}
-   */
-  applyFirstFrameOrFinish() {
-    if (
-      prefersReducedMotion(this.page_.ownerDocument.defaultView) &&
-      this.page_.querySelector('amp-story-animation')
-    ) {
-      if (this.presetTarget_) {
-        return Promise.resolve();
-      }
-      return this.applyLastFrame();
-    }
-    return this.applyFirstFrame();
-  }
-
-  /**
    * Applies the first animation frame as CSS props. This is similar to filling
    * the animation backwards, except:
    * - it evaluates before amp-animation is ready to prevent a race and cause
@@ -352,6 +339,9 @@ export class AnimationRunner {
    * @return {!Promise<void>}
    */
   applyLastFrame() {
+    if (this.presetTarget_) {
+      return Promise.resolve();
+    }
     this.runnerPromise_.then((runner) => {
       runner.maybeInit();
       runner.finish(/* pauseOnError */ true);
@@ -567,6 +557,9 @@ export class AnimationManager {
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
+    /** @private @const {bool} */
+    this.prefersReducedMotion_ = prefersReducedMotion(ampdoc.win);
+
     /** @private {?Array<!AnimationRunner>} */
     this.runners_ = null;
 
@@ -592,7 +585,9 @@ export class AnimationManager {
   applyFirstFrameOrFinish() {
     return Promise.all(
       this.getOrCreateRunners_().map((runner) =>
-        runner.applyFirstFrameOrFinish()
+        this.prefersReducedMotion_
+          ? runner.applyLastFrame()
+          : runner.applyFirstFrame()
       )
     );
   }
@@ -609,7 +604,7 @@ export class AnimationManager {
 
   /** Starts all entrance animations for the page. */
   animateIn() {
-    if (prefersReducedMotion(this.ampdoc_.win)) {
+    if (this.prefersReducedMotion_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.start());
