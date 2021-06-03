@@ -66,7 +66,7 @@
 `.i-amphtml-mega-menu-mask-parent` | 1000 | [extensions/amp-mega-menu/0.1/amp-mega-menu.css](/extensions/amp-mega-menu/0.1/amp-mega-menu.css)
 `amp-mega-menu` | 1000 | [extensions/amp-mega-menu/0.1/amp-mega-menu.css](/extensions/amp-mega-menu/0.1/amp-mega-menu.css)
 `amp-user-notification` | 1000 | [extensions/amp-user-notification/0.1/amp-user-notification.css](/extensions/amp-user-notification/0.1/amp-user-notification.css)
-`setStyles` | 1000 | [src/full-overlay-frame-helper.js](/src/full-overlay-frame-helper.js)
+`setStyles` | 1000 | [ads/inabox/full-overlay-frame-helper.js](/ads/inabox/full-overlay-frame-helper.js)
 `i-amphtml-app-banner-top-padding` | 15 | [extensions/amp-app-banner/0.1/amp-app-banner.css](/extensions/amp-app-banner/0.1/amp-app-banner.css)
 `.amp-app-banner-dismiss-button` | 14 | [extensions/amp-app-banner/0.1/amp-app-banner.css](/extensions/amp-app-banner/0.1/amp-app-banner.css)
 `amp-app-banner` | 13 | [extensions/amp-app-banner/0.1/amp-app-banner.css](/extensions/amp-app-banner/0.1/amp-app-banner.css)
