@@ -225,7 +225,7 @@ export class AmpRender extends BaseElement {
         this.togglePlaceholder(false);
       },
       'onRefresh': () => {
-        this.togglePlaceholder(true);
+        this.togglePlaceholder(false);
         this.toggleFallback(false);
       },
       'onError': () => {
