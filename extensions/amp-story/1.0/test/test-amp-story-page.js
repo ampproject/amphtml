@@ -15,7 +15,7 @@
  */
 
 import * as MediaQueryProps from '../../../../src/core/dom/media-query-props';
-import * as VideoUtils from '../../../../src/utils/video';
+import * as VideoUtils from '../../../../src/core/dom/video';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';

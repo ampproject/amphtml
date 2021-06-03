@@ -42,7 +42,10 @@ import {createViewportObserver} from '../viewport-observer';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../core/types/object';
 import {dispatchCustomEvent, removeElement} from '../dom';
-import {getInternalVideoElementFor, isAutoplaySupported} from '../utils/video';
+import {
+  getInternalVideoElementFor,
+  isAutoplaySupported,
+} from '../core/dom/video';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../core/types';
 import {measureIntersection} from '../utils/intersection';

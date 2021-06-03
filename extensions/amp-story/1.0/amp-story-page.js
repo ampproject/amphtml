@@ -72,7 +72,7 @@ import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
-import {isAutoplaySupported} from '../../../src/utils/video';
+import {isAutoplaySupported} from '../../../src/core/dom/video';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {isPrerenderActivePage} from './prerender-active-page';
