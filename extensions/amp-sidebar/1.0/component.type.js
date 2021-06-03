@@ -44,30 +44,12 @@ SidebarDef.SidebarToolbarProps;
 
 /**
  * @typedef {{
- *   toolbar: (string|undefined),
- *   toolbarTarget: (string|undefined),
  *   domElement: (!Element)
- *   children: (?PreactDef.Renderable|undefined),
- * }}
- */
-SidebarDef.AmpSidebarToolbarProps;
-
-/**
- * @typedef {{
  *   toolbar: (string|undefined),
  *   toolbarTarget: (string|undefined),
- *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-SidebarDef.ToolbarHelperProps;
-
-/**
- * @typedef {{
- *   preactMode: (boolean),
- *   domElement: (?Element),
- * }}
- */
-SidebarDef.ToolbarContext;
+SidebarDef.ToolbarShimProps;
 
 /** @interface */
 SidebarDef.SidebarApi = class {

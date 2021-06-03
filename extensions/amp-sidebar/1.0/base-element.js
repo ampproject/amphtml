@@ -15,13 +15,15 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {AmpSidebarToolbar, Sidebar} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {Sidebar} from './component';
 import {dict} from '../../../src/core/types/object';
 import {pauseAll} from '../../../src/utils/resource-container-helper';
 import {toggle} from '../../../src/style';
 import {toggleAttribute} from '../../../src/dom';
+import {useToolbarHook} from './sidebar-toolbar-hook';
+import {useValueRef} from '../../../src/preact/component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
@@ -55,11 +57,11 @@ export class BaseElement extends PreactBaseElement {
         child.hasAttribute('toolbar-target')
       ) {
         props['children'].push(
-          <AmpSidebarToolbar
+          <ToolbarShim
             toolbar={child.getAttribute('toolbar')}
             toolbarTarget={child.getAttribute('toolbar-target')}
             domElement={child}
-          ></AmpSidebarToolbar>
+          ></ToolbarShim>
         );
       }
     });
@@ -118,3 +120,15 @@ BaseElement['props'] = {
   'children': {passthrough: true},
   'side': {attr: 'side', type: 'string'},
 };
+
+/**
+ * @param {!SidebarDef.ToolbarShimProps} props
+ */
+function ToolbarShim({
+  domElement,
+  toolbar: mediaQueryProp,
+  toolbarTarget: toolbarTargetProp,
+}) {
+  const ref = useValueRef(domElement);
+  useToolbarHook(ref, mediaQueryProp, toolbarTargetProp);
+}

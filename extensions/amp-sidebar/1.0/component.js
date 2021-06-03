@@ -18,21 +18,20 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Side} from './sidebar-config';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
-  useContext,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from '../../../src/preact';
 import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './component.jss';
+import {useToolbarHook} from './sidebar-toolbar-hook';
 import objstr from 'obj-str';
 
 /**
@@ -182,132 +181,27 @@ const Sidebar = forwardRef(SidebarWithRef);
 Sidebar.displayName = 'Sidebar'; // Make findable for tests.
 export {Sidebar};
 
-const ToolbarContext = Preact.createContext(
-  /** @type {SidebarDef.ToolbarContext} */ ({})
-);
-
 /**
  * @param {!SidebarDef.SidebarToolbarProps} props
  * @return {PreactDef.Renderable}
  */
-export function SidebarToolbar(props) {
-  const context = useMemo(
-    () => ({
-      preactMode: true,
-      domElement: null,
-    }),
-    []
-  );
-
-  return (
-    <ToolbarContext.Provider value={context}>
-      <ToolbarHelper {...props}></ToolbarHelper>
-    </ToolbarContext.Provider>
-  );
-}
-
-/**
- * @param {!SidebarDef.AmpSidebarToolbarProps} props
- * @return {PreactDef.Renderable}
- */
-export function AmpSidebarToolbar(props) {
-  const childProps = {...props};
-  const {domElement} = childProps;
-  delete childProps.domElement;
-  const context = useMemo(
-    () => ({
-      preactMode: false,
-      domElement,
-    }),
-    [domElement]
-  );
-
-  return (
-    <ToolbarContext.Provider value={context}>
-      <ToolbarHelper {...childProps}></ToolbarHelper>
-    </ToolbarContext.Provider>
-  );
-}
-
-/**
- * @param {!SidebarDef.ToolbarHelperProps} props
- * @return {PreactDef.Renderable}
- */
-function ToolbarHelper({
+export function SidebarToolbar({
+  children,
   toolbar: mediaQueryProp,
   toolbarTarget: toolbarTargetProp,
   ...rest
 }) {
   const ref = useRef(null);
-  const [mediaQuery, setMediaQuery] = useState(null);
-  const [toolbarTarget, setToolbarTarget] = useState(null);
-  const [targetEl, setTargetEl] = useState(null);
-
-  const {domElement, preactMode} = useContext(ToolbarContext);
-  if (!preactMode) {
-    ref.current = domElement;
-  }
-
-  useEffect(() => {
-    const doc = ref.current?.ownerDocument;
-    if (!doc) {
-      return;
-    }
-
-    const sanitizedToolbarTarget = escapeCssSelectorIdent(toolbarTargetProp);
-    setToolbarTarget(sanitizedToolbarTarget);
-    setTargetEl(doc.getElementById(sanitizedToolbarTarget));
-  }, [toolbarTargetProp]);
-
-  useEffect(() => {
-    const win = ref.current?.ownerDocument?.defaultView;
-    if (!win) {
-      return;
-    }
-
-    setMediaQuery(sanitizeMediaQuery(win, mediaQueryProp));
-  }, [mediaQueryProp]);
-
-  useEffect(() => {
-    const element = ref.current;
-    const doc = ref.current?.ownerDocument;
-    if (!doc || !targetEl || mediaQuery == null) {
-      return;
-    }
-
-    const clone = element.cloneNode(true);
-    const style = doc.createElement('style');
-    style./*OK*/ textContent =
-      `#${toolbarTarget}{display: none;}` +
-      `@media ${mediaQuery}{#${toolbarTarget}{display: initial;}}`;
-
-    targetEl.appendChild(clone);
-    targetEl.appendChild(style);
-    return () => {
-      targetEl.removeChild(clone);
-      targetEl.removeChild(style);
-    };
-  }, [mediaQuery, toolbarTarget, targetEl]);
+  useToolbarHook(ref, mediaQueryProp, toolbarTargetProp);
 
   return (
-    preactMode && (
-      <nav
-        ref={ref}
-        toolbar={mediaQueryProp}
-        toolbar-target={toolbarTargetProp}
-        {...rest}
-      >
-        {children}
-      </nav>
-    )
+    <nav
+      ref={ref}
+      toolbar={mediaQueryProp}
+      toolbar-target={toolbarTargetProp}
+      {...rest}
+    >
+      {children}
+    </nav>
   );
-}
-
-/**
- * @param {!Window} win
- * @param {string|undefined} query
- * @return {string}
- */
-function sanitizeMediaQuery(win, query) {
-  return win.matchMedia(query).media;
 }
