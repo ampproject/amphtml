@@ -15,7 +15,7 @@
  */
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
-import {dev, devAssert} from './log';
+import {devAssert} from './log';
 import {map} from './core/types/object';
 
 /** @type {Object<string, string>} */
@@ -167,47 +167,6 @@ export function setStyles(element, styles) {
   for (const k in styles) {
     setStyle(element, k, styles[k]);
   }
-}
-
-/**
- * Asserts that the style is not the `display` style.
- * This is the only possible way to pass a dynamic style to setStyle.
- *
- * If you wish to set `display`, use the `toggle` helper instead. This is so
- * changes to display can trigger necessary updates. See #17475.
- *
- * @param {string} style
- * @return {string}
- */
-export function assertNotDisplay(style) {
-  if (style === 'display') {
-    dev().error(
-      'STYLE',
-      '`display` style detected. You must use toggle instead.'
-    );
-  }
-  return style;
-}
-
-/**
- * Asserts that the styles does not contain the `display` style.
- * This is the only possible way to pass a dynamic styles object to setStyles
- * and setImportantStyles.
- *
- * If you wish to set `display`, use the `toggle` helper instead. This is so
- * changes to display can trigger necessary updates. See #17475.
- *
- * @param {!Object<string, *>} styles
- * @return {!Object<string, *>}
- */
-export function assertDoesNotContainDisplay(styles) {
-  if ('display' in styles) {
-    dev().error(
-      'STYLE',
-      '`display` style detected in styles. You must use toggle instead.'
-    );
-  }
-  return styles;
 }
 
 /**
