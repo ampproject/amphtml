@@ -40,7 +40,7 @@
     },
     {
       pattern: '**/package{,-lock}.json',
-      owners: [{name: 'renovate'}],
+      owners: [{name: 'renovate[bot]'}],
     },
     {
       pattern: '**/OWNERS',
