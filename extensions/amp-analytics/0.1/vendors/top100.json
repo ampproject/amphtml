@@ -2,7 +2,7 @@
   "vars": {
     "pid": "",
     "rid": "PAGE_VIEW_ID",
-    "tid": "CLIENT_ID(ruid)",
+    "tid": "CLIENT_ID(top100_id)",
     "version": "1.0.1"
   },
   "requests": {
