@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {devAssertElement} from '../assert';
-import {setStyles} from './style';
+import {devAssertElement} from '../../assert';
+import {setStyles} from '../style';
 
 /**
  * @param {!Window} win
