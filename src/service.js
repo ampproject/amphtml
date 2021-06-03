@@ -22,7 +22,7 @@
 
 import {Deferred} from './core/data-structures/promise';
 import {dev, devAssert} from './log';
-import {toWin} from './types';
+import {toWin} from './core/window';
 
 /**
  * Holds info about a service.

@@ -15,10 +15,9 @@
  */
 
 /**
- * @fileoverview Externs for values expected to be on elements when Shadow DOM
- * is supported.
+ * @fileoverview Externs for properties expected to be on MediaQueryList in some
+ * browsers.
  * @externs
  */
 
-Element.prototype.attachShadow;
-Element.prototype.createShadowRoot;
+MediaQueryList.prototype.onchange;

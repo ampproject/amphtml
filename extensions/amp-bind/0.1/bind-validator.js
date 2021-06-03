@@ -15,7 +15,7 @@
  */
 
 import {hasOwn, ownProperty} from '../../../src/core/types/object';
-import {parseSrcset} from '../../../src/srcset';
+import {parseSrcset} from '../../../src/core/dom/srcset';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-bind';

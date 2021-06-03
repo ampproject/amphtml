@@ -72,7 +72,7 @@ import {
   setupInit,
   setupInput,
 } from '../../../src/utils/xhr-utils';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/core/types/object/json';
 

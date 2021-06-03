@@ -18,7 +18,7 @@ import {Util} from './util';
 import {dev, userAssert} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 
 // Popup options
 const POP =

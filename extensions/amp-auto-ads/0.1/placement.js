@@ -30,7 +30,7 @@ import {
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
+import {measurePageLayoutBox} from './measure-page-layout-box';
 
 /** @const */
 const TAG = 'amp-auto-ads';

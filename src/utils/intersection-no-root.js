@@ -15,7 +15,7 @@
  */
 import {Deferred} from '../core/data-structures/promise';
 import {createViewportObserver} from '../viewport-observer';
-import {toWin} from '../types';
+import {toWin} from '../core/window';
 
 /**
  * @fileoverview

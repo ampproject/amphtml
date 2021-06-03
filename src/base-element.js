@@ -22,7 +22,7 @@ import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray} from './core/types';
-import {toWin} from './types';
+import {toWin} from './core/window';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
