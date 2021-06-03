@@ -398,7 +398,7 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      this.runner_.maybePause();
+      this.runner_.pause();
     }
   }
 
@@ -411,7 +411,7 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      this.runner_.maybeResume();
+      this.runner_.resume();
     }
   }
 
@@ -621,7 +621,7 @@ export class AnimationManager {
 
   /** Pauses all animations in the page. */
   pauseAll() {
-    if (!this.runners_) {
+    if (!this.runners_ || this.prefersReducedMotion_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.pause());
@@ -629,7 +629,7 @@ export class AnimationManager {
 
   /** Resumes all animations in the page. */
   resumeAll() {
-    if (!this.runners_) {
+    if (!this.runners_ || this.prefersReducedMotion_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.resume());
