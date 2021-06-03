@@ -86,9 +86,7 @@ export function assert(
   // __AMP_REPORT_ERROR is installed globally per window in the entry point in
   // AMP documents. It may not be present for Bento/Preact elements on non-AMP
   // pages.
-  if (self.__AMP_REPORT_ERROR) {
-    self.__AMP_REPORT_ERROR(error);
-  }
+  self.__AMP_REPORT_ERROR?.(error);
   throw error;
 }
 
