@@ -22,7 +22,7 @@ import {Deferred} from '../core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../layout';
 import {Loading} from '../core/loading-instructions';
 import {MediaQueryProps} from '../core/dom/media-query-props';
-import {PauseHelper} from '../utils/pause-helper';
+import {PauseHelper} from '../core/dom/video/pause-helper';
 import {ReadyState} from '../core/constants/ready-state';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';

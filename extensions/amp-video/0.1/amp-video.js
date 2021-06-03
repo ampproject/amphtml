@@ -15,7 +15,7 @@
  */
 
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/core/constants/visibility-state';

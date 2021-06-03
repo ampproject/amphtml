@@ -16,7 +16,7 @@
 
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {ImaPlayerData} from '../../../ads/google/ima/ima-player-data';
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
