@@ -4,15 +4,21 @@ Sweeps experiments by id, or when they were last flipped before a certain cutoff
 
 ## Command line
 
-By default, removes experiments whose [production launch value](../../global-configs/prod-config.json) was last set to either `1` or `0` over a year ago:
+By default, removes experiments whose [production launch value](../../global-configs/prod-config.json) was last set to either `1` or `0` over ~6 months ago:
 
-```sh
+```console
 amp sweep-experiments
+```
+
+You may configure the cutoff date using `--days_ago`:
+
+```console
+amp sweep-experiments --days_ago=180
 ```
 
 The tool can also sweep a specific experiment by id, regardless of its launch value:
 
-```sh
+```console
 amp sweep-experiments --experiment=my-experiment
 ```
 

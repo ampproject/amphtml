@@ -434,7 +434,7 @@ async function sweepExperiments() {
   const canaryConfig = readJsonSync(canaryConfigPath);
 
   const cutoffDateFormatted = dateDaysAgo(
-    argv.experiment ? 0 : argv.days_ago || 365
+    argv.experiment ? 0 : argv.days_ago || 180
   ).toISOString();
 
   const {exclude, include = {}} = collectWork(
