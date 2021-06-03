@@ -211,12 +211,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
   });
 
   describe('getSessionValue', () => {
-    it('should return null on no type', async () => {
+    it('should return undefined on no type', async () => {
       const id = await sessionManager.getSessionValue(
         undefined,
         SESSION_VALUES.SESSION_ID
       );
-      expect(id).to.equal(null);
+      expect(id).to.be.undefined;
     });
 
     it('should return SESSION_VALUE.SESSION_ID', async () => {
