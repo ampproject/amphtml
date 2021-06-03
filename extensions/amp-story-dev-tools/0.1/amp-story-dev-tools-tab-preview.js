@@ -23,7 +23,7 @@ import {
 import {closest} from '../../../src/core/dom/query';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {htmlFor} from '../../../src/static-template';
-import {observeContentSize} from '../../../src/utils/size-observer';
+import {observeContentSize} from '../../../src/core/dom/size-observer';
 import {setStyles} from '../../../src/core/dom/style';
 
 /**

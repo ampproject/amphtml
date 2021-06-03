@@ -35,7 +35,7 @@ import {isRTL, tryFocus} from '../../../src/dom';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {setStyles, toggle} from '../../../src/core/dom/style';

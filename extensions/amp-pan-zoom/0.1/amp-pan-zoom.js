@@ -41,7 +41,7 @@ import {numeric} from '../../../src/transition';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {px, scale, setStyles, translate} from '../../../src/core/dom/style';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);

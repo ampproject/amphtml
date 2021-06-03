@@ -33,7 +33,7 @@ import {numeric} from '../../../src/transition';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,

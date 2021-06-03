@@ -1102,9 +1102,6 @@ class FeaturePolicy {
  */
 CSSStyleSheet.prototype.replaceSync = function (cssText) {};
 
-/** @type {?function(!MediaQueryListEvent)} */
-MediaQueryList.prototype.onchange;
-
 /** @type {!Array<!CSSStyleSheet>|undefined} */
 ShadowRoot.prototype.adoptedStyleSheets;
 

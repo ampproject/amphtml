@@ -37,7 +37,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {toArray} from '../../../src/core/types/array';
 
 /** @const */

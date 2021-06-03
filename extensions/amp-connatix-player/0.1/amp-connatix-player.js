@@ -34,7 +34,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {removeElement} from '../../../src/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {tryParseJson} from '../../../src/core/types/object/json';

@@ -25,7 +25,7 @@ import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,

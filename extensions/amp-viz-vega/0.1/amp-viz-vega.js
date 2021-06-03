@@ -28,7 +28,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {tryParseJson} from '../../../src/core/types/object/json';
 
 export class AmpVizVega extends AMP.BaseElement {

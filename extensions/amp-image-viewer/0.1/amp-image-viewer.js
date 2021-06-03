@@ -48,7 +48,7 @@ import {
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {setStyles} from '../../../src/core/dom/style';
 import {srcsetFromElement} from '../../../src/core/dom/srcset';
 
