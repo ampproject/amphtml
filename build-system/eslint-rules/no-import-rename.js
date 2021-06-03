@@ -36,9 +36,8 @@ const imports = {
   'src/core/types/object': ['dict'],
   'src/static-template': ['htmlFor'],
   'src/experiments': ['isExperimentOn'],
-  'src/style': [
-    'assertDoesNotContainDisplay',
-    'assertNotDisplay',
+  'src/assert-display': ['assertDoesNotContainDisplay', 'assertNotDisplay'],
+  'src/core/dom/style': [
     'resetStyles',
     'setImportantStyles',
     'setStyle',
