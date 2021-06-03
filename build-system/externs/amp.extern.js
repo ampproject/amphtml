@@ -1093,9 +1093,6 @@ class FeaturePolicy {
   getAllowlistForFeature(feature) {}
 }
 
-/** @type {boolean} */
-HTMLVideoElement.prototype.playsInline;
-
 /**
  * Going through the standardization process now.
  *

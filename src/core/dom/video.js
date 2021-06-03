@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev} from '../log';
-import {setStyles} from '../style';
+import {devAssertElement} from '../assert';
+import {setStyles} from './style';
 
 /**
  * @param {!Window} win
@@ -91,5 +91,5 @@ export function resetIsAutoplaySupported(win) {
  * @return {!Element}
  */
 export function getInternalVideoElementFor(element) {
-  return dev().assertElement(element.querySelector('video, iframe'));
+  return devAssertElement(element.querySelector('video, iframe'));
 }
