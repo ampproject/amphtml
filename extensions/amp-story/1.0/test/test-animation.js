@@ -464,7 +464,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       ).to.have.been.calledOnce;
     });
 
-    it('creates internal runners when applying first frame (preset)', async () => {
+    // TODO(wg-stories, #34695): This test is flaky during CI.
+    it.skip('creates internal runners when applying first frame (preset)', async () => {
       const page = html`
         <div>
           <div animate-in="fly-in-left"></div>
@@ -490,7 +491,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       });
     });
 
-    it('creates internal runners when applying first frame (amp-story-animation)', async () => {
+    // TODO(wg-stories, #34695): This test is flaky during CI.
+    it.skip('creates internal runners when applying first frame (amp-story-animation)', async () => {
       const spec1 = {keyframes: [{opacity: 1}]};
       const spec2 = {keyframes: [{transform: 'translate(10px, 10px)'}]};
 
