@@ -1,0 +1,18 @@
+name: Update Design Review Issues
+
+on:
+  schedule:
+    # At minute 1 on Wednesday (every hour).
+    - cron: '1 * * * 3'
+
+jobs:
+  update-design-review-issues:
+    if: github.repository == 'ampproject/amphtml'
+    name: Update Design Review Issues
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Design Review Issues
+        run: |
+          wget -q -O - "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/common/update-design-review-issues.js" | node
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
