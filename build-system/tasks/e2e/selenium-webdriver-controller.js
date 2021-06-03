@@ -38,6 +38,7 @@ const KeyToSeleniumMap = {
   [Key.ArrowLeft]: SeleniumKey.ARROW_LEFT,
   [Key.ArrowRight]: SeleniumKey.ARROW_RIGHT,
   [Key.ArrowUp]: SeleniumKey.ARROW_UP,
+  [Key.Backspace]: SeleniumKey.BACK_SPACE,
   [Key.Enter]: SeleniumKey.ENTER,
   [Key.Escape]: SeleniumKey.ESCAPE,
   [Key.Tab]: SeleniumKey.TAB,
