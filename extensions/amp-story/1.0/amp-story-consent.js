@@ -31,7 +31,7 @@ import {
   closestAncestorElementBySelector,
   matches,
 } from '../../../src/core/dom/query';
-import {computedStyle, setImportantStyles} from '../../../src/style';
+import {computedStyle, setImportantStyles} from '../../../src/core/dom/style';
 import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,

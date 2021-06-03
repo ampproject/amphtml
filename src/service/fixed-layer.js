@@ -28,7 +28,7 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '../style';
+} from '../core/dom/style';
 import {dev, user} from '../log';
 import {domOrderComparator} from '../dom';
 import {endsWith} from '../core/types/string';

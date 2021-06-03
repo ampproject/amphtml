@@ -22,7 +22,7 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {debounce} from '../../../src/core/types/function';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {px, resetStyles, setStyles} from '../../../src/style';
+import {px, resetStyles, setStyles} from '../../../src/core/dom/style';
 import {tryParseJson} from '../../../src/core/types/object/json';
 
 let id = 0;

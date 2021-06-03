@@ -32,7 +32,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {px, setStyles} from '../../../src/style';
+import {px, setStyles} from '../../../src/core/dom/style';
 import {removeElement} from '../../../src/dom';
 
 /** @const */

@@ -77,7 +77,7 @@ import {
 import {padStart} from '../../../src/core/types/string';
 import {parseJson} from '../../../src/core/types/object/json';
 import {processHead} from './head-validation';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';

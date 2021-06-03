@@ -32,7 +32,7 @@ import {isConnectedNode} from './dom';
 
 import {parseExtensionUrl} from './service/extension-script';
 import {parseUrlDeprecated} from './url';
-import {setStyle} from './style';
+import {setStyle} from './core/dom/style';
 
 /** @const @private {string} */
 const TAG = 'multidoc-manager';

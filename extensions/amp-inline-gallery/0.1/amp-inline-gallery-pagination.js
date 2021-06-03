@@ -21,7 +21,7 @@ import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {htmlFor} from '../../../src/static-template';
 import {scopedQuerySelectorAll} from '../../../src/core/dom/query';
-import {setImportantStyles} from '../../../src/style.js';
+import {setImportantStyles} from '../../../src/core/dom/style.js';
 import {toArray} from '../../../src/core/types/array';
 
 /**

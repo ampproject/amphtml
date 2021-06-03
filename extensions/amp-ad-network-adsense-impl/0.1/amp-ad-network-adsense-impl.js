@@ -55,7 +55,7 @@ import {
   addExperimentIdToElement,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {computedStyle, setStyles} from '../../../src/style';
+import {computedStyle, setStyles} from '../../../src/core/dom/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
 import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';

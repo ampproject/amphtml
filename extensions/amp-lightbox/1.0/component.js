@@ -18,7 +18,7 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 import {tryFocus} from '../../../src/dom';
 import {
   useImperativeHandle,

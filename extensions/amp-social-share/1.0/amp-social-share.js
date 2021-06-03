@@ -26,7 +26,7 @@ import {getSocialConfig} from './social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/core/types/string/url';
 import {toWin} from '../../../src/core/window';
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

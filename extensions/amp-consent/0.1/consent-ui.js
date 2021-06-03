@@ -33,7 +33,11 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
-import {setImportantStyles, setStyles, toggle} from '../../../src/style';
+import {
+  setImportantStyles,
+  setStyles,
+  toggle,
+} from '../../../src/core/dom/style';
 
 const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';

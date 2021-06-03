@@ -22,7 +22,7 @@ import {dict} from './core/types/object';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
 import {remove} from './core/types/array';
-import {setStyle} from './style';
+import {setStyle} from './core/dom/style';
 import {tryParseJson} from './core/types/object/json';
 
 /**

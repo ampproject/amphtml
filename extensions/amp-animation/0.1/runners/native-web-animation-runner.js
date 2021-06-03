@@ -31,7 +31,7 @@ import {
 import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {devAssert} from '../../../../src/log';
 import {getTotalDuration} from './utils';
-import {setStyles} from '../../../../src/style';
+import {setStyles} from '../../../../src/core/dom/style';
 
 /**
  */

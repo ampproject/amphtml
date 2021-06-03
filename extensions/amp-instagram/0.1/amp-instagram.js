@@ -41,7 +41,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/core/types';
 import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 import {tryParseJson} from '../../../src/core/types/object/json';
 import {userAssert} from '../../../src/log';
 

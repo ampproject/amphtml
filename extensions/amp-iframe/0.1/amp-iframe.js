@@ -38,7 +38,7 @@ import {moveLayoutRect} from '../../../src/core/math/layout-rect';
 import {parseJson} from '../../../src/core/types/object/json';
 import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 import {urls} from '../../../src/config';
 import {utf8Encode} from '../../../src/core/types/string/bytes.js';
 

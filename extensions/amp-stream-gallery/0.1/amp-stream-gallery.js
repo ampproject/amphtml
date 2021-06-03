@@ -37,7 +37,7 @@ import {
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 
 /** @enum {number} */

@@ -19,7 +19,7 @@ import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/core/types/object';
-import {px, setStyles} from '../../../src/style';
+import {px, setStyles} from '../../../src/core/dom/style';
 
 /** @abstract */
 export class ScrollComponent {

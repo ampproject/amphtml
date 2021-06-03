@@ -24,7 +24,7 @@ import {ViewportInterface} from './viewport-interface';
 import {VisibilityState} from '../../core/constants/visibility-state';
 import {clamp} from '../../core/math';
 import {closestAncestorElementBySelector} from '../../core/dom/query';
-import {computedStyle, setStyle} from '../../style';
+import {computedStyle, setStyle} from '../../core/dom/style';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';

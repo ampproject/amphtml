@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {removeChildren} from '../../../src/dom';
-import {setStyles, toggle} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/core/dom/style';
 
 /** @type {string} */
 const OBJ_PROP = '__BUBBLE_OBJ';

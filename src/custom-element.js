@@ -48,7 +48,7 @@ import {getMode} from './mode';
 import {getSchedulerForDoc} from './service/scheduler';
 import {isExperimentOn} from './experiments';
 import {rethrowAsync} from './core/error';
-import {setStyle} from './style';
+import {setStyle} from './core/dom/style';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
 import {toWin} from './core/window';

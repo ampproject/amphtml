@@ -19,7 +19,7 @@ import {Services} from '../../../../src/services';
 import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {dev} from '../../../../src/log';
 import {getTotalDuration} from './utils';
-import {px, setStyles} from '../../../../src/style';
+import {px, setStyles} from '../../../../src/core/dom/style';
 
 const moduleName = 'amp-animation-worklet';
 let workletModulePromise;

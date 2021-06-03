@@ -22,7 +22,7 @@ import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 import {urls} from '../../../src/config';
 
 /** @private @const {string} */

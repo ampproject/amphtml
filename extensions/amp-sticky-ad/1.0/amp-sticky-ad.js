@@ -22,7 +22,7 @@ import {
   removeAlphaFromColor,
   setStyle,
   toggle,
-} from '../../../src/style';
+} from '../../../src/core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
 import {removeElement, whenUpgradedToCustomElement} from '../../../src/dom';
 

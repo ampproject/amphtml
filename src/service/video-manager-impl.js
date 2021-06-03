@@ -49,7 +49,7 @@ import {measureIntersection} from '../utils/intersection';
 import {once} from '../core/types/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
-import {toggle} from '../style';
+import {toggle} from '../core/dom/style';
 
 /** @private @const {string} */
 const TAG = 'video-manager';

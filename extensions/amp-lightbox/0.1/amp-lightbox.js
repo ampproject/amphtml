@@ -31,7 +31,7 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '../../../src/style';
+} from '../../../src/core/dom/style';
 import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';

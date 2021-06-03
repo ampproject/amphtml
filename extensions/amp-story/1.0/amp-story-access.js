@@ -27,7 +27,7 @@ import {getStoryAttributeSrc} from './utils';
 import {htmlFor} from '../../../src/static-template';
 import {isArray, isObject} from '../../../src/core/types';
 import {parseJson} from '../../../src/core/types/object/json';
-import {setImportantStyles} from '../../../src/style';
+import {setImportantStyles} from '../../../src/core/dom/style';
 
 /** @const {string} */
 const TAG = 'amp-story-access';

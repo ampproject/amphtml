@@ -26,7 +26,7 @@ import {installPositionObserverServiceForDoc} from '../../../src/service/positio
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 import {removeElement} from '../../../src/dom';
-import {setStyle, toggle} from '../../../src/style';
+import {setStyle, toggle} from '../../../src/core/dom/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 // TODO(emarchiori): Make this a configurable parameter.

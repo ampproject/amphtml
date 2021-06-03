@@ -54,7 +54,12 @@ import {removeChildren, tryFocus} from '../../../src/dom';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/core/types/array';
 import {isExperimentOn} from '../../../src/experiments';
-import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
+import {
+  px,
+  setImportantStyles,
+  setStyles,
+  toggle,
+} from '../../../src/core/dom/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {
   setupAMPCors,

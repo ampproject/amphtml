@@ -39,7 +39,7 @@ import {getTopWindow} from '../../../src/service';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {toWin} from '../../../src/core/window';
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics/transport';

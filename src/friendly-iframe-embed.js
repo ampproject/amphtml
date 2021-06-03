@@ -47,7 +47,7 @@ import {
   setImportantStyles,
   setStyle,
   setStyles,
-} from './style';
+} from './core/dom/style';
 import {rethrowAsync} from './core/error';
 import {toWin} from './core/window';
 import {urls} from './config';

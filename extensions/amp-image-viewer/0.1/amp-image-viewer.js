@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
+import * as st from '../../../src/core/dom/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-viewer-0.1.css';
@@ -49,7 +49,7 @@ import {
   observeContentSize,
   unobserveContentSize,
 } from '../../../src/utils/size-observer';
-import {setStyles} from '../../../src/style';
+import {setStyles} from '../../../src/core/dom/style';
 import {srcsetFromElement} from '../../../src/core/dom/srcset';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);

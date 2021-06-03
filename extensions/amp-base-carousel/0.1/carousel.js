@@ -40,7 +40,7 @@ import {
   setImportantStyles,
   setStyle,
   setStyles,
-} from '../../../src/style';
+} from '../../../src/core/dom/style';
 import {iterateCursor} from '../../../src/dom';
 
 /**

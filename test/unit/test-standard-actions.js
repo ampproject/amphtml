@@ -25,7 +25,7 @@ import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {htmlFor} from '../../src/static-template';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {macroTask} from '../../testing/yield';
-import {toggle} from '../../src/style';
+import {toggle} from '../../src/core/dom/style';
 import {user} from '../../src/log';
 
 describes.sandboxed('StandardActions', {}, (env) => {

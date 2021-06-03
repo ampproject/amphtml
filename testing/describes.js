@@ -113,7 +113,7 @@ import {
   resetTrackImpressionPromiseForTesting,
 } from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
-import {setStyles} from '../src/style';
+import {setStyles} from '../src/core/dom/style';
 import {stubService} from './test-helper';
 import fetchMock from 'fetch-mock/es5/client-bundle';
 import sinon from /*OK*/ 'sinon';

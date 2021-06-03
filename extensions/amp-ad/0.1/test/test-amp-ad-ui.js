@@ -20,7 +20,7 @@ import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
-import {setStyles} from '../../../../src/style';
+import {setStyles} from '../../../../src/core/dom/style';
 
 describes.realWin(
   'amp-ad-ui handler',

@@ -108,7 +108,7 @@ import {
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
-import {setImportantStyles, setStyles} from '../../../src/style';
+import {setImportantStyles, setStyles} from '../../../src/core/dom/style';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 

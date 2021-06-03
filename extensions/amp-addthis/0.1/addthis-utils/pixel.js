@@ -22,7 +22,7 @@ import {getData} from '../../../../src/event-helper';
 import {isObject} from '../../../../src/core/types';
 import {parseJson} from '../../../../src/core/types/object/json';
 
-import {setStyles, toggle} from '../../../../src/style';
+import {setStyles, toggle} from '../../../../src/core/dom/style';
 
 const RE_IFRAME = /#iframe$/;
 const pixelatorFrameTitle = 'Pxltr Frame';

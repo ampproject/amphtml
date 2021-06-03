@@ -37,7 +37,7 @@ import {
 } from '../../../src/utils/size-observer';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {setStyles, toggle} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 import {unmountAll} from '../../../src/utils/resource-container-helper';
 

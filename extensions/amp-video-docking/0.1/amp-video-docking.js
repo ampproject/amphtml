@@ -58,7 +58,7 @@ import {
   setImportantStyles,
   setStyles,
   toggle,
-} from '../../../src/style';
+} from '../../../src/core/dom/style';
 import {scopedQuerySelector} from '../../../src/core/dom/query';
 
 const TAG = 'amp-video-docking';

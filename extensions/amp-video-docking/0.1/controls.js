@@ -32,7 +32,7 @@ import {
   setImportantStyles,
   toggle,
   translate,
-} from '../../../src/style';
+} from '../../../src/core/dom/style';
 
 /**
  * A single controls set can be displayed at a time on the controls layer.

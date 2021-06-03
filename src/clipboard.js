@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {removeElement} from './dom';
-import {setStyles} from './style';
+import {setStyles} from './core/dom/style';
 
 /**
  * @param {!Window} win

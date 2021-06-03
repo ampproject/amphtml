@@ -20,7 +20,7 @@ import {devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/core/types/object';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 import {urls} from '../../../src/config';
 
 /** @private @const {string} */

@@ -19,7 +19,7 @@ import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {dev, user} from '../../../../src/log';
 import {dict, hasOwn} from '../../../../src/core/types/object';
 import {isAmpElement} from '../../../../src/dom';
-import {setStyles} from '../../../../src/style';
+import {setStyles} from '../../../../src/core/dom/style';
 
 /** @const {RegExp} */
 const NON_SPACE_REGEX = /\S/;

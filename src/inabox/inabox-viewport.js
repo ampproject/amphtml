@@ -31,7 +31,7 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../core/math/layout-rect';
-import {px, resetStyles, setImportantStyles} from '../style';
+import {px, resetStyles, setImportantStyles} from '../core/dom/style';
 import {registerServiceBuilderForDoc} from '../service';
 import {throttle} from '../core/types/function';
 

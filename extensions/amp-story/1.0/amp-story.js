@@ -82,7 +82,11 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/core/dom/query';
-import {computedStyle, setImportantStyles, toggle} from '../../../src/style';
+import {
+  computedStyle,
+  setImportantStyles,
+  toggle,
+} from '../../../src/core/dom/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';

@@ -52,7 +52,7 @@ import {getExperimentBranch} from '../../../src/experiments';
 import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/core/types/object/json';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';

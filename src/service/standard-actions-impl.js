@@ -17,7 +17,7 @@
 import {ActionTrust} from '../core/constants/action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
-import {computedStyle, toggle} from '../style';
+import {computedStyle, toggle} from '../core/dom/style';
 import {dev, user, userAssert} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
 import {isFiniteNumber} from '../core/types';

@@ -21,7 +21,7 @@ import {dict} from '../../../src/core/types/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {matches, scopedQuerySelector} from '../../../src/core/dom/query';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 
 /**
  * Renders a carousel of thumbnails for an inline gallery.

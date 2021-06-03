@@ -45,7 +45,7 @@ import {
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
 
-import {setStyles, toggle} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/core/dom/style';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/core/types/object/json';

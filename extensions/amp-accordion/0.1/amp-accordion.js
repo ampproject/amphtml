@@ -27,7 +27,11 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent, tryFocus} from '../../../src/dom';
-import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
+import {
+  getStyle,
+  setImportantStyles,
+  setStyles,
+} from '../../../src/core/dom/style';
 import {
   numeric,
   px,

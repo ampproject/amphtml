@@ -20,7 +20,7 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-results-0.1.css';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
-import {computedStyle, setStyle} from '../../../src/style';
+import {computedStyle, setStyle} from '../../../src/core/dom/style';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 

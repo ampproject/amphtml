@@ -19,7 +19,7 @@ import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isIframeVideoPlayerComponent} from '../../../src/layout';
-import {setImportantStyles, setStyle} from '../../../src/style';
+import {setImportantStyles, setStyle} from '../../../src/core/dom/style';
 
 /**
  * @fileoverview This file implements the new AMP loader as an extension. This

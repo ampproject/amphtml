@@ -19,7 +19,7 @@ import {Services} from '../../../../src/services';
 import {createPointerEvent} from '../../../../testing/test-helper';
 import {htmlFor} from '../../../../src/static-template';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {setStyles} from '../../../../src/style';
+import {setStyles} from '../../../../src/core/dom/style';
 
 describes.realWin(
   'amp-pan-zoom',

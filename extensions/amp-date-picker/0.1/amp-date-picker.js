@@ -29,7 +29,7 @@ import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
 } from '../../../src/core/dom/query';
-import {computedStyle} from '../../../src/style';
+import {computedStyle} from '../../../src/core/dom/style';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';

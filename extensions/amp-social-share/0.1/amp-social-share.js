@@ -24,7 +24,7 @@ import {getDataParamsFromAttributes} from '../../../src/core/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseQueryString} from '../../../src/core/types/string/url';
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 
 const TAG = 'amp-social-share';
 

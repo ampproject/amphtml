@@ -46,7 +46,12 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
-import {px, resetStyles, setImportantStyles, toggle} from '../../../src/style';
+import {
+  px,
+  resetStyles,
+  setImportantStyles,
+  toggle,
+} from '../../../src/core/dom/style';
 
 /**
  * Action icons to be placed in tooltip.

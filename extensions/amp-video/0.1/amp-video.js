@@ -50,7 +50,7 @@ import {
   setImportantStyles,
   setInitialDisplay,
   setStyles,
-} from '../../../src/style';
+} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 
 const TAG = 'amp-video';

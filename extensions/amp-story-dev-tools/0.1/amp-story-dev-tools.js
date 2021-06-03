@@ -25,7 +25,7 @@ import {
 import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '../../../src/static-template';
 import {parseQueryString} from '../../../src/core/types/string/url';
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 import {updateHash} from './utils';
 
 /** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&amp;display=swap */

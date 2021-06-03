@@ -21,7 +21,7 @@ import {
 import {CSS} from '../../../build/amp-story-interactive-quiz-0.1.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {htmlFor} from '../../../src/static-template';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 import objstr from 'obj-str';
 
 /**

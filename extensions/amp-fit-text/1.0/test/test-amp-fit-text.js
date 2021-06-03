@@ -15,7 +15,7 @@
  */
 
 import '../amp-fit-text';
-import {computedStyle} from '../../../../src/style';
+import {computedStyle} from '../../../../src/core/dom/style';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {expect} from 'chai';
 import {toggleExperiment} from '../../../../src/experiments';

@@ -30,7 +30,7 @@ import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {isPrerenderActivePage} from './prerender-active-page';
-import {px, setStyles} from '../../../src/style';
+import {px, setStyles} from '../../../src/core/dom/style';
 import {scopedQuerySelectorAll} from '../../../src/core/dom/query';
 
 /**

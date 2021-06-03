@@ -51,7 +51,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error-reporting';
-import {setStyle, setStyles, toggle} from '../../../src/style';
+import {setStyle, setStyles, toggle} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 

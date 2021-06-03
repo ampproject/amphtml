@@ -20,7 +20,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Sidebar} from './component';
 import {dict} from '../../../src/core/types/object';
 import {pauseAll} from '../../../src/utils/resource-container-helper';
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 import {toggleAttribute} from '../../../src/dom';
 import {useToolbarHook} from './sidebar-toolbar-hook';
 import {useValueRef} from '../../../src/preact/component';
