@@ -15,7 +15,7 @@
  */
 
 import {endsWith} from '../../../../src/core/types/string';
-import {toWin} from '../../../../src/types';
+import {toWin} from '../../../../src/core/window';
 
 /**
  * Finds and extracts keyframes definition for Web Animations from CSS styles.

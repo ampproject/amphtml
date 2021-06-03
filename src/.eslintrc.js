@@ -69,7 +69,7 @@ module.exports = {
     },
     {
       'files': [
-        './core/window.extern.js',
+        './core/window/window.extern.js',
         './polyfills/custom-elements.extern.js',
         './experiments/experiments.extern.js',
         './experiments/shame.extern.js',

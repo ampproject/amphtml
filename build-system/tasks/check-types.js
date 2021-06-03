@@ -32,44 +32,6 @@ const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
 const {typecheckNewServer} = require('../server/typescript-compile');
 
-/**
- * Files that pass type-checking but don't belong to a passing directory target.
- * Note: This is a TEMPORARY holding point during the transition to type-safety.
- * @type {!Array<string>}
- */
-const PRIDE_FILES_GLOBS = [
-  // Core
-  'src/core/**/*.js',
-
-  // Runtime
-  'build/amp-loader-0.1.css.js',
-  'build/ampdoc.css.js',
-  'build/ampshared.css.js',
-  'src/config.js',
-  'src/document-ready.js',
-  'src/dom.js',
-  'src/exponential-backoff.js',
-  'src/format.js',
-  'src/history.js',
-  'src/internal-version.js',
-  'src/json.js',
-  'src/log.js',
-  'src/mode.js',
-  'src/resolved-promise.js',
-  'src/time.js',
-  'src/types.js',
-  'src/url-parse-query-string.js',
-  'src/url-try-decode-uri-component.js',
-  'src/utils/bytes.js',
-  'src/utils/img.js',
-
-  // Third Party
-  'third_party/css-escape/css-escape.js',
-  'third_party/webcomponentsjs/ShadowCSS.js',
-  'node_modules/promise-pjs/package.json',
-  'node_modules/promise-pjs/promise.mjs',
-];
-
 // We provide glob lists for core src/externs since any other targets are
 // allowed to depend on core.
 const CORE_SRCS_GLOBS = [
@@ -77,6 +39,33 @@ const CORE_SRCS_GLOBS = [
 
   // Needed for CSS escape polyfill
   'third_party/css-escape/css-escape.js',
+];
+
+/**
+ * Files that pass type-checking but don't belong to a passing directory target.
+ * Note: This is a TEMPORARY holding point during the transition to type-safety.
+ * @type {!Array<string>}
+ */
+const PRIDE_FILES_GLOBS = [
+  ...CORE_SRCS_GLOBS,
+
+  // Runtime
+  'build/amp-loader-0.1.css.js',
+  'build/ampdoc.css.js',
+  'build/ampshared.css.js',
+  'src/config.js',
+  'src/dom.js',
+  'src/format.js',
+  'src/internal-version.js',
+  'src/json.js',
+  'src/log.js',
+  'src/mode.js',
+  'src/types.js',
+
+  // Third Party
+  'third_party/webcomponentsjs/ShadowCSS.js',
+  'node_modules/promise-pjs/package.json',
+  'node_modules/promise-pjs/promise.mjs',
 ];
 
 /**

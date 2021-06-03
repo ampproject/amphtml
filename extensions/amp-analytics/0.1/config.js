@@ -25,7 +25,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/core/types';
 import {isCanary} from '../../../src/experiments';
 
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';

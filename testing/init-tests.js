@@ -43,7 +43,7 @@ import {
 import {preventAsyncErrorThrows} from './async-errors';
 import {removeElement} from '../src/dom';
 import {resetAccumulatedErrorMessagesForTesting} from '../src/error-reporting';
-import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen';
+import {resetEvtListenerOptsSupportForTesting} from '../src/core/dom/event-helper-listen';
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import AMP_CONFIG from '../build-system/global-configs/prod-config.json' assert {type: 'json'}; // lgtm[js/syntax-error]

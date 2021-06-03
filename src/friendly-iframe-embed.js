@@ -49,7 +49,7 @@ import {
   setStyles,
 } from './style';
 import {rethrowAsync} from './core/error';
-import {toWin} from './types';
+import {toWin} from './core/window';
 import {urls} from './config';
 import {whenContentIniLoad} from './ini-load';
 

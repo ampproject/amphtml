@@ -19,7 +19,7 @@ import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {iterateCursor} from '../../../src/dom';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 
 /** @const @private {string} */
 const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';

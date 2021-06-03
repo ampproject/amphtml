@@ -29,7 +29,7 @@ import {
   resetEvtListenerOptsSupportForTesting,
   resetPassiveSupportedForTesting,
   supportsPassiveEventListener,
-} from '../../src/event-helper-listen';
+} from '../../src/core/dom/event-helper-listen';
 
 describes.sandboxed('EventHelper', {}, (env) => {
   function getEvent(name, target) {

@@ -21,7 +21,7 @@ import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

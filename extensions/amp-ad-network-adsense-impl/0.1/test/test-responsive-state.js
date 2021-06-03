@@ -31,7 +31,7 @@ import {
 } from '../../../../src/dom';
 import {forceExperimentBranch} from '../../../../src/experiments';
 import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
-import {toWin} from '../../../../src/types';
+import {toWin} from '../../../../src/core/window';
 
 const AD_CLIENT_ID = 'ca-pub-123';
 

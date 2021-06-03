@@ -19,7 +19,7 @@ import {dict} from './core/types/object';
 import {experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
-import {getPageLayoutBoxBlocking} from './utils/page-layout-box';
+import {getPageLayoutBoxBlocking} from './core/dom/page-layout-box';
 import {internalRuntimeVersion} from './internal-version';
 import {urls} from './config';
 

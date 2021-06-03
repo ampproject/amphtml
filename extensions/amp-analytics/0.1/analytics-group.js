@@ -19,7 +19,7 @@ import {Deferred} from '../../../src/core/data-structures/promise';
 import {dev, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 
 /**
  * @const {number}

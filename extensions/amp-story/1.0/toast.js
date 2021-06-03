@@ -15,7 +15,7 @@
  */
 import {Services} from '../../../src/services';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 
 /** @private @const {string} */
 const TOAST_CLASSNAME = 'i-amphtml-story-toast';

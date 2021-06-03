@@ -18,7 +18,7 @@ import {Deferred} from '../../../src/core/data-structures/promise';
 import {getMode} from '../../../src/mode';
 import {isIframed} from '../../../src/dom';
 import {memo} from '../../../src/core/types/object';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 
 const OBSERVERS_MAP_PROP = '__AMP_A4A_VP_MAP';
 

@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {dev, devAssert} from '../../../src/log';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 
 /**
  * denylisted properties. Used mainly fot testing.

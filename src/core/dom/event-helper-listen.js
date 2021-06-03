@@ -28,6 +28,17 @@ let optsSupported;
 let passiveSupported;
 
 /**
+ * Options supported by addEventListener
+ * @typedef AddEventListenerOptsDef
+ * @property {undefined|boolean} [capture]
+ * @property {undefined|boolean} [once]
+ * @property {undefined|boolean} [passive]
+ * @property {undefined|!AbortSignal} [signal]
+ * }}
+ */
+let AddEventListenerOptsDef;
+
+/**
  * Listens for the specified event on the element.
  *
  * Do not use this directly. This method is implemented as a shared
@@ -37,7 +48,7 @@ let passiveSupported;
  * @param {!EventTarget} element
  * @param {string} eventType
  * @param {function(!Event)} listener
- * @param {Object=} opt_evtListenerOpts
+ * @param {!AddEventListenerOptsDef=} opt_evtListenerOpts
  * @return {!UnlistenDef}
  */
 export function internalListenImplementation(
@@ -48,38 +59,30 @@ export function internalListenImplementation(
 ) {
   let localElement = element;
   let localListener = listener;
-  /**
-   * @type {?Function}
-   */
-  let wrapped;
-
-  wrapped = (event) => {
+  /** @type {?function(!Event)} */
+  let wrapped = (event) => {
     try {
       return localListener(event);
     } catch (e) {
       // __AMP_REPORT_ERROR is installed globally per window in the entry point.
-      self.__AMP_REPORT_ERROR(e);
+      self.__AMP_REPORT_ERROR?.(e);
       throw e;
     }
   };
   const optsSupported = detectEvtListenerOptsSupport();
-  let capture = false;
-  if (opt_evtListenerOpts) {
-    capture = opt_evtListenerOpts.capture;
-  }
+  const capture = !!opt_evtListenerOpts?.capture;
+
   localElement.addEventListener(
     eventType,
     wrapped,
     optsSupported ? opt_evtListenerOpts : capture
   );
   return () => {
-    if (localElement) {
-      localElement.removeEventListener(
-        eventType,
-        wrapped,
-        optsSupported ? opt_evtListenerOpts : capture
-      );
-    }
+    localElement?.removeEventListener(
+      eventType,
+      wrapped,
+      optsSupported ? opt_evtListenerOpts : capture
+    );
     // Ensure these are GC'd
     localListener = null;
     localElement = null;

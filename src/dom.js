@@ -19,7 +19,7 @@ import {dev, devAssert} from './log';
 import {dict} from './core/types/object';
 import {includes} from './core/types/string';
 import {matches} from './core/dom/query';
-import {toWin} from './types';
+import {toWin} from './core/window';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',

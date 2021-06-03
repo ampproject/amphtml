@@ -16,7 +16,7 @@
 
 import {computedStyle} from '../style';
 import {remove} from '../core/types/array';
-import {toWin} from '../types';
+import {toWin} from '../core/window';
 import {tryCallback} from '../core/error';
 
 /** @enum {number} */

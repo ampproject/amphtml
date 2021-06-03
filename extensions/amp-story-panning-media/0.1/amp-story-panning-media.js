@@ -26,7 +26,7 @@ import {Services} from '../../../src/services';
 import {closest} from '../../../src/core/dom/query';
 import {deepEquals} from '../../../src/core/types/object/json';
 import {dev, user} from '../../../src/log';
-import {prefersReducedMotion} from '../../../src/utils/media-query-props';
+import {prefersReducedMotion} from '../../../src/core/dom/media-query-props';
 import {setImportantStyles} from '../../../src/style';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 

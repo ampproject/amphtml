@@ -15,7 +15,7 @@
  */
 
 import {dict} from '../../../src/core/types/object';
-import {getState} from '../../../src/history';
+import {getState} from '../../../src/core/window/history';
 import {parseJson} from '../../../src/core/types/object/json';
 
 const EXPIRATION_DURATION_MILLIS = 10 * 60 * 1000; // 10 Minutes

@@ -16,7 +16,7 @@
 
 import {DomFingerprint} from '../../../src/core/dom/fingerprint';
 import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {
   addDataAndJsonAttributes_,
   applySandbox,
