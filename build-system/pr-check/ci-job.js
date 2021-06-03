@@ -32,28 +32,38 @@ const {red} = require('../common/colors');
 const {updatePackages} = require('../common/update-packages');
 const {Worker} = require('worker_threads');
 
+/** @type {Worker} */
+let fastFailWorker;
+
 /**
  * Starts the fast fail background polling service as a worker.
  * @return {Promise<void>}
  */
 function startFastFailPollingWorker() {
-  return new Promise((resolve) => {
-    const worker = new Worker('./build-system/common/fast_fail.js', {
-      workerData: {pid: process.pid},
+  return new Promise((resolve, reject) => {
+    if (fastFailWorker) {
+      reject('The worker already exists');
+      return;
+    }
+    fastFailWorker = new Worker('./build-system/common/fast_fail.js', {
+      workerData: {
+        pid: process.pid,
+      },
     });
-    worker.on('message', (message) => {
-      if (message) {
-        logWithoutTimestamp(red(message));
-      }
+    fastFailWorker.on('message', (message) => {
+      logWithoutTimestamp(message);
       resolve();
     });
-    worker.on('exit', (code) => {
-      if (code !== 0) {
-        logWithoutTimestamp(red('Worker Exited with'), `${code}`);
-        process.exit(1);
-      }
-    });
   });
+}
+
+/**
+ * Stops the fast fail background process.
+ */
+function stopFastFailWorker() {
+  if (fastFailWorker) {
+    fastFailWorker.terminate();
+  }
 }
 
 /**
@@ -64,9 +74,7 @@ function startFastFailPollingWorker() {
  */
 async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
   if (isCircleciBuild()) {
-    logWithoutTimestamp(red('PID: '), `${process.pid}`);
-    // Ideally this would not need to be awaited but this should result in simpler debugging.
-    await startFastFailPollingWorker();
+    startFastFailPollingWorker();
   }
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
@@ -84,6 +92,8 @@ async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
     logWithoutTimestamp(getLoggingPrefix(), red('ERROR:'), err);
     abortTimedJob(jobName, startTime);
   }
+
+  stopFastFailWorker();
 }
 
 module.exports = {

@@ -16,7 +16,11 @@
 'use strict';
 
 const request = require('request');
+const {log} = require('./logging');
+const {mkdirSync} = require('../tasks/helpers');
 const {parentPort, workerData} = require('worker_threads');
+const {red} = require('./colors');
+const {writeFileSync} = require('fs');
 
 const {CIRCLE_TOKEN, CIRCLE_WORKFLOW_ID} = process.env;
 
@@ -63,26 +67,35 @@ function getJobs() {
 }
 
 /**
+ * End both the current and parent process
+ * @param {string} output
+ * @return {Promise<void>}
+ */
+async function terminate(output) {
+  mkdirSync('result-reports');
+  writeFileSync('result-reports/fast_fail.log', output);
+  // Trying to get lots to output correctly
+  process.kill(getPid());
+  log(red('Shutting down'), output);
+  process.exit(1);
+}
+
+/**
  * Starts the fast fail polling background service.
  */
 function initializeFastFailPolling() {
-  parentPort?./*OK*/ postMessage('');
+  parentPort?./*OK*/ postMessage('Fast Fail Worker Initialized');
   const interval = setInterval(async () => {
     const jobs = await getJobs();
     const failed = jobs.items.filter((job) => job.status === 'failed');
     if (failed.length) {
-      const pid = getPid();
+      clearInterval(interval);
+
       const failedJobNames = failed.map((job) => job.name).join(', ');
       const jobOrJobs = `job${failed.length > 1 ? 's' : ''}`;
-      parentPort?./*OK*/ postMessage(
-        `Found failed ${jobOrJobs}: ${failedJobNames}`
-      );
-      clearInterval(interval);
-      setTimeout(() => {
-        // Waiting a couple seconds so the parent can log the failures.
-        process.kill(pid);
-        process.exit(1);
-      }, 5000);
+      const output = `${red(`Found failed ${jobOrJobs}`)}: ${failedJobNames}`;
+      log(output);
+      terminate(output);
     }
   }, POLLING_RATE);
 }
