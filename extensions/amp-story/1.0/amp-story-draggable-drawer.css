@@ -115,6 +115,16 @@
   --i-amphtml-draggable-drawer-text-color: #fff !important;
 }
 
+[cta-drawer-theme="light"].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
+  --i-amphtml-draggable-drawer-background-color: #fff !important;
+  --i-amphtml-draggable-drawer-text-color: #202125 !important;
+}
+
+[cta-drawer-theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
+  --i-amphtml-draggable-drawer-background-color: #fff !important;
+  --i-amphtml-draggable-drawer-text-color: #202125 !important;
+}
+
 amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
   border-radius: 16px !important;
   height: 100% !important;

@@ -187,6 +187,14 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       '.i-amphtml-story-draggable-drawer'
     );
 
+    /*
+    const drawerTheme = this.element.getAttribute('cta-drawer-theme')?.toLowerCase();
+    if (drawerTheme && AttachmentTheme.DARK === drawerTheme) {
+      console.log(drawerTheme);
+      templateEl.setAttribute('theme', drawerTheme);
+    }
+    */
+
     while (this.element.firstChild && this.element.firstChild !== templateEl) {
       this.contentEl_.appendChild(this.element.firstChild);
     }
