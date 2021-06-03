@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {computedStyle} from '../style';
-import {remove} from '../core/types/array';
-import {toWin} from '../core/window';
-import {tryCallback} from '../core/error';
+import {computedStyle} from './style';
+import {remove} from '../types/array';
+import {toWin} from '../window';
+import {tryCallback} from '../error';
 
 /** @enum {number} */
 const Type = {
