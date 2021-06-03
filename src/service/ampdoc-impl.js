@@ -23,7 +23,7 @@ import {
   addDocumentVisibilityChangeListener,
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
-} from '../utils/document-visibility';
+} from '../core/document-visibility';
 import {dev, devAssert} from '../log';
 import {
   disposeServicesForDoc,
