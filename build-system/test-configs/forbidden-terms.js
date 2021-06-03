@@ -578,8 +578,8 @@ const forbiddenTermsGlobal = {
     allowlist: ['src/custom-element.js', 'src/service/resources-impl.js'],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
-    message: 'Use dom.openWindowDialog',
-    allowlist: ['src/dom.js'],
+    message: 'Use src/open-window-dialog',
+    allowlist: ['src/open-window-dialog.js'],
   },
   '\\.getWin\\(': {
     message: backwardCompat,
