@@ -23,17 +23,13 @@
   "files": ["./global.d.ts"],
   "include": ["./**/*.js"],
   "exclude": [
-    // Directories that do not need type-checking.
     "./**/node_modules/**",
     "./**/test/**/*.js",
-    "./**/*.test.js",
+    "./**/*test*.js",
     "./babel-plugins/**/*.js",
     "./eslint-rules/**/*.js",
     "./externs/**/*.js",
     "./tasks/make-extension/template/**/*.js",
-    "./tasks/performance/cache/**/*.js",
-
-    // Directories that need code fixes before type-checking can be enabled.
-    "./tasks/get-zindex/**/*.js"
+    "./tasks/performance/cache/**/*.js"
   ]
 }
