@@ -133,7 +133,7 @@ exports.rules = [
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
-      'ads/**->src/static-template.js',
+      'ads/**->src/core/dom/static-template.js',
       'ads/**->src/core/dom/style.js',
       'ads/**->src/internal-version.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
