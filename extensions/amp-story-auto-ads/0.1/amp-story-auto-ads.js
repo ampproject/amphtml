@@ -505,17 +505,19 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
     // TODO(#33969): Remove this if yellow bar not chosen.
-    const progressEl = this.storyProgressBar_.querySelector(
-      `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
-        // +2 for zero-index and we want the chip after the ad.
-        pageIndex + 2
-      )})`
-    );
-    const yellowChip = this.doc_.createElement('div');
-    yellowChip.className = 'i-amphtml-story-ad-progress-value';
+    if (isExperimentOn(this.win, 'story-ad-progress-chip')) {
+      const progressEl = this.storyProgressBar_.querySelector(
+        `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
+          // +2 for zero-index and we want the chip after the ad.
+          pageIndex + 2
+        )})`
+      );
+      const yellowChip = this.doc_.createElement('div');
+      yellowChip.className = 'i-amphtml-story-ad-progress-value';
 
-    this.visibleProgressChip_ = yellowChip;
-    progressEl.appendChild(yellowChip);
+      this.visibleProgressChip_ = yellowChip;
+      progressEl.appendChild(yellowChip);
+    }
 
     // Tell the iframe that it is visible.
     this.setVisibleAttribute_(adPage);
