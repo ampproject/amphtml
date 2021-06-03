@@ -169,11 +169,6 @@ export class AnimationRunner {
       return omit(keyframes[0], ['offset']);
     });
 
-    /** @private {bool} */
-    this.prefersReducedMotion_ = prefersReducedMotion(
-      this.page_.ownerDocument.defaultView
-    );
-
     /** @private {?../../amp-animation/0.1/runners/animation-runner.AnimationRunner} */
     this.runner_ = null;
 
