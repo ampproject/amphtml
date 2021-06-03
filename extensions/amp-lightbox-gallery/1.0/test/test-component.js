@@ -16,7 +16,6 @@
 
 import * as Preact from '../../../../src/preact';
 import {LightboxGalleryProvider, WithLightbox} from '../component';
-import {expect} from 'chai';
 import {mount} from 'enzyme';
 
 describes.sandboxed('LightboxGallery preact component', {}, () => {
