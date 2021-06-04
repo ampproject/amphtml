@@ -441,18 +441,17 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {?string}
    */
   getAttributionReportingValues_(adConversionData) {
-    if (!adConversionData) {
+    if (!adConversionData || !Object.keys(adConversionData)) {
       return;
-    }
-
-    const parts = [];
-    for (const key of Object.keys(adConversionData)) {
-      parts.push(`${key.toLowerCase()}=${adConversionData[key]}`);
     }
 
     // `noopener` is probably redundant here but left as defense in depth.
     // https://groups.google.com/a/chromium.org/g/blink-dev/c/FFX6VkvladY/m/QgaWHK6ZBAAJ
-    return parts.length ? 'noopener,' + parts.join(',') : undefined;
+    const parts = ['noopener'];
+    for (const key of Object.keys(adConversionData)) {
+      parts.push(`${key.toLowerCase()}=${adConversionData[key]}`);
+    }
+    return parts.join(',');
   }
 
   /**
