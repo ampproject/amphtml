@@ -21,7 +21,7 @@
       "options": {"parser": "json"}
     },
     {
-      "files": "build-system/compile/bundles.config.extensions.json",
+      "files": "build-system/**/*.json",
       "options": {"parser": "json-stringify"}
     },
     {
