@@ -17,7 +17,6 @@
 import {AmpAdExit} from '../amp-ad-exit';
 import {FilterType} from '../filters/filter';
 import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
-import {expect} from 'chai';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {setParentWindow} from '../../../../src/service';
