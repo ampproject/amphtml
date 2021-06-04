@@ -219,8 +219,8 @@ test('insertExtensionBundlesConfig inserts new entry', (t) =>
 
       await insertExtensionBundlesConfig(
         {
-          name: 'a',
           version: 'x',
+          name: 'a',
           options: {hasCss: true},
         },
         destination
