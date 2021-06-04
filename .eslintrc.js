@@ -19,6 +19,9 @@ const {
   forbiddenTermsGlobal,
   forbiddenTermsSrcInclusive,
 } = require('./build-system/test-configs/forbidden-terms');
+const {
+  getImportResolver,
+} = require('./build-system/babel-config/import-resolver');
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -84,6 +87,12 @@ module.exports = {
     },
     'react': {
       'pragma': 'Preact',
+    },
+    'import/resolver': {
+      // This makes it possible to eventually enable the built-in import linting
+      // rules to detect invalid imports, imports of things that aren't
+      // exported, etc.
+      'babel-module': getImportResolver(),
     },
   },
   'reportUnusedDisableDirectives': true,

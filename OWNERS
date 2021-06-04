@@ -46,5 +46,10 @@
       pattern: '**/OWNERS',
       owners: [{name: 'mrjoro', requestReviews: false}],
     },
+    {
+      // Locked down to minimize new import aliases being added
+      pattern: 'jsconfig.json',
+      owners: [{name: 'ampproject/wg-performance', required: true}],
+    },
   ],
 }
