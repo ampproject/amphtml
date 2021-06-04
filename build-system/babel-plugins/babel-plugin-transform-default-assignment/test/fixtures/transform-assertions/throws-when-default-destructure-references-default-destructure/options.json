@@ -1,4 +1,6 @@
 {
-  "plugins": ["../../../.."],
+  "plugins": [
+    "../../../.."
+  ],
   "throws": "default assignment of default assignment"
 }

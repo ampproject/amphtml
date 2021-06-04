@@ -23,7 +23,7 @@ const {
 const {cyan, magenta, yellow} = require('../../common/colors');
 const {getOutput} = require('../../common/process');
 const {log} = require('../../common/logging');
-const {readJsonSync, writeFileSync} = require('fs-extra');
+const {readJsonSync, writeJsonSync} = require('fs-extra');
 
 const containRuntimeSource = ['3p', 'ads', 'extensions', 'src', 'test'];
 const containExampleHtml = ['examples', 'test'];
@@ -141,7 +141,7 @@ function removeFromJsonConfig(config, path, id) {
     }
   }
 
-  writeFileSync(path, JSON.stringify(config, null, 2) + '\n');
+  writeJsonSync(path, config, {spaces: 2});
   return [path];
 }
 
@@ -482,8 +482,15 @@ async function sweepExperiments() {
       ...removeFromRuntimeSource(id, workItem.percentage),
     ];
 
+    const formattable = modified.filter(
+      (filename) =>
+        // We don't need to format JSON files since they were written with
+        // {spaces: 2}, and matches prettier's `json-stringify` parser
+        !filename.endsWith('.json')
+    );
+
     getStdoutThrowOnError(
-      `./node_modules/prettier/bin-prettier.js --write ${modified.join(' ')}`
+      `./node_modules/prettier/bin-prettier.js --write ${formattable.join(' ')}`
     );
 
     for (const line of gitCommitSingleExperiment(id, workItem, modified)) {

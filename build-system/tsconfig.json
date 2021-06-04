@@ -1,7 +1,10 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "outDir": "dist",
     "sourceMap": true,
     "moduleResolution": "node",
@@ -20,8 +23,12 @@
     "esModuleInterop": true,
     "declaration": true
   },
-  "files": ["./global.d.ts"],
-  "include": ["./**/*.js"],
+  "files": [
+    "./global.d.ts"
+  ],
+  "include": [
+    "./**/*.js"
+  ],
   "exclude": [
     "./**/node_modules/**",
     "./**/test/**/*.js",
