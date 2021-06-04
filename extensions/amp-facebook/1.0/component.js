@@ -38,16 +38,22 @@ const DEFAULT_TITLE = 'Facebook comments';
  */
 function FacebookWithRef(
   {
+    action,
     colorScheme,
     embedAs,
     href,
     includeCommentParent,
+    kdSite,
+    layout,
     locale: localeProp,
     numPosts,
     onReady,
     orderBy,
+    refLabel,
     requestResize,
+    share,
     showText,
+    size,
     style,
     title = DEFAULT_TITLE,
     ...rest
@@ -90,14 +96,20 @@ function FacebookWithRef(
   return (
     <ProxyIframeEmbed
       options={{
+        action,
         colorScheme,
         embedAs,
         href,
         includeCommentParent,
+        'kd_site': kdSite,
+        layout,
         locale,
         numPosts,
         orderBy,
+        ref: refLabel,
+        share,
         showText,
+        size,
       }}
       ref={ref}
       title={title}
