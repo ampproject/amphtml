@@ -367,7 +367,9 @@
     "name": "amp-facebook-page",
     "version": "1.0",
     "latestVersion": "0.1",
-    "options": {"hasCss": true}
+    "options": {
+      "hasCss": true
+    }
   },
   {
     "name": "amp-fit-text",
