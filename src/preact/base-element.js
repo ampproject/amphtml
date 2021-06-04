@@ -21,7 +21,7 @@ import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Deferred} from '../core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../layout';
 import {Loading} from '../core/loading-instructions';
-import {MediaQueryProps} from '../utils/media-query-props';
+import {MediaQueryProps} from '../core/dom/media-query-props';
 import {PauseHelper} from '../utils/pause-helper';
 import {ReadyState} from '../core/constants/ready-state';
 import {Slot, createSlot} from './slot';

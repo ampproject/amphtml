@@ -26,7 +26,7 @@ import {
   isInternalElement,
   isLoadingAllowed,
 } from './layout';
-import {MediaQueryProps} from './utils/media-query-props';
+import {MediaQueryProps} from './core/dom/media-query-props';
 import {ReadyState} from './core/constants/ready-state';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
@@ -47,7 +47,7 @@ import {rethrowAsync} from './core/error';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
-import {toWin} from './types';
+import {toWin} from './core/window';
 import {tryResolve} from './core/data-structures/promise';
 
 const TAG = 'CustomElement';

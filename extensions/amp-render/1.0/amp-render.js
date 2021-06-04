@@ -29,7 +29,16 @@ import {isExperimentOn} from '../../../src/experiments';
 /** @const {string} */
 const TAG = 'amp-render';
 
+/** @const {string} */
 const AMP_STATE_URI_SCHEME = 'amp-state:';
+
+/** @enum {string}  */
+const Binding = {
+  ALWAYS: 'always',
+  REFRESH: 'refresh',
+  NEVER: 'never',
+  NO: 'no',
+};
 
 /**
  * Returns true if element's src points to amp-state.
@@ -77,11 +86,11 @@ const getAmpStateJson = (element, src) => {
  * @return {boolean} Whether bind should evaluate and apply changes.
  */
 function getUpdateValue(bindingValue, isFirstMutation) {
-  if (!bindingValue || bindingValue === 'refresh') {
+  if (!bindingValue || bindingValue === Binding.REFRESH) {
     // default is 'refresh', so check that its not the first mutation
     return !isFirstMutation;
   }
-  if (bindingValue === 'always') {
+  if (bindingValue === Binding.ALWAYS) {
     // TODO(dmanek): add link to amp-render docs that elaborates on performance implications of "always"
     user().warn(TAG, 'binding="always" has performance implications.');
     return true;
@@ -278,7 +287,8 @@ export class AmpRender extends BaseElement {
       this.mutateProps(
         dict({
           'render': (data) => {
-            if (this.element.getAttribute('binding') === 'no') {
+            const bindingValue = this.element.getAttribute('binding');
+            if (bindingValue === Binding.NEVER || bindingValue === Binding.NO) {
               return this.renderTemplateAsString_(data);
             }
             return Services.bindForDocOrNull(this.element).then((bind) => {
@@ -292,7 +302,7 @@ export class AmpRender extends BaseElement {
                     .rescan([element], [], {
                       'fast': true,
                       'update': getUpdateValue(
-                        this.element.getAttribute('binding'),
+                        bindingValue,
                         // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
                         // mutation occured, which is null for the initial render
                         bind.signals().get('FIRST_MUTATE') === null

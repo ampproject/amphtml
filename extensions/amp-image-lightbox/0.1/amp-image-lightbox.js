@@ -29,7 +29,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, clamp, distance, magnitude} from '../../../src/core/math';
 import {continueMotion} from '../../../src/motion';
@@ -42,7 +42,7 @@ import {
 } from '../../../src/core/math/layout-rect';
 import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setStyles, toggle} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
+import {srcsetFromElement} from '../../../src/core/dom/srcset';
 
 const TAG = 'amp-image-lightbox';
 

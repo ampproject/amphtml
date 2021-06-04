@@ -36,7 +36,10 @@ import {dev, devAssert, userAssert} from '../../../../src/log';
 
 import {iterateCursor} from '../../../../src/dom';
 import {map} from '../../../../src/core/types/object';
-import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
+import {
+  srcsetFromElement,
+  srcsetFromSrc,
+} from '../../../../src/core/dom/srcset';
 import {toArray} from '../../../../src/core/types/array';
 
 const LIGHTBOX_ELIGIBLE_TAGS = new Set(['AMP-IMG', 'IMG']);

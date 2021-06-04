@@ -19,7 +19,7 @@ import {Layout, isLayoutSizeDefined} from '../../src/layout';
 import {ReadyState} from '../../src/core/constants/ready-state';
 import {Services} from '../../src/services';
 import {dev} from '../../src/log';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../src/utils/img';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../src/core/dom/img';
 import {listen} from '../../src/event-helper';
 import {propagateAttributes} from '../../src/core/dom/propagate-attributes';
 import {propagateObjectFitStyles, setImportantStyles} from '../../src/style';

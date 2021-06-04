@@ -888,7 +888,9 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'opinary': {},
+  'opinary': {
+    renderStartImplemented: true,
+  },
 
   'outbrain': {
     renderStartImplemented: true,
@@ -1190,6 +1192,10 @@ const adConfig = jsonConfiguration({
   },
 
   'taboola': {},
+
+  'tail': {
+    renderStartImplemented: true,
+  },
 
   'tcsemotion': {
     prefetch: 'https://ads.tcsemotion.com/www/delivery/amphb.js',

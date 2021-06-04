@@ -269,15 +269,13 @@ function updatePackages() {
  *
  * 1. During CI, do a clean install.
  * 2. During local development, do an incremental install if necessary.
- * 3. Since install scripts can be async, `await` the process object.
- * 4. Since script output is noisy, capture and print the stderr if needed.
- * 5. During CI, if not skipped, ensure package files were correctly updated.
+ * 3. Since script output is noisy, capture and print the stderr if needed.
+ * 4. During CI, if not skipped, ensure package files were correctly updated.
  *
  * @param {string} dir
  * @param {boolean=} skipNpmChecks
- * @return {Promise<void>}
  */
-async function updateSubpackages(dir, skipNpmChecks = false) {
+function updateSubpackages(dir, skipNpmChecks = false) {
   const results = checkDependencies.sync({packageDir: dir});
   const relativeDir = path.relative(process.cwd(), dir);
   if (results.depsWereOk) {
@@ -286,7 +284,7 @@ async function updateSubpackages(dir, skipNpmChecks = false) {
   } else {
     const installCmd = isCiBuild() ? 'npm ci' : 'npm install';
     log('Running', cyan(installCmd), 'in', cyan(relativeDir) + '...');
-    const output = await getOutput(`${installCmd} --prefix ${dir}`);
+    const output = getOutput(`${installCmd} --prefix ${dir}`);
     if (output.status !== 0) {
       log(red('ERROR:'), output.stderr);
       throw new Error('Installation failed');

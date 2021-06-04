@@ -78,7 +78,7 @@ import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
-import {prefersReducedMotion} from '../../../src/utils/media-query-props';
+import {prefersReducedMotion} from '../../../src/core/dom/media-query-props';
 import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {px, toggle} from '../../../src/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';

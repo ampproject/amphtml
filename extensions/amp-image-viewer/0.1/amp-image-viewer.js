@@ -29,7 +29,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, distance, magnitude} from '../../../src/core/math';
 import {
@@ -51,7 +51,7 @@ import {
 } from '../../../src/utils/size-observer';
 import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setStyles} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
+import {srcsetFromElement} from '../../../src/core/dom/srcset';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';

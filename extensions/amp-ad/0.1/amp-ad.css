@@ -23,6 +23,7 @@ amp-embed iframe {
   border: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
+  position: relative;
 }
 
 .i-amphtml-ad-default-holder {
@@ -82,7 +83,6 @@ amp-ad .amp-ad-close-button {
   visibility: visible;
   width: 28px;
   height: 28px;
-  top: -28px;
   right: 0;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg width="13" height="13" viewBox="341 8 13 13" xmlns="http://www.w3.org/2000/svg"><path fill="#4F4F4F" d="M354 9.31L352.69 8l-5.19 5.19L342.31 8 341 9.31l5.19 5.19-5.19 5.19 1.31 1.31 5.19-5.19 5.19 5.19 1.31-1.31-5.19-5.19z" fill-rule="evenodd"/></svg>');
   background-size: 13px 13px;
@@ -102,6 +102,19 @@ amp-ad .amp-ad-close-button:before {
   right: 0;
   left: -20px;
   bottom: 0;
+}
+
+amp-ad[sticky='bottom'] .amp-ad-close-button {
+  top: -28px;
+}
+
+amp-ad[sticky='bottom-right'] .amp-ad-close-button {
+  top: -28px;
+}
+
+amp-ad[sticky='top'] .amp-ad-close-button {
+  transform: rotate(270deg);
+  bottom: -28px;
 }
 
 [dir='rtl'] amp-ad .amp-ad-close-button {
@@ -133,7 +146,6 @@ amp-ad[sticky] {
   z-index: 11;
   position: fixed;
   overflow: visible !important;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2) !important;
   display: flex;
   flex-direction: column;
@@ -142,13 +154,15 @@ amp-ad[sticky] {
 amp-ad[sticky='top'] {
   width: 100% !important;
   background: #fff;
-  top: 0;
+  padding-bottom: 5px;
 }
 
 amp-ad[sticky='bottom'] {
   width: 100% !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: #fff;
   bottom: 0;
+  padding-top: 5px;
 }
 
 amp-ad[sticky='bottom-right'] {

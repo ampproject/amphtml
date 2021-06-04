@@ -20,7 +20,7 @@ import {CSS} from '../../../build/amp-stream-gallery-1.0.css';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
