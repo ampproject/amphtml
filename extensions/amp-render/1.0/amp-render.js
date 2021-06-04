@@ -214,10 +214,6 @@ export class AmpRender extends BaseElement {
         this.toggleLoading(false);
         this.togglePlaceholder(false);
       },
-      'onRefresh': () => {
-        this.togglePlaceholder(false);
-        this.toggleFallback(false);
-      },
       'onError': () => {
         this.toggleLoading(false);
         // If the content fails to load and there's a fallback element, display the fallback.
