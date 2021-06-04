@@ -88,6 +88,7 @@ export function createSecureFrame(win, title, height, width) {
       dict({
         // NOTE: It is possible for either width or height to be 'auto',
         // a non-numeric value.
+        'allow': `attribution-reporting 'src'`,
         'height': height,
         'width': width,
         'title': title,
