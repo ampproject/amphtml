@@ -50,20 +50,20 @@ class StableWhitespaceJsonArray {
     const content = match[1].trim();
 
     const closers = {')': '(', '}': '{', ']': '['};
-    const stack = {'(': 0, '{': 0, '[': 0, '"': 0};
+    const stack = {'(': 0, '{': 0, '[': 0};
 
-    const isStackClosed = () =>
-      !Object.keys(stack).find((k) => stack[k] % 2 > 0);
+    const getStackTotal = () => Object.values(stack).reduce((a, b) => a + b);
 
     let currentStart = 0;
     for (let i = 0; i < content.length; i++) {
       const char = content.charAt(i);
-      const closerOrOpener = closers[char] || char;
-      if (stack.hasOwnProperty(closerOrOpener)) {
-        stack[closerOrOpener]++;
+      if (typeof stack[char] === 'number') {
+        stack[char]++;
+      } else if (closers[char]) {
+        stack[closers[char]]--;
       }
       const isEnding = i === content.length - 1;
-      if ((isEnding || char === ',') && isStackClosed()) {
+      if (isEnding || (char === ',' && getStackTotal() === 0)) {
         const original = content.substr(
           currentStart,
           i - currentStart + (isEnding ? 1 : 0)
