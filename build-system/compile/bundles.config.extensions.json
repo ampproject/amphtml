@@ -340,10 +340,10 @@
   {
     "name": "amp-facebook",
     "version": "1.0",
+    "latestVersion": "0.1",
     "options": {
       "hasCss": true
-    },
-    "latestVersion": "0.1"
+    }
   },
   {
     "name": "amp-facebook-comments",
