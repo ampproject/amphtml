@@ -68,14 +68,7 @@ class StableWhitespaceJsonArray {
           currentStart,
           i - currentStart + (isEnding ? 1 : 0)
         );
-        let value;
-        try {
-          value = JSON.parse(original);
-        } catch (e) {
-          throw new Error(
-            `${JSON.stringify(stack)}\n${content}\n${original}\n ${e.message}`
-          );
-        }
+        const value = JSON.parse(original);
         const normalized = JSON.stringify(value);
         this.value_.push(
           /** @type {StableWhitespaceJsonArrayItemDef} */ ({
