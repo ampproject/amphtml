@@ -24,10 +24,7 @@
   "triggers": {
     "pageViewed": {
       "on": "visible",
-      "request": [
-        "addDevice",
-        "event"
-      ],
+      "request": ["addDevice", "event"],
       "extraUrlParams": {
         "e": "MOE_PAGE_VIEWED"
       }

@@ -1,10 +1,7 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "esnext"
-    ],
+    "lib": ["dom", "esnext"],
     "outDir": "dist",
     "sourceMap": true,
     "moduleResolution": "node",
@@ -20,8 +17,5 @@
     "esModuleInterop": true,
     "declaration": true
   },
-  "include": [
-    "./*.ts",
-    "./**/*.ts"
-  ]
+  "include": ["./*.ts", "./**/*.ts"]
 }

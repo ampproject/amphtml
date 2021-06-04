@@ -1,7 +1,5 @@
 {
-  "plugins": [
-    "../../../.."
-  ],
+  "plugins": ["../../../.."],
   "sourceType": "module",
   "filename": "component.jss.js",
   "throws": "CSS"

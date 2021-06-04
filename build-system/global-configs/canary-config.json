@@ -1,7 +1,5 @@
 {
-  "allow-doc-opt-in": [
-    "amp-next-page"
-  ],
+  "allow-doc-opt-in": ["amp-next-page"],
   "allow-url-opt-in": [],
   "canary": 1,
   "a4aProfilingRate": 0.01,

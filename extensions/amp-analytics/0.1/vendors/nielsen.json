@@ -10,10 +10,7 @@
   "triggers": {
     "visible": {
       "on": "visible",
-      "request": [
-        "session",
-        "cloudapi"
-      ]
+      "request": ["session", "cloudapi"]
     },
     "hidden": {
       "on": "hidden",

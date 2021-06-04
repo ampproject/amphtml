@@ -14,12 +14,8 @@
       "id": "default"
     }
   ],
-  "highlighted": [
-    "2019-01-29"
-  ],
-  "blocked": [
-    "2019-01-21"
-  ],
+  "highlighted": ["2019-01-29"],
+  "blocked": ["2019-01-21"],
   "date": "2019-01-25",
   "startDate": "2018-05-07",
   "endDate": "2018-05-10"

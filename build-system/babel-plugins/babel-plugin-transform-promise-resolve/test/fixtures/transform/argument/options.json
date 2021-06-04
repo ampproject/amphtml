@@ -1,6 +1,4 @@
 {
-  "plugins": [
-    "../../../.."
-  ],
+  "plugins": ["../../../.."],
   "sourceType": "module"
 }

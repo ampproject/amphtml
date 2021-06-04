@@ -1,16 +1,6 @@
 {
   "items": [
-    {
-      "content": "Hello",
-      "replies": [
-        {
-          "content": "Hi"
-        }
-      ]
-    },
-    {
-      "content": "Howdy",
-      "replies": []
-    }
+    {"content": "Hello", "replies": [{"content": "Hi"}]},
+    {"content": "Howdy", "replies": []}
   ]
 }

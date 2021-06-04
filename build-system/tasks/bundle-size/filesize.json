@@ -10,8 +10,6 @@
       "extensions/*/?.?/dist/*.js",
       "extensions/*/?.?/dist/*.mjs"
     ],
-    "trackFormat": [
-      "brotli"
-    ]
+    "trackFormat": ["brotli"]
   }
 }
