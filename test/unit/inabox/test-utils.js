@@ -41,7 +41,7 @@ describes.realWin('inabox-utils', {}, (env) => {
     iniLoadDeferred = new Deferred();
 
     env.sandbox
-      .stub(IniLoad, 'whenContentIniLoad')
+      .stub(IniLoad, 'whenContentIniLoadMeasure')
       .returns(iniLoadDeferred.promise);
     env.sandbox
       .stub(Services, 'viewportForDoc')
