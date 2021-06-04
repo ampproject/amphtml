@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
-/* eslint-env node */
-// eslint-disable-next-line local/no-module-exports
-module.exports = require('./dist/component-react');
+// src/polyfills.js must be the first import.
+import '../polyfills';
+
+import {draw3p, init} from '../integration-lib';
+import {register} from '../3p';
+
+import {tail} from '../../ads/vendors/tail';
+
+init(window);
+register('tail', tail);
+
+window.draw3p = draw3p;
