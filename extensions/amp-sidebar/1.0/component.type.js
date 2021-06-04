@@ -42,6 +42,15 @@ SidebarDef.SidebarProps;
  */
 SidebarDef.SidebarToolbarProps;
 
+/**
+ * @typedef {{
+ *   domElement: (!Element),
+ *   toolbar: (string|undefined),
+ *   toolbarTarget: (string|undefined),
+ * }}
+ */
+SidebarDef.ToolbarShimProps;
+
 /** @interface */
 SidebarDef.SidebarApi = class {
   /** Open the sidebar */
