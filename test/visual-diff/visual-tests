@@ -652,6 +652,7 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
       ],
+      "loading_complete_delay_ms": 200
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html",
