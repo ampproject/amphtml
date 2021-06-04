@@ -21,7 +21,7 @@ var FacebookDef = {};
 
 /**
  * @typedef {{
- *   colorScheme: (string|undefined),
+ *   colorscheme: (string|undefined),
  *   href: (string|undefined),
  *   loading: (string|undefined),
  *   locale: (string|undefined),

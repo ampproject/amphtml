@@ -38,7 +38,7 @@ const DEFAULT_TITLE = 'Facebook comments';
  */
 function FacebookWithRef(
   {
-    colorScheme,
+    colorscheme,
     embedAs,
     href,
     includeCommentParent,
@@ -90,7 +90,7 @@ function FacebookWithRef(
   return (
     <ProxyIframeEmbed
       options={{
-        colorScheme,
+        colorscheme,
         embedAs,
         href,
         includeCommentParent,
