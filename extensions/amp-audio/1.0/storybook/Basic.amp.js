@@ -32,11 +32,16 @@ export default {
 export const ExampleUseCase = () => {
   return (
     <amp-audio
-      width="300"
-      height="200"
-      example-property="example string property value"
+      src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+      artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
+      title="Snow Fight"
+      album="Jan Morgenstern"
+      artist="Sintel"
+      height="50"
+      width="auto"
+      controls
     >
-      This text is inside.
+      <div fallback>Your browser doesn’t support HTML5 audio</div>
     </amp-audio>
   );
 };

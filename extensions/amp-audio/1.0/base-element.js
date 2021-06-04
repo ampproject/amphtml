@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {CSS as COMPONENT_CSS} from './component.jss';
 import {Audio} from './component';
+import {CSS as COMPONENT_CSS} from './component.jss';
+import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 
 export class BaseElement extends PreactBaseElement {}
@@ -26,8 +27,16 @@ BaseElement['Component'] = Audio;
 /** @override */
 BaseElement['props'] = {
   'children': {passthrough: true},
-  // 'children': {passthroughNonEmpty: true},
-  // 'children': {selector: '...'},
+  album: {attr: 'album', type: 'string', default: EMPTY_METADATA.album},
+  artist: {attr: 'artist', type: 'string', default: EMPTY_METADATA.artist},
+  artwork: {attr: 'artwork', type: 'string', default: EMPTY_METADATA.artwork},
+  autoplay: {attr: 'autoplay', type: 'boolean', default: false},
+  controlsList: {attr: 'controlsList'},
+  loop: {attr: 'loop', type: 'boolean', default: false},
+  muted: {attr: 'muted', type: 'boolean', default: false},
+  preload: {attr: 'preload'},
+  src: {attr: 'src'},
+  title: {attr: 'title', type: 'string', default: EMPTY_METADATA.title},
 };
 
 /** @override */

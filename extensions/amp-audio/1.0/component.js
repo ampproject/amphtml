@@ -16,44 +16,81 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
+import {listen} from '../../../src/event-helper';
 import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '../../../src/preact';
-import {useStyles} from './component.jss';
+  setMediaSession,
+  validateMediaMetadata,
+} from '../../../src/mediasession-helper';
+
+const {useCallback, useEffect, useMemo, useRef} = Preact;
 
 /**
  * @param {!AudioDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function Audio({exampleTagNameProp, ...rest}) {
-  // Examples of state and hooks
-  // DO NOT SUBMIT: This is example code only.
-  const [exampleValue, setExampleValue] = useState(0);
-  const exampleRef = useRef(null);
-  const styles = useStyles();
+export function Audio({
+  album,
+  artist,
+  artwork,
+  autoplay,
+  controlsList,
+  loop,
+  muted,
+  preload,
+  src,
+  title,
+  ...rest
+}) {
+  const containerRef = useRef();
+  const audioRef = useRef();
 
-  useCallback(() => {
-    /* Do things */
-  }, []);
   useEffect(() => {
-    /* Do things */
-  }, []);
-  useLayoutEffect(() => {
-    /* Do things */
-  }, []);
-  useMemo(() => {
-    /* Do things */
-  }, []);
+    const unlistenPlaying = listen(audioRef.current, 'playing', () =>
+      audioPlaying()
+    );
+
+    return () => {
+      unlistenPlaying();
+    };
+  }, [audioPlaying]);
+
+  const metaData = useMemo(() => {
+    return {
+      title,
+      artist,
+      album,
+      artwork: [{src: artwork}],
+    };
+  }, [title, artist, album, artwork]);
+
+  const audioPlaying = useCallback(() => {
+    const win = audioRef.current?.ownerDocument?.defaultView;
+    const element = containerRef.current;
+
+    const playHandler = () => {
+      audioRef.current.play();
+    };
+
+    const pauseHandler = () => {
+      audioRef.current.pause();
+    };
+
+    validateMediaMetadata(element, metaData);
+    setMediaSession(win, metaData, playHandler, pauseHandler);
+  }, [metaData]);
 
   return (
-    <ContainWrapper layout size paint {...rest}>
-      {{exampleTagNameProp}}
-      <div className={`${styles.exampleContentHidden}`}>This is hidden</div>
+    <ContainWrapper ref={containerRef} layout size paint {...rest}>
+      <audio
+        ref={audioRef}
+        controls // Force controls otherwise there is no player UI.
+        src={src}
+        autoplay={autoplay}
+        loop={loop}
+        muted={muted}
+        preload={preload}
+        controlsList={controlsList}
+      ></audio>
     </ContainWrapper>
   );
 }
