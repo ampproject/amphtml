@@ -24,7 +24,6 @@ import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -114,15 +113,6 @@ export class AmpRender extends BaseElement {
 
     /** @private {?string} */
     this.src_ = null;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'amp-render'),
-      'Experiment "amp-render" is not turned on.'
-    );
-    return super.isLayoutSupported(layout);
   }
 
   /**
@@ -223,10 +213,6 @@ export class AmpRender extends BaseElement {
       'onReady': () => {
         this.toggleLoading(false);
         this.togglePlaceholder(false);
-      },
-      'onRefresh': () => {
-        this.togglePlaceholder(true);
-        this.toggleFallback(false);
       },
       'onError': () => {
         this.toggleLoading(false);
