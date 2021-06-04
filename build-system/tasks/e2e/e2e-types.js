@@ -52,6 +52,7 @@ const Key = {
   'ArrowLeft': 'ArrowLeft',
   'ArrowRight': 'ArrowRight',
   'ArrowUp': 'ArrowUp',
+  'Backspace': 'Backspace',
   'Enter': 'Enter',
   'Escape': 'Escape',
   'Tab': 'Tab',

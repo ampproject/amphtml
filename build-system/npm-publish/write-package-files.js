@@ -72,7 +72,7 @@ async function writePackageJson(extensionVersion) {
     description: `AMP HTML ${extension} Component`,
     author: 'The AMP HTML Authors',
     license: 'Apache-2.0',
-    main: './dist/component.js',
+    main: './dist/component-preact.js',
     module: './dist/component-preact.module.js',
     exports: {
       '.': './preact',
