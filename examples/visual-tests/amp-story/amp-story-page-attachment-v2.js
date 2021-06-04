@@ -58,7 +58,7 @@ module.exports = {
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
     await page.tap('.i-amphtml-story-page-attachment-label');
-    await verifySelectorsVisible(page, name, [
+    await page.waitForSelector(page, name, [
       '.i-amphtml-story-draggable-drawer-content',
     ]);
   },
@@ -77,7 +77,7 @@ module.exports = {
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
     await page.tap('.i-amphtml-story-page-attachment-label');
-    await verifySelectorsVisible(page, name, [
+    await page.waitForSelector(page, name, [
       '.i-amphtml-story-draggable-drawer-content',
     ]);
   },
