@@ -362,6 +362,42 @@ describes.realWin(
       );
     });
 
+    it('should enable attribution tracking when given `browserAdConversion`', async () => {
+      env.sandbox
+        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
+        .returns(true);
+      const openStub = env.sandbox.stub(win, 'open').returns(win);
+      const config = {
+        targets: {
+          landingPage: {
+            finalUrl: 'https://example.com',
+            behaviors: {
+              browserAdConversion: {
+                attributiondestination: 'https://example.com',
+                attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
+                attributionreportto: 'https://google.com',
+              },
+            },
+          },
+        },
+      };
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'landingPage'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(openStub).calledWithExactly(
+        'https://example.com',
+        '_blank',
+        'noopener,attributiondestination=https://example.com,attributionsourceeventid=EFnZ8GunL1xrwNTIHbXrvQ==,attributionreportto=https://google.com'
+      );
+    });
+
     it('should ping tracking URLs with sendBeacon', async () => {
       const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
