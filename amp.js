@@ -29,7 +29,6 @@ const {
  * 2. Name of the function in the source file.
  *    E.g. defaultTask()
  *    If not specified, this is assumed to be the same as the task name.
- * 3. Basename of the source file in build-system/tasks/.
  *    E.g. build-system/tasks/default-task.js
  *    If not specified, this is assumed to be the same as the task name.
  */
