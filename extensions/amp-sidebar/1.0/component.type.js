@@ -44,7 +44,7 @@ SidebarDef.SidebarToolbarProps;
 
 /**
  * @typedef {{
- *   domElement: (!Element)
+ *   domElement: (!Element),
  *   toolbar: (string|undefined),
  *   toolbarTarget: (string|undefined),
  * }}
