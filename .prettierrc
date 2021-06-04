@@ -9,12 +9,6 @@
       "options": {"parser": "json5"}
     },
     {
-      "files": "build-system/tasks/make-extension/template/**",
-      "options": {
-        "requirePragma": true
-      }
-    },
-    {
       "files": "*.md",
       "options": {
         "parser": "markdown",
@@ -25,6 +19,12 @@
     {
       "files": [".prettierrc", ".renovaterc.json", "*.json"],
       "options": {"parser": "json-stringify"}
+    },
+    {
+      "files": "build-system/tasks/make-extension/template/**",
+      "options": {
+        "requirePragma": true
+      }
     }
   ]
 }
