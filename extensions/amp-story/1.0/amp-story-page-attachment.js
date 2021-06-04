@@ -104,7 +104,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     super.buildCallback();
 
     const theme = this.element.getAttribute('theme')?.toLowerCase();
-    const drawerTheme = this.element.getAttribute('cta-drawer-theme')?.toLowerCase();
+    const drawerTheme = this.element
+      .getAttribute('cta-drawer-theme')
+      ?.toLowerCase();
     if (isPageAttachmentUiV2ExperimentOn(this.win)) {
       if (drawerTheme) {
         this.headerEl_.setAttribute('theme', drawerTheme);
