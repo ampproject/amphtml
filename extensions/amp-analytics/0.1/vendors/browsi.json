@@ -1,5 +1,9 @@
 {
-  "transport": {"beacon": true, "xhrpost": true, "image": false},
+  "transport": {
+    "beacon": true,
+    "xhrpost": true,
+    "image": false
+  },
   "requests": {
     "host": "https://events.browsiprod.com/events/amp",
     "base": "${host}?pk=${pubKey}&sk=${siteKey}&et=${type}&pvid=PAGE_VIEW_ID_64&aid=${ampdocUrl}&now=${timestamp}",

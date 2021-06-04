@@ -483,7 +483,14 @@ async function sweepExperiments() {
     ];
 
     getStdoutThrowOnError(
-      `./node_modules/prettier/bin-prettier.js --write ${modified.join(' ')}`
+      `./node_modules/prettier/bin-prettier.js --write ${modified
+        .filter(
+          (filename) =>
+            // we write JSON with 2 spaces, so it's already formatted as
+            // prettier parser `json-stringify`
+            !filename.endsWith('.json')
+        )
+        .join(' ')}`
     );
 
     for (const line of gitCommitSingleExperiment(id, workItem, modified)) {

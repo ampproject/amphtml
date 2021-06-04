@@ -27,7 +27,12 @@
     "trackCompletion": {
       "on": "scroll",
       "scrollSpec": {
-        "verticalBoundaries": [25, 50, 75, 100]
+        "verticalBoundaries": [
+          25,
+          50,
+          75,
+          100
+        ]
       },
       "request": "completion"
     }

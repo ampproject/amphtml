@@ -15,7 +15,11 @@
   "triggers": {
     "triggerName": {
       "on": "visible",
-      "request": ["ampstart", "pageload", "pagedcl"]
+      "request": [
+        "ampstart",
+        "pageload",
+        "pagedcl"
+      ]
     },
     "pageview": {
       "on": "ini-load",

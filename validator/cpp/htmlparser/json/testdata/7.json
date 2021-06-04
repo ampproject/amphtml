@@ -7,7 +7,11 @@
   "objects": [
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for Tennessee",
       "district": null,
@@ -55,7 +59,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for Maine",
       "district": null,
@@ -103,7 +111,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for Texas",
       "district": null,
@@ -151,7 +163,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for Illinois",
       "district": null,
@@ -199,7 +215,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for Wyoming",
       "district": null,
@@ -247,7 +267,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for South Carolina",
       "district": null,
@@ -295,7 +319,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for Oklahoma",
       "district": null,
@@ -343,7 +371,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for Kentucky",
       "district": null,
@@ -391,7 +423,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for Rhode Island",
       "district": null,
@@ -439,7 +475,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for Kansas",
       "district": null,
@@ -487,7 +527,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for West Virginia",
       "district": null,
@@ -534,7 +578,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Massachusetts",
       "district": null,
@@ -580,7 +628,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for New Mexico",
       "district": null,
@@ -628,7 +680,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for Louisiana",
       "district": null,
@@ -675,7 +731,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Michigan",
       "district": null,
@@ -722,7 +782,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for Virginia",
       "district": null,
@@ -770,7 +834,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Idaho",
       "district": null,
@@ -817,7 +885,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for New Hampshire",
       "district": null,
@@ -865,7 +937,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Oregon",
       "district": null,
@@ -913,7 +989,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Delaware",
       "district": null,
@@ -961,7 +1041,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Colorado",
       "district": null,
@@ -1008,7 +1092,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Arkansas",
       "district": null,
@@ -1054,7 +1142,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Montana",
       "district": null,
@@ -1101,7 +1193,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for New Jersey",
       "district": null,
@@ -1148,7 +1244,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Alaska",
       "district": null,
@@ -1194,7 +1294,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Senior Senator for Georgia",
       "district": null,
@@ -1240,7 +1344,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Iowa",
       "district": null,
@@ -1286,7 +1394,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for North Carolina",
       "district": null,
@@ -1332,7 +1444,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for South Dakota",
       "district": null,
@@ -1378,7 +1494,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [114, 115, 116],
+      "congress_numbers": [
+        114,
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Nebraska",
       "district": null,
@@ -1424,7 +1544,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Idaho",
       "district": null,
@@ -1471,7 +1595,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Iowa",
       "district": null,
@@ -1519,7 +1647,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Vermont",
       "district": null,
@@ -1567,7 +1699,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Alaska",
       "district": null,
@@ -1615,7 +1751,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Washington",
       "district": null,
@@ -1663,7 +1803,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for New York",
       "district": null,
@@ -1710,7 +1854,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Alabama",
       "district": null,
@@ -1758,7 +1906,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Oregon",
       "district": null,
@@ -1806,7 +1958,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Missouri",
       "district": null,
@@ -1854,7 +2010,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Arkansas",
       "district": null,
@@ -1902,7 +2062,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for North Carolina",
       "district": null,
@@ -1950,7 +2114,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Junior Senator for Kansas",
       "district": null,
@@ -1998,7 +2166,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Junior Senator for Ohio",
       "district": null,
@@ -2045,7 +2217,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Junior Senator for Pennsylvania",
       "district": null,
@@ -2093,7 +2269,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Junior Senator for Maryland",
       "district": null,
@@ -2140,7 +2320,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for South Dakota",
       "district": null,
@@ -2188,7 +2372,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Colorado",
       "district": null,
@@ -2236,7 +2424,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Indiana",
       "district": null,
@@ -2283,7 +2475,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Junior Senator for Oklahoma",
       "district": null,
@@ -2329,7 +2525,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Junior Senator for South Carolina",
       "district": null,
@@ -2377,7 +2577,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Connecticut",
       "district": null,
@@ -2425,7 +2629,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Florida",
       "district": null,
@@ -2473,7 +2681,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Junior Senator for Kentucky",
       "district": null,
@@ -2521,7 +2733,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for North Dakota",
       "district": null,
@@ -2569,7 +2785,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Utah",
       "district": null,
@@ -2616,7 +2836,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Wisconsin",
       "district": null,
@@ -2664,7 +2888,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Hawaii",
       "district": null,
@@ -2711,7 +2939,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Junior Senator for Illinois",
       "district": null,
@@ -2757,7 +2989,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Junior Senator for California",
       "district": null,
@@ -2803,7 +3039,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Junior Senator for Louisiana",
       "district": null,
@@ -2849,7 +3089,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Junior Senator for New Hampshire",
       "district": null,
@@ -2895,7 +3139,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116, 117],
+      "congress_numbers": [
+        115,
+        116,
+        117
+      ],
       "current": true,
       "description": "Senior Senator for Nevada",
       "district": null,
@@ -2941,7 +3189,10 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116],
+      "congress_numbers": [
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Alabama",
       "district": null,
@@ -2987,7 +3238,10 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116],
+      "congress_numbers": [
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Minnesota",
       "district": null,
@@ -3033,7 +3287,10 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [115, 116],
+      "congress_numbers": [
+        115,
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Mississippi",
       "district": null,
@@ -3079,7 +3336,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Washington",
       "district": null,
@@ -3126,7 +3387,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for Delaware",
       "district": null,
@@ -3173,7 +3438,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for California",
       "district": null,
@@ -3220,7 +3489,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for Michigan",
       "district": null,
@@ -3267,7 +3540,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Wisconsin",
       "district": null,
@@ -3314,7 +3591,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Tennessee",
       "district": null,
@@ -3360,7 +3641,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for Ohio",
       "district": null,
@@ -3407,7 +3692,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for Maryland",
       "district": null,
@@ -3454,7 +3743,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for New Jersey",
       "district": null,
@@ -3501,7 +3794,11 @@
     },
     {
       "caucus": "Democrat",
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Vermont",
       "district": null,
@@ -3548,7 +3845,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for Mississippi",
       "district": null,
@@ -3594,7 +3895,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Connecticut",
       "district": null,
@@ -3641,7 +3946,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Hawaii",
       "district": null,
@@ -3688,7 +3997,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for New York",
       "district": null,
@@ -3735,7 +4048,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for Minnesota",
       "district": null,
@@ -3781,7 +4098,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for Montana",
       "district": null,
@@ -3828,7 +4149,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for Pennsylvania",
       "district": null,
@@ -3875,7 +4200,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Rhode Island",
       "district": null,
@@ -3922,7 +4251,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Wyoming",
       "district": null,
@@ -3969,7 +4302,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for New Mexico",
       "district": null,
@@ -4015,7 +4352,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for West Virginia",
       "district": null,
@@ -4062,7 +4403,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for Arizona",
       "district": null,
@@ -4108,7 +4453,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for Massachusetts",
       "district": null,
@@ -4155,7 +4504,11 @@
     },
     {
       "caucus": "Democrat",
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Maine",
       "district": null,
@@ -4202,7 +4555,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for North Dakota",
       "district": null,
@@ -4248,7 +4605,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Senior Senator for Nebraska",
       "district": null,
@@ -4295,7 +4656,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Texas",
       "district": null,
@@ -4341,7 +4706,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Virginia",
       "district": null,
@@ -4388,7 +4757,9 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116],
+      "congress_numbers": [
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Arizona",
       "district": null,
@@ -4434,7 +4805,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Nevada",
       "district": null,
@@ -4480,7 +4855,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Florida",
       "district": null,
@@ -4526,7 +4905,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Indiana",
       "district": null,
@@ -4572,7 +4955,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Missouri",
       "district": null,
@@ -4618,7 +5005,11 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116, 117, 118],
+      "congress_numbers": [
+        116,
+        117,
+        118
+      ],
       "current": true,
       "description": "Junior Senator for Utah",
       "district": null,
@@ -4664,7 +5055,9 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [116],
+      "congress_numbers": [
+        116
+      ],
       "current": true,
       "description": "Junior Senator for Georgia",
       "district": null,

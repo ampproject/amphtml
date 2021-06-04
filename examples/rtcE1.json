@@ -1,6 +1,10 @@
 {
   "targeting": {
-    "hb_pb": ["1.00"],
-    "hb_cu": ["http://localhost:8000/examples/rtc-vendor-1.html"]
+    "hb_pb": [
+      "1.00"
+    ],
+    "hb_cu": [
+      "http://localhost:8000/examples/rtc-vendor-1.html"
+    ]
   }
 }

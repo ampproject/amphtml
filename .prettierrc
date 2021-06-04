@@ -24,10 +24,6 @@
     },
     {
       "files": [".prettierrc", ".renovaterc.json", "*.json"],
-      "options": {"parser": "json"}
-    },
-    {
-      "files": "build-system/compile/bundles.config.extensions.json",
       "options": {"parser": "json-stringify"}
     }
   ]
