@@ -177,12 +177,15 @@ async function insertExtensionBundlesConfig(
     ({name}) => name === bundle.name
   );
 
+  const {latestVersion, name, version, ...rest} = bundle;
   extensionBundles.push({
-    ...bundle,
+    name,
+    version,
     latestVersion:
       (existingOrNull && existingOrNull.latestVersion) ||
-      bundle.latestVersion ||
-      bundle.version,
+      latestVersion ||
+      version,
+    ...rest,
   });
 
   await fs.mkdirp(path.dirname(destination));
