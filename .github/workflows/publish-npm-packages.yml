@@ -40,13 +40,13 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: Get latest scripts
         run: |
-          wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/build-npm-binaries.js" -O build-npm-binaries.js
-          wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/write-package-files.js" -O write-package-files.js
+          wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/build-npm-binaries.js" -O ./build-system/npm-publish/build-npm-binaries.js
+          wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/write-package-files.js" -O ./build-system/npm-publish/write-package-files.js
       - name: Build package
         run: |
           npm install
-          node build-npm-binaries.js ${{ matrix.extension }}
-          node write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }}
+          node ./build-system/npm-publish/build-npm-binaries.js ${{ matrix.extension }}
+          node ./build-system/npm-publish/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }}
       - name: Publish v1
         run: npm publish ./extensions/${{ matrix.extension }}/1.0 --access public --tag ${{ github.event.inputs.tag }}
         env:
