@@ -200,6 +200,12 @@
   {"name": "amp-facebook-like", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-facebook-page", "version": "0.1", "latestVersion": "0.1"},
   {
+    "name": "amp-facebook-page",
+    "version": "1.0",
+    "options": {"hasCss": true},
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-fit-text",
     "version": "0.1",
     "latestVersion": "0.1",
