@@ -15,15 +15,16 @@
  */
 
 import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {findSentences, markTextRangeList} from './findtext';
+import {isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
-import {moveLayoutRect} from '../../../src/layout-rect';
-import {once} from '../../../src/utils/function';
-import {parseJson} from '../../../src/json';
-import {parseQueryString} from '../../../src/url';
+import {moveLayoutRect} from '../../../src/core/math/layout-rect';
+import {once} from '../../../src/core/types/function';
+import {parseJson} from '../../../src/core/types/object/json';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
-import {whenDocumentReady} from '../../../src/document-ready';
+import {whenDocumentReady} from '../../../src/core/document-ready';
 
 /**
  * The message name sent by viewers to dismiss highlights.
@@ -85,6 +86,12 @@ const SCROLL_ANIMATION_HEIGHT = 500;
  * @type {number}
  */
 const PAGE_TOP_MARGIN = 80;
+
+/**
+ * Text fragment prefix to add to the URL
+ * @type {string}
+ */
+const TEXT_FRAGMENT_PREFIX = ':~:';
 
 /**
  * Returns highlight param in the URL hash.
@@ -150,9 +157,46 @@ export class HighlightHandler {
     /** @private {?Array<!Element>} */
     this.highlightedNodes_ = null;
 
-    whenDocumentReady(ampdoc.win.document).then(() => {
-      this.initHighlight_(highlightInfo);
-    });
+    if (
+      'fragmentDirective' in document &&
+      isExperimentOn(ampdoc.win, 'use-text-fragments-for-highlights')
+    ) {
+      ampdoc
+        .whenFirstVisible()
+        .then(() => this.highlightUsingTextFragments_(highlightInfo));
+    } else {
+      whenDocumentReady(ampdoc.win.document).then(() => {
+        this.initHighlight_(highlightInfo);
+      });
+    }
+  }
+
+  /**
+   * @param {!HighlightInfoDef} highlightInfo
+   * @private
+   */
+  highlightUsingTextFragments_(highlightInfo) {
+    const {sentences} = highlightInfo;
+    if (!sentences?.length) {
+      return;
+    }
+    const fragment = sentences
+      .map((text) => 'text=' + encodeURIComponent(text))
+      .join('&');
+    this.updateUrlWithTextFragment_(fragment);
+  }
+
+  /**
+   * @param {string} fragment
+   * @private
+   */
+  updateUrlWithTextFragment_(fragment) {
+    const {hash} = this.ampdoc_.win.location;
+    if (hash) {
+      this.ampdoc_.win.location.replace(hash + TEXT_FRAGMENT_PREFIX + fragment);
+    } else {
+      this.ampdoc_.win.location.replace('#' + TEXT_FRAGMENT_PREFIX + fragment);
+    }
   }
 
   /**
@@ -285,7 +329,7 @@ export class HighlightHandler {
       // top and bottom returned by getLayoutRect includes the header padding
       // size. We need to cancel the padding to calculate the positions in
       // document.body like Viewport.animateScrollIntoView does.
-      const {top, bottom} = moveLayoutRect(
+      const {bottom, top} = moveLayoutRect(
         viewport.getLayoutRect(nodes[i]),
         0,
         -paddingTop

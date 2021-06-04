@@ -25,13 +25,11 @@ limitations under the License.
 
 # amp-image-lightbox
 
-## Behavior
+## Usage
 
-The `amp-image-lightbox` component provides a lightbox experience for a specified image. When the user clicks the image, the image displays in the center of a full-viewport lightbox.
-
-#### Typical usage
-
-The following is a typical example using an `amp-image-lightbox`:
+The `amp-image-lightbox` component provides a lightbox experience for a
+specified image. When the user clicks the image, the image displays in the
+center of a full-viewport lightbox.
 
 ```html
 <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
@@ -45,16 +43,34 @@ The following is a typical example using an `amp-image-lightbox`:
 ></amp-img>
 ```
 
-When the user clicks the image, the `<amp-img>` activates the `<amp-image-lightbox>` via the [`on`](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#on) action, which references the ID of the `<amp-image-lightbox>` element (i.e., `lightbox1`). The `<amp-image-lightbox>` then displays the image in the center of the full-viewport lightbox. Note that the `amp-image-lightbox` element itself must be empty and must be set to `layout=nodisplay`.
+When the user clicks the image, the `<amp-img>` activates the
+`<amp-image-lightbox>` via the
+[`on`](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#on)
+action, which references the ID of the `<amp-image-lightbox>` element (i.e.,
+`lightbox1`). The `<amp-image-lightbox>` then displays the image in the center
+of the full-viewport lightbox. Note that the `amp-image-lightbox` element itself
+must be empty and must be set to `layout=nodisplay`.
 
-Among other things the `amp-image-lightbox` allows the following user manipulations: zooming, panning, showing/hiding of the description.
-Pressing the escape key on a keyboard closes the lightbox.
+Among other things the `amp-image-lightbox` allows the following user
+manipulations: zooming, panning, showing/hiding of the description. Pressing the
+escape key on a keyboard closes the lightbox.
 
-_Using a single lightbox for multiple images_
+[tip type="read-on"]
 
-You can use the same `amp-image-lightbox` for more than one image on the AMP page.
+To show a gallery of images in a lightbox, there's also the
+[`<amp-lightbox-gallery>`](../amp-lightbox-gallery/amp-lightbox-gallery.md)
+component. To display other types of elements in a lightbox, use
+[`<amp-lightbox>`](../amp-lightbox/amp-lightbox.md).
 
-In this example, two images display: a cat and a frog. When the user clicks either image, the image displays in the lightbox.
+[/tip]
+
+### Use a single lightbox for multiple images
+
+You can use the same `amp-image-lightbox` for more than one image on the AMP
+page.
+
+In this example, two images display: a cat and a frog. When the user clicks
+either image, the image displays in the lightbox.
 
 ```html
 <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
@@ -80,14 +96,17 @@ In this example, two images display: a cat and a frog. When the user clicks eith
 ></amp-img>
 ```
 
-### Captions
+### Add captions
 
-Optionally, you can display captions at the bottom of the viewport for the image. The `<amp-image-lightbox>` components determines the content for the caption as follows:
+Optionally, you can display captions at the bottom of the viewport for the
+image. The `<amp-image-lightbox>` components determines the content for the
+caption as follows:
 
-1.  If the image is in a `figure` tag, the content of the `<figcaption>` displays for the caption.
-2.  If the image specifies an `aria-describedby` attribute, the content of the element whose ID is specified by the `aria-describedby`attribute displays for the caption.
-
-_Examples: Using captions_
+1.  If the image is in a `figure` tag, the content of the `<figcaption>`
+    displays for the caption.
+1.  If the image specifies an `aria-describedby` attribute, the content of the
+    element whose ID is specified by the `aria-describedby` attribute displays
+    for the caption.
 
 ```html
 <!-- Captions via figcaption -->
@@ -122,50 +141,34 @@ _Examples: Using captions_
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>layout (required)</strong></td>
-    <td>Must be set to <code>nodisplay</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>id (required)</strong></td>
-    <td>The ID for the lightbox element that's used as a target for the image's <code>on</code> action.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-close-button-aria-label (optional)</strong></td>
-    <td>An ARIA label that you can use for a close button.</td>
-  </tr>
-</table>
+### `layout`
 
-```html
-<amp-image-lightbox
-  id="image-lightbox1"
-  layout="nodisplay"
-  data-close-button-aria-label="Close"
-></amp-image-lightbox>
-```
+Must be set to `nodisplay`.
+
+### `id`
+
+The ID for the lightbox element that's used as a target for the image's `on`
+action.
+
+### `data-close-button-aria-label` (optional)
+
+An ARIA label that you can use for a close button.
+
+## Actions
+
+### `open` (default)
+
+Opens the image lightbox with the source image being the one that triggered the
+action.
 
 ## Styling
 
 You can style the `amp-image-lightbox` component with standard CSS. Some of the
-properties that can be styled are `background` and `color`. The `amp-image-lightbox-caption` class is also available to style the caption
+properties that can be styled are `background` and `color`. The
+`amp-image-lightbox-caption` class is also available to style the caption
 section.
-
-## Actions
-
-The `amp-image-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
-
-<table>
-  <tr>
-    <th width="20%">Action</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>open (default)</td>
-    <td>Opens the image lightbox with the source image being the one that triggered the action.</td>
-  </tr>
-</table>
 
 ## Validation
 
-See [amp-image-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/validator-amp-image-lightbox.protoascii) in the AMP validator specification.
+See [`amp-image-lightbox` rules](validator-amp-image-lightbox.protoascii)
+in the AMP validator specification.

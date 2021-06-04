@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Animation} from '../animation';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {
@@ -27,12 +28,13 @@ import {
   setStyles,
   toggle,
 } from '../style';
-import {closest, domOrderComparator, matches} from '../dom';
+import {closest, matches} from '../core/dom/query';
 import {dev, user} from '../log';
-import {endsWith} from '../string';
+import {domOrderComparator} from '../dom';
+import {endsWith} from '../core/types/string';
 import {getMode} from '../mode';
-import {isExperimentOn} from '../experiments';
-import {remove} from '../utils/array';
+
+import {remove} from '../core/types/array';
 
 const TAG = 'FixedLayer';
 
@@ -236,9 +238,6 @@ export class FixedLayer {
    * @visibleForTesting
    */
   observeHiddenMutations() {
-    if (!isExperimentOn(this.ampdoc.win, 'hidden-mutation-observer')) {
-      return;
-    }
     this.initHiddenObserver_();
   }
 
@@ -466,8 +465,8 @@ export class FixedLayer {
               const {element, forceTransfer} = fe;
               const style = computedStyle(win, element);
 
-              const {offsetWidth, offsetHeight, offsetTop} = element;
-              const {position = '', display = '', bottom, zIndex} = style;
+              const {offsetHeight, offsetTop, offsetWidth} = element;
+              const {bottom, display = '', position = '', zIndex} = style;
               const opacity = parseFloat(style.opacity);
               const transform =
                 style[getVendorJsPropertyName(style, 'transform')];
@@ -577,7 +576,6 @@ export class FixedLayer {
    * @param {!Node} root
    * @param {boolean=} opt_lightboxMode
    * @private
-   * @noinline
    */
   trySetupSelectors_(root, opt_lightboxMode) {
     try {
@@ -888,6 +886,36 @@ export class FixedLayer {
       }
     }
   }
+
+  /**
+   * @param {number} paddingTop
+   * @param {number} lastPaddingTop
+   * @param {number} duration
+   * @param {string} curve
+   * @param {boolean} transient
+   * @return {!Promise}
+   */
+  animateFixedElements(paddingTop, lastPaddingTop, duration, curve, transient) {
+    this.updatePaddingTop(paddingTop, transient);
+    if (duration <= 0) {
+      return Promise.resolve();
+    }
+    // Add transit effect on position fixed element
+    const tr = (time) => {
+      return lastPaddingTop - paddingTop + (paddingTop - lastPaddingTop) * time;
+    };
+    return Animation.animate(
+      this.ampdoc.getRootNode(),
+      (time) => {
+        const p = tr(time);
+        this.transformMutate(`translateY(${p}px)`);
+      },
+      duration,
+      curve
+    ).thenAlways(() => {
+      this.transformMutate(null);
+    });
+  }
 }
 
 /**
@@ -1071,9 +1099,8 @@ class TransferLayerBody {
     if (!fe.placeholder) {
       // Never been transfered before: ensure that it's properly configured.
       setStyle(element, 'pointer-events', 'initial');
-      const placeholder = (fe.placeholder = this.doc_.createElement(
-        'i-amphtml-fpa'
-      ));
+      const placeholder = (fe.placeholder =
+        this.doc_.createElement('i-amphtml-fpa'));
       toggle(placeholder, false);
       placeholder.setAttribute('i-amphtml-fixedid', fe.id);
     }

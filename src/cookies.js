@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import {endsWith} from './string';
-import {
-  getSourceOrigin,
-  isProxyOrigin,
-  parseUrlDeprecated,
-  tryDecodeUriComponent,
-} from './url';
+import {endsWith} from './core/types/string';
+import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from './url';
+import {tryDecodeUriComponent} from './core/types/string/url';
 import {urls} from './config';
 import {userAssert} from './log';
 
@@ -68,7 +64,6 @@ export function getCookie(win, name) {
  * This method should not be inlined to prevent TryCatch deoptimization.
  * @param {!Window} win
  * @return {string}
- * @noinline
  */
 function tryGetDocumentCookie_(win) {
   try {

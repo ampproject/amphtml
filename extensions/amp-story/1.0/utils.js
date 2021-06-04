@@ -16,18 +16,20 @@
 
 import {Services} from '../../../src/services';
 import {
-  closestAncestorElementBySelector,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {createShadowRoot} from '../../../src/shadow-embed';
-import {getMode} from '../../../src/mode';
-import {
+  assertHttpsUrl,
   getSourceOrigin,
   isProxyOrigin,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {setStyle} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+import {
+  closestAncestorElementBySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/core/dom/query';
+import {createShadowRoot} from '../../../src/shadow-embed';
+import {dev, user, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+
+import {setStyle, toggle} from '../../../src/style';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -42,7 +44,6 @@ export function timeStrToMillis(time, fallbackMs = NaN) {
   const units = match ? match[2] : undefined;
 
   if (!match || match.length !== 3 || (units !== 's' && units !== 'ms')) {
-    user().warn('AMP-STORY', 'Invalid time string', time);
     return fallbackMs;
   }
 
@@ -70,7 +71,7 @@ export function hasTapAction(el) {
  * @return {!ClientRect}
  */
 export function unscaledClientRect(el) {
-  const {width, height, left, top} = el./*OK*/ getBoundingClientRect();
+  const {height, left, top, width} = el./*OK*/ getBoundingClientRect();
 
   const scaleFactorX = width == 0 ? 1 : width / el./*OK*/ offsetWidth;
   const scaleFactorY = height == 0 ? 1 : height / el./*OK*/ offsetHeight;
@@ -149,7 +150,7 @@ export function getRGBFromCssColorValue(cssValue) {
  * @return {string} '#fff' or '#000'
  */
 export function getTextColorForRGB(rgb) {
-  const {r, g, b} = rgb;
+  const {b, g, r} = rgb;
   // Calculates the relative luminance L.
   // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
   const getLinearRGBValue = (x) => {
@@ -259,6 +260,28 @@ export function shouldShowStoryUrlInfo(viewer) {
 }
 
 /**
+ * Retrieves an attribute src from the <amp-story> element.
+ * @param {!Element} element
+ * @param {string} attribute
+ * @param {string=} warn
+ * @return {?string}
+ */
+export function getStoryAttributeSrc(element, attribute, warn = false) {
+  const storyEl = dev().assertElement(
+    closestAncestorElementBySelector(element, 'AMP-STORY')
+  );
+  const attrSrc = storyEl && storyEl.getAttribute(attribute);
+
+  if (attrSrc) {
+    assertHttpsUrl(attrSrc, storyEl, attribute);
+  } else if (warn) {
+    user().warn('AMP-STORY', `Expected ${attribute} attribute on <amp-story>`);
+  }
+
+  return attrSrc;
+}
+
+/**
  * The attribute name for text background color
  * @private @const {string}
  */
@@ -285,4 +308,18 @@ export function setTextBackgroundColor(element) {
     const color = el.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
     setStyle(el, 'background-color', color);
   });
+}
+
+/**
+ * Click a clone of the anchor in the context of the light dom.
+ * Used to apply linker logic on shadow-dom anchors.
+ * @param {!Element} anchorElement
+ * @param {!Element} domElement element from the light dom
+ */
+export function triggerClickFromLightDom(anchorElement, domElement) {
+  const outerAnchor = anchorElement.cloneNode();
+  toggle(outerAnchor, false);
+  domElement.appendChild(outerAnchor);
+  outerAnchor.click();
+  outerAnchor.remove();
 }

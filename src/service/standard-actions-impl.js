@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-constants';
+import {ActionTrust} from '../core/constants/action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, user, userAssert} from '../log';
-import {
-  getAmpdoc,
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
-import {isFiniteNumber, toWin} from '../types';
-import {startsWith} from '../string';
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
+import {isFiniteNumber} from '../core/types';
+import {toWin} from '../core/window';
 import {tryFocus} from '../dom';
 
 /**
@@ -60,23 +56,17 @@ const AMP_CSS_RE = /^i-amphtml-/;
 /**
  * This service contains implementations of some of the most typical actions,
  * such as hiding DOM elements.
- * @implements {../service.EmbeddableService}
- * @private Visible for testing.
+ * @visibleForTesting
  */
 export class StandardActions {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Window=} opt_win
    */
-  constructor(ampdoc, opt_win) {
-    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
-
+  constructor(ampdoc) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    const context = opt_win
-      ? opt_win.document.documentElement
-      : ampdoc.getHeadNode();
+    const context = ampdoc.getHeadNode();
 
     /** @const @private {!./mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(ampdoc);
@@ -87,19 +77,6 @@ export class StandardActions {
     // Explicitly not setting `Action` as a member to scope installation to one
     // method and for bundle size savings. 💰
     this.installActions_(Services.actionServiceForDoc(context));
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      'standard-actions',
-      new StandardActions(ampdoc, embedWin)
-    );
   }
 
   /**
@@ -147,13 +124,15 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
       return null;
     }
-    const {node, method, args} = invocation;
-    const win = (node.ownerDocument || node).defaultView;
+    const {args, method, node} = invocation;
+    const win = getWin(node);
     switch (method) {
       case 'pushState':
       case 'setState':
         const element =
-          node.nodeType === Node.DOCUMENT_NODE ? node.documentElement : node;
+          node.nodeType === Node.DOCUMENT_NODE
+            ? /** @type {!Document} */ (node).documentElement
+            : dev().assertElement(node);
         return Services.bindForDocOrNull(element).then((bind) => {
           userAssert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
@@ -200,12 +179,13 @@ export class StandardActions {
    * @private Visible to tests only.
    */
   handleNavigateTo_(invocation) {
-    const {node, caller, method, args} = invocation;
-    const win = (node.ownerDocument || node).defaultView;
+    const {args, caller, method, node} = invocation;
+    const win = getWin(node);
     // Some components have additional constraints on allowing navigation.
     let permission = Promise.resolve();
-    if (startsWith(caller.tagName, 'AMP-')) {
-      permission = caller.getImpl().then((impl) => {
+    if (caller.tagName.startsWith('AMP-')) {
+      const ampElement = /** @type {!AmpElement} */ (caller);
+      permission = ampElement.getImpl().then((impl) => {
         if (typeof impl.throwIfCannotNavigate == 'function') {
           impl.throwIfCannotNavigate();
         }
@@ -221,7 +201,7 @@ export class StandardActions {
         );
       },
       /* onrejected */ (e) => {
-        user().error(TAG, e.message);
+        user().error(TAG, e);
       }
     );
   }
@@ -239,7 +219,7 @@ export class StandardActions {
    */
   handleCloseOrNavigateTo_(invocation) {
     const {node} = invocation;
-    const win = (node.ownerDocument || node).defaultView;
+    const win = getWin(node);
 
     // Don't allow closing if embedded in iframe or does not have an opener or
     // embedded in a multi-doc shadowDOM case.
@@ -322,9 +302,10 @@ export class StandardActions {
     const target = dev().assertElement(invocation.node);
 
     if (target.classList.contains('i-amphtml-element')) {
+      const ampElement = /** @type {!AmpElement} */ (target);
       this.mutator_.mutateElement(
-        target,
-        () => target./*OK*/ collapse(),
+        ampElement,
+        () => ampElement./*OK*/ collapse(),
         // It is safe to skip measuring, because `mutator-impl.collapseElement`
         // will set the size of the element as well as trigger a remeasure of
         // everything below the collapsed element.
@@ -394,7 +375,8 @@ export class StandardActions {
    */
   handleShowSync_(target, autofocusElOrNull) {
     if (target.classList.contains('i-amphtml-element')) {
-      target./*OK*/ expand();
+      const ampElement = /** @type {!AmpElement} */ (target);
+      ampElement./*OK*/ expand();
     } else {
       toggle(target, true);
     }
@@ -449,6 +431,16 @@ export class StandardActions {
 
     return null;
   }
+}
+
+/**
+ * @param {!Node} node
+ * @return {!Window}
+ */
+function getWin(node) {
+  return toWin(
+    (node.ownerDocument || /** @type {!Document} */ (node)).defaultView
+  );
 }
 
 /**

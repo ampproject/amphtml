@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {
@@ -23,12 +24,12 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
+import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -61,6 +62,9 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -137,9 +141,12 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     });
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      el.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(el, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
+
+    this.pauseHelper_.updatePlaying(true);
+
     return loaded;
   }
 
@@ -157,17 +164,15 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true;
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */

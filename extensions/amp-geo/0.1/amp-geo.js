@@ -28,14 +28,14 @@
  *      "iceland": [ "is" ]
  *    }
  *  }
- *  </scirpt>
+ *  </script>
  * </amp-geo>
  * </code>
  *
  * the amp-geo element's layout type is nodisplay.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 
 /**
@@ -50,10 +50,11 @@ import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
 import {GEO_IN_GROUP} from './amp-geo-in-group';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
+import {isArray, isObject} from '../../../src/core/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
+
+import {tryParseJson} from '../../../src/core/types/object/json';
 import {urls} from '../../../src/config';
 
 /** @const */
@@ -98,6 +99,11 @@ const mode = {
 export let GeoDef;
 
 export class AmpGeo extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -114,11 +120,6 @@ export class AmpGeo extends AMP.BaseElement {
     this.matchedGroups_ = [];
     /** @private {Array<string>} */
     this.definedGroups_ = [];
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */
@@ -374,9 +375,9 @@ export class AmpGeo extends AMP.BaseElement {
    */
   matchCountryGroups_(config) {
     // ISOCountryGroups are optional but if specified at least one must exist
-    const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */ (config[
-      'ISOCountryGroups'
-    ]);
+    const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */ (
+      config['ISOCountryGroups']
+    );
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
       // TODO(zhouyx@): Change the name with generic ISO subdivision support

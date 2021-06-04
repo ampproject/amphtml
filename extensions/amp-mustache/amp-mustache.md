@@ -37,15 +37,15 @@ limitations under the License.
 
 Mustache is a logic-less template syntax. See [Mustache specification](http://mustache.github.io/mustache.5.html) for more details. Some of the core Mustache tags are:
 
-- `{{variable}}`: A variable tag. It outputs the the HTML-escaped value of a variable.
-- `{{#section}} {{/section}}`: A section tag. It can test the existence of a variable and iterate over it if it's an array.
-- `{{^section}} {{/section}}`: An inverted tag. It can test the non-existence of a variable.
-- `{{{unescaped}}}`: Unescaped HTML. It's restricted in the markup it may output (see "Restrictions" below).
+-   `{{variable}}`: A variable tag. It outputs the the HTML-escaped value of a variable.
+-   `{{#section}} {{/section}}`: A section tag. It can test the existence of a variable and iterate over it if it's an array.
+-   `{{^section}} {{/section}}`: An inverted tag. It can test the non-existence of a variable.
+-   `{{{unescaped}}}`: Unescaped HTML. It's restricted in the markup it may output (see "Restrictions" below).
 
 ## Usage
 
 The `amp-mustache` template has to be defined and used according to the
-[AMP Template Spec](../../spec/amp-html-templates.md).
+[AMP Template Spec](../../docs/spec/amp-html-templates.md).
 
 First, the `amp-mustache` has to be declared/loaded like this:
 
@@ -87,10 +87,10 @@ How templates are discovered, when they are rendered, how data is provided is al
 Like all AMP templates, `amp-mustache` templates are required to be well-formed DOM fragments. This means
 that among other things, you can't use `amp-mustache` to:
 
-- Calculate tag name. E.g. `<{{tagName}}>` is not allowed.
-- Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
+-   Calculate tag name. E.g. `<{{tagName}}>` is not allowed.
+-   Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
 
-The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `b`, `br`, `caption`, `col`, `colgroup`, `code`, `del`, `div`, `em`, `hr`, `i`, `ins`, `li`, `mark`, `ol`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`, `ul`.
+The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `amp-list`, `b`, `br`, `caption`, `col`, `colgroup`, `code`, `del`, `div`, `em`, `h1`, `h2`, `h3`, `hr`, `i`, `ins`, `li`, `mark`, `ol`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`, `ul`.
 
 ### Sanitization
 
@@ -179,8 +179,6 @@ When using `amp-mustache` to calculate attribute values, quote escaping can be a
 
 Using HTML character codes in the `{{foo}}` or `{{bar}}` variables won't work since Mustache will HTML escape `&` characters (e.g. `&quot;` -> `&amp;quot;`). One workaround is to use facsimile characters e.g. &prime; (`&prime;`) and &Prime; (`&Prime;`).
 
-There's an [open proposal](https://github.com/ampproject/amphtml/issues/8395) to perform this substitution in `amp-mustache` instead. Please comment on the issue if you'd like to support it.
-
 ### HTML entities
 
 HTML entities are not preserved in `<template>` elements.
@@ -191,4 +189,4 @@ Workarounds include replacing strings like {% raw %}`{{`{% endraw %} with differ
 
 ## Validation
 
-See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/validator-amp-mustache.protoascii) in the AMP validator specification.
+See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-mustache/validator-amp-mustache.protoascii) in the AMP validator specification.

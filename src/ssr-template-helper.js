@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dict} from './utils/object';
-import {isArray} from './types';
+import {dict} from './core/types/object';
+import {isArray} from './core/types';
 import {toStructuredCloneable} from './utils/xhr-utils';
 import {userAssert} from './log';
 
@@ -114,7 +114,7 @@ export class SsrTemplateHelper {
    * If SSR is supported, data is assumed to be from ssr() above.
    * @param {!Element} element
    * @param {(?JsonObject|string|undefined|!Array)} data
-   * @return {!Promise<!Element>}
+   * @return {!Promise<(!Element|!Array<!Element>)>}
    */
   applySsrOrCsrTemplate(element, data) {
     let renderTemplatePromise;

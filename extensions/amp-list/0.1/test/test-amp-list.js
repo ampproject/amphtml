@@ -15,11 +15,12 @@
  */
 
 import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AmpDocService} from '../../../../src/service/ampdoc-impl';
-import {AmpEvents} from '../../../../src/amp-events';
+import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {AmpList} from '../amp-list';
-import {Deferred} from '../../../../src/utils/promise';
+import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
+import {Deferred} from '../../../../src/core/data-structures/promise';
 import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,
@@ -66,7 +67,7 @@ describes.repeated(
             findAndRenderTemplate: env.sandbox.stub(),
             findAndRenderTemplateArray: env.sandbox.stub(),
           };
-          env.sandbox.stub(Services, 'templatesFor').returns(templates);
+          env.sandbox.stub(Services, 'templatesForDoc').returns(templates);
           env.sandbox
             .stub(AmpDocService.prototype, 'getAmpDoc')
             .returns(ampdoc);
@@ -167,14 +168,17 @@ describes.repeated(
           // Mock the actual network request.
           listMock
             .expects('fetch_')
-            .withExactArgs(!!opts.refresh, /* token */ undefined)
+            .withExactArgs(!!opts.refresh)
             .returns(Promise.resolve(fetched))
             .atLeast(1);
 
           // If "reset-on-refresh" is set, show loading/placeholder before fetch.
           if (opts.resetOnRefresh) {
             listMock.expects('togglePlaceholder').withExactArgs(true).once();
-            listMock.expects('toggleLoading').withExactArgs(true).once();
+            listMock
+              .expects('toggleLoading')
+              .withExactArgs(true, opts.resetOnRefresh)
+              .once();
           }
 
           // Stub the rendering of the template.
@@ -312,11 +316,21 @@ describes.repeated(
 
                 it('should require placeholder', () => {
                   list.getPlaceholder = () => null;
-                  allowConsoleError(() => {
-                    expect(() => list.isLayoutSupported('container')).to.throw(
-                      /amp-list with layout=container relies on a placeholder/
+                  if (variant.type === 'experiment') {
+                    allowConsoleError(() => {
+                      expect(() =>
+                        list.isLayoutSupported('container')
+                      ).to.throw(
+                        /amp-list\[layout=container\] should have a placeholder/
+                      );
+                    });
+                  } else {
+                    expect(() =>
+                      list.isLayoutSupported('container')
+                    ).to.not.throw(
+                      /amp-list\[layout=container\] should have a placeholder/
                     );
-                  });
+                  }
                 });
 
                 it('should unlock height for layout=container with successful attemptChangeHeight', () => {
@@ -463,12 +477,13 @@ describes.repeated(
             });
           });
 
-          it('should resize with viewport', () => {
+          it('should resize with viewport', async () => {
             const resize = env.sandbox.spy(list, 'attemptToFit_');
-            list.layoutCallback().then(() => {
-              list.viewport_.resize_();
-              expect(resize).to.have.been.called;
-            });
+            const itemElement = doc.createElement('div');
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+            await list.layoutCallback();
+            list.viewport_.resize_();
+            expect(resize).to.be.calledOnce;
           });
 
           // TODO(choumx, #14772): Flaky.
@@ -607,7 +622,7 @@ describes.repeated(
             });
           });
 
-          it('should set tabbindex only if the list item is not tabbable', () => {
+          it('should not override or set missing tabindex', () => {
             // A list item with a no tabindex value or tabbable child
             const nonTabbableItemElement = doc.createElement('div');
 
@@ -628,9 +643,8 @@ describes.repeated(
             ]);
 
             return list.layoutCallback().then(() => {
-              expect(nonTabbableItemElement.getAttribute('tabindex')).to.equal(
-                '0'
-              );
+              expect(nonTabbableItemElement.getAttribute('tabindex')).to.be
+                .null;
               expect(tabbableItemElement.getAttribute('tabindex')).to.equal(
                 '4'
               );
@@ -756,7 +770,7 @@ describes.repeated(
             it('should attemptChangeHeight initial content', async () => {
               const initialContent = doc.createElement('div');
               initialContent.setAttribute('role', 'list');
-              initialContent.style.height = '1337px';
+              initialContent.setAttribute('style', 'height: 123px');
 
               // Initial content must be set before buildCallback(), so use
               // a new test AmpList instance.
@@ -771,11 +785,12 @@ describes.repeated(
               // content, once to resize to rendered contents.
               listMock
                 .expects('attemptChangeHeight')
-                .withExactArgs(1337)
+                .withExactArgs(123)
                 .returns(Promise.resolve())
                 .twice();
 
               const itemElement = doc.createElement('div');
+              itemElement.setAttribute('style', 'height: 123px');
               expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
               await list.layoutCallback();
             });
@@ -819,14 +834,14 @@ describes.repeated(
             it('should error if proxied fetch fails', () => {
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
-                .returns(Promise.reject());
+                .returns(Promise.reject(new Error('error')));
 
               listMock.expects('toggleLoading').withExactArgs(false).once();
 
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /Error proxying amp-list templates/
+                /XHR Failed fetching \(https:\/\/data.com\/\.\.\.\): error/
               );
             });
 
@@ -850,7 +865,7 @@ describes.repeated(
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /Error proxying amp-list templates with status/
+                /fetching JSON data \(https:\/\/data.com\/\.\.\.\): HTTP error 400/
               );
             });
 
@@ -870,26 +885,34 @@ describes.repeated(
               const listItem = document.createElement('div');
               listItem.setAttribute('role', 'item');
               listContainer.appendChild(listItem);
+
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
                 .returns(Promise.resolve({html}));
               ssrTemplateHelper.applySsrOrCsrTemplate.returns(
-                Promise.resolve(listContainer)
+                Promise.resolve(rendered)
               );
+
               listMock
                 .expects('updateBindings_')
                 .returns(Promise.resolve(listContainer))
                 .once();
+              const renderSpy = env.sandbox.spy();
               listMock
                 .expects('render_')
                 .withExactArgs(listContainer, false)
-                .returns(Promise.resolve());
+                .callsFake(() => {
+                  renderSpy();
+                  return Promise.resolve();
+                })
+                .once();
 
-              ssrTemplateHelper.applySsrOrCsrTemplate
-                .withArgs(element, html)
-                .returns(Promise.resolve(rendered));
-
-              yield list.layoutCallback();
+              const layoutSpy = env.sandbox.spy();
+              yield list.layoutCallback().then(() => {
+                layoutSpy();
+              });
+              // layoutCallback() should be chained to render_().
+              expect(renderSpy).to.be.calledBefore(layoutSpy);
 
               const request = env.sandbox.match({
                 xhrUrl:
@@ -933,7 +956,6 @@ describes.repeated(
             });
 
             it('"amp-script:" uri should skip rendering and emit an error', () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               list.element.setAttribute('src', 'amp-script:fetchData');
 
               listMock.expects('scheduleRender_').never();
@@ -941,7 +963,6 @@ describes.repeated(
               const errorMsg = /cannot be used in SSR mode/;
               expectAsyncConsoleError(errorMsg);
               expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
-              toggleExperiment(win, 'protocol-adapters', false);
             });
 
             it('Bound [src] should skip rendering and emit an error', async () => {
@@ -988,12 +1009,15 @@ describes.repeated(
               return list.layoutCallback().catch(() => {});
             });
           });
+
           describe('Using amp-script: protocol', () => {
             let ampScriptEl;
             beforeEach(() => {
               resetExperimentTogglesForTesting(win);
 
-              env.sandbox.stub(Services, 'scriptForDocOrNull');
+              env.sandbox
+                .stub(Services, 'scriptForDocOrNull')
+                .returns(Promise.resolve(new AmpScriptService(env.ampdoc)));
               ampScriptEl = document.createElement('amp-script');
               ampScriptEl.setAttribute('id', 'example');
               doc.body.appendChild(ampScriptEl);
@@ -1004,14 +1028,7 @@ describes.repeated(
               list = createAmpList(element);
             });
 
-            it('should throw an error if used without the experiment enabled', async () => {
-              const errorMsg = /Invalid value: amp-script:example.fetchData/;
-              expectAsyncConsoleError(errorMsg);
-              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
-            });
-
             it('should throw an error if given an invalid format', async () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               const errorMsg = /URIs must be of the format/;
 
               element.setAttribute('src', 'amp-script:fetchData');
@@ -1028,7 +1045,6 @@ describes.repeated(
             });
 
             it('should throw if specified amp-script does not exist', () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               element.setAttribute('src', 'amp-script:doesnotexist.fn');
 
               const errorMsg = /could not find <amp-script> with/;
@@ -1037,7 +1053,6 @@ describes.repeated(
             });
 
             it('should fail if function call rejects', async () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction: () =>
@@ -1053,7 +1068,6 @@ describes.repeated(
             it('should render non-array if single-item is set', async () => {
               const callFunctionResult = {'items': {title: 'Title'}};
               element.setAttribute('single-item', 'true');
-              toggleExperiment(win, 'protocol-adapters', true);
               ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction(fnId) {
@@ -1078,7 +1092,6 @@ describes.repeated(
             });
 
             it('should render a list from AmpScriptService provided data', async () => {
-              toggleExperiment(win, 'protocol-adapters', true);
               ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction(fnId) {
@@ -1193,44 +1206,6 @@ describes.repeated(
             });
           });
 
-          it(
-            "should fetch with viewer auth token if 'crossorigin=" +
-              "amp-viewer-auth-token-via-post' attribute is present",
-            () => {
-              env.sandbox
-                .stub(Services, 'viewerAssistanceForDocOrNull')
-                .returns(
-                  Promise.resolve({
-                    getIdTokenPromise: () => Promise.resolve('idToken'),
-                  })
-                );
-              element.setAttribute(
-                'crossorigin',
-                'amp-viewer-auth-token-via-post'
-              );
-              const fetched = {items: DEFAULT_ITEMS};
-              const foo = doc.createElement('div');
-              const rendered = [foo];
-              const opts = DEFAULT_LIST_OPTS;
-
-              listMock
-                .expects('fetch_')
-                .withExactArgs(!!opts.refresh, 'idToken')
-                .returns(Promise.resolve(fetched))
-                .atLeast(1);
-
-              // Stub the rendering of the template.
-              const itemsToRender = fetched[opts.expr];
-              ssrTemplateHelper.applySsrOrCsrTemplate
-                .withArgs(element, itemsToRender)
-                .returns(Promise.resolve(rendered));
-
-              expectRender();
-
-              return list.layoutCallback().then(() => Promise.resolve());
-            }
-          );
-
           it('should reset if `reset-on-refresh` is set (new URL)', () => {
             element.setAttribute('reset-on-refresh', '');
             const foo = doc.createElement('div');
@@ -1299,7 +1274,10 @@ describes.repeated(
               listMock.expects('fetchList_').never();
               // Expect display of placeholder/loading before render.
               listMock.expects('togglePlaceholder').withExactArgs(true).once();
-              listMock.expects('toggleLoading').withExactArgs(true).once();
+              listMock
+                .expects('toggleLoading')
+                .withExactArgs(true, true)
+                .once();
               // Expect hiding of placeholder/loading after render.
               listMock.expects('togglePlaceholder').withExactArgs(false).once();
               listMock.expects('toggleLoading').withExactArgs(false).once();
@@ -1439,6 +1417,50 @@ describes.repeated(
                 }
               );
             });
+
+            describe('rescan vs. diff race', () => {
+              async function rescanVsDiffTest() {
+                env.sandbox.spy(list, 'diff_');
+                env.sandbox.spy(list, 'render_');
+
+                // Diffing is skipped if there's no existing children to diff against.
+                const oldChild = doc.createElement('p');
+                oldChild.textContent = 'foo';
+                list.container_.appendChild(oldChild);
+
+                const newChild = doc.createElement('p');
+                newChild.textContent = 'bar';
+                // New children must have at least one binding to trigger rescan.
+                newChild.setAttribute('i-amphtml-binding', '');
+                const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
+                  newChild,
+                ]);
+                await list.layoutCallback().then(() => rendered);
+              }
+
+              it('without diffing, should rescan _before_ render', async () => {
+                await rescanVsDiffTest();
+
+                expect(list.diff_).to.not.have.been.called;
+                expect(bind.rescan).to.have.been.calledOnce;
+
+                // Without diffable, rescan should happen before rendering the new children.
+                expect(bind.rescan).calledBefore(list.render_);
+              });
+
+              it('with diffing, should rescan _after_ render/diff', async () => {
+                element.setAttribute('diffable', '');
+
+                await rescanVsDiffTest();
+
+                expect(list.diff_).to.have.been.calledOnce;
+                expect(bind.rescan).to.have.been.calledOnce;
+
+                // With diffable, rescanning must happen after rendering (diffing) the new children.
+                expect(bind.rescan).calledAfter(list.render_);
+                expect(bind.rescan).calledAfter(list.diff_);
+              });
+            });
           });
 
           describe('binding="no"', () => {
@@ -1505,7 +1527,7 @@ describes.repeated(
             });
 
             it('should render a list using async data', async () => {
-              const {resolve, promise} = new Deferred();
+              const {promise, resolve} = new Deferred();
               bind.getStateAsync = () => promise;
 
               const ampStateEl = doc.createElement('amp-state');
@@ -1559,7 +1581,8 @@ describes.realWin(
       env.sandbox.spy(element, 'enqueAction');
       env.sandbox.stub(element, 'getDefaultActionAlias').returns({'items': []});
       await whenUpgradedToCustomElement(element);
-      env.sandbox.stub(element.implementation_, 'fetchList_');
+      const impl = await element.getImpl(false);
+      env.sandbox.stub(impl, 'fetchList_');
 
       ['changeToLayoutContainer', 'refresh'].forEach((method) => {
         action.execute(

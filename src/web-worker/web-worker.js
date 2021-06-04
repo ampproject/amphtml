@@ -24,8 +24,8 @@
 import './web-worker-polyfills';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 import {dev, initLogConstructor, setReportError} from '../log';
-import {exponentialBackoff} from '../exponential-backoff';
-import {reportError} from '../error';
+import {exponentialBackoff} from '../core/types/function/exponential-backoff';
+import {reportError} from '../error-reporting';
 import {urls} from '../config';
 
 initLogConstructor();
@@ -60,12 +60,10 @@ self.addEventListener('unhandledrejection', errorHandler_);
 self.addEventListener('error', errorHandler_);
 
 self.addEventListener('message', function (event) {
-  const {
-    method,
-    args,
-    id,
-    scope,
-  } = /** @type {ToWorkerMessageDef} */ (event.data);
+  const messageEvent = /** @type {!MessageEvent} */ (event);
+  const {args, id, method, scope} = /** @type {ToWorkerMessageDef} */ (
+    messageEvent.data
+  );
   let returnValue;
 
   // TODO(choumx): Remove this fallback when we confirm there are no errors.

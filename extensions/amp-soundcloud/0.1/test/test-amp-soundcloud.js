@@ -53,7 +53,7 @@ describes.realWin(
 
       doc.body.appendChild(scplayer);
       return scplayer
-        .build()
+        .buildInternal()
         .then(() => scplayer.layoutCallback())
         .then(() => scplayer);
     }
@@ -127,6 +127,18 @@ describes.realWin(
       expect(getSCPlayer('')).to.be.rejectedWith(
         /The data-trackid attribute is required for/
       );
+    });
+
+    it('unlayout and relayout', async () => {
+      const scplayer = await getSCPlayer('1595551', true);
+      expect(scplayer.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = scplayer.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(scplayer.querySelector('iframe')).to.not.exist;
+
+      await scplayer.layoutCallback();
+      expect(scplayer.querySelector('iframe')).to.exist;
     });
   }
 );

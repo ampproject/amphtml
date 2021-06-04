@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {
@@ -33,14 +33,15 @@ import {
   toggle,
 } from '../../../src/style';
 import {createCustomEvent} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isInFie} from '../../../src/iframe-helper';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 import {tryFocus} from '../../../src/dom';
+import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -138,9 +139,6 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @private {number} */
     this.pos_ = 0;
-
-    /** @private {number} */
-    this.oldPos_ = 0;
 
     /** @private {number} */
     this.eventCounter_ = 0;
@@ -255,7 +253,7 @@ class AmpLightbox extends AMP.BaseElement {
 
       element.addEventListener(AmpEvents.DOM_UPDATE, () => {
         this.takeOwnershipOfDescendants_();
-        this.updateChildrenInViewport_(this.pos_, this.pos_);
+        this.updateChildrenInViewport_(this.pos_);
       });
 
       element.addEventListener('scroll', this.scrollHandler_.bind(this));
@@ -286,16 +284,17 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
     this.initialize_();
-    this.boundCloseOnEscape_ = /** @type {?function(this:AmpLightbox, Event)} */ (this.closeOnEscape_.bind(
-      this
-    ));
+    this.boundCloseOnEscape_ =
+      /** @type {?function(this:AmpLightbox, Event)} */ (
+        this.closeOnEscape_.bind(this)
+      );
     this.document_.documentElement.addEventListener(
       'keydown',
       this.boundCloseOnEscape_
     );
-    this.boundFocusin_ = /** @type {?function(this:AmpLightbox)} */ (this.onFocusin_.bind(
-      this
-    ));
+    this.boundFocusin_ = /** @type {?function(this:AmpLightbox)} */ (
+      this.onFocusin_.bind(this)
+    );
     this.document_.documentElement.addEventListener(
       'focusin',
       this.boundFocusin_
@@ -345,11 +344,8 @@ class AmpLightbox extends AMP.BaseElement {
   finalizeOpen_(callback, trust) {
     const {element} = this;
 
-    const {
-      durationSeconds,
-      openStyle,
-      closedStyle,
-    } = this.getAnimationPresetDef_();
+    const {closedStyle, durationSeconds, openStyle} =
+      this.getAnimationPresetDef_();
 
     const props = Object.keys(openStyle);
 
@@ -382,15 +378,9 @@ class AmpLightbox extends AMP.BaseElement {
     });
 
     const container = dev().assertElement(this.container_);
-    if (!this.isScrollable_) {
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        container,
-        true
-      );
-    } else {
+    if (this.isScrollable_) {
       this.scrollHandler_();
-      this.updateChildrenInViewport_(this.pos_, this.pos_);
+      this.updateChildrenInViewport_(this.pos_);
     }
 
     const onAnimationEnd = () => {
@@ -400,6 +390,8 @@ class AmpLightbox extends AMP.BaseElement {
     element.addEventListener('transitionend', onAnimationEnd);
     element.addEventListener('animationend', onAnimationEnd);
 
+    this.setAsContainer();
+
     // TODO: instead of laying out children all at once, layout children based
     // on visibility.
     const owners = Services.ownersForDoc(this.element);
@@ -408,7 +400,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.triggerEvent_(LightboxEvents.OPEN, trust);
 
     this.getHistory_()
-      .push(this.close.bind(this))
+      .push((unused) => this.close(trust))
       .then((historyId) => {
         this.historyId_ = historyId;
       });
@@ -444,9 +436,10 @@ class AmpLightbox extends AMP.BaseElement {
     }
 
     // click event doesn't work with enter on i-amphtml-ad-close-header
-    this.boundCloseOnEnter_ = /** @type {?function(this:AmpLightbox, Event)} */ (this.closeOnEnter_.bind(
-      this
-    ));
+    this.boundCloseOnEnter_ =
+      /** @type {?function(this:AmpLightbox, Event)} */ (
+        this.closeOnEnter_.bind(this)
+      );
     this.closeButtonHeader_.addEventListener(
       'keydown',
       this.boundCloseOnEnter_
@@ -455,8 +448,8 @@ class AmpLightbox extends AMP.BaseElement {
     let headerHeight;
     this.measureMutateElement(
       () => {
-        headerHeight = this.closeButtonHeader_./*OK*/ getBoundingClientRect()
-          .height;
+        headerHeight =
+          this.closeButtonHeader_./*OK*/ getBoundingClientRect().height;
       },
       () => {
         // Done in vsync in order to apply transition.
@@ -486,9 +479,9 @@ class AmpLightbox extends AMP.BaseElement {
     if (!this.closeButtonSR_ && !this.closeButtonHeader_) {
       return;
     }
-    this.boundClose_ = /** @type {?function(this:AmpLightbox)} */ (this.closeOnClick_.bind(
-      this
-    ));
+    this.boundClose_ = /** @type {?function(this:AmpLightbox)} */ (
+      this.closeOnClick_.bind(this)
+    );
     this.closeButton_.addEventListener('click', this.boundClose_);
   }
 
@@ -624,6 +617,12 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundFocusin_ = null;
 
     this.untieCloseButton_();
+
+    this.removeAsContainer();
+
+    // Unmount all children when the lightbox is closed. They will automatically
+    // remount when the lightbox is opened again.
+    unmountAll(this.element, /* includeSelf */ false);
 
     Services.ownersForDoc(this.element).schedulePause(
       this.element,
@@ -781,28 +780,28 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   waitForScroll_(startingScrollTop) {
-    this.scrollTimerId_ = /** @type {number} */ (Services.timerFor(
-      this.win
-    ).delay(() => {
-      if (Math.abs(startingScrollTop - this.pos_) < 30) {
-        dev().fine(
-          TAG,
-          'slow scrolling: %s - %s',
-          startingScrollTop,
-          this.pos_
-        );
-        this.scrollTimerId_ = null;
-        this.update_(this.pos_);
-      } else {
-        dev().fine(
-          TAG,
-          'fast scrolling: %s - %s',
-          startingScrollTop,
-          this.pos_
-        );
-        this.waitForScroll_(this.pos_);
-      }
-    }, 100));
+    this.scrollTimerId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(() => {
+        if (Math.abs(startingScrollTop - this.pos_) < 30) {
+          dev().fine(
+            TAG,
+            'slow scrolling: %s - %s',
+            startingScrollTop,
+            this.pos_
+          );
+          this.scrollTimerId_ = null;
+          this.update_(this.pos_);
+        } else {
+          dev().fine(
+            TAG,
+            'fast scrolling: %s - %s',
+            startingScrollTop,
+            this.pos_
+          );
+          this.waitForScroll_(this.pos_);
+        }
+      }, 100)
+    );
   }
 
   /**
@@ -812,36 +811,22 @@ class AmpLightbox extends AMP.BaseElement {
    */
   update_(pos) {
     dev().fine(TAG, 'update_');
-    this.updateChildrenInViewport_(pos, this.oldPos_);
-    this.oldPos_ = pos;
+    this.updateChildrenInViewport_(pos);
     this.pos_ = pos;
   }
 
   /**
    * Update the inViewport status of children when scroll position changed.
    * @param {number} newPos
-   * @param {number} oldPos
    * @private
    */
-  updateChildrenInViewport_(newPos, oldPos) {
+  updateChildrenInViewport_(newPos) {
     const seen = [];
     this.forEachVisibleChild_(newPos, (cell) => {
       seen.push(cell);
       const owners = Services.ownersForDoc(this.element);
-      owners.updateInViewport(this.element, cell, true);
       owners.scheduleLayout(this.element, cell);
     });
-    if (oldPos != newPos) {
-      this.forEachVisibleChild_(oldPos, (cell) => {
-        if (!seen.includes(cell)) {
-          Services.ownersForDoc(this.element).updateInViewport(
-            this.element,
-            cell,
-            false
-          );
-        }
-      });
-    }
   }
 
   /**
@@ -908,7 +893,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   maybeSetTransparentBody_() {
-    const {win, element} = this;
+    const {element, win} = this;
     if (!isInFie(element)) {
       return;
     }

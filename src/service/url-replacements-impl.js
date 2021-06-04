@@ -23,28 +23,27 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from './variable-source';
+import {Expander} from './url-expander/expander';
+import {Services} from '../services';
+import {WindowInterface} from '../core/window/interface';
 import {
   addMissingParamsToUrl,
   addParamsToUrl,
   getSourceUrl,
   isProtocolValid,
-  parseQueryString,
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
+import {getTrackImpressionPromise} from '../impression.js';
+import {hasOwn} from '../core/types/object';
 import {
-  installServiceInEmbedScope,
+  installServiceInEmbedDoc,
   registerServiceBuilderForDoc,
 } from '../service';
-
-import {Expander} from './url-expander/expander';
-import {Services} from '../services';
-import {WindowInterface} from '../window-interface';
-import {getTrackImpressionPromise} from '../impression.js';
-import {hasOwn} from '../utils/object';
 import {internalRuntimeVersion} from '../internal-version';
+import {parseQueryString} from '../core/types/string/url';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -143,28 +142,33 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the referrer URL.
     this.setAsync(
       'DOCUMENT_REFERRER',
-      /** @type {AsyncResolverDef} */ (() => {
-        return Services.viewerForDoc(this.ampdoc).getReferrerUrl();
-      })
+      /** @type {AsyncResolverDef} */ (
+        () => {
+          return Services.viewerForDoc(this.ampdoc).getReferrerUrl();
+        }
+      )
     );
 
     // Like DOCUMENT_REFERRER, but returns null if the referrer is of
     // same domain or the corresponding CDN proxy.
     this.setAsync(
       'EXTERNAL_REFERRER',
-      /** @type {AsyncResolverDef} */ (() => {
-        return Services.viewerForDoc(this.ampdoc)
-          .getReferrerUrl()
-          .then((referrer) => {
-            if (!referrer) {
-              return null;
-            }
-            const referrerHostname = parseUrlDeprecated(getSourceUrl(referrer))
-              .hostname;
-            const currentHostname = WindowInterface.getHostname(win);
-            return referrerHostname === currentHostname ? null : referrer;
-          });
-      })
+      /** @type {AsyncResolverDef} */ (
+        () => {
+          return Services.viewerForDoc(this.ampdoc)
+            .getReferrerUrl()
+            .then((referrer) => {
+              if (!referrer) {
+                return null;
+              }
+              const referrerHostname = parseUrlDeprecated(
+                getSourceUrl(referrer)
+              ).hostname;
+              const currentHostname = WindowInterface.getHostname(win);
+              return referrerHostname === currentHostname ? null : referrer;
+            });
+        }
+      )
     );
 
     // Returns the title of this AMP document.
@@ -267,7 +271,7 @@ export class GlobalVariableSource extends VariableSource {
         }
         return clientIds[scope];
       },
-      (scope, opt_userNotificationId, opt_cookieName) => {
+      (scope, opt_userNotificationId, opt_cookieName, opt_disableBackup) => {
         userAssert(
           scope,
           'The first argument to CLIENT_ID, the fallback' +
@@ -287,11 +291,13 @@ export class GlobalVariableSource extends VariableSource {
         }
         return Services.cidForDoc(this.ampdoc)
           .then((cid) => {
+            opt_disableBackup = opt_disableBackup == 'true' ? true : false;
             return cid.get(
               {
                 /** @type {string} */ scope,
                 createCookieIfNotPresent: true,
-                cookieName: opt_cookieName,
+                cookieName: opt_cookieName || undefined,
+                disableBackup: opt_disableBackup,
               },
               consent
             );
@@ -327,54 +333,60 @@ export class GlobalVariableSource extends VariableSource {
     // Returns assigned variant name for the given experiment.
     this.setAsync(
       'VARIANT',
-      /** @type {AsyncResolverDef} */ ((experiment) => {
-        return this.getVariantsValue_((variants) => {
-          const variant = variants[/** @type {string} */ (experiment)];
-          userAssert(
-            variant !== undefined,
-            'The value passed to VARIANT() is not a valid experiment in <amp-experiment>:' +
-              experiment
-          );
-          // When no variant assigned, use reserved keyword 'none'.
-          return variant === null ? 'none' : /** @type {string} */ (variant);
-        }, 'VARIANT');
-      })
+      /** @type {AsyncResolverDef} */ (
+        (experiment) => {
+          return this.getVariantsValue_((variants) => {
+            const variant = variants[/** @type {string} */ (experiment)];
+            userAssert(
+              variant !== undefined,
+              'The value passed to VARIANT() is not a valid experiment in <amp-experiment>:' +
+                experiment
+            );
+            // When no variant assigned, use reserved keyword 'none'.
+            return variant === null ? 'none' : /** @type {string} */ (variant);
+          }, 'VARIANT');
+        }
+      )
     );
 
     // Returns all assigned experiment variants in a serialized form.
     this.setAsync(
       'VARIANTS',
-      /** @type {AsyncResolverDef} */ (() => {
-        return this.getVariantsValue_((variants) => {
-          const experiments = [];
-          for (const experiment in variants) {
-            const variant = variants[experiment];
-            experiments.push(
-              experiment + VARIANT_DELIMITER + (variant || 'none')
-            );
-          }
-          return experiments.join(EXPERIMENT_DELIMITER);
-        }, 'VARIANTS');
-      })
+      /** @type {AsyncResolverDef} */ (
+        () => {
+          return this.getVariantsValue_((variants) => {
+            const experiments = [];
+            for (const experiment in variants) {
+              const variant = variants[experiment];
+              experiments.push(
+                experiment + VARIANT_DELIMITER + (variant || 'none')
+              );
+            }
+            return experiments.join(EXPERIMENT_DELIMITER);
+          }, 'VARIANTS');
+        }
+      )
     );
 
     // Returns assigned geo value for geoType or all groups.
     this.setAsync(
       'AMP_GEO',
-      /** @type {AsyncResolverDef} */ ((geoType) => {
-        return this.getGeo_((geos) => {
-          if (geoType) {
-            userAssert(
-              geoType === 'ISOCountry',
-              'The value passed to AMP_GEO() is not valid name:' + geoType
+      /** @type {AsyncResolverDef} */ (
+        (geoType) => {
+          return this.getGeo_((geos) => {
+            if (geoType) {
+              userAssert(
+                geoType === 'ISOCountry',
+                'The value passed to AMP_GEO() is not valid name:' + geoType
+              );
+              return /** @type {string} */ (geos[geoType] || 'unknown');
+            }
+            return /** @type {string} */ (
+              geos.matchedISOCountryGroups.join(GEO_DELIM)
             );
-            return /** @type {string} */ (geos[geoType] || 'unknown');
-          }
-          return /** @type {string} */ (geos.matchedISOCountryGroups.join(
-            GEO_DELIM
-          ));
-        }, 'AMP_GEO');
-      })
+          }, 'AMP_GEO');
+        }
+      )
     );
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
@@ -426,7 +438,8 @@ export class GlobalVariableSource extends VariableSource {
       const nav = win.navigator;
       return (
         nav.language ||
-        nav.userLanguage ||
+        // Only used on IE.
+        nav['userLanguage'] ||
         nav.browserLanguage ||
         ''
       ).toLowerCase();
@@ -490,25 +503,29 @@ export class GlobalVariableSource extends VariableSource {
     // Access: Reader ID.
     this.setAsync(
       'ACCESS_READER_ID',
-      /** @type {AsyncResolverDef} */ (() => {
-        return this.getAccessValue_((accessService) => {
-          return accessService.getAccessReaderId();
-        }, 'ACCESS_READER_ID');
-      })
+      /** @type {AsyncResolverDef} */ (
+        () => {
+          return this.getAccessValue_((accessService) => {
+            return accessService.getAccessReaderId();
+          }, 'ACCESS_READER_ID');
+        }
+      )
     );
 
     // Access: data from the authorization response.
     this.setAsync(
       'AUTHDATA',
-      /** @type {AsyncResolverDef} */ ((field) => {
-        userAssert(
-          field,
-          'The first argument to AUTHDATA, the field, is required'
-        );
-        return this.getAccessValue_((accessService) => {
-          return accessService.getAuthdataField(field);
-        }, 'AUTHDATA');
-      })
+      /** @type {AsyncResolverDef} */ (
+        (field) => {
+          userAssert(
+            field,
+            'The first argument to AUTHDATA, the field, is required'
+          );
+          return this.getAccessValue_((accessService) => {
+            return accessService.getAuthdataField(field);
+          }, 'AUTHDATA');
+        }
+      )
     );
 
     // Returns an identifier for the viewer.
@@ -588,8 +605,9 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync('AMP_STATE', (key) => {
       // This is safe since AMP_STATE is not an A4A allowlisted variable.
       const root = this.ampdoc.getRootNode();
-      const element = /** @type {!Element|!ShadowRoot} */ (root.documentElement ||
-        root);
+      const element = /** @type {!Element|!ShadowRoot} */ (
+        root.documentElement || root
+      );
       return Services.bindForDocOrNull(element).then((bind) => {
         if (!bind) {
           return '';
@@ -607,11 +625,14 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   addReplaceParamsIfMissing_(orig) {
-    const {replaceParams} = /** @type {!Object} */ (this.getDocInfo_());
+    const {replaceParams} = this.getDocInfo_();
     if (!replaceParams) {
       return orig;
     }
-    return addMissingParamsToUrl(removeAmpJsParamsFromUrl(orig), replaceParams);
+    return addMissingParamsToUrl(
+      removeAmpJsParamsFromUrl(orig),
+      /** @type {!JsonObject} */ (replaceParams)
+    );
   }
 
   /**
@@ -627,7 +648,7 @@ export class GlobalVariableSource extends VariableSource {
    * the resulting value is `null`.
    * @param {function(!../../extensions/amp-access/0.1/access-vars.AccessVars):(T|!Promise<T>)} getter
    * @param {string} expr
-   * @return {T|null}
+   * @return {?T}
    * @template T
    * @private
    */
@@ -637,8 +658,15 @@ export class GlobalVariableSource extends VariableSource {
       Services.accessServiceForDocOrNull(element),
       Services.subscriptionsServiceForDocOrNull(element),
     ]).then((services) => {
-      const service = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (services[0] ||
-        services[1]);
+      const accessService =
+        /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (
+          services[0]
+        );
+      const subscriptionService =
+        /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (
+          services[1]
+        );
+      const service = accessService || subscriptionService;
       if (!service) {
         // Access/subscriptions service is not installed.
         user().error(
@@ -648,6 +676,13 @@ export class GlobalVariableSource extends VariableSource {
         );
         return null;
       }
+
+      // If both an access and subscription service are present, prefer
+      // subscription then fall back to access because access can be namespaced.
+      if (accessService && subscriptionService) {
+        return getter(subscriptionService) || getter(accessService);
+      }
+
       return getter(service);
     });
   }
@@ -693,7 +728,7 @@ export class GlobalVariableSource extends VariableSource {
         'param is required'
     );
     userAssert(typeof param == 'string', 'param should be a string');
-    const hash = this.ampdoc.win.location.originalHash;
+    const hash = this.ampdoc.win.location['originalHash'];
     const params = parseQueryString(hash);
     return params[param] === undefined ? defaultValue : params[param];
   }
@@ -721,7 +756,7 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Resolves the value via geo service.
-   * @param {function(Object<string, string>)} getter
+   * @param {function(!../../extensions/amp-geo/0.1/amp-geo.GeoDef)} getter
    * @param {string} expr
    * @return {!Promise<Object<string,(string|Array<string>)>>}
    * @template T
@@ -738,7 +773,7 @@ export class GlobalVariableSource extends VariableSource {
 
 /**
  * This class replaces substitution variables with their values.
- * Document new values in ../spec/amp-var-substitutions.md
+ * Document new values in ../docs/spec/amp-var-substitutions.md
  * @package For export
  */
 export class UrlReplacements {
@@ -760,19 +795,21 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of
    *     names that can be substituted.
    * @return {string}
    */
   expandStringSync(source, opt_bindings, opt_allowlist) {
-    return /** @type {string} */ (new Expander(
-      this.variableSource_,
-      opt_bindings,
-      /* opt_collectVars */ undefined,
-      /* opt_sync */ true,
-      opt_allowlist,
-      /* opt_noEncode */ true
-    )./*OK*/ expand(source));
+    return /** @type {string} */ (
+      new Expander(
+        this.variableSource_,
+        opt_bindings,
+        /* opt_collectVars */ undefined,
+        /* opt_sync */ true,
+        opt_allowlist,
+        /* opt_noEncode */ true
+      )./*OK*/ expand(source)
+    );
   }
 
   /**
@@ -785,14 +822,16 @@ export class UrlReplacements {
    * @return {!Promise<string>}
    */
   expandStringAsync(source, opt_bindings, opt_allowlist) {
-    return /** @type {!Promise<string>} */ (new Expander(
-      this.variableSource_,
-      opt_bindings,
-      /* opt_collectVars */ undefined,
-      /* opt_sync */ undefined,
-      opt_allowlist,
-      /* opt_noEncode */ true
-    )./*OK*/ expand(source));
+    return /** @type {!Promise<string>} */ (
+      new Expander(
+        this.variableSource_,
+        opt_bindings,
+        /* opt_collectVars */ undefined,
+        /* opt_sync */ undefined,
+        opt_allowlist,
+        /* opt_noEncode */ true
+      )./*OK*/ expand(source)
+    );
   }
 
   /**
@@ -801,20 +840,22 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of
    *     names that can be substituted.
    * @return {string}
    */
   expandUrlSync(url, opt_bindings, opt_allowlist) {
     return this.ensureProtocolMatches_(
       url,
-      /** @type {string} */ (new Expander(
-        this.variableSource_,
-        opt_bindings,
-        /* opt_collectVars */ undefined,
-        /* opt_sync */ true,
-        opt_allowlist
-      )./*OK*/ expand(url))
+      /** @type {string} */ (
+        new Expander(
+          this.variableSource_,
+          opt_bindings,
+          /* opt_collectVars */ undefined,
+          /* opt_sync */ true,
+          opt_allowlist
+        )./*OK*/ expand(url)
+      )
     );
   }
 
@@ -824,22 +865,24 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *     that can be substituted.
    * @param {boolean=} opt_noEncode should not encode URL
    * @return {!Promise<string>}
    */
   expandUrlAsync(url, opt_bindings, opt_allowlist, opt_noEncode) {
-    return /** @type {!Promise<string>} */ (new Expander(
-      this.variableSource_,
-      opt_bindings,
-      /* opt_collectVars */ undefined,
-      /* opt_sync */ undefined,
-      opt_allowlist,
-      opt_noEncode
-    )
-      ./*OK*/ expand(url)
-      .then((replacement) => this.ensureProtocolMatches_(url, replacement)));
+    return /** @type {!Promise<string>} */ (
+      new Expander(
+        this.variableSource_,
+        opt_bindings,
+        /* opt_collectVars */ undefined,
+        /* opt_sync */ undefined,
+        opt_allowlist,
+        opt_noEncode
+      )
+        ./*OK*/ expand(url)
+        .then((replacement) => this.ensureProtocolMatches_(url, replacement))
+    );
   }
 
   /**
@@ -848,10 +891,9 @@ export class UrlReplacements {
    * @return {!Promise<string>}
    */
   expandInputValueAsync(element) {
-    return /** @type {!Promise<string>} */ (this.expandInputValue_(
-      element,
-      /*opt_sync*/ false
-    ));
+    return /** @type {!Promise<string>} */ (
+      this.expandInputValue_(element, /*opt_sync*/ false)
+    );
   }
 
   /**
@@ -860,10 +902,9 @@ export class UrlReplacements {
    * @return {string} Replaced string for testing
    */
   expandInputValueSync(element) {
-    return /** @type {string} */ (this.expandInputValue_(
-      element,
-      /*opt_sync*/ true
-    ));
+    return /** @type {string} */ (
+      this.expandInputValue_(element, /*opt_sync*/ true)
+    );
   }
 
   /**
@@ -970,6 +1011,7 @@ export class UrlReplacements {
    */
   maybeExpandLink(element, defaultUrlParams) {
     devAssert(element.tagName == 'A');
+    const aElement = /** @type {!HTMLAnchorElement} */ (element);
     const supportedReplacements = {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
@@ -978,9 +1020,9 @@ export class UrlReplacements {
       'NAV_TIMING': true,
     };
     let additionalUrlParameters =
-      element.getAttribute('data-amp-addparams') || '';
+      aElement.getAttribute('data-amp-addparams') || '';
     const allowlist = this.getAllowlistForElement_(
-      element,
+      aElement,
       supportedReplacements
     );
 
@@ -991,11 +1033,11 @@ export class UrlReplacements {
     // We set this to the original value before doing any work and use it
     // on subsequent replacements, so that each run gets a fresh value.
     let href = dev().assertString(
-      element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href')
+      aElement[ORIGINAL_HREF_PROPERTY] || aElement.getAttribute('href')
     );
     const url = parseUrlDeprecated(href);
-    if (element[ORIGINAL_HREF_PROPERTY] == null) {
-      element[ORIGINAL_HREF_PROPERTY] = href;
+    if (aElement[ORIGINAL_HREF_PROPERTY] == null) {
+      aElement[ORIGINAL_HREF_PROPERTY] = href;
     }
 
     const isAllowedOrigin = this.isAllowedOrigin_(url);
@@ -1016,7 +1058,7 @@ export class UrlReplacements {
           href
         );
       }
-      return (element.href = href);
+      return (aElement.href = href);
     }
 
     // Note that defaultUrlParams is treated differently than
@@ -1041,7 +1083,7 @@ export class UrlReplacements {
 
     href = this.expandSyncIfAllowedList_(href, allowlist);
 
-    return (element.href = href);
+    return (aElement.href = href);
   }
 
   /**
@@ -1101,10 +1143,14 @@ export class UrlReplacements {
    * @return {string}
    */
   ensureProtocolMatches_(url, replacement) {
-    const newProtocol = parseUrlDeprecated(replacement, /* opt_nocache */ true)
-      .protocol;
-    const oldProtocol = parseUrlDeprecated(url, /* opt_nocache */ true)
-      .protocol;
+    const newProtocol = parseUrlDeprecated(
+      replacement,
+      /* opt_nocache */ true
+    ).protocol;
+    const oldProtocol = parseUrlDeprecated(
+      url,
+      /* opt_nocache */ true
+    ).protocol;
     if (newProtocol != oldProtocol) {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
@@ -1147,12 +1193,11 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!Window} embedWin
  * @param {!VariableSource} varSource
  */
-export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
-  installServiceInEmbedScope(
-    embedWin,
+export function installUrlReplacementsForEmbed(ampdoc, varSource) {
+  installServiceInEmbedDoc(
+    ampdoc,
     'url-replace',
     new UrlReplacements(ampdoc, varSource)
   );

@@ -17,7 +17,7 @@
 import {ChunkPriority, chunk} from '../../../../src/chunk';
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
-import {Observable} from '../../../../src/observable';
+import {Observable} from '../../../../src/core/data-structures/observable';
 import {TwoStepsResponse} from './two-steps-response';
 import {userAssert} from '../../../../src/log';
 
@@ -155,10 +155,11 @@ export class LinkRewriter {
           resolve();
         });
       };
-      const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (this
-        .rootNode_.nodeType == Node.DOCUMENT_NODE
-        ? this.rootNode_.documentElement
-        : this.rootNode_);
+      const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (
+        this.rootNode_.nodeType == Node.DOCUMENT_NODE
+          ? this.rootNode_.documentElement
+          : this.rootNode_
+      );
       chunk(elementOrShadowRoot, task, ChunkPriority.LOW);
     });
   }

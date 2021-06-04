@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.113 */
+/** Version: 0.1.22.168 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -174,9 +174,11 @@ class GlobalDoc {
   constructor(winOrDoc) {
     const isWin = !!winOrDoc.document;
     /** @private @const {!Window} */
-    this.win_ = /** @type {!Window} */ (isWin
-      ? /** @type {!Window} */ (winOrDoc)
-      : /** @type {!Document} */ (winOrDoc).defaultView);
+    this.win_ = /** @type {!Window} */ (
+      isWin
+        ? /** @type {!Window} */ (winOrDoc)
+        : /** @type {!Document} */ (winOrDoc).defaultView
+    );
     /** @private @const {!Document} */
     this.doc_ = isWin
       ? /** @type {!Window} */ (winOrDoc).document
@@ -404,6 +406,7 @@ class ErrorLogger {
 const userLogger = new ErrorLogger(
   self.__AMP_TOP ? AMP_USER_ERROR_SENTINEL : ''
 );
+new ErrorLogger();
 
 const user = () => userLogger;
 
@@ -524,86 +527,6 @@ function debugLog(var_args) {
 function log(var_args) {
   console.log.apply(console, arguments);
 }
-
-/**
- * @param  {...*} var_args [description]
- */
-function warn(var_args) {
-  console.warn.apply(console, arguments);
-}
-
-/**
- * Throws an error if the first argument isn't trueish.
- *
- * Supports argument substitution into the message via %s placeholders.
- *
- * Throws an error object that has two extra properties:
- * - associatedElement: This is the first element provided in the var args.
- *   It can be used for improved display of error messages.
- * - messageArray: The elements of the substituted message as non-stringified
- *   elements in an array. When e.g. passed to console.error this yields
- *   native displays of things like HTML elements.
- *
- * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
- *     not evaluate to true.
- * @param {string=} message The assertion message
- * @param {...*} var_args Arguments substituted into %s in the message.
- * @return {T} The value of shouldBeTrueish.
- * @template T
- */
-function assert(shouldBeTrueish, message, var_args) {
-  let firstElement;
-  if (!shouldBeTrueish) {
-    message = message || 'Assertion failed';
-    const splitMessage = message.split('%s');
-    const first = splitMessage.shift();
-    let formatted = first;
-    const messageArray = [];
-    pushIfNonEmpty(messageArray, first);
-    for (let i = 2; i < arguments.length; i++) {
-      const val = arguments[i];
-      if (val && val.tagName) {
-        firstElement = val;
-      }
-      const nextConstant = splitMessage.shift();
-      messageArray.push(val);
-      pushIfNonEmpty(messageArray, nextConstant.trim());
-      formatted += toString(val) + nextConstant;
-    }
-    const e = new Error(formatted);
-    e.fromAssert = true;
-    e.associatedElement = firstElement;
-    e.messageArray = messageArray;
-    throw e;
-  }
-  return shouldBeTrueish;
-}
-
-/**
- * @param {!Array} array
- * @param {*} val
- */
-function pushIfNonEmpty(array, val) {
-  if (val != '') {
-    array.push(val);
-  }
-}
-
-function toString(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val && val.nodeType == 1) {
-    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-  }
-  return /** @type {string} */ (val);
-}
-
-var log_1 = {
-  assert,
-  debugLog,
-  warn,
-  log
-};
-var log_3 = log_1.debugLog;
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -792,7 +715,7 @@ class PageConfigResolver {
       );
       this.configResolver_ = null;
     }
-    log_3(config);
+    debugLog(config);
     return config;
   }
 }
@@ -885,9 +808,9 @@ class MetaParser {
       this.doc_.getRootNode(),
       'subscriptions-accessible-for-free'
     );
-    const locked =
-      (accessibleForFree && accessibleForFree.toLowerCase() == 'false') ||
-      false;
+    const locked = !!(
+      accessibleForFree && accessibleForFree.toLowerCase() === 'false'
+    );
 
     return new PageConfig(productId, locked);
   }
@@ -945,38 +868,50 @@ class JsonLdParser {
    * @return {?PageConfig}
    */
   tryExtractConfig_(element) {
-    const json = tryParseJson(element.textContent);
-    if (!json) {
+    let possibleConfigs = tryParseJson(element.textContent);
+    if (!possibleConfigs) {
       return null;
     }
 
-    // Must be an ALLOWED_TYPE
-    if (!this.checkType_.checkValue(json['@type'], ALLOWED_TYPES)) {
-      return null;
+    // Support arrays of JSON objects.
+    if (!Array.isArray(possibleConfigs)) {
+      possibleConfigs = [possibleConfigs];
     }
 
-    // Must have a isPartOf[@type=Product].
-    let productId = null;
-    const partOfArray = this.valueArray_(json, 'isPartOf');
-    if (partOfArray) {
-      for (let i = 0; i < partOfArray.length; i++) {
-        productId = this.discoverProductId_(partOfArray[i]);
-        if (productId) {
-          break;
+    const configs = /** @type {!Array<!JsonObject>} */ (possibleConfigs);
+    for (let i = 0; i < configs.length; i++) {
+      const config = configs[i];
+
+      // Must be an ALLOWED_TYPE
+      if (!this.checkType_.checkValue(config['@type'], ALLOWED_TYPES)) {
+        continue;
+      }
+
+      // Must have a isPartOf[@type=Product].
+      let productId = null;
+      const partOfArray = this.valueArray_(config, 'isPartOf');
+      if (partOfArray) {
+        for (let j = 0; j < partOfArray.length; j++) {
+          productId = this.discoverProductId_(partOfArray[j]);
+          if (productId) {
+            break;
+          }
         }
       }
-    }
-    if (!productId) {
-      return null;
+      if (!productId) {
+        continue;
+      }
+
+      // Found product id, just check for the access flag.
+      const isAccessibleForFree = this.bool_(
+        this.singleValue_(config, 'isAccessibleForFree'),
+        /* default */ true
+      );
+
+      return new PageConfig(productId, !isAccessibleForFree);
     }
 
-    // Found product id, just check for the access flag.
-    const isAccessibleForFree = this.bool_(
-      this.singleValue_(json, 'isAccessibleForFree'),
-      /* default */ true
-    );
-
-    return new PageConfig(productId, !isAccessibleForFree);
+    return null;
   }
 
   /**

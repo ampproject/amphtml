@@ -16,6 +16,7 @@
 
 import {Services} from '../../../../src/services';
 import {processHead} from '../head-validation';
+import {rootNodeFor} from '../../../../src/dom';
 
 describes.realWin('head validation', {amp: true}, (env) => {
   let adElement;
@@ -26,10 +27,17 @@ describes.realWin('head validation', {amp: true}, (env) => {
     adElement = doc.createElement('amp-ad');
     doc.body.appendChild(adElement);
     head = doc.createElement('head');
+    doc.body.appendChild(head);
+    rootNodeFor(head).documentElement.setAttribute('amp4ads', '');
   });
 
   describe('processHead', () => {
     it('returns null when head is empty', () => {
+      const validated = processHead(env.win, adElement, head);
+      expect(validated).to.be.null;
+    });
+
+    it('returns null when no amp4ads or ⚡️4ads', () => {
       const validated = processHead(env.win, adElement, head);
       expect(validated).to.be.null;
     });
@@ -69,6 +77,39 @@ describes.realWin('head validation', {amp: true}, (env) => {
       expect(preloadStub).calledTwice;
       expect(preloadStub.firstCall).calledWith('amp-fit-text');
       expect(preloadStub.secondCall).calledWith('amp-video');
+    });
+
+    it('registers extensions with RTV', () => {
+      const preloadStub = env.sandbox.stub(
+        Services.extensionsFor(env.win),
+        'preloadExtension'
+      );
+      head.innerHTML = `
+        <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/rtv/012104070150000/v0/amp-analytics-0.1.js"></script>
+      `;
+      const validated = processHead(env.win, adElement, head);
+      expect(validated.head.querySelector('script')).not.to.exist;
+      expect(validated.extensions).to.have.length(1);
+      expect(preloadStub).calledOnce;
+      expect(validated.extensions[0].extensionId).to.equal('amp-analytics');
+      expect(preloadStub.firstCall).calledWith('amp-analytics');
+    });
+
+    it('ignores v0 scripts (versioned & unversioned)', () => {
+      const preloadStub = env.sandbox.stub(
+        Services.extensionsFor(env.win),
+        'preloadExtension'
+      );
+      head.innerHTML = `
+        <script async src="https://cdn.ampproject.org/v0.js"></script>
+        <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+        <script async src="https://cdn.ampproject.org/rtv/012104070150000/v0.js"></script>
+        <script async src="https://cdn.ampproject.org/rtv/012104070150000/amp4ads-v0.js"></script>
+      `;
+      const validated = processHead(env.win, adElement, head);
+      expect(validated.head.querySelector('script')).not.to.exist;
+      expect(validated.extensions).to.have.length(0);
+      expect(preloadStub).not.to.be.called;
     });
 
     it('removes non-allowlisted amp elements scripts', () => {
@@ -164,9 +205,10 @@ describes.realWin('head validation', {amp: true}, (env) => {
       head.innerHTML = `
         <style amp-custom></style>
         <style amp-keyframes></style>
+        <style amp4ads-boilerplate></style>
       `;
       const validated = processHead(env.win, adElement, head);
-      expect(validated.head.querySelectorAll('style')).to.have.length(2);
+      expect(validated.head.querySelectorAll('style')).to.have.length(3);
     });
 
     it('removes other styles', () => {

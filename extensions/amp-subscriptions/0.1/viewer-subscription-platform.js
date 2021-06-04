@@ -20,7 +20,7 @@ import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 
@@ -111,34 +111,36 @@ export class ViewerSubscriptionPlatform {
       authRequest['encryptedDocumentKey'] = encryptedDocumentKey;
     }
 
-    return /** @type {!Promise<Entitlement>} */ (this.timer_
-      .timeoutPromise(
-        ENTITLEMENTS_REQUEST_TIMEOUT,
-        this.viewer_.sendMessageAwaitResponse('auth', authRequest)
-      )
-      .then((entitlementData) => {
-        entitlementData = entitlementData || {};
+    return /** @type {!Promise<Entitlement>} */ (
+      this.timer_
+        .timeoutPromise(
+          ENTITLEMENTS_REQUEST_TIMEOUT,
+          this.viewer_.sendMessageAwaitResponse('auth', authRequest)
+        )
+        .then((entitlementData) => {
+          entitlementData = entitlementData || {};
 
-        /** Note to devs: Send error at top level of postMessage instead. */
-        const deprecatedError = entitlementData['error'];
-        const authData = entitlementData['authorization'];
-        const decryptedDocumentKey = entitlementData['decryptedDocumentKey'];
+          /** Note to devs: Send error at top level of postMessage instead. */
+          const deprecatedError = entitlementData['error'];
+          const authData = entitlementData['authorization'];
+          const decryptedDocumentKey = entitlementData['decryptedDocumentKey'];
 
-        if (deprecatedError) {
-          throw new Error(deprecatedError.message);
-        }
-
-        if (!authData) {
-          return Entitlement.empty('local');
-        }
-
-        return this.verifyAuthToken_(authData, decryptedDocumentKey).catch(
-          (reason) => {
-            this.sendAuthTokenErrorToViewer_(reason.message);
-            throw reason;
+          if (deprecatedError) {
+            throw new Error(deprecatedError.message);
           }
-        );
-      }));
+
+          if (!authData) {
+            return Entitlement.empty('local');
+          }
+
+          return this.verifyAuthToken_(authData, decryptedDocumentKey).catch(
+            (reason) => {
+              this.sendAuthTokenErrorToViewer_(reason.message);
+              throw reason;
+            }
+          );
+        })
+    );
   }
 
   /**
@@ -153,10 +155,9 @@ export class ViewerSubscriptionPlatform {
       const origin = getWinOrigin(this.ampdoc_.win);
       const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
       const decodedData = this.jwtHelper_.decode(token);
-      const currentProductId = /** @type {string} */ (userAssert(
-        this.pageConfig_.getProductId(),
-        'Product id is null'
-      ));
+      const currentProductId = /** @type {string} */ (
+        userAssert(this.pageConfig_.getProductId(), 'Product id is null')
+      );
       if (decodedData['aud'] != origin && decodedData['aud'] != sourceOrigin) {
         throw user().createError(
           `The mismatching "aud" field: ${decodedData['aud']}`
@@ -232,8 +233,8 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
-  getServiceId() {
-    return this.platform_.getServiceId();
+  getPlatformKey() {
+    return this.platform_.getPlatformKey();
   }
 
   /** @override */

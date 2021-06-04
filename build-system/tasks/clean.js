@@ -17,29 +17,55 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
-const log = require('fancy-log');
 const path = require('path');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('../common/colors');
+const {log} = require('../common/logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
 
 /**
- * Cleans up various build and test artifacts
+ * Cleans up various cache and output directories. Optionally cleans up inner
+ * node_modules package directories, or excludes some directories from deletion.
  */
 async function clean() {
   const pathsToDelete = [
-    '.amp-build',
-    '.karma-cache',
+    // Local cache directories
+    // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
+    '.babel-cache',
+    '.css-cache',
+    '.pre-closure-cache',
+
+    // Output directories
+    // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
+    '.amp-dep-check',
     'build',
+    'build-system/dist',
     'build-system/server/new-server/transforms/dist',
-    'deps.txt',
+    'build-system/tasks/performance/cache',
+    'build-system/tasks/performance/results.json',
+    'build-system/global-configs/custom-config.json',
     'dist',
     'dist.3p',
     'dist.tools',
-    'test-bin',
+    'export',
+    'examples/storybook',
+    'extensions/**/dist',
+    'release',
+    'result-reports',
+    'src/purifier/dist',
+    'test/coverage',
+    'test/coverage-e2e',
+    'validator/**/dist',
+    'validator/export',
   ];
   if (argv.include_subpackages) {
     pathsToDelete.push('**/node_modules', '!node_modules');
+  }
+  if (argv.exclude) {
+    const excludes = argv.exclude.split(',');
+    for (const exclude of excludes) {
+      pathsToDelete.push(`!${exclude}`);
+    }
   }
   const deletedPaths = await del(pathsToDelete, {
     expandDirectories: false,
@@ -57,9 +83,10 @@ module.exports = {
   clean,
 };
 
-clean.description = 'Cleans up various build and test artifacts';
+clean.description = 'Cleans up various cache and output directories';
 clean.flags = {
-  'dry_run': '  Does a dry run without actually deleting anything',
+  'dry_run': 'Does a dry run without actually deleting anything',
   'include_subpackages':
-    '  Also cleans up inner node_modules package directories',
+    'Also cleans up inner node_modules package directories',
+  'exclude': 'Comma separated list of directories to exclude from deletion',
 };

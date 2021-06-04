@@ -18,11 +18,11 @@ import {InlineGalleryEvents} from './inline-gallery-events';
 import {Layout} from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {htmlFor} from '../../../src/static-template';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {scopedQuerySelectorAll} from '../../../src/core/dom/query';
 import {setImportantStyles} from '../../../src/style.js';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
 
 /**
  * The maximum number of dots to show before converting to a count.
@@ -45,6 +45,11 @@ export function exponentialFalloff(percentage, power) {
 }
 
 export class AmpInlineGalleryPagination extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -71,11 +76,6 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED_HEIGHT;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */
@@ -254,8 +254,9 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
    * @param {number} total
    * @param {number} index
    * @param {number} offset
+   * @param {!Array<!Element>} unusedSlides
    */
-  updateProgress(total, index, offset) {
+  updateProgress(total, index, offset, unusedSlides) {
     this.mutateElement(() => {
       this.updateTotal_(total);
       this.updateDots_(index, offset);

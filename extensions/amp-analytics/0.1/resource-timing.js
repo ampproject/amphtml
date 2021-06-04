@@ -15,8 +15,8 @@
  */
 
 import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {findIndex} from '../../../src/utils/array';
-import {isObject} from '../../../src/types';
+import {findIndex} from '../../../src/core/types/array';
+import {isObject} from '../../../src/core/types';
 import {user} from '../../../src/log';
 
 /**
@@ -119,9 +119,9 @@ function validateResourceTimingSpec(spec) {
  * @return {!Array<!PerformanceResourceTiming>}
  */
 function getResourceTimingEntries(win) {
-  return /** @type {!Array<!PerformanceResourceTiming>} */ (win.performance.getEntriesByType(
-    'resource'
-  ));
+  return /** @type {!Array<!PerformanceResourceTiming>} */ (
+    win.performance.getEntriesByType('resource')
+  );
 }
 
 /**

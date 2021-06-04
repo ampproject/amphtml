@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -46,9 +47,8 @@ export class AlrightNetworkConfig {
   /** @override */
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
-    const publisherId = this.autoAmpAdsElement_.getAttribute(
-      'data-publisher-id'
-    );
+    const publisherId =
+      this.autoAmpAdsElement_.getAttribute('data-publisher-id');
     const pageType = this.autoAmpAdsElement_.getAttribute('data-page-type');
     const contentCategory =
       this.autoAmpAdsElement_.getAttribute('data-content-category') || '';
@@ -69,7 +69,9 @@ export class AlrightNetworkConfig {
   /** @override */
   getAttributes() {
     const attributes = dict({
-      'layout': 'fixed',
+      'width': 300,
+      'height': 250,
+      'layout': Layout.RESPONSIVE,
       'data-multi-size-validation': 'false',
       'type': 'doubleclick',
       'data-ad': 'alright',
@@ -94,6 +96,9 @@ export class AlrightNetworkConfig {
 
   /** @override */
   getSizing() {
-    return {};
+    return {
+      width: 300,
+      height: 250,
+    };
   }
 }

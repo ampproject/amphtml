@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 /**
  * @fileoverview
@@ -88,6 +89,7 @@ import {
   interceptEventListeners,
 } from './fake-dom';
 import {Services} from '../src/services';
+import {TestConfig} from './test-config';
 import {addParamsToUrl} from '../src/url';
 import {adopt, adoptShadowMode} from '../src/runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
@@ -100,16 +102,19 @@ import {
   installBuiltinElements,
   installRuntimeServices,
 } from '../src/service/core-services';
-import {stubService} from './test-helper';
-
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {install as installIntersectionObserver} from '../src/polyfills/intersection-observer';
-import {maybeTrackImpression} from '../src/impression';
+import {install as installResizeObserver} from '../src/polyfills/resize-observer';
+import {
+  maybeTrackImpression,
+  resetTrackImpressionPromiseForTesting,
+} from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
+import {stubService} from './test-helper';
 import fetchMock from 'fetch-mock/es5/client-bundle';
 import sinon from /*OK*/ 'sinon';
 
@@ -173,7 +178,7 @@ export let AmpTestEnv;
  * @param {!TestSpec} spec
  * @param {function()} fn
  */
-export const sandboxed = describeEnv((unusedSpec) => []);
+export const sandboxed = createConfigurableRunner((unusedSpec) => []);
 
 /**
  * A test with a fake window.
@@ -187,7 +192,7 @@ export const sandboxed = describeEnv((unusedSpec) => []);
  *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
-export const fakeWin = describeEnv((spec) => [
+export const fakeWin = createConfigurableRunner((spec) => [
   new FakeWinFixture(spec),
   new AmpFixture(spec),
 ]);
@@ -206,7 +211,7 @@ export const fakeWin = describeEnv((spec) => [
  *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
-export const realWin = describeEnv((spec) => [
+export const realWin = createConfigurableRunner((spec) => [
   new RealWinFixture(spec),
   new AmpFixture(spec),
 ]);
@@ -226,17 +231,22 @@ export const realWin = describeEnv((spec) => [
  *   iframe: !HTMLIFrameElement,
  * })} fn
  */
-export const integration = describeEnv((spec) => [
+export const integration = createConfigurableRunner((spec) => [
   new IntegrationFixture(spec),
 ]);
 
 /**
- * A repeating test.
+ * A repeated test within a sandboxed wrapper.
  * @param {string} name
  * @param {!Object<string, *>} variants
- * @param {function(string, *)} fn
+ * @param {function()} fn
  */
-export const repeated = (function () {
+export const repeated = createRepeatedRunner();
+
+/**
+ * Defines a repeating test within a sandboxed wrapper.
+ */
+function repeatedEnv() {
   /**
    * @param {string} name
    * @param {!Object<string, *>} variants
@@ -246,33 +256,30 @@ export const repeated = (function () {
   const templateFunc = function (name, variants, fn, describeFunc) {
     return describeFunc(name, function () {
       for (const name in variants) {
-        describe(name ? ` ${name} ` : SUB, function () {
-          fn.call(this, name, variants[name]);
+        sandboxed(name ? ` ${name} ` : SUB, {}, function (env) {
+          fn.call(this, name, variants[name], env);
         });
       }
     });
   };
 
-  /**
-   * @param {string} name
-   * @param {!Object<string, *>} variants
-   * @param {function(string, *)} fn
-   */
-  const mainFunc = function (name, variants, fn) {
-    return templateFunc(name, variants, fn, describe);
-  };
+  const createTemplate = (describeFunc) => (name, variants, fn) =>
+    templateFunc(name, variants, fn, describeFunc);
 
-  /**
-   * @param {string} name
-   * @param {!Object<string, *>} variants
-   * @param {function(string, *)} fn
-   */
-  mainFunc.only = function (name, variants, fn) {
-    return templateFunc(name, variants, fn, describe./*OK*/ only);
-  };
-
+  const mainFunc = createTemplate(describe);
+  mainFunc.only = createTemplate(describe.only);
+  mainFunc.skip = createTemplate(describe.skip);
   return mainFunc;
-})();
+}
+
+/**
+ * Creates a repeated version of a top-level describes runner.
+ */
+function createRepeatedRunner() {
+  const runner = repeatedEnv();
+  runner.configure = () => new TestConfig(runner);
+  return runner;
+}
 
 /**
  * Mocks Window.fetch in the given environment and exposes `env.fetchMock`. For
@@ -302,21 +309,24 @@ function describeEnv(factory) {
    * @param {!Object} spec
    * @param {function(!Object)} fn
    * @param {function(string, function())} describeFunc
+   * @param {?boolean} configured
    */
-  const templateFunc = function (name, spec, fn, describeFunc) {
-    const fixtures = [new SandboxFixture(spec)];
-    factory(spec).forEach((fixture) => {
-      if (fixture && fixture.isOn()) {
-        fixtures.push(fixture);
-      }
-    });
-    return describeFunc(name, function () {
+  const templateFunc = function (name, spec, fn, describeFunc, configured) {
+    const fixtures = [new SandboxFixture(spec)].concat(
+      factory(spec).filter((fixture) => fixture && fixture.isOn())
+    );
+
+    return describeFunc(name, () => {
       const env = Object.create(null);
 
+      // Note: If this `beforeEach` function is made async/always returns a
+      // Promise, even if it resolves immediately, tests start failing. It's
+      // not entirely clear why. Don't refactor this to be an async for-loop
+      // like the `afterEach` below.
       beforeEach(() => {
         let totalPromise = undefined;
         // Set up all fixtures.
-        fixtures.forEach((fixture, unusedIndex) => {
+        fixtures.forEach((fixture) => {
           if (totalPromise) {
             totalPromise = totalPromise.then(() => fixture.setup(env));
           } else {
@@ -329,60 +339,52 @@ function describeEnv(factory) {
         return totalPromise;
       });
 
-      afterEach(() => {
-        // Tear down all fixtures.
-        let teardown = Promise.resolve();
-        fixtures
-          .slice(0)
-          .reverse()
-          .forEach((fixture) => {
-            teardown = teardown.then(() => fixture.teardown(env));
-          });
+      afterEach(async () => {
+        // Tear down all fixtures in reverse order.
+        for (let i = fixtures.length - 1; i >= 0; --i) {
+          await fixtures[i].teardown(env);
+        }
 
-        return teardown.then(() => {
-          // Delete all other keys.
-          for (const key in env) {
-            delete env[key];
-          }
-        });
+        // Delete all other keys.
+        for (const key in env) {
+          delete env[key];
+        }
       });
 
-      let d = describe.configure();
-      if (spec.ifIe) {
-        d = d.ifIe();
-      }
-      d.run(SUB, function () {
+      function execute() {
         if (spec.timeout) {
           this.timeout(spec.timeout);
         }
         fn.call(this, env);
-      });
+      }
+
+      // Don't re-configure the inner describe() if the outer describes() was
+      // already configured.
+      if (configured) {
+        describe(SUB, execute);
+      } else {
+        describe.configure().run(SUB, execute);
+      }
     });
   };
 
-  /**
-   * @param {string} name
-   * @param {!Object} spec
-   * @param {function(!Object)} fn
-   */
-  const mainFunc = function (name, spec, fn) {
-    return templateFunc(name, spec, fn, describe);
-  };
+  const createTemplate = (describeFunc) => (name, spec, fn, configured) =>
+    templateFunc(name, spec, fn, describeFunc, configured);
 
-  /**
-   * @param {string} name
-   * @param {!Object} spec
-   * @param {function(!Object)} fn
-   */
-  mainFunc.only = function (name, spec, fn) {
-    return templateFunc(name, spec, fn, describe./*OK*/ only);
-  };
-
-  mainFunc.skip = function (name, variants, fn) {
-    return templateFunc(name, variants, fn, describe.skip);
-  };
-
+  const mainFunc = createTemplate(describe);
+  mainFunc.only = createTemplate(describe.only);
+  mainFunc.skip = createTemplate(describe.skip);
   return mainFunc;
+}
+
+/**
+ * Creates a configurable version of a top-level describes runner.
+ * @param {function(!Object):!Array<?Fixture>} factory
+ */
+function createConfigurableRunner(factory) {
+  const runner = describeEnv(factory);
+  runner.configure = () => new TestConfig(runner);
+  return runner;
 }
 
 /** @interface */
@@ -398,6 +400,7 @@ class FixtureInterface {
 
   /**
    * @param {!Object} env
+   * @return {!Promise|undefined}
    */
   teardown(unusedEnv) {}
 }
@@ -489,7 +492,7 @@ class IntegrationFixture {
   }
 
   /** @override */
-  setup(env) {
+  async setup(env) {
     const body =
       typeof this.spec.body == 'function' ? this.spec.body() : this.spec.body;
     const css =
@@ -514,26 +517,32 @@ class IntegrationFixture {
       url = addParamsToUrl(url, this.spec.params);
     }
 
+    const docUrl =
+      addParamsToUrl(url, {
+        body,
+        css,
+        experiments,
+        extensions,
+      }) + `#${this.hash}`;
+
+    // If shadow mode, wrap doc in shadow viewer.
+    const src =
+      ampDocType == 'shadow'
+        ? addParamsToUrl('/amp4test/compose-shadow', {docUrl})
+        : docUrl;
+
+    env.iframe = createElementWithAttributes(document, 'iframe', {
+      src,
+      style,
+    });
+
     return new Promise((resolve, reject) => {
-      const docUrl =
-        addParamsToUrl(url, {body, css, experiments, extensions}) +
-        `#${this.hash}`;
-
-      let src = docUrl;
-      // If shadow mode, wrap doc in shadow viewer.
-      if (ampDocType == 'shadow') {
-        src = addParamsToUrl('/amp4test/compose-shadow', {docUrl});
-      }
-
-      env.iframe = createElementWithAttributes(document, 'iframe', {
-        src,
-        style,
-      });
       env.iframe.onload = function () {
         env.win = env.iframe.contentWindow;
         resolve();
       };
       env.iframe.onerror = reject;
+
       document.body.appendChild(env.iframe);
     });
   }
@@ -622,7 +631,7 @@ class RealWinFixture {
         win.testLocation = new FakeLocation(window.location.href, win);
 
         if (!spec.allowExternalResources) {
-          doNotLoadExternalResourcesInTest(win);
+          doNotLoadExternalResourcesInTest(win, env.sandbox);
         }
 
         // Install AMP CSS if requested.
@@ -648,6 +657,7 @@ class RealWinFixture {
 
         // Install IntersectionObserver polyfill.
         installIntersectionObserver(win);
+        installResizeObserver(win);
 
         // Intercept event listeners
         interceptEventListeners(win);
@@ -734,26 +744,33 @@ class AmpFixture {
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Ensure cached meta name/content pairs are cleared before each test
       ampdoc.meta_ = null;
+      maybeTrackImpression(win);
     } else if (ampdocType == 'multi' || ampdocType == 'shadow') {
       adoptShadowMode(win);
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
     }
-    maybeTrackImpression(self);
-    const extensionIds = [];
+    const extensions = [];
     if (spec.extensions) {
       spec.extensions.forEach((extensionIdWithVersion) => {
         const tuple = extensionIdWithVersion.split(':');
         const extensionId = tuple[0];
-        extensionIds.push(extensionId);
         // Default to 0.1 if no version was provided.
-        const version = tuple[1] || '0.1';
-        const installer = extensionsBuffer[`${extensionId}:${version}`];
+        const extensionVersion = tuple[1] || '0.1';
+        extensions.push({extensionId, extensionVersion});
+        const installer =
+          extensionsBuffer[`${extensionId}:${extensionVersion}`];
         if (installer) {
           if (env.ampdoc) {
-            env.ampdoc.declareExtension(extensionId);
+            env.ampdoc.declareExtension(extensionId, extensionVersion);
           }
-          env.extensions.registerExtension(extensionId, installer, win.AMP);
+          env.extensions.registerExtension(
+            extensionId,
+            extensionVersion,
+            /* latest */ false,
+            installer,
+            win.AMP
+          );
         }
       });
     }
@@ -772,10 +789,16 @@ class AmpFixture {
     /**
      * Installs the specified extension.
      * @param {string} extensionId
-     * @param {string=} opt_version
+     * @param {string=} version
+     * @param {boolean=} latest
+     * @param {boolean=} auto
      */
-    env.installExtension = function (extensionId, opt_version) {
-      const version = opt_version || '0.1';
+    env.installExtension = function (
+      extensionId,
+      version = '0.1',
+      latest = false,
+      auto = true
+    ) {
       const installer = extensionsBuffer[`${extensionId}:${version}`];
       if (!installer) {
         throw new Error(
@@ -783,10 +806,16 @@ class AmpFixture {
             ' Make sure the module is imported'
         );
       }
-      if (env.ampdoc) {
-        env.ampdoc.declareExtension(extensionId);
+      if (env.ampdoc && auto) {
+        env.ampdoc.declareExtension(extensionId, version);
       }
-      env.extensions.registerExtension(extensionId, installer, win.AMP);
+      env.extensions.registerExtension(
+        extensionId,
+        version,
+        latest,
+        installer,
+        win.AMP
+      );
     };
 
     /**
@@ -822,7 +851,7 @@ class AmpFixture {
         {
           url: 'http://ads.localhost:8000/example',
           html,
-          extensionIds,
+          extensions,
         },
         (embedWin) => {
           interceptEventListeners(embedWin);
@@ -834,6 +863,8 @@ class AmpFixture {
         env.embed = embed;
         env.parentWin = env.win;
         env.win = embed.win;
+        env.parentAmpdoc = env.ampdoc;
+        env.ampdoc = embed.ampdoc;
         configureAmpTestMode(embed.win);
       });
       completePromise = completePromise
@@ -851,9 +882,10 @@ class AmpFixture {
       const {ampdoc} = ret;
       env.ampdoc = ampdoc;
       const promise = Promise.all([
-        env.extensions.installExtensionsInDoc(ampdoc, extensionIds),
+        env.extensions.installExtensionsInDoc(ampdoc, extensions),
         ampdoc.whenReady(),
       ]);
+      ampdoc.setExtensionsKnown();
       completePromise = completePromise
         ? completePromise.then(() => promise)
         : promise;
@@ -865,6 +897,7 @@ class AmpFixture {
   /** @override */
   teardown(env) {
     const {win} = env;
+    resetTrackImpressionPromiseForTesting();
     if (env.embed) {
       env.embed.destroy();
     }

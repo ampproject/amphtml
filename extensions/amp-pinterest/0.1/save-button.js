@@ -18,7 +18,7 @@ import {Util} from './util';
 import {dev, userAssert} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 
 // Popup options
 const POP =
@@ -205,5 +205,14 @@ export class SaveButton {
       promise = Promise.resolve();
     }
     return promise.then(this.renderTemplate.bind(this));
+  }
+
+  /**
+   * Determine the height of the contents to allow resizing after first layout.
+   *
+   * @return {!Promise<?number>}
+   */
+  height() {
+    return Promise.resolve(null);
   }
 }

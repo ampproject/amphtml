@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
-import {
-  assertIsName,
-  isScopeSelectorSupported,
-  prependSelectorsWith,
-} from './css';
+import {Deferred} from './core/data-structures/promise';
 import {dev, devAssert} from './log';
-import {dict} from './utils/object';
-import {includes, startsWith} from './string';
-import {toWin} from './types';
+import {dict} from './core/types/object';
+import {includes} from './core/types/string';
+import {matches} from './core/dom/query';
+import {toWin} from './core/window';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -42,11 +38,23 @@ export const UPGRADE_TO_CUSTOMELEMENT_PROMISE = '__AMP_UPG_PRM';
 export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER = '__AMP_UPG_RES';
 
 /**
+ * @typedef {{
+ *   bubbles: (boolean|undefined),
+ *   cancelable: (boolean|undefined),
+ * }}
+ */
+export let CustomEventOptionsDef;
+
+/** @const {!CustomEventOptionsDef} */
+const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
+
+/**
  * Waits until the child element is constructed. Once the child is found, the
  * callback is executed.
  * @param {!Element} parent
  * @param {function(!Element):boolean} checkFunc
  * @param {function()} callback
+ * @suppress {suspiciousCode}
  */
 export function waitForChild(parent, checkFunc, callback) {
   if (checkFunc(parent)) {
@@ -55,7 +63,7 @@ export function waitForChild(parent, checkFunc, callback) {
   }
   /** @const {!Window} */
   const win = toWin(parent.ownerDocument.defaultView);
-  if (win.MutationObserver) {
+  if (IS_ESM || win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
@@ -229,17 +237,20 @@ export function rootNodeFor(node) {
   }
   let n;
   // Check isShadowRoot() is only needed for the polyfill case.
-  for (n = node; !!n.parentNode && !isShadowRoot(n); n = n.parentNode) {}
+  for (
+    n = node;
+    !!n.parentNode && !isShadowRoot(/** @type {HTMLElement} */ (n));
+    n = n.parentNode
+  ) {}
   return n;
 }
 
 /**
  * Determines if value is actually a `ShadowRoot` node.
- * @param {*} value
+ * @param {HTMLElement} value
  * @return {boolean}
  */
 export function isShadowRoot(value) {
-  // TODO(#22733): remove in preference to dom's `rootNodeFor`.
   if (!value) {
     return false;
   }
@@ -255,309 +266,9 @@ export function isShadowRoot(value) {
 }
 
 /**
- * Finds the closest element that satisfies the callback from this element
- * up the DOM subtree.
- * @param {!Element} element
- * @param {function(!Element):boolean} callback
- * @param {Element=} opt_stopAt optional elemnt to stop the search at.
- * @return {?Element}
- */
-export function closest(element, callback, opt_stopAt) {
-  for (let el = element; el && el !== opt_stopAt; el = el.parentElement) {
-    if (callback(el)) {
-      return el;
-    }
-  }
-  return null;
-}
-
-/**
- * Finds the closest node that satisfies the callback from this node
- * up the DOM subtree.
- * @param {!Node} node
- * @param {function(!Node):boolean} callback
- * @return {?Node}
- */
-export function closestNode(node, callback) {
-  for (let n = node; n; n = n.parentNode) {
-    if (callback(n)) {
-      return n;
-    }
-  }
-  return null;
-}
-
-/**
- * Finds the closest ancestor element with the specified selector from this
- * element.
- * @param {!Element} element
- * @param {string} selector
- * @return {?Element} closest ancestor if found.
- */
-export function closestAncestorElementBySelector(element, selector) {
-  if (element.closest) {
-    return element.closest(selector);
-  }
-
-  return closest(element, (el) => {
-    return matches(el, selector);
-  });
-}
-
-/**
- * Finds all ancestor elements that satisfy predicate.
- * @param {!Element} child
- * @param {function(!Element):boolean} predicate
- * @return {!Array<!Element>}
- */
-export function ancestorElements(child, predicate) {
-  const ancestors = [];
-  for (
-    let ancestor = child.parentElement;
-    ancestor;
-    ancestor = ancestor.parentElement
-  ) {
-    if (predicate(ancestor)) {
-      ancestors.push(ancestor);
-    }
-  }
-  return ancestors;
-}
-
-/**
- * Finds all ancestor elements that has the specified tag name.
- * @param {!Element} child
- * @param {string} tagName
- * @return {!Array<!Element>}
- */
-export function ancestorElementsByTag(child, tagName) {
-  assertIsName(tagName);
-  tagName = tagName.toUpperCase();
-  return ancestorElements(child, (el) => {
-    return el.tagName == tagName;
-  });
-}
-
-/**
- * Finds the first child element that satisfies the callback.
- * @param {!Element} parent
- * @param {function(!Element):boolean} callback
- * @return {?Element}
- */
-export function childElement(parent, callback) {
-  for (
-    let child = parent.firstElementChild;
-    child;
-    child = child.nextElementSibling
-  ) {
-    if (callback(child)) {
-      return child;
-    }
-  }
-  return null;
-}
-
-/**
- * Finds all child elements that satisfy the callback.
- * @param {!Element} parent
- * @param {function(!Element):boolean} callback
- * @return {!Array<!Element>}
- */
-export function childElements(parent, callback) {
-  const children = [];
-  for (
-    let child = parent.firstElementChild;
-    child;
-    child = child.nextElementSibling
-  ) {
-    if (callback(child)) {
-      children.push(child);
-    }
-  }
-  return children;
-}
-
-/**
- * Finds the last child element that satisfies the callback.
- * @param {!Element} parent
- * @param {function(!Element):boolean} callback
- * @return {?Element}
- */
-export function lastChildElement(parent, callback) {
-  for (
-    let child = parent.lastElementChild;
-    child;
-    child = child.previousElementSibling
-  ) {
-    if (callback(child)) {
-      return child;
-    }
-  }
-  return null;
-}
-
-/**
- * Finds all child nodes that satisfy the callback.
- * These nodes can include Text, Comment and other child nodes.
- * @param {!Node} parent
- * @param {function(!Node):boolean} callback
- * @return {!Array<!Node>}
- */
-export function childNodes(parent, callback) {
-  const nodes = [];
-  for (let child = parent.firstChild; child; child = child.nextSibling) {
-    if (callback(child)) {
-      nodes.push(child);
-    }
-  }
-  return nodes;
-}
-
-/**
- * Finds the first child element that has the specified attribute.
- * @param {!Element} parent
- * @param {string} attr
- * @return {?Element}
- */
-export function childElementByAttr(parent, attr) {
-  assertIsName(attr);
-  return /*OK*/ scopedQuerySelector(parent, `> [${attr}]`);
-}
-
-/**
- * Finds the last child element that has the specified attribute.
- * @param {!Element} parent
- * @param {string} attr
- * @return {?Element}
- */
-export function lastChildElementByAttr(parent, attr) {
-  assertIsName(attr);
-  return lastChildElement(parent, (el) => {
-    return el.hasAttribute(attr);
-  });
-}
-
-/**
- * Finds all child elements that has the specified attribute.
- * @param {!Element} parent
- * @param {string} attr
- * @return {!NodeList<!Element>}
- */
-export function childElementsByAttr(parent, attr) {
-  assertIsName(attr);
-  return /*OK*/ scopedQuerySelectorAll(parent, `> [${attr}]`);
-}
-
-/**
- * Finds the first child element that has the specified tag name.
- * @param {!Element} parent
- * @param {string} tagName
- * @return {?Element}
- */
-export function childElementByTag(parent, tagName) {
-  assertIsName(tagName);
-  return /*OK*/ scopedQuerySelector(parent, `> ${tagName}`);
-}
-
-/**
- * Finds all child elements with the specified tag name.
- * @param {!Element} parent
- * @param {string} tagName
- * @return {!NodeList<!Element>}
- */
-export function childElementsByTag(parent, tagName) {
-  assertIsName(tagName);
-  return /*OK*/ scopedQuerySelectorAll(parent, `> ${tagName}`);
-}
-
-/**
- * Checks if the given element matches the selector
- * @param  {!Element} el The element to verify
- * @param  {string} selector The selector to check against
- * @return {boolean} True if the element matched the selector. False otherwise.
- */
-export function matches(el, selector) {
-  const matcher =
-    el.matches ||
-    el.webkitMatchesSelector ||
-    el.mozMatchesSelector ||
-    el.msMatchesSelector ||
-    el.oMatchesSelector;
-  if (matcher) {
-    return matcher.call(el, selector);
-  }
-  return false; // IE8 always returns false.
-}
-
-/**
- * Finds the first descendant element with the specified name.
- * @param {!Element|!Document|!ShadowRoot} element
- * @param {string} tagName
- * @return {?Element}
- */
-export function elementByTag(element, tagName) {
-  assertIsName(tagName);
-  return element./*OK*/ querySelector(tagName);
-}
-
-/**
- * Finds all elements that matche `selector`, scoped inside `root`
- * for user-agents that do not support native scoping.
- *
- * This method isn't required for modern builds, can be removed.
- *
- * @param {!Element} root
- * @param {string} selector
- * @return {!NodeList<!Element>}
- */
-function scopedQuerySelectionFallback(root, selector) {
-  const unique = 'i-amphtml-scoped';
-  root.classList.add(unique);
-  const scopedSelector = prependSelectorsWith(selector, `.${unique}`);
-  const elements = root./*OK*/ querySelectorAll(scopedSelector);
-  root.classList.remove(unique);
-  return elements;
-}
-
-/**
- * Finds the first element that matches `selector`, scoped inside `root`.
- * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {!Element} root
- * @param {string} selector
- * @return {?Element}
- */
-export function scopedQuerySelector(root, selector) {
-  if (isScopeSelectorSupported(root)) {
-    return root./*OK*/ querySelector(prependSelectorsWith(selector, ':scope'));
-  }
-
-  // Only IE.
-  const fallbackResult = scopedQuerySelectionFallback(root, selector);
-  return fallbackResult[0] === undefined ? null : fallbackResult[0];
-}
-
-/**
- * Finds every element that matches `selector`, scoped inside `root`.
- * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {!Element} root
- * @param {string} selector
- * @return {!NodeList<!Element>}
- */
-export function scopedQuerySelectorAll(root, selector) {
-  if (isScopeSelectorSupported(root)) {
-    return root./*OK*/ querySelectorAll(
-      prependSelectorsWith(selector, ':scope')
-    );
-  }
-
-  // Only IE.
-  return scopedQuerySelectionFallback(root, selector);
-}
-
-/**
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
- * @param {!Element} element
+ * @param {!HTMLElement} element
  * @param {function(string):string=} opt_computeParamNameFunc to compute the
  *    parameter name, get passed the camel-case parameter name.
  * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
@@ -758,7 +469,7 @@ export function isAmpElement(element) {
   // Use prefix to recognize AMP element. This is necessary because stub
   // may not be attached yet.
   return (
-    startsWith(tag, 'AMP-') &&
+    tag.startsWith('AMP-') &&
     // Some "amp-*" elements are not really AMP elements. :smh:
     !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY')
   );
@@ -767,14 +478,14 @@ export function isAmpElement(element) {
 /**
  * Return a promise that resolve when an AMP element upgrade from HTMLElement
  * to CustomElement
- * @param {!Element} element
- * @return {!Promise<!Element>}
+ * @param {!HTMLElement} element
+ * @return {!Promise<!AmpElement>}
  */
 export function whenUpgradedToCustomElement(element) {
   devAssert(isAmpElement(element), 'element is not AmpElement');
   if (element.createdCallback) {
     // Element already is CustomElement;
-    return Promise.resolve(element);
+    return Promise.resolve(/**@type {!AmpElement} */ (element));
   }
   // If Element is still HTMLElement, wait for it to upgrade to customElement
   // Note: use pure string to avoid obfuscation between versions.
@@ -788,84 +499,10 @@ export function whenUpgradedToCustomElement(element) {
 }
 
 /**
- * Replacement for `Element.requestFullscreen()` method.
- * https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullscreen
- * @param {!Element} element
- */
-export function fullscreenEnter(element) {
-  const requestFs =
-    element.requestFullscreen ||
-    element.requestFullScreen ||
-    element.webkitRequestFullscreen ||
-    element.webkitEnterFullscreen ||
-    element.msRequestFullscreen ||
-    element.mozRequestFullScreen;
-  if (requestFs) {
-    requestFs.call(element);
-  }
-}
-
-/**
- * Replacement for `Document.exitFullscreen()` method.
- * https://developer.mozilla.org/en-US/docs/Web/API/Document/exitFullscreen
- * @param {!Element} element
- */
-export function fullscreenExit(element) {
-  const elementBoundExit =
-    element.cancelFullScreen ||
-    element.exitFullscreen ||
-    element.webkitExitFullscreen ||
-    element.webkitCancelFullScreen ||
-    element.mozCancelFullScreen ||
-    element.msExitFullscreen;
-  if (elementBoundExit) {
-    elementBoundExit.call(element);
-    return;
-  }
-  const {ownerDocument} = element;
-  if (!ownerDocument) {
-    return;
-  }
-  const docBoundExit =
-    ownerDocument.cancelFullScreen ||
-    ownerDocument.exitFullscreen ||
-    ownerDocument.webkitExitFullscreen ||
-    ownerDocument.webkitCancelFullScreen ||
-    ownerDocument.mozCancelFullScreen ||
-    ownerDocument.msExitFullscreen;
-  if (docBoundExit) {
-    docBoundExit.call(ownerDocument);
-  }
-}
-
-/**
- * Replacement for `Document.fullscreenElement`.
- * https://developer.mozilla.org/en-US/docs/Web/API/Document/fullscreenElement
- * @param {!Element} element
- * @return {boolean}
- */
-export function isFullscreenElement(element) {
-  const {webkitDisplayingFullscreen} = element;
-  if (webkitDisplayingFullscreen !== undefined) {
-    return webkitDisplayingFullscreen;
-  }
-  const {ownerDocument} = element;
-  if (!ownerDocument) {
-    return false;
-  }
-  const fullscreenElement =
-    ownerDocument.fullscreenElement ||
-    ownerDocument.webkitFullscreenElement ||
-    ownerDocument.mozFullScreenElement ||
-    ownerDocument.webkitCurrentFullScreenElement;
-  return fullscreenElement == element;
-}
-
-/**
  * Returns true if node is not disabled.
  *
  * IE8 can return false positives, see {@link matches}.
- * @param {!Element} element
+ * @param {!HTMLInputElement} element
  * @return {boolean}
  * @see https://www.w3.org/TR/html5/forms.html#concept-fe-disabled
  */
@@ -928,6 +565,21 @@ export function toggleAttribute(element, name, forced) {
 }
 
 /**
+ * Parses a string as a boolean value using the expanded rules for DOM boolean
+ * attributes:
+ * - a `null` or `undefined` returns `null`;
+ * - an empty string returns `true`;
+ * - a "false" string returns `false`;
+ * - otherwise, `true` is returned.
+ *
+ * @param {?string|undefined} s
+ * @return {boolean|undefined}
+ */
+export function parseBooleanAttribute(s) {
+  return s == null ? undefined : s !== 'false';
+}
+
+/**
  * @param {!Window} win
  * @return {number} The width of the vertical scrollbar, in pixels.
  */
@@ -936,4 +588,36 @@ export function getVerticalScrollbarWidth(win) {
   const windowWidth = win./*OK*/ innerWidth;
   const documentWidth = documentElement./*OK*/ clientWidth;
   return windowWidth - documentWidth;
+}
+
+/**
+ * Dispatches a custom event.
+ *
+ * @param {!Node} node
+ * @param {string} name
+ * @param {!Object=} opt_data Event data.
+ * @param {!CustomEventOptionsDef=} opt_options
+ */
+export function dispatchCustomEvent(node, name, opt_data, opt_options) {
+  const data = opt_data || {};
+  // Constructors of events need to come from the correct window. Sigh.
+  const event = node.ownerDocument.createEvent('Event');
+
+  // Technically .data is not a property of Event.
+  /**@type {?}*/ (event).data = data;
+
+  const {bubbles, cancelable} = opt_options || DEFAULT_CUSTOM_EVENT_OPTIONS;
+  event.initEvent(name, bubbles, cancelable);
+  node.dispatchEvent(event);
+}
+
+/**
+ * Ensures the child is contained by the parent, but not the parent itself.
+ *
+ * @param {!Node} parent
+ * @param {!Node} child
+ * @return {boolean}
+ */
+export function containsNotSelf(parent, child) {
+  return child !== parent && parent.contains(child);
 }

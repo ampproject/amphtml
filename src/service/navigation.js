@@ -15,24 +15,17 @@
  */
 
 import {Services} from '../services';
-import {
-  closestAncestorElementBySelector,
-  isIframed,
-  openWindowDialog,
-  tryFocus,
-} from '../dom';
+import {closestAncestorElementBySelector} from '../core/dom/query';
 import {dev, user, userAssert} from '../log';
-import {dict} from '../utils/object';
-import {escapeCssSelectorIdent} from '../css';
+import {dict} from '../core/types/object';
+import {escapeCssSelectorIdent} from '../core/dom/css-selectors';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
+import {isIframed, openWindowDialog, tryFocus} from '../dom';
 import {isLocalhostOrigin} from '../url';
-import {toWin} from '../types';
-import PriorityQueue from '../utils/priority-queue';
+import {registerServiceBuilderForDoc} from '../service';
+import {toWin} from '../core/window';
+import PriorityQueue from '../core/data-structures/priority-queue';
 
 const TAG = 'navigation';
 
@@ -91,22 +84,18 @@ export function maybeExpandUrlParamsForTesting(ampdoc, e) {
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * @implements {../service.EmbeddableService}
  * @visibleForTesting
  */
 export class Navigation {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
-  constructor(ampdoc, opt_rootNode) {
-    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
-
+  constructor(ampdoc) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const {!Document|!ShadowRoot} */
-    this.rootNode_ = opt_rootNode || ampdoc.getRootNode();
+    this.rootNode_ = ampdoc.getRootNode();
 
     /** @private @const {!./viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
@@ -138,10 +127,11 @@ export class Navigation {
      * Must use URL parsing scoped to `rootNode_` for correct FIE behavior.
      * @private @const {!Element|!ShadowRoot}
      */
-    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (this.rootNode_
-      .nodeType == Node.DOCUMENT_NODE
-      ? this.rootNode_.documentElement
-      : this.rootNode_);
+    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (
+      this.rootNode_.nodeType == Node.DOCUMENT_NODE
+        ? this.rootNode_.documentElement
+        : this.rootNode_
+    );
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
@@ -201,19 +191,6 @@ export class Navigation {
   }
 
   /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      TAG,
-      new Navigation(ampdoc, embedWin.document)
-    );
-  }
-
-  /**
    * Removes all event listeners.
    */
   cleanup() {
@@ -265,14 +242,10 @@ export class Navigation {
    * @param {!{
    *   target: (string|undefined),
    *   opener: (boolean|undefined),
-   * }=} opt_options
+   * }=} options
    */
-  navigateTo(
-    win,
-    url,
-    opt_requestedBy,
-    {target = '_top', opener = false} = {}
-  ) {
+  navigateTo(win, url, opt_requestedBy, options = {}) {
+    const {opener = false, target = '_top'} = options;
     url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {
@@ -285,8 +258,9 @@ export class Navigation {
       `Target '${target}' not supported.`
     );
 
-    // Resolve navigateTos relative to the source URL, not the proxy URL.
-    url = urlService.getSourceUrl(url);
+    // If we're on cache, resolve relative URLs to the publisher (non-cache) origin.
+    const sourceUrl = urlService.getSourceUrl(win.location);
+    url = urlService.resolveRelativeUrl(url, sourceUrl);
 
     // If we have a target of "_blank", we will want to open a new window. A
     // target of "_top" should behave like it would on an anchor tag and
@@ -423,7 +397,7 @@ export class Navigation {
    * @private
    */
   handleContextMenuClick_(element, e) {
-    // TODO(wg-runtime): Handle A2A, custom link protocols, and ITP 2.3 mitigation.
+    // TODO(wg-performance): Handle A2A, custom link protocols, and ITP 2.3 mitigation.
     this.expandVarsForAnchor_(element);
     this.applyAnchorMutators_(element, e);
   }
@@ -641,7 +615,7 @@ export class Navigation {
     // confusing behavior e.g. when pressing "tab" button.
     // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
     // @see https://github.com/ampproject/amphtml/issues/18671
-    if (Services.platformFor(this.ampdoc.win).isIe()) {
+    if (!IS_ESM && Services.platformFor(this.ampdoc.win).isIe()) {
       const id = toLocation.hash.substring(1);
       const elementWithId = this.ampdoc.getElementById(id);
       if (elementWithId) {
@@ -775,9 +749,11 @@ export class Navigation {
     const viewerHasCapability = this.viewer_.hasCapability(
       'interceptNavigation'
     );
-    const docOptedIn = this.ampdoc
-      .getRootNode()
-      .documentElement.hasAttribute('allow-navigation-interception');
+    const docOptedIn =
+      this.ampdoc.isSingleDoc() &&
+      this.ampdoc
+        .getRootNode()
+        .documentElement.hasAttribute('allow-navigation-interception');
 
     if (
       !viewerHasCapability ||

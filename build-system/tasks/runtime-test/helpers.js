@@ -17,11 +17,11 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const log = require('fancy-log');
-const opn = require('opn');
 const path = require('path');
-const {green, yellow, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../../common/travis');
+const {cyan, green, red, yellow} = require('../../common/colors');
+const {isCiBuild} = require('../../common/ci');
+const {log, logWithoutTimestamp} = require('../../common/logging');
+const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestRunComplete} = require('../report-test-status');
 const {Server} = require('karma');
 
@@ -72,7 +72,7 @@ function getAdTypes() {
  * Prints help messages for args if tests are being run for local development.
  */
 function maybePrintArgvMessages() {
-  if (argv.nohelp || isTravisBuild()) {
+  if (argv.nohelp || isCiBuild()) {
     return;
   }
 
@@ -107,13 +107,13 @@ function maybePrintArgvMessages() {
       green('Launching'),
       cyan(CHROMEBASE),
       green('with flags'),
-      cyan(chromeFlags)
+      cyan(`${chromeFlags}`)
     );
   }
 
   log(
     green('Run'),
-    cyan('gulp help'),
+    cyan('amp --tasks'),
     green('to see a list of all test flags.')
   );
   log(green('⤷ Use'), cyan('--nohelp'), green('to silence these messages.'));
@@ -142,21 +142,12 @@ function maybePrintArgvMessages() {
     log(green('Running tests against unminified code.'));
   }
   Object.keys(argv).forEach((arg) => {
+    /** @type {string} */
     const message = argvMessages[arg];
     if (message) {
       log(yellow(`--${arg}:`), green(message));
     }
   });
-}
-
-function maybePrintCoverageMessage() {
-  if (!argv.coverage || isTravisBuild()) {
-    return;
-  }
-
-  const url = 'file://' + path.resolve('test/coverage/index.html');
-  log(green('INFO:'), 'Generated code coverage report at', cyan(url));
-  opn(url, {wait: false});
 }
 
 /**
@@ -166,60 +157,50 @@ function maybePrintCoverageMessage() {
 async function karmaBrowserComplete_(browser) {
   const result = browser.lastResult;
   result.total = result.success + result.failed + result.skipped;
-  // Initially we were reporting an error with reportTestErrored() when zero tests were detected (see #16851),
-  // but since Karma sometimes returns a transient, recoverable state, we will
-  // print a warning without reporting an error to the github test status. (see #24957)
+  // This used to be a warning with karma-browserify. See #16851 and #24957.
+  // Now, with karma-esbuild, this is a fatal error. See #34040.
   if (result.total == 0) {
     log(
-      yellow('WARNING:'),
-      'Received a status with zero tests:',
-      cyan(JSON.stringify(result))
+      red('ERROR:'),
+      'Karma returned a result with zero tests.',
+      'This usually indicates a transformation error. See logs above.'
     );
+    log(cyan(JSON.stringify(result)));
+    process.exit(1);
   }
 }
 
 /**
  * @private
  */
-function karmaBrowsersReady_() {
-  console./*OK*/ log('\n');
+function karmaBrowserStart_() {
+  logWithoutTimestamp('\n');
   log(green('Done. Running tests...'));
 }
 
 /**
- * @private
- */
-function karmaRunStart_() {
-  log(green('Running tests locally...'));
-}
-
-/**
  * Creates and starts karma server
- * @param {!Object} configBatch
- * @param {function()} runCompleteFn a function to execute on the
- *     `run_complete` event. It should take two arguments, (browser, results),
- *     and return nothing.
+ * @param {!Object} config
  * @return {!Promise<number>}
  */
-async function createKarmaServer(
-  configBatch,
-  runCompleteFn = reportTestRunComplete
-) {
-  let resolver;
+async function createKarmaServer(config) {
+  let resolver, results_;
   const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
-  const karmaServer = new Server(configBatch, (exitCode) => {
-    maybePrintCoverageMessage();
+  const karmaServer = new Server(config, async (exitCode) => {
+    await reportTestRunComplete(results_);
+    maybePrintCoverageMessage('test/coverage/index.html');
     resolver(exitCode);
   });
 
   karmaServer
-    .on('run_start', karmaRunStart_)
-    .on('browsers_ready', karmaBrowsersReady_)
+    .on('browser_start', karmaBrowserStart_)
     .on('browser_complete', karmaBrowserComplete_)
-    .on('run_complete', runCompleteFn);
+    .on('run_complete', (_browsers, results) => {
+      results_ = results;
+    });
 
   karmaServer.start();
 

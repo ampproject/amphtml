@@ -27,8 +27,7 @@ const viewport = {
 describes.endtoend(
   'amp-story-auto-ads:fullbleed',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/fullbleed.html',
+    fixture: 'amp-story-auto-ads/fullbleed.html',
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
     // TODO(ccordry): re-enable viewer-demo that should handle the 64px
     // offset set by the viewer header.
@@ -89,14 +88,13 @@ async function validateAdOverlay(controller) {
     .to.exist;
 
   const adBadge = await controller.findElement('.i-amphtml-story-ad-badge');
-  await expect(controller.getElementText(adBadge)).to.equal('Ad');
   await expect(controller.getElementCssValue(adBadge, 'visibility')).to.equal(
     'visible'
   );
-  // Design spec is 14px from top, 16px from left.
+  // Design spec is 12px from top, 12px from left.
   await expect(controller.getElementRect(adBadge)).to.include({
-    left: 16,
-    top: 14,
+    left: 12,
+    top: 12,
   });
 
   await controller.switchToLight();

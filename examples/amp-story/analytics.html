@@ -40,10 +40,10 @@
         <script type="application/json">
           {
             "requests": {
-              "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
+              "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/main/examples/img/ampicon.png",
               "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
               "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}",
-              "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&bookendTargetHref=${storyBookendTargetHref}&bookendCardType=${storyBookendComponentType}&bookendCardPosition=${storyBookendComponentPosition}"
+              "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}"
             },
             "triggers": {
               "trackAnchorClicks": {
@@ -52,13 +52,6 @@
                 "request": "click",
                 "vars": {
                   "eventId": "clickOnAnyAnchor"
-                }
-              },
-              "trackBookendClicks": {
-                "on": "story-bookend-click",
-                "request": "click",
-                "vars": {
-                  "eventId": "clickOnBookend"
                 }
               },
               "trackPageAttachmentOpen": {
@@ -88,16 +81,6 @@
                   "repeat": false
                 }
               },
-              "trackBookendEnter": {
-                "on": "story-open",
-                "tagName": "amp-story-bookend",
-                "request": "pageView"
-              },
-              "trackBookendExit": {
-                "on": "story-close",
-                "tagName": "amp-story-bookend",
-                "request": "pageView"
-              },
               "trackAudioEnable": {
                 "on": "story-audio-muted",
                 "request": "pageView"
@@ -105,6 +88,16 @@
               "trackAudioDisable": {
                 "on": "story-audio-unmuted",
                 "request": "pageView"
+              }
+            },
+            "linkers": {
+              "enabled": true,
+              "destinationDomains": ["google.com"],
+              "proxyOnly": false,
+              "linker": {
+                "ids": {
+                  "cid": "CLIENT_ID(cid)"
+                }
               }
             }
           }
@@ -134,11 +127,12 @@
       <amp-story-page id="p3">
         <amp-story-grid-layer template="vertical">
           <h1>Page Three</h1>
-          <a href="google.com">click me</a>
+          <a href="https://google.com">tooltip link</a>
         </amp-story-grid-layer>
         <amp-story-cta-layer>
-          <a>click me</a>
+          <a href="https://google.com">CTA link</a>
         </amp-story-cta-layer>
+        <amp-story-page-attachment layout="nodisplay" href="https://google.com"></amp-story-page-attachment>
       </amp-story-page>
 
       <amp-story-page id="p4" style="background-color: grey">
@@ -181,9 +175,6 @@
           </amp-video>
         </amp-story-grid-layer>
       </amp-story-page>
-
-      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
-      </amp-story-bookend>
     </amp-story>
   </body>
 </html>

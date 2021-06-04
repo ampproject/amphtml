@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dashToCamelCase} from '../../../src/core/types/string/index.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 
@@ -29,6 +30,15 @@ const DEFAULT_LOCALE = 'en';
 
 /** @const {number} */
 const DEFAULT_OFFSET_SECONDS = 0;
+
+/** @const {!Object<string, *>} */
+const DEFAULT_DATETIME_OPTIONS = {
+  'year': 'numeric',
+  'month': 'short',
+  'day': 'numeric',
+  'hour': 'numeric',
+  'minute': 'numeric',
+};
 
 /** @typedef {{
   year: number,
@@ -66,6 +76,7 @@ let VariablesDef;
   minuteTwoDigit: string,
   secondTwoDigit: string,
   dayPeriod: string,
+  localeString: string,
  }} */
 let EnhancedVariablesDef;
 
@@ -95,8 +106,11 @@ export class AmpDateDisplay extends AMP.BaseElement {
     /** @private {string} */
     this.locale_ = '';
 
-    /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {Object<string, *>} */
+    this.localeOptions_ = null;
+
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /** @private {?Element} */
     this.container_ = null;
@@ -104,6 +118,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
+
     this.container_ = this.element.ownerDocument.createElement('div');
     this.element.appendChild(devAssert(this.container_));
 
@@ -126,6 +142,11 @@ export class AmpDateDisplay extends AMP.BaseElement {
       DEFAULT_OFFSET_SECONDS;
 
     this.locale_ = this.element.getAttribute('locale') || DEFAULT_LOCALE;
+
+    this.localeOptions_ = this.parseLocaleOptionsAttrs_(
+      this.element,
+      'data-options-'
+    );
 
     const data = /** @type {!JsonObject} */ (this.getDataForTemplate_());
     this.templates_
@@ -150,8 +171,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
     const date = new Date(epoch + offset);
     const inUTC = this.displayIn_.toLowerCase() === 'utc';
     const basicData = inUTC
-      ? this.getVariablesInUTC_(date, this.locale_)
-      : this.getVariablesInLocal_(date, this.locale_);
+      ? this.getVariablesInUTC_(date, this.locale_, this.localeOptions_)
+      : this.getVariablesInLocal_(date, this.locale_, this.localeOptions_);
 
     return this.enhanceBasicVariables_(basicData);
   }
@@ -184,12 +205,66 @@ export class AmpDateDisplay extends AMP.BaseElement {
   }
 
   /**
+   * @param {null|string} attributeName
+   * @param {string|undefined} attributePrefix
+   * @return {boolean}
+   * @private
+   */
+  matchesAttrPrefix_(attributeName, attributePrefix) {
+    return (
+      attributeName !== null &&
+      attributePrefix !== undefined &&
+      attributeName.startsWith(attributePrefix) &&
+      attributeName !== attributePrefix
+    );
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {string} attrPrefix
+   * @return {Object<string, *>|undefined}
+   * @private
+   */
+  parseLocaleOptionsAttrs_(element, attrPrefix) {
+    const currObj = {};
+    let objContains = false;
+    const attrs = element.attributes;
+    for (let i = 0; i < attrs.length; i++) {
+      const attrib = attrs[i];
+      if (this.matchesAttrPrefix_(attrib.name, attrPrefix)) {
+        currObj[dashToCamelCase(attrib.name.slice(attrPrefix.length))] =
+          attrib.value;
+        objContains = true;
+      }
+    }
+    if (objContains) {
+      return currObj;
+    }
+  }
+
+  /**
    * @param {!Date} date
    * @param {string} locale
+   * @param {?Object<string, *>} localeOptions
+   * @return {string}
+   * @private
+   */
+  getLocaleString_(date, locale, localeOptions) {
+    try {
+      return date.toLocaleString(locale, localeOptions);
+    } catch (e) {
+      user().error(TAG, 'localeOptions', e);
+    }
+  }
+
+  /**
+   * @param {!Date} date
+   * @param {string} locale
+   * @param {?Object<string, *>} localeOptions
    * @return {!VariablesDef}
    * @private
    */
-  getVariablesInLocal_(date, locale) {
+  getVariablesInLocal_(date, locale, localeOptions = DEFAULT_DATETIME_OPTIONS) {
     return {
       year: date.getFullYear(),
       month: date.getMonth() + 1,
@@ -206,16 +281,22 @@ export class AmpDateDisplay extends AMP.BaseElement {
       minute: date.getMinutes(),
       second: date.getSeconds(),
       iso: date.toISOString(),
+      localeString: this.getLocaleString_(date, locale, localeOptions),
     };
   }
 
   /**
    * @param {!Date} date
    * @param {string} locale
+   * @param {?Object<string, *>} localeOptions
    * @return {!VariablesDef}
    * @private
    */
-  getVariablesInUTC_(date, locale) {
+  getVariablesInUTC_(date, locale, localeOptions = DEFAULT_DATETIME_OPTIONS) {
+    const localeOptionsInUTC = {
+      ...localeOptions,
+      timeZone: 'UTC',
+    };
     return {
       year: date.getUTCFullYear(),
       month: date.getUTCMonth() + 1,
@@ -240,6 +321,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
       minute: date.getUTCMinutes(),
       second: date.getUTCSeconds(),
       iso: date.toISOString(),
+      localeString: this.getLocaleString_(date, locale, localeOptionsInUTC),
     };
   }
 

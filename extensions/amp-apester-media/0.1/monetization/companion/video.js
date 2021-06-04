@@ -17,8 +17,7 @@
 import {Services} from '../../../../../src/services';
 const ALLOWED_AD_PROVIDER = 'sr';
 import {createElementWithAttributes} from '../../../../../src/dom';
-import {dict} from '../../../../../src/utils/object';
-import {getValueForExpr} from '../../../../../src/json';
+import {dict, getValueForExpr} from '../../../../../src/core/types/object';
 
 /**
  * @param {!JsonObject} media
@@ -148,12 +147,12 @@ function getSrMacros(interactionModel, campaignId, apesterElement, consentObj) {
     'param1': interactionId,
     'param2': publisherId,
     'param6': campaignId,
-    'page_url': pageUrl, // eslint-disable-line google-camelcase/google-camelcase
+    'page_url': pageUrl,
   });
 
   if (consentObj['gdpr']) {
     macros['gdpr'] = consentObj['gdpr'];
-    macros['user_consent'] = consentObj['user_consent']; // eslint-disable-line google-camelcase/google-camelcase
+    macros['user_consent'] = consentObj['user_consent'];
     macros['param4'] = consentObj['gdprString'];
   }
 

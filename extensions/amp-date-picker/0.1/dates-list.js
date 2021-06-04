@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as rrule from '../../../node_modules/rrule/dist/es5/rrule.min.js';
+import * as rrule from '../../../node_modules/rrule/dist/es5/rrule.js';
 import {requireExternal} from '../../../src/module';
 
-const rrulestr = rrule.default.rrulestr || rrule.rrulestr; // CC imports into .default, browserify flattens a layer.
+const rrulestr = rrule.default.rrulestr || rrule.rrulestr; // closure imports into .default, esbuild flattens a layer.
 
 /** @enum {string} */
 const DateType = {
@@ -35,9 +35,9 @@ export class DatesList {
    */
   constructor(dates) {
     /** @private @const */
-    this.ReactDates_ = /** @type {!JsonObject} */ (requireExternal(
-      'react-dates'
-    ));
+    this.ReactDates_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates')
+    );
 
     /** @private @const */
     this.moment_ = requireExternal('moment');

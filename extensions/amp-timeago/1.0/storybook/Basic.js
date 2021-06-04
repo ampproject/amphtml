@@ -15,26 +15,42 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Timeago} from '../timeago';
-import {date, number, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
+import {Timeago} from '../component';
+import {date, number, select, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'Timeago',
   component: Timeago,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
+
+const LOCALES = [
+  'en-US',
+  'en-GB',
+  'fr',
+  'ru',
+  'ar',
+  'he',
+  'ja',
+  'ZhTw',
+  'zH-Tw',
+];
 
 export const _default = () => {
   const dateTime = date('Date/time', new Date());
   const cutoff = number('Cutoff (seconds)', 0);
-  const cutoffText = text('Cutoff text', 'Time passed!');
+  const placeholder = text('Cutoff placeholder', 'Time passed!');
+  const userLocale = navigator.language || 'en-US';
+  const allLocales = [userLocale].concat(
+    LOCALES.filter((locale) => locale != userLocale)
+  );
+  const locale = select('Locale', allLocales, userLocale);
   return (
     <Timeago
-      datetime={new Date(dateTime).toISOString()}
-      locale="en"
+      datetime={dateTime}
+      locale={locale}
       cutoff={cutoff}
-      cutoffText={cutoffText}
+      placeholder={placeholder}
     />
   );
 };

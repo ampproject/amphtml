@@ -22,7 +22,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {SafeframeHostApi, removeSafeframeListener} from '../safeframe-host';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Encode} from '../../../../src/core/types/string/bytes';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -374,9 +374,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
     impl.isVerifiedAmpCreative_ = true;
     impl.reattemptToExpandFluidCreative_ = true;
     // Should do nothing
-    impl.viewportCallback(true);
+    impl.viewportCallbackTemp(true);
     expect(attemptChangeHeightStub).to.not.be.called;
-    impl.viewportCallback(false);
+    impl.viewportCallbackTemp(false);
     expect(attemptChangeHeightStub).to.be.calledOnce;
   });
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {WindowInterface} from '../src/window-interface';
+import {WindowInterface} from '../src/core/window/interface';
 import {createElementWithAttributes} from '../src/dom';
-import {dict} from '../src/utils/object';
+import {dict} from '../src/core/types/object';
 import {user} from '../src/log';
 
 /** @const {string} */

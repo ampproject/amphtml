@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {DomFingerprint} from './utils/dom-fingerprint';
+import {DomFingerprint} from './core/dom/fingerprint';
 import {Services} from './services';
-import {dict} from './utils/object.js';
+import {dict} from './core/types/object';
 import {experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
+import {getPageLayoutBoxBlocking} from './core/dom/page-layout-box';
 import {internalRuntimeVersion} from './internal-version';
 import {urls} from './config';
 
@@ -58,9 +59,7 @@ export function getContextMetadata(
   const viewer = Services.viewerForDoc(element);
   const referrer = viewer.getUnconfirmedReferrerUrl();
 
-  // TODO(alanorozco): Redesign data structure so that fields not exposed by
-  // AmpContext are not part of this object.
-  const layoutRect = element.getPageLayoutBox();
+  const layoutRect = getPageLayoutBoxBlocking(element);
 
   // Use JsonObject to preserve field names so that ampContext can access
   // values with name
@@ -95,7 +94,6 @@ export function getContextMetadata(
           'height': layoutRect.height,
         }
       : null,
-    'initialIntersection': element.getIntersectionChangeEntry(),
     'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),
     'sentinel': sentinel,

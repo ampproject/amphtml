@@ -23,17 +23,18 @@ import {
   variableServiceForDoc,
 } from '../variables';
 import {Services} from '../../../../src/services';
+import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
 
-const fakeElement = document.documentElement;
-
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
+  let fakeElement;
   let variables;
 
   beforeEach(() => {
+    fakeElement = env.win.document.documentElement;
     installLinkerReaderService(env.win);
     variables = new VariableService(env.ampdoc);
   });
@@ -352,6 +353,40 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       return check('$BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
     });
 
+    describe('$CALC', () => {
+      it('calc addition works', () => check('$CALC(1, 2, add)', '3'));
+
+      it('calc addition works with rounding flag', () =>
+        check('$CALC(1, 2, add, true)', '3'));
+
+      it('calc subtraction works', () =>
+        check('$CALC(1, 2, subtract, true)', '-1'));
+
+      it('calc multiplication works', () =>
+        check('$CALC(1, 2, multiply, true)', '2'));
+
+      it('calc division works', () =>
+        check('$CALC(1, 2, divide, false)', '0.5'));
+
+      it('calc division should round 2/3 to 1', () =>
+        check('$CALC(2, 3, divide, true)', '1'));
+
+      it('calc division should round 1/3 to 0', () =>
+        check('$CALC(1, 3, divide, true)', '0'));
+
+      it('calc division should round 1/2 to 1', () =>
+        check('$CALC(1, 2, divide, true)', '1'));
+
+      it('calc with unknown operation defaults to zero', () =>
+        check('$CALC(1, 2, somethingelse, true)', '0'));
+
+      it('calc with nested macro works', () =>
+        check('$CALC($SUBSTR(123456, 2, 5), 10, multiply, false)', '34560'));
+
+      it('calc should replace CUMULATIVE_LAYOUT_SHIFT with 1', () =>
+        check('$CALC(CUMULATIVE_LAYOUT_SHIFT, 10, multiply, true)', '10'));
+    });
+
     it('if works with true', () =>
       check('$IF(true, truthy, falsey)', 'truthy'));
 
@@ -443,6 +478,37 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       );
     });
 
+    it('replaces CONSENT_METADATA', () => {
+      env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+        Promise.resolve({
+          getConsentMetadataInfo: () => {
+            return Promise.resolve({
+              'gdprApplies': true,
+              'additionalConsent': 'abc123',
+              'consentStringType': 1,
+            });
+          },
+        })
+      );
+
+      return check(
+        'CONSENT_METADATA(gdprApplies)&CONSENT_METADATA(additionalConsent)&CONSENT_METADATA(consentStringType)&CONSENT_METADATA(invalid_key)',
+        'true&abc123&1&'
+      );
+    });
+
+    it('replaces CONSENT_STRING', () => {
+      env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+        Promise.resolve({
+          getConsentStringInfo: () => {
+            return Promise.resolve('userConsentString');
+          },
+        })
+      );
+
+      return check('a=CONSENT_STRING', 'a=userConsentString');
+    });
+
     it('"COOKIE" resolves cookie value', async () => {
       doc.cookie = 'test=123';
       await check('COOKIE(test)', '123');
@@ -495,6 +561,25 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
 
     it('should replace CUMULATIVE_LAYOUT_SHIFT', () => {
       return check('CUMULATIVE_LAYOUT_SHIFT', '1');
+    });
+
+    it('should expand EXPERIMENT_BRANCHES to name:value comma separated list', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      forceExperimentBranch(env.win, 'exp2', '5678');
+      return check('EXPERIMENT_BRANCHES', 'exp1%3A1234%2Cexp2%3A5678');
+    });
+
+    it('EXPERIMENT_BRANCHES should be empty string if no branches', () => {
+      return check('EXPERIMENT_BRANCHES', '');
+    });
+
+    it('should expand EXPERIMENT_BRANCHES(expName) to experiment value', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      return check('EXPERIMENT_BRANCHES(exp1)', '1234');
+    });
+
+    it('EXPERIMENT_BRANCHES(expName) should be empty string if not set', () => {
+      return check('EXPERIMENT_BRANCHES(exp1)', '');
     });
 
     describe('$MATCH', () => {
@@ -565,6 +650,32 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       await check('SCROLL_TOP', '99');
       scrollTopValue = 99.5;
       await check('SCROLL_TOP', '100');
+    });
+
+    describe('AMPDOC_META', () => {
+      it('should replace with meta tag content', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+          'foo': 'bar',
+        });
+        return check('AMPDOC_META(foo)', 'bar');
+      });
+
+      it('should replace with "" when no meta tag', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({});
+        return check('AMPDOC_META(foo)', '');
+      });
+
+      it('should replace with default_value when no meta tag', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({});
+        return check('AMPDOC_META(foo, default_value)', 'default_value');
+      });
+
+      it('should prefer empty meta tag over default_value', () => {
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+          'foo': '',
+        });
+        return check('AMPDOC_META(foo, default_value)', '');
+      });
     });
   });
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {user} from '../../../src/log';
 
@@ -96,19 +96,21 @@ export class SubscriptionAnalytics {
 
   /**
    * @param {!SubscriptionAnalyticsEvents|string} eventType
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {!JsonObject=} opt_vars
    * @param {!JsonObject=} internalVars
    */
-  serviceEvent(eventType, serviceId, opt_vars, internalVars) {
+  serviceEvent(eventType, platformKey, opt_vars, internalVars) {
     this.event(
       eventType,
-      /** @type {!JsonObject} */ (Object.assign(
-        dict({
-          'serviceId': serviceId,
-        }),
-        opt_vars
-      )),
+      /** @type {!JsonObject} */ (
+        Object.assign(
+          dict({
+            'serviceId': platformKey,
+          }),
+          opt_vars
+        )
+      ),
       internalVars
     );
   }
@@ -142,15 +144,15 @@ export class SubscriptionAnalytics {
   }
 
   /**
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {!Action|string} action
    * @param {!ActionStatus|string} status
    * @param {!JsonObject=} opt_vars
    */
-  actionEvent(serviceId, action, status, opt_vars) {
+  actionEvent(platformKey, action, status, opt_vars) {
     this.serviceEvent(
       SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
-      serviceId,
+      platformKey,
       opt_vars,
       dict({
         'action': action,

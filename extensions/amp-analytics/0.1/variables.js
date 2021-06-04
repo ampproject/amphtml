@@ -15,19 +15,28 @@
  */
 
 import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/enums';
-import {asyncStringReplace} from '../../../src/string';
-import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {TickLabel} from '../../../src/core/constants/enums';
+import {asyncStringReplace} from '../../../src/core/types/string';
+import {base64UrlEncodeFromString} from '../../../src/core/types/string/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getConsentPolicyState} from '../../../src/consent';
+import {dict} from '../../../src/core/types/object';
+import {
+  getActiveExperimentBranches,
+  getExperimentBranch,
+} from '../../../src/experiments';
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {isArray, isFiniteNumber} from '../../../src/types';
+import {isArray, isFiniteNumber} from '../../../src/core/types';
+
 import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';
 
@@ -174,6 +183,59 @@ function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
 }
 
 /**
+ * This macro function allows arithmetic operations over other analytics variables.
+ *
+ * @param {string} leftOperand
+ * @param {string} rightOperand
+ * @param {string} operation
+ * @param {string} round If this flag is truthy the result will be rounded
+ * @return {number}
+ */
+function calcMacro(leftOperand, rightOperand, operation, round) {
+  const left = Number(leftOperand);
+  const right = Number(rightOperand);
+  userAssert(!isNaN(left), 'CALC macro - left operand must be a number');
+  userAssert(!isNaN(right), 'CALC macro - right operand must be a number');
+  let result = 0;
+  switch (operation) {
+    case 'add':
+      result = left + right;
+      break;
+    case 'subtract':
+      result = left - right;
+      break;
+    case 'multiply':
+      result = left * right;
+      break;
+    case 'divide':
+      userAssert(right, 'CALC macro - cannot divide by 0');
+      result = left / right;
+      break;
+    default:
+      user().error(TAG, 'CALC macro - Invalid operation');
+  }
+  return stringToBool(round) ? Math.round(result) : result;
+}
+
+/**
+ * If given an experiment name returns the branch id if a branch is selected.
+ * If no branch name given, it returns a comma separated list of active branch
+ * experiment ids and their names or an empty string if none exist.
+ * @param {!Window} win
+ * @param {string=} opt_expName
+ * @return {string}
+ */
+function experimentBranchesMacro(win, opt_expName) {
+  if (opt_expName) {
+    return getExperimentBranch(win, opt_expName) || '';
+  }
+  const branches = getActiveExperimentBranches(win);
+  return Object.keys(branches)
+    .map((expName) => `${expName}:${branches[expName]}`)
+    .join(',');
+}
+
+/**
  * Provides support for processing of advanced variable syntax like nested
  * expansions macros etc.
  */
@@ -204,6 +266,7 @@ export class VariableService {
     );
     this.register_('$REPLACE', replaceMacro);
     this.register_('$MATCH', matchMacro);
+    this.register_('$CALC', calcMacro);
     this.register_(
       '$EQUALS',
       (firstValue, secValue) => firstValue === secValue
@@ -236,6 +299,15 @@ export class VariableService {
     this.register_('SCROLL_LEFT', () =>
       Math.round(Services.viewportForDoc(this.ampdoc_).getScrollLeft())
     );
+
+    this.register_('EXPERIMENT_BRANCHES', (opt_expName) =>
+      experimentBranchesMacro(this.ampdoc_.win, opt_expName)
+    );
+
+    // Returns the content of a meta tag in the ampdoc
+    this.register_('AMPDOC_META', (meta, defaultValue = '') => {
+      return this.ampdoc_.getMetaByName(meta) ?? defaultValue;
+    });
   }
 
   /**
@@ -247,6 +319,12 @@ export class VariableService {
       'COOKIE': (name) =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
+      'CONSENT_STRING': getConsentPolicyInfo(element),
+      'CONSENT_METADATA': (key) =>
+        getConsentMetadataValue(
+          element,
+          userAssert(key, 'CONSENT_METADATA macro must contain a key')
+        ),
     };
     const perfMacros = isInFie(element)
       ? {}
@@ -319,7 +397,7 @@ export class VariableService {
 
       // Split the key to name and args
       // e.g.: name='SOME_MACRO', args='(arg1, arg2)'
-      const {name, argList} = getNameArgs(key);
+      const {argList, name} = getNameArgs(key);
       if (options.freezeVars[name]) {
         // Do nothing with frozen params
         return match;
@@ -424,7 +502,7 @@ export function encodeVars(raw) {
     return raw.map(encodeVars).join(',');
   }
   // Separate out names and arguments from the value and encode the value.
-  const {name, argList} = getNameArgs(String(raw));
+  const {argList, name} = getNameArgs(String(raw));
   return encodeURIComponent(name) + argList;
 }
 
@@ -470,10 +548,9 @@ export function variableServiceForDoc(elementOrAmpDoc) {
  * @return {!Promise<!VariableService>}
  */
 export function variableServicePromiseForDoc(elementOrAmpDoc) {
-  return /** @type {!Promise<!VariableService>} */ (getServicePromiseForDoc(
-    elementOrAmpDoc,
-    'amp-analytics-variables'
-  ));
+  return /** @type {!Promise<!VariableService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, 'amp-analytics-variables')
+  );
 }
 
 /**
@@ -496,6 +573,22 @@ function getConsentStateStr(element) {
       return null;
     }
     return EXTERNAL_CONSENT_POLICY_STATE_STRING[consent];
+  });
+}
+
+/**
+ * Get the associated value from the resolved consent metadata object
+ * @param {!Element} element
+ * @param {string} key
+ * @return {!Promise<?Object>}
+ */
+function getConsentMetadataValue(element, key) {
+  // Get the metadata using the default policy id
+  return getConsentMetadata(element).then((consentMetadata) => {
+    if (!consentMetadata) {
+      return null;
+    }
+    return consentMetadata[key];
   });
 }
 

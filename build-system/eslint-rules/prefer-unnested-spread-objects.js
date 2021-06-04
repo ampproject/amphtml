@@ -50,6 +50,11 @@ module.exports = {
     const spreadElement =
       ':matches(ObjectExpression > ExperimentalSpreadProperty, ObjectExpression > SpreadElement)';
 
+    /**
+     * @param {Array<T>} array
+     * @param {T} item
+     * @return {?T}
+     */
     function findAfter(array, item) {
       const index = array.indexOf(item);
       return index < array.length - 1 ? array[index + 1] : null;
@@ -62,7 +67,7 @@ module.exports = {
           message: 'Nesting an object under an object spread is not useful',
 
           fix(fixer) {
-            const {properties, parent} = node;
+            const {parent, properties} = node;
             const texts = properties.map((prop) => sourceCode.getText(prop));
 
             if (texts.length > 0) {

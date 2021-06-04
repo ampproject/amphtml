@@ -30,7 +30,7 @@ Collect and enforce user consent with the Didomi Consent Management Platform. Us
   </script>
   <div id="postPromptUI">
     Post Prompt UI
-    <button on="tap:didomi.prompt(consent=didomi)" role="button">Manage</button>
+    <button on="tap:didomi.prompt(consent=didomi)">Manage</button>
   </div>
 </amp-consent>
 ```

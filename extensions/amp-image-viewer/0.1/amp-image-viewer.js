@@ -18,7 +18,7 @@ import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-viewer-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {
   DoubletapRecognizer,
   PinchRecognizer,
@@ -29,10 +29,13 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
-import {bezierCurve} from '../../../src/curve';
-import {boundValue, distance, magnitude} from '../../../src/utils/math';
-import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
+import {WindowInterface} from '../../../src/core/window/interface';
+import {bezierCurve} from '../../../src/core/data-structures/curve';
+import {boundValue, distance, magnitude} from '../../../src/core/math';
+import {
+  closestAncestorElementBySelector,
+  elementByTag,
+} from '../../../src/core/dom/query';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
@@ -41,9 +44,13 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../../src/layout-rect';
+} from '../../../src/core/math/layout-rect';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
 import {setStyles} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
+import {srcsetFromElement} from '../../../src/core/dom/srcset';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';
@@ -122,6 +129,8 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.loadPromise_ = null;
+
+    this.onResize_ = this.onResize_.bind(this);
   }
 
   /** @override */
@@ -146,23 +155,6 @@ export class AmpImageViewer extends AMP.BaseElement {
       this.sourceAmpImage_,
       this.element
     );
-  }
-
-  /** @override */
-  onMeasureChanged() {
-    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
-    // we have something better.
-    const isScaled = closestAncestorElementBySelector(
-      this.element,
-      '[i-amphtml-scale-animation]'
-    );
-    if (isScaled) {
-      return;
-    }
-
-    if (this.loadPromise_) {
-      this.loadPromise_.then(() => this.resetImageDimensions_());
-    }
   }
 
   /** @override */
@@ -231,6 +223,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   unlayoutCallback() {
     this.cleanupGestures_();
     this.loadPromise_ = null;
+    unobserveContentSize(this.element, this.onResize_);
     return true;
   }
 
@@ -319,6 +312,8 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.setSourceDimensions_(ampImg);
     this.srcset_ = srcsetFromElement(ampImg);
 
+    observeContentSize(this.element, this.onResize_);
+
     return this.mutateElement(() => {
       setStyles(dev().assertElement(this.image_), {
         top: 0,
@@ -332,6 +327,21 @@ export class AmpImageViewer extends AMP.BaseElement {
         ampImg.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
       });
     });
+  }
+
+  /** @private */
+  onResize_() {
+    // TODO(#19259): Tracks a more generic way to do this. Remove once
+    // we have something better.
+    const isScaled = closestAncestorElementBySelector(
+      this.element,
+      '[i-amphtml-scale-animation]'
+    );
+    if (isScaled) {
+      return;
+    }
+
+    this.resetImageDimensions_();
   }
 
   /**
@@ -766,12 +776,9 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
-    return /** @type {!Promise|undefined} */ (this.set_(
-      newScale,
-      newPosX,
-      newPosY,
-      animate
-    ));
+    return /** @type {!Promise|undefined} */ (
+      this.set_(newScale, newPosX, newPosY, animate)
+    );
   }
 
   /**

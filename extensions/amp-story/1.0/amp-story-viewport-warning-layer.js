@@ -26,7 +26,7 @@ import {createShadowRootWithStyle} from './utils';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {listen} from '../../../src/event-helper';
-import {throttle} from '../../../src/utils/rate-limit';
+import {throttle} from '../../../src/core/types/function';
 
 /**
  * CSS class indicating the format is landscape.

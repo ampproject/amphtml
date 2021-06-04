@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {VisibilityState} from '../visibility-state';
+import {VisibilityState} from '../core/constants/visibility-state';
 import {getVendorJsPropertyName} from '../style';
 
 /**

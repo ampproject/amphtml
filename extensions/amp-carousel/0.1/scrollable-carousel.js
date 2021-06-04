@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {isLayoutSizeFixed} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
@@ -111,6 +115,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallbackTemp(inViewport)
+    );
+
     this.doLayout_(this.pos_);
     this.preloadNext_(this.pos_, 1);
     this.setControlsState();
@@ -118,7 +126,14 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /** @override */
-  onViewportCallback(unusedInViewport) {
+  unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
+    return super.unlayoutCallback();
+  }
+
+  /** @override */
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
     this.updateInViewport_(this.pos_, this.pos_);
   }
 
@@ -240,29 +255,29 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   waitForScroll_(startingScrollLeft) {
-    this.scrollTimerId_ = /** @type {number} */ (Services.timerFor(
-      this.win
-    ).delay(() => {
-      // TODO(yuxichen): test out the threshold for identifying fast scrolling
-      if (Math.abs(startingScrollLeft - this.pos_) < 30) {
-        dev().fine(
-          TAG,
-          'slow scrolling: %s - %s',
-          startingScrollLeft,
-          this.pos_
-        );
-        this.scrollTimerId_ = null;
-        this.commitSwitch_(this.pos_);
-      } else {
-        dev().fine(
-          TAG,
-          'fast scrolling: %s - %s',
-          startingScrollLeft,
-          this.pos_
-        );
-        this.waitForScroll_(this.pos_);
-      }
-    }, 100));
+    this.scrollTimerId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(() => {
+        // TODO(yuxichen): test out the threshold for identifying fast scrolling
+        if (Math.abs(startingScrollLeft - this.pos_) < 30) {
+          dev().fine(
+            TAG,
+            'slow scrolling: %s - %s',
+            startingScrollLeft,
+            this.pos_
+          );
+          this.scrollTimerId_ = null;
+          this.commitSwitch_(this.pos_);
+        } else {
+          dev().fine(
+            TAG,
+            'fast scrolling: %s - %s',
+            startingScrollLeft,
+            this.pos_
+          );
+          this.waitForScroll_(this.pos_);
+        }
+      }, 100)
+    );
   }
 
   /**
@@ -306,7 +321,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   withinWindow_(pos, callback) {
-    const containerWidth = this.element.getLayoutWidth();
+    const containerWidth = this.element./*OK*/ offsetWidth;
     for (let i = 0; i < this.cells_.length; i++) {
       const cell = this.cells_[i];
       if (
@@ -351,17 +366,11 @@ export class AmpScrollableCarousel extends BaseCarousel {
     const seen = [];
     this.withinWindow_(newPos, (cell) => {
       seen.push(cell);
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        cell,
-        true
-      );
     });
     if (oldPos != newPos) {
       this.withinWindow_(oldPos, (cell) => {
         if (!seen.includes(cell)) {
           const owners = Services.ownersForDoc(this.element);
-          owners.updateInViewport(this.element, cell, false);
           owners.schedulePause(this.element, cell);
         }
       });
@@ -375,7 +384,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   hasNext() {
-    const containerWidth = this.element.getLayoutWidth();
+    const containerWidth = this.element./*OK*/ offsetWidth;
     const scrollWidth = this.container_./*OK*/ scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;

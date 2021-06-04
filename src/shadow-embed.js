@@ -21,26 +21,22 @@ import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
-  isShadowDomSupported,
-} from './web-components';
-import {closestNode, isShadowRoot, iterateCursor} from './dom';
+} from './core/dom/web-components';
 import {dev, devAssert} from './log';
-import {escapeCssSelectorIdent} from './css';
+import {escapeCssSelectorIdent} from './core/dom/css-selectors';
 import {installCssTransformer} from './style-installer';
+import {iterateCursor} from './dom';
 import {setInitialDisplay, setStyle} from './style';
-import {toArray, toWin} from './types';
-
-/**
- * Used for non-composed root-node search. See `getRootNode`.
- * @const {!GetRootNodeOptions}
- */
-const UNCOMPOSED_SEARCH = {composed: false};
+import {toArray} from './core/types/array';
+import {toWin} from './core/window';
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_END_REGEX = /[^\-\_0-9a-zA-Z]/;
+
+const SHADOW_CSS_CACHE = '__AMP_SHADOW_CSS';
 
 /**
  * @type {boolean|undefined}
@@ -87,7 +83,7 @@ export function createShadowRoot(hostElement) {
 
   if (!isShadowCssSupported()) {
     const rootId = `i-amphtml-sd-${win.Math.floor(win.Math.random() * 10000)}`;
-    shadowRoot.id = rootId;
+    shadowRoot['id'] = rootId;
     shadowRoot.host.classList.add(rootId);
 
     // CSS isolation.
@@ -135,9 +131,9 @@ function createShadowRootPolyfill(hostElement) {
   // `getElementById` is resolved via `querySelector('#id')`.
   shadowRoot.getElementById = function (id) {
     const escapedId = escapeCssSelectorIdent(id);
-    return /** @type {HTMLElement|null} */ (shadowRoot./*OK*/ querySelector(
-      `#${escapedId}`
-    ));
+    return /** @type {?HTMLElement} */ (
+      shadowRoot./*OK*/ querySelector(`#${escapedId}`)
+    );
   };
 
   // The styleSheets property should have a list of local styles.
@@ -153,20 +149,6 @@ function createShadowRootPolyfill(hostElement) {
   });
 
   return shadowRoot;
-}
-
-/**
- * Return shadow root for the specified node.
- * @param {!Node} node
- * @return {?ShadowRoot}
- */
-export function getShadowRootNode(node) {
-  // TODO(#22733): remove in preference to dom's `rootNodeFor`.
-  if (isShadowDomSupported() && Node.prototype.getRootNode) {
-    return /** @type {?ShadowRoot} */ (node.getRootNode(UNCOMPOSED_SEARCH));
-  }
-  // Polyfill shadow root lookup.
-  return /** @type {?ShadowRoot} */ (closestNode(node, (n) => isShadowRoot(n)));
 }
 
 /**
@@ -197,7 +179,7 @@ export function importShadowBody(shadowRoot, body, deep) {
     }
   }
   setStyle(resultBody, 'position', 'relative');
-  const oldBody = shadowRoot.body;
+  const oldBody = shadowRoot['body'];
   if (oldBody) {
     shadowRoot.removeChild(oldBody);
   }
@@ -232,7 +214,7 @@ export function transformShadowCss(shadowRoot, css) {
  * @visibleForTesting
  */
 export function scopeShadowCss(shadowRoot, css) {
-  const id = devAssert(shadowRoot.id);
+  const id = devAssert(shadowRoot['id']);
   const doc = shadowRoot.ownerDocument;
   let rules = null;
   // Try to use a separate document.
@@ -299,12 +281,12 @@ function rootSelectorPrefixer(match, name, pos, selector) {
  * @return {?CSSRuleList}
  */
 function getStylesheetRules(doc, css) {
-  const style = doc.createElement('style');
+  const style = /** @type {!HTMLStyleElement} */ (doc.createElement('style'));
   style./*OK*/ textContent = css;
   try {
     (doc.head || doc.documentElement).appendChild(style);
     if (style.sheet) {
-      return style.sheet.cssRules;
+      return /** @type {!CSSStyleSheet} */ (style.sheet).cssRules;
     }
     return null;
   } finally {
@@ -312,6 +294,43 @@ function getStylesheetRules(doc, css) {
       style.parentNode.removeChild(style);
     }
   }
+}
+
+/**
+ * @param {!ShadowRoot} shadowRoot
+ * @param {string} name
+ * @param {string} cssText
+ */
+export function installShadowStyle(shadowRoot, name, cssText) {
+  const doc = shadowRoot.ownerDocument;
+  const win = toWin(doc.defaultView);
+  if (
+    shadowRoot.adoptedStyleSheets !== undefined &&
+    win.CSSStyleSheet.prototype.replaceSync !== undefined
+  ) {
+    const cache = win[SHADOW_CSS_CACHE] || (win[SHADOW_CSS_CACHE] = {});
+    let styleSheet = cache[name];
+    if (!styleSheet) {
+      styleSheet = new win.CSSStyleSheet();
+      styleSheet.replaceSync(cssText);
+      cache[name] = styleSheet;
+    }
+    shadowRoot.adoptedStyleSheets =
+      shadowRoot.adoptedStyleSheets.concat(styleSheet);
+  } else {
+    const styleEl = doc.createElement('style');
+    styleEl.setAttribute('data-name', name);
+    styleEl.textContent = cssText;
+    shadowRoot.appendChild(styleEl);
+  }
+}
+
+/**
+ * @param {!Window} win
+ * @visibleForTesting
+ */
+export function resetShadowStyleCacheForTesting(win) {
+  win[SHADOW_CSS_CACHE] = null;
 }
 
 /**

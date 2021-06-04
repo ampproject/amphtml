@@ -16,13 +16,15 @@
 
 import '../flexible-bitrate';
 import {BitrateManager} from '../flexible-bitrate';
-import {childElementsByTag} from '../../../../src/dom';
-import {toArray} from '../../../../src/types';
+import {childElementsByTag} from '../../../../src/core/dom/query';
+import {toArray} from '../../../../src/core/types/array';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
   let clock;
   beforeEach(() => {
     clock = env.sandbox.useFakeTimers();
+    toggleExperiment(env.win, 'flexible-bitrate', true);
   });
 
   describe('reduce bitrate', () => {
@@ -77,6 +79,33 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
       expect(v0.currentSrc).to.equal('http://localhost:9876/1000.mp4');
       expect(currentBitrates(v1)[0]).to.equal(1000);
       expect(v1.currentSrc).to.equal('http://localhost:9876/1000.mp4');
+    });
+
+    it('should not lower bitrate on loaded video', () => {
+      const m = getManager('4g');
+      const v0 = getVideo([4000, 1000, 3000, 2000]);
+      env.sandbox.stub(v0, 'duration').value(10);
+      env.sandbox.stub(v0, 'buffered').value({
+        start: () => 0,
+        end: () => 9,
+        length: 1,
+      });
+      m.manage(v0);
+      m.updateOtherManagedAndPausedVideos_();
+
+      expect(currentBitrates(v0)[0]).to.equal(4000);
+    });
+
+    it('should not lower bitrate on waiting before metadata loaded', () => {
+      const m = getManager('4g');
+      const v0 = getVideo([4000, 1000, 3000, 2000]);
+      v0.id = 'v0';
+      m.sortSources_(v0);
+      m.manage(v0);
+      // Video should not downgrade on wait since it has not started loading (we never called `load`).
+      expect(currentBitrates(v0)[0]).to.equal(2000);
+      causeWait(v0);
+      expect(currentBitrates(v0)[0]).to.equal(2000);
     });
   });
 
@@ -166,15 +195,7 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
       v.insertBefore(cacheSource, v.firstElementChild);
       m.sortSources_(v);
       expect(currentBitrates(v)).to.jsonEqual([
-        2000,
-        2000,
-        1000,
-        1000,
-        3000,
-        3000,
-        4000,
-        4000,
-        4000,
+        2000, 2000, 1000, 1000, 3000, 3000, 4000, 4000, 4000,
       ]);
       expect(
         toArray(childElementsByTag(v, 'source')).map((source) => {
@@ -197,11 +218,31 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
         })
       ).to.jsonEqual([null, null, null, null, null, null, 'CACHE', null, null]);
     });
+
+    it("should sort sources only when it's not already sorted", () => {
+      const m = getManager('4g');
+      const v0 = getVideo([4000, 1000, 3000, 2000]);
+      m.manage(v0);
+
+      // Sorting once should work, but second time it should be a noop.
+      expect(m.sortSources_(v0)).to.be.true;
+      expect(m.sortSources_(v0)).to.be.false;
+    });
+
+    it('should not call load if there are no lower bitrates', () => {
+      const m = getManager('4g');
+      const v0 = getVideo([4000, 1000, 3000, 2000]);
+      m.manage(v0);
+      m.sortSources_(v0);
+      v0.load = env.sandbox.spy();
+      m.switchToLowerBitrate_(v0, m.acceptableBitrate_);
+      expect(v0.load).to.not.have.been.called;
+    });
   });
 
   function currentBitrates(video) {
     return toArray(childElementsByTag(video, 'source')).map((source) => {
-      return source.bitrate_;
+      return source.bitrate_ || parseFloat(source.getAttribute('data-bitrate'));
     });
   }
 
@@ -236,6 +277,7 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
         video.appendChild(s);
       });
     });
+    video.readyStateOverride = 0;
 
     Object.defineProperty(video, 'currentSrc', {
       get: () => {
@@ -250,9 +292,15 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
         video.currentTimeOverride = val;
       },
     });
+    Object.defineProperty(video, 'readyState', {
+      get: () => {
+        return video.readyStateOverride;
+      },
+    });
     video.load = function () {
       video.currentTime = 0;
       video.currentSrcOverride = video.firstElementChild.src;
+      video.readyStateOverride = 1;
     };
     video.play = env.sandbox.spy();
     env.win.document.body.appendChild(video);

@@ -15,9 +15,10 @@
  */
 
 import {getService, registerServiceBuilder} from '../../../src/service';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {parseLinker} from './linker';
-import {parseQueryString, removeParamsFromSearch} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
+import {removeParamsFromSearch} from '../../../src/url';
 
 import {user} from '../../../src/log';
 

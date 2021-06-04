@@ -19,7 +19,7 @@ import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {getAmpAdMetadata} from './amp-ad-utils';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {user} from '../../../src/log';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Decode} from '../../../src/core/types/string/bytes';
 
 export const SIGNATURE_VERIFIER_PROPERTY_NAME =
   'AMP_FAST_FETCH_SIGNATURE_VERIFIER_';
@@ -62,7 +62,7 @@ export class CryptographicValidator extends Validator {
   }
 
   /** @override */
-  validate(context, unvalidatedBytes, headers) {
+  validate(context, containerElement, unvalidatedBytes, headers) {
     return this.getSignatureVerifier_(context.win)
       .verify(
         unvalidatedBytes,

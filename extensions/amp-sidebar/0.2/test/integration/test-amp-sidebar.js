@@ -16,11 +16,11 @@
 
 import {poll} from '../../../../../testing/iframe';
 
-describe
+describes.sandboxed
   .configure()
   .skipSafari()
   .skipEdge()
-  .run('amp-sidebar', function () {
+  .run('amp-sidebar', {}, function () {
     // Extend timeout slightly for flakes on Windows environments
     this.timeout(4000);
     const extensions = ['amp-sidebar'];
@@ -72,9 +72,8 @@ describe
             openerButton.click();
             return openedPromise
               .then(() => {
-                const closerButton = win.document.getElementById(
-                  'sidebarCloser'
-                );
+                const closerButton =
+                  win.document.getElementById('sidebarCloser');
                 const closedPromise = waitForSidebarClose(win.document);
                 closerButton.click();
                 return closedPromise;
@@ -87,10 +86,11 @@ describe
         it.configure()
           .skipIfPropertiesObfuscated()
           .skipFirefox()
-          .run('should not change scroll position after close', () => {
+          .run('should not change scroll position after close', async () => {
             const openerButton = win.document.getElementById('sidebarOpener');
             const sidebar = win.document.getElementById('sidebar1');
-            const viewport = sidebar.implementation_.getViewport();
+            const impl = await sidebar.getImpl(false);
+            const viewport = impl.getViewport();
             const openedPromise = waitForSidebarOpen(win.document);
             openerButton.click();
             expect(viewport.getScrollTop()).to.equal(0);
@@ -98,9 +98,8 @@ describe
               .then(() => {
                 viewport.setScrollTop(1000);
                 expect(viewport.getScrollTop()).to.equal(1000);
-                const closerButton = win.document.getElementById(
-                  'sidebarCloser'
-                );
+                const closerButton =
+                  win.document.getElementById('sidebarCloser');
                 const closedPromise = waitForSidebarClose(win.document);
                 closerButton.click();
                 return closedPromise;

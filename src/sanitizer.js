@@ -24,11 +24,10 @@ import {
   TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
   isValidAttr,
 } from './purifier/sanitation';
-import {dict} from './utils/object';
+import {dict} from './core/types/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {isAmp4Email} from './format';
 import {rewriteAttributeValue} from './url-rewrite';
-import {startsWith} from './string';
 import {user} from './log';
 
 /** @private @const {string} */
@@ -105,7 +104,7 @@ export function sanitizeHtml(html, doc) {
         }
         return;
       }
-      const isAmpElement = startsWith(tagName, 'amp-');
+      const isAmpElement = tagName.startsWith('amp-');
       // Preprocess "binding" attributes, e.g. [attr], by stripping enclosing
       // brackets before custom validation and restoring them afterwards.
       const bindingAttribs = [];
@@ -115,7 +114,7 @@ export function sanitizeHtml(html, doc) {
           continue;
         }
         const classicBinding = attr[0] == '[' && attr[attr.length - 1] == ']';
-        const alternativeBinding = startsWith(attr, BIND_PREFIX);
+        const alternativeBinding = attr.startsWith(BIND_PREFIX);
         if (classicBinding) {
           attribs[i] = attr.slice(1, -1);
         }
@@ -135,10 +134,9 @@ export function sanitizeHtml(html, doc) {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
-        const scrubbed = /** @type {!JsonObject} */ (tagPolicy(
-          tagName,
-          attribs
-        ));
+        const scrubbed = /** @type {!JsonObject} */ (
+          tagPolicy(tagName, attribs)
+        );
         if (!scrubbed) {
           ignore++;
         } else {
@@ -214,7 +212,7 @@ export function sanitizeHtml(html, doc) {
           continue;
         }
         emit(' ');
-        if (bindingAttribs.includes(i) && !startsWith(attrName, BIND_PREFIX)) {
+        if (bindingAttribs.includes(i) && !attrName.startsWith(BIND_PREFIX)) {
           emit(`[${attrName}]`);
         } else {
           emit(attrName);

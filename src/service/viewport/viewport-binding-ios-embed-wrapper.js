@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../observable';
+import {Observable} from '../../core/data-structures/observable';
 import {Services} from '../../services';
 import {
   ViewportBindingDef,
@@ -23,9 +23,9 @@ import {
 import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
-import {layoutRectLtwh} from '../../layout-rect';
+import {layoutRectLtwh} from '../../core/math/layout-rect';
 import {waitForBodyOpen} from '../../dom';
-import {whenDocumentReady} from '../../document-ready';
+import {whenDocumentReady} from '../../core/document-ready';
 
 const TAG_ = 'Viewport';
 
@@ -69,7 +69,6 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {function()} */
     this.boundScrollEventListener_ = this.onScrolled_.bind(this);
 
-    // eslint-disable-next-line jsdoc/require-returns
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 
@@ -273,8 +272,8 @@ export class ViewportBindingIosEmbedWrapper_ {
   contentHeightChanged() {}
 
   /** @override */
-  getLayoutRect(el, opt_scrollLeft, opt_scrollTop, opt_premeasuredRect) {
-    const b = opt_premeasuredRect || el./*OK*/ getBoundingClientRect();
+  getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
+    const b = el./*OK*/ getBoundingClientRect();
     const scrollTop =
       opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
     const scrollLeft =

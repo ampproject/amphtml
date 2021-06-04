@@ -20,10 +20,11 @@ import {
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
+  validateMediaMetadata,
 } from '../../../src/mediasession-helper';
 import {Layout, isLayoutSizeFixed} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
@@ -289,13 +290,8 @@ export class AmpAudio extends AMP.BaseElement {
     };
 
     // Update the media session
-    setMediaSession(
-      this.element,
-      this.win,
-      this.metadata_,
-      playHandler,
-      pauseHandler
-    );
+    validateMediaMetadata(this.element, this.metadata_);
+    setMediaSession(this.win, this.metadata_, playHandler, pauseHandler);
   }
 }
 

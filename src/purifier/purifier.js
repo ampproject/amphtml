@@ -25,10 +25,10 @@ import {
   isValidAttr,
   markElementForDiffing,
 } from './sanitation';
-import {dev, user} from '../log';
+import {devAssertElement} from '../core/assert';
 import {isAmp4Email} from '../format';
 import {removeElement} from '../dom';
-import {startsWith} from '../string';
+import {user} from '../log';
 import purify from 'dompurify';
 
 /** @private @const {string} */
@@ -156,7 +156,7 @@ export class Purifier {
    *
    * @param {!Node} node
    * @param {string} attr Lower-case attribute name.
-   * @param {string|null} value
+   * @param {?string} value
    * @return {boolean}
    */
   validateAttributeChange(node, attr, value) {
@@ -199,7 +199,7 @@ export class Purifier {
       // This is OK but we ought to contribute new hooks and remove this.
       const attrsByTags = ALLOWLISTED_ATTRS_BY_TAGS[tag];
       const allowlistedForTag = attrsByTags && attrsByTags.includes(attr);
-      if (!allowlistedForTag && !startsWith(tag, 'amp-')) {
+      if (!allowlistedForTag && !tag.startsWith('amp-')) {
         return false;
       }
     }
@@ -239,13 +239,13 @@ export class Purifier {
       allowedTags = data.allowedTags;
 
       // Allow all AMP elements.
-      if (startsWith(tagName, 'amp-')) {
+      if (tagName.startsWith('amp-')) {
         // Enforce AMP4EMAIL tag allowlist at runtime.
         allowedTags[tagName] = !isEmail || EMAIL_ALLOWLISTED_AMP_TAGS[tagName];
       }
       // Set `target` attribute for <a> tags if necessary.
       if (tagName === 'a') {
-        const element = dev().assertElement(node);
+        const element = devAssertElement(node);
         if (element.hasAttribute('href') && !element.hasAttribute('target')) {
           element.setAttribute('target', '_top');
         }
@@ -254,7 +254,7 @@ export class Purifier {
       const allowlist = ALLOWLISTED_TAGS_BY_ATTRS[tagName];
       if (allowlist) {
         const {attribute, values} = allowlist;
-        const element = dev().assertElement(node);
+        const element = devAssertElement(node);
         if (
           element.hasAttribute(attribute) &&
           values.includes(element.getAttribute(attribute))
@@ -305,7 +305,7 @@ export class Purifier {
 
       // Allow all attributes for AMP elements. This avoids the need to allowlist
       // nonstandard attributes for every component e.g. amp-lightbox[scrollable].
-      const isAmpElement = startsWith(tagName, 'amp-');
+      const isAmpElement = tagName.startsWith('amp-');
       if (isAmpElement) {
         allowAttribute();
       } else {
@@ -353,7 +353,7 @@ export class Purifier {
           /* opt_purify */ true
         )
       ) {
-        if (attrRewrite && attrValue && !startsWith(attrName, BIND_PREFIX)) {
+        if (attrRewrite && attrValue && !attrName.startsWith(BIND_PREFIX)) {
           attrValue = attrRewrite(tagName, attrName, attrValue);
         }
       } else {
@@ -392,7 +392,7 @@ export class Purifier {
         ['href', 'xlink:href'].forEach((attr) => {
           if (
             element.hasAttribute(attr) &&
-            !startsWith(element.getAttribute(attr), '#')
+            !element.getAttribute(attr).startsWith('#')
           ) {
             removeElement(element);
             user().error(
@@ -483,7 +483,7 @@ function bindingTypeForAttr(attrName) {
   if (attrName[0] == '[' && attrName[attrName.length - 1] == ']') {
     return BindingType.CLASSIC;
   }
-  if (startsWith(attrName, BIND_PREFIX)) {
+  if (attrName.startsWith(BIND_PREFIX)) {
     return BindingType.ALTERNATIVE;
   }
   return BindingType.NONE;

@@ -15,7 +15,7 @@
  */
 
 import * as adHelper from '../../../../src/ad-helper';
-import * as dom from '../../../../src/dom';
+import * as domQuery from '../../../../src/core/dom/query';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -37,6 +37,7 @@ describes.realWin(
 
     beforeEach(() => {
       adElement = env.win.document.createElement('amp-ad');
+      adElement.ampdoc_ = env.win.document;
       adImpl = new BaseElement(adElement);
       uiHandler = new AmpAdUIHandler(adImpl);
       env.sandbox.stub(adHelper, 'getAdContainer').callsFake(() => {
@@ -67,7 +68,7 @@ describes.realWin(
             .stub(adImpl, 'collapse')
             .callsFake(() => {});
 
-          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(domQuery, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -98,7 +99,7 @@ describes.realWin(
 
           const otherElement = env.win.document.createElement('div');
 
-          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(domQuery, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -131,7 +132,7 @@ describes.realWin(
           adElement.remove();
           otherElement.appendChild(adElement);
 
-          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(domQuery, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -245,6 +246,7 @@ describes.realWin(
             height: '50px',
           });
           env.win.document.body.appendChild(adElement);
+          env.sandbox.stub(uiHandler, 'setSize_');
           env.sandbox
             .stub(adImpl, 'attemptChangeSize')
             .callsFake((height, width) => {
@@ -262,6 +264,7 @@ describes.realWin(
         });
 
         it('should tolerate string input', () => {
+          env.sandbox.stub(uiHandler, 'setSize_');
           env.sandbox
             .stub(adImpl, 'attemptChangeSize')
             .callsFake((height, width) => {
@@ -319,6 +322,27 @@ describes.realWin(
             });
           });
         });
+      });
+    });
+
+    describe('sticky ads', () => {
+      it('should render close buttons on render once', () => {
+        expect(uiHandler.unlisteners_).to.be.empty;
+        uiHandler.stickyAdPosition_ = 'bottom';
+        uiHandler.onResizeSuccess();
+        expect(uiHandler.closeButtonRendered_).to.be.true;
+        expect(uiHandler.unlisteners_.length).to.equal(2);
+        expect(uiHandler.element_.querySelector('.amp-ad-close-button')).to.be
+          .not.null;
+
+        uiHandler.onResizeSuccess();
+        expect(uiHandler.unlisteners_.length).to.equal(2);
+      });
+
+      it('onResizeSuccess top sticky ads shall cause padding top adjustment', () => {
+        uiHandler.stickyAdPosition_ = 'top';
+        uiHandler.onResizeSuccess();
+        expect(uiHandler.topStickyAdScrollListener_).to.not.be.undefined;
       });
     });
   }

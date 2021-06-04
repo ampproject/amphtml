@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller';
+import {Key} from '../../../../build-system/tasks/e2e/e2e-types';
 
 describes.endtoend(
   'amp-sidebar',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-sidebar/amp-sidebar.html',
+    version: '0.1',
+    fixture: 'amp-sidebar/amp-sidebar.html',
     environments: ['single', 'viewer-demo'],
   },
   async (env) => {

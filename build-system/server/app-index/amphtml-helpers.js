@@ -32,7 +32,7 @@ const containsByRegex = (str, re) => str.search(re) > -1;
 // TODO(alanorozco): Expand
 const formTypes = ['input', 'select', 'form'];
 
-const ExtensionScript = ({name, version, isTemplate}) =>
+const ExtensionScript = ({isTemplate, name, version}) =>
   html`
     <script
       async
@@ -57,7 +57,17 @@ const containsExpr = (haystack, needle, onTrue, onFalse) =>
 
 const ampStateKey = (...keys) => keys.join('.');
 
-const AmpDoc = ({body, css, head, canonical}) => {
+/**
+ *
+ * @param {{
+ *  body: string,
+ *  canonical: string,
+ *  css?: string,
+ *  head?: string,
+ * }} param0
+ * @return {string}
+ */
+const AmpDoc = ({body, canonical, css, head}) => {
   assert(canonical);
   return html`
     <!DOCTYPE html>
@@ -95,6 +105,14 @@ const componentExtensionNameMapping = {
 const componentExtensionName = (tagName) =>
   componentExtensionNameMapping[tagName] || tagName;
 
+/**
+ *
+ * @param {string} docStr
+ * @param {{
+ *  'amp-mustache': {version: string}
+ * }=} extensionConf
+ * @return {string}
+ */
 const addRequiredExtensionsToHead = (
   docStr,
   extensionConf = {
@@ -110,11 +128,11 @@ const addRequiredExtensionsToHead = (
     addExtension(name, {isTemplate: true, ...defaultConf});
 
   Array.from(matchIterator(componentTagNameRegex, docStr))
-    .map(([unusedFullMatch, tagName]) => componentExtensionName(tagName))
+    .map(([, tagName]) => componentExtensionName(tagName))
     .forEach(addExtension);
 
   Array.from(matchIterator(templateTagTypeRegex, docStr))
-    .map(([unusedFullMatch, type]) => type)
+    .map(([, type]) => type)
     .forEach(addTemplate);
 
   // TODO(alanorozco): Too greedy. Parse "on" attributes instead.

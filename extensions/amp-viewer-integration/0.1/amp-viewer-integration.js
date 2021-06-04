@@ -30,7 +30,7 @@ import {
 import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
 import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
@@ -90,10 +90,8 @@ export class AmpViewerIntegration {
       return Promise.resolve();
     }
 
-    if (MOVE_FIXED_LAYER) {
-      const viewport = Services.viewportForDoc(ampdoc);
-      viewport.createFixedLayer(FixedLayer);
-    }
+    const viewport = Services.viewportForDoc(ampdoc);
+    viewport.createFixedLayer(FixedLayer);
 
     if (this.isWebView_ || this.isHandShakePoll_) {
       const source = isIframed(this.win) ? this.win.parent : null;

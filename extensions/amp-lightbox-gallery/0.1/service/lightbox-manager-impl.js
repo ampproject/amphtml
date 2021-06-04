@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../src/amp-events';
+import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {
   AutoLightboxEvents,
   isActionableByTap,
 } from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {
   LIGHTBOX_THUMBNAIL_AD,
   LIGHTBOX_THUMBNAIL_UNKNOWN,
@@ -31,12 +31,16 @@ import {
   childElementByAttr,
   closestAncestorElementBySelector,
   elementByTag,
-  iterateCursor,
-} from '../../../../src/dom';
+} from '../../../../src/core/dom/query';
 import {dev, devAssert, userAssert} from '../../../../src/log';
-import {map} from '../../../../src/utils/object';
-import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
-import {toArray} from '../../../../src/types';
+
+import {iterateCursor} from '../../../../src/dom';
+import {map} from '../../../../src/core/types/object';
+import {
+  srcsetFromElement,
+  srcsetFromSrc,
+} from '../../../../src/core/dom/srcset';
+import {toArray} from '../../../../src/core/types/array';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
   'AMP-IMG': true,
@@ -244,10 +248,19 @@ export class LightboxManager {
       figure,
       (child) => child.tagName !== 'FIGCAPTION'
     );
-    if (element) {
-      element.setAttribute('lightbox', lightboxGroupId);
+    const isGallerySlide = element.classList.contains(
+      'i-amphtml-inline-gallery-slide-content-slot'
+    );
+    // Special handling for gallery slides, needed since they require a
+    // wrapping div inside of the figure for the content.
+    const unwrappedElement = isGallerySlide
+      ? isGallerySlide.firstChild
+      : element;
+
+    if (unwrappedElement) {
+      unwrappedElement.setAttribute('lightbox', lightboxGroupId);
     }
-    return element;
+    return unwrappedElement;
   }
 
   /**

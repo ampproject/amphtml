@@ -16,8 +16,26 @@
 
 import {Services} from './services';
 import {assertHttpsUrl} from './url';
-import {getValueForExpr} from './json';
+import {getValueForExpr} from './core/types/object';
 import {user} from './log';
+
+/**
+ * Detail of each `options` property:
+ * expr - Dot-syntax reference to subdata of JSON result to return. If not specified,
+ *     entire JSON result is returned.
+ * urlReplacement - If ALL, replaces all URL vars. If OPT_IN, replaces allowlisted
+ *     URL vars. Otherwise, don't expand.
+ * refresh - Forces refresh of browser cache.
+ * xssiPrefix - Prefix to optionally strip from the response before calling parseJson.
+ *
+ * @typedef {{
+ *  expr:(string|undefined),
+ *  urlReplacement: (UrlReplacementPolicy|undefined),
+ *  refresh: (boolean|undefined),
+ *  xssiPrefix: (string|undefined),
+ * }}
+ */
+export let BatchFetchOptionsDef;
 
 /**
  * @enum {number}
@@ -35,42 +53,21 @@ export const UrlReplacementPolicy = {
  *
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element
- * @param {!Object} options options bag for modifying the request.
- * @param {string|undefined} options.expr Dot-syntax reference to subdata of JSON result.
- *     to return. If not specified, entire JSON result is returned.
- * @param {UrlReplacementPolicy|undefined} options.urlReplacement If ALL, replaces all URL
- *     vars. If OPT_IN, replaces allowlisted URL vars. Otherwise, don't expand.
- * @param {boolean|undefined} options.refresh Forces refresh of browser cache.
- * @param {string|undefined} options.token Auth token that forces a POST request.
- * @param {string|undefined} options.xssiPrefix Prefix to optionally
- *     strip from the response before calling parseJson.
+ * @param {!BatchFetchOptionsDef} options options bag for modifying the request.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
-export function batchFetchJsonFor(
-  ampdoc,
-  element,
-  {
+export function batchFetchJsonFor(ampdoc, element, options = {}) {
+  const {
     expr = '.',
     urlReplacement = UrlReplacementPolicy.NONE,
     refresh = false,
-    token = undefined,
     xssiPrefix = undefined,
-  } = {}
-) {
+  } = options;
   assertHttpsUrl(element.getAttribute('src'), element);
   const xhr = Services.batchedXhrFor(ampdoc.win);
   return requestForBatchFetch(element, urlReplacement, refresh)
     .then((data) => {
-      if (token !== undefined) {
-        data.fetchOpt['method'] = 'POST';
-        data.fetchOpt['headers'] = {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        };
-        data.fetchOpt['body'] = {
-          'ampViewerAuthToken': token,
-        };
-      }
       return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
     })
     .then((res) => Services.xhrFor(ampdoc.win).xssiJson(res, xssiPrefix))

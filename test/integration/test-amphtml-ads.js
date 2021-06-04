@@ -16,13 +16,13 @@
 
 import {RequestBank} from '../../testing/test-helper';
 import {maybeSwitchToCompiledJs} from '../../testing/iframe';
-import {parseQueryString} from '../../src/url';
+import {parseQueryString} from '../../src/core/types/string/url';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
-// TODO(wg-ads, #29112): Unskip on Safari.
-const t = describe.configure().skipSafari();
+// TODO(wg-monetization, #29112): Unskip on Safari.
+const t = describes.sandboxed.configure().skipSafari();
 
-t.run('AMPHTML ad on AMP Page', () => {
+t.run('AMPHTML ad on AMP Page', {}, () => {
   describes.integration(
     'ATF',
     {
@@ -76,7 +76,7 @@ t.run('AMPHTML ad on AMP Page', () => {
         return RequestBank.tearDown();
       });
 
-      // TODO(#24657): Flaky on Travis.
+      // TODO(#24657): Flaky on CI.
       it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
         // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
         return testAmpComponentsBTF(env.win);
@@ -85,7 +85,7 @@ t.run('AMPHTML ad on AMP Page', () => {
   );
 });
 
-t.run('AMPHTML ad on non-AMP page (inabox)', () => {
+t.run('AMPHTML ad on non-AMP page (inabox)', {}, () => {
   describes.integration(
     'ATF',
     {
@@ -277,7 +277,8 @@ t.run('AMPHTML ad on non-AMP page (inabox)', () => {
   );
 });
 
-t.run('A more real AMPHTML image ad', () => {
+// TODO(wg-monetization, #24421): Make this test less flaky.
+t.skip('A more real AMPHTML image ad', () => {
   const {testServerPort} = window.ampTestRuntimeConfig;
 
   // The image ad as seen in examples/inabox.gpt.html,
@@ -333,12 +334,14 @@ t.run('A more real AMPHTML image ad', () => {
         Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
       });
 
-      it('should properly render ad in a friendly iframe with viewability pings', () => {
+      // TODO(wg-monetization, #24421): Make this test less flaky.
+      it.skip('should properly render ad in a friendly iframe with viewability pings', () => {
         writeFriendlyFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });
 
-      it('should properly render ad in a safe frame with viewability pings', () => {
+      // TODO(wg-monetization, #24421): Make this test less flaky.
+      it.skip('should properly render ad in a safe frame with viewability pings', () => {
         writeSafeFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });

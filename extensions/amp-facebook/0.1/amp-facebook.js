@@ -16,17 +16,25 @@
 
 import {Services} from '../../../src/services';
 import {createLoaderLogo} from './facebook-loader';
-import {dashToUnderline} from '../../../src/string';
+import {dashToUnderline} from '../../../src/core/types/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
+import {userAssert} from '../../../src/log';
+
+const TYPE = 'facebook';
 
 class AmpFacebook extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static createLoaderLogoCallback(element) {
+    return createLoaderLogo(element);
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -67,7 +75,7 @@ class AmpFacebook extends AMP.BaseElement {
       'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js',
       'script'
     );
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, TYPE, this.getAmpDoc(), preconnect);
   }
 
   /** @override */
@@ -77,7 +85,15 @@ class AmpFacebook extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'facebook');
+    const embedAs = this.element.getAttribute('data-embed-as');
+    userAssert(
+      !embedAs || ['post', 'video', 'comment'].indexOf(embedAs) !== -1,
+      'Attribute data-embed-as for <amp-facebook> value is wrong, should be' +
+        ' "post", "video" or "comment" but was: %s',
+      embedAs
+    );
+    const iframe = getIframe(this.win, this.element, TYPE);
+    iframe.title = this.element.title || 'Facebook';
     this.applyFillContent(iframe);
     if (this.element.hasAttribute('data-allowfullscreen')) {
       iframe.setAttribute('allowfullscreen', 'true');
@@ -130,11 +146,6 @@ class AmpFacebook extends AMP.BaseElement {
         this.toggleLoadingCounter_++;
       }
     }
-  }
-
-  /** @override */
-  createLoaderLogoCallback() {
-    return createLoaderLogo(this.element);
   }
 
   /** @override */

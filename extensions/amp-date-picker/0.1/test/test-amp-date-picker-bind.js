@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import '../../../../third_party/react-dates/bundle';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpDatePicker} from '../amp-date-picker';
 import {createElementWithAttributes} from '../../../../src/dom.js';
 
@@ -94,10 +94,9 @@ describes.realWin(
 
     beforeEach(() => {
       document = env.win.document;
-      clock = lolex.install({
-        // Use the global window and not env.win. There is no way to inject the
-        // env.win into moment right now.
-        target: window,
+      // Use the global window and not env.win. There is no way to inject the
+      // env.win into moment right now.
+      clock = fakeTimers.withGlobal(window).install({
         now: new Date('2018-01-01T08:00:00Z'),
       });
     });
@@ -108,7 +107,7 @@ describes.realWin(
 
     describe('bind', () => {
       it('should forward mutations to the date picker state', async () => {
-        const {picker, layoutCallback} = createDatePicker({
+        const {layoutCallback, picker} = createDatePicker({
           src: 'https://localhost:8000/examples/date-picker.json',
         });
         env.sandbox.stub(picker, 'fetchSrc_').resolves();

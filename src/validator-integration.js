@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
+import {getMode, isModeDevelopment} from './mode';
 import {loadPromise} from './event-helper';
-import {parseQueryString} from './url';
-import {startsWith} from './string';
+import {parseQueryString} from './core/types/string/url';
 import {urls} from './config';
 
 /**
@@ -29,20 +28,20 @@ import {urls} from './config';
  */
 export function maybeValidate(win) {
   const filename = win.location.href;
-  if (startsWith(filename, 'about:')) {
+  if (filename.startsWith('about:')) {
     // Should only happen in tests.
     return;
   }
   let validator = false;
-  if (getMode().development) {
+  if (isModeDevelopment(win)) {
     const hash = parseQueryString(
-      win.location.originalHash || win.location.hash
+      win.location['originalHash'] || win.location.hash
     );
     validator = hash['validate'] !== '0';
   }
 
   if (validator) {
-    loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
+    loadScript(win.document, `${urls.cdn}/v0/validator_wasm.js`).then(() => {
       /* global amp: false */
       amp.validator.validateUrlAndLog(filename, win.document);
     });
@@ -59,7 +58,9 @@ export function maybeValidate(win) {
  * @return {!Promise}
  */
 export function loadScript(doc, url) {
-  const script = doc.createElement('script');
+  const script = /** @type {!HTMLScriptElement} */ (
+    doc.createElement('script')
+  );
   script.src = url;
 
   // Propagate nonce to all generated script tags.

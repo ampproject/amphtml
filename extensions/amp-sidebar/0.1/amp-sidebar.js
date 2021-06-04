@@ -14,30 +14,32 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
-import {
-  closestAncestorElementBySelector,
-  isRTL,
-  tryFocus,
-} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
+import {debounce} from '../../../src/core/types/function';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {handleAutoscroll} from './autoscroll';
-import {isExperimentOn} from '../../../src/experiments';
+import {isRTL, tryFocus} from '../../../src/dom';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/core/types/array';
+import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 /** @private @const {string} */
 const TAG = 'amp-sidebar toolbar';
@@ -135,6 +137,17 @@ export class AmpSidebar extends AMP.BaseElement {
       // The sidebar is already animated by swipe to dismiss, so skip animation.
       () => this.dismiss_(/*skipAnimation*/ true, ActionTrust.HIGH)
     );
+
+    /** @private {boolean} */
+    this.currentSwipeForThisElement_ = false;
+
+    /** @private {boolean} */
+    this.disableSwipeClose_ = false;
+
+    this.onResized_ = this.onResized_.bind(this);
+
+    /** @private {?UnlistenDef} */
+    this.onViewportResizeUnlisten_ = null;
   }
 
   /** @override */
@@ -145,6 +158,8 @@ export class AmpSidebar extends AMP.BaseElement {
     element.classList.add('i-amphtml-scrollable');
 
     this.side_ = element.getAttribute('side');
+
+    this.disableSwipeClose_ = element.hasAttribute('data-disable-swipe-close');
 
     this.viewport_ = this.getViewport();
 
@@ -188,6 +203,7 @@ export class AmpSidebar extends AMP.BaseElement {
             this.user().error(TAG, 'Failed to instantiate toolbar', e);
           }
         });
+        this.onResized_();
       });
 
     if (this.isIos_) {
@@ -223,14 +239,14 @@ export class AmpSidebar extends AMP.BaseElement {
     element.appendChild(this.createScreenReaderCloseButton());
 
     this.registerDefaultAction((invocation) => {
-      const {trust, caller} = invocation;
+      const {caller, trust} = invocation;
       this.open_(trust, caller);
     }, 'open');
     this.registerAction('close', (invocation) => {
       this.close_(invocation.trust);
     });
     this.registerAction('toggle', (invocation) => {
-      const {trust, caller} = invocation;
+      const {caller, trust} = invocation;
       if (this.opened_) {
         this.close_(trust);
       } else {
@@ -273,6 +289,22 @@ export class AmpSidebar extends AMP.BaseElement {
     );
 
     this.setupGestures_(this.element);
+  }
+
+  /** @override */
+  attachedCallback() {
+    this.onViewportResizeUnlisten_ = this.viewport_.onResize(
+      debounce(this.win, this.onResized_, 100)
+    );
+    this.onResized_();
+  }
+
+  /** @override */
+  detachedCallback() {
+    if (this.onViewportResizeUnlisten_) {
+      this.onViewportResizeUnlisten_();
+      this.onViewportResizeUnlisten_ = null;
+    }
   }
 
   /**
@@ -352,8 +384,8 @@ export class AmpSidebar extends AMP.BaseElement {
     return screenReaderCloseButton;
   }
 
-  /** @override */
-  onLayoutMeasure() {
+  /** @private */
+  onResized_() {
     this.getAmpDoc()
       .whenReady()
       .then(() => {
@@ -435,6 +467,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.triggerEvent_(SidebarEvents.OPEN, trust);
     this.element.setAttribute('i-amphtml-sidebar-opened', '');
     this.getMaskElement_().setAttribute('i-amphtml-sidebar-opened', '');
+
+    // Set as a container for scheduler to load children elements.
+    this.setAsContainer();
   }
 
   /**
@@ -470,6 +505,13 @@ export class AmpSidebar extends AMP.BaseElement {
       this.getRealChildren()
     );
     this.triggerEvent_(SidebarEvents.CLOSE, trust);
+
+    // Undo `setAsContainer`.
+    this.removeAsContainer();
+
+    // Unmount all children when the sidebar is closed. They will automatically
+    // remount when the sidebar is opened again.
+    unmountAll(this.element, /* includeSelf */ false);
   }
 
   /**
@@ -502,6 +544,8 @@ export class AmpSidebar extends AMP.BaseElement {
       this.openerElement_ = openerElement;
       this.initialScrollTop_ = this.viewport_.getScrollTop();
     }
+
+    observeContentSize(this.element, this.onResized_);
   }
 
   /**
@@ -549,6 +593,7 @@ export class AmpSidebar extends AMP.BaseElement {
         tryFocus(this.openerElement_);
       }
     }
+    unobserveContentSize(this.element, this.onResized_);
     return true;
   }
 
@@ -558,26 +603,30 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   setupGestures_(element) {
-    if (!isExperimentOn(this.win, 'amp-sidebar-swipe-to-dismiss')) {
+    if (this.disableSwipeClose_) {
       return;
     }
     // stop propagation of swipe event inside amp-viewer
     const gestures = Gestures.get(
       dev().assertElement(element),
-      /* shouldNotPreventDefault */ false,
+      /* shouldNotPreventDefault */ true,
       /* shouldStopPropagation */ true
     );
-    gestures.onGesture(SwipeXRecognizer, (e) => {
-      const {data} = e;
-      this.handleSwipe_(data);
+    // The onGesture method has a recognizer and a handler argument
+    // The handler takes a gesture object as an argument which
+    // includes data and event properties
+    gestures.onGesture(SwipeXRecognizer, (gesture) => {
+      const {data, event} = gesture;
+      this.handleSwipe_(data, event);
     });
   }
 
   /**
    * Handles a swipe gesture, updating the current swipe to dismiss state.
    * @param {!SwipeDef} data
+   * @param {Event|undefined} event
    */
-  handleSwipe_(data) {
+  handleSwipe_(data, event) {
     if (data.first) {
       this.swipeToDismiss_.startSwipe({
         swipeElement: dev().assertElement(this.element),
@@ -590,11 +639,15 @@ export class AmpSidebar extends AMP.BaseElement {
     }
 
     if (data.last) {
-      this.swipeToDismiss_.endSwipe(data);
+      this.currentSwipeForThisElement_ && this.swipeToDismiss_.endSwipe(data);
+      this.currentSwipeForThisElement_ = false;
       return;
     }
 
-    this.swipeToDismiss_.swipeMove(data);
+    if (event && event.target && !excludeFromSwipeClose(event.target)) {
+      this.currentSwipeForThisElement_ = true;
+      this.swipeToDismiss_.swipeMove(data);
+    }
   }
 
   /**
@@ -619,7 +672,7 @@ export class AmpSidebar extends AMP.BaseElement {
   getMaskElement_() {
     if (!this.maskElement_) {
       const mask = this.document_.createElement('div');
-      mask.classList.add('i-amphtml-sidebar-mask');
+      mask.classList.add('amp-sidebar-mask', 'i-amphtml-sidebar-mask');
       mask.addEventListener('click', () => {
         // Click gesture is high trust.
         this.close_(ActionTrust.HIGH);
@@ -703,3 +756,14 @@ export class AmpSidebar extends AMP.BaseElement {
 AMP.extension('amp-sidebar', '0.1', (AMP) => {
   AMP.registerElement('amp-sidebar', AmpSidebar, CSS);
 });
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function excludeFromSwipeClose(element) {
+  return (
+    element.nodeName.toLowerCase() === 'input' &&
+    element.getAttribute('type') === 'range'
+  );
+}

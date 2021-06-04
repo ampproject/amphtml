@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
-import {dict} from '../../../src/utils/object';
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
+import {dict} from '../../../src/core/types/object';
 import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
@@ -31,7 +31,7 @@ const NON_AFFILIATE_CLICK = 'non-affiliate-click';
  *  - Link impression tracking
  *  - Non-affiliate click tracking.
  *
- * It uses the amp-analytics internal API (https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-components-analytics.md)
+ * It uses the amp-analytics internal API (https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/amp-components-analytics.md)
  * in order to send the tracking requests.
  */
 export class Tracking {
@@ -51,7 +51,7 @@ export class Tracking {
       customTrackingId: skimOptions.customTrackingId,
       guid: null,
       pageImpressionId: generatePageImpressionId(),
-      // https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
+      // https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md
       pageUrl: 'CANONICAL_URL',
       pubcode: skimOptions.pubcode,
       referrer,
@@ -93,13 +93,8 @@ export class Tracking {
     if (!this.tracking_) {
       return;
     }
-    const {
-      pageImpressionId,
-      timezone,
-      pubcode,
-      pageUrl,
-      guid,
-    } = this.trackingInfo_;
+    const {guid, pageImpressionId, pageUrl, pubcode, timezone} =
+      this.trackingInfo_;
 
     // This data is common to both page & link impression requests.
     const commonData = dict({
@@ -130,12 +125,12 @@ export class Tracking {
       return;
     }
     const {
-      pageImpressionId,
-      timezone,
-      pubcode,
-      pageUrl,
-      referrer,
       customTrackingId,
+      pageImpressionId,
+      pageUrl,
+      pubcode,
+      referrer,
+      timezone,
     } = this.trackingInfo_;
 
     const data = dict({
@@ -173,16 +168,18 @@ export class Tracking {
   sendPageImpressionTracking_(commonData, numberAffiliateLinks) {
     const {customTrackingId, referrer} = this.trackingInfo_;
 
-    const data = /** @type {!JsonObject} */ (Object.assign(
-      dict({
-        'slc': numberAffiliateLinks,
-        'jsl': 0, // Javascript load time, not relevant in AMP context.
-        'pref': referrer,
-        'uc': customTrackingId,
-        't': 1,
-      }),
-      commonData
-    ));
+    const data = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict({
+          'slc': numberAffiliateLinks,
+          'jsl': 0, // Javascript load time, not relevant in AMP context.
+          'pref': referrer,
+          'uc': customTrackingId,
+          't': 1,
+        }),
+        commonData
+      )
+    );
 
     // Sends POST request. Second param is the object used to interpolate
     // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL
@@ -209,14 +206,16 @@ export class Tracking {
       return;
     }
 
-    const data = /** @type {!JsonObject} */ (Object.assign(
-      dict({
-        'dl': urls,
-        'hae': numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
-        'typ': 'l',
-      }),
-      commonData
-    ));
+    const data = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict({
+          'dl': urls,
+          'hae': numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
+          'typ': 'l',
+        }),
+        commonData
+      )
+    );
 
     // Send POST request. Second param is the object used to interpolate
     // placeholder variables defined in LINKS_IMPRESSIONS_TRACKING_URL.
@@ -240,11 +239,8 @@ export class Tracking {
    */
   setupAnalytics_(element) {
     const analyticsBuilder = new CustomEventReporterBuilder(element);
-    const {
-      pageTrackingUrl,
-      linksTrackingUrl,
-      nonAffiliateTrackingUrl,
-    } = this.skimOptions_.config;
+    const {linksTrackingUrl, nonAffiliateTrackingUrl, pageTrackingUrl} =
+      this.skimOptions_.config;
 
     // Configure analytics to send POST request when receiving
     // 'page-impressions' event.
@@ -285,7 +281,7 @@ export class Tracking {
     const urls = dict({});
 
     anchorReplacementList.forEach((anchorReplacement) => {
-      const {replacementUrl, anchor} = anchorReplacement;
+      const {anchor, replacementUrl} = anchorReplacement;
       const isExcluded = isExcludedAnchorUrl(anchor, this.skimOptions_);
       const isAffiliate = Boolean(replacementUrl);
       // Do not track na-links since the backend doesn't use them.

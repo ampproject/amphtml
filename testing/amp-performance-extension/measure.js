@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line no-unused-vars
-let cumulativeLayoutShift, largestContentfulPaint, longTasks, measureStarted;
+let cumulativeLayoutShift, largestContentfulPaint, longTasks;
+let measureStarted; // eslint-disable-line no-unused-vars
 
 function renderMeasurement(container, label, count) {
   container./*OK*/ innerHTML += `<div class='i-amphtml-performance-line'>
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
             width: 200px;
             overflow: hidden;
         }
-        
+
         .i-amphtml-performance-line {
             display: flex;
             flex-direction: row;
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
             justify-content: space-between;
             font-size: 12px;
         }
-        
+
         .i-amphtml-performance-count {
             margin-left: 8px;
             font-weight: bold;

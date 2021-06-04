@@ -15,9 +15,9 @@
  */
 
 import {Services} from '../services';
-import {closestAncestorElementBySelector} from '../dom';
+import {closestAncestorElementBySelector} from '../core/dom/query';
 import {getLengthNumeral} from '../layout';
-import {transparentPng} from '../utils/img';
+import {transparentPng} from '../core/dom/img';
 
 /**
  * IE can't handle auto-scaling SVG images used for intrinsic layout. Generate
@@ -34,7 +34,7 @@ export function ieIntrinsicCheckAndFix(win, opt_platform) {
 
   const {document} = win;
   const intrinsics = document.querySelectorAll(
-    '.i-amphtml-intrinsic-sizer[src^=data:image/svg]'
+    '.i-amphtml-intrinsic-sizer[src^="data:image/svg"]'
   );
   for (let i = 0; i < intrinsics.length; i++) {
     const intrinsic = intrinsics[i];

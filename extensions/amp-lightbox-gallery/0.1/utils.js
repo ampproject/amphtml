@@ -17,7 +17,7 @@
  * @fileoverview Description of this file.
  */
 import {Services} from '../../../src/services';
-import {padStart} from '../../../src/string';
+import {padStart} from '../../../src/core/types/string';
 /**
  * Runs a delay after deferring to the event loop. This is useful to call from
  * within an animation frame, as you can be sure that at least duration

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {DirectionX} from './def';
-import {LayoutRectDef, layoutRectLtwh} from '../../../src/layout-rect';
-import {mapRange} from '../../../src/utils/math.js';
+import {DirectionX, RectDef} from './def';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
+import {mapRange} from '../../../src/core/math';
 
 /**
  * @param {number} containerWidth
@@ -76,8 +76,8 @@ const mapStep = (step, min, max) => mapRange(step, 0, 1, min, max);
 
 /**
  * Provides offset coords to interpolate `from` rect `to` rect.
- * @param {!LayoutRectDef} from
- * @param {!LayoutRectDef} to
+ * @param {!RectDef} from
+ * @param {!RectDef} to
  * @param {number=} step  in [0..1]
  * @return {{x: number, y: number, scale: number, relativeX: !DirectionX}}
  *  - x is offset from the original box in pixels.
@@ -95,13 +95,13 @@ export function interpolatedBoxesTransform(from, to, step = 1) {
 
 /**
  * Scales, fits and centers `original` into `container`.
- * @param {!LayoutRectDef} original
- * @param {!LayoutRectDef} container
- * @return {!LayoutRectDef}
+ * @param {!RectDef} original
+ * @param {!RectDef} container
+ * @return {!RectDef}
  */
 export function letterboxRect(original, container) {
-  const {width, height} = original;
-  const {top, left, width: maxWidth, height: maxHeight} = container;
+  const {height, width} = original;
+  const {height: maxHeight, left, top, width: maxWidth} = container;
 
   const containerAspect = maxWidth / maxHeight;
   const originalAspect = width / height;
@@ -122,14 +122,14 @@ export function letterboxRect(original, container) {
 }
 
 /**
- * @param {!LayoutRectDef} original
- * @param {!LayoutRectDef} container
+ * @param {!RectDef} original
+ * @param {!RectDef} container
  * @param {DirectionX} horizontalEdge
  * @param {number} widthRatio
  * @param {number} widthMin
  * @param {number} marginRatio
  * @param {number} marginMax
- * @return {!LayoutRectDef}
+ * @return {!RectDef}
  */
 export function topCornerRect(
   original,
@@ -163,10 +163,10 @@ export function topCornerRect(
  * @return {boolean}
  */
 export const isVisibleBySize = (element) =>
-  isSizedRect(element.getPageLayoutBox());
+  isSizedRect(element./*OK*/ getBoundingClientRect());
 
 /**
- * @param {!LayoutRectDef|!ClientRect|!DOMRect} rect
+ * @param {!RectDef} rect
  * @return {boolean}
  */
 export const isSizedRect = (rect) => rect.width > 0 && rect.height > 0;

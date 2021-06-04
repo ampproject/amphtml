@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {map} from '../src/utils/object';
+import {map} from '../src/core/types/object';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
@@ -42,6 +42,8 @@ export function getA4ARegistry() {
       'adzerk': () => true,
       'doubleclick': () => true,
       'fake': () => true,
+      'nws': () => true,
+      'valueimpression': () => true,
       // TODO: Add new ad network implementation "is enabled" functions here.
       // Note: if you add a function here that requires a new "import", above,
       // you'll probably also need to add an exception to

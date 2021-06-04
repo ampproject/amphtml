@@ -14,36 +14,38 @@
  * limitations under the License.
  */
 
-const {resolve, dirname} = require('path');
+const {dirname, join, relative, resolve} = require('path').posix;
 
-// Returns a new Map<string, {detected: boolean, removeable: Array<string>}
-// key is a valid callee name to potentially remove.
-// value.detected indicates if the callee name (key) was imported into the current module.
-// value.removeable is the array of property names that can be removed.
-// Example: ['dev', {detected: false, removeable: ['fine']}] would mean ... `dev().fine(...)` can be removed.
+/**
+ * Returns a new Map<string, {detected: boolean, removeable: Array<string>}
+ * key is a valid callee name to potentially remove.
+ * value.detected indicates if the callee name (key) was imported into the current module.
+ * value.removeable is the array of property names that can be removed.
+ * Example: ['dev', {detected: false, removeable: ['fine']}] would mean ... `dev().fine(...)` can be removed.
+ * @return {Map<string, {detected: boolean, removeable: Array<string>}}
+ */
 function defaultCalleeToPropertiesMap() {
   return new Map([
     [
       'dev',
       {
         detected: false,
-        removeable: ['info', 'fine'],
+        removeable: ['info', 'fine', 'warn'],
       },
     ],
     [
       'user',
       {
         detected: false,
-        removeable: ['fine'],
+        removeable: ['info', 'fine', 'warn'],
       },
     ],
   ]);
 }
 
 // This Babel Plugin removes
-// 1. `dev().info(...)`
-// 2. `dev().fine(...)`
-// 3. `user().fine(...)`
+// - `dev().(info|fine|warn)(...)`
+// - `user().(info|fine|warn)(...)`
 // CallExpressions for production ESM builds.
 module.exports = function () {
   let calleeToPropertiesMap = defaultCalleeToPropertiesMap();
@@ -60,18 +62,18 @@ module.exports = function () {
       },
       ImportDeclaration({node}, state) {
         // Only remove the CallExpressions if this module imported the correct method ('dev') from '/log'.
-        const {specifiers, source} = node;
+        const {source, specifiers} = node;
         if (!source.value.endsWith('/log')) {
           return;
         }
         specifiers.forEach((specifier) => {
           if (specifier.imported) {
-            const filepath = resolve(
-              dirname(state.file.opts.filename),
-              source.value
+            const filepath = relative(
+              join(__dirname, '../../../'),
+              resolve(dirname(state.file.opts.filename), source.value)
             );
 
-            if (filepath.endsWith('/amphtml/src/log')) {
+            if (filepath.endsWith('src/log')) {
               const propertyMapped = calleeToPropertiesMap.get(
                 specifier.imported.name
               );

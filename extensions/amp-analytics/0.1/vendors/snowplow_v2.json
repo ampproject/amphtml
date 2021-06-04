@@ -1,6 +1,6 @@
 {
   "linkers": {
-    "linker": {
+    "sp_amp_linker": {
       "ids": {
         "_sp_duid": "${duid}",
         "amp_id": "${ampVistorId}"
@@ -10,23 +10,24 @@
   "cookies": {
     "enabled": true,
     "_sp_duid": {
-      "value": "$IF($IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(linker,_sp_duid)), $IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(linker,_sp_duid)), $SUBSTR(QUERY_PARAM(_sp),0,36))"
+      "value": "$IF($SUBSTR(QUERY_PARAM(_sp),0,36), $SUBSTR(QUERY_PARAM(_sp),0,36), $IF(LINKER_PARAM(sp_amp_linker,_sp_duid), LINKER_PARAM(sp_amp_linker,_sp_duid), COOKIE(_sp_duid)))"
     },
-    "_sp_id": {
-      "value": "LINKER_PARAM(linker, amp_id)"
+    "_sp_ampid": {
+      "value": "$IF(COOKIE(_sp_ampid), LINKER_PARAM(sp_amp_linker, amp_id), $IF(LINKER_PARAM(sp_amp_linker, amp_id), LINKER_PARAM(sp_amp_linker, amp_id), COOKIE(_sp_id)))"
     }
   },
   "vars": {
-    "aaVersion": "amp-1.0.1",
-    "ampVistorId": "CLIENT_ID(_sp_id)",
+    "trackerVersion": "amp-1.0.2",
+    "ampVistorId": "CLIENT_ID(_sp_ampid)",
+    "duid": "$IF($SUBSTR(QUERY_PARAM(_sp),0,36), $SUBSTR(QUERY_PARAM(_sp),0,36), $IF(LINKER_PARAM(sp_amp_linker,_sp_duid), LINKER_PARAM(sp_amp_linker,_sp_duid), COOKIE(_sp_duid)))",
     "nullString": "null",
     "customEventTemplate": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0\",\"data\":{\"schema\":\"iglu:${customEventSchemaVendor}/${customEventSchemaName}/jsonschema/${customEventSchemaVersion}\",\"data\":${customEventSchemaData}}}",
-    "contextsHead": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0\",\"data\":[{\"schema\":\"iglu:dev.amp.snowplow/amp_id/jsonschema/1-0-0\",\"data\":{\"ampClientId\":\"${ampVistorId}\", \"domainUserid\": \"COOKIE(_sp_duid)\", \"userId\": \"${userId}\"}},$REPLACE(`${customContexts}`, `^,*(.+?),*$`, `$1,`)",
+    "contextsHead": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0\",\"data\":[{\"schema\":\"iglu:dev.amp.snowplow/amp_id/jsonschema/1-0-0\",\"data\":{\"ampClientId\":\"${ampVistorId}\", \"domainUserid\": \"${duid}\", \"userId\": \"${userId}\"}},$REPLACE(`${customContexts}`, `^,*(.+?),*$`, `$1,`)",
     "contextsTail": "{\"schema\":\"iglu:dev.amp.snowplow/amp_web_page/jsonschema/1-0-0\",\"data\":{\"ampPageViewId\":\"PAGE_VIEW_ID_64\"}}]}",
     "ampPagePingTemplate": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0\",\"data\":{\"schema\":\"iglu:dev.amp.snowplow/amp_page_ping/jsonschema/1-0-0\",\"data\":{\"scrollLeft\":${scrollLeft},\"scrollWidth\":${scrollWidth},\"viewportWidth\":${viewportWidth},\"scrollTop\":${scrollTop},\"scrollHeight\":${scrollHeight},\"viewportHeight\":${viewportHeight},\"totalEngagedTime\":${totalEngagedTime}}}}"
   },
   "requests": {
-    "basePrefix": "https://${collectorHost}/i?p=web&tv=${aaVersion}",
+    "basePrefix": "https://${collectorHost}/i?p=web&tv=${trackerVersion}",
     "pageView": "${basePrefix}&e=pv",
     "structEvent": "${basePrefix}&e=se&se_ca=${structEventCategory}&se_ac=${structEventAction}&se_la=${structEventLabel}&se_pr=${structEventProperty}&se_va=$IF(${structEventValue}, ${structEventValue}, ${nullString})",
     "pagePing": "${basePrefix}&e=pp&pp_mix=${scrollLeft}&pp_miy=${scrollTop}",

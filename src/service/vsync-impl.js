@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {JankMeter} from './jank-meter';
+import {Deferred} from '../core/data-structures/promise';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {
@@ -23,10 +22,11 @@ import {
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
-import {cancellation} from '../error';
-import {dev, devAssert, rethrowAsync} from '../log';
+import {cancellation} from '../error-reporting';
+import {dev, devAssert} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {installTimerService} from './timer-impl';
+import {rethrowAsync} from '../core/error';
 
 /** @const {time} */
 const FRAME_TIME = 16;
@@ -153,9 +153,6 @@ export class Vsync {
         this.boundOnVisibilityChanged_
       );
     }
-
-    /** @private {!JankMeter} */
-    this.jankMeter_ = new JankMeter(this.win);
   }
 
   /** @override */
@@ -215,9 +212,11 @@ export class Vsync {
    * @return {function(!VsyncStateDef=)}
    */
   createTask(task) {
-    return /** @type {function(!VsyncStateDef=)} */ ((opt_state) => {
-      this.run(task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=)} */ (
+      (opt_state) => {
+        this.run(task, opt_state);
+      }
+    );
   }
 
   /**
@@ -331,9 +330,11 @@ export class Vsync {
    * @return {function(!VsyncStateDef=):boolean}
    */
   createAnimTask(contextNode, task) {
-    return /** @type {function(!VsyncStateDef=):boolean} */ ((opt_state) => {
-      return this.runAnim(contextNode, task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=):boolean} */ (
+      (opt_state) => {
+        return this.runAnim(contextNode, task, opt_state);
+      }
+    );
   }
 
   /**
@@ -382,7 +383,6 @@ export class Vsync {
     }
     // Schedule actual animation frame and then run tasks.
     this.scheduled_ = true;
-    this.jankMeter_.onScheduled();
     this.forceSchedule_();
   }
 
@@ -405,9 +405,8 @@ export class Vsync {
   runScheduledTasks_() {
     this.backupPass_.cancel();
     this.scheduled_ = false;
-    this.jankMeter_.onRun();
 
-    const {tasks_: tasks, states_: states, nextFrameResolver_: resolver} = this;
+    const {nextFrameResolver_: resolver, states_: states, tasks_: tasks} = this;
     this.nextFrameResolver_ = null;
     this.nextFramePromise_ = null;
     // Double buffering
@@ -462,7 +461,6 @@ export class Vsync {
  * @param {function(!VsyncStateDef):undefined|undefined} callback
  * @param {!VsyncStateDef} state
  * @return {boolean}
- * @noinline
  */
 function callTask_(callback, state) {
   devAssert(callback);

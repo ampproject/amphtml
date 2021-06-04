@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
@@ -24,12 +24,11 @@ import {
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict, map} from '../../../src/core/types/object';
 import {getSourceOrigin} from '../../../src/url';
-import {getViewerAuthTokenIfAvailable} from '../../../src/utils/xhr-utils';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 export class AmpState extends AMP.BaseElement {
   /**
@@ -160,15 +159,13 @@ export class AmpState extends AMP.BaseElement {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!UrlReplacementPolicy} policy
    * @param {boolean=} opt_refresh
-   * @param {string=} token
    * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    * @private
    */
-  fetch_(ampdoc, policy, opt_refresh, token = undefined) {
+  fetch_(ampdoc, policy, opt_refresh) {
     return batchFetchJsonFor(ampdoc, this.element, {
       urlReplacement: policy,
       refresh: opt_refresh,
-      token,
     });
   }
 
@@ -176,7 +173,7 @@ export class AmpState extends AMP.BaseElement {
    * Transforms and prepares the fetch request.
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
+   * @return {!Promise<!JsonObject|!Array<JsonObject>|undefined>}
    */
   prepareAndSendFetch_(isInit, opt_refresh) {
     const {element} = this;
@@ -192,20 +189,18 @@ export class AmpState extends AMP.BaseElement {
         ? UrlReplacementPolicy.OPT_IN
         : UrlReplacementPolicy.ALL;
 
-    return getViewerAuthTokenIfAvailable(element).then((token) =>
-      this.fetch_(ampdoc, policy, opt_refresh, token).catch((error) => {
-        const event = error
-          ? createCustomEvent(
-              this.win,
-              'amp-state.error',
-              dict({'response': error.response})
-            )
-          : null;
-        // Trigger "fetch-error" event on fetch failure.
-        const actions = Services.actionServiceForDoc(element);
-        actions.trigger(element, 'fetch-error', event, ActionTrust.LOW);
-      })
-    );
+    return this.fetch_(ampdoc, policy, opt_refresh).catch((error) => {
+      const event = error
+        ? createCustomEvent(
+            this.win,
+            'amp-state.error',
+            dict({'response': error.response})
+          )
+        : null;
+      // Trigger "fetch-error" event on fetch failure.
+      const actions = Services.actionServiceForDoc(element);
+      actions.trigger(element, 'fetch-error', event, ActionTrust.LOW);
+    });
   }
 
   /**

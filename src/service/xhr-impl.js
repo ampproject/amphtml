@@ -27,8 +27,7 @@ import {dev, user} from '../log';
 import {getCorsUrl, parseUrlDeprecated} from '../url';
 import {getService, registerServiceBuilder} from '../service';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {parseJson} from '../json';
-import {startsWith} from '../string';
+import {parseJson} from '../core/types/object/json';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -81,7 +80,9 @@ export class Xhr {
       // will expect a native `FormData` object in the `body` property, so
       // the native `FormData` object needs to be unwrapped.
       if (isFormDataWrapper(init.body)) {
-        const formDataWrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
+        const formDataWrapper = /** @type {!FormDataWrapperInterface} */ (
+          init.body
+        );
         init.body = formDataWrapper.getFormData();
       }
       return this.win.fetch.apply(null, arguments);
@@ -110,7 +111,7 @@ export class Xhr {
         throw user().createExpectedError(
           'XHR',
           `Failed fetching (${targetOrigin}/...):`,
-          reason && reason.message
+          reason && /** @type {!Error} */ (reason).message
         );
       }
     );
@@ -161,7 +162,7 @@ export class Xhr {
     }
 
     return res.text().then((txt) => {
-      if (!startsWith(txt, dev().assertString(prefix))) {
+      if (!txt.startsWith(dev().assertString(prefix))) {
         user().warn(
           'XHR',
           `Failed to strip missing prefix "${prefix}" in fetch response.`

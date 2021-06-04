@@ -17,9 +17,10 @@ import {Builder} from '../web-animations';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
 import {Services} from '../../../../src/services';
 import {WebAnimationPlayState} from '../web-animation-types';
-import {closestAncestorElementBySelector} from '../../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../../src/core/dom/query';
 import {htmlFor, htmlRefs} from '../../../../src/static-template';
-import {isArray, isObject} from '../../../../src/types';
+import {isArray, isObject} from '../../../../src/core/types';
+
 import {poll} from '../../../../testing/iframe';
 import {user} from '../../../../src/log';
 
@@ -250,7 +251,7 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
     );
     allowConsoleError(() => {
       expect(() => scanTiming({direction: 'invalid'})).to.throw(
-        /Unknown direction value/
+        /Unknown direction/
       );
     });
   });
@@ -262,9 +263,7 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
       'backwards'
     );
     allowConsoleError(() => {
-      expect(() => scanTiming({fill: 'invalid'})).to.throw(
-        /Unknown fill value/
-      );
+      expect(() => scanTiming({fill: 'invalid'})).to.throw(/Unknown fill/);
     });
   });
 
@@ -1064,8 +1063,9 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
     beforeEach(() => {
       animation2Spec = {};
       animation2 = env.createAmpElement('amp-animation');
-      animation2.implementation_.getAnimationSpec = () => animation2Spec;
-      animation2.signals().signal('built');
+      env.sandbox.stub(animation2, 'getImpl').resolves({
+        getAnimationSpec: () => animation2Spec,
+      });
       animation2.id = 'animation2';
       doc.body.appendChild(animation2);
 

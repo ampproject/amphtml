@@ -16,7 +16,7 @@
 
 import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 
 describes.realWin('inabox-host:messaging', {}, (env) => {
   let win;
@@ -327,7 +327,8 @@ describes.realWin('inabox-host:messaging', {}, (env) => {
     let iframePostMessageSpy;
 
     beforeEach(() => {
-      iframe1.contentWindow.postMessage = iframePostMessageSpy = env.sandbox.stub();
+      iframe1.contentWindow.postMessage = iframePostMessageSpy =
+        env.sandbox.stub();
     });
 
     it('should accept request and expand', () => {
@@ -441,7 +442,8 @@ describes.realWin('inabox-host:messaging', {}, (env) => {
     it('should return correct frame when many iframes at same level', () => {
       const {source} = createNestedIframeMocks(6, 3);
       const expectedMeasureableWin = source.parent.parent;
-      const correctFrame = expectedMeasureableWin.parent.document.querySelectorAll()[0];
+      const correctFrame =
+        expectedMeasureableWin.parent.document.querySelectorAll()[0];
       expectedMeasureableWin.parent.document.querySelectorAll = () => {
         const f1 = {};
         const f2 = {};

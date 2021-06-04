@@ -18,12 +18,18 @@ import * as dom from '../../../src/dom';
 import {CSS} from '../../../build/amp-viz-vega-0.1.css';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {childElementsByTag} from '../../../src/core/dom/query';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber, isObject} from '../../../src/types';
+import {isFiniteNumber, isObject} from '../../../src/core/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {tryParseJson} from '../../../src/json';
+
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 export class AmpVizVega extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -62,6 +68,8 @@ export class AmpVizVega extends AMP.BaseElement {
      * Instance of Vega chart object. https://goo.gl/laszHL
      */
     this.chart_ = null;
+
+    this.onResized_ = this.onResized_.bind(this);
   }
 
   /** @override */
@@ -107,22 +115,34 @@ export class AmpVizVega extends AMP.BaseElement {
   }
 
   /** @override */
+  attachedCallback() {
+    observeContentSize(this.element, this.onResized_);
+  }
+
+  /** @override */
+  detachedCallback() {
+    unobserveContentSize(this.element, this.onResized_);
+  }
+
+  /** @override */
   layoutCallback() {
     this.initialize_();
     return this.loadData_().then(() => this.renderGraph_());
   }
 
-  /** @override */
-  onLayoutMeasure() {
-    const box = this.getLayoutBox();
+  /**
+   * @param {!../layout-rect.LayoutSizeDef} size
+   * @private
+   */
+  onResized_(size) {
     if (
-      this.measuredWidth_ == box.width &&
-      this.measuredHeight_ == box.height
+      this.measuredWidth_ == size.width &&
+      this.measuredHeight_ == size.height
     ) {
       return;
     }
-    this.measuredWidth_ = box.width;
-    this.measuredHeight_ = box.height;
+    this.measuredWidth_ = size.width;
+    this.measuredHeight_ = size.height;
     if (this.chart_) {
       this.renderGraph_();
     }
@@ -149,16 +169,15 @@ export class AmpVizVega extends AMP.BaseElement {
     devAssert(!this.src_ != !this.inlineData_);
 
     if (this.inlineData_) {
-      this.data_ = /** @type {JsonObject} */ (tryParseJson(
-        this.inlineData_,
-        (err) => {
+      this.data_ = /** @type {JsonObject} */ (
+        tryParseJson(this.inlineData_, (err) => {
           userAssert(
             !err,
             'data could not be parsed. Is it in a valid JSON format?: %s',
             err
           );
-        }
-      ));
+        })
+      );
       return Promise.resolve();
     } else {
       // TODO(aghassemi): We may need to expose credentials. But for now Vega
@@ -181,7 +200,7 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   getInlineData_() {
-    const scripts = dom.childElementsByTag(this.element, 'SCRIPT');
+    const scripts = childElementsByTag(this.element, 'SCRIPT');
     if (scripts.length == 0) {
       return;
     }

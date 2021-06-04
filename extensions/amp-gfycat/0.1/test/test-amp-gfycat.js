@@ -52,7 +52,7 @@ describes.realWin(
       }
       doc.body.appendChild(gfycat);
       return gfycat
-        .build()
+        .buildInternal()
         .then(() => {
           return gfycat.layoutCallback();
         })
@@ -95,21 +95,22 @@ describes.realWin(
       return getGfycat('LeanMediocreBeardeddragon').then((gfycat) => {
         const iframe = gfycat.querySelector('iframe');
         return Promise.resolve()
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(gfycat, VideoEvents.PLAYING);
-            sendFakeMessage(gfycat, iframe, 'playing');
+            await sendFakeMessage(gfycat, iframe, 'playing');
             return p;
           })
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(gfycat, VideoEvents.PAUSE);
-            sendFakeMessage(gfycat, iframe, 'paused');
+            await sendFakeMessage(gfycat, iframe, 'paused');
             return p;
           });
       });
     });
 
-    function sendFakeMessage(gfycat, iframe, command) {
-      gfycat.implementation_.handleGfycatMessages_({
+    async function sendFakeMessage(gfycat, iframe, command) {
+      const impl = await gfycat.getImpl(false);
+      impl.handleGfycatMessages_({
         origin: 'https://gfycat.com',
         source: iframe.contentWindow,
         data: command,
@@ -128,8 +129,11 @@ describes.realWin(
       return getGfycat('LeanMediocreBeardeddragon', {
         withAlt: true,
       }).then((gfycat) => {
-        const placeHolder = gfycat.querySelector('amp-img');
+        const placeHolder = gfycat.querySelector('img');
         expect(placeHolder).to.not.be.null;
+        expect(placeHolder).to.have.attribute('placeholder');
+        expect(placeHolder).to.have.class('i-amphtml-fill-content');
+        expect(placeHolder.getAttribute('loading')).to.equal('lazy');
         expect(placeHolder.getAttribute('alt')).to.equal(
           'Loading gif test alt label'
         );
@@ -139,7 +143,7 @@ describes.realWin(
       return getGfycat('LeanMediocreBeardeddragon', {
         withAria: true,
       }).then((gfycat) => {
-        const placeHolder = gfycat.querySelector('amp-img');
+        const placeHolder = gfycat.querySelector('img');
         expect(placeHolder).to.not.be.null;
         expect(placeHolder.getAttribute('alt')).to.equal(
           'Loading gif test aria label'

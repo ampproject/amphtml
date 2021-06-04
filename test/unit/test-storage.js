@@ -32,6 +32,7 @@ describes.sandboxed('Storage', {}, (env) => {
   let windowApi;
   let ampdoc;
   let viewerBroadcastHandler;
+  let clock;
 
   // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
@@ -311,6 +312,47 @@ describes.sandboxed('Storage', {}, (env) => {
               'key2': undefined,
             });
           });
+      });
+
+      it('should get unexpired value based on duration', async () => {
+        clock = env.sandbox.useFakeTimers();
+        const store1 = new Store({});
+        store1.set('key1', 'value1');
+        expect(store1.values_).to.deep.equal({
+          'key1': {v: 'value1', t: 0},
+        });
+
+        bindingMock
+          .expects('loadBlob')
+          .withExactArgs('https://acme.com')
+          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+          .once();
+        bindingMock
+          .expects('saveBlob')
+          .withExactArgs(
+            'https://acme.com',
+            env.sandbox.match((arg) => {
+              const store2 = new Store(JSON.parse(atob(arg)));
+              return store2.get('key1') === undefined;
+            })
+          )
+          .returns(Promise.resolve())
+          .twice();
+        viewerMock
+          .expects('broadcast')
+          .withExactArgs(
+            env.sandbox.match((arg) => {
+              return (
+                arg['type'] == 'amp-storage-reset' &&
+                arg['origin'] == 'https://acme.com'
+              );
+            })
+          )
+          .once();
+
+        expect(await storage.get('key1', 10)).to.equal('value1');
+        clock.tick(100);
+        expect(await storage.get('key1', 5)).to.be.undefined;
       });
 
       it('should react to reset messages', () => {

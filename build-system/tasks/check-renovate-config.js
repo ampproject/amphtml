@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp check-renovate-config` task,
+ * @fileoverview This file implements the `amp check-renovate-config` task,
  * which validates the Renovate configuration file using Renovate's provided
  * config validator. The output of this built-in validator is shown below.
  *
@@ -49,19 +49,19 @@
 
 'use strict';
 
-const log = require('fancy-log');
-const {cyan, red, green} = require('ansi-colors');
-const {getOutput} = require('../common/exec');
+const {cyan, green, red} = require('../common/colors');
+const {getOutput} = require('../common/process');
+const {log} = require('../common/logging');
 
 /**
  * Checks Renovate config for correctness using the validator provided by the
  * `renovate` package.
- * The cumulative result is returned to the `gulp` process via process.exitCode
+ * The cumulative result is returned to the `amp` process via process.exitCode
  * so that all OWNERS files can be checked / fixed.
  */
 async function checkRenovateConfig() {
   const {status, stdout} = getOutput(
-    'node_modules/renovate/dist/config-validator.js'
+    'npx -q -p renovate renovate-config-validator'
   );
   const [configFile] = stdout.match(/(?<=Validating )\S+/);
 

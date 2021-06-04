@@ -15,19 +15,19 @@
  */
 
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
+import {Animation} from '../../src/animation';
 import {FakeMutationObserver, FakeWindow} from '../../testing/fake-dom';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {Services} from '../../src/services';
-import {endsWith} from '../../src/string';
+import {endsWith} from '../../src/core/types/string';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {toggle} from '../../src/style';
-import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 
-describes.sandboxed('FixedLayer', {}, () => {
+describes.sandboxed('FixedLayer', {}, (env) => {
   let parentApi;
   let documentApi;
   let ampdoc;
@@ -552,7 +552,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should add and remove element directly', () => {
-        const updateStub = window.sandbox.stub(fixedLayer, 'update');
+        const updateStub = env.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         // Add.
@@ -898,7 +898,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         expect(state['F0'].top).to.equal('0px');
 
         // Update to transient padding.
-        window.sandbox.stub(fixedLayer, 'update').callsFake(() => {});
+        env.sandbox.stub(fixedLayer, 'update').callsFake(() => {});
         fixedLayer.updatePaddingTop(22, /* transient */ true);
         vsyncTasks[0].measure(state);
         expect(state['F0'].fixed).to.be.true;
@@ -1168,7 +1168,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         element1.setAttribute('style', 'bottom: 10px');
         element1.style.bottom = '10px';
 
-        const userError = window.sandbox.stub(user(), 'error');
+        const userError = env.sandbox.stub(user(), 'error');
         fixedLayer.setup();
         // Expect error regarding inline styles.
         expect(userError).calledWithMatch(
@@ -1180,11 +1180,6 @@ describes.sandboxed('FixedLayer', {}, () => {
       describe('hidden toggle', () => {
         let mutationObserver;
         beforeEach(() => {
-          toggleExperiment(
-            documentApi.defaultView,
-            'hidden-mutation-observer',
-            true
-          );
           fixedLayer.observeHiddenMutations();
           mutationObserver = Services.hiddenObserverForDoc(
             documentApi.documentElement
@@ -1205,7 +1200,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
           element1.computedStyle['display'] = '';
 
-          window.sandbox.stub(timer, 'delay').callsFake((callback) => {
+          env.sandbox.stub(timer, 'delay').callsFake((callback) => {
             callback();
           });
           return mutationObserver
@@ -1225,7 +1220,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should ignore descendants of already-tracked elements', () => {
-        const updateStub = window.sandbox.stub(fixedLayer, 'update');
+        const updateStub = env.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         element1.appendChild(element6);
@@ -1237,7 +1232,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should replace descendants of tracked elements', () => {
-        const updateStub = window.sandbox.stub(fixedLayer, 'update');
+        const updateStub = env.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         element6.appendChild(element1);
@@ -1579,7 +1574,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       element1.setAttribute('style', 'bottom: 10px');
       element1.style.bottom = '10px';
 
-      const userError = window.sandbox.stub(user(), 'error');
+      const userError = env.sandbox.stub(user(), 'error');
       fixedLayer.setup();
       // Expect error regarding inline styles.
       expect(userError).calledWithMatch(
@@ -1591,11 +1586,6 @@ describes.sandboxed('FixedLayer', {}, () => {
     describe('hidden toggle', () => {
       let mutationObserver;
       beforeEach(() => {
-        toggleExperiment(
-          documentApi.defaultView,
-          'hidden-mutation-observer',
-          true
-        );
         fixedLayer.observeHiddenMutations();
         mutationObserver = Services.hiddenObserverForDoc(
           documentApi.documentElement
@@ -1616,7 +1606,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
         element1.computedStyle['display'] = '';
 
-        window.sandbox.stub(timer, 'delay').callsFake((callback) => {
+        env.sandbox.stub(timer, 'delay').callsFake((callback) => {
           callback();
         });
         return mutationObserver
@@ -1840,6 +1830,59 @@ describes.sandboxed(
       );
       const executed = fixedLayer.setup();
       expect(executed).to.be.true;
+    });
+  }
+);
+
+describes.sandboxed(
+  'FixedLayer bug due to calling browser native instead of AMP implementation',
+  {},
+  (env) => {
+    let win;
+    let ampdoc;
+    let viewer;
+    let vsyncApi;
+
+    beforeEach(() => {
+      win = new FakeWindow();
+      window.__AMP_MODE = {
+        localDev: true,
+        development: false,
+        minified: false,
+        test: false,
+        version: '$internalRuntimeVersion$',
+      };
+
+      const vsyncTasks = [];
+      vsyncApi = {
+        runPromise: async (task) => {
+          vsyncTasks.push(task);
+        },
+        mutate: (mutator) => {
+          vsyncTasks.push({mutate: mutator});
+        },
+      };
+    });
+
+    it('should call Animation.animate in animateFixedElements', () => {
+      const animateSpy = env.sandbox.spy(Animation, 'animate');
+
+      ampdoc = new AmpDocSingle(win);
+      installPlatformService(win);
+      installTimerService(win);
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => true;
+
+      const fixedLayer = new FixedLayer(
+        ampdoc,
+        vsyncApi,
+        /* borderTop */ 0,
+        /* paddingTop */ 11,
+        /* transfer */ false
+      );
+      fixedLayer.animateFixedElements(123, 456, 789, 'ease-in', false);
+      expect(animateSpy).to.be.calledOnce;
     });
   }
 );

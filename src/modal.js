@@ -1,6 +1,7 @@
 import {devAssert} from './log';
 import {isConnectedNode, rootNodeFor} from './dom';
-import {toArray} from './types';
+import {isElement} from './core/types';
+import {toArray} from './core/types/array';
 
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
@@ -172,9 +173,7 @@ export function setModalAsOpen(element) {
   devAssert(isConnectedNode(element));
 
   const elements = getElementsToAriaHide(element);
-  const ancestry = getAncestors(element).filter(
-    (n) => n.nodeType == Node.ELEMENT_NODE
-  );
+  const ancestry = getAncestors(element).filter(isElement);
   const focusableElements = getPotentiallyFocusableElements(element);
   // Get the elements that are internally focusable, and have been made
   // non-focusable; we want to unhide these.
@@ -225,9 +224,9 @@ export function setModalAsOpen(element) {
 export function setModalAsClosed(element) {
   const {
     element: topModalElement,
-    hiddenElementInfos,
     focusableExternalElements,
     focusableInternalElements,
+    hiddenElementInfos,
   } = modalEntryStack.pop();
 
   devAssert(isConnectedNode(element));

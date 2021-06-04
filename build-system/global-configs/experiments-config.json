@@ -1,17 +1,11 @@
 {
   "experimentA": {},
   "experimentB": {
-    "name": "MoveFixedLayer",
+    "name": "amp-img in the deferred mount mode",
     "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/27120",
-    "expiration_date_utc": "2021-01-01",
-    "define_experiment_constant": "MOVE_FIXED_LAYER"
+    "issue": "https://github.com/ampproject/amphtml/issues/31915",
+    "expiration_date_utc": "2021-06-30",
+    "define_experiment_constant": "R1_IMG_DEFERRED_BUILD"
   },
-  "experimentC": {
-    "name": "StrictCompilation",
-    "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/19380",
-    "expiration_date_utc": "2020-08-07",
-    "define_experiment_constant": "STRICT_COMPILATION"
-  }
+  "experimentC": {}
 }

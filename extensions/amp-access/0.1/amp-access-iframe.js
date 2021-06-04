@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Messenger} from './iframe-api/messenger';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
-import {parseJson} from '../../../src/json';
+import {isArray} from '../../../src/core/types';
+import {parseJson} from '../../../src/core/types/object/json';
 import {toggle} from '../../../src/style';
 
 const AUTHORIZATION_TIMEOUT = 3000;

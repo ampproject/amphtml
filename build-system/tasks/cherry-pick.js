@@ -16,36 +16,22 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
-const {getOutput} = require('../common/exec');
-const {green, cyan, red, yellow} = require('ansi-colors');
-
-/**
- * Executes a shell command, and logs an error message if the command fails.
- *
- * @param {string} cmd
- * @param {string} msg
- * @return {!Object}
- */
-function execOrThrow(cmd, msg) {
-  const result = getOutput(cmd);
-  if (result.status) {
-    log(yellow('ERROR:'), msg);
-    throw new Error(result.stderr);
-  }
-
-  return result;
-}
+const {cyan, green, red, yellow} = require('../common/colors');
+const {execOrThrow} = require('../common/exec');
+const {getOutput} = require('../common/process');
+const {log} = require('../common/logging');
 
 /**
  * Determines the name of the cherry-pick branch.
  *
  * @param {string} version
+ * @param {number} numCommits
  * @return {string}
  */
-function cherryPickBranchName(version) {
+function cherryPickBranchName(version, numCommits) {
   const timestamp = version.slice(0, -3);
-  const suffix = String(Number(version.slice(-3)) + 1).padStart(3, '0');
+  const suffixNumber = Number(version.slice(-3)) + numCommits;
+  const suffix = String(suffixNumber).padStart(3, '0');
   return `amp-release-${timestamp}${suffix}`;
 }
 
@@ -53,27 +39,15 @@ function cherryPickBranchName(version) {
  * Updates tags from the remote and creates a branch at the release commit.
  *
  * @param {string} ref
- * @param {!Array<string>} commits
  * @param {string} branch
  * @param {string} remote
  */
-function prepareBranch(ref, commits, branch, remote) {
-  const needsFetch = [ref]
-    .concat(commits)
-    .some((r) => getOutput(`git rev-parse ${r}`).status);
-
-  if (needsFetch) {
-    log(green('INFO:'), 'Fetching latest tags and commits from', cyan(remote));
-    execOrThrow(
-      `git fetch ${remote}`,
-      `Failed to fetch updates from remote ${cyan(remote)}`
-    );
-  } else {
-    log(
-      green('INFO:'),
-      'Identified tag and all commits available in local repository'
-    );
-  }
+function prepareBranch(ref, branch, remote) {
+  log(green('INFO:'), 'Pulling latest from', cyan(remote));
+  execOrThrow(
+    `git pull ${remote}`,
+    `Failed to pull latest from remote ${cyan(remote)}`
+  );
 
   execOrThrow(
     `git checkout -b ${branch} ${ref}`,
@@ -102,20 +76,19 @@ function performCherryPick(sha) {
   }
 }
 
-function cherryPick() {
+/**
+ * @return {Promise<void>}
+ */
+async function cherryPick() {
   const {push, remote = 'origin'} = argv;
   const commits = (argv.commits || '').split(',').filter(Boolean);
   let onto = String(argv.onto || '');
 
   if (!commits.length) {
-    log(red('ERROR:'), 'Must provide commit list with --commits');
-    process.exitCode = 1;
-    return;
+    throw new Error('Must provide commit list with --commits');
   }
   if (!onto) {
-    log(red('ERROR:'), 'Must provide 13-digit AMP version with --onto');
-    process.exitCode = 1;
-    return;
+    throw new Error('Must provide 13-digit AMP version with --onto');
   }
   if (onto.length === 15) {
     log(
@@ -127,14 +100,12 @@ function cherryPick() {
     onto = onto.substr(2);
   }
   if (onto.length !== 13) {
-    log(red('ERROR:'), 'Expected 13-digit AMP version; got', cyan(onto));
-    process.exitCode = 1;
-    return;
+    throw new Error('Expected 13-digit AMP version');
   }
 
-  const branch = cherryPickBranchName(onto);
+  const branch = cherryPickBranchName(onto, commits.length);
   try {
-    prepareBranch(onto, commits, branch, remote);
+    prepareBranch(onto, branch, remote);
     commits.forEach(performCherryPick);
 
     if (push) {
@@ -155,12 +126,11 @@ function cherryPick() {
       green('SUCCESS:'),
       `Cherry-picked ${commits.length} commits onto release ${onto}`
     );
-    process.exitCode = 0;
   } catch (e) {
     log(red('ERROR:'), e.message);
     log('Deleting branch', cyan(branch));
-    getOutput(`git checkout master && git branch -d ${branch}`);
-    process.exitCode = 1;
+    getOutput(`git checkout main && git branch -d ${branch}`);
+    throw e;
   }
 }
 
@@ -168,8 +138,8 @@ module.exports = {cherryPick};
 
 cherryPick.description = 'Cherry-picks one or more commits onto a new branch';
 cherryPick.flags = {
-  'commits': '  Comma-delimited list of commit SHAs to cherry-pick',
-  'push': '  If set, will push the created branch to the remote',
-  'remote': '  Remote to refresh tags from (default: origin)',
-  'onto': '  13-digit AMP version to cherry-pick onto',
+  'commits': 'Comma-delimited list of commit SHAs to cherry-pick',
+  'push': 'If set, will push the created branch to the remote',
+  'remote': 'Remote to refresh tags from (default: origin)',
+  'onto': '13-digit AMP version to cherry-pick onto',
 };
