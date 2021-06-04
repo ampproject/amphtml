@@ -44,6 +44,38 @@ module.exports = {
     ]);
   },
 
+  'dark theme, light drawer theme - inline CTA drawer should display': async (page, name) => {
+    const pageID = 'inline-dark-theme-drawer-theme-light';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+    await page.tap('.i-amphtml-story-page-attachment-label');
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-draggable-drawer-content',
+    ]);
+  },
+
+  'light theme, dark drawer theme - inline CTA drawer should display': async (page, name) => {
+    const pageID = 'inline-light-theme-drawer-theme-dark';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+    await page.tap('.i-amphtml-story-page-attachment-label');
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-draggable-drawer-content',
+    ]);
+  },
+
   '1 img - dark theme - inline CTA pre-tap UI should display': async (
     page,
     name
