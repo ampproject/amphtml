@@ -24,6 +24,8 @@ import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-facebook-page';
+
+/** @const {string} */
 const TYPE = 'facebook';
 
 class AmpFacebookPage extends BaseElement {
