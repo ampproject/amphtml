@@ -29,42 +29,11 @@ const {
 const {determineBuildTargets} = require('./build-targets');
 const {isCircleciBuild, isPullRequestBuild} = require('../common/ci');
 const {red} = require('../common/colors');
+const {
+  startFastFailPollingWorker,
+  stopFastFailWorker,
+} = require('../common/fast-fail-worker');
 const {updatePackages} = require('../common/update-packages');
-const {Worker} = require('worker_threads');
-
-/** @type {Worker} */
-let fastFailWorker;
-
-/**
- * Starts the fast fail background polling service as a worker.
- * @return {Promise<void>}
- */
-function startFastFailPollingWorker() {
-  return new Promise((resolve, reject) => {
-    if (fastFailWorker) {
-      reject('The worker already exists');
-      return;
-    }
-    fastFailWorker = new Worker('./build-system/common/fast_fail.js', {
-      workerData: {
-        pid: process.pid,
-      },
-    });
-    fastFailWorker.on('message', (message) => {
-      logWithoutTimestamp(message);
-      resolve();
-    });
-  });
-}
-
-/**
- * Stops the fast fail background process.
- */
-function stopFastFailWorker() {
-  if (fastFailWorker) {
-    fastFailWorker.terminate();
-  }
-}
 
 /**
  * Helper used by all CI job scripts. Runs the PR / push build workflow.

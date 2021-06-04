@@ -103,6 +103,7 @@ function initializeFastFailPolling() {
 if (require.main === module) {
   initializeFastFailPolling();
 }
+
 module.exports = {
   initializeFastFailPolling,
 };
