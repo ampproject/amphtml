@@ -18,7 +18,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const JSCONFIG_PATH = path.join(__dirname, '../../jsconfig.json');
+const JSCONFIG_PATH = path.join(__dirname, '..', '..', 'jsconfig.json');
 let aliasPaths = null;
 
 /**
