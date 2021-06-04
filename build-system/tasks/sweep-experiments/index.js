@@ -23,7 +23,7 @@ const {
 const {cyan, magenta, yellow} = require('../../common/colors');
 const {getOutput} = require('../../common/process');
 const {log} = require('../../common/logging');
-const {readJsonSync, writeFileSync, writeJsonSync} = require('fs-extra');
+const {readJsonSync, writeJsonSync} = require('fs-extra');
 
 const containRuntimeSource = ['3p', 'ads', 'extensions', 'src', 'test'];
 const containExampleHtml = ['examples', 'test'];
