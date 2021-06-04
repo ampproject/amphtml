@@ -38,6 +38,10 @@ jobs:
         with:
           check-latest: true
           registry-url: https://registry.npmjs.org
+      - name: Get latest scripts
+        run: |
+          wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/build-npm-binaries.js" -O ./build-system/npm-publish/build-npm-binaries.js
+          wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/write-package-files.js" -O ./build-system/npm-publish/write-package-files.js
       - name: Build package
         run: |
           npm install
