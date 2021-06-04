@@ -5,7 +5,12 @@
   "startLine": 1,
   "tokens": true,
   "plugins": [
-    ["flow", {"all": true}],
+    [
+      "flow",
+      {
+        "all": true
+      }
+    ],
     "flowComments",
     "jsx",
     "asyncGenerators",
@@ -13,7 +18,12 @@
     "classProperties",
     "classPrivateProperties",
     "classPrivateMethods",
-    ["decorators", {"decoratorsBeforeExport": false}],
+    [
+      "decorators",
+      {
+        "decoratorsBeforeExport": false
+      }
+    ],
     "doExpressions",
     "dynamicImport",
     "exportDefaultFrom",
@@ -28,7 +38,12 @@
     "objectRestSpread",
     "optionalCatchBinding",
     "optionalChaining",
-    ["pipelineOperator", {"proposal": "minimal"}],
+    [
+      "pipelineOperator",
+      {
+        "proposal": "minimal"
+      }
+    ],
     "throwExpressions"
   ]
 }

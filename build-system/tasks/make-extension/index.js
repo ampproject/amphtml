@@ -197,10 +197,13 @@ async function insertExtensionBundlesConfig(
         return -1;
       }
       return a.name.localeCompare(b.name);
-    })
+    }),
+    {
+      // Written file is parsed by prettier as `json-stringify`, which means
+      // that default formatting by `spaces` is fine.
+      spaces: 2,
+    }
   );
-
-  format([destination]);
 
   logLocalDev(green('SUCCESS:'), 'Wrote', cyan(path.basename(destination)));
 }
