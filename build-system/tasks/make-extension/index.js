@@ -197,10 +197,9 @@ async function insertExtensionBundlesConfig(
         return -1;
       }
       return a.name.localeCompare(b.name);
-    })
+    }),
+    {spaces: 2}
   );
-
-  format([destination]);
 
   logLocalDev(green('SUCCESS:'), 'Wrote', cyan(path.basename(destination)));
 }
