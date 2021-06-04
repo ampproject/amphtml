@@ -108,6 +108,17 @@ PASS
 |          <a href="https://www.google.com" title="Page attachment title">Call To Action</a>
 |        </amp-story-page-outlink>
 |      </amp-story-page>
+|      <amp-story-page id="inline-drawer-theme-dark">
+|        <amp-story-grid-layer template="vertical">
+|          <h1>fill</h1>
+|        </amp-story-grid-layer>
+|        <amp-story-page-attachment
+|          data-title="Lorem ipsum"
+|          layout="nodisplay"
+|          cta-drawer-theme="dark"
+|          >
+|        </amp-story-page-attachment>
+|      </amp-story-page>
 |    </amp-story>
 |  </body>
 |  </html>
