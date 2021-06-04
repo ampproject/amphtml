@@ -24,6 +24,7 @@ const {cyan, green, red, yellow} = require('../../common/colors');
 const {format} = require('./format');
 const {getOutput, getStdout} = require('../../common/process');
 const {log, logLocalDev, logWithoutTimestamp} = require('../../common/logging');
+const {StableWhitespaceJsonArray} = require('./stable-json');
 
 const argv = minimist(process.argv.slice(2), {string: ['version']});
 
@@ -168,10 +169,14 @@ async function insertExtensionBundlesConfig(
   bundle,
   destination = extensionBundlesJson
 ) {
-  let extensionBundles = [];
+  let extensionBundlesSource = '';
   try {
-    extensionBundles = await fs.readJson(destination, {throws: false});
+    extensionBundlesSource = await fs.readFile(destination, 'utf8');
   } catch (_) {}
+
+  const extensionBundles = new StableWhitespaceJsonArray(
+    extensionBundlesSource
+  );
 
   const existingOrNull = extensionBundles.find(
     ({name}) => name === bundle.name
@@ -187,17 +192,19 @@ async function insertExtensionBundlesConfig(
 
   await fs.mkdirp(path.dirname(destination));
 
-  await fs.writeJson(
+  await fs.writeFile(
     destination,
-    extensionBundles.sort((a, b) => {
-      if (!a.name) {
-        return 1;
-      }
-      if (!b.name) {
-        return -1;
-      }
-      return a.name.localeCompare(b.name);
-    })
+    extensionBundles
+      .sort((a, b) => {
+        if (!a.name) {
+          return 1;
+        }
+        if (!b.name) {
+          return -1;
+        }
+        return a.name.localeCompare(b.name);
+      })
+      .stringify()
   );
 
   format([destination]);

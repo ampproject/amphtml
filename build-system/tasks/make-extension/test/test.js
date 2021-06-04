@@ -349,3 +349,36 @@ test('insertExtensionBundlesConfig uses version as latestVersion', (t) =>
     },
     {extension: 'json'}
   ));
+
+test('insertExtensionBundlesConfig maintains existing object whitespace', (t) =>
+  tempy.file.task(
+    async (destination) => {
+      const {insertExtensionBundlesConfig} = require('..');
+      await writeFile(
+        destination,
+        `[{
+      "name": "aaaaaaaaaa",
+  "foo": "bababababababarrrrrr"
+},
+{"name": "bbbbbbbbbbb", "foo": "fofofofofofofofofofo"}]`
+      );
+
+      await insertExtensionBundlesConfig(
+        {
+          name: 'cccccccccc',
+          version: 'new version',
+        },
+        destination
+      );
+
+      t.deepEqual(
+        await readFile(destination, 'utf8'),
+        `[{
+      "name": "aaaaaaaaaa",
+  "foo": "bababababababarrrrrr"
+},
+{"name": "bbbbbbbbbbb", "foo": "fofofofofofofofofofo"},{"name":"cccccccccc","version":"new version","latestVersion":"new version"}]`
+      );
+    },
+    {extension: 'json'}
+  ));
