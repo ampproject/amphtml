@@ -1101,20 +1101,6 @@ HTMLVideoElement.prototype.playsInline;
  */
 CSSStyleSheet.prototype.replaceSync = function (cssText) {};
 
-/**
- * @constructor @struct
- */
-function ResizeObserverSize() {}
-
-/** @type {number} */
-ResizeObserverSize.prototype.inlineSize;
-
-/** @type {number} */
-ResizeObserverSize.prototype.blockSize;
-
-/** @type {!Array<!ResizeObserverSize>|undefined} */
-ResizeObserverEntry.prototype.borderBoxSize;
-
 /** @type {?function(!MediaQueryListEvent)} */
 MediaQueryList.prototype.onchange;
 
