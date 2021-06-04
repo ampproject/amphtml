@@ -94,7 +94,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         sequence
       );
 
-      await runner.applyFirstFrameOrFinish();
+      await runner.applyFirstFrame();
 
       expect(
         preset.keyframes.withArgs(
@@ -145,7 +145,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         sequence
       );
 
-      await runner.applyFirstFrameOrFinish();
+      await runner.applyFirstFrame();
 
       expect(
         preset.keyframes.withArgs(
@@ -190,7 +190,7 @@ describes.realWin('amp-story animations', {}, (env) => {
           sequence
         );
 
-        await runner.applyFirstFrameOrFinish();
+        await runner.applyFirstFrame();
 
         expect(target.style.opacity).to.equal('0');
       });
@@ -293,6 +293,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         start: env.sandbox.spy(),
         getPlayState: () => WebAnimationPlayState.IDLE,
         onPlayStateChanged: () => {},
+        maybeInit: () => {},
       };
 
       webAnimationBuilder.createRunner = () => webAnimationRunner;
@@ -331,6 +332,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         start: env.sandbox.spy(),
         getPlayState: () => WebAnimationPlayState.IDLE,
         onPlayStateChanged: () => {},
+        maybeInit: () => {},
       };
 
       webAnimationBuilder.createRunner = () => webAnimationRunner;
@@ -442,7 +444,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         .returns(Promise.resolve(webAnimationService));
 
       runner = {
-        applyFirstFrameOrFinish: env.sandbox.spy(() => Promise.resolve()),
+        applyFirstFrame: env.sandbox.spy(() => Promise.resolve()),
       };
 
       createAnimationRunner = env.sandbox
@@ -464,8 +466,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       ).to.have.been.calledOnce;
     });
 
-    // TODO(wg-stories, #34695): This test is flaky during CI.
-    it.skip('creates internal runners when applying first frame (preset)', async () => {
+    it('creates internal runners when applying first frame (preset)', async () => {
       const page = html`
         <div>
           <div animate-in="fly-in-left"></div>
@@ -483,7 +484,7 @@ describes.realWin('amp-story animations', {}, (env) => {
           createAnimationRunner.withArgs(
             page,
             env.sandbox.match({source: target, preset, spec: {target}}),
-            webAnimationBuilderPromise,
+            env.sandbox.match.any,
             env.sandbox.match.any,
             env.sandbox.match.any
           )
@@ -491,8 +492,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       });
     });
 
-    // TODO(wg-stories, #34695): This test is flaky during CI.
-    it.skip('creates internal runners when applying first frame (amp-story-animation)', async () => {
+    it('creates internal runners when applying first frame (amp-story-animation)', async () => {
       const spec1 = {keyframes: [{opacity: 1}]};
       const spec2 = {keyframes: [{transform: 'translate(10px, 10px)'}]};
 
@@ -518,7 +518,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         createAnimationRunner.withArgs(
           page,
           env.sandbox.match({source: spec1source, spec: spec1}),
-          webAnimationBuilderPromise,
+          env.sandbox.match.any,
           env.sandbox.match.any,
           env.sandbox.match.any
         )
@@ -528,7 +528,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         createAnimationRunner.withArgs(
           page,
           env.sandbox.match({source: spec2source, spec: spec2}),
-          webAnimationBuilderPromise,
+          env.sandbox.match.any,
           env.sandbox.match.any,
           env.sandbox.match.any
         )
@@ -623,7 +623,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       `;
       const animationManager = new AnimationManager(page, ampdoc);
       await animationManager.applyFirstFrameOrFinish();
-      expect(runner.applyFirstFrameOrFinish).to.have.callCount(
+      expect(runner.applyFirstFrame).to.have.callCount(
         querySelectorAllAnimateIn(page).length
       );
     });
