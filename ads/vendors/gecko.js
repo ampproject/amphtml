@@ -36,5 +36,4 @@ export function gecko(global, data) {
   };
 
   loadScript(global, 'https://widget.gecko.me/gecko/gecko_amp_loader.js');
-
 }
