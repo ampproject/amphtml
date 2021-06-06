@@ -131,9 +131,9 @@ describes.realWin(
 );
 
 function createCampaignData({
+  bottomAd,
   disabledAmpCompanionAds,
   display,
-  bottomAd,
   srAbove,
   srBelow,
 }) {

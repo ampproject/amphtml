@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import {getConsentData} from './consent-util';
+import {handleCompanionBottomAd} from './companion/bottomAd';
 import {handleCompanionDisplay} from './companion/display';
 import {handleCompanionVideo} from './companion/video';
-import {handleCompanionBottomAd} from './companion/bottomAd';
 
 /**
  * @param {!JsonObject} media
