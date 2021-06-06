@@ -27,13 +27,16 @@ import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {boundValue, distance, magnitude} from '../../../src/utils/math';
+import {boundValue, distance, magnitude} from '../../../src/core/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/dom';
-import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
+import {
+  layoutRectFromDomRect,
+  layoutRectLtwh,
+} from '../../../src/core/math/layout-rect';
 import {numeric} from '../../../src/transition';
 import {
   observeContentSize,
@@ -351,7 +354,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   updateMaxScale_(sourceAspectRatio) {
-    const {width, height} = this.elementBox_;
+    const {height, width} = this.elementBox_;
     const elementBoxRatio = width / height;
     const maxScale = Math.max(
       elementBoxRatio / sourceAspectRatio,
@@ -738,12 +741,12 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   updatePanZoomBounds_(scale) {
     const {
-      width: cWidth,
-      left: xOffset,
       height: cHeight,
+      left: xOffset,
       top: yOffset,
+      width: cWidth,
     } = this.contentBox_;
-    const {width: eWidth, height: eHeight} = this.elementBox_;
+    const {height: eHeight, width: eWidth} = this.elementBox_;
 
     this.minX_ = Math.min(0, eWidth - (xOffset + (cWidth * (scale + 1)) / 2));
     this.maxX_ = Math.max(0, (cWidth * scale - cWidth) / 2 - xOffset);
@@ -757,7 +760,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   updatePanZoom_() {
-    const {scale_: s, posX_: x, posY_: y, content_: content} = this;
+    const {content_: content, posX_: x, posY_: y, scale_: s} = this;
     return this.mutateElement(() => {
       setStyles(dev().assertElement(content), {
         transform: translate(x, y) + ' ' + scale(s),
@@ -864,7 +867,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     if (dir == 0) {
       return Promise.resolve();
     }
-    const {width, height} = this.elementBox_;
+    const {height, width} = this.elementBox_;
     const dist = magnitude(deltaX, deltaY);
     const newScale = this.startScale_ * (1 + (dir * dist) / 100);
     const deltaCenterX = width / 2 - this.getOffsetX_(centerClientX);

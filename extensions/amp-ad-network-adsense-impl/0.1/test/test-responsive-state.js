@@ -30,8 +30,8 @@ import {
   createElementWithAttributes,
 } from '../../../../src/dom';
 import {forceExperimentBranch} from '../../../../src/experiments';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {toWin} from '../../../../src/types';
+import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
+import {toWin} from '../../../../src/core/window';
 
 const AD_CLIENT_ID = 'ca-pub-123';
 

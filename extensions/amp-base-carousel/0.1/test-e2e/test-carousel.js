@@ -49,7 +49,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should render correctly', async function () {
+    it.skip('should render correctly', async function () {
       this.timeout(testTimeout);
       const el = await getScrollingElement(controller);
 

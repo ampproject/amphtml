@@ -23,11 +23,7 @@ import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
-import {
-  closestAncestorElementBySelector,
-  isRTL,
-  tryFocus,
-} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/core/types/function';
 import {descendsFromStory} from '../../../src/utils/story';
@@ -35,6 +31,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {handleAutoscroll} from './autoscroll';
 import {isExperimentOn} from '../../../src/experiments';
+import {isRTL, tryFocus} from '../../../src/dom';
 import {
   observeContentSize,
   unobserveContentSize,
@@ -246,14 +243,14 @@ export class AmpSidebar extends AMP.BaseElement {
     element.appendChild(this.createScreenReaderCloseButton());
 
     this.registerDefaultAction((invocation) => {
-      const {trust, caller} = invocation;
+      const {caller, trust} = invocation;
       this.open_(trust, caller);
     }, 'open');
     this.registerAction('close', (invocation) => {
       this.close_(invocation.trust);
     });
     this.registerAction('toggle', (invocation) => {
-      const {trust, caller} = invocation;
+      const {caller, trust} = invocation;
       if (this.opened_) {
         this.close_(trust);
       } else {

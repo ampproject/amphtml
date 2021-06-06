@@ -131,11 +131,11 @@ describes.realWin(
 );
 
 function createCampaignData({
+  disabledAmpCompanionAds,
   display,
   bottomAd,
   srAbove,
   srBelow,
-  disabledAmpCompanionAds,
 }) {
   const media = {};
   const campaignData = {

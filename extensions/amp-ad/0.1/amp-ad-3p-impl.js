@@ -31,7 +31,7 @@ import {
 } from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {computedStyle, setStyle} from '../../../src/style';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
@@ -54,12 +54,12 @@ import {
   intersectionEntryToJson,
   measureIntersection,
 } from '../../../src/utils/intersection';
-import {moveLayoutRect} from '../../../src/layout-rect';
+import {moveLayoutRect} from '../../../src/core/math/layout-rect';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 
 /** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';

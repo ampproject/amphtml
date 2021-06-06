@@ -199,7 +199,8 @@ export class IntersectionObserverStub {
     if (this.inst_) {
       return this.inst_.root;
     }
-    return this.options_.root || null;
+    // eslint-disable-next-line local/no-forbidden-terms
+    return /** @type {!Element} */ (this.options_.root) || null;
   }
 
   /** @return {string} */

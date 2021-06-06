@@ -16,7 +16,7 @@
 
 import {computedStyle} from '../style';
 import {remove} from '../core/types/array';
-import {toWin} from '../types';
+import {toWin} from '../core/window';
 import {tryCallback} from '../core/error';
 
 /** @enum {number} */
@@ -187,7 +187,7 @@ function processEntries(entries) {
     }
     targetEntryMap.set(target, entry);
     for (let k = 0; k < callbacks.length; k++) {
-      const {type, callback} = callbacks[k];
+      const {callback, type} = callbacks[k];
       computeAndCall(type, callback, entry);
     }
   }
@@ -201,7 +201,7 @@ function processEntries(entries) {
 function computeAndCall(type, callback, entry) {
   if (type == Type.CONTENT) {
     const {contentRect} = entry;
-    const {width, height} = contentRect;
+    const {height, width} = contentRect;
     /** @type {!../layout-rect.LayoutSizeDef} */
     const size = {width, height};
     tryCallback(callback, size);
@@ -227,7 +227,7 @@ function computeAndCall(type, callback, entry) {
       const isVertical = VERTICAL_RE.test(
         computedStyle(win, target)['writing-mode']
       );
-      const {offsetWidth, offsetHeight} = /** @type {!HTMLElement} */ (target);
+      const {offsetHeight, offsetWidth} = /** @type {!HTMLElement} */ (target);
       let inlineSize, blockSize;
       if (isVertical) {
         blockSize = offsetWidth;

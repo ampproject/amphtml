@@ -35,7 +35,6 @@ const transformableMethods = {
   assertString: {variadic: false, extractMessages: true, messageArgPos: 1},
   assertNumber: {variadic: false, extractMessages: true, messageArgPos: 1},
   assertBoolean: {variadic: false, extractMessages: true, messageArgPos: 1},
-  assertEnumValue: {variadic: false, extractMessages: false, messageArgPos: 2},
   assertElement: {variadic: false, extractMessages: true, messageArgPos: 1},
   fine: {variadic: true, extractMessages: true, messageArgPos: 1},
   info: {variadic: true, extractMessages: true, messageArgPos: 1},

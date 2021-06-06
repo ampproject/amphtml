@@ -22,7 +22,7 @@ import {ResourcesImpl} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
 import {Signals} from '../../src/core/data-structures/signals';
 import {VisibilityState} from '../../src/core/constants/visibility-state';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {layoutRectLtwh} from '../../src/core/math/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
@@ -48,16 +48,16 @@ describes.realWin('Resources', {amp: true}, (env) => {
   function createResource(opts) {
     const {
       id,
-      isBuilt,
+      idleRenderOutsideViewport,
       isBuilding,
-      state,
+      isBuilt,
       isDisplayed,
       isFixed,
       isInViewport,
+      layoutPriority,
       prerenderAllowed,
       renderOutsideViewport,
-      idleRenderOutsideViewport,
-      layoutPriority,
+      state,
       taskId,
     } = {
       id: '1',

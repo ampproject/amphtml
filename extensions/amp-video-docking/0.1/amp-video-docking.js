@@ -42,12 +42,15 @@ import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
 import {createViewportRect} from './viewport-rect';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
-import {layoutRectEquals, rectIntersection} from '../../../src/layout-rect';
+import {isRTL, removeElement} from '../../../src/dom';
+import {
+  layoutRectEquals,
+  rectIntersection,
+} from '../../../src/core/math/layout-rect';
 import {once} from '../../../src/core/types/function';
 import {
   px,
@@ -56,6 +59,7 @@ import {
   setStyles,
   toggle,
 } from '../../../src/style';
+import {scopedQuerySelector} from '../../../src/core/dom/query';
 
 const TAG = 'amp-video-docking';
 
@@ -458,7 +462,7 @@ export class VideoDocking {
           // most recent.
           const handled = [];
           for (let i = entries.length - 1; i >= 0; i--) {
-            const {target, boundingClientRect} = entries[i];
+            const {boundingClientRect, target} = entries[i];
             if (handled.indexOf(target) < 0) {
               target.getImpl().then((video) => {
                 this.updateOnPositionChange_(video, boundingClientRect);
@@ -686,7 +690,7 @@ export class VideoDocking {
    * @private
    */
   isValidSize_(video, opt_inlineRect) {
-    const {width, height} =
+    const {height, width} =
       opt_inlineRect || video.element./*OK*/ getBoundingClientRect();
     if (width / height < 1 - FLOAT_TOLERANCE) {
       complainAboutPortrait(video.element);
@@ -777,7 +781,7 @@ export class VideoDocking {
     // TODO(alanorozco): Make docking agnostic to this workaround.
     this.removePosterForAndroidBug_(element);
 
-    const {x, y, scale, relativeX} = this.getDims_(
+    const {relativeX, scale, x, y} = this.getDims_(
       video,
       target,
       step,
@@ -916,7 +920,7 @@ export class VideoDocking {
     const inlineRect =
       opt_inlineRect || video.element./*OK*/ getBoundingClientRect();
 
-    const {width, height} = inlineRect;
+    const {height, width} = inlineRect;
 
     this.placedAt_ = {x, y, scale};
 
@@ -1172,7 +1176,7 @@ export class VideoDocking {
     const step = 1;
     const transitionDurationMs = 0;
 
-    const {x, y, scale} = this.getDims_(video, target, step);
+    const {scale, x, y} = this.getDims_(video, target, step);
     const centerX = this.getCenterX_(offsetX);
     const directionX = this.calculateDirectionX_(centerX);
 
@@ -1387,7 +1391,7 @@ export class VideoDocking {
 
     const step = 1;
     const {target} = devAssert(this.currentlyDocked_);
-    const {x, y, width} = target.rect;
+    const {width, x, y} = target.rect;
     const {scale} = this.getDims_(video, target, step);
 
     const currentX = x + offsetX;
@@ -1429,7 +1433,7 @@ export class VideoDocking {
     const step = 1;
     const {target} = devAssert(this.currentlyDocked_);
 
-    const {x, y, width} = target.rect;
+    const {width, x, y} = target.rect;
     const {scale} = this.getDims_(video, target, step);
 
     const outerWidth = this.viewportRect_.width;
@@ -1476,10 +1480,10 @@ export class VideoDocking {
    * @private
    */
   getCenterX_(offsetX) {
-    const {target, step} = this.currentlyDocked_;
+    const {step, target} = this.currentlyDocked_;
     const video = this.getDockedVideo_();
     const {width} = video.element./*OK*/ getBoundingClientRect();
-    const {x, scale} = this.getDims_(video, target, step);
+    const {scale, x} = this.getDims_(video, target, step);
     return x + offsetX + (width * scale) / 2;
   }
 
@@ -1499,7 +1503,7 @@ export class VideoDocking {
 
     this.currentlyDocked_.target = target;
 
-    const {x, y, scale} = this.getDims_(video, target, step);
+    const {scale, x, y} = this.getDims_(video, target, step);
 
     this.placeAt_(
       video,
@@ -1569,7 +1573,7 @@ export class VideoDocking {
 
     const {target} = devAssert(this.currentlyDocked_);
 
-    const {x, y, scale, relativeX} = this.getDims_(video, target, step);
+    const {relativeX, scale, x, y} = this.getDims_(video, target, step);
 
     // Do not animate transition if video is out-of-view. Chrome glitches
     // when pausing an out-of-view video, so we need to show controls and

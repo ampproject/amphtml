@@ -26,22 +26,25 @@ import {VisibilityState} from '../../../src/core/constants/visibility-state';
 import {
   childElementByAttr,
   childElementsByTag,
+  scopedQuerySelector,
+} from '../../../src/core/dom/query';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {findIndex, toArray} from '../../../src/core/types/array';
+import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {
   insertAtStart,
   isJsonScriptTag,
   removeChildren,
   removeElement,
-  scopedQuerySelector,
 } from '../../../src/dom';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {findIndex, toArray} from '../../../src/core/types/array';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
+
 import {setStyles, toggle} from '../../../src/style';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -495,7 +498,7 @@ export class NextPageService {
    * @return {!HostPage}
    */
   createHostPage() {
-    const {title, location} = this.doc_;
+    const {location, title} = this.doc_;
     const {href: url} = location;
     const image =
       parseSchemaImage(this.doc_) ||

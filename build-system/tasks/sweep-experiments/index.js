@@ -17,13 +17,13 @@ const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
 const path = require('path');
 const {
-  jscodeshift,
   getJscodeshiftReport,
+  jscodeshift,
 } = require('../../test-configs/jscodeshift');
 const {cyan, magenta, yellow} = require('../../common/colors');
 const {getOutput} = require('../../common/process');
 const {log} = require('../../common/logging');
-const {readJsonSync, writeFileSync} = require('fs-extra');
+const {readJsonSync, writeJsonSync} = require('fs-extra');
 
 const containRuntimeSource = ['3p', 'ads', 'extensions', 'src', 'test'];
 const containExampleHtml = ['examples', 'test'];
@@ -54,7 +54,7 @@ const isSpecialCannotBeRemoved = (id) =>
  * @return {string}
  */
 function getStdoutThrowOnError(cmd) {
-  const {stdout, stderr} = getOutput(cmd);
+  const {stderr, stdout} = getOutput(cmd);
   if (!stdout && stderr) {
     throw new Error(`${cmd}\n\n${stderr}`);
   }
@@ -141,7 +141,7 @@ function removeFromJsonConfig(config, path, id) {
     }
   }
 
-  writeFileSync(path, JSON.stringify(config, null, 2) + '\n');
+  writeJsonSync(path, config, {spaces: 2});
   return [path];
 }
 
@@ -180,7 +180,7 @@ function gitCommitSingleExperiment(id, workItem, modified) {
       `Previous history on ${prodConfigPath.split('/').pop()}:`,
       workItem.previousHistory
         .map(
-          ({hash, authorDate, subject}) =>
+          ({authorDate, hash, subject}) =>
             `- ${hash} - ${authorDate} - ${subject}`
         )
         .join('\n')
@@ -312,11 +312,11 @@ const readmeMdGithubLink = () =>
  * @return {string}
  */
 function summaryCommitMessage({
-  removed,
   cleanupIssues,
   cutoffDateFormatted,
-  modifiedSourceFiles,
   htmlFilesWithReferences,
+  modifiedSourceFiles,
+  removed,
 }) {
   const paragraphs = [
     `🚮 Sweep experiments older than ${cutoffDateFormatted}`,
@@ -331,7 +331,7 @@ function summaryCommitMessage({
       "Close these once they've been addressed and this PR has been merged:",
       checklistMarkdown(
         cleanupIssues.map(
-          ({id, cleanupIssue}) =>
+          ({cleanupIssue, id}) =>
             `\`${id}\`: ${issueUrlToNumberOrUrl(cleanupIssue)}`
         )
       )
@@ -434,7 +434,7 @@ async function sweepExperiments() {
   const canaryConfig = readJsonSync(canaryConfigPath);
 
   const cutoffDateFormatted = dateDaysAgo(
-    argv.experiment ? 0 : argv.days_ago || 365
+    argv.experiment ? 0 : argv.days_ago || 180
   ).toISOString();
 
   const {exclude, include = {}} = collectWork(
@@ -482,8 +482,15 @@ async function sweepExperiments() {
       ...removeFromRuntimeSource(id, workItem.percentage),
     ];
 
+    const formattable = modified.filter(
+      (filename) =>
+        // We don't need to format JSON files since they were written with
+        // {spaces: 2}, and matches prettier's `json-stringify` parser
+        !filename.endsWith('.json')
+    );
+
     getStdoutThrowOnError(
-      `./node_modules/prettier/bin-prettier.js --write ${modified.join(' ')}`
+      `./node_modules/prettier/bin-prettier.js --write ${formattable.join(' ')}`
     );
 
     for (const line of gitCommitSingleExperiment(id, workItem, modified)) {

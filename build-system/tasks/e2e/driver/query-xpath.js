@@ -40,8 +40,8 @@ const TEST_ID_ATTRIBUTE = 'data-i-amphtml-xpath-test-id';
  *
  * Precondition: wgxpath has been installed on the window object
  * @param {string} xpathString
- * @param {!Element} context
- * @return {?Array<!Element>}
+ * @param {!HTMLElement} context
+ * @return {?Array<!HTMLElement>}
  */
 function queryXpath(xpathString, context) {
   // Install https://github.com/google/wicked-good-xpath
@@ -57,7 +57,7 @@ function queryXpath(xpathString, context) {
   // Add an ID to every element in the tree so we can reference them later.
   // This allows us to correlate nodes from the cloned tree to the
   // original tree.
-  for (const {item, index} of createIndexedInterator(
+  for (const {index, item} of createIndexedInterator(
     createElementIterator(context)
   )) {
     setData(item, index);
@@ -95,13 +95,13 @@ function queryXpath(xpathString, context) {
     removeData(node);
   }
 
-  return elements.length ? elements : null;
+  return elements.length ? /** @type {Array<HTMLElement>} */ (elements) : null;
 }
 
 /**
  * Get the xpath test id data param
- * @param {!Element} node
- * @return {string}
+ * @param {!HTMLElement} node
+ * @return {string|undefined}
  */
 function getData(node) {
   return node.dataset[TEST_ID_PROPERTY];
@@ -109,16 +109,16 @@ function getData(node) {
 
 /**
  * Set the xpath test id data param
- * @param {!Element} node
+ * @param {!HTMLElement} node
  * @param {number} value
  */
 function setData(node, value) {
-  node.dataset[TEST_ID_PROPERTY] = value;
+  node.dataset[TEST_ID_PROPERTY] = value.toString();
 }
 
 /**
  * Remove the xpath test id data param.
- * @param {!Element} node
+ * @param {!HTMLElement} node
  */
 function removeData(node) {
   delete node.dataset[TEST_ID_PROPERTY];
@@ -126,8 +126,8 @@ function removeData(node) {
 
 /**
  * Create an iterator over the subtree of the given element.
- * @param {!Element} element
- * @return {!Iterable<!Element>}
+ * @param {!HTMLElement} element
+ * @return {!Iterable<!HTMLElement>}
  */
 function createElementIterator(element) {
   const document = element.ownerDocument;
@@ -140,7 +140,7 @@ function createElementIterator(element) {
 /**
  * Create an iterator from an XPathResult instance.
  * @param {!XPathResult} xpathResult
- * @return {!Iterable<!Element>}
+ * @return {!Iterable<!HTMLElement>}
  */
 function createXpathIterator(xpathResult) {
   return createCommonIterator(xpathResult, 'iterateNext');
@@ -149,6 +149,7 @@ function createXpathIterator(xpathResult) {
 /**
  * Create an iterator from an object with iterator-like behavior but a
  * different API name for the iteration method.
+ * @template T
  * @param {!NodeIterator|!XPathResult} iterator
  * @param {string} nextProperty
  * @return {!Iterable<T>}
@@ -164,8 +165,9 @@ function* createCommonIterator(iterator, nextProperty) {
  * Create an iterator from an existing iterator, which nests the original
  * value under the `item` property in the iteration object value and adds an
  * `index` property.
+ * @template T
  * @param {!Iterable<T>} iter
- * @return {!Iterable<{{item: T, index: number}}>}
+ * @return {!Iterable<{item: T, index: number}>}
  */
 function* createIndexedInterator(iter) {
   let index = 0;

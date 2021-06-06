@@ -30,7 +30,7 @@ import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {isPrerenderActivePage} from './prerender-active-page';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {scopedQuerySelectorAll} from '../../../src/core/dom/query';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -185,7 +185,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     if (!pageSize) {
       return;
     }
-    const {width: vw, height: vh} = pageSize;
+    const {height: vh, width: vw} = pageSize;
     const {horiz, vert} = this.aspectRatio_;
     const width = Math.min(vw, (vh * horiz) / vert);
     const height = Math.min(vh, (vw * vert) / horiz);

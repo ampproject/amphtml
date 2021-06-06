@@ -16,7 +16,7 @@
 import {devAssert} from '../src/log';
 import {getMode} from './mode';
 import {isIframed} from './dom';
-import {toWin} from './types';
+import {toWin} from './core/window';
 
 /**
  * Returns an IntersectionObserver tracking the Viewport.
@@ -30,7 +30,7 @@ import {toWin} from './types';
  * @return {!IntersectionObserver}
  */
 export function createViewportObserver(ioCallback, win, opts = {}) {
-  const {threshold, needsRootBounds} = opts;
+  const {needsRootBounds, threshold} = opts;
   // The Document -> Element type conversion is necessary to satisfy the
   // `IntersectionObserver` constructor extern that only accepts `Element`.
   const root =

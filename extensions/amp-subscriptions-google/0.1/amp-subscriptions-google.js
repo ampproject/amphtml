@@ -37,7 +37,7 @@ import {GaaMeteringRegwall} from '../../../third_party/subscriptions-project/swg
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';

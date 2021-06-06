@@ -18,9 +18,8 @@ import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
-import {formElementsQuerySelectorAll} from './amp-form';
 import {iterateCursor} from '../../../src/dom';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 
 /** @const @private {string} */
 const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
@@ -116,7 +115,7 @@ export class FormValidator {
 
   /** @return {!NodeList} */
   inputs() {
-    return formElementsQuerySelectorAll(this.form, 'input,select,textarea');
+    return this.form.querySelectorAll('input,select,textarea');
   }
 
   /**
