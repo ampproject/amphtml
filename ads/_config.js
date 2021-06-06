@@ -539,6 +539,8 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
   },
 
+  'gecko': {},
+
   'genieessp': {
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
   },
