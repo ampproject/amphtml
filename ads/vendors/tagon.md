@@ -34,7 +34,7 @@ limitations under the License.
 
 Supported parameters:
 
--   `data-size (Creative Size) [800x600, 640x480, 320x480 ,300x250, 320x100, 320x50]`
+-   `data-size (Creative Size) [800x600, 640x480, 320x480, 300x250, 320x100, 320x50]`
 -   `data-adunit (Adunit ID)`
 -   `data-inventory (Inventory ID)`
 -   `data-publisher (Publisher ID)`

@@ -22,5 +22,5 @@ import {loadScript} from '../../3p/3p';
  */
 export function tagon(global, data) {
   global.tagonData = data;
-  loadScript(global, 'https://js.tagon.co/tagon-amp.min.js'); //change
+  loadScript(global, 'https://js.tagon.co/tagon-amp.min.js');
 }
