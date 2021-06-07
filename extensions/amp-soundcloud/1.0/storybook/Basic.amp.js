@@ -28,11 +28,10 @@ export default {
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const ExampleUseCase = () => {
-  const trackid = text('Track ID', '864765493');
+export const TrackId = () => {
+  const trackId = text('Track ID', '864765493');
   const height = text('Height', '180');
-  const mcolor = color('Color', 'ff5500');
+  const mcolor = color('Color', 'RGBA(255, 85, 0, 1)');
   const visual = boolean('Visual', true);
 
   const rgb = mcolor
@@ -50,7 +49,7 @@ export const ExampleUseCase = () => {
   return (
     <amp-soundcloud
       height={height}
-      data-trackid={trackid}
+      data-trackid={trackId}
       data-color={hex}
       data-visual={visual}
       layout="fixed-height"
@@ -60,6 +59,33 @@ export const ExampleUseCase = () => {
   );
 };
 
-ExampleUseCase.story = {
-  name: 'Example use case story',
+export const PlaylistId = () => {
+  const playlistId = text('Playlist ID', '151584683');
+  const height = text('Height', '180');
+  const mcolor = color('Color', 'RGBA(255, 85, 0, 1)');
+  const visual = boolean('Visual', true);
+
+  const rgb = mcolor
+    .replace(/\s/g, '')
+    .match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i);
+  let hex = rgb
+    ? (rgb[1] | (1 << 8)).toString(16).slice(1) +
+      (rgb[2] | (1 << 8)).toString(16).slice(1) +
+      (rgb[3] | (1 << 8)).toString(16).slice(1)
+    : mcolor;
+
+  // multiply before convert to HEX
+  hex = hex;
+
+  return (
+    <amp-soundcloud
+      height={height}
+      data-playlistid={playlistId}
+      data-color={hex}
+      data-visual={visual}
+      layout="fixed-height"
+    >
+      This text is inside.
+    </amp-soundcloud>
+  );
 };

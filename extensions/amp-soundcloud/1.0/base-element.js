@@ -44,11 +44,13 @@ BaseElement['Component'] = Soundcloud;
 
 /** @override */
 BaseElement['props'] = {
-  'height': {attr: 'height', type: 'number'},
-  'trackId': {attr: 'data-trackid'},
-  'playlistId': {attr: 'data-playlistid'},
-  'color': {attr: 'data-color'},
   'children': {passthrough: true},
+  'color': {attr: 'data-color'},
+  'height': {attr: 'height', type: 'number'},
+  'playlistId': {attr: 'data-playlistid'},
+  'secretToken': {attr: 'data-secret-token'},
+  'trackId': {attr: 'data-trackid'},
+  'visual': {attr: 'data-visual'},
 };
 
 /** @override */

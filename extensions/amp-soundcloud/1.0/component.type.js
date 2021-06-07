@@ -21,7 +21,12 @@ var SoundcloudDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   color: string,
+ *   height: number,
+ *   playlistId: (string|undefined),
+ *   secretToken: (string|undefined),
+ *   trackId: (string|undefined),
+ *   visual: boolean,
  * }}
  */
 SoundcloudDef.Props;

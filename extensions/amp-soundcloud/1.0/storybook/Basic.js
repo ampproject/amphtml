@@ -45,9 +45,9 @@ export const track = () => {
   return (
     <Soundcloud
       height={height}
-      data-trackid={trackid}
-      data-color={hex}
-      data-visual={visual}
+      trackId={trackid}
+      color={hex}
+      visual={visual}
       layout="fixed-height"
     />
   );
@@ -56,7 +56,7 @@ export const track = () => {
 export const playlist = () => {
   const playlistid = text('Playlist ID', '151584683');
   const height = text('height', '480');
-  const mcolor = color('color', 'ff5500');
+  const mcolor = color('color', 'RGBA(255, 85, 0, 1)');
   const visual = boolean('Visual', true);
 
   const rgb = mcolor
@@ -74,9 +74,9 @@ export const playlist = () => {
   return (
     <Soundcloud
       height={height}
-      data-playlistid={playlistid}
-      data-color={hex}
-      data-visual={visual}
+      playlistId={playlistid}
+      color={hex}
+      visual={visual}
       layout="fixed-height"
     />
   );

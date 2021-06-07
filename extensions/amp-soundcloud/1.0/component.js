@@ -23,28 +23,19 @@ import {useEffect, useRef} from '../../../src/preact';
  * @return {PreactDef.Renderable}
  */
 export function Soundcloud(props) {
+  // Extract props
+  const {color, height, playlistId, secretToken, trackId, visual} = props;
+
   const iframeRef = useRef(null);
-
-  // TODO: PreconnectFor
-  // Services.preconnectFor(iframeRef.current?.ownerDocument?.defaultView);
-
-  // Retrive attributes
-  const height = props['height'];
-  const color = props['data-color'];
-  const visual = props['data-visual'];
 
   // Process URL
   const url =
     'https://api.soundcloud.com/' +
-    (props['data-trackid'] != undefined ? 'tracks' : 'playlists') +
+    (trackId != undefined ? 'tracks' : 'playlists') +
     '/';
 
-  console.log(props);
-  const mediaid =
-    props['data-trackid'] != undefined
-      ? props['data-trackid']
-      : props['data-playlistid'];
-  const secret = props['data-secret-token'];
+  const mediaid = trackId != undefined ? trackId : playlistId;
+  const secret = secretToken;
 
   let src =
     'https://w.soundcloud.com/player/?' +
@@ -62,7 +53,6 @@ export function Soundcloud(props) {
     src += '&color=' + encodeURIComponent(color);
   }
 
-  console.log(src);
   useEffect(() => {
     //
 
