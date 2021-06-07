@@ -63,7 +63,7 @@ export function Soundcloud(props) {
   }
 
   // Prepare iframe for Soundcloud Widget
-  const iframeSoundcloud = Preact.createElement('iframe', {
+  const iframeElement = Preact.createElement('iframe', {
     allow: 'autoplay',
     frameborder: 'no',
     height,
@@ -74,24 +74,19 @@ export function Soundcloud(props) {
     width: '100%',
   });
 
-  useEffect(
-    () => {
-      /** Unmount Procedure */
-      return () => {
-        // Pause widget
-        iframeRef.current.contentWindow./*OK*/ postMessage(
-          JSON.stringify(dict({'method': 'pause'})),
-          'https://w.soundcloud.com'
-        );
+  useEffect(() => {
+    /** Unmount Procedure */
+    return () => {
+      // Pause widget
+      iframeRef.current.contentWindow./*OK*/ postMessage(
+        JSON.stringify(dict({'method': 'pause'})),
+        'https://w.soundcloud.com'
+      );
 
-        // Release iframe resources
-        iframeRef.current = null;
-      };
-    },
-    [
-      /** Left blank for Unmount Procedure */
-    ]
-  );
+      // Release iframe resources
+      iframeRef.current = null;
+    };
+  }, []);
 
-  return {iframeSoundcloud};
+  return {iframeElement};
 }
