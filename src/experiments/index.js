@@ -125,6 +125,9 @@ export function experimentToggles(win) {
   win[TOGGLES_WINDOW_PROPERTY] = map();
   const toggles = win[TOGGLES_WINDOW_PROPERTY];
 
+  // eslint-disable-next-line local/window-property-name
+  win.AMP_EXP ??= JSON.parse(win.__AMP_EXP?.textContent || '{}');
+
   // Read default and injected configs of this build.
   const buildExperimentConfigs = {
     ...(win.AMP_CONFIG ?? {}),
