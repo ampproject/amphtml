@@ -41,6 +41,7 @@ export const SESSION_MAX_AGE_MILLIS = 30 * 60 * 1000;
 export const SESSION_VALUES = {
   SESSION_ID: 'sessionId',
   TIMESTAMP: 'creationTimestamp',
+  COUNT: 'count',
 };
 
 /**
@@ -49,7 +50,9 @@ export const SESSION_VALUES = {
  */
 const SESSION_STORAGE_KEYS = {
   SESSION_ID: 'ssid',
+  LAST_ACCESS_TIMESTAMP: 'lat',
   CREATION_TIMESTAMP: 'ct',
+  COUNT: 'c',
 };
 
 /**
@@ -61,6 +64,7 @@ const SESSION_STORAGE_KEYS = {
  *  sessionId: number,
  *  creationTimestamp: number,
  *  lastAccessTimestamp: number,
+ *  count: number,
  * }}
  */
 export let SessionInfoDef;
@@ -105,12 +109,12 @@ export class SessionManager {
       hasOwn(this.sessions_, type) &&
       !this.isSessionExpired_(this.sessions_[type])
     ) {
+      this.sessions_[type] = this.updateSession_(this.sessions_[type]);
       this.setSession_(type, this.sessions_[type]);
-      this.sessions_[type].lastAccessTimestamp = Date.now();
       return Promise.resolve(this.sessions_[type]);
     }
 
-    return this.getSessionFromStorage_(type);
+    return this.getOrCreateSession_(type);
   }
 
   /**
@@ -119,18 +123,17 @@ export class SessionManager {
    * @param {string} type
    * @return {!Promise<SessionInfoDef>}
    */
-  getSessionFromStorage_(type) {
+  getOrCreateSession_(type) {
     return this.storagePromise_
       .then((storage) => {
         const storageKey = getStorageKey(type);
-        // Gets the session if it has not expired
-        return storage.get(storageKey, SESSION_MAX_AGE_MILLIS);
+        return storage.get(storageKey);
       })
       .then((session) => {
-        // If no valid session in storage, create a new one
+        // Either create session or update it
         return !session
-          ? constructSessionInfo(generateSessionId(), Date.now())
-          : constructSessionFromStoredValue(session);
+          ? constructSessionInfo(generateSessionId(), Date.now(), 1, Date.now())
+          : this.updateSession_(constructSessionFromStoredValue(session));
       })
       .then((session) => {
         // Avoid multiple session creation race
@@ -141,10 +144,29 @@ export class SessionManager {
           session = this.sessions_[type];
         }
         this.setSession_(type, session);
-        session.lastAccessTimestamp = Date.now();
         this.sessions_[type] = session;
         return this.sessions_[type];
       });
+  }
+
+  /**
+   * Check if session has expired and reset values (id, count) if so.
+   * Also update `lastAccessTimestamp`.
+   * @param {!SessionInfoDef} session
+   * @return {!SessionInfoDef}
+   */
+  updateSession_(session) {
+    if (this.isSessionExpired_(session)) {
+      const newSessionCount =
+        session.count === undefined ? 1 : session.count + 1;
+      session = constructSessionInfo(
+        generateSessionId(),
+        Date.now(),
+        newSessionCount,
+      );
+    }
+    session.lastAccessTimestamp = Date.now();
+    return session;
   }
 
   /**
@@ -190,18 +212,19 @@ function getStorageKey(type) {
 
 /**
  * @param {SessionInfoDef|string} storedSession
- * @return {SessionInfoDef|undefined}
+ * @return {SessionInfoDef}
  */
 function constructSessionFromStoredValue(storedSession) {
   if (!isObject(storedSession)) {
     dev().error(TAG, 'Invalid stored session value');
-    return;
+    return constructSessionInfo(generateSessionId(), Date.now(), 1);
   }
 
   return constructSessionInfo(
     storedSession[SESSION_STORAGE_KEYS.SESSION_ID],
     storedSession[SESSION_STORAGE_KEYS.CREATION_TIMESTAMP],
-    Date.now()
+    storedSession[SESSION_STORAGE_KEYS.COUNT],
+    storedSession[SESSION_STORAGE_KEYS.LAST_ACCESS_TIMESTAMP],
   );
 }
 
@@ -213,6 +236,8 @@ export function composeStorageSessionValue(session) {
   const obj = map();
   obj[SESSION_STORAGE_KEYS.SESSION_ID] = session.sessionId;
   obj[SESSION_STORAGE_KEYS.CREATION_TIMESTAMP] = session.creationTimestamp;
+  obj[SESSION_STORAGE_KEYS.LAST_ACCESS_TIMESTAMP] = session.lastAccessTimestamp;
+  obj[SESSION_STORAGE_KEYS.COUNT] = session.count;
   return obj;
 }
 
@@ -220,18 +245,21 @@ export function composeStorageSessionValue(session) {
  * Construct the session info object from values
  * @param {number} sessionId
  * @param {number} creationTimestamp
- * @param {number} lastAccessTimestamp
+ * @param {number} count
+ * @param {number|undefined} opt_lastAccessTimestamp
  * @return {!SessionInfoDef}
  */
 function constructSessionInfo(
   sessionId,
   creationTimestamp,
-  lastAccessTimestamp
+  count,
+  opt_lastAccessTimestamp
 ) {
   return {
     'sessionId': sessionId,
     'creationTimestamp': creationTimestamp,
-    'lastAccessTimestamp': lastAccessTimestamp,
+    'count': count,
+    'lastAccessTimestamp': opt_lastAccessTimestamp,
   };
 }
 

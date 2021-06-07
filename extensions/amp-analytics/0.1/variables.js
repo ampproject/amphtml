@@ -340,10 +340,12 @@ export class VariableService {
       },
       'SESSION_TIMESTAMP': () => {
         return this.sessionManagerPromise_.then((sessionManager) => {
-          return sessionManager.getSessionValue(
-            type,
-            SESSION_VALUES.TIMESTAMP
-          );
+          return sessionManager.getSessionValue(type, SESSION_VALUES.TIMESTAMP);
+        });
+      },
+      'SESSION_COUNT': () => {
+        return this.sessionManagerPromise_.then((sessionManager) => {
+          return sessionManager.getSessionValue(type, SESSION_VALUES.COUNT);
         });
       },
     };
