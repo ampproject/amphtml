@@ -131,11 +131,9 @@ describes.realWin(
       await element.layoutCallback();
 
       const impl = await element.getImpl(false);
-      const attemptChangeHeightStub = env.sandbox.stub(
-        impl,
-        'attemptChangeHeight'
-      );
-      attemptChangeHeightStub.returns(Promise.resolve());
+      const attemptChangeHeightStub = env.sandbox
+        .stub(impl, 'attemptChangeHeight')
+        .resolves();
 
       const mockEvent = new CustomEvent('message');
       const sentinel = JSON.parse(

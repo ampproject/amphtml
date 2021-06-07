@@ -22,6 +22,8 @@ var FacebookDef = {};
 /**
  * @typedef {{
  *   colorScheme: (string|undefined),
+ *   hideCta: (string|undefined),
+ *   hideCover: (string|undefined),
  *   href: (string|undefined),
  *   loading: (string|undefined),
  *   locale: (string|undefined),
@@ -29,6 +31,9 @@ var FacebookDef = {};
  *   orderBy: (string|undefined),
  *   onReadyState: (function(string, *=)|undefined),
  *   requestResize: (function(number):*|undefined),
+ *   showFacepile: (string|undefined),
+ *   smallHeader: (string|undefined),
+ *   tabs: (string|undefined),
  *   title: (string|undefined),
  * }}
  */
