@@ -17,6 +17,7 @@
 import * as Preact from '../../../../src/preact';
 import {Soundcloud} from '../component';
 import {boolean, color, text, withKnobs} from '@storybook/addon-knobs';
+import {rgba2hex} from '../converter';
 
 export default {
   title: 'Soundcloud',
@@ -25,59 +26,45 @@ export default {
 };
 
 export const track = () => {
-  const trackid = text('Track ID', '864765493');
+  // Knobs
+  const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
   const height = text('Height', '180');
-  const mcolor = color('Color', 'ff5500');
+  const trackid = text('Track ID', '864765493');
   const visual = boolean('Visual', true);
 
-  const rgb = mcolor
-    .replace(/\s/g, '')
-    .match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i);
-  let hex = rgb
-    ? (rgb[1] | (1 << 8)).toString(16).slice(1) +
-      (rgb[2] | (1 << 8)).toString(16).slice(1) +
-      (rgb[3] | (1 << 8)).toString(16).slice(1)
-    : mcolor;
+  // Convert RGBA to HEX (without Alpha Channel)
+  const hex = rgba2hex(componentColor);
 
-  // multiply before convert to HEX
-  hex = hex;
-
+  // Render Preact Component
   return (
     <Soundcloud
-      height={height}
-      trackId={trackid}
       color={hex}
-      visual={visual}
+      height={height}
       layout="fixed-height"
+      trackId={trackid}
+      visual={visual}
     />
   );
 };
 
 export const playlist = () => {
+  // Knobs
   const playlistid = text('Playlist ID', '151584683');
   const height = text('height', '480');
-  const mcolor = color('color', 'RGBA(255, 85, 0, 1)');
+  const componentColor = color('color', 'RGBA(255, 85, 0, 1)');
   const visual = boolean('Visual', true);
 
-  const rgb = mcolor
-    .replace(/\s/g, '')
-    .match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i);
-  let hex = rgb
-    ? (rgb[1] | (1 << 8)).toString(16).slice(1) +
-      (rgb[2] | (1 << 8)).toString(16).slice(1) +
-      (rgb[3] | (1 << 8)).toString(16).slice(1)
-    : mcolor;
+  // Convert RGBA to HEX (without Alpha Channel)
+  const hex = rgba2hex(componentColor);
 
-  // multiply before convert to HEX
-  hex = hex;
-
+  // Render Preact Component
   return (
     <Soundcloud
-      height={height}
-      playlistId={playlistid}
       color={hex}
-      visual={visual}
+      height={height}
       layout="fixed-height"
+      playlistId={playlistid}
+      visual={visual}
     />
   );
 };

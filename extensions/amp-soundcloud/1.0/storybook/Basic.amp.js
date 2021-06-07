@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {boolean, color, text, withKnobs} from '@storybook/addon-knobs';
+import {rgba2hex} from '../converter';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
@@ -29,63 +30,45 @@ export default {
 };
 
 export const TrackId = () => {
-  const trackId = text('Track ID', '864765493');
+  // Knobs
+  const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
   const height = text('Height', '180');
-  const mcolor = color('Color', 'RGBA(255, 85, 0, 1)');
+  const trackId = text('Track ID', '864765493');
   const visual = boolean('Visual', true);
 
-  const rgb = mcolor
-    .replace(/\s/g, '')
-    .match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i);
-  let hex = rgb
-    ? (rgb[1] | (1 << 8)).toString(16).slice(1) +
-      (rgb[2] | (1 << 8)).toString(16).slice(1) +
-      (rgb[3] | (1 << 8)).toString(16).slice(1)
-    : mcolor;
+  // Convert RGBA to HEX (without Alpha Channel)
+  const hex = rgba2hex(componentColor);
 
-  // multiply before convert to HEX
-  hex = hex;
-
+  // Render Bento Component
   return (
     <amp-soundcloud
-      height={height}
-      data-trackid={trackId}
       data-color={hex}
+      data-trackid={trackId}
       data-visual={visual}
+      height={height}
       layout="fixed-height"
-    >
-      This text is inside.
-    </amp-soundcloud>
+    />
   );
 };
 
 export const PlaylistId = () => {
-  const playlistId = text('Playlist ID', '151584683');
+  // Knobs
+  const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
   const height = text('Height', '180');
-  const mcolor = color('Color', 'RGBA(255, 85, 0, 1)');
+  const playlistId = text('Playlist ID', '151584683');
   const visual = boolean('Visual', true);
 
-  const rgb = mcolor
-    .replace(/\s/g, '')
-    .match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i);
-  let hex = rgb
-    ? (rgb[1] | (1 << 8)).toString(16).slice(1) +
-      (rgb[2] | (1 << 8)).toString(16).slice(1) +
-      (rgb[3] | (1 << 8)).toString(16).slice(1)
-    : mcolor;
+  // Convert RGBA to HEX (without Alpha Channel)
+  const hex = rgba2hex(componentColor);
 
-  // multiply before convert to HEX
-  hex = hex;
-
+  // Render Bento Component
   return (
     <amp-soundcloud
-      height={height}
-      data-playlistid={playlistId}
       data-color={hex}
+      data-playlistid={playlistId}
       data-visual={visual}
+      height={height}
       layout="fixed-height"
-    >
-      This text is inside.
-    </amp-soundcloud>
+    />
   );
 };

@@ -23,62 +23,75 @@ import {useEffect, useRef} from '../../../src/preact';
  * @return {PreactDef.Renderable}
  */
 export function Soundcloud(props) {
-  // Extract props
+  // Property and Reference Variables
   const {color, height, playlistId, secretToken, trackId, visual} = props;
-
   const iframeRef = useRef(null);
 
-  // Process URL
+  // Perform manual checking as assertion is not available for Bento: Issue #32739
+  if (playlistId == undefined && trackId === undefined) {
+    console /*OK*/
+      .error(
+        'data-trackid or data-playlistid is required for <amp-soundcloud>'
+      );
+  }
+
+  // Build Base URL
   const url =
     'https://api.soundcloud.com/' +
     (trackId != undefined ? 'tracks' : 'playlists') +
     '/';
 
-  const mediaid = trackId != undefined ? trackId : playlistId;
-  const secret = secretToken;
+  // Extract Media ID
+  const mediaId = playlistId ? playlistId : trackId;
 
+  // Prepare Soundcloud Widget URL for iFrame
   let src =
     'https://w.soundcloud.com/player/?' +
     'url=' +
-    encodeURIComponent(url + mediaid);
+    encodeURIComponent(url + mediaId);
 
-  if (secret) {
+  if (secretToken) {
     // It's very important the entire thing is encoded, since it's part of
     // the `url` query param added above.
-    src += encodeURIComponent('?secret_token=' + secret);
+    src += encodeURIComponent('?secret_token=' + secretToken);
   }
+
   if (visual === true) {
     src += '&visual=true';
   } else if (color) {
     src += '&color=' + encodeURIComponent(color);
   }
 
-  useEffect(() => {
-    //
+  // Prepare iframe for Soundcloud Widget
+  const iframeSoundcloud = Preact.createElement('iframe', {
+    allow: 'autoplay',
+    frameborder: 'no',
+    height,
+    ref: iframeRef,
+    scrolling: 'no',
+    src,
+    title: 'Soundcloud Widget - ' + {mediaId},
+    width: '100%',
+  });
 
-    /** Unmount Procedure */
-    return () => {
-      iframeRef.current.contentWindow./*OK*/ postMessage(
-        JSON.stringify(dict({'method': 'pause'})),
-        'https://w.soundcloud.com'
-      );
+  useEffect(
+    () => {
+      /** Unmount Procedure */
+      return () => {
+        // Pause widget
+        iframeRef.current.contentWindow./*OK*/ postMessage(
+          JSON.stringify(dict({'method': 'pause'})),
+          'https://w.soundcloud.com'
+        );
 
-      iframeRef.current = null;
-    };
-  }, []);
-
-  return (
-    <div>
-      <iframe
-        title="soundcloud"
-        ref={iframeRef}
-        width="100%"
-        height={height}
-        scrolling="no"
-        frameborder="no"
-        allow="autoplay"
-        src={src}
-      />
-    </div>
+        // Release iframe resources
+        iframeRef.current = null;
+      };
+    },
+    [
+      /** Left blank for Unmount Procedure */
+    ]
   );
+
+  return {iframeSoundcloud};
 }
