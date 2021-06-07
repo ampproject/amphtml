@@ -103,15 +103,16 @@ async function validateHtmlFixtures() {
   await runCheck(filesToCheck);
 }
 
-validateHtmlFixtures.description =
-  'Makes sure that HTML fixtures used during tests contain valid AMPHTML.';
-validateHtmlFixtures.flags = {
-  'files': 'Checks just the specified files',
-  'include_skipped':
-    'Include skipped files while validating (can be used with --local_changes)',
-  'local_changes': 'Checks just the files changed in the local branch',
-};
-
 module.exports = {
   validateHtmlFixtures,
+};
+
+validateHtmlFixtures.description =
+  'Make sure that HTML fixtures used during tests contain valid AMPHTML';
+
+validateHtmlFixtures.flags = {
+  'files': 'Check just the specified files',
+  'include_skipped':
+    'Include skipped files while validating (can be used with --local_changes)',
+  'local_changes': 'Check just the files changed in the local branch',
 };

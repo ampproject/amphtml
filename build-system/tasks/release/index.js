@@ -499,13 +499,13 @@ module.exports = {
   release,
 };
 
-release.description = 'Generates a release build';
+release.description = 'Generate a release build';
 release.flags = {
   'output_dir':
     'Directory path to emplace release files (defaults to "./release")',
   'flavor':
-    'Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
+    'Limit this release build to a single flavor (can be used to split the release work across multiple build machines)',
   'esm':
     // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
-    'True to compile with --esm, false to compile without; Do not set to compile both.',
+    'Compile with --esm if true, without --esm if false, and with + without --esm if left unset',
 };

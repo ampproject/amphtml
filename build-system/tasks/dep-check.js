@@ -333,4 +333,4 @@ module.exports = {
   depCheck,
 };
 
-depCheck.description = 'Runs a dependency check on each module';
+depCheck.description = 'Run a dependency check on each module';

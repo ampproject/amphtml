@@ -55,4 +55,4 @@ module.exports = {
   devDashboardTests,
 };
 
-devDashboardTests.description = 'Runs all the dev dashboard tests';
+devDashboardTests.description = 'Run all the dev dashboard tests';

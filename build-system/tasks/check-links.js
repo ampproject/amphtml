@@ -177,8 +177,8 @@ module.exports = {
   checkLinks,
 };
 
-checkLinks.description = 'Detects dead links in markdown files';
+checkLinks.description = 'Check markdown files for dead links';
 checkLinks.flags = {
-  'files': 'Checks only the specified files',
-  'local_changes': 'Checks just the files changed in the local branch',
+  'files': 'Check only the specified files',
+  'local_changes': 'Check just the files changed in the local branch',
 };

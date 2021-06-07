@@ -208,4 +208,4 @@ module.exports = {
   serverTests,
 };
 
-serverTests.description = "Runs tests for the AMP server's custom transforms";
+serverTests.description = "Run tests for the AMP server's custom transforms";

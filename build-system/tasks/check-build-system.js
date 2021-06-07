@@ -47,7 +47,7 @@ function checkBuildSystem() {
 }
 
 checkBuildSystem.description =
-  'Check source code in build-system/ for JS type errors.';
+  'Check source code in build-system/ for JS type errors';
 
 module.exports = {
   checkBuildSystem,

@@ -83,10 +83,9 @@ module.exports = {
   clean,
 };
 
-clean.description = 'Cleans up various cache and output directories';
+clean.description = 'Clean up various cache and output directories';
 clean.flags = {
-  'dry_run': 'Does a dry run without actually deleting anything',
-  'include_subpackages':
-    'Also cleans up inner node_modules package directories',
-  'exclude': 'Comma separated list of directories to exclude from deletion',
+  'dry_run': 'Do a dry run without actually deleting anything',
+  'include_subpackages': 'Also clean up inner node_modules package directories',
+  'exclude': 'Comma-separated list of directories to exclude from deletion',
 };
