@@ -87,6 +87,44 @@ export const Comments = () => {
   );
 };
 
+export const Like = () => {
+  const href = text('href', 'https://www.facebook.com/nasa/');
+  const locale = boolean('french locale') ? 'fr_FR' : undefined;
+
+  const action = select('action', ['like', 'recommend'], undefined);
+  const colorscheme = select(
+    'colorscheme (broken)',
+    ['light', 'dark'],
+    undefined
+  );
+  const kdSite = boolean('kd_site') || undefined;
+  const layout = select(
+    'layout',
+    ['standard', 'button_count', 'button', 'box_count'],
+    undefined
+  );
+  const refLabel = text('ref', undefined);
+  const share = boolean('share') || undefined;
+  const size = select('size (small by default)', ['large', 'small'], undefined);
+  return (
+    <Facebook
+      bootstrap="./vendor/facebook.max.js"
+      embedAs="like"
+      href={href}
+      locale={locale}
+      action={action}
+      colorscheme={colorscheme}
+      kdSite={kdSite}
+      layout={layout}
+      refLabel={refLabel}
+      share={share}
+      size={size}
+      src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
+      style={{width: '800px', height: '400px'}}
+    ></Facebook>
+  );
+};
+
 export const Page = () => {
   const href = text('href', 'https://www.facebook.com/nasa/');
   const locale = boolean('french locale') ? 'fr_FR' : undefined;
