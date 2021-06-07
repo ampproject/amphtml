@@ -974,7 +974,7 @@ const forbiddenTermsSrcInclusive = {
       'Do not directly use CI-specific environment vars. Instead, add a ' +
       'function to build-system/common/ci.js',
   },
-  '\\.matches\\(': 'Please use matches() helper in src/dom.js',
+  '\\.matches\\(': 'Please use matches() helper in src/core/dom/query.js',
   '\\.getLayoutBox': {
     message: measurementApiDeprecated,
     allowlist: [

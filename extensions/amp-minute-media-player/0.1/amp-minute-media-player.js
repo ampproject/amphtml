@@ -424,7 +424,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    * implementation of fullscreen (flash for example) then check
    * if Services.platformFor(this.win).isSafari is true and use the internal
    * implementation instead. If not, it is recommended to take the iframe
-   * to fullscreen using fullscreenEnter from dom.js
+   * to fullscreen using fullscreenEnter from src/core/dom/fullscreen.js
    */
   /** @override */
   fullscreenEnter() {

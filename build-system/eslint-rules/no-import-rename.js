@@ -33,18 +33,18 @@ const path = require('path');
 // otherName()
 
 const imports = {
-  'src/core/types/object': ['dict'],
-  'src/static-template': ['htmlFor'],
-  'src/experiments': ['isExperimentOn'],
   'src/assert-display': ['assertDoesNotContainDisplay', 'assertNotDisplay'],
+  'src/core/types/object': ['dict'],
+  'src/core/dom/css': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
+  'src/core/dom/query': ['scopedQuerySelector', 'scopedQuerySelectorAll'],
+  'src/core/dom/static-template': ['htmlFor'],
   'src/core/dom/style': [
     'resetStyles',
     'setImportantStyles',
     'setStyle',
     'setStyles',
   ],
-  'src/core/dom/css': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
-  'src/dom': ['scopedQuerySelector', 'scopedQuerySelectorAll'],
+  'src/experiments': ['isExperimentOn'],
   'src/log': ['user', 'dev'],
   'src/mode': ['getMode'],
 };

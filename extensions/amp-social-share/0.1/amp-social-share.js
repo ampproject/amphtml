@@ -20,8 +20,9 @@ import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
+import {getDataParamsFromAttributes} from '../../../src/core/dom';
 import {getSocialConfig} from './amp-social-share-config';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseQueryString} from '../../../src/core/types/string/url';
 import {toggle} from '../../../src/style';
 
