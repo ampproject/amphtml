@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Definitions for the PerformanceObserver API.
- *
- * Created from
- * @see https://www.w3.org/TR/performance-timeline-2/#the-performanceobserver-interface
- *
- * @todo This should be removed when the definitions are released
- * in closure-compiler.
- *
- * @externs
- */
+// src/polyfills.js must be the first import.
+import '../polyfills';
 
-/** @type {!Array} */ PerformanceObserver.supportedEntryTypes;
+import {draw3p, init} from '../integration-lib';
+import {register} from '../3p';
+
+import {gecko} from '../../ads/vendors/gecko';
+
+init(window);
+register('gecko', gecko);
+
+window.draw3p = draw3p;
