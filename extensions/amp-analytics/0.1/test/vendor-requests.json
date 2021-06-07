@@ -515,10 +515,10 @@
   },
   "top100": {
     "host": "https://kraken.rambler.ru",
-    "base": "https://kraken.rambler.ru/cnt/?pid=!pid&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id(ruid)_&ct=amp",
-    "pageview": "https://kraken.rambler.ru/cnt/?pid=!pid&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id(ruid)_&ct=amp&et=pv&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
+    "base": "https://kraken.rambler.ru/cnt/?pid=!pid&rid=_page_view_id_&v=1.0.1&rn=_random_&tid=_client_id(top100_id)_&ct=amp",
+    "pageview": "https://kraken.rambler.ru/cnt/?pid=!pid&rid=_page_view_id_&v=1.0.1&rn=_random_&tid=_client_id(top100_id)_&ct=amp&et=pv&url=_canonical_url_&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
     "_screenData": "&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
-    "_pageData": "&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_"
+    "_pageData": "&url=_canonical_url_&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_"
   },
   "topmailru": {
     "pageView": "https://top-fwz1.mail.ru/counter?js=13;id=!id;u=_source_url_;r=_document_referrer_;s=_screen_width_*_screen_height_;vp=_viewport_width_*_viewport_height_;st=!start;gender=!gender;age=!age;pid=!pid;userid=!userid;device=!device;params=!params;_=_random_;title=_title_",
