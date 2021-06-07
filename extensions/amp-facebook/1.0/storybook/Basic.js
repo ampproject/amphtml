@@ -16,7 +16,13 @@
 
 import * as Preact from '../../../../src/preact';
 import {Facebook} from '../component';
-import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
+import {
+  boolean,
+  optionsKnob,
+  select,
+  text,
+  withKnobs,
+} from '@storybook/addon-knobs';
 
 export default {
   title: 'Facebook',
@@ -115,6 +121,38 @@ export const Like = () => {
       size={size}
       src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
       style={{width: '800px', height: '400px'}}
+    ></Facebook>
+  );
+};
+
+export const Page = () => {
+  const href = text('href', 'https://www.facebook.com/nasa/');
+  const locale = boolean('french locale') ? 'fr_FR' : undefined;
+
+  const hideCover = boolean('hide cover') ? 'true' : undefined;
+  const hideCta = boolean('hide cta') ? 'true' : undefined;
+  const smallHeader = boolean('small header') ? 'true' : undefined;
+  const showFacepile = boolean('show facepile') ? undefined : 'false';
+  const tabs = optionsKnob(
+    'tabs',
+    {timeline: 'timeline', events: 'events', messages: 'messages'},
+    undefined,
+    {display: 'inline-check'}
+  );
+
+  return (
+    <Facebook
+      bootstrap="./vendor/facebook.max.js"
+      embedAs="page"
+      href={href}
+      locale={locale}
+      hideCover={hideCover}
+      hideCta={hideCta}
+      smallHeader={smallHeader}
+      showFacepile={showFacepile}
+      tabs={tabs}
+      src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
+      style={{width: '400px', height: '400px'}}
     ></Facebook>
   );
 };

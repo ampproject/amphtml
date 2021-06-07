@@ -41,6 +41,8 @@ function FacebookWithRef(
     action,
     colorScheme,
     embedAs,
+    hideCover,
+    hideCta,
     href,
     includeCommentParent,
     kdSite,
@@ -52,9 +54,12 @@ function FacebookWithRef(
     refLabel,
     requestResize,
     share,
+    showFacepile,
     showText,
     size,
+    smallHeader,
     style,
+    tabs,
     title = DEFAULT_TITLE,
     ...rest
   },
@@ -99,6 +104,8 @@ function FacebookWithRef(
         action,
         colorScheme,
         embedAs,
+        hideCover,
+        hideCta,
         href,
         includeCommentParent,
         'kd_site': kdSite,
@@ -108,8 +115,11 @@ function FacebookWithRef(
         orderBy,
         ref: refLabel,
         share,
+        showFacepile,
         showText,
         size,
+        smallHeader,
+        tabs,
       }}
       ref={ref}
       title={title}

@@ -23,6 +23,8 @@ var FacebookDef = {};
  * @typedef {{
  *   action: (string|undefined),
  *   colorScheme: (string|undefined),
+ *   hideCta: (string|undefined),
+ *   hideCover: (string|undefined),
  *   href: (string|undefined),
  *   loading: (string|undefined),
  *   kdSite: (boolean|undefined),
@@ -34,7 +36,10 @@ var FacebookDef = {};
  *   refLabel: (string|undefined),
  *   requestResize: (function(number):*|undefined),
  *   share: (boolean|undefined),
+ *   showFacepile: (string|undefined),
  *   size: (string|undefined),
+ *   smallHeader: (string|undefined),
+ *   tabs: (string|undefined),
  *   title: (string|undefined),
  * }}
  */
