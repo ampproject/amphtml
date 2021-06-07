@@ -18,64 +18,7 @@
                 height: 10px;
             }
         </style>
-        <style amp-boilerplate>
-            body {
-                -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-                -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-                -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-                animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-            }
-            @-webkit-keyframes -amp-start {
-                from {
-                    visibility: hidden;
-                }
-                to {
-                    visibility: visible;
-                }
-            }
-            @-moz-keyframes -amp-start {
-                from {
-                    visibility: hidden;
-                }
-                to {
-                    visibility: visible;
-                }
-            }
-            @-ms-keyframes -amp-start {
-                from {
-                    visibility: hidden;
-                }
-                to {
-                    visibility: visible;
-                }
-            }
-            @-o-keyframes -amp-start {
-                from {
-                    visibility: hidden;
-                }
-                to {
-                    visibility: visible;
-                }
-            }
-            @keyframes -amp-start {
-                from {
-                    visibility: hidden;
-                }
-                to {
-                    visibility: visible;
-                }
-            }
-        </style>
-        <noscript>
-            <style amp-boilerplate>
-                body {
-                    -webkit-animation: none;
-                    -moz-animation: none;
-                    -ms-animation: none;
-                    animation: none;
-                }
-            </style>
-        </noscript>
+        <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
         <script async src="https://cdn.ampproject.org/v0.js"></script>
         <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     </head>
@@ -101,12 +44,23 @@
                             "session": {
                               "on": "timer",
                               "timerSpec": {
-                                  "interval": 2
+                                  "interval": 10
                               },
-                              "enabled": false,
+                              "enabled": true,
                               "request": "endpoint",
                               "extraUrlParams": {
                                 "timer": true
+                              }
+                            },
+                            "session2": {
+                              "on": "timer",
+                              "timerSpec": {
+                                  "interval": 15
+                              },
+                              "enabled": true,
+                              "request": "endpoint",
+                              "extraUrlParams": {
+                                "timer2": true
                               }
                             }
                         },
@@ -118,11 +72,12 @@
                     }
                 </script>
             </amp-analytics>
+
             <amp-analytics type="googleanalytics">
                 <script type="application/json">
                     {
                         "requests": {
-                            "endpoint": "https://example.com/analytics?session=SESSION_ID&ct=SESSION_TIMESTAMP"
+                            "endpoint": "https://example.com/analytics?session=${sessionId}&ct=SESSION_TIMESTAMP"
                         },
                         "triggers": {
                             "pageview": {

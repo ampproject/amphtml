@@ -133,6 +133,13 @@ export class SessionManager {
           : constructSessionFromStoredValue(session);
       })
       .then((session) => {
+        // Avoid multiple session creation race
+        if (
+          type in this.sessions_ &&
+          !this.isSessionExpired_(this.sessions_[type])
+        ) {
+          session = this.sessions_[type];
+        }
         this.setSession_(type, session);
         session.lastAccessTimestamp = Date.now();
         this.sessions_[type] = session;
