@@ -40,6 +40,8 @@ function FacebookWithRef(
   {
     colorScheme,
     embedAs,
+    hideCover,
+    hideCta,
     href,
     includeCommentParent,
     locale: localeProp,
@@ -47,8 +49,11 @@ function FacebookWithRef(
     onReady,
     orderBy,
     requestResize,
+    showFacepile,
     showText,
+    smallHeader,
     style,
+    tabs,
     title = DEFAULT_TITLE,
     ...rest
   },
@@ -92,12 +97,17 @@ function FacebookWithRef(
       options={{
         colorScheme,
         embedAs,
+        hideCover,
+        hideCta,
         href,
         includeCommentParent,
         locale,
         numPosts,
         orderBy,
+        showFacepile,
         showText,
+        smallHeader,
+        tabs,
       }}
       ref={ref}
       title={title}
