@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {createCustomEvent} from '../event-helper.js';
-import {whenContentIniLoad} from '../ini-load';
+import {whenContentIniLoadMeasure} from '../ini-load';
 
 /**
  * Registers ini-load listener that will fire custom 'amp-ini-load' event
@@ -27,7 +27,7 @@ import {whenContentIniLoad} from '../ini-load';
 export function registerIniLoadListener(ampdoc) {
   const {win} = ampdoc;
   const root = ampdoc.getRootNode();
-  whenContentIniLoad(
+  whenContentIniLoadMeasure(
     ampdoc,
     win,
     Services.viewportForDoc(ampdoc).getLayoutRect(

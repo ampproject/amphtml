@@ -198,6 +198,8 @@ If we just want to display the German cars from the response, we can use the `ke
 </amp-render>
 ```
 
+Note that they `key` attribute is valid only when `src` is a URL.
+
 ### `binding`
 
 Controls whether to block render to evaluate bindings (e.g. `[text]`) in children on pages using `amp-render` and `amp-bind` together.

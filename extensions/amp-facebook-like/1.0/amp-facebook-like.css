@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Definitions for the PerformanceObserver API.
- *
- * Created from
- * @see https://www.w3.org/TR/performance-timeline-2/#the-performanceobserver-interface
- *
- * @todo This should be removed when the definitions are released
- * in closure-compiler.
- *
- * @externs
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
  */
+amp-facebook-like {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
 
-/** @type {!Array} */ PerformanceObserver.supportedEntryTypes;
+/* Pre-upgrade: size-defining element - hide text. */
+amp-facebook-like:not(.i-amphtml-built) {
+  color: transparent !important;
+}
+
+/* Pre-upgrade: size-defining element - hide children. */
+amp-facebook-like:not(.i-amphtml-built)
+  > :not([placeholder]):not(.i-amphtml-svc) {
+  display: none;
+  content-visibility: hidden;
+}
