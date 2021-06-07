@@ -22,7 +22,7 @@ export class BaseElement extends FacebookBaseElement {}
 BaseElement['props'] = {
   ...FacebookBaseElement['props'],
   'action': {attr: 'data-action'},
-  'colorScheme': {attr: 'data-colorscheme'},
+  'colorscheme': {attr: 'data-colorscheme'},
   'kdSite': {attr: 'data-kd_site'},
   'layout': {attr: 'data-layout'},
   'refLabel': {attr: 'data-ref'},

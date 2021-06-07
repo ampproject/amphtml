@@ -22,7 +22,7 @@ var FacebookDef = {};
 /**
  * @typedef {{
  *   action: (string|undefined),
- *   colorScheme: (string|undefined),
+ *   colorscheme: (string|undefined),
  *   hideCta: (string|undefined),
  *   hideCover: (string|undefined),
  *   href: (string|undefined),
