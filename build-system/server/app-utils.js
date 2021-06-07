@@ -81,14 +81,36 @@ const isRtvMode = (serveMode) => {
 };
 
 /**
- * @param {string} mode
- * @param {string} file
- * @param {string=} hostName
- * @param {boolean=} inabox
+ * @param {string} html
  * @return {string}
  */
-const replaceUrls = (mode, file, hostName, inabox) => {
-  hostName = hostName || '';
+function toInaboxDocument(html) {
+  return html
+    .replace(/<html [^>]*>/, '<html amp4ads>')
+    .replace(
+      /https:\/\/cdn\.ampproject\.org\/v0\.(m?js)/g,
+      'https://cdn.ampproject.org/amp4ads-v0.$2'
+    );
+}
+
+/**
+ * @param {string} mode 'compiled', 'default' or a number string (RTV)
+ * @param {string} file
+ * @param {string=} hostName
+ * @return {string}
+ */
+function replaceUrls(mode, file, hostName = '') {
+  // RTV only adds /rtv/.../ to real CDN paths.
+  if (isRtvMode(mode)) {
+    return file.replace(
+      /https:\/\/cdn\.ampproject\.org\//g,
+      `https://cdn.ampproject.org/rtv/${mode}/`
+    );
+  }
+
+  // TODO(alanorozco): Write default max filenames exactly as the CDN does,
+  // but with .max.js. This would allow us to use a catch-all pattern like
+  // with (mode === 'compiled'), and is just generally simpler.
   if (mode == 'default') {
     file = file.replace(
       /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
@@ -110,62 +132,22 @@ const replaceUrls = (mode, file, hostName, inabox) => {
       /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
       hostName + '/dist/v0/$1.max.js'
     );
-    if (inabox) {
-      const filename = '/dist/amp-inabox.js';
-      file = file.replace(/<html [^>]*>/, '<html amp4ads>');
-      file = file.replace(/\/dist\/amp\.js/g, filename);
-    }
   } else if (mode == 'compiled') {
     file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\.(m?js)/g,
-      hostName + '/dist/v0.$1'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/shadow-v0\.(m?js)/g,
-      hostName + '/dist/shadow-v0.$1'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.(m?js)/g,
-      hostName + '/dist/amp4ads-v0.$1'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.(m?js)/g,
-      hostName + '/dist/video-iframe-integration-v0.$1'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?)\.(m?js)/g,
-      hostName + '/dist/v0/$1.$2'
+      /https:\/\/cdn\.ampproject\.org\/(.+\.m?js)/g,
+      hostName + '/dist/$1'
     );
     file = file.replace(
       /\/dist\/v0\/examples\/(.*)\.max\.(m?js)/g,
-      '/dist/v0/examples/$1.$2'
+      hostName + '/dist/v0/examples/$1.$2'
     );
     file = file.replace(
       /\/dist.3p\/current\/(.*)\.max.html/g,
       hostName + '/dist.3p/current-min/$1.html'
     );
-
-    if (inabox) {
-      file = file.replace(/\/dist\/v0\.(m?js)/g, '/dist/amp4ads-v0.$1');
-    }
-  } else if (isRtvMode(mode)) {
-    hostName = `https://cdn.ampproject.org/rtv/${mode}/`;
-    file = file.replace(/https:\/\/cdn\.ampproject\.org\//g, hostName);
-
-    if (inabox) {
-      file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/rtv\/\d{15}\/v0\.(m?js)/g,
-        hostName + 'amp4ads-v0.$1'
-      );
-    }
-  } else if (inabox) {
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\.(m?js)/g,
-      'https://cdn.ampproject.org/amp4ads-v0.$1'
-    );
   }
   return file;
-};
+}
 
 module.exports = {
   getServeMode,
@@ -173,4 +155,5 @@ module.exports = {
   logServeMode,
   replaceUrls,
   setServeMode,
+  toInaboxDocument,
 };
