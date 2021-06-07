@@ -20,7 +20,7 @@ import {LayoutPriority} from '../../src/layout';
 import {Resource} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {createAmpElementForTesting} from '../../src/custom-element';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {layoutRectLtwh} from '../../src/core/math/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
 
 describes.realWin('BaseElement', {amp: true}, (env) => {
@@ -48,6 +48,37 @@ describes.realWin('BaseElement', {amp: true}, (env) => {
     );
     element.updateLayoutPriority(LayoutPriority.METADATA);
     expect(updateLayoutPriorityStub).to.be.calledOnce;
+  });
+
+  it('propagateAttributes - niente', () => {
+    const target = doc.createElement('div');
+    expect(target.hasAttributes()).to.be.false;
+
+    element.propagateAttributes(['data-test1'], target);
+    expect(target.hasAttributes()).to.be.false;
+
+    element.propagateAttributes(['data-test2', 'data-test3'], target);
+    expect(target.hasAttributes()).to.be.false;
+  });
+
+  it('propagateAttributes', () => {
+    const target = doc.createElement('div');
+    expect(target.hasAttributes()).to.be.false;
+
+    customElement.setAttribute('data-test1', 'abc');
+    customElement.setAttribute('data-test2', 'xyz');
+    customElement.setAttribute('data-test3', '123');
+
+    element.propagateAttributes('data-test1', target);
+    expect(target.hasAttributes()).to.be.true;
+
+    expect(target.getAttribute('data-test1')).to.equal('abc');
+    expect(target.getAttribute('data-test2')).to.be.null;
+    expect(target.getAttribute('data-test3')).to.be.null;
+
+    element.propagateAttributes(['data-test2', 'data-test3'], target);
+    expect(target.getAttribute('data-test2')).to.equal('xyz');
+    expect(target.getAttribute('data-test3')).to.equal('123');
   });
 
   it('should register action', () => {

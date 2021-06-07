@@ -18,17 +18,19 @@ import {ScrollManager} from './scroll-manager';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
-  getDataParamsFromAttributes,
   matches,
   scopedQuerySelector,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/core/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 import {map} from '../../../src/core/types/object';
+
 import {provideVisibilityManager} from './visibility-manager';
+
 import {tryResolve} from '../../../src/core/data-structures/promise';
 import {whenContentIniLoad} from '../../../src/ini-load';
 

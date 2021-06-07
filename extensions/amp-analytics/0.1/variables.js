@@ -36,8 +36,8 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {isArray} from '../../../src/core/types';
-import {isFiniteNumber} from '../../../src/types';
+import {isArray, isFiniteNumber} from '../../../src/core/types';
+
 import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';
 
@@ -422,7 +422,7 @@ export class VariableService {
 
       // Split the key to name and args
       // e.g.: name='SOME_MACRO', args='(arg1, arg2)'
-      const {name, argList} = getNameArgs(key);
+      const {argList, name} = getNameArgs(key);
       if (options.freezeVars[name]) {
         // Do nothing with frozen params
         return match;
@@ -527,7 +527,7 @@ export function encodeVars(raw) {
     return raw.map(encodeVars).join(',');
   }
   // Separate out names and arguments from the value and encode the value.
-  const {name, argList} = getNameArgs(String(raw));
+  const {argList, name} = getNameArgs(String(raw));
   return encodeURIComponent(name) + argList;
 }
 

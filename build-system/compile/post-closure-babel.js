@@ -20,7 +20,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
-const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
+const {CompilationLifecycles, debug} = require('./debug-compilation-lifecycle');
 const {jsBundles} = require('./bundles.config.js');
 
 /** @type {Remapping.default} */
@@ -73,20 +73,21 @@ async function terserMinify(code, filename) {
 
 /**
  * Apply Babel Transforms on output from Closure Compuler, then cleanup added
- * space with Terser. Used only in esm mode.
+ * space with Terser.
  * @param {string} file
  * @return {Promise<void>}
  */
 async function postClosureBabel(file) {
-  if ((!argv.esm && !argv.sxg) || path.extname(file) === '.map') {
+  if (path.extname(file) === '.map') {
     debug(CompilationLifecycles['complete'], file);
     return;
   }
 
   debug(CompilationLifecycles['closured-pre-babel'], file);
+  /** @type {?babel.TransformOptions} */
   const babelOptions = babel.loadOptions({caller: {name: 'post-closure'}});
   const {code, map: babelMap} =
-    (await babel.transformFileAsync(file, babelOptions)) || {};
+    (await babel.transformFileAsync(file, babelOptions ?? undefined)) || {};
   if (!code || !babelMap) {
     throw new Error(`Error transforming contents of ${file}`);
   }
@@ -101,8 +102,12 @@ async function postClosureBabel(file) {
     () => null,
     !argv.full_sourcemaps
   );
-
-  debug(CompilationLifecycles['complete'], file, compressed, sourceMap);
+  debug(
+    CompilationLifecycles['complete'],
+    file,
+    compressed?.toString(),
+    sourceMap
+  );
   await fs.writeJson(`${file}.map`, sourceMap);
 }
 

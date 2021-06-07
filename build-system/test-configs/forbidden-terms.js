@@ -304,8 +304,6 @@ const forbiddenTermsGlobal = {
       'extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
-      'extensions/amp-form/0.1/amp-form.js', // References service defined in amp-form.
-      'extensions/amp-form/0.1/form-dirtiness.js', // References service defined in amp-form.
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',
@@ -515,7 +513,7 @@ const forbiddenTermsGlobal = {
       'src/inabox/inabox-viewer.js',
       'src/service/viewer-impl.js',
       'src/error-reporting.js',
-      'src/window-interface.js',
+      'src/core/window/interface.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -535,7 +533,7 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
-      'src/event-helper-listen.js',
+      'src/core/dom/event-helper-listen.js',
     ],
   },
   'setTimeout.*throw': {
@@ -821,8 +819,8 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
+      'src/core/dom/stream/response.js',
       'src/core/types/string/bytes.js',
-      'src/utils/stream-response.js',
     ],
   },
   'contentHeightChanged': {
@@ -871,14 +869,12 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/transport.js',
       'extensions/amp-web-push/0.1/iframehost.js',
       'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
-      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
-      'extensions/amp-image-slider/0.1/amp-image-slider.js',
     ],
   },
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     allowlist: [
-      '.github/workflows/create-design-review-issue.js',
+      'build-system/common/update-design-review-issues.js',
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/1.0/component.js',
       'src/core/types/date.js',
@@ -1107,10 +1103,10 @@ function matchForbiddenTerms(srcFile, contents, terms) {
   return Object.entries(terms)
     .map(([term, messageOrDef]) => {
       const {
-        message,
         allowlist = null,
         checkInTestFolder = false,
         checkProse = false,
+        message,
       } = typeof messageOrDef === 'string'
         ? {message: messageOrDef}
         : messageOrDef;

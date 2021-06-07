@@ -24,11 +24,10 @@ import {
 } from '../../../src/mediasession-helper';
 import {Layout, isLayoutSizeFixed} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -86,11 +85,7 @@ export class AmpAudio extends AMP.BaseElement {
       if (src !== undefined) {
         assertHttpsUrl(src, this.element);
       }
-      propagateAttributes(
-        ['src', 'loop', 'controlsList'],
-        this.element,
-        this.audio_
-      );
+      this.propagateAttributes(['src', 'loop', 'controlsList'], this.audio_);
     }
 
     const artist = mutations['artist'];
@@ -124,7 +119,7 @@ export class AmpAudio extends AMP.BaseElement {
     if (src) {
       assertHttpsUrl(src, this.element);
     }
-    propagateAttributes(
+    this.propagateAttributes(
       [
         'src',
         'preload',
@@ -136,7 +131,6 @@ export class AmpAudio extends AMP.BaseElement {
         'aria-labelledby',
         'controlsList',
       ],
-      this.element,
       audio
     );
 

@@ -57,7 +57,10 @@ import {
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
 import {installRealTimeConfigServiceForDoc} from '../../../../src/service/real-time-config/real-time-config-impl';
-import {layoutRectLtwh, layoutSizeFromRect} from '../../../../src/layout-rect';
+import {
+  layoutRectLtwh,
+  layoutSizeFromRect,
+} from '../../../../src/core/math/layout-rect';
 import {macroTask} from '../../../../testing/yield';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
@@ -111,6 +114,7 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
       'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
         'allow-same-origin allow-scripts allow-top-navigation'
     );
+    expect(fie.getAttribute('allow')).to.equal(`attribution-reporting 'src'`);
     const cspMeta = fie.contentDocument.querySelector(
       'meta[http-equiv=Content-Security-Policy]'
     );
@@ -3471,7 +3475,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
       {type: 'otherNetwork', prefVal: true},
     ].forEach((test) =>
       it(JSON.stringify(test), () => {
-        const {type, prefVal, expected} = test;
+        const {expected, prefVal, type} = test;
         if (type) {
           a4a.element.setAttribute('type', type);
         }

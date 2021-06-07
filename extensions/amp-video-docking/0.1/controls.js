@@ -20,14 +20,12 @@ import {Services} from '../../../src/services';
 import {Timeout} from './timeout';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
-import {
-  closestAncestorElementBySelector,
-  iterateCursor,
-} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {iterateCursor} from '../../../src/dom';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 import {once} from '../../../src/core/types/function';
 import {
   resetStyles,
@@ -340,7 +338,7 @@ export class Controls {
 
   /** @private */
   onPlay_() {
-    const {playButton_, pauseButton_} = this;
+    const {pauseButton_, playButton_} = this;
     this.isSticky_ = false;
     swap(playButton_, pauseButton_);
   }
@@ -360,7 +358,7 @@ export class Controls {
 
   /** @private */
   onUnmute_() {
-    const {unmuteButton_, muteButton_} = this;
+    const {muteButton_, unmuteButton_} = this;
     swap(unmuteButton_, muteButton_);
   }
 
@@ -529,7 +527,7 @@ export class Controls {
       devAssert(this.area_);
 
       const {x, y} = pointerCoords(/** @type {!MouseEvent} */ (e));
-      const {left, top, right, bottom} = this.area_;
+      const {bottom, left, right, top} = this.area_;
 
       // check bounding box as not to trigger this while mouse hovers over
       // buttons
@@ -556,7 +554,7 @@ export class Controls {
 
   /** @public */
   reset() {
-    const {overlay, container} = this;
+    const {container, overlay} = this;
     const els = [overlay, container];
 
     toggle(overlay, false);

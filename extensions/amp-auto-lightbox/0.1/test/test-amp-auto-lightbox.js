@@ -133,69 +133,36 @@ describes.realWin(
         `Criteria.meetsTreeShapeCriteria(html\`${outerHtml}\`)`;
 
       function itAcceptsOrRejects(scenarios) {
-        scenarios.forEach(({rejects, accepts, mutate, wrapWith}) => {
+        scenarios.forEach(({accepts, mutate, rejects, wrapWith}) => {
           const maybeWrap = (root) =>
             wrapWith ? wrap(root, wrapWith()) : root;
           const maybeMutate = (root) => mutate && mutate(root);
 
           it(`${accepts ? 'accepts' : 'rejects'} ${accepts || rejects}`, () => {
             [
-              {
-                markup: html`
-                  <amp-img src="asada.png" layout="flex-item"></amp-img>
-                `,
-                tagName: 'AMP-IMG',
-              },
-              {
-                markup: html`
+              html` <amp-img src="asada.png" layout="flex-item"></amp-img> `,
+              html`
+                <div>
+                  <amp-img src="adobada.png" layout="flex-item"></amp-img>
+                </div>
+              `,
+              html`
+                <div>
                   <div>
-                    <amp-img src="adobada.png" layout="flex-item"></amp-img>
+                    <amp-img src="carnitas.png" layout="flex-item"></amp-img>
                   </div>
-                `,
-                tagName: 'AMP-IMG',
-              },
-              {
-                markup: html`
-                  <div>
-                    <div>
-                      <amp-img src="carnitas.png" layout="flex-item"></amp-img>
-                    </div>
-                  </div>
-                `,
-                tagName: 'AMP-IMG',
-              },
-              {
-                markup: html` <img src="asada.png" layout="flex-item" /> `,
-                tagName: 'IMG',
-              },
-              {
-                markup: html`
-                  <div>
-                    <img src="adobada.png" layout="flex-item" />
-                  </div>
-                `,
-                tagName: 'IMG',
-              },
-              {
-                markup: html`
-                  <div>
-                    <div>
-                      <img src="carnitas.png" layout="flex-item" />
-                    </div>
-                  </div>
-                `,
-                tagName: 'IMG',
-              },
+                </div>
+              `,
             ].forEach((unwrapped) => {
-              maybeMutate(unwrapped.markup);
+              maybeMutate(unwrapped);
 
-              const scenario = maybeWrap(unwrapped.markup);
+              const scenario = maybeWrap(unwrapped);
               const candidate = firstElementLeaf(scenario);
 
               env.win.document.body.appendChild(scenario);
 
               expect(candidate).to.be.ok;
-              expect(candidate.tagName).to.equal(unwrapped.tagName);
+              expect(candidate.tagName).to.equal('AMP-IMG');
 
               expect(
                 Criteria.meetsTreeShapeCriteria(candidate),
@@ -292,7 +259,7 @@ describes.realWin(
 
     describe('meetsSizingCriteria', () => {
       const areaDeltaPerc = RENDER_AREA_RATIO * 100;
-      const {vw, vh} = {vw: 1000, vh: 600};
+      const {vh, vw} = {vw: 1000, vh: 600};
 
       const expectMeetsSizingCriteria = (
         renderWidth,

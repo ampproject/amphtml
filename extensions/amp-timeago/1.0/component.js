@@ -18,7 +18,7 @@ import * as Preact from '../../../src/preact';
 import {Wrapper} from '../../../src/preact/component';
 import {format, getLocale} from './locales';
 import {getDate} from '../../../src/core/types/date';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 import {useEffect, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
@@ -42,9 +42,9 @@ const DEFAULT_TIME_OPTIONS = {'hour': 'numeric', 'minute': 'numeric'};
  * @return {PreactDef.Renderable}
  */
 export function Timeago({
+  cutoff,
   datetime,
   locale: localeProp,
-  cutoff,
   placeholder,
   ...rest
 }) {

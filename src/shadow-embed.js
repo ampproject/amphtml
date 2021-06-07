@@ -21,14 +21,14 @@ import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
-} from './web-components';
+} from './core/dom/web-components';
 import {dev, devAssert} from './log';
-import {escapeCssSelectorIdent} from './core/dom/css';
+import {escapeCssSelectorIdent} from './core/dom/css-selectors';
 import {installCssTransformer} from './style-installer';
 import {iterateCursor} from './dom';
 import {setInitialDisplay, setStyle} from './style';
 import {toArray} from './core/types/array';
-import {toWin} from './types';
+import {toWin} from './core/window';
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;

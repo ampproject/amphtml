@@ -1126,7 +1126,7 @@ describes.sandboxed('wildcard matching', {}, () => {
     },
   ];
   testCases.forEach((test) => {
-    const {hostname, domain, result} = test;
+    const {domain, hostname, result} = test;
     it(`wildcard test: ${hostname}, ${domain}, ${result}`, () => {
       expect(isWildCardMatch(hostname, domain)).to.equal(result);
     });

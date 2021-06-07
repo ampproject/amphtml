@@ -20,16 +20,14 @@ import {BaseSlides} from './base-slides';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {
-  closestAncestorElementBySelector,
-  dispatchCustomEvent,
-} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {getStyle, setStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber} from '../../../src/types';
+import {isFiniteNumber} from '../../../src/core/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
 import {

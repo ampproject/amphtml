@@ -158,18 +158,14 @@ const presubmitGlobs = [
  * 2. Make sure it is listed in .vscode/settings.json (for auto-fix-on-save)
  */
 const prettifyGlobs = [
-  '.circleci/config.yml',
-  '.codecov.yml',
-  '.lando.yml',
-  '.lgtm.yml',
   '.prettierrc',
   '.renovaterc.json',
-  '.circleci/config.yml',
   '.vscode/settings.json',
   '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
+  '**/*.yml',
 ];
 
 /**
@@ -439,10 +435,10 @@ const htmlFixtureGlobs = [
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-horizontal.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-thirds.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-vertical.html',
-  '!examples/visual-tests/amp-story/amp-story-inline-page-attachment-dark-theme.html',
   '!examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html',
   '!examples/visual-tests/amp-story/amp-story-landscape-templates.html',
   '!examples/visual-tests/amp-story/amp-story-page-attachment.html',
+  '!examples/visual-tests/amp-story/amp-story-page-attachment-v2.html',
   '!examples/visual-tests/amp-story/amp-story-sidebar.html',
   '!examples/visual-tests/amp-story/amp-story-tooltip.html',
   '!examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html',

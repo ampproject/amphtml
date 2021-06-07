@@ -22,8 +22,8 @@ import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {ImageViewer} from '../amp-image-lightbox';
 import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
-import {WindowInterface} from '../../../../src/window-interface';
-import {parseSrcset} from '../../../../src/srcset';
+import {WindowInterface} from '../../../../src/core/window/interface';
+import {parseSrcset} from '../../../../src/core/dom/srcset';
 
 describes.realWin(
   'amp-image-lightbox component',
@@ -65,13 +65,19 @@ describes.realWin(
       const impl = await lightbox.getImpl(false);
 
       const noop = () => {};
-      impl.getViewport = () => ({
-        onChanged: noop,
-        enterLightboxMode: noop,
-      });
-      impl.getHistory_ = () => ({
-        push: () => Promise.resolve(),
-      });
+      impl.getViewport = () => {
+        return {
+          onChanged: noop,
+          enterLightboxMode: noop,
+        };
+      };
+      impl.getHistory_ = () => {
+        return {
+          push: () => {
+            return Promise.resolve();
+          },
+        };
+      };
       impl.enter_ = noop;
 
       const ampImage = doc.createElement('amp-img');
@@ -81,69 +87,23 @@ describes.realWin(
       const container = lightbox.querySelector(
         '.i-amphtml-image-lightbox-container'
       );
-      expect(container).to.not.be.null;
+      expect(container).to.not.equal(null);
 
       const caption = container.querySelector(
         '.i-amphtml-image-lightbox-caption'
       );
-      expect(caption).to.not.be.null;
+      expect(caption).to.not.equal(null);
       expect(caption).to.have.class('amp-image-lightbox-caption');
 
       const viewer = container.querySelector(
         '.i-amphtml-image-lightbox-viewer'
       );
-      expect(viewer).to.not.be.null;
+      expect(viewer).to.not.equal(null);
 
       const image = viewer.querySelector(
         '.i-amphtml-image-lightbox-viewer-image'
       );
-      expect(image).to.not.be.null;
-
-      // Very important. Image must have transform-origin=50% 50%.
-      const win = image.ownerDocument.defaultView;
-      expect(win.getComputedStyle(image)['transform-origin']).to.equal(
-        '50% 50%'
-      );
-    });
-
-    it('should render correctly with an img element', async () => {
-      const lightbox = await getImageLightbox();
-      const impl = await lightbox.getImpl(false);
-
-      const noop = () => {};
-      impl.getViewport = () => ({
-        onChanged: noop,
-        enterLightboxMode: noop,
-      });
-      impl.getHistory_ = () => ({
-        push: () => Promise.resolve(),
-      });
-      impl.enter_ = noop;
-
-      const img = doc.createElement('img');
-      img.setAttribute('src', 'data:');
-      impl.open_({caller: img});
-
-      const container = lightbox.querySelector(
-        '.i-amphtml-image-lightbox-container'
-      );
-      expect(container).to.not.be.null;
-
-      const caption = container.querySelector(
-        '.i-amphtml-image-lightbox-caption'
-      );
-      expect(caption).to.not.be.null;
-      expect(caption).to.have.class('amp-image-lightbox-caption');
-
-      const viewer = container.querySelector(
-        '.i-amphtml-image-lightbox-viewer'
-      );
-      expect(viewer).to.not.be.null;
-
-      const image = viewer.querySelector(
-        '.i-amphtml-image-lightbox-viewer-image'
-      );
-      expect(image).to.not.be.null;
+      expect(image).to.not.equal(null);
 
       // Very important. Image must have transform-origin=50% 50%.
       const win = image.ownerDocument.defaultView;
@@ -349,7 +309,6 @@ describes.realWin(
     let loadPromiseStub;
 
     const sourceElement = {
-      tagName: 'amp-img',
       offsetWidth: 101,
       offsetHeight: 201,
       getAttribute: (name) => {

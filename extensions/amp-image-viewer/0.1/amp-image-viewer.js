@@ -29,10 +29,13 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {boundValue, distance, magnitude} from '../../../src/utils/math';
-import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
+import {boundValue, distance, magnitude} from '../../../src/core/math';
+import {
+  closestAncestorElementBySelector,
+  elementByTag,
+} from '../../../src/core/dom/query';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
@@ -41,21 +44,23 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../../src/layout-rect';
+} from '../../../src/core/math/layout-rect';
 import {
   observeContentSize,
   unobserveContentSize,
 } from '../../../src/utils/size-observer';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {setStyles} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
+import {srcsetFromElement} from '../../../src/core/dom/srcset';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby', 'aria-labelledby'];
 const DEFAULT_MAX_SCALE = 2;
 
-const ELIGIBLE_TAGS = new Set(['AMP-IMG', 'AMP-ANIM', 'IMG']);
+const ELIGIBLE_TAGS = {
+  'amp-img': true,
+  'amp-anim': true,
+};
 
 export class AmpImageViewer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -120,7 +125,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.motion_ = null;
 
     /** @private {?Element} */
-    this.sourceImage_ = null;
+    this.sourceAmpImage_ = null;
 
     /** @private {?Promise} */
     this.loadPromise_ = null;
@@ -145,9 +150,9 @@ export class AmpImageViewer extends AMP.BaseElement {
       TAG
     );
 
-    this.sourceImage_ = children[0];
+    this.sourceAmpImage_ = children[0];
     Services.ownersForDoc(this.element).setOwner(
-      this.sourceImage_,
+      this.sourceAmpImage_,
       this.element
     );
   }
@@ -175,14 +180,14 @@ export class AmpImageViewer extends AMP.BaseElement {
     // TODO(sparhami, cathyxz) Refactor image viewer once auto sizes lands to
     // use the amp-img as-is, which means we can simplify this logic to just
     // wait for the layout signal.
-    const img = dev().assertElement(this.sourceImage_);
+    const ampImg = dev().assertElement(this.sourceAmpImage_);
     const haveImg = !!this.image_;
     const laidOutPromise = haveImg
       ? Promise.resolve()
-      : img.signals().whenSignal(CommonSignals.LOAD_END);
+      : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
 
     if (!haveImg) {
-      Services.ownersForDoc(this.element).scheduleLayout(this.element, img);
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, ampImg);
     }
 
     this.loadPromise_ = laidOutPromise
@@ -267,7 +272,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   elementIsSupported_(element) {
-    return ELIGIBLE_TAGS.has(element.tagName);
+    return ELIGIBLE_TAGS[element.tagName.toLowerCase()];
   }
 
   /**
@@ -303,9 +308,9 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     this.image_ = this.element.ownerDocument.createElement('img');
     this.image_.classList.add('i-amphtml-image-viewer-image');
-    const img = dev().assertElement(this.sourceImage_);
-    this.setSourceDimensions_(img);
-    this.srcset_ = srcsetFromElement(img);
+    const ampImg = dev().assertElement(this.sourceAmpImage_);
+    this.setSourceDimensions_(ampImg);
+    this.srcset_ = srcsetFromElement(ampImg);
 
     observeContentSize(this.element, this.onResize_);
 
@@ -316,10 +321,10 @@ export class AmpImageViewer extends AMP.BaseElement {
         width: 0,
         height: 0,
       });
-      st.toggle(img, false);
+      st.toggle(ampImg, false);
       this.element.appendChild(this.image_);
-      return img.getImpl().then((impl) => {
-        propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_);
+      return ampImg.getImpl().then((ampImg) => {
+        ampImg.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
       });
     });
   }

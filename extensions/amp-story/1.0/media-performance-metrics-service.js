@@ -21,8 +21,8 @@ import {
 import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/core/constants/enums';
 import {dev} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {lastChildElement, matches} from '../../../src/dom';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {lastChildElement, matches} from '../../../src/core/dom/query';
 import {registerServiceBuilder} from '../../../src/service';
 import {urls} from '../../../src/config';
 
@@ -405,7 +405,7 @@ export class MediaPerformanceMetricsService {
    */
   onPlaying_(event) {
     const mediaEntry = this.mediaMap_.get(event.target);
-    const {timeStamps, metrics} = mediaEntry;
+    const {metrics, timeStamps} = mediaEntry;
 
     if (!metrics.jointLatency) {
       metrics.jointLatency = Date.now() - timeStamps.start;

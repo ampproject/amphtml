@@ -21,7 +21,7 @@ import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Deferred} from '../core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../layout';
 import {Loading} from '../core/loading-instructions';
-import {MediaQueryProps} from '../utils/media-query-props';
+import {MediaQueryProps} from '../core/dom/media-query-props';
 import {PauseHelper} from '../utils/pause-helper';
 import {ReadyState} from '../core/constants/ready-state';
 import {Slot, createSlot} from './slot';
@@ -36,9 +36,11 @@ import {
 import {
   childElementByAttr,
   childElementByTag,
+  matches,
+} from '../core/dom/query';
+import {
   createElementWithAttributes,
   dispatchCustomEvent,
-  matches,
   parseBooleanAttribute,
 } from '../dom';
 import {dashToCamelCase} from '../core/types/string';
@@ -49,7 +51,7 @@ import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
 import {isElement} from '../core/types';
-import {sequentialIdGenerator} from '../utils/id-generator';
+import {sequentialIdGenerator} from '../core/math/id-generator';
 import {toArray} from '../core/types/array';
 
 /**

@@ -22,10 +22,10 @@
 import {dev, devAssert, userAssert} from './log';
 import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
-import {isFiniteNumber, toWin} from './types';
+import {isFiniteNumber} from './core/types';
 import {setStyle, setStyles, toggle} from './style';
-
-import {transparentPng} from './utils/img';
+import {toWin} from './core/window';
+import {transparentPng} from './core/dom/img';
 
 /**
  * @enum {string}

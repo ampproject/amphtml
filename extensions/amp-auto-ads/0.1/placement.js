@@ -18,23 +18,19 @@ import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {
   LayoutMarginsChangeDef,
   cloneLayoutMarginsChangeDef,
-} from '../../../src/layout-rect';
+} from '../../../src/core/math/layout-rect';
 import {Services} from '../../../src/services';
-import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
 import {
   closestAncestorElementBySelector,
-  createElementWithAttributes,
   scopedQuerySelectorAll,
+} from '../../../src/core/dom/query';
+import {
+  createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
-import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
+import {measurePageLayoutBox} from './measure-page-layout-box';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -200,30 +196,7 @@ export class Placement {
    */
   placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
     return this.getEstimatedPosition().then((yPosition) => {
-      // TODO(powerivq@) Remove this after finishing the experiment
-      const controlBranch = '31060868';
-      const expBranch = '31060869';
-      const holdbackExp = isExperimentOn(
-        this.ampdoc.win,
-        'auto-ads-no-insertion-above'
-      );
-      if (holdbackExp) {
-        const expInfoList =
-          /** @type {!Array<!../../../experiments.ExperimentInfo>} */ ([
-            {
-              experimentId: 'auto-ads-no-insertion-above',
-              isTrafficEligible: () => true,
-              branches: [controlBranch, expBranch],
-            },
-          ]);
-        randomlySelectUnsetExperiments(this.ampdoc.win, expInfoList);
-      }
-      if (
-        (!holdbackExp ||
-          getExperimentBranch(this.ampdoc.win, 'auto-ads-no-insertion-above') ==
-            expBranch) &&
-        this.ampdoc.win./*OK*/ scrollY > yPosition
-      ) {
+      if (this.ampdoc.win./*OK*/ scrollY > yPosition) {
         this.state_ = PlacementState.UNUSED;
         return this.state_;
       }
@@ -239,12 +212,6 @@ export class Placement {
         this.adElement_ = shouldUseFullWidthResponsive
           ? this.createFullWidthResponsiveAdElement_(baseAttributes)
           : this.createAdElement_(baseAttributes, sizing.width);
-        if (holdbackExp) {
-          addExperimentIdToElement(
-            getExperimentBranch(this.ampdoc.win, 'auto-ads-no-insertion-above'),
-            this.getAdElement()
-          );
-        }
 
         this.injector_(this.anchorElement_, this.getAdElement());
 

@@ -22,14 +22,12 @@ import {Services} from '../../../src/services';
 import {
   closest,
   closestAncestorElementBySelector,
-  isConnectedNode,
-  isRTL,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-  tryFocus,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {dev, userAssert} from '../../../src/log';
-import {mod} from '../../../src/utils/math';
+import {isConnectedNode, isRTL, tryFocus} from '../../../src/dom';
+import {mod} from '../../../src/core/math';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {toArray} from '../../../src/core/types/array';
 

@@ -59,13 +59,13 @@ export class Entitlement {
    */
   constructor(input) {
     const {
-      source,
-      raw = '',
-      service,
-      granted = false,
-      grantReason = '',
       dataObject,
       decryptedDocumentKey,
+      grantReason = '',
+      granted = false,
+      raw = '',
+      service,
+      source,
     } = input;
     /** @const {string} */
     this.raw = raw;
