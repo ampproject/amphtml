@@ -125,13 +125,15 @@ export function experimentToggles(win) {
   win[TOGGLES_WINDOW_PROPERTY] = map();
   const toggles = win[TOGGLES_WINDOW_PROPERTY];
 
-  // Read the default config of this build.
-  if (win.AMP_CONFIG) {
-    for (const experimentId in win.AMP_CONFIG) {
-      const frequency = win.AMP_CONFIG[experimentId];
-      if (typeof frequency === 'number' && frequency >= 0 && frequency <= 1) {
-        toggles[experimentId] = Math.random() < frequency;
-      }
+  // Read default and injected configs of this build.
+  const buildExperimentConfigs = {
+    ...(win.AMP_CONFIG ?? {}),
+    ...(win.AMP_EXP ?? {}),
+  };
+  for (const experimentId in buildExperimentConfigs) {
+    const frequency = buildExperimentConfigs[experimentId];
+    if (typeof frequency === 'number' && frequency >= 0 && frequency <= 1) {
+      toggles[experimentId] = Math.random() < frequency;
     }
   }
   // Read document level override from meta tag.
