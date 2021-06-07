@@ -83,6 +83,9 @@ commands:
           replace-existing: true
   fail_fast:
     steps:
+      - run:
+            name: 'Display Failures'
+            command: cat result-reports/fast_fail.log
       - store_artifacts:
           path: result-reports
   store_test_output:

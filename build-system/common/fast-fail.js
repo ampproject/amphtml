@@ -21,6 +21,7 @@ const {mkdirSync} = require('../tasks/helpers');
 const {parentPort, workerData} = require('worker_threads');
 const {red} = require('./colors');
 const {writeFileSync} = require('fs');
+const {hostname} = require('os');
 const { exec } = require('./exec');
 
 const {CIRCLE_TOKEN, CIRCLE_WORKFLOW_ID} = process.env;
@@ -57,11 +58,21 @@ function get(url) {
   });
 }
 
+let failed = false;
+setTimeout(() => {
+  failed = true;
+}, 10000);
+
 /**
  * The the list of CircleCI jobs
  * @return {Promise<{items: Array<Object>}>}
  */
 function getJobs() {
+  // Triggering consistent fast failure locally for easy debugging
+  if (hostname().startsWith('rileyjones')) {
+    const items = failed ? [{status: 'failed', name: 'some job'}] : [];
+    return Promise.resolve({items});
+  }
   return get(
     `https://circleci.com/api/v2/workflow/${CIRCLE_WORKFLOW_ID}/job?circle-token=${CIRCLE_TOKEN}`
   );
@@ -76,8 +87,10 @@ async function terminate(output) {
   mkdirSync('result-reports');
   writeFileSync('result-reports/fast_fail.log', output);
   // Trying to get lots to output correctly
+  // process.kill(getPid());
+  exec(`kill -2 ${getPid()}`);
   log(red('Shutting down'), output);
-  exec('circleci-agent step halt');
+  process.exit(1);
 }
 
 /**
