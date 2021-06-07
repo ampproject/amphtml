@@ -57,10 +57,8 @@ module.exports = {
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
-    await page.tap('.i-amphtml-story-page-attachment-label');
-    await page.waitForSelector(
-      '.i-amphtml-story-draggable-drawer-content'
-    );
+    await screen.tap(300, 240);
+    await page.waitForTimeout(500); // For animations to finish.
   },
 
   'light theme, dark drawer theme - inline CTA drawer should display': async (
@@ -76,10 +74,8 @@ module.exports = {
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
-    await page.tap('.i-amphtml-story-page-attachment-label');
-    await page.waitForSelector(
-      '.i-amphtml-story-draggable-drawer-content'
-    );
+    await screen.tap(300, 240);
+    await page.waitForTimeout(500); // For animations to finish.
   },
 
   '1 img - dark theme - inline CTA pre-tap UI should display': async (
