@@ -45,7 +45,7 @@ export const _default = () => {
     undefined
   );
   const refLabel = text('ref', undefined);
-  const share = boolean('share') || undefined;
+  const share = boolean('share') ? 'true' : undefined;
   const size = select('size (small by default)', ['large', 'small'], undefined);
   return (
     <amp-facebook-like
