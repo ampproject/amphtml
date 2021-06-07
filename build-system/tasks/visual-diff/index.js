@@ -105,9 +105,6 @@ const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
   'utf8'
 );
 
-// Browser instance that runs all visual tests.
-let browser_;
-
 /**
  * @typedef {{
  *  name: string,
@@ -245,14 +242,7 @@ async function launchBrowser(browserFetcher) {
     executablePath: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
       .executablePath,
   };
-
-  try {
-    browser_ = await puppeteer.launch(browserOptions);
-  } catch (error) {
-    log('fatal', error);
-  }
-
-  return browser_;
+  return await puppeteer.launch(browserOptions);
 }
 
 /**
