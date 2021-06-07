@@ -91,4 +91,5 @@ module.exports = {
   compileJison,
 };
 
-compileJison.description = 'Use jison to create parsers';
+compileJison.description =
+  'Precompile jison parsers for use during the main build';

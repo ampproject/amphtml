@@ -63,27 +63,25 @@ module.exports = {
 /* eslint "google-camelcase/google-camelcase": 0 */
 
 defaultTask.description =
-  'Starts the dev server, lazily builds JS and extensions when requested, and watches them for changes';
+  'Start the dev server, lazily build JS when requested, and watch for changes';
 defaultTask.flags = {
-  compiled: 'Compiles and serves minified binaries',
+  compiled: 'Compile and serve minified binaries',
   pseudo_names:
-    'Compiles with readable names. ' +
-    'Great for profiling and debugging production code.',
+    'Compile with readable names (useful while profiling / debugging production code)',
   pretty_print:
-    'Outputs compiled code with whitespace. ' +
-    'Great for debugging production code.',
-  fortesting: 'Compiles production binaries for local testing',
-  noconfig: 'Compiles production binaries without applying AMP_CONFIG',
-  config: 'Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  closure_concurrency: 'Sets the number of concurrent invocations of closure',
-  extensions: 'Pre-builds the given extensions, lazily builds the rest.',
+    'Output compiled code with whitespace (useful while profiling / debugging production code)',
+  fortesting: 'Compile production binaries for local testing',
+  noconfig: 'Compile production binaries without applying AMP_CONFIG',
+  config: 'Set the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  closure_concurrency: 'Set the number of concurrent invocations of closure',
+  extensions: 'Pre-build the given extensions, lazily builds the rest.',
   extensions_from:
-    'Pre-builds the extensions used by the provided example page.',
-  full_sourcemaps: 'Includes source code content in sourcemaps',
-  version_override: 'Overrides the version written to AMP_CONFIG',
-  host: 'Host to serve the project on. localhost by default.',
-  port: 'Port to serve the project on. 8000 by default.',
-  https: 'Use https server. http by default.',
+    'Pre-build the extensions used by the provided example page.',
+  full_sourcemaps: 'Include source code content in sourcemaps',
+  version_override: 'Override the version written to AMP_CONFIG',
+  host: 'Host to serve the project on [default: localhost]',
+  port: 'Port to serve the project on [default: 8000]',
+  https: 'Use https',
   define_experiment_constant:
-    'Builds runtime with the EXPERIMENT constant set to true',
+    'Build runtime with the EXPERIMENT constant set to true',
 };

@@ -49,16 +49,16 @@ async function performance() {
   return deferred;
 }
 
-performance.description = 'Runs web performance test on current branch';
+performance.description = 'Run web performance tests';
 
 performance.flags = {
   'devtools': 'Run with devtools open',
-  'headless': 'Run chromium headless',
-  'nobuild': 'Does not compile minified runtime before running tests',
+  'headless': 'Run on chromium headless',
+  'nobuild': 'Do not compile minified runtime before running tests',
   'threshold':
-    'Fraction by which metrics are allowed to increase. Number between 0.0 and 1.0',
-  'quiet': 'Does not log progress per page',
-  'url': 'Page to test. Overrides urls set in config.json',
+    'Fraction by which metrics are allowed to increase (number between 0.0 and 1.0)',
+  'quiet': 'Do not log progress per page',
+  'url': 'Page to test (overrides urls set in config.json)',
 };
 
 module.exports = {

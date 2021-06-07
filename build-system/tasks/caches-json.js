@@ -53,4 +53,4 @@ module.exports = {
   cachesJson,
 };
 
-cachesJson.description = 'Check that caches.json contains all expected caches.';
+cachesJson.description = 'Check that caches.json contains all expected caches';

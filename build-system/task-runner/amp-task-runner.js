@@ -21,6 +21,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const commander = require('commander');
+const esprima = require('esprima');
 const fs = require('fs-extra');
 const os = require('os');
 const path = require('path');
@@ -170,6 +171,42 @@ function getTaskFunc(taskSourceFileName, taskFuncName) {
 }
 
 /**
+ * Uses esprima to extract the description from a task file without require-ing
+ * it, by tokenizing the JS file and finding the sequence that matches the text
+ * "fooTask.description = '<task description>'".
+ * @param {string} taskSourceFileName
+ * @param {string} taskFuncName
+ * @return {string}
+ */
+function getTaskDescription(taskSourceFileName, taskFuncName) {
+  const taskSourceFilePath = getTaskSourceFilePath(taskSourceFileName);
+  const taskSourceFile = fs.existsSync(`${taskSourceFilePath}.js`)
+    ? `${taskSourceFilePath}.js`
+    : path.join(taskSourceFilePath, 'index.js');
+  const contents = fs.readFileSync(taskSourceFile, 'utf-8').trim();
+  const tokens = Array.from(esprima.tokenize(contents));
+  let description = '';
+  for (let i = 0; i < tokens.length; ++i) {
+    if (
+      tokens[i]?.type == 'Identifier' &&
+      tokens[i]?.value == taskFuncName &&
+      tokens[i + 1]?.type == 'Punctuator' &&
+      tokens[i + 1]?.value == '.' &&
+      tokens[i + 2]?.type == 'Identifier' &&
+      tokens[i + 2]?.value == 'description' &&
+      tokens[i + 3]?.type == 'Punctuator' &&
+      tokens[i + 3]?.value == '=' &&
+      tokens[i + 4]?.type == 'String'
+    ) {
+      description = tokens[i + 4]?.value
+        ?.replace(/^['"]/, '')
+        ?.replace(/['"]$/, '');
+    }
+  }
+  return description;
+}
+
+/**
  * Helper that creates the tasks in AMP's toolchain based on the invocation:
  * - For `amp --help`, load all task descriptions so a list can be printed.
  * - For `amp <task> --help`, load and print just the task description + flags.
@@ -189,9 +226,9 @@ function createTask(
     argv._.length === 0 && taskName == 'default' && !isHelpTask; // `amp`
 
   if (isHelpTask) {
-    const taskFunc = getTaskFunc(taskSourceFileName, taskFuncName);
     const task = commander.command(cyan(taskName));
-    task.description(taskFunc.description);
+    const description = getTaskDescription(taskSourceFileName, taskFuncName);
+    task.description(description);
   }
   if (isInvokedTask || isDefaultTask) {
     startAtRepoRoot();

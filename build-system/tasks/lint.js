@@ -149,9 +149,9 @@ module.exports = {
   lint,
 };
 
-lint.description = 'Runs eslint checks against JS files';
+lint.description = 'Run lint checks against JS files using eslint';
 lint.flags = {
-  'fix': 'Fixes simple lint errors (spacing etc)',
-  'files': 'Lints just the specified files',
-  'local_changes': 'Lints just the files changed in the local branch',
+  'fix': 'Fix all errors that can be auto-fixed (e.g. spacing)',
+  'files': 'Lint just the specified files',
+  'local_changes': 'Lint just the files changed in the local branch',
 };

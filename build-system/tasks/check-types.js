@@ -334,12 +334,11 @@ module.exports = {
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
-
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
-  closure_concurrency: 'Sets the number of concurrent invocations of closure',
-  debug: 'Outputs the file contents during compilation lifecycles',
+  closure_concurrency: 'Set the number of concurrent invocations of closure',
+  debug: 'Output the file contents during compilation lifecycles',
   targets: 'Comma-delimited list of targets to type-check',
   warning_level:
-    "Optionally sets closure's warning level to one of [quiet, default, verbose]",
+    "Optionally set closure's warning level to one of [quiet, default, verbose]",
 };
