@@ -359,9 +359,25 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-facebook-like",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "amp-facebook-page",
     "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-facebook-page",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
   },
   {
     "name": "amp-fit-text",
