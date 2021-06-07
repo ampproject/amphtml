@@ -84,4 +84,4 @@ module.exports = {
 };
 
 checkAsserts.description =
-  "Checks amp.js and v0.js to validate that assertions are DCE'd correctly";
+  "Check amp.js and v0.js to validate that assertions are DCE'd correctly";

@@ -169,15 +169,15 @@ module.exports = {
 };
 
 coverageMap.description =
-  'Generates a code coverage heat map for v0.js via source map explorer';
+  'Generate a code-coverage heat map for v0.js via source map explorer';
 
 coverageMap.flags = {
   json: 'JSON output filename [default: out.json]',
   inputhtml: 'Input HTML file under "examples/" [default: everything.amp.html]',
   outputhtml: 'Output HTML file [default: out.html]',
-  nobuild: 'Skips dist build.',
+  nobuild: 'Skip building the runtime',
   port: 'Port number for AMP server [default: 8000]',
   file: 'Output file(s) relative to dist/. Accepts .js, .mjs, and wildcards. [default: v0.js]',
-  esm: 'Generate coverage in ESM mode. Triggers an extra HTML transformation.',
-  sxg: 'Generate in SxG mode. Triggers an extra HTML transformation.',
+  esm: 'Generate coverage in ESM mode (triggers an extra HTML transformation)',
+  sxg: 'Generate in SxG mode (triggers an extra HTML transformation)',
 };
