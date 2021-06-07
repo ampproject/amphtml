@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {Deferred} from './core/data-structures/promise';
-import {devAssert} from './core/assert';
 import {dict} from './core/types/object';
 import {matches} from './core/dom/query';
 import {toWin} from './core/window';
@@ -29,13 +27,6 @@ const HTML_ESCAPE_CHARS = {
   '`': '&#x60;',
 };
 const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
-
-/** @const {string} */
-export const UPGRADE_TO_CUSTOMELEMENT_PROMISE = '__AMP_UPG_PRM';
-
-/** @const {string} */
-export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER = '__AMP_UPG_RES';
-
 /**
  * @typedef {{
  *   bubbles: (boolean|undefined),
@@ -425,45 +416,6 @@ export function tryFocus(element) {
  */
 export function isIframed(win) {
   return win.parent && win.parent != win;
-}
-
-/**
- * Determines if this element is an AMP element
- * @param {!Element} element
- * @return {boolean}
- */
-export function isAmpElement(element) {
-  const tag = element.tagName;
-  // Use prefix to recognize AMP element. This is necessary because stub
-  // may not be attached yet.
-  return (
-    tag.startsWith('AMP-') &&
-    // Some "amp-*" elements are not really AMP elements. :smh:
-    !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY')
-  );
-}
-
-/**
- * Return a promise that resolve when an AMP element upgrade from HTMLElement
- * to CustomElement
- * @param {!HTMLElement} element
- * @return {!Promise<!AmpElement>}
- */
-export function whenUpgradedToCustomElement(element) {
-  devAssert(isAmpElement(element), 'element is not AmpElement');
-  if (element.createdCallback) {
-    // Element already is CustomElement;
-    return Promise.resolve(/**@type {!AmpElement} */ (element));
-  }
-  // If Element is still HTMLElement, wait for it to upgrade to customElement
-  // Note: use pure string to avoid obfuscation between versions.
-  if (!element[UPGRADE_TO_CUSTOMELEMENT_PROMISE]) {
-    const deferred = new Deferred();
-    element[UPGRADE_TO_CUSTOMELEMENT_PROMISE] = deferred.promise;
-    element[UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = deferred.resolve;
-  }
-
-  return element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
 }
 
 /**

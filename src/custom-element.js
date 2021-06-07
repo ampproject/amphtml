@@ -32,6 +32,10 @@ import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './core/data-structures/signals';
 import {
+  UPGRADE_TO_CUSTOMELEMENT_PROMISE,
+  UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
+} from './amp-element-helpers';
+import {
   blockedByConsentError,
   cancellation,
   isBlockedByConsent,
@@ -293,10 +297,10 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       /** @private {?MediaQueryProps} */
       this.mediaQueryProps_ = null;
 
-      if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
-        nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
-        delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
-        delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_PROMISE];
+      if (nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
+        nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
+        delete nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
+        delete nonStructThis[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
       }
     }
 

@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import * as dom from '../../src/dom';
-import {BaseElement} from '../../src/base-element';
-import {createAmpElementForTesting} from '../../src/custom-element';
-import {loadPromise} from '../../src/event-helper';
-import {matches} from '../../src/core/dom/query';
-import {setScopeSelectorSupportedForTesting} from '../../src/core/dom/css-selectors';
-import {setShadowDomSupportedVersionForTesting} from '../../src/core/dom/web-components';
+import * as dom from '../../../../src/core/dom';
+import {loadPromise} from '../../../../src/event-helper';
+import {matches} from '../../../../src/core/dom/query';
+import {setScopeSelectorSupportedForTesting} from '../../../../src/core/dom/css-selectors';
+import {setShadowDomSupportedVersionForTesting} from '../../../../src/core/dom/web-components';
 
 describes.sandboxed('DOM', {}, (env) => {
   afterEach(() => {
@@ -670,48 +668,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  (env) => {
-    let doc;
-    class TestElement extends BaseElement {}
-    describe('whenUpgradeToCustomElement function', () => {
-      beforeEach(() => {
-        doc = env.win.document;
-      });
-
-      it('should not continue if element is not AMP element', () => {
-        const element = doc.createElement('div');
-        allowConsoleError(() => {
-          expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
-            'element is not AmpElement'
-          );
-        });
-      });
-
-      it('should resolve if element has already upgrade', () => {
-        const element = doc.createElement('amp-img');
-        element.setAttribute('layout', 'nodisplay');
-        doc.body.appendChild(element);
-        return dom.whenUpgradedToCustomElement(element).then((element) => {
-          expect(element.whenBuilt).to.exist;
-        });
-      });
-
-      it('should resolve when element upgrade', () => {
-        const element = doc.createElement('amp-test');
-        element.setAttribute('layout', 'nodisplay');
-        doc.body.appendChild(element);
-        env.win.setTimeout(() => {
-          env.win.customElements.define(
-            'amp-test',
-            createAmpElementForTesting(env.win, TestElement)
-          );
-        }, 100);
-        return dom.whenUpgradedToCustomElement(element).then((element) => {
-          expect(element.whenBuilt).to.exist;
-        });
-      });
-    });
-
+  () => {
     describe('toggleAttribute', () => {
       let el;
 

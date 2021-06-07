@@ -21,6 +21,7 @@ import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
 import {whenCalled} from '../../../../testing/test-helper.js';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(
   'amp-lightbox component',
@@ -84,7 +85,7 @@ describes.realWin(
       const element = createLightbox();
       env.sandbox.spy(element, 'enqueAction');
       env.sandbox.stub(element, 'getDefaultActionAlias');
-      await dom.whenUpgradedToCustomElement(element);
+      await whenUpgradedToCustomElement(element);
       const impl = await element.getImpl(true);
       impl.getHistory_ = () => {
         return {
