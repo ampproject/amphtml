@@ -1,0 +1,93 @@
+---
+name: Bento Component Tracker
+description: Track a new Bento component.
+labels: 'WG: bento'
+title: "\U0001F371 [amp-component-name:version] Bento tracking issue"
+body:
+  - type: markdown
+    id: header
+    attributes:
+      value: |
+        This is a tracker meant to be used by AMP developers working on new Bento components.
+        - See AMP's [documentation](https://github.com/ampproject/amphtml/blob/main/docs/building-a-bento-amp-extension.md) to learn about how to write a Bento component.
+        - See past [tracking issues](https://github.com/ampproject/amphtml/issues?q=is%3Aopen+label%3A%22WG%3A+bento%22+%22bento+tracking+issue%22) for information about other bento components.
+  - type: textarea
+    id: requirements
+    attributes:
+      label: High-Level Requirements
+      description: Matrix of considerations to be addressed.
+      value: |
+        <!-- Update each row of this table with the relevant information. -->
+        <!-- Information unknown at this time can be filled in later. -->
+
+        _To be updated as information becomes available._
+
+        | Consideration           | Ready When      | Status  |
+        | ----------------------- | --------------- | ------- |
+        | Component Compatibility | <fill this out> | ✅ / ✖️ |
+        | Testing                 | <fill this out> | ✅ / ✖️ |
+        | Internationalization    | <fill this out> | ✅ / ✖️ |
+        | Analytics               | <fill this out> | ✅ / ✖️ |
+        | Accessibility           | <fill this out> | ✅ / ✖️ |
+        | Page Experience         | <fill this out> | ✅ / ✖️ |
+        | Documentation           | <fill this out> | ✅ / ✖️ |
+        | Storybook               | <fill this out> | ✅ / ✖️ |
+    validations:
+      required: true
+  - type: textarea
+    id: feature_checklist
+    attributes:
+      label: Feature Checklist
+      description: A checklist of features of the component.
+      value: |
+        _To be updated as information becomes available._
+
+        ### Existing attributes
+        - [ ] `attribute 1`
+        - [ ] `attribute 2`
+        - [ ] `attribute 3`
+
+        ### Actions
+        - [ ] `action 1`
+        - [ ] `action 2`
+        - [ ] `action 3`
+
+        ### Events
+        - [ ] `event 1`
+        - [ ] `event 2`
+        - [ ] `event 3`
+
+        ### Analytics Events (Classic Version)
+        - [ ] `classic analytics event 1`
+        - [ ] `classic analytics event 2`
+        - [ ] `classic analytics event 3`
+
+        ### Analytics Events (Bento Version)
+        - [ ] `bento analytics event 1`
+        - [ ] `bento analytics event 2`
+        - [ ] `bento analytics event 3`
+  - type: textarea
+    id: migration_notes
+    attributes:
+      label: Migration Notes
+      description: Relevant information for component authors.
+      placeholder: Provide information about any API changes that might prevent document authors from upgrading a classic version component to the new Bento version.
+  - type: textarea
+    id: open_tasks
+    attributes:
+      label: Open Tasks
+      description: A checklist of tasks to be completed before this component can be shipped.
+      value: |
+        _To be updated as information becomes available._
+
+        - [ ] open task 1
+        - [ ] open task 2
+        - [ ] open task 3
+        - [ ] open task 4
+        - [ ] open task 5
+  - type: textarea
+    id: notifications
+    attributes:
+      label: Notifications
+      description: Add working groups or individuals you want to notify about this release.
+      value: /cc @ampproject/wg-bento
