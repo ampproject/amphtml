@@ -114,6 +114,7 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
       'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
         'allow-same-origin allow-scripts allow-top-navigation'
     );
+    expect(fie.getAttribute('allow')).to.equal(`attribution-reporting 'src'`);
     const cspMeta = fie.contentDocument.querySelector(
       'meta[http-equiv=Content-Security-Policy]'
     );

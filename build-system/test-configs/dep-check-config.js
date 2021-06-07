@@ -250,6 +250,10 @@ exports.rules = [
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/1.0/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/1.0/base-element.js->extensions/amp-facebook/1.0/facebook-base-element.js',
+      'extensions/amp-facebook-like/1.0/amp-facebook-like.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-like/1.0/base-element.js->extensions/amp-facebook/1.0/facebook-base-element.js',
+      'extensions/amp-facebook-page/1.0/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-page/1.0/base-element.js->extensions/amp-facebook/1.0/facebook-base-element.js',
 
       // VideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
       'extensions/**->extensions/amp-video/1.0/base-element.js',
