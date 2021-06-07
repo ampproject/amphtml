@@ -131,7 +131,7 @@ export function experimentToggles(win) {
   // Read default and injected configs of this build.
   const buildExperimentConfigs = {
     ...(win.AMP_CONFIG ?? {}),
-    ...(win.AMP_EXP ?? {}),
+    ...win.AMP_EXP,
   };
   for (const experimentId in buildExperimentConfigs) {
     const frequency = buildExperimentConfigs[experimentId];
