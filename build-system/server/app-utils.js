@@ -125,6 +125,9 @@ const replaceUrls = (mode, file, hostName, inabox) => {
   file = file.replace(
     /https:\/\/cdn\.ampproject\.org\/.+\.(m?js)/g,
     (match, extension) => {
+      // TODO(alanorozco): Match --esm in output extension and/or allow
+      // `.mjs` to be lazily built regardless of --esm
+
       const url = new URL(match);
 
       if (isRtv) {
