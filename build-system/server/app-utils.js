@@ -17,7 +17,7 @@
 const esbuild = require('esbuild');
 const minimist = require('minimist');
 const {cyan, green} = require('../common/colors');
-const {log} = require('../common/logging');
+const {log, logLocalDev} = require('../common/logging');
 const {relative} = require('path');
 
 let serveMode = 'default';
@@ -82,10 +82,30 @@ const isRtvMode = (serveMode) => {
   return /^\d{15}$/.test(serveMode);
 };
 
-let cdnModule;
-const cdnModuleSourcePath =
-  'build-system/server/new-server/transforms/utilities/cdn.ts';
-const cdnModulePath = 'dist/server-cdn.js';
+const tsModule = Object.create(null);
+
+/**
+ * @param {string} path
+ * @return {*}
+ */
+function requireTsSync(path) {
+  if (!tsModule[path]) {
+    const outfile = `dist/${path.replace('/', '--')}.js`;
+    logLocalDev('Building', cyan(path), '...');
+    esbuild.buildSync({
+      entryPoints: [path],
+      format: 'cjs',
+      write: true,
+      outfile,
+    });
+    tsModule[path] = require(`${relative(
+      __dirname,
+      process.cwd()
+    )}/${outfile}`);
+    logLocalDev('Built', cyan(path));
+  }
+  return tsModule[path];
+}
 
 /**
  * @param {string} mode
@@ -95,21 +115,11 @@ const cdnModulePath = 'dist/server-cdn.js';
  * @return {string}
  */
 const replaceUrls = (mode, file, hostName, inabox) => {
-  if (!cdnModule) {
-    esbuild.buildSync({
-      entryPoints: [cdnModuleSourcePath],
-      format: 'cjs',
-      write: true,
-      outfile: cdnModulePath,
-    });
-    cdnModule = require(`${relative(
-      __dirname,
-      process.cwd()
-    )}/${cdnModulePath}`);
-  }
+  const cdnUrl = requireTsSync(
+    'build-system/server/new-server/transforms/utilities/cdn.ts'
+  );
 
-  // All inabox documents use `amp4ads-v0.js`, which optionally gets mapped to
-  // a local URL later.
+  // All inabox documents use `amp4ads-v0.js`. Its URL may be rewritten later.
   if (inabox) {
     file = file.replace(
       /(https:\/\/cdn\.ampproject\.org)\/v0\.(m?js)/g,
@@ -129,10 +139,10 @@ const replaceUrls = (mode, file, hostName, inabox) => {
       // `.mjs` to be lazily built regardless of --esm
       const url = new URL(match);
       if (isRtv) {
-        return cdnModule.CDNURLToRTVURL(url, mode, pathnames, extension);
+        return cdnUrl.CDNURLToRTVURL(url, mode, pathnames, extension);
       }
       const useMaxNames = mode !== 'compiled';
-      const {host, href, protocol} = cdnModule.replaceCDNURLPath(
+      const {host, href, protocol} = cdnUrl.replaceCDNURLPath(
         url,
         pathnames,
         extension,
