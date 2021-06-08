@@ -15,7 +15,7 @@
  */
 
 import {ScrollComponent} from './scroll-component';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/core/types/object';
 import {toggle} from '../../../src/style';
 
 /** Provides iframe for the Scroll Audio Player. */
@@ -93,20 +93,22 @@ export class Sheet extends ScrollComponent {
    * @private
    * */
   makeIframe_() {
-    this.frame_ = /** @type {!HTMLIFrameElement} */ (this.el(
-      'iframe',
-      dict({
-        'class': 'amp-access-scroll-sheet',
-        'scrolling': 'no',
-        'frameborder': '0',
-        'allowtransparency': 'true',
-        'title': this.DEFAULT_TITLE_,
-        'sandbox':
-          'allow-scripts allow-same-origin ' +
-          'allow-top-navigation allow-popups ' +
-          'allow-popups-to-escape-sandbox',
-      })
-    ));
+    this.frame_ = /** @type {!HTMLIFrameElement} */ (
+      this.el(
+        'iframe',
+        dict({
+          'class': 'amp-access-scroll-sheet',
+          'scrolling': 'no',
+          'frameborder': '0',
+          'allowtransparency': 'true',
+          'title': this.DEFAULT_TITLE_,
+          'sandbox':
+            'allow-scripts allow-same-origin ' +
+            'allow-top-navigation allow-popups ' +
+            'allow-popups-to-escape-sandbox',
+        })
+      )
+    );
     this.root_ = this.frame_;
     this.mount();
   }

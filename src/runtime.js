@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from './base-element';
-import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
   dev,
@@ -40,9 +39,10 @@ import {
 } from './service/extensions-impl';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
-import {reportErrorForWin} from './error';
-import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
+import {reportErrorForWin} from './error-reporting';
 import {setStyle} from './style';
+import {shouldLoadPolyfill as shouldLoadInObPolyfill} from './polyfills/stubs/intersection-observer-stub';
+import {shouldLoadPolyfill as shouldLoadResObPolyfill} from './polyfills/stubs/resize-observer-stub';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 import {waitForBodyOpenPromise} from './dom';
@@ -122,8 +122,6 @@ function adoptShared(global, callback) {
 
   global.AMP.BaseElement = BaseElement;
 
-  global.AMP.BaseTemplate = BaseTemplate;
-
   /**
    * Registers an extended element and installs its styles.
    * @param {string} name
@@ -135,11 +133,9 @@ function adoptShared(global, callback) {
   /**
    * Registers an extended template.
    * @param {string} name
-   * @param {typeof BaseTemplate} implementationClass
+   * @param {typeof ./base-template.BaseTemplate} implementationClass
    */
-  global.AMP.registerTemplate = function (name, implementationClass) {
-    registerExtendedTemplate(global, name, implementationClass);
-  };
+  global.AMP.registerTemplate = extensions.addTemplate.bind(extensions);
 
   /**
    * Registers an ampdoc service.
@@ -172,7 +168,6 @@ function adoptShared(global, callback) {
    * @param {function(string,?string=,number=)} unusedFn
    * @param {function()=} opt_flush
    * @deprecated
-   * @export
    */
   global.AMP.setTickFunction = (unusedFn, opt_flush) => {};
 
@@ -188,21 +183,18 @@ function adoptShared(global, callback) {
         if (typeof fnOrStruct == 'function') {
           fnOrStruct(global.AMP, global.AMP._);
         } else {
-          extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
+          extensions.registerExtension(
+            fnOrStruct.n,
+            fnOrStruct.ev,
+            fnOrStruct.l,
+            fnOrStruct.f,
+            global.AMP
+          );
         }
       });
     };
 
-    // We support extension declarations which declare they have an
-    // "intermediate" dependency that needs to be loaded before they
-    // can execute.
-    if (!(typeof fnOrStruct == 'function') && fnOrStruct.i) {
-      preloadDeps(extensions, fnOrStruct).then(function () {
-        return startRegisterOrChunk(global, fnOrStruct, register);
-      });
-    } else {
-      startRegisterOrChunk(global, fnOrStruct, register);
-    }
+    startRegisterOrChunk(global, fnOrStruct, register);
   }
 
   // Handle high priority extensions now, and if necessary issue
@@ -258,9 +250,10 @@ function adoptShared(global, callback) {
   // If the closure passed to maybePumpEarlyFrame didn't execute
   // immediately we need to keep pushing onto preregisteredExtensions
   if (!global.AMP.push) {
-    global.AMP.push = /** @type {function((ExtensionPayload|function(!Object, !Object): ?))} */ (preregisteredExtensions.push.bind(
-      preregisteredExtensions
-    ));
+    global.AMP.push =
+      /** @type {function((ExtensionPayload|function(!Object, !Object): ?))} */ (
+        preregisteredExtensions.push.bind(preregisteredExtensions)
+      );
   }
 
   // For iOS we need to set `cursor:pointer` to ensure that click events are
@@ -270,43 +263,15 @@ function adoptShared(global, callback) {
   }
 
   // Some deferred polyfills.
-  if (
-    // eslint-disable-next-line no-undef
-    INTERSECTION_OBSERVER_POLYFILL ||
-    // eslint-disable-next-line no-undef
-    INTERSECTION_OBSERVER_POLYFILL_INABOX ||
-    getMode().localDev ||
-    getMode().test
-  ) {
-    scheduleInObUpgradeIfNeeded(global);
+  const extensionsFor = Services.extensionsFor(global);
+  if (shouldLoadResObPolyfill(global)) {
+    extensionsFor.preloadExtension('amp-resize-observer-polyfill');
+  }
+  if (shouldLoadInObPolyfill(global)) {
+    extensionsFor.preloadExtension('amp-intersection-observer-polyfill');
   }
 
   return iniPromise;
-}
-
-/**
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
- * @return {!Promise}
- */
-function preloadDeps(extensions, fnOrStruct) {
-  // Allow a single string as the intermediate dependency OR allow
-  // for an array if intermediate dependencies that needs to be
-  // resolved first before executing this current extension.
-  if (Array.isArray(fnOrStruct.i)) {
-    const promises = fnOrStruct.i.map((dep) => {
-      return extensions.preloadExtension(dep);
-    });
-    return Promise.all(promises);
-  } else if (typeof fnOrStruct.i == 'string') {
-    return extensions.preloadExtension(fnOrStruct.i);
-  }
-  dev().error(
-    'RUNTIME',
-    'dependency is neither an array or a string',
-    fnOrStruct.i
-  );
-  return Promise.resolve();
 }
 
 /**
@@ -403,7 +368,12 @@ function adoptServicesAndResources(global) {
  */
 function adoptMultiDocDeps(global) {
   global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
-  global.AMP.combinedCss = ampDocCss + ampSharedCss;
+  if (IS_ESM) {
+    const style = global.document.querySelector('style[amp-runtime]');
+    global.AMP.combinedCss = style ? style.textContent : '';
+  } else {
+    global.AMP.combinedCss = ampDocCss + ampSharedCss;
+  }
 }
 
 /**
@@ -445,9 +415,8 @@ export function adoptShadowMode(global) {
      * @param {!Object<string, string>=} opt_initParams
      * @return {!Object}
      */
-    global.AMP.attachShadowDocAsStream = manager.attachShadowDocAsStream.bind(
-      manager
-    );
+    global.AMP.attachShadowDocAsStream =
+      manager.attachShadowDocAsStream.bind(manager);
 
     return waitForBodyOpenPromise(global.document);
   });
@@ -460,21 +429,32 @@ export function adoptShadowMode(global) {
  * If they are different, returns false, and initiates a load
  * of the respective extension via a versioned URL.
  *
- * This is currently guarded by the 'version-locking' experiment.
- * With this active, all scripts in a given page are guaranteed
- * to have the same AMP release version.
- *
  * @param {!Window} win
  * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {
-  if (!isExperimentOn(win, 'version-locking')) {
+  if (getMode().localDev && isExperimentOn(win, 'disable-version-locking')) {
     return false;
   }
   if (typeof fnOrStruct == 'function') {
     return false;
   }
+
+  if (IS_ESM) {
+    // If we're in a module runtime, trying to execute a nomodule extension
+    // simply remove the nomodule extension so that it is not executed.
+    if (!fnOrStruct.m) {
+      return true;
+    }
+  } else {
+    // If we're in a nomodule runtime, trying to execute a module extension
+    // simply remove the module extension so that it is not executed.
+    if (fnOrStruct.m) {
+      return true;
+    }
+  }
+
   const {v} = fnOrStruct;
   // This is non-obvious, but we only care about the release version,
   // not about the full rtv version, because these only differ
@@ -482,7 +462,11 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (internalRuntimeVersion() == v) {
     return false;
   }
-  Services.extensionsFor(win).reloadExtension(fnOrStruct.n);
+  Services.extensionsFor(win).reloadExtension(
+    fnOrStruct.n,
+    fnOrStruct.ev,
+    fnOrStruct.l
+  );
   return true;
 }
 
@@ -494,10 +478,6 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
  *     pumped.
  */
 function maybePumpEarlyFrame(win, cb) {
-  if (!isExperimentOn(win, 'pump-early-frame')) {
-    cb();
-    return;
-  }
   // There is definitely nothing to draw yet, so we might as well
   // proceed.
   if (!win.document.body) {

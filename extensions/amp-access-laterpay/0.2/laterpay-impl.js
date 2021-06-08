@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-access-laterpay-0.2.css';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {listen} from '../../../src/event-helper';
@@ -170,11 +170,13 @@ export class LaterpayVendor {
     this.currentLocale_ = this.laterpayConfig_['locale'] || 'en';
 
     /** @private {!JsonObject} */
-    this.i18n_ = /** @type {!JsonObject} */ (Object.assign(
-      dict(),
-      DEFAULT_MESSAGES,
-      this.laterpayConfig_['localeMessages'] || dict()
-    ));
+    this.i18n_ = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict(),
+        DEFAULT_MESSAGES,
+        this.laterpayConfig_['localeMessages'] || dict()
+      )
+    );
 
     /** @private {string} */
     this.purchaseConfigBaseUrl_ = this.getConfigUrl_() + CONFIG_BASE_PATH;

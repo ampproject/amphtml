@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import '../../../../third_party/react-dates/bundle';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpDatePicker} from '../amp-date-picker';
 import {createElementWithAttributes} from '../../../../src/dom.js';
 import {requireExternal} from '../../../../src/module';
@@ -107,10 +107,9 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       document = env.win.document;
-      clock = lolex.install({
-        // Use the global window and not env.win. There is no way to inject the
-        // env.win into moment right now.
-        target: window,
+      // Use the global window and not env.win. There is no way to inject the
+      // env.win into moment right now.
+      clock = fakeTimers.withGlobal(window).install({
         now: new Date('2018-01-01T08:00:00Z'),
       });
     });
@@ -120,7 +119,7 @@ describes.realWin(
     });
 
     it('should render in the simplest case', () => {
-      const {picker, layoutCallback} = createDatePicker({
+      const {layoutCallback, picker} = createDatePicker({
         layout: 'fixed-height',
         height: 360,
       });
@@ -138,7 +137,7 @@ describes.realWin(
         input.value = '2018-01-01';
         document.body.appendChild(input);
 
-        const {picker, buildCallback} = createDatePicker({
+        const {buildCallback, picker} = createDatePicker({
           'layout': 'fixed-height',
           'height': '360',
           'input-selector': '#date',
@@ -160,7 +159,7 @@ describes.realWin(
         endInput.value = '2018-01-02';
         document.body.appendChild(endInput);
 
-        const {picker, buildCallback} = createDatePicker({
+        const {buildCallback, picker} = createDatePicker({
           'layout': 'fixed-height',
           'height': '360',
           'type': 'range',
@@ -175,7 +174,7 @@ describes.realWin(
       });
 
       it('should use the "date" value from src data', () => {
-        const {picker, layoutCallback} = createDatePicker({
+        const {layoutCallback, picker} = createDatePicker({
           'layout': 'fixed-height',
           'height': '360',
         });
@@ -187,7 +186,7 @@ describes.realWin(
       });
 
       it('should use the "startDate" and "endDate" values from src data', () => {
-        const {picker, layoutCallback} = createDatePicker({
+        const {layoutCallback, picker} = createDatePicker({
           'layout': 'fixed-height',
           'height': '360',
           'type': 'range',
@@ -259,7 +258,7 @@ describes.realWin(
           element.appendChild(template);
           element.appendChild(defaultTemplate);
 
-          const {srcTemplates, srcDefaultTemplate} = picker.parseSrcTemplates_(
+          const {srcDefaultTemplate, srcTemplates} = picker.parseSrcTemplates_(
             win.JSON.parse(templateJson)
           );
           expect(srcTemplates[0].dates.contains('2018-01-01')).to.be.true;
@@ -451,7 +450,7 @@ describes.realWin(
 
       describe('changing dates', () => {
         it('should set the date in a single date picker', async () => {
-          const {element, picker, layoutCallback} = createDatePicker();
+          const {element, layoutCallback, picker} = createDatePicker();
           await layoutCallback();
 
           picker.onDateChange(moment('2018-01-03'));
@@ -460,7 +459,7 @@ describes.realWin(
         });
 
         it('should set date range in a date range picker', async () => {
-          const {element, picker, layoutCallback} = createDatePicker({
+          const {element, layoutCallback, picker} = createDatePicker({
             'blocked': '2018-01-06',
           });
           await layoutCallback();

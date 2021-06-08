@@ -31,12 +31,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
-    id: 'amp-access-iframe',
-    name: 'AMP Access iframe prototype (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/13287',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
-  },
-  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
@@ -54,24 +48,10 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
   },
   {
-    id: 'amp-google-vrview-image',
-    name: 'AMP VR Viewer for images via Google VRView',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-      'amp-google-vrview-image/amp-google-vrview-image.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
-  },
-  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
     spec: 'https://github.com/ampproject/amphtml/issues/25049',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25022',
-  },
-  {
-    id: 'ampdoc-fie',
-    name: 'Install AmpDoc on FIE level',
-    spec: 'https://github.com/ampproject/amphtml/issues/22734',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22733',
   },
   {
     id: 'no-auth-in-prerender',
@@ -86,26 +66,9 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
   },
   {
-    id: 'cache-service-worker',
-    name: 'AMP Cache Service Worker',
-    spec: 'https://github.com/ampproject/amphtml/issues/1199',
-  },
-  {
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
-  },
-  {
-    id: 'amp-playbuzz',
-    name: 'AMP extension for playbuzz items (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/6106',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
-  },
-  {
-    id: 'amp-action-macro',
-    name: 'AMP extension for defining action macros',
-    spec: 'https://github.com/ampproject/amphtml/issues/19494',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
   },
   {
     id: 'ios-fixed-no-transfer',
@@ -114,32 +77,9 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
   },
   {
-    id: 'chunked-amp',
-    name: "Split AMP's loading phase into chunks",
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
-  },
-  {
-    id: 'pump-early-frame',
-    name:
-      'If applicable, let the browser paint the current frame before ' +
-      'executing the callback.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
-  },
-  {
-    id: 'version-locking',
-    name:
-      'Force all extensions to have the same release ' +
-      'as the main JS binary',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
-  },
-  {
     id: 'web-worker',
     name: 'Web worker for background processing',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
-  },
-  {
-    id: 'jank-meter',
-    name: 'Display jank meter',
   },
   {
     id: 'input-debounced',
@@ -162,18 +102,6 @@ export const EXPERIMENTS = [
     name: 'Visual storytelling in AMP (v0.1)',
     spec: 'https://github.com/ampproject/amphtml/issues/11329',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
-  },
-  {
-    id: 'disable-amp-story-default-media',
-    name: 'Removes default media for amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/14535',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14535',
-  },
-  {
-    id: 'amp-story-responsive-units',
-    name: 'Scale pages in amp-story by rewriting responsive units',
-    spec: 'https://github.com/ampproject/amphtml/issues/15955',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
     id: 'amp-next-page',
@@ -209,20 +137,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
   {
-    id: 'hidden-mutation-observer',
-    name: "Enables FixedLayer's hidden-attribute mutation observer",
-    spec: 'https://github.com/ampproject/amphtml/issues/17475',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
-  },
-  {
-    id: 'amp-user-location',
-    name:
-      'Expose the browser geolocation API for latitude and longitude ' +
-      'access after user interaction and approval',
-    spec: 'https://github.com/ampproject/amphtml/issues/8929',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
-  },
-  {
     id: 'untrusted-xhr-interception',
     name:
       'Enable "xhrInterceptor" capability for untrusted viewers. ' +
@@ -231,43 +145,12 @@ export const EXPERIMENTS = [
     cleanupIssue: 'N/A',
   },
   {
-    id: 'pausable-iframe',
-    name: 'Use iframe freezing instead of recreating iframes.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24110',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
-  },
-  {
-    id: 'protocol-adapters',
-    name: 'Allow amp-list to get its data from amp-script functions.',
-    spec: 'https://github.com/ampproject/amphtml/issues/26474',
-  },
-  {
     id: 'adsense-ad-size-optimization',
     name:
       'Per publisher server side settings for changing the ad size ' +
       'to responsive.',
     spec: 'https://github.com/ampproject/amphtml/issues/23568',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
-  },
-  {
-    id: 'fix-inconsistent-responsive-height-selection',
-    name: 'Fix inconsistent responsive height selection.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24166',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
-  },
-  {
-    id: 'intersect-resources',
-    name: 'Use IntersectionObserver for resource scheduling.',
-    spec: 'https://github.com/ampproject/amphtml/issues/25428',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26233',
-  },
-  {
-    id: 'layoutbox-invalidate-on-scroll',
-    name:
-      'Invalidate the cached layoutboxes of elements nested in a scroller ' +
-      'after that scroller scrolls.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24929',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25203',
   },
   {
     id: 'amp-stream-gallery',
@@ -282,35 +165,59 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
   },
   {
-    id: 'analytics-chunks',
-    name: 'AMP Analytics Break long tasks to chunks (AMP docs only)',
-    spec: 'https://github.com/ampproject/amphtml/issues/28435',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
-  },
-  {
-    id: 'analytics-chunks-inabox',
-    name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
-    spec: 'https://github.com/ampproject/amphtml/issues/28435',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
-  },
-  {
     id: 'a4a-no-signing',
     name: 'Remove signing requirement for AMPHTML ads',
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
   },
   {
-    id: 'sticky-ad-padding-bottom',
-    name: 'Add a bottom padding for edgeless iPhones',
-    spec: 'https://github.com/ampproject/amphtml/issues/22251',
-  },
-  {
-    id: 'expand-json-targeting',
-    name: 'Allow CLIENT_ID in doubleclick json targeting feature',
-    spec: 'https://github.com/ampproject/amphtml/issues/25190',
-  },
-  {
     id: 'auto-ads-layout-callback',
     name: 'Move ads placement into layoutCallback',
     spec: 'https://github.com/ampproject/amphtml/issues/27068',
+  },
+  {
+    id: 'amp-cid-backup',
+    name: 'Backup AMP-generated CIDs to Storage.',
+    spec: 'https://github.com/ampproject/amphtml/issues/29484',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/29484',
+  },
+  {
+    id: 'layout-aspect-ratio-css',
+    name: 'Responsive layouts implemented via aspect-ratio CSS',
+    spec: 'https://github.com/ampproject/amphtml/issues/30291',
+  },
+  {
+    id: 'tcf-post-message-proxy-api',
+    name: 'Proxy for TCF PostMessageAPI to send TCData to 3p iframes',
+    spec: 'https://github.com/ampproject/amphtml/issues/30385',
+  },
+  {
+    id: 'dfp-render-on-idle-cwv-exp',
+    name: 'To measure the CWV impact of ads idle rendering',
+    spec: 'https://github.com/ampproject/amphtml/issues/31436',
+  },
+  {
+    id: 'amp-consent-granular-consent',
+    name: 'Client-side granular consent',
+    spec: 'https://github.com/ampproject/amphtml/issues/31607',
+  },
+  {
+    id: 'amp-story-page-attachment-ui-v2',
+    name: 'New UI for all new page attachments in stories format',
+    spec: 'https://github.com/ampproject/amphtml/projects/123',
+  },
+  {
+    id: 'flexible-bitrate',
+    name: 'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
+    spec: 'https://github.com/ampproject/amphtml/projects/111',
+  },
+  {
+    id: 'story-ad-placements',
+    name: 'Optimization of story ad placements',
+    spec: 'https://github.com/ampproject/amphtml/issues/33147',
+  },
+  {
+    id: 'story-ad-auto-advance',
+    name: 'Auto advancing story ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/33969',
   },
 ];

@@ -16,10 +16,11 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {getImportResolverPlugin} = require('./import-resolver');
 const {getReplacePlugin} = require('./helpers');
 
 /**
- * Gets the config for pre-closure babel transforms run during `gulp dist`.
+ * Gets the config for pre-closure babel transforms run during `amp dist`.
  *
  * @return {!Object}
  */
@@ -29,16 +30,6 @@ function getPreClosureConfig() {
   const isTestTask = testTasks.some((task) => argv._.includes(task));
   const isFortesting = argv.fortesting || isTestTask;
 
-  const filterImportsPlugin = [
-    'filter-imports',
-    {
-      imports: {
-        // Imports that are not needed for valid transformed documents.
-        '../build/ampshared.css': ['cssText', 'ampSharedCss'],
-        '../build/ampdoc.css': ['cssText', 'ampDocCss'],
-      },
-    },
-  ];
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
     {
@@ -49,12 +40,16 @@ function getPreClosureConfig() {
   ];
   const replacePlugin = getReplacePlugin();
   const preClosurePlugins = [
+    'optimize-objstr',
+    getImportResolverPlugin(),
+    argv.coverage ? 'babel-plugin-istanbul' : null,
+    './build-system/babel-plugins/babel-plugin-imported-helpers',
+    './build-system/babel-plugins/babel-plugin-transform-inline-isenumvalue',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
-    './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
-    argv.esm
+    argv.esm || argv.sxg
       ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
       : null,
     // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
@@ -63,16 +58,21 @@ function getPreClosureConfig() {
       {replaceCallArguments: false},
     ],
     './build-system/babel-plugins/babel-plugin-transform-parenthesize-expression',
+    [
+      './build-system/babel-plugins/babel-plugin-transform-json-import',
+      {freeze: false},
+    ],
     './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
+    './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-version-call',
     './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
+    './build-system/babel-plugins/babel-plugin-transform-default-assignment',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
-    argv.esm ? filterImportsPlugin : null,
     // TODO(erwinm, #28698): fix this in fixit week
-    //argv.esm
+    // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
     //: null,
     !isCheckTypes
@@ -85,7 +85,7 @@ function getPreClosureConfig() {
         ]
       : null,
     !(isFortesting || isCheckTypes)
-      ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
+      ? './build-system/babel-plugins/babel-plugin-is_fortesting-constant-transformer'
       : null,
   ].filter(Boolean);
   const presetEnv = [
@@ -96,12 +96,13 @@ function getPreClosureConfig() {
       targets: {esmodules: true},
     },
   ];
-  const preClosurePresets = argv.esm ? [presetEnv] : [];
+  const preClosurePresets = argv.esm || argv.sxg ? [presetEnv] : [];
   const preClosureConfig = {
     compact: false,
     plugins: preClosurePlugins,
     presets: preClosurePresets,
     retainLines: true,
+    sourceMaps: true,
   };
   return preClosureConfig;
 }

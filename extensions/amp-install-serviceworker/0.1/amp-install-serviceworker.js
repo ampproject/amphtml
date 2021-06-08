@@ -15,16 +15,13 @@
  */
 
 import {Services} from '../../../src/services';
-import {
-  closestAncestorElementBySelector,
-  removeElement,
-} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
+import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
-import {startsWith} from '../../../src/string';
 import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
@@ -401,7 +398,7 @@ function sendAmpScriptToSwOnFirstVisit(win, registration) {
       .getEntriesByType('resource')
       .filter(
         (item) =>
-          item.initiatorType === 'script' && startsWith(item.name, urls.cdn)
+          item.initiatorType === 'script' && item.name.startsWith(urls.cdn)
       )
       .map((script) => script.name);
     const activeSW = registration.active;

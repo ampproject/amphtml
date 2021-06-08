@@ -15,20 +15,19 @@
  */
 
 import {BrowserController, RequestBank} from '../../testing/test-helper';
-import {Deferred} from '../../src/utils/promise';
+import {Deferred} from '../../src/core/data-structures/promise';
 import {poll} from '../../testing/iframe';
 
-// TODO(wg-ui-and-a11y): These tests are broken on Firefox (as of v77). They
+// TODO(wg-components): These tests are broken on Firefox (as of v77). They
 // also fail on Safari.
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
   .skipSafari()
-  .run('amp-recaptcha-input', function () {
+  .run('amp-recaptcha-input', {}, function () {
     describes.integration(
       'with form and amp-mustache',
       {
-        /* eslint-disable max-len */
         body: `
     <form
       method="POST"
@@ -113,7 +112,6 @@ describe
         display: block;
       }
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache:0.2'],
         experiments: ['amp-recaptcha-input'],
       },
@@ -184,7 +182,6 @@ describe
     describes.integration(
       recaptchaRequestId.GET,
       {
-        /* eslint-disable max-len */
         body: `
     <form
       method="GET"
@@ -206,7 +203,6 @@ describe
       </fieldset>
     </form>
   `,
-        /* eslint-enable max-len */
         extensions: ['amp-recaptcha-input', 'amp-form'],
         experiments: ['amp-recaptcha-input'],
       },
@@ -239,7 +235,6 @@ describe
     describes.integration(
       recaptchaRequestId.POST,
       {
-        /* eslint-disable max-len */
         body: `
     <form
       method="POST"
@@ -261,7 +256,6 @@ describe
       </fieldset>
     </form>
   `,
-        /* eslint-enable max-len */
         extensions: ['amp-recaptcha-input', 'amp-form'],
         experiments: ['amp-recaptcha-input'],
       },

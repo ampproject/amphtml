@@ -62,7 +62,7 @@
         padding: 0.5rem; /* default-ui-space-large */
         border: 1px solid rgba(0, 0, 0, 0.33); /* default-ui-med-gray */
         font-size: 1rem; /* default-ui-font-size */
-        line-height: 1.5rem; /* default-ui-space-large */        
+        line-height: 1.5rem; /* default-ui-space-large */
       }
     </style>
   </head>
@@ -181,6 +181,35 @@
         <input name="input2" required />
       </amp-autocomplete>
     <p [text]="'Hello ' + inputSelect">Hello World</p>
+
+    <h2>Select event with object value</h2>
+    <amp-autocomplete filter="token-prefix"
+        filter-value="city"
+        min-characters=0
+        on="select:AMP.setState({chosenPlace: event.valueAsObject})">
+      <input type="search" name="city">
+      <script type="application/json">
+        {
+          "items": [
+            {
+              "city": "Albany",
+              "state": "New York"
+            }, {
+              "city": "Annapolis",
+              "state": "Maryland"
+            }
+          ]
+        }
+      </script>
+      <template type="amp-mustache" id="amp-template-custom">
+        <div class="city-item" data-value="{{city}}" data-json="{{objToJson}}">
+          <div>{{city}}, {{state}}</div>
+        </div>
+      </template>
+    </amp-autocomplete>
+    <p [text]="'Your choice: ' + chosenPlace.city + ', ' + chosenPlace.state">
+      Select a place
+    </p>
 
     <h2>Disable browser autofill</h2>
     <p>form has no autocomplete attr</p>

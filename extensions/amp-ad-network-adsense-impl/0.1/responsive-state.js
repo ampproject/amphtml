@@ -22,14 +22,14 @@ import {
 } from '../../../ads/google/utils';
 import {Services} from '../../../src/services';
 import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {computedStyle, getStyle, setStyle} from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/core/types/object';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+import {toWin} from '../../../src/core/window';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 const TAG = 'amp-ad-network-adsense-impl';
 
@@ -86,10 +86,8 @@ export class ResponsiveState {
    *  corresponds to a responsive ad, otherwise null.
    */
   static createIfResponsive(element) {
-    if (
-      !this.isContainerWidth_ &&
-      !hasOwn(RAFMT_PARAMS, element.getAttribute('data-auto-format'))
-    ) {
+    const autoFormat = element.getAttribute('data-auto-format');
+    if (!hasOwn(RAFMT_PARAMS, autoFormat)) {
       return null;
     }
     return new ResponsiveState(element);
@@ -104,44 +102,20 @@ export class ResponsiveState {
   }
 
   /**
-   * Upgrades the ad unit to full-width responsive if it does not fall back to container width.
-   * @param {!Element} element
-   * @param {string} adClientId
-   * @return {!Promise<?ResponsiveState>} a promise that resolves when any upgrade is complete.
-   */
-  static maybeUpgradeToResponsive(element, adClientId) {
-    // For Desktop Full-width Ad request, it should fall back to container width.
-    if (
-      element.hasAttribute('data-auto-format') &&
-      !ResponsiveState.isLayoutViewportNarrow_(element)
-    ) {
-      return ResponsiveState.convertToContainerWidth_(element);
-    }
-
-    return ResponsiveState.maybeUpgradeToFullWidthResponsive(
-      element,
-      adClientId
-    );
-  }
-
-  /**
    * Upgrades the ad unit to responsive if there is an opt-in setting in localstorage.
    * See https://github.com/ampproject/amphtml/issues/23568 for design.
    * @param {!Element} element
    * @param {string} adClientId
    * @return {!Promise<?ResponsiveState>} a promise that resolves when any upgrade is complete.
    */
-  static maybeUpgradeToFullWidthResponsive(element, adClientId) {
-    if (!ResponsiveState.isInAdSizeOptimizationExperimentBranch_(element)) {
-      return Promise.resolve(null);
-    }
+  static maybeUpgradeToResponsive(element, adClientId) {
     // If the ad unit is already responsive we don't upgrade again.
     if (element.hasAttribute('data-auto-format')) {
       return Promise.resolve(null);
     }
 
     // If the user already has a wide viewport layout, we don't upgrade to responsive.
-    if (!ResponsiveState.isLayoutViewportNarrow_(element)) {
+    if (!ResponsiveState.isLayoutViewportNarrow(element)) {
       return Promise.resolve(null);
     }
 
@@ -189,9 +163,8 @@ export class ResponsiveState {
    *
    * @param {!Element} element
    * @return {!Promise<?ResponsiveState>} a promise that return container width responsive state.
-   * @private
    */
-  static convertToContainerWidth_(element) {
+  static convertToContainerWidth(element) {
     const vsync = Services.vsyncFor(toWin(element.ownerDocument.defaultView));
 
     return vsync
@@ -214,7 +187,6 @@ export class ResponsiveState {
       .then(() => {
         const state = ResponsiveState.createContainerWidthState(element);
         devAssert(state != null, 'Convert to container width state failed');
-        this.isContainerWidth_ = true;
         return /** @type {!ResponsiveState} */ (state);
       });
   }
@@ -410,45 +382,19 @@ export class ResponsiveState {
   }
 
   /**
-   * Selects into the ad size optimization experiment.
-   * @param {!Element} element
-   * @return {boolean}
-   */
-  static isInAdSizeOptimizationExperimentBranch_(element) {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: AD_SIZE_OPTIMIZATION_EXP.branch,
-        isTrafficEligible: () => true,
-        branches: [
-          AD_SIZE_OPTIMIZATION_EXP.control,
-          AD_SIZE_OPTIMIZATION_EXP.experiment,
-        ],
-      },
-    ]);
-    const win = toWin(element.ownerDocument.defaultView);
-    const setExps = randomlySelectUnsetExperiments(win, experimentInfoList);
-    Object.keys(setExps).forEach((expName) =>
-      addExperimentIdToElement(setExps[expName], element)
-    );
-    return (
-      setExps[AD_SIZE_OPTIMIZATION_EXP.branch] ==
-      AD_SIZE_OPTIMIZATION_EXP.experiment
-    );
-  }
-
-  /**
    * Selects into the inconsistent responsive height fix experiment.
    * @return {boolean}
    * @private
    */
   isInResponsiveHeightFixExperimentBranch_() {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: MAX_HEIGHT_EXP.branch,
-        isTrafficEligible: () => true,
-        branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
-      },
-    ]);
+    const experimentInfoList =
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+        {
+          experimentId: MAX_HEIGHT_EXP.branch,
+          isTrafficEligible: () => true,
+          branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
+        },
+      ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win_,
       experimentInfoList
@@ -515,9 +461,8 @@ export class ResponsiveState {
    * Estimate if the viewport has a narrow layout.
    * @param {!Element} element
    * @return {boolean}
-   * @private
    */
-  static isLayoutViewportNarrow_(element) {
+  static isLayoutViewportNarrow(element) {
     const viewportSize = Services.viewportForDoc(element).getSize();
 
     return viewportSize.width < 488;

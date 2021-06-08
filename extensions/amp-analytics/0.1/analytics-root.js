@@ -18,18 +18,20 @@ import {ScrollManager} from './scroll-manager';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
-  getDataParamsFromAttributes,
   matches,
   scopedQuerySelector,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/utils/object';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
+import {map} from '../../../src/core/types/object';
+
 import {provideVisibilityManager} from './visibility-manager';
-import {tryResolve} from '../../../src/utils/promise';
+
+import {tryResolve} from '../../../src/core/data-structures/promise';
 import {whenContentIniLoad} from '../../../src/ini-load';
 
 const TAG = 'amp-analytics/analytics-root';
@@ -266,7 +268,6 @@ export class AnalyticsRoot {
         }
         elementArray = this.getDataVarsElements_(elementArray, selector);
         userAssert(elementArray.length, `Element "${selector}" not found`);
-        this.verifyAmpElements_(elementArray, selector);
         elements = elements.concat(elementArray);
       }
       // Return unique
@@ -331,7 +332,7 @@ export class AnalyticsRoot {
   }
 
   /**
-   * Searches for the AMP element(s) that matches the selector
+   * Searches for the element(s) that matches the selector
    * within the scope of the analytics root in relationship to
    * the specified context node.
    *
@@ -339,9 +340,9 @@ export class AnalyticsRoot {
    * @param {!Array<string>|string} selectors DOM query selector(s).
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
-   * @return {!Promise<!Array<!AmpElement>>} Array of AMP elements corresponding to the selector if found.
+   * @return {!Promise<!Array<!Element>>} Array of elements corresponding to the selector if found.
    */
-  getAmpElements(context, selectors, selectionMethod) {
+  getElements(context, selectors, selectionMethod) {
     if (
       isExperimentOn(this.ampdoc.win, 'visibility-trigger-improvements') &&
       isArray(selectors)
@@ -355,7 +356,7 @@ export class AnalyticsRoot {
         /** @type {!Array<string>} */ (selectors)
       );
     }
-    return this.getAmpElement(
+    return this.getElement(
       context,
       /** @type {string} */ (selectors),
       selectionMethod
@@ -583,7 +584,6 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
  * @param  {!Element} el
  * @param  {string} selector
  * @return {boolean}
- * @noinline
  */
 function tryMatches_(el, selector) {
   try {

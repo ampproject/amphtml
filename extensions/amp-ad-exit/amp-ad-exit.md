@@ -41,14 +41,14 @@ the following steps:
 1. Find the requested exit target.
 1. Process the click event through declared filters to determine whether the
    exit should be allowed.
-1. Rewrite [URL variables](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/amp-ad-exit.md#variable-substitution).
+1. Rewrite [URL variables](https://github.com/ampproject/amphtml/blob/main/extensions/amp-ad-exit/amp-ad-exit.md#variable-substitution).
 1. Ping click-tracking URLs.
 1. Open the target URL in a new tab.
 
 ### Configuration spec
 
 See the `AmpAdExitConfig` typedef in
-[config.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/0.1/config.js)
+[config.js](https://github.com/ampproject/amphtml/blob/main/extensions/amp-ad-exit/0.1/config.js)
 for a configuration spec.
 
 ### Filters
@@ -241,8 +241,8 @@ Navigation targets can be associated with click-tracking URLs in the config.
 Before navigation, `amp-ad-exit` attempts to use the following to ping the
 tracking URLs:
 
-- `navigator.sendBeacon`, if available
-- image request
+-   `navigator.sendBeacon`, if available
+-   image request
 
 You can override this behavior with a `"transport"` object on the config, such as in this example:
 
@@ -260,7 +260,7 @@ You can override this behavior with a `"transport"` object on the config, such a
 
 Variable substitution applies to navigation URLs and click-tracking URLs. URL
 variable substitution works like standard
-[AMP variable substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md)
+[AMP variable substitution](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md)
 with custom variables and a limited set of platform variables.
 
 #### Platform variables
@@ -272,7 +272,7 @@ with custom variables and a limited set of platform variables.
   </tr>
   <tr>
     <td><code>RANDOM</code></td>
-    <td>A <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#random">random</a> float.</td>
+    <td>A <a href="https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md#random">random</a> float.</td>
   </tr>
   <tr>
     <td><code>CLICK_X</code></td>
@@ -512,5 +512,5 @@ The `amp-ad-exit` element exposes an `exit` action that other elements reference
 ## Validation
 
 The amp-ad-exit element is only available for [AMPHTML ads](https://www.ampproject.org/docs/ads/amphtml_ads).
-Read [amp-ad-exit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/validator-amp-ad-exit.protoascii)
+Read [amp-ad-exit rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-ad-exit/validator-amp-ad-exit.protoascii)
 for the AMP validator specification.

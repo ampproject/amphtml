@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as DocumentReady from '../../../../src/document-ready';
+import * as DocumentReady from '../../../../src/core/document-ready';
 import * as LinkmateOptions from '../linkmate-options';
 import {AmpSmartlinks} from '../amp-smartlinks';
 import {LinkRewriterManager} from '../../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
@@ -135,14 +135,28 @@ describes.fakeWin(
         };
 
         ampSmartlinks = helpers.createAmpSmartlinks(options);
-
-        env.sandbox
-          .stub(ampSmartlinks, 'getLinkmateOptions_')
-          .returns(Promise.resolve({'publisher_id': 999}));
         env.sandbox.stub(xhr, 'fetchJson');
       });
 
+      it('should not call downstream methods with invalid configuration', () => {
+        env.sandbox
+          .stub(ampSmartlinks, 'getLinkmateOptions_')
+          .returns(Promise.resolve(undefined));
+        env.sandbox.spy(ampSmartlinks, 'postPageImpression_');
+        env.sandbox.spy(ampSmartlinks, 'initLinkRewriter_');
+
+        return ampSmartlinks.buildCallback().then(() => {
+          env.ampdoc.whenFirstVisible().then(() => {
+            expect(ampSmartlinks.postPageImpression_.calledOnce).to.be.false;
+            expect(ampSmartlinks.initLinkRewriter_.calledOnce).to.be.false;
+          });
+        });
+      });
+
       it('Should call postPageImpression_', () => {
+        env.sandbox
+          .stub(ampSmartlinks, 'getLinkmateOptions_')
+          .returns(Promise.resolve({'publisher_id': 999}));
         env.sandbox.spy(ampSmartlinks, 'postPageImpression_');
 
         return ampSmartlinks.buildCallback().then(() => {
@@ -153,6 +167,9 @@ describes.fakeWin(
       });
 
       it('Should call initLinkRewriter_', () => {
+        env.sandbox
+          .stub(ampSmartlinks, 'getLinkmateOptions_')
+          .returns(Promise.resolve({'publisher_id': 999}));
         env.sandbox.spy(ampSmartlinks, 'initLinkRewriter_');
 
         return ampSmartlinks.buildCallback().then(() => {
@@ -170,7 +187,6 @@ describes.fakeWin(
           'linkmate': '',
           'exclusive-links': '',
         };
-
         ampSmartlinks = helpers.createAmpSmartlinks(options);
       });
 
@@ -181,7 +197,7 @@ describes.fakeWin(
           .stub(ampSmartlinks, 'generateUUID_')
           .returns('acbacc4b-e171-4869-b32a-921f48659624');
         env.sandbox
-          .stub(env.ampdoc, 'getUrl')
+          .stub(ampSmartlinks, 'getLocationHref_')
           .returns('http://fakewebsite.example/');
 
         const mockPub = 999;

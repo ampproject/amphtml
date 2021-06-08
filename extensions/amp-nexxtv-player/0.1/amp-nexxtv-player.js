@@ -14,27 +14,28 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {
   createFrameFor,
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
+import {getConsentPolicyInfo} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {once} from '../../../src/utils/function';
+import {removeElement} from '../../../src/dom';
 
 const TAG = 'amp-nexxtv-player';
 
@@ -47,8 +48,8 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {function():string} */
-    this.getVideoIframeSrc_ = once(() => this.resolveVideoIframeSrc_());
+    /**@private {?string} */
+    this.origin_ = 'https://embed.nexx.cloud/';
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -58,6 +59,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -67,7 +71,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     Services.preconnectFor(this.win).url(
       this.getAmpDoc(),
-      this.getVideoIframeSrc_(),
+      this.origin_,
       opt_onLayout
     );
   }
@@ -88,88 +92,92 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 
   /**
+   * @param {!JsonObject} data
+   * @private
+   */
+  playerReady_(data) {
+    this.playerReadyResolver_(this.iframe_);
+
+    dev().info(TAG, 'nexx player ready', data);
+  }
+
+  /**
    * @return {string}
    * @private
    */
-  resolveVideoIframeSrc_() {
+  getVideoIframeSrc_(consentString) {
     const {element: el} = this;
 
-    const mediaId = userAssert(
-      el.getAttribute('data-mediaid'),
+    const {
+      client,
+      disableAds,
+      domainId,
+      exitMode,
+      mediaid,
+      mode,
+      streamingFilter,
+      streamtype,
+    } = el.dataset;
+
+    const clientId = userAssert(
+      client || domainId,
+      'One of data-client or data-domain-id attributes is required for <amp-nexxtv-player> %s',
+      el
+    );
+
+    userAssert(
+      mediaid,
       'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
       el
     );
 
-    const client = userAssert(
-      el.getAttribute('data-client'),
-      'The data-client attribute is required for <amp-nexxtv-player> %s',
-      el
+    const url =
+      this.origin_ +
+      [clientId, streamtype, mediaid].map(encodeURIComponent).join('/');
+
+    return assertAbsoluteHttpOrHttpsUrl(
+      addParamsToUrl(
+        url,
+        dict({
+          'dataMode': mode,
+          'platform': 'amp',
+          'disableAds': disableAds,
+          'streamingFilter': streamingFilter,
+          'exitMode': exitMode,
+          'consentString': consentString,
+        })
+      )
     );
-
-    const delay = el.getAttribute('data-seek-to') || '0';
-    const mode = el.getAttribute('data-mode') || 'static';
-    const streamtype = el.getAttribute('data-streamtype') || 'video';
-    const origin =
-      el.getAttribute('data-origin') || 'https://embed.nexx.cloud/';
-    const disableAds = el.getAttribute('data-disable-ads');
-    const streamingFilter = el.getAttribute('data-streaming-filter');
-
-    let src = origin;
-
-    src += `${encodeURIComponent(client)}/`;
-    src += `${encodeURIComponent(streamtype)}/`;
-    src += encodeURIComponent(mediaId);
-    src += `?dataMode=${encodeURIComponent(mode)}&platform=amp`;
-
-    if (delay > 0) {
-      src += `&delay=${encodeURIComponent(delay)}`;
-    }
-
-    if (disableAds === '1') {
-      src += '&disableAds=1';
-    }
-
-    if (streamingFilter !== null && streamingFilter.length > 0) {
-      src += `&streamingFilter=${encodeURIComponent(streamingFilter)}`;
-    }
-
-    return assertAbsoluteHttpOrHttpsUrl(src);
   }
 
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+  /**
+   * Get consent data from consent module
+   * @return {!Promise<string>}
+   */
+  getConsentPolicyInfo_() {
+    const consentPolicy = this.getConsentPolicy() || 'default';
+    return getConsentPolicyInfo(this.element, consentPolicy);
   }
 
   /** @override */
   layoutCallback() {
-    const iframe = createFrameFor(this, this.getVideoIframeSrc_());
+    return this.getConsentPolicyInfo_().then((consentString) => {
+      this.iframe_ = createFrameFor(
+        this,
+        this.getVideoIframeSrc_(consentString)
+      );
+      this.unlistenMessage_ = listen(this.win, 'message', (event) => {
+        this.handleNexxMessage_(event);
+      });
+      this.pauseHelper_.updatePlaying(true);
 
-    this.iframe_ = iframe;
-
-    this.unlistenMessage_ = listen(this.win, 'message', (event) => {
-      this.handleNexxMessage_(event);
+      return this.loadPromise(this.iframe_);
     });
-
-    this.element.appendChild(this.iframe_);
-    const loaded = this.loadPromise(this.iframe_).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    });
-    this.playerReadyResolver_(loaded);
-    return loaded;
   }
 
   /** @override */
   pauseCallback() {
-    if (this.iframe_) {
-      this.pause();
-    }
-  }
-
-  /** @override */
-  unlayoutOnPause() {
-    // TODO(aghassemi, #8264): Temp until #8264 is fixed.
-    return true;
+    this.pause();
   }
 
   /** @override */
@@ -186,6 +194,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    this.pauseHelper_.updatePlaying(false);
+
     return true;
   }
 
@@ -221,7 +232,17 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       return;
     }
 
-    redispatch(this.element, data['event'], {
+    const eventType = data['event'];
+    if (!eventType) {
+      return;
+    }
+
+    if (eventType === 'playerready') {
+      this.playerReady_(data);
+    }
+
+    redispatch(this.element, eventType, {
+      'ready': VideoEvents.LOAD,
       'play': VideoEvents.PLAYING,
       'pause': VideoEvents.PAUSE,
       'mute': VideoEvents.MUTED,
@@ -238,7 +259,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
   /** @override */
   pause() {
-    this.sendCommand_('pause');
+    if (this.iframe_) {
+      this.sendCommand_('pause');
+    }
   }
 
   /** @override */

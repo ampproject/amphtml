@@ -20,22 +20,19 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import '../../amp-a4a/0.1/real-time-config-manager';
-import {EXPERIMENT_INFO_LIST as AMPDOC_FIE_EXPERIMENT_INFO_LIST} from '../../../src/ampdoc-fie';
+import '../../../src/service/real-time-config/real-time-config-impl';
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {
   AmpA4A,
   ConsentTupleDef,
   DEFAULT_SAFEFRAME_VERSION,
-  NO_SIGNING_EXP,
   XORIGIN_MODE,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
-  RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
-  STICKY_AD_PADDING_BOTTOM_EXP,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
@@ -43,6 +40,7 @@ import {
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
+  getServeNpaPromise,
   googleAdUrl,
   googleBlockParameters,
   googlePageParameters,
@@ -52,15 +50,18 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../src/core/constants/consent-state';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
-import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
+import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
@@ -73,7 +74,13 @@ import {
   serializeTargeting,
   sraBlockCallbackHandler,
 } from './sra-utils';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
+import {
+  addAmpExperimentIdToElement,
+  addExperimentIdToElement,
+  extractUrlExperimentId,
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
 import {
   assertDoesNotContainDisplay,
   setImportantStyles,
@@ -84,21 +91,20 @@ import {
   isRTL,
   removeElement,
 } from '../../../src/dom';
-import {deepMerge, dict} from '../../../src/utils/object';
+import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {
-  extractUrlExperimentId,
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
+import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
-import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
+import {
+  getCryptoRandomBytesArray,
+  utf8Decode,
+} from '../../../src/core/types/string/bytes';
 import {
   getExperimentBranch,
   isExperimentOn,
@@ -106,18 +112,23 @@ import {
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
+
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
+import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
+import {StoryAdAutoAdvance} from '../../../src/experiments/story-ad-auto-advance';
+import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
+import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {isArray} from '../../../src/types';
-import {isCancellation} from '../../../src/error';
+import {isArray} from '../../../src/core/types';
+import {isCancellation} from '../../../src/error-reporting';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
-import {parseQueryString} from '../../../src/url';
-import {stringHash32} from '../../../src/string';
-import {tryParseJson} from '../../../src/json';
+import {parseQueryString} from '../../../src/core/types/string/url';
+import {stringHash32} from '../../../src/core/types/string';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -148,22 +159,13 @@ const ZINDEX_EXP_BRANCHES = {
   HOLDBACK: '21065357',
 };
 
-/**
- * @const @enum {string}
- * @visibleForTesting
- * TODO(#28555): Clean up experiment
- */
-export const EXPAND_JSON_TARGETING_EXP = {
-  ID: 'expand-json-targeting',
-  CONTROL: '21066261',
-  EXPERIMENT: '21066262',
-};
+/** @const {string} */
+const IDLE_CWV_EXP = 'dfp-render-on-idle-cwv-exp';
 
-/** @const @enum {string} */
-const ROUND_LOCATION_PARAMS_EXP = {
-  ID: 'ad-adsense-gam-round-params',
-  CONTROL: '21066728',
-  EXPERIMENT: '21066729',
+/** @const @enum{string} */
+const IDLE_CWV_EXP_BRANCHES = {
+  CONTROL: '20208860',
+  EXPERIMENT: '20208859',
 };
 
 /**
@@ -235,6 +237,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = Services.extensionsFor(this.win);
 
+    /** @private @const {?../../../src/service/performance-impl.Performance} */
+    this.performance_ = Services.performanceForOrNull(this.win);
+
     /** @private {?string} */
     this.qqid_ = null;
 
@@ -258,6 +263,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @type {!Array<string>} */
     this.experimentIds = [];
+
+    /** @type {!Array<string>} */
+    this.ampExperimentIds = [];
 
     /** @protected {boolean} */
     this.useSra = false;
@@ -352,6 +360,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {boolean}
      */
     this.inZIndexHoldBack_ = false;
+
+    /**
+     * A signal from publishers to serve NPA through ad url.
+     * @private {boolean}
+     */
+    this.serveNpaSignal_ = false;
   }
 
   /**
@@ -373,7 +387,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // holdback branch sends non-numeric value.
       return false;
     }
-    return vpRange || 12;
+
+    if (vpRange) {
+      return vpRange;
+    }
+
+    let fallbackRange = 12;
+    if (!this.performance_) {
+      return fallbackRange;
+    }
+
+    const idleCwvExpSelectedBranch = getExperimentBranch(
+      this.win,
+      IDLE_CWV_EXP
+    );
+    if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.CONTROL) {
+      this.performance_.addEnabledExperiment('dfp-idle-cwv-control');
+    } else if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.EXPERIMENT) {
+      fallbackRange = 3;
+      this.performance_.addEnabledExperiment('dfp-idle-cwv-exp');
+    }
+    return fallbackRange;
   }
 
   /** @override */
@@ -393,9 +427,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // being schedule due to being beyond viewport max offset.  If slot
     // comes within standard outside viewport range, then ensure throttling
     // will not be applied.
-    this.getResource()
-      .whenWithinViewport(renderOutsideViewport)
-      .then(() => (this.isIdleRender_ = false));
+    this.whenWithinViewport(renderOutsideViewport).then(
+      () => (this.isIdleRender_ = false)
+    );
     return vpRange;
   }
 
@@ -430,63 +464,45 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.experimentIds.push(forcedExperimentId);
       }
     }
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: DOUBLECLICK_SRA_EXP,
-        isTrafficEligible: () =>
-          !forcedExperimentId &&
-          !this.win.document./*OK*/ querySelector(
-            'meta[name=amp-ad-enable-refresh], ' +
-              'amp-ad[type=doubleclick][data-enable-refresh], ' +
-              'meta[name=amp-ad-doubleclick-sra]'
+    const experimentInfoList =
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+        {
+          experimentId: DOUBLECLICK_SRA_EXP,
+          isTrafficEligible: () =>
+            !forcedExperimentId &&
+            !this.win.document./*OK*/ querySelector(
+              'meta[name=amp-ad-enable-refresh], ' +
+                'amp-ad[type=doubleclick][data-enable-refresh], ' +
+                'meta[name=amp-ad-doubleclick-sra]'
+            ),
+          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
+            (key) => DOUBLECLICK_SRA_EXP_BRANCHES[key]
           ),
-        branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
-          (key) => DOUBLECLICK_SRA_EXP_BRANCHES[key]
-        ),
-      },
-      {
-        experimentId: ZINDEX_EXP,
-        isTrafficEligible: () => true,
-        branches: Object.values(ZINDEX_EXP_BRANCHES),
-      },
-      {
-        experimentId: EXPAND_JSON_TARGETING_EXP.ID,
-        isTrafficEligible: () => true,
-        branches: [
-          EXPAND_JSON_TARGETING_EXP.CONTROL,
-          EXPAND_JSON_TARGETING_EXP.EXPERIMENT,
-        ],
-      },
-      {
-        experimentId: RENDER_ON_IDLE_FIX_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          RENDER_ON_IDLE_FIX_EXP.control,
-          RENDER_ON_IDLE_FIX_EXP.experiment,
-        ],
-      },
-      {
-        experimentId: NO_SIGNING_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment],
-      },
-      {
-        experimentId: STICKY_AD_PADDING_BOTTOM_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          STICKY_AD_PADDING_BOTTOM_EXP.control,
-          STICKY_AD_PADDING_BOTTOM_EXP.experiment,
-        ],
-      },
-      {
-        experimentId: ROUND_LOCATION_PARAMS_EXP.ID,
-        isTrafficEligible: () => true,
-        branches: [
-          ROUND_LOCATION_PARAMS_EXP.CONTROL,
-          ROUND_LOCATION_PARAMS_EXP.EXPERIMENT,
-        ],
-      },
-    ]).concat(AMPDOC_FIE_EXPERIMENT_INFO_LIST);
+        },
+        {
+          experimentId: ZINDEX_EXP,
+          isTrafficEligible: () => true,
+          branches: Object.values(ZINDEX_EXP_BRANCHES),
+        },
+        {
+          experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
+          isTrafficEligible: () => true,
+          branches: [
+            ADS_INITIAL_INTERSECTION_EXP.control,
+            ADS_INITIAL_INTERSECTION_EXP.experiment,
+          ],
+        },
+        {
+          experimentId: IDLE_CWV_EXP,
+          isTrafficEligible: () => {
+            return (
+              !!this.performance_ &&
+              !this.element.getAttribute('data-loading-strategy')
+            );
+          },
+          branches: Object.values(IDLE_CWV_EXP_BRANCHES),
+        },
+      ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
       (expName) => setExps[expName] && this.experimentIds.push(setExps[expName])
@@ -495,8 +511,29 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (moduleNomoduleExpId) {
       this.experimentIds.push(moduleNomoduleExpId);
     }
+
+    const ssrExpIds = this.getSsrExpIds_();
+    for (let i = 0; i < ssrExpIds.length; i++) {
+      addAmpExperimentIdToElement(ssrExpIds[i], this.element);
+    }
     if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
       this.inZIndexHoldBack_ = true;
+    }
+
+    const storyAdPlacementsExpId = getExperimentBranch(
+      this.win,
+      StoryAdPlacements.ID
+    );
+    if (storyAdPlacementsExpId) {
+      addExperimentIdToElement(storyAdPlacementsExpId, this.element);
+    }
+
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win,
+      StoryAdAutoAdvance.ID
+    );
+    if (autoAdvanceExpBranch) {
+      addExperimentIdToElement(autoAdvanceExpBranch, this.element);
     }
   }
 
@@ -608,12 +645,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
-    const {consentString, gdprApplies} = consentTuple;
+    const {additionalConsent, consentString, consentStringType, gdprApplies} =
+      consentTuple;
 
     return {
+      'ptt': 13,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN
+        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN ||
+        this.serveNpaSignal_
           ? 1
           : null,
       'gdfp_req': '1',
@@ -622,8 +662,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
-      'gdpr_consent': consentString,
+      'gdpr_consent':
+        consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
+      'addtl_consent': additionalConsent,
+      'us_privacy':
+        consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ? consentString
+          : null,
     };
+  }
+
+  /**
+   * @override
+   */
+  skipClientSideValidation(headers) {
+    return headers && !headers.has(AMP_SIGNATURE_HEADER);
   }
 
   /**
@@ -638,7 +693,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ifi_ =
       (this.isRefreshing && this.ifi_) || this.win['ampAdGoogleIfiCounter']++;
     const pageLayoutBox = this.isSinglePageStoryAd
-      ? this.element.getPageLayoutBox()
+      ? getPageLayoutBoxBlocking(this.element)
       : null;
     let msz = null;
     let psz = null;
@@ -647,7 +702,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.win,
       this.element.parentElement
     );
-    const {fwSignal, slotWidth, parentWidth} = this.flexibleAdSlotData_;
+    const {fwSignal, parentWidth, slotWidth} = this.flexibleAdSlotData_;
     // If slotWidth is -1, that means its width must be determined by its
     // parent container, and so should have the same value as parentWidth.
     msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
@@ -665,7 +720,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
       'ifi': this.ifi_,
       'rc': this.refreshCount_ || null,
-      'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe ? '1' : null,
       'msz': msz,
@@ -680,10 +734,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'spsa': this.isSinglePageStoryAd
         ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
         : null,
-      ...googleBlockParameters(
-        this,
-        this.experimentIds.includes(ROUND_LOCATION_PARAMS_EXP.EXPERIMENT)
-      ),
+      ...googleBlockParameters(this),
     };
   }
 
@@ -723,10 +774,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
+  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise, opt_serveNpaSignal) {
     if (this.useSra) {
       this.sraDeferred = this.sraDeferred || new Deferred();
     }
+    this.serveNpaSignal_ = !!opt_serveNpaSignal;
     const consentTuple = opt_consentTuple || {};
     if (
       consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -765,19 +817,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return this.mergeRtcResponses_(results);
     });
 
-    // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
-    const isJsonTargetingExpOn =
-      isExperimentOn(this.win, 'expand-json-targeting') &&
-      getExperimentBranch(this.win, EXPAND_JSON_TARGETING_EXP.ID) ===
-        EXPAND_JSON_TARGETING_EXP.EXPERIMENT;
-
-    const targetingExpansionPromise = isJsonTargetingExpOn
-      ? timerService
-          .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
-          .catch(() => {
-            dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
-          })
-      : Promise.resolve();
+    const targetingExpansionPromise = timerService
+      .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
+      .catch(() => {
+        dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
+      });
 
     Promise.all([
       rtcParamsPromise,
@@ -797,12 +841,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.getPageParameters(consentTuple, /* instances= */ undefined),
           rtcParams
         ),
-        this.experimentIds.includes(ROUND_LOCATION_PARAMS_EXP.EXPERIMENT),
         this.experimentIds
       ).then((adUrl) => this.getAdUrlDeferred.resolve(adUrl));
     });
     this.troubleshootData_.adUrl = this.getAdUrlDeferred.promise;
     return this.getAdUrlDeferred.promise;
+  }
+
+  /** @override */
+  getServeNpaSignal() {
+    return getServeNpaPromise(this.element);
   }
 
   /**
@@ -908,16 +956,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           if (!exclusions) {
             exclusions = {};
             if (this.jsonTargeting['categoryExclusions']) {
-              /** @type {!Array} */ (this.jsonTargeting[
-                'categoryExclusions'
-              ]).forEach((exclusion) => {
+              /** @type {!Array} */ (
+                this.jsonTargeting['categoryExclusions']
+              ).forEach((exclusion) => {
                 exclusions[exclusion] = true;
               });
             }
           }
-          /** @type {!Array} */ (rtcResponse.response[
-            'categoryExclusions'
-          ]).forEach((exclusion) => {
+          /** @type {!Array} */ (
+            rtcResponse.response['categoryExclusions']
+          ).forEach((exclusion) => {
             exclusions[exclusion] = true;
           });
         }
@@ -939,6 +987,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const allowlist = {
       'height': true,
       'width': true,
+      'json': true,
       'data-slot': true,
       'data-multi-size': true,
       'data-multi-size-validation': true,
@@ -965,12 +1014,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         ),
       ATTR: (name) => {
         if (!allowlist[name.toLowerCase()]) {
-          dev().warn('TAG', `Invalid attribute ${name}`);
+          dev().warn(TAG, `Invalid attribute ${name}`);
         } else {
           return this.element.getAttribute(name);
         }
       },
-      ELEMENT_POS: () => this.element.getPageLayoutBox().top,
+      ELEMENT_POS: () => getPageLayoutBoxBlocking(this.element).top,
       SCROLL_TOP: () =>
         Services.viewportForDoc(this.getAmpDoc()).getScrollTop(),
       PAGE_HEIGHT: () =>
@@ -1091,7 +1140,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!LayoutRectOrDimsDef}
    */
   getSlotSize() {
-    const {width, height} = this.getDeclaredSlotSize_();
+    const {height, width} = this.getDeclaredSlotSize_();
     return width && height
       ? {width, height}
       : // width/height could be 'auto' in which case we fallback to measured.
@@ -1198,8 +1247,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    super.viewportCallback(inViewport);
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
       // If the initial expansion attempt failed (e.g., the slot was within the
       // viewport), then we will re-attempt to expand it here whenever the slot
@@ -1416,7 +1465,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               'Attempt to change size failed on fluid ' +
                 'creative. Will re-attempt when slot is out of the viewport.'
             );
-            const {width, height} = this.getSlotSize();
+            const {height, width} = this.getSlotSize();
             if (width && height) {
               // This call is idempotent, so it's okay to make it multiple
               // times.
@@ -1469,7 +1518,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       newWidth &&
       newHeight
     );
-    const {width, height} = this.getDeclaredSlotSize_();
+    const {height, width} = this.getDeclaredSlotSize_();
     const returnedSizeDifferent = newWidth != width || newHeight != height;
     const heightNotIncreased = newHeight <= height;
     if (
@@ -1506,7 +1555,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     ) {
       return;
     }
-    const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
+    const {parentStyle, parentWidth} = this.flexibleAdSlotData_;
     const isRtl = isRTL(this.win.document);
     const dirStr = isRtl ? 'Right' : 'Left';
     const /** !Object<string, string> */ style = this.inZIndexHoldBack_
@@ -1529,7 +1578,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       } else {
         // Must center creative within the viewport
         const viewportWidth = this.getViewport().getRect().width;
-        const pageLayoutBox = this.element.getPageLayoutBox();
+        const pageLayoutBox = getPageLayoutBoxBlocking(this.element);
         const whitespace = (viewportWidth - newWidth) / 2;
         if (isRtl) {
           style['margin-right'] = getMarginStr(
@@ -1671,8 +1720,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               checkStillCurrent();
               // Exclude any instances that do not have an adPromise_ as this
               // indicates they were invalid.
-              const typeInstances = /** @type {!Array<!AmpAdNetworkDoubleclickImpl>}*/ (instances).filter(
-                (instance) => {
+              const typeInstances =
+                /** @type {!Array<!AmpAdNetworkDoubleclickImpl>}*/ (
+                  instances
+                ).filter((instance) => {
                   const isValid = instance.hasAdPromise();
                   if (!isValid) {
                     dev().info(
@@ -1683,8 +1734,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     );
                   }
                   return isValid;
-                }
-              );
+                });
               if (!typeInstances.length) {
                 // Only contained invalid elements.
                 return;
@@ -1731,7 +1781,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         headersObj,
                         done,
                         sraRequestAdUrlResolvers,
-                        sraUrl
+                        sraUrl,
+                        this.isInNoSigningExp()
                       );
                     }
                   );
@@ -2009,15 +2060,7 @@ function constructSRARequest_(a4a, instances) {
   return Promise.all(
     instances.map((instance) => instance.getAdUrlDeferred.promise)
   )
-    .then(() =>
-      googlePageParameters(
-        a4a,
-        startTime,
-        instances[0].experimentIds.includes(
-          ROUND_LOCATION_PARAMS_EXP.EXPERIMENT
-        )
-      )
-    )
+    .then(() => googlePageParameters(a4a, startTime))
     .then((googPageLevelParameters) => {
       const blockParameters = constructSRABlockParameters(instances);
       return truncAndTimeUrl(

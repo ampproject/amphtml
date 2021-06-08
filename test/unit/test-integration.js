@@ -18,16 +18,16 @@
 // Most coverage through test-3p-frame
 
 import {
-  draw3p,
+  draw3pInternal,
   ensureFramed,
   parseFragment,
   validateAllowedEmbeddingOrigins,
   validateAllowedTypes,
   validateParentOrigin,
-} from '../../3p/integration';
+} from '../../3p/integration-lib';
 import {getRegistrations, register} from '../../3p/3p';
 
-describe('3p integration.js', () => {
+describes.sandboxed('3p integration.js', {}, () => {
   const registrations = getRegistrations();
   afterEach(() => {
     delete registrations.testAction;
@@ -154,11 +154,11 @@ describe('3p integration.js', () => {
       expect(myData).to.equal(myData);
     });
     expect(called).to.be.false;
-    draw3p(win, data);
+    draw3pInternal(win, data);
     expect(called).to.be.true;
   });
 
-  it('should support config processing in draw3p', () => {
+  it('should support config processing in draw3pInternal', () => {
     const data = {
       type: 'testAction2',
     };
@@ -180,7 +180,7 @@ describe('3p integration.js', () => {
     });
     expect(called).to.be.false;
     let finish;
-    draw3p(win, data, (_config, done) => {
+    draw3pInternal(win, data, (_config, done) => {
       finish = () => {
         done({
           custom: true,
@@ -207,7 +207,7 @@ describe('3p integration.js', () => {
     };
     allowConsoleError(() => {
       expect(() => {
-        draw3p(win, data);
+        draw3pInternal(win, data);
       }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/);
     });
   });

@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -41,15 +41,27 @@ export class DenakopNetworkConfig {
    * True if responsive is enabled for auto-ads
    */
   isResponsiveEnabled() {
-    return false;
+    return true;
   }
 
   /** @override */
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
-    const publisherId = this.autoAmpAdsElement_.getAttribute(
-      'data-publisher-id'
-    );
+    const accountId = this.autoAmpAdsElement_.getAttribute('data-account-id');
+    if (accountId) {
+      return buildUrl(
+        'https://v3.denakop.com/ad-request',
+        {
+          'a': accountId,
+          'v': 'amp',
+          'u': docInfo.canonicalUrl,
+        },
+        /* maxLength */ 4096
+      );
+    }
+
+    const publisherId =
+      this.autoAmpAdsElement_.getAttribute('data-publisher-id');
     const tagId = this.autoAmpAdsElement_.getAttribute('data-tag-id');
     return buildUrl(
       '//v2.denakop.com/ad-request/amp',
@@ -57,8 +69,6 @@ export class DenakopNetworkConfig {
         'p': publisherId,
         't': tagId,
         'u': docInfo.canonicalUrl,
-        'w': window.screen.width,
-        'h': window.screen.height,
       },
       /* maxLength */ 4096
     );
@@ -67,10 +77,10 @@ export class DenakopNetworkConfig {
   /** @override */
   getAttributes() {
     const attributes = dict({
-      'layout': 'fixed',
       'data-multi-size-validation': 'false',
       'type': 'doubleclick',
       'data-ad': 'denakop',
+      'style': 'position:relative !important',
     });
     return attributes;
   }
@@ -83,10 +93,10 @@ export class DenakopNetworkConfig {
     return {
       initialMinSpacing: viewportHeight,
       subsequentMinSpacing: [
-        {adCount: 3, spacing: viewportHeight * 2},
-        {adCount: 6, spacing: viewportHeight * 3},
+        {adCount: 4, spacing: viewportHeight * 2},
+        {adCount: 8, spacing: viewportHeight * 3},
       ],
-      maxAdCount: 8,
+      maxAdCount: 20,
     };
   }
 

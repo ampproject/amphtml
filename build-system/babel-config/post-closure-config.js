@@ -18,21 +18,24 @@
 const argv = require('minimist')(process.argv.slice(2));
 
 /**
- * Gets the config for post-closure babel transforms run during `gulp dist --esm`.
+ * Gets the config for post-closure babel transforms run during `amp dist`.
  *
  * @return {!Object}
  */
 function getPostClosureConfig() {
-  if (!argv.esm) {
-    return {};
-  }
-
   const postClosurePlugins = [
+    argv.esm || argv.sxg
+      ? './build-system/babel-plugins/babel-plugin-const-transformer'
+      : null,
+    argv.esm || argv.sxg
+      ? './build-system/babel-plugins/babel-plugin-transform-remove-directives'
+      : null,
+    argv.esm || argv.sxg
+      ? './build-system/babel-plugins/babel-plugin-transform-stringish-literals'
+      : null,
     './build-system/babel-plugins/babel-plugin-transform-minified-comments',
-    './build-system/babel-plugins/babel-plugin-const-transformer',
-    './build-system/babel-plugins/babel-plugin-transform-remove-directives',
-    './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
-  ];
+  ].filter(Boolean);
+
   return {
     compact: false,
     inputSourceMap: false,

@@ -27,6 +27,10 @@
 // const [b] = value;
 // function bad([b]) {}
 module.exports = function (context) {
+  /**
+   * @param {*} node
+   * @return {boolean}
+   */
   function isAllowed(node) {
     const {parent} = node;
     if (parent.type !== 'VariableDeclarator') {
@@ -45,11 +49,14 @@ module.exports = function (context) {
     }
 
     if (callee.type === 'MemberExpression') {
-      const {object, property, computed} = callee;
+      const {computed, object, property} = callee;
       if (computed) {
         return false;
       }
-      if (object.type !== 'Identifier' || object.name !== 'preact') {
+      if (
+        object.type !== 'Identifier' ||
+        object.name.toLowerCase() !== 'preact'
+      ) {
         return false;
       }
       if (property.type !== 'Identifier' || !property.name.startsWith('use')) {

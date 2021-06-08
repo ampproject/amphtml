@@ -16,12 +16,13 @@
 
 import {Services} from '../../../src/services';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/core/types/object';
 import {getData} from '../../../src/event-helper';
+import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
 import {getStyle, setStyles} from '../../../src/style';
 import {parseUrlDeprecated} from '../../../src/url';
-import {throttle} from '../../../src/utils/rate-limit';
-import {tryParseJson} from '../../../src/json';
+import {throttle} from '../../../src/core/types/function';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /**
  * Used to manage messages for different Safeframe ad slots.
@@ -203,7 +204,7 @@ export class SafeframeHostApi {
    * Returns true if the given window matches the Safeframe's content window.
    * Comparing to a null window will always return false.
    *
-   * @param {Window|null} otherWindow
+   * @param {?Window} otherWindow
    * @return {boolean}
    */
   equalsSafeframeContentWindow(otherWindow) {
@@ -282,15 +283,11 @@ export class SafeframeHostApi {
    * Returns the initialGeometry to assign to the name of the safeframe
    * for rendering. This needs to be done differently than all the other
    * geometry updates, because we don't actually have access to the
-   * rendered safeframe yet. Note that we are using getPageLayoutBox,
-   * which is not guaranteed to be perfectly accurate as it is from
-   * the last measure of the element. This is fine for our use case
-   * here, as even if the position is slightly off, we'll send the right
-   * size.
+   * rendered safeframe yet.
    * @return {string}
    */
   getInitialGeometry() {
-    const ampAdBox = this.baseInstance_.getPageLayoutBox();
+    const ampAdBox = getPageLayoutBoxBlocking(this.baseInstance_.element);
     const heightOffset = (ampAdBox.height - this.creativeSize_.height) / 2;
     const widthOffset = (ampAdBox.width - this.creativeSize_.width) / 2;
     const iframeBox = /** @type {!../../../src/layout-rect.LayoutRectDef} */ ({
@@ -754,7 +751,7 @@ export class SafeframeHostApi {
       })
       .catch((err) => {
         user().warn(TAG, err);
-        const {width, height} = this.baseInstance_.getSlotSize();
+        const {height, width} = this.baseInstance_.getSlotSize();
         if (width && height) {
           this.onFluidResize_(height);
         }

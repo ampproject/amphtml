@@ -25,12 +25,11 @@ import {
   ActionTrust,
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
-} from '../../src/action-constants';
+} from '../../src/core/constants/action-constants';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Keys} from '../../src/utils/key-codes';
+import {Keys} from '../../src/core/constants/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {htmlFor} from '../../src/static-template';
-import {setParentWindow} from '../../src/service';
 import {whenCalled} from '../../testing/test-helper.js';
 
 /**
@@ -47,7 +46,7 @@ function actionService() {
       },
     },
     __AMP_SERVICES: {
-      vsync: {obj: {}},
+      vsync: {obj: {}, ctor: Object},
     },
   };
   return new ActionService(new AmpDocSingle(win), document);
@@ -84,7 +83,7 @@ function assertInvocation(
   }
 }
 
-describe('ActionService parseAction', () => {
+describes.sandboxed('ActionService parseAction', {}, () => {
   function parseMultipleActions(s) {
     const actionMap = parseActionMap(s);
     if (actionMap == null) {
@@ -471,7 +470,7 @@ describe('ActionService parseAction', () => {
   });
 });
 
-describe('ActionService setActions', () => {
+describes.sandboxed('ActionService setActions', {}, () => {
   it('should set actions', () => {
     const action = actionService();
     const element = document.createElement('div');
@@ -492,7 +491,7 @@ describe('ActionService setActions', () => {
   });
 });
 
-describe('Action parseActionMap', () => {
+describes.sandboxed('Action parseActionMap', {}, () => {
   it('should parse with a single action', () => {
     const m = parseActionMap('event1:action1');
     expect(m['event1'][0].target).to.equal('action1');
@@ -515,29 +514,6 @@ describe('Action parseActionMap', () => {
     expect(parseActionMap('')).to.equal(null);
     expect(parseActionMap('  ')).to.equal(null);
     expect(parseActionMap(';;;')).to.equal(null);
-  });
-});
-
-describes.sandboxed('Action adoptEmbedWindow', {}, () => {
-  let action;
-  let embedWin;
-
-  beforeEach(() => {
-    action = actionService();
-    embedWin = {
-      frameElement: document.createElement('div'),
-      document: document.implementation.createHTMLDocument(''),
-    };
-    setParentWindow(embedWin, action.ampdoc.win);
-  });
-
-  it('should create embedded action service', () => {
-    ActionService.installInEmbedWindow(embedWin, action.ampdoc);
-    const embedService =
-      embedWin.__AMP_SERVICES.action && embedWin.__AMP_SERVICES.action.obj;
-    expect(embedService).to.exist;
-    expect(embedService.ampdoc).to.equal(action.ampdoc);
-    expect(embedService.root_).to.equal(embedWin.document);
   });
 });
 
@@ -868,11 +844,11 @@ describes.sandboxed('Action method', {}, (env) => {
         const {
           actionEventType,
           args,
+          caller,
+          event,
           method,
           node,
           source,
-          caller,
-          event,
           tagOrTarget,
           trust,
         } = invocation;
@@ -1507,7 +1483,7 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
       element,
       'change',
       env.sandbox.match((e) => {
-        const {min, max, value, valueAsNumber} = e.detail;
+        const {max, min, value, valueAsNumber} = e.detail;
         return (
           min === '0' && max === '10' && value === '5' && valueAsNumber === 5
         );

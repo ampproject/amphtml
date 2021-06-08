@@ -15,18 +15,17 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {FitText} from '../fit-text';
+import {FitText} from '../component';
 import {number, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'FitText',
   component: FitText,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 export const _default = () => {
-  const minFontSize = number('minFontSize', 6);
+  const minFontSize = number('minFontSize', 35);
   const maxFontSize = number('maxFontSize', 72);
   const width = number('width', 300);
   const height = number('height', 200);
@@ -34,7 +33,7 @@ export const _default = () => {
     <FitText
       minFontSize={minFontSize}
       maxFontSize={maxFontSize}
-      style={{display: 'block', border: '1px solid black', width, height}}
+      style={{border: '1px solid black', width, height}}
     >
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt.
@@ -51,7 +50,7 @@ export const scaleUpOverflowEllipsis = () => {
     <FitText
       minFontSize={minFontSize}
       maxFontSize={maxFontSize}
-      style={{display: 'block', border: '1px solid black', width, height}}
+      style={{border: '1px solid black', width, height}}
     >
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt.
@@ -68,7 +67,7 @@ export const scaleDown = () => {
     <FitText
       minFontSize={minFontSize}
       maxFontSize={maxFontSize}
-      style={{display: 'block', border: '1px solid black', width, height}}
+      style={{border: '1px solid black', width, height}}
     >
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te
@@ -89,7 +88,7 @@ export const scaleDownMore = () => {
     <FitText
       minFontSize={minFontSize}
       maxFontSize={maxFontSize}
-      style={{display: 'block', border: '1px solid black', width, height}}
+      style={{border: '1px solid black', width, height}}
     >
       Superlongword text
     </FitText>
@@ -106,7 +105,7 @@ export const configureContent = () => {
     <FitText
       minFontSize={minFontSize}
       maxFontSize={maxFontSize}
-      style={{display: 'block', border: '1px solid black', width, height}}
+      style={{border: '1px solid black', width, height}}
     >
       {content}
     </FitText>

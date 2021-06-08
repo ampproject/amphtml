@@ -16,9 +16,9 @@
 import {Services} from '../services';
 import {devAssert} from '../log';
 import {isAmp4Email} from '../format';
-import {isFiniteNumber} from '../types';
+import {isFiniteNumber} from '../core/types';
 import {loadPromise} from '../event-helper';
-import {whenDocumentComplete} from '../document-ready';
+import {whenDocumentComplete} from '../core/document-ready';
 
 /** @typedef {string|number|boolean|undefined|null} */
 export let ResolverReturnDef;
@@ -271,7 +271,7 @@ export class VariableSource {
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @return {!RegExp}
    */
@@ -285,7 +285,7 @@ export class VariableSource {
 
   /**
    * @param {!Array<string>} keys
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @return {!RegExp}
    * @private

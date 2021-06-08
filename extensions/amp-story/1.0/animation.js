@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {
   PRESET_OPTION_ATTRIBUTES,
   presets,
@@ -34,10 +34,13 @@ import {
 } from './animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getChildJsonConfig} from '../../../src/json';
-import {map, omit} from '../../../src/utils/object';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {map, omit} from '../../../src/core/types/object';
+import {
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/core/dom/query';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 const TAG = 'AMP-STORY';
@@ -109,7 +112,7 @@ export class AnimationRunner {
    * @param {!AnimationSequence} sequence
    */
   constructor(page, config, webAnimationBuilderPromise, vsync, sequence) {
-    const {source, preset, startAfterId, spec} = config;
+    const {preset, source, spec, startAfterId} = config;
 
     /** @private @const */
     this.page_ = page;
@@ -246,7 +249,9 @@ export class AnimationRunner {
   resolvePresetKeyframes_(keyframesOrCreateFn, keyframeOptions) {
     if (typeof keyframesOrCreateFn === 'function') {
       return this.getDims().then((dimensions) => {
-        const fn = /** @type {!WebKeyframesCreateFnDef} */ (keyframesOrCreateFn);
+        const fn = /** @type {!WebKeyframesCreateFnDef} */ (
+          keyframesOrCreateFn
+        );
         return fn(dimensions, keyframeOptions || {});
       });
     }
@@ -269,11 +274,9 @@ export class AnimationRunner {
     // The need for this cast is an unfortunate result of using @mixes in
     // WebAnimationDef. Otherwise Closure will not understand the timing props
     // mixed in from another type.
-    const {
-      delay,
-      duration,
-      easing,
-    } = /** @type {!WebAnimationTimingDef} */ (spec);
+    const {delay, duration, easing} = /** @type {!WebAnimationTimingDef} */ (
+      spec
+    );
     const {target} = /** @type {!WebAnimationSelectorDef} */ (spec);
     return this.resolvePresetKeyframes_(preset.keyframes, keyframeOptions).then(
       (keyframes) => ({
@@ -450,10 +453,12 @@ export class AnimationRunner {
       /**
        * @type {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner}
        */
-      (devAssert(
-        this.runner_,
-        'Tried to execute playbackWhenReady_ before runner was resolved.'
-      ));
+      (
+        devAssert(
+          this.runner_,
+          'Tried to execute playbackWhenReady_ before runner was resolved.'
+        )
+      );
 
     (wait || Promise.resolve()).then(() => {
       if (!this.isActivityScheduled_(activity)) {
@@ -658,7 +663,7 @@ export class AnimationManager {
               })
           )
         )
-        .filter((presetOrNull) => !!presetOrNull);
+        .filter(Boolean);
     }
     return devAssert(this.runners_);
   }

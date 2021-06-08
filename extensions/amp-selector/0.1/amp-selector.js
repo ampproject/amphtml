@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
-import {areEqualOrdered} from '../../../src/utils/array';
-import {
-  closestAncestorElementBySelector,
-  isRTL,
-  tryFocus,
-} from '../../../src/dom';
+import {areEqualOrdered, toArray} from '../../../src/core/types/array';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {mod} from '../../../src/utils/math';
-import {toArray} from '../../../src/types';
+import {dev, userAssert} from '../../../src/log';
+import {dict} from '../../../src/core/types/object';
+import {isEnumValue} from '../../../src/core/types';
+import {isRTL, tryFocus} from '../../../src/dom';
+import {mod} from '../../../src/core/math';
 
 const TAG = 'amp-selector';
 
@@ -45,6 +42,11 @@ const KEYBOARD_SELECT_MODES = {
 };
 
 export class AmpSelector extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -82,11 +84,6 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-  /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.isMultiple_ = this.element.hasAttribute('multiple');
@@ -106,7 +103,10 @@ export class AmpSelector extends AMP.BaseElement {
     let kbSelectMode = this.element.getAttribute('keyboard-select-mode');
     if (kbSelectMode) {
       kbSelectMode = kbSelectMode.toLowerCase();
-      user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
+      userAssert(
+        isEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode),
+        `Unknown keyboard-select-mode: ${kbSelectMode}`
+      );
       userAssert(
         !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
         '[keyboard-select-mode=select] not supported for multiple ' +
@@ -465,14 +465,6 @@ export class AmpSelector extends AMP.BaseElement {
         'selectedOptions': this.selectedOptions_(),
       })
     );
-    // TODO(wg-ui-and-a11y): Remove this in Q1 2020.
-    if (trust < ActionTrust.DEFAULT) {
-      user().warn(
-        TAG,
-        '"select" event now has the same trust as the originating action. ' +
-          'See https://github.com/ampproject/amphtml/issues/24443 for details.'
-      );
-    }
     this.action_.trigger(this.element, name, selectEvent, trust);
   }
 
@@ -719,7 +711,7 @@ export class AmpSelector extends AMP.BaseElement {
  * @return {boolean}
  */
 function isElementHidden(element, rect) {
-  const {width, height} = rect;
+  const {height, width} = rect;
   return element.hidden || width == 0 || height == 0;
 }
 

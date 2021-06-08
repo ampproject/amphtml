@@ -14,49 +14,52 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events';
-import {createFixtureIframe} from '../../testing/iframe.js';
+import {BrowserController} from '../../testing/test-helper';
 import {setInitialDisplay, toggle} from '../../src/style';
 
-describe('toggle display helper', () => {
-  let fixture;
-  let img;
-
-  beforeEach(() => {
-    return createFixtureIframe('test/fixtures/images.html', 500)
-      .then((f) => {
-        fixture = f;
-
-        // Wait for one <amp-img> element to load.
-        return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
-      })
-      .then(() => {
-        img = fixture.doc.querySelector('amp-img');
-      });
-  });
-
-  describes.repeated(
-    'toggle',
+describes.integration
+  .configure()
+  .enableIe()
+  .run(
+    'toggle display helper',
     {
-      'regular': () => {},
-      'inline display style': (el) => {
-        setInitialDisplay(el, 'inline-block');
-      },
-      'stylesheet display style': () => {
-        const s = fixture.doc.createElement('style');
-        s.innerText = 'amp-img { display: inline-block !important; }';
-        fixture.doc.head.appendChild(s);
-      },
+      body: '<amp-img src="/examples/img/hero@1x.jpg" width="289" height="216"></amp-img>',
     },
-    (name, setup) => {
-      it('toggle display', () => {
-        setup(img);
+    (env) => {
+      let browser, doc;
+      let img;
 
-        toggle(img, false);
-        expect(img).to.have.display('none');
-        toggle(img, true);
-        expect(img).to.not.have.display('none');
+      beforeEach(async () => {
+        const {win} = env;
+        doc = win.document;
+        browser = new BrowserController(win);
+
+        await browser.waitForElementLayout('amp-img');
+        img = doc.querySelector('amp-img');
+      });
+
+      function expectToggleDisplay(el) {
+        toggle(el, false);
+        expect(el).to.have.display('none');
+        toggle(el, true);
+        expect(el).to.not.have.display('none');
+      }
+
+      it('toggles regular display', () => {
+        expectToggleDisplay(img);
+      });
+
+      it('toggles initial display style', () => {
+        setInitialDisplay(img, 'inline-block');
+        expectToggleDisplay(img);
+      });
+
+      it('toggles stylesheet display style', () => {
+        const style = doc.createElement('style');
+        style.innerText = 'amp-img { display: inline-block !important; }';
+        doc.head.appendChild(style);
+
+        expectToggleDisplay(img);
       });
     }
   );
-});

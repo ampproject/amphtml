@@ -40,7 +40,7 @@ describes.realWin(
       }
     });
 
-    function getApester(attributes, opt_responsive) {
+    async function getApester(attributes, opt_responsive) {
       const media = doc.createElement('amp-apester-media');
       const regularResponse = {
         status: 200,
@@ -81,14 +81,6 @@ describes.realWin(
           ? playlistResponse
           : regularResponse;
 
-      changeSizeSpy = env.sandbox.spy(
-        media.implementation_,
-        'forceChangeHeight'
-      );
-      attemptChangeSizeSpy = env.sandbox.spy(
-        media.implementation_,
-        'attemptChangeHeight'
-      );
       xhrMock = env.sandbox.mock(Services.xhrFor(win));
       if (attributes) {
         xhrMock.expects('fetchJson').returns(
@@ -112,12 +104,14 @@ describes.realWin(
         media.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(media);
-      return media
-        .build()
-        .then(() => {
-          return media.layoutCallback();
-        })
-        .then(() => media);
+      await media.buildInternal();
+
+      const impl = await media.getImpl();
+      changeSizeSpy = env.sandbox.spy(impl, 'forceChangeHeight');
+      attemptChangeSizeSpy = env.sandbox.spy(impl, 'attemptChangeHeight');
+
+      await media.layoutCallback();
+      return media;
     }
 
     it('renders', () => {
@@ -186,21 +180,20 @@ describes.realWin(
       });
     });
 
-    it('removes iframe after unlayoutCallback', () => {
-      return getApester({
+    it('removes iframe after unlayoutCallback', async () => {
+      const ape = await getApester({
         'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
-      }).then((ape) => {
-        const iframe = ape.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.src).not.to.be.null;
-        const url = new URL(iframe.src);
-        expect(url.hostname).to.equal('renderer.apester.com');
-        expect(url.pathname).to.equal('/interaction/5aaa70c79aaf0c5443078d31');
-        const tag = ape.implementation_;
-        tag.unlayoutCallback();
-        expect(ape.querySelector('iframe')).to.be.null;
-        expect(tag.iframe_).to.be.null;
       });
+      const tag = await ape.getImpl();
+      const iframe = ape.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).not.to.be.null;
+      const url = new URL(iframe.src);
+      expect(url.hostname).to.equal('renderer.apester.com');
+      expect(url.pathname).to.equal('/interaction/5aaa70c79aaf0c5443078d31');
+      tag.unlayoutCallback();
+      expect(ape.querySelector('iframe')).to.be.null;
+      expect(tag.iframe_).to.be.null;
     });
 
     it('requires media-id or channel-token', () => {

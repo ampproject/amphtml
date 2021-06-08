@@ -16,10 +16,8 @@
 
 import {CONFIGURATION_EVENT, ORIGIN, SHARE_EVENT} from './constants';
 import {getData} from '../../../src/event-helper';
-import {isObject} from '../../../src/types';
-import {startsWith} from '../../../src/string';
-
-import {tryParseJson} from '../../../src/json';
+import {isObject} from '../../../src/core/types';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 export class PostMessageDispatcher {
   /**
@@ -68,7 +66,7 @@ export class PostMessageDispatcher {
       return /** @type {!JsonObject} */ (data);
     }
 
-    if (typeof data === 'string' && startsWith(data, '{')) {
+    if (typeof data === 'string' && data.startsWith('{')) {
       return tryParseJson(data);
     }
 

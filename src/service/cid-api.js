@@ -15,9 +15,9 @@
  */
 
 import {Services} from '../services';
-import {WindowInterface} from '../window-interface';
+import {WindowInterface} from '../core/window/interface';
 import {dev} from '../log';
-import {dict} from '../utils/object';
+import {dict} from '../core/types/object';
 import {getCookie, setCookie} from '../cookies';
 import {isProxyOrigin, parseUrlDeprecated} from '../url';
 

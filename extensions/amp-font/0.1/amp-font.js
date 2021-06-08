@@ -35,7 +35,7 @@
 
 import {FontLoader} from './fontloader';
 import {Services} from '../../../src/services';
-import {isFiniteNumber} from '../../../src/types';
+import {isFiniteNumber} from '../../../src/core/types';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-font';
@@ -69,6 +69,11 @@ const DEFAULT_SIZE_ = 'medium';
 const CACHED_FONT_LOAD_TIME_ = 100;
 
 export class AmpFont extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -87,11 +92,6 @@ export class AmpFont extends AMP.BaseElement {
 
     /** @private {?FontLoader} */
     this.fontLoader_ = null;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

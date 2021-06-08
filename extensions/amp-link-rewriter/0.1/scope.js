@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {iterateCursor} from '../../../src/dom';
 
 /**
@@ -40,6 +41,36 @@ export function getScopeElements(ampDoc, configOpts) {
   });
 
   return filteredSelection;
+}
+
+/**
+ * @param {!Node} htmlElement
+ * @param {?Object} configOpts
+ * @return {boolean}
+ */
+export function isElementInScope(htmlElement, configOpts) {
+  return (
+    !!hasAttributeValues(htmlElement, configOpts) &&
+    isBelongsToContainer(htmlElement, configOpts)
+  );
+}
+
+/**
+ * Check if the element has a parent container specified in config.
+ *
+ * @param {!Node} htmlElement
+ * @param {!Object} configOpts
+ * @return {boolean}
+ */
+function isBelongsToContainer(htmlElement, configOpts) {
+  if (configOpts.section.length === 0) {
+    return true;
+  }
+
+  return !!closestAncestorElementBySelector(
+    htmlElement,
+    configOpts.section.join(',')
+  );
 }
 
 /**

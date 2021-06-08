@@ -15,7 +15,6 @@
  */
 
 /* eslint-disable local/html-template */
-/* eslint-disable indent */
 
 'use strict';
 
@@ -26,11 +25,9 @@ const {FileList} = require('./file-list');
 const {html, joinFragments} = require('./html');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
 
-const HeaderLink = ({name, href, divider}) => html`
+const HeaderLink = ({divider, href, name}) => html`
   <li class="${divider ? 'divider' : ''}">
-    <a target="_blank" rel="noopener noreferrer" href="${href}">
-      ${name}
-    </a>
+    <a target="_blank" rel="noopener noreferrer" href="${href}"> ${name} </a>
   </li>
 `;
 
@@ -41,7 +38,7 @@ const Header = ({isMainPage, links}) => html`
       ${!isMainPage ? HeaderBackToMainLink() : ''}
     </div>
     <ul class="right-nav">
-      ${joinFragments(links, ({name, href, divider}, i) =>
+      ${joinFragments(links, ({divider, href, name}, i) =>
         HeaderLink({
           divider: divider || i == links.length - 1,
           name,
@@ -57,15 +54,26 @@ const HeaderBackToMainLink = () => html` <a href="/">← Back to main</a> `;
 
 const ProxyFormOptional = ({isMainPage}) => (isMainPage ? ProxyForm() : '');
 
-function renderTemplate(opt_params) {
-  const {basepath, css, isMainPage, fileSet, serveMode, selectModePrefix} = {
-    basepath: '/',
-    isMainPage: false,
-    fileSet: [],
-    serveMode: 'default',
-    selectModePrefix: '/',
-    ...(opt_params || {}),
-  };
+/**
+ * @param {{
+ *  basepath?: string,
+ *  css?: string
+ *  isMainPage?: boolean,
+ *  fileSet?: Array,
+ *  serveMode?: string,
+ *  selectModePrefix?: string,
+ * }=} opt_params
+ * @return {string}
+ */
+function renderTemplate(opt_params = {}) {
+  const {
+    basepath = '/',
+    css,
+    isMainPage = false,
+    fileSet = [],
+    serveMode = 'default',
+    selectModePrefix = '/',
+  } = opt_params;
 
   const body = joinFragments([
     html`

@@ -16,24 +16,23 @@
 
 import {AccessSource, AccessType} from './amp-access-source';
 import {AccessVars} from './access-vars';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {AmpAccessEvaluator} from './access-expr';
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
-import {Observable} from '../../../src/observable';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/enums';
-import {cancellation} from '../../../src/error';
+import {TickLabel} from '../../../src/core/constants/enums';
+import {cancellation} from '../../../src/error-reporting';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getSourceOrigin} from '../../../src/url';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isArray} from '../../../src/types';
+import {isArray} from '../../../src/core/types';
 import {isJsonScriptTag} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /** @const */
 const TAG = 'amp-access';
@@ -91,7 +90,7 @@ export class AccessService {
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(ampdoc.win);
+    this.templates_ = Services.templatesForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(ampdoc);
@@ -262,7 +261,10 @@ export class AccessService {
     for (let i = 0; i < this.sources_.length; i++) {
       const source = this.sources_[i];
       if (source.getType() == AccessType.VENDOR) {
-        const vendorAdapter = /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (source.getAdapter());
+        const vendorAdapter =
+          /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (
+            source.getAdapter()
+          );
         if (vendorAdapter.getVendorName() == name) {
           return source;
         }
@@ -465,16 +467,24 @@ export class AccessService {
    */
   applyAuthorizationToElement_(element, response) {
     const expr = element.getAttribute('amp-access');
-    const on = this.evaluator_.evaluate(expr, response);
-    let renderPromise = null;
+    let on = false;
+    try {
+      on = this.evaluator_.evaluate(expr, response);
+    } catch (err) {
+      // If evaluating the expression yields an error
+      // it is most likely an invalid expression (publisher error).
+      user().error(TAG, err);
+    }
+
     if (on) {
-      renderPromise = this.renderTemplates_(element, response);
+      const renderTemplate = this.renderTemplates_(element, response);
+      if (renderTemplate) {
+        return renderTemplate.then(() =>
+          this.applyAuthorizationAttrs_(element, on)
+        );
+      }
     }
-    if (renderPromise) {
-      return renderPromise.then(() =>
-        this.applyAuthorizationAttrs_(element, on)
-      );
-    }
+
     return this.applyAuthorizationAttrs_(element, on);
   }
 
@@ -703,7 +713,7 @@ export class AccessService {
         invocation.event.preventDefault();
       }
       this.loginWithType_('');
-    } else if (startsWith(invocation.method, 'login-')) {
+    } else if (invocation.method.startsWith('login-')) {
       if (invocation.event) {
         invocation.event.preventDefault();
       }
@@ -764,8 +774,9 @@ export class AccessService {
    */
   combinedResponses() {
     if (this.sources_.length == 1 && !this.sources_[0].getNamespace()) {
-      return /** @type {!JsonObject} */ (this.sources_[0].getAuthResponse() ||
-        {});
+      return /** @type {!JsonObject} */ (
+        this.sources_[0].getAuthResponse() || {}
+      );
     }
 
     const combined = /** @type {!JsonObject} */ ({});

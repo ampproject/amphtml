@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ownProperty} from '../../../src/utils/object';
+import {ownProperty} from '../../../src/core/types/object';
 import {tryFocus} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
@@ -83,7 +83,7 @@ export class AutocompleteBindingInline {
       return null;
     }
 
-    const {value, selectionStart: cursor} = inputEl;
+    const {selectionStart: cursor, value} = inputEl;
     let match, lastMatch;
 
     while ((match = regex.exec(value)) !== null) {

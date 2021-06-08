@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 /* eslint-disable local/html-template */
-/* eslint-disable indent */
 
 const {html} = require('./app-index/html');
 
@@ -144,7 +143,7 @@ const SCRIPT = `
 };
 `;
 
-const renderShadowViewer = ({src, baseHref}) =>
+const renderShadowViewer = ({baseHref, src}) =>
   html`
     <!DOCTYPE html>
     <html>

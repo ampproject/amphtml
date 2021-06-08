@@ -33,7 +33,13 @@
       <amp-story-grid-layer template="vertical">
         <h1>fill</h1>
       </amp-story-grid-layer>
-      <amp-story-page-attachment layout="nodisplay" theme="dark">
+      <amp-story-page-attachment
+        layout="nodisplay"
+        theme="dark"
+        title="Page attachment title"
+        cta-image="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
+        cta-image-2="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
+        >
         <h1>Amazing title</h1>
         <p>Bacon ipsum dolor cat cat cat.</p>
         <amp-youtube
@@ -56,6 +62,50 @@
       </amp-story-grid-layer>
       <amp-story-page-attachment layout="nodisplay" href="https://www.google.com">
       </amp-story-page-attachment>
+    </amp-story-page>
+    <amp-story-page id="fill-template-title">
+      <amp-story-grid-layer template="vertical">
+        <h1>fill</h1>
+      </amp-story-grid-layer>
+      <amp-story-page-outlink layout="nodisplay">
+        <a href="https://www.google.com">Call To Action</a>
+      </amp-story-page-outlink>
+    </amp-story-page>
+    <amp-story-page id="cta-button-with-images">
+      <amp-story-grid-layer template="vertical">
+        <h1>fill</h1>
+      </amp-story-grid-layer>
+      <amp-story-page-outlink
+        layout="nodisplay"
+        cta-image="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
+        >
+        <a href="https://www.google.com" title="Page attachment title">Call To Action</a>
+      </amp-story-page-outlink>
+    </amp-story-page>
+    <amp-story-page id="outlink-cta-button">
+      <amp-story-grid-layer template="vertical">
+        <h1>fill</h1>
+      </amp-story-grid-layer>
+      <amp-story-page-outlink
+        layout="nodisplay"
+        cta-image="none"
+        >
+        <a href="https://www.google.com" title="Page attachment title">Call To Action</a>
+      </amp-story-page-outlink>
+    </amp-story-page>
+    <amp-story-page id="outlink-cta-button-custom-theme">
+      <amp-story-grid-layer template="vertical">
+        <h1>fill</h1>
+      </amp-story-grid-layer>
+      <amp-story-page-outlink
+        layout="nodisplay"
+        theme="custom"
+        cta-accent-color="pink"
+        cta-accent-element="background"
+        cta-image="https://website.com/image.png"
+        >
+        <a href="https://www.google.com" title="Page attachment title">Call To Action</a>
+      </amp-story-page-outlink>
     </amp-story-page>
   </amp-story>
 </body>

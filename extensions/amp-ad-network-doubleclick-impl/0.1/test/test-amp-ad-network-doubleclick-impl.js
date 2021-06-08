@@ -19,7 +19,11 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as bytesUtils from '../../../../src/utils/bytes';
+import * as bytesUtils from '../../../../src/core/types/string/bytes';
+import {
+  AMP_EXPERIMENT_ATTRIBUTE,
+  QQID_HEADER,
+} from '../../../../ads/google/a4a/utils';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
@@ -34,24 +38,22 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
-  EXPAND_JSON_TARGETING_EXP,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
   resetTokensToInstancesMap,
 } from '../amp-ad-network-doubleclick-impl';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {Deferred} from '../../../../src/utils/promise';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../../src/core/constants/consent-state';
+import {Deferred} from '../../../../src/core/data-structures/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
-import {QQID_HEADER} from '../../../../ads/google/a4a/utils';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {
-  forceExperimentBranch,
-  toggleExperiment,
-} from '../../../../src/experiments';
+import {toggleExperiment} from '../../../../src/experiments';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -402,10 +404,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
         env.sandbox.stub(impl, 'getViewport').callsFake(() => ({
           getRect: () => ({width: 400}),
         }));
-        env.sandbox.stub(impl.element, 'getPageLayoutBox').callsFake(() => ({
-          left: 25,
-          right: 25,
-        }));
+        env.sandbox.stub(impl.element, 'offsetLeft').value(25);
+        env.sandbox.stub(impl.element, 'offsetTop').value(25);
         const dirStr = testCase.direction == 'ltr' ? 'Left' : 'Right';
         impl.flexibleAdSlotData_ = {
           parentWidth: testCase.parentWidth,
@@ -521,9 +521,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
               '1';
           }
           impl.onCreativeRender(false);
-          const ampAnalyticsElement = impl.element.querySelector(
-            'amp-analytics'
-          );
+          const ampAnalyticsElement =
+            impl.element.querySelector('amp-analytics');
           expect(ampAnalyticsElement).to.be.ok;
           expect(ampAnalyticsElement.CONFIG).jsonEqual(
             impl.ampAnalyticsConfig_
@@ -632,7 +631,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
       // Temporary fix for local test failure.
-      window.sandbox
+      env.sandbox
         .stub(impl, 'getIntersectionElementLayoutBox')
         .callsFake(() => {
           return {
@@ -644,19 +643,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
             height: 50,
           };
         });
-
-      // Reproduced from noopMethods in ads/google/a4a/test/test-utils.js,
-      // to fix failures when this is run after 'gulp build', without a 'dist'.
-      window.sandbox.stub(impl, 'getPageLayoutBox').callsFake(() => {
-        return {
-          top: 11,
-          left: 12,
-          right: 0,
-          bottom: 0,
-          width: 0,
-          height: 0,
-        };
-      });
     });
 
     afterEach(() => {
@@ -811,12 +797,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('expands CLIENT_ID in targeting', () => {
-      toggleExperiment(win, 'expand-json-targeting', true, true);
-      forceExperimentBranch(
-        win,
-        EXPAND_JSON_TARGETING_EXP.ID,
-        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
-      );
       element.setAttribute(
         'json',
         `{
@@ -832,12 +812,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('expands CLIENT_ID in targeting inside array', () => {
-      toggleExperiment(win, 'expand-json-targeting', true, true);
-      forceExperimentBranch(
-        win,
-        EXPAND_JSON_TARGETING_EXP.ID,
-        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
-      );
       element.setAttribute(
         'json',
         `{
@@ -991,15 +965,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
             return impl.getAdUrl().then((url2) => {
               expect(url2).to.match(/(\?|&)rc=1(&|$)/);
               expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
-              expect(url2).to.not.match(/(\?|&)frc=1(&|$)/);
             });
           });
-      });
-    });
-    it('has correct frc value', () => {
-      impl.fromResumeCallback = true;
-      impl.getAdUrl().then((url) => {
-        expect(url).to.match(/(\?|&)frc=1(&|$)/);
       });
     });
     it('should include identity', () => {
@@ -1058,6 +1025,39 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
           expect(url).to.not.match(/(\?|&)npa=(&|$)/);
         }));
 
+    it('should save opt_serveNpaSignal', () =>
+      impl
+        .getAdUrl(
+          {consentState: CONSENT_POLICY_STATE.SUFFICIENT},
+          undefined,
+          true
+        )
+        .then(() => {
+          expect(impl.serveNpaSignal_).to.be.true;
+        }));
+
+    it('should include npa=1 if `serveNpaSignal` is found, regardless of consent', () =>
+      impl
+        .getAdUrl(
+          {consentState: CONSENT_POLICY_STATE.SUFFICIENT},
+          undefined,
+          true
+        )
+        .then((url) => {
+          expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        }));
+
+    it('should include npa=1 if `serveNpaSignal` is false & insufficient consent', () =>
+      impl
+        .getAdUrl(
+          {consentState: CONSENT_POLICY_STATE.INSUFFICIENT},
+          undefined,
+          false
+        )
+        .then((url) => {
+          expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        }));
+
     it('should include gdpr_consent, if TC String is provided', () =>
       impl.getAdUrl({consentString: 'tcstring'}).then((url) => {
         expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
@@ -1077,6 +1077,46 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       impl.getAdUrl({}).then((url) => {
         expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
       }));
+
+    it('should include addtl_consent', () =>
+      impl.getAdUrl({additionalConsent: 'abc123'}).then((url) => {
+        expect(url).to.match(/(\?|&)addtl_consent=abc123(&|$)/);
+      }));
+
+    it('should not include addtl_consent, if additionalConsent is missing', () =>
+      impl.getAdUrl({}).then((url) => {
+        expect(url).to.not.match(/(\?|&)addtl_consent=/);
+      }));
+
+    it('should include us_privacy, if consentStringType matches', () =>
+      impl
+        .getAdUrl({
+          consentStringType: CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+          consentString: 'usPrivacyString',
+        })
+        .then((url) => {
+          expect(url).to.match(/(\?|&)us_privacy=usPrivacyString(&|$)/);
+          expect(url).to.not.match(/(\?|&)gdpr_consent=/);
+        }));
+
+    it('should include gdpr_consent, if consentStringType is not US_PRIVACY_STRING', () =>
+      impl
+        .getAdUrl({
+          consentStringType: CONSENT_STRING_TYPE.TCF_V2,
+          consentString: 'gdprString',
+        })
+        .then((url) => {
+          expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
+          expect(url).to.not.match(/(\?|&)us_privacy=/);
+        }));
+
+    it('should include gdpr_consent, if consentStringType is undefined', () =>
+      impl
+        .getAdUrl({consentStringType: undefined, consentString: 'gdprString'})
+        .then((url) => {
+          expect(url).to.match(/(\?|&)gdpr_consent=gdprString(&|$)/);
+          expect(url).to.not.match(/(\?|&)us_privacy=/);
+        }));
 
     it('should include msz/psz/fws if in holdback control', () => {
       env.sandbox
@@ -1099,6 +1139,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
         expect(url).to.not.match(/(=|%2C)2106317(3|4)(%2C|&|$)/);
       });
     });
+
+    it('sets ptt parameter', () =>
+      expect(impl.getAdUrl()).to.eventually.match(/(\?|&)ptt=13(&|$)/));
   });
 
   describe('#getPageParameters', () => {
@@ -1113,6 +1156,23 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       expect(
         impl.getPageParameters({
           consentState: CONSENT_POLICY_STATE.INSUFFICIENT,
+        }).npa
+      ).to.equal(1);
+    });
+
+    it('should include npa=1 when `serveNpaSignal_` is true', () => {
+      const element = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'doubleclick',
+        height: 320,
+        width: 50,
+        'data-slot': '/1234/abc/def',
+        'always-serve-npa': 'gdpr',
+      });
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.serveNpaSignal_ = true;
+      expect(
+        impl.getPageParameters({
+          consentState: CONSENT_POLICY_STATE.SUFFICIENT,
         }).npa
       ).to.equal(1);
     });
@@ -1136,7 +1196,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       impl.win.ampAdSlotIdCounter = 1;
       expect(impl.element.getAttribute('data-amp-slot-index')).to.not.be.ok;
       impl.layoutMeasureExecuted_ = true;
-      impl.uiHandler = {applyUnlayoutUI: () => {}};
+      impl.uiHandler = {applyUnlayoutUI: () => {}, cleanup: () => {}};
       const placeholder = doc.createElement('div');
       placeholder.setAttribute('placeholder', '');
       const fallback = doc.createElement('div');
@@ -1299,16 +1359,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       env.sandbox
         .stub(impl, 'shouldInitializePromiseChain_')
         .callsFake(() => true);
-      env.sandbox.stub(impl, 'getPageLayoutBox').callsFake(() => {
-        return {
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: 200,
-          height: 50,
-        };
-      });
       env.sandbox.stub(impl, 'attemptChangeSize').callsFake((height, width) => {
         impl.element.style.height = `${height}px`;
         impl.element.style.width = `${width}px`;
@@ -1749,9 +1799,7 @@ describes.realWin(
           'type': 'doubleclick',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
-        env.sandbox
-          .stub(impl, 'getResource')
-          .returns({whenWithinViewport: () => Promise.resolve()});
+        env.sandbox.stub(impl, 'whenWithinViewport').returns(Promise.resolve());
       });
 
       it('should use experiment value', () => {
@@ -1856,7 +1904,11 @@ describes.realWin(
     describe('#setPageLevelExperiments', () => {
       let randomlySelectUnsetExperimentsStub;
       let extractUrlExperimentIdStub;
-      let getAmpDocStub;
+      const ampdocMock = {
+        whenFirstVisible: () => new Deferred().promise,
+        getMetaByName: () => null,
+      };
+
       beforeEach(() => {
         randomlySelectUnsetExperimentsStub = env.sandbox.stub(
           impl,
@@ -1867,11 +1919,9 @@ describes.realWin(
           'extractUrlExperimentId_'
         );
         env.sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
-        getAmpDocStub = env.sandbox.stub(impl, 'getAmpDoc').returns({
-          whenFirstVisible: () => new Deferred().promise,
-          getMetaByName: () => null,
-        });
+        env.sandbox.stub(impl, 'getAmpDoc').returns(ampdocMock);
       });
+
       afterEach(() => {
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
       });
@@ -1896,14 +1946,14 @@ describes.realWin(
         });
         extractUrlExperimentIdStub.returns(undefined);
         impl.buildCallback();
-        expect(impl.experimentIds.includes('117152667')).to.be.true;
+        expect(impl.experimentIds).to.include('117152667');
         expect(impl.useSra).to.be.true;
       });
 
       it('should force-select SRA experiment from URL experiment ID', () => {
         randomlySelectUnsetExperimentsStub.returns({});
         impl.setPageLevelExperiments('8');
-        expect(impl.experimentIds.includes('117152667')).to.be.true;
+        expect(impl.experimentIds).to.include('117152667');
       });
 
       describe('should properly limit SRA traffic', () => {
@@ -1947,38 +1997,35 @@ describes.realWin(
 
       describe('detect module/nomodule experiment', () => {
         it('should identify module/nomodule control when runtime-type is 10', () => {
-          getAmpDocStub./*OK*/ restore();
-          env.sandbox.stub(impl, 'getAmpDoc').returns({
-            whenFirstVisible: () => new Deferred().promise,
-            getMetaByName: () => '10',
-          });
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('10');
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(
-            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.CONTROL)
-          ).to.be.true;
+          expect(impl.experimentIds).to.include(
+            MODULE_NOMODULE_PARAMS_EXP.CONTROL
+          );
         });
 
         it('should identify module/nomodule experiment when runtime-type is 2', () => {
-          getAmpDocStub./*OK*/ restore();
-          env.sandbox.stub(impl, 'getAmpDoc').returns({
-            whenFirstVisible: () => new Deferred().promise,
-            getMetaByName: () => '2',
-          });
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('2');
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(
-            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)
-          ).to.be.true;
+          expect(impl.experimentIds).to.include(
+            MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT
+          );
         });
 
         // Only 2, 4, 10 should be recognized.
         it('should ignore module/nomodule experiment when runtime-type is 6', () => {
-          getAmpDocStub./*OK*/ restore();
-          env.sandbox.stub(impl, 'getAmpDoc').returns({
-            whenFirstVisible: () => new Deferred().promise,
-            getMetaByName: () => '6',
-          });
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('runtime-type')
+            .returns('6');
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
           expect(
@@ -1987,6 +2034,62 @@ describes.realWin(
           expect(
             impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.CONTROL)
           ).to.be.false;
+        });
+      });
+
+      describe('SSR experiments', () => {
+        it('should include SSR experiments', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=45,3579282=0');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal(
+            '579823748245,357928200'
+          );
+        });
+
+        it('should pad value to two chars', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=1');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.equal(
+            '579823748201'
+          );
+        });
+
+        it('should ignore excessively large value', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=100');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.be.null;
+        });
+
+        it('should ignore negative values', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=-1');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.be.null;
+        });
+
+        it('should ignore non-number values', () => {
+          env.sandbox
+            .stub(ampdocMock, 'getMetaByName')
+            .withArgs('amp-usqp')
+            .returns('5798237482=testing');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(element.getAttribute(AMP_EXPERIMENT_ATTRIBUTE)).to.be.null;
         });
       });
     });
@@ -2130,9 +2233,6 @@ describes.realWin(
       it('should change safeframeApi value', () => {
         impl.safeframeApi_ = mockSafeFrameApi;
         impl.isRefreshing = true;
-        env.sandbox
-          .stub(impl, 'getPageLayoutBox')
-          .returns({width: 411, height: 1500, left: 0, right: 0});
         impl.getAdditionalContextMetadata(/* isSafeFrame= */ true);
         expect(impl.safeframeApi_).to.not.equal(mockSafeFrameApi);
         // We just want to make sure the value's changed and is not null.

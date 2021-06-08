@@ -29,22 +29,23 @@ import {
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/core/constants/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
+import {addAttributesToElement, tryFocus} from '../../../src/dom';
+import {closest, matches} from '../../../src/core/dom/query';
 import {
-  addAttributesToElement,
-  closest,
-  matches,
-  tryFocus,
-} from '../../../src/dom';
-import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
+  createShadowRootWithStyle,
+  getSourceOriginForElement,
+  triggerClickFromLightDom,
+} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
+
 import {px, resetStyles, setImportantStyles, toggle} from '../../../src/style';
 
 /**
@@ -213,10 +214,8 @@ export const EMBED_ID_ATTRIBUTE_NAME = 'i-amphtml-embed-id';
  * @return {!Element}
  */
 const buildExpandedViewOverlay = (element) => htmlFor(element)`
-    <div class="i-amphtml-story-expanded-view-overflow
-        i-amphtml-story-system-reset">
-      <span class="i-amphtml-expanded-view-close-button" role="button">
-      </span>
+    <div class="i-amphtml-story-expanded-view-overflow i-amphtml-story-system-reset">
+      <button class="i-amphtml-expanded-view-close-button" aria-label="close" role="button"></button>
     </div>`;
 
 /**
@@ -257,7 +256,9 @@ function buildStringStyleForTweet(embedData) {
   return `{
     width: ${px(embedData.width)} !important;
     transform: ${embedData.transform} !important;
-    margin: 0 ${embedData.horizontalMargin}px !important;
+    margin: ${embedData.verticalMargin}px ${
+    embedData.horizontalMargin
+  }px !important;
     }`;
 }
 
@@ -278,7 +279,7 @@ function buildDefaultStringStyle(embedData) {
 }
 
 /**
- * Measures syles for a given element in preparation for its expanded animation.
+ * Measures styles for a given element in preparation for its expanded animation.
  * @param {!Element} element
  * @param {!Object} state
  * @param {!DOMRect} pageRect
@@ -311,6 +312,9 @@ function measureStylesForTwitter(state, pageRect, elRect) {
   state.scaleFactor =
     Math.min(elRect.width, MAX_TWEET_WIDTH_PX) / state.newWidth;
 
+  const shrinkedSize = elRect.height * state.scaleFactor;
+
+  state.verticalMargin = -1 * ((elRect.height - shrinkedSize) / 2);
   state.horizontalMargin = -1 * ((state.newWidth - elRect.width) / 2);
 
   return state;
@@ -395,6 +399,7 @@ function updateStylesForTwitter(elId, state) {
     scaleFactor: state.scaleFactor,
     transform: `scale(${state.scaleFactor})`,
     horizontalMargin: state.horizontalMargin,
+    verticalMargin: state.verticalMargin,
   };
 }
 
@@ -668,6 +673,20 @@ export class AmpStoryEmbeddedComponent {
    */
   buildAndAppendExpandedViewOverlay_() {
     this.expandedViewOverlay_ = buildExpandedViewOverlay(this.storyEl_);
+    const closeButton = dev().assertElement(
+      this.expandedViewOverlay_.querySelector(
+        '.i-amphtml-expanded-view-close-button'
+      )
+    );
+    const localizationService = getLocalizationService(
+      devAssert(this.storyEl_)
+    );
+    if (localizationService) {
+      const localizedCloseString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+      );
+      closeButton.setAttribute('aria-label', localizedCloseString);
+    }
     this.mutator_.mutateElement(dev().assertElement(this.componentPage_), () =>
       this.componentPage_.appendChild(this.expandedViewOverlay_)
     );
@@ -718,6 +737,7 @@ export class AmpStoryEmbeddedComponent {
           StoryAnalyticsEvent.CLICK_THROUGH,
           this.triggeringTarget_
         );
+        this.tooltip_.href && this.onAnchorClick_(event);
       },
       true /** capture */
     );
@@ -736,11 +756,12 @@ export class AmpStoryEmbeddedComponent {
       this.clearTooltip_();
     }, TOOLTIP_CLOSE_ANIMATION_MS);
 
+    if (this.state_ === EmbeddedComponentState.EXPANDED) {
+      this.toggleExpandedView_(null);
+    }
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       state: EmbeddedComponentState.HIDDEN,
     });
-
-    this.toggleExpandedView_(null);
     this.tooltip_.removeEventListener(
       'click',
       this.expandComponentHandler_,
@@ -878,11 +899,13 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   updateTooltipEl_(component) {
-    const embedConfig = /** @type {!Object} */ (userAssert(
-      this.getEmbedConfigFor_(component.element),
-      'Invalid embed config for target',
-      component.element
-    ));
+    const embedConfig = /** @type {!Object} */ (
+      userAssert(
+        this.getEmbedConfigFor_(component.element),
+        'Invalid embed config for target',
+        component.element
+      )
+    );
 
     const theme = this.triggeringTarget_.getAttribute('theme');
     if (theme && TooltipTheme.DARK === theme.toLowerCase()) {
@@ -1366,7 +1389,6 @@ export class AmpStoryEmbeddedComponent {
               i-amphtml-story-tooltip-nav-button-left"
         >
           <button
-            role="button"
             ref="buttonLeft"
             class="i-amphtml-story-focused-state-layer-nav-button
                 i-amphtml-story-tooltip-nav-button-left"
@@ -1377,7 +1399,6 @@ export class AmpStoryEmbeddedComponent {
               i-amphtml-story-tooltip-nav-button-right"
         >
           <button
-            role="button"
             ref="buttonRight"
             class="i-amphtml-story-focused-state-layer-nav-button
                     i-amphtml-story-tooltip-nav-button-right"
@@ -1397,12 +1418,8 @@ export class AmpStoryEmbeddedComponent {
       </section>
     `;
     const overlayEls = htmlRefs(tooltipOverlay);
-    const {
-      tooltip,
-      buttonLeft,
-      buttonRight,
-      arrow,
-    } = /** @type {!tooltipElementsDef} */ (overlayEls);
+    const {arrow, buttonLeft, buttonRight, tooltip} =
+      /** @type {!tooltipElementsDef} */ (overlayEls);
 
     this.tooltip_ = tooltip;
     this.tooltipArrow_ = arrow;
@@ -1446,6 +1463,16 @@ export class AmpStoryEmbeddedComponent {
       undefined,
       {bubbles: true}
     );
+  }
+
+  /**
+   * Linkers don't work on shadow root elements so we click a clone of the anchor on the root dom.
+   * @param {!Event} event
+   * @private
+   */
+  onAnchorClick_(event) {
+    event.preventDefault();
+    triggerClickFromLightDom(this.tooltip_, this.storyEl_);
   }
 
   /**

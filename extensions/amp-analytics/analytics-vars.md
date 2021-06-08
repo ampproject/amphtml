@@ -37,8 +37,8 @@ Vars can be defined by the platform, in the config at the top level, inside the 
 
 For the following event types, variables can be passed as part of the element level data attribute
 
-- visible
-- click
+-   visible
+-   click
 
 The variables passed as data attributes should follow the format `data-vars-*`.
 
@@ -59,7 +59,7 @@ When the same `var` is defined in multiple locations, the value is picked in the
 
 ## Variables
 
-For a list of variables supported in `amp-analytics`, see [Variable Substitutions](../../spec/amp-var-substitutions.md). These variables may be substituted as well as nested within each other. For example, a variable that is substituted to
+For a list of variables supported in `amp-analytics`, see [Variable Substitutions](../../docs/spec/amp-var-substitutions.md). These variables may be substituted as well as nested within each other. For example, a variable that is substituted to
 
 ```javascript
 {

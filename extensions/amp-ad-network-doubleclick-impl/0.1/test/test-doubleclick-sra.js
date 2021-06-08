@@ -26,7 +26,7 @@ import {
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {BaseElement} from '../../../../src/base-element';
-import {Deferred} from '../../../../src/utils/promise';
+import {Deferred} from '../../../../src/core/data-structures/promise';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {MANUAL_EXPERIMENT_ID} from '../../../../ads/google/a4a/traffic-experiments';
 import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
@@ -51,8 +51,8 @@ import {
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {devAssert} from '../../../../src/log';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
+import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
+import {utf8Decode, utf8Encode} from '../../../../src/core/types/string/bytes';
 
 const config = {amp: true, allowExternalResources: true};
 
@@ -81,6 +81,20 @@ describes.realWin('Doubleclick SRA', config, (env) => {
     });
     (opt_domElement || doc.body).appendChild(element);
     return element;
+  }
+
+  function createElementWithRect(rect) {
+    const el = doc.createElement('div');
+    setElementRect(el, rect);
+    return el;
+  }
+
+  function setElementRect(el, {height, left, top, width}) {
+    env.sandbox.stub(el, 'offsetParent').value(null);
+    env.sandbox.stub(el, 'offsetLeft').value(left);
+    env.sandbox.stub(el, 'offsetTop').value(top);
+    env.sandbox.stub(el, 'offsetWidth').value(width);
+    env.sandbox.stub(el, 'offsetHeight').value(height);
   }
 
   describe('#SRA enabled', () => {
@@ -274,12 +288,12 @@ describes.realWin('Doubleclick SRA', config, (env) => {
       expect(getForceSafeframe(impls)).to.jsonEqual({'fsfs': '0,1,1'});
     });
     it('should combine page offsets', () => {
-      impls[0] = {getPageLayoutBox: () => ({left: 123, top: 456})};
+      impls[0] = {element: createElementWithRect({left: 123, top: 456})};
       expect(getPageOffsets(impls)).to.jsonEqual({
         'adxs': '123',
         'adys': '456',
       });
-      impls[1] = {getPageLayoutBox: () => ({left: 123, top: 789})};
+      impls[1] = {element: createElementWithRect({left: 123, top: 789})};
       expect(getPageOffsets(impls)).to.jsonEqual({
         'adxs': '123,123',
         'adys': '456,789',
@@ -362,21 +376,20 @@ describes.realWin('Doubleclick SRA', config, (env) => {
           'data-multi-size': '9999x9999',
         };
         const element1 = createElementWithAttributes(doc, 'amp-ad', config1);
+        setElementRect(element1, {top: 123, left: 456});
         const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
-        env.sandbox
-          .stub(impl1, 'getPageLayoutBox')
-          .returns({top: 123, left: 456});
         impl1.experimentIds = [MANUAL_EXPERIMENT_ID];
         env.sandbox
           .stub(impl1, 'generateAdKey_')
           .withArgs('50x320')
           .returns('13579');
         impl1.populateAdUrlState();
-        impl1.identityToken = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
-          token: 'abcdef',
-          jar: 'some_jar',
-          pucrd: 'some_pucrd',
-        });
+        impl1.identityToken =
+          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
+            token: 'abcdef',
+            jar: 'some_jar',
+            pucrd: 'some_pucrd',
+          });
         const targeting2 = {
           cookieOptOut: 1,
           categoryExclusions: 'food',
@@ -393,10 +406,8 @@ describes.realWin('Doubleclick SRA', config, (env) => {
           'data-multi-size': '1x2,3x4',
         };
         const element2 = createElementWithAttributes(doc, 'amp-ad', config2);
+        setElementRect(element2, {top: 789, left: 101});
         const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
-        env.sandbox
-          .stub(impl2, 'getPageLayoutBox')
-          .returns({top: 789, left: 101});
         env.sandbox
           .stub(impl2, 'generateAdKey_')
           .withArgs('250x300')
@@ -800,6 +811,40 @@ describes.realWin('Doubleclick SRA', config, (env) => {
       });
     });
 
+    it('should return a real response in no-siging exp', async () => {
+      const headerObj = {a: 'b', c: 123};
+      const slotDeferred = new Deferred();
+      const sraRequestAdUrlResolvers = [
+        slotDeferred.resolve,
+        {
+          resolve: () => {
+            throw new Error();
+          },
+        },
+      ];
+      sraBlockCallbackHandler(
+        creative,
+        headerObj,
+        /* done */ false,
+        sraRequestAdUrlResolvers,
+        /* sraUrl */ 'http://www.example.com',
+        /* isNoSigning */ true
+      );
+      expect(sraRequestAdUrlResolvers.length).to.equal(1);
+      const fetchResponse = await slotDeferred.promise;
+      expect(fetchResponse).to.be.an.instanceof(Response);
+      expect(fetchResponse.body).to.be.an.instanceof(ReadableStream);
+      expect(fetchResponse.headers.get('a')).to.equal('b');
+      expect(fetchResponse.headers.get('c')).to.equal('123');
+      expect(
+        fetchResponse.headers.get(RENDERING_TYPE_HEADER.toLowerCase())
+      ).to.equal(XORIGIN_MODE.SAFEFRAME);
+      expect(fetchResponse.headers.has('unknown')).to.be.false;
+
+      const text = await fetchResponse.text();
+      expect(text).to.equal(creative);
+    });
+
     it('should handle multiple blocks', () => {
       const blocks = [
         {
@@ -821,7 +866,7 @@ describes.realWin('Doubleclick SRA', config, (env) => {
       const promises = [];
       const resolvers = blocks.map((block) => block.deferred.resolve);
       for (let i = 1; i <= blocks.length; i++) {
-        const {creative, headers, deferred} = blocks[i - 1];
+        const {creative, deferred, headers} = blocks[i - 1];
         sraBlockCallbackHandler(
           creative,
           headers,

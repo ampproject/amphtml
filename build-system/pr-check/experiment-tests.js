@@ -16,63 +16,75 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script builds an experiment binary and runs local tests.
- * This is run during the CI stage = test; job = experiments tests.
+ * @fileoverview Script that runs the experiment A/B/C tests during CI.
  */
 
-const colors = require('ansi-colors');
-const experimentsConfig = require('../global-configs/experiments-config.json');
 const {
-  startTimer,
-  stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
+  skipDependentJobs,
+  timedExecOrDie,
+  timedExecOrThrow,
 } = require('./utils');
 const {experiment} = require('minimist')(process.argv.slice(2));
-const FILENAME = `${experiment}-tests.js`;
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const {getExperimentConfig} = require('../common/utils');
+const {isPushBuild} = require('../common/ci');
+const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
-function getConfig_() {
-  const config = experimentsConfig[experiment];
+const jobName = `${experiment}-tests.js`;
 
-  if (!config || !config.name || !config.define_experiment_constant) {
-    return;
+/**
+ * Runs tests for the given configuration and reports results for push builds.
+ * @param {!Object} config
+ */
+function runExperimentTests(config) {
+  try {
+    const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
+    const experimentFlag = `--experiment ${experiment}`;
+    const reportFlag = isPushBuild() ? '--report' : '';
+    timedExecOrThrow(
+      `amp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag} ${reportFlag}`
+    );
+    timedExecOrThrow(
+      `amp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag} ${reportFlag}`
+    );
+  } catch (e) {
+    if (e.status) {
+      process.exitCode = e.status;
+    }
+  } finally {
+    if (isPushBuild()) {
+      timedExecOrDie('amp test-report-upload');
+    }
   }
-
-  if (new Date(config['expiration_date_utc']) < Date.now()) {
-    return;
-  }
-
-  return config;
 }
 
-function build_(config) {
-  const command = `gulp dist --fortesting --define_experiment_constant ${config.define_experiment_constant}`;
-  timedExecOrDie('gulp clean');
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie(command);
+/**
+ * Steps to run during push builds.
+ */
+function pushBuildWorkflow() {
+  // Note that if config is invalid, this build would have been skipped by CircleCI.
+  const config = getExperimentConfig(experiment);
+  runExperimentTests(config);
 }
 
-function test_() {
-  timedExecOrDie('gulp integration --nobuild --compiled --headless');
-  timedExecOrDie('gulp e2e --nobuild --compiled --headless');
-}
-
-function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  const config = getConfig_();
-  if (config) {
-    build_(config);
-    test_();
+/**
+ * Steps to run during PR builds.
+ */
+function prBuildWorkflow() {
+  if (
+    buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.INTEGRATION_TEST,
+      Targets.E2E_TEST
+    )
+  ) {
+    pushBuildWorkflow();
   } else {
-    console.log(
-      `${FILELOGPREFIX} Skipping`,
-      colors.cyan(`${experiment} Tests`),
-      `because ${experiment} is expired, misconfigured, or does not exist.`
+    skipDependentJobs(
+      jobName,
+      'this PR does not affect the runtime, integration tests, or end-to-end tests'
     );
   }
-  stopTimer(FILENAME, FILENAME, startTime);
 }
 
-main();
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

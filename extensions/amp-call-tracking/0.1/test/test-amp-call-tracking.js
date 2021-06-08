@@ -53,7 +53,7 @@ describes.realWin(
 
       doc.body.appendChild(callTrackingEl);
       return callTrackingEl
-        .build()
+        .buildInternal()
         .then(() => {
           return callTrackingEl.layoutCallback();
         })

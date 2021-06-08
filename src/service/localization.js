@@ -19,7 +19,7 @@
 // eslint-disable-next-line no-unused-vars
 import {LocalizedStringId} from '../localized-strings';
 import {Services} from '../services';
-import {closest} from '../dom';
+import {closest} from '../core/dom/query';
 
 /**
  * Language code used if there is no language code specified by the document.
@@ -38,7 +38,7 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
  * @param {!Object<string, !../localized-strings.LocalizedStringBundleDef>} localizedStringBundles
  * @param {!Array<string>} languageCodes
  * @param {!LocalizedStringId} localizedStringId
- * @return {string|null}
+ * @return {?string}
  */
 function findLocalizedString(
   localizedStringBundles,
@@ -150,7 +150,7 @@ export class LocalizationService {
    *     used.  The language is based on the language at that part of the
    *     document.  If unspecified, will use the document-level language, if
    *     one exists, or the default otherwise.
-   * @return {string|null}
+   * @return {?string}
    */
   getLocalizedString(localizedStringId, elementToUse = this.element_) {
     const languageCodes = this.getLanguageCodesForElement_(elementToUse);

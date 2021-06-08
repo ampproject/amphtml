@@ -17,15 +17,22 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
+  doBuild3pVendor,
+  generateBundles,
+} = require('../tasks/3p-vendor-helpers');
+const {
   doBuildExtension,
-  maybeInitializeExtensions,
   getExtensionsToBuild,
+  maybeInitializeExtensions,
 } = require('../tasks/extension-helpers');
-const {doBuildJs} = require('../tasks/helpers');
+const {compileCoreRuntime, doBuildJs} = require('../tasks/helpers');
 const {jsBundles} = require('../compile/bundles.config');
+const {VERSION} = require('../compile/internal-version');
 
 const extensionBundles = {};
 maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);
+
+const vendorBundles = generateBundles();
 
 /**
  * Gets the unminified name of the bundle if it can be lazily built.
@@ -53,10 +60,10 @@ function maybeGetUnminifiedName(bundles, name) {
  * required.
  *
  * @param {string} url
- * @param {string} matcher
+ * @param {string|RegExp} matcher
  * @param {!Object} bundles
- * @param {function()} buildFunc
- * @param {function()} next
+ * @param {function(!Object, string, ?Object):Promise} buildFunc
+ * @param {function(): void} next
  */
 async function lazyBuild(url, matcher, bundles, buildFunc, next) {
   const match = url.match(matcher);
@@ -76,8 +83,8 @@ async function lazyBuild(url, matcher, bundles, buildFunc, next) {
  *
  * @param {!Object} bundles
  * @param {string} name
- * @param {function()} buildFunc
- * @return {Promise|undefined}
+ * @param {function(!Object, string, ?Object):Promise} buildFunc
+ * @return {Promise<void>}
  */
 async function build(bundles, name, buildFunc) {
   const bundle = bundles[name];
@@ -105,10 +112,10 @@ async function build(bundles, name, buildFunc) {
  * Lazy builds the correct version of an extension when requested.
  *
  * @param {!Object} req
- * @param {!Object} res
- * @param {function()} next
+ * @param {!Object} _res
+ * @param {function(): void} next
  */
-async function lazyBuildExtensions(req, res, next) {
+async function lazyBuildExtensions(req, _res, next) {
   const matcher = argv.compiled
     ? /\/dist\/v0\/([^\/]*)\.js/ // '/dist/v0/*.js'
     : /\/dist\/v0\/([^\/]*)\.max\.js/; // '/dist/v0/*.max.js'
@@ -119,27 +126,42 @@ async function lazyBuildExtensions(req, res, next) {
  * Lazy builds a non-extension JS file when requested.
  *
  * @param {!Object} req
- * @param {!Object} res
- * @param {function()} next
+ * @param {!Object} _res
+ * @param {function(): void} next
  */
-async function lazyBuildJs(req, res, next) {
+async function lazyBuildJs(req, _res, next) {
   const matcher = /\/.*\/([^\/]*\.js)/;
   await lazyBuild(req.url, matcher, jsBundles, doBuildJs, next);
+}
+
+/**
+ * Lazy builds a 3p iframe vendor file when requested.
+ *
+ * @param {!Object} req
+ * @param {!Object} _res
+ * @param {function(): void} next
+ */
+async function lazyBuild3pVendor(req, _res, next) {
+  const matcher = argv.compiled
+    ? new RegExp(`\\/dist\\.3p\\/${VERSION}\\/vendor\\/([^\/]*)\\.js`) // '/dist.3p/21900000/vendor/*.js'
+    : /\/dist\.3p\/current\/vendor\/([^\/]*)\.max\.js/; // '/dist.3p/current/vendor/*.max.js'
+  await lazyBuild(req.url, matcher, vendorBundles, doBuild3pVendor, next);
 }
 
 /**
  * Pre-builds the core runtime and the JS files that it loads.
  */
 async function preBuildRuntimeFiles() {
-  await build(jsBundles, 'amp.js', doBuildJs);
-  await build(jsBundles, 'ww.max.js', doBuildJs);
+  await build(jsBundles, 'amp.js', (_bundles, _name, options) =>
+    compileCoreRuntime(options)
+  );
 }
 
 /**
  * Pre-builds default extensions and ones requested via command line flags.
  */
 async function preBuildExtensions() {
-  const extensions = getExtensionsToBuild();
+  const extensions = getExtensionsToBuild(/* preBuild */ true);
   for (const extensionBundle in extensionBundles) {
     const extension = extensionBundles[extensionBundle].name;
     if (extensions.includes(extension) && !extensionBundle.endsWith('latest')) {
@@ -151,6 +173,7 @@ async function preBuildExtensions() {
 module.exports = {
   lazyBuildExtensions,
   lazyBuildJs,
+  lazyBuild3pVendor,
   preBuildExtensions,
   preBuildRuntimeFiles,
 };

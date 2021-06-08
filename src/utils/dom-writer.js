@@ -15,8 +15,10 @@
  */
 
 import {Services} from '../services';
-import {childElementsByTag, iterateCursor, removeElement} from '../dom';
-import {dev, devAssert} from '../log';
+import {childElementsByTag} from '../core/dom/query';
+import {dev} from '../log';
+import {devAssert} from '../core/assert';
+import {iterateCursor, removeElement} from '../dom';
 
 /**
  * Takes as an input a text stream, parses it and incrementally reconstructs

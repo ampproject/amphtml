@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
-import {parseJson} from '../../../src/json';
+import {dict} from '../../../src/core/types/object';
+import {parseJson} from '../../../src/core/types/object/json';
 import {user} from '../../../src/log';
 
 export class AmpAdMetadataTransformer {
@@ -221,10 +221,10 @@ export class AmpAdMetadataTransformer {
     let start = 0;
     let end = 0;
     if (this.firstRuntimeElement_ != null) {
-      const firstRuntimeElementString = this.firstRuntimeElement_
-        ./*OK*/ outerHTML;
-      const lastRuntimeElementString = this.lastRuntimeElement_
-        ./*OK*/ outerHTML;
+      const firstRuntimeElementString =
+        this.firstRuntimeElement_./*OK*/ outerHTML;
+      const lastRuntimeElementString =
+        this.lastRuntimeElement_./*OK*/ outerHTML;
       start = creative.indexOf(firstRuntimeElementString);
       end =
         creative.indexOf(lastRuntimeElementString) +

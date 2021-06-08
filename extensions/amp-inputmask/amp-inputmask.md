@@ -38,9 +38,9 @@ from typing incorrect characters.
 
 ### Supported elements
 
-- `input[type=text]`
-- `input[type=tel]`
-- `input[type=search]`
+-   `input[type=text]`
+-   `input[type=tel]`
+-   `input[type=search]`
 
 ## Attributes
 
@@ -150,10 +150,10 @@ left side. For example, North American phone numbers are sometimes stored as
 
 Specifies how the form will submit the input value.
 
-- **raw** (default): Outputs the value as-is with all special characters.
-- **alphanumeric**: Only outputs alphanumeric characters in the mask. The form
-  will add a `type="hidden"` input with the masked input's `name` or `id`
-  attribute with `-unmasked` appended.
+-   **raw** (default): Outputs the value as-is with all special characters.
+-   **alphanumeric**: Only outputs alphanumeric characters in the mask. The form
+    will add a `type="hidden"` input with the masked input's `name` or `id`
+    attribute with `-unmasked` appended.
 
 In the example below the `mask-output` output attribute is set to `raw`.
 
@@ -197,7 +197,7 @@ Here, the `mask-output` output attribute is set to `alphanumeric`.
 />
 ```
 
-When `mask-output` is set to `raw`, the form will submit the `input` value as-is, and the form will add a hidden input. The hidden input will have the alphanumeric characters from the original input. Its `name` will be the original input's name with `-unmasked` appended. For example, if the input contains `+1 (800) 123-4567`, the form will submit the following values:
+When `mask-output` is set to `alphanumeric`, the form will submit the `input` value as-is, and the form will add a hidden input. The hidden input will have the alphanumeric characters from the original input. Its `name` will be the original input's name with `-unmasked` appended. For example, if the input contains `+1 (800) 123-4567`, the form will submit the following values:
 
 ```json
 {
@@ -208,4 +208,4 @@ When `mask-output` is set to `raw`, the form will submit the `input` value as-is
 
 ## Validation
 
-See [amp-inputmask rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-inputmask/validator-amp-inputmask.protoascii) in the AMP validator specification.
+See [amp-inputmask rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-inputmask/validator-amp-inputmask.protoascii) in the AMP validator specification.

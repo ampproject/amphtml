@@ -49,18 +49,21 @@ describes.realWin(
       }
 
       // see yt test implementation
-      timer.promise(50).then(() => {
-        const bridTimerIframe = bc.querySelector('iframe');
+      timer
+        .promise(50)
+        .then(() => bc.getImpl())
+        .then((impl) => {
+          const bridTimerIframe = bc.querySelector('iframe');
 
-        bc.implementation_.handleBridMessage_({
-          origin: 'https://services.brid.tv',
-          source: bridTimerIframe.contentWindow,
-          data: 'Brid|0|trigger|ready',
+          impl.handleBridMessage_({
+            origin: 'https://services.brid.tv',
+            source: bridTimerIframe.contentWindow,
+            data: 'Brid|0|trigger|ready',
+          });
         });
-      });
       doc.body.appendChild(bc);
       return bc
-        .build()
+        .buildInternal()
         .then(() => {
           bc.layoutCallback();
         })
@@ -119,43 +122,87 @@ describes.realWin(
       });
     });
 
-    it('should forward events from brid-player to the amp element', () => {
-      return getBridPlayer(
+    it('requires data-partner for playlists', () => {
+      return allowConsoleError(() => {
+        return getBridPlayer({
+          'data-player': '4144',
+          'data-playlist': '13663',
+        }).should.eventually.be.rejectedWith(
+          /The data-partner attribute is required for/
+        );
+      });
+    });
+
+    it('requires data-player for playlists', () => {
+      return allowConsoleError(() => {
+        return getBridPlayer({
+          'data-partner': '264',
+          'data-playlist': '13663',
+        }).should.eventually.be.rejectedWith(
+          /The data-player attribute is required for/
+        );
+      });
+    });
+
+    it('requires data-partner for carousels', () => {
+      return allowConsoleError(() => {
+        return getBridPlayer({
+          'data-player': '4144',
+          'data-carousel': '459',
+        }).should.eventually.be.rejectedWith(
+          /The data-partner attribute is required for/
+        );
+      });
+    });
+
+    it('requires data-player for carousels', () => {
+      return allowConsoleError(() => {
+        return getBridPlayer({
+          'data-partner': '264',
+          'data-carousel': '459',
+        }).should.eventually.be.rejectedWith(
+          /The data-player attribute is required for/
+        );
+      });
+    });
+
+    it('should forward events from brid-player to the amp element', async () => {
+      const bc = await getBridPlayer(
         {
           'data-partner': '1177',
           'data-player': '979',
           'data-video': '5204',
         },
         true
-      ).then((bc) => {
-        const iframe = bc.querySelector('iframe');
+      );
+      const impl = await bc.getImpl();
 
-        return Promise.resolve()
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PLAYING);
-            sendFakeMessage(bc, iframe, 'trigger|play');
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.MUTED);
-            sendFakeMessage(bc, iframe, 'volume|0');
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PAUSE);
-            sendFakeMessage(bc, iframe, 'trigger|pause');
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.UNMUTED);
-            sendFakeMessage(bc, iframe, 'volume|1');
-            return p;
-          });
-      });
+      const iframe = bc.querySelector('iframe');
+      return Promise.resolve()
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.PLAYING);
+          sendFakeMessage(impl, iframe, 'trigger|play');
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.MUTED);
+          sendFakeMessage(impl, iframe, 'volume|0');
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.PAUSE);
+          sendFakeMessage(impl, iframe, 'trigger|pause');
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.UNMUTED);
+          sendFakeMessage(impl, iframe, 'volume|1');
+          return p;
+        });
     });
 
-    function sendFakeMessage(bc, iframe, command) {
-      bc.implementation_.handleBridMessage_({
+    function sendFakeMessage(impl, iframe, command) {
+      impl.handleBridMessage_({
         origin: 'https://services.brid.tv',
         source: iframe.contentWindow,
         data: 'Brid|0|' + command,
@@ -169,13 +216,13 @@ describes.realWin(
           'data-player': '979',
           'data-video': '13663',
         }).then((brid) => {
-          const img = brid.querySelector('amp-img');
+          const img = brid.querySelector('img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
             'https://cdn.brid.tv/live/partners/264/snapshot/13663.jpg'
           );
-          expect(img.getAttribute('layout')).to.equal('fill');
-          expect(img.hasAttribute('placeholder')).to.be.true;
+          expect(img).to.have.class('i-amphtml-fill-content');
+          expect(img).to.have.attribute('placeholder');
           expect(img.getAttribute('alt')).to.equal('Loading video');
           expect(img.getAttribute('referrerpolicy')).to.equal('origin');
         });
@@ -187,28 +234,11 @@ describes.realWin(
           'data-video': '13663',
           'aria-label': 'great video',
         }).then((brid) => {
-          const img = brid.querySelector('amp-img');
+          const img = brid.querySelector('img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('alt')).to.equal(
             'Loading video - great video'
           );
-        });
-      });
-      it('should create a fallback for default snapshot', () => {
-        return getBridPlayer({
-          'data-partner': '264',
-          'data-player': '979',
-          'data-video': '13663',
-        }).then((brid) => {
-          const img = brid.querySelector('amp-img');
-          const fallbackImg = img.querySelector('amp-img');
-          expect(fallbackImg).to.not.be.null;
-          expect(fallbackImg.getAttribute('src')).to.equal(
-            'https://cdn.brid.tv/live/default/defaultSnapshot.png'
-          );
-          expect(fallbackImg.getAttribute('layout')).to.equal('fill');
-          expect(fallbackImg.hasAttribute('fallback')).to.be.true;
-          expect(fallbackImg.getAttribute('referrerpolicy')).to.equal('origin');
         });
       });
     });

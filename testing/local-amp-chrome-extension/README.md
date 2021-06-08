@@ -18,13 +18,13 @@ limitations under the License.
 
 Install this extension to test existing public AMP docs against the current version in your development tree.
 
-- Please turn this extension off when you aren't currently working on AMP.
-- Should be used as an unpacked extension.
-  - Open chrome://extensions/
-  - Select "Load unpacked extension".
-- Only works with HTTP host pages.
+-   Please turn this extension off when you aren't currently working on AMP.
+-   Should be used as an unpacked extension.
+    -   Open chrome://extensions/
+    -   Select "Load unpacked extension".
+-   Only works with HTTP host pages.
 
-For the basic use case of just proxying all amp js files, you can just run amp locally (via `gulp`), and hit:
+For the basic use case of just proxying all amp js files, you can just run amp locally (via `amp`), and hit:
 http://localhost:8000/proxy/s/url-of-website-you-wish-to-test
 
 For example:

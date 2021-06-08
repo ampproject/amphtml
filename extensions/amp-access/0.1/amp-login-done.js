@@ -23,8 +23,8 @@ import '../../../src/polyfills';
 import {LoginDoneDialog} from './amp-login-done-dialog';
 import {bodyAlwaysVisible} from '../../../src/style-installer';
 import {initLogConstructor, setReportError} from '../../../src/log';
-import {onDocumentReady} from '../../../src/document-ready';
-import {reportError} from '../../../src/error';
+import {onDocumentReady} from '../../../src/core/document-ready';
+import {reportError} from '../../../src/error-reporting';
 
 bodyAlwaysVisible(window);
 initLogConstructor();

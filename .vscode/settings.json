@@ -7,14 +7,7 @@
 
     // Enable JSON auto-formatting for these files.
     ".prettierrc": "json",
-    ".renovaterc.json": "json",
-
-    // Enable YAML auto-formatting for these files.
-    ".codecov.yml": "yaml",
-    ".github/workflows/continuous-integration-workflow.yml": "yaml",
-    ".lando.yml": "yaml",
-    ".lgtm.yml": "yaml",
-    ".travis.yml": "yaml"
+    ".renovaterc.json": "json"
   },
 
   // Auto-fix JS files with ESLint using amphtml's custom settings. Needs

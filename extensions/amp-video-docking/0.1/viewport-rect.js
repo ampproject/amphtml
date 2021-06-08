@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LayoutRectDef, layoutRectLtwh} from '../../../src/layout-rect';
+import {
+  LayoutRectDef,
+  layoutRectLtwh,
+} from '../../../src/core/math/layout-rect';
 
 /**
  * @param {function():T} get
@@ -36,13 +39,12 @@ export function createViewportRect(viewport) {
   const width = readonlyGetterProp(() => viewport.getSize().width);
   const height = readonlyGetterProp(() => viewport.getSize().height);
 
-  return /** @type {!LayoutRectDef} */ (Object.defineProperties(
-    layoutRectLtwh(0, 0, 0, 0),
-    {
+  return /** @type {!LayoutRectDef} */ (
+    Object.defineProperties(layoutRectLtwh(0, 0, 0, 0), {
       width,
       height,
       right: width,
       bottom: height,
-    }
-  ));
+    })
+  );
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {
@@ -26,12 +26,12 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
+import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -119,7 +119,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell Wistia Player we want to receive messages
       this.listenToFrame_();
-      element.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(element, VideoEvents.LOAD);
     });
 
     this.playerReadyResolver_(loaded);
@@ -141,11 +141,6 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
     return true;
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -194,7 +189,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
 
     if (playerEvent == 'mutechange') {
       const isMuted = data['args'] ? data['args'][1] : undefined;
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(isMuted));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(isMuted));
       return;
     }
   }

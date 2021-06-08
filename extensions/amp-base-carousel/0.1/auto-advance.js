@@ -16,7 +16,7 @@
 
 import {ActionSource} from './action-source';
 import {CarouselEvents} from './carousel-events';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/core/types/function';
 import {getDetail, listen, listenOnce} from '../../../src/event-helper';
 
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
@@ -48,7 +48,7 @@ export class AutoAdvance {
    * }} config
    */
   constructor(config) {
-    const {win, element, scrollContainer, advanceable} = config;
+    const {advanceable, element, scrollContainer, win} = config;
     /** @private @const */
     this.win_ = win;
 

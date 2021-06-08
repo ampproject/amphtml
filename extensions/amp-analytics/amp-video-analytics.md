@@ -26,7 +26,6 @@ AMP video analytics gathers data about how users interact with videos in AMP doc
 | `<amp-3q-player>`     | Partial support<sup>[1]</sup> |
 | `<amp-brid-player>`   | Partial support<sup>[1]</sup> |
 | `<amp-brightcove>`    | Full support                  |
-| `<amp-jwplayer>`      | Full support                  |
 | `<amp-dailymotion>`   | Partial support<sup>[1]</sup> |
 | `<amp-ima-video>`     | Partial support<sup>[1]</sup> |
 | `<amp-nexxtv-player>` | Partial support<sup>[1]</sup> |
@@ -230,7 +229,7 @@ If you'd like to capture the initial `play` event (e.g. click-to-play), you can 
 
 ## Video analytics variables
 
-Video analytics contributes the following variables to [AMP URL Variable Substitutions](../../spec/amp-var-substitutions.md).
+Video analytics contributes the following variables to [AMP URL Variable Substitutions](../../docs/spec/amp-var-substitutions.md).
 
 ### VIDEO_STATE
 

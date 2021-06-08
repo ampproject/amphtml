@@ -16,10 +16,11 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {getReplacePlugin} = require('./helpers');
+const {getImportResolverPlugin} = require('./import-resolver');
+const {getReplaceGlobalsPlugin, getReplacePlugin} = require('./helpers');
 
 /**
- * Gets the config for babel transforms run during `gulp [unit|integration]`.
+ * Gets the config for babel transforms run during `amp [unit|integration|e2e]`.
  *
  * @return {!Object}
  */
@@ -55,11 +56,17 @@ function getTestConfig() {
     },
   ];
   const replacePlugin = getReplacePlugin();
+  const replaceGlobalsPlugin = getReplaceGlobalsPlugin();
   const testPlugins = [
+    getImportResolverPlugin(),
     argv.coverage ? instanbulPlugin : null,
     replacePlugin,
+    replaceGlobalsPlugin,
+    './build-system/babel-plugins/babel-plugin-imported-helpers',
+    './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
+    './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
     '@babel/plugin-transform-classes',
@@ -68,12 +75,9 @@ function getTestConfig() {
   const testPresets = [presetEnv];
   return {
     compact: false,
-    // We do not want to ignore our dependencies in test mode, since some may
-    // be using newer features that need to be transpiled down for our test
-    // browsers.
-    ignore: [],
     plugins: testPlugins,
     presets: testPresets,
+    sourceMaps: 'inline',
   };
 }
 

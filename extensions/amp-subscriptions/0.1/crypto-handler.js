@@ -20,10 +20,10 @@ import {
   safeAesGcmImportKey,
 } from '../../../third_party/subscriptions-project/aes_gcm';
 import {iterateCursor} from '../../../src/dom';
-import {padStart} from '../../../src/string';
-import {toArray} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
-import {utf8Encode} from '../../../src/utils/bytes';
+import {padStart} from '../../../src/core/types/string';
+import {toArray} from '../../../src/core/types/array';
+import {tryParseJson} from '../../../src/core/types/object/json';
+import {utf8Encode} from '../../../src/core/types/string/bytes';
 
 export class CryptoHandler {
   /**
@@ -76,17 +76,17 @@ export class CryptoHandler {
    * Returns encrypted document key if it exists.
    * This key is needed for requesting a different key
    * that decrypts locked content on the page.
-   * @param {string} serviceId Who you want to decrypt the key.
-   *                           For example: 'google.com'
+   * @param {string} platformKey Who you want to decrypt the key.
+   *                             For example: 'google.com'
    * @return {?string}
    */
-  getEncryptedDocumentKey(serviceId) {
+  getEncryptedDocumentKey(platformKey) {
     // Doing this for testing.
     const encryptedKeys = this.getEncryptedKeys();
     if (!encryptedKeys) {
       return null;
     }
-    return encryptedKeys[serviceId] || null;
+    return encryptedKeys[platformKey] || null;
   }
 
   /**

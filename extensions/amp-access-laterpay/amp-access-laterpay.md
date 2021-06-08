@@ -110,10 +110,10 @@ You can find a more complete example [here](https://ampexample.laterpay.net/dual
 
 The following resources provide further documentation on using LaterPay with AMP:
 
-- [`amp-access`](https://amp.dev/documentation/components/amp-access)
-- [LaterPay](https://www.laterpay.net)
-- [LaterPay: How we do MicroPayments](https://docs.laterpay.net/how_we_do_micropayments/)
-- [LaterPay Connector](https://docs.laterpay.net/connector/) - Similar to `amp-access-laterpay` but for non AMP pages.
+-   [`amp-access`](https://amp.dev/documentation/components/amp-access)
+-   [LaterPay](https://www.laterpay.net)
+-   [LaterPay: How we do MicroPayments](https://docs.laterpay.net/how_we_do_micropayments/)
+-   [LaterPay Connector](https://docs.laterpay.net/connector/) - Similar to `amp-access-laterpay` but for non AMP pages.
 
 [/tip]
 
@@ -322,4 +322,4 @@ The following message keys can be translated or customized, but be aware that th
 
 ## Validation
 
-See [`amp-access-laterpay` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-laterpay/validator-amp-access-laterpay.protoascii) in the AMP validator specification.
+See [`amp-access-laterpay` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-access-laterpay/validator-amp-access-laterpay.protoascii) in the AMP validator specification.

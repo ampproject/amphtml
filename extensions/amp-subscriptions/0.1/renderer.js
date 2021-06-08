@@ -15,8 +15,9 @@
  */
 
 import {Services} from '../../../src/services';
-import {childElementByTag, createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {childElementByTag} from '../../../src/core/dom/query';
+import {createElementWithAttributes} from '../../../src/dom';
+import {dict} from '../../../src/core/types/object';
 
 const CSS_PREFIX = 'i-amphtml-subs';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as DocumentReady from '../../../../src/document-ready';
+import * as DocumentReady from '../../../../src/core/document-ready';
 import {AmpSmartlinks} from '../amp-smartlinks';
 import {Linkmate} from '../linkmate';
 import {Services} from '../../../../src/services';
@@ -73,7 +73,7 @@ describes.fakeWin(
           publisherID: 999,
           linkAttribute: 'href',
         };
-        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions, env.win);
         anchorList = [
           {attributeName: 'href', link: 'http://fakelink.example'},
           {attributeName: 'href', link: 'http://fakelink2.example'},
@@ -408,12 +408,12 @@ describes.fakeWin(
           publisherID: 999,
           linkAttribute: 'href',
         };
-        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
-        const envRoot = env.ampdoc.getRootNode();
-        envRoot.title = 'Fake Website Title';
-
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions, env.win);
         env.sandbox
-          .stub(env.ampdoc, 'getUrl')
+          .stub(linkmate, 'getEditName_')
+          .returns('Fake Website Title');
+        env.sandbox
+          .stub(linkmate, 'getLocationHref_')
           .returns('http://fakewebsite.example/');
         env.sandbox.spy(linkmate, 'getEditInfo_');
 

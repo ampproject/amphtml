@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {endsWith, startsWith} from '../../../src/string';
+import {endsWith} from '../../../src/core/types/string';
 import {urls} from '../../../src/config';
 
 export class ExternalReorderHeadTransformer {
@@ -163,11 +163,8 @@ export class ExternalReorderHeadTransformer {
     }
     if (
       isAsync &&
-      ((startsWith(src, urls.cdn) &&
-        (endsWith(src, '/v0.js') ||
-          endsWith(src, '/v0.js.br') ||
-          endsWith(src, '/amp4ads-v0.js') ||
-          endsWith(src, '/amp4ads-v0.js.br'))) ||
+      ((src.startsWith(urls.cdn) &&
+        (endsWith(src, '/v0.js') || endsWith(src, '/amp4ads-v0.js'))) ||
         endsWith(src, '/dist/amp.js') ||
         endsWith(src, '/dist/amp-inabox.js') ||
         endsWith(src, '/dist/v0.js') ||
@@ -178,7 +175,7 @@ export class ExternalReorderHeadTransformer {
     }
     if (
       isAsync &&
-      startsWith(src, urls.cdn + '/v0/amp-viewer-integration-gmail-') &&
+      src.startsWith(urls.cdn + '/v0/amp-viewer-integration-gmail-') &&
       endsWith(src, '.js')
     ) {
       this.headComponents_.scriptGmailAmpViewer = element;
@@ -186,9 +183,8 @@ export class ExternalReorderHeadTransformer {
     }
     if (
       isAsync &&
-      (startsWith(src, urls.cdn + '/v0/amp-viewer-integration-') ||
-        (startsWith(src, urls.cdn + '/viewer/google/v') &&
-          endsWith(src, '.js')))
+      (src.startsWith(urls.cdn + '/v0/amp-viewer-integration-') ||
+        (src.startsWith(urls.cdn + '/viewer/google/v') && endsWith(src, '.js')))
     ) {
       this.headComponents_.scriptAmpViewer = element;
       return;
@@ -233,7 +229,7 @@ export class ExternalReorderHeadTransformer {
     const rel = element.getAttribute('rel');
     if (rel == 'stylesheet') {
       if (
-        startsWith(element.getAttribute('href'), urls.cdn) &&
+        element.getAttribute('href').startsWith(urls.cdn) &&
         endsWith(element.getAttribute('href'), '/v0.css')
       ) {
         this.headComponents_.linkStylesheetRuntimeCss = element;

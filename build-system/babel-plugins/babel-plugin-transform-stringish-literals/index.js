@@ -20,6 +20,11 @@ module.exports = function ({types: t}) {
   const cloneNodes = (nodes) => nodes.map((node) => t.cloneNode(node));
   const escapeValue = (value) => String(value).replace(ESCAPE_REGEX, '\\$&');
 
+  /**
+   * @param {CompilerNode} clonedQuasis
+   * @param {number} index
+   * @return {number|undefined}
+   */
   function whichCloneQuasi(clonedQuasis, index) {
     for (let i = index; i >= 0; i--) {
       const quasi = clonedQuasis[i];
@@ -29,6 +34,10 @@ module.exports = function ({types: t}) {
     }
   }
 
+  /**
+   * @param {CompilerNode} leftPath
+   * @param {CompilerNode} rightPath
+   */
   function joinTemplateLiterals(leftPath, rightPath) {
     const {node: leftNode} = leftPath;
     const {node: rightNode} = rightPath;
@@ -47,6 +56,9 @@ module.exports = function ({types: t}) {
     rightPath.remove();
   }
 
+  /**
+   * @param {BabelPath} path
+   */
   function joinMaybeTemplateLiteral(path) {
     const left = path.get('left');
     const right = path.get('right');
@@ -95,6 +107,9 @@ module.exports = function ({types: t}) {
         },
       },
 
+      /**
+       * @param {BabelPath} path
+       */
       TemplateLiteral(path) {
         // Convert any items inside a template literal that are static literals.
         // `foo{'123'}bar` => `foo123bar`

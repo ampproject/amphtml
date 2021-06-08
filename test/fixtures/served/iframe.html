@@ -51,6 +51,12 @@ window.addEventListener('message', function(event) {
             sentinel: sentinel,
             type: 'send-embed-state',
           }, '*');
+    }  else if (event.data.type === 'requestSendConsentState') {
+      sentinel = 'amp';
+      getAmpWindow(sentinel)./*OK*/postMessage( {
+        sentinel,
+        type: 'send-consent-data',
+      }, '*');
     } else if (event.data.type === 'requestPymjsHeight') {
       msg = [ 'pym', 'example', 'height', event.data.height ].join( 'xPYMx' );
       if (event.data.is3p) {

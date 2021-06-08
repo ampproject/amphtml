@@ -13,35 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const log = require('fancy-log');
-const {cyan, green} = require('ansi-colors');
+const esbuild = require('esbuild');
+const globby = require('globby');
+const path = require('path');
+const {cyan, green} = require('../common/colors');
+const {endBuildStep} = require('../tasks/helpers');
 const {exec} = require('../common/exec');
+const {log} = require('../common/logging');
 
 const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
-
-// Used by new server implementation
-const typescriptBinary = './node_modules/typescript/bin/tsc';
+const CONFIG_PATH = `${SERVER_TRANSFORM_PATH}/tsconfig.json`;
 
 /**
- * Builds the new server by converting typescript transforms to JS
+ * Builds the new server by converting typescript transforms to JS. This JS
+ * output is not type-checked as part of `amp check-build-system`.
+ * @return {Promise<void>}
  */
-function buildNewServer() {
-  const buildCmd = `${typescriptBinary} -p ${SERVER_TRANSFORM_PATH}/tsconfig.json`;
+async function buildNewServer() {
   log(
     green('Building'),
-    cyan('AMP Dev Server'),
+    cyan('AMP Server'),
     green('at'),
     cyan(`${SERVER_TRANSFORM_PATH}/dist`) + green('...')
   );
-  const result = exec(buildCmd, {'stdio': ['inherit', 'inherit', 'pipe']});
+  const entryPoints = globby.sync(`${SERVER_TRANSFORM_PATH}/**/*.ts`);
+  const startTime = Date.now();
+  await esbuild.build({
+    entryPoints,
+    outdir: path.join(SERVER_TRANSFORM_PATH, 'dist'),
+    bundle: false,
+    banner: {js: '// @ts-nocheck'},
+    tsconfig: CONFIG_PATH,
+    format: 'cjs',
+  });
+  endBuildStep('Built', 'AMP Server', startTime);
+}
+
+/**
+ * Checks all types in the generated output after running server transforms.
+ */
+function typecheckNewServer() {
+  const cmd = `npx -p typescript tsc --noEmit -p ${CONFIG_PATH}`;
+  const result = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
+
   if (result.status != 0) {
-    const err = new Error('Could not build AMP Dev Server');
-    err.showStack = false;
-    throw err;
+    throw new Error(`Typechecking AMP Server failed.`);
   }
 }
 
 module.exports = {
   buildNewServer,
+  typecheckNewServer,
   SERVER_TRANSFORM_PATH,
 };

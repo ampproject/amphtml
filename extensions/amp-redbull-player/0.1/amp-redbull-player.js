@@ -23,10 +23,14 @@ import {
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
+import {
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
@@ -55,7 +59,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {!UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenFrame_ = null;
 
     /** @private {string} */
@@ -199,7 +203,8 @@ class AmpRedBullPlayer extends AMP.BaseElement {
    * @param {!Object<string, string>=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars) {
-    this.element.dispatchCustomEvent(
+    dispatchCustomEvent(
+      this.element,
       VideoEvents.CUSTOM_TICK,
       dict({
         'eventType': `video-custom-tracking-${this.tagId_}`,

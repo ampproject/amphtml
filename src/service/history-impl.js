@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
+import {Deferred, tryResolve} from '../core/data-structures/promise';
 import {Services} from '../services';
 import {dev, devAssert} from '../log';
-import {dict, map} from '../utils/object';
+import {dict, map} from '../core/types/object';
 import {getMode} from '../mode';
 import {
   getService,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from '../service';
-import {getState} from '../history';
+import {getState} from '../core/window/history';
 
 /** @private @const {string} */
 const TAG_ = 'History';
@@ -247,7 +247,7 @@ export class History {
    */
   enque_(callback, name) {
     const deferred = new Deferred();
-    const {promise, resolve, reject} = deferred;
+    const {promise, reject, resolve} = deferred;
 
     // TODO(dvoytenko, #8785): cleanup after tracing.
     const trace = new Error('history trace for ' + name + ': ');
@@ -684,7 +684,7 @@ export class HistoryBindingNatural_ {
   wait_() {
     this.assertReady_();
     const deferred = new Deferred();
-    const {resolve, reject} = deferred;
+    const {reject, resolve} = deferred;
     const promise = this.timer_.timeoutPromise(500, deferred.promise);
     this.waitingState_ = {promise, resolve, reject};
     return promise;
@@ -965,9 +965,11 @@ export class HistoryBindingVirtual_ {
     return this.viewer_
       .sendMessageAwaitResponse(pop, message)
       .then((response) => {
-        const fallbackState = /** @type {!HistoryStateDef} */ (dict({
-          'stackIndex': this.stackIndex_ - 1,
-        }));
+        const fallbackState = /** @type {!HistoryStateDef} */ (
+          dict({
+            'stackIndex': this.stackIndex_ - 1,
+          })
+        );
         const newState = this.toHistoryState_(response, fallbackState, pop);
         this.updateHistoryState_(newState);
         return newState;
@@ -987,9 +989,11 @@ export class HistoryBindingVirtual_ {
       if (!this.viewer_.hasCapability('fullReplaceHistory')) {
         // Full URL replacement requested, but not supported by the viewer.
         // Don't update, and return the current state.
-        const curState = /** @type {!HistoryStateDef} */ (dict({
-          'stackIndex': this.stackIndex_,
-        }));
+        const curState = /** @type {!HistoryStateDef} */ (
+          dict({
+            'stackIndex': this.stackIndex_,
+          })
+        );
         return Promise.resolve(curState);
       }
 
@@ -1107,11 +1111,13 @@ export class HistoryBindingVirtual_ {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve();
     }
-    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-      'replaceHistory',
-      dict({'fragment': fragment}),
-      /* cancelUnsent */ true
-    ));
+    return /** @type {!Promise} */ (
+      this.viewer_.sendMessageAwaitResponse(
+        'replaceHistory',
+        dict({'fragment': fragment}),
+        /* cancelUnsent */ true
+      )
+    );
   }
 }
 

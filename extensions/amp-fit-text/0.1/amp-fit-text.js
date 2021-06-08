@@ -17,11 +17,18 @@
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {px, setStyle, setStyles} from '../../../src/style';
+import {throttle} from '../../../src/core/types/function';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;
+const RESIZE_THROTTLE_MS = 100;
 
 class AmpFitText extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -40,6 +47,9 @@ class AmpFitText extends AMP.BaseElement {
 
     /** @private {number} */
     this.maxFontSize_ = -1;
+
+    /** @private {?UnlistenDef} */
+    this.resizeObserverUnlistener_ = null;
 
     /**
      * Synchronously stores updated textContent, but only after it has been
@@ -107,20 +117,42 @@ class AmpFitText extends AMP.BaseElement {
   }
 
   /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-  /** @override */
   isRelayoutNeeded() {
     return true;
   }
 
   /** @override */
   layoutCallback() {
+    if (this.win.ResizeObserver && this.resizeObserverUnlistener_ === null) {
+      const observer = new this.win.ResizeObserver(
+        throttle(
+          this.win,
+          () =>
+            this.mutateElement(() => {
+              this.updateMeasurerContent_();
+              this.updateFontSize_();
+            }),
+          RESIZE_THROTTLE_MS
+        )
+      );
+
+      observer.observe(this.content_);
+      observer.observe(this.measurer_);
+      this.resizeObserverUnlistener_ = function () {
+        observer.disconnect();
+      };
+    }
     return this.mutateElement(() => {
       this.updateFontSize_();
     });
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.resizeObserverUnlistener_ !== null) {
+      this.resizeObserverUnlistener_();
+      this.resizeObserverUnlistener_ = null;
+    }
   }
 
   /**
@@ -175,6 +207,7 @@ export function calculateFontSize_(
       minFontSize = mid;
     }
   }
+
   return minFontSize;
 }
 

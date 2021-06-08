@@ -18,7 +18,7 @@ import {Action} from './analytics';
 import {Actions} from './actions';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {UrlBuilder} from './url-builder';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {dev, userAssert} from '../../../src/log';
 
 /**
@@ -49,9 +49,8 @@ export class LocalSubscriptionBasePlatform {
     this.serviceConfig_ = platformConfig;
 
     /** @private @const {boolean} */
-    this.pingbackAllEntitlements_ = !!this.serviceConfig_[
-      'pingbackAllEntitlements'
-    ];
+    this.pingbackAllEntitlements_ =
+      !!this.serviceConfig_['pingbackAllEntitlements'];
 
     /** @protected @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
@@ -89,7 +88,7 @@ export class LocalSubscriptionBasePlatform {
   /**
    * @override
    */
-  getServiceId() {
+  getPlatformKey() {
     return 'local';
   }
 
@@ -154,7 +153,7 @@ export class LocalSubscriptionBasePlatform {
           const platform = this.serviceAdapter_.selectPlatformForLogin();
           this.serviceAdapter_.delegateActionToService(
             action,
-            platform.getServiceId(),
+            platform.getPlatformKey(),
             element.id
           );
         } else {
@@ -240,8 +239,6 @@ export class LocalSubscriptionBasePlatform {
 
   /**
    * @override
-   * @param {?./entitlement.Entitlement} unusedEntitlement
-   * @return {!Promise|undefined}
    */
   pingback(unusedEntitlement) {}
 

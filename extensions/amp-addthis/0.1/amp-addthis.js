@@ -56,7 +56,7 @@ import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {
   getAddThisMode,
   isProductCode,
@@ -120,7 +120,7 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {string} */
     this.referrer_ = '';
 
-    /** @private {(?JsonObject<string, string>|null)} */
+    /** @private {?JsonObject<string, string>} */
     this.shareConfig_ = null;
 
     /** @private {(?JsonObject)} */
@@ -404,12 +404,17 @@ class AmpAddThis extends AMP.BaseElement {
   }
 
   /**
+   * @typedef {{
+   *   ampdoc: !../../../src/service/ampdoc-impl.AmpDoc,
+   *   loc: *,
+   *   pubId: *,
+   * }} SetupListenersInput
+   */
+
+  /**
    * Sets up listeners.
    *
-   * @param {!Object} input
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} [input.ampdoc]
-   * @param {*} [input.loc]
-   * @param {*} [input.pubId]
+   * @param {!SetupListenersInput} input
    * @memberof AmpAddThis
    */
   setupListeners_(input) {

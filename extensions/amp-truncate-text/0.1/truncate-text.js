@@ -19,7 +19,7 @@ import {
   BinarySearchStop,
   binarySearch,
 } from './binary-search';
-import {trimEnd} from '../../../src/string';
+import {trimEnd} from '../../../src/core/types/string';
 
 /** The class to add to the container when it has overflow. */
 const CONTAINER_OVERFLOW_ATTRIBUTE = 'i-amphtml-truncate-overflow';
@@ -175,7 +175,7 @@ function getOverflowY(element) {
  *   overflowNodes: !Array<!Node>,
  * }} config
  */
-export function truncateText({container, overflowNodes} = {}) {
+export function truncateText({container, overflowNodes}) {
   clearTruncated(container);
 
   // If everything fits while the overflow button is hidden, we are done.

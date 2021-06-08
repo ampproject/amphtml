@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -39,31 +38,27 @@ export class PremiumadsNetworkConfig {
    * True if responsive is enabled for auto-ads
    */
   isResponsiveEnabled() {
-    return true;
+    return false;
   }
 
   /** @override */
   getConfigUrl() {
-    return buildUrl(
-      'https://tags.premiumads.com.br/autoads/' +
-        this.autoAmpAdsElement_.getAttribute('data-publisher'),
-      {},
-      4096
-    );
+    const data = this.autoAmpAdsElement_.dataset;
+    const host = data.host || 'https://tags.premiumads.com.br';
+    return buildUrl(`${host}/autoads/${data.publisher}`, {}, 4096);
   }
 
   /** @override */
   getAttributes() {
-    const attributesObj = dict({
+    const data = this.autoAmpAdsElement_.dataset;
+    return dict({
       'type': 'doubleclick',
       'data-ad': 'premiumads',
-      'width': 336,
-      'height': 280,
-      'layout': Layout.RESPONSIVE,
-      'sizes': '(min-width: 320px) 320px, 100vw',
-      'style': 'position:relative!important',
+      'layout': data.layout || Layout.FIXED,
+      'style':
+        data['style'] ||
+        'margin: 15px auto; position: relative !important; display: block !important;',
     });
-    return attributesObj;
   }
 
   /** @override */

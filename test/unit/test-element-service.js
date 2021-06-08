@@ -14,141 +14,125 @@
  * limitations under the License.
  */
 
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {FakeWindow} from '../../testing/fake-dom';
 import {Services} from '../../src/services';
+import {createElementWithAttributes} from '../../src/dom';
 import {
-  getElementService,
   getElementServiceForDoc,
   getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
   getElementServiceIfAvailableForDocInEmbedScope,
-  isExtensionScriptInNode,
 } from '../../src/element-service';
 import {
-  installServiceInEmbedScope,
+  installServiceInEmbedDoc,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
-  resetServiceForTesting,
   setParentWindow,
 } from '../../src/service';
-import {
-  markElementScheduledForTesting,
-  resetScheduledElementForTesting,
-} from '../../src/service/custom-element-registry';
 
-describe('getElementServiceIfAvailable()', () => {
-  let doc;
-  let win;
-  let setIntervalCallback;
+describes.realWin('getElementServiceIfAvailable()', {amp: true}, (env) => {
+  let win, doc;
+  let extensionsMock;
+  let clock;
 
   beforeEach(() => {
-    doc = {
-      head: {},
-      body: {},
-    };
-    doc.documentElement = {ownerDocument: doc};
-    doc.getHeadNode = () => doc.head;
-    doc.head.querySelectorAll = () => [];
+    win = env.win;
+    doc = env.win.document;
+    clock = fakeTimers.withGlobal(win).install();
 
-    win = {
-      document: doc,
-      setInterval: (callback) => {
-        setIntervalCallback = callback;
-      },
-      clearInterval: () => {},
-    };
-    doc.defaultView = win;
-
-    resetServiceForTesting(win, 'e1');
-    resetScheduledElementForTesting(win, 'element-1');
+    extensionsMock = env.sandbox.mock(Services.extensionsFor(win));
   });
 
   afterEach(() => {
-    setIntervalCallback = undefined;
+    clock.uninstall();
+    extensionsMock.verify();
   });
 
-  it('should wait for doc ready when not available', () => {
-    doc.body = null; // Body not available
+  it('should wait for body', async () => {
+    const {body} = doc;
+    doc.documentElement.removeChild(body);
     let resolvedService;
-    const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1').then(
+    const p1 = getElementServiceIfAvailable(win, 'e1', 'element1', '0.1').then(
       (service) => {
         resolvedService = service;
         return service;
       }
     );
-    return Promise.resolve()
-      .then(() => {
-        expect(setIntervalCallback).to.exist;
-        expect(resolvedService).to.be.undefined;
 
-        // Resolve body.
-        doc.body = {};
-        setIntervalCallback();
-        return p1;
-      })
-      .then((service) => {
-        expect(resolvedService).to.be.null;
-        expect(service).to.be.null;
-      });
+    await Promise.resolve();
+    expect(resolvedService).to.be.undefined;
+
+    // Resolve body.
+    doc.documentElement.appendChild(body);
+    expect(doc.body).to.exist;
+    clock.tick(1000);
+
+    const service = await p1;
+    expect(resolvedService).to.be.null;
+    expect(service).to.be.null;
   });
 
-  it('should resolve with body when not available', () => {
-    doc.body = {}; // Body is available
-    const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
-    return Promise.resolve()
-      .then(() => {
-        expect(setIntervalCallback).to.be.undefined;
-        return p1;
-      })
-      .then((service) => {
-        expect(service).to.be.null;
-      });
-  });
-
-  it('should wait for body when available', () => {
-    doc.body = null; // Body not available
-    let resolvedService;
-    const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1').then(
-      (service) => {
-        resolvedService = service;
-        return service;
-      }
+  it('should resolve with body when not available', async () => {
+    const service = await getElementServiceIfAvailable(
+      win,
+      'e1',
+      'element1',
+      '0.1'
     );
-    return Promise.resolve()
-      .then(() => {
-        expect(setIntervalCallback).to.exist;
-        expect(resolvedService).to.be.undefined;
-
-        // Resolve body.
-        markElementScheduledForTesting(win, 'element-1');
-        registerServiceBuilder(win, 'e1', function () {
-          return {str: 'fake1'};
-        });
-        doc.body = {};
-        setIntervalCallback();
-        return p1;
-      })
-      .then((service) => {
-        expect(resolvedService).to.deep.equal({str: 'fake1'});
-        expect(service).to.deep.equal({str: 'fake1'});
-      });
+    expect(service).to.be.null;
   });
 
-  it('should resolve with body when available', () => {
-    doc.body = {}; // Body is available
-    markElementScheduledForTesting(win, 'element-1');
-    const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
-    return Promise.resolve()
-      .then(() => {
-        expect(setIntervalCallback).to.be.undefined;
-        registerServiceBuilder(win, 'e1', function () {
-          return {str: 'fake1'};
-        });
-        return p1;
-      })
-      .then((service) => {
-        expect(service).to.deep.equal({str: 'fake1'});
-      });
+  it('should resolve when available', async () => {
+    const script = createElementWithAttributes(doc, 'script', {
+      'custom-element': 'element1',
+    });
+    env.sandbox
+      .stub(script, 'src')
+      .value('https://cdn.ampproject.org/v0/element1-0.1.js');
+    doc.head.appendChild(script);
+
+    extensionsMock
+      .expects('waitForExtension')
+      .withExactArgs('element1', '0.1')
+      .returns(Promise.resolve({}))
+      .once();
+
+    const promise = getElementServiceIfAvailable(win, 'e1', 'element1', '0.1');
+
+    registerServiceBuilder(win, 'e1', function () {
+      return {str: 'fake1'};
+    });
+
+    const service = await promise;
+    expect(service).to.deep.equal({str: 'fake1'});
+  });
+
+  it('should not wait for the element-service', async () => {
+    const script = createElementWithAttributes(doc, 'script', {
+      'custom-element': 'element1',
+    });
+    env.sandbox
+      .stub(script, 'src')
+      .value('https://cdn.ampproject.org/v0/element1-0.1.js');
+    doc.head.appendChild(script);
+
+    extensionsMock
+      .expects('waitForExtension')
+      .withExactArgs('element1', '0.1')
+      .returns(Promise.resolve({}))
+      .once();
+
+    const promise = getElementServiceIfAvailable(
+      win,
+      'e1',
+      'element1',
+      '0.1',
+      true
+    );
+
+    const service = await promise;
+    expect(service).to.deep.be.null;
   });
 });
 
@@ -160,97 +144,91 @@ describes.realWin(
     },
   },
   (env) => {
-    let ampdoc;
+    let win, doc, ampdoc;
+    let extensionsMock;
 
     beforeEach(() => {
+      win = env.win;
+      doc = win.document;
       ampdoc = env.ampdoc;
-
-      resetServiceForTesting(env.win, 'e1');
-      resetScheduledElementForTesting(env.win, 'element-1');
-      resetScheduledElementForTesting(env.win, 'element-foo');
+      extensionsMock = env.sandbox.mock(Services.extensionsFor(win));
     });
 
-    describe('getElementService()', () => {
-      it('should be provided by element', () => {
-        markElementScheduledForTesting(env.win, 'element-1');
-        const p1 = getElementService(env.win, 'e1', 'element-1');
-        const p2 = getElementService(env.win, 'e1', 'element-1');
-
-        registerServiceBuilder(env.win, 'e1', function () {
-          return {str: 'from e1'};
-        });
-
-        return p1.then((s1) => {
-          expect(s1).to.deep.equal({str: 'from e1'});
-          return p2.then((s2) => {
-            expect(s1).to.equal(s2);
-          });
-        });
-      });
-
-      it('should fail if element is not in page.', () => {
-        expectAsyncConsoleError(
-          /e1 was requested to be provided through element-bar/
-        );
-        markElementScheduledForTesting(env.win, 'element-foo');
-
-        return getElementService(env.win, 'e1', 'element-bar')
-          .then(
-            () => {
-              return 'SUCCESS';
-            },
-            (error) => {
-              return 'ERROR ' + error;
-            }
-          )
-          .then((result) => {
-            expect(result).to.match(
-              /Service e1 was requested to be provided through element-bar/
-            );
-          });
-      });
+    afterEach(() => {
+      extensionsMock.verify();
     });
 
     describe('getElementServiceIfAvailable()', () => {
-      it('should be provided by element if available', () => {
-        markElementScheduledForTesting(env.win, 'element-1');
-        const p1 = getElementServiceIfAvailable(env.win, 'e1', 'element-1');
-        const p2 = getElementServiceIfAvailable(env.win, 'e2', 'not-available');
+      it('should be provided by element if available', async () => {
+        const script = createElementWithAttributes(doc, 'script', {
+          'custom-element': 'element1',
+        });
+        env.sandbox
+          .stub(script, 'src')
+          .value('https://cdn.ampproject.org/v0/element1-0.1.js');
+        doc.head.appendChild(script);
+
+        extensionsMock
+          .expects('waitForExtension')
+          .withExactArgs('element1', '0.1')
+          .returns(Promise.resolve({}))
+          .once();
+
+        const p1 = getElementServiceIfAvailable(
+          env.win,
+          'e1',
+          'element1',
+          '0.1'
+        );
+        const p2 = getElementServiceIfAvailable(
+          env.win,
+          'e2',
+          'not-available',
+          '0.1'
+        );
         registerServiceBuilder(env.win, 'e1', function () {
           return {str: 'from e1'};
         });
-        return p1.then((s1) => {
-          expect(s1).to.deep.equal({str: 'from e1'});
-          return p2.then((s2) => {
-            expect(s2).to.be.null;
-          });
-        });
+
+        const s1 = await p1;
+        expect(s1).to.deep.equal({str: 'from e1'});
+
+        const s2 = await p2;
+        expect(s2).to.be.null;
       });
     });
 
     describe('getElementServiceForDoc()', () => {
-      it('should be provided by element', () => {
-        markElementScheduledForTesting(env.win, 'element-1');
-        const p1 = getElementServiceForDoc(ampdoc, 'e1', 'element-1');
-        const p2 = getElementServiceForDoc(ampdoc, 'e1', 'element-1');
+      it('should be provided by element', async () => {
+        // Make sure that `whenExtensionsKnown` is observerd.
+        ampdoc.signals().reset('-ampdoc-ext-known');
+        extensionsMock
+          .expects('waitForExtension')
+          .withExactArgs('element1', '0.2')
+          .returns(Promise.resolve({}))
+          .twice();
+
+        const p1 = getElementServiceForDoc(ampdoc, 'e1', 'element1');
+        const p2 = getElementServiceForDoc(ampdoc, 'e1', 'element1');
+
+        ampdoc.declareExtension('element1', '0.2');
+        ampdoc.setExtensionsKnown();
 
         registerServiceBuilder(env.win, 'e1', function () {
           return {str: 'from e1'};
         });
 
-        return p1.then((s1) => {
-          expect(s1).to.deep.equal({str: 'from e1'});
-          return p2.then((s2) => {
-            expect(s1).to.equal(s2);
-          });
-        });
+        const s1 = await p1;
+        expect(s1).to.deep.equal({str: 'from e1'});
+
+        const s2 = await p2;
+        expect(s2).to.equal(s1);
       });
 
       it('should fail if element is not in page.', () => {
         expectAsyncConsoleError(
           /e1 was requested to be provided through element-bar/
         );
-        markElementScheduledForTesting(env.win, 'element-foo');
 
         return getElementServiceForDoc(ampdoc, 'e1', 'element-bar')
           .then(
@@ -270,136 +248,65 @@ describes.realWin(
     });
 
     describe('getElementServiceIfAvailableForDoc()', () => {
-      it('should be provided by element if available', () => {
-        markElementScheduledForTesting(env.win, 'element-1');
-        const p1 = getElementServiceIfAvailableForDoc(
-          ampdoc,
-          'e1',
-          'element-1'
-        );
+      it('should be provided by element if available', async () => {
+        // Make sure that `whenExtensionsKnown` is observerd.
+        ampdoc.signals().reset('-ampdoc-ext-known');
+        extensionsMock
+          .expects('waitForExtension')
+          .withExactArgs('element1', '0.2')
+          .returns(Promise.resolve({}))
+          .once();
+
+        const p1 = getElementServiceIfAvailableForDoc(ampdoc, 'e1', 'element1');
         const p2 = getElementServiceIfAvailableForDoc(
           ampdoc,
           'e2',
           'not-available'
         );
+
+        ampdoc.declareExtension('element1', '0.2');
+        ampdoc.setExtensionsKnown();
+
         registerServiceBuilder(env.win, 'e1', function () {
           return {str: 'from e1'};
         });
-        return p1.then((s1) => {
-          expect(s1).to.deep.equal({str: 'from e1'});
-          return p2.then((s2) => {
-            expect(s2).to.be.null;
-          });
-        });
+
+        const s1 = await p1;
+        expect(s1).to.deep.equal({str: 'from e1'});
+
+        const s2 = await p2;
+        expect(s2).to.be.null;
       });
 
-      it('should wait for body when not available', () => {
-        let bodyResolver;
-        ampdoc.bodyPromise_ = new Promise((resolve) => {
-          bodyResolver = resolve;
-        });
-        let resolvedService;
-        const p1 = getElementServiceIfAvailableForDoc(
+      it('resolve w/ body when not available', async () => {
+        const service = await getElementServiceIfAvailableForDoc(
           ampdoc,
           'e1',
-          'element-1'
-        ).then((service) => {
-          resolvedService = service;
-          return service;
+          'element1'
+        );
+        expect(service).to.be.null;
+      });
+
+      it('should resolve with body when available', async () => {
+        // Make sure that `whenExtensionsKnown` is observerd.
+        ampdoc.signals().reset('-ampdoc-ext-known');
+        extensionsMock
+          .expects('waitForExtension')
+          .withExactArgs('element1', '0.2')
+          .returns(Promise.resolve({}))
+          .once();
+
+        const p1 = getElementServiceIfAvailableForDoc(ampdoc, 'e1', 'element1');
+
+        ampdoc.declareExtension('element1', '0.2');
+        ampdoc.setExtensionsKnown();
+
+        registerServiceBuilder(env.win, 'e1', function () {
+          return {str: 'fake1'};
         });
-        return Promise.resolve()
-          .then(() => {
-            expect(resolvedService).to.be.undefined;
 
-            // Resolve body.
-            bodyResolver();
-            return p1;
-          })
-          .then((service) => {
-            expect(resolvedService).to.be.null;
-            expect(service).to.be.null;
-          });
-      });
-
-      it('resolve w/ body when not available', () => {
-        const p1 = getElementServiceIfAvailableForDoc(
-          ampdoc,
-          'e1',
-          'element-1'
-        );
-        return Promise.resolve()
-          .then(() => {
-            return p1;
-          })
-          .then((service) => {
-            expect(service).to.be.null;
-          });
-      });
-
-      it('should wait for body when available', () => {
-        let bodyResolver;
-        ampdoc.bodyPromise_ = new Promise((resolve) => {
-          bodyResolver = resolve;
-        });
-        let resolvedService;
-        const p1 = getElementServiceIfAvailableForDoc(
-          ampdoc,
-          'e1',
-          'element-1'
-        ).then((service) => {
-          resolvedService = service;
-          return service;
-        });
-        return Promise.resolve()
-          .then(() => {
-            expect(resolvedService).to.be.undefined;
-
-            // Resolve body.
-            markElementScheduledForTesting(env.win, 'element-1');
-            registerServiceBuilder(env.win, 'e1', function () {
-              return {str: 'fake1'};
-            });
-            bodyResolver();
-            return p1;
-          })
-          .then((service) => {
-            expect(resolvedService).to.deep.equal({str: 'fake1'});
-            expect(service).to.deep.equal({str: 'fake1'});
-          });
-      });
-
-      it('should resolve with body when available', () => {
-        markElementScheduledForTesting(env.win, 'element-1');
-        const p1 = getElementServiceIfAvailableForDoc(
-          ampdoc,
-          'e1',
-          'element-1'
-        );
-        return Promise.resolve()
-          .then(() => {
-            registerServiceBuilder(env.win, 'e1', function () {
-              return {str: 'fake1'};
-            });
-            return p1;
-          })
-          .then((service) => {
-            expect(service).to.deep.equal({str: 'fake1'});
-          });
-      });
-
-      it('isExtensionScriptInNode', () => {
-        const extension = document.createElement('script');
-        extension.setAttribute('custom-element', 'amp-form');
-        extension.setAttribute(
-          'src',
-          'https://cdn.ampproject.org/v0/amp-form-0.1.js'
-        );
-        ampdoc.getHeadNode().appendChild(extension);
-        return isExtensionScriptInNode(ampdoc, 'amp-form').then(
-          (ampFormInstalled) => {
-            expect(ampFormInstalled).to.equal(true);
-          }
-        );
+        const service = await p1;
+        expect(service).to.deep.equal({str: 'fake1'});
       });
     });
   }
@@ -412,9 +319,12 @@ describes.fakeWin('in embed scope', {amp: true}, (env) => {
   let nodeInTopWin;
   let frameElement;
   let service;
+  let embedAmpDoc;
+  let extensionsMock;
 
   beforeEach(() => {
     win = env.win;
+    extensionsMock = env.sandbox.mock(Services.extensionsFor(win));
 
     frameElement = win.document.createElement('div');
     win.document.body.appendChild(frameElement);
@@ -423,7 +333,7 @@ describes.fakeWin('in embed scope', {amp: true}, (env) => {
     embedWin.frameElement = frameElement;
     setParentWindow(embedWin, win);
 
-    Services.ampdocServiceFor(win).installFieDoc(
+    embedAmpDoc = env.ampdocService.installFieDoc(
       'https://example.org',
       embedWin
     );
@@ -442,8 +352,12 @@ describes.fakeWin('in embed scope', {amp: true}, (env) => {
     service = {name: 'fake-service-object'};
   });
 
+  afterEach(() => {
+    extensionsMock.verify();
+  });
+
   it('should return existing service', () => {
-    installServiceInEmbedScope(embedWin, 'foo', service);
+    installServiceInEmbedDoc(embedAmpDoc, 'foo', service);
     return getElementServiceIfAvailableForDocInEmbedScope(
       nodeInEmbedWin,
       'foo',
@@ -453,21 +367,31 @@ describes.fakeWin('in embed scope', {amp: true}, (env) => {
     });
   });
 
-  it('should return service for scheduled element', () => {
-    markElementScheduledForTesting(embedWin, 'amp-foo');
+  it('should return service for scheduled element', async () => {
+    // Make sure that `whenExtensionsKnown` is observerd.
+    embedAmpDoc.signals().reset('-ampdoc-ext-known');
+    extensionsMock
+      .expects('waitForExtension')
+      .withExactArgs('amp-foo', '0.2')
+      .returns(Promise.resolve({}))
+      .once();
+
     const promise = getElementServiceIfAvailableForDocInEmbedScope(
       nodeInEmbedWin,
       'foo',
       'amp-foo'
     );
-    installServiceInEmbedScope(embedWin, 'foo', service);
-    return promise.then((returned) => {
-      expect(returned).to.equal(service);
-    });
+
+    embedAmpDoc.declareExtension('amp-foo', '0.2');
+    embedAmpDoc.setExtensionsKnown();
+
+    installServiceInEmbedDoc(embedAmpDoc, 'foo', service);
+
+    const returned = await promise;
+    expect(returned).to.equal(service);
   });
 
-  it('should return ampdoc-scope service if node in top window', () => {
-    markElementScheduledForTesting(win, 'amp-foo');
+  it('should return ampdoc-scope service if node in top window', async () => {
     registerServiceBuilderForDoc(
       nodeInTopWin,
       'foo',
@@ -476,17 +400,16 @@ describes.fakeWin('in embed scope', {amp: true}, (env) => {
       },
       /* opt_instantiate */ true
     );
-    return getElementServiceIfAvailableForDocInEmbedScope(
+
+    const returned = await getElementServiceIfAvailableForDocInEmbedScope(
       nodeInTopWin,
       'foo',
       'amp-foo'
-    ).then((returned) => {
-      expect(returned).to.equal(service);
-    });
+    );
+    expect(returned).to.equal(service);
   });
 
-  it('should NOT return ampdoc-scope service if node in embed window', () => {
-    markElementScheduledForTesting(win, 'amp-foo');
+  it('should NOT return ampdoc-scope service if node in embed window', async () => {
     registerServiceBuilderForDoc(
       nodeInTopWin,
       'foo',
@@ -495,12 +418,14 @@ describes.fakeWin('in embed scope', {amp: true}, (env) => {
       },
       /* opt_instantiate */ true
     );
-    return getElementServiceIfAvailableForDocInEmbedScope(
+
+    embedAmpDoc.setExtensionsKnown();
+
+    const returned = await getElementServiceIfAvailableForDocInEmbedScope(
       nodeInEmbedWin,
       'foo',
       'amp-foo'
-    ).then((returned) => {
-      expect(returned).to.be.null;
-    });
+    );
+    expect(returned).to.be.null;
   });
 });

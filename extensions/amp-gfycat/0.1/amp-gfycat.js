@@ -18,8 +18,12 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
+import {
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
@@ -83,14 +87,11 @@ class AmpGfycat extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
+    const placeholder = this.win.document.createElement('img');
     const videoid = dev().assertString(this.videoid_);
+    this.applyFillContent(placeholder);
     this.propagateAttributes(['alt', 'aria-label'], placeholder);
-    placeholder.setAttribute(
-      'src',
-      'https://thumbs.gfycat.com/' + encodeURIComponent(videoid) + '-poster.jpg'
-    );
-    placeholder.setAttribute('layout', 'fill');
+    placeholder.setAttribute('loading', 'lazy');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (this.element.hasAttribute('aria-label')) {
@@ -106,7 +107,10 @@ class AmpGfycat extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading gif');
     }
-    this.applyFillContent(placeholder);
+    placeholder.setAttribute(
+      'src',
+      'https://thumbs.gfycat.com/' + encodeURIComponent(videoid) + '-poster.jpg'
+    );
 
     return placeholder;
   }
@@ -160,7 +164,7 @@ class AmpGfycat extends AMP.BaseElement {
 
     this.element.appendChild(iframe);
     return this.loadPromise(this.iframe_).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(this.element, VideoEvents.LOAD);
     });
   }
 
@@ -205,14 +209,16 @@ class AmpGfycat extends AMP.BaseElement {
     }
 
     if (eventData == 'paused') {
-      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      dispatchCustomEvent(this.element, VideoEvents.PAUSE);
     } else if (eventData == 'playing') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+      dispatchCustomEvent(this.element, VideoEvents.PLAYING);
     }
   }
 
   /** @override */
   pauseCallback() {
+    // gfycat automatically paused in the zero-size case and additional
+    // intervention is not needed. Additionally, gfycat are always muted.
     this.pause();
   }
 

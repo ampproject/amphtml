@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {PROTOCOL_VERSION} from './scroll-protocol';
 import {ScrollComponent} from './scroll-component';
-import {dict} from '../../../src/utils/object';
+import {buildUrl, connectHostname} from './scroll-url';
+import {dict} from '../../../src/core/types/object';
 
 /**
  * UI for Scroll users.
@@ -27,16 +27,12 @@ export class ScrollBar extends ScrollComponent {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} doc
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
-   * @param {string} baseUrl
    */
-  constructor(doc, accessSource, baseUrl) {
+  constructor(doc, accessSource) {
     super(doc);
 
     /** @protected */
     this.accessSource_ = accessSource;
-
-    /** @protected */
-    this.baseUrl_ = baseUrl;
 
     this.render_();
   }
@@ -56,21 +52,23 @@ export class ScrollBar extends ScrollComponent {
    * @protected
    * */
   makeIframe_() {
-    this.frame_ = /** @type {!HTMLIFrameElement} */ (this.el(
-      'iframe',
-      dict({
-        'scrolling': 'no',
-        'frameborder': '0',
-        'allowtransparency': 'true',
-        'title': 'Scroll',
-        'width': '100%',
-        'height': '100%',
-        'sandbox':
-          'allow-scripts allow-same-origin ' +
-          'allow-top-navigation allow-popups ' +
-          'allow-popups-to-escape-sandbox',
-      })
-    ));
+    this.frame_ = /** @type {!HTMLIFrameElement} */ (
+      this.el(
+        'iframe',
+        dict({
+          'scrolling': 'no',
+          'frameborder': '0',
+          'allowtransparency': 'true',
+          'title': 'Scroll',
+          'width': '100%',
+          'height': '100%',
+          'sandbox':
+            'allow-scripts allow-same-origin ' +
+            'allow-top-navigation allow-popups ' +
+            'allow-popups-to-escape-sandbox',
+        })
+      )
+    );
 
     this.root_ = this.el(
       'div',
@@ -83,20 +81,13 @@ export class ScrollBar extends ScrollComponent {
     this.mount();
 
     // Set iframe to scrollbar URL.
-    this.accessSource_
-      .buildUrl(
-        `${this.baseUrl_}/html/amp/scrolltab` +
-          '?rid=READER_ID' +
-          '&cid=CLIENT_ID(scroll1)' +
-          '&c=CANONICAL_URL' +
-          '&o=AMPDOC_URL' +
-          `&p=${PROTOCOL_VERSION}` +
-          '&x=QUERY_PARAM(scrollx)',
-        false
-      )
-      .then((scrollbarUrl) => {
-        this.frame_.setAttribute('src', scrollbarUrl);
-      });
+    buildUrl(
+      this.accessSource_,
+      connectHostname(this.accessSource_.getAdapterConfig()) +
+        '/html/amp/scrolltab'
+    ).then((scrollbarUrl) => {
+      this.frame_.setAttribute('src', scrollbarUrl);
+    });
   }
 
   /**

@@ -45,7 +45,7 @@ html.i-amphtml-fie {
 /**
  * Margin:0 is currently needed for iOS viewer embeds.
  * See:
- * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+ * https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md
  */
 body {
   margin: 0 !important;
@@ -623,17 +623,6 @@ amp-live-list > [update] {
  */
 amp-experiment {
   display: none;
-}
-
-.i-amphtml-jank-meter {
-  position: fixed;
-  background-color: rgba(232,72,95,.5);
-  bottom: 0;
-  right: 0;
-  color: #fff;
-  font-size: 16px;
-  z-index: 1000;
-  padding: 5px;
 }
 
 /**

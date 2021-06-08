@@ -16,7 +16,7 @@
 
 import {Attributes, getAttributesFromConfigObj} from '../attributes';
 
-describe('attributes', () => {
+describes.sandboxed('attributes', {}, () => {
   it('should ignore attributes field if an array', () => {
     const configObj = {
       attributes: ['val1', 'val2'],
@@ -43,6 +43,7 @@ describe('attributes', () => {
       getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
     ).to.deep.equal({
       'type': 'val2',
+      'layout': 'val3',
       'data-something': 'val5',
       'data-1234': 'val6',
     });

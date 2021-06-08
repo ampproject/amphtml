@@ -16,7 +16,7 @@
 
 import {Renderer} from './amp-ad-type-defs';
 import {devAssert} from '../../../src/log';
-import {getAmpAdTemplateHelper} from './template-validator';
+import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
 
 /**
@@ -55,7 +55,7 @@ export class TemplateRenderer extends Renderer {
   render(context, element, creativeData) {
     creativeData = /** @type {CreativeData} */ (creativeData);
 
-    const {size, adUrl} = context;
+    const {adUrl, size} = context;
     const {creativeMetadata} = creativeData;
 
     devAssert(size, 'missing creative size');
@@ -67,12 +67,15 @@ export class TemplateRenderer extends Renderer {
       element,
       creativeMetadata
     ).then((iframe) => {
-      const templateData = /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (creativeData.templateData);
+      const templateData =
+        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+          creativeData.templateData
+        );
       const {data} = templateData;
       if (!data) {
         return Promise.resolve();
       }
-      const templateHelper = getAmpAdTemplateHelper(context.win);
+      const templateHelper = getAmpAdTemplateHelper(element);
       return templateHelper
         .render(data, this.getDocument(iframe).body)
         .then((renderedElement) => {
@@ -81,9 +84,8 @@ export class TemplateRenderer extends Renderer {
             templateHelper.insertAnalytics(renderedElement, analytics);
           }
           // This element must exist, or #render() would have thrown.
-          const templateElement = this.getDocument(iframe).querySelector(
-            'template'
-          );
+          const templateElement =
+            this.getDocument(iframe).querySelector('template');
           templateElement.parentNode.replaceChild(
             renderedElement,
             templateElement

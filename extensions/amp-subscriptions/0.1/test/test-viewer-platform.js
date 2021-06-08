@@ -22,7 +22,7 @@ import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {Services} from '../../../../src/services';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/core/types/object';
 import {getWinOrigin} from '../../../../src/url';
 
 describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
@@ -68,7 +68,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     win = env.win;
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     serviceAdapter = new ServiceAdapter(null);
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
@@ -354,12 +354,12 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
   });
 
   describe('proxy methods', () => {
-    it('should delegate getServiceId', () => {
+    it('should delegate getPlatformKey', () => {
       const proxyStub = env.sandbox.stub(
         viewerPlatform.platform_,
-        'getServiceId'
+        'getPlatformKey'
       );
-      viewerPlatform.getServiceId();
+      viewerPlatform.getPlatformKey();
       expect(proxyStub).to.be.called;
     });
 

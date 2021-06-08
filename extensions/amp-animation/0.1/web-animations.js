@@ -16,7 +16,7 @@
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
 import {
-  InternalWebAnimationRequestDef, // eslint-disable-line no-unused-vars
+  InternalWebAnimationRequestDef,
   WebAnimationDef,
   WebAnimationSelectorDef,
   WebAnimationSubtargetDef,
@@ -38,18 +38,20 @@ import {
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
-import {dashToCamelCase, startsWith} from '../../../src/string';
+import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject, toArray} from '../../../src/types';
+import {isArray, toArray} from '../../../src/core/types/array';
+import {isEnumValue, isObject} from '../../../src/core/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/utils/object';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
+import {map} from '../../../src/core/types/object';
+
 import {parseCss} from './parsers/css-expr';
 
 /** @const {string} */
@@ -422,10 +424,10 @@ export class MeasureScanner extends Scanner {
     });
     this.with_(spec, () => {
       const {
-        target_: target,
         index_: index,
-        vars_: vars,
+        target_: target,
         timing_: timing,
+        vars_: vars,
       } = this;
       const promise = otherSpecPromise
         .then((otherSpec) => {
@@ -592,10 +594,10 @@ export class MeasureScanner extends Scanner {
   with_(spec, callback) {
     // Save context.
     const {
-      target_: prevTarget,
       index_: prevIndex,
-      vars_: prevVars,
+      target_: prevTarget,
       timing_: prevTiming,
+      vars_: prevVars,
     } = this;
 
     // Push new context and perform calculations.
@@ -725,13 +727,13 @@ export class MeasureScanner extends Scanner {
     // the previous and new vars.
     const result = map(prevVars);
     for (const k in newVars) {
-      if (startsWith(k, '--')) {
+      if (k.startsWith('--')) {
         result[k] = newVars[k];
       }
     }
     this.css_.withVars(result, () => {
       for (const k in newVars) {
-        if (startsWith(k, '--')) {
+        if (k.startsWith('--')) {
           result[k] = this.css_.resolveCss(newVars[k]);
         }
       }
@@ -770,14 +772,12 @@ export class MeasureScanner extends Scanner {
 
     // Identifier CSS values.
     const easing = this.css_.resolveIdent(newTiming.easing, prevTiming.easing);
-    const direction = /** @type {!WebAnimationTimingDirection} */ (this.css_.resolveIdent(
-      newTiming.direction,
-      prevTiming.direction
-    ));
-    const fill = /** @type {!WebAnimationTimingFill} */ (this.css_.resolveIdent(
-      newTiming.fill,
-      prevTiming.fill
-    ));
+    const direction = /** @type {!WebAnimationTimingDirection} */ (
+      this.css_.resolveIdent(newTiming.direction, prevTiming.direction)
+    );
+    const fill = /** @type {!WebAnimationTimingFill} */ (
+      this.css_.resolveIdent(newTiming.fill, prevTiming.fill)
+    );
 
     // Validate.
     this.validateTime_(duration, newTiming.duration, 'duration');
@@ -793,16 +793,17 @@ export class MeasureScanner extends Scanner {
       '"iterationStart" is invalid: %s',
       newTiming.iterationStart
     );
-    user().assertEnumValue(
-      WebAnimationTimingDirection,
-      /** @type {string} */ (direction),
-      'direction'
+
+    userAssert(
+      isEnumValue(WebAnimationTimingDirection, direction),
+      `Unknown direction: ${direction}`
     );
-    user().assertEnumValue(
-      WebAnimationTimingFill,
-      /** @type {string} */ (fill),
-      'fill'
+
+    userAssert(
+      isEnumValue(WebAnimationTimingFill, fill),
+      `Unknown fill: ${fill}`
     );
+
     return {
       duration,
       delay,
@@ -853,7 +854,7 @@ class CssContextImpl {
    * @param {!./web-animation-types.WebAnimationBuilderOptionsDef} options
    */
   constructor(win, rootNode, baseUrl, options) {
-    const {scope = null, scaleByScope = false} = options;
+    const {scaleByScope = false, scope = null} = options;
 
     /** @const @private */
     this.win_ = win;
@@ -966,13 +967,13 @@ class CssContextImpl {
     let styles = this.computedStyleCache_[targetId];
     if (!styles) {
       styles = computedStyle(this.win_, target);
-      this.computedStyleCache_[
-        targetId
-      ] = /** @type {!CSSStyleDeclaration} */ (styles);
+      this.computedStyleCache_[targetId] = /** @type {!CSSStyleDeclaration} */ (
+        styles
+      );
     }
 
     // Resolve a var or a property.
-    return startsWith(prop, '--')
+    return prop.startsWith('--')
       ? styles.getPropertyValue(prop)
       : styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
   }
@@ -994,7 +995,7 @@ class CssContextImpl {
    * @protected
    */
   withTarget(target, index, callback) {
-    const {currentTarget_: prev, currentIndex_: prevIndex} = this;
+    const {currentIndex_: prevIndex, currentTarget_: prev} = this;
     this.currentTarget_ = target;
     this.currentIndex_ = index;
     const result = callback(target);
@@ -1199,7 +1200,7 @@ class CssContextImpl {
     if (!this.viewportParams_) {
       if (this.scope_ && this.scaleByScope_) {
         const rect = this.scope_./*OK*/ getBoundingClientRect();
-        const {offsetWidth, offsetHeight} = this.scope_;
+        const {offsetHeight, offsetWidth} = this.scope_;
         this.viewportParams_ = {
           offset: {x: rect.x, y: rect.y},
           size: {width: offsetWidth, height: offsetHeight},
@@ -1207,7 +1208,7 @@ class CssContextImpl {
           scaleFactorY: offsetHeight / (rect.height || 1),
         };
       } else {
-        const {innerWidth, innerHeight} = this.win_;
+        const {innerHeight, innerWidth} = this.win_;
         this.viewportParams_ = {
           offset: {x: 0, y: 0},
           size: {width: innerWidth, height: innerHeight},
@@ -1301,7 +1302,7 @@ class CssContextImpl {
    */
   getElementRect_(target) {
     const {offset, scaleFactorX, scaleFactorY} = this.getViewportParams_();
-    const {x, y, width, height} = target./*OK*/ getBoundingClientRect();
+    const {height, width, x, y} = target./*OK*/ getBoundingClientRect();
 
     // This assumes default `transform-origin: center center`
     return layoutRectLtwh(

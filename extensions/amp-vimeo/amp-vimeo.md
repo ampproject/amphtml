@@ -48,7 +48,13 @@ With responsive layout, the width and height from the example should yield corre
     <td width="40%"><strong>autoplay</strong></td>
     <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
 played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
+to be played, <a href="https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>do-not-track</strong></td>
+    <td>If this attribute is present the player will be blocked from tracking any session data, including all cookies and
+    <a href="https://vimeo.com/stats">stats</a>. (It has the same effect as enabling a Do Not Track setting in your browser).
+    See the 'dnt' parameter in the <a href="https://developer.vimeo.com/api/oembed/videos">Vimeo oEmbed Documentation</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
@@ -58,4 +64,4 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
 
 ## Validation
 
-See [amp-vimeo rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/validator-amp-vimeo.protoascii) in the AMP validator specification.
+See [amp-vimeo rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-vimeo/validator-amp-vimeo.protoascii) in the AMP validator specification.

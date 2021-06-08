@@ -25,7 +25,7 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {removeChildren} from '../../../src/dom';
@@ -86,9 +86,10 @@ export class AmpStoryEducation extends AMP.BaseElement {
     this.state_ = State.HIDDEN;
 
     /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = /** @type {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */ (Services.storyStoreService(
-      this.win
-    ));
+    this.storeService_ =
+      /** @type {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */ (
+        Services.storyStoreService(this.win)
+      );
 
     /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
@@ -220,9 +221,8 @@ export class AmpStoryEducation extends AMP.BaseElement {
           : LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE;
         el.querySelector(
           '.i-amphtml-story-education-navigation-progress'
-        ).textContent = this.localizationService_.getLocalizedString(
-          progressStringId
-        );
+        ).textContent =
+          this.localizationService_.getLocalizedString(progressStringId);
         el.querySelector(
           '.i-amphtml-story-education-navigation-instructions'
         ).textContent = this.localizationService_.getLocalizedString(

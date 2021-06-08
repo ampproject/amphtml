@@ -1,0 +1,48 @@
+workspace(name = "htmlparser")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "com_google_absl",
+    strip_prefix = "abseil-cpp-master",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/master.zip"],
+)
+
+http_archive(
+    name = "com_google_googletest",
+    sha256 = "c4873c05ff263f18124faef3366dda10ab8ef020faf648c3f960927c6db4be54",
+    strip_prefix = "googletest-53495a2a7d6ba7e0691a7f3602e9a5324bba6e45",
+    urls = ["https://github.com/google/googletest/archive/53495a2a7d6ba7e0691a7f3602e9a5324bba6e45.zip"],  # 2019-01-07
+)
+
+http_archive(
+    name = "com_github_gflags_gflags",
+    strip_prefix = "gflags-master",
+    urls = ["https://github.com/gflags/gflags/archive/master.zip"],
+)
+
+http_archive(
+    name = "com_github_re2",
+    strip_prefix = "re2-master",
+    urls = ["https://github.com/google/re2/archive/master.zip"],
+)
+
+http_archive(
+    name = "com_github_glog",
+    strip_prefix = "glog-master",
+    urls = ["https://github.com/google/glog/archive/master.zip"],
+)
+
+http_archive(
+    name = "com_google_protobuf",
+    strip_prefix = "protobuf-master",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/master.zip"],
+)
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+protobuf_deps()
+
+local_repository(
+    name = "validator",
+    path = "../../",
+)

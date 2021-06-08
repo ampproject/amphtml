@@ -15,7 +15,7 @@
  */
 
 // src/polyfills.js must be the first import.
-import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+import './polyfills';
 
 import ampToolboxCacheUrl from '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
@@ -27,10 +27,10 @@ import {
   setReportError,
   user,
 } from '../src/log';
-import {dict, hasOwn} from '../src/utils/object';
+import {dict, hasOwn} from '../src/core/types/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {loadScript} from './3p';
-import {parseJson} from '../src/json';
+import {parseJson} from '../src/core/types/object/json';
 
 /**
  * @fileoverview

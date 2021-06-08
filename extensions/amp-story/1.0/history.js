@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
-import {getState} from '../../../src/history';
-import {parseJson} from '../../../src/json';
+import {dict} from '../../../src/core/types/object';
+import {getState} from '../../../src/core/window/history';
+import {parseJson} from '../../../src/core/types/object/json';
 
 const EXPIRATION_DURATION_MILLIS = 10 * 60 * 1000; // 10 Minutes
 const CREATION_TIME = 'time';
@@ -27,7 +27,6 @@ export const LOCAL_STORAGE_KEY = 'amp-story-state';
 /** @enum {string} */
 export const HistoryState = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
-  BOOKEND_ACTIVE: 'ampStoryBookendActive',
   NAVIGATION_PATH: 'ampStoryNavigationPath',
 };
 
@@ -68,8 +67,9 @@ export function getHistoryState(win, stateName) {
     state = getLocalStorageState(win);
   }
   if (state) {
-    return /** @type {string|boolean|Array<string>|null} */ (state[stateName] ||
-      null);
+    return /** @type {string|boolean|Array<string>|null} */ (
+      state[stateName] || null
+    );
   }
   return null;
 }
@@ -81,8 +81,12 @@ export function getHistoryState(win, stateName) {
  */
 function getLocalStorageState(win) {
   // We definitely don't want to restore state from localStorage if the URL
-  // is explicit about the page that should be shown.
-  if (win.location.hash.indexOf('page=') != -1) {
+  // is explicit about it.
+  const {hash} = win.location;
+  if (
+    hash.indexOf('page=') != -1 ||
+    hash.indexOf('ignoreLocalStorageHistory') != -1
+  ) {
     return undefined;
   }
   const container = getLocalStorageStateContainer(win);

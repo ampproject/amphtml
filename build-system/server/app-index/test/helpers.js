@@ -17,17 +17,14 @@
 const {expect} = require('chai');
 const {JSDOM} = require('jsdom');
 
-
-const parseHtmlChunk = htmlStr => {
-  const {body} = (new JSDOM(htmlStr)).window.document;
+const parseHtmlChunk = (htmlStr) => {
+  const {body} = new JSDOM(htmlStr).window.document;
   expect(body.children).to.have.length(1);
   return body.firstElementChild;
 };
 
-
-const boundAttrRe = attr =>
+const boundAttrRe = (attr) =>
   new RegExp(`\\[${attr}\\]=(("[^"]+")|('[^']+')|([^\\s\\>]+))`);
-
 
 // JSDom doesn't parse attributes whose names don't follow the spec, so
 // our only way to test [attr] values is via regex.
@@ -36,14 +33,12 @@ const getBoundAttr = ({outerHTML}, attr) => {
   if (!match) {
     return;
   }
-  const [_, valuePart] = match;
-  if (valuePart.charAt(0) == '"' ||
-      valuePart.charAt(0) == '\'') {
+  const [, valuePart] = match;
+  if (valuePart.charAt(0) == '"' || valuePart.charAt(0) == "'") {
     return valuePart.substring(1, valuePart.length - 1);
   }
   return valuePart;
-}
-
+};
 
 const expectValidAmphtml = (validator, string) => {
   const {errors: errorsAndWarnings, status} = validator.validateString(string);
@@ -54,7 +49,6 @@ const expectValidAmphtml = (validator, string) => {
   expect(errors).to.deep.equal([]);
   expect(status).to.equal('PASS');
 };
-
 
 module.exports = {
   expectValidAmphtml,

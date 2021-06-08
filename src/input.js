@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
+import {Observable} from './core/data-structures/observable';
 import {Services} from './services';
 import {dev} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
@@ -84,15 +84,15 @@ export class Input {
     // mouse events.
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
-      this.boundOnMouseMove_ = /** @type {function(!Event)} */ (this.onMouseMove_.bind(
-        this
-      ));
+      this.boundOnMouseMove_ = /** @type {function(!Event)} */ (
+        this.onMouseMove_.bind(this)
+      );
       listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
   }
 
   /**
-   * See https://github.com/ampproject/amphtml/blob/master/spec/amp-css-classes.md#input-mode-classes
+   * See https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-css-classes.md#input-mode-classes
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
   setupInputModeClasses(ampdoc) {

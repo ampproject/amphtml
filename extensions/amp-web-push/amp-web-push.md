@@ -24,11 +24,9 @@ limitations under the License.
 
 # amp-web-push
 
-## Behavior
+## Usage
 
 Developers compose widgets that appear based on a user's subscription state. Widgets are composed of AMP elements and can be as simple as a button or a text link.
-
-_Example_
 
 Clicking the subscription widget pops up a page prompting the user for notification permissions and signals the service worker (configured below) to subscribe the user to push in the background. Clicking the unsubscription widget signals the worker to unsubscribe the user from push in the background.
 
@@ -56,18 +54,7 @@ Clicking the subscription widget pops up a page prompting the user for notificat
 </amp-web-push-widget>
 ```
 
-## Attributes
-
-<table>
-  <tr>
-    <td width="40%"><strong>visibility (required)</strong></td>
-    <td>Describes when the widget is shown. The value can be one of <code>unsubscribed</code>, <code>subscribed</code>, or <code>blocked</code>.<br>
-Widgets are initially hidden while the user's subscription state is computed.</td>
-  </tr>
-
-</table>
-
-## Configuration
+### Configuration
 
 The `amp-web-push` component requires extra integration on your site. You will need to upload two HTML files (provided) on your site as well as an amp-web-push compatible service worker JavaScript file. These three files form the configuration described below.
 
@@ -128,7 +115,7 @@ All properties are <strong>required</strong>, and all URLs must begin with the s
         This service worker runs in the background and subscribes and unsubscribes the user from notifications.
       </p>
       <p>
-         If you develop a custom push solution, <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-web-push/0.1/amp-web-push.service-worker.js">see this example on how to make your service worker compatible with amp-web-push</a>.
+         If you develop a custom push solution, <a href="https://github.com/ampproject/amphtml/blob/main/extensions/amp-web-push/0.1/amp-web-push.service-worker.js">see this example on how to make your service worker compatible with amp-web-push</a>.
        </p>
     </td>
   </tr>
@@ -142,6 +129,14 @@ All properties are <strong>required</strong>, and all URLs must begin with the s
   </tr>
 </table>
 
+## Attributes
+
+### visibility (required)
+
+Describes when the widget is shown. The value can be one of `unsubscribed`, `subscribed`, or `blocked`.
+
+Widgets are initially hidden while the user's subscription state is computed.
+
 ## Validation
 
-See [amp-web-push rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-web-push/validator-amp-web-push.protoascii) in the AMP validator specification.
+See [amp-web-push rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-web-push/validator-amp-web-push.protoascii) in the AMP validator specification.

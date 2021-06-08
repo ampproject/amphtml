@@ -15,7 +15,7 @@
  */
 
 import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/common-signals';
+import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {
   Criteria,
   DocMetaAnnotations,
@@ -33,11 +33,11 @@ import {
   scan,
 } from '../amp-auto-lightbox';
 import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
+import {Signals} from '../../../../src/core/data-structures/signals';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
-import {isArray} from '../../../../src/types';
-import {tryResolve} from '../../../../src/utils/promise';
+import {isArray} from '../../../../src/core/types';
+import {tryResolve} from '../../../../src/core/data-structures/promise';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -133,7 +133,7 @@ describes.realWin(
         `Criteria.meetsTreeShapeCriteria(html\`${outerHtml}\`)`;
 
       function itAcceptsOrRejects(scenarios) {
-        scenarios.forEach(({rejects, accepts, mutate, wrapWith}) => {
+        scenarios.forEach(({accepts, mutate, rejects, wrapWith}) => {
           const maybeWrap = (root) =>
             wrapWith ? wrap(root, wrapWith()) : root;
           const maybeMutate = (root) => mutate && mutate(root);
@@ -259,7 +259,7 @@ describes.realWin(
 
     describe('meetsSizingCriteria', () => {
       const areaDeltaPerc = RENDER_AREA_RATIO * 100;
-      const {vw, vh} = {vw: 1000, vh: 600};
+      const {vh, vw} = {vw: 1000, vh: 600};
 
       const expectMeetsSizingCriteria = (
         renderWidth,
@@ -517,10 +517,16 @@ describes.realWin(
         const signals = new Signals();
         img.signals = () => signals;
 
-        signals.signal(CommonSignals.UNLOAD);
         signals.signal(CommonSignals.LOAD_END);
 
-        const elected = await Promise.all(runCandidates(env.ampdoc, [img]));
+        const candidatePromise = Promise.all(runCandidates(env.ampdoc, [img]));
+
+        // Skip microtask and reset LOAD_END to emulate unloading in the middle
+        // of the candidate's measurement.
+        await new Promise((resolve) => resolve());
+        signals.reset(CommonSignals.LOAD_END);
+
+        const elected = await candidatePromise;
         expect(elected[0]).to.be.undefined;
       });
 
@@ -727,13 +733,11 @@ describes.realWin(
           <amp-img src="chabuddy.g" layout="flex-item"></amp-img>
         `;
 
-        element.dispatchCustomEvent = env.sandbox.spy();
+        const eventSpy = env.sandbox.spy();
+        element.addEventListener(AutoLightboxEvents.NEWLY_SET, eventSpy);
 
         await apply(env.ampdoc, element);
-
-        expect(
-          element.dispatchCustomEvent.withArgs(AutoLightboxEvents.NEWLY_SET)
-        ).to.have.been.calledOnce;
+        expect(eventSpy).to.be.calledOnce;
       });
     });
   }

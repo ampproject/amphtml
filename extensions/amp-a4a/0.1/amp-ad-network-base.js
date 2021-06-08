@@ -17,7 +17,7 @@
 import {FailureType, RecoveryModeType} from './amp-ad-type-defs';
 import {dev, devAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {map} from '../../../src/utils/object';
+import {map} from '../../../src/core/types/object';
 import {sendXhrRequest} from './amp-ad-utils';
 
 const TAG = 'amp-ad-network-base';
@@ -172,7 +172,12 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
         response.headers.get('AMP-Ad-Response-Type') || 'default';
       devAssert(this.validators_[validatorType], 'Validator never registered!');
       return this.validators_[validatorType]
-        .validate(this.context_, unvalidatedBytes, response.headers)
+        .validate(
+          this.context_,
+          this.element,
+          unvalidatedBytes,
+          response.headers
+        )
         .catch((err) =>
           Promise.reject({type: FailureType.VALIDATOR_ERROR, msg: err})
         );

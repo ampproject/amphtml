@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {devAssert} from '../../../src/log';
+
 export const ACTIVATION_TIMEOUT = 5000; // 5 seconds.
 
 const ACTIVATION_EVENTS = [
@@ -23,6 +25,7 @@ const ACTIVATION_EVENTS = [
   'input',
   'keypress',
   'submit',
+  'keydown',
 ];
 
 /**
@@ -98,14 +101,18 @@ export class UserActivationTracker {
     if (!this.isActive()) {
       return;
     }
+    devAssert(
+      !this.inLongTask_,
+      'Should not expand while a longTask is already ongoing.'
+    );
     this.inLongTask_ = true;
-    promise
-      .catch(() => {})
-      .then(() => {
-        this.inLongTask_ = false;
-        // Add additional "activity window" after a long task is done.
-        this.lastActivationTime_ = Date.now();
-      });
+
+    const longTaskComplete = () => {
+      this.inLongTask_ = false;
+      // Add additional "activity window" after a long task is done.
+      this.lastActivationTime_ = Date.now();
+    };
+    promise.then(longTaskComplete, longTaskComplete);
   }
 
   /**

@@ -17,15 +17,13 @@
 import {CSS} from '../../../build/amp-truncate-text-0.1.css';
 import {Services} from '../../../src/services';
 import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css';
-import {
-  closestAncestorElementBySelector,
-  iterateCursor,
-} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createShadowRoot} from './shadow-utils';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/types';
+import {iterateCursor} from '../../../src/dom';
+import {toArray} from '../../../src/core/types/array';
 import {truncateText} from './truncate-text';
 
 /**
@@ -81,6 +79,13 @@ export class AmpTruncateText extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.mutationObserver_.observe(this.element, {
+      attributes: true,
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
+
     this.useShadow_ =
       !!this.element.attachShadow &&
       isExperimentOn(this.win, 'amp-truncate-text-shadow');
@@ -176,16 +181,6 @@ export class AmpTruncateText extends AMP.BaseElement {
   layoutCallback() {
     return this.mutateElement(() => {
       this.truncate_();
-    });
-  }
-
-  /** @override */
-  firstAttachedCallback() {
-    this.mutationObserver_.observe(this.element, {
-      attributes: true,
-      characterData: true,
-      childList: true,
-      subtree: true,
     });
   }
 

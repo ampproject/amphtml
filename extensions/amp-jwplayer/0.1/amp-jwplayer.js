@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -27,20 +28,19 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
+import {dispatchCustomEvent, removeElement, getDataParamsFromAttributes} from '../../../src/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-  getDataParamsFromAttributes
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {once} from '../../../src/utils/function';
+import {once} from '../../../src/core/types/function';
 
 const JWPLAYER_EVENTS = {
   'ready': VideoEvents.LOAD,
@@ -101,7 +101,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     /** @private {number} */
     this.currentTime_ = 0;
 
-    /** @private {Array<(Array<number>|null)>} */
+    /** @private {Array<?Array<number>>} */
     this.playedRanges_ = [];
 
     /** @private {?function()} */
@@ -109,6 +109,9 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     /** @private {?function()} */
     this.unlistenFullscreen_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /** @override */
@@ -181,7 +184,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    const {win, playlistItem_} = this;
+    const {playlistItem_, win} = this;
     if (win.MediaMetadata && playlistItem_['meta']) {
       try {
         return new win.MediaMetadata(playlistItem_['meta']);
@@ -341,6 +344,8 @@ class AmpJWPlayer extends AMP.BaseElement {
       this.iframe_ = null;
     }
 
+    this.pauseHelper_.updatePlaying(false);
+
     return true; // Call layoutCallback again.
   }
 
@@ -349,15 +354,9 @@ class AmpJWPlayer extends AMP.BaseElement {
     if (!this.element.hasAttribute('data-media-id')) {
       return;
     }
-    const placeholder = this.win.document.createElement('amp-img');
+    const placeholder = this.win.document.createElement('img');
     this.propagateAttributes(['aria-label'], placeholder);
-    placeholder.setAttribute(
-      'src',
-      'https://content.jwplatform.com/thumbs/' +
-        encodeURIComponent(this.contentid_) +
-        '-720.jpg'
-    );
-    placeholder.setAttribute('layout', 'fill');
+    this.applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {
@@ -368,6 +367,13 @@ class AmpJWPlayer extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading video');
     }
+    placeholder.setAttribute('loading', 'lazy');
+    placeholder.setAttribute(
+      'src',
+      'https://content.jwplatform.com/thumbs/' +
+        encodeURIComponent(this.contentid_) +
+        '-720.jpg'
+    );
     return placeholder;
   }
 
@@ -383,10 +389,10 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     // Inform Video Manager that the video is pre-muted from persisted options.
     if (detail.muted) {
-      element.dispatchCustomEvent(VideoEvents.MUTED);
+      dispatchCustomEvent(element, VideoEvents.MUTED);
     }
 
-    element.dispatchCustomEvent(VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents.LOAD);
   }
 
   /**
@@ -420,6 +426,17 @@ class AmpJWPlayer extends AMP.BaseElement {
       return;
     }
 
+    switch (event) {
+      case 'play':
+      case 'adPlay':
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case 'pause':
+      case 'complete':
+        this.pauseHelper_.updatePlaying(false);
+        break;
+    }
+
     const {element} = this;
 
     if (redispatch(element, event, JWPLAYER_EVENTS)) {
@@ -435,7 +452,7 @@ class AmpJWPlayer extends AMP.BaseElement {
           }
           break;
         case 'meta':
-          const {metadataType, duration} = detail;
+          const {duration, metadataType} = detail;
           if (metadataType === 'media') {
             this.duration_ = duration;
           }
@@ -443,7 +460,7 @@ class AmpJWPlayer extends AMP.BaseElement {
         case 'mute':
           const {mute} = detail;
           const {element} = this;
-          element.dispatchCustomEvent(mutedOrUnmutedEvent(mute));
+          dispatchCustomEvent(element, mutedOrUnmutedEvent(mute));
           break;
         case 'playedRanges':
           const {ranges} = detail;

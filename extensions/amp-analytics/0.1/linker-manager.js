@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
+import {AMPDOC_SINGLETON_NAME} from '../../../src/core/constants/enums';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
 import {getHighestAvailableDomain} from '../../../src/cookies';
-import {isObject} from '../../../src/types';
+import {isObject} from '../../../src/core/types';
 import {user} from '../../../src/log';
 
 /** @const {string} */
@@ -278,7 +278,11 @@ export class LinkerManager {
    */
   maybeAppendLinker_(url, name, config) {
     const /** @type {Array} */ domains = config['destinationDomains'];
-    if (this.isDomainMatch_(url, name, domains)) {
+    const location = this.urlService_.parse(url);
+    if (
+      this.isDomainMatch_(location, name, domains) &&
+      this.isProtocolMatch_(location)
+    ) {
       const linkerValue = createLinker(
         /* version */ '1',
         this.resolvedIds_[name]
@@ -294,13 +298,20 @@ export class LinkerManager {
 
   /**
    * Check to see if the url is a match for the given set of domains.
-   * @param {string} url
+   * @param {Location} location
    * @param {string} name Name given in linker config.
    * @param {?Array} domains
-   * @return {*} TODO(#23582): Specify return type
+   * @return {boolean}
    */
-  isDomainMatch_(url, name, domains) {
-    const {hostname} = this.urlService_.parse(url);
+  isDomainMatch_(location, name, domains) {
+    const {hostname} = location;
+    // Don't append linker for exact domain match, relative urls, or
+    // fragments.
+    const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
+    if (winHostname === hostname) {
+      return false;
+    }
+
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
       user().warn(TAG, '%s destinationDomains must be an array.', name);
@@ -313,15 +324,7 @@ export class LinkerManager {
     }
 
     // Fallback to default behavior
-
-    // Don't append linker for exact domain match, relative urls, or
-    // fragments.
-    const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
-    if (winHostname === hostname) {
-      return false;
-    }
-
-    const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.ampdoc_);
+    const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(this.ampdoc_);
     const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
     const isFriendlyCanonicalOrigin = areFriendlyDomains(
       canonicalOrigin,
@@ -347,6 +350,15 @@ export class LinkerManager {
     return (
       areFriendlyDomains(sourceOrigin, hostname) || isFriendlyCanonicalOrigin
     );
+  }
+
+  /**
+   * Only matching protocols should use Linker parameters.
+   * @param {Location} location
+   * @return {boolean}
+   */
+  isProtocolMatch_(location) {
+    return location.protocol === 'https:' || location.protocol === 'http:';
   }
 
   /**
@@ -391,7 +403,7 @@ export class LinkerManager {
    * @param {!../../amp-form/0.1/form-submit-service.FormSubmitEventDef} event
    */
   handleFormSubmit_(event) {
-    const {form, actionXhrMutator} = event;
+    const {actionXhrMutator, form} = event;
 
     for (const linkerName in this.config_) {
       const config = this.config_[linkerName];
@@ -399,8 +411,8 @@ export class LinkerManager {
 
       const url =
         form.getAttribute('action-xhr') || form.getAttribute('action');
-
-      if (this.isDomainMatch_(url, linkerName, domains)) {
+      const location = this.urlService_.parse(url);
+      if (this.isDomainMatch_(location, linkerName, domains)) {
         this.addDataToForm_(form, actionXhrMutator, linkerName);
       }
     }

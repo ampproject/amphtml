@@ -15,9 +15,9 @@
  */
 
 import {dev, devAssert} from './log';
-import {dict} from './utils/object';
-import {internalListenImplementation} from './event-helper-listen';
-import {parseJson} from './json';
+import {dict} from './core/types/object';
+import {internalListenImplementation} from './core/dom/event-helper-listen';
+import {tryParseJson} from './core/types/object/json';
 
 /** @const */
 const AMP_MESSAGE_PREFIX = 'amp-';
@@ -43,6 +43,7 @@ export const MessageType = {
   NO_CONTENT: 'no-content',
   GET_HTML: 'get-html',
   GET_CONSENT_STATE: 'get-consent-state',
+  SIGNAL_INTERACTIVE: 'signal-interactive',
 
   // For the frame to be placed in full overlay mode for lightboxes
   FULL_OVERLAY_FRAME: 'full-overlay-frame',
@@ -61,6 +62,10 @@ export const MessageType = {
 
   // For user-error-in-iframe
   USER_ERROR_IN_IFRAME: 'user-error-in-iframe',
+
+  // For amp-iframe
+  SEND_CONSENT_DATA: 'send-consent-data',
+  CONSENT_DATA: 'consent-data',
 };
 
 /**
@@ -115,12 +120,9 @@ export function deserializeMessage(message) {
   }
   const startPos = message.indexOf('{');
   devAssert(startPos != -1, 'JSON missing in %s', message);
-  try {
-    return parseJson(message.substr(startPos));
-  } catch (e) {
-    dev().error('MESSAGING', 'Failed to parse message: ' + message, e);
-    return null;
-  }
+  return tryParseJson(message.substr(startPos), (e) =>
+    dev().error('MESSAGING', 'Failed to parse message: ' + message, e)
+  );
 }
 
 /**

@@ -16,7 +16,7 @@
 
 import '../amp-carousel';
 import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,
@@ -35,7 +35,6 @@ describes.realWin(
     let win,
       doc,
       owners,
-      updateInViewportSpy,
       schedulePauseSpy,
       scheduleLayoutSpy,
       schedulePreloadSpy;
@@ -47,7 +46,6 @@ describes.realWin(
       env.iframe.height = '200';
 
       owners = Services.ownersForDoc(doc);
-      updateInViewportSpy = env.sandbox.spy(owners, 'updateInViewport');
       schedulePauseSpy = env.sandbox.spy(owners, 'schedulePause');
       scheduleLayoutSpy = env.sandbox.spy(owners, 'scheduleLayout');
       schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
@@ -76,7 +74,7 @@ describes.realWin(
 
       doc.body.appendChild(carouselElement);
       return carouselElement
-        .build()
+        .buildInternal()
         .then(() => {
           carouselElement.updateLayoutBox({
             top: 0,
@@ -92,145 +90,156 @@ describes.realWin(
     it(
       'should initialize correctly: create container, build initial slides ' +
         'and show control buttons',
-      () => {
-        return getAmpScrollableCarousel().then((carousel) => {
-          const impl = carousel.implementation_;
+      async () => {
+        const carousel = await getAmpScrollableCarousel();
+        const impl = await carousel.getImpl();
 
-          // create container
-          expect(
-            carousel.getElementsByClassName(
-              'i-amphtml-scrollable-carousel-container'
-            ).length
-          ).to.equal(1);
-          const container = carousel.getElementsByClassName(
+        // create container
+        expect(
+          carousel.getElementsByClassName(
             'i-amphtml-scrollable-carousel-container'
-          )[0];
-          const containerStyle = win.getComputedStyle(container, null);
+          ).length
+        ).to.equal(1);
+        const container = carousel.getElementsByClassName(
+          'i-amphtml-scrollable-carousel-container'
+        )[0];
+        const containerStyle = win.getComputedStyle(container, null);
 
-          expect(containerStyle.getPropertyValue('overflow-x')).to.equal(
-            'auto'
-          );
-          expect(containerStyle.getPropertyValue('overflow-y')).to.equal(
-            'hidden'
-          );
-          expect(containerStyle.getPropertyValue('white-space')).to.equal(
-            'nowrap'
-          );
+        expect(containerStyle.getPropertyValue('overflow-x')).to.equal('auto');
+        expect(containerStyle.getPropertyValue('overflow-y')).to.equal(
+          'hidden'
+        );
+        expect(containerStyle.getPropertyValue('white-space')).to.equal(
+          'nowrap'
+        );
 
-          // build child slides
-          const carouselSlideEls = container.getElementsByClassName(
-            'amp-carousel-slide'
-          );
-          expect(carouselSlideEls.length).to.equal(7);
-          expect(carouselSlideEls[0]).to.have.display('inline-block');
+        // build child slides
+        const carouselSlideEls =
+          container.getElementsByClassName('amp-carousel-slide');
+        expect(carouselSlideEls.length).to.equal(7);
+        expect(carouselSlideEls[0]).to.have.display('inline-block');
 
-          // show control buttons correctly
-          expect(impl.hasPrev()).to.be.false;
-          expect(impl.hasNext()).to.be.true;
-          expect(impl.prevButton_.classList.contains('amp-disabled')).to.be
-            .true;
-          expect(impl.nextButton_.classList.contains('amp-disabled')).to.be
-            .false;
-          // Controls are hidden from screen readers as they do not provide
-          // any functionality for scrollable carousel.
-          // ATs see this is a scrolling div and can scroll it as user navigates
-          // items just fine (unlike type=slide which requires next/prev)
-          expect(impl.nextButton_.getAttribute('role')).equal('presentation');
-          expect(impl.prevButton_.getAttribute('role')).equal('presentation');
-        });
+        // show control buttons correctly
+        expect(impl.hasPrev()).to.be.false;
+        expect(impl.hasNext()).to.be.true;
+        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
+        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
+        // Controls are hidden from screen readers as they do not provide
+        // any functionality for scrollable carousel.
+        // ATs see this is a scrolling div and can scroll it as user navigates
+        // items just fine (unlike type=slide which requires next/prev)
+        expect(impl.nextButton_.getAttribute('role')).equal('presentation');
+        expect(impl.prevButton_.getAttribute('role')).equal('presentation');
       }
     );
+
+    it('should properly style controls; focusable but not visible', async () => {
+      const carousel = await getAmpScrollableCarousel();
+      const impl = await carousel.getImpl();
+      const container = carousel.getElementsByClassName(
+        'i-amphtml-scrollable-carousel-container'
+      )[0];
+      const carouselSlideEls =
+        container.getElementsByClassName('amp-carousel-slide');
+
+      // show control buttons correctly
+      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
+      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
+      // Explicitly check if buttons don't have visibility hidden or display none
+      expect(impl.prevButton_.tabIndex).to.equal(-1);
+      expect(impl.nextButton_.tabIndex).to.equal(0);
+      expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
+      expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
+
+      impl.nextButton_.focus();
+      expect(doc.activeElement).to.equal(impl.nextButton_);
+
+      // Scroll to end
+      for (let i = 0; i < carouselSlideEls.length - 1; i++) {
+        impl.goCallback(1, /*animate*/ false);
+      }
+      // Explicitly check if buttons don't have visibility hidden or display none
+      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.true;
+      expect(impl.prevButton_.tabIndex).to.equal(0);
+      expect(impl.nextButton_.tabIndex).to.equal(-1);
+      expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
+      expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
+      expect(doc.activeElement).to.equal(impl.nextButton_);
+
+      impl.prevButton_.focus();
+
+      for (let i = 0; i < carouselSlideEls.length - 1; i++) {
+        impl.goCallback(-1, /*animate*/ false);
+      }
+      // Explicitly check if buttons don't have visibility hidden or display none
+      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
+      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
+      expect(impl.prevButton_.tabIndex).to.equal(-1);
+      expect(impl.nextButton_.tabIndex).to.equal(0);
+      expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
+      expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
+      expect(doc.activeElement).to.equal(impl.prevButton_);
+    });
 
     // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
     it.skip(
       'should behave correctly when clicking on next button and the ' +
         'space to the right is MORE than containerWidth',
-      () => {
-        return getAmpScrollableCarousel().then((carousel) => {
-          const impl = carousel.implementation_;
+      async () => {
+        const carousel = await getAmpScrollableCarousel();
+        const impl = await carousel.getImpl();
 
-          // click on the next button
-          impl.goCallback(1, /*animate*/ false);
+        // click on the next button
+        impl.goCallback(1, /*animate*/ false);
 
-          // scroll to the correct position
-          expect(impl.container_./*OK*/ scrollLeft).to.equal(300);
+        // scroll to the correct position
+        expect(impl.container_./*OK*/ scrollLeft).to.equal(300);
 
-          // load new slides in viewport
-          expect(updateInViewportSpy).to.have.callCount(5);
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[3],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4],
-            true
-          );
+        expect(schedulePauseSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[0]
+        );
+        expect(schedulePauseSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[1]
+        );
 
-          // unload and pause old slides in viewport
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[0],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[1],
-            false
-          );
-          expect(schedulePauseSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[0]
-          );
-          expect(schedulePauseSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[1]
-          );
+        // schedule layout for new slides
+        expect(scheduleLayoutSpy).to.have.callCount(3);
+        expect(scheduleLayoutSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[2]
+        );
+        expect(scheduleLayoutSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[3]
+        );
+        expect(scheduleLayoutSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[4]
+        );
 
-          // schedule layout for new slides
-          expect(scheduleLayoutSpy).to.have.callCount(3);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2]
-          );
-          expect(scheduleLayoutSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[3]
-          );
-          expect(scheduleLayoutSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4]
-          );
+        // preload slides in viewport
+        expect(schedulePreloadSpy).to.have.callCount(3);
+        expect(schedulePreloadSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[4]
+        );
+        expect(schedulePreloadSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[5]
+        );
+        expect(schedulePreloadSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[6]
+        );
 
-          // preload slides in viewport
-          expect(schedulePreloadSpy).to.have.callCount(3);
-          expect(schedulePreloadSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4]
-          );
-          expect(schedulePreloadSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[5]
-          );
-          expect(schedulePreloadSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[6]
-          );
-
-          // set control buttons correctly
-          expect(impl.hasPrev()).to.be.true;
-          expect(impl.hasNext()).to.be.true;
-          expect(impl.prevButton_.classList.contains('amp-disabled')).to.be
-            .false;
-          expect(impl.nextButton_.classList.contains('amp-disabled')).to.be
-            .false;
-        });
+        // set control buttons correctly
+        expect(impl.hasPrev()).to.be.true;
+        expect(impl.hasNext()).to.be.true;
+        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
       }
     );
 
@@ -238,84 +247,52 @@ describes.realWin(
     it.skip(
       'should behave correctly when clicking on next button and the ' +
         'space to the right is LESS than containerWidth',
-      () => {
-        return getAmpScrollableCarousel().then((carousel) => {
-          const impl = carousel.implementation_;
+      async () => {
+        const carousel = await getAmpScrollableCarousel();
+        const impl = await carousel.getImpl();
 
-          // click on the next button the first time
-          impl.goCallback(1, /*animate*/ false);
+        // click on the next button the first time
+        impl.goCallback(1, /*animate*/ false);
 
-          // click on the next button the second time
-          impl.goCallback(1, /*animate*/ false);
+        // click on the next button the second time
+        impl.goCallback(1, /*animate*/ false);
 
-          // scroll to the correct position
-          // note the correct scrollLeft is not 600 (300 * 2) but 588 (888 - 300)
-          expect(impl.container_./*OK*/ scrollLeft).to.equal(588);
+        // scroll to the correct position
+        // note the correct scrollLeft is not 600 (300 * 2) but 588 (888 - 300)
+        expect(impl.container_./*OK*/ scrollLeft).to.equal(588);
 
-          // load new slides in viewport
-          expect(updateInViewportSpy).to.have.callCount(5);
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[5],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[6],
-            true
-          );
+        expect(schedulePauseSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[2]
+        );
+        expect(schedulePauseSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[3]
+        );
 
-          // unload and pause old slides in viewport
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[3],
-            false
-          );
-          expect(schedulePauseSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2]
-          );
-          expect(schedulePauseSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[3]
-          );
+        // schedule layout for new slides
+        expect(scheduleLayoutSpy).to.have.callCount(3);
+        expect(scheduleLayoutSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[4]
+        );
+        expect(scheduleLayoutSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[5]
+        );
+        expect(scheduleLayoutSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[6]
+        );
 
-          // schedule layout for new slides
-          expect(scheduleLayoutSpy).to.have.callCount(3);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4]
-          );
-          expect(scheduleLayoutSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[5]
-          );
-          expect(scheduleLayoutSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[6]
-          );
+        // preload slides in viewport
+        expect(schedulePreloadSpy).to.have.not.been.called;
 
-          // preload slides in viewport
-          expect(schedulePreloadSpy).to.have.not.been.called;
-
-          // set control buttons correctly
-          expect(impl.hasPrev()).to.be.true;
-          expect(impl.hasNext()).to.be.false;
-          expect(impl.prevButton_.classList.contains('amp-disabled')).to.be
-            .false;
-          expect(impl.nextButton_.classList.contains('amp-disabled')).to.be
-            .true;
-        });
+        // set control buttons correctly
+        expect(impl.hasPrev()).to.be.true;
+        expect(impl.hasNext()).to.be.false;
+        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.true;
       }
     );
 
@@ -323,97 +300,65 @@ describes.realWin(
     it.skip(
       'should behave correctly when clicking on previous button and the ' +
         'space to the left is MORE than containerWidth',
-      () => {
-        return getAmpScrollableCarousel().then((carousel) => {
-          const impl = carousel.implementation_;
+      async () => {
+        const carousel = await getAmpScrollableCarousel();
+        const impl = await carousel.getImpl();
 
-          // click on the next button twice to reach the right end
-          // scrollLeft after second click is 588
-          impl.goCallback(1, /*animate*/ false);
-          impl.goCallback(1, /*animate*/ false);
+        // click on the next button twice to reach the right end
+        // scrollLeft after second click is 588
+        impl.goCallback(1, /*animate*/ false);
+        impl.goCallback(1, /*animate*/ false);
 
-          // click on the previous button
-          impl.goCallback(-1, /*animate*/ false);
+        // click on the previous button
+        impl.goCallback(-1, /*animate*/ false);
 
-          // scroll to the correct position
-          expect(impl.container_./*OK*/ scrollLeft).to.equal(288);
+        // scroll to the correct position
+        expect(impl.container_./*OK*/ scrollLeft).to.equal(288);
 
-          // load new slides in viewport
-          expect(updateInViewportSpy).to.have.callCount(5);
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[3],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4],
-            true
-          );
+        expect(schedulePauseSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[5]
+        );
+        expect(schedulePauseSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[6]
+        );
 
-          // unload and pause old slides in viewport
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[5],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[6],
-            false
-          );
-          expect(schedulePauseSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[5]
-          );
-          expect(schedulePauseSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[6]
-          );
+        // schedule layout for new slides
+        expect(scheduleLayoutSpy).to.have.callCount(3);
+        expect(scheduleLayoutSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[2]
+        );
+        expect(scheduleLayoutSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[3]
+        );
+        expect(scheduleLayoutSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[4]
+        );
 
-          // schedule layout for new slides
-          expect(scheduleLayoutSpy).to.have.callCount(3);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2]
-          );
-          expect(scheduleLayoutSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[3]
-          );
-          expect(scheduleLayoutSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4]
-          );
+        // preload slides in viewport
+        expect(schedulePreloadSpy).to.have.callCount(3);
+        expect(schedulePreloadSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[0]
+        );
+        expect(schedulePreloadSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[1]
+        );
+        expect(schedulePreloadSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[2]
+        );
 
-          // preload slides in viewport
-          expect(schedulePreloadSpy).to.have.callCount(3);
-          expect(schedulePreloadSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[0]
-          );
-          expect(schedulePreloadSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[1]
-          );
-          expect(schedulePreloadSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2]
-          );
-
-          // set control buttons correctly
-          expect(impl.hasPrev()).to.be.true;
-          expect(impl.hasNext()).to.be.true;
-          expect(impl.prevButton_.classList.contains('amp-disabled')).to.be
-            .false;
-          expect(impl.nextButton_.classList.contains('amp-disabled')).to.be
-            .false;
-        });
+        // set control buttons correctly
+        expect(impl.hasPrev()).to.be.true;
+        expect(impl.hasNext()).to.be.true;
+        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
       }
     );
 
@@ -421,86 +366,54 @@ describes.realWin(
     it.skip(
       'should behave correctly when clicking on previous button and the ' +
         'space to the left is LESS than containerWidth',
-      () => {
-        return getAmpScrollableCarousel().then((carousel) => {
-          const impl = carousel.implementation_;
+      async () => {
+        const carousel = await getAmpScrollableCarousel();
+        const impl = await carousel.getImpl();
 
-          // click on the next button twice to reach the right end and click on
-          // the previous button once, scrollLeft after third click is 288
-          impl.goCallback(1, /*animate*/ false);
-          impl.goCallback(1, /*animate*/ false);
-          impl.goCallback(-1, /*animate*/ false);
+        // click on the next button twice to reach the right end and click on
+        // the previous button once, scrollLeft after third click is 288
+        impl.goCallback(1, /*animate*/ false);
+        impl.goCallback(1, /*animate*/ false);
+        impl.goCallback(-1, /*animate*/ false);
 
-          // click on the previous button
-          impl.goCallback(-1, /*animate*/ false);
+        // click on the previous button
+        impl.goCallback(-1, /*animate*/ false);
 
-          // scroll to the correct position
-          expect(impl.container_./*OK*/ scrollLeft).to.equal(0);
+        // scroll to the correct position
+        expect(impl.container_./*OK*/ scrollLeft).to.equal(0);
 
-          // load new slides in viewport
-          expect(updateInViewportSpy).to.have.callCount(5);
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[0],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[1],
-            true
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2],
-            true
-          );
+        expect(schedulePauseSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[3]
+        );
+        expect(schedulePauseSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[4]
+        );
 
-          // unload and pause old slides in viewport
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[3],
-            false
-          );
-          expect(updateInViewportSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4],
-            false
-          );
-          expect(schedulePauseSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[3]
-          );
-          expect(schedulePauseSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[4]
-          );
+        // schedule layout for new slides
+        expect(scheduleLayoutSpy).to.have.callCount(3);
+        expect(scheduleLayoutSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[0]
+        );
+        expect(scheduleLayoutSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[1]
+        );
+        expect(scheduleLayoutSpy).to.have.been.calledWith(
+          impl.element,
+          impl.cells_[2]
+        );
 
-          // schedule layout for new slides
-          expect(scheduleLayoutSpy).to.have.callCount(3);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[0]
-          );
-          expect(scheduleLayoutSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[1]
-          );
-          expect(scheduleLayoutSpy).to.have.been.calledWith(
-            impl.element,
-            impl.cells_[2]
-          );
+        // preload slides in viewport
+        expect(schedulePreloadSpy).to.have.not.been.called;
 
-          // preload slides in viewport
-          expect(schedulePreloadSpy).to.have.not.been.called;
-
-          // set control buttons correctly
-          expect(impl.hasPrev()).to.be.false;
-          expect(impl.hasNext()).to.be.true;
-          expect(impl.prevButton_.classList.contains('amp-disabled')).to.be
-            .true;
-          expect(impl.nextButton_.classList.contains('amp-disabled')).to.be
-            .false;
-        });
+        // set control buttons correctly
+        expect(impl.hasPrev()).to.be.false;
+        expect(impl.hasNext()).to.be.true;
+        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
+        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
       }
     );
 
@@ -562,3 +475,15 @@ describes.realWin(
     });
   }
 );
+
+/**
+ *
+ * @param {Element} element
+ * @returns {boolean}
+ */
+function isScreenReaderHidden(element) {
+  const computedStyle = getComputedStyle(element);
+  return (
+    computedStyle.visibility === 'hidden' || computedStyle.display === 'none'
+  );
+}

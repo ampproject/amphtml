@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
+import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {
   DevelopmentModeLog,
@@ -27,13 +29,27 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
+import {
+  closest,
+  matches,
+  scopedQuerySelector,
+} from '../../../src/core/dom/query';
+import {
+  createShadowRootWithStyle,
+  getStoryAttributeSrc,
+  shouldShowStoryUrlInfo,
+  triggerClickFromLightDom,
+} from './utils';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/core/types/object';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
-import {matches} from '../../../src/dom';
+import {getSourceOrigin} from '../../../src/url';
+
 import {renderAsElement} from './simple-template';
-import {toArray} from '../../../src/types';
+
+import {setImportantStyles} from '../../../src/style';
+import {toArray} from '../../../src/core/types/array';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -49,6 +65,15 @@ const HAS_INFO_BUTTON_ATTRIBUTE = 'info';
 
 /** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
+
+/** @private @const {string} */
+const CLOSE_CLASS = 'i-amphtml-story-close-control';
+
+/** @private @const {string} */
+const SKIP_TO_NEXT_CLASS = 'i-amphtml-story-skip-to-next';
+
+/** @private @const {string} */
+const VIEWER_CUSTOM_CONTROL_CLASS = 'i-amphtml-story-viewer-custom-control';
 
 /** @private @const {string} */
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
@@ -80,6 +105,9 @@ const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 /** @private @const {string} */
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
 
+/** @private @const {string} */
+const ATTRIBUTION_CLASS = 'i-amphtml-story-attribution';
+
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
@@ -90,6 +118,36 @@ const TEMPLATE = {
     'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
   }),
   children: [
+    {
+      tag: 'a',
+      attrs: dict({
+        'class': ATTRIBUTION_CLASS,
+        'target': '_blank',
+      }),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-logo-container',
+          }),
+          children: [
+            {
+              tag: 'img',
+              attrs: dict({
+                'alt': '',
+                'class': 'i-amphtml-story-attribution-logo',
+              }),
+            },
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-attribution-text',
+          }),
+        },
+      ],
+    },
     {
       tag: 'div',
       attrs: dict({
@@ -199,19 +257,30 @@ const TEMPLATE = {
               attrs: dict({
                 'class': PAUSE_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId: LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL,
             },
             {
               tag: 'button',
               attrs: dict({
                 'class': PLAY_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId: LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL,
             },
           ],
         },
         {
-          tag: 'a',
+          tag: 'button',
           attrs: dict({
-            'role': 'button',
+            'class':
+              SKIP_TO_NEXT_CLASS +
+              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+          }),
+          localizedLabelId:
+            LocalizedStringId.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL,
+        },
+        {
+          tag: 'button',
+          attrs: dict({
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
           localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
@@ -223,9 +292,53 @@ const TEMPLATE = {
           }),
           localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
         },
+        {
+          tag: 'button',
+          attrs: dict({
+            'class':
+              CLOSE_CLASS +
+              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+          }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL,
+        },
       ],
     },
+    {
+      tag: 'div',
+      attrs: dict({
+        'class': 'i-amphtml-story-system-layer-buttons-start-position',
+      }),
+    },
   ],
+};
+
+/**
+ * Contains the event name belonging to the viewer control.
+ * @const {string}
+ */
+const VIEWER_CONTROL_EVENT_NAME = '__AMP_VIEWER_CONTROL_EVENT_NAME__';
+
+/** @enum {string} */
+const VIEWER_CONTROL_TYPES = {
+  CLOSE: 'close',
+  SHARE: 'share',
+  DEPRECATED_SKIP_NEXT: 'skip-next', // Deprecated in favor of SKIP_TO_NEXT.
+  SKIP_TO_NEXT: 'skip-to-next',
+};
+
+const VIEWER_CONTROL_DEFAULTS = {
+  [VIEWER_CONTROL_TYPES.SHARE]: {
+    'selector': `.${SHARE_CLASS}`,
+  },
+  [VIEWER_CONTROL_TYPES.CLOSE]: {
+    'selector': `.${CLOSE_CLASS}`,
+  },
+  [VIEWER_CONTROL_TYPES.DEPRECATED_SKIP_NEXT]: {
+    'selector': `.${SKIP_TO_NEXT_CLASS}`,
+  },
+  [VIEWER_CONTROL_TYPES.SKIP_TO_NEXT]: {
+    'selector': `.${SKIP_TO_NEXT_CLASS}`,
+  },
 };
 
 /**
@@ -233,11 +346,12 @@ const TEMPLATE = {
  * Chrome contains:
  *   - mute/unmute button
  *   - story progress bar
- *   - bookend close button
  *   - share button
  *   - domain info button
  *   - sidebar
  *   - story updated label (for live stories)
+ *   - close (for players)
+ *   - skip (for players)
  */
 export class SystemLayer {
   /**
@@ -289,6 +403,12 @@ export class SystemLayer {
 
     /** @private {?number|?string} */
     this.timeoutId_ = null;
+
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = null;
+
+    /** @private {?AmpStoryViewerMessagingHandler} */
+    this.viewerMessagingHandler_ = null;
   }
 
   /**
@@ -308,9 +428,8 @@ export class SystemLayer {
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
-    this.systemLayerEl_.querySelector(
-      '.i-amphtml-story-share-control'
-    ).href = Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
+    this.systemLayerEl_.querySelector('.i-amphtml-story-share-control').href =
+      Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
@@ -342,18 +461,50 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    const viewer = Services.viewerForDoc(this.win_.document.documentElement);
+    this.viewer_ = Services.viewerForDoc(this.win_.document.documentElement);
+    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
+      ? new AmpStoryViewerMessagingHandler(this.win_, this.viewer_)
+      : null;
 
-    if (shouldShowStoryUrlInfo(viewer)) {
+    if (shouldShowStoryUrlInfo(this.viewer_)) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
       this.getShadowRoot().removeAttribute(HAS_INFO_BUTTON_ATTRIBUTE);
     }
 
+    this.maybeBuildAttribution_();
+
     this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
     return this.getRoot();
+  }
+
+  /** @private */
+  maybeBuildAttribution_() {
+    if (!this.viewer_ || this.viewer_.getParam('attribution') !== 'auto') {
+      return;
+    }
+
+    this.systemLayerEl_.querySelector('.i-amphtml-story-attribution-logo').src =
+      getStoryAttributeSrc(this.parentEl_, 'entity-logo-src') ||
+      getStoryAttributeSrc(this.parentEl_, 'publisher-logo-src');
+
+    const anchorEl = this.systemLayerEl_.querySelector(
+      `.${escapeCssSelectorIdent(ATTRIBUTION_CLASS)}`
+    );
+
+    anchorEl.href =
+      getStoryAttributeSrc(this.parentEl_, 'entity-url') ||
+      getSourceOrigin(Services.documentInfoForDoc(this.parentEl_).sourceUrl);
+
+    this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-attribution-text'
+    ).textContent =
+      this.parentEl_.getAttribute('entity') ||
+      this.parentEl_.getAttribute('publisher');
+
+    anchorEl.classList.add('i-amphtml-story-attribution-visible');
   }
 
   /**
@@ -394,15 +545,23 @@ export class SystemLayer {
         this.onInfoClick_();
       } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
         this.onSidebarClick_();
+      } else if (
+        matches(
+          target,
+          `.${VIEWER_CUSTOM_CONTROL_CLASS}, .${VIEWER_CUSTOM_CONTROL_CLASS} *`
+        )
+      ) {
+        this.onViewerControlClick_(dev().assertElement(event.target));
+      } else if (
+        matches(target, `.${ATTRIBUTION_CLASS}, .${ATTRIBUTION_CLASS} *`)
+      ) {
+        const anchorClicked = closest(target, (e) => matches(e, 'a[href]'));
+        triggerClickFromLightDom(anchorClicked, this.parentEl_);
       }
     });
 
     this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
-    });
-
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.onBookendStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(
@@ -478,6 +637,14 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
+      StateProperty.KEYBOARD_ACTIVE_STATE,
+      (keyboardState) => {
+        this.onKeyboardActiveUpdate_(keyboardState);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.PAGE_HAS_AUDIO_STATE,
       (audio) => {
         this.onPageHasAudioStateUpdate_(audio);
@@ -511,6 +678,12 @@ export class SystemLayer {
     this.storeService_.subscribe(StateProperty.NEW_PAGE_AVAILABLE_ID, () => {
       this.onNewPageAvailable_();
     });
+
+    this.storeService_.subscribe(
+      StateProperty.VIEWER_CUSTOM_CONTROLS,
+      (config) => this.onViewerCustomControls_(config),
+      true /* callToInitialize */
+    );
   }
 
   /**
@@ -539,18 +712,6 @@ export class SystemLayer {
     isAd
       ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
       : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
-  }
-
-  /**
-   * Reacts to the bookend state updates and updates the UI accordingly.
-   * @param {boolean} isActive
-   * @private
-   */
-  onBookendStateUpdate_(isActive) {
-    this.getShadowRoot().classList.toggle(
-      'i-amphtml-story-bookend-active',
-      isActive
-    );
   }
 
   /**
@@ -731,12 +892,15 @@ export class SystemLayer {
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
       shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+      shadowRoot.removeAttribute('desktop');
 
       switch (uiState) {
         case UIType.DESKTOP_PANELS:
+          shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-panels');
           break;
         case UIType.DESKTOP_FULLBLEED:
+          shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
           break;
       }
@@ -790,6 +954,20 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to keyboard updates and updates the UI.
+   * @param {boolean} keyboardActive
+   * @private
+   */
+  onKeyboardActiveUpdate_(keyboardActive) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle(
+        'amp-mode-keyboard-active',
+        keyboardActive
+      );
+    });
+  }
+
+  /**
    * Handles click events on the mute and unmute buttons.
    * @param {boolean} mute Specifies if the audio is being muted or unmuted.
    * @private
@@ -818,8 +996,31 @@ export class SystemLayer {
    */
   onShareClick_(event) {
     event.preventDefault();
+    if (event.target[VIEWER_CONTROL_EVENT_NAME]) {
+      this.onViewerControlClick_(dev().assertElement(event.target));
+      return;
+    }
+
     const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
+  }
+
+  /**
+   * Sends message back to the viewer with the corresponding event.
+   * @param {!Element} element
+   * @private
+   */
+  onViewerControlClick_(element) {
+    const eventName = element[VIEWER_CONTROL_EVENT_NAME];
+
+    this.viewerMessagingHandler_ &&
+      this.viewerMessagingHandler_.send(
+        'documentStateUpdate',
+        dict({
+          'state': AMP_STORY_PLAYER_EVENT,
+          'value': eventName,
+        })
+      );
   }
 
   /**
@@ -847,6 +1048,83 @@ export class SystemLayer {
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'show');
       this.hideMessageAfterTimeout_(HAS_NEW_PAGE_ATTRIBUTE);
+    });
+  }
+
+  /**
+   * Reacts to a custom configuration change coming from the player level.
+   * Updates UI to match configuration described by publisher.
+   * @param {!Array<!../../../src/amp-story-player/amp-story-player-impl.ViewerControlDef>} controls
+   * @private
+   */
+  onViewerCustomControls_(controls) {
+    if (controls.length <= 0) {
+      return;
+    }
+
+    controls.forEach((control) => {
+      if (!control.name) {
+        return;
+      }
+
+      const defaultConfig = VIEWER_CONTROL_DEFAULTS[control.name];
+
+      let element;
+      if (defaultConfig && defaultConfig.selector) {
+        element = scopedQuerySelector(
+          this.getShadowRoot(),
+          defaultConfig.selector
+        );
+      } else {
+        element = this.win_.document.createElement('button');
+        this.vsync_.mutate(() => {
+          element.classList.add('i-amphtml-story-button');
+          this.buttonsContainer_.appendChild(element);
+        });
+      }
+
+      this.vsync_.mutate(() => {
+        element.classList.add(VIEWER_CUSTOM_CONTROL_CLASS);
+      });
+
+      if (control.visibility === 'hidden') {
+        this.vsync_.mutate(() => {
+          element.classList.add('i-amphtml-story-ui-hide-button');
+        });
+      }
+
+      if (!control.visibility || control.visibility === 'visible') {
+        this.vsync_.mutate(() => {
+          dev()
+            .assertElement(element)
+            .classList.remove('i-amphtml-story-ui-hide-button');
+        });
+      }
+
+      if (control.state === 'disabled') {
+        this.vsync_.mutate(() => {
+          element.disabled = true;
+        });
+      }
+
+      if (control.position === 'start') {
+        const startButtonContainer = this.systemLayerEl_.querySelector(
+          '.i-amphtml-story-system-layer-buttons-start-position'
+        );
+
+        this.vsync_.mutate(() => {
+          this.buttonsContainer_.removeChild(element);
+          startButtonContainer.appendChild(element);
+        });
+      }
+
+      if (control.backgroundImageUrl) {
+        setImportantStyles(dev().assertElement(element), {
+          'background-image': `url('${control.backgroundImageUrl}')`,
+        });
+      }
+
+      element[VIEWER_CONTROL_EVENT_NAME] = `amp-story-player-${control.name}`;
     });
   }
 
