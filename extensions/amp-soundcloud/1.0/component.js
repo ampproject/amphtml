@@ -20,11 +20,18 @@ import {useEffect, useRef} from '../../../src/preact';
 
 /**
  * @param {!SoundcloudDef.Props} props
+ * @param ref
  * @return {PreactDef.Renderable}
  */
-export function Soundcloud(props) {
+export function Soundcloud({
+  color,
+  playlistId,
+  secretToken,
+  trackId,
+  visual,
+  ...rest
+}) {
   // Property and Reference Variables
-  const {color, height, playlistId, secretToken, trackId, visual} = props;
   const iframeRef = useRef(null);
 
   // Perform manual checking as assertion is not available for Bento: Issue #32739
@@ -45,7 +52,7 @@ export function Soundcloud(props) {
   const mediaId = playlistId ? playlistId : trackId;
 
   // Prepare Soundcloud Widget URL for iFrame
-  let src =
+  let iframeSrc =
     'https://w.soundcloud.com/player/?' +
     'url=' +
     encodeURIComponent(url + mediaId);
@@ -53,26 +60,25 @@ export function Soundcloud(props) {
   if (secretToken) {
     // It's very important the entire thing is encoded, since it's part of
     // the `url` query param added above.
-    src += encodeURIComponent('?secret_token=' + secretToken);
+    iframeSrc += encodeURIComponent('?secret_token=' + secretToken);
   }
 
-  if (visual === true) {
-    src += '&visual=true';
+  if (visual === 'true') {
+    iframeSrc += '&visual=true';
   } else if (color) {
-    src += '&color=' + encodeURIComponent(color);
+    iframeSrc += '&color=' + encodeURIComponent(color);
   }
 
-  // Prepare iframe for Soundcloud Widget
-  const iframeElement = Preact.createElement('iframe', {
-    allow: 'autoplay',
-    frameborder: 'no',
-    height,
-    ref: iframeRef,
-    scrolling: 'no',
-    src,
-    title: 'Soundcloud Widget - ' + {mediaId},
-    width: '100%',
-  });
+  // // Prepare iframe for Soundcloud Widget
+  // const iframeElement = Preact.createElement('iframe', {
+  //   allow: 'autoplay',
+  //   frameborder: 'no',
+  //   ref: iframeRef,
+  //   scrolling: 'no',
+  //   src: iframeSrc,
+  //   title: 'Soundcloud Widget - ' + {mediaId},
+  //   width: '100%',
+  // });
 
   useEffect(() => {
     /** Unmount Procedure */
@@ -87,6 +93,15 @@ export function Soundcloud(props) {
       iframeRef.current = null;
     };
   }, []);
-
-  return {iframeElement};
+  return (
+    <iframe
+      {...rest}
+      allow="autoplay"
+      frameborder="no"
+      ref={iframeRef}
+      scrolling="no"
+      src={iframeSrc}
+      title={'Soundcloud Widget - ' + mediaId}
+    ></iframe>
+  );
 }

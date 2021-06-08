@@ -33,20 +33,24 @@ export const TrackId = () => {
   // Knobs
   const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
   const height = text('Height', '180');
-  const trackId = text('Track ID', '864765493');
+  const width = text('Width', 'auto');
+  const trackid = text('Track ID', '864765493');
+  const layout = text('Layout', 'fixed-height');
   const visual = boolean('Visual', true);
 
   // Convert RGBA to HEX (without Alpha Channel)
   const hex = rgba2hex(componentColor);
 
-  // Render Bento Component
+  // Render Preact Component
   return (
     <amp-soundcloud
-      data-color={hex}
-      data-trackid={trackId}
-      data-visual={visual}
-      height={height}
-      layout="fixed-height"
+      color={hex}
+      width="400"
+      height="300"
+      layout="responsive"
+      sizes="(min-width: 600px) 320px, 100vw"
+      data-trackid={trackid}
+      data-visual={'"' + visual + '"'}
     />
   );
 };

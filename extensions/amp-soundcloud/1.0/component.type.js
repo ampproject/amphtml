@@ -23,10 +23,12 @@ var SoundcloudDef = {};
  * @typedef {{
  *   color: string,
  *   height: number,
+ *   layout: string,
  *   playlistId: (string|undefined),
  *   secretToken: (string|undefined),
  *   trackId: (string|undefined),
- *   visual: boolean,
+ *   visual: (string|undefined),
+ *   width: number,
  * }}
  */
 SoundcloudDef.Props;

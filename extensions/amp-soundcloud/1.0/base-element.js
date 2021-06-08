@@ -34,9 +34,12 @@ export class BaseElement extends PreactBaseElement {
       'https://api.soundcloud.com/',
       opt_onLayout
     );
-    console /*OK*/
-      .log('PreconnectFor');
   }
+
+  // /**@override*/
+  // unlayoutCallback() {
+  //   return true;
+  // }
 }
 
 /** @override */
@@ -46,7 +49,9 @@ BaseElement['Component'] = Soundcloud;
 BaseElement['props'] = {
   'children': {passthrough: true},
   'color': {attr: 'data-color'},
-  'height': {attr: 'height', type: 'number'},
+  'height': {attr: 'height'},
+  'width': {attr: 'width'},
+  'layout': {attr: 'layout'},
   'playlistId': {attr: 'data-playlistid'},
   'secretToken': {attr: 'data-secret-token'},
   'trackId': {attr: 'data-trackid'},
