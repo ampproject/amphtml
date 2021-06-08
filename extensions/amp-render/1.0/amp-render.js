@@ -26,6 +26,7 @@ import {dict} from '../../../src/core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 import {computedStyle, setStyle, setStyles} from '../../../src/style';
 import {Layout} from '../../../src/layout';
+import {measureIntersection} from '../../../src/utils/intersection';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -231,6 +232,14 @@ this.clippedHeightPromise_.then(() => {
           user().warn(TAG, 'placeholder required with layout="container"');
           return;
         }
+        // measureIntersection(this.element).then(({boundingClientRect}) => {
+        //   console.log(boundingClientRect.height, '**********');
+        //   setStyles(this.element, {
+        //     'overflow': 'hidden',
+        //     'height': boundingClientRect.height,
+        //   });
+        // });
+
         let height;
         this.measureMutateElement(
           () => {
@@ -240,6 +249,7 @@ this.clippedHeightPromise_.then(() => {
             ).getPropertyValue('value');
           },
           () => {
+            console.log({height});
             setStyles(this.element, {
               'overflow': 'hidden',
               'height': height,

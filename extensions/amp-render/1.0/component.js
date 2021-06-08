@@ -64,7 +64,7 @@ export function RenderWithRef(
 
   const [data, setData] = useState(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     // TODO(dmanek): Add additional validation for src
     // when adding url replacement logic.
     if (!src) {
@@ -88,8 +88,6 @@ export function RenderWithRef(
     };
   }, [getJson, src, onLoading, onReady, onError]);
 
-  const dataIsNull = data === null;
-
   const refresh = useCallback(() => {
     onRefresh?.();
     getJson(src, /* shouldRefresh */ true)
@@ -101,6 +99,15 @@ export function RenderWithRef(
         onError?.(e);
       });
   }, [getJson, src, onReady, onRefresh, onError]);
+
+  const refFn = (node) => {
+    // use useCallBack
+    if (node?.firstElementChild && rendered) {
+      // add check if any props changed
+      onDataReady?.();
+      onReady?.();
+    }
+  };
 
   useImperativeHandle(
     ref,
@@ -117,14 +124,7 @@ export function RenderWithRef(
 
   return (
     <Wrapper
-      ref={(ref) => {
-        //use useCallBack
-        if (ref !== null && rendered && ref.firstElementChild) {
-          // add check if any props changed
-          onDataReady?.();
-          onReady?.();
-        }
-      }}
+      ref={refFn}
       {...rest}
       dangerouslySetInnerHTML={isHtml ? rendered : null}
       aria-live={ariaLiveValue}
