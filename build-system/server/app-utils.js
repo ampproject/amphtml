@@ -120,12 +120,11 @@ const replaceUrls = (mode, file, hostName, inabox) => {
   hostName = hostName || '';
 
   const isRtv = isRtvMode(mode);
+  const pathnames = undefined; // we don't override the mapping
 
   file = file.replace(
-    /https:\/\/cdn\.ampproject\.org\/(.+)\.(m?js)/g,
-    (match) => {
-      const pathnames = undefined;
-      const extension = '.js';
+    /https:\/\/cdn\.ampproject\.org\/.+\.(m?js)/g,
+    (match, extension) => {
       const url = new URL(match);
 
       if (isRtv) {
