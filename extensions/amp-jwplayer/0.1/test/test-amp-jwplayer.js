@@ -18,6 +18,7 @@ import '../amp-jwplayer';
 import * as utils from '../../../../src/dom';
 import {VideoEvents} from '../../../../src/video-interface';
 import {htmlFor} from '../../../../src/static-template';
+import {parseUrlDeprecated} from '../../../../src/url';
 
 describes.realWin(
   'amp-jwplayer',
@@ -100,19 +101,32 @@ describes.realWin(
         );
       });
 
-      it('renders with a playlist and all parameters', async () => {
+      it('should pass data-media-querystring value to the iframe src', async () => {
+        let queryString = 'name1=abc&name2=xyz&name3=123';
+        let queryStringParams = queryString.split('&');
         const jw = await getjwplayer({
           'data-playlist-id': '482jsTAr',
           'data-player-id': 'sDZEo0ea',
-          'data-content-search': 'dog',
-          'data-content-backfill': true,
+          'data-media-querystring': queryString
         });
         const iframe = jw.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&backfill=true&isAMP=true'
-        );
+        const params = parseUrlDeprecated(iframe.src).search.split('&');
+        for (let i = 0; i < params.length; i++) {
+          expect(queryStringParams).to.contain(params[i]);
+        }
+      });
+
+      it('should pass data-param-* attributes to the iframe src', async () => {
+        const jw = await getjwplayer({
+          'data-playlist-id': '482jsTAr',
+          'data-player-id': 'sDZEo0ea',
+          'data-param-language': 'de',
+          'data-param-custom-ad-data': 'key:value;key2:value2',
+        });
+        const iframe = jw.querySelector('iframe');
+        const params = parseUrlDeprecated(iframe.src).search.split('&');
+        expect(params).to.contain('language=de');
+        expect(params).to.contain('customAdData=key%3Avalue%3Bkey2%3Avalue2');
       });
     });
 
