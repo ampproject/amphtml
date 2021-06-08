@@ -116,12 +116,11 @@ export function CDNURLToRTVURL(
     url.pathname = newPathname;
   }
 
-  const parsedPath = parse(`/rtv/${mode}/${url.pathname}`);
+  const parsedPath = parse(`/rtv/${mode}/${url.pathname.replace(/^\//, '')}`);
   if (parsedPath.ext !== extension) {
     parsedPath.base = parsedPath.base.replace(parsedPath.ext, extension);
     parsedPath.ext = extension;
   }
   url.pathname = format(parsedPath);
-
   return url;
 }
