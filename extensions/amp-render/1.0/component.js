@@ -20,6 +20,7 @@ import {forwardRef} from '../../../src/preact/compat';
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useImperativeHandle,
   useState,
 } from '../../../src/preact';
@@ -52,6 +53,7 @@ export function RenderWithRef(
     ariaLiveValue = 'polite',
     onLoading,
     onReady,
+    onDataReady,
     onRefresh,
     onError,
     ...rest
@@ -60,9 +62,9 @@ export function RenderWithRef(
 ) {
   useResourcesNotify();
 
-  const [data, setData] = useState({});
+  const [data, setData] = useState(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // TODO(dmanek): Add additional validation for src
     // when adding url replacement logic.
     if (!src) {
@@ -73,8 +75,9 @@ export function RenderWithRef(
     getJson(src)
       .then((data) => {
         if (!cancelled) {
+          // onDataReady?.();
           setData(data);
-          onReady?.();
+          // onReady?.();
         }
       })
       .catch((e) => {
@@ -84,6 +87,15 @@ export function RenderWithRef(
       cancelled = true;
     };
   }, [getJson, src, onLoading, onReady, onError]);
+
+  const dataIsNull = data === null;
+
+  // useEffect(() => {
+  //   if (!dataIsNull && rendered) {
+  //     onDataReady?.();
+  //     onReady?.();
+  //   }
+  // }, [dataIsNull, rendered]);
 
   const refresh = useCallback(() => {
     onRefresh?.();
@@ -106,12 +118,22 @@ export function RenderWithRef(
     [refresh]
   );
 
+  // useLayoutEffect(() => {}, []);
+
   const rendered = useRenderer(render, data);
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
 
   return (
     <Wrapper
+      ref={(ref) => {
+        //use useCallBack
+        if (ref !== null && rendered && ref.firstElementChild) {
+          // add check if any props changed
+          onDataReady?.();
+          onReady?.();
+        }
+      }}
       {...rest}
       dangerouslySetInnerHTML={isHtml ? rendered : null}
       aria-live={ariaLiveValue}

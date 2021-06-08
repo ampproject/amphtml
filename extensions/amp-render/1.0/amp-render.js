@@ -24,6 +24,8 @@ import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
+import {computedStyle, setStyle, setStyles} from '../../../src/style';
+import {Layout} from '../../../src/layout';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -201,7 +203,18 @@ export class AmpRender extends BaseElement {
       }
       api.refresh();
     });
+    /*
+    // onDataReady
+this.clippedHeightPromise_ = measureIntersection(this.element)
+  .then(({boundingClientRect}) => {
+    setStyles(...)
+  })
 
+// onReady
+this.clippedHeightPromise_.then(() => {
+  setStyles(...)
+})
+*/
     return dict({
       'ariaLiveValue': hasAriaLive
         ? this.element.getAttribute('aria-live')
@@ -210,9 +223,65 @@ export class AmpRender extends BaseElement {
       'onLoading': () => {
         this.toggleLoading(true);
       },
+      'onDataReady': () => {
+        if (this.element.getAttribute('layout') !== Layout.CONTAINER) {
+          return;
+        }
+        if (!this.getPlaceholder()) {
+          // TODO: placeholder is required for container layout, show error
+          return;
+        }
+        this.togglePlaceholder(true);
+        const computed = computedStyle(this.getAmpDoc().win, this.element);
+        console.log(
+          computed.getPropertyValue('height'),
+          this.element.offsetHeight,
+          '%%%%%'
+        );
+        setStyles(this.element, {
+          'overflow': 'hidden',
+          'height': computed.getPropertyValue('height'), // use measureIntersection
+        });
+
+        // let currentHeight;
+        // return this.measureMutateElement(
+        //   () => {
+        //     currentHeight = this.element./*OK*/ offsetHeight;
+        //     const computed = computedStyle(this.getAmpDoc().win, this.element);
+        //     console.log({currentHeight}, computed.getPropertyValue('height'));
+        //     return currentHeight;
+        //   },
+        //   () => {
+        //     setImportantStyles(this.element, {
+        //       'height': `${currentHeight}px`,
+        //       'overflow': 'hidden',
+        //     });
+        //     return () => {};
+        //     // return mutate();
+        //   }
+        // );
+      },
       'onReady': () => {
         this.toggleLoading(false);
         this.togglePlaceholder(false);
+        // const newHeight = this.element.scrollHeight; // get child element's scroll height
+        const {scrollHeight} = this.element.querySelector(
+          '[i-amphtml-rendered]'
+        );
+        console.log(
+          {scrollHeight},
+          this.element.getBoundingClientRect().height
+        );
+        this.attemptChangeHeight(scrollHeight)
+          .then(() => {
+            console.warn('resize succeded');
+            setStyles(this.element, {
+              'overflow': '',
+            });
+          })
+          .catch(() => {
+            console.warn('resize failed');
+          });
       },
       'onError': () => {
         this.toggleLoading(false);
