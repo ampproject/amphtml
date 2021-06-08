@@ -1824,6 +1824,7 @@ export class AmpStory extends AMP.BaseElement {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
         });
         break;
       case UIType.DESKTOP_ONE_PANEL:
@@ -1840,6 +1841,7 @@ export class AmpStory extends AMP.BaseElement {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
         });
         break;
       // Because of the DOM mutations, switching from this mode to another is
