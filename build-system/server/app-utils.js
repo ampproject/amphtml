@@ -102,11 +102,9 @@ const toInaboxDocument = (html) =>
  * @param {URL} url
  * @return {string}
  */
-const getHrefWithoutHost = (url) =>
-  url.href.substr(
-    //  2 slashes // between protocol and host
-    url.protocol.length + 2 + url.host.length
-  );
+const getHrefWithoutHost = ({host, href, protocol}) =>
+  // 2 slashes // between protocol and host
+  href.substr(protocol.length + 2 + host.length);
 
 /**
  * @param {string} mode
