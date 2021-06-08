@@ -136,7 +136,7 @@ function replaceUrls(mode, file, hostName, inabox) {
   const isRtv = isRtvMode(mode);
 
   file = file.replace(
-    /https:\/\/cdn\.ampproject\.org\/.+\.(m?js)/g,
+    /https:\/\/cdn\.ampproject\.org\/[^'">]+(\.m?js)/g,
     (match, extension) => {
       // TODO(alanorozco): Match --esm in output extension and/or allow
       // `.mjs` to be lazily built regardless of --esm
