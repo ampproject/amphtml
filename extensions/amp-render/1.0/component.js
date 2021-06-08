@@ -90,13 +90,6 @@ export function RenderWithRef(
 
   const dataIsNull = data === null;
 
-  // useEffect(() => {
-  //   if (!dataIsNull && rendered) {
-  //     onDataReady?.();
-  //     onReady?.();
-  //   }
-  // }, [dataIsNull, rendered]);
-
   const refresh = useCallback(() => {
     onRefresh?.();
     getJson(src, /* shouldRefresh */ true)
@@ -117,8 +110,6 @@ export function RenderWithRef(
       }),
     [refresh]
   );
-
-  // useLayoutEffect(() => {}, []);
 
   const rendered = useRenderer(render, data);
   const isHtml =
