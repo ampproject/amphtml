@@ -111,8 +111,8 @@ describes.realWin(
         });
         const iframe = jw.querySelector('iframe');
         const params = parseUrlDeprecated(iframe.src).search.split('&');
-        for (let i = 0; i < params.length; i++) {
-          expect(queryStringParams).to.contain(params[i]);
+        for (let i = 0; i < queryStringParams.length; i++) {
+          expect(params).to.contain(queryStringParams[i]);
         }
       });
 
