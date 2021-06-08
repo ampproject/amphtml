@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import * as propagateAttributeObject from '../../src/core/dom/propagate-attributes';
-import {AmpImg, installImg} from '../../builtins/amp-img/amp-img';
+import {
+  ATTRIBUTES_TO_PROPAGATE,
+  AmpImg,
+  installImg,
+} from '../../builtins/amp-img/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {Layout, LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
@@ -390,36 +393,9 @@ describes.sandboxed('amp-img', {}, (env) => {
     expect(AmpImg.prerenderAllowed(el)).to.equal(true);
   });
 
-  it('should propogate src as the final attribute when provided a srcset', () => {
-    // Providing src before srcset will cause Safari 14.4 to request two src values for the same `img`.
-    const el = document.createElement('amp-img');
-    el.setAttribute('src', 'test.jpg');
-    el.setAttribute('srcset', SRCSET_STRING);
-    el.setAttribute('width', 300);
-    el.setAttribute('height', 200);
-    el.getResources = () => Services.resourcesForDoc(document);
-    el.getPlaceholder = () => {
-      const img = document.createElement('img');
-      img.src = 'data:image/svg+xml;charset=utf-8,%3Csvg%3E%3C/svg%3E';
-      return img;
-    };
-    el.getLayout = () => 'responsive';
-    el.getLayoutSize = () => ({width: 300, height: 200});
-
-    const impl = new AmpImg(el);
-    const propagateAttributesSpy = sandbox.spy(
-      propagateAttributeObject,
-      'propagateAttributes'
-    );
-    impl.buildCallback();
-    impl.layoutCallback();
-
-    expect(propagateAttributesSpy).to.be.calledOnce;
-    const spiedAttributesToPropagate =
-      propagateAttributesSpy.getCall(0).args[0];
-
+  it('should propogate src as the final attribute', () => {
     expect(
-      spiedAttributesToPropagate[spiedAttributesToPropagate.length - 1]
+      ATTRIBUTES_TO_PROPAGATE[ATTRIBUTES_TO_PROPAGATE.length - 1]
     ).to.equal('src');
   });
 

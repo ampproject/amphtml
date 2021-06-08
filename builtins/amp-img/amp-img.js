@@ -34,7 +34,7 @@ const TAG = 'amp-img';
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
  */
-const ATTRIBUTES_TO_PROPAGATE = [
+export const ATTRIBUTES_TO_PROPAGATE = [
   'alt',
   'aria-describedby',
   'aria-label',
