@@ -19,6 +19,7 @@ const minimist = require('minimist');
 const {cyan, green} = require('../common/colors');
 const {log, logLocalDev} = require('../common/logging');
 const {relative} = require('path');
+const {URL} = require('url');
 
 let serveMode = 'default';
 
@@ -132,9 +133,12 @@ function replaceUrls(mode, file, hostName, inabox) {
   // If you need to add URL mapping logic, please don't do it in this function.
   // Instead, do so in the `cdn.ts` module built below.
 
-  const cdnUrl = requireTsSync(
-    'build-system/server/new-server/transforms/utilities/cdn.ts'
-  );
+  const cdnUrl =
+    /** @type {import('./new-server/transforms/utilities/cdn')} */ (
+      requireTsSync(
+        'build-system/server/new-server/transforms/utilities/cdn.ts'
+      )
+    );
 
   // All inabox documents use `amp4ads-v0.js`. Its URL may be rewritten later.
   if (inabox) {
@@ -156,7 +160,7 @@ function replaceUrls(mode, file, hostName, inabox) {
       // `.mjs` to be lazily built regardless of --esm
       const url = new URL(match);
       if (isRtv) {
-        return cdnUrl.CDNURLToRTVURL(url, mode, pathnames, extension);
+        return cdnUrl.CDNURLToRTVURL(url, mode, pathnames, extension).href;
       }
       const useMaxNames = mode !== 'compiled';
       const {host, href, protocol} = cdnUrl.replaceCDNURLPath(
