@@ -41,7 +41,7 @@ In your AMP page you will have to add the following snippets:
 
 ```html
 <!DOCTYPE html>
-<html ⚡>
+<html ⚡ lang="en">
   <head>
     ...
     <meta
