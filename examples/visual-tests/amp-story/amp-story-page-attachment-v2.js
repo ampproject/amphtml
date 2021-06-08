@@ -44,12 +44,48 @@ module.exports = {
     ]);
   },
 
+  'light theme, light drawer theme - inline CTA drawer should display': async (
+    page,
+    name
+  ) => {
+    const screen = page.touchscreen;
+    const pageID = 'inline-light-theme-drawer-theme-light';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+    await screen.tap(160, 460);
+    await page.waitForTimeout(500); // For animations to finish.
+  },
+
   'dark theme, light drawer theme - inline CTA drawer should display': async (
     page,
     name
   ) => {
     const screen = page.touchscreen;
     const pageID = 'inline-dark-theme-drawer-theme-light';
+    const url = await page.url();
+    await page.goto(`${url}#page=${pageID}`);
+    await page.waitForSelector(
+      `amp-story-page#${pageID}[active][distance="0"]`
+    );
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+    await screen.tap(160, 460);
+    await page.waitForTimeout(500); // For animations to finish.
+  },
+
+  'dark theme, dark drawer theme - inline CTA drawer should display': async (
+    page,
+    name
+  ) => {
+    const screen = page.touchscreen;
+    const pageID = 'inline-dark-theme-drawer-theme-dark';
     const url = await page.url();
     await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
