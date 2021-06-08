@@ -173,7 +173,7 @@ function replaceUrls(mode, file, hostName, inabox) {
     }
   );
 
-  // TODO(alanorozco): is this still useful?
+  // TODO(alanorozco): This should be handled in new-server as well.
   if (mode == 'compiled') {
     file = file.replace(
       /\/dist.3p\/current\/(.*)\.max.html/g,
