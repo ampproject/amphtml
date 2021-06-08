@@ -131,7 +131,7 @@ const replaceUrls = (mode, file, hostName, inabox) => {
       if (isRtv) {
         return cdnModule.CDNURLToRTVURL(url, mode, pathnames, extension);
       }
-      const useMaxNames = mode === 'default';
+      const useMaxNames = mode !== 'compiled';
       const replacedUrl = cdnModule.replaceCDNURLPath(
         url,
         pathnames,
