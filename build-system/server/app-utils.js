@@ -155,10 +155,10 @@ function replaceUrls(mode, file, hostName, inabox) {
 
   file = file.replace(
     /https:\/\/cdn\.ampproject\.org\/[^'">]+(\.m?js)/g,
-    (match, extension) => {
+    (urlString, extension) => {
       // TODO(alanorozco): Match --esm in output extension and/or allow
       // `.mjs` to be lazily built regardless of --esm
-      const url = new URL(match);
+      const url = new URL(urlString);
       if (isRtv) {
         return cdnUrl.CDNURLToRTVURL(url, mode, pathnames, extension).href;
       }
