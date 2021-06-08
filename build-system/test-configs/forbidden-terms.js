@@ -608,12 +608,19 @@ const forbiddenTermsGlobal = {
   '__AMP_EXP': {
     message:
       'Do not access __AMP_EXP directly. Use isExperimentOn() to access config',
-    allowlist: ['src/experiments/index.js'],
+    allowlist: [
+      'src/experiments/index.js',
+      'src/experiments/experiments.extern.js',
+    ],
   },
   'AMP_EXP': {
     message:
       'Do not access AMP_EXP directly. Use isExperimentOn() to access config',
-    allowlist: ['src/experiments/index.js'],
+    allowlist: [
+      'build-system/externs/amp.extern.js',
+      'src/experiments/index.js',
+      'src/experiments/experiments.extern.js',
+    ],
   },
   'AMP_CONFIG': {
     message:
