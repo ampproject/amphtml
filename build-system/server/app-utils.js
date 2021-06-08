@@ -132,18 +132,13 @@ const replaceUrls = (mode, file, hostName, inabox) => {
         return cdnModule.CDNURLToRTVURL(url, mode, pathnames, extension);
       }
       const useMaxNames = mode !== 'compiled';
-      const replacedUrl = cdnModule.replaceCDNURLPath(
+      const {host, href, protocol} = cdnModule.replaceCDNURLPath(
         url,
         pathnames,
         extension,
         useMaxNames
       );
-      return (
-        hostName +
-        replacedUrl.href.substr(
-          `${replacedUrl.protocol}//${replacedUrl.host}`.length
-        )
-      );
+      return hostName + href.substr(`${protocol}//${host}`.length);
     }
   );
 
