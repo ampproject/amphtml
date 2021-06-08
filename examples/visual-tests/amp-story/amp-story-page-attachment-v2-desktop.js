@@ -48,6 +48,7 @@ module.exports = {
     page,
     name
   ) => {
+    const screen = page.touchscreen;
     const pageID = 'inline-dark-theme-drawer-theme-light';
     const url = await page.url();
     await page.goto(`${url}#page=${pageID}`);
@@ -65,6 +66,7 @@ module.exports = {
     page,
     name
   ) => {
+    const screen = page.touchscreen;
     const pageID = 'inline-light-theme-drawer-theme-dark';
     const url = await page.url();
     await page.goto(`${url}#page=${pageID}`);
