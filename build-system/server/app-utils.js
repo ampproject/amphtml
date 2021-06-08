@@ -127,12 +127,10 @@ const replaceUrls = (mode, file, hostName, inabox) => {
     (match, extension) => {
       // TODO(alanorozco): Match --esm in output extension and/or allow
       // `.mjs` to be lazily built regardless of --esm
-
       const url = new URL(match);
       if (isRtv) {
         return cdnModule.CDNURLToRTVURL(url, mode, pathnames, extension);
       }
-
       const useMaxNames = mode === 'default';
       const replacedUrl = cdnModule.replaceCDNURLPath(
         url,
@@ -140,7 +138,6 @@ const replaceUrls = (mode, file, hostName, inabox) => {
         extension,
         useMaxNames
       );
-
       return (
         hostName +
         replacedUrl.href.substr(
