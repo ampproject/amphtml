@@ -47,14 +47,16 @@ jobs:
           npm install
           node ./build-system/npm-publish/build-npm-binaries.js ${{ matrix.extension }}
           node ./build-system/npm-publish/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }}
-      - name: Publish v1
-        run: npm publish ./extensions/${{ matrix.extension }}/1.0 --access public --tag ${{ github.event.inputs.tag }}
+      - name: Publish package for Nightly releases
+        if: github.event.inputs.tag != 'latest'
+        run: npm publish ./extensions/${{ matrix.extension }}/${{ matrix.version }} --access public --tag ${{ github.event.inputs.tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Publish v2 if it exists
+      - name: Tag package as latest for Stable releases
+        if: github.event.inputs.tag == 'latest'
         run: |
-          if $(test -d ${{ github.workspace }}/extensions/${{ matrix.extension }}/2.0); then      
-            npm publish ./extensions/${{ matrix.extension }}/2.0 --access public --tag ${{ github.event.inputs.tag }}
-          fi
+          NPM_PACKAGE=$(jq -r .name ./extensions/${{ matrix.extension }}/${{ matrix.version }}/package.json)
+          NPM_VERSION=$(jq -r .version ./extensions/${{ matrix.extension }}/${{ matrix.version }}/package.json)
+          npm dist-tag add ${NPM_PACKAGE}@${NPM_VERSION} latest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
