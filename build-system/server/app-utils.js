@@ -115,6 +115,9 @@ function requireTsSync(path) {
  * @return {string}
  */
 function replaceUrls(mode, file, hostName, inabox) {
+  // If you need to add URL mapping logic, please don't do it in this function.
+  // Instead, do so in the `cdn.ts` module built below.
+
   const cdnUrl = requireTsSync(
     'build-system/server/new-server/transforms/utilities/cdn.ts'
   );
