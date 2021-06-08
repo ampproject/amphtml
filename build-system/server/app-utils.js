@@ -114,7 +114,7 @@ function requireTsSync(path) {
  * @param {boolean=} inabox
  * @return {string}
  */
-const replaceUrls = (mode, file, hostName, inabox) => {
+function replaceUrls(mode, file, hostName, inabox) {
   const cdnUrl = requireTsSync(
     'build-system/server/new-server/transforms/utilities/cdn.ts'
   );
@@ -165,7 +165,7 @@ const replaceUrls = (mode, file, hostName, inabox) => {
   }
 
   return file;
-};
+}
 
 module.exports = {
   getServeMode,
