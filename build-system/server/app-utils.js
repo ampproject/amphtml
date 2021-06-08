@@ -85,24 +85,38 @@ const isRtvMode = (serveMode) => {
 const tsModule = Object.create(null);
 
 /**
+ * @param {function():void} cb
+ * @return {number}
+ */
+function runTimedMs(cb) {
+  const time = process.hrtime();
+  cb();
+  const elapsedTime = process.hrtime(time);
+  const NS_PER_SEC = 1e9;
+  const MS_PER_NS = 1e-6;
+  return (elapsedTime[0] * NS_PER_SEC + elapsedTime[1]) * MS_PER_NS;
+}
+
+/**
  * @param {string} path
  * @return {*}
  */
 function requireTsSync(path) {
   if (!tsModule[path]) {
     const outfile = `build/${path.replace(/\//g, '--')}.js`;
-    logLocalDev('Building', cyan(path), '...');
-    esbuild.buildSync({
-      entryPoints: [path],
-      format: 'cjs',
-      write: true,
-      outfile,
-    });
+    const elapsedTimeMs = runTimedMs(() =>
+      esbuild.buildSync({
+        entryPoints: [path],
+        format: 'cjs',
+        write: true,
+        outfile,
+      })
+    );
     tsModule[path] = require(`${relative(
       __dirname,
       process.cwd()
     )}/${outfile}`);
-    logLocalDev('Built', cyan(path));
+    logLocalDev('Built', cyan(path), `(${elapsedTimeMs.toFixed(0)}ms)`);
   }
   return tsModule[path];
 }
