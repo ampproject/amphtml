@@ -26,6 +26,7 @@ import {getMode} from '../mode';
 import {getTopWindow} from '../service';
 import {hasOwn, map} from '../core/types/object';
 import {isArray} from '../core/types';
+import {parseJson} from '../core/types/object/json';
 import {parseQueryString} from '../core/types/string/url';
 
 // typedef imports
@@ -125,13 +126,10 @@ export function experimentToggles(win) {
   win[TOGGLES_WINDOW_PROPERTY] = map();
   const toggles = win[TOGGLES_WINDOW_PROPERTY];
 
-  // eslint-disable-next-line local/window-property-name
-  win.AMP_EXP ?? (win.AMP_EXP = JSON.parse(win.__AMP_EXP?.textContent || '{}'));
-
   // Read default and injected configs of this build.
   const buildExperimentConfigs = {
     ...(win.AMP_CONFIG ?? {}),
-    ...win.AMP_EXP,
+    ...(win.AMP_EXP ?? parseJson(win.__AMP_EXP?.textContent || '{}')),
   };
   for (const experimentId in buildExperimentConfigs) {
     const frequency = buildExperimentConfigs[experimentId];
