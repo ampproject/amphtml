@@ -52,12 +52,20 @@ export function CDNURLToLocalDistURL(
   pathnames: [string | null, string | null] = [null, null],
   extension: string = '.js',
   port: number = 8000,
-  useMaxNames = false,
+  useMaxNames = false
 ): URL {
   url.protocol = 'http';
   url.hostname = 'localhost';
   url.port = String(port);
+  return replaceCDNURLPath(url, pathnames, extension, useMaxNames);
+}
 
+export function replaceCDNURLPath(
+  url: URL,
+  pathnames: [string | null, string | null] = [null, null],
+  extension: string = '.js',
+  useMaxNames = false
+): URL {
   const [overwriteablePathname, newPathname] = pathnames;
   if (url.pathname === overwriteablePathname && newPathname !== null) {
     url.pathname = newPathname;
@@ -82,9 +90,15 @@ export function CDNURLToLocalHostRelativeAbsoluteDist(
   pathnames: [string | null, string | null] = [null, null],
   extension: string = '.js',
   port: number = 8000,
-  useMaxNames = false,
+  useMaxNames = false
 ): string {
-  const newUrl = CDNURLToLocalDistURL(url, pathnames, extension, port, useMaxNames);
+  const newUrl = CDNURLToLocalDistURL(
+    url,
+    pathnames,
+    extension,
+    port,
+    useMaxNames
+  );
   return `${newUrl.pathname}${newUrl.search}${newUrl.hash}`;
 }
 
@@ -97,7 +111,6 @@ export function CDNURLToRTVURL(
   pathnames: [string | null, string | null] = [null, null],
   extension: string = '.js'
 ): URL {
-
   const [overwriteablePathname, newPathname] = pathnames;
   if (url.pathname === overwriteablePathname && newPathname !== null) {
     url.pathname = newPathname;
@@ -112,4 +125,3 @@ export function CDNURLToRTVURL(
 
   return url;
 }
-

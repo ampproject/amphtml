@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+const esbuild = require('esbuild');
 const minimist = require('minimist');
 const {cyan, green} = require('../common/colors');
 const {log} = require('../common/logging');
+const {relative} = require('path');
 
 let serveMode = 'default';
 
@@ -80,6 +82,11 @@ const isRtvMode = (serveMode) => {
   return /^\d{15}$/.test(serveMode);
 };
 
+let cdnModule;
+const cdnModuleSourcePath =
+  'build-system/server/new-server/transforms/utilities/cdn.ts';
+const cdnModulePath = 'dist/server-cdn.js';
+
 /**
  * @param {string} mode
  * @param {string} file
@@ -88,54 +95,60 @@ const isRtvMode = (serveMode) => {
  * @return {string}
  */
 const replaceUrls = (mode, file, hostName, inabox) => {
+  if (!cdnModule) {
+    esbuild.buildSync({
+      entryPoints: [cdnModuleSourcePath],
+      format: 'cjs',
+      write: true,
+      outfile: cdnModulePath,
+    });
+    cdnModule = require(`${relative(
+      __dirname,
+      process.cwd()
+    )}/${cdnModulePath}`);
+  }
+
+  // All inabox documents use `amp4ads-v0.js`, which optionally gets mapped to
+  // a local URL later.
+  if (inabox) {
+    file = file.replace(
+      /(https:\/\/cdn\.ampproject\.org)\/v0\.(m?js)/g,
+      '$1/amp4ads-v0.$2'
+    );
+  }
+
   hostName = hostName || '';
-  if (mode == 'default') {
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
-      hostName + '/dist/amp.js'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
-      hostName + '/dist/amp-shadow.js'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
-      hostName + '/dist/amp-inabox.js'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.js/g,
-      hostName + '/dist/video-iframe-integration.js'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
-      hostName + '/dist/v0/$1.max.js'
-    );
-    if (inabox) {
-      const filename = '/dist/amp-inabox.js';
-      file = file.replace(/<html [^>]*>/, '<html amp4ads>');
-      file = file.replace(/\/dist\/amp\.js/g, filename);
+
+  const isRtv = isRtvMode(mode);
+
+  file = file.replace(
+    /https:\/\/cdn\.ampproject\.org\/(.+)\.(m?js)/g,
+    (match) => {
+      const pathnames = undefined;
+      const extension = '.js';
+      const url = new URL(match);
+
+      if (isRtv) {
+        return cdnModule.CDNURLToRTVURL(url, mode, pathnames, extension);
+      }
+
+      const useMaxNames = mode === 'default';
+      const replacedUrl = cdnModule.replaceCDNURLPath(
+        url,
+        pathnames,
+        extension,
+        useMaxNames
+      );
+
+      // relative to root if no hostName is provided
+      const hrefNoHost = replacedUrl.href.substr(
+        `${replacedUrl.protocol}//${replacedUrl.host}`.length
+      );
+      return hostName + hrefNoHost;
     }
-  } else if (mode == 'compiled') {
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\.(m?js)/g,
-      hostName + '/dist/v0.$1'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/shadow-v0\.(m?js)/g,
-      hostName + '/dist/shadow-v0.$1'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.(m?js)/g,
-      hostName + '/dist/amp4ads-v0.$1'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.(m?js)/g,
-      hostName + '/dist/video-iframe-integration-v0.$1'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?)\.(m?js)/g,
-      hostName + '/dist/v0/$1.$2'
-    );
+  );
+
+  if (mode == 'compiled') {
     file = file.replace(
       /\/dist\/v0\/examples\/(.*)\.max\.(m?js)/g,
       '/dist/v0/examples/$1.$2'
@@ -144,26 +157,8 @@ const replaceUrls = (mode, file, hostName, inabox) => {
       /\/dist.3p\/current\/(.*)\.max.html/g,
       hostName + '/dist.3p/current-min/$1.html'
     );
-
-    if (inabox) {
-      file = file.replace(/\/dist\/v0\.(m?js)/g, '/dist/amp4ads-v0.$1');
-    }
-  } else if (isRtvMode(mode)) {
-    hostName = `https://cdn.ampproject.org/rtv/${mode}/`;
-    file = file.replace(/https:\/\/cdn\.ampproject\.org\//g, hostName);
-
-    if (inabox) {
-      file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/rtv\/\d{15}\/v0\.(m?js)/g,
-        hostName + 'amp4ads-v0.$1'
-      );
-    }
-  } else if (inabox) {
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\.(m?js)/g,
-      'https://cdn.ampproject.org/amp4ads-v0.$1'
-    );
   }
+
   return file;
 };
 
