@@ -150,6 +150,7 @@ const replaceUrls = (mode, file, hostName, inabox) => {
     }
   );
 
+  // TODO(alanorozco): is this still useful?
   if (mode == 'compiled') {
     file = file.replace(
       /\/dist\/v0\/examples\/(.*)\.max\.(m?js)/g,
