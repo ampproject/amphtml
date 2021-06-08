@@ -290,22 +290,29 @@ class AmpJWPlayer extends AMP.BaseElement {
     this.contentSearch_ = element.getAttribute('data-content-search') || '';
     this.contentBackfill_ = element.getAttribute('data-content-backfill') || '';
     this.contentRecency_ = element.getAttribute('data-content-recency') || '';
-
+    this.queryString_ = element.getAttribute('data-media-querystring') || '';
+    
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */
   layoutCallback() {
-    const queryParams = dict({
+    let queryParams = dict({
       'search': this.getContextualVal_() || undefined,
       'recency': this.contentRecency_ || undefined,
       'backfill': this.contentBackfill_ || undefined,
-      'isAMP': true,
+      'isAMP': true
     });
 
     const url = this.getSingleLineEmbed_();
-    const src = addParamsToUrl(url, queryParams);
+    let src = addParamsToUrl(url, queryParams);
+    src = addParamsToUrl(src, getDataParamsFromAttributes(this.element))
+    
+    if (this.queryString_ && typeof this.queryString_ === 'string') {
+      src += `&${this.queryString_}`;
+    }
+
     const frame = disableScrollingOnIframe(
       createFrameFor(this, src, this.element.id)
     );
