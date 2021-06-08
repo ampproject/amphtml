@@ -17,6 +17,8 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.events.inputs.ampversion }}
+      - name: Get latest scripts
+        run: wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/get-extensions.js" -O ./build-system/npm-publish/get-extensions.js
       - name: Get extensions to publish
         id: get-extensions
         run: |
