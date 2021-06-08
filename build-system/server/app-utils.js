@@ -90,7 +90,7 @@ const tsModule = Object.create(null);
  */
 function requireTsSync(path) {
   if (!tsModule[path]) {
-    const outfile = `dist/${path.replace('/', '--')}.js`;
+    const outfile = `build/${path.replace(/\//g, '--')}.js`;
     logLocalDev('Building', cyan(path), '...');
     esbuild.buildSync({
       entryPoints: [path],
