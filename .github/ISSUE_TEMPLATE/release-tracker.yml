@@ -54,6 +54,7 @@ body:
       label: LTS Release
       description: Details for the LTS promotion if necessary.
       value: |
+        _To be updated if an LTS promotion is necessary._
         <!-- Replace VERSION with the contents of the "Release Version" field. -->
         <!-- After creating this issue, check the checkbox and replace CL_SUBMIT_TIME with the the "Submitted" time from the promotion CL. -->
 
@@ -79,11 +80,12 @@ body:
       value: |
         Sometimes, a bug in a release necessitates that a fix be cherry-picked before the release can progress. If this is the case, follow the instructions in the [cherry-picks documentation](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md#Cherry-picks) and fill out this section.
   - type: textarea
-    id: cherry_picks
+    id: cherry_pick_progress
     attributes:
-      label: Cherry-Picks
-      description: Details for cherry-picks if necessary.
+      label: Cherry-Pick Release Progress
+      description: Progress details for a cherry-pick release if necessary.
       value: |
+        _To be updated if a cherry-pick release is necessary._
         <!-- Replace CP_VERSION with the contents of the "Cherry-Pick Release Version" field. -->
         <!-- Replace CP_ISSUE with one or more cherry-pick issue numbers. -->
         <!-- After creating this issue, check the appropriate checkbox at each stage and replace CL_SUBMIT_TIME with the "Submitted" time from the promotion CL. -->

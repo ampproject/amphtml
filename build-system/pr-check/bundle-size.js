@@ -25,12 +25,18 @@ const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'bundle-size.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   timedExecOrDie('amp dist --noconfig --esm');
   timedExecOrDie('amp dist --noconfig');
   timedExecOrDie('amp bundle-size --on_push_build');
 }
 
+/**
+ * Steps to run during PR builds.
+ */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME)) {
     timedExecOrDie('amp dist --noconfig --esm');

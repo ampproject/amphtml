@@ -17,7 +17,7 @@ import {Deferred} from '../core/data-structures/promise';
 import {createViewportObserver} from '../viewport-observer';
 import {dict} from '../core/types/object';
 import {layoutRectFromDomRect} from '../core/math/layout-rect';
-import {toWin} from '../types';
+import {toWin} from '../core/window';
 
 /** @type {!WeakMap<!Element, !Deferred>|undefined} */
 let intersectionDeferreds;

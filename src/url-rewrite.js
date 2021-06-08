@@ -21,7 +21,7 @@ import {
   parseUrlDeprecated,
   resolveRelativeUrl,
 } from './url';
-import {parseSrcset} from './srcset';
+import {parseSrcset} from './core/dom/srcset';
 import {urls} from './config';
 import {user} from './log';
 

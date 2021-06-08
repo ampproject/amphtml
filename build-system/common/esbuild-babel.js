@@ -44,6 +44,13 @@ function getEsbuildBabelPlugin(
     transformCache = new TransformCache('.babel-cache', '.js');
   }
 
+  /**
+   * @param {string} filename
+   * @param {string} contents
+   * @param {string} hash
+   * @param {Object} babelOptions
+   * @return {Promise}
+   */
   async function transformContents(filename, contents, hash, babelOptions) {
     if (enableCache) {
       const cached = transformCache.get(hash);
@@ -58,7 +65,7 @@ function getEsbuildBabelPlugin(
       .then((result) => {
         const {code, map} = result || {};
         debug('post-babel', filename, code, map);
-        return code;
+        return code + `\n// ${filename}`;
       });
 
     if (enableCache) {

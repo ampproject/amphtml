@@ -25,7 +25,7 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
 
 /**
  * Cleans up various cache and output directories. Optionally cleans up inner
- * node_modules package directories.
+ * node_modules package directories, or excludes some directories from deletion.
  */
 async function clean() {
   const pathsToDelete = [
@@ -61,6 +61,12 @@ async function clean() {
   if (argv.include_subpackages) {
     pathsToDelete.push('**/node_modules', '!node_modules');
   }
+  if (argv.exclude) {
+    const excludes = argv.exclude.split(',');
+    for (const exclude of excludes) {
+      pathsToDelete.push(`!${exclude}`);
+    }
+  }
   const deletedPaths = await del(pathsToDelete, {
     expandDirectories: false,
     dryRun: argv.dry_run,
@@ -77,9 +83,9 @@ module.exports = {
   clean,
 };
 
-clean.description = 'Cleans up various cache and output directories';
+clean.description = 'Clean up various cache and output directories';
 clean.flags = {
-  'dry_run': 'Does a dry run without actually deleting anything',
-  'include_subpackages':
-    'Also cleans up inner node_modules package directories',
+  'dry_run': 'Do a dry run without actually deleting anything',
+  'include_subpackages': 'Also clean up inner node_modules package directories',
+  'exclude': 'Comma-separated list of directories to exclude from deletion',
 };

@@ -22,13 +22,13 @@ const {updateSubpackages} = require('../common/update-packages');
 
 /**
  * Helper that updates build-system subpackages so their types can be verified.
- * Skips NPM checks during CI (already done while running each task).
+ * Skips npm checks during CI (already done while running each task).
  */
-async function updateBuildSystemSubpackages() {
+function updateBuildSystemSubpackages() {
   const packageFiles = globby.sync('build-system/tasks/*/package.json');
   for (const packageFile of packageFiles) {
     const packageDir = path.dirname(packageFile);
-    await updateSubpackages(packageDir, /* skipNpmChecks */ true);
+    updateSubpackages(packageDir, /* skipNpmChecks */ true);
   }
 }
 
@@ -36,8 +36,8 @@ async function updateBuildSystemSubpackages() {
  * Performs type checking on the /build-system directory using TypeScript.
  * Configuration is defined in /build-system/tsconfig.json.
  */
-async function checkBuildSystem() {
-  await updateBuildSystemSubpackages();
+function checkBuildSystem() {
+  updateBuildSystemSubpackages();
   log('Checking types in', cyan('build-system') + '...');
   execOrThrow(
     'npx -p typescript tsc --project ./build-system/tsconfig.json',
@@ -47,7 +47,7 @@ async function checkBuildSystem() {
 }
 
 checkBuildSystem.description =
-  'Check source code in build-system/ for JS type errors.';
+  'Check source code in build-system/ for JS type errors';
 
 module.exports = {
   checkBuildSystem,

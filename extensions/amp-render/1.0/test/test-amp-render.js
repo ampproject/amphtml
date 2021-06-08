@@ -100,6 +100,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -127,6 +128,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="https://example.com/data.json"
           width="auto"
           height="140"
@@ -158,6 +160,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-script:dataFunctions.getRemoteData"
           width="auto"
           height="200"
@@ -182,7 +185,12 @@ describes.realWin(
 
     it('fails gracefully when src is omitted', async () => {
       element = html`
-        <amp-render width="auto" height="140" layout="fixed-height">
+        <amp-render
+          width="auto"
+          height="140"
+          layout="fixed-height"
+          binding="no"
+        >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
         </amp-render>
       `;
@@ -201,6 +209,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           id="my-amp-render"
           src="https://example.com/data.json"
           width="auto"
@@ -252,6 +261,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -293,6 +303,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-script:dataFunctions.getRemoteData"
           width="auto"
           height="200"
@@ -344,6 +355,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           xssi-prefix=")]}"
           key="fullName"
           src="https://example.com/data.json"
@@ -387,6 +399,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           xssi-prefix=")]}"
           key="fullName"
           src="https://example.com/data.json?RANDOM"
@@ -431,6 +444,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:president"
           [src]="srcUrl"
           width="auto"
@@ -469,6 +483,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -500,6 +515,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -530,6 +546,7 @@ describes.realWin(
           width="auto"
           height="140"
           layout="fixed-height"
+          binding="no"
         >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
           <p placeholder>Loading data</p>
@@ -564,6 +581,7 @@ describes.realWin(
           width="auto"
           height="140"
           layout="fixed-height"
+          binding="no"
         >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
           <p placeholder>Loading data</p>
@@ -584,6 +602,171 @@ describes.realWin(
       const fallback = element.querySelector(`[fallback]`);
 
       expect(fallback.textContent).to.equal('Failed');
+    });
+
+    it('should work with binding="always"', async () => {
+      const rescanStub = env.sandbox.stub();
+      rescanStub.resolves({});
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanStub,
+        signals: () => {
+          return {
+            get: () => null,
+          };
+        },
+      });
+
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="always"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+
+      expect(rescanStub).to.be.calledOnce;
+      const {fast, update} = rescanStub.getCall(0).args[2];
+      expect(fast).to.be.true;
+      expect(update).to.be.true;
+    });
+
+    it('should work with binding="refresh"', async () => {
+      const rescanStub = env.sandbox.stub();
+      rescanStub.resolves({});
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanStub,
+        signals: () => {
+          return {
+            get: () => 123,
+          };
+        },
+      });
+
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchStub.resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="refresh"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+
+      expect(rescanStub).to.be.calledOnce;
+      const {fast, update} = rescanStub.getCall(0).args[2];
+      expect(fast).to.be.true;
+      expect(update).to.be.true;
+    });
+
+    it('should default to binding="refresh" when nothing is specified', async () => {
+      const rescanStub = env.sandbox.stub();
+      rescanStub.resolves({});
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanStub,
+        signals: () => {
+          return {
+            get: () => null,
+          };
+        },
+      });
+
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchStub.resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+
+      expect(rescanStub).to.be.calledOnce;
+      const {fast, update} = rescanStub.getCall(0).args[2];
+      expect(fast).to.be.true;
+      expect(update).to.be.false;
+    });
+
+    it('should not perform any updates when binding="no"', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"
+            >Hello {{name}} 1+1=<span [text]="1+1">?</span></template
+          >
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Hello Joe 1+1=?');
+    });
+
+    it('should not perform any updates when binding="never"', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"
+            >Hello {{name}} 1+1=<span [text]="1+1">?</span></template
+          >
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Hello Joe 1+1=?');
     });
   }
 );

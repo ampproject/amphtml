@@ -33,7 +33,7 @@ import {isEnabled} from '../dom';
 import {isFiniteNumber} from '../core/types';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error-reporting';
-import {toWin} from '../types';
+import {toWin} from '../core/window';
 
 /** @const {string} */
 const TAG_ = 'Action';
