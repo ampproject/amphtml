@@ -119,8 +119,8 @@ const replaceUrls = (mode, file, hostName, inabox) => {
 
   hostName = hostName || '';
 
+  const pathnames = undefined; // we don't override the mapping, optional arg
   const isRtv = isRtvMode(mode);
-  const pathnames = undefined; // we don't override the mapping
 
   file = file.replace(
     /https:\/\/cdn\.ampproject\.org\/.+\.(m?js)/g,
@@ -129,7 +129,6 @@ const replaceUrls = (mode, file, hostName, inabox) => {
       // `.mjs` to be lazily built regardless of --esm
 
       const url = new URL(match);
-
       if (isRtv) {
         return cdnModule.CDNURLToRTVURL(url, mode, pathnames, extension);
       }
@@ -142,11 +141,12 @@ const replaceUrls = (mode, file, hostName, inabox) => {
         useMaxNames
       );
 
-      // relative to root if no hostName is provided
-      const hrefNoHost = replacedUrl.href.substr(
-        `${replacedUrl.protocol}//${replacedUrl.host}`.length
+      return (
+        hostName +
+        replacedUrl.href.substr(
+          `${replacedUrl.protocol}//${replacedUrl.host}`.length
+        )
       );
-      return hostName + hrefNoHost;
     }
   );
 
