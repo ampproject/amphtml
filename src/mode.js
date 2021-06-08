@@ -15,7 +15,7 @@
  */
 
 import {internalRuntimeVersion} from './internal-version';
-import {parseQueryString_} from './url-parse-query-string';
+import {parseQueryString} from './core/types/string/url';
 
 /**
  * @typedef {{
@@ -71,9 +71,9 @@ function getMode_(win) {
   const IS_MINIFIED = false;
 
   const runningTests =
-    IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win.__karma__);
+    IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
   const isLocalDev = IS_FORTESTING && (!!AMP_CONFIG.localDev || runningTests);
-  const hashQuery = parseQueryString_(
+  const hashQuery = parseQueryString(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
     win.location['originalHash'] || win.location.hash
@@ -89,15 +89,7 @@ function getMode_(win) {
   // paths for localhost/testing/development are eliminated.
   return {
     localDev: isLocalDev,
-    // Triggers validation or enable pub level logging. Validation can be
-    // bypassed via #validate=0.
-    // Note that AMP_DEV_MODE flag is used for testing purposes.
-    // Use Array.indexOf instead of Array.includes because of #24219
-    development: !!(
-      ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].indexOf(
-        hashQuery['development']
-      ) >= 0 || win.AMP_DEV_MODE
-    ),
+    development: isModeDevelopment(win),
     examiner: hashQuery['development'] == '2',
     esm: IS_ESM,
     // amp-geo override
@@ -128,6 +120,24 @@ function getRtvVersion(win) {
   // TODO(erwinmombay): decide whether internalRuntimeVersion should contain
   // minor version.
   return `01${internalRuntimeVersion()}`;
+}
+
+/**
+ * Triggers validation or enable pub level logging. Validation can be
+ * bypassed via #validate=0.
+ * Note that AMP_DEV_MODE flag is used for testing purposes.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isModeDevelopment(win) {
+  const hashQuery = parseQueryString(
+    win.location['originalHash'] || win.location.hash
+  );
+  return !!(
+    ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].includes(
+      hashQuery['development']
+    ) || win.AMP_DEV_MODE
+  );
 }
 
 /**

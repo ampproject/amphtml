@@ -17,8 +17,8 @@
 import {dev} from '../src/log';
 import {dict} from '../src/core/types/object';
 import {getMode} from '../src/mode';
-import {once} from '../src/core/types/function.js';
-import {parseJson} from '../src/json';
+import {once} from '../src/core/types/function';
+import {parseJson} from '../src/core/types/object/json';
 import {parseUrlDeprecated} from '../src/url';
 
 /**

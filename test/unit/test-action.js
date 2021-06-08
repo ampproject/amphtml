@@ -83,7 +83,7 @@ function assertInvocation(
   }
 }
 
-describe('ActionService parseAction', () => {
+describes.sandboxed('ActionService parseAction', {}, () => {
   function parseMultipleActions(s) {
     const actionMap = parseActionMap(s);
     if (actionMap == null) {
@@ -470,7 +470,7 @@ describe('ActionService parseAction', () => {
   });
 });
 
-describe('ActionService setActions', () => {
+describes.sandboxed('ActionService setActions', {}, () => {
   it('should set actions', () => {
     const action = actionService();
     const element = document.createElement('div');
@@ -491,7 +491,7 @@ describe('ActionService setActions', () => {
   });
 });
 
-describe('Action parseActionMap', () => {
+describes.sandboxed('Action parseActionMap', {}, () => {
   it('should parse with a single action', () => {
     const m = parseActionMap('event1:action1');
     expect(m['event1'][0].target).to.equal('action1');
@@ -844,11 +844,11 @@ describes.sandboxed('Action method', {}, (env) => {
         const {
           actionEventType,
           args,
+          caller,
+          event,
           method,
           node,
           source,
-          caller,
-          event,
           tagOrTarget,
           trust,
         } = invocation;
@@ -1483,7 +1483,7 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
       element,
       'change',
       env.sandbox.match((e) => {
-        const {min, max, value, valueAsNumber} = e.detail;
+        const {max, min, value, valueAsNumber} = e.detail;
         return (
           min === '0' && max === '10' && value === '5' && valueAsNumber === 5
         );

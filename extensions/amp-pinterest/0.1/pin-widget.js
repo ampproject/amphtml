@@ -20,7 +20,7 @@ import {Util} from './util';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {measureIntersection} from '../../../src/utils/intersection';
 import {openWindowDialog} from '../../../src/dom';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 import {user, userAssert} from '../../../src/log';
 
 // Popup options
@@ -347,7 +347,7 @@ export class PinWidget {
   /**
    * Determine the height of the contents to allow resizing after first layout.
    *
-   * @return {!Promise<number|null>}
+   * @return {!Promise<?number>}
    */
   height() {
     return measureIntersection(this.heightOwnerElement_).then(

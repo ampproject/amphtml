@@ -38,8 +38,8 @@ import {installForChildWin as installIntersectionObserver} from './polyfills/int
 import {installForChildWin as installResizeObserver} from './polyfills/resize-observer';
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
-import {isDocumentReady} from './document-ready';
-import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
+import {isDocumentReady} from './core/document-ready';
+import {layoutRectLtwh, moveLayoutRect} from './core/math/layout-rect';
 import {loadPromise} from './event-helper';
 import {
   px,
@@ -49,7 +49,7 @@ import {
   setStyles,
 } from './style';
 import {rethrowAsync} from './core/error';
-import {toWin} from './types';
+import {toWin} from './core/window';
 import {urls} from './config';
 import {whenContentIniLoad} from './ini-load';
 
@@ -557,9 +557,9 @@ export class FriendlyIframeEmbed {
    * @visibleForTesting
    */
   getBodyElement() {
-    return /** @type {!HTMLBodyElement} */ ((
-      this.iframe.contentDocument || this.iframe.contentWindow.document
-    ).body);
+    return /** @type {!HTMLBodyElement} */ (
+      (this.iframe.contentDocument || this.iframe.contentWindow.document).body
+    );
   }
 
   /**
@@ -618,7 +618,7 @@ export class FriendlyIframeEmbed {
 
         // Offset by scroll top as iframe will be position: fixed.
         const dy = -Services.viewportForDoc(this.iframe).getScrollTop();
-        const {top, left, width, height} = moveLayoutRect(rect, /* dx */ 0, dy);
+        const {height, left, top, width} = moveLayoutRect(rect, /* dx */ 0, dy);
 
         // Offset body by header height to prevent visual jump.
         bodyStyle = {

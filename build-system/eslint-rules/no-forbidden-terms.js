@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {cyan} = require('kleur/colors');
+const {cyan} = require('../common/colors');
 const {matchForbiddenTerms} = require('../test-configs/forbidden-terms');
 const {relative} = require('path');
 
@@ -35,7 +35,7 @@ module.exports = function (context) {
 
       for (const terms of context.options) {
         for (const report of matchForbiddenTerms(filename, contents, terms)) {
-          const {match, message, loc} = report;
+          const {loc, match, message} = report;
           const formattedMatch = cyan(`"${match}"`);
           context.report({
             loc,

@@ -19,6 +19,9 @@ const {
   forbiddenTermsGlobal,
   forbiddenTermsSrcInclusive,
 } = require('./build-system/test-configs/forbidden-terms');
+const {
+  getImportResolver,
+} = require('./build-system/babel-config/import-resolver');
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -49,6 +52,7 @@ module.exports = {
     'prettier',
     'react',
     'react-hooks',
+    'sort-destructure-keys',
     'sort-imports-es6-autofix',
     'sort-requires',
   ],
@@ -83,6 +87,12 @@ module.exports = {
     },
     'react': {
       'pragma': 'Preact',
+    },
+    'import/resolver': {
+      // This makes it possible to eventually enable the built-in import linting
+      // rules to detect invalid imports, imports of things that aren't
+      // exported, etc.
+      'babel-module': getImportResolver(),
     },
   },
   'reportUnusedDisableDirectives': true,
@@ -143,7 +153,6 @@ module.exports = {
     'local/no-dynamic-import': 2,
     'local/no-es2015-number-props': 2,
     'local/no-export-side-effect': 2,
-    'local/no-for-of-statement': 2,
     'local/no-forbidden-terms': [
       2,
       forbiddenTermsGlobal,
@@ -252,6 +261,7 @@ module.exports = {
         },
       },
     ],
+    'sort-destructure-keys/sort-destructure-keys': 2,
     'sort-imports-es6-autofix/sort-imports-es6': [
       2,
       {
@@ -270,13 +280,13 @@ module.exports = {
         'extensions/**/test-e2e/*.js',
         'ads/**/test/**/*.js',
         'testing/**/*.js',
+        'build-system/**/test/*.js',
       ],
       'rules': {
         'require-jsdoc': 0,
         'local/always-call-chai-methods': 2,
         'local/no-bigint': 0,
         'local/no-dynamic-import': 0,
-        'local/no-for-of-statement': 0,
         'local/no-function-async': 0,
         'local/no-function-generator': 0,
         'local/no-import-meta': 0,
@@ -309,14 +319,15 @@ module.exports = {
       },
     },
     {
-      'files': [
-        '**/test-*',
-        '**/_init_tests.js',
-        '**/*_test.js',
-        '**/testing/**',
-        '**/storybook/*.js',
-      ],
+      'files': ['**/test-*', '**/*_test.js', '**/testing/**'],
       'rules': {
+        'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
+      },
+    },
+    {
+      'files': ['**/storybook/*.js'],
+      'rules': {
+        'require-jsdoc': 0,
         'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
       },
     },

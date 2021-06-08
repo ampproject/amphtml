@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'using strict';
+
 const {getFilesToCheck} = require('../common/utils');
 const {getStdout} = require('../common/process');
-const {green, red} = require('kleur/colors');
+const {green, red} = require('../common/colors');
 const {invalidWhitespaceGlobs} = require('../test-configs/config');
 const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
 
@@ -57,10 +59,10 @@ function checkInvalidWhitespaces() {
 }
 
 checkInvalidWhitespaces.description =
-  'Checks different types of files for invalid whitespaces.';
+  'Check multiple types of non-JS source files for invalid whitespaces';
 checkInvalidWhitespaces.flags = {
-  'files': 'Checks just the specified files',
-  'local_changes': 'Checks just the files changed in the local branch',
+  'files': 'Check just the specified files',
+  'local_changes': 'Check just the files changed in the local branch',
 };
 
 module.exports = {

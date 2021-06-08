@@ -20,12 +20,12 @@ import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
 import {WebAnimationPlayState} from './web-animation-types';
 import {WebAnimationService} from './web-animation-service';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {dev, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';
 import {installWebAnimationsIfNecessary} from './install-polyfill';
-import {isFiniteNumber} from '../../../src/types';
+import {isFiniteNumber} from '../../../src/core/types';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-animation';
@@ -372,7 +372,7 @@ export class AmpAnimation extends AMP.BaseElement {
   onResize_() {
     // Store the previous `triggered` and `pausedByAction` value since
     // `cancel` may reset it.
-    const {triggered_: triggered, pausedByAction_: pausedByAction} = this;
+    const {pausedByAction_: pausedByAction, triggered_: triggered} = this;
 
     // Stop animation right away.
     if (this.runner_) {
@@ -465,10 +465,12 @@ export class AmpAnimation extends AMP.BaseElement {
   createRunner_(opt_args, opt_positionObserverData) {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
-    const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (this
-      .configJson_);
-    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (opt_args ||
-      null);
+    const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
+      this.configJson_
+    );
+    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (
+      opt_args || null
+    );
 
     // Ensure polyfill is installed.
     const ampdoc = this.getAmpDoc();

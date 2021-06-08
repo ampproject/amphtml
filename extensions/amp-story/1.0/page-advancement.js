@@ -26,9 +26,9 @@ import {AdvancementMode} from './story-analytics';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, matches} from '../../../src/dom';
+import {closest, matches} from '../../../src/core/dom/query';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getAmpdoc} from '../../../src/service';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
@@ -62,6 +62,9 @@ const PROTECTED_SCREEN_EDGE_PERCENT = 12;
  * @private
  */
 const MINIMUM_PROTECTED_SCREEN_EDGE_PX = 48;
+
+/** @private @const {number} */
+const MINIMUM_TIME_BASED_AUTO_ADVANCE_MS = 500;
 
 /**
  * Maximum percent of screen that can be occupied by a single link
@@ -365,9 +368,9 @@ export class ManualAdvancement extends AdvancementConfig {
       return;
     }
     this.touchstartTimestamp_ = Date.now();
-    this.pausedState_ = /** @type {boolean} */ (this.storeService_.get(
-      StateProperty.PAUSED_STATE
-    ));
+    this.pausedState_ = /** @type {boolean} */ (
+      this.storeService_.get(StateProperty.PAUSED_STATE)
+    );
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
@@ -410,9 +413,9 @@ export class ManualAdvancement extends AdvancementConfig {
     this.timeoutId_ = null;
     if (
       !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
-      /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-        StateProperty.INTERACTIVE_COMPONENT_STATE
-      )).state !== EmbeddedComponentState.EXPANDED
+      /** @type {InteractiveComponentDef} */ (
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+      ).state !== EmbeddedComponentState.EXPANDED
     ) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
@@ -474,7 +477,10 @@ export class ManualAdvancement extends AdvancementConfig {
       (el) => {
         tagName = el.tagName.toLowerCase();
 
-        if (tagName === 'amp-story-page-attachment') {
+        if (
+          tagName === 'amp-story-page-attachment' ||
+          tagName === 'amp-story-page-outlink'
+        ) {
           shouldHandleEvent = false;
           return true;
         }
@@ -502,7 +508,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
   /**
    * For an element to trigger a tooltip it has to be descendant of
-   * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
+   * amp-story-page but not of amp-story-cta-layer, amp-story-page-attachment or amp-story-page-outlink.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
@@ -542,7 +548,8 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName === 'amp-story-cta-layer' ||
-          tagName === 'amp-story-page-attachment'
+          tagName === 'amp-story-page-attachment' ||
+          tagName === 'amp-story-page-outlink'
         ) {
           valid = false;
           return false;
@@ -634,9 +641,9 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   isHandledByEmbeddedComponent_(event, pageRect) {
     const target = dev().assertElement(event.target);
-    const stored = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-      StateProperty.INTERACTIVE_COMPONENT_STATE
-    ));
+    const stored = /** @type {InteractiveComponentDef} */ (
+      this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+    );
     const inExpandedMode = stored.state === EmbeddedComponentState.EXPANDED;
 
     return (
@@ -681,9 +688,9 @@ export class ManualAdvancement extends AdvancementConfig {
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
       event.preventDefault();
-      const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-        StateProperty.INTERACTIVE_COMPONENT_STATE
-      ));
+      const embedComponent = /** @type {InteractiveComponentDef} */ (
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+      );
       this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
         element: target,
         state: embedComponent.state || EmbeddedComponentState.FOCUSED,
@@ -806,6 +813,14 @@ export class TimeBasedAdvancement extends AdvancementConfig {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
+    if (delayMs < MINIMUM_TIME_BASED_AUTO_ADVANCE_MS) {
+      user().warn(
+        'AMP-STORY-PAGE',
+        `${element.id} has an auto advance duration that is too short. ` +
+          `${MINIMUM_TIME_BASED_AUTO_ADVANCE_MS}ms is used instead.`
+      );
+      delayMs = MINIMUM_TIME_BASED_AUTO_ADVANCE_MS;
+    }
     /** @private @const {number} */
     this.delayMs_ = delayMs;
 
@@ -898,6 +913,21 @@ export class TimeBasedAdvancement extends AdvancementConfig {
       AdvancementMode.AUTO_ADVANCE_TIME
     );
     super.onAdvance();
+  }
+
+  /**
+   * Updates the delay (and derived values) from the given auto-advance string.
+   * @param {string} autoAdvanceStr The value of the updated auto-advance-after attribute.
+   */
+  updateTimeDelay(autoAdvanceStr) {
+    const newDelayMs = timeStrToMillis(autoAdvanceStr);
+    if (newDelayMs === undefined || isNaN(newDelayMs)) {
+      return;
+    }
+    if (this.remainingDelayMs_) {
+      this.remainingDelayMs_ += newDelayMs - this.delayMs_;
+    }
+    this.delayMs_ = newDelayMs;
   }
 
   /**

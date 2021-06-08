@@ -24,8 +24,8 @@ import {Deferred} from '../../../src/core/data-structures/promise';
 import {Observable} from '../../../src/core/data-structures/observable';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {hasOwn, map} from '../../../src/core/types/object';
-import {isFiniteNumber} from '../../../src/types';
-import {isObject} from '../../../src/core/types';
+import {isFiniteNumber, isObject} from '../../../src/core/types';
+
 import {user, userAssert} from '../../../src/log';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -196,8 +196,8 @@ export class ConsentPolicyManager {
     const consentMetadata = info['consentMetadata'];
     const purposeConsents = info['purposeConsents'];
     const {
-      consentString_: prevConsentStr,
       consentMetadata_: prevConsentMetadata,
+      consentString_: prevConsentStr,
       purposeConsents_: prevPurposeConsents,
     } = this;
 
@@ -367,8 +367,9 @@ export class ConsentPolicyManager {
     if (!this.policyInstancesDeferred_[policyId]) {
       this.policyInstancesDeferred_[policyId] = new Deferred();
     }
-    return /** @type {!Promise} */ (this.policyInstancesDeferred_[policyId]
-      .promise);
+    return /** @type {!Promise} */ (
+      this.policyInstancesDeferred_[policyId].promise
+    );
   }
 }
 

@@ -19,15 +19,15 @@ const argv = require('minimist')(process.argv.slice(2));
 const fetch = require('node-fetch');
 const {
   isCircleciBuild,
-  isPullRequestBuild,
   isGithubActionsBuild,
+  isPullRequestBuild,
 } = require('../common/ci');
 const {ciJobUrl} = require('../common/ci');
-const {cyan, yellow} = require('kleur/colors');
-const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
+const {cyan, yellow} = require('../common/colors');
 const {getValidExperiments} = require('../common/utils');
 const {gitCommitHash} = require('../common/git');
 const {log} = require('../common/logging');
+const {Targets, determineBuildTargets} = require('../pr-check/build-targets');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
@@ -136,7 +136,7 @@ async function postReport(type, action) {
           'Content-Type': 'application/json',
         },
       });
-      const body = await response.text();
+      const body = /** @type {string} */ (await response.text());
 
       log('Reported', cyan(`${type}/${action}`), 'to GitHub');
       if (body.length > 0) {
@@ -209,11 +209,16 @@ async function reportAllExpectedTests() {
 
 /**
  * Callback to the Karma.Server on('run_complete') event for simple test types.
+ * Optionally takes an object containing test results if they were run.
  *
- * @param {!Karma.TestResults} results
+ * @param {?{
+ *   error: string|number,
+ *   failed: string|number,
+ *   success: string|number,
+ * }} results
  */
 async function reportTestRunComplete(results) {
-  if (results.error) {
+  if (!results || results.error) {
     await reportTestErrored();
   } else {
     await reportTestFinished(results.success, results.failed);

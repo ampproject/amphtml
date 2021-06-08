@@ -325,6 +325,7 @@
     <option>purch</option>
     <option>rakutenunifiedads</option>
     <option>rbinfox</option>
+    <option>rcmwidget</option>
     <option>readmo</option>
     <option>realclick</option>
     <option>recomad</option>
@@ -363,6 +364,7 @@
     <option>swoop</option>
     <option>taboola</option>
     <option>tagon</option>
+    <option>tail</option>
     <option>tcsemotion</option>
     <option>teads</option>
     <option>temedya</option>
@@ -1205,6 +1207,11 @@
   <amp-ad width="300" height="150" type="freewheel" layout="responsive" data-zone="2003">
   </amp-ad>
 
+  <h2>Gecko widget</h2>
+  <amp-embed width="200" height="200" type="gecko" layout="responsive" data-widgetIds="96451"
+    data-websiteId="139705" data-publisherId="170734">
+  </amp-embed>
+
   <h2>Geniee SSP</h2>
   <amp-ad width="300" height="250" type="genieessp" data-vid="3" data-zid="1077330">
   </amp-ad>
@@ -1530,7 +1537,7 @@
   </div>
 
   <h2>Opinary</h2>
-  <amp-embed width="500" height="500" type="opinary" layout="intrinsic" data-client="test-success">
+  <amp-embed width="500" height="1" type="opinary" layout="intrinsic" data-client="test-success">
   </amp-embed>
 
   <h2>Outbrain widget</h2>
@@ -1651,6 +1658,14 @@
 
   <h2>RbInfox</h2>
   <amp-embed width="240" height="400" type="rbinfox" src="https://rb.infox.sg/infox/503">
+  </amp-embed>
+
+  <h2>RcmWidget</h2>
+  <amp-embed
+    width="auto"
+    height="500"
+    type="rcmwidget"
+  >
   </amp-embed>
 
   <h2>ReadMo</h2>
@@ -1878,6 +1893,13 @@
 
   <h2>Tagon</h2>
   <amp-ad data-test="true" width=300 height=250 type="tagon">
+    
+  <h2>Tail</h2>
+  <div>It is common to see a no-fill ad in this example.</div>
+  <amp-ad width="300" height="250"
+  type="doubleclick"
+  data-slot="/1234567/medium-rectangle"
+  rtc-config="{"vendors": {"tail": {"TAIL_ACCOUNT": "TT-0000-0"}}}">
   </amp-ad>
 
   <h2>TcsEmotion AMP tag</h2>

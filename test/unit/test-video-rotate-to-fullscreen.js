@@ -41,7 +41,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
     env.win.screen.orientation.type = orientation;
   }
 
-  function fireIntersection({target, boundingClientRect, intersectionRatio}) {
+  function fireIntersection({boundingClientRect, intersectionRatio, target}) {
     ioCallback([
       {
         target,
@@ -155,7 +155,8 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
     autoFullscreenManager.register({video: video2});
     autoFullscreenManager.register({video: video3});
 
-    const bestCenteredPromise = autoFullscreenManager.selectBestCenteredInPortrait_();
+    const bestCenteredPromise =
+      autoFullscreenManager.selectBestCenteredInPortrait_();
     fireIntersection(video3Entry);
     expect(await bestCenteredPromise).equal(video3);
   });
@@ -217,7 +218,8 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
     autoFullscreenManager.register({video: video2});
     autoFullscreenManager.register({video: video3});
 
-    const bestCenteredPromise = autoFullscreenManager.selectBestCenteredInPortrait_();
+    const bestCenteredPromise =
+      autoFullscreenManager.selectBestCenteredInPortrait_();
     [video1Entry, video2Entry, video3Entry].forEach(fireIntersection);
     expect(await bestCenteredPromise).to.equal(video2);
   });
@@ -265,7 +267,8 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
 
-    const bestCenteredPromise = autoFullscreenManager.selectBestCenteredInPortrait_();
+    const bestCenteredPromise =
+      autoFullscreenManager.selectBestCenteredInPortrait_();
     [video1Entry, video2Entry].forEach(fireIntersection);
     expect(await bestCenteredPromise).to.equal(video1);
   });
@@ -312,7 +315,8 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
 
-    const bestCenteredPromise = autoFullscreenManager.selectBestCenteredInPortrait_();
+    const bestCenteredPromise =
+      autoFullscreenManager.selectBestCenteredInPortrait_();
     [video1Entry, video2Entry].forEach(fireIntersection);
     expect(await bestCenteredPromise).to.equal(video2);
   });

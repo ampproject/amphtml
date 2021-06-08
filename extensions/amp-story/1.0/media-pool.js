@@ -33,8 +33,9 @@ import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/core/types/array';
-import {isConnectedNode, matches} from '../../../src/dom';
-import {toWin} from '../../../src/types';
+import {isConnectedNode} from '../../../src/dom';
+import {matches} from '../../../src/core/dom/query';
+import {toWin} from '../../../src/core/window';
 import {userInteractedWith} from '../../../src/video-interface';
 
 /** @const @enum {string} */
@@ -256,9 +257,9 @@ export class MediaPool {
       // comparison with the itervar below, so we have to roll it by hand.
       for (let i = count; i > 0; i--) {
         // Use seed element at end of set to prevent wasting it.
-        const mediaEl = /** @type {!PoolBoundElementDef} */ (i == 1
-          ? mediaElSeed
-          : mediaElSeed.cloneNode(/* deep */ true));
+        const mediaEl = /** @type {!PoolBoundElementDef} */ (
+          i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true)
+        );
         mediaEl.addEventListener('error', this.onMediaError_, {capture: true});
         mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
         // In Firefox, cloneNode() does not properly copy the muted property
@@ -581,11 +582,13 @@ export class MediaPool {
    */
   swapPoolMediaElementOutOfDom_(poolMediaEl) {
     const placeholderElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
-    const placeholderEl = /** @type {!PlaceholderElementDef} */ (dev().assertElement(
-      this.placeholderEls_[placeholderElId],
-      `No media element ${placeholderElId} to put back into DOM after` +
-        'eviction.'
-    ));
+    const placeholderEl = /** @type {!PlaceholderElementDef} */ (
+      dev().assertElement(
+        this.placeholderEls_[placeholderElId],
+        `No media element ${placeholderElId} to put back into DOM after` +
+          'eviction.'
+      )
+    );
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
 
     const swapOutOfDom = this.enqueueMediaElementTask_(

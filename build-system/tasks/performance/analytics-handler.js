@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
+
 /**
  *
  * @param {!Array<function>} handlersList
@@ -80,7 +82,7 @@ function setupAnalyticsHandler(handlersList, handlerOptions, resolve) {
  * Matches intercepted request with special analytics parameter
  * and records first outgoing analytics request, using callback.
  * Abort all requests, to not ping real servers.
- * @param {Request} interceptedRequest
+ * @param {puppeteer.HTTPRequest} interceptedRequest
  * @param {string} analyticsParam
  * @param {!Function} requestCallback
  * @return {!Promise<boolean>}
@@ -114,12 +116,8 @@ async function maybeHandleAnalyticsRequest(
  * @return {!Object}
  */
 function getAnalyticsMetrics(analyticsHandlerOptions) {
-  const {
-    expectedRequests,
-    firstRequestTime,
-    requests,
-    startTime,
-  } = analyticsHandlerOptions;
+  const {expectedRequests, firstRequestTime, requests, startTime} =
+    analyticsHandlerOptions;
   const analyticsMetrics = {};
   // If there is no firstRequestTime, that means that request didn't fire.
   // `percentRequestsFailed` because we take the mean rather than sum

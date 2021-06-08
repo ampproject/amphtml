@@ -19,7 +19,7 @@ import {isArray, isObject} from '../../../src/core/types';
 
 import {isSecureUrlDeprecated} from '../../../src/url';
 import {parseExtensionUrl} from '../../../src/service/extension-script';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {urls} from '../../../src/config';
 
 const TAG = 'amp-ad-util';
@@ -167,7 +167,7 @@ export function getAmpAdMetadata(creative) {
 /**
  * Merges any elements from customElementExtensions array into extensions array if
  * the element is not present.
- * @param {!Array<{custom-element: string, 'src': string}} extensions
+ * @param {!Array<{custom-element: string, 'src': string}>} extensions
  * @param {!Array<string>} customElementExtensions
  */
 export function mergeExtensionsMetadata(extensions, customElementExtensions) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonConfiguration} from '../src/json';
+import {jsonConfiguration} from '../src/core/types/object/json';
 
 /**
  * @typedef {{
@@ -539,6 +539,8 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
   },
 
+  'gecko': {},
+
   'genieessp': {
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
   },
@@ -807,6 +809,7 @@ const adConfig = jsonConfiguration({
       'https://www.myfinance.com',
     ],
     renderStartImplemented: true,
+    clientIdScope: 'AMP_ECID_GOOGLE',
   },
 
   'myoffrz': {
@@ -887,7 +890,9 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'opinary': {},
+  'opinary': {
+    renderStartImplemented: true,
+  },
 
   'outbrain': {
     renderStartImplemented: true,
@@ -982,6 +987,11 @@ const adConfig = jsonConfiguration({
   },
 
   'rbinfox': {
+    renderStartImplemented: true,
+  },
+
+  'rcmwidget': {
+    prefetch: 'https://rcmjs.rambler.ru/static/rcmw/rcmw-amp.js',
     renderStartImplemented: true,
   },
 
@@ -1187,6 +1197,10 @@ const adConfig = jsonConfiguration({
 
   'tagon': {
     prefetch: 'https://js.tagon.co/tagon-amp.min.js',
+  },
+  
+  'tail': {
+    renderStartImplemented: true,
   },
 
   'tcsemotion': {

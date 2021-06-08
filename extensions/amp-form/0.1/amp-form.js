@@ -36,7 +36,6 @@ import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
   isProxyOrigin,
-  parseQueryString,
   serializeQueryString,
 } from '../../../src/url';
 import {Services} from '../../../src/services';
@@ -44,16 +43,18 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   ancestorElementsByTag,
   childElementByAttr,
+} from '../../../src/core/dom/query';
+import {createCustomEvent} from '../../../src/event-helper';
+import {
   createElementWithAttributes,
   iterateCursor,
   removeElement,
   tryFocus,
 } from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {
   formOrNullForElement,
   getFormAsObject,
@@ -65,15 +66,15 @@ import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/core/types/array';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {
   setupAMPCors,
   setupInit,
   setupInput,
 } from '../../../src/utils/xhr-utils';
-
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /** @const {string} */
 const TAG = 'amp-form';
@@ -445,7 +446,7 @@ export class AmpForm {
     if (!this.ssrTemplateHelper_.isEnabled()) {
       this.form_.addEventListener('change', (e) => {
         this.verifier_.onCommit().then((updatedErrors) => {
-          const {updatedElements, errors} = updatedErrors;
+          const {errors, updatedElements} = updatedErrors;
           updatedElements.forEach(checkUserValidityAfterInteraction_);
           // Tell the validation to reveal any input.validationMessage added
           // by the form verifier.
@@ -1407,8 +1408,9 @@ export class AmpForm {
     const queryParams = parseQueryString(this.win_.location.search);
     Object.keys(queryParams).forEach((key) => {
       // Typecast since Closure is missing NodeList union type in HTMLFormElement.elements.
-      const formControls = /** @type {(!Element|!NodeList)} */ (this.form_
-        .elements[key]);
+      const formControls = /** @type {(!Element|!NodeList)} */ (
+        this.form_.elements[key]
+      );
       if (!formControls) {
         return;
       }

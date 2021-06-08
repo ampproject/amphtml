@@ -28,10 +28,12 @@ import {
   setStyles,
   toggle,
 } from '../style';
-import {closest, domOrderComparator, matches} from '../dom';
+import {closest, matches} from '../core/dom/query';
 import {dev, user} from '../log';
+import {domOrderComparator} from '../dom';
 import {endsWith} from '../core/types/string';
 import {getMode} from '../mode';
+
 import {remove} from '../core/types/array';
 
 const TAG = 'FixedLayer';
@@ -463,8 +465,8 @@ export class FixedLayer {
               const {element, forceTransfer} = fe;
               const style = computedStyle(win, element);
 
-              const {offsetWidth, offsetHeight, offsetTop} = element;
-              const {position = '', display = '', bottom, zIndex} = style;
+              const {offsetHeight, offsetTop, offsetWidth} = element;
+              const {bottom, display = '', position = '', zIndex} = style;
               const opacity = parseFloat(style.opacity);
               const transform =
                 style[getVendorJsPropertyName(style, 'transform')];
@@ -1097,9 +1099,8 @@ class TransferLayerBody {
     if (!fe.placeholder) {
       // Never been transfered before: ensure that it's properly configured.
       setStyle(element, 'pointer-events', 'initial');
-      const placeholder = (fe.placeholder = this.doc_.createElement(
-        'i-amphtml-fpa'
-      ));
+      const placeholder = (fe.placeholder =
+        this.doc_.createElement('i-amphtml-fpa'));
       toggle(placeholder, false);
       placeholder.setAttribute('i-amphtml-fixedid', fe.id);
     }

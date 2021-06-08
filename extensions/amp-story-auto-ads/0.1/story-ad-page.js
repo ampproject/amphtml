@@ -23,6 +23,10 @@ import {
   validateCtaMetadata,
 } from './story-ad-ui';
 import {
+  AdvanceExpToTime,
+  StoryAdAutoAdvance,
+} from '../../../src/experiments/story-ad-auto-advance';
+import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
@@ -37,16 +41,17 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   createElementWithAttributes,
-  elementByTag,
   isJsonScriptTag,
   toggleAttribute,
 } from '../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
+import {elementByTag} from '../../../src/core/dom/query';
 import {getData, listen} from '../../../src/event-helper';
+import {getExperimentBranch} from '../../../src/experiments';
 import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {setStyle} from '../../../src/style';
 
 /** @const {string} */
@@ -312,6 +317,17 @@ export class StoryAdPage {
       'id': this.id_,
     });
 
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win_,
+      StoryAdAutoAdvance.ID
+    );
+    if (
+      autoAdvanceExpBranch &&
+      autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
+    ) {
+      attributes['auto-advance-after'] = AdvanceExpToTime[autoAdvanceExpBranch];
+    }
+
     const page = createElementWithAttributes(
       this.doc_,
       'amp-story-page',
@@ -385,10 +401,9 @@ export class StoryAdPage {
     if (this.adFrame_) {
       return this.adFrame_;
     }
-    return (this.adFrame_ = /** @type {?HTMLIFrameElement} */ (elementByTag(
-      devAssert(this.pageElement_),
-      'iframe'
-    )));
+    return (this.adFrame_ = /** @type {?HTMLIFrameElement} */ (
+      elementByTag(devAssert(this.pageElement_), 'iframe')
+    ));
   }
 
   /**

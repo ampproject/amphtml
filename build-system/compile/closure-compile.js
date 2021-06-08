@@ -17,7 +17,7 @@
 
 const compiler = require('@ampproject/google-closure-compiler');
 const vinylFs = require('vinyl-fs');
-const {cyan, red, yellow} = require('kleur/colors');
+const {cyan, red, yellow} = require('../common/colors');
 const {getBabelOutputDir} = require('./pre-closure-babel');
 const {log, logWithoutTimestamp} = require('../common/logging');
 
@@ -45,14 +45,16 @@ function logClosureCompilerError(message) {
  * Handles a closure error during compilation and type checking. Passes through
  * the error except in watch mode, where we want to print a failure message and
  * continue.
- * @param {!PluginError} err
+ * @param {!compiler.PluginError} err
  * @param {string} outputFilename
  * @param {?Object} options
- * @return {!PluginError|undefined}
+ * @return {!compiler.PluginError|undefined}
  */
 function handleClosureCompilerError(err, outputFilename, options) {
   if (options.typeCheckOnly) {
-    log(`${red('ERROR:')} Type checking failed`);
+    if (!options.logger) {
+      log(`${red('ERROR:')} Type checking failed`);
+    }
     return err;
   }
   log(`${red('ERROR:')} Could not minify ${cyan(outputFilename)}`);
@@ -69,10 +71,14 @@ function handleClosureCompilerError(err, outputFilename, options) {
  * on Windows exceeds the command line size limit. The stream mode is 'IN'
  * because output files and sourcemaps are written directly to disk.
  * @param {Array<string>} flags
+ * @param {!Object} options
  * @return {!Object}
  */
-function initializeClosure(flags) {
-  const pluginOptions = {streamMode: 'IN', logger: logClosureCompilerError};
+function initializeClosure(flags, options) {
+  const pluginOptions = {
+    streamMode: 'IN',
+    logger: options.logger || logClosureCompilerError,
+  };
   return compiler.gulp()(flags, pluginOptions);
 }
 
@@ -88,7 +94,7 @@ function runClosure(outputFilename, options, flags, srcFiles) {
   return new Promise((resolve, reject) => {
     vinylFs
       .src(srcFiles, {base: getBabelOutputDir()})
-      .pipe(initializeClosure(flags))
+      .pipe(initializeClosure(flags, options))
       .on('error', (err) => {
         const reason = handleClosureCompilerError(err, outputFilename, options);
         reason ? reject(reason) : resolve();
@@ -99,5 +105,6 @@ function runClosure(outputFilename, options, flags, srcFiles) {
 }
 
 module.exports = {
+  logClosureCompilerError,
   runClosure,
 };

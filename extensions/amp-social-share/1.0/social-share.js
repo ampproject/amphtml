@@ -19,10 +19,11 @@ import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {SocialShareIcon} from './social-share-svgs';
 import {Wrapper} from '../../../src/preact/component';
-import {addParamsToUrl, parseQueryString} from '../../../src/url';
+import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
 import {getSocialConfig} from './social-share-config';
 import {openWindowDialog} from '../../../src/dom';
+import {parseQueryString} from '../../../src/core/types/string/url';
 import {useResourcesNotify} from '../../../src/preact/utils';
 import {useStyles} from './social-share.jss';
 
@@ -37,17 +38,17 @@ const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
  * @return {PreactDef.Renderable}
  */
 export function SocialShare({
-  type,
-  endpoint,
-  params,
-  target,
-  width,
-  height,
-  color,
   background,
-  tabIndex = 0,
-  style,
   children,
+  color,
+  endpoint,
+  height,
+  params,
+  style,
+  tabIndex = 0,
+  target,
+  type,
+  width,
   ...rest
 }) {
   useResourcesNotify();
@@ -66,12 +67,8 @@ export function SocialShare({
     return null;
   }
 
-  const {
-    finalEndpoint,
-    checkedWidth,
-    checkedHeight,
-    checkedTarget,
-  } = checkPropsReturnValue;
+  const {checkedHeight, checkedTarget, checkedWidth, finalEndpoint} =
+    checkPropsReturnValue;
 
   return (
     <Wrapper
@@ -245,10 +242,12 @@ function getQueryString(endpoint) {
  * @return {boolean}
  */
 function isIos() {
-  return /** @type {boolean} */ (window &&
-    window.navigator &&
-    window.navigator.userAgent &&
-    window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0);
+  return /** @type {boolean} */ (
+    window &&
+      window.navigator &&
+      window.navigator.userAgent &&
+      window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0
+  );
 }
 
 /**

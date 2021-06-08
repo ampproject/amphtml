@@ -30,7 +30,7 @@ const {
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
 const {buildRuntime, getFilesFromArgv} = require('../../common/utils');
-const {cyan} = require('kleur/colors');
+const {cyan} = require('../../common/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
@@ -80,7 +80,8 @@ function createMocha_() {
   if (argv.testnames || argv.watch) {
     reporter = '';
   } else if (argv.report || isCircleciBuild()) {
-    reporter = ciReporter;
+    // TODO(#28387) clean up this typing.
+    reporter = /** @type {*} */ (ciReporter);
   } else {
     reporter = dotsReporter;
   }
@@ -128,27 +129,29 @@ async function fetchCoverage_(outDir) {
   const zipFilename = path.join(outDir, 'coverage.zip');
   const zipFile = fs.createWriteStream(zipFilename);
 
-  await new Promise((resolve, reject) => {
-    http
-      .get(
-        {
-          host: HOST,
-          port: PORT,
-          path: COV_DOWNLOAD_PATH,
-        },
-        (response) => {
-          response.pipe(zipFile);
-          zipFile.on('finish', () => {
-            zipFile.close();
-            resolve();
-          });
-        }
-      )
-      .on('error', (err) => {
-        fs.unlinkSync(zipFilename);
-        reject(err);
-      });
-  });
+  await /** @type {Promise<void>} */ (
+    new Promise((resolve, reject) => {
+      http
+        .get(
+          {
+            host: HOST,
+            port: PORT,
+            path: COV_DOWNLOAD_PATH,
+          },
+          (response) => {
+            response.pipe(zipFile);
+            zipFile.on('finish', () => {
+              zipFile.close();
+              resolve();
+            });
+          }
+        )
+        .on('error', (err) => {
+          fs.unlinkSync(zipFilename);
+          reject(err);
+        });
+    })
+  );
   execOrDie(`unzip -o ${zipFilename} -d ${outDir}`);
 }
 
@@ -218,25 +221,24 @@ module.exports = {
   e2e,
 };
 
-e2e.description = 'Runs e2e tests';
+e2e.description = 'Run e2e tests';
 e2e.flags = {
   'browsers':
-    'Run only the specified browser tests. Options are ' +
-    '`chrome`, `firefox`, `safari`.',
+    'Run tests on the specified browser (options are `chrome`, `firefox`, `safari`)',
   'config':
-    'Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
-  'core_runtime_only': 'Builds only the core runtime.',
-  'nobuild': 'Skips building the runtime via `amp (build|dist) --fortesting`',
+    'Set the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
+  'core_runtime_only': 'Build only the core runtime.',
+  'nobuild': 'Skip building the runtime via `amp (build|dist) --fortesting`',
   'define_experiment_constant':
-    'Transforms tests with the EXPERIMENT constant set to true',
+    'Transform tests with the EXPERIMENT constant set to true',
   'experiment': 'Experiment being tested (used for status reporting)',
-  'extensions': 'Builds only the listed extensions.',
-  'compiled': 'Runs tests against minified JS',
+  'extensions': 'Build only the listed extensions.',
+  'compiled': 'Run tests against minified JS',
   'files': 'Run tests found in a specific path (ex: **/test-e2e/*.js)',
-  'testnames': 'Lists the name of each test being run',
-  'watch': 'Watches for changes in files, runs corresponding test(s)',
-  'headless': 'Runs the browser in headless mode',
-  'debug': 'Prints debugging information while running tests',
+  'testnames': 'List the name of each test being run',
+  'watch': 'Watch for changes in files, runs corresponding test(s)',
+  'headless': 'Run the browser in headless mode',
+  'debug': 'Print debugging information while running tests',
   'report': 'Write test result report to a local file',
   'coverage': 'Collect coverage data from instrumented code',
 };

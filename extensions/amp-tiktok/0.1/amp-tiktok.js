@@ -17,16 +17,13 @@
 import {CSS} from '../../../build/amp-tiktok-0.1.css';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
-import {
-  childElementByTag,
-  createElementWithAttributes,
-  removeElement,
-} from '../../../src/dom';
+import {childElementByTag} from '../../../src/core/dom/query';
+import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {debounce} from '../../../src/core/types/function';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {px, resetStyles, setStyles} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 let id = 0;
 const NAME_PREFIX = '__tt_embed__v';

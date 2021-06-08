@@ -22,13 +22,13 @@ const {
   stopTimer,
 } = require('./utils');
 const {
+  getLoggingPrefix,
   logWithoutTimestamp,
   setLoggingPrefix,
-  getLoggingPrefix,
 } = require('../common/logging');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
-const {red} = require('kleur/colors');
+const {red} = require('../common/colors');
 const {updatePackages} = require('../common/update-packages');
 
 /**

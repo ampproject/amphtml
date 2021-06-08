@@ -99,42 +99,23 @@
   overflow: hidden !important;
 }
 
-/** Bookend overrides. */
-
-.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-container,
-.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-container[hidden] {
-  height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-  background: transparent !important;
-  transition: none !important;
-}
-
-.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
-  margin-top: auto !important;
-  padding-top: 88px !important;
-}
-
-.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {
-  opacity: 1 !important;
-}
-
-[desktop] .i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer {
-  height: 100% !important;
-  width: 100% !important;
-}
-
-[desktop] .i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
-  padding-top: 0 !important;
-}
-
 /* For amp-story-page-attachment-ui-v2 experiment. */
 
 [desktop] .i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
   background: none !important;
 }
 
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
+.i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
+  --i-amphtml-draggable-drawer-background-color: #fff !important;
+  --i-amphtml-draggable-drawer-text-color: #202125 !important;
+}
+
+[theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
+  --i-amphtml-draggable-drawer-background-color: #202125 !important;
+  --i-amphtml-draggable-drawer-text-color: #fff !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-container {
   border-radius: 16px !important;
   height: 100% !important;
 }
@@ -148,6 +129,11 @@ amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-s
   /* This makes the spacer elmement take up all available space to push content to the bottom of the screen. */
   display: flex !important;
   flex-direction: column !important;
+}
+
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
+  /* spacer is mobile only */
+  display: none !important;
 }
 
 amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-spacer {
@@ -165,12 +151,11 @@ body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-amp-stor
   outline: none !important;
 }
 
-amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
-  border-radius: inherit !important;
-  background: #fff !important;
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
+  background: var(--i-amphtml-draggable-drawer-background-color) !important;
+  color: var(--i-amphtml-draggable-drawer-text-color) !important;
 }
 
-amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
-  padding-top: 0 !important;
-  background: none !important;
+amp-story:not([desktop]) .i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-draggable-drawer-content {
+  border-radius: inherit !important;
 }

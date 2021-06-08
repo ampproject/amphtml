@@ -20,7 +20,7 @@ import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {dev, user, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
@@ -38,53 +38,53 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {Document} */
     this.doc_ = this.win.document;
 
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.container_ = null;
 
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.leftAmpImage_ = null;
 
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.rightAmpImage_ = null;
 
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.leftLabelWrapper_ = null;
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.leftLabel_ = null;
 
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.rightLabelWrapper_ = null;
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.rightLabel_ = null;
 
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.leftMask_ = null;
 
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.rightMask_ = null;
 
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.bar_ = null;
 
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.barStick_ = null;
 
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.hintLeftArrow_ = null;
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.hintRightArrow_ = null;
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.hintLeftBody_ = null;
-    /** @private {Element|null} */
+    /** @private {?Element} */
     this.hintRightBody_ = null;
 
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenMouseDown_ = null;
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenMouseUp_ = null;
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenMouseMove_ = null;
-    /** @private {UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenKeyDown_ = null;
 
     // Step size on keyboard action, 0.1 = 10%
@@ -98,7 +98,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       'disable-hint-reappear'
     );
 
-    /** @private {Gestures|null} */
+    /** @private {?Gestures} */
     this.gestures_ = null;
 
     /** @private {boolean} */
@@ -509,7 +509,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Unlisten a listener and clear. If null, does nothing
-   * @param {UnlistenDef|null} unlistenHandle
+   * @param {?UnlistenDef} unlistenHandle
    * @private
    */
   unlisten_(unlistenHandle) {
@@ -562,10 +562,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   getCurrentSliderPercentage_() {
     const {left: barLeft} = this.bar_./*OK*/ getBoundingClientRect();
-    const {
-      left: boxLeft,
-      width: boxWidth,
-    } = this.element./*OK*/ getBoundingClientRect();
+    const {left: boxLeft, width: boxWidth} =
+      this.element./*OK*/ getBoundingClientRect();
     return (barLeft - boxLeft) / boxWidth;
   }
 

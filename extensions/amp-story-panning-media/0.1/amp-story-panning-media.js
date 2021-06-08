@@ -23,10 +23,12 @@ import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
-import {deepEquals} from '../../../src/json';
+import {closest} from '../../../src/core/dom/query';
+import {deepEquals} from '../../../src/core/types/object/json';
 import {dev, user} from '../../../src/log';
+import {prefersReducedMotion} from '../../../src/core/dom/media-query-props';
 import {setImportantStyles} from '../../../src/style';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_PANNING_MEDIA';
@@ -211,7 +213,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   getMaxBounds_() {
     // Calculations to clamp image to edge of container.
-    const {width: containerWidth, height: containerHeight} = this.pageSize_;
+    const {height: containerHeight, width: containerWidth} = this.pageSize_;
 
     const ampImgWidth = this.ampImgEl_.getAttribute('width');
     const ampImgHeight = this.ampImgEl_.getAttribute('height');
@@ -250,7 +252,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     ];
 
     // Don't animate if first instance of group or prefers-reduced-motion.
-    if (!startPos || this.prefersReducedMotion_()) {
+    if (!startPos || prefersReducedMotion(this.win)) {
       this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
         [this.groupId_]: this.animateTo_,
       });
@@ -350,15 +352,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       dev().assertElement(this.element),
       (el) => el.tagName.toLowerCase() === 'amp-story-page'
     );
-  }
-
-  /**
-   * Whether the device opted in prefers-reduced-motion.
-   * @return {boolean}
-   * @private
-   */
-  prefersReducedMotion_() {
-    return this.win.matchMedia('(prefers-reduced-motion: reduce)')?.matches;
   }
 
   /** @override */

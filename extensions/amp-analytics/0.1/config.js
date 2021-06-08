@@ -25,7 +25,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/core/types';
 import {isCanary} from '../../../src/experiments';
 
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';
@@ -217,9 +217,8 @@ export class AnalyticsConfig {
         body: config,
       };
       if (this.element_.hasAttribute('data-credentials')) {
-        fetchConfig.credentials = this.element_.getAttribute(
-          'data-credentials'
-        );
+        fetchConfig.credentials =
+          this.element_.getAttribute('data-credentials');
       }
       return (
         Services.urlReplacementsForDoc(this.element_)

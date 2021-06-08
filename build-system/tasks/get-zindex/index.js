@@ -22,12 +22,12 @@ const Postcss = require('postcss');
 const prettier = require('prettier');
 const textTable = require('text-table');
 const {
-  jscodeshiftAsync,
   getJscodeshiftReport,
+  jscodeshiftAsync,
 } = require('../../test-configs/jscodeshift');
 const {getStdout} = require('../../common/process');
-const {gray, magenta} = require('kleur/colors');
-const {logOnSameLineLocalDev, logLocalDev} = require('../../common/logging');
+const {gray, magenta} = require('../../common/colors');
+const {logLocalDev, logOnSameLineLocalDev} = require('../../common/logging');
 const {writeDiffOrFail} = require('../../common/diff');
 
 /** @type {Postcss.default} */
@@ -91,6 +91,7 @@ function createTable(filesData) {
     const entry = Array.isArray(filesData[filename])
       ? filesData[filename]
       : Object.entries(filesData[filename]).sort(sortedByEntryKey);
+    // @ts-ignore
     for (const [context, zIndex] of entry) {
       rows.push([`\`${context}\``, zIndex, `[${filename}](/${filename})`]);
     }
@@ -155,7 +156,7 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
     const result = {};
 
-    const {stdout, stderr} = jscodeshiftAsync([
+    const {stderr, stdout} = jscodeshiftAsync([
       '--dry',
       '--no-babel',
       `--transform=${__dirname}/jscodeshift/collect-zindex.js`,
@@ -254,8 +255,8 @@ module.exports = {
 };
 
 getZindex.description =
-  'Runs through all css files of project to gather z-index values';
+  'Run through all css files in the repo to gather z-index values';
 
 getZindex.flags = {
-  'fix': 'Write to file',
+  'fix': 'Write the results to file',
 };

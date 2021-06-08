@@ -170,11 +170,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
   },
   {
-    id: 'expand-json-targeting',
-    name: 'Allow CLIENT_ID in doubleclick json targeting feature',
-    spec: 'https://github.com/ampproject/amphtml/issues/25190',
-  },
-  {
     id: 'auto-ads-layout-callback',
     name: 'Move ads placement into layoutCallback',
     spec: 'https://github.com/ampproject/amphtml/issues/27068',
@@ -212,13 +207,17 @@ export const EXPERIMENTS = [
   },
   {
     id: 'flexible-bitrate',
-    name:
-      'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
+    name: 'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
     spec: 'https://github.com/ampproject/amphtml/projects/111',
   },
   {
     id: 'story-ad-placements',
     name: 'Optimization of story ad placements',
     spec: 'https://github.com/ampproject/amphtml/issues/33147',
+  },
+  {
+    id: 'story-ad-auto-advance',
+    name: 'Auto advancing story ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/33969',
   },
 ];

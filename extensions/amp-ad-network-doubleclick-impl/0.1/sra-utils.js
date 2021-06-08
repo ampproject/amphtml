@@ -17,11 +17,11 @@
 import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 import {dev, devAssert} from '../../../src/log';
 import {getEnclosingContainerTypes} from '../../../ads/google/a4a/utils';
-import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
+import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
 import {isInManualExperiment} from '../../../ads/google/a4a/traffic-experiments';
 import {isObject} from '../../../src/core/types';
 import {tryResolve} from '../../../src/core/data-structures/promise';
-import {utf8Encode} from '../../../src/utils/bytes';
+import {utf8Encode} from '../../../src/core/types/string/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';

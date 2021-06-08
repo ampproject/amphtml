@@ -20,13 +20,13 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {Layout} from '../../../src/layout';
-import {closest, copyChildren, removeChildren} from '../../../src/dom';
+import {closest} from '../../../src/core/dom/query';
+import {copyChildren, removeChildren} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getStoryAttributeSrc} from './utils';
 import {htmlFor} from '../../../src/static-template';
 import {isArray, isObject} from '../../../src/core/types';
-
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {setImportantStyles} from '../../../src/style';
 
 /** @const {string} */
@@ -263,9 +263,9 @@ export class AmpStoryAccess extends AMP.BaseElement {
     );
 
     // Configuration validation is handled by the amp-access extension.
-    let accessConfig = /** @type {!Array|!Object} */ (parseJson(
-      accessEl.textContent
-    ));
+    let accessConfig = /** @type {!Array|!Object} */ (
+      parseJson(accessEl.textContent)
+    );
 
     if (!isArray(accessConfig)) {
       accessConfig = [accessConfig];

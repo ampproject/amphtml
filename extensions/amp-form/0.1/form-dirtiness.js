@@ -251,7 +251,7 @@ export class FormDirtiness {
  * @return {boolean}
  */
 function shouldSkipDirtinessCheck(field) {
-  const {tagName, name, hidden} = field;
+  const {hidden, name, tagName} = field;
 
   if (!SUPPORTED_TAG_NAMES[tagName]) {
     return true;

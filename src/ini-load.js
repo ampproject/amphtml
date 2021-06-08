@@ -54,14 +54,13 @@ export function whenContentIniLoad(
 
 /**
  * A legacy way using direct measurement.
+ * Used by inabox runtime, and will be moved there after #31915.
  *
  * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {!Window} hostWin
  * @param {!./layout-rect.LayoutRectDef} rect
  * @param {boolean=} opt_prerenderableOnly signifies if we are in prerender mode.
  * @return {!Promise}
- * @visibleForTesting
- * TODO(#31915): remove, once launched.
  */
 export function whenContentIniLoadMeasure(
   elementOrAmpDoc,
@@ -132,7 +131,7 @@ export function whenContentIniLoadInOb(elementOrAmpDoc, opt_prerenderableOnly) {
           io.disconnect();
           const intersecting = [];
           for (let i = 0; i < entries.length; i++) {
-            const {target, isIntersecting} = entries[i];
+            const {isIntersecting, target} = entries[i];
             if (isIntersecting) {
               intersecting.push(target);
             }

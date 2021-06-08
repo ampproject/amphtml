@@ -20,7 +20,8 @@ import {Services} from '../services';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {ViewportInterface} from '../service/viewport/viewport-interface';
 import {canInspectWindow} from '../iframe-helper';
-import {dev, devAssert} from '../log';
+import {dev} from '../log';
+import {devAssert, devAssertElement} from '../core/assert';
 import {getFrameOverlayManager} from '../../ads/inabox/frame-overlay-manager.js';
 import {getPositionObserver} from '../../ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
@@ -29,7 +30,7 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../layout-rect';
+} from '../core/math/layout-rect';
 import {px, resetStyles, setImportantStyles} from '../style';
 import {registerServiceBuilderForDoc} from '../service';
 import {throttle} from '../core/types/function';
@@ -798,7 +799,7 @@ export class ViewportBindingInabox {
 
   /** @visibleForTesting */
   getBodyElement() {
-    return dev().assertElement(this.win.document.body);
+    return devAssertElement(this.win.document.body);
   }
 
   /** @override */

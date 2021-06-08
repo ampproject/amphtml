@@ -16,8 +16,8 @@
 
 import {computedStyle} from '../style';
 import {remove} from '../core/types/array';
-import {rethrowAsync} from '../core/error';
-import {toWin} from '../types';
+import {toWin} from '../core/window';
+import {tryCallback} from '../core/error';
 
 /** @enum {number} */
 const Type = {
@@ -187,7 +187,7 @@ function processEntries(entries) {
     }
     targetEntryMap.set(target, entry);
     for (let k = 0; k < callbacks.length; k++) {
-      const {type, callback} = callbacks[k];
+      const {callback, type} = callbacks[k];
       computeAndCall(type, callback, entry);
     }
   }
@@ -201,10 +201,10 @@ function processEntries(entries) {
 function computeAndCall(type, callback, entry) {
   if (type == Type.CONTENT) {
     const {contentRect} = entry;
-    const {width, height} = contentRect;
+    const {height, width} = contentRect;
     /** @type {!../layout-rect.LayoutSizeDef} */
     const size = {width, height};
-    callCallbackNoInline(callback, size);
+    tryCallback(callback, size);
   } else if (type == Type.BORDER_BOX) {
     const {borderBoxSize: borderBoxSizeArray} = entry;
     /** @type {!ResizeObserverSize} */
@@ -227,7 +227,7 @@ function computeAndCall(type, callback, entry) {
       const isVertical = VERTICAL_RE.test(
         computedStyle(win, target)['writing-mode']
       );
-      const {offsetWidth, offsetHeight} = /** @type {!HTMLElement} */ (target);
+      const {offsetHeight, offsetWidth} = /** @type {!HTMLElement} */ (target);
       let inlineSize, blockSize;
       if (isVertical) {
         blockSize = offsetWidth;
@@ -241,18 +241,6 @@ function computeAndCall(type, callback, entry) {
         blockSize,
       });
     }
-    callCallbackNoInline(callback, borderBoxSize);
-  }
-}
-
-/**
- * @param {function(?)} callback
- * @param {?} value
- */
-function callCallbackNoInline(callback, value) {
-  try {
-    callback(value);
-  } catch (e) {
-    rethrowAsync(e);
+    tryCallback(callback, borderBoxSize);
   }
 }

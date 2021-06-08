@@ -16,7 +16,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const {green, red, cyan} = require('kleur/colors');
+const {cyan, green, red} = require('../common/colors');
 const {log} = require('../common/logging');
 
 const CONFIG_PATH = './performance/config.json';
@@ -35,6 +35,7 @@ async function performanceUrls() {
     process.exitCode = 1;
     return;
   }
+  /** @type {string[]} */
   const filepaths = jsonContent.handlers.flatMap((handler) =>
     handler.urls
       .filter((url) => url.startsWith(LOCAL_HOST_URL))
@@ -56,5 +57,4 @@ module.exports = {
   performanceUrls,
 };
 
-performanceUrls.description =
-  "Check validity of performance task config's urls";
+performanceUrls.description = 'Validite config urls for the performance task';

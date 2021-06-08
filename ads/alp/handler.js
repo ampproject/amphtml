@@ -18,12 +18,13 @@ import {
   addParamToUrl,
   isLocalhostOrigin,
   isProxyOrigin,
-  parseQueryString,
   parseUrlDeprecated,
 } from '../../src/url';
-import {closest, openWindowDialog} from '../../src/dom';
+import {closest} from '../../src/core/dom/query';
 import {dev} from '../../src/log';
 import {dict} from '../../src/core/types/object';
+import {openWindowDialog} from '../../src/dom';
+import {parseQueryString} from '../../src/core/types/string/url';
 import {urls} from '../../src/config';
 
 /**

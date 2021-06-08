@@ -87,15 +87,18 @@ export class AnchorAdStrategy {
    * @private
    */
   placeStickyAd_() {
+    const baseAttributes = this.baseAttributes_;
     const viewportWidth = Services.viewportForDoc(this.ampdoc).getWidth();
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      dict(),
-      this.baseAttributes_,
-      dict({
-        'width': String(viewportWidth),
-        'height': '100',
-      })
-    ));
+    const attributes = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict(),
+        baseAttributes,
+        dict({
+          'width': String(viewportWidth),
+          'height': baseAttributes.height || '100',
+        })
+      )
+    );
     const doc = this.ampdoc.win.document;
     const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
     const stickyAd = createElementWithAttributes(

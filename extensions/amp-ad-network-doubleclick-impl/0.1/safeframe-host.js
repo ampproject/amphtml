@@ -18,11 +18,11 @@ import {Services} from '../../../src/services';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/core/types/object';
 import {getData} from '../../../src/event-helper';
-import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
+import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
 import {getStyle, setStyles} from '../../../src/style';
 import {parseUrlDeprecated} from '../../../src/url';
 import {throttle} from '../../../src/core/types/function';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 /**
  * Used to manage messages for different Safeframe ad slots.
@@ -204,7 +204,7 @@ export class SafeframeHostApi {
    * Returns true if the given window matches the Safeframe's content window.
    * Comparing to a null window will always return false.
    *
-   * @param {Window|null} otherWindow
+   * @param {?Window} otherWindow
    * @return {boolean}
    */
   equalsSafeframeContentWindow(otherWindow) {
@@ -751,7 +751,7 @@ export class SafeframeHostApi {
       })
       .catch((err) => {
         user().warn(TAG, err);
-        const {width, height} = this.baseInstance_.getSlotSize();
+        const {height, width} = this.baseInstance_.getSlotSize();
         if (width && height) {
           this.onFluidResize_(height);
         }

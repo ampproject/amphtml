@@ -363,15 +363,6 @@
       ]
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-bookend.html",
-      "name": "amp-story: bookend",
-      "viewport": {"width": 320, "height": 480},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-bookend"
-      ]
-    },
-    {
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent",
       "viewport": {"width": 320, "height": 480},
@@ -467,15 +458,6 @@
       ]
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-bookend.html",
-      "name": "amp-story: bookend (desktop)",
-      "viewport": {"width": 1440, "height": 900},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-bookend"
-      ]
-    },
-    {
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent (desktop)",
       "viewport": {"width": 1440, "height": 900},
@@ -523,15 +505,6 @@
       ]
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-bookend.rtl.html",
-      "name": "amp-story: bookend (rtl)",
-      "viewport": {"width": 320, "height": 480},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-bookend"
-      ]
-    },
-    {
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
       "name": "amp-story: consent (rtl)",
       "viewport": {"width": 320, "height": 480},
@@ -551,15 +524,6 @@
       ],
       // for page navigation
       "loading_complete_delay_ms": 500
-    },
-    {
-      "url": "examples/visual-tests/amp-story/amp-story-bookend.rtl.html",
-      "name": "amp-story: bookend (desktop) (rtl)",
-      "viewport": {"width": 1440, "height": 900},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-bookend"
-      ]
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
@@ -698,6 +662,7 @@
       ],
     },
     {
+      "flaky": true, // #34033. See https://percy.io/ampproject/amphtml/builds/10102542/changed/568786603
       "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&url=https://preview.amp.dev/documentation/examples/introduction/stories_in_amp",
       "name": "amp-story-dev-tools: preview tab loading and running",
       "viewport": {"width": 1080, "height": 720},
@@ -706,6 +671,7 @@
       ]
     },
     {
+      "flaky": true, // #34033. See https://percy.io/ampproject/amphtml/builds/10102542/changed/568786603
       "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&url=https://preview.amp.dev/documentation/examples/introduction/stories_in_amp&devices=desktop;ipad",
       "name": "amp-story-dev-tools: preview tab loading and running with a desktop and ipad layout",
       "viewport": {"width": 1080, "height": 720},
@@ -878,15 +844,22 @@
       "loading_complete_selectors": [".i-amphtml-story-360-loaded"]
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-inline-page-attachment-dark-theme.html",
-      "name": "amp-story-inline-page-attachment-dark-theme: displays new inline CTA button with dark theme",
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html",
+      "name": "amp-story-page-attachment-v2: new inline & outlink CTA buttons",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        "amp-story-page#cover[active]"
       ],
-      // for page navigation
-      "loading_complete_delay_ms": 500
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.html",
+      "name": "amp-story-page-attachment-v2: page attachment desktop",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-v2.js"
     }
   ]
 }

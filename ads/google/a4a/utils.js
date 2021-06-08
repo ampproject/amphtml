@@ -15,7 +15,7 @@
  */
 
 import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {DomFingerprint} from '../../../src/core/dom/fingerprint';
 import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {buildUrl} from './shared/url-builder';
@@ -30,10 +30,10 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
+import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */
@@ -114,7 +114,8 @@ export let NameframeExperimentConfig;
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
 /** @const {Object} */
-const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+const CDN_PROXY_REGEXP =
+  /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
 /**
  * Returns the value of some navigation timing parameter.
@@ -300,7 +301,7 @@ export function googlePageParameters(a4a, startTime) {
   ]).then((promiseResults) => {
     const clientId = promiseResults[0];
     const referrer = promiseResults[1];
-    const {pageViewId, canonicalUrl} = Services.documentInfoForDoc(ampDoc);
+    const {canonicalUrl, pageViewId} = Services.documentInfoForDoc(ampDoc);
     // Read by GPT for GA/GPT integration.
     win.gaGlobal = win.gaGlobal || {cid: clientId, hid: pageViewId};
     const {screen} = win;
@@ -523,7 +524,7 @@ function makeCorrelator(pageViewId, opt_clientId) {
 /**
  * Collect additional dimensions for the brdim parameter.
  * @param {!Window} win The window for which we read the browser dimensions.
- * @param {{width: number, height: number}|null} viewportSize
+ * @param {?{width: number, height: number}} viewportSize
  * @return {string}
  * @visibleForTesting
  */

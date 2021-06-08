@@ -16,7 +16,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs').promises;
 const {buildNewServer} = require('../../server/typescript-compile');
-const {cyan} = require('kleur/colors');
+const {cyan} = require('../../common/colors');
 const {dist} = require('../dist');
 const {log} = require('../../common/logging');
 const {startServer, stopServer} = require('../serve');
@@ -66,27 +66,30 @@ async function collectCoverage() {
 
 /**
  * Source: https://github.com/chenxiaochun/blog/issues/38s
- *
- * @param {puppeteer.Page} page
+ * TODO(#28387) change the first parameter to puppeteer.Page once puppeteer is consistently
+ * imported.
+ * @param {*} page
  * @return {Promise<void>}
  */
 async function autoScroll(page) {
   await page.evaluate(async () => {
-    await /** @type {Promise<void>} */ (new Promise((resolve) => {
-      let totalHeight = 0;
-      const scrollDistance = 100;
-      const distance = scrollDistance;
-      const timer = setInterval(() => {
-        const {scrollHeight} = document.body;
-        window./*OK*/ scrollBy(0, distance);
-        totalHeight += distance;
+    await /** @type {Promise<void>} */ (
+      new Promise((resolve) => {
+        let totalHeight = 0;
+        const scrollDistance = 100;
+        const distance = scrollDistance;
+        const timer = setInterval(() => {
+          const {scrollHeight} = document.body;
+          window./*OK*/ scrollBy(0, distance);
+          totalHeight += distance;
 
-        if (totalHeight >= scrollHeight) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 100);
-    }));
+          if (totalHeight >= scrollHeight) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 100);
+      })
+    );
   });
 }
 
@@ -94,9 +97,8 @@ async function autoScroll(page) {
  * @return {Promise<void>}
  */
 async function htmlTransform() {
-  const {
-    transform,
-  } = require('../../server/new-server/transforms/dist/transform');
+  // @ts-ignore
+  const {transform} = require('../../server/new-server/transforms/dist/transform'); // prettier-ignore
   log('Transforming', cyan(`${inputHtml}`) + '...');
   const transformed = await transform(`examples/${inputHtml}`);
   const transformedName = `transformed.${inputHtml}`;
@@ -167,16 +169,15 @@ module.exports = {
 };
 
 coverageMap.description =
-  'Generates a code coverage heat map for v0.js via source map explorer';
+  'Generate a code-coverage heat map for v0.js via source map explorer';
 
 coverageMap.flags = {
   json: 'JSON output filename [default: out.json]',
   inputhtml: 'Input HTML file under "examples/" [default: everything.amp.html]',
   outputhtml: 'Output HTML file [default: out.html]',
-  nobuild: 'Skips dist build.',
+  nobuild: 'Skip building the runtime',
   port: 'Port number for AMP server [default: 8000]',
-  file:
-    'Output file(s) relative to dist/. Accepts .js, .mjs, and wildcards. [default: v0.js]',
-  esm: 'Generate coverage in ESM mode. Triggers an extra HTML transformation.',
-  sxg: 'Generate in SxG mode. Triggers an extra HTML transformation.',
+  file: 'Output file(s) relative to dist/. Accepts .js, .mjs, and wildcards. [default: v0.js]',
+  esm: 'Generate coverage in ESM mode (triggers an extra HTML transformation)',
+  sxg: 'Generate in SxG mode (triggers an extra HTML transformation)',
 };

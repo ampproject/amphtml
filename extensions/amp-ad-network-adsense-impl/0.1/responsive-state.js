@@ -22,14 +22,14 @@ import {
 } from '../../../ads/google/utils';
 import {Services} from '../../../src/services';
 import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '../../../src/core/math';
 import {computedStyle, getStyle, setStyle} from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {hasOwn} from '../../../src/core/types/object';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+import {toWin} from '../../../src/core/window';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 const TAG = 'amp-ad-network-adsense-impl';
 
@@ -387,13 +387,14 @@ export class ResponsiveState {
    * @private
    */
   isInResponsiveHeightFixExperimentBranch_() {
-    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
-      {
-        experimentId: MAX_HEIGHT_EXP.branch,
-        isTrafficEligible: () => true,
-        branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
-      },
-    ]);
+    const experimentInfoList =
+      /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+        {
+          experimentId: MAX_HEIGHT_EXP.branch,
+          isTrafficEligible: () => true,
+          branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
+        },
+      ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win_,
       experimentInfoList

@@ -19,7 +19,7 @@ import {IframeEmbed} from '../../../src/preact/component/iframe';
 import {dict} from '../../../src/core/types/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {getData} from '../../../src/event-helper';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {useCallback, useState} from '../../../src/preact';
 
 const NO_HEIGHT_STYLE = dict();
@@ -28,11 +28,11 @@ const MATCHES_MESSAGING_ORIGIN = (origin) =>
 
 /**
  * @param {!InstagramDef.Props} props
- * @param {{current: (!InstagramDef.Api|null)}} ref
+ * @param {{current: ?InstagramDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
 function InstagramWithRef(
-  {captioned, shortcode, requestResize, title = 'Instagram', ...rest},
+  {captioned, requestResize, shortcode, title = 'Instagram', ...rest},
   ref
 ) {
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);

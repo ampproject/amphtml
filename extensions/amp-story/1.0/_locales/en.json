@@ -95,18 +95,6 @@
     "string": "Continue Anyway",
     "description": "Button label to allow the user to continue even if they are not using a supportive browser."
   },
-  "28": {
-    "string": "Change data privacy settings",
-    "description": "Label for a button that allows the user to change their choice to consent to providing their cookie access."
-  },
-  "29": {
-    "string": "Privacy settings",
-    "description": "Title for a section that allows the user to configure their privacy settings"
-  },
-  "30": {
-    "string": "More to read",
-    "description": "Label to be placed as a title on top of related articles at the end of a story."
-  },
   "31": {
     "string": "Sound off",
     "description": "Text that informs users that the sound is off after they click the mute button"
@@ -267,16 +255,12 @@
     "string": "Previous page",
     "description": "Label for a button that returns the user to the previous page of the story."
   },
-  "94": {
-    "string": "Close bookend",
-    "description": "Label for a button that closes a dialog containing related articles and sharing options and returns the user to the article."
-  },
-  "95": {
-    "string": "Show bookend",
-    "description": "Label for a button that displays a dialog with related articles and sharing options."
-  },
   "96": {
     "string": "Move device to explore",
     "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+  },
+  "97": {
+    "string": "Opening",
+    "description": "Text displayed to users on tap of outlink button."
   }
 }

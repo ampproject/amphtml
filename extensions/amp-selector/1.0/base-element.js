@@ -17,8 +17,8 @@
 import * as Preact from '../../../src/preact';
 import {Option, Selector} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {
-  closestAncestorElementBySelector,
   createElementWithAttributes,
   toggleAttribute,
   tryFocus,
@@ -68,7 +68,7 @@ export class BaseElement extends PreactBaseElement {
     };
 
     // Return props
-    const {children, value, options} = getOptions(element, mu);
+    const {children, options, value} = getOptions(element, mu);
     this.optionState = options;
     return dict({
       'as': SelectorShim,
@@ -137,13 +137,13 @@ function getOptions(element, mu) {
  * @return {PreactDef.Renderable}
  */
 export function OptionShim({
-  shimDomElement,
+  disabled,
   onClick,
   onFocus,
   onKeyDown,
-  selected,
-  disabled,
   role = 'option',
+  selected,
+  shimDomElement,
   tabIndex,
 }) {
   const syncEvent = useCallback(
@@ -159,10 +159,10 @@ export function OptionShim({
 
   useLayoutEffect(() => syncEvent('click', onClick), [onClick, syncEvent]);
   useLayoutEffect(() => syncEvent('focus', onFocus), [onFocus, syncEvent]);
-  useLayoutEffect(() => syncEvent('keydown', onKeyDown), [
-    onKeyDown,
-    syncEvent,
-  ]);
+  useLayoutEffect(
+    () => syncEvent('keydown', onKeyDown),
+    [onKeyDown, syncEvent]
+  );
 
   useLayoutEffect(() => {
     toggleAttribute(shimDomElement, 'selected', !!selected);
@@ -191,14 +191,14 @@ export function OptionShim({
  * @return {PreactDef.Renderable}
  */
 function SelectorShim({
-  shimDomElement,
   children,
+  disabled,
   form,
   multiple,
   name,
-  disabled,
   onKeyDown,
   role = 'listbox',
+  shimDomElement,
   tabIndex,
   value,
 }) {

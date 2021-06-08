@@ -18,17 +18,19 @@ import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {
   LayoutMarginsChangeDef,
   cloneLayoutMarginsChangeDef,
-} from '../../../src/layout-rect';
+} from '../../../src/core/math/layout-rect';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
-  createElementWithAttributes,
   scopedQuerySelectorAll,
+} from '../../../src/core/dom/query';
+import {
+  createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
+import {measurePageLayoutBox} from './measure-page-layout-box';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -194,7 +196,6 @@ export class Placement {
    */
   placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
     return this.getEstimatedPosition().then((yPosition) => {
-      // TODO(powerivq@) Remove this after fixing ad resizing
       if (this.ampdoc.win./*OK*/ scrollY > yPosition) {
         this.state_ = PlacementState.UNUSED;
         return this.state_;
@@ -283,16 +284,18 @@ export class Placement {
    * @private
    */
   createAdElement_(baseAttributes, width) {
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      dict({
-        'layout': width ? 'fixed' : 'fixed-height',
-        'height': '0',
-        'width': width ? width : 'auto',
-        'class': 'i-amphtml-layout-awaiting-size',
-      }),
-      baseAttributes,
-      this.attributes_
-    ));
+    const attributes = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict({
+          'layout': width ? 'fixed' : 'fixed-height',
+          'height': '0',
+          'width': width ? width : 'auto',
+          'class': 'i-amphtml-layout-awaiting-size',
+        }),
+        baseAttributes,
+        this.attributes_
+      )
+    );
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',
@@ -306,18 +309,20 @@ export class Placement {
    * @private
    */
   createFullWidthResponsiveAdElement_(baseAttributes) {
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      dict({
-        'width': '100vw',
-        'height': '0',
-        'layout': 'fixed',
-        'class': 'i-amphtml-layout-awaiting-size',
-        'data-auto-format': 'rspv',
-        'data-full-width': '',
-      }),
-      baseAttributes,
-      this.attributes_
-    ));
+    const attributes = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict({
+          'width': '100vw',
+          'height': '0',
+          'layout': 'fixed',
+          'class': 'i-amphtml-layout-awaiting-size',
+          'data-auto-format': 'rspv',
+          'data-full-width': '',
+        }),
+        baseAttributes,
+        this.attributes_
+      )
+    );
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',

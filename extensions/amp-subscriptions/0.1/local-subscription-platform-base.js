@@ -18,7 +18,7 @@ import {Action} from './analytics';
 import {Actions} from './actions';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {UrlBuilder} from './url-builder';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {dev, userAssert} from '../../../src/log';
 
 /**
@@ -49,9 +49,8 @@ export class LocalSubscriptionBasePlatform {
     this.serviceConfig_ = platformConfig;
 
     /** @private @const {boolean} */
-    this.pingbackAllEntitlements_ = !!this.serviceConfig_[
-      'pingbackAllEntitlements'
-    ];
+    this.pingbackAllEntitlements_ =
+      !!this.serviceConfig_['pingbackAllEntitlements'];
 
     /** @protected @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;

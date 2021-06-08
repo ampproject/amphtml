@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {DomFingerprint} from '../../../src/core/dom/fingerprint';
 import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {
   addDataAndJsonAttributes_,
   applySandbox,
@@ -85,7 +85,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           return Services.ampdoc(window.document);
         };
 
-        const {innerWidth: width, innerHeight: height} = window;
+        const {innerHeight: height, innerWidth: width} = window;
         div.getIntersectionChangeEntry = function () {
           return {
             time: 1234567888,
@@ -372,14 +372,16 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
 
       it('should return different values for different file names', () => {
         mockMode({});
-        let match = /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/.exec(
-          getDefaultBootstrapBaseUrl(window)
-        );
+        let match =
+          /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/.exec(
+            getDefaultBootstrapBaseUrl(window)
+          );
         const domain = match && match[1];
         expect(domain).to.be.ok;
-        match = /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/.exec(
-          getDefaultBootstrapBaseUrl(window, 'frame2')
-        );
+        match =
+          /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/.exec(
+            getDefaultBootstrapBaseUrl(window, 'frame2')
+          );
         expect(match && match[1]).to.equal(domain);
       });
 

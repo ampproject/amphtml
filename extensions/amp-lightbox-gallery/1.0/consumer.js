@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {LightboxGalleryContext} from './context';
-import {sequentialIdGenerator} from '../../../src/utils/id-generator';
+import {sequentialIdGenerator} from '../../../src/core/math/id-generator';
 import {
   useContext,
   useLayoutEffect,
@@ -46,7 +46,7 @@ export function WithLightbox({
   ...rest
 }) {
   const [genKey] = useState(generateLightboxItemKey);
-  const {open, register, deregister} = useContext(LightboxGalleryContext);
+  const {deregister, open, register} = useContext(LightboxGalleryContext);
   useLayoutEffect(() => {
     register(genKey, render);
     return () => deregister(genKey);

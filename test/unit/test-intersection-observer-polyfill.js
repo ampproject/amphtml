@@ -21,7 +21,7 @@ import {
   intersectionRatio,
 } from '../../src/utils/intersection-observer-3p-host';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {layoutRectLtwh} from '../../src/core/math/layout-rect';
 
 const fakeAmpDoc = {
   getRootNode: () => {
@@ -167,7 +167,7 @@ describes.sandboxed('getIntersectionChangeEntry', {}, (env) => {
   });
 });
 
-describe('intersectionRatio', () => {
+describes.sandboxed('intersectionRatio', {}, () => {
   let smallRectMock;
   let largeRectMock;
   beforeEach(() => {

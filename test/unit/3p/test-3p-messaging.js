@@ -19,7 +19,7 @@ import {createIframePromise} from '../../../testing/iframe';
 import {listenParent} from '../../../3p/messaging';
 import {postMessage} from '../../../src/iframe-helper';
 
-describe('3p messaging', () => {
+describes.sandboxed('3p messaging', {}, () => {
   let testWin;
   let iframe;
   const timer = Services.timerFor(window);

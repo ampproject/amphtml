@@ -15,10 +15,10 @@
  */
 
 import {MessageType} from '../../../src/3p-frame-messaging';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {getMode} from '../../../src/mode';
 import {iframeMessagingClientFor} from '../../../src/inabox/inabox-iframe-messaging-client';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
 
 /**
  * Setup cross-origin iframe polyfill for AMP iframes, such as inabox.
@@ -44,12 +44,14 @@ export function maybeSetupCrossOriginObserver(win) {
     MessageType.SEND_POSITIONS,
     MessageType.POSITION,
     (data) => {
-      const boundingClientRect = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (data[
-        'targetRect'
-      ]);
-      const viewportRect = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (data[
-        'viewportRect'
-      ]);
+      const boundingClientRect =
+        /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
+          data['targetRect']
+        );
+      const viewportRect =
+        /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
+          data['viewportRect']
+        );
       const intersectionRect = calculateIntersectionRect(
         viewportRect,
         boundingClientRect

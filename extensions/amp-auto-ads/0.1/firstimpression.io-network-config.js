@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/core/types/object';
-import {parseQueryString} from '../../../src/url';
+import {parseQueryString} from '../../../src/core/types/string/url';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -28,6 +28,7 @@ export class FirstImpressionIoConfig {
    */
   constructor(autoAmpAdsElement) {
     this.autoAmpAdsElement_ = autoAmpAdsElement;
+    this.pvid64 = 0;
   }
 
   /**
@@ -49,7 +50,13 @@ export class FirstImpressionIoConfig {
   getConfigUrl() {
     let previewId = 0;
 
-    const {host, pathname, hash, search} = window.location;
+    Services.documentInfoForDoc(this.autoAmpAdsElement_).pageViewId64.then(
+      (pageViewId64Value) => {
+        this.pvid64 = pageViewId64Value;
+      }
+    );
+
+    const {hash, host, pathname, search} = window.location;
     const hashParams = Object.assign(
       parseQueryString(hash),
       parseQueryString(search)
@@ -86,10 +93,10 @@ export class FirstImpressionIoConfig {
     if (targeting) {
       queryParams['targeting'] = targeting;
     }
-    if (fiReveal) {
+    if (fiReveal !== undefined) {
       queryParams['fi_reveal'] = fiReveal;
     }
-    if (fiDemand) {
+    if (fiDemand !== undefined) {
       queryParams['fi_demand'] = fiDemand;
     }
     if (fiGeo) {
@@ -113,6 +120,7 @@ export class FirstImpressionIoConfig {
   getAttributes() {
     const attributes = dict({
       'type': 'firstimpression',
+      'data-pvid64': this.pvid64,
     });
     return attributes;
   }

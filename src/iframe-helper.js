@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {addAttributesToElement, closestAncestorElementBySelector} from './dom';
+import {addAttributesToElement} from './dom';
+import {closestAncestorElementBySelector} from './core/dom/query';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev, devAssert} from './log';
 import {dict} from './core/types/object';
@@ -22,7 +23,7 @@ import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
 import {remove} from './core/types/array';
 import {setStyle} from './style';
-import {tryParseJson} from './json';
+import {tryParseJson} from './core/types/object/json';
 
 /**
  * Sentinel used to force unlistening after a iframe is detached.
@@ -511,7 +512,7 @@ export class SubscriptionApi {
  * @return {boolean}
  */
 export function looksLikeTrackingIframe(element) {
-  const {width, height} = element.getLayoutSize();
+  const {height, width} = element.getLayoutSize();
   // This heuristic is subject to change.
   if (width > 10 || height > 10) {
     return false;
@@ -536,7 +537,7 @@ const adSizes = [
  * @visibleForTesting
  */
 export function isAdLike(element) {
-  const {width, height} = element.getLayoutSize();
+  const {height, width} = element.getLayoutSize();
   for (let i = 0; i < adSizes.length; i++) {
     const refWidth = adSizes[i][0];
     const refHeight = adSizes[i][1];
@@ -601,9 +602,9 @@ export const FIE_EMBED_PROP = '__AMP_EMBED__';
  * @return {?./friendly-iframe-embed.FriendlyIframeEmbed}
  */
 export function getFriendlyIframeEmbedOptional(iframe) {
-  return /** @type {?./friendly-iframe-embed.FriendlyIframeEmbed} */ (iframe[
-    FIE_EMBED_PROP
-  ]);
+  return /** @type {?./friendly-iframe-embed.FriendlyIframeEmbed} */ (
+    iframe[FIE_EMBED_PROP]
+  );
 }
 
 /**

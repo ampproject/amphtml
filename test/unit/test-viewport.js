@@ -36,7 +36,7 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {layoutRectLtwh} from '../../src/core/math/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
 
@@ -1257,7 +1257,7 @@ describes.fakeWin('Viewport', {}, (env) => {
   });
 });
 
-describe('Viewport META', () => {
+describes.sandboxed('Viewport META', {}, (env) => {
   describe('parseViewportMeta', () => {
     it('should accept null or empty strings', () => {
       expect(parseViewportMeta(null)).to.be.empty;
@@ -1431,7 +1431,7 @@ describe('Viewport META', () => {
     let viewportMetaSetter;
 
     beforeEach(() => {
-      clock = window.sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       viewer = {
         isEmbedded: () => false,
         getParam: (param) => {
@@ -1448,7 +1448,7 @@ describe('Viewport META', () => {
       originalViewportMetaString = 'width=device-width,minimum-scale=1';
       viewportMetaString = originalViewportMetaString;
       viewportMeta = Object.create(null);
-      viewportMetaSetter = window.sandbox.spy();
+      viewportMetaSetter = env.sandbox.spy();
       Object.defineProperty(viewportMeta, 'content', {
         get: () => viewportMetaString,
         set: (value) => {
@@ -1558,7 +1558,7 @@ describe('Viewport META', () => {
   });
 });
 
-describe('createViewport', () => {
+describes.sandboxed('createViewport', {}, () => {
   describes.fakeWin(
     'in Android',
     {

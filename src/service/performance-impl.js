@@ -24,10 +24,10 @@ import {dict, map} from '../core/types/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isStoryDocument} from '../utils/story';
-import {layoutRectLtwh} from '../layout-rect';
+import {layoutRectLtwh} from '../core/math/layout-rect';
 import {throttle} from '../core/types/function';
 import {whenContentIniLoad} from '../ini-load';
-import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
+import {whenDocumentComplete, whenDocumentReady} from '../core/document-ready';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -179,7 +179,7 @@ export class Performance {
      * The latest reported largest contentful paint time, where the loadTime
      * is specified.
      *
-     * @private {number|null}
+     * @private {?number}
      */
     this.largestContentfulPaintLoadTime_ = null;
 
@@ -187,7 +187,7 @@ export class Performance {
      * The latest reported largest contentful paint time, where the renderTime
      * is specified.
      *
-     * @private {number|null}
+     * @private {?number}
      */
     this.largestContentfulPaintRenderTime_ = null;
 
@@ -559,7 +559,7 @@ export class Performance {
    * Tick the largest contentful paint metrics.
    */
   tickLargestContentfulPaint_() {
-    /** @type {number|null} */ let end;
+    /** @type {?number} */ let end;
     if (this.largestContentfulPaintLoadTime_ !== null) {
       this.tickDelta(
         TickLabel.LARGEST_CONTENTFUL_PAINT_LOAD,

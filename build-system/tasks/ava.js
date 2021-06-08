@@ -26,6 +26,7 @@ async function ava() {
   // (see targetMatchers[Targets.AVA])
   const testFiles = [
     'build-system/tasks/get-zindex/get-zindex.test.js',
+    'build-system/tasks/make-extension/test/test.js',
     'build-system/tasks/markdown-toc/test/test.js',
     'build-system/tasks/prepend-global/prepend-global.test.js',
   ];
@@ -43,8 +44,8 @@ module.exports = {
   ava,
 };
 
-ava.description = "Runs ava tests for AMP's tasks";
+ava.description = "Run ava tests for AMP's tasks";
 
 ava.flags = {
-  'watch': 'Watches for changes',
+  'watch': 'Watch for changes',
 };

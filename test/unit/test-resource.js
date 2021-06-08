@@ -21,7 +21,7 @@ import {Resource, ResourceState} from '../../src/service/resource';
 import {ResourcesImpl} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
 import {isCancellation} from '../../src/error-reporting';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {layoutRectLtwh} from '../../src/core/math/layout-rect';
 
 describes.realWin('Resource', {amp: true}, (env) => {
   let win, doc;
@@ -981,7 +981,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   });
 });
 
-describe('Resource idleRenderOutsideViewport', () => {
+describes.sandboxed('Resource idleRenderOutsideViewport', {}, (env) => {
   let element;
   let resources;
   let resource;
@@ -989,7 +989,7 @@ describe('Resource idleRenderOutsideViewport', () => {
   let isWithinViewportRatio;
 
   beforeEach(() => {
-    idleRenderOutsideViewport = window.sandbox.stub();
+    idleRenderOutsideViewport = env.sandbox.stub();
     element = {
       idleRenderOutsideViewport,
       ownerDocument: {defaultView: window},
@@ -1014,10 +1014,7 @@ describe('Resource idleRenderOutsideViewport', () => {
     };
     resources = new ResourcesImpl(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
-    isWithinViewportRatio = window.sandbox.stub(
-      resource,
-      'isWithinViewportRatio'
-    );
+    isWithinViewportRatio = env.sandbox.stub(resource, 'isWithinViewportRatio');
   });
 
   it('should return true if isWithinViewportRatio', () => {

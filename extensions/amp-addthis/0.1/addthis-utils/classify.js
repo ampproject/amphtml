@@ -25,7 +25,8 @@ const REFERRER_BITS = {
   ON_DOMAIN: 0x2,
   OFF_DOMAIN: 0x4,
 };
-const RE_SEARCH_TERMS = /^(?:q|search|bs|wd|p|kw|keyword|query|qry|querytext|text|searchcriteria|searchstring|searchtext|sp_q)=(.*)/i;
+const RE_SEARCH_TERMS =
+  /^(?:q|search|bs|wd|p|kw|keyword|query|qry|querytext|text|searchcriteria|searchstring|searchtext|sp_q)=(.*)/i;
 const RE_SEARCH_REFERRER = /ws\/results\/(web|images|video|news)/;
 const RE_SEARCH_GOOGLE = /google.*\/(search|url|aclk|m\?)/;
 const RE_SEARCH_AOL = /aol.*\/aol/;
@@ -201,7 +202,7 @@ export const classifyPage = (pageInfo, metaElements) => {
     classifyString(pageInfo.title) | classifyString(pageInfo.hostname, true);
 
   metaElements.forEach((metaElement) => {
-    const {name, content} = getDetailsForMeta(metaElement);
+    const {content, name} = getDetailsForMeta(metaElement);
 
     if (name === 'description' || name === 'keywords') {
       bitmask |= classifyString(content);
@@ -269,7 +270,7 @@ export const isProductPage = (doc, metaElements) => {
 
   // see if 'og:type' meta tag === 'product'
   const ogTags = metaElements.reduce((tags, metaElement) => {
-    const {name, content} = getDetailsForMeta(metaElement);
+    const {content, name} = getDetailsForMeta(metaElement);
 
     if (name.startsWith('og:')) {
       const ogProperty = name.split(':').pop();

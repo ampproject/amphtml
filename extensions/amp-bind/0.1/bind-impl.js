@@ -22,17 +22,18 @@ import {Deferred} from '../../../src/core/data-structures/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/core/constants/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/core/data-structures/signals';
-import {
-  closestAncestorElementBySelector,
-  iterateCursor,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {debounce} from '../../../src/core/types/function';
-import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
-import {deepMerge, dict, map} from '../../../src/core/types/object';
+import {deepEquals, parseJson} from '../../../src/core/types/object/json';
+import {
+  deepMerge,
+  dict,
+  getValueForExpr,
+  map,
+} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {
   findIndex,
   isArray,
@@ -40,11 +41,13 @@ import {
   toArray,
 } from '../../../src/core/types/array';
 import {getMode} from '../../../src/mode';
+import {iterateCursor, whenUpgradedToCustomElement} from '../../../src/dom';
+
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';
 
-import {isFiniteNumber} from '../../../src/types';
-import {isObject} from '../../../src/core/types';
+import {isFiniteNumber, isObject} from '../../../src/core/types';
+
 import {reportError} from '../../../src/error-reporting';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 
@@ -98,6 +101,15 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
+ * The options bag for binding application.
+ *
+ * @typedef {Record} ApplyOptionsDef
+ * @property {boolean=} skipAmpState If true, skips <amp-state> elements.
+ * @property {Array<!Element>=} constrain If provided, restricts application to children of the provided elements.
+ * @property {boolean=} evaluateOnly If provided, caches the evaluated result on each bound element and skips the actual DOM updates.
+ */
+
+/**
  * A map of tag names to arrays of attributes that do not have non-bind
  * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
  * but does not support a `slide` attribute.
@@ -113,7 +125,7 @@ const BIND_ONLY_ATTRIBUTES = map({
  * Elements that opt-out of tree walking in favor of rescan() with {fast: true}.
  * @const {!Array<string>}
  */
-const FAST_RESCAN_TAGS = ['AMP-LIST'];
+const FAST_RESCAN_TAGS = ['AMP-LIST', 'AMP-RENDER'];
 
 /**
  * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from
@@ -960,7 +972,7 @@ export class Bind {
     }
     const {tagName} = element;
     boundProperties.forEach((boundProperty) => {
-      const {property, expressionString} = boundProperty;
+      const {expressionString, property} = boundProperty;
       outBindings.push({tagName, property, expressionString});
       if (!this.expressionToElements_[expressionString]) {
         this.expressionToElements_[expressionString] = [];
@@ -1042,7 +1054,7 @@ export class Bind {
         return this.ww_('bind.evaluateExpression', [expression, scope]);
       })
       .then((returnValue) => {
-        const {result, error} = returnValue;
+        const {error, result} = returnValue;
         if (error) {
           // Throw to reject promise.
           throw this.reportWorkerError_(
@@ -1063,7 +1075,7 @@ export class Bind {
   evaluate_() {
     const evaluatePromise = this.ww_('bind.evaluateBindings', [this.state_]);
     return evaluatePromise.then((returnValue) => {
-      const {results, errors} = returnValue;
+      const {errors, results} = returnValue;
       // Report evaluation errors.
       Object.keys(errors).forEach((expressionString) => {
         const elements = this.expressionToElements_[expressionString];
@@ -1100,7 +1112,7 @@ export class Bind {
     const mismatches = {};
 
     this.boundElements_.forEach((boundElement) => {
-      const {element, boundProperties} = boundElement;
+      const {boundProperties, element} = boundElement;
 
       // If provided, filter elements that are _not_ children of `opt_elements`.
       if (elements && !this.elementsContains_(elements, element)) {
@@ -1117,8 +1129,8 @@ export class Bind {
           return;
         }
         const {tagName} = element;
-        const {property, expressionString} = boundProperty;
-        const {expected, actual} = mismatch;
+        const {expressionString, property} = boundProperty;
+        const {actual, expected} = mismatch;
 
         // Only store unique mismatches (dupes possible when rendering an array
         // of data to a template).
@@ -1188,12 +1200,7 @@ export class Bind {
    * Applies expression results to elements in the document.
    *
    * @param {Object<string, BindExpressionResultDef>} results
-   * @param {!Object} opts
-   * @param {boolean=} opts.skipAmpState If true, skips <amp-state> elements.
-   * @param {Array<!Element>=} opts.constrain If provided, restricts application
-   *   to children of the provided elements.
-   * @param {boolean=} opts.evaluateOnly If provided, caches the evaluated
-   *   result on each bound element and skips the actual DOM updates.
+   * @param {!ApplyOptionsDef} opts
    * @return {!Promise}
    * @private
    */
@@ -1216,7 +1223,7 @@ export class Bind {
         return;
       }
 
-      const {element, boundProperties} = boundElement;
+      const {boundProperties, element} = boundElement;
       const updates = this.calculateUpdates_(boundProperties, results);
       // If this is a "evaluate only" application, skip the DOM mutations.
       if (opts.evaluateOnly) {
@@ -1801,9 +1808,8 @@ class BindWalker {
       'ownerDocument is null.'
     );
 
-    const useQuerySelector = doc.documentElement.hasAttribute(
-      'i-amphtml-binding'
-    );
+    const useQuerySelector =
+      doc.documentElement.hasAttribute('i-amphtml-binding');
     /** @private @const {boolean} */
     this.useQuerySelector_ = useQuerySelector;
 

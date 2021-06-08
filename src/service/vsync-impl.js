@@ -212,9 +212,11 @@ export class Vsync {
    * @return {function(!VsyncStateDef=)}
    */
   createTask(task) {
-    return /** @type {function(!VsyncStateDef=)} */ ((opt_state) => {
-      this.run(task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=)} */ (
+      (opt_state) => {
+        this.run(task, opt_state);
+      }
+    );
   }
 
   /**
@@ -328,9 +330,11 @@ export class Vsync {
    * @return {function(!VsyncStateDef=):boolean}
    */
   createAnimTask(contextNode, task) {
-    return /** @type {function(!VsyncStateDef=):boolean} */ ((opt_state) => {
-      return this.runAnim(contextNode, task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=):boolean} */ (
+      (opt_state) => {
+        return this.runAnim(contextNode, task, opt_state);
+      }
+    );
   }
 
   /**
@@ -402,7 +406,7 @@ export class Vsync {
     this.backupPass_.cancel();
     this.scheduled_ = false;
 
-    const {tasks_: tasks, states_: states, nextFrameResolver_: resolver} = this;
+    const {nextFrameResolver_: resolver, states_: states, tasks_: tasks} = this;
     this.nextFrameResolver_ = null;
     this.nextFramePromise_ = null;
     // Double buffering

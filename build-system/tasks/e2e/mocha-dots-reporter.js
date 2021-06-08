@@ -25,11 +25,9 @@ const {
   EVENT_TEST_PENDING,
 } = Mocha.Runner.constants;
 const {Base} = Mocha.reporters;
-const {
-  icon,
-  nbDotsPerLine,
-} = require('../../test-configs/karma.conf').superDotsReporter;
-const {green, red, yellow} = require('kleur/colors');
+const {green, red, yellow} = require('../../common/colors');
+const {icon, nbDotsPerLine} =
+  require('../../test-configs/karma.conf').superDotsReporter;
 const {reportTestFinished} = require('../report-test-status');
 
 /**
@@ -68,7 +66,7 @@ class MochaDotsReporter extends Base {
       })
       .once(EVENT_RUN_END, () => {
         Base.list(this.failures);
-        const {passes, pending, failures, tests} = runner.stats;
+        const {failures, passes, pending, tests} = runner.stats;
         logWithoutTimestamp(
           `Executed ${failures + passes} of ${tests}`,
           `(Skipped ${pending})`,

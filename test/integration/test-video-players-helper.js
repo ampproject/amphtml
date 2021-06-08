@@ -20,28 +20,26 @@ import {
   VideoEvents,
   VideoInterface,
 } from '../../src/video-interface';
-import {VideoUtils} from '../../src/utils/video';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
 } from '../../testing/iframe';
+import {detectIsAutoplaySupported} from '../../src/utils/video';
 import {getData, listenOncePromise} from '../../src/event-helper';
 import {removeElement} from '../../src/dom';
 import {toggleExperiment} from '../../src/experiments';
 
 function skipIfAutoplayUnsupported(win) {
-  VideoUtils.resetIsAutoplaySupported();
-
-  return VideoUtils.isAutoplaySupported(win).then((isSupported) => {
-    if (isSupported) {
-      return;
+  return detectIsAutoplaySupported(win).then((isSupported) => {
+    if (!isSupported) {
+      this.skipTest();
     }
-    this.skipTest();
   });
 }
 
 export function runVideoPlayerIntegrationTests(
+  env,
   createVideoElementFunc,
   opt_experiment,
   timeout = 2000
@@ -503,7 +501,7 @@ export function runVideoPlayerIntegrationTests(
             autoFullscreen = manager.getAutoFullscreenManagerForTesting_();
           }
           if (!isInLandscapeStub) {
-            isInLandscapeStub = window.sandbox.stub(
+            isInLandscapeStub = env.sandbox.stub(
               autoFullscreen,
               'isInLandscape'
             );
@@ -533,7 +531,7 @@ export function runVideoPlayerIntegrationTests(
           })
           .then(async () => {
             const impl = await video.getImpl(false);
-            const enter = window.sandbox.stub(impl, 'fullscreenEnter');
+            const enter = env.sandbox.stub(impl, 'fullscreenEnter');
             mockLandscape(true);
             autoFullscreen.onRotation_();
             return poll('fullscreen enter', () => enter.called);
@@ -603,8 +601,6 @@ export function runVideoPlayerIntegrationTests(
   }
 
   function cleanUp() {
-    VideoUtils.resetIsAutoplaySupported();
-
     try {
       if (fixtureGlobal) {
         if (opt_experiment) {

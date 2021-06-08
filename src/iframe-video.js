@@ -19,8 +19,7 @@ import {dev} from './log';
 import {dispatchCustomEvent} from './dom';
 import {htmlFor} from './static-template';
 import {isArray, isObject} from './core/types';
-
-import {tryParseJson} from './json';
+import {tryParseJson} from './core/types/object/json';
 
 /** @enum {string} */
 export const SandboxOptions = {
@@ -143,4 +142,12 @@ export function addUnsafeAllowAutoplay(iframe) {
   let val = iframe.getAttribute('allow') || '';
   val += 'autoplay;';
   iframe.setAttribute('allow', val);
+}
+
+/**
+ * @param {?HTMLIFrameElement=} iframe
+ * @param {*} message
+ */
+export function postMessageWhenAvailable(iframe, message) {
+  iframe?.contentWindow?./*OK*/ postMessage(message, '*');
 }

@@ -18,7 +18,7 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Side} from './sidebar-config';
-import {createPortal, forwardRef} from '../../../src/preact/compat';
+import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
@@ -30,6 +30,7 @@ import {
 } from '../../../src/preact';
 import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './component.jss';
+import {useToolbarHook} from './sidebar-toolbar-hook';
 import objstr from 'obj-str';
 
 /**
@@ -40,13 +41,13 @@ import objstr from 'obj-str';
 function SidebarWithRef(
   {
     as: Comp = 'div',
-    side: sideProp,
-    onBeforeOpen,
-    onAfterOpen,
-    onAfterClose,
-    backdropStyle,
     backdropClassName,
+    backdropStyle,
     children,
+    onAfterClose,
+    onAfterOpen,
+    onBeforeOpen,
+    side: sideProp,
     ...rest
   },
   ref
@@ -74,11 +75,10 @@ function SidebarWithRef(
     setOpened(true);
   }, [onBeforeOpenRef]);
   const close = useCallback(() => setOpened(false), []);
-  const toggle = useCallback(() => (opened ? close() : open()), [
-    opened,
-    open,
-    close,
-  ]);
+  const toggle = useCallback(
+    () => (opened ? close() : open()),
+    [opened, open, close]
+  );
 
   useImperativeHandle(
     ref,
@@ -185,50 +185,22 @@ export {Sidebar};
  * @return {PreactDef.Renderable}
  */
 export function SidebarToolbar({
-  toolbar: mediaQueryProp,
-  toolbarTarget,
   children,
+  toolbar: mediaQueryProp,
+  toolbarTarget: toolbarTargetProp,
   ...rest
 }) {
-  const ref = useRef();
-  const [matches, setMatches] = useState(false);
-  const [targetEl, setTargetEl] = useState(null);
-
-  useEffect(() => {
-    const window = ref.current?.ownerDocument?.defaultView;
-    if (!window) {
-      return;
-    }
-
-    const mediaQueryList = window.matchMedia(mediaQueryProp);
-    const updateMatches = () => setMatches(mediaQueryList.matches);
-    mediaQueryList.addEventListener('change', updateMatches);
-    setMatches(mediaQueryList.matches);
-    return () => mediaQueryList.removeEventListener('change', updateMatches);
-  }, [mediaQueryProp]);
-
-  useEffect(() => {
-    const document = ref.current?.ownerDocument;
-    if (!document) {
-      return;
-    }
-
-    const selector = `#${CSS.escape(toolbarTarget)}`;
-    const newTargetEl = document.querySelector(selector);
-    setTargetEl(newTargetEl);
-  }, [toolbarTarget]);
+  const ref = useRef(null);
+  useToolbarHook(ref, mediaQueryProp, toolbarTargetProp);
 
   return (
-    <>
-      <nav
-        ref={ref}
-        toolbar={mediaQueryProp}
-        toolbar-target={toolbarTarget}
-        {...rest}
-      >
-        {children}
-      </nav>
-      {matches && targetEl && createPortal(children, targetEl)}
-    </>
+    <nav
+      ref={ref}
+      toolbar={mediaQueryProp}
+      toolbar-target={toolbarTargetProp}
+      {...rest}
+    >
+      {children}
+    </nav>
   );
 }

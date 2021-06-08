@@ -30,8 +30,8 @@ import {
   layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
-} from '../layout-rect';
-import {toWin} from '../types';
+} from '../core/math/layout-rect';
+import {toWin} from '../core/window';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -92,11 +92,13 @@ export class Resource {
    * @return {!Resource}
    */
   static forElement(element) {
-    return /** @type {!Resource} */ (devAssert(
-      Resource.forElementOptional(element),
-      'Missing resource prop on %s',
-      element
-    ));
+    return /** @type {!Resource} */ (
+      devAssert(
+        Resource.forElementOptional(element),
+        'Missing resource prop on %s',
+        element
+      )
+    );
   }
 
   /**
@@ -960,7 +962,7 @@ export class Resource {
    * @return {!Promise}
    */
   loadedOnce() {
-    if (this.element.V1()) {
+    if (this.element.R1()) {
       return this.element.whenLoaded();
     }
     return this.loadPromise_;

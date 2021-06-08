@@ -42,10 +42,10 @@ import {toArray} from '../../../../../src/core/types/array';
  */
 function createElement(env, container, binding, opts = {}) {
   const {
-    tag = 'p',
     amp = false,
     insertInHead = false,
     insertQuerySelectorAttr = false,
+    tag = 'p',
   } = opts;
   const div = env.win.document.createElement('div');
   div.innerHTML = `<${tag} ${binding}></${tag}>`;
@@ -212,8 +212,8 @@ const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
   type: AmpEvents.FORM_VALUE_CHANGE,
   bubbles: true,
 };
-const chromed = describe.configure().ifChrome();
-chromed.run('Bind', function () {
+const chromed = describes.sandboxed.configure().ifChrome();
+chromed.run('Bind', {}, function () {
   describes.repeated(
     'Walker',
     {
@@ -1037,7 +1037,7 @@ chromed.run('Bind', function () {
 
           describe('with trusted viewer', () => {
             beforeEach(() => {
-              window.sandbox
+              env.sandbox
                 .stub(viewer, 'isTrustedViewer')
                 .returns(Promise.resolve(true));
             });

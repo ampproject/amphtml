@@ -20,19 +20,20 @@ import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/curve';
-import {clamp} from '../../../src/utils/math';
-import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
+import {bezierCurve} from '../../../src/core/data-structures/curve';
+import {clamp} from '../../../src/core/math';
+import {closest} from '../../../src/core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
+import {dispatchCustomEvent, tryFocus} from '../../../src/dom';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
 import {
   numeric,
   px,
   setStyles as setStylesTransition,
 } from '../../../src/transition';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '../../../src/core/types/object/json';
 import {removeFragment} from '../../../src/url';
 
 const TAG = 'amp-accordion';
@@ -195,7 +196,7 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   handleAction_(invocation) {
-    const {method, args, trust} = invocation;
+    const {args, method, trust} = invocation;
 
     let toExpand = undefined;
     if (method === 'expand') {
@@ -242,9 +243,9 @@ class AmpAccordion extends AMP.BaseElement {
         dev().assertString(this.sessionId_)
       );
       return sessionStr
-        ? /** @type {!JsonObject} */ (devAssert(
-            parseJson(dev().assertString(sessionStr))
-          ))
+        ? /** @type {!JsonObject} */ (
+            devAssert(parseJson(dev().assertString(sessionStr)))
+          )
         : dict();
     } catch (e) {
       dev().fine(

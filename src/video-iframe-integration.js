@@ -18,9 +18,9 @@
 import {dict} from '../src/core/types/object';
 import {getData, listen} from '../src/event-helper';
 import {getMode} from '../src/mode';
-import {isFiniteNumber} from '../src/types';
+import {isFiniteNumber} from '../src/core/types';
 import {once} from '../src/core/types/function';
-import {tryParseJson} from '../src/json';
+import {tryParseJson} from '../src/core/types/object/json';
 import {tryResolve} from '../src/core/data-structures/promise';
 
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */

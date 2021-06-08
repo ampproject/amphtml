@@ -91,12 +91,12 @@ export class ConfigManager {
 
     iframeData.forEach((iframeDatum) => {
       const {
-        iframe,
-        widgetId,
-        shareConfig,
         atConfig,
-        productCode,
         containerClassName,
+        iframe,
+        productCode,
+        shareConfig,
+        widgetId,
       } = iframeDatum;
       this.sendConfiguration_({
         iframe,
@@ -111,31 +111,34 @@ export class ConfigManager {
   }
 
   /**
-   * @param {!Object} input
-   * @param {*} [input.iframe]
-   * @param {string} [input.widgetId]
-   * @param {string} [input.pubId]
-   * @param {!Object} [input.shareConfig]
-   * @param {!Object} [input.atConfig]
-   * @param {string} [input.productCode]
-   * @param {string} [input.containerClassName]
+   * @typedef {{
+   *  iframe: *,
+   *  widgetId: string,
+   *  pubId: string,
+   *  shareConfig: !Object,
+   *  atConfig: !Object,
+   *  productCode: string,
+   *  containerClassName: string,
+   * }} SendConfigurationInput
+   */
+
+  /**
+   * @param {!SendConfigurationInput} input
    * @private
    */
   sendConfiguration_(input) {
     const {
+      atConfig,
+      containerClassName,
       iframe,
-      widgetId,
+      productCode,
       pubId,
       shareConfig,
-      atConfig,
-      productCode,
-      containerClassName,
+      widgetId,
     } = input;
     const pubData = this.dataForPubId_[pubId];
-    const {
-      config: dashboardConfig,
-      requestStatus: configRequestStatus,
-    } = pubData;
+    const {config: dashboardConfig, requestStatus: configRequestStatus} =
+      pubData;
     const jsonToSend = dict({
       'event': CONFIGURATION_EVENT,
       'shareConfig': shareConfig,
@@ -206,15 +209,15 @@ export class ConfigManager {
    */
   register(config) {
     const {
-      pubId,
-      widgetId,
-      productCode,
+      activeToolsMonitor,
+      atConfig,
       containerClassName,
       iframe,
       iframeLoadPromise,
+      productCode,
+      pubId,
       shareConfig,
-      atConfig,
-      activeToolsMonitor,
+      widgetId,
     } = config;
     if (!this.activeToolsMonitor_) {
       this.activeToolsMonitor_ = activeToolsMonitor;
@@ -261,7 +264,7 @@ export class ConfigManager {
    * @param {{pubId:string, iframe:Element}} param
    */
   unregister(param) {
-    const {pubId, iframe} = param;
+    const {iframe, pubId} = param;
     this.configProviderIframes_ = this.configProviderIframes_.filter(
       (providerFrame) => providerFrame !== iframe
     );

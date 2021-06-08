@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {parseQueryString} from '../../../src/url';
-import {toWin} from '../../../src/types';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {parseQueryString} from '../../../src/core/types/string/url';
+import {toWin} from '../../../src/core/window';
 
 /**
  * Returns true if the page should be prerendered (for being an active page or

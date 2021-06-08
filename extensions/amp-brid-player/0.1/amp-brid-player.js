@@ -27,13 +27,13 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
+import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {
-  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
+
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
@@ -240,17 +240,21 @@ class AmpBridPlayer extends AMP.BaseElement {
       return;
     }
 
-    const {partnerID_: partnerID, feedID_: feedID} = this;
+    const {feedID_: feedID, partnerID_: partnerID} = this;
 
-    const placeholder = htmlFor(element)`
-      <amp-img referrerpolicy=origin layout=fill placeholder>
-        <amp-img referrerpolicy=origin layout=fill fallback
-            src="https://cdn.brid.tv/live/default/defaultSnapshot.png">
-        </amp-img>
-      </amp-img>`;
+    const html = htmlFor(element);
+    const placeholder = html`
+      <img placeholder referrerpolicy="origin" loading="lazy" />
+    `;
 
     this.propagateAttributes(['aria-label'], placeholder);
     this.applyFillContent(placeholder);
+
+    const altText = placeholder.hasAttribute('aria-label')
+      ? 'Loading video - ' + placeholder.getAttribute('aria-label')
+      : 'Loading video';
+
+    placeholder.setAttribute('alt', altText);
 
     placeholder.setAttribute(
       'src',
@@ -258,11 +262,9 @@ class AmpBridPlayer extends AMP.BaseElement {
         `/snapshot/${encodeURIComponent(feedID)}.jpg`
     );
 
-    const altText = placeholder.hasAttribute('aria-label')
-      ? 'Loading video - ' + placeholder.getAttribute('aria-label')
-      : 'Loading video';
-
-    placeholder.setAttribute('alt', altText);
+    this.loadPromise(placeholder).catch(() => {
+      placeholder.src = 'https://cdn.brid.tv/live/default/defaultSnapshot.png';
+    });
 
     return placeholder;
   }

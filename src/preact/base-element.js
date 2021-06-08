@@ -21,7 +21,7 @@ import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Deferred} from '../core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../layout';
 import {Loading} from '../core/loading-instructions';
-import {MediaQueryProps} from '../utils/media-query-props';
+import {MediaQueryProps} from '../core/dom/media-query-props';
 import {PauseHelper} from '../utils/pause-helper';
 import {ReadyState} from '../core/constants/ready-state';
 import {Slot, createSlot} from './slot';
@@ -34,20 +34,24 @@ import {
   subscribe,
 } from '../context';
 import {
+  childElementByAttr,
   childElementByTag,
+  matches,
+} from '../core/dom/query';
+import {
   createElementWithAttributes,
   dispatchCustomEvent,
-  matches,
   parseBooleanAttribute,
 } from '../dom';
 import {dashToCamelCase} from '../core/types/string';
-import {devAssert} from '../log';
+import {devAssert} from '../core/assert';
 import {dict, hasOwn, map} from '../core/types/object';
 import {getDate} from '../core/types/date';
 import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
-import {sequentialIdGenerator} from '../utils/id-generator';
+import {isElement} from '../core/types';
+import {sequentialIdGenerator} from '../core/math/id-generator';
 import {toArray} from '../core/types/array';
 
 /**
@@ -113,8 +117,17 @@ const SHADOW_CONTAINER_ATTRS = dict({
   'part': 'c',
 });
 
+/** @const {string} */
+const SERVICE_SLOT_NAME = 'i-amphtml-svc';
+
 /** @const {!JsonObject<string, string>} */
-const SERVICE_SLOT_ATTRS = dict({'name': 'i-amphtml-svc'});
+const SERVICE_SLOT_ATTRS = dict({'name': SERVICE_SLOT_NAME});
+
+/** @const {string} */
+const RENDERED_ATTR = 'i-amphtml-rendered';
+
+/** @const {!JsonObject<string, string>} */
+const RENDERED_ATTRS = dict({'i-amphtml-rendered': ''});
 
 /**
  * The same as `applyFillContent`, but inside the shadow.
@@ -192,7 +205,7 @@ const IS_EMPTY_TEXT_NODE = (node) =>
  */
 export class PreactBaseElement extends AMP.BaseElement {
   /** @override @nocollapse */
-  static V1() {
+  static R1() {
     return true;
   }
 
@@ -623,6 +636,8 @@ export class PreactBaseElement extends AMP.BaseElement {
             SERVICE_SLOT_ATTRS
           );
           shadowRoot.appendChild(serviceSlot);
+          this.getPlaceholder()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getFallback()?.setAttribute('slot', SERVICE_SLOT_NAME);
         }
         this.container_ = container;
 
@@ -637,8 +652,8 @@ export class PreactBaseElement extends AMP.BaseElement {
       } else if (lightDomTag) {
         this.container_ = this.element;
         const replacement =
-          childElementByTag(this.container_, lightDomTag) ||
-          doc.createElement(lightDomTag);
+          childElementByAttr(this.container_, RENDERED_ATTR) ||
+          createElementWithAttributes(doc, lightDomTag, RENDERED_ATTRS);
         replacement[RENDERED_PROP] = true;
         if (Ctor['layoutSizeDefined']) {
           replacement.classList.add('i-amphtml-fill-content');
@@ -700,7 +715,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       hydrate(v, this.container_);
     } else {
       const replacement = lightDomTag
-        ? childElementByTag(this.container_, lightDomTag)
+        ? childElementByAttr(this.container_, RENDERED_ATTR)
         : null;
       if (replacement) {
         replacement[RENDERED_PROP] = true;
@@ -1029,6 +1044,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
 
   // Light DOM.
   if (lightDomTag) {
+    props[RENDERED_ATTR] = true;
     props[RENDERED_PROP] = true;
     props['as'] = lightDomTag;
   }
@@ -1081,7 +1097,13 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
         continue;
       }
       const def = propDefs[match];
-      const {single, name = match, clone, props: slotProps = {}} = def;
+      const {
+        as = false,
+        single,
+        name = match,
+        clone,
+        props: slotProps = {},
+      } = def;
       devAssert(clone || Ctor['usesShadowDom']);
       const parsedSlotProps = {};
       parsePropDefs(
@@ -1097,10 +1119,12 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
         props[name] = createSlot(
           childElement,
           childElement.getAttribute('slot') || `i-amphtml-${name}`,
-          parsedSlotProps
+          parsedSlotProps,
+          as
         );
       } else {
         const list = props[name] || (props[name] = []);
+        devAssert(!as);
         list.push(
           clone
             ? createShallowVNodeCopy(childElement)
@@ -1228,7 +1252,7 @@ function matchChild(element, defs) {
 function shouldMutationForNodeListBeRerendered(nodeList) {
   for (let i = 0; i < nodeList.length; i++) {
     const node = nodeList[i];
-    if (node.nodeType == /* ELEMENT */ 1) {
+    if (isElement(node)) {
       // Ignore service elements, e.g. `<i-amphtml-svc>` or
       // `<x slot="i-amphtml-svc">`.
       if (

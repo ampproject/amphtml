@@ -19,9 +19,9 @@ import {LegacyAdIntersectionObserverHost} from '../legacy-ad-intersection-observ
 import {createAmpElementForTesting} from '../../../../src/custom-element';
 import {deserializeMessage} from '../../../../src/3p-frame-messaging';
 import {getIntersectionChangeEntry} from '../../../../src/utils/intersection-observer-3p-host';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 
-describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
+describes.sandboxed('IntersectionObserverHostForAd', {}, (env) => {
   const ElementClass = createAmpElementForTesting(window, BaseElement);
   customElements.define('amp-int', ElementClass);
 
@@ -54,9 +54,9 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
   }
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
-    onScrollSpy = window.sandbox.spy();
-    onChangeSpy = window.sandbox.spy();
+    clock = env.sandbox.useFakeTimers();
+    onScrollSpy = env.sandbox.spy();
+    onChangeSpy = env.sandbox.spy();
     testIframe = getIframe(iframeSrc);
     element = new ElementClass();
     element.win = window;
@@ -86,7 +86,7 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
           fireObserved = true;
         },
         unobserve: () => (fireObserved = false),
-        disconnect: window.sandbox.spy(),
+        disconnect: env.sandbox.spy(),
       };
       return host.fireInOb_;
     };
@@ -104,7 +104,7 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
       testIframe
     );
     insert(testIframe);
-    const postMessageSpy = window.sandbox /*OK*/
+    const postMessageSpy = env.sandbox /*OK*/
       .spy(testIframe.contentWindow, 'postMessage');
     ioInstance.fire();
     clock.tick(0);
@@ -188,7 +188,7 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
   });
 
   it('should init listeners when element is in viewport', () => {
-    const sendElementIntersectionSpy = window.sandbox.spy(
+    const sendElementIntersectionSpy = env.sandbox.spy(
       LegacyAdIntersectionObserverHost.prototype,
       'sendElementIntersection_'
     );
@@ -206,7 +206,7 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
   });
 
   it('should unlisten listeners when element is out of viewport', () => {
-    const sendElementIntersectionSpy = window.sandbox.spy(
+    const sendElementIntersectionSpy = env.sandbox.spy(
       LegacyAdIntersectionObserverHost.prototype,
       'sendElementIntersection_'
     );

@@ -25,7 +25,6 @@ import {findIndex} from '../core/types/array';
 import {
   getSourceOrigin,
   isProxyOrigin,
-  parseQueryString,
   parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
@@ -33,11 +32,13 @@ import {
 import {isIframed} from '../dom';
 import {listen} from '../event-helper';
 import {map} from '../core/types/object';
+import {parseQueryString} from '../core/types/string/url';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error-reporting';
 import {urls} from '../config';
 
 import {ViewerInterface} from './viewer-interface';
+import {isEnumValue} from '../core/types';
 
 const TAG_ = 'Viewer';
 
@@ -65,7 +66,8 @@ const VIEWER_ORIGIN_TIMEOUT_ = 1000;
  * @const
  * @private {!RegExp}
  */
-const TRIM_ORIGIN_PATTERN_ = /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
+const TRIM_ORIGIN_PATTERN_ =
+  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
  * An AMP representation of the Viewer. This class doesn't do any work itself
@@ -528,7 +530,8 @@ export class ViewerImpl {
     if (!state) {
       return;
     }
-    state = dev().assertEnumValue(VisibilityState, state, 'VisibilityState');
+
+    devAssert(isEnumValue(VisibilityState, state));
 
     // The viewer is informing us we are not currently active because we are
     // being pre-rendered, or the user swiped to another doc (or closed the
@@ -792,14 +795,15 @@ export class ViewerImpl {
       // Certain message deliverers return fake "Promise" instances called
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
-      return /** @type {!Promise<?JsonObject|string|undefined>} */ (tryResolve(
-        () =>
+      return /** @type {!Promise<?JsonObject|string|undefined>} */ (
+        tryResolve(() =>
           this.messageDeliverer_(
             eventType,
             /** @type {?JsonObject|string|undefined} */ (data),
             awaitResponse
           )
-      ));
+        )
+      );
     }
 
     if (!this.messagingReadyPromise_) {

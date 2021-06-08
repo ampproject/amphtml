@@ -17,18 +17,27 @@
 import {BaseElement} from './base-element';
 import {
   BatchFetchOptionsDef,
+  UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {isAmpScriptUri} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
+import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-render';
 
+/** @const {string} */
 const AMP_STATE_URI_SCHEME = 'amp-state:';
+
+/** @enum {string}  */
+const Binding = {
+  ALWAYS: 'always',
+  REFRESH: 'refresh',
+  NEVER: 'never',
+  NO: 'no',
+};
 
 /**
  * Returns true if element's src points to amp-state.
@@ -71,47 +80,21 @@ const getAmpStateJson = (element, src) => {
 };
 
 /**
- * @param {!AmpElement} element
- * @param {boolean} shouldRefresh true to force refresh of browser cache.
- * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
+ * @param {string} bindingValue
+ * @param {boolean} isFirstMutation
+ * @return {boolean} Whether bind should evaluate and apply changes.
  */
-function buildOptionsObject(element, shouldRefresh = false) {
-  return {
-    xssiPrefix: element.getAttribute('xssi-prefix'),
-    expr: element.getAttribute('key') ?? '.',
-    refresh: shouldRefresh,
-  };
-}
-
-/**
- * Returns a function to fetch json from remote url, amp-state or
- * amp-script.
- *
- * @param {!AmpElement} element
- * @return {Function}
- */
-export function getJsonFn(element) {
-  const src = element.getAttribute('src');
-  if (!src) {
-    // TODO(dmanek): assert that src is provided instead of silently failing below.
-    return () => {};
+function getUpdateValue(bindingValue, isFirstMutation) {
+  if (!bindingValue || bindingValue === Binding.REFRESH) {
+    // default is 'refresh', so check that its not the first mutation
+    return !isFirstMutation;
   }
-  if (isAmpStateSrc(src)) {
-    return (src) => getAmpStateJson(element, src);
+  if (bindingValue === Binding.ALWAYS) {
+    // TODO(dmanek): add link to amp-render docs that elaborates on performance implications of "always"
+    user().warn(TAG, 'binding="always" has performance implications.');
+    return true;
   }
-  if (isAmpScriptUri(src)) {
-    return (src) =>
-      Services.scriptForDocOrNull(element).then((ampScriptService) => {
-        userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
-        return ampScriptService.fetch(src);
-      });
-  }
-  return (unusedSrc, shouldRefresh = false) =>
-    batchFetchJsonFor(
-      element.getAmpDoc(),
-      element,
-      buildOptionsObject(element, shouldRefresh)
-    );
+  return false;
 }
 
 export class AmpRender extends BaseElement {
@@ -124,19 +107,89 @@ export class AmpRender extends BaseElement {
 
     /** @private {?Element} */
     this.template_ = null;
+
+    /** @private {?string} */
+    this.initialSrc_ = null;
+
+    /** @private {?string} */
+    this.src_ = null;
   }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'amp-render'),
-      'Experiment "amp-render" is not turned on.'
-    );
-    return super.isLayoutSupported(layout);
+  /**
+   * @return {!UrlReplacementPolicy}
+   * @private
+   */
+  getPolicy_() {
+    const src = this.element.getAttribute('src');
+    // Require opt-in for URL variable replacements on CORS fetches triggered
+    // by [src] mutation. @see spec/amp-var-substitutions.md
+    // TODO(dmanek): Update spec/amp-var-substitutions.md with this information
+    // and add a `Substitution` sections in this component's markdown file.
+    let policy = UrlReplacementPolicy.OPT_IN;
+    if (
+      src == this.initialSrc_ ||
+      getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
+    ) {
+      policy = UrlReplacementPolicy.ALL;
+    }
+    return policy;
+  }
+
+  /**
+   * @param {boolean} shouldRefresh true to force refresh of browser cache.
+   * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
+   * @private
+   */
+  buildOptionsObject_(shouldRefresh = false) {
+    return {
+      xssiPrefix: this.element.getAttribute('xssi-prefix'),
+      expr: this.element.getAttribute('key') ?? '.',
+      refresh: shouldRefresh,
+      urlReplacement: this.getPolicy_(),
+    };
+  }
+
+  /**
+   * Returns a function to fetch json from remote url, amp-state or
+   * amp-script.
+   *
+   * @return {Function}
+   */
+  getFetchJsonFn() {
+    const {element} = this;
+    const src = element.getAttribute('src');
+    if (!src) {
+      // TODO(dmanek): assert that src is provided instead of silently failing below.
+      return () => {};
+    }
+    if (isAmpStateSrc(src)) {
+      return (src) => getAmpStateJson(element, src);
+    }
+    if (isAmpScriptUri(src)) {
+      return (src) =>
+        Services.scriptForDocOrNull(element).then((ampScriptService) => {
+          userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
+          return ampScriptService.fetch(src);
+        });
+    }
+    return (unusedSrc, shouldRefresh = false) =>
+      batchFetchJsonFor(
+        element.getAmpDoc(),
+        element,
+        this.buildOptionsObject_(shouldRefresh)
+      );
   }
 
   /** @override */
   init() {
+    this.initialSrc_ = this.element.getAttribute('src');
+    this.src_ = this.initialSrc_;
+
+    const hasAriaLive = this.element.hasAttribute('aria-live');
+    if (!hasAriaLive) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
+
     this.registerApiAction('refresh', (api) => {
       const src = this.element.getAttribute('src');
       // There is an alternative way to do this using `mutationObserverCallback` while using a boolean
@@ -150,16 +203,53 @@ export class AmpRender extends BaseElement {
     });
 
     return dict({
-      'getJson': getJsonFn(this.element),
+      'ariaLiveValue': hasAriaLive
+        ? this.element.getAttribute('aria-live')
+        : 'polite',
+      'getJson': this.getFetchJsonFn(),
+      'onLoading': () => {
+        this.toggleLoading(true);
+      },
+      'onReady': () => {
+        this.toggleLoading(false);
+        this.togglePlaceholder(false);
+      },
+      'onError': () => {
+        this.toggleLoading(false);
+        // If the content fails to load and there's a fallback element, display the fallback.
+        // Otherwise, continue displaying the placeholder.
+        if (this.getFallback()) {
+          this.togglePlaceholder(false);
+          this.toggleFallback(true);
+        } else {
+          this.togglePlaceholder(true);
+        }
+      },
     });
   }
 
+  /** @override */
+  mutationObserverCallback() {
+    const src = this.element.getAttribute('src');
+    if (src === this.src_) {
+      return;
+    }
+    this.src_ = src;
+    this.mutateProps(dict({'getJson': this.getFetchJsonFn()}));
+  }
+
   /**
-   * TODO: this implementation is identical to one in amp-date-display &
-   * amp-date-countdown. Move it to a common file and import it.
-   *
-   * @override
+   * @param {!JsonObject} data
+   * @return {!Promise<!Element>}
+   * @private
    */
+  renderTemplateAsString_(data) {
+    return this.templates_
+      .renderTemplateAsString(dev().assertElement(this.template_), data)
+      .then((html) => dict({'__html': html}));
+  }
+
+  /** @override */
   checkPropsPostMutations() {
     const templates =
       this.templates_ ||
@@ -173,6 +263,7 @@ export class AmpRender extends BaseElement {
       this.mutateProps(dict({'render': null}));
       return;
     }
+
     // Only overwrite `render` when template is ready to minimize FOUC.
     templates.whenReady(template).then(() => {
       if (template != this.template_) {
@@ -182,9 +273,30 @@ export class AmpRender extends BaseElement {
       this.mutateProps(
         dict({
           'render': (data) => {
-            return templates
-              .renderTemplateAsString(dev().assertElement(template), data)
-              .then((html) => dict({'__html': html}));
+            const bindingValue = this.element.getAttribute('binding');
+            if (bindingValue === Binding.NEVER || bindingValue === Binding.NO) {
+              return this.renderTemplateAsString_(data);
+            }
+            return Services.bindForDocOrNull(this.element).then((bind) => {
+              if (!bind) {
+                return this.renderTemplateAsString_(data);
+              }
+              return templates
+                .renderTemplate(dev().assertElement(template), data)
+                .then((element) => {
+                  return bind
+                    .rescan([element], [], {
+                      'fast': true,
+                      'update': getUpdateValue(
+                        bindingValue,
+                        // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
+                        // mutation occured, which is null for the initial render
+                        bind.signals().get('FIRST_MUTATE') === null
+                      ),
+                    })
+                    .then(() => dict({'__html': element./* OK */ innerHTML}));
+                });
+            });
           },
         })
       );
@@ -202,11 +314,6 @@ export class AmpRender extends BaseElement {
     return !this.template_ || 'render' in props;
   }
 }
-
-AmpRender['props'] = {
-  ...BaseElement['props'],
-  'getJson': {attrs: ['src'], parseAttrs: getJsonFn},
-};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);

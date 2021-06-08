@@ -16,7 +16,7 @@
 
 import '../flexible-bitrate';
 import {BitrateManager} from '../flexible-bitrate';
-import {childElementsByTag} from '../../../../src/dom';
+import {childElementsByTag} from '../../../../src/core/dom/query';
 import {toArray} from '../../../../src/core/types/array';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -195,15 +195,7 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
       v.insertBefore(cacheSource, v.firstElementChild);
       m.sortSources_(v);
       expect(currentBitrates(v)).to.jsonEqual([
-        2000,
-        2000,
-        1000,
-        1000,
-        3000,
-        3000,
-        4000,
-        4000,
-        4000,
+        2000, 2000, 1000, 1000, 3000, 3000, 4000, 4000, 4000,
       ]);
       expect(
         toArray(childElementsByTag(v, 'source')).map((source) => {

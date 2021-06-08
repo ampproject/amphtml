@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../core/data-structures/promise';
-import {FiniteStateMachine} from '../finite-state-machine';
+import {FiniteStateMachine} from '../core/data-structures/finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
@@ -26,7 +26,7 @@ import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../core/constants/visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../core/types/object';
-import {expandLayoutRect} from '../layout-rect';
+import {expandLayoutRect} from '../core/math/layout-rect';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
@@ -634,6 +634,18 @@ export class ResourcesImpl {
       dev().fine(TAG_, 'document height on load: %s', this.contentHeight_);
     }
 
+    // Once we know the document is fully parsed, we check to see if every AMP Element has been built
+    const firstPassAfterAllBuilt =
+      !this.firstPassAfterDocumentReady_ &&
+      this.firstPassAfterAllBuilt_ &&
+      this.resources_.every(
+        (r) => r.getState() != Resource.NOT_BUILT || r.element.R1()
+      );
+    if (firstPassAfterAllBuilt) {
+      this.firstPassAfterAllBuilt_ = false;
+      this.maybeChangeHeight_ = true;
+    }
+
     const viewportSize = this.viewport_.getSize();
     dev().fine(
       TAG_,
@@ -748,17 +760,15 @@ export class ResourcesImpl {
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
-        const {
-          resource,
-          event,
-        } = /** @type {!./resources-interface.ChangeSizeRequestDef} */ (request);
+        const {event, resource} =
+          /** @type {!./resources-interface.ChangeSizeRequestDef} */ (request);
         const box = resource.getLayoutBox();
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
         let leftMarginDiff = 0;
         let rightMarginDiff = 0;
-        let {top: topUnchangedBoundary, bottom: bottomDisplacedBoundary} = box;
+        let {bottom: bottomDisplacedBoundary, top: topUnchangedBoundary} = box;
         let newMargins = undefined;
         if (request.marginChange) {
           newMargins = request.marginChange.newMargins;
@@ -949,7 +959,8 @@ export class ResourcesImpl {
         this.vsync_.run(
           {
             measure: (state) => {
-              state./*OK*/ scrollHeight = this.viewport_./*OK*/ getScrollHeight();
+              state./*OK*/ scrollHeight =
+                this.viewport_./*OK*/ getScrollHeight();
               state./*OK*/ scrollTop = this.viewport_./*OK*/ getScrollTop();
             },
             mutate: (state) => {
@@ -1056,9 +1067,9 @@ export class ResourcesImpl {
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
     const {
+      elementsThatScrolled_: elementsThatScrolled,
       relayoutAll_: relayoutAll,
       relayoutTop_: relayoutTop,
-      elementsThatScrolled_: elementsThatScrolled,
     } = this;
     this.relayoutAll_ = false;
     this.relayoutTop_ = -1;
@@ -1071,7 +1082,7 @@ export class ResourcesImpl {
       if (
         r.getState() == ResourceState.NOT_BUILT &&
         !r.isBuilding() &&
-        !r.element.V1()
+        !r.element.R1()
       ) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
@@ -1101,7 +1112,7 @@ export class ResourcesImpl {
     ) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if ((r.hasOwner() && !r.isMeasureRequested()) || r.element.V1()) {
+        if ((r.hasOwner() && !r.isMeasureRequested()) || r.element.R1()) {
           // If element has owner, and measure is not requested, do nothing.
           continue;
         }
@@ -1165,7 +1176,7 @@ export class ResourcesImpl {
       if (
         r.getState() == ResourceState.NOT_BUILT ||
         r.hasOwner() ||
-        r.element.V1()
+        r.element.R1()
       ) {
         continue;
       }
@@ -1191,7 +1202,7 @@ export class ResourcesImpl {
           !r.isBuilt() &&
           !r.isBuilding() &&
           !r.hasOwner() &&
-          !r.element.V1() &&
+          !r.element.R1() &&
           r.hasBeenMeasured() &&
           r.isDisplayed() &&
           r.overlaps(loadRect)
@@ -1227,7 +1238,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
-          !r.element.V1() &&
+          !r.element.R1() &&
           r.isDisplayed() &&
           r.idleRenderOutsideViewport()
         ) {
@@ -1247,7 +1258,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
-          !r.element.V1() &&
+          !r.element.R1() &&
           r.isDisplayed()
         ) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
@@ -1537,7 +1548,7 @@ export class ResourcesImpl {
     opt_parentPriority,
     opt_forceOutsideViewport
   ) {
-    if (resource.element.V1()) {
+    if (resource.element.R1()) {
       return;
     }
     const isBuilt = resource.getState() != ResourceState.NOT_BUILT;
@@ -1635,11 +1646,11 @@ export class ResourcesImpl {
    */
   setupVisibilityStateMachine_(vsm) {
     const {
+      HIDDEN: hidden,
+      INACTIVE: inactive,
+      PAUSED: paused,
       PRERENDER: prerender,
       VISIBLE: visible,
-      HIDDEN: hidden,
-      PAUSED: paused,
-      INACTIVE: inactive,
     } = VisibilityState;
     const doWork = () => {
       // If viewport size is 0, the manager will wait for the resize event.

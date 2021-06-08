@@ -20,7 +20,7 @@ import {
   RelativePositions,
   layoutRectLtwh,
   layoutRectsRelativePos,
-} from '../../../src/layout-rect';
+} from '../../../src/core/math/layout-rect';
 import {Services} from '../../../src/services';
 import {
   assertLength,
@@ -132,9 +132,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
         this.positionObserver_.observe(
           scene,
           PositionObserverFidelity.HIGH,
-          /** @type {function(?PositionInViewportEntryDef)} */ (this.positionChanged_.bind(
-            this
-          ))
+          /** @type {function(?PositionInViewportEntryDef)} */ (
+            this.positionChanged_.bind(this)
+          )
         );
       });
   }

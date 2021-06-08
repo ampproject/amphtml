@@ -15,26 +15,25 @@
  */
 
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {ImaPlayerData} from '../../../ads/google/ima-player-data';
+import {ImaPlayerData} from '../../../ads/google/ima/ima-player-data';
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
+import {childElementsByTag} from '../../../src/core/dom/query';
+import {dict} from '../../../src/core/types/object';
 import {
-  childElementsByTag,
   dispatchCustomEvent,
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {dict} from '../../../src/core/types/object';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isEnumValue, isObject} from '../../../src/core/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-
 import {
   observeContentSize,
   unobserveContentSize,
@@ -45,6 +44,28 @@ import {toArray} from '../../../src/core/types/array';
 const TAG = 'amp-ima-video';
 
 const TYPE = 'ima-video';
+
+/**
+ * [tagName, attributes]
+ *   like:
+ *   ['SOURCE', {src: 'source.mp4'}]
+ * @type {!Array<string, !Object>}
+ */
+let SerializableChildDef;
+
+/**
+ * @param {!Element} element
+ * @return {!Object<string, *>}
+ */
+function serializeAttributes(element) {
+  const {attributes} = element;
+  const serialized = {};
+  for (let i = 0; i < attributes.length; i++) {
+    const {name, value} = attributes[i];
+    serialized[name] = value;
+  }
+  return serialized;
+}
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -68,6 +89,9 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private {?Array<!SerializableChildDef>} */
+    this.sourceChildren_ = null;
 
     /** @private {?string} */
     this.preconnectSource_ = null;
@@ -119,22 +143,18 @@ class AmpImaVideo extends AMP.BaseElement {
     const childElements = toArray(sourceElements).concat(
       toArray(trackElements)
     );
-    if (childElements.length > 0) {
-      const children = [];
-      childElements.forEach((child) => {
-        // Save the first source and first track to preconnect.
-        if (child.tagName == 'SOURCE' && !this.preconnectSource_) {
-          this.preconnectSource_ = child.src;
-        } else if (child.tagName == 'TRACK' && !this.preconnectTrack_) {
-          this.preconnectTrack_ = child.src;
-        }
-        children.push(child./*OK*/ outerHTML);
-      });
-      this.element.setAttribute(
-        'data-child-elements',
-        JSON.stringify(children)
-      );
-    }
+
+    this.sourceChildren_ = childElements.map((element) => {
+      const {tagName} = element;
+      const src = element.getAttribute('src');
+      // Save the first source and first track to preconnect.
+      if (tagName == 'SOURCE' && !this.preconnectSource_) {
+        this.preconnectSource_ = src;
+      } else if (tagName == 'TRACK' && !this.preconnectTrack_) {
+        this.preconnectTrack_ = src;
+      }
+      return [tagName, serializeAttributes(element)];
+    });
 
     // Handle IMASetting JSON
     const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
@@ -186,6 +206,10 @@ class AmpImaVideo extends AMP.BaseElement {
     const consentPromise = consentPolicyId
       ? getConsentPolicyState(element, consentPolicyId)
       : Promise.resolve(null);
+    element.setAttribute(
+      'data-source-children',
+      JSON.stringify(this.sourceChildren_)
+    );
     return consentPromise.then((initialConsentState) => {
       const iframe = getIframe(
         win,
@@ -246,7 +270,7 @@ class AmpImaVideo extends AMP.BaseElement {
    * @param {!../layout-rect.LayoutSizeDef} size
    * @private
    */
-  onResized_({width, height}) {
+  onResized_({height, width}) {
     if (!this.iframe_) {
       return;
     }
@@ -329,6 +353,20 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /** @override */
+  createPlaceholderCallback() {
+    const {poster} = this.element.dataset;
+    if (!poster) {
+      return null;
+    }
+    const img = new Image();
+    img.src = poster;
+    img.setAttribute('placeholder', '');
+    img.setAttribute('loading', 'lazy');
+    this.applyFillContent(img);
+    return img;
+  }
+
+  /** @override */
   pauseCallback() {
     this.pause();
   }
@@ -347,12 +385,12 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.sendCommand_('playVideo');
+    this.sendCommand_('play');
   }
 
   /** @override */
   pause() {
-    this.sendCommand_('pauseVideo');
+    this.sendCommand_('pause');
   }
 
   /** @override */
@@ -362,7 +400,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   unmute() {
-    this.sendCommand_('unMute');
+    this.sendCommand_('unmute');
   }
 
   /** @override */
@@ -377,7 +415,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   fullscreenEnter() {
-    this.sendCommand_('enterFullscreen');
+    this.sendCommand_('requestFullscreen');
   }
 
   /** @override */

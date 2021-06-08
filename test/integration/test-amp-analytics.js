@@ -15,14 +15,14 @@
  */
 
 import {BrowserController, RequestBank} from '../../testing/test-helper';
-import {parseQueryString} from '../../src/url';
+import {parseQueryString} from '../../src/core/types/string/url';
 
 // TODO(wg-analytics): These tests time out on Firefox and Safari.
-describe
+describes.sandboxed
   .configure()
   .skipSafari()
   .skipFirefox()
-  .run('amp-analytics', function () {
+  .run('amp-analytics', {}, function () {
     describes.integration(
       'basic pageview',
       {

@@ -23,9 +23,9 @@ import {Deferred} from '../../../../src/core/data-structures/promise';
 import {Services} from '../../../../src/services';
 import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';
 import {htmlFor, htmlRefs} from '../../../../src/static-template';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 import {presets} from '../animation-presets';
-import {scopedQuerySelectorAll} from '../../../../src/dom';
+import {scopedQuerySelectorAll} from '../../../../src/core/dom/query';
 import {toArray} from '../../../../src/core/types/array';
 
 const querySelectorAllAnimateIn = (element) =>
@@ -335,7 +335,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       webAnimationBuilder.createRunner = () => webAnimationRunner;
 
-      const {resolve: resolveWaitFor, promise} = new Deferred();
+      const {promise, resolve: resolveWaitFor} = new Deferred();
       sequence.waitFor = env.sandbox.spy(() => promise);
 
       const runner = new AnimationRunner(
@@ -464,7 +464,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       ).to.have.been.calledOnce;
     });
 
-    it('creates internal runners when applying first frame (preset)', async () => {
+    // TODO(wg-stories, #34695): This test is flaky during CI.
+    it.skip('creates internal runners when applying first frame (preset)', async () => {
       const page = html`
         <div>
           <div animate-in="fly-in-left"></div>
@@ -490,7 +491,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       });
     });
 
-    it('creates internal runners when applying first frame (amp-story-animation)', async () => {
+    // TODO(wg-stories, #34695): This test is flaky during CI.
+    it.skip('creates internal runners when applying first frame (amp-story-animation)', async () => {
       const spec1 = {keyframes: [{opacity: 1}]};
       const spec2 = {keyframes: [{transform: 'translate(10px, 10px)'}]};
 
@@ -591,7 +593,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       const animationManager = new AnimationManager(page, ampdoc);
       await animationManager.applyFirstFrame();
 
-      targetsWithOptions.forEach(({target, expectedOptions}) => {
+      targetsWithOptions.forEach(({expectedOptions, target}) => {
         expect(
           createAnimationRunner.withArgs(
             page,
@@ -713,12 +715,8 @@ describes.realWin('amp-story animations', {}, (env) => {
           </amp-story-animation>
         </div>
       `;
-      const {
-        animatedFirst,
-        animatedSecond,
-        animatedThird,
-        animatedFourth,
-      } = htmlRefs(page);
+      const {animatedFirst, animatedFourth, animatedSecond, animatedThird} =
+        htmlRefs(page);
 
       env.win.document.body.appendChild(page);
 

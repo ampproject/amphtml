@@ -43,8 +43,8 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
-import {toWin} from '../../../../src/types';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
+import {toWin} from '../../../../src/core/window';
+import {utf8Decode, utf8Encode} from '../../../../src/core/types/string/bytes';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -353,9 +353,8 @@ describes.realWin(
                 '1';
             }
             impl.onCreativeRender(false);
-            const ampAnalyticsElement = impl.element.querySelector(
-              'amp-analytics'
-            );
+            const ampAnalyticsElement =
+              impl.element.querySelector('amp-analytics');
             expect(ampAnalyticsElement).to.be.ok;
             expect(ampAnalyticsElement.CONFIG).jsonEqual(
               impl.ampAnalyticsConfig_
@@ -815,11 +814,12 @@ describes.realWin(
 
       it('should include identity', () => {
         // Force get identity result by overloading window variable.
-        const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
-          token: 'abcdef',
-          jar: 'some_jar',
-          pucrd: 'some_pucrd',
-        });
+        const token =
+          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({
+            token: 'abcdef',
+            jar: 'some_jar',
+            pucrd: 'some_pucrd',
+          });
         impl.win['goog_identity_prom'] = Promise.resolve(token);
         impl.buildCallback();
         return impl.getAdUrl().then((url) => {
@@ -1563,7 +1563,8 @@ describes.realWin(
         });
         ampStickyAd.appendChild(element);
         doc.body.appendChild(ampStickyAd);
-        const letCreativeTriggerRenderStart = impl.letCreativeTriggerRenderStart();
+        const letCreativeTriggerRenderStart =
+          impl.letCreativeTriggerRenderStart();
         expect(letCreativeTriggerRenderStart).to.equal(true);
       });
 
@@ -1601,7 +1602,8 @@ describes.realWin(
         );
         ampStickyAd.appendChild(element);
         doc.body.appendChild(ampStickyAd);
-        const letCreativeTriggerRenderStart = impl.letCreativeTriggerRenderStart();
+        const letCreativeTriggerRenderStart =
+          impl.letCreativeTriggerRenderStart();
         expect(letCreativeTriggerRenderStart).to.equal(false);
       });
     });

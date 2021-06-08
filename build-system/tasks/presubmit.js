@@ -19,10 +19,10 @@ const fs = require('fs');
 const globby = require('globby');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const {
-  matchForbiddenTerms,
   forbiddenTermsGlobal,
+  matchForbiddenTerms,
 } = require('../test-configs/forbidden-terms');
-const {cyan, red, yellow} = require('kleur/colors');
+const {cyan, red, yellow} = require('../common/colors');
 const {log} = require('../common/logging');
 
 /**
@@ -34,12 +34,15 @@ const dedicatedCopyrightNoteSources = /(\.css|\.go)$/;
 
 // Terms that must appear in a source file.
 const requiredTerms = {
-  'Copyright 20(15|16|17|18|19|2\\d) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
-  'Licensed under the Apache License, Version 2\\.0': dedicatedCopyrightNoteSources,
-  'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0': dedicatedCopyrightNoteSources,
+  'Copyright 20(15|16|17|18|19|2\\d) The AMP HTML Authors\\.':
+    dedicatedCopyrightNoteSources,
+  'Licensed under the Apache License, Version 2\\.0':
+    dedicatedCopyrightNoteSources,
+  'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0':
+    dedicatedCopyrightNoteSources,
 };
 // Exclude extension generator templates
-const requiredTermsExcluded = /amp-__component_name_hyphenated__/;
+const requiredTermsExcluded = new RegExp('/make-extension(/.+)?/template/');
 
 /**
  * Test if a file's contents match any of the forbidden terms
@@ -50,7 +53,7 @@ const requiredTermsExcluded = /amp-__component_name_hyphenated__/;
 function hasForbiddenTerms(srcFile) {
   const contents = fs.readFileSync(srcFile, 'utf-8');
   const terms = matchForbiddenTerms(srcFile, contents, forbiddenTermsGlobal);
-  for (const {match, loc, message} of terms) {
+  for (const {loc, match, message} of terms) {
     log(
       red('ERROR:'),
       'Found forbidden',

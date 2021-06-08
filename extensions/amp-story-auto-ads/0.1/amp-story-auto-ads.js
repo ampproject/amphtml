@@ -15,6 +15,11 @@
  */
 
 import {
+  AdvanceExpToTime,
+  StoryAdAutoAdvance,
+  divertStoryAdAutoAdvance,
+} from '../../../src/experiments/story-ad-auto-advance';
+import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
@@ -35,12 +40,13 @@ import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {divertStoryAdPlacements} from '../../../src/experiments/story-ad-placements';
+import {getExperimentBranch} from '../../../src/experiments';
 import {getPlacementAlgo} from './algorithm-utils';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
 import {setStyle} from '../../../src/style';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
+import {toggleAttribute} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads';
@@ -56,6 +62,7 @@ export const Attributes = {
   AD_SHOWING: 'ad-showing',
   DESKTOP_PANELS: 'desktop-panels',
   DIR: 'dir',
+  PAUSED: 'paused',
 };
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
@@ -141,6 +148,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.config_
         );
         divertStoryAdPlacements(this.win);
+        divertStoryAdAutoAdvance(this.win);
         this.placementAlgorithm_ = getPlacementAlgo(
           this.win,
           this.storeService_,
@@ -167,9 +175,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {!StoryAdPage} adPage
    */
   forcePlaceAdAfterPage_(adPage) {
-    const pageBeforeAdId = /** @type {string} */ (this.storeService_.get(
-      StateProperty.CURRENT_PAGE_ID
-    ));
+    const pageBeforeAdId = /** @type {string} */ (
+      this.storeService_.get(StateProperty.CURRENT_PAGE_ID)
+    );
     adPage.registerLoadCallback(() =>
       this.adPageManager_
         .maybeInsertPageAfter(pageBeforeAdId, adPage)
@@ -306,13 +314,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const {DESKTOP_PANELS} = Attributes;
       this.adBadgeContainer_.removeAttribute(DESKTOP_PANELS);
       // TODO(#33969) can no longer be null when launched.
-      this.progressBarBackground_ &&
-        this.progressBarBackground_.removeAttribute(DESKTOP_PANELS);
+      this.progressBarBackground_?.removeAttribute(DESKTOP_PANELS);
 
       if (uiState === UIType.DESKTOP_PANELS) {
         this.adBadgeContainer_.setAttribute(DESKTOP_PANELS, '');
-        this.progressBarBackground_ &&
-          this.progressBarBackground_.setAttribute(DESKTOP_PANELS, '');
+        this.progressBarBackground_?.setAttribute(DESKTOP_PANELS, '');
       }
     });
   }
@@ -340,9 +346,21 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * Create progress bar if auto advance exp is on.
    */
   maybeCreateProgressBar_() {
-    // TODO(ccordry): use experiment branch to set time value.
-    if (isExperimentOn(this.win, 'story-ad-auto-advance')) {
-      this.createProgressBar_('6s');
+    const autoAdvanceExpBranch = getExperimentBranch(
+      this.win,
+      StoryAdAutoAdvance.ID
+    );
+    // TODO(ccordry): move to experiment id when viewer is able to share.
+    const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
+      'storyNextUp'
+    );
+    if (
+      autoAdvanceExpBranch &&
+      autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
+    ) {
+      this.createProgressBar_(AdvanceExpToTime[autoAdvanceExpBranch]);
+    } else if (storyNextUpParam) {
+      this.createProgressBar_(storyNextUpParam);
     }
   }
 
@@ -365,6 +383,24 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.progressBarBackground_.appendChild(progressBar);
     createShadowRootWithStyle(host, this.progressBarBackground_, progessBarCSS);
     this.ampStory_.element.appendChild(host);
+
+    // TODO(#33969) move this to init listeners when no longer conditional.
+    this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
+      this.onPauseStateUpdate_(isPaused);
+    });
+  }
+
+  /**
+   * If video is paused and ad is showing pause the progress bar.
+   * @param {boolean} isPaused
+   */
+  onPauseStateUpdate_(isPaused) {
+    const adShowing = this.storeService_.get(StateProperty.AD_STATE);
+    if (!adShowing) {
+      return;
+    }
+
+    toggleAttribute(this.progressBarBackground_, Attributes.PAUSED, isPaused);
   }
 
   /**

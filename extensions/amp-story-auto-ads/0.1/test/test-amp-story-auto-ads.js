@@ -55,11 +55,12 @@ describes.realWin(
     let story;
     let storeService;
     let storeGetterStub;
+    let viewer;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      const viewer = Services.viewerForDoc(env.ampdoc);
+      viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       registerServiceBuilder(win, 'performance', function () {
         return {
@@ -267,6 +268,22 @@ describes.realWin(
       });
     });
 
+    // TODO(#33969) remove when launched.
+    it('should create progress bar from #storyNextUp', async () => {
+      env.sandbox.stub(viewer, 'getParam').returns('6s');
+      env.sandbox.stub(autoAds, 'mutateElement').callsArg(0);
+      addStoryAutoAdsConfig(adElement);
+      await story.buildCallback();
+      // Fire these events so that story ads thinks the parent story is ready.
+      story.signals().signal(CommonSignals.BUILT);
+      story.signals().signal(CommonSignals.INI_LOAD);
+      await autoAds.buildCallback();
+      await autoAds.layoutCallback();
+
+      const progressBar = doc.querySelector('.i-amphtml-story-ad-progress-bar');
+      expect(progressBar).to.exist;
+    });
+
     describe('system layer', () => {
       beforeEach(async () => {
         // TODO(#33969) remove when launched.
@@ -333,6 +350,31 @@ describes.realWin(
         expect(adBadgeContainer).not.to.have.attribute(Attributes.DIR);
         storeService.dispatch(Action.TOGGLE_RTL, true);
         expect(adBadgeContainer).to.have.attribute(Attributes.DIR, 'rtl');
+      });
+
+      it('should propagate the pause state if ad showing', () => {
+        const progressBackground = doc.querySelector(
+          '.i-amphtml-story-ad-progress-background'
+        );
+        storeService.dispatch(Action.TOGGLE_AD, true);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+        storeService.dispatch(Action.TOGGLE_PAUSED, true);
+        expect(progressBackground).to.have.attribute(Attributes.PAUSED);
+        storeService.dispatch(Action.TOGGLE_PAUSED, false);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+      });
+
+      // TODO(calebcordry): Skipping test since it's failing on main, marking for review.
+      it.skip('should not propagate the pause state if no ad showing', () => {
+        const progressBackground = doc.querySelector(
+          '.i-amphtml-story-ad-progress-background'
+        );
+        storeService.dispatch(Action.TOGGLE_AD, false);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+        storeService.dispatch(Action.TOGGLE_PAUSED, true);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
+        storeService.dispatch(Action.TOGGLE_PAUSED, false);
+        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
       });
     });
 

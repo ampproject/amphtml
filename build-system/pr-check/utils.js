@@ -25,14 +25,14 @@ const {
 const {
   gitBranchCreationPoint,
   gitBranchName,
+  gitCiMainBaseline,
   gitCommitHash,
   gitDiffCommitLog,
   gitDiffStatMain,
-  gitCiMainBaseline,
   shortSha,
 } = require('../common/git');
-const {cyan, green, yellow} = require('kleur/colors');
-const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
+const {cyan, green, yellow} = require('../common/colors');
+const {exec, execOrDie, execOrThrow, execWithError} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
@@ -52,7 +52,7 @@ const APP_SERVING_DIRS = [
 ];
 
 const GIT_BRANCH_URL =
-  'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#create-a-git-branch';
+  'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md#create-a-git-branch';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.

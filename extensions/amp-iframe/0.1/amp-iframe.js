@@ -21,7 +21,7 @@ import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {PauseHelper} from '../../../src/utils/pause-helper';
 import {Services} from '../../../src/services';
-import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
+import {base64EncodeFromBytes} from '../../../src/core/types/string/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
@@ -34,13 +34,13 @@ import {
 } from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {moveLayoutRect} from '../../../src/layout-rect';
-import {parseJson} from '../../../src/json';
+import {moveLayoutRect} from '../../../src/core/math/layout-rect';
+import {parseJson} from '../../../src/core/types/object/json';
 import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
-import {utf8Encode} from '../../../src/utils/bytes.js';
+import {utf8Encode} from '../../../src/core/types/string/bytes.js';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -148,7 +148,7 @@ export class AmpIframe extends AMP.BaseElement {
     const {element} = this;
     const urlService = Services.urlForDoc(element);
     const url = urlService.parse(src);
-    const {hostname, protocol, origin} = url;
+    const {hostname, origin, protocol} = url;
     // Some of these can be easily circumvented with redirects.
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
@@ -163,7 +163,7 @@ export class AmpIframe extends AMP.BaseElement {
         (origin != containerUrl.origin && protocol != 'data:'),
       'Origin of <amp-iframe> must not be equal to container %s' +
         ' if allow-same-origin is set. See https://github.com/ampproject/' +
-        'amphtml/blob/main/spec/amp-iframe-origin-policy.md for details.',
+        'amphtml/blob/main/docs/spec/amp-iframe-origin-policy.md for details.',
       element
     );
     userAssert(
@@ -218,7 +218,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (!src) {
       return;
     }
-    const {protocol, hash} = Services.urlForDoc(this.element).parse(src);
+    const {hash, protocol} = Services.urlForDoc(this.element).parse(src);
     // data-URLs are not modified.
     if (protocol == 'data:') {
       return src;
@@ -277,13 +277,13 @@ export class AmpIframe extends AMP.BaseElement {
   buildCallback() {
     this.sandbox_ = this.element.getAttribute('sandbox');
 
-    const iframeSrc = /** @type {string} */ (this.transformSrc_(
-      this.element.getAttribute('src')
-    ) ||
-      this.transformSrcDoc_(
-        this.element.getAttribute('srcdoc'),
-        this.sandbox_
-      ));
+    const iframeSrc = /** @type {string} */ (
+      this.transformSrc_(this.element.getAttribute('src')) ||
+        this.transformSrcDoc_(
+          this.element.getAttribute('srcdoc'),
+          this.sandbox_
+        )
+    );
     this.iframeSrc = this.assertSource_(
       iframeSrc,
       window.location.href,
@@ -355,9 +355,9 @@ export class AmpIframe extends AMP.BaseElement {
       this.measureIframeLayoutBox_();
     }
 
-    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (devAssert(
-      this.iframeLayoutBox_
-    ));
+    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
+      devAssert(this.iframeLayoutBox_)
+    );
     return moveLayoutRect(iframe, box.left, box.top);
   }
 
@@ -397,7 +397,7 @@ export class AmpIframe extends AMP.BaseElement {
             'Only 1 analytics/tracking iframe allowed per ' +
               'page. Please use amp-analytics instead or file a GitHub issue ' +
               'for your use case: ' +
-              'https://github.com/ampproject/amphtml/issues/new'
+              'https://github.com/ampproject/amphtml/issues/new/choose'
           );
         return Promise.resolve();
       }

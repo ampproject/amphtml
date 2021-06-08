@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {VideoElementWithActions} from './_helpers';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -57,8 +58,7 @@ const AmpVideoWithKnobs = ({i, ...rest}) => {
     'sources',
     [
       {
-        src:
-          'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
+        src: 'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
         type: 'video/webm',
       },
       {
@@ -129,29 +129,12 @@ export const Default = () => {
   );
 };
 
-const ActionButton = ({children, ...props}) => (
-  <button style={{flex: 1, margin: '0 4px'}} {...props}>
-    {children}
-  </button>
-);
-
 export const Actions = () => {
+  const id = 'player';
   return (
-    <div style="max-width: 800px">
-      <AmpVideoWithKnobs id="player" />
-      <div
-        style={{
-          margin: '12px 0',
-          display: 'flex',
-        }}
-      >
-        <ActionButton on="tap:player.play">Play</ActionButton>
-        <ActionButton on="tap:player.pause">Pause</ActionButton>
-        <ActionButton on="tap:player.mute">Mute</ActionButton>
-        <ActionButton on="tap:player.unmute">Unmute</ActionButton>
-        <ActionButton on="tap:player.fullscreen">Fullscreen</ActionButton>
-      </div>
-    </div>
+    <VideoElementWithActions id={id}>
+      <AmpVideoWithKnobs id={id} />
+    </VideoElementWithActions>
   );
 };
 

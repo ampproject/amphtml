@@ -53,6 +53,11 @@ describes.realWin(
       return element.querySelector('div');
     }
 
+    async function waitForText(el, txt) {
+      const hasText = () => el.querySelector('div').textContent === txt;
+      await waitFor(hasText, 'element text updated');
+    }
+
     async function getRenderedData() {
       const wrapper = await waitRendered();
       return wrapper.textContent;
@@ -95,6 +100,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -122,6 +128,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="https://example.com/data.json"
           width="auto"
           height="140"
@@ -153,6 +160,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-script:dataFunctions.getRemoteData"
           width="auto"
           height="200"
@@ -177,7 +185,12 @@ describes.realWin(
 
     it('fails gracefully when src is omitted', async () => {
       element = html`
-        <amp-render width="auto" height="140" layout="fixed-height">
+        <amp-render
+          width="auto"
+          height="140"
+          layout="fixed-height"
+          binding="no"
+        >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
         </amp-render>
       `;
@@ -196,6 +209,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           id="my-amp-render"
           src="https://example.com/data.json"
           width="auto"
@@ -247,6 +261,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -288,6 +303,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-script:dataFunctions.getRemoteData"
           width="auto"
           height="200"
@@ -339,6 +355,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           xssi-prefix=")]}"
           key="fullName"
           src="https://example.com/data.json"
@@ -357,6 +374,399 @@ describes.realWin(
       expect(options.xssiPrefix).to.equal(')]}');
       expect(options.expr).to.equal('fullName');
       expect(options.refresh).to.be.false;
+    });
+
+    it('should perform url replacement in src', async () => {
+      const json = {
+        fullName: {
+          firstName: 'Joe',
+          lastName: 'Biden',
+        },
+      };
+
+      const fetchJsonStub = env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .callThrough();
+
+      env.sandbox.stub(Services, 'batchedXhrFor').returns({
+        fetchJson: () => Promise.resolve(json),
+      });
+
+      env.sandbox.stub(Services, 'xhrFor').returns({
+        fetch: () => Promise.resolve(json),
+        xssiJson: () => Promise.resolve(json),
+      });
+
+      element = html`
+        <amp-render
+          binding="no"
+          xssi-prefix=")]}"
+          key="fullName"
+          src="https://example.com/data.json?RANDOM"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">{{lastName}}, {{firstName}}</template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Biden, Joe');
+      const options = fetchJsonStub.getCall(0).args[2];
+      expect(options.urlReplacement).to.equal(
+        BatchedJsonModule.UrlReplacementPolicy.ALL
+      );
+    });
+
+    it('should render updates when src mutates', async () => {
+      const fetchJsonStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchJsonStub.resolves({
+        firstName: 'Joe',
+        lastName: 'Biden',
+      });
+
+      const ampState = html`
+        <amp-state id="president">
+          <script type="application/json">
+            {
+              "firstName": "Bill",
+              "lastName": "Clinton"
+            }
+          </script>
+        </amp-state>
+      `;
+      doc.body.appendChild(ampState);
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="amp-state:president"
+          [src]="srcUrl"
+          width="auto"
+          height="100"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">{{lastName}}, {{firstName}}</template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(ampState);
+      await ampState.buildInternal();
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Clinton, Bill');
+      expect(fetchJsonStub).not.to.have.been.called;
+
+      element.setAttribute('src', 'https://example.com/data.json');
+
+      await waitForText(element, 'Biden, Joe');
+      expect(fetchJsonStub).to.have.been.called;
+    });
+
+    it('should add aria-live="polite" attribute', async () => {
+      const ampState = html`
+        <amp-state id="theFood">
+          <script type="application/json">
+            {
+              "name": "Bill"
+            }
+          </script>
+        </amp-state>
+      `;
+      doc.body.appendChild(ampState);
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="amp-state:theFood"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(ampState);
+      await ampState.buildInternal();
+
+      await getRenderedData();
+      expect(element.getAttribute('aria-live')).to.equal('polite');
+    });
+
+    it('should not add aria-live="polite" attribute if one already exists', async () => {
+      const ampState = html`
+        <amp-state id="theFood">
+          <script type="application/json">
+            {
+              "name": "Bill"
+            }
+          </script>
+        </amp-state>
+      `;
+      doc.body.appendChild(ampState);
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="amp-state:theFood"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+          aria-live="assertive"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(ampState);
+      await ampState.buildInternal();
+
+      await getRenderedData();
+      expect(element.getAttribute('aria-live')).to.equal('assertive');
+    });
+
+    it('should render a placeholder', async () => {
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+
+      element = html`
+        <amp-render
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+          binding="no"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+          <p placeholder>Loading data</p>
+          <p fallback>Failed</p>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await waitFor(() => {
+        const div = element.querySelector(`[placeholder]`);
+        return div && div.textContent;
+      }, 'placeholder rendered');
+      const placeholder = element.querySelector(`[placeholder]`);
+
+      expect(placeholder.textContent).to.equal('Loading data');
+
+      await element.buildInternal();
+      fetchStub.resolves({name: 'Joe'});
+      await waitForText(element, 'Hello Joe');
+      expect(fetchStub).to.be.calledOnce;
+    });
+
+    it('should render a fallback', async () => {
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+
+      element = html`
+        <amp-render
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+          binding="no"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+          <p placeholder>Loading data</p>
+          <p fallback>Failed</p>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+
+      fetchStub.rejects();
+      await element.buildInternal();
+
+      await waitFor(() => {
+        const div = element.querySelector(`[fallback]`);
+        return div && div.textContent;
+      }, 'fallback rendered');
+      const fallback = element.querySelector(`[fallback]`);
+
+      expect(fallback.textContent).to.equal('Failed');
+    });
+
+    it('should work with binding="always"', async () => {
+      const rescanStub = env.sandbox.stub();
+      rescanStub.resolves({});
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanStub,
+        signals: () => {
+          return {
+            get: () => null,
+          };
+        },
+      });
+
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="always"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+
+      expect(rescanStub).to.be.calledOnce;
+      const {fast, update} = rescanStub.getCall(0).args[2];
+      expect(fast).to.be.true;
+      expect(update).to.be.true;
+    });
+
+    it('should work with binding="refresh"', async () => {
+      const rescanStub = env.sandbox.stub();
+      rescanStub.resolves({});
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanStub,
+        signals: () => {
+          return {
+            get: () => 123,
+          };
+        },
+      });
+
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchStub.resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="refresh"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+
+      expect(rescanStub).to.be.calledOnce;
+      const {fast, update} = rescanStub.getCall(0).args[2];
+      expect(fast).to.be.true;
+      expect(update).to.be.true;
+    });
+
+    it('should default to binding="refresh" when nothing is specified', async () => {
+      const rescanStub = env.sandbox.stub();
+      rescanStub.resolves({});
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanStub,
+        signals: () => {
+          return {
+            get: () => null,
+          };
+        },
+      });
+
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchStub.resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+
+      expect(rescanStub).to.be.calledOnce;
+      const {fast, update} = rescanStub.getCall(0).args[2];
+      expect(fast).to.be.true;
+      expect(update).to.be.false;
+    });
+
+    it('should not perform any updates when binding="no"', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"
+            >Hello {{name}} 1+1=<span [text]="1+1">?</span></template
+          >
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Hello Joe 1+1=?');
+    });
+
+    it('should not perform any updates when binding="never"', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"
+            >Hello {{name}} 1+1=<span [text]="1+1">?</span></template
+          >
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Hello Joe 1+1=?');
     });
   }
 );

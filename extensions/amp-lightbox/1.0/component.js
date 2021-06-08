@@ -50,7 +50,7 @@ const CONTENT_PROPS = {'part': 'scroller'};
 
 /**
  * @param {!LightboxDef.Props} props
- * @param {{current: (!LightboxDef.LightboxApi|null)}} ref
+ * @param {{current: ?LightboxDef.LightboxApi}} ref
  * @return {PreactDef.Renderable}
  */
 function LightboxWithRef(
@@ -58,9 +58,9 @@ function LightboxWithRef(
     animation = 'fade-in',
     children,
     closeButtonAs,
-    onBeforeOpen,
     onAfterClose,
     onAfterOpen,
+    onBeforeOpen,
     ...rest
   },
   ref

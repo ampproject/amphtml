@@ -26,15 +26,15 @@ import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Services} from '../../../src/services';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
+import {dev} from '../../../src/log';
 import {
-  closestAncestorElementBySelector,
   dispatchCustomEvent,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
-import {dev} from '../../../src/log';
 import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
 import {toArray} from '../../../src/core/types/array';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/core/types/object/json';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -160,12 +160,12 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsSizingCriteria(element, renderWidth, renderHeight) {
-    const {naturalWidth, naturalHeight} = getMaxNaturalDimensions(
+    const {naturalHeight, naturalWidth} = getMaxNaturalDimensions(
       dev().assertElement(element.querySelector('img'))
     );
 
     const viewport = Services.viewportForDoc(element);
-    const {width: vw, height: vh} = viewport.getSize();
+    const {height: vh, width: vw} = viewport.getSize();
 
     return meetsSizingCriteria(
       renderWidth,
@@ -217,7 +217,7 @@ export function getMaxWidthFromSrcset(img) {
  * @return {{naturalWidth: number, naturalHeight: number}}
  */
 export function getMaxNaturalDimensions(img) {
-  const {naturalWidth, naturalHeight} = img;
+  const {naturalHeight, naturalWidth} = img;
   const ratio = naturalWidth / naturalHeight;
   const maxWidthFromSrcset = getMaxWidthFromSrcset(img);
   if (maxWidthFromSrcset > naturalWidth) {
@@ -445,7 +445,7 @@ export function runCandidates(ampdoc, candidates) {
           if (!candidate.signals().get(CommonSignals.LOAD_END)) {
             return;
           }
-          const {width, height} = boundingClientRect;
+          const {height, width} = boundingClientRect;
           if (!Criteria.meetsAll(candidate, width, height)) {
             return;
           }

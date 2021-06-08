@@ -30,13 +30,12 @@ import {
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
+import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {
-  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
@@ -102,7 +101,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     /** @private {number} */
     this.currentTime_ = 0;
 
-    /** @private {Array<(Array<number>|null)>} */
+    /** @private {Array<?Array<number>>} */
     this.playedRanges_ = [];
 
     /** @private {?function()} */
@@ -185,7 +184,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    const {win, playlistItem_} = this;
+    const {playlistItem_, win} = this;
     if (win.MediaMetadata && playlistItem_['meta']) {
       try {
         return new win.MediaMetadata(playlistItem_['meta']);
@@ -348,15 +347,9 @@ class AmpJWPlayer extends AMP.BaseElement {
     if (!this.element.hasAttribute('data-media-id')) {
       return;
     }
-    const placeholder = this.win.document.createElement('amp-img');
+    const placeholder = this.win.document.createElement('img');
     this.propagateAttributes(['aria-label'], placeholder);
-    placeholder.setAttribute(
-      'src',
-      'https://content.jwplatform.com/thumbs/' +
-        encodeURIComponent(this.contentid_) +
-        '-720.jpg'
-    );
-    placeholder.setAttribute('layout', 'fill');
+    this.applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {
@@ -367,6 +360,13 @@ class AmpJWPlayer extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading video');
     }
+    placeholder.setAttribute('loading', 'lazy');
+    placeholder.setAttribute(
+      'src',
+      'https://content.jwplatform.com/thumbs/' +
+        encodeURIComponent(this.contentid_) +
+        '-720.jpg'
+    );
     return placeholder;
   }
 
@@ -445,7 +445,7 @@ class AmpJWPlayer extends AMP.BaseElement {
           }
           break;
         case 'meta':
-          const {metadataType, duration} = detail;
+          const {duration, metadataType} = detail;
           if (metadataType === 'media') {
             this.duration_ = duration;
           }

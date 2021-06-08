@@ -15,7 +15,7 @@
  */
 
 import '../amp-jwplayer';
-import * as utils from '../../../../src/dom';
+import * as fullscreen from '../../../../src/core/dom/fullscreen';
 import {VideoEvents} from '../../../../src/video-interface';
 import {htmlFor} from '../../../../src/static-template';
 
@@ -219,7 +219,7 @@ describes.realWin(
       });
 
       it('can enter fullscreen', () => {
-        const spy = env.sandbox.spy(utils, 'fullscreenEnter');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenEnter');
         const messageSpy = env.sandbox.spy(impl, 'sendCommand_');
         impl.fullscreenEnter();
         if (impl.isSafariOrIos_()) {
@@ -229,7 +229,7 @@ describes.realWin(
       });
 
       it('can exit fullscreen', () => {
-        const spy = env.sandbox.spy(utils, 'fullscreenExit');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenExit');
         const messageSpy = env.sandbox.spy(impl, 'sendCommand_');
 
         impl.fullscreenExit();
@@ -352,13 +352,14 @@ describes.realWin(
           'data-media-id': 'Wferorsv',
           'data-player-id': 'sDZEo0ea',
         });
-        const img = jw.querySelector('amp-img');
+        const img = jw.querySelector('img');
         expect(img).to.not.be.null;
         expect(img.getAttribute('src')).to.equal(
           'https://content.jwplatform.com/thumbs/Wferorsv-720.jpg'
         );
-        expect(img.getAttribute('layout')).to.equal('fill');
-        expect(img.hasAttribute('placeholder')).to.be.true;
+        expect(img).to.have.class('i-amphtml-fill-content');
+        expect(img).to.have.attribute('placeholder');
+        expect(img.getAttribute('loading')).to.equal('lazy');
         expect(img.getAttribute('referrerpolicy')).to.equal('origin');
         expect(img.getAttribute('alt')).to.equal('Loading video');
       });
@@ -368,7 +369,7 @@ describes.realWin(
           'data-player-id': 'sDZEo0ea',
           'aria-label': 'interesting video',
         });
-        const img = jw.querySelector('amp-img');
+        const img = jw.querySelector('img');
         expect(img).to.not.be.null;
         expect(img.getAttribute('aria-label')).to.equal('interesting video');
         expect(img.getAttribute('alt')).to.equal(
@@ -380,7 +381,7 @@ describes.realWin(
           'data-playlist-id': 'Wferorsv',
           'data-player-id': 'sDZEo0ea',
         });
-        const img = jw.querySelector('amp-img');
+        const img = jw.querySelector('img');
         expect(img).to.be.null;
       });
     });

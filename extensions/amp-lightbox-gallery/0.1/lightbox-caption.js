@@ -107,9 +107,9 @@ export class LightboxCaption {
    * @return {!OverflowState} state
    */
   getOverflowState() {
-    return /** @type {OverflowState} */ (this.scrollContainer_.getAttribute(
-      'i-amphtml-lbg-caption-state'
-    ));
+    return /** @type {OverflowState} */ (
+      this.scrollContainer_.getAttribute('i-amphtml-lbg-caption-state')
+    );
   }
 
   /**
@@ -143,7 +143,7 @@ export class LightboxCaption {
    *    current state is toggled.
    */
   toggleOverflow(requestExpansion) {
-    const {scrollContainer_, overflowMask_} = this;
+    const {overflowMask_, scrollContainer_} = this;
     let descriptionOverflows;
 
     const measureOverflowState = () => {

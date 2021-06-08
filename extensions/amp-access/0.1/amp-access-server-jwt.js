@@ -25,7 +25,7 @@ import {
 } from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/core/types';

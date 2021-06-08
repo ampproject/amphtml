@@ -16,7 +16,7 @@
 const esbuild = require('esbuild');
 const globby = require('globby');
 const path = require('path');
-const {cyan, green} = require('kleur/colors');
+const {cyan, green} = require('../common/colors');
 const {endBuildStep} = require('../tasks/helpers');
 const {exec} = require('../common/exec');
 const {log} = require('../common/logging');
@@ -25,7 +25,8 @@ const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
 const CONFIG_PATH = `${SERVER_TRANSFORM_PATH}/tsconfig.json`;
 
 /**
- * Builds the new server by converting typescript transforms to JS
+ * Builds the new server by converting typescript transforms to JS. This JS
+ * output is not type-checked as part of `amp check-build-system`.
  * @return {Promise<void>}
  */
 async function buildNewServer() {
@@ -41,12 +42,16 @@ async function buildNewServer() {
     entryPoints,
     outdir: path.join(SERVER_TRANSFORM_PATH, 'dist'),
     bundle: false,
+    banner: {js: '// @ts-nocheck'},
     tsconfig: CONFIG_PATH,
     format: 'cjs',
   });
   endBuildStep('Built', 'AMP Server', startTime);
 }
 
+/**
+ * Checks all types in the generated output after running server transforms.
+ */
 function typecheckNewServer() {
   const cmd = `npx -p typescript tsc --noEmit -p ${CONFIG_PATH}`;
   const result = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
