@@ -230,8 +230,8 @@ describes.realWin(
       element = html`
         <amp-soundcloud
           data-trackid="243169232"
-          width="1080"
-          height="610"
+          width="480"
+          height="340"
           layout="responsive"
         ></amp-soundcloud>
       `;

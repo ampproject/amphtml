@@ -47,7 +47,6 @@ BaseElement['props'] = {
   'color': {attr: 'data-color'},
   'height': {attr: 'height'},
   'heights': {attr: 'heights'},
-  'layout': {attr: 'layout'},
   'media': {attr: 'media'},
   'playlistId': {attr: 'data-playlistid'},
   'secretToken': {attr: 'data-secret-token'},

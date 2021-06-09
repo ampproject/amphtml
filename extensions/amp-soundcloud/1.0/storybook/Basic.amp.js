@@ -43,11 +43,11 @@ export const TrackId = () => {
   return (
     <amp-soundcloud
       color={hex}
-      width="100%"
-      height={height}
-      layout="fixed-height"
       data-trackid={trackid}
       data-visual={visual}
+      height={height}
+      layout="fixed-height"
+      width="auto"
     />
   );
 };
@@ -70,6 +70,7 @@ export const PlaylistId = () => {
       data-visual={visual}
       height={height}
       layout="fixed-height"
+      width="auto"
     />
   );
 };
@@ -91,21 +92,21 @@ export const MediaQuery = () => {
     <div>
       <amp-soundcloud
         color={hex}
-        width="466"
-        height="355"
-        layout="responsive"
-        media={media1}
         data-trackid={trackid1}
         data-visual={visual}
+        height="240"
+        layout="fixed"
+        media={media1}
+        width="240"
       />
       <amp-soundcloud
         color={hex}
-        width="527"
-        height="193"
-        layout="responsive"
-        media={media2}
         data-trackid={trackid2}
         data-visual={visual}
+        height="180"
+        layout="responsive"
+        media={media2}
+        width="180"
       />
     </div>
   );
@@ -125,12 +126,12 @@ export const ResponsiveLayout = () => {
   return (
     <amp-soundcloud
       color={hex}
-      width="520"
+      data-trackid={trackid}
+      data-visual={visual}
       height="340"
       layout="responsive"
       sizes={sizes}
-      data-trackid={trackid}
-      data-visual={visual}
+      width="520"
     />
   );
 };

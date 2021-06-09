@@ -73,7 +73,7 @@ export function Soundcloud({
     /** Unmount Procedure */
     return () => {
       // Pause widget
-      iframeRef.current.contentWindow./*OK*/ postMessage(
+      iframeRef.current?.contentWindow?./*OK*/ postMessage(
         JSON.stringify(dict({'method': 'pause'})),
         'https://w.soundcloud.com'
       );

@@ -28,10 +28,7 @@ export default {
 export const track = () => {
   // Knobs
   const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
-  const height = text('Height', '180');
-  const width = text('Width', '100%');
   const trackid = text('Track ID', '864765493');
-  const layout = text('Layout', 'fixed-height');
   const visual = boolean('Visual', true);
 
   // Convert RGBA to HEX (without Alpha Channel)
@@ -41,20 +38,18 @@ export const track = () => {
   return (
     <Soundcloud
       color={hex}
-      height={height}
-      width={width}
-      layout={layout}
+      height="240"
+      layout="fixed-height"
       trackId={trackid}
-      visual={'"' + visual + '"'}
+      visual={visual ? 'true' : 'false'}
     />
   );
 };
 
 export const playlist = () => {
   // Knobs
-  const playlistid = text('Playlist ID', '151584683');
-  const height = text('height', '480');
   const componentColor = color('color', 'RGBA(255, 85, 0, 1)');
+  const playlistid = text('Playlist ID', '151584683');
   const visual = boolean('Visual', true);
 
   // Convert RGBA to HEX (without Alpha Channel)
@@ -64,10 +59,10 @@ export const playlist = () => {
   return (
     <Soundcloud
       color={hex}
-      height={height}
+      height="240"
       layout="fixed-height"
       playlistId={playlistid}
-      visual={'"' + visual + '"'}
+      visual={visual ? 'true' : 'false'}
     />
   );
 };

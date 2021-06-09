@@ -24,7 +24,6 @@ var SoundcloudDef = {};
  *   color: string,
  *   height: number,
  *   heights: (string|undefined),
- *   layout: string,
  *   media: (string|undefined),
  *   playlistId: (string|undefined),
  *   secretToken: (string|undefined),
