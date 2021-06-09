@@ -44,9 +44,9 @@ let RotationItemDef;
  * @type {Array<RotationItemDef>}
  */
 const timeRotationUtc = [
-  [/* wed */ 3, 'Africa/Europe/western Asia', '16:30'],
-  [/* wed */ 3, 'Americas', '21:00'],
-  [/* thu */ 4, 'Asia/Oceania', '01:00'],
+  [/* wed */ 3, '16:30', 'Africa/Europe/western Asia'],
+  [/* wed */ 3, '21:00', 'Americas'],
+  [/* thu */ 4, '01:00', 'Asia/Oceania'],
 ];
 
 const timeRotationStart = new Date('2021-04-14');
@@ -351,7 +351,7 @@ const timeZ = (yyyy, mm, dd, hours, minutes) =>
 function getNextIssueData() {
   const upcomingWeekday = addDays(new Date(), generateWeeksFromNow * 7);
 
-  const [dayOfWeek, region, timeUtcNoDst] = getRotation(
+  const [dayOfWeek, timeUtcNoDst, region] = getRotation(
     upcomingWeekday,
     timeRotationStart
   );
