@@ -42,16 +42,16 @@
       </amp-story-page>
 
     </amp-story>
-    <!-- For easily toggling experiment in demos without copy pasting into inspector. -->
+    <!-- For toggling experiment in demos without copy pasting into inspector. -->
     <button id="expToggle" onclick="
-      console.log('test')
       AMP.toggleExperiment('amp-story-desktop-one-panel');
-      this.innerHTML = `one panel on: ` +  AMP.isExperimentOn('amp-story-desktop-one-panel');
+      location.reload();
     "></button>
   </body>
   <script>
-    setTimeout(() => {
-      expToggle.innerHTML = "one panel on: " + AMP.isExperimentOn('amp-story-desktop-one-panel');
-    },1000)
+    // Indicate whether experiment is on.
+    document.addEventListener('ampstory:load', () => {
+      expToggle.innerHTML = "amp-story-desktop-one-panel active: " + AMP.isExperimentOn('amp-story-desktop-one-panel');
+    });
   </script>
 </html>
