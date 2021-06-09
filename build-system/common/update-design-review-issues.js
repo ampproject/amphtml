@@ -44,12 +44,12 @@ let RotationItemDef;
  * @type {Array<RotationItemDef>}
  */
 const timeRotationUtc = [
+  [/* wed */ 3, 'Africa/Europe/western Asia', '16:30'],
   [/* wed */ 3, 'Americas', '21:00'],
   [/* thu */ 4, 'Asia/Oceania', '01:00'],
-  [/* wed */ 3, 'Africa/Europe/western Asia', '16:30'],
 ];
 
-const timeRotationStart = new Date('2021-03-31');
+const timeRotationStart = new Date('2021-04-14');
 
 // All previous weeks have already been handled.
 const generateWeeksFromNow = 3;
