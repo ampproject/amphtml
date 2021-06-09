@@ -243,10 +243,10 @@ export class AmpRender extends BaseElement {
             () => {
               containerHeight = this.element.querySelector(
                 '[i-amphtml-rendered]'
-              )./* OK */ scrollHeight;
+              )./*OK*/ scrollHeight;
             },
             () => {
-              this.attemptChangeHeight(containerHeight)
+              return this.attemptChangeHeight(containerHeight)
                 .then(() => {
                   this.togglePlaceholder(false);
                   setStyles(this.element, {

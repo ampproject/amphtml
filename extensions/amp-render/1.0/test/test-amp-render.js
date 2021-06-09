@@ -119,12 +119,9 @@ describes.realWin(
     });
 
     it('renders json from src', async () => {
-      const fetchStub = env.sandbox.stub(
-        BatchedJsonModule,
-        'batchFetchJsonFor'
-      );
-
-      fetchStub.resolves({name: 'Joe'});
+      const fetchStub = env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
 
       element = html`
         <amp-render
@@ -142,6 +139,35 @@ describes.realWin(
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe');
       expect(fetchStub).to.have.been.calledOnce;
+    });
+
+    it('renders json with layout=container', async () => {
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+
+      fetchStub.resolves({name: 'Joe'});
+
+      const mutatorStub = env.sandbox
+        .stub(Services, 'mutatorForDoc')
+        .callThrough();
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          layout="container"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Hello Joe');
+      expect(fetchStub).to.have.been.calledOnce;
+      expect(mutatorStub).to.be.called;
     });
 
     it('renders from amp-script', async () => {
