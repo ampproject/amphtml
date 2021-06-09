@@ -39,7 +39,23 @@ const controlsPanel = {
   },
 };
 
+const lightbox = {
+  '&$showControls $control': {
+    animationTimingFunction: 'ease-in',
+    animationName: '$fadeIn',
+  },
+  '&$hideControls $control': {
+    animationTimingFunction: 'linear',
+    animationName: '$fadeOut',
+  },
+};
+
+const showControls = {};
+const hideControls = {};
+
 const control = {
+  animationFillMode: 'forwards',
+  animationDuration: '400ms',
   position: 'absolute !important',
   boxSizing: 'content-box',
   cursor: 'pointer !important',
@@ -87,13 +103,30 @@ const arrow = {
 };
 
 const JSS = {
+  '@keyframes fadeIn': {
+    from: {opacity: 0},
+    to: {
+      opacity: 1,
+      visibility: 'visible',
+    },
+  },
+  '@keyframes fadeOut': {
+    from: {opacity: 1},
+    to: {
+      opacity: 0,
+      visibility: 'hidden',
+    },
+  },
   arrow,
   closeButton,
   control,
   controlsPanel,
+  hideControls,
+  lightbox,
   gallery,
   nextArrow,
   prevArrow,
+  showControls,
   topControl,
 };
 

@@ -48,6 +48,7 @@ export function LightboxGalleryProvider({children, render}) {
     },
   };
 
+  const [showControls, setShowControls] = useState(true);
   const renderElements = useCallback(() => {
     renderers.current.forEach((render, index) => {
       if (!lightboxElements.current[index]) {
@@ -59,8 +60,15 @@ export function LightboxGalleryProvider({children, render}) {
   return (
     <>
       <Lightbox
+        className={objStr({
+          [classes.lightbox]: true,
+          [classes.showControls]: showControls,
+          [classes.hideControls]: !showControls,
+        })}
         closeButtonAs={CloseButtonIcon}
         onBeforeOpen={() => renderElements()}
+        onAfterOpen={() => setShowControls(true)}
+        onClick={() => setShowControls(!showControls)}
         ref={lightboxRef}
       >
         <div className={classes.controlsPanel}></div>
