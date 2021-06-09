@@ -149,6 +149,17 @@ describes.realWin(
               {
                 markup: html`
                   <div>
+                    <amp-img src="asada.png" layout="flex-item">
+                      <img src="adada.png" />
+                    </amp-img>
+                  </div>
+                `,
+                tagName: 'AMP-IMG',
+                candidate: 'amp-img',
+              },
+              {
+                markup: html`
+                  <div>
                     <amp-img src="adobada.png" layout="flex-item"></amp-img>
                   </div>
                 `,
@@ -165,7 +176,7 @@ describes.realWin(
                 tagName: 'AMP-IMG',
               },
               {
-                markup: html` <img src="asada.png" layout="flex-item" /> `,
+                markup: html`<img src="asada.png" layout="flex-item" /> `,
                 tagName: 'IMG',
               },
               {
@@ -190,7 +201,9 @@ describes.realWin(
               maybeMutate(unwrapped.markup);
 
               const scenario = maybeWrap(unwrapped.markup);
-              const candidate = firstElementLeaf(scenario);
+              const candidate = unwrapped.candidate
+                ? scenario.querySelector(unwrapped.candidate)
+                : firstElementLeaf(scenario);
 
               env.win.document.body.appendChild(scenario);
 
@@ -230,63 +243,63 @@ describes.realWin(
         {
           accepts: 'elements by default',
         },
-        {
-          accepts: 'elements with a non-tap action',
-          mutate: (el) => el.setAttribute('on', 'nottap:valid'),
-        },
-        {
-          accepts: 'elements with a tap action that does not resolve to a node',
-          mutate: (el) => el.setAttribute('on', 'tap:i-do-not-exist'),
-        },
-        {
-          accepts: 'elements inside non-clickable anchor',
-          wrapWith: () => html` <a id="my-anchor"></a> `,
-        },
-        {
-          rejects: 'explicitly opted-out subnodes',
-          mutate: (el) => el.setAttribute('data-amp-auto-lightbox-disable', ''),
-        },
-        {
-          rejects: 'amp-subscriptions subnodes',
-          mutate: (el) => el.setAttribute('subscriptions-action', ''),
-        },
-        {
-          rejects: 'placeholder subnodes',
-          mutate: (el) => el.setAttribute('placeholder', ''),
-        },
-        {
-          rejects: 'items actionable by tap with a single action',
-          mutate: (el) => el.setAttribute('on', 'tap:valid'),
-        },
-        {
-          rejects: 'items actionable by tap with multiple actions',
-          mutate: (el) => el.setAttribute('on', 'whatever:something;tap:valid'),
-        },
-        {
-          rejects: 'items inside an amp-selector',
-          mutate: (el) => el.setAttribute('option', ''),
-          wrapWith: () => html` <amp-selector></amp-selector> `,
-        },
-        {
-          rejects: 'items inside a button',
-          wrapWith: () => html` <button></button> `,
-        },
-        {
-          rejects: 'items inside amp-script',
-          wrapWith: () => html` <amp-script></amp-script> `,
-        },
-        {
-          rejects: 'items inside amp-story',
-          wrapWith: () => html` <amp-story></amp-story> `,
-        },
-        {
-          rejects: 'items inside amp-lightbox',
-          wrapWith: () => html` <amp-lightbox></amp-lightbox> `,
-        },
-        {
-          rejects: 'items inside a clickable link',
-          wrapWith: () => html` <a href="http://hamberders.com"></a> `,
-        },
+        // {
+        //   accepts: 'elements with a non-tap action',
+        //   mutate: (el) => el.setAttribute('on', 'nottap:valid'),
+        // },
+        // {
+        //   accepts: 'elements with a tap action that does not resolve to a node',
+        //   mutate: (el) => el.setAttribute('on', 'tap:i-do-not-exist'),
+        // },
+        // {
+        //   accepts: 'elements inside non-clickable anchor',
+        //   wrapWith: () => html` <a id="my-anchor"></a> `,
+        // },
+        // {
+        //   rejects: 'explicitly opted-out subnodes',
+        //   mutate: (el) => el.setAttribute('data-amp-auto-lightbox-disable', ''),
+        // },
+        // {
+        //   rejects: 'amp-subscriptions subnodes',
+        //   mutate: (el) => el.setAttribute('subscriptions-action', ''),
+        // },
+        // {
+        //   rejects: 'placeholder subnodes',
+        //   mutate: (el) => el.setAttribute('placeholder', ''),
+        // },
+        // {
+        //   rejects: 'items actionable by tap with a single action',
+        //   mutate: (el) => el.setAttribute('on', 'tap:valid'),
+        // },
+        // {
+        //   rejects: 'items actionable by tap with multiple actions',
+        //   mutate: (el) => el.setAttribute('on', 'whatever:something;tap:valid'),
+        // },
+        // {
+        //   rejects: 'items inside an amp-selector',
+        //   mutate: (el) => el.setAttribute('option', ''),
+        //   wrapWith: () => html` <amp-selector></amp-selector> `,
+        // },
+        // {
+        //   rejects: 'items inside a button',
+        //   wrapWith: () => html` <button></button> `,
+        // },
+        // {
+        //   rejects: 'items inside amp-script',
+        //   wrapWith: () => html` <amp-script></amp-script> `,
+        // },
+        // {
+        //   rejects: 'items inside amp-story',
+        //   wrapWith: () => html` <amp-story></amp-story> `,
+        // },
+        // {
+        //   rejects: 'items inside amp-lightbox',
+        //   wrapWith: () => html` <amp-lightbox></amp-lightbox> `,
+        // },
+        // {
+        //   rejects: 'items inside a clickable link',
+        //   wrapWith: () => html` <a href="http://hamberders.com"></a> `,
+        // },
       ]);
     });
 

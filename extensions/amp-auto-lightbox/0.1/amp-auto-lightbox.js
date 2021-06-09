@@ -141,8 +141,11 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsTreeShapeCriteria(element, ampdoc) {
-    if (element.parentNode?.tagName === 'AMP-IMG') {
-      // Images that are a direct child of an AMP-IMG do not need additional treatment.
+    if (
+      element.tagName === 'IMG' &&
+      closestAncestorElementBySelector('AMP-IMG')
+    ) {
+      // Images that are a child of an AMP-IMG do not need additional treatment.
       return false;
     }
 
