@@ -339,8 +339,6 @@ AmpConfigType.prototype.geoApiUrl;
 
 /** @type {!AmpConfigType} */
 window.AMP_CONFIG;
-/** @type {undefined|!Object<string, number>} */
-window.AMP_EXP;
 
 window.AMP_CONTEXT_DATA;
 
