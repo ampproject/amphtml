@@ -471,14 +471,10 @@ async function closeStaleIssues(token, repo, issuesWithSessionDate) {
   // Compensate duration so that we swap only once the session has ended.
   now.setHours(now.getHours() - sessionDurationHours);
 
-  // We may run matching a session's end by the minute, add to prevent off-by-one.
-  now.setMinutes(now.getMinutes() + 1);
+  // We may run matching a session's end by the minute, this prevents off-by-one.
+  now.setSeconds(Math.max(1, now.getSeconds()));
 
-  console./*OK*/ log(
-    'Closing issues for sessions before',
-    now.toISOString(),
-    '...'
-  );
+  console./*OK*/ log('Session close cutoff:', now);
 
   const issues = issuesWithSessionDate.filter(
     ({sessionDate}) => sessionDate < now.getTime()
