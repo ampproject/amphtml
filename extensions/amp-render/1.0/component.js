@@ -20,7 +20,6 @@ import {forwardRef} from '../../../src/preact/compat';
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useImperativeHandle,
   useState,
 } from '../../../src/preact';
@@ -83,7 +82,7 @@ export function RenderWithRef(
     return () => {
       cancelled = true;
     };
-  }, [getJson, src, onError]);
+  }, [getJson, src, onError, onLoading]);
 
   const refresh = useCallback(() => {
     onRefresh?.();

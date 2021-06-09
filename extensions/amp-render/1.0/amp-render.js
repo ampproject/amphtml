@@ -20,13 +20,12 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {computedStyle, setStyles} from '../../../src/style';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {computedStyle, setStyle, setStyles} from '../../../src/style';
-import {Layout} from '../../../src/layout';
-import {measureIntersection} from '../../../src/utils/intersection';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -116,8 +115,6 @@ export class AmpRender extends BaseElement {
 
     /** @private {?string} */
     this.src_ = null;
-
-    this.heightPromise_ = null;
   }
 
   /**
@@ -246,7 +243,7 @@ export class AmpRender extends BaseElement {
             () => {
               containerHeight = this.element.querySelector(
                 '[i-amphtml-rendered]'
-              ).scrollHeight;
+              )./* OK */ scrollHeight;
             },
             () => {
               this.attemptChangeHeight(containerHeight)
