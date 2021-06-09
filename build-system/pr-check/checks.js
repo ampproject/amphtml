@@ -50,6 +50,7 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp check-sourcemaps');
   timedExecOrDie('amp performance-urls');
   timedExecOrDie('amp check-analytics-vendors-list');
+  timedExecOrDie('amp check-update-design-review-issues');
   timedExecOrDie('amp check-video-interface-list');
   timedExecOrDie('amp get-zindex');
   timedExecOrDie('amp markdown-toc');
@@ -90,6 +91,7 @@ async function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.BUILD_SYSTEM)) {
     timedExecOrDie('amp check-build-system');
+    timedExecOrDie('amp check-update-design-review-issues');
   }
 
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {

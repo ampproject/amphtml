@@ -560,9 +560,18 @@ async function updateDesignReviewIssues(token, repo) {
   await closeStalePinUpcoming(token, repo, existing);
 }
 
-updateDesignReviewIssues(env('GITHUB_TOKEN'), env('GITHUB_REPOSITORY')).catch(
-  (e) => {
-    console./*OK*/ error(e);
-    process.exit(1);
-  }
-);
+if (require.main === module) {
+  updateDesignReviewIssues(env('GITHUB_TOKEN'), env('GITHUB_REPOSITORY')).catch(
+    (e) => {
+      console./*OK*/ error(e);
+      process.exit(1);
+    }
+  );
+}
+
+module.exports = {
+  DayOfWeekDef,
+  RotationItemDef,
+  timeRotationUtc,
+  sessionDurationHours,
+};
