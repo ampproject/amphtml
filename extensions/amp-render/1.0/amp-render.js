@@ -219,7 +219,7 @@ export class AmpRender extends BaseElement {
           return;
         }
         if (!this.getPlaceholder()) {
-          user().warn(TAG, 'placeholder required with layout="container"');
+          user().error(TAG, 'placeholder required with layout="container"');
           return;
         }
 
