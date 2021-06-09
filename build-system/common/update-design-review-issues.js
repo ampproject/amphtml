@@ -339,7 +339,7 @@ function getRotation(nextDay, start) {
 }
 
 const timeZ = (yyyy, mm, dd, hours, minutes) =>
-  `${yyyy + mm + dd}T${leadingZero(hours) + leadingZero(minutes)}Z`;
+  `${yyyy + mm + dd}T${leadingZero(hours) + leadingZero(minutes)}00Z`;
 
 /**
  * @return {Object}
