@@ -204,18 +204,7 @@ export class AmpRender extends BaseElement {
       }
       api.refresh();
     });
-    /*
-    // onDataReady
-this.clippedHeightPromise_ = measureIntersection(this.element)
-  .then(({boundingClientRect}) => {
-    setStyles(...)
-  })
 
-// onReady
-this.clippedHeightPromise_.then(() => {
-  setStyles(...)
-})
-*/
     return dict({
       'ariaLiveValue': hasAriaLive
         ? this.element.getAttribute('aria-live')
@@ -232,30 +221,38 @@ this.clippedHeightPromise_.then(() => {
           user().warn(TAG, 'placeholder required with layout="container"');
           return;
         }
+
+        const height = computedStyle(
+          this.getAmpDoc().win,
+          this.element
+        ).getPropertyValue('height');
+        setStyles(this.element, {
+          'overflow': 'hidden',
+          'height': height,
+        });
+
         // measureIntersection(this.element).then(({boundingClientRect}) => {
-        //   console.log(boundingClientRect.height, '**********');
+        //   console.log(boundingClientRect, '**********');
         //   setStyles(this.element, {
         //     'overflow': 'hidden',
         //     'height': boundingClientRect.height,
         //   });
         // });
 
-        let height;
-        this.measureMutateElement(
-          () => {
-            height = computedStyle(
-              this.getAmpDoc().win,
-              this.element
-            ).getPropertyValue('height');
-          },
-          () => {
-            console.log({height});
-            setStyles(this.element, {
-              'overflow': 'hidden',
-              'height': height,
-            });
-          }
-        );
+        // let height;
+        // this.measureMutateElement(
+        //   () => {
+        //     const computed = computedStyle(this.getAmpDoc().win, this.element);
+        //     height = computed.getPropertyValue('height');
+        //   },
+        //   () => {
+        //     console.log(' setting height to ' + height);
+        //     setStyles(this.element, {
+        //       'overflow': 'hidden',
+        //       'height': height,
+        //     });
+        //   }
+        // );
       },
       'onReady': () => {
         this.toggleLoading(false);

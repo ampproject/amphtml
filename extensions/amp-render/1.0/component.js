@@ -20,7 +20,6 @@ import {forwardRef} from '../../../src/preact/compat';
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useImperativeHandle,
   useState,
 } from '../../../src/preact';
