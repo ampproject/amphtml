@@ -20,7 +20,7 @@
  *
  * https://go.amp.dev/design-reviews
  *
- * A Github Action runs this once a week. See create-design-review-issues.yml
+ * A Github Action runs this once a week. See update-design-review-issues.yml
  */
 
 /*
@@ -40,7 +40,9 @@ const sessionDurationHours = 1;
 let RotationItemDef;
 
 /**
- * Times in this rotation are adjusted according to Daylight Savings
+ * Times in this rotation are adjusted according to Daylight Savings.
+ * If these are updated, the schedule on update-design-review-issues.yml should
+ * also be updated correspondingly.
  * @type {Array<RotationItemDef>}
  */
 const timeRotationUtc = [
