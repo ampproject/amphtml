@@ -113,17 +113,16 @@ export function RenderWithRef(
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
 
-  const refFn = (node) => {
-    console.log({node, rendered});
-    if (!node?.firstElementChild || !rendered) {
-      return;
-    }
-    // add check if any props changed
-    onDataReady?.();
-    onReady?.();
-  };
-
-  const memoizedRefFn = useCallback(refFn, []);
+  const refFn = useCallback(
+    (node) => {
+      if (!node?.firstElementChild || !rendered) {
+        return;
+      }
+      onDataReady?.();
+      onReady?.();
+    },
+    [rendered, onDataReady, onReady]
+  );
 
   return (
     <Wrapper

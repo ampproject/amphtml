@@ -241,7 +241,7 @@ export class AmpRender extends BaseElement {
         // });
 
         let height;
-        this.measureMutateElement(
+        const promise = this.measureMutateElement(
           () => {
             const computed = computedStyle(this.getAmpDoc().win, this.element);
             height = computed.getPropertyValue('height');
