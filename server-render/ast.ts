@@ -6,7 +6,6 @@ export type Attribute = {
 };
 
 export type NodeProto = {
-  // Within the actual google3 NodeProto, the field is actually "tagId: number".
   tagName: undefined | string;
   value: undefined | string;
   attributes: Array<Attribute>;
