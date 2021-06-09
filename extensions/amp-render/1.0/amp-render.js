@@ -116,6 +116,8 @@ export class AmpRender extends BaseElement {
 
     /** @private {?string} */
     this.src_ = null;
+
+    this.heightPromise_ = null;
   }
 
   /**
@@ -222,14 +224,14 @@ export class AmpRender extends BaseElement {
           return;
         }
 
-        const height = computedStyle(
-          this.getAmpDoc().win,
-          this.element
-        ).getPropertyValue('height');
-        setStyles(this.element, {
-          'overflow': 'hidden',
-          'height': height,
-        });
+        // const height = computedStyle(
+        //   this.getAmpDoc().win,
+        //   this.element
+        // ).getPropertyValue('height');
+        // setStyles(this.element, {
+        //   'overflow': 'hidden',
+        //   'height': height,
+        // });
 
         // measureIntersection(this.element).then(({boundingClientRect}) => {
         //   setStyles(this.element, {
@@ -238,40 +240,48 @@ export class AmpRender extends BaseElement {
         //   });
         // });
 
-        // let height;
-        // this.measureMutateElement(
-        //   () => {
-        //     const computed = computedStyle(this.getAmpDoc().win, this.element);
-        //     height = computed.getPropertyValue('height');
-        //   },
-        //   () => {
-        //     setStyles(this.element, {
-        //       'overflow': 'hidden',
-        //       'height': height,
-        //     });
-        //   }
-        // );
+        let height;
+        this.measureMutateElement(
+          () => {
+            const computed = computedStyle(this.getAmpDoc().win, this.element);
+            height = computed.getPropertyValue('height');
+          },
+          () => {
+            console.log('setStyles overflow:hidden & height:', height);
+            setStyles(this.element, {
+              'overflow': 'hidden',
+              'height': height,
+            });
+          }
+        );
       },
       'onReady': () => {
         this.toggleLoading(false);
-        this.togglePlaceholder(false);
+        // this.togglePlaceholder(false);
         let newHeight;
         this.measureMutateElement(
           () => {
             newHeight = this.element.querySelector(
               '[i-amphtml-rendered]'
             ).scrollHeight;
+            console.log({newHeight});
           },
           () => {
             this.attemptChangeHeight(newHeight)
               .then(() => {
                 console.warn('resize succeded');
+                this.togglePlaceholder(false);
                 setStyles(this.element, {
                   'overflow': '',
                 });
               })
               .catch(() => {
                 console.warn('resize failed');
+                this.togglePlaceholder(false);
+                setStyles(this.element, {
+                  'overflow': 'hidden',
+                  'height': newHeight,
+                });
               });
           }
         );

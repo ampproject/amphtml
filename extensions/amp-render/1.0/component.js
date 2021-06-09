@@ -100,25 +100,6 @@ export function RenderWithRef(
       });
   }, [getJson, src, onReady, onRefresh, onError]);
 
-  // const refFn = useCallback(
-  //   (node) => {
-  //     if (node?.firstElementChild && rendered) {
-  //       // add check if any props changed
-  //       onDataReady?.();
-  //       onReady?.();
-  //     }
-  //   },
-  //   [onDataReady, onReady]
-  // );
-
-  const refFn = (node) => {
-    if (node?.firstElementChild && rendered) {
-      // add check if any props changed
-      onDataReady?.();
-      onReady?.();
-    }
-  };
-
   useImperativeHandle(
     ref,
     () =>
@@ -131,6 +112,18 @@ export function RenderWithRef(
   const rendered = useRenderer(render, data);
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
+
+  const refFn = (node) => {
+    console.log({node, rendered});
+    if (!node?.firstElementChild || !rendered) {
+      return;
+    }
+    // add check if any props changed
+    onDataReady?.();
+    onReady?.();
+  };
+
+  const memoizedRefFn = useCallback(refFn, []);
 
   return (
     <Wrapper
