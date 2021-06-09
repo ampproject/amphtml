@@ -15,7 +15,7 @@
  */
 
 import {AmpFxCollection} from '../amp-fx-collection';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 
 describes.fakeWin(
   'amp-fx-collection',

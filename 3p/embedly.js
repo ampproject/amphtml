@@ -16,7 +16,7 @@
 
 import {hasOwn} from '../src/core/types/object';
 import {loadScript} from './3p';
-import {setStyle} from '../src/style';
+import {setStyle} from '../src/core/dom/style';
 
 /**
  * Embedly platform library url to create cards.

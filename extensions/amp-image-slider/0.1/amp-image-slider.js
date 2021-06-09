@@ -28,7 +28,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {setStyles} from '../../../src/style';
+import {setStyles} from '../../../src/core/dom/style';
 
 export class AmpImageSlider extends AMP.BaseElement {
   /** @param {!AmpElement} element */

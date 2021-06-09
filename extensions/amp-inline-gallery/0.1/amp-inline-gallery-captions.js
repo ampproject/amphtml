@@ -18,7 +18,7 @@ import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {exponentialFalloff} from './amp-inline-gallery-pagination';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setImportantStyles} from '../../../src/style.js';
+import {setImportantStyles} from '../../../src/core/dom/style.js';
 import {userAssert} from '../../../src/log';
 
 export class AmpInlineGalleryCaptions extends AMP.BaseElement {

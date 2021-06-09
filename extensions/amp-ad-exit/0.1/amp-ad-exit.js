@@ -30,10 +30,11 @@ import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
-import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
+import {isJsonScriptTag} from '../../../src/core/dom';
 import {isObject} from '../../../src/core/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseJson} from '../../../src/core/types/object/json';
 import {parseUrlDeprecated} from '../../../src/url';
 

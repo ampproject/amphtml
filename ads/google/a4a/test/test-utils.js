@@ -43,7 +43,7 @@ import {GEO_IN_GROUP} from '../../../../extensions/amp-geo/0.1/amp-geo-in-group'
 import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '../../../../src/services';
 import {buildUrl} from '../shared/url-builder';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installExtensionsService} from '../../../../src/service/extensions-impl';

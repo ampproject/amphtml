@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as dom from '../../../../src/dom';
+import * as openWindowDialog from '../../../../src/open-window-dialog';
 import * as service from '../../../../src/service';
 import {
   Action,
@@ -402,7 +402,10 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         'https://googleads.g.doubleclick.net/pagead/images/mtad/ad_choices_blue.png'
       );
 
-      const openWindowDialogStub = env.sandbox.stub(dom, 'openWindowDialog');
+      const openWindowDialogStub = env.sandbox.stub(
+        openWindowDialog,
+        'openWindowDialog'
+      );
       attribution.click();
       expect(openWindowDialogStub).to.be.calledOnce;
       expect(openWindowDialogStub).to.be.calledWithExactly(

@@ -30,7 +30,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {rethrowAsync} from '../../../src/core/error';
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';

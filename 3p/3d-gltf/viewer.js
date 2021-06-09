@@ -16,7 +16,7 @@
 
 /* global THREE */
 
-import {setStyle} from '../../src/style';
+import {setStyle} from '../../src/core/dom/style';
 import AnimationLoop from './animation-loop';
 
 const CAMERA_DISTANCE_FACTOR = 1;

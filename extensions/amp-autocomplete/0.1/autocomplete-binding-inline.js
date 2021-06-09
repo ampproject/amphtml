@@ -15,7 +15,7 @@
  */
 
 import {ownProperty} from '../../../src/core/types/object';
-import {tryFocus} from '../../../src/dom';
+import {tryFocus} from '../../../src/core/dom';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-autocomplete';

@@ -25,7 +25,7 @@ import {LightboxGalleryContext} from '../../amp-lightbox-gallery/1.0/context';
 import {debounce} from '../../../src/core/types/function';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/core/math';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 import {toWin} from '../../../src/core/window';
 import {
   useCallback,

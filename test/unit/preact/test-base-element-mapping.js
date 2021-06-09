@@ -17,8 +17,8 @@
 import * as Preact from '../../../src/preact/index';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Slot} from '../../../src/preact/slot';
-import {createElementWithAttributes} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
+import {createElementWithAttributes} from '../../../src/core/dom';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {omit} from '../../../src/core/types/object';
 import {testElementR1} from '../../../testing/element-v1';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';

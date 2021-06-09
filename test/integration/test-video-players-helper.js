@@ -25,9 +25,9 @@ import {
   expectBodyToBecomeVisible,
   poll,
 } from '../../testing/iframe';
-import {detectIsAutoplaySupported} from '../../src/utils/video';
+import {detectIsAutoplaySupported} from '../../src/core/dom/video';
 import {getData, listenOncePromise} from '../../src/event-helper';
-import {removeElement} from '../../src/dom';
+import {removeElement} from '../../src/core/dom';
 import {toggleExperiment} from '../../src/experiments';
 
 function skipIfAutoplayUnsupported(win) {

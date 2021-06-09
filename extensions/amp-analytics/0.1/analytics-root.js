@@ -22,7 +22,7 @@ import {
   scopedQuerySelector,
 } from '../../../src/core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes} from '../../../src/core/dom';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/core/types';
 import {isExperimentOn} from '../../../src/experiments';

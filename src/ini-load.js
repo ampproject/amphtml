@@ -16,7 +16,7 @@
 
 import {READY_SCAN_SIGNAL} from './service/resources-interface';
 import {Services} from './services';
-import {isIframed} from './dom';
+import {isIframed} from './core/dom';
 
 /** @const {!Array<string>} */
 const EXCLUDE_INI_LOAD = [

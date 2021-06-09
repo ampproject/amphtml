@@ -26,7 +26,7 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/core/dom/query';
 import {dev, userAssert} from '../../../src/log';
-import {isConnectedNode, isRTL, tryFocus} from '../../../src/dom';
+import {isConnectedNode, isRTL, tryFocus} from '../../../src/core/dom';
 import {mod} from '../../../src/core/math';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {toArray} from '../../../src/core/types/array';

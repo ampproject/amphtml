@@ -20,7 +20,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {toggleAttribute} from '../../../src/dom';
+import {toggleAttribute} from '../../../src/core/dom';
 
 const _CONTROL_HIDE_ATTRIBUTE = 'i-amphtml-carousel-hide-buttons';
 const _HAS_CONTROL_CLASS = 'i-amphtml-carousel-has-controls';

@@ -16,7 +16,7 @@
 
 import {LOCAL_STORAGE_KEY, getHistoryState, setHistoryState} from '../history';
 import {loadPromise} from '../../../../src/event-helper';
-import {removeElement} from '../../../../src/dom';
+import {removeElement} from '../../../../src/core/dom';
 
 describes.realWin('amp-story history', {}, (env) => {
   let clock;

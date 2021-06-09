@@ -15,7 +15,7 @@
  */
 
 import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
-import {iterateCursor} from '../../../src/dom';
+import {iterateCursor} from '../../../src/core/dom';
 
 /**
  *

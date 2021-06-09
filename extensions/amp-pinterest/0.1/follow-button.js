@@ -16,7 +16,7 @@
 
 import {Util} from './util';
 import {assertHttpsUrl} from '../../../src/url';
-import {openWindowDialog} from '../../../src/dom';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 import {tryResolve} from '../../../src/core/data-structures/promise';
 
 import {userAssert} from '../../../src/log';

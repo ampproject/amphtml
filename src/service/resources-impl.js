@@ -28,7 +28,7 @@ import {dev, devAssert} from '../log';
 import {dict} from '../core/types/object';
 import {expandLayoutRect} from '../core/math/layout-rect';
 import {getSourceUrl} from '../url';
-import {hasNextNodeInDocumentOrder} from '../dom';
+import {hasNextNodeInDocumentOrder} from '../core/dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error-reporting';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as dom from './dom';
+import * as dom from './core/dom';
 import {extensionScriptInNode} from './service/extension-script';
 import {
   getAmpdoc,

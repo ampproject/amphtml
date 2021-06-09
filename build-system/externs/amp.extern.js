@@ -1091,9 +1091,6 @@ class FeaturePolicy {
   getAllowlistForFeature(feature) {}
 }
 
-/** @type {boolean} */
-HTMLVideoElement.prototype.playsInline;
-
 /**
  * Going through the standardization process now.
  *
@@ -1102,9 +1099,6 @@ HTMLVideoElement.prototype.playsInline;
  * @param {string} cssText
  */
 CSSStyleSheet.prototype.replaceSync = function (cssText) {};
-
-/** @type {?function(!MediaQueryListEvent)} */
-MediaQueryList.prototype.onchange;
 
 /** @type {!Array<!CSSStyleSheet>|undefined} */
 ShadowRoot.prototype.adoptedStyleSheets;

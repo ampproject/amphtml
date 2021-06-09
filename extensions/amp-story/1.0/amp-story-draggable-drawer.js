@@ -28,11 +28,15 @@ import {closest} from '../../../src/core/dom/query';
 import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '../../../src/static-template';
-import {isAmpElement} from '../../../src/dom';
+import {htmlFor} from '../../../src/core/dom/static-template';
+import {isAmpElement} from '../../../src/amp-element-helpers';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {listen} from '../../../src/event-helper';
-import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
+import {
+  resetStyles,
+  setImportantStyles,
+  toggle,
+} from '../../../src/core/dom/style';
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;

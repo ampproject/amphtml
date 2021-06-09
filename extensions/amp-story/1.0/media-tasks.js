@@ -16,7 +16,7 @@
 
 import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
 import {Sources} from './sources';
-import {isConnectedNode} from '../../../src/dom';
+import {isConnectedNode} from '../../../src/core/dom';
 
 /**
  * The name for a boolean property on an element indicating whether that element

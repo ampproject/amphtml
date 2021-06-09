@@ -27,7 +27,7 @@ import {
   stubElementsForDoc,
   upgradeOrRegisterElement,
 } from '../../src/service/custom-element-registry';
-import {createElementWithAttributes} from '../../src/dom';
+import {createElementWithAttributes} from '../../src/core/dom';
 import {getImplSyncForTesting} from '../../src/custom-element';
 
 describes.realWin('CustomElement register', {amp: true}, (env) => {

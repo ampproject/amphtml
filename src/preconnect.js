@@ -21,7 +21,7 @@
 
 import {Services} from './services';
 import {dev} from './log';
-import {htmlFor} from './static-template';
+import {htmlFor} from './core/dom/static-template';
 import {parseUrlDeprecated} from './url';
 import {registerServiceBuilder} from './service';
 import {whenDocumentComplete} from './core/document-ready';

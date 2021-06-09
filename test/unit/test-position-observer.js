@@ -20,7 +20,7 @@ import {PositionObserverFidelity} from '../../src/service/position-observer/posi
 import {Services} from '../../src/services';
 import {layoutRectLtwh} from '../../src/core/math/layout-rect';
 import {macroTask} from '../../testing/yield';
-import {setStyles} from '../../src/style';
+import {setStyles} from '../../src/core/dom/style';
 
 describes.realWin('PositionObserver', {amp: 1}, (env) => {
   let win;

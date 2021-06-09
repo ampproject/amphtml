@@ -28,7 +28,7 @@ import {
   safeframeListener,
 } from '../safeframe-host';
 import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 
 /**
  * We're allowing external resources because otherwise using realWin causes

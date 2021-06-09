@@ -28,7 +28,7 @@ import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
   createElementWithAttributes,
-} from '../../../../src/dom';
+} from '../../../../src/core/dom';
 import {forceExperimentBranch} from '../../../../src/experiments';
 import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 import {toWin} from '../../../../src/core/window';

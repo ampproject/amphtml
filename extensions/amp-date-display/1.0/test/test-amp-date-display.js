@@ -19,7 +19,7 @@ import '../amp-date-display';
 import {expect} from 'chai';
 import {user} from '../../../../src/log';
 import {waitFor} from '../../../../testing/test-helper.js';
-import {whenUpgradedToCustomElement} from '../../../../src/dom';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(
   'amp-date-display 1.0',

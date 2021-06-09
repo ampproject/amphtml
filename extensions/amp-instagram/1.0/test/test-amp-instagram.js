@@ -15,7 +15,7 @@
  */
 
 import '../amp-instagram';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';

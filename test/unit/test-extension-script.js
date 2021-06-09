@@ -20,7 +20,7 @@ import {
   getExtensionScripts,
   parseExtensionUrl,
 } from '../../src/service/extension-script';
-import {createElementWithAttributes} from '../../src/dom';
+import {createElementWithAttributes} from '../../src/core/dom';
 import {initLogConstructor, resetLogConstructorForTesting} from '../../src/log';
 
 describes.sandboxed('Extension Location', {}, () => {

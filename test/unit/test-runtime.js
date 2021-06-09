@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as dom from '../../src/dom';
+import * as dom from '../../src/core/dom';
 import * as ext from '../../src/service/extensions-impl';
 import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';

@@ -15,7 +15,7 @@
  */
 
 import * as events from '../../../src/event-helper';
-import {isJsonLdScriptTag} from '../../../src/dom';
+import {isJsonLdScriptTag} from '../../../src/core/dom';
 import {toArray} from '../../../src/core/types/array';
 import {tryParseJson} from '../../../src/core/types/object/json';
 

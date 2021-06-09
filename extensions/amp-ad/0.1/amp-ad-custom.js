@@ -24,7 +24,7 @@ import {
   closestAncestorElementBySelector,
 } from '../../../src/core/dom/query';
 import {hasOwn} from '../../../src/core/types/object';
-import {removeChildren} from '../../../src/dom';
+import {removeChildren} from '../../../src/core/dom';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} Tag name for custom ad implementation. */

@@ -23,9 +23,9 @@ import {
 import {Slot} from '../../../src/preact/slot';
 import {forwardRef} from '../../../src/preact/compat';
 import {getSchedulerForDoc} from '../../../src/service/scheduler';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {installResizeObserverStub} from '../../../testing/resize-observer-stub';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {subscribe} from '../../../src/context';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 import {useAmpContext, useLoading} from '../../../src/preact/context';

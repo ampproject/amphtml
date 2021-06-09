@@ -34,7 +34,7 @@ import {
 } from '../../../../src/core/dom/query';
 import {dev, devAssert, userAssert} from '../../../../src/log';
 
-import {iterateCursor} from '../../../../src/dom';
+import {iterateCursor} from '../../../../src/core/dom';
 import {map} from '../../../../src/core/types/object';
 import {
   srcsetFromElement,

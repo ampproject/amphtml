@@ -48,7 +48,7 @@ import {getSourceOrigin} from '../../../src/url';
 
 import {renderAsElement} from './simple-template';
 
-import {setImportantStyles} from '../../../src/style';
+import {setImportantStyles} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 
 /** @private @const {string} */

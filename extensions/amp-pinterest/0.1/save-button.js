@@ -16,7 +16,7 @@
 import {Services} from '../../../src/services';
 import {Util} from './util';
 import {dev, userAssert} from '../../../src/log';
-import {openWindowDialog} from '../../../src/dom';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 
 import {toWin} from '../../../src/core/window';
 

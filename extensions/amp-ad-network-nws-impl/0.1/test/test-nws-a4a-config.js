@@ -19,7 +19,7 @@ import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {AmpAdNetworkNwsImpl} from '../amp-ad-network-nws-impl';
 import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 
 describes.fakeWin('amp-ad-network-nws-impl', {amp: true}, (env) => {
   let win, doc, element, impl, preloadExtensionSpy;

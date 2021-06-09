@@ -19,10 +19,10 @@ import {Services} from './services';
 import {TickLabel} from './core/constants/enums';
 import {dev, devAssert} from './log';
 import {getAmpdoc} from './service';
-import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
+import {insertAfterOrAtStart, waitForBodyOpenPromise} from './core/dom';
 import {map} from './core/types/object';
 import {rethrowAsync} from './core/error';
-import {setStyles} from './style';
+import {setStyles} from './core/dom/style';
 import {waitForServices} from './render-delaying-services';
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';

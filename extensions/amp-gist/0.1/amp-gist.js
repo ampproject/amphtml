@@ -31,7 +31,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 
 export class AmpGist extends AMP.BaseElement {
   /** @param {!AmpElement} element */

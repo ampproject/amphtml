@@ -21,7 +21,7 @@
 
 import * as closure from '../../../third_party/closure-responding-channel/closure-bundle';
 import {Services} from '../../../src/services';
-import {addAttributesToElement} from '../../../src/dom';
+import {addAttributesToElement} from '../../../src/core/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {

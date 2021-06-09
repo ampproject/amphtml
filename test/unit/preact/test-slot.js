@@ -23,7 +23,7 @@ import {
 } from '../../../src/context/contextprops';
 import {Slot, createSlot, useSlotContext} from '../../../src/preact/slot';
 import {WithAmpContext} from '../../../src/preact/context';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {createRef, useLayoutEffect, useRef} from '../../../src/preact';
 import {forwardRef} from '../../../src/preact/compat';
 import {mount} from 'enzyme';

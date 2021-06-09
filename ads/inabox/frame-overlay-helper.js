@@ -22,8 +22,8 @@ import {
   centerFrameUnderVsyncMutate,
   collapseFrameUnderVsyncMutate,
   expandFrameUnderVsyncMutate,
-} from '../../src/full-overlay-frame-helper';
-import {resetStyles, setImportantStyles} from '../../src/style';
+} from './full-overlay-frame-helper';
+import {resetStyles, setImportantStyles} from '../../src/core/dom/style';
 import {restrictedVsync, timer} from './util';
 
 const CENTER_TRANSITION_TIME_MS = 150;

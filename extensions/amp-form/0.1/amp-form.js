@@ -50,7 +50,7 @@ import {
   iterateCursor,
   removeElement,
   tryFocus,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';

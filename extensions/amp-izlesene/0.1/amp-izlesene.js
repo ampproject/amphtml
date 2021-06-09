@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes} from '../../../src/core/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
 

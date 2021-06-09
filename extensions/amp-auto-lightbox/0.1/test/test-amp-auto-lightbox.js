@@ -34,8 +34,8 @@ import {
 } from '../amp-auto-lightbox';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/core/data-structures/signals';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
+import {createElementWithAttributes} from '../../../../src/core/dom';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {isArray} from '../../../../src/core/types';
 import {tryResolve} from '../../../../src/core/data-structures/promise';
 

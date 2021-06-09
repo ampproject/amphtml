@@ -22,7 +22,7 @@ import {Wrapper} from '../../../src/preact/component';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
 import {getSocialConfig} from './social-share-config';
-import {openWindowDialog} from '../../../src/dom';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseQueryString} from '../../../src/core/types/string/url';
 import {useResourcesNotify} from '../../../src/preact/utils';
 import {useStyles} from './social-share.jss';

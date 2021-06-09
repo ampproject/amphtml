@@ -22,14 +22,12 @@ import {AmpList} from '../amp-list';
 import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
 import {Deferred} from '../../../../src/core/data-structures/promise';
 import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {
   resetExperimentTogglesForTesting,
   toggleExperiment,
 } from '../../../../src/experiments';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.repeated(
   'amp-list',

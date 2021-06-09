@@ -27,7 +27,7 @@ import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {InlineGalleryEvents} from './inline-gallery-events';
 import {Layout} from '../../../src/layout';
 import {getDetail} from '../../../src/event-helper';
-import {iterateCursor} from '../../../src/dom';
+import {iterateCursor} from '../../../src/core/dom';
 import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
