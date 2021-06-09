@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "gulp": "4.0.2",
-    "mocha": "8.4.0"
+    "mocha": "9.0.0"
   },
   "scripts": {
     "test": " ./node_modules/mocha/bin/mocha",

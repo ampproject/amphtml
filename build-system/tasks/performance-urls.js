@@ -57,5 +57,4 @@ module.exports = {
   performanceUrls,
 };
 
-performanceUrls.description =
-  "Check validity of performance task config's urls";
+performanceUrls.description = 'Validite config urls for the performance task';

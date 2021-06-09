@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-import {FacebookBaseElement} from '../../amp-facebook/1.0/facebook-base-element';
+import {isExperimentOn} from '../../../src/experiments';
 
-export class BaseElement extends FacebookBaseElement {}
-
-/** @override */
-BaseElement['props'] = {
-  ...FacebookBaseElement['props'],
-  'action': {attr: 'data-action'},
-  'colorscheme': {attr: 'data-colorscheme'},
-  'kdSite': {attr: 'data-kd_site'},
-  'layout': {attr: 'data-layout'},
-  'refLabel': {attr: 'data-ref'},
-  'share': {attr: 'data-share'},
-  'size': {attr: 'data-size'},
-};
-
-/** @override */
-BaseElement['staticProps'] = {
-  'embedAs': 'like',
+/**
+ * Returns true if desktop one panel experiment is enabled.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export const isDesktopOnePanelExperimentOn = (win) => {
+  return isExperimentOn(win, 'amp-story-desktop-one-panel');
 };
