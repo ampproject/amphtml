@@ -6,18 +6,11 @@ export type Attribute = {
 };
 
 export type NodeProto = {
-  // TODO: can tagid be a string instead of a number?
-  tagid: undefined | number;
+  // Within the actual google3 NodeProto, the field is actually "tagId: number".
+  tagName: undefined | string;
   value: undefined | string;
   attributes: Array<Attribute>;
   children: Array<NodeProto>;
-
-  // TODO: do we need these?
-  num_terms: undefined | number;
-  position: undefined | number;
-  end_position: undefined | number;
-  hover_styles: undefined | string;
-  non_hover_styles_override: undefined | string;
 };
 
 export type TreeProto = {
