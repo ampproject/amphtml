@@ -20,6 +20,7 @@ import {forwardRef} from '../../../src/preact/compat';
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useImperativeHandle,
   useState,
 } from '../../../src/preact';
@@ -85,7 +86,7 @@ export function RenderWithRef(
     return () => {
       cancelled = true;
     };
-  }, [getJson, src, onLoading, onReady, onError]);
+  }, [getJson, src, onError]);
 
   const refresh = useCallback(() => {
     onRefresh?.();
@@ -99,8 +100,18 @@ export function RenderWithRef(
       });
   }, [getJson, src, onReady, onRefresh, onError]);
 
+  // const refFn = useCallback(
+  //   (node) => {
+  //     if (node?.firstElementChild && rendered) {
+  //       // add check if any props changed
+  //       onDataReady?.();
+  //       onReady?.();
+  //     }
+  //   },
+  //   [onDataReady, onReady]
+  // );
+
   const refFn = (node) => {
-    // use useCallBack
     if (node?.firstElementChild && rendered) {
       // add check if any props changed
       onDataReady?.();

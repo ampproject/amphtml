@@ -232,7 +232,6 @@ export class AmpRender extends BaseElement {
         });
 
         // measureIntersection(this.element).then(({boundingClientRect}) => {
-        //   console.log(boundingClientRect, '**********');
         //   setStyles(this.element, {
         //     'overflow': 'hidden',
         //     'height': boundingClientRect.height,
@@ -246,7 +245,6 @@ export class AmpRender extends BaseElement {
         //     height = computed.getPropertyValue('height');
         //   },
         //   () => {
-        //     console.log(' setting height to ' + height);
         //     setStyles(this.element, {
         //       'overflow': 'hidden',
         //       'height': height,
