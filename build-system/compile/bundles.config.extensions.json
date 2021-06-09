@@ -363,7 +363,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -873,7 +874,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
@@ -1092,7 +1094,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   },
   {
