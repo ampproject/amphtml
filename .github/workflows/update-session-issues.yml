@@ -1,4 +1,4 @@
-name: Update Design Review Issues
+name: Update Session Issues
 
 on:
   # This schedule should match the time rotation configured on
@@ -11,13 +11,16 @@ on:
     - cron: '0 1,2 * * 4' # Asia/Oceania
 
 jobs:
-  update-design-review-issues:
+  update-session-issues:
     if: github.repository == 'ampproject/amphtml'
-    name: Update Design Review Issues
+    name: Update Session Issues
     runs-on: ubuntu-latest
     steps:
-      - name: Update Design Review Issues
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Update Session Issues
         run: |
-          wget -q -O - "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/common/update-design-review-issues.js" | node
+          node ./build-system/common/update-session-issues
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
