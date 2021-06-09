@@ -246,7 +246,7 @@ this.clippedHeightPromise_.then(() => {
             height = computedStyle(
               this.getAmpDoc().win,
               this.element
-            ).getPropertyValue('value');
+            ).getPropertyValue('height');
           },
           () => {
             console.log({height});
