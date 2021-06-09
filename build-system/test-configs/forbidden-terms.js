@@ -605,23 +605,6 @@ const forbiddenTermsGlobal = {
       'src/service/resources-impl.js',
     ],
   },
-  '__AMP_EXP': {
-    message:
-      'Do not access __AMP_EXP directly. Use isExperimentOn() to access config',
-    allowlist: [
-      'src/experiments/index.js',
-      'src/experiments/experiments.extern.js',
-    ],
-  },
-  'AMP_EXP': {
-    message:
-      'Do not access AMP_EXP directly. Use isExperimentOn() to access config',
-    allowlist: [
-      'build-system/externs/amp.extern.js',
-      'src/experiments/index.js',
-      'src/experiments/experiments.extern.js',
-    ],
-  },
   'AMP_CONFIG': {
     message:
       'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
@@ -643,6 +626,7 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/helpers.js',
       'src/config.js',
       'src/experiments/index.js',
+      'src/experiments/shame.extern.js',
       'src/mode.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'testing/init-tests.js',
