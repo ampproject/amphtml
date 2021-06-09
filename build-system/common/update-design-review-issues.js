@@ -332,14 +332,9 @@ function addDays(date, days = 1) {
  * @return {RotationItemDef}
  */
 function getRotation(nextDay, start) {
-  const dateBeginningOfDay = new Date(
-    nextDay.getFullYear(),
-    nextDay.getMonth(),
-    nextDay.getDate()
-  );
   const weeks = Math.round(
     // @ts-ignore date calc
-    (dateBeginningOfDay - start) / (7 * 24 * 60 * 60 * 1000)
+    (nextDay - start) / (7 * 24 * 60 * 60 * 1000)
   );
   return timeRotationUtc[weeks % timeRotationUtc.length];
 }
