@@ -75,9 +75,7 @@ export function RenderWithRef(
     getJson(src)
       .then((data) => {
         if (!cancelled) {
-          // onDataReady?.();
           setData(data);
-          // onReady?.();
         }
       })
       .catch((e) => {

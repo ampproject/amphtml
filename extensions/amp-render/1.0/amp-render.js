@@ -224,30 +224,15 @@ export class AmpRender extends BaseElement {
           return;
         }
 
-        // const height = computedStyle(
-        //   this.getAmpDoc().win,
-        //   this.element
-        // ).getPropertyValue('height');
-        // setStyles(this.element, {
-        //   'overflow': 'hidden',
-        //   'height': height,
-        // });
-
-        // measureIntersection(this.element).then(({boundingClientRect}) => {
-        //   setStyles(this.element, {
-        //     'overflow': 'hidden',
-        //     'height': boundingClientRect.height,
-        //   });
-        // });
-
         let height;
-        const promise = this.measureMutateElement(
+        this.measureMutateElement(
           () => {
-            const computed = computedStyle(this.getAmpDoc().win, this.element);
-            height = computed.getPropertyValue('height');
+            height = computedStyle(
+              this.getAmpDoc().win,
+              this.element
+            ).getPropertyValue('height');
           },
           () => {
-            console.log('setStyles overflow:hidden & height:', height);
             setStyles(this.element, {
               'overflow': 'hidden',
               'height': height,
@@ -257,31 +242,23 @@ export class AmpRender extends BaseElement {
       },
       'onReady': () => {
         this.toggleLoading(false);
-        // this.togglePlaceholder(false);
-        let newHeight;
+        let containerHeight;
         this.measureMutateElement(
           () => {
-            newHeight = this.element.querySelector(
+            containerHeight = this.element.querySelector(
               '[i-amphtml-rendered]'
             ).scrollHeight;
-            console.log({newHeight});
           },
           () => {
-            this.attemptChangeHeight(newHeight)
+            this.attemptChangeHeight(containerHeight)
               .then(() => {
-                console.warn('resize succeded');
                 this.togglePlaceholder(false);
                 setStyles(this.element, {
                   'overflow': '',
                 });
               })
               .catch(() => {
-                console.warn('resize failed');
                 this.togglePlaceholder(false);
-                setStyles(this.element, {
-                  'overflow': 'hidden',
-                  'height': newHeight,
-                });
               });
           }
         );

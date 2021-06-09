@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8" />
+    <title>My AMP Page</title>
+    <link rel="canonical" href="self.html" />
+    <meta name="viewport" content="width=device-width" />
+    <noscript
+      ><style amp-boilerplate>
+        body {
+          -webkit-animation: none;
+          -moz-animation: none;
+          -ms-animation: none;
+          animation: none;
+        }
+      </style></noscript
+    >
+    <style amp-custom>
+      h1 {
+        margin: 1rem;
+      }
+    </style>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script
+      async
+      custom-element="amp-bind"
+      src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"
+    ></script>
+    <script
+      async
+      custom-template="amp-mustache"
+      src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-render"
+      src="https://cdn.ampproject.org/v0/amp-render-1.0.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-list"
+      src="https://cdn.ampproject.org/v0/amp-list-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-script"
+      src="https://cdn.ampproject.org/v0/amp-script-0.1.js"
+    ></script>
+    <script>
+       (self.AMP = self.AMP || []).push(function (AMP) {
+            AMP.toggleExperiment('amp-render', true);
+         });
+    </script>
+    <!-- prettier-ignore -->
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
+    <style amp-custom>
+      .product .image-placeholder {
+        width: 150px;
+        height: 100px;
+        background-color: #999;
+      }
+    </style>
+  </head>
+  <body>
+
+    <amp-render
+      id="my-amp-render"
+      layout="container"
+      src="https://amp.dev/documentation/examples/api/slow-json-with-items?delay=2000"
+      [src]="srcUrl"
+      style="border:1px red solid;"
+    >
+      <template type="amp-mustache">
+        {{#items}}
+        <div class="product" tabindex="0">
+          <div>
+            <div>{{name}}</div>
+            <div>{{{stars}}}</div>
+            <div>${{price}}</div>
+          </div>
+        </div>
+        {{/items}}
+      </template>
+      <div placeholder>
+        <div class="product">
+          <div class="image-placeholder"></div>
+          <h1>This component will not resize</h1>
+        </div>
+      </div>
+      <h1 fallback>Failed!</h1>
+    </amp-render>
+
+    <button on="tap:AMP.setState({srcUrl: 'https://amp.dev/documentation/examples/api/slow-json-with-items/?delay=3000'})">Update</button>
+    <button on="tap:my-amp-render.refresh">Refresh list</button>
+
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt, placeat repellat? Quasi atque, tenetur fuga aliquam deleniti aut molestias! Fuga laborum sed maiores et tenetur, tempora quos in harum nostrum!
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt, placeat repellat? Quasi atque, tenetur fuga aliquam deleniti aut molestias! Fuga laborum sed maiores et tenetur, tempora quos in harum nostrum!
+    </p>
+
+    <amp-render
+      id="my-amp-render2"
+      layout="container"
+      src="https://amp.dev/documentation/examples/api/slow-json-with-items?delay=2000"
+      style="border:1px red solid;"
+    >
+      <template type="amp-mustache">
+        {{#items}}
+        <div class="product" tabindex="0">
+          <div>
+            <div>{{name}}</div>
+            <div>{{{stars}}}</div>
+            <div>${{price}}</div>
+          </div>
+        </div>
+        {{/items}}
+      </template>
+      <div placeholder>
+        <div class="product">
+          <div class="image-placeholder"></div>
+          <h1>This component will resize to fit its content</h1>
+        </div>
+      </div>
+      <h1 fallback>Failed!</h1>
+    </amp-render>
+
+    </body>
+    </html>
