@@ -474,6 +474,12 @@ async function closeStaleIssues(token, repo, issuesWithSessionDate) {
   // We may run matching a session's end by the minute, add to prevent off-by-one.
   now.setMinutes(now.getMinutes() + 1);
 
+  console./*OK*/ log(
+    'Closing issues for sessions before',
+    now.toISOString(),
+    '...'
+  );
+
   const issues = issuesWithSessionDate.filter(
     ({sessionDate}) => sessionDate < now.getTime()
   );
