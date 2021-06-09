@@ -89,7 +89,7 @@ export const MediaQuery = () => {
 
   // Render Preact Component
   return (
-    <div>
+    <>
       <amp-soundcloud
         color={hex}
         data-trackid={trackid1}
@@ -108,7 +108,7 @@ export const MediaQuery = () => {
         media={media2}
         width="180"
       />
-    </div>
+    </>
   );
 };
 
