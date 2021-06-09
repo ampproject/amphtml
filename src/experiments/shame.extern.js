@@ -46,10 +46,3 @@ let getTopWindow$$module$src$service;
 
 /** @type {function(string):!JsonObject} */
 let parseQueryString$$module$src$url;
-
-/** @type {?} */
-window.AMP_CONFIG;
-/** @type {boolean|undefined} */
-window.AMP_CONFIG.canary;
-/** @type {string|undefined} */
-window.AMP_CONFIG.type;
