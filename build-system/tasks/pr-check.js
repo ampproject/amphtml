@@ -146,7 +146,7 @@ module.exports = {
   prCheck,
 };
 
-prCheck.description = 'Runs a subset of the CI checks against local changes.';
+prCheck.description = 'Run almost all CI checks against the local branch';
 prCheck.flags = {
-  'nobuild': 'Skips building the runtime via `amp dist`.',
+  'nobuild': 'Skip building the runtime',
 };
