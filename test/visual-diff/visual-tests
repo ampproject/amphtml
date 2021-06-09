@@ -150,7 +150,7 @@
       "loading_complete_selectors": [".login-section"]
     },
     {
-      # TODO(#34792, kristoferbaxter): See issue for details.
+      // TODO(#34792, kristoferbaxter): See issue for details.
       "flaky": true,
       "url": "examples/visual-tests/font.amp/font.amp.html",
       "name": "Fonts",
