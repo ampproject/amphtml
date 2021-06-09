@@ -6,12 +6,9 @@ on:
   # Times correspond to session end, and additionally 1 hour earlier to account
   # for Daylight Savings.
   schedule:
-    # Africa/Europe/western Asia
-    - cron: '30 16,17 * * 3'
-    # Americas
-    - cron: '00 21,22 * * 3'
-    # Asia/Oceania
-    - cron: '00 01,02 * * 4'
+    - cron: '30 16,17 * * 3' # Africa/Europe/western Asia
+    - cron: '00 21,22 * * 3' # Americas
+    - cron: '00 01,02 * * 4' # Asia/Oceania
 
 jobs:
   update-design-review-issues:
