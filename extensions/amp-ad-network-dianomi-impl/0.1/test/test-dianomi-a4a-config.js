@@ -18,11 +18,10 @@
 import '../../../amp-ad/0.1/amp-ad-ui';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {AmpAdNetworkDianomiImpl} from '../amp-ad-network-dianomi-impl';
-import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.fakeWin('amp-ad-network-dianomi-impl', {amp: true}, (env) => {
-  let win, doc, element, impl, preloadExtensionSpy;
+  let win, doc, element, impl;
 
   beforeEach(() => {
     win = env.win;
@@ -33,8 +32,6 @@ describes.fakeWin('amp-ad-network-dianomi-impl', {amp: true}, (env) => {
     });
     doc.body.appendChild(element);
     impl = new AmpAdNetworkDianomiImpl(element);
-    const extensions = Services.extensionsFor(impl.win);
-    preloadExtensionSpy = env.sandbox.spy(extensions, 'preloadExtension');
   });
 
   describe('#getAdUrl', () => {
