@@ -20,6 +20,7 @@ tags: {  # amp-twitter
   extension_spec: {
     name: "amp-twitter"
     version: "0.1"
+    version: "1.0"
     version: "latest"
     requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
