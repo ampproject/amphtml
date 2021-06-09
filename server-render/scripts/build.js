@@ -17,7 +17,7 @@ const esbuild = require('esbuild');
 const path = require('path');
 
 esbuild.buildSync({
-  entryPoints: [path.join(__dirname, '..', 'index.ts')],
+  entryPoints: [path.join(__dirname, '..', 'src', 'index.ts')],
   format: 'esm',
   bundle: true,
   outdir: path.join(__dirname, '..', 'dist'),
