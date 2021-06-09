@@ -320,6 +320,8 @@ AmpConfigType.prototype.betaErrorReportingUrl;
 AmpConfigType.prototype.localDev;
 /* @public {string} */
 AmpConfigType.prototype.v;
+/* @public {string} */
+AmpConfigType.prototype.type;
 /* @public {boolean} */
 AmpConfigType.prototype.canary;
 /* @public {string} */
@@ -335,7 +337,7 @@ AmpConfigType.prototype.geoApi;
 /* @public {string} */
 AmpConfigType.prototype.geoApiUrl;
 
-/** @type {!AmpConfigType}  */
+/** @type {!AmpConfigType} */
 window.AMP_CONFIG;
 
 window.AMP_CONTEXT_DATA;

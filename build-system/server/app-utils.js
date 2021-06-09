@@ -17,6 +17,8 @@
 const minimist = require('minimist');
 const {cyan, green} = require('../common/colors');
 const {log} = require('../common/logging');
+const {requireNewServerModule} = require('./typescript-compile');
+const {URL} = require('url');
 
 let serveMode = 'default';
 
@@ -81,93 +83,79 @@ const isRtvMode = (serveMode) => {
 };
 
 /**
- * @param {string} mode
- * @param {string} file
- * @param {string=} hostName
- * @param {boolean=} inabox
+ * @param {string=} pathPattern
+ * @return {RegExp}
+ */
+const getCdnJsRegExp = (pathPattern = '[^\'">]+') =>
+  new RegExp(`(https://cdn\\.ampproject\\.org)/${pathPattern}(\\.m?js)`, 'g');
+
+/**
+ * @param  {string} html
  * @return {string}
  */
-const replaceUrls = (mode, file, hostName, inabox) => {
-  hostName = hostName || '';
-  if (mode == 'default') {
-    // TODO(alanorozco): Match argv.esm in output extension/ and/or allow
-    // `.mjs` to be lazily built regardless of `.mjs`
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\.(m?js)/g,
-      hostName + '/dist/amp.js'
+const toInaboxDocument = (html) =>
+  html
+    .replace(/<html [^>]*>/, '<html amp4ads>')
+    .replace(getCdnJsRegExp('v0'), '$1/amp4ads-v0$2');
+
+/**
+ * @param {URL} url
+ * @return {string}
+ */
+const getHrefWithoutHost = ({host, href, protocol}) =>
+  // 2 slashes // between protocol and host
+  href.substr(protocol.length + 2 + host.length);
+
+/**
+ * @param {string} mode
+ * @param {string} html
+ * @param {string} hostName
+ * @param {boolean} useMaxNames
+ * @return {string}
+ */
+function replaceCdnJsUrls(mode, html, hostName, useMaxNames) {
+  const {CDNURLToRTVURL, replaceCDNURLPath} =
+    /** @type {import('./new-server/transforms/utilities/cdn')} */ (
+      requireNewServerModule('utilities/cdn')
     );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/shadow-v0\.(m?js)/g,
-      hostName + '/dist/amp-shadow.js'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.(m?js)/g,
-      hostName + '/dist/amp-inabox.js'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.(m?js)/g,
-      hostName + '/dist/video-iframe-integration.js'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?)\.(m?js)/g,
-      hostName + '/dist/v0/$1.max.js'
-    );
-    if (inabox) {
-      const filename = '/dist/amp-inabox.js';
-      file = file.replace(/<html [^>]*>/, '<html amp4ads>');
-      file = file.replace(/\/dist\/amp\.(m?js)/g, filename);
+
+  const pathnames = undefined; // we don't override the mapping, optional arg
+  const isRtv = isRtvMode(mode);
+
+  // TODO(alanorozco): Match --esm in output extension and/or allow
+  // `.mjs` to be lazily built regardless of --esm
+  return html.replace(getCdnJsRegExp(), (urlString, _cdnPrefix, extension) => {
+    const url = new URL(urlString);
+    if (isRtv) {
+      return CDNURLToRTVURL(url, mode, pathnames, extension).href;
     }
-  } else if (mode == 'compiled') {
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\.(m?js)/g,
-      hostName + '/dist/v0.$1'
+    const href = getHrefWithoutHost(
+      replaceCDNURLPath(url, pathnames, extension, useMaxNames)
     );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/shadow-v0\.(m?js)/g,
-      hostName + '/dist/shadow-v0.$1'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.(m?js)/g,
-      hostName + '/dist/amp4ads-v0.$1'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.(m?js)/g,
-      hostName + '/dist/video-iframe-integration-v0.$1'
-    );
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?)\.(m?js)/g,
-      hostName + '/dist/v0/$1.$2'
-    );
-    file = file.replace(
-      /\/dist\/v0\/examples\/(.*)\.max\.(m?js)/g,
-      '/dist/v0/examples/$1.$2'
-    );
-    file = file.replace(
+    return hostName + href;
+  });
+}
+
+/**
+ * @param {string} mode
+ * @param {string} html
+ * @param {string=} hostName
+ * @return {string}
+ */
+function replaceUrls(mode, html, hostName = '') {
+  // If you need to add URL mapping logic, please don't do it in this function.
+  // Instead, do so in the `cdn.ts` module required by `replaceCdnJsUrls()`
+
+  const useMaxNames = mode !== 'compiled';
+  if (!useMaxNames) {
+    // TODO(alanorozco): This should be handled in new-server as well.
+    html = html.replace(
       /\/dist.3p\/current\/(.*)\.max.html/g,
       hostName + '/dist.3p/current-min/$1.html'
     );
-
-    if (inabox) {
-      file = file.replace(/\/dist\/v0\.(m?js)/g, '/dist/amp4ads-v0.$1');
-    }
-  } else if (isRtvMode(mode)) {
-    hostName = `https://cdn.ampproject.org/rtv/${mode}/`;
-    file = file.replace(/https:\/\/cdn\.ampproject\.org\//g, hostName);
-
-    if (inabox) {
-      file = file.replace(
-        /https:\/\/cdn\.ampproject\.org\/rtv\/\d{15}\/v0\.(m?js)/g,
-        hostName + 'amp4ads-v0.$1'
-      );
-    }
-  } else if (inabox) {
-    file = file.replace(
-      /https:\/\/cdn\.ampproject\.org\/v0\.(m?js)/g,
-      'https://cdn.ampproject.org/amp4ads-v0.$1'
-    );
   }
-  return file;
-};
+  return replaceCdnJsUrls(mode, html, hostName, useMaxNames);
+}
 
 module.exports = {
   getServeMode,
@@ -175,4 +163,5 @@ module.exports = {
   logServeMode,
   replaceUrls,
   setServeMode,
+  toInaboxDocument,
 };
