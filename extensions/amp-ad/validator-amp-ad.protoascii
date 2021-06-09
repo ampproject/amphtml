@@ -104,7 +104,7 @@ tags: {  # <amp-ad type="custom">
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/main/ads/custom.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/main/ads/vendors/custom.md"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
