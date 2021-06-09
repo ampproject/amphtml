@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import * as dom from '../../../src/dom';
+import * as dom from '../../../src/core/dom';
 import * as query from '../../../src/core/dom/query';
-import * as st from '../../../src/style';
+import * as st from '../../../src/core/dom/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
@@ -40,7 +40,7 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/core/math/layout-rect';
-import {setStyles, toggle} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/core/dom/style';
 import {srcsetFromElement} from '../../../src/core/dom/srcset';
 
 const TAG = 'amp-image-lightbox';

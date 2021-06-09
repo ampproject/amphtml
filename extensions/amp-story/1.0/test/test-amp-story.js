@@ -33,7 +33,7 @@ import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';

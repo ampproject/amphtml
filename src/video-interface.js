@@ -15,7 +15,7 @@
  */
 
 import {dev} from './log';
-import {whenUpgradedToCustomElement} from './dom';
+import {whenUpgradedToCustomElement} from './amp-element-helpers';
 
 export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
 
@@ -176,7 +176,7 @@ export class VideoInterface {
    * implementation of fullscreen (flash for example) then check
    * if Services.platformFor(this.win).isSafari is true and use the internal
    * implementation instead. If not, it is recommended to take the iframe
-   * to fullscreen using fullscreenEnter from dom.js
+   * to fullscreen using fullscreenEnter from src/core/dom/fullscreen.js
    */
   fullscreenEnter() {}
 

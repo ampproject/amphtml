@@ -29,7 +29,7 @@ import {
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Keys} from '../../src/core/constants/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
-import {htmlFor} from '../../src/static-template';
+import {htmlFor} from '../../src/core/dom/static-template';
 import {whenCalled} from '../../testing/test-helper.js';
 
 /**

@@ -29,7 +29,7 @@ import {
   removeFragment,
   serializeQueryString,
 } from '../url';
-import {isIframed} from '../dom';
+import {isIframed} from '../core/dom';
 import {listen} from '../event-helper';
 import {map} from '../core/types/object';
 import {parseQueryString} from '../core/types/string/url';
