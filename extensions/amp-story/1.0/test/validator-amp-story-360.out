@@ -19,7 +19,7 @@ PASS
 |    Tests the validation rules of the amp-story-360 tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <title>amp-story</title>

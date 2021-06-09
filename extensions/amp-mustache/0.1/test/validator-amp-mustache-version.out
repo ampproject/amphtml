@@ -19,7 +19,7 @@ PASS
 |    This tests the logic for <template> tags and mustache variable replacements.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">

@@ -19,7 +19,7 @@ FAIL
 |    This tests validation for the amp-soundcloud tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |      <meta charset="utf-8">
 |      <link rel="canonical" href="amps.html">

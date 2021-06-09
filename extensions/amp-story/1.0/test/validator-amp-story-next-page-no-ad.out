@@ -19,7 +19,7 @@ PASS
 |    Tests for the amp-story tag using next-page-no-ad.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <title>STAMP examples</title>
