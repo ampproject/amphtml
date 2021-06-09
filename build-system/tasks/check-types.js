@@ -42,33 +42,6 @@ const CORE_SRCS_GLOBS = [
 ];
 
 /**
- * Files that pass type-checking but don't belong to a passing directory target.
- * Note: This is a TEMPORARY holding point during the transition to type-safety.
- * @type {!Array<string>}
- */
-const PRIDE_FILES_GLOBS = [
-  ...CORE_SRCS_GLOBS,
-
-  // Runtime
-  'build/amp-loader-0.1.css.js',
-  'build/ampdoc.css.js',
-  'build/ampshared.css.js',
-  'src/config.js',
-  'src/dom.js',
-  'src/format.js',
-  'src/internal-version.js',
-  'src/json.js',
-  'src/log.js',
-  'src/mode.js',
-  'src/types.js',
-
-  // Third Party
-  'third_party/webcomponentsjs/ShadowCSS.js',
-  'node_modules/promise-pjs/package.json',
-  'node_modules/promise-pjs/promise.mjs',
-];
-
-/**
  * Generates a list of source file paths for extensions to type-check
  * Must be run after `maybeInitializeExtensions`
  * @function
@@ -141,16 +114,6 @@ const TYPE_CHECK_TARGETS = {
   'src-web-worker': {
     srcGlobs: ['src/web-worker/**/*.js'],
     warningLevel: 'QUIET',
-  },
-
-  // Opposite of `shame.extern.js`. This target is a catch-all for files that
-  // are currently passing, but whose parent directories are not fully passing.
-  // Adding a file or glob here will cause CI to fail if type errors are
-  // introduced. It is okay to remove a file from this list only when fixing a
-  // bug for cherry-pick.
-  'pride': {
-    srcGlobs: PRIDE_FILES_GLOBS,
-    externGlobs: ['build-system/externs/*.extern.js'],
   },
 
   // Ensures that all files in src and extensions pass the specified set of
