@@ -31,18 +31,25 @@
  */
 const https = require('https');
 
-const dayOfWeek = /* wednesday */ 3; // sunday = 0, monday = 1, ...
+/** @typedef {0|1|2|3|4|5|6} */
+let DayOfWeekDef; // sunday = 0, monday = 1, ...
 
 const sessionDurationHours = 1;
 
-// Times in this rotation are adjusted according to Daylight Savings
+/** @typedef {[DayOfWeekDef, string, string]} */
+let RotationItemDef;
+
+/**
+ * Times in this rotation are adjusted according to Daylight Savings
+ * @type {Array<RotationItemDef>}
+ */
 const timeRotationUtc = [
-  ['Americas', '21:00'],
-  ['Asia/Oceania', '01:00'],
-  ['Africa/Europe/western Asia', '16:30'],
+  [/* wed */ 3, 'Americas', '21:00'],
+  [/* thu */ 4, 'Asia/Oceania', '01:00'],
+  [/* wed */ 3, 'Africa/Europe/western Asia', '16:30'],
 ];
 
-const timeRotationStartYyyyMmDd = '2021-03-31';
+const timeRotationStart = new Date('2021-03-31');
 
 // All previous weeks have already been handled.
 const generateWeeksFromNow = 3;
@@ -308,34 +315,25 @@ function unpinGithubIssue(token, repo, number) {
 
 /**
  * @param {Date} date
- * @param {number} dayOfWeek
- * @param {number=} weeks
+ * @param {number=} days
  * @return {Date}
  */
-function getNextDayOfWeek(date, dayOfWeek, weeks = 1) {
+function addDays(date, days = 1) {
   const resultDate = new Date(date.getTime());
-  resultDate.setDate(
-    resultDate.getDate() +
-      (weeks - 1) * 7 +
-      ((7 + dayOfWeek - date.getDay()) % 7)
-  );
+  resultDate.setDate(resultDate.getDate() + days);
   return resultDate;
 }
 
 /**
- * @param {Date} date
- * @param {string} startYyyyMmDd
- * @return {Array<string>}
+ * @param {Date} nextDay
+ * @param {Date} start
+ * @return {RotationItemDef}
  */
-function getRotation(date, startYyyyMmDd) {
-  const [year, month, day] = startYyyyMmDd
-    .split('-')
-    .map((n) => parseInt(n, 10));
-  const start = new Date(year, month - 1, day);
+function getRotation(nextDay, start) {
   const dateBeginningOfDay = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate()
+    nextDay.getFullYear(),
+    nextDay.getMonth(),
+    nextDay.getDate()
   );
   const weeks = Math.round(
     // @ts-ignore date calc
@@ -353,16 +351,20 @@ const timeZ = (yyyy, mm, dd, hours, minutes) =>
 function getNextIssueData() {
   const today = new Date();
 
-  // if we run on the same day of week, we need to skip one day to calculate
-  // properly
-  today.setDate(today.getDate() + 1);
+  // Since we may run matching a session's end, add 1 to prevent off-by-one.
+  today.setMinutes(today.getMinutes() + 1);
 
-  const nextDay = getNextDayOfWeek(today, dayOfWeek, generateWeeksFromNow);
-  const [region, timeUtcNoDst] = getRotation(
-    nextDay,
-    timeRotationStartYyyyMmDd
+  const upcomingWeekday = addDays(today, generateWeeksFromNow * 7);
+
+  const [dayOfWeek, region, timeUtcNoDst] = getRotation(
+    upcomingWeekday,
+    timeRotationStart
   );
 
+  const nextDay = addDays(
+    upcomingWeekday,
+    dayOfWeek - upcomingWeekday.getDay()
+  );
   const [hoursUnadjusted, minutes] = timeUtcNoDst.split(':').map(Number);
   const hours = hoursUnadjusted - (isDaylightSavingsUsa(nextDay) ? 1 : 0);
 
