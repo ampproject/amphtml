@@ -21,3 +21,6 @@
 
 /** @type {undefined|Object<string, ?string>} */
 window.__AMP_EXPERIMENT_BRANCHES;
+
+/** @type {undefined|HTMLScriptElement} */
+window.__AMP_EXP;
