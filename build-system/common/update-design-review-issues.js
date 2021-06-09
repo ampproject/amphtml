@@ -349,12 +349,7 @@ const timeZ = (yyyy, mm, dd, hours, minutes) =>
  * @return {Object}
  */
 function getNextIssueData() {
-  const today = new Date();
-
-  // Since we may run matching a session's end, add 1 to prevent off-by-one.
-  today.setMinutes(today.getMinutes() + 1);
-
-  const upcomingWeekday = addDays(today, generateWeeksFromNow * 7);
+  const upcomingWeekday = addDays(new Date(), generateWeeksFromNow * 7);
 
   const [dayOfWeek, region, timeUtcNoDst] = getRotation(
     upcomingWeekday,
@@ -475,6 +470,9 @@ async function closeStaleIssues(token, repo, issuesWithSessionDate) {
 
   // Compensate duration so that we swap only once the session has ended.
   now.setHours(now.getHours() - sessionDurationHours);
+
+  // We may run matching a session's end by the minute, add to prevent off-by-one.
+  now.setMinutes(now.getMinutes() + 1);
 
   const issues = issuesWithSessionDate.filter(
     ({sessionDate}) => sessionDate < now.getTime()
