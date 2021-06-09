@@ -162,8 +162,10 @@ export class SessionManager {
       session = constructSessionInfo(
         generateSessionId(),
         Date.now(),
-        newSessionCount,
+        newSessionCount
       );
+    } else if (session.count === undefined) {
+      session.count = 1;
     }
     session.lastAccessTimestamp = Date.now();
     return session;
@@ -224,7 +226,7 @@ function constructSessionFromStoredValue(storedSession) {
     storedSession[SESSION_STORAGE_KEYS.SESSION_ID],
     storedSession[SESSION_STORAGE_KEYS.CREATION_TIMESTAMP],
     storedSession[SESSION_STORAGE_KEYS.COUNT],
-    storedSession[SESSION_STORAGE_KEYS.LAST_ACCESS_TIMESTAMP],
+    storedSession[SESSION_STORAGE_KEYS.LAST_ACCESS_TIMESTAMP]
   );
 }
 
