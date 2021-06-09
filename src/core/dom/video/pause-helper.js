@@ -26,19 +26,20 @@ import {PausableInterface} from './pausable-interface';
  * @extends Element
  * @implements {PausableInterface}
  */
-class PausableElement {
+class PausableElementDef {
+  /** @function */
   pause() {}
 }
 
 export class PauseHelper {
   /**
-   * @param {!PausableElement} element
+   * @param {!PausableElementDef} element
    */
   constructor(element) {
     /**
      * @private
      * @const
-     * @type {!PausableElement}
+     * @type {!PausableElementDef}
      */
     this.element_ = element;
 
