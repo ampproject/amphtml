@@ -19,7 +19,7 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {openWindowDialog} from '../../../src/dom';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseUrlDeprecated} from '../../../src/url';
 import {urls} from '../../../src/config';
 

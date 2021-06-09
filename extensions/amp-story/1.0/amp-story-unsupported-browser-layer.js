@@ -19,7 +19,7 @@ import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from './../../../src/core/types/object';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {renderAsElement} from './simple-template';
 
 /** @const {string} Class for the continue anyway button */

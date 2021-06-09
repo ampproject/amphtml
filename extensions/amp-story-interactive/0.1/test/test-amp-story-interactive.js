@@ -32,7 +32,7 @@ import {Services} from '../../../../src/services';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {dict} from '../../../../src/core/types/object';
 import {getBackendSpecs} from '../interactive-disclaimer';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {measureMutateElementStub} from '../../../../testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';

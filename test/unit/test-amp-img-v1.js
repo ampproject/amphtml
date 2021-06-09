@@ -17,7 +17,10 @@
 import {AmpImg} from '../../builtins/amp-img/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {Layout, LayoutPriority} from '../../src/layout';
-import {createElementWithAttributes, dispatchCustomEvent} from '../../src/dom';
+import {
+  createElementWithAttributes,
+  dispatchCustomEvent,
+} from '../../src/core/dom';
 import {testElementR1} from '../../testing/element-v1';
 
 describes.realWin('amp-img R1', {amp: true}, (env) => {

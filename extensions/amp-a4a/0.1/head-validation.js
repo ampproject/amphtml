@@ -20,7 +20,7 @@ import {includes} from '../../../src/core/types/string';
 import {map} from '../../../src/core/types/object';
 import {parseExtensionUrl} from '../../../src/service/extension-script';
 import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
-import {removeElement, rootNodeFor} from '../../../src/dom';
+import {removeElement, rootNodeFor} from '../../../src/core/dom';
 import {urls} from '../../../src/config';
 
 /**

@@ -15,7 +15,7 @@
  */
 
 import * as MediaQueryProps from '../../../../src/core/dom/media-query-props';
-import * as VideoUtils from '../../../../src/utils/video';
+import * as VideoUtils from '../../../../src/core/dom/video';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
@@ -28,8 +28,8 @@ import {Signals} from '../../../../src/core/data-structures/signals';
 import {
   addAttributesToElement,
   createElementWithAttributes,
-} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
+} from '../../../../src/core/dom';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';
 import {scopedQuerySelectorAll} from '../../../../src/core/dom/query';

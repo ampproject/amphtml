@@ -25,8 +25,8 @@ import {
 import {dev, devAssert} from './log';
 import {escapeCssSelectorIdent} from './core/dom/css-selectors';
 import {installCssTransformer} from './style-installer';
-import {iterateCursor} from './dom';
-import {setInitialDisplay, setStyle} from './style';
+import {iterateCursor} from './core/dom';
+import {setInitialDisplay, setStyle} from './core/dom/style';
 import {toArray} from './core/types/array';
 import {toWin} from './core/window';
 

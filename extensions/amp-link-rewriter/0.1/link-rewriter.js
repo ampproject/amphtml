@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {getConfigOpts} from './config-options';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes} from '../../../src/core/dom';
 import {getScopeElements, isElementInScope} from './scope';
 
 const WL_ANCHOR_ATTR = ['href', 'id', 'rel', 'rev'];

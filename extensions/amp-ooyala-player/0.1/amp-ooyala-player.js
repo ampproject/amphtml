@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {
@@ -24,7 +24,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dispatchCustomEvent, removeElement} from '../../../src/dom';
+import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,

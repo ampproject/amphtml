@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {computedStyle} from '../style';
+import {computedStyle} from '../core/dom/style';
 import {dev} from '../log';
-import {devAssert, devAssertElement} from '../core/assert/dev';
+import {devAssert, devAssertElement} from '../core/assert';
 
 /** @typedef {
  *    function(!Element, !Object<string, string>): *

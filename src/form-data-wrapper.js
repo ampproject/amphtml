@@ -16,7 +16,7 @@
 
 import {Services} from './services';
 import {getFormAsObject, getSubmitButtonUsed} from './form';
-import {iterateCursor} from './dom';
+import {iterateCursor} from './core/dom';
 import {map} from './core/types/object';
 
 /**

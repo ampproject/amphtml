@@ -24,7 +24,7 @@ import {
   scopedQuerySelector,
 } from '../../../src/core/dom/query';
 import {dev, userAssert} from '../../../src/log';
-import {isRTL, tryFocus} from '../../../src/dom';
+import {isRTL, tryFocus} from '../../../src/core/dom';
 
 import {toArray} from '../../../src/core/types/array';
 

@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../core/data-structures/promise';
-import {devAssert, devAssertElement} from '../core/assert/dev';
+import {devAssert, devAssertElement} from '../core/assert';
 import {removeNoScriptElements} from './dom-writer';
 
 /**

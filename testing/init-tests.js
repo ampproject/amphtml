@@ -41,7 +41,7 @@ import {
   warnForConsoleError,
 } from './console-logging-setup';
 import {preventAsyncErrorThrows} from './async-errors';
-import {removeElement} from '../src/dom';
+import {removeElement} from '../src/core/dom';
 import {resetAccumulatedErrorMessagesForTesting} from '../src/error-reporting';
 import {resetEvtListenerOptsSupportForTesting} from '../src/core/dom/event-helper-listen';
 import {resetExperimentTogglesForTesting} from '../src/experiments';

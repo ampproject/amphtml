@@ -18,7 +18,7 @@ import {BaseTemplate} from '../../../src/base-template';
 import {Purifier} from '../../../src/purifier/purifier';
 import {dict} from '../../../src/core/types/object';
 import {getService, registerServiceBuilder} from '../../../src/service';
-import {iterateCursor, templateContentClone} from '../../../src/dom';
+import {iterateCursor, templateContentClone} from '../../../src/core/dom';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {user} from '../../../src/log';
 import mustache from '../../../third_party/mustache/mustache';

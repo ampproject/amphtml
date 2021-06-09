@@ -454,7 +454,7 @@ chromed.run('Bind', {}, function () {
             insertQuerySelectorAttr: useQuerySelector,
           });
 
-          // Makes dom.whenUpgradedToCustomElement() resolve immediately.
+          // Makes whenUpgradedToCustomElement() resolve immediately.
           element.createdCallback = () => {};
 
           const parseAndUpdate = env.sandbox.spy();
@@ -1213,7 +1213,7 @@ chromed.run('Bind', {}, function () {
             insertQuerySelectorAttr: useQuerySelector,
           });
 
-          // Makes dom.whenUpgradedToCustomElement() resolve immediately.
+          // Makes whenUpgradedToCustomElement() resolve immediately.
           element.createdCallback = () => {};
           element.getImpl = () =>
             Promise.resolve({parseAndUpdate: env.sandbox.spy()});

@@ -23,7 +23,11 @@ import {moveLayoutRect} from '../../../src/core/math/layout-rect';
 import {once} from '../../../src/core/types/function';
 import {parseJson} from '../../../src/core/types/object/json';
 import {parseQueryString} from '../../../src/core/types/string/url';
-import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
+import {
+  resetStyles,
+  setInitialDisplay,
+  setStyles,
+} from '../../../src/core/dom/style';
 import {whenDocumentReady} from '../../../src/core/document-ready';
 
 /**

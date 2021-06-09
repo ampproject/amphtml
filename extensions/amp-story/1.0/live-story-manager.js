@@ -17,7 +17,7 @@
 import {Action, getStoreService} from './amp-story-store-service';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {dict} from '../../../src/core/types/object';
 import {lastChildElement} from '../../../src/core/dom/query';
 import {userAssert} from '../../../src/log';

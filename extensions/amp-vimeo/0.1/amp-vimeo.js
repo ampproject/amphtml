@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {
   VIMEO_EVENTS,
@@ -32,10 +32,10 @@ import {
   postMessageWhenAvailable,
   redispatch,
 } from '../../../src/iframe-video';
-import {dispatchCustomEvent, removeElement} from '../../../src/dom';
+import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isAutoplaySupported} from '../../../src/utils/video';
+import {isAutoplaySupported} from '../../../src/core/dom/video';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/core/types/function';
 import {userAssert} from '../../../src/log';

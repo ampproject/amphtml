@@ -15,7 +15,7 @@
  */
 import {devAssert} from '../src/log';
 import {getMode} from './mode';
-import {isIframed} from './dom';
+import {isIframed} from './core/dom';
 import {toWin} from './core/window';
 
 /**

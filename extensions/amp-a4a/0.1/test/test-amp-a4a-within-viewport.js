@@ -21,7 +21,7 @@
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpA4A} from '../amp-a4a';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {pushIfNotExist, removeItem} from '../../../../src/core/types/array';
 import {upgradeOrRegisterElement} from '../../../../src/service/custom-element-registry';
 

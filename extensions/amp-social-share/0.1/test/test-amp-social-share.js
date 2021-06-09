@@ -17,7 +17,7 @@
 import '../amp-social-share';
 import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
-import {tryFocus} from '../../../../src/dom';
+import {tryFocus} from '../../../../src/core/dom';
 
 const STRINGS = {
   'text': 'Hello world',

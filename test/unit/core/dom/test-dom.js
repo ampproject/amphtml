@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import * as dom from '../../src/dom';
-import {BaseElement} from '../../src/base-element';
-import {createAmpElementForTesting} from '../../src/custom-element';
-import {loadPromise} from '../../src/event-helper';
-import {matches} from '../../src/core/dom/query';
-import {setScopeSelectorSupportedForTesting} from '../../src/core/dom/css-selectors';
-import {setShadowDomSupportedVersionForTesting} from '../../src/core/dom/web-components';
+import * as dom from '../../../../src/core/dom';
+import {loadPromise} from '../../../../src/event-helper';
+import {matches} from '../../../../src/core/dom/query';
+import {setScopeSelectorSupportedForTesting} from '../../../../src/core/dom/css-selectors';
+import {setShadowDomSupportedVersionForTesting} from '../../../../src/core/dom/web-components';
 
 describes.sandboxed('DOM', {}, (env) => {
   afterEach(() => {
@@ -443,178 +441,6 @@ describes.sandboxed('DOM', {}, (env) => {
     });
   });
 
-  describe('openWindowDialog', () => {
-    let windowApi;
-    let windowMock;
-
-    beforeEach(() => {
-      windowApi = {
-        open: () => {
-          throw new Error('not mocked');
-        },
-      };
-      windowMock = env.sandbox.mock(windowApi);
-    });
-
-    afterEach(() => {
-      windowMock.verify();
-    });
-
-    it('should return on first success', () => {
-      const dialog = {};
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_blank', 'width=1')
-        .returns(dialog)
-        .once();
-      const res = dom.openWindowDialog(
-        windowApi,
-        'https://example.com/',
-        '_blank',
-        'width=1'
-      );
-      expect(res).to.equal(dialog);
-    });
-
-    it('should retry on first null', () => {
-      const dialog = {};
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_blank', 'width=1')
-        .returns(null)
-        .once();
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_top')
-        .returns(dialog)
-        .once();
-      const res = dom.openWindowDialog(
-        windowApi,
-        'https://example.com/',
-        '_blank',
-        'width=1'
-      );
-      expect(res).to.equal(dialog);
-    });
-
-    it('should retry on first undefined', () => {
-      const dialog = {};
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_blank', 'width=1')
-        .returns(undefined)
-        .once();
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_top')
-        .returns(dialog)
-        .once();
-      const res = dom.openWindowDialog(
-        windowApi,
-        'https://example.com/',
-        '_blank',
-        'width=1'
-      );
-      expect(res).to.equal(dialog);
-    });
-
-    it('should retry on first exception', () => {
-      const dialog = {};
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_blank', 'width=1')
-        .throws(new Error('intentional'))
-        .once();
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_top')
-        .returns(dialog)
-        .once();
-      allowConsoleError(() => {
-        const res = dom.openWindowDialog(
-          windowApi,
-          'https://example.com/',
-          '_blank',
-          'width=1'
-        );
-        expect(res).to.equal(dialog);
-      });
-    });
-
-    it('should return the final result', () => {
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_blank', 'width=1')
-        .returns(undefined)
-        .once();
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_top')
-        .returns(null)
-        .once();
-      const res = dom.openWindowDialog(
-        windowApi,
-        'https://example.com/',
-        '_blank',
-        'width=1'
-      );
-      expect(res).to.be.null;
-    });
-
-    it('should return the final exception', () => {
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_blank', 'width=1')
-        .throws(new Error('intentional1'))
-        .once();
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_top')
-        .throws(new Error('intentional2'))
-        .once();
-      allowConsoleError(() => {
-        expect(() => {
-          dom.openWindowDialog(
-            windowApi,
-            'https://example.com/',
-            '_blank',
-            'width=1'
-          );
-        }).to.throw(/intentional2/);
-      });
-    });
-
-    it('should not retry with noopener set', () => {
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_blank', 'noopener,width=1')
-        .returns(null)
-        .once();
-      const res = dom.openWindowDialog(
-        windowApi,
-        'https://example.com/',
-        '_blank',
-        'noopener,width=1'
-      );
-      expect(res).to.be.null;
-    });
-
-    it('should retry only non-top target', () => {
-      windowMock
-        .expects('open')
-        .withExactArgs('https://example.com/', '_top', 'width=1')
-        .returns(null)
-        .once();
-      const res = dom.openWindowDialog(
-        windowApi,
-        'https://example.com/',
-        '_top',
-        'width=1'
-      );
-      expect(res).to.be.null;
-    });
-  });
-
   describe('isJsonScriptTag', () => {
     it('should return true for <script type="application/json">', () => {
       const element = document.createElement('script');
@@ -842,48 +668,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  (env) => {
-    let doc;
-    class TestElement extends BaseElement {}
-    describe('whenUpgradeToCustomElement function', () => {
-      beforeEach(() => {
-        doc = env.win.document;
-      });
-
-      it('should not continue if element is not AMP element', () => {
-        const element = doc.createElement('div');
-        allowConsoleError(() => {
-          expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
-            'element is not AmpElement'
-          );
-        });
-      });
-
-      it('should resolve if element has already upgrade', () => {
-        const element = doc.createElement('amp-img');
-        element.setAttribute('layout', 'nodisplay');
-        doc.body.appendChild(element);
-        return dom.whenUpgradedToCustomElement(element).then((element) => {
-          expect(element.whenBuilt).to.exist;
-        });
-      });
-
-      it('should resolve when element upgrade', () => {
-        const element = doc.createElement('amp-test');
-        element.setAttribute('layout', 'nodisplay');
-        doc.body.appendChild(element);
-        env.win.setTimeout(() => {
-          env.win.customElements.define(
-            'amp-test',
-            createAmpElementForTesting(env.win, TestElement)
-          );
-        }, 100);
-        return dom.whenUpgradedToCustomElement(element).then((element) => {
-          expect(element.whenBuilt).to.exist;
-        });
-      });
-    });
-
+  () => {
     describe('toggleAttribute', () => {
       let el;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {devAssert} from '../../src/log';
-import {getStyle, setStyle, setStyles} from '../../src/style';
+import {getStyle, setStyle, setStyles} from '../../src/core/dom/style';
 import {loadScript, validateData} from '../../3p/3p';
 import {tryParseJson} from '../../src/core/types/object/json';
 

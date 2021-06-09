@@ -27,7 +27,7 @@ import {isFiniteNumber, isObject} from '../../../src/core/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 import {parseJson} from '../../../src/core/types/object/json';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';

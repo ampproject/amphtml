@@ -18,7 +18,7 @@ import * as Preact from '../../../../src/preact';
 import {Youtube} from '../component';
 import {createRef} from '../../../../src/preact';
 
-import {dispatchCustomEvent} from '../../../../src/dom';
+import {dispatchCustomEvent} from '../../../../src/core/dom';
 import {mount} from 'enzyme';
 
 describes.realWin('YouTube preact component v1.0', {}, (env) => {

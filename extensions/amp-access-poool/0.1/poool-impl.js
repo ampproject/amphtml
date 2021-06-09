@@ -19,7 +19,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {listenFor} from '../../../src/iframe-helper';
-import {resetStyles, setStyle, setStyles} from '../../../src/style';
+import {resetStyles, setStyle, setStyles} from '../../../src/core/dom/style';
 
 const TAG = 'amp-access-poool';
 

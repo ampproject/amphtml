@@ -53,7 +53,7 @@ import {isArray, isEnumValue, isObject} from '../../../src/core/types';
 
 import {isExperimentOn} from '../../../src/experiments';
 
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';

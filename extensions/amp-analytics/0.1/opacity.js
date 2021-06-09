@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {computedStyle} from '../../../src/style';
+import {computedStyle} from '../../../src/core/dom/style';
 
 /**
  *  Returns the min opacity found amongst the element and its ancestors

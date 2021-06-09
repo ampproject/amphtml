@@ -22,7 +22,7 @@
  */
 
 import {LayoutRectDef, layoutRectLtwh} from '../core/math/layout-rect';
-import {isConnectedNode} from '../dom';
+import {isConnectedNode} from '../core/dom';
 
 /**
  * Stores the native getBoundingClientRect before we patch it, so that the

@@ -52,11 +52,7 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
-import {
-  addAttributesToElement,
-  iterateCursor,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {addAttributesToElement, iterateCursor} from '../../../src/core/dom';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
@@ -71,17 +67,18 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
-import {htmlFor} from '../../../src/static-template';
-import {isAutoplaySupported} from '../../../src/utils/video';
+import {htmlFor} from '../../../src/core/dom/static-template';
+import {isAutoplaySupported} from '../../../src/core/dom/video';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {prefersReducedMotion} from '../../../src/core/dom/media-query-props';
-import {px, toggle} from '../../../src/style';
+import {px, toggle} from '../../../src/core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 import {toArray} from '../../../src/core/types/array';
 import {upgradeBackgroundAudio} from './audio';

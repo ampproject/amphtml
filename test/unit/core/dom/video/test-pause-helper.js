@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {installResizeObserverStub} from '../../../testing/resize-observer-stub';
+import {PauseHelper} from '../../../../../src/core/dom/video/pause-helper';
+import {installResizeObserverStub} from '../../../../../testing/resize-observer-stub';
 
-describes.realWin('PauseHelper', {}, (env) => {
+describes.realWin('DOM - video - PauseHelper', {}, (env) => {
   let win, doc;
   let resizeObserverStub;
   let element;

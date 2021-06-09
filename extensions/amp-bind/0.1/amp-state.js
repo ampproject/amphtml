@@ -26,8 +26,8 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
 import {getSourceOrigin} from '../../../src/url';
-import {isJsonScriptTag} from '../../../src/dom';
-import {toggle} from '../../../src/style';
+import {isJsonScriptTag} from '../../../src/core/dom';
+import {toggle} from '../../../src/core/dom/style';
 import {tryParseJson} from '../../../src/core/types/object/json';
 
 export class AmpState extends AMP.BaseElement {

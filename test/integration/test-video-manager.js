@@ -16,12 +16,12 @@
 
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 import {Services} from '../../src/services';
-import {dispatchCustomEvent, waitForChildPromise} from '../../src/dom';
+import {dispatchCustomEvent, waitForChildPromise} from '../../src/core/dom';
 import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
 import {
   isAutoplaySupported,
   resetIsAutoplaySupported,
-} from '../../src/utils/video';
+} from '../../src/core/dom/video';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {listenOncePromise} from '../../src/event-helper';
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';

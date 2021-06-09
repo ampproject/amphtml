@@ -29,7 +29,7 @@ import {dict, getValueForExpr} from '../../../src/core/types/object';
 import {getSourceOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isArray} from '../../../src/core/types';
-import {isJsonScriptTag} from '../../../src/dom';
+import {isJsonScriptTag} from '../../../src/core/dom';
 import {listenOnce} from '../../../src/event-helper';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/core/types/object/json';

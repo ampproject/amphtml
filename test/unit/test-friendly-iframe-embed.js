@@ -41,7 +41,7 @@ import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/core/math/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {resetScheduledElementForTesting} from '../../src/service/custom-element-registry';
-import {setStyles} from '../../src/style';
+import {setStyles} from '../../src/core/dom/style';
 
 describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
   let window, document;

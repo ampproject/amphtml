@@ -18,7 +18,7 @@ import {ALT_TEXT, CONFIGURATION_EVENT, ICON_SIZE, ORIGIN} from '../constants';
 import {ConfigManager} from '../config-manager';
 
 import {createCUID, isDateInFuture} from '../addthis-utils/cuid';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {dict} from '../../../../src/core/types/object';
 import {
   getAddThisMode,

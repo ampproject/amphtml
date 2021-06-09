@@ -16,7 +16,7 @@
 
 import {ScrollComponent} from './scroll-component';
 import {dict, hasOwn} from '../../../src/core/types/object';
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 
 /** Provides iframe for the Scroll Audio Player. */
 export class Sheet extends ScrollComponent {

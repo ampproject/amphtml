@@ -24,8 +24,8 @@ import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent} from '../../../src/dom';
-import {getStyle, setStyle} from '../../../src/style';
+import {dispatchCustomEvent} from '../../../src/core/dom';
+import {getStyle, setStyle} from '../../../src/core/dom/style';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/core/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -33,7 +33,7 @@ import {numeric} from '../../../src/transition';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,

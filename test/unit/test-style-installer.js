@@ -19,7 +19,7 @@ import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
 import {createShadowRoot} from '../../src/shadow-embed';
-import {getStyle} from '../../src/style';
+import {getStyle} from '../../src/core/dom/style';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {isAnimationNone} from '../../testing/test-helper';

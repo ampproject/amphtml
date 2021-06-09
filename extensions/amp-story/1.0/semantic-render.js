@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {includes} from '../../../src/core/types/string';

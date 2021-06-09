@@ -21,7 +21,7 @@
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkValueimpressionImpl} from '../amp-ad-network-valueimpression-impl';
 import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 
 /**
  * We're allowing external resources because otherwise using realWin causes

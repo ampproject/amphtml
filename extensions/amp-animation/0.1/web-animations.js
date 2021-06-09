@@ -39,7 +39,10 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/core/dom/query';
-import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
+import {
+  computedStyle,
+  getVendorJsPropertyName,
+} from '../../../src/core/dom/style';
 import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';

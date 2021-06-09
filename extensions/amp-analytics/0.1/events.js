@@ -25,7 +25,8 @@ import {
 import {deepMerge, dict, hasOwn} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
+import {getDataParamsFromAttributes} from '../../../src/core/dom';
+import {isAmpElement} from '../../../src/amp-element-helpers';
 import {isArray, isEnumValue, isFiniteNumber} from '../../../src/core/types';
 
 const SCROLL_PRECISION_PERCENT = 5;

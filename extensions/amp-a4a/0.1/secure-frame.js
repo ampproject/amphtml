@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createElementWithAttributes, escapeHtml} from '../../../src/dom';
+import {createElementWithAttributes, escapeHtml} from '../../../src/core/dom';
 import {dict} from '../../../src/core/types/object';
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 

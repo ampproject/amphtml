@@ -19,7 +19,7 @@ import {devAssert} from '../src/log';
 import {dict} from '../src/core/types/object';
 import {isEnumValue} from '../src/core/types/enum';
 import {loadScript} from './3p';
-import {setStyle} from '../src/style';
+import {setStyle} from '../src/core/dom/style';
 
 /** @const @enum {string} */
 export const FacebookEmbedType = {

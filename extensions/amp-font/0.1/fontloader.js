@@ -32,8 +32,8 @@ const TEST_STRING_ = 'MAxmTYklsjo190QW';
 const TOLERANCE_ = 2;
 
 import {Services} from '../../../src/services';
-import {removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
+import {removeElement} from '../../../src/core/dom';
+import {setStyles} from '../../../src/core/dom/style';
 
 export class FontLoader {
   /**

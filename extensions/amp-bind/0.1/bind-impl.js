@@ -41,7 +41,8 @@ import {
   toArray,
 } from '../../../src/core/types/array';
 import {getMode} from '../../../src/mode';
-import {iterateCursor, whenUpgradedToCustomElement} from '../../../src/dom';
+import {iterateCursor} from '../../../src/core/dom';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';

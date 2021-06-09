@@ -32,7 +32,7 @@ import {
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/core/math';
-import {computedStyle, setStyle} from '../../../src/style';
+import {computedStyle, setStyle} from '../../../src/core/dom/style';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getAdCid} from '../../../src/ad-cid';

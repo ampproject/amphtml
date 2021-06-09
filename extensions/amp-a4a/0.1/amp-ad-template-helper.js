@@ -16,7 +16,7 @@
 
 import {LruCache} from '../../../src/core/data-structures/lru-cache';
 import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';

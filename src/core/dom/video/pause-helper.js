@@ -14,14 +14,33 @@
  * limitations under the License.
  */
 
-import {observeBorderBoxSize, unobserveBorderBoxSize} from './size-observer';
+import {observeBorderBoxSize, unobserveBorderBoxSize} from '../size-observer';
+
+// typedef imports
+import {PausableInterface} from './pausable-interface';
+
+/**
+ * TODO(rcebulko, #34096): Remove this once a proper AMPElement type is
+ * available, and declare that it @implements PausableInterface. For now, this
+ * provides the necessary type strictness.
+ * @extends Element
+ * @implements {PausableInterface}
+ */
+class PausableElementDef {
+  /** @function */
+  pause() {}
+}
 
 export class PauseHelper {
   /**
-   * @param {!AmpElement} element
+   * @param {!PausableElementDef} element
    */
   constructor(element) {
-    /** @private @const */
+    /**
+     * @private
+     * @const
+     * @type {!PausableElementDef}
+     */
     this.element_ = element;
 
     /** @private {boolean} */
@@ -62,8 +81,11 @@ export class PauseHelper {
       return;
     }
     this.hasSize_ = hasSize;
+
+    /** @implements {PausableInterface} */
+    const element = this.element_;
     if (!hasSize) {
-      this.element_.pause();
+      element.pause();
     }
   }
 }

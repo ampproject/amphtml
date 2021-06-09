@@ -43,7 +43,7 @@ import {
   createElementWithAttributes,
   isJsonScriptTag,
   toggleAttribute,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
 import {elementByTag} from '../../../src/core/dom/query';
@@ -52,7 +52,7 @@ import {getExperimentBranch} from '../../../src/experiments';
 import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/core/types/object/json';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';

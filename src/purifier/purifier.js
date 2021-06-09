@@ -27,7 +27,7 @@ import {
 } from './sanitation';
 import {devAssertElement} from '../core/assert';
 import {isAmp4Email} from '../format';
-import {removeElement} from '../dom';
+import {removeElement} from '../core/dom';
 import {user} from '../log';
 import purify from 'dompurify';
 

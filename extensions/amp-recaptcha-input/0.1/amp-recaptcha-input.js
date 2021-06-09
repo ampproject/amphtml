@@ -30,7 +30,7 @@ import {
 } from '../../../src/async-input';
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
-import {setStyles, toggle} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/core/dom/style';
 import {userAssert} from '../../../src/log';
 
 /** @const */

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {computedStyle} from '../../../src/style';
+import {computedStyle} from '../../../src/core/dom/style';
 import {devAssert} from '../../../src/log';
 
 /**

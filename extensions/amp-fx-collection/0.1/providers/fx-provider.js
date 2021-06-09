@@ -27,11 +27,8 @@ import {
   scrollToggleFloatIn,
 } from '../scroll-toggle';
 import {Services} from '../../../../src/services';
-import {
-  assertDoesNotContainDisplay,
-  computedStyle,
-  setStyles,
-} from '../../../../src/style';
+import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
+import {computedStyle, setStyles} from '../../../../src/core/dom/style';
 import {
   convertEasingKeyword,
   defaultDurationValues,

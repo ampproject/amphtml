@@ -16,7 +16,7 @@
 
 import {Services} from '../../../../src/services';
 import {processHead} from '../head-validation';
-import {rootNodeFor} from '../../../../src/dom';
+import {rootNodeFor} from '../../../../src/core/dom';
 
 describes.realWin('head validation', {amp: true}, (env) => {
   let adElement;

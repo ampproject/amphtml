@@ -23,7 +23,7 @@ import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/core/types';
 import {parseJson} from '../../../src/core/types/object/json';
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 
 const AUTHORIZATION_TIMEOUT = 3000;
 const EXPIRATION_TIMEOUT = 1000 * 60 * 60 * 24 * 7; // 7 days

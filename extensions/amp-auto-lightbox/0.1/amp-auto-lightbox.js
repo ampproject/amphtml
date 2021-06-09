@@ -28,13 +28,11 @@ import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Services} from '../../../src/services';
 import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {dev} from '../../../src/log';
-import {
-  dispatchCustomEvent,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {dispatchCustomEvent} from '../../../src/core/dom';
 import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
 import {toArray} from '../../../src/core/types/array';
 import {tryParseJson} from '../../../src/core/types/object/json';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 const TAG = 'amp-auto-lightbox';
 

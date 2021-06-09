@@ -40,12 +40,12 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {reportErrorForWin} from './error-reporting';
-import {setStyle} from './style';
+import {setStyle} from './core/dom/style';
 import {shouldLoadPolyfill as shouldLoadInObPolyfill} from './polyfills/stubs/intersection-observer-stub';
 import {shouldLoadPolyfill as shouldLoadResObPolyfill} from './polyfills/stubs/resize-observer-stub';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {waitForBodyOpenPromise} from './dom';
+import {waitForBodyOpenPromise} from './core/dom';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));

@@ -19,12 +19,12 @@ import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attributi
 import {
   createElementWithAttributes,
   iterateCursor,
-  openWindowDialog,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 
 /**
  * @typedef {{

@@ -18,7 +18,7 @@ import {dict} from '../src/core/types/object';
 import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
 import {parseJson} from '../src/core/types/object/json';
-import {setStyles} from '../src/style';
+import {setStyles} from '../src/core/dom/style';
 
 const libSourceUrl = dict({
   'canvas':

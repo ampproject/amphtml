@@ -20,7 +20,7 @@ import {ElementStub} from '../../src/element-stub';
 import {Extensions} from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
 import {dev} from '../../src/log';
-import {dispatchCustomEvent} from '../../src/dom';
+import {dispatchCustomEvent} from '../../src/core/dom';
 import {getServiceForDoc} from '../../src/service';
 import {
   getTemplateClassForTesting,

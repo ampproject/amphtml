@@ -28,11 +28,11 @@ import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
 import {isArray, isObject} from './core/types';
-import {isConnectedNode} from './dom';
+import {isConnectedNode} from './core/dom';
 
 import {parseExtensionUrl} from './service/extension-script';
 import {parseUrlDeprecated} from './url';
-import {setStyle} from './style';
+import {setStyle} from './core/dom/style';
 
 /** @const @private {string} */
 const TAG = 'multidoc-manager';

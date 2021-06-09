@@ -21,7 +21,7 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/core/types';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {tryParseJson} from '../../../src/core/types/object/json';
 
 const TYPE = 'facebook';

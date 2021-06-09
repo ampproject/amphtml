@@ -31,13 +31,13 @@ import {
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {findIndex, toArray} from '../../../src/core/types/array';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
 import {
   insertAtStart,
   isJsonScriptTag,
   removeChildren,
   removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   parseFavicon,
@@ -45,7 +45,7 @@ import {
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
 
-import {setStyles, toggle} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/core/dom/style';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/core/types/object/json';

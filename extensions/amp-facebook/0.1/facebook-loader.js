@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 
 /**
  * Common function to create the facebook loader logo for all amp-facebook-*

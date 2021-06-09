@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import * as st from '../../src/style';
+import * as st from '../../../../src/core/dom/style';
 
-describes.sandboxed('Style', {}, (env) => {
+describes.sandboxed('DOM - style helpers', {}, (env) => {
   it('toggle', () => {
     const element = document.createElement('div');
 

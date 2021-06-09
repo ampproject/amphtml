@@ -25,7 +25,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {isEnumValue} from '../../../src/core/types';
-import {isRTL, tryFocus} from '../../../src/dom';
+import {isRTL, tryFocus} from '../../../src/core/dom';
 import {mod} from '../../../src/core/math';
 
 const TAG = 'amp-selector';

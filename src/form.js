@@ -15,7 +15,7 @@
  */
 
 import {ancestorElementsByTag} from './core/dom/query';
-import {iterateCursor} from './dom';
+import {iterateCursor} from './core/dom';
 
 /** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';

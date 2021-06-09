@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {devAssert} from './log';
-import {map} from './core/types/object';
+import {devAssert} from '../assert';
+import {map} from '../types/object';
 
 let htmlContainer;
 let svgContainer;

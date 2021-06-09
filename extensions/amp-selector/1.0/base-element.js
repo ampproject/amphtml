@@ -22,7 +22,7 @@ import {
   createElementWithAttributes,
   toggleAttribute,
   tryFocus,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {toArray} from '../../../src/core/types/array';

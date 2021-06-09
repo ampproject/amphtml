@@ -16,7 +16,7 @@
 
 import '../amp-google-assistant-assistjs';
 import {Services} from '../../../../src/services';
-import {addAttributesToElement} from '../../../../src/dom';
+import {addAttributesToElement} from '../../../../src/core/dom';
 
 describes.realWin(
   'amp-google-assistant-assistjs',

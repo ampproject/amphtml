@@ -21,7 +21,7 @@ import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
 import {clearModalStack, getModalStackLength} from '../../../../src/modal';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {toggleExperiment} from '../../../../src/experiments';
 
 // Represents the correct value of KeyboardEvent.which for the Escape key

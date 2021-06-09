@@ -23,7 +23,7 @@ import {
 import {closest} from '../../src/core/dom/query';
 import {dev} from '../../src/log';
 import {dict} from '../../src/core/types/object';
-import {openWindowDialog} from '../../src/dom';
+import {openWindowDialog} from '../../src/open-window-dialog';
 import {parseQueryString} from '../../src/core/types/string/url';
 import {urls} from '../../src/config';
 

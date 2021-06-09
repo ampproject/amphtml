@@ -21,7 +21,7 @@ import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {LiveStoryManager} from '../live-story-manager';
 import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
-import {addAttributesToElement} from '../../../../src/dom';
+import {addAttributesToElement} from '../../../../src/core/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(

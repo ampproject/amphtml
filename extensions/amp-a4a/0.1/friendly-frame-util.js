@@ -15,12 +15,12 @@
  */
 
 import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {dict} from '../../../src/core/types/object';
 import {getExtensionsFromMetadata} from './amp-ad-utils';
 import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 
 /**
  * Renders a creative into a friendly iframe.

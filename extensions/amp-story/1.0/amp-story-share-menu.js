@@ -35,8 +35,8 @@ import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '../../../src/static-template';
-import {setStyles} from '../../../src/style';
+import {htmlFor} from '../../../src/core/dom/static-template';
+import {setStyles} from '../../../src/core/dom/style';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';

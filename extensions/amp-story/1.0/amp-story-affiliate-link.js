@@ -22,7 +22,7 @@ import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {getAmpdoc} from '../../../src/service';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 
 /**
  * Links that are affiliate links.
