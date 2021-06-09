@@ -19,7 +19,7 @@ FAIL
 |    Correct results, as well as 2 incorrect results
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <title>STAMP examples</title>

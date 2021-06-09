@@ -360,10 +360,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.mutateElement(() => {
       const {length} = this.elementsMetadata_[lightboxGroupId];
       this.maybeEnableMultipleItemControls_(length);
-      this.carousel_.getImpl().then((implementation) => {
-        implementation.unlayoutCallback();
-        toggle(this.carousel_, true);
-      });
+      const owners = Services.ownersForDoc(this.element);
+      owners./*OK*/ scheduleUnlayout(this.element, this.carousel_);
+      toggle(this.carousel_, true);
     });
   }
 

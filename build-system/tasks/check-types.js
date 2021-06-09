@@ -108,7 +108,10 @@ const TYPE_CHECK_TARGETS = {
   'src-context': ['src/context/**/*.js', ...CORE_SRCS_GLOBS],
   'src-core': CORE_SRCS_GLOBS,
   'src-examiner': ['src/examiner/**/*.js'],
-  'src-experiments': ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
+  'src-experiments': {
+    srcGlobs: ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
+    externGlobs: ['build-system/externs/amp.extern.js'],
+  },
   'src-inabox': {
     srcGlobs: ['src/inabox/**/*.js'],
     warningLevel: 'QUIET',
