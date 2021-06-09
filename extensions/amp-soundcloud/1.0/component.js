@@ -17,10 +17,10 @@
 import * as Preact from '../../../src/preact';
 import {dict} from '../../../src/core/types/object';
 import {useEffect, useRef} from '../../../src/preact';
+import {user} from '../../../src/log';
 
 /**
  * @param {!SoundcloudDef.Props} props
- * @param ref
  * @return {PreactDef.Renderable}
  */
 export function Soundcloud({
@@ -36,10 +36,10 @@ export function Soundcloud({
 
   // Perform manual checking as assertion is not available for Bento: Issue #32739
   if (playlistId == undefined && trackId === undefined) {
-    console /*OK*/
-      .error(
-        'data-trackid or data-playlistid is required for <amp-soundcloud>'
-      );
+    user().warn(
+      'AMP-SOUNDCLOUD',
+      'data-trackid or data-playlistid is required for <amp-soundcloud>'
+    );
   }
 
   // Build Base URL
@@ -68,17 +68,6 @@ export function Soundcloud({
   } else if (color) {
     iframeSrc += '&color=' + encodeURIComponent(color);
   }
-
-  // // Prepare iframe for Soundcloud Widget
-  // const iframeElement = Preact.createElement('iframe', {
-  //   allow: 'autoplay',
-  //   frameborder: 'no',
-  //   ref: iframeRef,
-  //   scrolling: 'no',
-  //   src: iframeSrc,
-  //   title: 'Soundcloud Widget - ' + {mediaId},
-  //   width: '100%',
-  // });
 
   useEffect(() => {
     /** Unmount Procedure */

@@ -33,9 +33,7 @@ export const TrackId = () => {
   // Knobs
   const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
   const height = text('Height', '180');
-  const width = text('Width', 'auto');
   const trackid = text('Track ID', '864765493');
-  const layout = text('Layout', 'fixed-height');
   const visual = boolean('Visual', true);
 
   // Convert RGBA to HEX (without Alpha Channel)
@@ -45,12 +43,11 @@ export const TrackId = () => {
   return (
     <amp-soundcloud
       color={hex}
-      width="400"
-      height="300"
-      layout="responsive"
-      sizes="(min-width: 600px) 320px, 100vw"
+      width="100%"
+      height={height}
+      layout="fixed-height"
       data-trackid={trackid}
-      data-visual={'"' + visual + '"'}
+      data-visual={visual}
     />
   );
 };
@@ -73,6 +70,67 @@ export const PlaylistId = () => {
       data-visual={visual}
       height={height}
       layout="fixed-height"
+    />
+  );
+};
+
+export const MediaQuery = () => {
+  // Knobs
+  const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
+  const trackid1 = text('Track ID 1', '864765493');
+  const trackid2 = text('Track ID 2', '582363801');
+  const media1 = text('Media Query 1', '(min-width: 650px)');
+  const media2 = text('Media Query 2', '(max-width: 649px)');
+  const visual = boolean('Visual', true);
+
+  // Convert RGBA to HEX (without Alpha Channel)
+  const hex = rgba2hex(componentColor);
+
+  // Render Preact Component
+  return (
+    <div>
+      <amp-soundcloud
+        color={hex}
+        width="466"
+        height="355"
+        layout="responsive"
+        media={media1}
+        data-trackid={trackid1}
+        data-visual={visual}
+      />
+      <amp-soundcloud
+        color={hex}
+        width="527"
+        height="193"
+        layout="responsive"
+        media={media2}
+        data-trackid={trackid2}
+        data-visual={visual}
+      />
+    </div>
+  );
+};
+
+export const ResponsiveLayout = () => {
+  // Knobs
+  const componentColor = color('Color', 'RGBA(255, 85, 0, 1)');
+  const trackid = text('Track ID', '864765493');
+  const sizes = text('Sizes', '(min-width: 720px) 520px, 100vw');
+  const visual = boolean('Visual', true);
+
+  // Convert RGBA to HEX (without Alpha Channel)
+  const hex = rgba2hex(componentColor);
+
+  // Render Preact Component
+  return (
+    <amp-soundcloud
+      color={hex}
+      width="520"
+      height="340"
+      layout="responsive"
+      sizes={sizes}
+      data-trackid={trackid}
+      data-visual={visual}
     />
   );
 };

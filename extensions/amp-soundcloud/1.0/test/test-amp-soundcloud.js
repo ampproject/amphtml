@@ -15,8 +15,6 @@
  */
 
 import '../amp-soundcloud';
-import * as Preact from '../../../../src/preact';
-import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
@@ -29,17 +27,13 @@ describes.realWin(
     },
   },
   (env) => {
-    const trackEmbedUrl =
-      'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F243169232';
-    const playlistEmbedUrl =
-      'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F1595551';
-
     let win;
-    let doc;
     let html;
+    let doc;
 
     let element;
 
+    // Perform before every testcase
     beforeEach(async () => {
       win = env.win;
       html = htmlFor(env.win.document);
@@ -228,6 +222,7 @@ describes.realWin(
       // Make sure iframe is available
       expect(iframe).to.not.be.null;
 
+      // Check element for correct layout class
       expect(element.className).to.match(/i-amphtml-layout-fixed-height/);
     });
 
@@ -253,6 +248,7 @@ describes.realWin(
       // Make sure iframe is available
       expect(iframe).to.not.be.null;
 
+      // Check element for correct layout class
       expect(element.className).to.match(/i-amphtml-layout-responsive/);
     });
 
@@ -274,6 +270,7 @@ describes.realWin(
       // Make sure iframe is available
       expect(iframe).to.not.be.null;
 
+      // Check iframe scr for correct parameters
       expect(iframe.src).to.include('visual=true');
       expect(iframe.src).not.to.include('color=00FF00');
     });
@@ -297,36 +294,8 @@ describes.realWin(
 
       /** Cannot test as userAssert not available for Preact Component */
       // expect(iframe.src).to.be.rejectedWith(
-      //   /The data-trackid attribute is required for/
+      //   /data-trackid or data-playlistid is required for <amp-soundcloud>/
       // );
-    });
-
-    it('unlayout and relayout', async () => {
-      element = html`
-        <amp-soundcloud data-playlistid="1595551"></amp-soundcloud>
-      `;
-
-      // Add to Document
-      env.win.document.body.appendChild(element);
-
-      // Wait till rendering is finished
-      await waitForRender();
-
-      // Extract iframe
-      const iframe = element.shadowRoot.querySelector('iframe');
-
-      // Make sure iframe is available
-      expect(iframe).to.not.be.null;
-
-      // Extract iframe
-      expect(iframe).to.exist;
-
-      const unlayoutResult = element.unlayoutCallback();
-      expect(unlayoutResult).to.be.true;
-      expect(iframe).to.not.exist;
-
-      await element.layoutCallback();
-      expect(iframe).to.exist;
     });
   }
 );

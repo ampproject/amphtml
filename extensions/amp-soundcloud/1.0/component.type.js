@@ -23,9 +23,12 @@ var SoundcloudDef = {};
  * @typedef {{
  *   color: string,
  *   height: number,
+ *   heights: (string|undefined),
  *   layout: string,
+ *   media: (string|undefined),
  *   playlistId: (string|undefined),
  *   secretToken: (string|undefined),
+ *   sizes: (string|undefined),
  *   trackId: (string|undefined),
  *   visual: (string|undefined),
  *   width: number,

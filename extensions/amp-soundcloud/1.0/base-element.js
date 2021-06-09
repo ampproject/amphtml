@@ -21,6 +21,7 @@ import {Soundcloud} from './component';
 export class BaseElement extends PreactBaseElement {
   /** @override @nocollapse */
   static R1() {
+    // Required to execute 'preconnectCallback'
     return false;
   }
 
@@ -35,11 +36,6 @@ export class BaseElement extends PreactBaseElement {
       opt_onLayout
     );
   }
-
-  // /**@override*/
-  // unlayoutCallback() {
-  //   return true;
-  // }
 }
 
 /** @override */
@@ -50,12 +46,15 @@ BaseElement['props'] = {
   'children': {passthrough: true},
   'color': {attr: 'data-color'},
   'height': {attr: 'height'},
-  'width': {attr: 'width'},
+  'heights': {attr: 'heights'},
   'layout': {attr: 'layout'},
+  'media': {attr: 'media'},
   'playlistId': {attr: 'data-playlistid'},
   'secretToken': {attr: 'data-secret-token'},
+  'sizes': {attr: 'sizes'},
   'trackId': {attr: 'data-trackid'},
   'visual': {attr: 'data-visual'},
+  'width': {attr: 'width'},
 };
 
 /** @override */
