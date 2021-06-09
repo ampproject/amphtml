@@ -53,7 +53,6 @@ export function RenderWithRef(
     ariaLiveValue = 'polite',
     onLoading,
     onReady,
-    onDataReady,
     onRefresh,
     onError,
     ...rest
@@ -62,7 +61,7 @@ export function RenderWithRef(
 ) {
   useResourcesNotify();
 
-  const [data, setData] = useState(null);
+  const [data, setData] = useState({});
 
   useEffect(() => {
     // TODO(dmanek): Add additional validation for src
@@ -116,10 +115,9 @@ export function RenderWithRef(
       if (!node?.firstElementChild || !rendered) {
         return;
       }
-      onDataReady?.();
       onReady?.();
     },
-    [rendered, onDataReady, onReady]
+    [rendered, onReady]
   );
 
   return (

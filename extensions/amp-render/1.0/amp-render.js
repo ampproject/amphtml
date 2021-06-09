@@ -215,8 +215,10 @@ export class AmpRender extends BaseElement {
       'onLoading': () => {
         this.toggleLoading(true);
       },
-      'onDataReady': () => {
+      'onReady': () => {
+        this.toggleLoading(false);
         if (this.element.getAttribute('layout') !== Layout.CONTAINER) {
+          this.togglePlaceholder(false);
           return;
         }
         if (!this.getPlaceholder()) {
@@ -238,30 +240,28 @@ export class AmpRender extends BaseElement {
               'height': height,
             });
           }
-        );
-      },
-      'onReady': () => {
-        this.toggleLoading(false);
-        let containerHeight;
-        this.measureMutateElement(
-          () => {
-            containerHeight = this.element.querySelector(
-              '[i-amphtml-rendered]'
-            ).scrollHeight;
-          },
-          () => {
-            this.attemptChangeHeight(containerHeight)
-              .then(() => {
-                this.togglePlaceholder(false);
-                setStyles(this.element, {
-                  'overflow': '',
+        ).then(() => {
+          let containerHeight;
+          this.measureMutateElement(
+            () => {
+              containerHeight = this.element.querySelector(
+                '[i-amphtml-rendered]'
+              ).scrollHeight;
+            },
+            () => {
+              this.attemptChangeHeight(containerHeight)
+                .then(() => {
+                  this.togglePlaceholder(false);
+                  setStyles(this.element, {
+                    'overflow': '',
+                  });
+                })
+                .catch(() => {
+                  this.togglePlaceholder(false);
                 });
-              })
-              .catch(() => {
-                this.togglePlaceholder(false);
-              });
-          }
-        );
+            }
+          );
+        });
       },
       'onError': () => {
         this.toggleLoading(false);
