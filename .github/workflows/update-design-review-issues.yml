@@ -7,8 +7,8 @@ on:
   # for Daylight Savings.
   schedule:
     - cron: '30 16,17 * * 3' # Africa/Europe/western Asia
-    - cron: '00 21,22 * * 3' # Americas
-    - cron: '00 01,02 * * 4' # Asia/Oceania
+    - cron: '0 21,22 * * 3' # Americas
+    - cron: '0 1,2 * * 4' # Asia/Oceania
 
 jobs:
   update-design-review-issues:
