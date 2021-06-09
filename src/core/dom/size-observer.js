@@ -41,7 +41,7 @@ const Type = {
 const VERTICAL_RE = /vertical/;
 
 /** @const {!WeakMap<!Window, !ResizeObserver>} */
-const observers = new WeakMap();
+const observers = /* #__PURE__ */ new WeakMap();
 
 /**
  * @const {!WeakMap<!Element, !Array<{
@@ -49,10 +49,10 @@ const observers = new WeakMap();
  *   callback: (function(!LayoutSizeDef)|function(!ResizeObserverSize))
  * }>>}
  */
-const targetObserverMultimap = new WeakMap();
+const targetObserverMultimap = /* #__PURE__ */ new WeakMap();
 
 /** @const {!WeakMap<!Element, !ResizeObserverEntry>} */
-const targetEntryMap = new WeakMap();
+const targetEntryMap = /* #__PURE__ */ new WeakMap();
 
 /**
  * @param {!Element} element

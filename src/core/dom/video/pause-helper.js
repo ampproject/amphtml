@@ -23,13 +23,12 @@ import {PausableInterface} from './pausable-interface';
  * TODO(rcebulko, #34096): Remove this once a proper AMPElement type is
  * available, and declare that it @implements PausableInterface. For now, this
  * provides the necessary type strictness.
- * @constructor
  * @extends Element
  * @implements {PausableInterface}
  */
-export function PausableElement() {}
-/** @function */
-PausableElement.prototype.pause = () => {};
+class PausableElement {
+  pause() {}
+}
 
 export class PauseHelper {
   /**
