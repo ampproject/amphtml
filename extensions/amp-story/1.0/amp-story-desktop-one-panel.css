@@ -26,7 +26,7 @@
   margin: auto auto !important;
   aspect-ratio: var(--large-desktop-ratio) !important;
   height: calc(100vh - 148px) !important;
-  max-height: 752px;
+  max-height: 752px !important;
   width: auto !important; 
   border-radius: 10px !important;
 }
