@@ -49,23 +49,21 @@ exports.extension = function (name, version, latest, isModule, loadPriority) {
 };
 
 const bentoTemplate = removeWhitespace(`
-  (function (p) {
-    self.AMP
-      ? self.AMP.push(p)
-      : document.head.querySelector(
-          'script[src$="v0.js"],script[src$="v0.mjs"]'
-        )
-      ? (self.AMP = [p])
-      : p.f({
-          registerElement: function (n, b, s) {
-            if (s)
-              document.head.appendChild(
-                document.createElement("style")
-              ).textContent = s;
-            customElements.define(n, b.CustomElement(b));
-          },
-        });
-  })(__PAYLOAD__);
+(function (p) {
+  self.AMP
+    ? self.AMP.push(p)
+    : document.head.querySelector('script[src$="v0.js"],script[src$="v0.mjs"]')
+    ? (self.AMP = [p])
+    : p.f({
+        registerElement: function (n, b, s) {
+          if (s)
+            document.head.appendChild(
+              document.createElement("style")
+            ).textContent = s;
+          customElements.define(n, b.CustomElement(b));
+        },
+      });
+})(__PAYLOAD__);
 `);
 
 exports.bento = function (name, version, latest, isModule, loadPriority) {
