@@ -39,7 +39,7 @@ Example:
   width="16"
   height="9"
 >
-</amp-vidazoo-player>
+</amp-vidazoo-widget>
 ```
 
 ## Attributes
