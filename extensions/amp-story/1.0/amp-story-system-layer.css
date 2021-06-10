@@ -450,7 +450,7 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  flex-direction: row-revers !important;
+  flex-direction: row-reverse !important;
 }
 
 .i-amphtml-animate-progress li {
