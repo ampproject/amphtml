@@ -51,8 +51,9 @@ export const getStoreService = (win) => {
  */
 export const UIType = {
   MOBILE: 0,
-  DESKTOP_PANELS: 1, // Default desktop UI.
+  DESKTOP_PANELS: 1, // Default desktop UI displaying previous and next pages.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
+  DESKTOP_ONE_PANEL: 4, // Desktop UI with one panel and space around story.
   VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
 };
 
