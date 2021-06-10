@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {getFlexibleAdSlotData} from '../flexible-ad-slot-utils';
 
 describes.realWin('#getFlexibleAdSlotData', {amp: true}, (env) => {

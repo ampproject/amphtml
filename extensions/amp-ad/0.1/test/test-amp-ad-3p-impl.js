@@ -25,7 +25,7 @@ import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state
 import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
 import {adConfig} from '../../../../ads/_config';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {macroTask} from '../../../../testing/yield';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {

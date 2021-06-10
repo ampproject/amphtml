@@ -19,7 +19,7 @@ FAIL
 |    This tests validation for the amp-vimeo tag version 1.0.
 |  -->
 |  <!DOCTYPE html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |    <!-- prettier-ignore -->
 |    <head>
 |      <meta charset="utf-8">

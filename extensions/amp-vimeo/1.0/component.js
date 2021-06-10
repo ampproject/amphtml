@@ -23,7 +23,7 @@ import {
   makeVimeoMessage,
 } from '../vimeo-api';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {dispatchCustomEvent} from '../../../src/dom';
+import {dispatchCustomEvent} from '../../../src/core/dom';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   objOrParseJson,

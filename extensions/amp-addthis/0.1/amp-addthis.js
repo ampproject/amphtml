@@ -55,7 +55,10 @@ import {Services} from '../../../src/services';
 import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  removeElement,
+} from '../../../src/core/dom';
 import {dict} from '../../../src/core/types/object';
 import {
   getAddThisMode,
@@ -69,7 +72,7 @@ import {internalRuntimeVersion} from '../../../src/internal-version';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 import {userAssert} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to

@@ -19,14 +19,11 @@ import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
-import {computedStyle} from '../../../../src/style';
-import {
-  createElementWithAttributes,
-  tryFocus,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
+import {computedStyle} from '../../../../src/core/dom/style';
+import {createElementWithAttributes, tryFocus} from '../../../../src/core/dom';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {poll} from '../../../../testing/iframe';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(
   'amp-accordion',

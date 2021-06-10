@@ -22,7 +22,7 @@ import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
 import {isArray} from '../../../src/core/types';
 import {parseJson} from '../../../src/core/types/object/json';
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 
 /**
  * Implments the iframe local subscriptions platform which provides
