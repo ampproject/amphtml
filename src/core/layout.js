@@ -17,16 +17,6 @@
 import {devAssertElement} from './assert';
 
 /**
- * Whether the tag is an internal (service) AMP tag.
- * @param {!Element|string} tag
- * @return {boolean}
- */
-function isInternalElement(tag) {
-  const tagName = typeof tag == 'string' ? tag : tag.tagName;
-  return !!(tagName && tagName.toLowerCase().startsWith('i-'));
-}
-
-/**
  * Returns "true" for internal AMP nodes or for placeholder elements.
  * @param {!Node} node
  * @return {boolean}
@@ -37,14 +27,13 @@ export function isInternalOrServiceNode(node) {
   }
   node = devAssertElement(node);
 
-  if (isInternalElement(node)) {
+  if (node.tagName.toLowerCase().startsWith('i-')) {
     return true;
   }
   if (
-    node.tagName &&
-    (node.hasAttribute('placeholder') ||
-      node.hasAttribute('fallback') ||
-      node.hasAttribute('overflow'))
+    node.hasAttribute('placeholder') ||
+    node.hasAttribute('fallback') ||
+    node.hasAttribute('overflow')
   ) {
     return true;
   }
