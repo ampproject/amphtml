@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {assertElement} from '../assert/base';
 import {childNodes, matches} from './query';
 import {dict} from '../types/object';
 import {isInternalOrServiceNode} from '../layout';
@@ -563,12 +562,9 @@ export function applyFillContent(element, opt_replacedContent) {
  * nodes that could have been added for markup. These nodes can include
  * Text, Comment and other child nodes.
  *
- * @param {!Element} element
+ * @param {!Node} element
  * @return {!Array<!Node>}
  */
 export function getRealChildNodes(element) {
-  return childNodes(
-    element,
-    (node) => !isInternalOrServiceNode(assertElement(node))
-  );
+  return childNodes(element, (node) => !isInternalOrServiceNode(node));
 }

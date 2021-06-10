@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {devAssertElement} from './assert';
+
 /**
  * Whether the tag is an internal (service) AMP tag.
  * @param {!Element|string} tag
@@ -26,10 +28,15 @@ function isInternalElement(tag) {
 
 /**
  * Returns "true" for internal AMP nodes or for placeholder elements.
- * @param {!Element} node
+ * @param {!Node} node
  * @return {boolean}
  */
 export function isInternalOrServiceNode(node) {
+  if (node.nodeType !== Node.ELEMENT_NODE) {
+    return false;
+  }
+  node = devAssertElement(node);
+
   if (isInternalElement(node)) {
     return true;
   }
