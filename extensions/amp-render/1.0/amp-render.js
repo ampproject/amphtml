@@ -22,7 +22,7 @@ import {
 } from '../../../src/batched-json';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {computedStyle, setStyles} from '../../../src/style';
+import {computedStyle, setStyles} from '../../../src/core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
