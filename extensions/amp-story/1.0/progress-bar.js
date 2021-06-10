@@ -446,11 +446,7 @@ export class ProgressBar {
     if (!this.root_.hasAttribute('i-amphtml-yellow-progress')) {
       this.root_.setAttribute('i-amphtml-yellow-progress', '');
     }
-    if (adState) {
-      this.createAdSegment_();
-    } else {
-      this.removeAdSegment_();
-    }
+    adState ? this.createAdSegment_() : this.removeAdSegment_();
   }
 
   /**
