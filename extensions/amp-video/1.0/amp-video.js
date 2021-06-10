@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-video-1.0.css';
-import {VideoBaseElement} from './base-element';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-video';
 
-class AmpVideo extends VideoBaseElement {
+class AmpVideo extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
