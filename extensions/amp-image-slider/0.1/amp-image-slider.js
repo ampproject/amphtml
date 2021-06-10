@@ -22,7 +22,7 @@ import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/core/math';
 import {dev, user, userAssert} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen, loadPromise} from '../../../src/event-helper';
 import {
