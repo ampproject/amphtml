@@ -443,8 +443,8 @@ export class ProgressBar {
     }
     // Set CSS signal that we are in the experiment.
     // TODO(#33969) delete when launched.
-    if (!this.root_.hasAttribute('i-amphtml-yellow-progress')) {
-      this.root_.setAttribute('i-amphtml-yellow-progress', '');
+    if (!this.root_.hasAttribute('i-amphtml-ad-progress-exp')) {
+      this.root_.setAttribute('i-amphtml-ad-progress-exp', '');
     }
     adState ? this.createAdSegment_() : this.removeAdSegment_();
   }
@@ -460,10 +460,10 @@ export class ProgressBar {
         index
       )})`
     );
-    const yellowSegment = this.win_.document.createElement('div');
-    yellowSegment.className = 'i-amphtml-story-ad-progress-value';
-    this.currentAdSegment_ = yellowSegment;
-    progressEl.appendChild(yellowSegment);
+    const adSegment = this.win_.document.createElement('div');
+    adSegment.className = 'i-amphtml-story-ad-progress-value';
+    this.currentAdSegment_ = adSegment;
+    progressEl.appendChild(adSegment);
   }
 
   /**
