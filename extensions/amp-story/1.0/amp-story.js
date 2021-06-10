@@ -100,6 +100,7 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
 import {getState} from '../../../src/core/window/history';
+import {isDesktopOnePanelExperimentOn} from './amp-story-desktop-one-panel';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {isRTL} from '../../../src/core/dom';
@@ -1819,6 +1820,7 @@ export class AmpStory extends AMP.BaseElement {
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
         });
         break;
       case UIType.DESKTOP_PANELS:
@@ -1827,6 +1829,16 @@ export class AmpStory extends AMP.BaseElement {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
+        });
+        break;
+      case UIType.DESKTOP_ONE_PANEL:
+        this.setDesktopPositionAttributes_(this.activePage_);
+        this.vsync_.mutate(() => {
+          this.element.removeAttribute('desktop');
+          this.element.classList.add('i-amphtml-story-desktop-one-panel');
+          this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-panels');
         });
         break;
       case UIType.DESKTOP_FULLBLEED:
@@ -1834,6 +1846,7 @@ export class AmpStory extends AMP.BaseElement {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
         });
         break;
       // Because of the DOM mutations, switching from this mode to another is
@@ -1894,6 +1907,9 @@ export class AmpStory extends AMP.BaseElement {
       return UIType.DESKTOP_FULLBLEED;
     }
 
+    if (isDesktopOnePanelExperimentOn(this.win)) {
+      return UIType.DESKTOP_ONE_PANEL;
+    }
     // Three panels desktop UI (default).
     return UIType.DESKTOP_PANELS;
   }

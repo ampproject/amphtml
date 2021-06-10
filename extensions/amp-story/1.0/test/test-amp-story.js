@@ -357,6 +357,21 @@ describes.realWin(
       );
     });
 
+    it('should default to the one panel UI desktop experience when axperiment is active', async () => {
+      toggleExperiment(win, 'amp-story-desktop-one-panel', true);
+      await createStoryWithPages(4, ['cover', '1', '2', '3']);
+
+      // Don't do this at home. :(
+      story.desktopMedia_ = {matches: true};
+
+      story.buildCallback();
+
+      await story.layoutCallback();
+      expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
+        UIType.DESKTOP_ONE_PANEL
+      );
+    });
+
     it('should detect landscape opt in', async () => {
       await createStoryWithPages(4, ['cover', '1', '2', '3']);
       story.element.setAttribute('supports-landscape', '');
