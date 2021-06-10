@@ -22,7 +22,6 @@ import {ElementStub} from './element-stub';
 import {
   Layout,
   LayoutPriority,
-  applyStaticLayout,
   isInternalElement,
   isLoadingAllowed,
 } from './layout';
@@ -35,6 +34,7 @@ import {
   UPGRADE_TO_CUSTOMELEMENT_PROMISE,
   UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
 } from './amp-element-helpers';
+import {applyStaticLayout} from './static-layout';
 import {
   blockedByConsentError,
   cancellation,
