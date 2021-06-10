@@ -310,7 +310,6 @@ import {zen} from '../ads/vendors/zen';
 import {zergnet} from '../ads/vendors/zergnet';
 import {zucks} from '../ads/vendors/zucks';
 
-
 init(window);
 
 if (getMode().test || getMode().localDev) {
