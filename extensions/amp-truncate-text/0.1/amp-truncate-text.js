@@ -20,9 +20,9 @@ import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css'
 import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createShadowRoot} from './shadow-utils';
 import {dev} from '../../../src/log';
+import {getRealChildNodes, iterateCursor} from '../../../src/core/dom';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {iterateCursor} from '../../../src/core/dom';
 import {toArray} from '../../../src/core/types/array';
 import {truncateText} from './truncate-text';
 
@@ -146,7 +146,7 @@ export class AmpTruncateText extends AMP.BaseElement {
         this.persistentSlot_.appendChild(el);
       }
     );
-    this.getRealChildNodes().forEach((node) => {
+    getRealChildNodes(this.element).forEach((node) => {
       defaultSlot.appendChild(node);
     });
 

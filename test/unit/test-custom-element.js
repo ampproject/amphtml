@@ -28,6 +28,7 @@ import {
   getImplSyncForTesting,
 } from '../../src/custom-element';
 import {elementConnectedCallback} from '../../src/service/custom-element-registry';
+import {getRealChildNodes} from '../../src/core/dom';
 import {toggleExperiment} from '../../src/experiments';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
@@ -1979,7 +1980,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
   }
 
   it('getRealChildren should return nothing', () => {
-    expect(element.getRealChildNodes().length).to.equal(0);
+    expect(getRealChildNodes(element).length).to.equal(0);
     expect(element.getRealChildren().length).to.equal(0);
   });
 
@@ -1991,7 +1992,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
     element.appendChild(doc.createTextNode('abc'));
     element.appendChild(doc.createElement('content'));
 
-    const nodes = element.getRealChildNodes();
+    const nodes = getRealChildNodes(element);
     expect(nodes.length).to.equal(2);
     expect(nodes[0].textContent).to.equal('abc');
     expect(nodes[1].tagName.toLowerCase()).to.equal('content');

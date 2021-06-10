@@ -41,6 +41,7 @@ import {
 import {
   createElementWithAttributes,
   dispatchCustomEvent,
+  getRealChildNodes,
   parseBooleanAttribute,
 } from '../core/dom';
 import {dashToCamelCase} from '../core/types/string';
@@ -48,11 +49,11 @@ import {devAssert} from '../core/assert';
 import {dict, hasOwn, map} from '../core/types/object';
 import {getDate} from '../core/types/date';
 import {getMode} from '../mode';
+
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
 import {isElement} from '../core/types';
 import {sequentialIdGenerator} from '../core/math/id-generator';
-import {toArray} from '../core/types/array';
 
 /**
  * The following combinations are allowed.
@@ -1087,9 +1088,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     // as separate properties. Thus in a carousel the plain "children" are
     // slides, and the "arrowNext" children are passed via a "arrowNext"
     // property.
-    const nodes = element.getRealChildNodes
-      ? element.getRealChildNodes()
-      : toArray(element.childNodes);
+    const nodes = getRealChildNodes(element);
     for (let i = 0; i < nodes.length; i++) {
       const childElement = nodes[i];
       const match = matchChild(childElement, propDefs);
@@ -1161,7 +1160,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       devAssert(Ctor['usesShadowDom']);
       // Use lazy loading inside the passthrough by default due to too many
       // elements.
-      value = element.getRealChildNodes().every(IS_EMPTY_TEXT_NODE)
+      value = getRealChildNodes(element).every(IS_EMPTY_TEXT_NODE)
         ? null
         : [<Slot loading={Loading.LAZY} />];
     } else if (def.attr) {

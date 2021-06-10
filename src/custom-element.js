@@ -1897,18 +1897,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
-     * See dom.getRealChildNodes for the full description.
-     * TODO: migrate to the fn in dom.js.
-     * @deprecated
-     * @package @final
-     *
-     * @return {!Array<!Node>}
-     */
-    getRealChildNodes() {
-      return dom.getRealChildNodes(this);
-    }
-
-    /**
      * Returns the original children of the custom element without any service
      * nodes that could have been added for markup.
      * @return {!Array<!Element>}

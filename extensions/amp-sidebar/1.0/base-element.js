@@ -19,9 +19,9 @@ import {CSS as COMPONENT_CSS} from './component.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Sidebar} from './component';
 import {dict} from '../../../src/core/types/object';
+import {getRealChildNodes, toggleAttribute} from '../../../src/core/dom';
 import {pauseAll} from '../../../src/utils/resource-container-helper';
 import {toggle} from '../../../src/core/dom/style';
-import {toggleAttribute} from '../../../src/core/dom';
 import {useToolbarHook} from './sidebar-toolbar-hook';
 import {useValueRef} from '../../../src/preact/component';
 
@@ -50,7 +50,7 @@ export class BaseElement extends PreactBaseElement {
 
   /** @override */
   updatePropsForRendering(props) {
-    this.getRealChildNodes().map((child) => {
+    getRealChildNodes(this.element).map((child) => {
       if (
         child.nodeName === 'NAV' &&
         child.hasAttribute('toolbar') &&

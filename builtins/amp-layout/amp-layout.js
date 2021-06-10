@@ -16,6 +16,7 @@
 
 import {BaseElement} from '../../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../../src/layout';
+import {getRealChildNodes} from '../../src/core/dom';
 import {registerElement} from '../../src/service/custom-element-registry';
 
 class AmpLayout extends BaseElement {
@@ -36,7 +37,7 @@ class AmpLayout extends BaseElement {
     }
     const container = this.win.document.createElement('div');
     this.applyFillContent(container);
-    this.getRealChildNodes().forEach((child) => {
+    getRealChildNodes(this.element).forEach((child) => {
       container.appendChild(child);
     });
     this.element.appendChild(container);
