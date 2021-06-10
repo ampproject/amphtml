@@ -5698,7 +5698,7 @@ class Validator {
 
   // Updates context's line column index using the current node's position.
   inline void UpdateLineColumnIndex(htmlparser::Node* node) {
-    auto node_line_col = node->PositionInHtmlSrc();
+    auto node_line_col = node->LineColInHtmlSrc();
     if (node_line_col.has_value()) {
       auto [line_no, col_no] = node_line_col.value();
       context_.SetLineCol(line_no >= 0 ? line_no : line_no + 1,
@@ -5736,15 +5736,15 @@ class Validator {
         if (node->IsManufactured()) {
           UpdateLineColumnIndex(node);
           context_.AddError(ValidationError::DISALLOWED_TAG,
-                            LineCol(node->PositionInHtmlSrc()->first + 1,
-                                    node->PositionInHtmlSrc()->second),
+                            LineCol(node->LineColInHtmlSrc()->first + 1,
+                                    node->LineColInHtmlSrc()->second),
                             /*params=*/{"<?"}, /*spec_url=*/"", &result_);
         }
         return true;
       case htmlparser::NodeType::DOCTYPE_NODE:
         if (parse_accounting_.quirks_mode) {
           LineCol linecol(1, 0);
-          auto lc = node->PositionInHtmlSrc();
+          auto lc = node->LineColInHtmlSrc();
           if (lc.has_value()) {
             auto [line, col] = lc.value();
             linecol = LineCol(line, col > 0 ? col - 1 : col);
@@ -5786,10 +5786,10 @@ class Validator {
                 !v.first) {
               std::pair<int, int> json_linecol{0, 0};
               std::pair<int, int> script_linecol{0, 0};
-              if (auto pos = node->PositionInHtmlSrc(); pos.has_value()) {
+              if (auto pos = node->LineColInHtmlSrc(); pos.has_value()) {
                 script_linecol = {pos.value().first, pos.value().second};
               }
-              if (auto pos = node->FirstChild()->PositionInHtmlSrc();
+              if (auto pos = node->FirstChild()->LineColInHtmlSrc();
                   pos.has_value()) {
                 json_linecol = {pos.value().first, pos.value().second};
               }
