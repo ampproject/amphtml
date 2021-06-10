@@ -19,8 +19,8 @@
  * details.
  */
 
+import {devAssertElement, userAssert} from './core/assert';
 import {isFiniteNumber} from './core/types';
-import {userAssert} from './core/assert';
 
 /**
  * @enum {string}
@@ -146,12 +146,19 @@ export function isLayoutSizeFixed(layout) {
 
 /**
  * Whether the tag is an internal (service) AMP tag.
- * @param {!Node|string} tag
+ * @param {!Node|string} nodeOrTagName
  * @return {boolean}
  */
-export function isInternalElement(tag) {
-  const tagName = typeof tag == 'string' ? tag : tag.tagName;
-  return tagName && tagName.toLowerCase().startsWith('i-');
+export function isInternalElement(nodeOrTagName) {
+  /** @type string */
+  let tagName;
+  if (typeof nodeOrTagName == 'string') {
+    tagName = nodeOrTagName;
+  } else if (nodeOrTagName.nodeType === Node.ELEMENT_NODE) {
+    tagName = devAssertElement(nodeOrTagName).tagName;
+  }
+
+  return !!tagName && tagName.toLowerCase().startsWith('i-');
 }
 
 /**
