@@ -17,6 +17,9 @@
 import {createUseStyles} from 'react-jss';
 
 const button = {
+  'textDecoration': 'none',
+  'cursor': 'pointer',
+  'position': 'relative',
   '&:focus': {
     outline: '#0389ff solid 2px',
     outlineOffset: '2px',

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as CSS from './social-share.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {SocialShareIcon} from './social-share-svgs';
@@ -25,7 +24,7 @@ import {getSocialConfig} from './social-share-config';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseQueryString} from '../../../src/core/types/string/url';
 import {useResourcesNotify} from '../../../src/preact/utils';
-import {useStyles} from './social-share.jss';
+import {useStyles} from './component.jss';
 
 const NAME = 'SocialShare';
 const DEFAULT_WIDTH = 60;
@@ -110,7 +109,6 @@ function processChildren(type, children, color, background) {
     return children;
   } else {
     const typeConfig = getSocialConfig(type) || {};
-    const baseStyle = CSS.BASE_STYLE;
     const iconStyle = dict({
       'color': color || typeConfig.defaultColor,
       'backgroundColor': background || typeConfig.defaultBackgroundColor,
@@ -119,7 +117,6 @@ function processChildren(type, children, color, background) {
       <SocialShareIcon
         style={{
           ...iconStyle,
-          ...baseStyle,
           width: '100%',
           height: '100%',
         }}
