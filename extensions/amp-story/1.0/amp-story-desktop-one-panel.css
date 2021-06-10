@@ -18,4 +18,22 @@
 
 
 .i-amphtml-story-desktop-one-panel {
+  --large-desktop-ratio: 69 / 116;
+  --small-desktop-ratio: 3 / 4;
+}
+
+.i-amphtml-story-desktop-one-panel amp-story-page {
+  margin: auto auto !important;
+  aspect-ratio: var(--large-desktop-ratio) !important;
+  height: calc(100vh - 148px) !important;
+  max-height: 752px;
+  width: auto !important; 
+  border-radius: 10px !important;
+}
+
+@media(max-height: 756px) {
+  .i-amphtml-story-desktop-one-panel amp-story-page {
+    aspect-ratio: var(--small-desktop-ratio) !important;
+    height: 100vh !important;
+  }
 }
