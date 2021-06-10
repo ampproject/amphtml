@@ -19,7 +19,12 @@
  * details.
  */
 
-import {dev, devAssert, userAssert} from './log';
+import {
+  devAssert,
+  devAssertNumber,
+  devAssertString,
+  userAssert,
+} from './core/assert';
 import {htmlFor} from './core/dom/static-template';
 import {isExperimentOn} from './experiments';
 import {isFiniteNumber} from './core/types';
@@ -512,11 +517,11 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
     element['style']['display'] = '';
   } else if (layout == Layout.FIXED) {
     setStyles(element, {
-      width: dev().assertString(width),
-      height: dev().assertString(height),
+      width: devAssertString(width),
+      height: devAssertString(height),
     });
   } else if (layout == Layout.FIXED_HEIGHT) {
-    setStyle(element, 'height', dev().assertString(height));
+    setStyle(element, 'height', devAssertString(height));
   } else if (layout == Layout.RESPONSIVE) {
     if (shouldUseAspectRatioCss(toWin(element.ownerDocument.defaultView))) {
       setStyle(
@@ -549,8 +554,8 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
       !IS_ESM && fixIeIntrinsic && element.ownerDocument
         ? transparentPng(
             element.ownerDocument,
-            dev().assertNumber(getLengthNumeral(width)),
-            dev().assertNumber(getLengthNumeral(height))
+            devAssertNumber(getLengthNumeral(width)),
+            devAssertNumber(getLengthNumeral(height))
           )
         : `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
     );
