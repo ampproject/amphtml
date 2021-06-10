@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {SocialShare} from '../social-share';
+import {SocialShare} from '../component';
 import {dict} from '../../../../src/core/types/object';
 import {mount} from 'enzyme';
 
