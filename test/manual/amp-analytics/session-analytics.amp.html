@@ -26,7 +26,9 @@
         <p>Scroll down to see content</p>
         <div id="container">
             Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
-
+            <span id="test1" class="box" data-vars-title="Example request with element level overrides">
+                Click here to generate an event
+              </span>
             <amp-analytics type="_fake_">
                 <script type="application/json">
                     {
@@ -57,7 +59,7 @@
                               "timerSpec": {
                                   "interval": 15
                               },
-                              "enabled": true,
+                              "enabled": false,
                               "request": "endpoint",
                               "extraUrlParams": {
                                 "timer2": true
@@ -77,7 +79,8 @@
                 <script type="application/json">
                     {
                         "requests": {
-                            "endpoint": "https://example.com/analytics?session=${sessionId}&ct=SESSION_TIMESTAMP"
+                            "endpoint": "https://example.com/analytics?session=${sessionId}&ct=SESSION_TIMESTAMP&eventTimestamp=${eventTimestamp(false)}",
+                            "click": "https://example.com/CLICK?session=${sessionId}"
                         },
                         "triggers": {
                             "pageview": {
@@ -96,6 +99,14 @@
                               "request": "endpoint",
                               "extraUrlParams": {
                                 "timer": true
+                              }
+                            },
+                            "click": {
+                              "on": "click",
+                              "selector": "#test1",
+                              "request": "click",
+                              "extraUrlParams": {
+                                "lastEventTimestamp": "${eventTimestamp}"
                               }
                             }
                         },

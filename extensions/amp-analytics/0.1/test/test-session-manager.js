@@ -90,6 +90,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         'creationTimestamp': 1555555555555,
         'lastAccessTimestamp': 1555555555555,
         'count': 1,
+        'lastEventTimestamp': undefined,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -102,19 +103,21 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         'creationTimestamp': 1555555555556,
         'lastAccessTimestamp': 1555555555556,
         'count': 1,
+        'lastEventTimestamp': undefined,
       };
       expect(await sessionManager.get(vendorType2)).to.deep.equals(session2);
       expect(sessionManager.sessions_[vendorType2]).to.deep.equals(session2);
       expect(Object.keys(sessionManager.sessions_).length).to.equal(2);
     });
 
-    it('should update an existing session in memory and storage', async () => {
+    it('should update existing session lastAccessTimestamp in memory and storage', async () => {
       const vendorType = 'myVendorType';
       const session = {
         'sessionId': 5000,
         'creationTimestamp': 1555555555555,
         'lastAccessTimestamp': 1555555555555,
         'count': 1,
+        'lastEventTimestamp': undefined,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -169,6 +172,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         'creationTimestamp': 1555555555555,
         'lastAccessTimestamp': 1555555555555,
         'count': 1,
+        'lastEventTimestamp': undefined,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -184,6 +188,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         'creationTimestamp': 1555557355556,
         'lastAccessTimestamp': 1555557355556,
         'count': 2,
+        'lastEventTimestamp': undefined,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -226,6 +231,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         'creationTimestamp': 1555555555555,
         'lastAccessTimestamp': 1555555555556,
         'count': 1,
+        'lastEventTimestamp': undefined,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
         parsedSession
@@ -254,6 +260,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         'creationTimestamp': 1555557355556,
         'lastAccessTimestamp': 1555557355556,
         'count': 2,
+        'lastEventTimestamp': undefined,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
         parsedSession
@@ -281,12 +288,244 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         'creationTimestamp': 1555555555555,
         'lastAccessTimestamp': 1555555555555,
         'count': 1,
+        'lastEventTimestamp': undefined,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
         parsedSession
       );
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(
         parsedSession
+      );
+    });
+  });
+
+  describe('lastEventTimestamp', () => {
+    let vendorType, session;
+
+    beforeEach(() => {
+      vendorType = 'myVendorType';
+    });
+
+    it('should return no lastEventTimestamp when first time calling', async () => {
+      const lastEventTimestamp = await sessionManager.getSessionValue(
+        vendorType,
+        SESSION_VALUES.LAST_EVENT_TIMESTAMP,
+        true
+      );
+      expect(lastEventTimestamp).to.be.undefined;
+    });
+
+    it('should persist the lastEventTimestamp', async () => {
+      session = {
+        'sessionId': 5000,
+        'creationTimestamp': 1555555555555,
+        'lastAccessTimestamp': 1555555555555,
+        'count': 1,
+        'lastEventTimestamp': 1555555555555,
+      };
+      const lastEventTimestamp = await sessionManager.getSessionValue(
+        vendorType,
+        SESSION_VALUES.LAST_EVENT_TIMESTAMP,
+        true
+      );
+      expect(lastEventTimestamp).to.be.undefined;
+
+      expect(storageSetSpy).to.be.calledTwice;
+      expect(storageSetSpy).to.be.calledWith(
+        'amp-session:' + vendorType,
+        composeStorageSessionValue(session)
+      );
+    });
+
+    it('should return no lastEventTimestamp when session has expired', async () => {
+      // Returned undefined, stores LET in LS
+      await sessionManager.getSessionValue(
+        vendorType,
+        SESSION_VALUES.LAST_EVENT_TIMESTAMP,
+        true
+      );
+
+      // Go past expiration
+      clock.tick(SESSION_MAX_AGE_MILLIS + 1);
+      randomVal = 0.6;
+
+      storageSetSpy.resetHistory();
+      // Expired session resets LET, returns undefined and persists
+      expect(
+        await sessionManager.getSessionValue(
+          vendorType,
+          SESSION_VALUES.LAST_EVENT_TIMESTAMP,
+          true
+        )
+      ).to.be.undefined;
+      session = {
+        'sessionId': 6000,
+        'creationTimestamp': 1555557355556,
+        'lastAccessTimestamp': 1555557355556,
+        'count': 2,
+        'lastEventTimestamp': 1555557355556,
+      };
+      expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
+
+      expect(storageSetSpy).to.be.calledTwice;
+      expect(storageSetSpy).to.be.calledWith(
+        'amp-session:' + vendorType,
+        composeStorageSessionValue(session)
+      );
+
+      // Go past expiration
+      clock.tick(SESSION_MAX_AGE_MILLIS + 1);
+      randomVal = 0.7;
+
+      storageSetSpy.resetHistory();
+      // Expired session resets LET, returns undefined and does not persist
+      expect(
+        await sessionManager.getSessionValue(
+          vendorType,
+          SESSION_VALUES.LAST_EVENT_TIMESTAMP,
+          false
+        )
+      ).to.be.undefined;
+      session = {
+        'sessionId': 7000,
+        'creationTimestamp': 1555559155557,
+        'lastAccessTimestamp': 1555559155557,
+        'count': 3,
+        'lastEventTimestamp': undefined,
+      };
+      expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
+
+      expect(storageSetSpy).to.be.calledOnce;
+      expect(storageSetSpy).to.be.calledWith(
+        'amp-session:' + vendorType,
+        composeStorageSessionValue(session)
+      );
+    });
+
+    it('should return persisted lastEventTimestamp from memory', async () => {
+      session = {
+        'sessionId': 5000,
+        'creationTimestamp': 1555555555555,
+        'lastAccessTimestamp': 1555555555555,
+        'count': 1,
+        'lastEventTimestamp': 1555555555555,
+      };
+      // Returns undefined and persists
+      await sessionManager.getSessionValue(
+        vendorType,
+        SESSION_VALUES.LAST_EVENT_TIMESTAMP,
+        true
+      );
+      clock.tick(1);
+      const lastEventTimestamp = await sessionManager.getSessionValue(
+        vendorType,
+        SESSION_VALUES.LAST_EVENT_TIMESTAMP,
+        true
+      );
+      // Returns persisted value
+      expect(lastEventTimestamp).to.equal(session.lastEventTimestamp);
+
+      // Persists new values
+      session.lastEventTimestamp = session.lastEventTimestamp + 1;
+      session.lastAccessTimestamp = session.lastAccessTimestamp + 1;
+      expect(storageSetSpy).to.be.calledWith(
+        'amp-session:' + vendorType,
+        composeStorageSessionValue(session)
+      );
+      expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
+    });
+
+    it('should return persisted lastEventTimestamp from storage', async () => {
+      storageValue = {
+        ['amp-session:' + vendorType]: {
+          'ssid': 5000,
+          'ct': 1555555555555,
+          'lat': 1555555555555,
+          'c': 1,
+          'let': 1555555555555,
+        },
+      };
+      session = {
+        'sessionId': 5000,
+        'creationTimestamp': 1555555555555,
+        'lastAccessTimestamp': 1555555555556,
+        'count': 1,
+        'lastEventTimestamp': 1555555555556,
+      };
+
+      clock.tick(1);
+
+      const lastEventTimestamp = await sessionManager.getSessionValue(
+        vendorType,
+        SESSION_VALUES.LAST_EVENT_TIMESTAMP,
+        true
+      );
+      expect(lastEventTimestamp).to.equal(1555555555555);
+
+      expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
+      // Once to store session in memeory and once more to update LET
+      expect(storageSetSpy).to.be.calledTwice;
+      expect(storageSetSpy).to.be.calledWith(
+        'amp-session:' + vendorType,
+        composeStorageSessionValue(session)
+      );
+    });
+
+    it('should reset lastEventTimestamp from expired session in storage', async () => {
+      storageValue = {
+        ['amp-session:' + vendorType]: {
+          'ssid': 5000,
+          'ct': 1555555555555,
+          'lat': 1555555555555,
+          'c': 1,
+          'let': 1555555555555,
+        },
+      };
+      session = {
+        'sessionId': 5000,
+        'creationTimestamp': 1555557355556,
+        'lastAccessTimestamp': 1555557355556,
+        'count': 2,
+        'lastEventTimestamp': undefined,
+      };
+
+      clock.tick(SESSION_MAX_AGE_MILLIS + 1);
+
+      let lastEventTimestamp = await sessionManager.getSessionValue(
+        vendorType,
+        SESSION_VALUES.LAST_EVENT_TIMESTAMP,
+        false
+      );
+      expect(lastEventTimestamp).to.equal(undefined);
+
+      expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
+      expect(storageSetSpy).to.be.calledOnce;
+      expect(storageSetSpy).to.be.calledWith(
+        'amp-session:' + vendorType,
+        composeStorageSessionValue(session)
+      );
+
+      clock.tick(SESSION_MAX_AGE_MILLIS + 1);
+      storageSetSpy.resetHistory();
+
+      lastEventTimestamp = await sessionManager.getSessionValue(
+        vendorType,
+        SESSION_VALUES.LAST_EVENT_TIMESTAMP,
+        true
+      );
+      expect(lastEventTimestamp).to.equal(undefined);
+      session = {
+        'sessionId': 5000,
+        'creationTimestamp': 1555559155557,
+        'lastAccessTimestamp': 1555559155557,
+        'count': 3,
+        'lastEventTimestamp': 1555559155557,
+      };
+      expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
+      expect(storageSetSpy).to.be.calledTwice;
+      expect(storageSetSpy).to.be.calledWith(
+        'amp-session:' + vendorType,
+        composeStorageSessionValue(session)
       );
     });
   });

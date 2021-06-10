@@ -42,6 +42,7 @@ export const SESSION_VALUES = {
   SESSION_ID: 'sessionId',
   TIMESTAMP: 'creationTimestamp',
   COUNT: 'count',
+  LAST_EVENT_TIMESTAMP: 'lastEventTimestamp',
 };
 
 /**
@@ -51,6 +52,7 @@ export const SESSION_VALUES = {
 const SESSION_STORAGE_KEYS = {
   SESSION_ID: 'ssid',
   LAST_ACCESS_TIMESTAMP: 'lat',
+  LAST_EVENT_TIMESTAMP: 'let',
   CREATION_TIMESTAMP: 'ct',
   COUNT: 'c',
 };
@@ -64,6 +66,7 @@ const SESSION_STORAGE_KEYS = {
  *  sessionId: number,
  *  creationTimestamp: number,
  *  lastAccessTimestamp: number,
+ *  lastEventTimestamp: number,
  *  count: number,
  * }}
  */
@@ -85,12 +88,33 @@ export class SessionManager {
    * Get the value from the session per the vendor.
    * @param {string|undefined} type
    * @param {SESSION_VALUES} value
+   * @param {boolean|undefined} opt_persist
    * @return {!Promise<number|undefined>}
    */
-  getSessionValue(type, value) {
+  getSessionValue(type, value, opt_persist) {
     return this.get(type).then((session) => {
+      if (value === SESSION_VALUES.LAST_EVENT_TIMESTAMP) {
+        return this.getSessionEventTimestamp_(type, session, opt_persist);
+      }
       return session?.[value];
     });
+  }
+
+  /**
+   * Get the value from the session per the vendor.
+   * @param {string} type
+   * @param {SessionInfoDef} session
+   * @param {boolean} persist
+   * @return {number|undefined}
+   */
+  getSessionEventTimestamp_(type, session, persist) {
+    const lastTimestamp = session.lastEventTimestamp;
+    if (persist) {
+      session.lastEventTimestamp = Date.now();
+      this.sessions_[type] = this.updateSession_(session);
+      this.setSession_(type, session);
+    }
+    return lastTimestamp;
   }
 
   /**
@@ -141,7 +165,7 @@ export class SessionManager {
           type in this.sessions_ &&
           !this.isSessionExpired_(this.sessions_[type])
         ) {
-          session = this.sessions_[type];
+          return this.sessions_[type];
         }
         this.setSession_(type, session);
         this.sessions_[type] = session;
@@ -150,7 +174,7 @@ export class SessionManager {
   }
 
   /**
-   * Check if session has expired and reset values (id, count) if so.
+   * Check if session has expired and reset/update values (id, count) if so.
    * Also update `lastAccessTimestamp`.
    * @param {!SessionInfoDef} session
    * @return {!SessionInfoDef}
@@ -226,7 +250,8 @@ function constructSessionFromStoredValue(storedSession) {
     storedSession[SESSION_STORAGE_KEYS.SESSION_ID],
     storedSession[SESSION_STORAGE_KEYS.CREATION_TIMESTAMP],
     storedSession[SESSION_STORAGE_KEYS.COUNT],
-    storedSession[SESSION_STORAGE_KEYS.LAST_ACCESS_TIMESTAMP]
+    storedSession[SESSION_STORAGE_KEYS.LAST_ACCESS_TIMESTAMP],
+    storedSession[SESSION_STORAGE_KEYS.LAST_EVENT_TIMESTAMP]
   );
 }
 
@@ -240,6 +265,7 @@ export function composeStorageSessionValue(session) {
   obj[SESSION_STORAGE_KEYS.CREATION_TIMESTAMP] = session.creationTimestamp;
   obj[SESSION_STORAGE_KEYS.LAST_ACCESS_TIMESTAMP] = session.lastAccessTimestamp;
   obj[SESSION_STORAGE_KEYS.COUNT] = session.count;
+  obj[SESSION_STORAGE_KEYS.LAST_EVENT_TIMESTAMP] = session.lastEventTimestamp;
   return obj;
 }
 
@@ -249,19 +275,22 @@ export function composeStorageSessionValue(session) {
  * @param {number} creationTimestamp
  * @param {number} count
  * @param {number|undefined} opt_lastAccessTimestamp
+ * @param {number|undefined} opt_lastEventTimestamp
  * @return {!SessionInfoDef}
  */
 function constructSessionInfo(
   sessionId,
   creationTimestamp,
   count,
-  opt_lastAccessTimestamp
+  opt_lastAccessTimestamp,
+  opt_lastEventTimestamp
 ) {
   return {
     'sessionId': sessionId,
     'creationTimestamp': creationTimestamp,
     'count': count,
     'lastAccessTimestamp': opt_lastAccessTimestamp,
+    'lastEventTimestamp': opt_lastEventTimestamp,
   };
 }
 

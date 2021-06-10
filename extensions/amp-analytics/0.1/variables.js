@@ -348,6 +348,27 @@ export class VariableService {
           return sessionManager.getSessionValue(type, SESSION_VALUES.COUNT);
         });
       },
+      'EVENT_TIMESTAMP': (persist) => {
+        // If persist then store this value in local storage
+        // otherwise don't
+        // If opt_lastTimestamp send the last value stored in LS
+        // Otherwise send the current time
+
+        // Use EVENT_TIMESTAMP(true) to send current timestamp and persist
+        // Use EVENT_TIMESTAMP(false, true) to send last value stored and not persist
+        // Use EVENT_TIMESTAMP(true, true) to send last value stored and persist
+
+        // Parameters are parsed as strings. Default it to true.
+        persist = persist === 'false' ? false : true;
+        // Check for stored event, return it, update timestamp w/ this time
+        return this.sessionManagerPromise_.then((sessionManager) => {
+          return sessionManager.getSessionValue(
+            type,
+            SESSION_VALUES.LAST_EVENT_TIMESTAMP,
+            persist
+          );
+        });
+      },
     };
     const perfMacros = isInFie(element)
       ? {}
