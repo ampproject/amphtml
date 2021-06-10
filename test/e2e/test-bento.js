@@ -15,7 +15,7 @@
  */
 
 describes.endtoend('Bento', {fixture: 'bento/index.html'}, async (env) => {
-  it('Applies static layout without v0.js', async () => {
+  it('applies static layout without v0.js', async () => {
     const layoutSizedDefined = await env.controller.findElement(
       '.i-amphtml-layout-size-defined'
     );
