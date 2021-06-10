@@ -280,7 +280,7 @@ class Tokenizer {
 
   // Number of words in a text node. Only considers words separated by ascii
   // whitespace.
-  int num_terms_;
+  int num_terms_ = 0;
 };
 
 }  // namespace htmlparser

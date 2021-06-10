@@ -87,7 +87,7 @@ struct Token {
   Offsets offsets_in_html_src{0, 0};
   // For text node, number of words in the node. Only considers ascii
   // whitespace.
-  int num_terms;
+  int num_terms = 0;
 
   // List of attributes (unsorted in the same order as they appear in html
   // source, with duplicates).
