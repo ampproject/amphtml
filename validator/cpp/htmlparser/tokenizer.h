@@ -277,10 +277,6 @@ class Tokenizer {
   // The start/end index of the current token in HTML.
   int position_;
   int position_end_;
-
-  // Number of words in a text node. Only considers words separated by ascii
-  // whitespace.
-  int num_terms_ = 0;
 };
 
 }  // namespace htmlparser
