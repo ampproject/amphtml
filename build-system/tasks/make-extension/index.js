@@ -177,7 +177,7 @@ async function insertExtensionBundlesConfig(
     ({name}) => name === bundle.name
   );
 
-  const {latestVersion, name, version, options = {}, ...rest} = bundle;
+  const {latestVersion, name, version, ...rest} = bundle;
   extensionBundles.push({
     name,
     version,
@@ -185,8 +185,6 @@ async function insertExtensionBundlesConfig(
       (existingOrNull && existingOrNull.latestVersion) ||
       latestVersion ||
       version,
-    // Add options object only if not empty
-    ...(Object.keys(options).length > 0 ? {options} : null),
     ...rest,
   });
 
@@ -304,11 +302,14 @@ async function makeExtensionFromTemplates(
   const bundleConfig = {
     name: `amp-${name}`,
     version,
-    options: {
-      ...(options.nocss ? null : {hasCss: true}),
-      ...(!options.bento ? null : {wrapper: 'bento'}),
-    },
   };
+
+  if (!options.nocss) {
+    bundleConfig.options = {...bundleConfig.options, hasCss: true};
+  }
+  if (options.bento) {
+    bundleConfig.options = {...bundleConfig.options, wrapper: 'bento'};
+  }
 
   await insertExtensionBundlesConfig(
     bundleConfig,
