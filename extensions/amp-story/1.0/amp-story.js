@@ -1761,6 +1761,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   maybeTriggerViewportWarning_(isLandscape) {
+    if (isDesktopOnePanelExperimentOn(this.win)) {
+      return;
+    }
     if (
       isLandscape ===
       this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE)
