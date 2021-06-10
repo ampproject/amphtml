@@ -71,6 +71,7 @@ import {adplugg} from '../ads/vendors/adplugg';
 import {adpon} from '../ads/vendors/adpon';
 import {adpushup} from '../ads/vendors/adpushup';
 import {adreactor} from '../ads/vendors/adreactor';
+import {ads2bid} from '../ads/vendors/ads2bid';
 import {adsensor} from '../ads/vendors/adsensor';
 import {adservsolutions} from '../ads/vendors/adservsolutions';
 import {adsloom} from '../ads/vendors/adsloom';
@@ -309,6 +310,7 @@ import {zen} from '../ads/vendors/zen';
 import {zergnet} from '../ads/vendors/zergnet';
 import {zucks} from '../ads/vendors/zucks';
 
+
 init(window);
 
 if (getMode().test || getMode().localDev) {
@@ -344,6 +346,7 @@ register('adplugg', adplugg);
 register('adpon', adpon);
 register('adpushup', adpushup);
 register('adreactor', adreactor);
+register('ads2bid', ads2bid);
 register('adsensor', adsensor);
 register('adservsolutions', adservsolutions);
 register('adsloom', adsloom);

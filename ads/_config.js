@@ -181,6 +181,10 @@ const adConfig = jsonConfiguration({
 
   'adreactor': {},
 
+  'ads2bid': {
+    renderStartImplemented: true,
+  },
+
   'adsensor': {
     prefetch: 'https://wfpscripts.webspectator.com/amp/adsensor-amp.js',
     clientIdScope: 'amp_ecid_adensor',
