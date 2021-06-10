@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-// TODO(alanorozco): Share these across components, make them JSS.
+import {createUseStyles} from 'react-jss';
 
+// TODO(alanorozco): Share these across components.
 export const fillStretch = {
   'position': 'relative',
   'width': '100%',
@@ -29,3 +30,12 @@ export const fillContentOverlay = {
   'bottom': 0,
   'top': 0,
 };
+
+const JSS = {
+  fillStretch,
+  fillContentOverlay,
+};
+
+// useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
+// eslint-disable-next-line local/no-export-side-effect
+export const useStyles = createUseStyles(JSS);
