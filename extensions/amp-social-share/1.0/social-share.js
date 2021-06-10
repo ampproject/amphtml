@@ -33,7 +33,7 @@ const DEFAULT_TARGET = '_blank';
 const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
 
 /**
- * @param {!SocialSharePropsDef} props
+ * @param {!SocialShareDef.Props} props
  * @return {PreactDef.Renderable}
  */
 export function SocialShare({
