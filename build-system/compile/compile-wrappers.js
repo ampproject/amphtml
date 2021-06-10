@@ -99,18 +99,14 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
     }
     priority = {p: 'high'};
   }
-  return JSON.stringify({
-    // Use a numeric value instead of boolean. "m" stands for "module"
-    m: isModule ? 1 : 0,
-    ev: version,
-    v: VERSION,
-    n: name,
-    l: latest,
-    ...priority,
-    // Extension callback. We set as __FUNCTION__ initially because we serialize
-    // into JSON, and later remove quotes so we can insert a Javascript function.
-    f: '__FUNCTION__',
-  }).replace('"__FUNCTION__"', '(function(AMP,_){<%= contents %>})');
+  // Use a numeric value instead of boolean. "m" stands for "module"
+  const m = isModule ? 1 : 0;
+  return (
+    `(self.AMP=self.AMP||[]).push({n:"${name}",ev:"${version}",l:${latest},` +
+    `${priority}` +
+    `v:"${VERSION}",m:${m},f:(function(AMP,_){\n` +
+    '<%= contents %>\n})});'
+  );
 }
 
 exports.none = '<%= contents %>';
