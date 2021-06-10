@@ -243,26 +243,23 @@ export class AmpRender extends BaseElement {
             });
           }
         ).then(() => {
-          let containerHeight;
-          this.measureMutateElement(
-            () => {
-              containerHeight = this.element.querySelector(
-                '[i-amphtml-rendered]'
-              )./*OK*/ scrollHeight;
-            },
-            () => {
-              return this.attemptChangeHeight(containerHeight)
-                .then(() => {
-                  this.togglePlaceholder(false);
-                  setStyles(this.element, {
-                    'overflow': '',
-                  });
-                })
-                .catch(() => {
-                  this.togglePlaceholder(false);
+          // let containerHeight;
+          this.measureElement(
+            () =>
+              this.element.querySelector('[i-amphtml-rendered]')
+                ./*OK*/ scrollHeight
+          ).then((containerHeight) => {
+            return this.attemptChangeHeight(containerHeight)
+              .then(() => {
+                this.togglePlaceholder(false);
+                setStyles(this.element, {
+                  'overflow': '',
                 });
-            }
-          );
+              })
+              .catch(() => {
+                this.togglePlaceholder(false);
+              });
+          });
         });
       },
       'onError': () => {
