@@ -15,7 +15,7 @@
  */
 
 import {AmpAudio} from '../amp-audio';
-import {naturalDimensions_} from '../../../../src/core/dom/layout';
+import {naturalDimensions_} from '../../../../src/static-layout';
 
 describes.realWin(
   'amp-audio',
