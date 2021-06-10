@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-social-share-1.0.css';
 import {Layout} from '../../../src/layout';
-import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
-import {SocialShare} from './social-share';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
 import {getDataParamsFromAttributes} from '../../../src/core/dom';
@@ -31,6 +30,12 @@ import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
+
+/** @const {!JsonObject<string, string>} */
+const DEFAULT_RESPONSIVE_DIMENSIONS = dict({
+  'width': '100%',
+  'height': '100%',
+});
 
 /**
  * @private
@@ -123,7 +128,7 @@ const updateTypeConfig = (element, mutations, prevTypeValue) => {
   return typeConfig;
 };
 
-class AmpSocialShare extends PreactBaseElement {
+class AmpSocialShare extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -144,14 +149,9 @@ class AmpSocialShare extends PreactBaseElement {
     this.element.classList.add(`amp-social-share-${this.ampSocialShareType_}`);
 
     this.renderWithHrefAndTarget_(typeConfig);
-    const responsive =
-      this.element.getAttribute('layout') === Layout.RESPONSIVE && '100%';
-    return dict({
-      'width': responsive || this.element.getAttribute('width'),
-      'height': responsive || this.element.getAttribute('height'),
-      'color': 'currentColor',
-      'background': 'inherit',
-    });
+    if (this.element.getAttribute('layout') === Layout.RESPONSIVE) {
+      return DEFAULT_RESPONSIVE_DIMENSIONS;
+    }
   }
 
   /** @override */
@@ -224,25 +224,6 @@ class AmpSocialShare extends PreactBaseElement {
       });
   }
 }
-
-/** @override */
-AmpSocialShare['Component'] = SocialShare;
-
-/** @override */
-AmpSocialShare['layoutSizeDefined'] = true;
-
-/** @override */
-AmpSocialShare['delegatesFocus'] = true;
-
-/** @override */
-AmpSocialShare['props'] = {
-  'children': {passthroughNonEmpty: true},
-  'tabIndex': {attr: 'tabindex'},
-  'type': {attr: 'type'},
-};
-
-/** @override */
-AmpSocialShare['usesShadowDom'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpSocialShare, CSS);
