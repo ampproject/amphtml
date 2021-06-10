@@ -16,7 +16,7 @@
 import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from './autoplay.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {VideoWrapper} from './video-wrapper';
+import {VideoWrapper} from './component';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
 export class VideoBaseElement extends PreactBaseElement {
