@@ -15,6 +15,7 @@
  */
 
 const fs = require('fs');
+
 const {
   forbiddenTermsGlobal,
   forbiddenTermsSrcInclusive,
@@ -22,6 +23,8 @@ const {
 const {
   getImportResolver,
 } = require('./build-system/babel-config/import-resolver');
+
+const importAliases = getImportResolver().alias;
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -229,10 +232,7 @@ module.exports = {
     'local/vsync': 0,
     'local/window-property-name': 2,
 
-    'module-resolver/use-alias': [
-      'error',
-      {'alias': getImportResolver().alias},
-    ],
+    'module-resolver/use-alias': ['error', {'alias': importAliases}],
     'no-alert': 2,
     'no-cond-assign': 2,
     'no-debugger': 2,
@@ -306,6 +306,47 @@ module.exports = {
       },
     ],
     'sort-destructure-keys/sort-destructure-keys': 2,
+    'import/order': [
+      'error',
+      {
+        // Split up imports groups with exactly one newline
+        'newlines-between': 'always',
+        // Sort imports within each group alphabetically, ignoring case
+        'alphabetize': {
+          'order': 'asc',
+          'caseInsensitive': true,
+        },
+
+        'pathGroups': [
+          // Define each import alias (#core, #preact, etc.) as its own group.
+          ...Object.keys(importAliases).map((alias) => ({
+            // Group imports from `#alias/foobar` and `#alias` together.
+            'pattern': `${alias}{,/**}`,
+            'group': 'internal',
+            'position': 'before',
+          })),
+        ],
+        'pathGroupsExcludedImportTypes': Object.keys(importAliases),
+
+        // Order the input groups first as builtins, then #internal, followed by
+        // same-directory and submodule imports, then relative imports that
+        // reach into parent directories.
+        'groups': [
+          // import * as Preact from '#preact/index'
+          ['builtin', 'external'],
+          'internal',
+          ['index', 'sibling'],
+          'parent',
+        ],
+      },
+    ],
+    'sort-imports': [
+      2,
+      {
+        'allowSeparatedGroups': true,
+        'ignoreDeclarationSort': true,
+      },
+    ],
     'sort-requires/sort-requires': 2,
   },
   'overrides': [
