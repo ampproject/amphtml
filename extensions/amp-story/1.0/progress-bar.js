@@ -27,7 +27,7 @@ import {escapeCssSelectorNth} from '../../../src/core/dom/css-selectors';
 import {hasOwn, map} from '../../../src/core/types/object';
 import {isExperimentOn} from 'src/experiments';
 import {removeChildren} from '../../../src/core/dom';
-import {scale, setImportantStyles} from '../../../src/style';
+import {scale, setImportantStyles} from '../../../src/core/dom/style';
 import {scopedQuerySelector} from '../../../src/core/dom/query';
 
 /**
