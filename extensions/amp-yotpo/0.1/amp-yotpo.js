@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {getIframe} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/core/dom';
 import {userAssert} from '../../../src/log';

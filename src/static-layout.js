@@ -22,7 +22,7 @@ import {
   isLayoutSizeDefined,
   parseLayout,
   parseLength,
-} from './layout';
+} from './core/dom/layout';
 import {
   devAssert,
   devAssertNumber,

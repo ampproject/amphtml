@@ -18,7 +18,7 @@
  * @fileoverview Base layer from which other layers in a story page extend from.
  */
 
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 
 /**
  * Base layer template.

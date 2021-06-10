@@ -24,7 +24,7 @@ import {
   LayoutPriority,
   isInternalElement,
   isLoadingAllowed,
-} from './layout';
+} from './core/dom/layout';
 import {MediaQueryProps} from './core/dom/media-query-props';
 import {ReadyState} from './core/constants/ready-state';
 import {ResourceState} from './service/resource';

@@ -19,8 +19,8 @@
  * details.
  */
 
-import {devAssertElement, userAssert} from './core/assert';
-import {isFiniteNumber} from './core/types';
+import {devAssertElement, userAssert} from '../assert';
+import {isFiniteNumber} from '../types';
 
 /**
  * @enum {string}
