@@ -228,38 +228,34 @@ export class AmpRender extends BaseElement {
           return;
         }
 
-        let height;
+        let componentHeight, contentHeight;
         this.measureMutateElement(
           () => {
-            height = computedStyle(
+            componentHeight = computedStyle(
               this.getAmpDoc().win,
               this.element
             ).getPropertyValue('height');
+            contentHeight = this.element.querySelector(
+              '[i-amphtml-rendered]'
+            )./*OK*/ scrollHeight;
           },
           () => {
             setStyles(this.element, {
               'overflow': 'hidden',
-              'height': height,
+              'height': componentHeight,
             });
           }
         ).then(() => {
-          // let containerHeight;
-          this.measureElement(
-            () =>
-              this.element.querySelector('[i-amphtml-rendered]')
-                ./*OK*/ scrollHeight
-          ).then((containerHeight) => {
-            return this.attemptChangeHeight(containerHeight)
-              .then(() => {
-                this.togglePlaceholder(false);
-                setStyles(this.element, {
-                  'overflow': '',
-                });
-              })
-              .catch(() => {
-                this.togglePlaceholder(false);
+          return this.attemptChangeHeight(contentHeight)
+            .then(() => {
+              this.togglePlaceholder(false);
+              setStyles(this.element, {
+                'overflow': '',
               });
-          });
+            })
+            .catch(() => {
+              this.togglePlaceholder(false);
+            });
         });
       },
       'onError': () => {
