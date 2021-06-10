@@ -56,7 +56,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -194,7 +194,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -285,7 +285,7 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -299,7 +299,7 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -398,7 +398,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -537,7 +537,7 @@
         "amp-inline-gallery-pagination"
       ],
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -560,7 +560,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -603,7 +603,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -829,7 +829,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -837,7 +837,7 @@
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
-      "wrapperName": "none"
+      "wrapper": "none"
     }
   },
   {
@@ -1019,7 +1019,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -1057,7 +1057,7 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -1083,7 +1083,7 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -1127,7 +1127,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -1154,7 +1154,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   },
   {
@@ -1210,7 +1210,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapperName": "bento"
+      "wrapper": "bento"
     }
   }
 ]

@@ -625,7 +625,6 @@ function buildBinaries(extDir, binaries, options) {
         minifiedName: maybeToNpmEsmName(`${name}.js`),
         latestName: '',
         outputFormat: esm ? 'esm' : 'cjs',
-        wrapper: '',
         externalDependencies: external,
         remapDependencies: remap,
       })
@@ -650,24 +649,18 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
   const filename = options.filename || name + '.js';
   const latest = version === latestVersion;
 
-  // Wrapper that either registers the extension or schedules it for execution
-  // after the main binary comes back.
-  // The `function` is wrapped in `()` to avoid lazy parsing it, since it will
-  // be immediately executed anyway.
-  // See https://github.com/ampproject/amphtml/issues/3977
-  let wrapper = wrappers.extension;
-
-  // TODO(alanorozco): I want to name this option "wrapper" instead, but if I do
-  // so, the value is stripped before it gets here idk why
-  const {wrapperName} = options;
-  if (wrapperName) {
-    if (!wrappers[wrapperName]) {
-      throw new Error(
-        `Unknown options.wrapper "${wrapperName}" (${name}:${version})`
-      );
-    }
-    wrapper = wrappers[wrapperName];
+  const {wrapper = 'extension'} = options;
+  if (!wrappers[wrapper]) {
+    throw new Error(
+      `Unknown options.wrapper "${wrapper}" (${name}:${version})\n` +
+        `Expected one of: ${Object.keys(wrappers).join(', ')}`
+    );
   }
+  const wrapperOrFn = wrappers[wrapper];
+  const wrapperString =
+    typeof wrapperOrFn === 'function'
+      ? wrapperOrFn(name, version, latest, argv.esm, options.loadPriority)
+      : wrapperOrFn;
 
   await compileJs(
     extDir + '/',
@@ -677,10 +670,7 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
       toName: `${name}-${version}.max.js`,
       minifiedName: `${name}-${version}.js`,
       latestName: latest ? `${name}-latest.js` : '',
-      wrapper:
-        typeof wrapper === 'string'
-          ? wrapper
-          : wrapper(name, version, latest, argv.esm, options.loadPriority),
+      wrapper: wrapperString,
     })
   );
 

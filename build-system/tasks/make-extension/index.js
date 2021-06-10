@@ -55,7 +55,7 @@ let ArgsDef;
  *   name: string,
  *   version: string,
  *   latestVersion?: (string|undefined)
- *   options?: ({hasCss?: boolean, wrapperName?: string}|undefined)
+ *   options?: ({hasCss?: boolean, wrapper?: string}|undefined)
  * }}
  */
 let BundleDef;
@@ -306,7 +306,7 @@ async function makeExtensionFromTemplates(
     version,
     options: {
       ...(options.nocss ? null : {hasCss: true}),
-      ...(!options.bento ? null : {wrapperName: 'bento'}),
+      ...(!options.bento ? null : {wrapper: 'bento'}),
     },
   };
 
