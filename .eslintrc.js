@@ -54,7 +54,6 @@ module.exports = {
     'react',
     'react-hooks',
     'sort-destructure-keys',
-    'sort-imports-es6-autofix',
     'sort-requires',
   ],
   'env': {
@@ -307,14 +306,6 @@ module.exports = {
       },
     ],
     'sort-destructure-keys/sort-destructure-keys': 2,
-    'sort-imports-es6-autofix/sort-imports-es6': [
-      2,
-      {
-        'ignoreCase': false,
-        'ignoreMemberSort': false,
-        'memberSyntaxSortOrder': ['none', 'all', 'multiple', 'single'],
-      },
-    ],
     'sort-requires/sort-requires': 2,
   },
   'overrides': [
