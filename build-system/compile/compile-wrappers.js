@@ -103,12 +103,12 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
   const m = isModule ? 1 : 0;
   return (
     '{' +
+    `m:${m},` +
+    `v:"${VERSION}",` +
     `n:"${name}",` +
     `ev:"${version}",` +
-    `v:"${VERSION}",` +
     `l:${latest},` +
-    `${priority}` +
-    `m:${m},` +
+    priority +
     `f:(function(AMP,_){<%= contents %>})` +
     '}'
   );
