@@ -478,6 +478,14 @@
       ]
     },
     {
+      "url": "examples/visual-tests/amp-story/amp-story-desktop-one-panel.html",
+      "name": "amp-story: desktop one panel",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+    },
+    {
       "url": "examples/visual-tests/amp-story/basic.rtl.html",
       "name": "amp-story: basic (rtl)",
       "viewport": {"width": 320, "height": 480},
