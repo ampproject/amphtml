@@ -82,7 +82,11 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/core/dom/query';
-import {computedStyle, setImportantStyles, toggle} from '../../../src/style';
+import {
+  computedStyle,
+  setImportantStyles,
+  toggle,
+} from '../../../src/core/dom/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
@@ -98,7 +102,8 @@ import {getMode, isModeDevelopment} from '../../../src/mode';
 import {getState} from '../../../src/core/window/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
-import {isRTL, whenUpgradedToCustomElement} from '../../../src/dom';
+import {isRTL} from '../../../src/core/dom';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 import {parseQueryString} from '../../../src/core/types/string/url';
 import {

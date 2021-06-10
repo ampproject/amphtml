@@ -20,10 +20,8 @@ import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {AmpSelector} from '../amp-selector';
 import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(
   'amp-selector',

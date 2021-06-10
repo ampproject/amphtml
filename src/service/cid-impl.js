@@ -34,7 +34,7 @@ import {getCryptoRandomBytesArray} from '../core/types/string/bytes';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
 import {isExperimentOn} from '../../src/experiments';
-import {isIframed} from '../dom';
+import {isIframed} from '../core/dom';
 import {parseJson, tryParseJson} from '../core/types/object/json';
 import {rethrowAsync} from '../core/error';
 import {tryResolve} from '../core/data-structures/promise';

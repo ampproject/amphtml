@@ -22,11 +22,11 @@ import * as BatchedJsonModule from '../../../../src/batched-json';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Services} from '../../../../src/services';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {waitFor} from '../../../../testing/test-helper';
-import {whenUpgradedToCustomElement} from '../../../../src/dom';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(
   'amp-render-v1.0',

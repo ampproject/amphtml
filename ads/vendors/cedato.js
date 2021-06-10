@@ -15,7 +15,7 @@
  */
 
 import {parseUrlDeprecated} from '../../src/url';
-import {setStyles} from '../../src/style';
+import {setStyles} from '../../src/core/dom/style';
 import {validateData} from '../../3p/3p';
 
 /**

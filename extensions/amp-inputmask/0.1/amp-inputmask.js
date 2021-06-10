@@ -16,7 +16,7 @@
 
 import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {TextMask} from './text-mask';
-import {iterateCursor} from '../../../src/dom';
+import {iterateCursor} from '../../../src/core/dom';
 import {listen} from '../../../src/event-helper';
 
 const SERVICE = 'inputmask';

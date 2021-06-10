@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {htmlFor, htmlRefs} from '../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../../src/core/dom/static-template';
 
-describes.sandboxed('Static Template', {}, () => {
+describes.sandboxed('DOM - Static Template', {}, () => {
   describe('html', () => {
     it('generates static html tree', () => {
       const div = htmlFor(document)`<div attr="test"><p class="er"></p></div>`;

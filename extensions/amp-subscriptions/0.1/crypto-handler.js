@@ -19,7 +19,7 @@ import {
   decryptAesGcmImpl,
   safeAesGcmImportKey,
 } from '../../../third_party/subscriptions-project/aes_gcm';
-import {iterateCursor} from '../../../src/dom';
+import {iterateCursor} from '../../../src/core/dom';
 import {padStart} from '../../../src/core/types/string';
 import {toArray} from '../../../src/core/types/array';
 import {tryParseJson} from '../../../src/core/types/object/json';
