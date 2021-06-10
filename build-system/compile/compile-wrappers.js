@@ -16,6 +16,9 @@
 
 const {VERSION} = require('./internal-version');
 
+// TODO(alanorozco): Use real minification
+const removeWhitespace = (str) => str.replace(/\s+/g, '');
+
 // If there is a sync JS error during initial load,
 // at least try to unhide the body.
 // If "AMP" is already an object then that means another runtime has already
@@ -35,6 +38,57 @@ exports.mainBinary =
   's.WebkitAnimation="none;"},1000);throw e};';
 
 exports.extension = function (name, version, latest, isModule, loadPriority) {
+  const payload = extensionPayload(
+    name,
+    version,
+    latest,
+    isModule,
+    loadPriority
+  );
+  return `(self.AMP=self.AMP||[]).push(${payload});`;
+};
+
+const bentoTemplate = removeWhitespace(`
+  (function (p) {
+    self.AMP
+      ? self.AMP.push(p)
+      : document.head.querySelector(
+          'script[src$="v0.js"],script[src$="v0.mjs"]'
+        )
+      ? (self.AMP = [p])
+      : p.f({
+          registerElement: function (n, b, s) {
+            if (s)
+              document.head.appendChild(
+                document.createElement("style")
+              ).textContent = s;
+            customElements.define(n, b.CustomElement(b));
+          },
+        });
+  })(__PAYLOAD__);
+`);
+
+exports.bento = function (name, version, latest, isModule, loadPriority) {
+  const payload = extensionPayload(
+    name,
+    version,
+    latest,
+    isModule,
+    loadPriority
+  );
+  return bentoTemplate.replace('__PAYLOAD__', payload);
+};
+
+/**
+ *
+ * @param {string} name
+ * @param {string} version
+ * @param {string} latest
+ * @param {boolean} isModule
+ * @param {'high'=} loadPriority
+ * @return {string}
+ */
+function extensionPayload(name, version, latest, isModule, loadPriority) {
   let priority = '';
   if (loadPriority) {
     if (loadPriority != 'high') {
@@ -45,11 +99,11 @@ exports.extension = function (name, version, latest, isModule, loadPriority) {
   // Use a numeric value instead of boolean. "m" stands for "module"
   const m = isModule ? 1 : 0;
   return (
-    `(self.AMP=self.AMP||[]).push({n:"${name}",ev:"${version}",l:${latest},` +
+    `{n:"${name}",ev:"${version}",l:${latest},` +
     `${priority}` +
     `v:"${VERSION}",m:${m},f:(function(AMP,_){\n` +
-    '<%= contents %>\n})});'
+    '<%= contents %>\n})}'
   );
-};
+}
 
 exports.none = '<%= contents %>';

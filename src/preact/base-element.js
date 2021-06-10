@@ -17,6 +17,7 @@
 import * as Preact from './index';
 import {ActionTrust} from '../core/constants/action-constants';
 import {AmpEvents} from '../core/constants/amp-events';
+import {BaseElement} from './bento-ce';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Deferred} from '../core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../layout';
@@ -203,7 +204,7 @@ const IS_EMPTY_TEXT_NODE = (node) =>
  *
  * @template API_TYPE
  */
-export class PreactBaseElement extends AMP.BaseElement {
+export class PreactBaseElement extends BaseElement {
   /** @override @nocollapse */
   static R1() {
     return true;
@@ -229,7 +230,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     return !Ctor.usesLoading();
   }
 
-  /** @param {!AmpElement} element */
+  /** @param {!Element} element */
   constructor(element) {
     super(element);
 
@@ -341,7 +342,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   buildCallback() {
     const Ctor = this.constructor;
 
-    this.observer = new MutationObserver(this.checkMutations_.bind(this));
+    this.observer = new MutationObserver((rs) => this.checkMutations_(rs));
     const props = Ctor['props'];
     const childrenInit = checkPropsFor(props, HAS_SELECTOR)
       ? CHILDREN_MUTATION_INIT
@@ -636,8 +637,9 @@ export class PreactBaseElement extends AMP.BaseElement {
             SERVICE_SLOT_ATTRS
           );
           shadowRoot.appendChild(serviceSlot);
-          this.getPlaceholder()?.setAttribute('slot', SERVICE_SLOT_NAME);
-          this.getFallback()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          // TODO(alanorozco): Should these methods be standalone functions?
+          this.getPlaceholder?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getFallback?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
         }
         this.container_ = container;
 
@@ -662,7 +664,12 @@ export class PreactBaseElement extends AMP.BaseElement {
       } else {
         const container = doc.createElement('i-amphtml-c');
         this.container_ = container;
-        this.applyFillContent(container);
+        // Callee would usually be this.applyFillContent(), but it's absent from
+        // the methods present on the Bento CE implementation.
+        // TODO(alanorozco): Hollow-out BaseElement to be as uniform as possible.
+        // For example, applyFillContent() could be a standalone helper function.
+        // https://github.com/ampproject/amphtml/pull/30275/files#r492222921
+        container.classList.add('i-amphtml-fill-content');
         if (!isDetached) {
           this.element.appendChild(container);
         }
@@ -1074,6 +1081,18 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
 }
 
 /**
+ * @param {Element} element
+ * @return {Array<Node>}
+ */
+function getChildNodes(element) {
+  if (element.getRealChildNodes) {
+    // AMP only
+    return element.getRealChildNodes();
+  }
+  return toArray(element.childNodes);
+}
+
+/**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!Object} props
  * @param {!Object} propDefs
@@ -1087,9 +1106,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     // as separate properties. Thus in a carousel the plain "children" are
     // slides, and the "arrowNext" children are passed via a "arrowNext"
     // property.
-    const nodes = element.getRealChildNodes
-      ? element.getRealChildNodes()
-      : toArray(element.childNodes);
+    const nodes = getChildNodes(element);
     for (let i = 0; i < nodes.length; i++) {
       const childElement = nodes[i];
       const match = matchChild(childElement, propDefs);
@@ -1161,7 +1178,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       devAssert(Ctor['usesShadowDom']);
       // Use lazy loading inside the passthrough by default due to too many
       // elements.
-      value = element.getRealChildNodes().every(IS_EMPTY_TEXT_NODE)
+      value = getChildNodes(element).every(IS_EMPTY_TEXT_NODE)
         ? null
         : [<Slot loading={Loading.LAZY} />];
     } else if (def.attr) {

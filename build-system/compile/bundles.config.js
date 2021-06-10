@@ -31,6 +31,17 @@ exports.jsBundles = {
     destDir: './build/',
     minifiedDestDir: './build/',
   },
+  'custom-elements-polyfill.js': {
+    srcDir: 'src/polyfills/',
+    srcFilename: 'custom-elements-entrypoint.js',
+    destDir: './dist',
+    minifiedDestDir: './dist',
+    options: {
+      toName: 'custom-elements-polyfill.max.js',
+      includePolyfills: false,
+      minifiedName: 'custom-elements-polyfill.js',
+    },
+  },
   'alp.max.js': {
     srcDir: './ads/alp/',
     srcFilename: 'install-alp.js',

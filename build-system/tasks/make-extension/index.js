@@ -55,7 +55,7 @@ let ArgsDef;
  *   name: string,
  *   version: string,
  *   latestVersion?: (string|undefined)
- *   options?: ({hasCss: boolean}|undefined)
+ *   options?: ({hasCss?: boolean, wrapperName?: string}|undefined)
  * }}
  */
 let BundleDef;
@@ -177,7 +177,7 @@ async function insertExtensionBundlesConfig(
     ({name}) => name === bundle.name
   );
 
-  const {latestVersion, name, version, ...rest} = bundle;
+  const {latestVersion, name, version, options = {}, ...rest} = bundle;
   extensionBundles.push({
     name,
     version,
@@ -185,6 +185,8 @@ async function insertExtensionBundlesConfig(
       (existingOrNull && existingOrNull.latestVersion) ||
       latestVersion ||
       version,
+    // Add options object only if not empty
+    ...(Object.keys(options).length > 0 ? {options} : null),
     ...rest,
   });
 
@@ -302,11 +304,11 @@ async function makeExtensionFromTemplates(
   const bundleConfig = {
     name: `amp-${name}`,
     version,
+    options: {
+      ...(options.nocss ? null : {hasCss: true}),
+      ...(!options.bento ? null : {wrapperName: 'bento'}),
+    },
   };
-
-  if (!options.nocss) {
-    bundleConfig.options = {hasCss: true};
-  }
 
   await insertExtensionBundlesConfig(
     bundleConfig,

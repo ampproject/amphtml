@@ -13,10 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function (AMP) {
-  AMP.registerTemplate(TAG, AmpMustache);
-})(self.AMP);
-
-(AMP => {
-  AMP.registerElement('amp-gist', AmpGist);
-})(self.AMP);
+AMP.registerTemplate(TAG, AmpMustache);
+AMP.registerElement('amp-gist', AmpGist);
+AMP.registerBentoElement('amp-foo', AmpFoo, class {});

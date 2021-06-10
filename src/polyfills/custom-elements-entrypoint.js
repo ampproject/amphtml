@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-AMP.extension('amp-mustache', '0.2', function (AMP) {
-  AMP.registerTemplate(TAG, AmpMustache);
-});
+import {install} from './custom-elements';
 
-AMP.extension('amp-gist', '0.1', (AMP) => {
-  AMP.registerElement('amp-gist', AmpGist);
-});
-
-AMP.extension('amp-foo', '0.1', (AMP) =>
-  AMP.registerBentoElement('amp-foo', AmpFoo, class {})
-);
+install(self);
