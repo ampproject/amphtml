@@ -141,7 +141,7 @@ export class Criteria {
   static meetsTreeShapeCriteria(element, ampdoc) {
     if (
       element.tagName === 'IMG' &&
-      closestAncestorElementBySelector('AMP-IMG')
+      closestAncestorElementBySelector(element, 'amp-img')
     ) {
       // Images that are a child of an AMP-IMG do not need additional treatment.
       return false;

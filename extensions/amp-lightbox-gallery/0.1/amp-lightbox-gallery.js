@@ -363,8 +363,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.mutateElement(() => {
       const {length} = this.elementsMetadata_[lightboxGroupId];
       this.maybeEnableMultipleItemControls_(length);
-      const owners = Services.ownersForDoc(this.element);
-      owners./*OK*/ scheduleUnlayout(this.element, this.carousel_);
+      Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
+        this.element,
+        this.carousel_
+      );
       toggle(this.carousel_, true);
     });
   }
@@ -936,6 +938,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     };
 
     const mutate = () => {
+      if (enter) {
+        Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
+          this.element,
+          this.carousel_
+        );
+      }
+
       toggle(carousel, enter);
       // Undo opacity 0 from `openLightboxGallery_`
       setStyle(this.element, 'opacity', '');
@@ -1007,6 +1016,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   fade_(fadeIn) {
     return this.mutateElement(() => {
       if (fadeIn) {
+        Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
+          this.element,
+          this.carousel_
+        );
         toggle(dev().assertElement(this.carousel_), true);
         toggle(this.element, true);
       }
@@ -1250,6 +1263,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   closeGallery_() {
     return this.mutateElement(() => {
       this.container_.removeAttribute('gallery-view');
+      Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
+        this.element,
+        this.carousel_
+      );
       toggle(dev().assertElement(this.carousel_), true);
       this.updateDescriptionBox_();
     });
