@@ -281,6 +281,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Adpon](../../ads/vendors/adpon.md)
 -   [Adpushup](../../ads/vendors/adpushup.md)
 -   [AdReactor](../../ads/vendors/adreactor.md)
+-   [Ads2Bid](../../ads/vendors/ads2bid.md)
 -   [AdSense](../../ads/google/adsense.md)
 -   [AdSensor](../../ads/vendors/adsensor.md)
 -   [AdServSolutions](../../ads/vendors/adservsolutions.md)
