@@ -16,7 +16,7 @@
 
 import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
 import {parseJson} from '../../src/core/types/object/json';
-import {setStyle, setStyles} from '../../src/style';
+import {setStyle, setStyles} from '../../src/core/dom/style';
 
 /*
  * How to develop:

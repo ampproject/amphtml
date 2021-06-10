@@ -18,11 +18,9 @@ import '../amp-carousel';
 import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {user} from '../../../../src/log';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 describes.realWin(
   'test-scrollable-carousel',
   {

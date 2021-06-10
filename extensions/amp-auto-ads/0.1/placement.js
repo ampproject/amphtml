@@ -24,13 +24,11 @@ import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
 } from '../../../src/core/dom/query';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {measurePageLayoutBox} from './measure-page-layout-box';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /** @const */
 const TAG = 'amp-auto-ads';

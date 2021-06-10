@@ -19,7 +19,10 @@ import {ACTIONS, SENTINEL} from '../amp-onetap-google';
 import {AmpDoc} from '../../../../src/service/ampdoc-impl';
 import {BaseElement} from '../../../../src/base-element';
 import {Services} from '../../../../src/services';
-import {createElementWithAttributes, waitForChild} from '../../../../src/dom';
+import {
+  createElementWithAttributes,
+  waitForChild,
+} from '../../../../src/core/dom';
 import {loadPromise} from '../../../../src/event-helper';
 import {macroTask} from '../../../../testing/yield';
 import {user} from '../../../../src/log';

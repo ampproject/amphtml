@@ -1,5 +1,5 @@
 import {devAssert} from './log';
-import {isConnectedNode, rootNodeFor} from './dom';
+import {isConnectedNode, rootNodeFor} from './core/dom';
 import {isElement} from './core/types';
 import {toArray} from './core/types/array';
 

@@ -23,7 +23,7 @@ import {Keys} from '../../../../src/core/constants/key-codes';
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
-import {getStyle} from '../../../../src/style';
+import {getStyle} from '../../../../src/core/dom/style';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-share-menu', {amp: true}, (env) => {

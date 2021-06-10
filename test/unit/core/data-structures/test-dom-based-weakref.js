@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {DomBasedWeakRef} from '../../../../src/core/dom/weakref';
+import {DomBasedWeakRef} from '../../../../src/core/data-structures/dom-based-weakref';
 
-describes.realWin('DOM - DOM-based weakref', {}, (env) => {
+describes.realWin('data structures - DOM-based weakref', {}, (env) => {
   let element;
   beforeEach(() => {
     element = document.createElement('div');

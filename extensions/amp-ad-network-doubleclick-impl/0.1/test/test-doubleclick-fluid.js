@@ -21,7 +21,7 @@
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {SafeframeHostApi, removeSafeframeListener} from '../safeframe-host';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {utf8Encode} from '../../../../src/core/types/string/bytes';
 
 /**

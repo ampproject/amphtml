@@ -29,7 +29,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {setStyle, setStyles} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 
 const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
 
@@ -699,9 +699,11 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   updateTranslateX_(element, percentage) {
-    setStyles(dev().assertElement(element), {
-      transform: `translateX(${percentage * 100}%)`,
-    });
+    setStyle(
+      dev().assertElement(element),
+      'transform',
+      `translateX(${percentage * 100}%)`
+    );
   }
 
   /** @override */

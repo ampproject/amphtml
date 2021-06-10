@@ -32,7 +32,7 @@ import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent} from '../../../src/dom';
+import {dispatchCustomEvent} from '../../../src/core/dom';
 import {htmlFor} from '../../../src/static-template';
 import {
   layoutRectFromDomRect,
@@ -42,8 +42,8 @@ import {numeric} from '../../../src/transition';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {px, scale, setStyles, translate} from '../../../src/style';
+} from '../../../src/core/dom/size-observer';
+import {px, scale, setStyles, translate} from '../../../src/core/dom/style';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';

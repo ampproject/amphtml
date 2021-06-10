@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {computedStyle} from './style';
+import {computedStyle} from './core/dom/style';
 import {dev} from './log';
 import {getParentWindowFrameElement} from './service';
 

@@ -29,7 +29,7 @@ import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {isAmp4Email} from '../format';
 import {isArray, toArray} from '../core/types/array';
-import {isEnabled} from '../dom';
+import {isEnabled} from '../core/dom';
 import {isFiniteNumber} from '../core/types';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error-reporting';

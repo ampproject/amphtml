@@ -49,7 +49,7 @@ import {
   sraBlockCallbackHandler,
 } from '../sra-utils';
 import {Xhr} from '../../../../src/service/xhr-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {devAssert} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 import {utf8Decode, utf8Encode} from '../../../../src/core/types/string/bytes';

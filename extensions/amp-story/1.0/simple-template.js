@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {LocalizedStringId} from '../../../src/localized-strings'; // eslint-disable-line no-unused-vars
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {hasOwn} from '../../../src/core/types/object';

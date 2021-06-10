@@ -30,7 +30,7 @@ import {getIframe} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {redispatch} from '../../../src/iframe-video';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 
 const TAG = 'amp-viqeo-player';
 

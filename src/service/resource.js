@@ -22,7 +22,7 @@ import {
   isBlockedByConsent,
   reportError,
 } from '../error-reporting';
-import {computedStyle, toggle} from '../style';
+import {computedStyle, toggle} from '../core/dom/style';
 import {dev, devAssert} from '../log';
 import {
   layoutRectLtwh,
