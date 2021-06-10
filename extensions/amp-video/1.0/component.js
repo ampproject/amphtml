@@ -42,7 +42,7 @@ import {
   useState,
 } from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
-import {useStyles} from './video-wrapper.css';
+import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
 /**
@@ -380,7 +380,7 @@ function Autoplay({
           aria-label={(metadata && metadata.title) || 'Unmute video'}
           tabindex="0"
           className={objstr({
-            [classes.autoplayMaskButton]: true,
+            [autoplayClasses.autoplayMaskButton]: true,
             [classes.fillContentOverlay]: true,
           })}
           onClick={onOverlayClick}
