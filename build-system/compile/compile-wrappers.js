@@ -92,20 +92,25 @@ exports.bento = function (name, version, latest, isModule, loadPriority) {
  * @return {string}
  */
 function extensionPayload(name, version, latest, isModule, loadPriority) {
-  let priority;
+  let priority = '';
   if (loadPriority) {
     if (loadPriority != 'high') {
       throw new Error('Unsupported loadPriority: ' + loadPriority);
     }
-    priority = {p: 'high'};
+    priority = 'p:"high",';
   }
   // Use a numeric value instead of boolean. "m" stands for "module"
   const m = isModule ? 1 : 0;
   return (
-    `(self.AMP=self.AMP||[]).push({n:"${name}",ev:"${version}",l:${latest},` +
+    '{' +
+    `n:"${name}",` +
+    `ev:"${version}",` +
+    `v:"${VERSION}",` +
+    `l:${latest},` +
     `${priority}` +
-    `v:"${VERSION}",m:${m},f:(function(AMP,_){\n` +
-    '<%= contents %>\n})});'
+    `m:${m},` +
+    `f:(function(AMP,_){<%= contents %>})` +
+    '}'
   );
 }
 
