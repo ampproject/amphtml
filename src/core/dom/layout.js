@@ -98,7 +98,7 @@ const videoPlayerTagNameRe =
 
 /**
  * @param {string} s
- * @return {Layout|undefined} Returns undefined in case of failure to parse
+ * @return {!Layout|undefined} Returns undefined in case of failure to parse
  *   the layout string.
  */
 export function parseLayout(s) {
