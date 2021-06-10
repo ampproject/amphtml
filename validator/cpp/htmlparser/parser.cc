@@ -65,7 +65,8 @@ std::unique_ptr<Document> Parse(std::string_view html) {
       ParseOptions{.scripting = true,
                    .frameset_ok = true,
                    .record_node_offsets = true,
-                   .record_attribute_offsets = true});
+                   .record_attribute_offsets = true,
+                   .count_num_terms_in_text_node = true});
   return parser->Parse();
 }
 
@@ -122,7 +123,8 @@ std::unique_ptr<Document> ParseFragment(std::string_view html,
   ParseOptions options = {.scripting = true,
                           .frameset_ok = true,
                           .record_node_offsets = true,
-                          .record_attribute_offsets = true};
+                          .record_attribute_offsets = true,
+                          .count_num_terms_in_text_node = true};
   return ParseFragmentWithOptions(html, options, fragment_parent);
 }
 
@@ -138,6 +140,7 @@ Parser::Parser(std::string_view html, const ParseOptions& options,
       frameset_ok_(options.frameset_ok),
       record_node_offsets_(options.record_node_offsets),
       record_attribute_offsets_(options.record_attribute_offsets),
+      count_num_terms_in_text_node_(options.count_num_terms_in_text_node),
       fragment_(fragment_parent != nullptr),
       context_node_(fragment_parent) {
   insertion_mode_ = std::bind(&Parser::InitialIM, this);
@@ -392,7 +395,6 @@ void Parser::FosterParent(Node* node) {
   if (prev && prev->node_type_ == NodeType::TEXT_NODE &&
       node->node_type_ == NodeType::TEXT_NODE) {
     prev->data_.append(node->data_);
-    prev->num_terms_ += node->num_terms_;
     return;
   }
 
@@ -410,7 +412,6 @@ void Parser::AddText(const std::string& text) {
       text_node->line_col_in_html_src_ = token_.line_col_in_html_src;
       text_node->offsets_in_html_src_ = token_.offsets_in_html_src;
     }
-    text_node->num_terms_ = token_.num_terms;
     FosterParent(text_node);
     return;
   }
@@ -419,7 +420,6 @@ void Parser::AddText(const std::string& text) {
   if (top_node->LastChild() &&
       top_node->LastChild()->node_type_ == NodeType::TEXT_NODE) {
     top_node->LastChild()->data_.append(text);
-    top_node->num_terms_ += token_.num_terms;
     return;
   }
 
@@ -428,7 +428,9 @@ void Parser::AddText(const std::string& text) {
     text_node->line_col_in_html_src_ = token_.line_col_in_html_src;
     text_node->offsets_in_html_src_ = token_.offsets_in_html_src;
   }
-  text_node->num_terms_ = token_.num_terms;
+  if (count_num_terms_in_text_node_) {
+    text_node->num_terms_ = Strings::CountTerms(text);
+  }
   AddChild(text_node);
 }  // Parser::AddText.
 
