@@ -80,7 +80,10 @@ exports.bento = function (name, version, latest, isModule, loadPriority) {
 };
 
 /**
- *
+ * Wrap in a structure that allows lazy execution and provides extension
+ * metadata.
+ * The returned code corresponds to an object. A bundle is not complete until
+ * this object is wrapped in a loader like `AMP.push`.
  * @param {string} name
  * @param {string} version
  * @param {string} latest
@@ -89,21 +92,25 @@ exports.bento = function (name, version, latest, isModule, loadPriority) {
  * @return {string}
  */
 function extensionPayload(name, version, latest, isModule, loadPriority) {
-  let priority = '';
+  let priority;
   if (loadPriority) {
     if (loadPriority != 'high') {
       throw new Error('Unsupported loadPriority: ' + loadPriority);
     }
-    priority = 'p:"high",';
+    priority = {p: 'high'};
   }
-  // Use a numeric value instead of boolean. "m" stands for "module"
-  const m = isModule ? 1 : 0;
-  return (
-    `{n:"${name}",ev:"${version}",l:${latest},` +
-    `${priority}` +
-    `v:"${VERSION}",m:${m},f:(function(AMP,_){\n` +
-    '<%= contents %>\n})}'
-  );
+  return JSON.stringify({
+    // Use a numeric value instead of boolean. "m" stands for "module"
+    m: isModule ? 1 : 0,
+    ev: version,
+    v: VERSION,
+    n: name,
+    l: latest,
+    ...priority,
+    // Extension callback. We set as __FUNCTION__ initially because we serialize
+    // into JSON, and later remove quotes so we can insert a Javascript function.
+    f: '__FUNCTION__',
+  }).replace('"__FUNCTION__"', '(function(AMP,_){<%= contents %>})');
 }
 
 exports.none = '<%= contents %>';
