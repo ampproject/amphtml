@@ -52,7 +52,7 @@ BaseElement['props'] = {
   'secretToken': {attr: 'data-secret-token'},
   'sizes': {attr: 'sizes'},
   'trackId': {attr: 'data-trackid'},
-  'visual': {attr: 'data-visual'},
+  'visual': {attr: 'data-visual', type: 'boolean', default: false},
   'width': {attr: 'width'},
 };
 

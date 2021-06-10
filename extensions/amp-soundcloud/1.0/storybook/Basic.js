@@ -41,7 +41,7 @@ export const track = () => {
       height="240"
       layout="fixed-height"
       trackId={trackid}
-      visual={visual ? 'true' : 'false'}
+      visual={visual}
     />
   );
 };
@@ -62,7 +62,7 @@ export const playlist = () => {
       height="240"
       layout="fixed-height"
       playlistId={playlistid}
-      visual={visual ? 'true' : 'false'}
+      visual={visual}
     />
   );
 };

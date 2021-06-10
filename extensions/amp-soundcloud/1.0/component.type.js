@@ -29,7 +29,7 @@ var SoundcloudDef = {};
  *   secretToken: (string|undefined),
  *   sizes: (string|undefined),
  *   trackId: (string|undefined),
- *   visual: (string|undefined),
+ *   visual: boolean,
  *   width: number,
  * }}
  */
