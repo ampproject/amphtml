@@ -277,10 +277,9 @@ export class LinkerManager {
    * @private
    */
   maybeAppendLinker_(url, name, config) {
-    const /** @type {Array} */ domains = config['destinationDomains'];
     const location = this.urlService_.parse(url);
     if (
-      this.isDomainMatch_(location, name, domains) &&
+      this.isDomainMatch_(location, name, config) &&
       this.isProtocolMatch_(location)
     ) {
       const linkerValue = createLinker(
@@ -300,15 +299,18 @@ export class LinkerManager {
    * Check to see if the url is a match for the given set of domains.
    * @param {Location} location
    * @param {string} name Name given in linker config.
-   * @param {?Array} domains
+   * @param {!Object} config
    * @return {boolean}
    */
-  isDomainMatch_(location, name, domains) {
+  isDomainMatch_(location, name, config) {
+    const /** @type {Array} */ domains = config['destinationDomains'];
     const {hostname} = location;
     // Don't append linker for exact domain match, relative urls, or
     // fragments.
     const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
-    if (winHostname === hostname) {
+    const sameDomain = config['sameDomainEnabled'];
+    const sameDomainEnabled = sameDomain && sameDomain == true;
+    if (!sameDomainEnabled && winHostname === hostname) {
       return false;
     }
 
@@ -407,12 +409,11 @@ export class LinkerManager {
 
     for (const linkerName in this.config_) {
       const config = this.config_[linkerName];
-      const /** @type {Array} */ domains = config['destinationDomains'];
 
       const url =
         form.getAttribute('action-xhr') || form.getAttribute('action');
       const location = this.urlService_.parse(url);
-      if (this.isDomainMatch_(location, linkerName, domains)) {
+      if (this.isDomainMatch_(location, linkerName, config)) {
         this.addDataToForm_(form, actionXhrMutator, linkerName);
       }
     }

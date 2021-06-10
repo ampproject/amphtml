@@ -355,6 +355,30 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
         expect(localDomainUrl).to.not.contain('testLinker2=');
       });
     });
+    
+    it('should only allow same domain matching when opt in', async () => {
+      const config = {
+        linkers: {
+          enabled: true,
+          testLinker: {
+            ids: {
+              id: '222',
+            },
+            sameDomainEnabled: true,
+            destinationDomains: ['testdomain.com'],
+          },
+        },
+      };
+
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      await lm.init();
+      windowInterface.getHostname.returns('testdomain.com');
+      // When the window host name matches the target,
+      // the linker should not be applied.
+      const localDomainUrl = clickAnchor('https://testdomain.com/path');
+      expect(localDomainUrl).to.not.contain('testLinker1=');
+      expect(localDomainUrl).to.not.contain('testLinker2=');
+    });
 
     it('should respect default destinationDomains config', () => {
       const config = {
