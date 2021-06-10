@@ -20,7 +20,7 @@ import {AmpEvents} from '../core/constants/amp-events';
 import {BaseElement} from './bento-ce';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Deferred} from '../core/data-structures/promise';
-import {Layout, isLayoutSizeDefined} from '../layout';
+import {Layout, applyFillContent, isLayoutSizeDefined} from '../layout';
 import {Loading} from '../core/loading-instructions';
 import {MediaQueryProps} from '../core/dom/media-query-props';
 import {PauseHelper} from '../core/dom/video/pause-helper';
@@ -213,20 +213,20 @@ export class PreactBaseElement extends BaseElement {
   /** @override @nocollapse */
   static requiresShadowDom() {
     // eslint-disable-next-line local/no-static-this
-    return this['usesShadowDom'];
+    return this['usesShadowDom']; // eslint-disable-line local/restrict-this-access
   }
 
   /** @override @nocollapse */
   static usesLoading() {
     // eslint-disable-next-line local/no-static-this
-    const Ctor = this;
+    const Ctor = this; // eslint-disable-line local/restrict-this-access
     return Ctor['loadable'];
   }
 
   /** @override @nocollapse */
   static prerenderAllowed() {
     // eslint-disable-next-line local/no-static-this
-    const Ctor = this;
+    const Ctor = this; // eslint-disable-line local/restrict-this-access
     return !Ctor.usesLoading();
   }
 
@@ -237,8 +237,8 @@ export class PreactBaseElement extends BaseElement {
     /** @private {!JsonObject} */
     this.defaultProps_ = dict({
       'loading': Loading.AUTO,
-      'onReadyState': this.onReadyState_.bind(this),
-      'onPlayingState': this.updateIsPlaying_.bind(this),
+      'onReadyState': () => this.onReadyState_(),
+      'onPlayingState': () => this.updateIsPlaying_(),
     });
 
     /** @private {!AmpContextDef.ContextType} */
@@ -637,8 +637,12 @@ export class PreactBaseElement extends BaseElement {
             SERVICE_SLOT_ATTRS
           );
           shadowRoot.appendChild(serviceSlot);
-          // TODO(alanorozco): Should these methods be standalone functions?
+          // TODO(alanorozco): Consider updating local/restrict-this-access
+          // so that it ignores the left side of an optional chain opt
+          // (this.getPlaceholder?.())
+          // eslint-disable-next-line local/restrict-this-access
           this.getPlaceholder?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          // eslint-disable-next-line local/restrict-this-access
           this.getFallback?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
         }
         this.container_ = container;
@@ -650,6 +654,7 @@ export class PreactBaseElement extends BaseElement {
         // to create a simple mechanism that would automatically compute
         // `CanRender = false` on undistributed children.
         addGroup(this.element, UNSLOTTED_GROUP, MATCH_ANY, /* weight */ -1);
+        // eslint-disable-next-line local/restrict-this-access
         setGroupProp(this.element, UNSLOTTED_GROUP, CanRender, this, false);
       } else if (lightDomTag) {
         this.container_ = this.element;
@@ -664,12 +669,7 @@ export class PreactBaseElement extends BaseElement {
       } else {
         const container = doc.createElement('i-amphtml-c');
         this.container_ = container;
-        // Callee would usually be this.applyFillContent(), but it's absent from
-        // the methods present on the Bento CE implementation.
-        // TODO(alanorozco): Hollow-out BaseElement to be as uniform as possible.
-        // For example, applyFillContent() could be a standalone helper function.
-        // https://github.com/ampproject/amphtml/pull/30275/files#r492222921
-        container.classList.add('i-amphtml-fill-content');
+        applyFillContent(container);
         if (!isDetached) {
           this.element.appendChild(container);
         }
@@ -791,6 +791,7 @@ export class PreactBaseElement extends BaseElement {
     const keys = Object.keys(current);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
+      // eslint-disable-next-line local/restrict-this-access
       wrapRefProperty(this, api, key);
     }
     this.apiWrapper_ = api;

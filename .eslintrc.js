@@ -196,6 +196,7 @@ module.exports = {
           'mutateProps',
           'registerAction',
           'registerApiAction',
+          'setReadyState',
           'win',
         ],
       },

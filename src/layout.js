@@ -602,6 +602,24 @@ function shouldUseAspectRatioCss(win) {
   return aspectRatioCssCache;
 }
 
+/**
+ * Configures the supplied element to have a "fill content" layout. The
+ * exact interpretation of "fill content" depends on the element's layout.
+ *
+ * If `opt_replacedContent` is specified, it indicates whether the "replaced
+ * content" styling should be applied. Replaced content is not allowed to
+ * have its own paddings or border.
+ *
+ * @param {!Element} element
+ * @param {boolean=} opt_replacedContent
+ */
+export function applyFillContent(element, opt_replacedContent) {
+  element.classList.add('i-amphtml-fill-content');
+  if (opt_replacedContent) {
+    element.classList.add('i-amphtml-replaced-content');
+  }
+}
+
 /** @visibleForTesting */
 export function resetShouldUseAspectRatioCssForTesting() {
   aspectRatioCssCache = null;

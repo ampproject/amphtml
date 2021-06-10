@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust, DEFAULT_ACTION} from './core/constants/action-constants';
-import {Layout, LayoutPriority} from './layout';
+import {Layout, LayoutPriority, applyFillContent} from './layout';
 import {Services} from './services';
 import {devAssert, user, userAssert} from './log';
 import {dispatchCustomEvent} from './core/dom';
@@ -879,12 +879,12 @@ export class BaseElement {
    * @param {!Element} element
    * @param {boolean=} opt_replacedContent
    * @public @final
+   *
+   * TODO(alanorozco): Remove from BaseElement, change users to call
+   * `applyFillContent() directly.
    */
   applyFillContent(element, opt_replacedContent) {
-    element.classList.add('i-amphtml-fill-content');
-    if (opt_replacedContent) {
-      element.classList.add('i-amphtml-replaced-content');
-    }
+    applyFillContent(element, opt_replacedContent);
   }
 
   /**
