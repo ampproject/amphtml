@@ -17,8 +17,8 @@
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
-import {mod} from '../../../src/utils/math';
-import {tryFocus} from '../../../src/dom';
+import {mod} from '../../../src/core/math';
+import {tryFocus} from '../../../src/core/dom';
 import {
   useCallback,
   useContext,
@@ -303,8 +303,8 @@ export function Option({
     keyboardSelectMode,
     multiple: selectorMultiple,
     optionsRef,
-    selected,
     selectOption,
+    selected,
   } = useContext(SelectorContext);
 
   const focus = useCallback(

@@ -15,7 +15,7 @@
  */
 
 import {ownProperty} from '../../../src/core/types/object';
-import {tryFocus} from '../../../src/dom';
+import {tryFocus} from '../../../src/core/dom';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-autocomplete';
@@ -83,7 +83,7 @@ export class AutocompleteBindingInline {
       return null;
     }
 
-    const {value, selectionStart: cursor} = inputEl;
+    const {selectionStart: cursor, value} = inputEl;
     let match, lastMatch;
 
     while ((match = regex.exec(value)) !== null) {

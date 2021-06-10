@@ -19,18 +19,17 @@ import {Deferred} from '../../../src/core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
-import {redispatch} from '../../../src/iframe-video';
-
 import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {redispatch} from '../../../src/iframe-video';
+import {removeElement} from '../../../src/core/dom';
 
 const TAG = 'amp-viqeo-player';
 
@@ -204,8 +203,12 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.element.ownerDocument.createElement('amp-img');
+    const placeholder = this.element.ownerDocument.createElement('img');
     this.propagateAttributes(['aria-label'], placeholder);
+    this.applyFillContent(placeholder);
+    placeholder.setAttribute('loading', 'lazy');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {
       placeholder.setAttribute(
         'alt',
@@ -218,10 +221,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
       'src',
       `https://cdn.viqeo.tv/preview/${encodeURIComponent(this.videoId_)}.jpg`
     );
-    placeholder.setAttribute('layout', 'fill');
-    placeholder.setAttribute('placeholder', '');
-    placeholder.setAttribute('referrerpolicy', 'origin');
-    this.applyFillContent(placeholder);
+
     return placeholder;
   }
 

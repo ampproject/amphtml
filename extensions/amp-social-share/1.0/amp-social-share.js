@@ -21,12 +21,12 @@ import {Services} from '../../../src/services';
 import {SocialShare} from './social-share';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes} from '../../../src/core/dom';
 import {getSocialConfig} from './social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/core/types/string/url';
-import {toWin} from '../../../src/types';
-import {toggle} from '../../../src/style';
+import {toWin} from '../../../src/core/window';
+import {toggle} from '../../../src/core/dom/style';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

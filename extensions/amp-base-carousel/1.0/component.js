@@ -29,9 +29,9 @@ import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
 import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
 import {forwardRef, toChildArray} from '../../../src/preact/compat';
-import {isRTL} from '../../../src/dom';
-import {mod} from '../../../src/utils/math';
-import {toWin} from '../../../src/types';
+import {isRTL} from '../../../src/core/dom';
+import {mod} from '../../../src/core/math';
+import {toWin} from '../../../src/core/window';
 import {
   useCallback,
   useContext,
@@ -133,7 +133,7 @@ function BaseCarouselWithRef(
     setCurrentSlide(globalCurrentSlide);
   }, [globalCurrentSlide, setCurrentSlide]);
 
-  const {slides, setSlides} = carouselContext;
+  const {setSlides, slides} = carouselContext;
 
   const scrollRef = useRef(null);
   const containRef = useRef(null);

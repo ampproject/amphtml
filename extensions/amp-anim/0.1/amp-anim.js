@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
+import * as st from '../../../src/core/dom/style';
 import {dev} from '../../../src/log';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/utils/img';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/core/dom/img';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {propagateObjectFitStyles} from '../../../src/style';
+import {propagateObjectFitStyles} from '../../../src/core/dom/style';
 
 const TAG = 'amp-anim';
 const BUILD_ATTRIBUTES = [

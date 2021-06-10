@@ -27,7 +27,7 @@ import {
   getTopWindow,
   setParentWindow,
 } from './service';
-import {escapeHtml} from './dom';
+import {escapeHtml} from './core/dom';
 import {getMode} from './mode';
 import {install as installAbortController} from './polyfills/abort-controller';
 import {installAmpdocServicesForEmbed} from './service/core-services';
@@ -38,8 +38,8 @@ import {installForChildWin as installIntersectionObserver} from './polyfills/int
 import {installForChildWin as installResizeObserver} from './polyfills/resize-observer';
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
-import {isDocumentReady} from './document-ready';
-import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
+import {isDocumentReady} from './core/document-ready';
+import {layoutRectLtwh, moveLayoutRect} from './core/math/layout-rect';
 import {loadPromise} from './event-helper';
 import {
   px,
@@ -47,9 +47,9 @@ import {
   setImportantStyles,
   setStyle,
   setStyles,
-} from './style';
+} from './core/dom/style';
 import {rethrowAsync} from './core/error';
-import {toWin} from './types';
+import {toWin} from './core/window';
 import {urls} from './config';
 import {whenContentIniLoad} from './ini-load';
 
@@ -618,7 +618,7 @@ export class FriendlyIframeEmbed {
 
         // Offset by scroll top as iframe will be position: fixed.
         const dy = -Services.viewportForDoc(this.iframe).getScrollTop();
-        const {top, left, width, height} = moveLayoutRect(rect, /* dx */ 0, dy);
+        const {height, left, top, width} = moveLayoutRect(rect, /* dx */ 0, dy);
 
         // Offset body by header height to prevent visual jump.
         bodyStyle = {

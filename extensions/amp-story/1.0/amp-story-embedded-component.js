@@ -32,12 +32,8 @@ import {EventType, dispatch} from './events';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
-import {
-  addAttributesToElement,
-  closest,
-  matches,
-  tryFocus,
-} from '../../../src/dom';
+import {addAttributesToElement, tryFocus} from '../../../src/core/dom';
+import {closest, matches} from '../../../src/core/dom/query';
 import {
   createShadowRootWithStyle,
   getSourceOriginForElement,
@@ -47,9 +43,15 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
-import {px, resetStyles, setImportantStyles, toggle} from '../../../src/style';
+
+import {
+  px,
+  resetStyles,
+  setImportantStyles,
+  toggle,
+} from '../../../src/core/dom/style';
 
 /**
  * Action icons to be placed in tooltip.
@@ -1421,7 +1423,7 @@ export class AmpStoryEmbeddedComponent {
       </section>
     `;
     const overlayEls = htmlRefs(tooltipOverlay);
-    const {tooltip, buttonLeft, buttonRight, arrow} =
+    const {arrow, buttonLeft, buttonRight, tooltip} =
       /** @type {!tooltipElementsDef} */ (overlayEls);
 
     this.tooltip_ = tooltip;

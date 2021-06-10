@@ -18,9 +18,9 @@ import {AmpNextPage} from '../amp-next-page';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/core/constants/visibility-state';
 import {getServicePromiseForDoc} from '../../../../src/service';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 import {macroTask} from '../../../../testing/yield';
-import {setStyle} from '../../../../src/style';
+import {setStyle} from '../../../../src/core/dom/style';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const EXAMPLE_PAGE = `

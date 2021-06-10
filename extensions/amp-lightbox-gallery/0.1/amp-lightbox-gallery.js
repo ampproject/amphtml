@@ -34,25 +34,27 @@ import {
   closest,
   closestAncestorElementBySelector,
   elementByTag,
-  getVerticalScrollbarWidth,
   scopedQuerySelectorAll,
-  toggleAttribute,
-} from '../../../src/dom';
-import {clamp} from '../../../src/utils/math';
+} from '../../../src/core/dom/query';
+import {clamp} from '../../../src/core/math';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
 } from './utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
-import {htmlFor} from '../../../src/static-template';
+import {
+  getVerticalScrollbarWidth,
+  toggleAttribute,
+} from '../../../src/core/dom';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error-reporting';
-import {setStyle, setStyles, toggle} from '../../../src/style';
+import {setStyle, setStyles, toggle} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -352,6 +354,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
+   * Show an existing carousel. Ensure it's been unlayed out before displaying again.
    * @param {string} lightboxGroupId
    * @return {!Promise}
    * @private
@@ -360,7 +363,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.mutateElement(() => {
       const {length} = this.elementsMetadata_[lightboxGroupId];
       this.maybeEnableMultipleItemControls_(length);
-      toggle(dev().assertElement(this.carousel_), true);
+      const owners = Services.ownersForDoc(this.element);
+      owners./*OK*/ scheduleUnlayout(this.element, this.carousel_);
+      toggle(this.carousel_, true);
     });
   }
 
@@ -848,7 +853,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.getCurrentElement_()
       .imageViewer.getImpl()
       .then((imageViewer) => {
-        const {width, height} = imageViewer.getImageBoxWithOffset() || {};
+        const {height, width} = imageViewer.getImageBoxWithOffset() || {};
 
         // Check if our imageBox has a width or height. We may be in the
         // gallery view if not, and we do not want to animate.

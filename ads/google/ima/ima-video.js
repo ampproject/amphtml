@@ -16,9 +16,13 @@
 
 import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
-import {camelCaseToTitleCase, setStyle, toggle} from '../../../src/style';
+import {
+  camelCaseToTitleCase,
+  setStyle,
+  toggle,
+} from '../../../src/core/dom/style';
 import {getData} from '../../../src/event-helper';
-import {htmlFor, htmlRefs, svgFor} from '../../../src/static-template';
+import {htmlFor, htmlRefs, svgFor} from '../../../src/core/dom/static-template';
 import {isArray, isObject} from '../../../src/core/types';
 import {loadScript} from '../../../3p/3p';
 import {throttle} from '../../../src/core/types/function';
@@ -291,7 +295,7 @@ function renderElements(elementOrDoc) {
 
   // Buttons toggle SVGs by including two each, one is displayed at a time.
   // See CSS selectors for buttons under .root[data-*].
-  const {'playButton': playButton, 'muteButton': muteButton} = elements;
+  const {'muteButton': muteButton, 'playButton': playButton} = elements;
 
   playButton.appendChild(icons.play(svg));
   playButton.appendChild(icons.pause(svg));
@@ -388,10 +392,10 @@ export function imaVideo(global, data) {
   imaLoadAllowed = true;
 
   const {
+    'fullscreenButton': fullscreenButton,
+    'muteButton': muteButton,
     'playButton': playButton,
     'progress': progress,
-    'muteButton': muteButton,
-    'fullscreenButton': fullscreenButton,
   } = elements;
 
   let mobileBrowser = false;
@@ -592,7 +596,7 @@ function onImaLoadFail() {
  * @visibleForTesting
  */
 export function onOverlayButtonInteract(global) {
-  const {'video': video, 'overlayButton': overlayButton} = elements;
+  const {'overlayButton': overlayButton, 'video': video} = elements;
   if (playbackStarted) {
     // Resart the video
     playVideo();
@@ -862,7 +866,7 @@ export function onContentPauseRequested(global) {
  * @visibleForTesting
  */
 export function onContentResumeRequested() {
-  const {'video': video, 'overlayButton': overlayButton} = elements;
+  const {'overlayButton': overlayButton, 'video': video} = elements;
   adsActive = false;
   addHoverEventToElement(
     /** @type {!Element} */ (video),
@@ -949,9 +953,9 @@ function playerDataTick() {
  */
 export function updateTime(currentTime, duration) {
   const {
-    'time': time,
     'progressLine': progressLine,
     'progressMarker': progressMarker,
+    'time': time,
   } = elements;
   time.textContent = formatTime(currentTime) + ' / ' + formatTime(duration);
   const progressPercent = Math.floor((currentTime / duration) * 100);
@@ -1031,7 +1035,7 @@ function onProgressClickEnd() {
  * @param {!Event} event
  */
 function onProgressMove(event) {
-  const {'video': video, 'progress': progress} = elements;
+  const {'progress': progress, 'video': video} = elements;
   const progressWrapperPosition = getPagePosition(progress);
   const progressListStart = progressWrapperPosition.x;
   const progressListWidth = progress./*OK*/ offsetWidth;

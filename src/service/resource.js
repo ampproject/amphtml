@@ -22,7 +22,7 @@ import {
   isBlockedByConsent,
   reportError,
 } from '../error-reporting';
-import {computedStyle, toggle} from '../style';
+import {computedStyle, toggle} from '../core/dom/style';
 import {dev, devAssert} from '../log';
 import {
   layoutRectLtwh,
@@ -30,8 +30,8 @@ import {
   layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
-} from '../layout-rect';
-import {toWin} from '../types';
+} from '../core/math/layout-rect';
+import {toWin} from '../core/window';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';

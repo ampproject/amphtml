@@ -23,8 +23,9 @@ import {getMode} from '../../../src/mode';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/core/types';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {tryParseJson} from '../../../src/core/types/object/json';
+import {userAssert} from '../../../src/log';
 
 const TYPE = 'facebook';
 
@@ -84,6 +85,13 @@ class AmpFacebook extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    const embedAs = this.element.getAttribute('data-embed-as');
+    userAssert(
+      !embedAs || ['post', 'video', 'comment'].indexOf(embedAs) !== -1,
+      'Attribute data-embed-as for <amp-facebook> value is wrong, should be' +
+        ' "post", "video" or "comment" but was: %s',
+      embedAs
+    );
     const iframe = getIframe(this.win, this.element, TYPE);
     iframe.title = this.element.title || 'Facebook';
     this.applyFillContent(iframe);

@@ -23,7 +23,7 @@ import {
   makeVimeoMessage,
 } from '../vimeo-api';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {dispatchCustomEvent} from '../../../src/dom';
+import {dispatchCustomEvent} from '../../../src/core/dom';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   objOrParseJson,
@@ -63,7 +63,7 @@ function makeMethodMessage(method) {
  * @template T
  */
 export function VimeoWithRef(
-  {videoid, autoplay = false, doNotTrack = false, ...rest},
+  {autoplay = false, doNotTrack = false, videoid, ...rest},
   ref
 ) {
   const origin = useMemo(getVimeoOriginRegExp, []);

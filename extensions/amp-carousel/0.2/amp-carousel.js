@@ -21,15 +21,13 @@ import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
 import {Services} from '../../../src/services';
-import {
-  closestAncestorElementBySelector,
-  dispatchCustomEvent,
-} from '../../../src/dom';
-import {computedStyle} from '../../../src/style';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
+import {computedStyle} from '../../../src/core/dom/style';
 import {createCustomEvent, getDetail, listen} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {htmlFor} from '../../../src/static-template';
+import {dispatchCustomEvent} from '../../../src/core/dom';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 

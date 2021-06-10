@@ -17,12 +17,12 @@
     "url": "https://github.com/ampproject/amphtml/tree/main/validator/js/gulpjs"
   },
   "dependencies": {
-    "amphtml-validator": "1.0.34",
+    "amphtml-validator": "1.0.35",
     "through2": "4.0.2"
   },
   "devDependencies": {
     "gulp": "4.0.2",
-    "mocha": "8.4.0"
+    "mocha": "9.0.0"
   },
   "scripts": {
     "test": " ./node_modules/mocha/bin/mocha",

@@ -22,7 +22,7 @@
 
 import {Deferred} from './core/data-structures/promise';
 import {dev, devAssert} from './log';
-import {toWin} from './types';
+import {toWin} from './core/window';
 
 /**
  * Holds info about a service.
@@ -651,7 +651,7 @@ function isServiceRegistered(holder, id) {
 /** @return {!ServiceHolderDef} */
 function emptyServiceHolderWithPromise() {
   const deferred = new Deferred();
-  const {promise, resolve, reject} = deferred;
+  const {promise, reject, resolve} = deferred;
   promise.catch(() => {}); // avoid uncaught exception when service gets rejected
   return {
     obj: null,

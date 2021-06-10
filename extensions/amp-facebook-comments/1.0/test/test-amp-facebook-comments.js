@@ -15,7 +15,7 @@
  */
 
 import '../amp-facebook-comments';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
 import {resetServiceForTesting} from '../../../../src/service';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
@@ -108,6 +108,21 @@ describes.realWin(
 
       const iframe = element.shadowRoot.querySelector('iframe');
       expect(iframe.getAttribute('name')).to.contain('"locale":"fr_FR"');
+    });
+
+    it('renders with correct embed type', async () => {
+      element = createElementWithAttributes(doc, 'amp-facebook-comments', {
+        'data-href': href,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      const context = JSON.parse(iframe.getAttribute('name'));
+      expect(context.attributes.embedAs).to.equal('comments');
     });
 
     it("container's height is changed", async () => {

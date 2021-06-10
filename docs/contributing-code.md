@@ -32,7 +32,7 @@ Significant changes (e.g. new components or significant changes to behavior) req
 
 -   [ ] _Before you start coding_, [find a guide](#find-a-guide) who you can discuss your change with and who can help guide you through the process.
 -   [ ] Agree to the [OpenJSF Contributor License Agreement (CLA)](#contributor-license-agreement).
--   [ ] File an [Intent-to-implement (I2I)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) GitHub issue and cc your guide on it. The I2I should include:
+-   [ ] File an [Intent-to-implement (I2I)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement.yml) GitHub issue and cc your guide on it. The I2I should include:
     -   A description of the change you plan to implement.
     -   If you are integrating a third-party service, provide a link to the third-party's site and product.
     -   Details on any data collection or tracking that your change might require.
@@ -43,7 +43,7 @@ Significant changes (e.g. new components or significant changes to behavior) req
     -   Familiarize yourself with our [Design Principles](design-principles.md).
     -   Your guide can help you determine if your change requires a design doc and whether it should be brought to a [design review](./design-reviews.md).
 -   [ ] Proceed with the [implementation](#implementation) of your change.
--   [ ] For changes that require approval from the Approvers WG, file an [Intent-to-ship (I2S) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+SHIP&template=intent-to-ship--i2s-.md&title=I2S:%20%3Cyour%20change/update%3E). Indicate which experiment is gating your change and a rollout plan. Once this issue is approved by 3 members of the Approvers WG the rollout plan described in the I2S may proceed.
+-   [ ] For changes that require approval from the Approvers WG, file an [Intent-to-ship (I2S) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+SHIP&template=intent-to-ship.yml). Indicate which experiment is gating your change and a rollout plan. Once this issue is approved by 3 members of the Approvers WG the rollout plan described in the I2S may proceed.
 
 ## Find a guide
 
@@ -171,6 +171,7 @@ These guidelines are specific to the amphtml repository. Other ampproject repos 
     -   When creating a new directory (such as when creating a new AMP extension) the author of the pull request should designate themselves as an Owner of that directory.
     -   Owners of an area may approve other Owners at or below their area of expertise following the normal PR process. To request becoming an Owner create a PR adding yourself to the appropriate OWNERS file and assign/cc a current Owner for that directory.
 -   The list of Owners for a directory can be found in the [OWNERS](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3A"OWNERS"&s=indexed) file in the directory or a parent directory.
+-   Please note that some Owners may be relevant regardless of code location and therefore may include one or more [AMP Working Groups](https://amp.dev/community/governance/#working-groups), such as the groups for [Security & Privacy](https://amp.dev/community/working-groups/security-privacy/) and [Components](https://amp.dev/community/working-groups/components), which can provide guidance on web accessibility.
 
 ## Cherry-picks
 
@@ -194,9 +195,9 @@ We have a well-defined process for handling requests for changes to the **experi
 
 The following outlines the process to request a cherry-pick.
 
--   Ensure there is a [GitHub issue](https://github.com/ampproject/amphtml/issues/new/choose) filed for the problem that needs to be resolved _before_ filing the cherry-pick request issue.
+-   Ensure there is a [bug report](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.yml) filed for the problem, and ensure it is resolved _before_ filing the cherry-pick request.
 -   Escalate the issue to P0 by attaining consensus from one or more members of the [Approvers Working Group (WG)](https://github.com/ampproject/wg-approvers) (if you are a member of this working group, you may not count your voice for consensus purposes)
--   File the cherry-pick request issue using the [Cherry-pick request template](https://github.com/ampproject/amphtml/issues/new?title=%F0%9F%8C%B8%20Cherry%20pick%20request%20for%20%3CYOUR_ISSUE_NUMBER%3E%20into%20%3CRELEASE_ISSUE_NUMBER%3E%20%28Pending%29&template=cherry_pick_template.md). Follow the instructions in the template, providing all the requested data. **Make sure you fill out this issue completely or your cherry-pick may not be seen or acted upon.**
+-   File the cherry-pick request issue using the [Cherry-pick request template](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type:+Release,Cherry-pick:+Beta,Cherry-pick:+Experimental,Cherry-pick:+LTS,Cherry-pick:+Stable&template=cherry-pick-request.yml&title=%F0%9F%8C%B8+Cherry-pick+request+for+%23ISSUE+into+%23RELEASE). Follow the instructions in the template, providing all the requested data. **Make sure you fill out this issue completely or your cherry-pick may not be seen or acted upon.**
 -   Get the necessary approval for your cherry-pick, indicated via comments on the cherry-pick request issue.
     -   For cherry-picks into **experimental**/**beta**, at least one member of the [Approvers WG](https://github.com/orgs/ampproject/teams/wg-approvers/members) must approve the cherry-pick/rollback.
     -   For cherry-picks into **stable**/**lts** at least one member from the [Cherry-Pick Approvers group](https://github.com/orgs/ampproject/teams/cherry-pick-approvers/members) must approve the cherry-pick.

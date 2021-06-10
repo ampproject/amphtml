@@ -42,10 +42,10 @@ import {toArray} from '../../../../../src/core/types/array';
  */
 function createElement(env, container, binding, opts = {}) {
   const {
-    tag = 'p',
     amp = false,
     insertInHead = false,
     insertQuerySelectorAttr = false,
+    tag = 'p',
   } = opts;
   const div = env.win.document.createElement('div');
   div.innerHTML = `<${tag} ${binding}></${tag}>`;
@@ -454,7 +454,7 @@ chromed.run('Bind', {}, function () {
             insertQuerySelectorAttr: useQuerySelector,
           });
 
-          // Makes dom.whenUpgradedToCustomElement() resolve immediately.
+          // Makes whenUpgradedToCustomElement() resolve immediately.
           element.createdCallback = () => {};
 
           const parseAndUpdate = env.sandbox.spy();
@@ -1213,7 +1213,7 @@ chromed.run('Bind', {}, function () {
             insertQuerySelectorAttr: useQuerySelector,
           });
 
-          // Makes dom.whenUpgradedToCustomElement() resolve immediately.
+          // Makes whenUpgradedToCustomElement() resolve immediately.
           element.createdCallback = () => {};
           element.getImpl = () =>
             Promise.resolve({parseAndUpdate: env.sandbox.spy()});

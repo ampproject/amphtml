@@ -24,7 +24,7 @@ import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from '../service';
-import {getState} from '../history';
+import {getState} from '../core/window/history';
 
 /** @private @const {string} */
 const TAG_ = 'History';
@@ -247,7 +247,7 @@ export class History {
    */
   enque_(callback, name) {
     const deferred = new Deferred();
-    const {promise, resolve, reject} = deferred;
+    const {promise, reject, resolve} = deferred;
 
     // TODO(dvoytenko, #8785): cleanup after tracing.
     const trace = new Error('history trace for ' + name + ': ');
@@ -684,7 +684,7 @@ export class HistoryBindingNatural_ {
   wait_() {
     this.assertReady_();
     const deferred = new Deferred();
-    const {resolve, reject} = deferred;
+    const {reject, resolve} = deferred;
     const promise = this.timer_.timeoutPromise(500, deferred.promise);
     this.waitingState_ = {promise, resolve, reject};
     return promise;

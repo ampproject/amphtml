@@ -33,11 +33,11 @@ import {
   dispatchCustomEvent,
   isRTL,
   iterateCursor,
-  scopedQuerySelectorAll,
   toggleAttribute,
-} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
+} from '../../../src/core/dom';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {scopedQuerySelectorAll} from '../../../src/core/dom/query';
 import {toArray} from '../../../src/core/types/array';
 
 /**
@@ -245,7 +245,7 @@ class AmpCarousel extends AMP.BaseElement {
    * }=} options
    */
   goToSlide(index, options = {}) {
-    const {smoothScroll = false, actionSource} = options;
+    const {actionSource, smoothScroll = false} = options;
     this.carousel_.goToSlide(index, {smoothScroll, actionSource});
   }
 

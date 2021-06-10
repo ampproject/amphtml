@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
@@ -153,27 +153,11 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
+    const placeholder = this.win.document.createElement('img');
     this.propagateAttributes(['aria-label'], placeholder);
-    placeholder.setAttribute(
-      'src',
-      'https://www.springboardplatform.com/storage/' +
-        encodeURIComponent(this.domain_) +
-        '/snapshots/' +
-        encodeURIComponent(this.contentId_) +
-        '.jpg'
-    );
-    /** Show default image for playlist */
-    if (this.mode_ == 'playlist') {
-      placeholder.setAttribute(
-        'src',
-        'https://www.springboardplatform.com/storage/default/' +
-          'snapshots/default_snapshot.png'
-      );
-    }
+    this.applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
-    placeholder.setAttribute('layout', 'fill');
     if (placeholder.hasAttribute('aria-label')) {
       placeholder.setAttribute(
         'alt',
@@ -182,6 +166,15 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading video');
     }
+    placeholder.setAttribute(
+      'src',
+      'https://www.springboardplatform.com/storage/' +
+        (this.mode_ == 'playlist'
+          ? 'default/snapshots/default_snapshot.png'
+          : `${encodeURIComponent(this.domain_)}/snapshots/${encodeURIComponent(
+              this.contentId_
+            )}.jpg`)
+    );
     return placeholder;
   }
 }

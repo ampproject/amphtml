@@ -27,12 +27,9 @@ import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {
   closestAncestorElementBySelector,
-  isRTL,
-  iterateCursor,
   scopedQuerySelector,
-  tryFocus,
-} from '../../../src/dom';
-import {computedStyle} from '../../../src/style';
+} from '../../../src/core/dom/query';
+import {computedStyle} from '../../../src/core/dom/style';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
@@ -40,7 +37,8 @@ import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {isRTL, iterateCursor, tryFocus} from '../../../src/core/dom';
 import {once} from '../../../src/core/types/function';
 import {requireExternal} from '../../../src/module';
 
@@ -595,7 +593,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setupStateMachine_(initialState) {
     const sm = new FiniteStateMachine(initialState);
-    const {OVERLAY_OPEN_INPUT, OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, STATIC} =
+    const {OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, STATIC} =
       DatePickerState;
     const noop = () => {};
     sm.addTransition(STATIC, STATIC, noop);
@@ -1221,7 +1219,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       .then((json) => this.parseSrcTemplates_(json))
       .then((parsedTemplates) => {
         if (parsedTemplates) {
-          const {srcTemplates, srcDefaultTemplate} = parsedTemplates;
+          const {srcDefaultTemplate, srcTemplates} = parsedTemplates;
           this.srcTemplates_ = srcTemplates;
           this.srcDefaultTemplate_ = srcDefaultTemplate;
         }

@@ -25,12 +25,12 @@ import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 
 const TAG = 'amp-3d-gltf';
 const TYPE = '3d-gltf';
@@ -252,7 +252,7 @@ export class Amp3dGltf extends AMP.BaseElement {
    * @param {!../layout-rect.LayoutSizeDef} size
    * @private
    */
-  onResized_({width, height}) {
+  onResized_({height, width}) {
     this.sendCommandWhenReady_(
       'setSize',
       dict({'width': width, 'height': height})

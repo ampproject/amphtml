@@ -22,8 +22,8 @@ import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
-  assertDoesNotContainDisplay,
   computedStyle,
   px,
   resetStyles,
@@ -31,16 +31,16 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '../../../src/style';
+} from '../../../src/core/dom/style';
 import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isInFie} from '../../../src/iframe-helper';
 import {toArray} from '../../../src/core/types/array';
-import {tryFocus} from '../../../src/dom';
+import {tryFocus} from '../../../src/core/dom';
 import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 /** @const {string} */
@@ -344,7 +344,7 @@ class AmpLightbox extends AMP.BaseElement {
   finalizeOpen_(callback, trust) {
     const {element} = this;
 
-    const {durationSeconds, openStyle, closedStyle} =
+    const {closedStyle, durationSeconds, openStyle} =
       this.getAnimationPresetDef_();
 
     const props = Object.keys(openStyle);
@@ -893,7 +893,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   maybeSetTransparentBody_() {
-    const {win, element} = this;
+    const {element, win} = this;
     if (!isInFie(element)) {
       return;
     }

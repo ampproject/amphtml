@@ -21,12 +21,17 @@ import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {clamp} from '../../../src/utils/math';
-import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
+import {clamp} from '../../../src/core/math';
+import {closest} from '../../../src/core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
+import {dispatchCustomEvent, tryFocus} from '../../../src/core/dom';
+import {
+  getStyle,
+  setImportantStyles,
+  setStyles,
+} from '../../../src/core/dom/style';
 import {
   numeric,
   px,
@@ -195,7 +200,7 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   handleAction_(invocation) {
-    const {method, args, trust} = invocation;
+    const {args, method, trust} = invocation;
 
     let toExpand = undefined;
     if (method === 'expand') {

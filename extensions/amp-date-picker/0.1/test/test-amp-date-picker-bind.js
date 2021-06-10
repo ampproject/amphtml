@@ -16,7 +16,7 @@
 import '../../../../third_party/react-dates/bundle';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpDatePicker} from '../amp-date-picker';
-import {createElementWithAttributes} from '../../../../src/dom.js';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 
 describes.realWin(
   'amp-date-picker',
@@ -107,7 +107,7 @@ describes.realWin(
 
     describe('bind', () => {
       it('should forward mutations to the date picker state', async () => {
-        const {picker, layoutCallback} = createDatePicker({
+        const {layoutCallback, picker} = createDatePicker({
           src: 'https://localhost:8000/examples/date-picker.json',
         });
         env.sandbox.stub(picker, 'fetchSrc_').resolves();

@@ -29,7 +29,11 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {closest, matches, scopedQuerySelector} from '../../../src/dom';
+import {
+  closest,
+  matches,
+  scopedQuerySelector,
+} from '../../../src/core/dom/query';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
@@ -38,11 +42,13 @@ import {
 } from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
+
 import {renderAsElement} from './simple-template';
-import {setImportantStyles} from '../../../src/style';
+
+import {setImportantStyles} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 
 /** @private @const {string} */

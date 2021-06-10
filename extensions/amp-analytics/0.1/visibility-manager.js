@@ -22,13 +22,13 @@ import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {isArray} from '../../../src/core/types';
-import {isFiniteNumber} from '../../../src/types';
+import {isArray, isFiniteNumber} from '../../../src/core/types';
+
 import {
   layoutPositionRelativeToScrolledViewport,
   layoutRectLtwh,
-} from '../../../src/layout-rect';
-import {rootNodeFor} from '../../../src/dom';
+} from '../../../src/core/math/layout-rect';
+import {rootNodeFor} from '../../../src/core/dom';
 
 const TAG = 'amp-analytics/visibility-manager';
 

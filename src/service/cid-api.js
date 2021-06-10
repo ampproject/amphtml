@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {WindowInterface} from '../window-interface';
+import {WindowInterface} from '../core/window/interface';
 import {dev} from '../log';
 import {dict} from '../core/types/object';
 import {getCookie, setCookie} from '../cookies';

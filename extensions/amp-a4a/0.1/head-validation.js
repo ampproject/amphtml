@@ -20,7 +20,7 @@ import {includes} from '../../../src/core/types/string';
 import {map} from '../../../src/core/types/object';
 import {parseExtensionUrl} from '../../../src/service/extension-script';
 import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
-import {removeElement, rootNodeFor} from '../../../src/dom';
+import {removeElement, rootNodeFor} from '../../../src/core/dom';
 import {urls} from '../../../src/config';
 
 /**
@@ -63,6 +63,7 @@ const EXTENSION_ALLOWLIST = map({
   'amp-fit-text': true,
   'amp-font': true,
   'amp-form': true,
+  'amp-gwd-animation': true,
   'amp-img': true,
   'amp-layout': true,
   'amp-lightbox': true,
@@ -201,7 +202,7 @@ function handleScript(extensions, script) {
  * @param {!Element} link
  */
 function handleLink(fonts, images, link) {
-  const {href, as, rel} = link;
+  const {as, href, rel} = link;
   if (rel === 'preload' && as === 'image') {
     images.push(href);
     return;

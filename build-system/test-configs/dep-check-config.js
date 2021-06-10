@@ -73,7 +73,7 @@ exports.rules = [
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-google-assistant-assistjs/**/*.js->third_party/closure-responding-channel/closure-bundle.js',
-      'src/core/dom/css.js->third_party/css-escape/css-escape.js',
+      'src/core/dom/css-selectors.js->third_party/css-escape/css-escape.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
     ],
@@ -87,13 +87,14 @@ exports.rules = [
       '3p/**->src/core/data-structures/observable.js',
       '3p/**->src/core/data-structures/promise.js',
       '3p/**->src/core/error/index.js',
+      '3p/**->src/core/types/enum.js',
       '3p/**->src/core/types/function/index.js',
       '3p/**->src/core/types/index.js',
       '3p/**->src/core/types/object/index.js',
       '3p/**->src/core/types/string/index.js',
       '3p/**->src/core/types/string/url.js',
       '3p/**->src/log.js',
-      '3p/**->src/style.js',
+      '3p/**->src/core/dom/style.js',
       '3p/**->src/url.js',
       '3p/**->src/config.js',
       '3p/**->src/mode.js',
@@ -120,7 +121,7 @@ exports.rules = [
     filesMatching: 'ads/**/*.js',
     mustNotDependOn: 'src/**/*.js',
     allowlist: [
-      'ads/**->src/utils/dom-fingerprint.js',
+      'ads/**->src/core/dom/fingerprint.js',
       'ads/**->src/core/constants/consent-state.js',
       'ads/**->src/core/error/index.js',
       'ads/**->src/core/types/array.js',
@@ -132,19 +133,19 @@ exports.rules = [
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
-      'ads/**->src/static-template.js',
-      'ads/**->src/style.js',
+      'ads/**->src/core/dom/static-template.js',
+      'ads/**->src/core/dom/style.js',
       'ads/**->src/internal-version.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
       'ads/google/a4a/**->src/consent.js',
-      'ads/google/a4a/**->src/dom.js',
+      'ads/google/a4a/**->src/amp-element-helpers.js',
       'ads/google/a4a/**->src/experiments/index.js',
       'ads/google/a4a/**->src/services.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
-      'ads/google/a4a/utils.js->src/utils/page-layout-box.js',
+      'ads/google/a4a/utils.js->src/core/dom/page-layout-box.js',
       // Some ads need to depend on json.js
       'ads/**->src/core/types/object/json.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
@@ -245,9 +246,15 @@ exports.rules = [
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/component.js',
 
       // Facebook components
+      'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/1.0/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-comments/1.0/base-element.js->extensions/amp-facebook/1.0/facebook-base-element.js',
+      'extensions/amp-facebook-like/1.0/amp-facebook-like.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-like/1.0/base-element.js->extensions/amp-facebook/1.0/facebook-base-element.js',
+      'extensions/amp-facebook-page/1.0/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-page/1.0/base-element.js->extensions/amp-facebook/1.0/facebook-base-element.js',
 
       // VideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
       'extensions/**->extensions/amp-video/1.0/base-element.js',
@@ -331,8 +338,6 @@ exports.rules = [
         'src/service/extension-script.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
-      'extensions/amp-video/0.1/video-cache.js->' +
-        'src/service/extension-script.js',
       'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +

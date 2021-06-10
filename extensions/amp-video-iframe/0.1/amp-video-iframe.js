@@ -19,7 +19,7 @@ import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   VideoEvents,
 } from '../../../src/video-interface';
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {
   SandboxOptions,
   createFrameFor,
@@ -38,12 +38,12 @@ import {
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
-  isFullscreenElement,
   removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {getConsentDataToForward} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {isFullscreenElement} from '../../../src/core/dom/fullscreen';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {measureIntersection} from '../../../src/utils/intersection';
 import {once} from '../../../src/core/types/function';
@@ -171,8 +171,8 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   getMetadata_() {
-    const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
-    const {title, documentElement} = this.getAmpDoc().getRootNode();
+    const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(this.element);
+    const {documentElement, title} = this.getAmpDoc().getRootNode();
 
     return dict({
       'sourceUrl': sourceUrl,
@@ -198,6 +198,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
     const img = new Image();
     img.src = addDataParamsToUrl(poster, element);
+    img.setAttribute('loading', 'lazy');
     img.setAttribute('placeholder', '');
     this.applyFillContent(img);
     return img;

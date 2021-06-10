@@ -16,9 +16,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {cyan, green, red, yellow} = require('../common/colors');
 const {execOrThrow} = require('../common/exec');
 const {getOutput} = require('../common/process');
-const {green, cyan, red, yellow} = require('../common/colors');
 const {log} = require('../common/logging');
 
 /**
@@ -136,10 +136,10 @@ async function cherryPick() {
 
 module.exports = {cherryPick};
 
-cherryPick.description = 'Cherry-picks one or more commits onto a new branch';
+cherryPick.description = 'Cherry-pick one or more commits onto a new branch';
 cherryPick.flags = {
   'commits': 'Comma-delimited list of commit SHAs to cherry-pick',
-  'push': 'If set, will push the created branch to the remote',
-  'remote': 'Remote to refresh tags from (default: origin)',
+  'push': 'If set, push the created branch to the remote',
+  'remote': 'Remote ref to refresh tags from (default: origin)',
   'onto': '13-digit AMP version to cherry-pick onto',
 };

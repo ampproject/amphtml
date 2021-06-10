@@ -25,13 +25,13 @@ import {devAssert, devAssertElement} from '../core/assert';
 import {getFrameOverlayManager} from '../../ads/inabox/frame-overlay-manager.js';
 import {getPositionObserver} from '../../ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {isIframed} from '../dom';
+import {isIframed} from '../core/dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../layout-rect';
-import {px, resetStyles, setImportantStyles} from '../style';
+} from '../core/math/layout-rect';
+import {px, resetStyles, setImportantStyles} from '../core/dom/style';
 import {registerServiceBuilderForDoc} from '../service';
 import {throttle} from '../core/types/function';
 

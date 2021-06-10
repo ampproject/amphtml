@@ -19,7 +19,7 @@ import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent} from '../../../src/dom';
+import {dispatchCustomEvent} from '../../../src/core/dom';
 import {forwardRef} from '../../../src/preact/compat';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
 import {useRef} from '../../../src/preact';
@@ -59,7 +59,7 @@ const PlayerFlags = {
   HIDE_ANNOTATION: 3,
 };
 
-/** @const {!../../../src/dom.CustomEventOptionsDef} */
+/** @const {!../../../src/core/dom.CustomEventOptionsDef} */
 const VIDEO_EVENT_OPTIONS = {bubbles: false, cancelable: false};
 
 /**
@@ -132,7 +132,7 @@ function YoutubeWithRef(
     playerStateRef.current = createDefaultInfo();
   }
 
-  const onMessage = ({data, currentTarget}) => {
+  const onMessage = ({currentTarget, data}) => {
     const parsedData = objOrParseJson(data);
     if (!parsedData) {
       return;

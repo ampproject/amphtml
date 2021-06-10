@@ -22,7 +22,7 @@ import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
   removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -87,14 +87,11 @@ class AmpGfycat extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
+    const placeholder = this.win.document.createElement('img');
     const videoid = dev().assertString(this.videoid_);
+    this.applyFillContent(placeholder);
     this.propagateAttributes(['alt', 'aria-label'], placeholder);
-    placeholder.setAttribute(
-      'src',
-      'https://thumbs.gfycat.com/' + encodeURIComponent(videoid) + '-poster.jpg'
-    );
-    placeholder.setAttribute('layout', 'fill');
+    placeholder.setAttribute('loading', 'lazy');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (this.element.hasAttribute('aria-label')) {
@@ -110,7 +107,10 @@ class AmpGfycat extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading gif');
     }
-    this.applyFillContent(placeholder);
+    placeholder.setAttribute(
+      'src',
+      'https://thumbs.gfycat.com/' + encodeURIComponent(videoid) + '-poster.jpg'
+    );
 
     return placeholder;
   }

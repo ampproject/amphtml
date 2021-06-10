@@ -20,7 +20,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {addAttributesToElement} from '../../../src/dom';
+import {addAttributesToElement} from '../../../src/core/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 export class AmpGoogleAssistantInlineSuggestionBar extends AMP.BaseElement {

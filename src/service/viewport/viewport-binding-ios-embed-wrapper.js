@@ -20,12 +20,12 @@ import {
   ViewportBindingDef,
   marginBottomOfLastChild,
 } from './viewport-binding-def';
-import {computedStyle, px, setImportantStyles} from '../../style';
+import {computedStyle, px, setImportantStyles} from '../../core/dom/style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
-import {layoutRectLtwh} from '../../layout-rect';
-import {waitForBodyOpen} from '../../dom';
-import {whenDocumentReady} from '../../document-ready';
+import {layoutRectLtwh} from '../../core/math/layout-rect';
+import {waitForBodyOpen} from '../../core/dom';
+import {whenDocumentReady} from '../../core/document-ready';
 
 const TAG_ = 'Viewport';
 

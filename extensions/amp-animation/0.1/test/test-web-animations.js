@@ -17,8 +17,8 @@ import {Builder} from '../web-animations';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
 import {Services} from '../../../../src/services';
 import {WebAnimationPlayState} from '../web-animation-types';
-import {closestAncestorElementBySelector} from '../../../../src/dom';
-import {htmlFor, htmlRefs} from '../../../../src/static-template';
+import {closestAncestorElementBySelector} from '../../../../src/core/dom/query';
+import {htmlFor, htmlRefs} from '../../../../src/core/dom/static-template';
 import {isArray, isObject} from '../../../../src/core/types';
 
 import {poll} from '../../../../testing/iframe';
@@ -251,7 +251,7 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
     );
     allowConsoleError(() => {
       expect(() => scanTiming({direction: 'invalid'})).to.throw(
-        /Unknown direction value/
+        /Unknown direction/
       );
     });
   });
@@ -263,9 +263,7 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
       'backwards'
     );
     allowConsoleError(() => {
-      expect(() => scanTiming({fill: 'invalid'})).to.throw(
-        /Unknown fill value/
-      );
+      expect(() => scanTiming({fill: 'invalid'})).to.throw(/Unknown fill/);
     });
   });
 

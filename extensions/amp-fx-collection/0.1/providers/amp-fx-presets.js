@@ -16,11 +16,8 @@
 
 import {FxType} from '../fx-type';
 import {Services} from '../../../../src/services';
-import {
-  assertDoesNotContainDisplay,
-  computedStyle,
-  setStyles,
-} from '../../../../src/style';
+import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
+import {computedStyle, setStyles} from '../../../../src/core/dom/style';
 import {dev, devAssert, userAssert} from '../../../../src/log';
 
 /**
@@ -258,7 +255,7 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      const {viewportHeight, marginStart} = fxElement;
+      const {marginStart, viewportHeight} = fxElement;
       devAssert(fxElement.adjustedViewportHeight);
 
       if (

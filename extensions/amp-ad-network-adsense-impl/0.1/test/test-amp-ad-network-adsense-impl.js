@@ -38,12 +38,12 @@ import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
   createElementWithAttributes,
-} from '../../../../src/dom';
+} from '../../../../src/core/dom';
 import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
-import {toWin} from '../../../../src/types';
+import {toWin} from '../../../../src/core/window';
 import {utf8Decode, utf8Encode} from '../../../../src/core/types/string/bytes';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {

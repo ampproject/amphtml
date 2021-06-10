@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {dict} from '../../../src/core/types/object';
 import {user} from '../../../src/log';
 
@@ -87,14 +87,15 @@ export class AnchorAdStrategy {
    * @private
    */
   placeStickyAd_() {
+    const baseAttributes = this.baseAttributes_;
     const viewportWidth = Services.viewportForDoc(this.ampdoc).getWidth();
     const attributes = /** @type {!JsonObject} */ (
       Object.assign(
         dict(),
-        this.baseAttributes_,
+        baseAttributes,
         dict({
           'width': String(viewportWidth),
-          'height': '100',
+          'height': baseAttributes.height || '100',
         })
       )
     );

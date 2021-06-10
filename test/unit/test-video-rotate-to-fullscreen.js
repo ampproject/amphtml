@@ -41,7 +41,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
     env.win.screen.orientation.type = orientation;
   }
 
-  function fireIntersection({target, boundingClientRect, intersectionRatio}) {
+  function fireIntersection({boundingClientRect, intersectionRatio, target}) {
     ioCallback([
       {
         target,

@@ -54,7 +54,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 
 class AmpPlaybuzz extends AMP.BaseElement {
   /** @param {!AmpElement} element */

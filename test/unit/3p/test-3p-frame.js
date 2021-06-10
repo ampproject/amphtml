@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {DomFingerprint} from '../../../src/core/dom/fingerprint';
 import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {
   addDataAndJsonAttributes_,
   applySandbox,
@@ -85,7 +85,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           return Services.ampdoc(window.document);
         };
 
-        const {innerWidth: width, innerHeight: height} = window;
+        const {innerHeight: height, innerWidth: width} = window;
         div.getIntersectionChangeEntry = function () {
           return {
             time: 1234567888,

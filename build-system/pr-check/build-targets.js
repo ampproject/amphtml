@@ -37,11 +37,7 @@ let buildTargets;
 /**
  * Used to prevent the repeated expansion of globs during PR jobs.
  */
-let lintFiles;
-let htmlFixtureFiles;
-let invalidWhitespaceFiles;
-let presubmitFiles;
-let prettifyFiles;
+const fileLists = {};
 
 /***
  * All of AMP's build targets that can be tested during CI.
@@ -51,6 +47,7 @@ let prettifyFiles;
 const Targets = {
   AVA: 'AVA',
   BABEL_PLUGIN: 'BABEL_PLUGIN',
+  BUILD_SYSTEM: 'BUILD_SYSTEM',
   CACHES_JSON: 'CACHES_JSON',
   DEV_DASHBOARD: 'DEV_DASHBOARD',
   DOCS: 'DOCS',
@@ -59,6 +56,7 @@ const Targets = {
   INTEGRATION_TEST: 'INTEGRATION_TEST',
   INVALID_WHITESPACES: 'INVALID_WHITESPACES',
   LINT: 'LINT',
+  LINT_RULES: 'LINT_RULES',
   OWNERS: 'OWNERS',
   PACKAGE_UPGRADE: 'PACKAGE_UPGRADE',
   PRESUBMIT: 'PRESUBMIT',
@@ -131,6 +129,7 @@ const targetMatchers = {
     }
     return (
       file == 'build-system/tasks/ava.js' ||
+      file.startsWith('build-system/server/') ||
       file.startsWith('build-system/tasks/get-zindex/') ||
       file.startsWith('build-system/tasks/make-extension/') ||
       file.startsWith('build-system/tasks/markdown-toc/') ||
@@ -150,6 +149,19 @@ const targetMatchers = {
       file == 'babel.config.js' ||
       file.startsWith('build-system/babel-plugins/') ||
       file.startsWith('build-system/babel-config/')
+    );
+  },
+  [Targets.BUILD_SYSTEM]: (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file == 'build-system/tasks/check-build-system.js' ||
+      file == 'build-system/tsconfig.json' ||
+      (file.startsWith('build-system') &&
+        (file.endsWith('.js') ||
+          file.endsWith('.ts') ||
+          file.endsWith('.json')))
     );
   },
   [Targets.CACHES_JSON]: (file) => {
@@ -176,9 +188,9 @@ const targetMatchers = {
       return false;
     }
     return (
+      fileLists.linkCheckFiles.includes(file) ||
       file == 'build-system/tasks/check-links.js' ||
-      file.startsWith('build-system/tasks/markdown-toc/') ||
-      (path.extname(file) == '.md' && !file.startsWith('examples/'))
+      file.startsWith('build-system/tasks/markdown-toc/')
     );
   },
   [Targets.E2E_TEST]: (file) => {
@@ -194,7 +206,7 @@ const targetMatchers = {
   },
   [Targets.HTML_FIXTURES]: (file) => {
     return (
-      htmlFixtureFiles.includes(file) ||
+      fileLists.htmlFixtureFiles.includes(file) ||
       file == 'build-system/tasks/validate-html-fixtures.js' ||
       file.startsWith('build-system/test-configs')
     );
@@ -214,7 +226,7 @@ const targetMatchers = {
   },
   [Targets.INVALID_WHITESPACES]: (file) => {
     return (
-      invalidWhitespaceFiles.includes(file) ||
+      fileLists.invalidWhitespaceFiles.includes(file) ||
       file == 'build-system/tasks/check-invalid-whitespaces.js' ||
       file.startsWith('build-system/test-configs')
     );
@@ -224,10 +236,13 @@ const targetMatchers = {
       return false;
     }
     return (
-      lintFiles.includes(file) ||
+      fileLists.lintFiles.includes(file) ||
       file == 'build-system/tasks/lint.js' ||
       file.startsWith('build-system/test-configs')
     );
+  },
+  [Targets.LINT_RULES]: (file) => {
+    return file.endsWith('.eslintrc.js') || file == 'package.json';
   },
   [Targets.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
@@ -240,7 +255,7 @@ const targetMatchers = {
       return false;
     }
     return (
-      presubmitFiles.includes(file) ||
+      fileLists.presubmitFiles.includes(file) ||
       file == 'build-system/tasks/presubmit-checks.js' ||
       file.startsWith('build-system/test-configs')
     );
@@ -248,7 +263,7 @@ const targetMatchers = {
   [Targets.PRETTIFY]: (file) => {
     // OWNERS files can be prettified.
     return (
-      prettifyFiles.includes(file) ||
+      fileLists.prettifyFiles.includes(file) ||
       file == '.prettierrc' ||
       file == '.prettierignore' ||
       file == 'build-system/tasks/prettify.js'
@@ -329,12 +344,8 @@ function determineBuildTargets() {
   if (buildTargets != undefined) {
     return buildTargets;
   }
+  expandFileLists();
   buildTargets = new Set();
-  lintFiles = globby.sync(config.lintGlobs);
-  htmlFixtureFiles = globby.sync(config.htmlFixtureGlobs);
-  invalidWhitespaceFiles = globby.sync(config.invalidWhitespaceGlobs);
-  presubmitFiles = globby.sync(config.presubmitGlobs);
-  prettifyFiles = globby.sync(config.prettifyGlobs);
   const filesChanged = gitDiffNameOnlyMain();
   for (const file of filesChanged) {
     let isRuntimeFile = true;
@@ -378,6 +389,25 @@ function buildTargetsInclude(...targets) {
     determineBuildTargets();
   }
   return Array.from(targets).some((target) => buildTargets.has(target));
+}
+
+/**
+ * Helper that expands some of the config globs used to match files. Called once
+ * at the start in order to avoid repeated glob expansion.
+ */
+function expandFileLists() {
+  const globNames = [
+    'htmlFixtureGlobs',
+    'invalidWhitespaceGlobs',
+    'linkCheckGlobs',
+    'lintGlobs',
+    'presubmitGlobs',
+    'prettifyGlobs',
+  ];
+  for (const globName of globNames) {
+    const fileListName = globName.replace('Globs', 'Files');
+    fileLists[fileListName] = globby.sync(config[globName], {dot: true});
+  }
 }
 
 module.exports = {

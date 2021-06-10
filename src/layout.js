@@ -20,12 +20,12 @@
  */
 
 import {dev, devAssert, userAssert} from './log';
-import {htmlFor} from './static-template';
+import {htmlFor} from './core/dom/static-template';
 import {isExperimentOn} from './experiments';
-import {isFiniteNumber, toWin} from './types';
-import {setStyle, setStyles, toggle} from './style';
-
-import {transparentPng} from './utils/img';
+import {isFiniteNumber} from './core/types';
+import {setStyle, setStyles, toggle} from './core/dom/style';
+import {toWin} from './core/window';
+import {transparentPng} from './core/dom/img';
 
 /**
  * @enum {string}
@@ -107,6 +107,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
   'AMP-PLAYBUZZ': true,
+  'AMP-RENDER': true,
   'AMP-TWITTER': true,
 };
 /**

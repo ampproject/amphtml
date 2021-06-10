@@ -23,10 +23,11 @@ import {
 } from './amp-story-store-service';
 import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert} from '../../../src/log';
-import {escapeCssSelectorNth} from '../../../src/core/dom/css';
+import {escapeCssSelectorNth} from '../../../src/core/dom/css-selectors';
 import {hasOwn, map} from '../../../src/core/types/object';
-import {removeChildren, scopedQuerySelector} from '../../../src/dom';
-import {scale, setImportantStyles} from '../../../src/style';
+import {removeChildren} from '../../../src/core/dom';
+import {scale, setImportantStyles} from '../../../src/core/dom/style';
+import {scopedQuerySelector} from '../../../src/core/dom/query';
 
 /**
  * Transition used to show the progress of a media. Has to be linear so the

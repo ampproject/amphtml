@@ -49,6 +49,8 @@ export function RenderWithRef(
     src = '',
     getJson = DEFAULT_GET_JSON,
     render = DEFAULT_RENDER,
+    ariaLiveValue = 'polite',
+    onLoading,
     onReady,
     onRefresh,
     onError,
@@ -67,6 +69,7 @@ export function RenderWithRef(
       return;
     }
     let cancelled = false;
+    onLoading?.();
     getJson(src)
       .then((data) => {
         if (!cancelled) {
@@ -80,7 +83,7 @@ export function RenderWithRef(
     return () => {
       cancelled = true;
     };
-  }, [getJson, src, onReady, onError]);
+  }, [getJson, src, onLoading, onReady, onError]);
 
   const refresh = useCallback(() => {
     onRefresh?.();
@@ -108,7 +111,11 @@ export function RenderWithRef(
     rendered && typeof rendered == 'object' && '__html' in rendered;
 
   return (
-    <Wrapper {...rest} dangerouslySetInnerHTML={isHtml ? rendered : null}>
+    <Wrapper
+      {...rest}
+      dangerouslySetInnerHTML={isHtml ? rendered : null}
+      aria-live={ariaLiveValue}
+    >
       {isHtml ? null : rendered}
     </Wrapper>
   );

@@ -29,10 +29,11 @@ import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {isAmp4Email} from '../format';
 import {isArray, toArray} from '../core/types/array';
-import {isEnabled} from '../dom';
-import {isFiniteNumber, toWin} from '../types';
+import {isEnabled} from '../core/dom';
+import {isFiniteNumber} from '../core/types';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error-reporting';
+import {toWin} from '../core/window';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -627,7 +628,7 @@ export class ActionService {
     /** @type {?Promise} */
     let currentPromise = null;
     action.actionInfos.forEach((actionInfo) => {
-      const {target, args, method, str} = actionInfo;
+      const {args, method, str, target} = actionInfo;
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
       const invokeAction = () => {
         const node = this.getActionNode_(target);

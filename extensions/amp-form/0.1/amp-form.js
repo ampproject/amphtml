@@ -43,18 +43,18 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   ancestorElementsByTag,
   childElementByAttr,
-  closestAncestorElementBySelector,
+} from '../../../src/core/dom/query';
+import {createCustomEvent} from '../../../src/event-helper';
+import {
   createElementWithAttributes,
   iterateCursor,
-  matches,
   removeElement,
   tryFocus,
-} from '../../../src/dom';
-import {createCustomEvent, listen} from '../../../src/event-helper';
+} from '../../../src/core/dom';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {deepMerge, dict, hasOwn} from '../../../src/core/types/object';
+import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {
   formOrNullForElement,
   getFormAsObject,
@@ -62,7 +62,6 @@ import {
 } from '../../../src/form';
 import {getFormValidator, isCheckValiditySupported} from './form-validators';
 import {getMode} from '../../../src/mode';
-import {getServiceForDocOrNull} from '../../../src/service';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
@@ -73,8 +72,7 @@ import {
   setupInit,
   setupInput,
 } from '../../../src/utils/xhr-utils';
-
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/core/types/object/json';
 
@@ -146,9 +144,6 @@ export class AmpForm {
 
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = Services.ampdoc(this.form_);
-
-    /** @const @private {?AmpFormService} */
-    this.ampFormService_ = getServiceForDocOrNull(this.ampdoc_, TAG);
 
     /** @private {?Promise} */
     this.dependenciesPromise_ = null;
@@ -396,9 +391,6 @@ export class AmpForm {
    * Returns a promise that will be resolved when all dependencies used inside
    * the form tag are loaded and built (e.g. amp-selector) or 2 seconds timeout
    * - whichever is first.
-   *
-   * NOTE: amp-form allows elements that are not descendants of itself, but
-   * not <amp-selector>s. See https://go.amp.dev/issue/33891
    * @return {!Promise}
    * @private
    */
@@ -425,16 +417,14 @@ export class AmpForm {
         tryFocus(autofocus);
       }
     });
-    devAssert(this.ampFormService_);
-    this.ampFormService_.addFormEventListener(
-      this.form_,
+
+    this.form_.addEventListener(
       'submit',
       this.handleSubmitEvent_.bind(this),
       true
     );
 
-    this.ampFormService_.addFormEventListener(
-      this.form_,
+    this.form_.addEventListener(
       'blur',
       (e) => {
         checkUserValidityAfterInteraction_(dev().assertElement(e.target));
@@ -443,8 +433,7 @@ export class AmpForm {
       true
     );
 
-    this.ampFormService_.addFormEventListener(
-      this.form_,
+    this.form_.addEventListener(
       AmpEvents.FORM_VALUE_CHANGE,
       (e) => {
         checkUserValidityAfterInteraction_(dev().assertElement(e.target));
@@ -455,9 +444,9 @@ export class AmpForm {
 
     //  Form verification is not supported when SSRing templates is enabled.
     if (!this.ssrTemplateHelper_.isEnabled()) {
-      this.ampFormService_.addFormEventListener(this.form_, 'change', (e) => {
+      this.form_.addEventListener('change', (e) => {
         this.verifier_.onCommit().then((updatedErrors) => {
-          const {updatedElements, errors} = updatedErrors;
+          const {errors, updatedElements} = updatedErrors;
           updatedElements.forEach(checkUserValidityAfterInteraction_);
           // Tell the validation to reveal any input.validationMessage added
           // by the form verifier.
@@ -482,7 +471,7 @@ export class AmpForm {
       });
     }
 
-    this.ampFormService_.addFormEventListener(this.form_, 'change', (e) => {
+    this.form_.addEventListener('input', (e) => {
       checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onInput(e);
     });
@@ -550,11 +539,10 @@ export class AmpForm {
     this.form_.classList.remove('user-valid');
     this.form_.classList.remove('user-invalid');
 
-    const validityElements = formElementsQuerySelectorAll(
-      this.form_,
+    const validityElements = this.form_.querySelectorAll(
       '.user-valid, .user-invalid'
     );
-    validityElements.forEach((element) => {
+    iterateCursor(validityElements, (element) => {
       element.classList.remove('user-valid');
       element.classList.remove('user-invalid');
     });
@@ -709,15 +697,12 @@ export class AmpForm {
 
   /**
    * Get form fields that require variable substitutions
-   * @return {!Array<!HTMLInputElement>}
+   * @return {!IArrayLike<!HTMLInputElement>}
    * @private
    */
   getVarSubsFields_() {
     // Fields that support var substitutions.
-    return formElementsQuerySelectorAll(
-      this.form_,
-      '[type="hidden"][data-amp-replace]'
-    );
+    return this.form_.querySelectorAll('[type="hidden"][data-amp-replace]');
   }
 
   /**
@@ -894,7 +879,7 @@ export class AmpForm {
 
   /**
    * Perform asynchronous variable substitution on the fields that require it.
-   * @param {!Array<!HTMLInputElement>} varSubsFields
+   * @param {!IArrayLike<!HTMLInputElement>} varSubsFields
    * @return {!Promise}
    * @private
    */
@@ -954,9 +939,10 @@ export class AmpForm {
    * @private
    */
   doVerifyXhr_() {
-    const noVerifyFields = formElementsQuerySelectorAll(
-      this.form_,
-      `[${escapeCssSelectorIdent(FORM_VERIFY_OPTOUT)}]`
+    const noVerifyFields = toArray(
+      this.form_.querySelectorAll(
+        `[${escapeCssSelectorIdent(FORM_VERIFY_OPTOUT)}]`
+      )
     );
     const denylist = noVerifyFields.map((field) => field.name || field.id);
 
@@ -1142,14 +1128,13 @@ export class AmpForm {
    * @private
    */
   assertNoSensitiveFields_() {
-    const fields = formElementsQuerySelectorAll(
-      this.form_,
+    const fields = this.form_.querySelectorAll(
       'input[type=password],input[type=file]'
     );
     userAssert(
       fields.length == 0,
       'input[type=password] or input[type=file] ' +
-        'may only appear with form[method=post]'
+        'may only appear in form[method=post]'
     );
   }
 
@@ -1462,44 +1447,13 @@ export class AmpForm {
 }
 
 /**
- * Returns all elements of form.elements
- * that match the selectors.
- * @param {!HTMLFormElement} form
- * @param {string} query
- * @return {!Array<HTMLElement>}
- */
-export function formElementsQuerySelectorAll(form, query) {
-  return Array.from(form.elements).filter((element) => matches(element, query));
-}
-
-/**
- * Returns the first element for the form.elements
- * that match the selectors.
- * @param {!HTMLFormElement} form
- * @param {string} query
- * @return {?HTMLElement}
- */
-export function formElementsQuerySelector(form, query) {
-  for (let i = 0; i < form.elements.length; i++) {
-    const element = form.elements[i];
-    if (matches(element, query)) {
-      return element;
-    }
-  }
-  return null;
-}
-
-/**
  * Checks user validity for all inputs, fieldsets and the form.
  * @param {!HTMLFormElement} form
  * @return {boolean} Whether the form is currently valid or not.
  */
 function checkUserValidityOnSubmission(form) {
-  const elements = formElementsQuerySelectorAll(
-    form,
-    'input,select,textarea,fieldset'
-  );
-  elements.forEach((element) => checkUserValidity(element));
+  const elements = form.querySelectorAll('input,select,textarea,fieldset');
+  iterateCursor(elements, (element) => checkUserValidity(element));
   return checkUserValidity(form);
 }
 
@@ -1539,11 +1493,10 @@ function updateInvalidTypesClasses(element) {
 function removeValidityStateClasses(form) {
   const dummyInput = document.createElement('input');
   for (const validityState in dummyInput.validity) {
-    const elements = formElementsQuerySelectorAll(
-      form,
+    const elements = form.querySelectorAll(
       `.${escapeCssSelectorIdent(validityState)}`
     );
-    elements.forEach((element) => {
+    iterateCursor(elements, (element) => {
       dev().assertElement(element).classList.remove(validityState);
     });
   }
@@ -1623,7 +1576,6 @@ export function checkUserValidityAfterInteraction_(input) {
 
 /**
  * Bootstraps the amp-form elements
- * @implements {../../src/service.Disposable}
  */
 export class AmpFormService {
   /**
@@ -1634,15 +1586,6 @@ export class AmpFormService {
     this.whenInitialized_ = this.installStyles_(ampdoc).then(() =>
       this.installHandlers_(ampdoc)
     );
-
-    /** @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
-    this.ampdoc_ = ampdoc;
-
-    /** @const @private {!Array<UnlistenDef>} */
-    this.unlisteners_ = [];
-
-    /** @const @private {!Object<string, WeakMap<HTMLFormElement, Array<function(!Event)>>>} */
-    this.eventHandlers_ = {};
 
     // Dispatch a test-only event for integration tests.
     if (getMode().test) {
@@ -1721,62 +1664,6 @@ export class AmpFormService {
   installDomUpdateEventListener_(doc) {
     doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
-    });
-  }
-
-  /** @override */
-  dispose() {
-    while (this.unlisteners_.length > 0) {
-      const unlisten = this.unlisteners_.pop();
-      unlisten();
-    }
-  }
-
-  /**
-   * Adds handler for the form for a given type, when the
-   * rootNode gets the signal.
-   * @param {!HTMLFormElement} form
-   * @param {string} type
-   * @param {function(!Event)} handler
-   * @param {boolean=} opt_options
-   */
-  addFormEventListener(form, type, handler, opt_options) {
-    if (!hasOwn(this.eventHandlers_, type)) {
-      this.eventHandlers_[type] = new WeakMap();
-      this.unlisteners_.push(
-        listen(
-          this.ampdoc_.getRootNode(),
-          type,
-          (e) => {
-            let {form} = e.target;
-
-            // If it's an AMP element that does not have a native form attribute,
-            // then find the form by either querySelector for based upon 'form'
-            // attribute on the element or traversing up.
-            if (!form) {
-              dev().assertElement(e.target);
-              const formId = e.target.getAttribute('form');
-              form = formId
-                ? this.ampdoc_.getRootNode().querySelector(formId)
-                : closestAncestorElementBySelector(e.target, 'form');
-            }
-
-            // Only call handlers if the element has a registered form.
-            if (form && this.eventHandlers_[type].has(form)) {
-              this.eventHandlers_[type].get(form).forEach((handlerForForm) => {
-                handlerForForm(e);
-              });
-            }
-          },
-          opt_options
-        )
-      );
-    }
-    const handlersArr = this.eventHandlers_[type].get(form) || [];
-    handlersArr.push(handler);
-    this.eventHandlers_[type].set(form, handlersArr);
-    this.unlisteners_.push(() => {
-      this.eventHandlers_[type].delete(form);
     });
   }
 

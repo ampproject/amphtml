@@ -15,7 +15,7 @@
  */
 
 import {loadScript, validateData} from '../../3p/3p';
-import {setStyle} from '../../src/style';
+import {setStyle} from '../../src/core/dom/style';
 
 /**
  * @typedef FeedAdGlobal

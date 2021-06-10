@@ -21,10 +21,10 @@
 
 import {Services} from './services';
 import {dev} from './log';
-import {htmlFor} from './static-template';
+import {htmlFor} from './core/dom/static-template';
 import {parseUrlDeprecated} from './url';
 import {registerServiceBuilder} from './service';
-import {whenDocumentComplete} from './document-ready';
+import {whenDocumentComplete} from './core/document-ready';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;

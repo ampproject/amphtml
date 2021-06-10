@@ -19,7 +19,7 @@ import {
   CONSENT_STRING_TYPE,
 } from '../../../src/core/constants/consent-state';
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
@@ -34,8 +34,8 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {removeElement} from '../../../src/dom';
+} from '../../../src/core/dom/size-observer';
+import {removeElement} from '../../../src/core/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {tryParseJson} from '../../../src/core/types/object/json';
 import {userAssert} from '../../../src/log';
@@ -318,7 +318,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
    * @param {!../layout-rect.LayoutSizeDef} size
    * @private
    */
-  onResized_({width, height}) {
+  onResized_({height, width}) {
     if (!this.iframe_) {
       return;
     }

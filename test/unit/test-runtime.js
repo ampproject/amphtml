@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as dom from '../../src/dom';
+import * as dom from '../../src/core/dom';
 import * as ext from '../../src/service/extensions-impl';
 import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
@@ -32,7 +32,7 @@ import {installAmpdocServices} from '../../src/service/core-services';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTemplatesServiceForDoc} from '../../src/service/template-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
+import {setShadowDomSupportedVersionForTesting} from '../../src/core/dom/web-components';
 import {toArray} from '../../src/core/types/array';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 

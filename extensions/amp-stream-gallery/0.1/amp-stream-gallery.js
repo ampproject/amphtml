@@ -33,11 +33,11 @@ import {
   isRTL,
   iterateCursor,
   toggleAttribute,
-} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
+} from '../../../src/core/dom';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 
 /** @enum {number} */
@@ -585,8 +585,8 @@ class AmpStreamGallery extends AMP.BaseElement {
   updateVisibleCount_() {
     const {
       maxItemWidth_,
-      minItemWidth_,
       maxVisibleCount_,
+      minItemWidth_,
       minVisibleCount_,
       slides_,
     } = this;

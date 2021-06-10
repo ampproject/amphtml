@@ -17,7 +17,7 @@
 import * as Preact from '../../../src/preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
-import {px} from '../../../src/style';
+import {px} from '../../../src/core/dom/style';
 import {
   useContext,
   useEffect,
@@ -42,7 +42,7 @@ export function Thumbnails({
   const [pointerFine, setPointerFine] = useState(false);
   const ref = useRef(null);
   const [height, setHeight] = useState(0);
-  const {slides, setCurrentSlide} = useContext(CarouselContext);
+  const {setCurrentSlide, slides} = useContext(CarouselContext);
 
   useEffect(() => {
     const win = getWin(ref);

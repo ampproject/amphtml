@@ -15,7 +15,7 @@
  */
 
 import {ampMediaElementFor} from './utils';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {toArray} from '../../../src/core/types/array';
 
 /**

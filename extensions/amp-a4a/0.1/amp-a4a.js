@@ -18,7 +18,10 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
-import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
+import {
+  DetachedDomStream,
+  streamResponseToWriter,
+} from '../../../src/core/dom/stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -31,7 +34,7 @@ import {
 } from '../../../src/3p-frame';
 import {assertHttpsUrl} from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
@@ -74,9 +77,9 @@ import {
 import {padStart} from '../../../src/core/types/string';
 import {parseJson} from '../../../src/core/types/object/json';
 import {processHead} from './head-validation';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
-import {streamResponseToWriter} from '../../../src/utils/stream-response';
+
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {utf8Decode} from '../../../src/core/types/string/bytes';
 import {whenWithinViewport} from './within-viewport';

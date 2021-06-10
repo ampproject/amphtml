@@ -158,25 +158,22 @@ const presubmitGlobs = [
  * 2. Make sure it is listed in .vscode/settings.json (for auto-fix-on-save)
  */
 const prettifyGlobs = [
-  '.circleci/config.yml',
-  '.codecov.yml',
-  '.lando.yml',
-  '.lgtm.yml',
   '.prettierrc',
   '.renovaterc.json',
-  '.circleci/config.yml',
   '.vscode/settings.json',
   '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
+  '**/*.yml',
 ];
 
 /**
- * List of markdown files that may be checked by `amp check-links` (using
- * markdown-link-check).
+ * List of markdown and yaml files that may be checked by `amp check-links`
+ * (using markdown-link-check).
  */
 const linkCheckGlobs = [
+  '.github/ISSUE_TEMPLATE/*.yml',
   '**/*.md',
   '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
@@ -267,6 +264,7 @@ const htmlFixtureGlobs = [
   '!examples/amp-story/amp-story-animation.html',
   '!examples/amp-story/amp-story-auto-ads.html',
   '!examples/amp-story/amp-story-branching.html',
+  '!examples/amp-story/amp-story-desktop-one-panel.html',
   '!examples/amp-story/amp-story-panning-media.html',
   '!examples/amp-story/ampconf.html',
   '!examples/amp-story/analytics.html',
@@ -432,16 +430,17 @@ const htmlFixtureGlobs = [
   '!examples/visual-tests/amp-story/amp-story-consent.html',
   '!examples/visual-tests/amp-story/amp-story-consent.rtl.html',
   '!examples/visual-tests/amp-story/amp-story-cta-layer.html',
+  '!examples/visual-tests/amp-story/amp-story-desktop-one-panel.html',
   '!examples/visual-tests/amp-story/amp-story-dev-tools.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-presets.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-horizontal.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-thirds.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-vertical.html',
-  '!examples/visual-tests/amp-story/amp-story-inline-page-attachment-dark-theme.html',
   '!examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html',
   '!examples/visual-tests/amp-story/amp-story-landscape-templates.html',
   '!examples/visual-tests/amp-story/amp-story-page-attachment.html',
+  '!examples/visual-tests/amp-story/amp-story-page-attachment-v2.html',
   '!examples/visual-tests/amp-story/amp-story-sidebar.html',
   '!examples/visual-tests/amp-story/amp-story-tooltip.html',
   '!examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html',

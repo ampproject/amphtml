@@ -81,20 +81,20 @@ const getMetadata = (player, props) =>
  */
 function VideoWrapperWithRef(
   {
-    component: Component = 'video',
-    loading: loadingProp,
     autoplay = false,
-    controls = false,
-    loop = false,
-    noaudio = false,
-    mediasession = true,
     className,
-    style,
-    src,
-    sources,
-    poster,
-    onReadyState,
+    component: Component = 'video',
+    controls = false,
+    loading: loadingProp,
+    loop = false,
+    mediasession = true,
+    noaudio = false,
     onPlayingState,
+    onReadyState,
+    poster,
+    sources,
+    src,
+    style,
     ...rest
   },
   ref
@@ -320,14 +320,14 @@ function VideoWrapperWithRef(
  * @return {PreactDef.Renderable}
  */
 function Autoplay({
-  metadata,
   displayIcon,
-  playing,
   displayOverlay,
+  metadata,
   onOverlayClick,
-  wrapperRef,
-  play,
   pause,
+  play,
+  playing,
+  wrapperRef,
 }) {
   const {playable} = useAmpContext();
   const classes = useAutoplayStyles();

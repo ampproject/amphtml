@@ -32,12 +32,16 @@ import {
   WebKeyframesCreateFnDef,
   WebKeyframesDef,
 } from './animation-types';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '../../../src/core/types/object';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/core/dom/query';
+import {setStyles} from '../../../src/core/dom/style';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 const TAG = 'AMP-STORY';
@@ -109,7 +113,7 @@ export class AnimationRunner {
    * @param {!AnimationSequence} sequence
    */
   constructor(page, config, webAnimationBuilderPromise, vsync, sequence) {
-    const {source, preset, startAfterId, spec} = config;
+    const {preset, source, spec, startAfterId} = config;
 
     /** @private @const */
     this.page_ = page;
