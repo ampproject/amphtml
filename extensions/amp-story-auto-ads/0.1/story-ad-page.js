@@ -48,7 +48,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
 import {elementByTag} from '../../../src/core/dom/query';
 import {getData, listen} from '../../../src/event-helper';
-import {getExperimentBranch} from '../../../src/experiments';
+import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/core/types/object/json';
@@ -321,7 +321,10 @@ export class StoryAdPage {
       this.win_,
       StoryAdAutoAdvance.ID
     );
-    if (
+    // TODO(ccordry): move to viewer set branched experiment.
+    if (isExperimentOn(this.win_, 'story-ad-progress-segment')) {
+      attributes['auto-advance-after'] = '8s';
+    } else if (
       autoAdvanceExpBranch &&
       autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
     ) {
