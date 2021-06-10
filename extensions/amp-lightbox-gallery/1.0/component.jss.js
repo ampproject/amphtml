@@ -17,7 +17,6 @@
 import {createUseStyles} from 'react-jss';
 
 const gallery = {
-  backgroundColor: 'rgba(0,0,0, 1) !important',
   position: 'absolute !important',
   left: '0 important',
   right: '0 important',
