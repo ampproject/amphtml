@@ -183,6 +183,15 @@ export class AmpRender extends BaseElement {
   }
 
   /** @override */
+  isLayoutSupported(layout) {
+    userAssert(
+      layout === Layout.CONTAINER && this.getPlaceholder(),
+      'placeholder required with layout="container"'
+    );
+    return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
   init() {
     this.initialSrc_ = this.element.getAttribute('src');
     this.src_ = this.initialSrc_;
@@ -216,10 +225,6 @@ export class AmpRender extends BaseElement {
         this.toggleLoading(false);
         if (this.element.getAttribute('layout') !== Layout.CONTAINER) {
           this.togglePlaceholder(false);
-          return;
-        }
-        if (!this.getPlaceholder()) {
-          user().error(TAG, 'placeholder required with layout="container"');
           return;
         }
 
