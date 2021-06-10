@@ -187,6 +187,7 @@ exports.rules = [
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-oblivki-impl/0.1/amp-ad-network-oblivki-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-dianomi-impl/0.1/amp-ad-network-dianomi-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
 
       // A4A impls importing amp fast fetch header name
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
