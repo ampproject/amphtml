@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact/index';
+import * as Preact from '#preact/index';
 import {mount} from 'enzyme';
 import {useRenderer} from '../../../../src/preact/component';
 

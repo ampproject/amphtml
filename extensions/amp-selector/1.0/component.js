@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/core/math';

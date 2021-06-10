@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {Wrapper, useRenderer} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact/index';
 import {Option, Selector} from '../component';
 import {select, withKnobs} from '@storybook/addon-knobs';
 import {useState} from '../../../../src/preact';

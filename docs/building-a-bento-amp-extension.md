@@ -168,7 +168,7 @@ BaseElement['props'] = {  // Map DOM attributes and children to Preact Component
 The following shows the corresponding overall structure of your Preact functional component implementation file (extensions/amp-my-element/0.1/component.js).
 
 ```js
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {func1, func2} from '../../../src/module';
 // more ES2015-style import statements.
 

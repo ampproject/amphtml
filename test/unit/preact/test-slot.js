@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact/index';
+import * as Preact from '#preact/index';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   CanPlay,

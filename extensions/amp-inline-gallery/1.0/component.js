@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
 import {useMemo, useState} from '../../../src/preact';

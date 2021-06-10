@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact/index';
 import {DateDisplay} from '../component';
 import {date, select, withKnobs} from '@storybook/addon-knobs';
 

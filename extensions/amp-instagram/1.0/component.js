@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {IframeEmbed} from '../../../src/preact/component/iframe';
 import {dict} from '../../../src/core/types/object';
 import {forwardRef} from '../../../src/preact/compat';

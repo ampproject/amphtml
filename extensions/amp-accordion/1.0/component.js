@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {WithAmpContext} from '../../../src/preact/context';
 import {animateCollapse, animateExpand} from './animations';
 import {forwardRef} from '../../../src/preact/compat';

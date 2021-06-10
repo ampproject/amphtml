@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {LightboxGalleryContext} from './context';
 import {sequentialIdGenerator} from '../../../src/core/math/id-generator';
 import {

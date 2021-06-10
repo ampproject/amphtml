@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../';
+import * as Preact from '#preact/index';
 import {ContainWrapper, Wrapper} from '../component';
 import {boolean, object, text, withKnobs} from '@storybook/addon-knobs';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact/index';
 import {Sidebar, SidebarToolbar} from '../component';
 import {htmlFor} from '../../../../src/core/dom/static-template';
 import {mount} from 'enzyme';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {Wrapper} from '../../../src/preact/component';
 import {format, getLocale} from './locales';
 import {getDate} from '../../../src/core/types/date';

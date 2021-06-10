@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {VideoWrapper} from './video-wrapper';
 import {forwardRef} from '../../../src/preact/compat';

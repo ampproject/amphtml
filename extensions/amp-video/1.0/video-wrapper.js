@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {Loading} from '../../../src/core/loading-instructions';

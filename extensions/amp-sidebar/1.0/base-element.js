@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Sidebar} from './component';

@@ -15,7 +15,7 @@
  */
 
 import * as CSS from './social-share.css';
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {SocialShareIcon} from './social-share-svgs';
 import {Wrapper} from '../../../src/preact/component';

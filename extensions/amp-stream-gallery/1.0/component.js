@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/core/dom/style';

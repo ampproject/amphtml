@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact/index';
 import {Option, Selector} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {closestAncestorElementBySelector} from '../../../src/core/dom/query';

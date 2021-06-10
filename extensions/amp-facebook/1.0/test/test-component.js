@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact/index';
 import {Facebook} from '../component';
 import {WithAmpContext} from '../../../../src/preact/context';
 import {createRef} from '../../../../src/preact';
