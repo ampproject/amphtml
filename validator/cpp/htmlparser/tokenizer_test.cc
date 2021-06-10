@@ -136,16 +136,16 @@ TEST(TokenizerTest, BasicTokenizationOfADocument) {
     if (tt == htmlparser::TokenType::START_TAG_TOKEN) {
       switch (token.atom) {
         case htmlparser::Atom::TITLE:
-          EXPECT_EQ(token.position_in_html_src.first, 4);
-          EXPECT_EQ(token.position_in_html_src.second, 5);
+          EXPECT_EQ(token.line_col_in_html_src.first, 4);
+          EXPECT_EQ(token.line_col_in_html_src.second, 5);
           break;
         case htmlparser::Atom::BODY:
-          EXPECT_EQ(token.position_in_html_src.first, 6);
-          EXPECT_EQ(token.position_in_html_src.second, 3);
+          EXPECT_EQ(token.line_col_in_html_src.first, 6);
+          EXPECT_EQ(token.line_col_in_html_src.second, 3);
           break;
         case htmlparser::Atom::IMG:
-          EXPECT_EQ(token.position_in_html_src.first, 9);
-          EXPECT_EQ(token.position_in_html_src.second, 5);
+          EXPECT_EQ(token.line_col_in_html_src.first, 9);
+          EXPECT_EQ(token.line_col_in_html_src.second, 5);
           break;
         default:
           break;
@@ -207,25 +207,25 @@ TEST(TokenizerTest, BasicTokenizationOfADocument) {
       switch (token.atom) {
         case htmlparser::Atom::DIV:
           if (token.attributes.at(0).value == "one") {
-            EXPECT_EQ(token.position_in_html_src.first, 7);
-            EXPECT_EQ(token.position_in_html_src.second, 3);
+            EXPECT_EQ(token.line_col_in_html_src.first, 7);
+            EXPECT_EQ(token.line_col_in_html_src.second, 3);
           } else {
-            EXPECT_EQ(token.position_in_html_src.first, 7);
-            EXPECT_EQ(token.position_in_html_src.second, 33);
+            EXPECT_EQ(token.line_col_in_html_src.first, 7);
+            EXPECT_EQ(token.line_col_in_html_src.second, 33);
           }
           break;
         case htmlparser::Atom::STYLE:
           if (token.attributes.at(0).value == "first") {
-            EXPECT_EQ(token.position_in_html_src.first, 8);
-            EXPECT_EQ(token.position_in_html_src.second, 3);
+            EXPECT_EQ(token.line_col_in_html_src.first, 8);
+            EXPECT_EQ(token.line_col_in_html_src.second, 3);
           } else {
-            EXPECT_EQ(token.position_in_html_src.first, 8);
-            EXPECT_EQ(token.position_in_html_src.second, 55);
+            EXPECT_EQ(token.line_col_in_html_src.first, 8);
+            EXPECT_EQ(token.line_col_in_html_src.second, 55);
           }
           break;
         case htmlparser::Atom::NOSCRIPT:
-          EXPECT_EQ(token.position_in_html_src.first, 8);
-          EXPECT_EQ(token.position_in_html_src.second, 45);
+          EXPECT_EQ(token.line_col_in_html_src.first, 8);
+          EXPECT_EQ(token.line_col_in_html_src.second, 45);
           break;
         default:
           break;
