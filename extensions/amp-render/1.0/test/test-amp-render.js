@@ -24,6 +24,7 @@ import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Services} from '../../../../src/services';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
+import {user} from '../../../../src/log';
 import {waitFor} from '../../../../testing/test-helper';
 import {whenUpgradedToCustomElement} from '../../../../src/dom';
 
@@ -141,13 +142,10 @@ describes.realWin(
       expect(fetchStub).to.have.been.calledOnce;
     });
 
-    it('renders json with layout=container', async () => {
-      const fetchStub = env.sandbox.stub(
-        BatchedJsonModule,
-        'batchFetchJsonFor'
-      );
-
-      fetchStub.resolves({name: 'Joe'});
+    it('should render with layout=container', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
 
       const mutatorStub = env.sandbox
         .stub(Services, 'mutatorForDoc')
@@ -160,14 +158,39 @@ describes.realWin(
           layout="container"
         >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
+          <div placeholder>Placeholder text</div>
         </amp-render>
       `;
       doc.body.appendChild(element);
 
-      const text = await getRenderedData();
-      expect(text).to.equal('Hello Joe');
-      expect(fetchStub).to.have.been.calledOnce;
+      await getRenderedData();
       expect(mutatorStub).to.be.called;
+    });
+
+    it('should error when layout=container is used without placeholder', async () => {
+      const errorSpy = env.sandbox.stub(user(), 'error');
+
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          layout="container"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await getRenderedData();
+      expect(errorSpy).to.be.called;
+      expect(errorSpy.args[0][0]).to.match(/amp-render/);
+      expect(errorSpy.args[0][1]).to.match(
+        /placeholder required with layout="container"/
+      );
     });
 
     it('renders from amp-script', async () => {
