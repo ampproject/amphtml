@@ -30,7 +30,7 @@ ABSL_FLAG(std::size_t, htmlparser_max_attributes_per_node,
 namespace htmlparser {
 
 Tokenizer::Tokenizer(std::string_view html, std::string context_tag) :
-    buffer_(html) {
+    buffer_(html), num_terms_(0) {
   lines_cols_.push_back(std::make_pair(1, 0));
   current_line_col_ = std::make_pair(1, 0);
   token_line_col_ = std::make_pair(1, 0);
