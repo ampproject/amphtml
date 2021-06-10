@@ -39,7 +39,7 @@ Example:
   width="16"
   height="9"
 >
-</amp-connatix-player>
+</amp-vidazoo-player>
 ```
 
 ## Attributes
