@@ -23,7 +23,6 @@ import {
   Layout,
   LayoutPriority,
   applyStaticLayout,
-  isInternalElement,
   isLoadingAllowed,
 } from './layout';
 import {MediaQueryProps} from './core/dom/media-query-props';
@@ -47,6 +46,7 @@ import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host'
 import {getMode} from './mode';
 import {getSchedulerForDoc} from './service/scheduler';
 import {isExperimentOn} from './experiments';
+import {isInternalOrServiceNode} from './core/layout';
 import {rethrowAsync} from './core/error';
 import {setStyle} from './core/dom/style';
 import {shouldBlockOnConsentByMeta} from './consent';
@@ -1897,14 +1897,15 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     }
 
     /**
-     * Returns the original nodes of the custom element without any service
-     * nodes that could have been added for markup. These nodes can include
-     * Text, Comment and other child nodes.
-     * @return {!Array<!Node>}
+     * See dom.getRealChildNodes for the full description.
+     * TODO: migrate to the fn in dom.js.
+     * @deprecated
      * @package @final
+     *
+     * @return {!Array<!Node>}
      */
     getRealChildNodes() {
-      return query.childNodes(this, (node) => !isInternalOrServiceNode(node));
+      return dom.getRealChildNodes(this);
     }
 
     /**
@@ -2169,26 +2170,6 @@ function isInputPlaceholder(element) {
 /** @param {!Element} element */
 function assertNotTemplate(element) {
   devAssert(!element.isInTemplate_, 'Must never be called in template');
-}
-
-/**
- * Returns "true" for internal AMP nodes or for placeholder elements.
- * @param {!Node} node
- * @return {boolean}
- */
-function isInternalOrServiceNode(node) {
-  if (isInternalElement(node)) {
-    return true;
-  }
-  if (
-    node.tagName &&
-    (node.hasAttribute('placeholder') ||
-      node.hasAttribute('fallback') ||
-      node.hasAttribute('overflow'))
-  ) {
-    return true;
-  }
-  return false;
 }
 
 /**

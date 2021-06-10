@@ -174,16 +174,6 @@ export function isLayoutSizeFixed(layout) {
 }
 
 /**
- * Whether the tag is an internal (service) AMP tag.
- * @param {!Node|string} tag
- * @return {boolean}
- */
-export function isInternalElement(tag) {
-  const tagName = typeof tag == 'string' ? tag : tag.tagName;
-  return tagName && tagName.toLowerCase().startsWith('i-');
-}
-
-/**
  * Parses the CSS length value. If no units specified, the assumed value is
  * "px". Returns undefined in case of parsing error.
  * @param {string|undefined|null} s
