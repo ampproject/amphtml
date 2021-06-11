@@ -114,6 +114,9 @@ export function parseUrlDeprecated(url) {
  */
 export function parseUrlWithA(a, url) {
   a.href = '';
+  // In Safari 14 and earlier, calling the URL constructor with a base URL whose
+  // value is undefined causes Safari to throw a TypeError;
+  // see https://webkit.org/b/216841
   return /** @type {?} */ (new URL(url, a.href));
 }
 
@@ -502,10 +505,12 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
   if (typeof baseUrl == 'string') {
     baseUrl = parseUrlDeprecated(baseUrl);
   }
-  if (IS_ESM || typeof URL == 'function') {
-    return new URL(relativeUrlString, baseUrl.href).toString();
-  }
-  return resolveRelativeUrlFallback_(relativeUrlString, baseUrl);
+
+  // In Safari 14 and earlier, calling the URL constructor with a base URL whose
+  // value is undefined causes Safari to throw a TypeError;
+  // see https://webkit.org/b/216841. Since Location#href or URL#href should
+  // never be undefined, this is safe.
+  return new URL(relativeUrlString, baseUrl.href).toString();
 }
 
 /**
