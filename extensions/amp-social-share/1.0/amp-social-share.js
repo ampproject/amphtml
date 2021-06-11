@@ -16,7 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-social-share-1.0.css';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
