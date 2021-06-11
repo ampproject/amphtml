@@ -69,6 +69,61 @@ export const getMockInteractiveData = () => {
   };
 };
 
+/**
+ * Returns mock interactive data with index key values that don't match the
+ * index within the options array.
+ *
+ * @return {Object}
+ */
+const getMockScrambledData = () => {
+  return {
+    options: [
+      {
+        index: 3,
+        count: 4,
+        selected: false,
+      },
+      {
+        index: 0,
+        count: 1,
+        selected: true,
+      },
+      {
+        index: 1,
+        count: 2,
+        selected: false,
+      },
+      {
+        index: 2,
+        count: 3,
+        selected: true,
+      },
+    ],
+  };
+};
+
+/**
+ * Returns mock interactive data that doesn't account for all options.
+ *
+ * @return {Object}
+ */
+const getMockIncompleteData = () => {
+  return {
+    options: [
+      {
+        index: 1,
+        count: 5,
+        selected: false,
+      },
+      {
+        index: 2,
+        count: 5,
+        selected: true,
+      },
+    ],
+  };
+};
+
 export const addConfigToInteractive = (
   interactive,
   options = 4,
@@ -277,6 +332,69 @@ describes.realWin(
       expect(ampStoryInteractive.getOptionElements()[0]).to.have.class(
         'i-amphtml-story-interactive-option-selected'
       );
+    });
+
+    it('should select the correct option if the backend responds with scrambled data', async () => {
+      const NUM_OPTIONS = 4;
+      const scrambledData = getMockScrambledData();
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(scrambledData);
+      addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
+      ampStoryInteractive.element.setAttribute(
+        'endpoint',
+        'http://localhost:8000'
+      );
+      await ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+
+      expect(ampStoryInteractive.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
+      );
+      const selectedIndex = scrambledData.options.filter(
+        (option) => option.selected
+      ).index;
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        if (i === selectedIndex) {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        } else {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.not.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        }
+      }
+    });
+
+    it('should select the correct option if the backend responds with incomplete data', async () => {
+      const NUM_OPTIONS = 4;
+      const incompleteData = getMockIncompleteData();
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(incompleteData);
+      addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
+      ampStoryInteractive.element.setAttribute(
+        'endpoint',
+        'http://localhost:8000'
+      );
+      await ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+
+      expect(ampStoryInteractive.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
+      );
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        if (i === incompleteData[0].index) {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        } else {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.not.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        }
+      }
     });
 
     it('should throw error if percentages are not correctly passed', () => {
