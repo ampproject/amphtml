@@ -43,6 +43,7 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   ancestorElementsByTag,
   childElementByAttr,
+  closestAncestorElementBySelector,
   matches,
 } from '../../../src/core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
@@ -482,7 +483,7 @@ export class AmpForm {
       });
     }
 
-    this.ampFormService_.addFormEventListener(this.form_, 'change', (e) => {
+    this.ampFormService_.addFormEventListener(this.form_, 'input', (e) => {
       checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onInput(e);
     });
