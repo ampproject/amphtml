@@ -232,7 +232,7 @@ describes.realWin(
       doc.body.appendChild(element);
 
       await getRenderedData();
-      expect(errorSpy).to.be.called;
+      expect(errorSpy.callCount).to.equal(6);
       expect(errorSpy.getCall(4).args[1]).to.match(
         /placeholder required with layout="container"/
       );
