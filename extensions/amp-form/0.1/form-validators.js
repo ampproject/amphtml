@@ -20,6 +20,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {iterateCursor} from '../../../src/core/dom';
 import {toWin} from '../../../src/core/window';
+import {formElementsQuerySelectorAll} from './amp-form';
 
 /** @const @private {string} */
 const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
@@ -115,7 +116,7 @@ export class FormValidator {
 
   /** @return {!NodeList} */
   inputs() {
-    return this.form.querySelectorAll('input,select,textarea');
+    return formElementsQuerySelectorAll(this.form, 'input,select,textarea');
   }
 
   /**
