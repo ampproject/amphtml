@@ -34,7 +34,7 @@ import {
   removeElement,
 } from '../../../src/core/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {isObject} from '../../../src/core/types';
 import {tryParseJson} from '../../../src/core/types/object/json';
 import {user, userAssert} from '../../../src/log';

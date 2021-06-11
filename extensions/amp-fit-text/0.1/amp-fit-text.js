@@ -15,7 +15,10 @@
  */
 
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {
+  getLengthNumeral,
+  isLayoutSizeDefined,
+} from '../../../src/core/dom/layout';
 import {px, setStyle, setStyles} from '../../../src/core/dom/style';
 import {throttle} from '../../../src/core/types/function';
 

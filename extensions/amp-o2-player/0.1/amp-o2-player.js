@@ -23,7 +23,7 @@ import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
