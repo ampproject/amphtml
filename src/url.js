@@ -16,7 +16,6 @@
 
 import {dict, hasOwn} from './core/types/object';
 import {endsWith} from './core/types/string';
-import {getMode} from './mode';
 import {isArray} from './core/types';
 import {parseQueryString} from './core/types/string/url';
 import {urls} from './config';
