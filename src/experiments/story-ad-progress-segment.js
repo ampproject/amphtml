@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/** @const {!Object<string, string>} */
+/** @const */
 export const StoryAdSegmentExp = {
   ID: 'story-ad-progress-segment',
   CONTROL: '31061402',
@@ -23,7 +23,7 @@ export const StoryAdSegmentExp = {
   TEN_SECONDS: '31061405',
 };
 
-/** @const {!Object<string, string>} */
+/** @const */
 export const StoryAdSegmentTimes = {
   SENTINEL: '999999ms',
   SIX_SECONDS: '6000ms',
@@ -31,7 +31,7 @@ export const StoryAdSegmentTimes = {
   TEN_SECONDS: '10000ms',
 };
 
-/** @const {!Object<string, string>} */
+/** @const */
 export const ViewerSetTimeToBranch = {
   [StoryAdSegmentTimes.SIX_SECONDS]: StoryAdSegmentExp.SIX_SECONDS,
   [StoryAdSegmentTimes.EIGHT_SECONDS]: StoryAdSegmentExp.EIGHT_SECONDS,
@@ -39,7 +39,7 @@ export const ViewerSetTimeToBranch = {
   [StoryAdSegmentTimes.SENTINEL]: StoryAdSegmentExp.CONTROL,
 };
 
-/** @const {!Object<string, string>} */
+/** @const */
 export const BranchToTimeValues = {
   [StoryAdSegmentExp.SIX_SECONDS]: StoryAdSegmentTimes.SIX_SECONDS,
   [StoryAdSegmentExp.EIGHT_SECONDS]: StoryAdSegmentTimes.EIGHT_SECONDS,
