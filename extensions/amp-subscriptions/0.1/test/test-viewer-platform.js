@@ -20,9 +20,9 @@ import {ENTITLEMENTS_REQUEST_TIMEOUT} from '../constants';
 import {Entitlement, GrantReason} from '../entitlement';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
-import {dict} from '../../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getWinOrigin} from '../../../../src/url';
 
 describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {

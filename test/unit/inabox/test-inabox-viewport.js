@@ -15,18 +15,18 @@
  */
 
 import * as iframeHelper from '../../../src/iframe-helper';
-import {FrameOverlayManager} from '../../../ads/inabox/frame-overlay-manager';
-import {Observable} from '../../../src/core/data-structures/observable';
-import {PositionObserver} from '../../../ads/inabox/position-observer';
-import {Services} from '../../../src/services';
+import {FrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
+import {Observable} from '#core/data-structures/observable';
+import {PositionObserver} from '#ads/inabox/position-observer';
+import {Services} from '#service';
 import {
   ViewportBindingInabox,
   prepareBodyForOverlay,
   resetBodyForOverlay,
-} from '../../../src/inabox/inabox-viewport';
-import {installIframeMessagingClient} from '../../../src/inabox/inabox-iframe-messaging-client';
-import {installPlatformService} from '../../../src/service/platform-impl';
-import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
+} from '#inabox/inabox-viewport';
+import {installIframeMessagingClient} from '#inabox/inabox-iframe-messaging-client';
+import {installPlatformService} from '#service/platform-impl';
+import {layoutRectLtwh} from '#core/math/layout-rect';
 
 const NOOP = () => {};
 

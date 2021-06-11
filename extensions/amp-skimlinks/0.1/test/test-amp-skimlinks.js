@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as DocumentReady from '../../../../src/core/document-ready';
+import * as DocumentReady from '#core/document-ready';
 import * as SkimOptionsModule from '../skim-options';
 import * as chunkModule from '../../../../src/chunk';
-import {Deferred} from '../../../../src/core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
 import {SKIMLINKS_REWRITER_ID} from '../constants';
 import {EVENTS as linkRewriterEvents} from '../link-rewriter/constants';

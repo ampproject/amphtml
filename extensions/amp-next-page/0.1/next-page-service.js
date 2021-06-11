@@ -16,17 +16,17 @@
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {MultidocManager} from '../../../src/multidoc-manager';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
-import {Services} from '../../../src/services';
-import {VisibilityState} from '../../../src/core/constants/visibility-state';
+import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
+import {Services} from '#service';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {getAmpdoc} from '../../../src/service';
-import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
+import {dict} from '#core/types/object';
+import {getAmpdoc} from '../../../src/service-helpers';
+import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
-import {removeElement} from '../../../src/core/dom';
-import {setStyle, toggle} from '../../../src/core/dom/style';
+import {layoutRectLtwh} from '#core/math/layout-rect';
+import {removeElement} from '#core/dom';
+import {setStyle, toggle} from '#core/dom/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 // TODO(emarchiori): Make this a configurable parameter.

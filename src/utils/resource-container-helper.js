@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {tryCallback} from '../core/error';
+import {tryCallback} from '#core/error';
 
 const AMP_CLASS = 'i-amphtml-element';
 const DEEP = true;

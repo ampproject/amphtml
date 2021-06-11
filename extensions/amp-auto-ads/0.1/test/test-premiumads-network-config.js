@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../../src/core/dom/layout';
-import {Services} from '../../../../src/services';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
 import {getAdNetworkConfig} from '../ad-network-config';
 
 describes.realWin(

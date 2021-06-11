@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 
 const calendarLabel = 'Calendar';
 const jumpToPrevMonth = 'Move backward to switch to the previous month.';

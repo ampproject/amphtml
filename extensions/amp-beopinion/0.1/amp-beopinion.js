@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/core/dom';
+import {removeElement} from '#core/dom';
 
 /** @const */
 const TAG = 'amp-beopinion';

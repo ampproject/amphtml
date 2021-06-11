@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {unruly} from '../../../ads/vendors/unruly';
+import {unruly} from '#ads/vendors/unruly';
 
 describes.sandboxed('unruly', {}, () => {
   it('should set unruly publisher config on global', () => {

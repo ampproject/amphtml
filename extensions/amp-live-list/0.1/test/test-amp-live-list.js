@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {AmpEvents} from '../../../../src/core/constants/amp-events';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {AmpEvents} from '#core/constants/amp-events';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
 

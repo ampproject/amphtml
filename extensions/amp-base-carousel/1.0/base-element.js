@@ -17,8 +17,8 @@
 import {BaseCarousel} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {CarouselContextProp} from './carousel-props';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {dict} from '../../../src/core/types/object';
+import {PreactBaseElement} from '#preact/base-element';
+import {dict} from '#core/types/object';
 
 export class BaseElement extends PreactBaseElement {
   /** @param {!AmpElement} element */

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {Wrapper, useRenderer} from '../../../src/preact/component';
-import {dict} from '../../../src/core/types/object';
-import {getDate} from '../../../src/core/types/date';
+import * as Preact from '#preact';
+import {Wrapper, useRenderer} from '#preact/component';
+import {dict} from '#core/types/object';
+import {getDate} from '#core/types/date';
 import {getLocaleStrings} from './messages';
-import {useAmpContext} from '../../../src/preact/context';
-import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
-import {useResourcesNotify} from '../../../src/preact/utils';
+import {useAmpContext} from '#preact/context';
+import {useEffect, useMemo, useRef, useState} from '#preact';
+import {useResourcesNotify} from '#preact/utils';
 
 const NAME = 'DateCountdown';
 

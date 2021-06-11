@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   assertHttpsUrl,
   getSourceOrigin,
@@ -24,12 +24,12 @@ import {
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
-} from '../../../src/core/dom/query';
+} from '#core/dom/query';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 
-import {setStyle, toggle} from '../../../src/core/dom/style';
+import {setStyle, toggle} from '#core/dom/style';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)

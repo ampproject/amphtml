@@ -15,7 +15,7 @@
  */
 
 import {FocusHistory} from '../../src/focus-history';
-import {installTimerService} from '../../src/service/timer-impl';
+import {installTimerService} from '#service/timer-impl';
 
 describes.sandboxed('FocusHistory', {}, (env) => {
   let clock;

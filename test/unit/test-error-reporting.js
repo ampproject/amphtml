@@ -15,7 +15,7 @@
  */
 
 import * as analytics from '../../src/analytics';
-import {Services} from '../../src/services';
+import {Services} from '#service';
 import {
   blockedByConsentError,
   cancellation,
@@ -29,10 +29,7 @@ import {
   reportErrorToServerOrViewer,
 } from '../../src/error-reporting';
 import {getRtvVersionForTesting} from '../../src/mode';
-import {
-  resetExperimentTogglesForTesting,
-  toggleExperiment,
-} from '../../src/experiments';
+import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
 import {user, userAssert} from '../../src/log';
 
 describes.fakeWin('installErrorReporting', {}, (env) => {

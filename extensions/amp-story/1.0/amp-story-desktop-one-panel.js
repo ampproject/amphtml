@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
 
 /**
  * Returns true if desktop one panel experiment is enabled.

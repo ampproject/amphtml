@@ -16,10 +16,7 @@
 
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {listen} from '../../../src/event-helper';
-import {
-  parseQueryString,
-  tryDecodeUriComponent,
-} from '../../../src/core/types/string/url';
+import {parseQueryString, tryDecodeUriComponent} from '#core/types/string/url';
 
 /**
  * @private Visible for testing.

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {Youtube} from '../component';
-import {createRef} from '../../../../src/preact';
-import {dispatchCustomEvent} from '../../../../src/core/dom';
+import {createRef} from '#preact';
+import {dispatchCustomEvent} from '#core/dom';
 import {mount} from 'enzyme';
 import {useStyles} from 'extensions/amp-video/1.0/component.jss';
 

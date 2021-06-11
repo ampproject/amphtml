@@ -15,7 +15,7 @@
  */
 
 import {DayPickerPhrases} from './defaultPhrases';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {requireExternal} from '../../../src/module';
 import {withDatePickerCommon} from './date-picker-common';
 import {wrap as withMaximumNights} from './wrappers/maximum-nights';

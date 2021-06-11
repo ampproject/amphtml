@@ -15,10 +15,10 @@
  */
 
 import '../amp-youtube';
-import {createElementWithAttributes} from '../../../../src/core/dom';
+import {createElementWithAttributes} from '#core/dom';
 
 import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
 describes.realWin(

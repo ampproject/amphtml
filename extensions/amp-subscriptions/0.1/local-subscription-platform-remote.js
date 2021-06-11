@@ -16,11 +16,11 @@
 
 import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {isArray} from '../../../src/core/types';
+import {dict} from '#core/types/object';
+import {isArray} from '#core/types';
 
 /**
  * Implments the remotel local subscriptions platform which uses

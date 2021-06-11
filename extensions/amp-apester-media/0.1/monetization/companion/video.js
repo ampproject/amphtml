@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../../src/services';
+import {Services} from '#service';
 const ALLOWED_AD_PROVIDER = 'sr';
-import {createElementWithAttributes} from '../../../../../src/core/dom';
-import {dict, getValueForExpr} from '../../../../../src/core/types/object';
+import {createElementWithAttributes} from '#core/dom';
+import {dict, getValueForExpr} from '#core/types/object';
 
 /**
  * @param {!JsonObject} media

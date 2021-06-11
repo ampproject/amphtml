@@ -16,12 +16,9 @@
 
 import {NotificationPermission, StorageKeys} from './vars';
 import {WindowMessenger} from './window-messenger';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
-import {
-  parseQueryString,
-  tryDecodeUriComponent,
-} from '../../../src/core/types/string/url';
+import {parseQueryString, tryDecodeUriComponent} from '#core/types/string/url';
 import {parseUrlDeprecated} from '../../../src/url.js';
 
 /** @typedef {{

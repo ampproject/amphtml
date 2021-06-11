@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
+import {Services} from './service';
 import {dev} from './log';
 import {getData} from './event-helper';
-import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from './service-helpers';
 import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './core/data-structures/priority-queue';
 

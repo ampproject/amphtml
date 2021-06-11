@@ -23,12 +23,12 @@ import {
   isLoadingAllowed,
   parseLayout,
   parseLength,
-} from '../../../../src/core/dom/layout';
+} from '#core/dom/layout';
 import {
   applyStaticLayout,
   resetShouldUseAspectRatioCssForTesting,
 } from '../../../../src/static-layout';
-import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
+import {isExperimentOn, toggleExperiment} from '#experiments';
 
 describes.sandboxed('Layout', {}, () => {
   let div;

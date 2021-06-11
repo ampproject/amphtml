@@ -15,7 +15,7 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {BASE_CID_MAX_AGE_MILLIS} from '../../src/service/cid-impl';
+import {BASE_CID_MAX_AGE_MILLIS} from '#service/cid-impl';
 import {
   getCookie,
   getHighestAvailableDomain,

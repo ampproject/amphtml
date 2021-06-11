@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LayoutPriority} from '../../../src/core/dom/layout';
+import {LayoutPriority} from '#core/dom/layout';
 
 /**
  * The <amp-bind-macro> element is used to define an expression macro that can

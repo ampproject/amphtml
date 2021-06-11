@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as CID from '../../src/service/cid-impl';
+import * as CID from '#service/cid-impl';
 
-import {Services} from '../../src/services';
+import {Services} from '#service';
 import {createIframePromise} from '../../testing/iframe';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
+import {installDocService} from '#service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 
 describes.sandboxed
   .configure()

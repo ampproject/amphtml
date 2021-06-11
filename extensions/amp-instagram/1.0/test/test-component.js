@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {Instagram} from '../component';
-import {WithAmpContext} from '../../../../src/preact/context';
-import {createRef} from '../../../../src/preact';
+import {WithAmpContext} from '#preact/context';
+import {createRef} from '#preact';
 import {mount} from 'enzyme';
 import {waitFor} from '../../../../testing/test-helper';
 

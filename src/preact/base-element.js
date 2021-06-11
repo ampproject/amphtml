@@ -15,15 +15,15 @@
  */
 
 import * as Preact from './index';
-import {ActionTrust} from '../core/constants/action-constants';
-import {AmpEvents} from '../core/constants/amp-events';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
-import {Deferred} from '../core/data-structures/promise';
-import {Layout, isLayoutSizeDefined} from '../core/dom/layout';
-import {Loading} from '../core/loading-instructions';
-import {MediaQueryProps} from '../core/dom/media-query-props';
-import {PauseHelper} from '../core/dom/video/pause-helper';
-import {ReadyState} from '../core/constants/ready-state';
+import {Deferred} from '#core/data-structures/promise';
+import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Loading} from '#core/loading-instructions';
+import {MediaQueryProps} from '#core/dom/media-query-props';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {ReadyState} from '#core/constants/ready-state';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {
@@ -33,26 +33,22 @@ import {
   setParent,
   subscribe,
 } from '../context';
-import {
-  childElementByAttr,
-  childElementByTag,
-  matches,
-} from '../core/dom/query';
+import {childElementByAttr, childElementByTag, matches} from '#core/dom/query';
 import {
   createElementWithAttributes,
   dispatchCustomEvent,
   parseBooleanAttribute,
-} from '../core/dom';
-import {dashToCamelCase} from '../core/types/string';
-import {devAssert} from '../core/assert';
-import {dict, hasOwn, map} from '../core/types/object';
-import {getDate} from '../core/types/date';
+} from '#core/dom';
+import {dashToCamelCase} from '#core/types/string';
+import {devAssert} from '#core/assert';
+import {dict, hasOwn, map} from '#core/types/object';
+import {getDate} from '#core/types/date';
 import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
-import {isElement} from '../core/types';
-import {sequentialIdGenerator} from '../core/math/id-generator';
-import {toArray} from '../core/types/array';
+import {isElement} from '#core/types';
+import {sequentialIdGenerator} from '#core/math/id-generator';
+import {toArray} from '#core/types/array';
 
 /**
  * The following combinations are allowed.

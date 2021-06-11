@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {Vimeo} from '../component';
 import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 

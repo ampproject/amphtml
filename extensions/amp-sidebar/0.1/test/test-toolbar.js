@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {Services} from '../../../../src/services';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {Services} from '#service';
 import {Toolbar} from '../toolbar';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {toArray} from '../../../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 adopt(window);
 

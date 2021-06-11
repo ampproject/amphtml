@@ -15,8 +15,8 @@
  */
 
 import * as applyExperiment from '../apply-experiment';
-import {createElementWithAttributes} from '../../../../src/core/dom';
-import {toggleExperiment} from '../../../../src/experiments';
+import {createElementWithAttributes} from '#core/dom';
+import {toggleExperiment} from '#experiments';
 
 const TEST_ELEMENT_CLASS = 'experiment-test-element';
 

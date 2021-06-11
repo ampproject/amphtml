@@ -33,18 +33,18 @@ import {
 import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {SubscriptionPlatform as SubscriptionPlatformInterface} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, getValueForExpr} from '../../../src/core/types/object';
+import {dict, getValueForExpr} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isStoryDocument} from '../../../src/utils/story';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {tryParseJson} from '#core/types/object/json';
 
 /** @const */
 const TAG = 'amp-subscriptions';

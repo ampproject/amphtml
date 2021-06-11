@@ -15,7 +15,7 @@
  */
 
 import {CommonSignals} from './core/constants/common-signals';
-import {Services} from './services';
+import {Services} from './service';
 import {VisibilityState} from './core/constants/visibility-state';
 import {childElementsByTag} from './core/dom/query';
 import {
@@ -24,7 +24,10 @@ import {
   importShadowBody,
 } from './shadow-embed';
 import {dev, user} from './log';
-import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
+import {
+  disposeServicesForDoc,
+  getServicePromiseOrNullForDoc,
+} from './service-helpers';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
 import {isArray, isObject} from './core/types';

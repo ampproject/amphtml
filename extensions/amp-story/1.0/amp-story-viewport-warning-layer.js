@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-story-viewport-warning-layer-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   StateProperty,
   UIType,
@@ -24,9 +24,9 @@ import {
 } from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '../../../src/core/dom/static-template';
+import {htmlFor} from '#core/dom/static-template';
 import {listen} from '../../../src/event-helper';
-import {throttle} from '../../../src/core/types/function';
+import {throttle} from '#core/types/function';
 
 /**
  * CSS class indicating the format is landscape.

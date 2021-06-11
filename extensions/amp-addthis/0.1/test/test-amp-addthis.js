@@ -18,8 +18,8 @@ import {ALT_TEXT, CONFIGURATION_EVENT, ICON_SIZE, ORIGIN} from '../constants';
 import {ConfigManager} from '../config-manager';
 
 import {createCUID, isDateInFuture} from '../addthis-utils/cuid';
-import {createElementWithAttributes} from '../../../../src/core/dom';
-import {dict} from '../../../../src/core/types/object';
+import {createElementWithAttributes} from '#core/dom';
+import {dict} from '#core/types/object';
 import {
   getAddThisMode,
   isProductCode,
@@ -31,7 +31,7 @@ import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
 import {getSessionId} from '../addthis-utils/session';
 import {getWidgetOverload} from '../addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
-import {toArray} from '../../../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 describes.realWin(
   'amp-addthis',

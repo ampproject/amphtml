@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import {LayoutPriority} from '../core/dom/layout';
+import {LayoutPriority} from '#core/dom/layout';
 import {READY_SCAN_SIGNAL} from './resources-interface';
-import {VisibilityState} from '../core/constants/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {
   containsNotSelf,
   hasNextNodeInDocumentOrder,
   isIframed,
-} from '../core/dom';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {removeItem} from '../core/types/array';
+} from '#core/dom';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
+import {removeItem} from '#core/types/array';
 
 const ID = 'scheduler';
 

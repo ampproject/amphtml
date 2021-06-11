@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
-import {useEffect, useState} from '../../../src/preact';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {useEffect, useState} from '#preact';
 
 /**
  * @param {{current: (Element|null)}} ref

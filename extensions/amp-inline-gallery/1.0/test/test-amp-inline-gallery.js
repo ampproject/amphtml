@@ -15,13 +15,13 @@
  */
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-inline-gallery';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
+import {ActionInvocation} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
 import {CarouselContextProp} from '../../../amp-base-carousel/1.0/carousel-props';
-import {createElementWithAttributes} from '../../../../src/core/dom';
-import {setStyles} from '../../../../src/core/dom/style';
+import {createElementWithAttributes} from '#core/dom';
+import {setStyles} from '#core/dom/style';
 import {subscribe} from '../../../../src/context';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
 describes.realWin(

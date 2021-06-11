@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Observable} from '../core/data-structures/observable';
+import {Observable} from '#core/data-structures/observable';
 import {devAssert} from '../log';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * MutationObserverInit options to listen for mutations to the `hidden`

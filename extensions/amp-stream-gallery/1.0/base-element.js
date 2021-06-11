@@ -16,9 +16,9 @@
 
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
 import {CSS as GALLERY_CSS} from './component.jss';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {PreactBaseElement} from '#preact/base-element';
 import {StreamGallery} from './component';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */

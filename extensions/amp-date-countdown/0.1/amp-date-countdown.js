@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
-import {removeChildren} from '../../../src/core/dom';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Services} from '#service';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {removeChildren} from '#core/dom';
 import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */

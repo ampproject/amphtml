@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {
   Alignment,
   Axis,
@@ -22,11 +22,11 @@ import {
   scrollContainerToElement,
 } from './dimensions';
 import {LightboxGalleryContext} from '../../amp-lightbox-gallery/1.0/context';
-import {debounce} from '../../../src/core/types/function';
-import {forwardRef} from '../../../src/preact/compat';
-import {mod} from '../../../src/core/math';
-import {setStyle} from '../../../src/core/dom/style';
-import {toWin} from '../../../src/core/window';
+import {debounce} from '#core/types/function';
+import {forwardRef} from '#preact/compat';
+import {mod} from '#core/math';
+import {setStyle} from '#core/dom/style';
+import {toWin} from '#core/window';
 import {
   useCallback,
   useContext,
@@ -34,7 +34,7 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
-} from '../../../src/preact';
+} from '#preact';
 import {useStyles} from './component.jss';
 
 /**

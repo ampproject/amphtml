@@ -15,8 +15,8 @@
  */
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
-import {devAssert} from '../assert';
-import {map} from '../types/object';
+import {devAssert} from '#core/assert';
+import {map} from '#core/types/object';
 
 /** @type {Object<string, string>} */
 let propertyNameCache;

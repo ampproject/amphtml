@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
 import {CSS} from '../../../build/amp-sidebar-0.2.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
 import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
-import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
-import {debounce} from '../../../src/core/types/function';
+import {debounce} from '#core/types/function';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {handleAutoscroll} from './autoscroll';
-import {isExperimentOn} from '../../../src/experiments';
-import {isRTL, tryFocus} from '../../../src/core/dom';
+import {isExperimentOn} from '#experiments';
+import {isRTL, tryFocus} from '#core/dom';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/core/dom/size-observer';
+} from '#core/dom/size-observer';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {setStyles, toggle} from '../../../src/core/dom/style';
-import {toArray} from '../../../src/core/types/array';
+import {setStyles, toggle} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 /** @private @const {string} */

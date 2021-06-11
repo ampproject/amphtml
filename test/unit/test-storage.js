@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   LocalStorageBinding,
   Storage,
   Store,
   ViewerStorageBinding,
-} from '../../src/service/storage-impl';
+} from '#service/storage-impl';
 import {dev} from '../../src/log';
 
 describes.sandboxed('Storage', {}, (env) => {

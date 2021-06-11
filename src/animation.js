@@ -16,7 +16,7 @@
 
 import {Deferred} from './core/data-structures/promise';
 import {NormTimeDef, getCurve} from './core/data-structures/curve';
-import {Services} from './services';
+import {Services} from './service';
 import {TimestampDef} from './core/types/date';
 import {dev} from './log';
 

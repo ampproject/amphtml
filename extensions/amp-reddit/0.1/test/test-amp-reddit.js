@@ -15,7 +15,7 @@
  */
 
 import '../amp-reddit';
-import {reddit} from '../../../../3p/reddit';
+import {reddit} from '#3p/reddit';
 
 describes.realWin(
   'amp-reddit',

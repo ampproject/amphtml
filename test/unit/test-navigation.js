@@ -15,12 +15,12 @@
  */
 
 import * as Impression from '../../src/impression';
-import {Services} from '../../src/services';
+import {Services} from '#service';
 import {addParamToUrl} from '../../src/url';
-import {createElementWithAttributes} from '../../src/core/dom';
-import {installUrlReplacementsServiceForDoc} from '../../src/service/url-replacements-impl';
+import {createElementWithAttributes} from '#core/dom';
+import {installUrlReplacementsServiceForDoc} from '#service/url-replacements-impl';
 import {macroTask} from '../../testing/yield';
-import {maybeExpandUrlParamsForTesting} from '../../src/service/navigation';
+import {maybeExpandUrlParamsForTesting} from '#service/navigation';
 
 describes.sandboxed('Navigation', {}, () => {
   let event;

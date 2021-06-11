@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
-import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpReachPlayer extends AMP.BaseElement {

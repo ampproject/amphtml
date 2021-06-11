@@ -21,7 +21,7 @@ import {
   checkCorsUrl,
   isProxyOrigin,
 } from './url';
-import {Services} from './services';
+import {Services} from './service';
 import {dev, user, userAssert} from './log';
 
 /**

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {adConfig} from '../../ads/_config';
-import {hasOwn} from '../../src/core/types/object';
+import {adConfig} from '#ads/_config';
+import {hasOwn} from '#core/types/object';
 
 describes.sandboxed('test-ads-config', {}, () => {
   it('should have all ad networks configured', () => {

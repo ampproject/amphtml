@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {install} from '../../../src/polyfills/abort-controller';
+import {install} from '#polyfills/abort-controller';
 
 describes.realWin('AbortController', {}, (env) => {
   let win;

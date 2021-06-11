@@ -16,7 +16,7 @@
 
 import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
 import {cssText} from '../../../build/amp-story-player.css';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
 class AmpStoryPlayerWrapper extends AMP.BaseElement {
   /** @override @nocollapse */

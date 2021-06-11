@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dashToUnderline} from '../../../src/core/types/string';
+import {Services} from '#service';
+import {dashToUnderline} from '#core/types/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
-import {isObject} from '../../../src/core/types';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {isObject} from '#core/types';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/core/dom';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {removeElement} from '#core/dom';
+import {tryParseJson} from '#core/types/object/json';
 
 const TYPE = 'facebook';
 

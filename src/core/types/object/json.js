@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isArray} from '../array';
+import {isArray} from '#core/types/array';
 
 /**
  * @fileoverview This module declares JSON types as defined in the

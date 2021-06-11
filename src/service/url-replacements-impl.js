@@ -24,8 +24,8 @@ import {
   getTimingDataSync,
 } from './variable-source';
 import {Expander} from './url-expander/expander';
-import {Services} from '../services';
-import {WindowInterface} from '../core/window/interface';
+import {Services} from '#service';
+import {WindowInterface} from '#core/window/interface';
 import {
   addMissingParamsToUrl,
   addParamsToUrl,
@@ -37,13 +37,13 @@ import {
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
 import {getTrackImpressionPromise} from '../impression.js';
-import {hasOwn} from '../core/types/object';
+import {hasOwn} from '#core/types/object';
 import {
   installServiceInEmbedDoc,
   registerServiceBuilderForDoc,
-} from '../service';
+} from '../service-helpers';
 import {internalRuntimeVersion} from '../internal-version';
-import {parseQueryString} from '../core/types/string/url';
+import {parseQueryString} from '#core/types/string/url';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';

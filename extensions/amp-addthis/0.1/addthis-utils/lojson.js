@@ -27,11 +27,11 @@ import {
   getFragmentId,
   getServiceFromUrlFragment,
 } from './fragment';
-import {dict} from '../../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
 import {parseUrlDeprecated} from '../../../../src/url';
-import {toArray} from '../../../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 const VIEW_EVENT_CHANNEL = 100;
 const nonTrackedDomainMatcher = /\.gov|\.mil/;

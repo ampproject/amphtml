@@ -23,7 +23,7 @@ import {
   translate2d,
   whooshIn,
 } from './animation-presets-utils';
-import {px} from '../../../src/core/dom/style';
+import {px} from '#core/dom/style';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

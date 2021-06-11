@@ -16,13 +16,13 @@
 
 import {AccessClientAdapter} from '../amp-access-client';
 import {AccessService} from '../amp-access';
-import {AmpEvents} from '../../../../src/core/constants/amp-events';
-import {Observable} from '../../../../src/core/data-structures/observable';
-import {Services} from '../../../../src/services';
-import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
-import {installPerformanceService} from '../../../../src/service/performance-impl';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {toggleExperiment} from '../../../../src/experiments';
+import {AmpEvents} from '#core/constants/amp-events';
+import {Observable} from '#core/data-structures/observable';
+import {Services} from '#service';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+import {installPerformanceService} from '#service/performance-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {toggleExperiment} from '#experiments';
 
 describes.fakeWin(
   'AccessService',

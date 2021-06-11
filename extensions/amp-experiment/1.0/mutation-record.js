@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {isObject} from '../../../src/core/types';
-import {toArray} from '../../../src/core/types/array';
+import {isObject} from '#core/types';
+import {toArray} from '#core/types/array';
 import {userAssert} from '../../../src/log';
 
 /**

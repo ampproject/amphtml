@@ -15,7 +15,7 @@
  */
 
 import {dev} from '../../src/log';
-import {ieMediaCheckAndFix} from '../../src/service/ie-media-bug';
+import {ieMediaCheckAndFix} from '#service/ie-media-bug';
 
 describes.sandboxed('ie-media-bug', {}, (env) => {
   let clock;

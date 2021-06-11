@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {WithAmpContext} from '../../../src/preact/context';
+import * as Preact from '#preact';
+import {WithAmpContext} from '#preact/context';
 import {animateCollapse, animateExpand} from './animations';
-import {forwardRef} from '../../../src/preact/compat';
-import {omit} from '../../../src/core/types/object';
+import {forwardRef} from '#preact/compat';
+import {omit} from '#core/types/object';
 import {
   randomIdGenerator,
   sequentialIdGenerator,
-} from '../../../src/core/math/id-generator';
+} from '#core/math/id-generator';
 import {
   useCallback,
   useContext,
@@ -32,7 +32,7 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 

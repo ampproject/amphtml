@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as Preact from '../';
-import {forwardRef} from '../compat';
+import * as Preact from '#preact';
+import {forwardRef} from '#preact/compat';
 
 const CONTAIN = [
   null, // 0: none

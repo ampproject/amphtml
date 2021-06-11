@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
+import {ActionTrust} from '#core/constants/action-constants';
+import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
 import {
   RelativePositions,
   layoutRectLtwh,
   layoutRectsRelativePos,
-} from '../../../src/core/math/layout-rect';
-import {Services} from '../../../src/services';
+} from '#core/math/layout-rect';
+import {Services} from '#service';
 import {
   assertLength,
   getLengthNumeral,
   getLengthUnits,
   parseLength,
-} from '../../../src/core/dom/layout';
+} from '#core/dom/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
+import {dict} from '#core/types/object';
+import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
 
 const TAG = 'amp-position-observer';
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from './services';
+import {Services} from './service';
 import {VideoEvents} from './video-interface';
 import {dev} from './log';
 import {dispatchCustomEvent} from './core/dom';

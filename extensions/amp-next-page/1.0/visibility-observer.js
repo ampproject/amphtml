@@ -17,15 +17,15 @@
 import {
   PositionInViewportEntryDef,
   PositionObserverFidelity,
-} from '../../../src/service/position-observer/position-observer-worker';
+} from '#service/position-observer/position-observer-worker';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
   installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
-import {RelativePositions} from '../../../src/core/math/layout-rect';
-import {Services} from '../../../src/services';
+} from '#service/position-observer/position-observer-impl';
+import {RelativePositions} from '#core/math/layout-rect';
+import {Services} from '#service';
 import {devAssert} from '../../../src/log';
-import {throttle} from '../../../src/core/types/function';
+import {throttle} from '#core/types/function';
 
 /** @enum {number} */
 export const ViewportRelativePos = {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {DateDisplay} from '../component';
 import {mount} from 'enzyme';
 import {user} from '../../../../src/log';
