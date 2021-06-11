@@ -690,7 +690,10 @@ export class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   onVideoLoaded_() {
-    dispatchCustomEvent(this.element, VideoEvents.LOAD);
+    // When managed, only dispatch if the video was swapped.
+    if (!this.isManagedByPool_() || this.containsPoolVideo_()) {
+      dispatchCustomEvent(this.element, VideoEvents.LOAD);
+    }
   }
 
   /** @override */
@@ -754,20 +757,21 @@ export class AmpVideo extends AMP.BaseElement {
    * @private
    */
   createPosterForAndroidBug_() {
-    if (!Services.platformFor(this.win).isAndroid()) {
+    const {element} = this;
+    const src = element.getAttribute('poster');
+    if (!Services.platformFor(this.win).isAndroid() || !src) {
       return;
     }
-    const {element} = this;
     if (element.querySelector('i-amphtml-poster')) {
       return;
     }
     const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
-    const src = element.getAttribute('poster');
     setInitialDisplay(poster, 'block');
     setStyles(poster, {
       'background-image': `url(${src})`,
       'background-size': 'cover',
       'background-position': 'center',
+      'z-index': '-1',
     });
     poster.classList.add('i-amphtml-android-poster-bug');
     this.applyFillContent(poster);
@@ -807,6 +811,14 @@ export class AmpVideo extends AMP.BaseElement {
    */
   isManagedByPool_() {
     return this.element.classList.contains('i-amphtml-poolbound');
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  containsPoolVideo_() {
+    return this.video_.classList.contains('i-amphtml-pool-media');
   }
 
   /**
@@ -887,7 +899,11 @@ export class AmpVideo extends AMP.BaseElement {
     if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
-    this.removePosterForAndroidBug_();
+    // After the intended video is loaded, listen for first timeupdate to remove placeholder. Context #31358.
+
+    listenOncePromise(this.element, VideoEvents.LOAD)
+      .then(() => listenOncePromise(this.video_, 'timeupdate', {capture: true}))
+      .then(() => this.removePosterForAndroidBug_());
   }
 
   /**
