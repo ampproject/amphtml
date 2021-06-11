@@ -16,16 +16,16 @@
 
 import {CSS} from '../../../build/amp-nested-menu-0.1.css';
 import {Keys} from '../../../src/core/constants/key-codes';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {
   closest,
   closestAncestorElementBySelector,
-  isRTL,
   scopedQuerySelector,
-  tryFocus,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {dev, userAssert} from '../../../src/log';
+import {isRTL, tryFocus} from '../../../src/core/dom';
+
 import {toArray} from '../../../src/core/types/array';
 
 const TAG = 'amp-nested-menu';

@@ -49,10 +49,10 @@ import {
 } from '../../../../src/core/constants/consent-state';
 import {Deferred} from '../../../../src/core/data-structures/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {Layout} from '../../../../src/layout';
+import {Layout} from '../../../../src/core/dom/layout';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {toggleExperiment} from '../../../../src/experiments';
 
 /**

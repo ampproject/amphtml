@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
@@ -29,14 +29,16 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {
   dispatchCustomEvent,
+  getDataParamsFromAttributes,
+} from '../../../src/core/dom';
+import {
   fullscreenEnter,
   fullscreenExit,
-  getDataParamsFromAttributes,
   isFullscreenElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {parseQueryString} from '../../../src/core/types/string/url';
 
 const TAG = 'amp-dailymotion';

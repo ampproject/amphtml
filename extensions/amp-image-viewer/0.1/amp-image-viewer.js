@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
+import * as st from '../../../src/core/dom/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-viewer-0.1.css';
@@ -27,12 +27,15 @@ import {
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, distance, magnitude} from '../../../src/core/math';
-import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  elementByTag,
+} from '../../../src/core/dom/query';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
@@ -45,9 +48,9 @@ import {
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {setStyles} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
+} from '../../../src/core/dom/size-observer';
+import {setStyles} from '../../../src/core/dom/style';
+import {srcsetFromElement} from '../../../src/core/dom/srcset';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';

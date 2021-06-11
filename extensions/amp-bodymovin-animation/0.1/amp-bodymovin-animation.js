@@ -24,10 +24,10 @@ import {dict} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isFiniteNumber, isObject} from '../../../src/core/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 
 import {parseJson} from '../../../src/core/types/object/json';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';

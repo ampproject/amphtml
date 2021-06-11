@@ -15,14 +15,14 @@
  */
 
 import {Deferred} from '../core/data-structures/promise';
-import {Layout} from '../layout';
+import {Layout} from '../core/dom/layout';
 import {Services} from '../services';
 import {
   cancellation,
   isBlockedByConsent,
   reportError,
 } from '../error-reporting';
-import {computedStyle, toggle} from '../style';
+import {computedStyle, toggle} from '../core/dom/style';
 import {dev, devAssert} from '../log';
 import {
   layoutRectLtwh,
@@ -31,7 +31,7 @@ import {
   moveLayoutRect,
   rectsOverlap,
 } from '../core/math/layout-rect';
-import {toWin} from '../types';
+import {toWin} from '../core/window';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';

@@ -22,11 +22,7 @@ import {Deferred} from '../../../src/core/data-structures/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/core/constants/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/core/data-structures/signals';
-import {
-  closestAncestorElementBySelector,
-  iterateCursor,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {debounce} from '../../../src/core/types/function';
 import {deepEquals, parseJson} from '../../../src/core/types/object/json';
@@ -37,7 +33,7 @@ import {
   map,
 } from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {
   findIndex,
   isArray,
@@ -45,6 +41,8 @@ import {
   toArray,
 } from '../../../src/core/types/array';
 import {getMode} from '../../../src/mode';
+import {iterateCursor} from '../../../src/core/dom';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';
@@ -128,7 +126,7 @@ const BIND_ONLY_ATTRIBUTES = map({
  * Elements that opt-out of tree walking in favor of rescan() with {fast: true}.
  * @const {!Array<string>}
  */
-const FAST_RESCAN_TAGS = ['AMP-LIST'];
+const FAST_RESCAN_TAGS = ['AMP-LIST', 'AMP-RENDER'];
 
 /**
  * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from

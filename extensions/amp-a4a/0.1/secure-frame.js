@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createElementWithAttributes, escapeHtml} from '../../../src/dom';
+import {createElementWithAttributes, escapeHtml} from '../../../src/core/dom';
 import {dict} from '../../../src/core/types/object';
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
@@ -88,6 +88,7 @@ export function createSecureFrame(win, title, height, width) {
       dict({
         // NOTE: It is possible for either width or height to be 'auto',
         // a non-numeric value.
+        'allow': `attribution-reporting 'src'`,
         'height': height,
         'width': width,
         'title': title,

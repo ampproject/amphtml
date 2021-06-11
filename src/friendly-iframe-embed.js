@@ -27,7 +27,7 @@ import {
   getTopWindow,
   setParentWindow,
 } from './service';
-import {escapeHtml} from './dom';
+import {escapeHtml} from './core/dom';
 import {getMode} from './mode';
 import {install as installAbortController} from './polyfills/abort-controller';
 import {installAmpdocServicesForEmbed} from './service/core-services';
@@ -47,9 +47,9 @@ import {
   setImportantStyles,
   setStyle,
   setStyles,
-} from './style';
+} from './core/dom/style';
 import {rethrowAsync} from './core/error';
-import {toWin} from './types';
+import {toWin} from './core/window';
 import {urls} from './config';
 import {whenContentIniLoad} from './ini-load';
 

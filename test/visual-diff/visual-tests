@@ -150,6 +150,8 @@
       "loading_complete_selectors": [".login-section"]
     },
     {
+      // TODO(#34792, kristoferbaxter): See issue for details.
+      "flaky": true,
       "url": "examples/visual-tests/font.amp/font.amp.html",
       "name": "Fonts",
       "loading_incomplete_selectors": [
@@ -474,6 +476,14 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-unsupported-browser-overlay"
       ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-desktop-one-panel.html",
+      "name": "amp-story: desktop one panel",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
     },
     {
       "url": "examples/visual-tests/amp-story/basic.rtl.html",

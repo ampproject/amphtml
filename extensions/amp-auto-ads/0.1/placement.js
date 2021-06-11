@@ -22,13 +22,13 @@ import {
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
-  createElementWithAttributes,
   scopedQuerySelectorAll,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
+import {measurePageLayoutBox} from './measure-page-layout-box';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /** @const */
 const TAG = 'amp-auto-ads';

@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import * as dom from '../../../src/dom';
+import * as dom from '../../../src/core/dom';
 import {CSS} from '../../../build/amp-viz-vega-0.1.css';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {childElementsByTag} from '../../../src/core/dom/query';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber, isObject} from '../../../src/core/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {tryParseJson} from '../../../src/core/types/object/json';
 
 export class AmpVizVega extends AMP.BaseElement {
@@ -199,7 +200,7 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   getInlineData_() {
-    const scripts = dom.childElementsByTag(this.element, 'SCRIPT');
+    const scripts = childElementsByTag(this.element, 'SCRIPT');
     if (scripts.length == 0) {
       return;
     }

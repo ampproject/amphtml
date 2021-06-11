@@ -22,17 +22,14 @@ import {DatesList} from './dates-list';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {FiniteStateMachine} from '../../../src/core/data-structures/finite-state-machine';
 import {Keys} from '../../../src/core/constants/key-codes';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Layout, isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {
   closestAncestorElementBySelector,
-  isRTL,
-  iterateCursor,
   scopedQuerySelector,
-  tryFocus,
-} from '../../../src/dom';
-import {computedStyle} from '../../../src/style';
+} from '../../../src/core/dom/query';
+import {computedStyle} from '../../../src/core/dom/style';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
@@ -40,7 +37,8 @@ import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {isRTL, iterateCursor, tryFocus} from '../../../src/core/dom';
 import {once} from '../../../src/core/types/function';
 import {requireExternal} from '../../../src/module';
 

@@ -17,12 +17,12 @@
 import * as Preact from '../../../src/preact';
 import {Option, Selector} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {
-  closestAncestorElementBySelector,
   createElementWithAttributes,
   toggleAttribute,
   tryFocus,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {toArray} from '../../../src/core/types/array';

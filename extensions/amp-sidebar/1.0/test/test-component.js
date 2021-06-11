@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {Sidebar, SidebarToolbar} from '../component';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {mount} from 'enzyme';
 
 describes.sandboxed('Sidebar preact component', {}, (env) => {

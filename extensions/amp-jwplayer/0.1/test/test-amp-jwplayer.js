@@ -15,9 +15,9 @@
  */
 
 import '../amp-jwplayer';
-import * as utils from '../../../../src/dom';
+import * as fullscreen from '../../../../src/core/dom/fullscreen';
 import {VideoEvents} from '../../../../src/video-interface';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 
 describes.realWin(
   'amp-jwplayer',
@@ -219,7 +219,7 @@ describes.realWin(
       });
 
       it('can enter fullscreen', () => {
-        const spy = env.sandbox.spy(utils, 'fullscreenEnter');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenEnter');
         const messageSpy = env.sandbox.spy(impl, 'sendCommand_');
         impl.fullscreenEnter();
         if (impl.isSafariOrIos_()) {
@@ -229,7 +229,7 @@ describes.realWin(
       });
 
       it('can exit fullscreen', () => {
-        const spy = env.sandbox.spy(utils, 'fullscreenExit');
+        const spy = env.sandbox.spy(fullscreen, 'fullscreenExit');
         const messageSpy = env.sandbox.spy(impl, 'sendCommand_');
 
         impl.fullscreenExit();

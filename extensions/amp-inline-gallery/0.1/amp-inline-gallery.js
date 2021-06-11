@@ -25,13 +25,13 @@ import {AmpInlineGalleryThumbnails} from './amp-inline-gallery-thumbnails';
 import {CSS as AmpInlineGalleryThumbnailsCSS} from '../../../build/amp-inline-gallery-thumbnails-0.1.css';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {InlineGalleryEvents} from './inline-gallery-events';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {getDetail} from '../../../src/event-helper';
+import {iterateCursor} from '../../../src/core/dom';
 import {
-  iterateCursor,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {toArray} from '../../../src/core/types/array';
 
 /**

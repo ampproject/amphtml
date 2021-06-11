@@ -30,7 +30,7 @@ import {
   InstrumentationService,
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
-import {LayoutPriority} from '../../../src/layout';
+import {LayoutPriority} from '../../../src/core/dom/layout';
 import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
 import {Services} from '../../../src/services';
@@ -43,7 +43,7 @@ import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/core/types';
 import {rethrowAsync} from '../../../src/core/error';
 
-import {isIframed} from '../../../src/dom';
+import {isIframed} from '../../../src/core/dom';
 import {isInFie} from '../../../src/iframe-helper';
 
 const TAG = 'amp-analytics';

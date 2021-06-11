@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -30,17 +30,16 @@ import {
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
+import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
 import {
-  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {once} from '../../../src/core/types/function';
 
 const JWPLAYER_EVENTS = {

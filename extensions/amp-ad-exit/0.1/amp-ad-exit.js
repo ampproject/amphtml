@@ -30,10 +30,11 @@ import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
-import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
+import {isJsonScriptTag} from '../../../src/core/dom';
 import {isObject} from '../../../src/core/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseJson} from '../../../src/core/types/object/json';
 import {parseUrlDeprecated} from '../../../src/url';
 
@@ -97,6 +98,10 @@ export class AmpAdExit extends AMP.BaseElement {
 
     /** @private @const {!Object<string,string>} */
     this.expectedOriginToVendor_ = {};
+
+    /** @private @const {boolean} */
+    this.isAttributionReportingSupported_ =
+      this.detectAttributionReportingSupport();
   }
 
   /**
@@ -148,6 +153,7 @@ export class AmpAdExit extends AMP.BaseElement {
         .forEach((url) => this.pingTrackingUrl_(url));
     }
     const finalUrl = substituteVariables(target.finalUrl);
+    // TODO(wg-monetization): clean up unused HostServices.
     if (HostServices.isAvailable(this.getAmpDoc())) {
       HostServices.exitForDoc(this.getAmpDoc())
         .then((exitService) => exitService.openUrl(finalUrl))
@@ -165,7 +171,7 @@ export class AmpAdExit extends AMP.BaseElement {
         target.behaviors.clickTarget == '_top'
           ? '_top'
           : '_blank';
-      openWindowDialog(this.win, finalUrl, clickTarget);
+      openWindowDialog(this.win, finalUrl, clickTarget, target.windowFeatures);
     }
   }
 
@@ -380,6 +386,14 @@ export class AmpAdExit extends AMP.BaseElement {
             .filter(Boolean),
           behaviors: target['behaviors'] || {},
         };
+
+        if (this.isAttributionReportingSupported_) {
+          this.targets_[name]['windowFeatures'] =
+            this.getAttributionReportingValues_(
+              target?.behaviors?.browserAdConversion
+            );
+        }
+
         // Build a map of {vendor, origin} for 3p custom variables in the config
         for (const customVar in target['vars']) {
           if (!target['vars'][customVar].iframeTransportSignal) {
@@ -407,6 +421,38 @@ export class AmpAdExit extends AMP.BaseElement {
     }
 
     this.init3pResponseListener_();
+  }
+
+  /**
+   * Determine if `attribution-reporting` is supported by user-agent. Should only return
+   * true for Chrome 92+.
+   * @visibleForTesting
+   * @return {boolean}
+   */
+  detectAttributionReportingSupport() {
+    return this.win.document.featurePolicy
+      ?.features()
+      .includes('attribution-reporting');
+  }
+
+  /**
+   * Extracts the keys from the `browserAdConversion` data creates a
+   * string to be used as the `features` param for the `window.open()` call.
+   * @param {JsonObject} adConversionData
+   * @return {?string}
+   */
+  getAttributionReportingValues_(adConversionData) {
+    if (!adConversionData || !Object.keys(adConversionData)) {
+      return;
+    }
+
+    // `noopener` is probably redundant here but left as defense in depth.
+    // https://groups.google.com/a/chromium.org/g/blink-dev/c/FFX6VkvladY/m/QgaWHK6ZBAAJ
+    const parts = ['noopener'];
+    for (const key of Object.keys(adConversionData)) {
+      parts.push(`${key.toLowerCase()}=${adConversionData[key]}`);
+    }
+    return parts.join(',');
   }
 
   /**

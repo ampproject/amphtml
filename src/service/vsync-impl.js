@@ -21,7 +21,7 @@ import {
   addDocumentVisibilityChangeListener,
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
-} from '../utils/document-visibility';
+} from '../core/document-visibility';
 import {cancellation} from '../error-reporting';
 import {dev, devAssert} from '../log';
 import {getService, registerServiceBuilder} from '../service';

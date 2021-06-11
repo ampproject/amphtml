@@ -19,8 +19,8 @@ import {Services} from '../../../src/services';
 import {Util} from './util';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {measureIntersection} from '../../../src/utils/intersection';
-import {openWindowDialog} from '../../../src/dom';
-import {toWin} from '../../../src/types';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {toWin} from '../../../src/core/window';
 import {user, userAssert} from '../../../src/log';
 
 // Popup options

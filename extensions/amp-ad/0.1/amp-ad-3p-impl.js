@@ -28,11 +28,11 @@ import {
   Layout, // eslint-disable-line no-unused-vars
   LayoutPriority,
   isLayoutSizeDefined,
-} from '../../../src/layout';
+} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/core/math';
-import {computedStyle, setStyle} from '../../../src/style';
+import {computedStyle, setStyle} from '../../../src/core/dom/style';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getAdCid} from '../../../src/ad-cid';
@@ -59,7 +59,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {toWin} from '../../../src/types';
+import {toWin} from '../../../src/core/window';
 
 /** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';

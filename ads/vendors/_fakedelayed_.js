@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {setStyles} from '../../src/style';
+import {setStyles} from '../../src/core/dom/style';
 import {validateData, writeScript} from '../../3p/3p';
 
 /**

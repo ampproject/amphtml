@@ -23,14 +23,14 @@ module.exports = function (context) {
 
   const displayMessage = [
     'Do not set the display property using setStyle.',
-    'Only the `toggle` helper in `src/style.js` is permitted to change the `display: none` style of an element.',
+    'Only the `toggle` helper in `src/core/dom/style.js` is permitted to change the `display: none` style of an element.',
     'Or use `setInitialDisplay` to setup an initial `display: block`, `inline-block`, etc., if it is not possible to do so in CSS.',
   ].join('\n\t');
 
   return {
     [setStyleCall]: function (node) {
       const filePath = context.getFilename();
-      if (filePath.endsWith('src/style.js')) {
+      if (filePath.endsWith('src/core/dom/style.js')) {
         return;
       }
 

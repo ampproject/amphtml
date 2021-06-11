@@ -17,7 +17,7 @@
 import * as Impression from '../../src/impression';
 import {Services} from '../../src/services';
 import {addParamToUrl} from '../../src/url';
-import {createElementWithAttributes} from '../../src/dom';
+import {createElementWithAttributes} from '../../src/core/dom';
 import {installUrlReplacementsServiceForDoc} from '../../src/service/url-replacements-impl';
 import {macroTask} from '../../testing/yield';
 import {maybeExpandUrlParamsForTesting} from '../../src/service/navigation';

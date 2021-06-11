@@ -20,9 +20,9 @@ import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {
   createElementWithAttributes,
   waitForChildPromise,
-} from '../../../../src/dom';
+} from '../../../../src/core/dom';
 import {poll} from '../../../../testing/iframe';
-import {setStyles} from '../../../../src/style';
+import {setStyles} from '../../../../src/core/dom/style';
 import {toArray} from '../../../../src/core/types/array';
 import {toggleExperiment} from '../../../../src/experiments';
 import {useStyles} from '../../../amp-base-carousel/1.0/component.jss';

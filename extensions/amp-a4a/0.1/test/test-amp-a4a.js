@@ -44,12 +44,12 @@ import {Extensions} from '../../../../src/service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {LayoutPriority} from '../../../../src/layout';
+import {LayoutPriority} from '../../../../src/core/dom/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/core/data-structures/signals';
 import {cancellation} from '../../../../src/error-reporting';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {dev, user} from '../../../../src/log';
 import {
@@ -114,6 +114,7 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
       'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
         'allow-same-origin allow-scripts allow-top-navigation'
     );
+    expect(fie.getAttribute('allow')).to.equal(`attribution-reporting 'src'`);
     const cspMeta = fie.contentDocument.querySelector(
       'meta[http-equiv=Content-Security-Policy]'
     );

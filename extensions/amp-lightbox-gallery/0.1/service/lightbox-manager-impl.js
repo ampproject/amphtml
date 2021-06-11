@@ -31,11 +31,15 @@ import {
   childElementByAttr,
   closestAncestorElementBySelector,
   elementByTag,
-  iterateCursor,
-} from '../../../../src/dom';
+} from '../../../../src/core/dom/query';
 import {dev, devAssert, userAssert} from '../../../../src/log';
+
+import {iterateCursor} from '../../../../src/core/dom';
 import {map} from '../../../../src/core/types/object';
-import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
+import {
+  srcsetFromElement,
+  srcsetFromSrc,
+} from '../../../../src/core/dom/srcset';
 import {toArray} from '../../../../src/core/types/array';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {

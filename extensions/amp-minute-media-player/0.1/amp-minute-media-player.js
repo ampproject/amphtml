@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Layout, isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -29,13 +29,12 @@ import {
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
+import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
 import {
-  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 
@@ -425,7 +424,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    * implementation of fullscreen (flash for example) then check
    * if Services.platformFor(this.win).isSafari is true and use the internal
    * implementation instead. If not, it is recommended to take the iframe
-   * to fullscreen using fullscreenEnter from dom.js
+   * to fullscreen using fullscreenEnter from src/core/dom/fullscreen.js
    */
   /** @override */
   fullscreenEnter() {

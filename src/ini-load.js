@@ -16,7 +16,7 @@
 
 import {READY_SCAN_SIGNAL} from './service/resources-interface';
 import {Services} from './services';
-import {isIframed} from './dom';
+import {isIframed} from './core/dom';
 
 /** @const {!Array<string>} */
 const EXCLUDE_INI_LOAD = [
@@ -54,14 +54,13 @@ export function whenContentIniLoad(
 
 /**
  * A legacy way using direct measurement.
+ * Used by inabox runtime, and will be moved there after #31915.
  *
  * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {!Window} hostWin
  * @param {!./layout-rect.LayoutRectDef} rect
  * @param {boolean=} opt_prerenderableOnly signifies if we are in prerender mode.
  * @return {!Promise}
- * @visibleForTesting
- * TODO(#31915): remove, once launched.
  */
 export function whenContentIniLoadMeasure(
   elementOrAmpDoc,

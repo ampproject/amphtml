@@ -42,11 +42,11 @@ import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
 import {createViewportRect} from './viewport-rect';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {getInternalVideoElementFor} from '../../../src/utils/video';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {getInternalVideoElementFor} from '../../../src/core/dom/video';
+import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
+import {isRTL, removeElement} from '../../../src/core/dom';
 import {
   layoutRectEquals,
   rectIntersection,
@@ -58,7 +58,8 @@ import {
   setImportantStyles,
   setStyles,
   toggle,
-} from '../../../src/style';
+} from '../../../src/core/dom/style';
+import {scopedQuerySelector} from '../../../src/core/dom/query';
 
 const TAG = 'amp-video-docking';
 

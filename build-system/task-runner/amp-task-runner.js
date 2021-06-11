@@ -21,6 +21,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const commander = require('commander');
+const esprima = require('esprima');
 const fs = require('fs-extra');
 const os = require('os');
 const path = require('path');
@@ -76,32 +77,36 @@ function startAtRepoRoot() {
 }
 
 /**
- * Updates task-specific subpackages if there are any.
- * @param {string} taskSourceFilePath
- * @return {Promise<void>}
+ * 1. Updates root-level packages during local development. (Skipped during CI
+ *    because they're guaranteed to be fresh.)
+ * 2. Updates task-level subpackages if a package.json file exists in the task
+ *    directory.
+ * @param {string} taskSourceFileName
  */
-async function maybeUpdateSubpackages(taskSourceFilePath) {
+function ensureUpdatedPackages(taskSourceFileName) {
+  if (!isCiBuild()) {
+    updatePackages();
+  }
+  const taskSourceFilePath = getTaskSourceFilePath(taskSourceFileName);
   const packageFile = path.join(taskSourceFilePath, 'package.json');
-  const hasSubpackages = await fs.pathExists(packageFile);
+  const hasSubpackages = fs.pathExistsSync(packageFile);
   if (hasSubpackages) {
-    await updateSubpackages(taskSourceFilePath);
+    updateSubpackages(taskSourceFilePath);
   }
 }
 
 /**
  * Runs an AMP task with logging and timing after installing its subpackages.
  * @param {string} taskName
- * @param {string} taskSourceFileName
  * @param {TaskFuncDef} taskFunc
  * @return {Promise<void>}
  */
-async function runTask(taskName, taskSourceFileName, taskFunc) {
+async function runTask(taskName, taskFunc) {
   const taskFile = path.relative(os.homedir(), 'amp.js');
   log('Using task file', magenta(taskFile));
   const start = Date.now();
   try {
     log(`Starting '${cyan(taskName)}'...`);
-    await maybeUpdateSubpackages(getTaskSourceFilePath(taskSourceFileName));
     await taskFunc();
     log('Finished', `'${cyan(taskName)}'`, 'after', magenta(getTime(start)));
   } catch (err) {
@@ -166,6 +171,42 @@ function getTaskFunc(taskSourceFileName, taskFuncName) {
 }
 
 /**
+ * Uses esprima to extract the description from a task file without require-ing
+ * it, by tokenizing the JS file and finding the sequence that matches the text
+ * "fooTask.description = '<task description>'".
+ * @param {string} taskSourceFileName
+ * @param {string} taskFuncName
+ * @return {string}
+ */
+function getTaskDescription(taskSourceFileName, taskFuncName) {
+  const taskSourceFilePath = getTaskSourceFilePath(taskSourceFileName);
+  const taskSourceFile = fs.existsSync(`${taskSourceFilePath}.js`)
+    ? `${taskSourceFilePath}.js`
+    : path.join(taskSourceFilePath, 'index.js');
+  const contents = fs.readFileSync(taskSourceFile, 'utf-8').trim();
+  const tokens = Array.from(esprima.tokenize(contents));
+  let description = '';
+  for (let i = 0; i < tokens.length; ++i) {
+    if (
+      tokens[i]?.type == 'Identifier' &&
+      tokens[i]?.value == taskFuncName &&
+      tokens[i + 1]?.type == 'Punctuator' &&
+      tokens[i + 1]?.value == '.' &&
+      tokens[i + 2]?.type == 'Identifier' &&
+      tokens[i + 2]?.value == 'description' &&
+      tokens[i + 3]?.type == 'Punctuator' &&
+      tokens[i + 3]?.value == '=' &&
+      tokens[i + 4]?.type == 'String'
+    ) {
+      description = tokens[i + 4]?.value
+        ?.replace(/^['"]/, '')
+        ?.replace(/['"]$/, '');
+    }
+  }
+  return description;
+}
+
+/**
  * Helper that creates the tasks in AMP's toolchain based on the invocation:
  * - For `amp --help`, load all task descriptions so a list can be printed.
  * - For `amp <task> --help`, load and print just the task description + flags.
@@ -183,19 +224,15 @@ function createTask(
   const isInvokedTask = argv._.includes(taskName); // `amp <task>`
   const isDefaultTask =
     argv._.length === 0 && taskName == 'default' && !isHelpTask; // `amp`
-  const isTaskLevelHelp =
-    (isInvokedTask || isDefaultTask) && argv.hasOwnProperty('help'); // `amp <task> --help`
 
   if (isHelpTask) {
-    const taskFunc = getTaskFunc(taskSourceFileName, taskFuncName);
     const task = commander.command(cyan(taskName));
-    task.description(taskFunc.description);
+    const description = getTaskDescription(taskSourceFileName, taskFuncName);
+    task.description(description);
   }
   if (isInvokedTask || isDefaultTask) {
     startAtRepoRoot();
-    if (!isTaskLevelHelp && !isCiBuild()) {
-      updatePackages();
-    }
+    ensureUpdatedPackages(taskSourceFileName);
     const taskFunc = getTaskFunc(taskSourceFileName, taskFuncName);
     const task = commander.command(taskName, {isDefault: isDefaultTask});
     task.description(green(taskFunc.description));
@@ -207,7 +244,7 @@ function createTask(
     }
     task.action(async () => {
       validateUsage(task, taskName, taskFunc);
-      await runTask(taskName, taskSourceFileName, taskFunc);
+      await runTask(taskName, taskFunc);
     });
   }
 }

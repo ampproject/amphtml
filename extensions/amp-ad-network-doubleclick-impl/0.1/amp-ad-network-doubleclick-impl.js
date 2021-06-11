@@ -59,7 +59,7 @@ import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Layout, isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
 import {
@@ -74,27 +74,23 @@ import {
   serializeTargeting,
   sraBlockCallbackHandler,
 } from './sra-utils';
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/core/window/interface';
 import {
   addAmpExperimentIdToElement,
   addExperimentIdToElement,
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {
-  assertDoesNotContainDisplay,
-  setImportantStyles,
-  setStyles,
-} from '../../../src/style';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
   createElementWithAttributes,
   isRTL,
   removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -112,13 +108,14 @@ import {
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {setImportantStyles, setStyles} from '../../../src/core/dom/style';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {StoryAdAutoAdvance} from '../../../src/experiments/story-ad-auto-advance';
 import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
-import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
+import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/core/types';
 import {isCancellation} from '../../../src/error-reporting';

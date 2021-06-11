@@ -61,7 +61,7 @@ import {Gestures} from '../../../src/gesture';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/core/constants/key-codes';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {LiveStoryManager} from './live-story-manager';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
@@ -78,28 +78,34 @@ import {
   childElements,
   childNodes,
   closest,
-  isRTL,
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
-import {computedStyle, setImportantStyles, toggle} from '../../../src/style';
+} from '../../../src/core/dom/query';
+import {
+  computedStyle,
+  setImportantStyles,
+  toggle,
+} from '../../../src/core/dom/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/core/types/object';
 import {endsWith} from '../../../src/core/types/string';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {findIndex, lastItem, toArray} from '../../../src/core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
-import {getState} from '../../../src/history';
+import {getState} from '../../../src/core/window/history';
+import {isDesktopOnePanelExperimentOn} from './amp-story-desktop-one-panel';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
+import {isRTL} from '../../../src/core/dom';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+
 import {parseQueryString} from '../../../src/core/types/string/url';
 import {
   removeAttributeInMutate,
@@ -1755,6 +1761,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   maybeTriggerViewportWarning_(isLandscape) {
+    if (isDesktopOnePanelExperimentOn(this.win)) {
+      return;
+    }
     if (
       isLandscape ===
       this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE)
@@ -1814,6 +1823,7 @@ export class AmpStory extends AMP.BaseElement {
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
         });
         break;
       case UIType.DESKTOP_PANELS:
@@ -1822,6 +1832,16 @@ export class AmpStory extends AMP.BaseElement {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
+        });
+        break;
+      case UIType.DESKTOP_ONE_PANEL:
+        this.setDesktopPositionAttributes_(this.activePage_);
+        this.vsync_.mutate(() => {
+          this.element.removeAttribute('desktop');
+          this.element.classList.add('i-amphtml-story-desktop-one-panel');
+          this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-panels');
         });
         break;
       case UIType.DESKTOP_FULLBLEED:
@@ -1829,6 +1849,7 @@ export class AmpStory extends AMP.BaseElement {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
         });
         break;
       // Because of the DOM mutations, switching from this mode to another is
@@ -1889,6 +1910,9 @@ export class AmpStory extends AMP.BaseElement {
       return UIType.DESKTOP_FULLBLEED;
     }
 
+    if (isDesktopOnePanelExperimentOn(this.win)) {
+      return UIType.DESKTOP_ONE_PANEL;
+    }
     // Three panels desktop UI (default).
     return UIType.DESKTOP_PANELS;
   }

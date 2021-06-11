@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -32,17 +32,19 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {
   dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '../../../src/core/dom';
+import {
   fullscreenEnter,
   fullscreenExit,
-  getDataParamsFromAttributes,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {setStyles} from '../../../src/core/dom/style';
 
 const TAG = 'amp-youtube';
 

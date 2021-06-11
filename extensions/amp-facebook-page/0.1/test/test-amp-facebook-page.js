@@ -15,7 +15,7 @@
  */
 
 import '../amp-facebook-page';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {facebook} from '../../../../3p/facebook';
 import {resetServiceForTesting} from '../../../../src/service';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
@@ -131,11 +131,9 @@ describes.realWin(
       await element.layoutCallback();
 
       const impl = await element.getImpl(false);
-      const attemptChangeHeightStub = env.sandbox.stub(
-        impl,
-        'attemptChangeHeight'
-      );
-      attemptChangeHeightStub.returns(Promise.resolve());
+      const attemptChangeHeightStub = env.sandbox
+        .stub(impl, 'attemptChangeHeight')
+        .resolves();
 
       const mockEvent = new CustomEvent('message');
       const sentinel = JSON.parse(

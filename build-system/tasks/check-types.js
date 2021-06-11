@@ -32,44 +32,6 @@ const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
 const {typecheckNewServer} = require('../server/typescript-compile');
 
-/**
- * Files that pass type-checking but don't belong to a passing directory target.
- * Note: This is a TEMPORARY holding point during the transition to type-safety.
- * @type {!Array<string>}
- */
-const PRIDE_FILES_GLOBS = [
-  // Core
-  'src/core/**/*.js',
-
-  // Runtime
-  'build/amp-loader-0.1.css.js',
-  'build/ampdoc.css.js',
-  'build/ampshared.css.js',
-  'src/config.js',
-  'src/document-ready.js',
-  'src/dom.js',
-  'src/exponential-backoff.js',
-  'src/format.js',
-  'src/history.js',
-  'src/internal-version.js',
-  'src/json.js',
-  'src/log.js',
-  'src/mode.js',
-  'src/resolved-promise.js',
-  'src/time.js',
-  'src/types.js',
-  'src/url-parse-query-string.js',
-  'src/url-try-decode-uri-component.js',
-  'src/utils/bytes.js',
-  'src/utils/img.js',
-
-  // Third Party
-  'third_party/css-escape/css-escape.js',
-  'third_party/webcomponentsjs/ShadowCSS.js',
-  'node_modules/promise-pjs/package.json',
-  'node_modules/promise-pjs/promise.mjs',
-];
-
 // We provide glob lists for core src/externs since any other targets are
 // allowed to depend on core.
 const CORE_SRCS_GLOBS = [
@@ -149,16 +111,6 @@ const TYPE_CHECK_TARGETS = {
   'src-web-worker': {
     srcGlobs: ['src/web-worker/**/*.js'],
     warningLevel: 'QUIET',
-  },
-
-  // Opposite of `shame.extern.js`. This target is a catch-all for files that
-  // are currently passing, but whose parent directories are not fully passing.
-  // Adding a file or glob here will cause CI to fail if type errors are
-  // introduced. It is okay to remove a file from this list only when fixing a
-  // bug for cherry-pick.
-  'pride': {
-    srcGlobs: PRIDE_FILES_GLOBS,
-    externGlobs: ['build-system/externs/*.extern.js'],
   },
 
   // Ensures that all files in src and extensions pass the specified set of
@@ -345,12 +297,11 @@ module.exports = {
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
-
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
-  closure_concurrency: 'Sets the number of concurrent invocations of closure',
-  debug: 'Outputs the file contents during compilation lifecycles',
+  closure_concurrency: 'Set the number of concurrent invocations of closure',
+  debug: 'Output the file contents during compilation lifecycles',
   targets: 'Comma-delimited list of targets to type-check',
   warning_level:
-    "Optionally sets closure's warning level to one of [quiet, default, verbose]",
+    "Optionally set closure's warning level to one of [quiet, default, verbose]",
 };

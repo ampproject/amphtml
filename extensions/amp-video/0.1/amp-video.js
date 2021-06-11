@@ -15,7 +15,7 @@
  */
 
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/core/constants/visibility-state';
@@ -24,21 +24,25 @@ import {
   childElement,
   childElementByTag,
   childElementsByTag,
-  dispatchCustomEvent,
-  fullscreenEnter,
-  fullscreenExit,
-  insertAfterOrAtStart,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom/query';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
+import {
+  dispatchCustomEvent,
+  insertAfterOrAtStart,
+  removeElement,
+} from '../../../src/core/dom';
 import {fetchCachedSources} from './video-cache';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/core/dom/fullscreen';
 import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
@@ -46,7 +50,7 @@ import {
   setImportantStyles,
   setInitialDisplay,
   setStyles,
-} from '../../../src/style';
+} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 
 const TAG = 'amp-video';

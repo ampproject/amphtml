@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.167 */
+/** Version: 0.1.22.169 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -189,6 +189,8 @@ const AnalyticsEvent = {
   ACTION_SWG_SUBSCRIPTION_MINI_PROMPT_CLOSE: 1032,
   ACTION_SWG_CONTRIBUTION_MINI_PROMPT_CLOSE: 1033,
   ACTION_CONTRIBUTION_OFFER_SELECTED: 1034,
+  ACTION_SHOWCASE_REGWALL_GSI_CLICK: 1035,
+  ACTION_SHOWCASE_REGWALL_EXISTING_ACCOUNT_CLICK: 1036,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -1050,9 +1052,13 @@ let GoogleUserDef;
 /**
  * Returns true if the query string contains fresh Google Article Access (GAA) params.
  * @param {string} queryString
+ * @param {boolean} allowAllAccessTypes
  * @return {boolean}
  */
-function queryStringHasFreshGaaParams(queryString) {
+function queryStringHasFreshGaaParams(
+  queryString,
+  allowAllAccessTypes = false
+) {
   const params = parseQueryString(queryString);
 
   // Verify GAA params exist.
@@ -1065,10 +1071,12 @@ function queryStringHasFreshGaaParams(queryString) {
     return false;
   }
 
-  // Verify access type.
-  const noAccess = params['gaa_at'] === 'na';
-  if (noAccess) {
-    return false;
+  if (!allowAllAccessTypes) {
+    // Verify access type.
+    const noAccess = params['gaa_at'] === 'na';
+    if (noAccess) {
+      return false;
+    }
   }
 
   // Verify timestamp isn't stale.
