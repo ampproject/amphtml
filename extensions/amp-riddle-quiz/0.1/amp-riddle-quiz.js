@@ -15,7 +15,7 @@
  */
 import {getData, listen} from './../../../src/event-helper';
 import {isFiniteNumber, isObject} from '../../../src/core/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 
 import {removeElement} from '../../../src/core/dom';
 import {userAssert} from '../../../src/log';

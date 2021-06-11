@@ -22,10 +22,9 @@ import {ElementStub} from './element-stub';
 import {
   Layout,
   LayoutPriority,
-  applyStaticLayout,
   isInternalElement,
   isLoadingAllowed,
-} from './layout';
+} from './core/dom/layout';
 import {MediaQueryProps} from './core/dom/media-query-props';
 import {ReadyState} from './core/constants/ready-state';
 import {ResourceState} from './service/resource';
@@ -35,6 +34,7 @@ import {
   UPGRADE_TO_CUSTOMELEMENT_PROMISE,
   UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
 } from './amp-element-helpers';
+import {applyStaticLayout} from './static-layout';
 import {
   blockedByConsentError,
   cancellation,

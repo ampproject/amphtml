@@ -34,7 +34,7 @@ import {
 import {getConsentPolicyInfo} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {removeElement} from '../../../src/core/dom';
 
 const TAG = 'amp-nexxtv-player';

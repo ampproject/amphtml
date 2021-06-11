@@ -17,7 +17,10 @@
 import {AMPDOC_SINGLETON_NAME} from '../../../src/core/constants/enums';
 import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
-import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
+import {
+  LayoutPriority,
+  isLayoutSizeDefined,
+} from '../../../src/core/dom/layout';
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';

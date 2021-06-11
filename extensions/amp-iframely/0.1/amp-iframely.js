@@ -19,7 +19,7 @@ import {
   removeElement,
 } from '../../../src/core/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {measureIntersection} from '../../../src/utils/intersection';
 import {omit} from '../../../src/core/types/object';
 import {setStyle} from '../../../src/core/dom/style';

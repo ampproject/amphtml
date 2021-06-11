@@ -20,7 +20,11 @@ import {AmpEvents} from '../core/constants/amp-events';
 import {BaseElement} from './bento-ce';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Deferred} from '../core/data-structures/promise';
-import {Layout, applyFillContent, isLayoutSizeDefined} from '../layout';
+import {
+  Layout,
+  applyFillContent,
+  isLayoutSizeDefined,
+} from '../core/dom/layout';
 import {Loading} from '../core/loading-instructions';
 import {MediaQueryProps} from '../core/dom/media-query-props';
 import {PauseHelper} from '../core/dom/video/pause-helper';
