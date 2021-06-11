@@ -155,12 +155,36 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
       return;
     }
 
-    const percentages = this.preprocessPercentages_(optionsData);
+    const optionElements = this.getOptionElements();
+    // Accounts for any scrambled or incomplete data
+    const orderedData = new Array(optionElements.length);
+    for (let i = 0; i < optionsData.length; i++) {
+      orderedData[optionsData[i].index] = optionsData[i];
+    }
+    /**
+     * Object constructor for default option data.
+     * Useful if the response from the backend gives incomplete data.
+     *
+     * @constructor
+     * @param {number} index
+     * @private
+     */
+    function OptionData_(index) {
+      this.count = 0;
+      this.index = index;
+      this.selected = false;
+    }
+    for (let i = 0; i < orderedData.length; i++) {
+      if (typeof orderedData[i] === 'undefined') {
+        orderedData[i] = new OptionData_(i);
+      }
+    }
+    const percentages = this.preprocessPercentages_(orderedData);
 
-    this.getOptionElements().forEach((el, index) => {
+    optionElements.forEach((el, index) => {
       // Update the aria-label so they read "selected" and "correct" or "incorrect"
       const ariaDescription = objstr({
-        selected: optionsData[index].selected,
+        selected: orderedData[index].selected,
         correct: el.hasAttribute('correct'),
         incorrect: !el.hasAttribute('correct'),
       });
