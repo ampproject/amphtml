@@ -201,8 +201,8 @@ const htmlFixtureGlobs = [
   'test/fixtures/e2e/**/*.html',
 
   // The following are not AMP documents and are not meant to validate.
+  '!**/bento/**/*.html',
   '!examples/amp-video-iframe/frame*.html',
-  '!examples/bento.amp.html',
   '!examples/viewer-iframe-poll.html',
   '!examples/viewer-webview.html',
   '!examples/viewer.html',
