@@ -41,15 +41,18 @@ import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {createViewportObserver} from '../viewport-observer';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '../core/types/object';
-import {dispatchCustomEvent, removeElement} from '../dom';
-import {getInternalVideoElementFor, isAutoplaySupported} from '../utils/video';
+import {dispatchCustomEvent, removeElement} from '../core/dom';
+import {
+  getInternalVideoElementFor,
+  isAutoplaySupported,
+} from '../core/dom/video';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../core/types';
 import {measureIntersection} from '../utils/intersection';
 import {once} from '../core/types/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
-import {toggle} from '../style';
+import {toggle} from '../core/dom/style';
 
 /** @private @const {string} */
 const TAG = 'video-manager';

@@ -22,7 +22,7 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../src/service';
-import {getStyle} from '../src/style';
+import {getStyle} from '../src/core/dom/style';
 import {poll} from './iframe';
 
 export function stubService(sandbox, win, serviceId, method) {
