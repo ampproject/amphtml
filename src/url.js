@@ -101,7 +101,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
       : self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
-  return parseUrlWithA(a, url, IS_ESM || opt_nocache ? null : cache);
+  return parseUrlWithA(a, url);
 }
 
 /**
@@ -110,12 +110,10 @@ export function parseUrlDeprecated(url, opt_nocache) {
  * Consider the returned object immutable.
  * @param {!HTMLAnchorElement} a
  * @param {string} url
- * @param {LruCache=} opt_cache
- *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  * @restricted
  */
-export function parseUrlWithA(a, url, opt_cache) {
+export function parseUrlWithA(a, url) {
   a.href = '';
   return /** @type {?} */ (new URL(url, a.href));
 }
