@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpImg, installImg} from '../../builtins/amp-img/amp-img';
+import {AmpImg, installImg} from '#builtins/amp-img/amp-img';
 import {BaseElement} from '../../src/base-element';
-import {Layout, LayoutPriority} from '../../src/core/dom/layout';
-import {Services} from '../../src/service';
+import {Layout, LayoutPriority} from '#core/dom/layout';
+import {Services} from '#service';
 import {createCustomEvent} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';
 

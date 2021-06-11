@@ -15,9 +15,9 @@
  */
 
 import {Poller} from './poller';
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {addParamToUrl} from '../../../src/url';
-import {extensionScriptsInNode} from '../../../src/service/extension-script';
+import {extensionScriptsInNode} from '#service/extension-script';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';

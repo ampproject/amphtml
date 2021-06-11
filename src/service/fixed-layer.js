@@ -16,9 +16,9 @@
 
 import {Animation} from '../animation';
 import {Pass} from '../pass';
-import {Services} from '../service';
+import {Services} from '#service';
 import {assertDoesNotContainDisplay} from '../assert-display';
-import {closest, matches} from '../core/dom/query';
+import {closest, matches} from '#core/dom/query';
 import {
   computedStyle,
   getStyle,
@@ -28,12 +28,12 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '../core/dom/style';
+} from '#core/dom/style';
 import {dev, user} from '../log';
-import {domOrderComparator} from '../core/dom';
-import {endsWith} from '../core/types/string';
+import {domOrderComparator} from '#core/dom';
+import {endsWith} from '#core/types/string';
 import {getMode} from '../mode';
-import {remove} from '../core/types/array';
+import {remove} from '#core/types/array';
 
 const TAG = 'FixedLayer';
 

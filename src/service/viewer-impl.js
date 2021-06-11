@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../core/data-structures/promise';
-import {Observable} from '../core/data-structures/observable';
-import {Services} from '../service';
-import {VisibilityState} from '../core/constants/visibility-state';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {Observable} from '#core/data-structures/observable';
+import {Services} from '#service';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {dev, devAssert, stripUserError} from '../log';
-import {duplicateErrorIfNecessary} from '../core/error';
-import {endsWith} from '../core/types/string';
-import {findIndex} from '../core/types/array';
+import {duplicateErrorIfNecessary} from '#core/error';
+import {endsWith} from '#core/types/string';
+import {findIndex} from '#core/types/array';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -29,16 +29,16 @@ import {
   removeFragment,
   serializeQueryString,
 } from '../url';
-import {isIframed} from '../core/dom';
+import {isIframed} from '#core/dom';
 import {listen} from '../event-helper';
-import {map} from '../core/types/object';
-import {parseQueryString} from '../core/types/string/url';
+import {map} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {reportError} from '../error-reporting';
 import {urls} from '../config';
 
 import {ViewerInterface} from './viewer-interface';
-import {isEnumValue} from '../core/types';
+import {isEnumValue} from '#core/types';
 
 const TAG_ = 'Viewer';
 

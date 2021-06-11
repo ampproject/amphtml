@@ -18,8 +18,8 @@
 // LocalizedStringId enum values and any other strings.
 // eslint-disable-next-line no-unused-vars
 import {LocalizedStringId} from '../localized-strings';
-import {Services} from '../service';
-import {closest} from '../core/dom/query';
+import {Services} from '#service';
+import {closest} from '#core/dom/query';
 
 /**
  * Language code used if there is no language code specified by the document.

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as DocumentReady from '../../../../src/core/document-ready';
+import * as DocumentReady from '#core/document-ready';
 import * as LinkmateOptions from '../linkmate-options';
 import {AmpSmartlinks} from '../amp-smartlinks';
 import {LinkRewriterManager} from '../../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
-import {Services} from '../../../../src/service';
+import {Services} from '#service';
 
 const helpersFactory = (env) => {
   return {

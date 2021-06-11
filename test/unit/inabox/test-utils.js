@@ -15,10 +15,10 @@
  */
 
 import * as IniLoad from '../../../src/ini-load';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/service';
-import {createElementWithAttributes} from '../../../src/core/dom';
-import {getA4AId, registerIniLoadListener} from '../../../src/inabox/utils';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {getA4AId, registerIniLoadListener} from '#inabox/utils';
 
 describes.realWin('inabox-utils', {}, (env) => {
   let dispatchEventStub;

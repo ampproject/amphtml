@@ -24,10 +24,10 @@
 import {dev, user} from '../log';
 import {getMode} from '../mode';
 import {getTopWindow} from '../service-helpers';
-import {hasOwn, map} from '../core/types/object';
-import {isArray} from '../core/types';
-import {parseJson} from '../core/types/object/json';
-import {parseQueryString} from '../core/types/string/url';
+import {hasOwn, map} from '#core/types/object';
+import {isArray} from '#core/types';
+import {parseJson} from '#core/types/object/json';
+import {parseQueryString} from '#core/types/string/url';
 
 // typedef imports
 import {ExperimentInfoDef} from './experiments.type';

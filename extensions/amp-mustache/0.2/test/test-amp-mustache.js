@@ -16,7 +16,7 @@
 
 import * as service from '../../../../src/service-helpers';
 import {AmpMustache} from '../amp-mustache';
-import {Purifier} from '../../../../src/purifier/purifier';
+import {Purifier} from '#purifier/purifier';
 import mustache from '../../../../third_party/mustache/mustache';
 
 describes.repeated(

@@ -16,7 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-fit-text-1.0.css';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

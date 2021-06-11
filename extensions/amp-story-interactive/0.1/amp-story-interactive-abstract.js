@@ -24,25 +24,25 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 import {CSS} from '../../../build/amp-story-interactive-0.1.css';
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {
   addParamsToUrl,
   appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
-import {base64UrlEncodeFromString} from '../../../src/core/types/string/base64';
+import {base64UrlEncodeFromString} from '#core/types/string/base64';
 import {
   buildInteractiveDisclaimer,
   tryCloseDisclaimer,
 } from './interactive-disclaimer';
-import {closest} from '../../../src/core/dom/query';
+import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
-import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/core/types/array';
+import {isExperimentOn} from '#experiments';
+import {toArray} from '#core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';

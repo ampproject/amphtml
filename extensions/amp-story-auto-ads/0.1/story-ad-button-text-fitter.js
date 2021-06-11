@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
-import {px, setStyle, setStyles} from '../../../src/core/dom/style';
+import {Services} from '#service';
+import {px, setStyle, setStyles} from '#core/dom/style';
 
 /** @const {number} Fixed button height from design spec. */
 const MAX_HEIGHT = 32;

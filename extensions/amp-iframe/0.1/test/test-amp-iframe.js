@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
-import {CommonSignals} from '../../../../src/core/constants/common-signals';
-import {LayoutPriority} from '../../../../src/core/dom/layout';
-import {Services} from '../../../../src/service';
-import {createElementWithAttributes} from '../../../../src/core/dom';
+import {CommonSignals} from '#core/constants/common-signals';
+import {LayoutPriority} from '#core/dom/layout';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {isAdLike} from '../../../../src/iframe-helper';
 import {macroTask} from '../../../../testing/yield';
 import {poll} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 import {user} from '../../../../src/log';
 
 /** @const {number} */

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {
   VariableSource,
   getNavigationData,
   getTimingDataAsync,
   getTimingDataSync,
-} from '../../../src/service/variable-source';
+} from '#service/variable-source';
 import {user, userAssert} from '../../../src/log';
 
 const ALLOWLISTED_VARIABLES = [

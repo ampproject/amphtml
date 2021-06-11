@@ -15,14 +15,14 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/core/dom/layout';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {ResourcesImpl} from '../../src/service/resources-impl';
-import {Services} from '../../src/service';
-import {Signals} from '../../src/core/data-structures/signals';
-import {VisibilityState} from '../../src/core/constants/visibility-state';
-import {layoutRectLtwh} from '../../src/core/math/layout-rect';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LayoutPriority} from '#core/dom/layout';
+import {Resource, ResourceState} from '#service/resource';
+import {ResourcesImpl} from '#service/resources-impl';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {layoutRectLtwh} from '#core/math/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 
 /*eslint "google-camelcase/google-camelcase": 0*/

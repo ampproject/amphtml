@@ -20,8 +20,8 @@
  */
 
 import {FxType} from '../fx-type';
-import {Services} from '../../../../src/service';
-import {mapRange} from '../../../../src/core/math';
+import {Services} from '#service';
+import {mapRange} from '#core/math';
 import {userAssert} from '../../../../src/log';
 
 const MAX_MOBILE_WIDTH = 480;

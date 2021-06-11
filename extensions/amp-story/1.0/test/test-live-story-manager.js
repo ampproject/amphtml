@@ -17,11 +17,11 @@
 import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
-import {CommonSignals} from '../../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {LiveStoryManager} from '../live-story-manager';
-import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/service';
-import {addAttributesToElement} from '../../../../src/core/dom';
+import {LocalizationService} from '#service/localization';
+import {Services} from '#service';
+import {addAttributesToElement} from '#core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(

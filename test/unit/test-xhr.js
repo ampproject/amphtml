@@ -15,15 +15,15 @@
  */
 
 import * as mode from '../../src/mode';
-import {Services} from '../../src/service';
+import {Services} from '#service';
 import {assertSuccess} from '../../src/utils/xhr-utils';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
-import {fetchPolyfill} from '../../src/polyfills/fetch';
+import {fetchPolyfill} from '#polyfills/fetch';
 import {getCookie} from '../../src/cookies';
-import {toggleExperiment} from '../../src/experiments';
+import {toggleExperiment} from '#experiments';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
-import {xhrServiceForTesting} from '../../src/service/xhr-impl';
+import {xhrServiceForTesting} from '#service/xhr-impl';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describes.sandboxed

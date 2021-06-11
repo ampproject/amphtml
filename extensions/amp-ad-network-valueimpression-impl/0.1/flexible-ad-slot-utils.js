@@ -17,8 +17,8 @@ import {
   DomAncestorVisitor,
   VisitorCallbackTypeDef,
 } from '../../../src/utils/dom-ancestor-visitor';
-import {Layout} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/service';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
 import {dev} from '../../../src/log';
 
 /** @const @enum {number} */

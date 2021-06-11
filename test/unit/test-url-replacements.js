@@ -19,24 +19,24 @@ import * as trackPromise from '../../src/impression';
 import {
   extractClientIdFromGaCookie,
   installUrlReplacementsServiceForDoc,
-} from '../../src/service/url-replacements-impl';
+} from '#service/url-replacements-impl';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
-} from '../../src/service/custom-element-registry';
+} from '#service/custom-element-registry';
 import {
   mockWindowInterface,
   stubServiceForDoc,
 } from '../../testing/test-helper';
 
-import {Observable} from '../../src/core/data-structures/observable';
-import {Services} from '../../src/service';
-import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
+import {Observable} from '#core/data-structures/observable';
+import {Services} from '#service';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
 import {createIframePromise} from '../../testing/iframe';
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
-import {installCryptoService} from '../../src/service/crypto-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
+import {installCryptoService} from '#service/crypto-impl';
+import {installDocService} from '#service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 import {parseUrlDeprecated} from '../../src/url';
 import {registerServiceBuilder} from '../../src/service-helpers';
 import {setCookie} from '../../src/cookies';

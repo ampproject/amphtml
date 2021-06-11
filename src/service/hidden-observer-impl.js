@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Observable} from '../core/data-structures/observable';
+import {Observable} from '#core/data-structures/observable';
 import {devAssert} from '../log';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 

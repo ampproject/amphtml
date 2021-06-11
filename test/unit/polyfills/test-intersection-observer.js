@@ -20,12 +20,9 @@ import {
   resetStubsForTesting,
   shouldLoadPolyfill,
   upgradePolyfill,
-} from '../../../src/polyfills/stubs/intersection-observer-stub';
-import {Services} from '../../../src/service';
-import {
-  install,
-  installForChildWin,
-} from '../../../src/polyfills/intersection-observer';
+} from '#polyfills/stubs/intersection-observer-stub';
+import {Services} from '#service';
+import {install, installForChildWin} from '#polyfills/intersection-observer';
 
 class NativeIntersectionObserver {
   constructor(callback, options) {

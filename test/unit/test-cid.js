@@ -17,22 +17,22 @@
 import * as cookie from '../../src/cookies';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import * as url from '../../src/url';
-import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
-import {Services} from '../../src/service';
+import {Crypto, installCryptoService} from '#service/crypto-impl';
+import {Services} from '#service';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
   isOptedOutOfCid,
   optOutOfCid,
-} from '../../src/service/cid-impl';
+} from '#service/cid-impl';
 import {getCookie, setCookie} from '../../src/cookies';
 import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-import {installExtensionsService} from '../../src/service/extensions-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
+import {installDocService} from '#service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
+import {installExtensionsService} from '#service/extensions-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {installViewerServiceForDoc} from '#service/viewer-impl';
 import {macroTask} from '../../testing/yield';
 import {parseUrlDeprecated} from '../../src/url';
 import {

@@ -15,7 +15,7 @@
  */
 
 import {Services} from './service';
-import {adConfig} from '../ads/_config';
+import {adConfig} from '#ads/_config';
 import {dev} from '../src/log';
 
 /**

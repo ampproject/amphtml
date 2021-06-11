@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import * as docready from '../../../../src/core/document-ready';
+import * as docready from '#core/document-ready';
 import {HighlightHandler, getHighlightParam} from '../highlight-handler';
 import {Messaging, WindowPortEmulator} from '../messaging/messaging';
-import {Services} from '../../../../src/service';
-import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
-import {toggleExperiment} from '../../../../src/experiments';
+import {Services} from '#service';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {layoutRectLtwh} from '#core/math/layout-rect';
+import {toggleExperiment} from '#experiments';
 
 describes.fakeWin(
   'getHighlightParam',

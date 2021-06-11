@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {AMPDOC_SINGLETON_NAME} from '../../../src/core/constants/enums';
+import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {Priority} from '../../../src/service/navigation';
-import {Services} from '../../../src/service';
-import {WindowInterface} from '../../../src/core/window/interface';
+import {Priority} from '#service/navigation';
+import {Services} from '#service';
+import {WindowInterface} from '#core/window/interface';
 import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
-import {createElementWithAttributes} from '../../../src/core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {createLinker} from './linker';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getHighestAvailableDomain} from '../../../src/cookies';
-import {isObject} from '../../../src/core/types';
+import {isObject} from '#core/types';
 import {user} from '../../../src/log';
 
 /** @const {string} */

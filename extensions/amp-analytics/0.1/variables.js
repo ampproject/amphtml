@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
-import {TickLabel} from '../../../src/core/constants/enums';
-import {asyncStringReplace} from '../../../src/core/types/string';
-import {base64UrlEncodeFromString} from '../../../src/core/types/string/base64';
+import {Services} from '#service';
+import {TickLabel} from '#core/constants/enums';
+import {asyncStringReplace} from '#core/types/string';
+import {base64UrlEncodeFromString} from '#core/types/string/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {
-  getActiveExperimentBranches,
-  getExperimentBranch,
-} from '../../../src/experiments';
+import {dict} from '#core/types/object';
+import {getActiveExperimentBranches, getExperimentBranch} from '#experiments';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -35,7 +32,7 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
-import {isArray, isFiniteNumber} from '../../../src/core/types';
+import {isArray, isFiniteNumber} from '#core/types';
 
 import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';

@@ -29,10 +29,10 @@ import {
   trackerTypeForTesting,
 } from '../events';
 import {AmpdocAnalyticsRoot} from '../analytics-root';
-import {Deferred} from '../../../../src/core/data-structures/promise';
-import {Signals} from '../../../../src/core/data-structures/signals';
+import {Deferred} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
 import {macroTask} from '../../../../testing/yield';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin('Events', {amp: 1}, (env) => {
   let win;

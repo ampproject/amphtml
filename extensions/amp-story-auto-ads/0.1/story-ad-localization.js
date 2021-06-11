@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {LocalizationService} from '../../../src/service/localization';
+import {LocalizationService} from '#service/localization';
 import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../../src/localized-strings';
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]

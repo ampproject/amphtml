@@ -20,9 +20,9 @@
  */
 
 import * as closure from '../../../third_party/closure-responding-channel/closure-bundle';
-import {Services} from '../../../src/service';
-import {addAttributesToElement} from '../../../src/core/dom';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {Services} from '#service';
+import {addAttributesToElement} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
 export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
   /** @param {!AmpElement} element */

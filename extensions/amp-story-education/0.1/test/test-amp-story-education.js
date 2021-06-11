@@ -19,10 +19,10 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryEducation, State} from '../amp-story-education';
-import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/service';
+import {LocalizationService} from '#service/localization';
+import {Services} from '#service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-education', {amp: true}, (env) => {

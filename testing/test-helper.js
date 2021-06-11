@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {WindowInterface} from '../src/core/window/interface';
+import {WindowInterface} from '#core/window/interface';
 import {
   getService,
   getServiceForDoc,
@@ -22,7 +22,7 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../src/service-helpers';
-import {getStyle} from '../src/core/dom/style';
+import {getStyle} from '#core/dom/style';
 import {poll} from './iframe';
 
 export function stubService(sandbox, win, serviceId, method) {

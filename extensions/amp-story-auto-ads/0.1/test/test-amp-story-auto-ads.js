@@ -23,18 +23,18 @@ import {
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
-import {CommonSignals} from '../../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {
   MockStoryImpl,
   addStoryAutoAdsConfig,
   addStoryPages,
 } from './story-mock';
 import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
-import {Services} from '../../../../src/service';
+import {Services} from '#service';
 import {StoryAdPage} from '../story-ad-page';
 import {macroTask} from '../../../../testing/yield';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 
 const NOOP = () => {};
 

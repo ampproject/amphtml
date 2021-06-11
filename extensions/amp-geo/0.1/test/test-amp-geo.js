@@ -16,10 +16,10 @@
 
 import {AmpGeo} from '../amp-geo';
 import {GEO_IN_GROUP} from '../amp-geo-in-group';
-import {Services} from '../../../../src/service';
+import {Services} from '#service';
 import {urls} from '../../../../src/config';
 import {user} from '../../../../src/log';
-import {vsyncForTesting} from '../../../../src/service/vsync-impl';
+import {vsyncForTesting} from '#service/vsync-impl';
 
 describes.realWin(
   'amp-geo',

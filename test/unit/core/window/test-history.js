@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   History,
   HistoryBindingNatural_,
   HistoryBindingVirtual_,
   installHistoryServiceForDoc,
-} from '../../../../src/service/history-impl';
-import {Services} from '../../../../src/service';
-import {installTimerService} from '../../../../src/service/timer-impl';
+} from '#service/history-impl';
+import {Services} from '#service';
+import {installTimerService} from '#service/timer-impl';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../../src/url';
 

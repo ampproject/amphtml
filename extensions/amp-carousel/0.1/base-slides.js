@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {BaseCarousel} from './base-carousel';
-import {Services} from '../../../src/service';
-import {isFiniteNumber} from '../../../src/core/types';
+import {Services} from '#service';
+import {isFiniteNumber} from '#core/types';
 import {userAssert} from '../../../src/log';
 
 export class BaseSlides extends BaseCarousel {

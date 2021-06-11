@@ -22,7 +22,7 @@ import {
   StorageLocation,
 } from '../../amp-script';
 import {FakeWindow} from '../../../../../testing/fake-dom';
-import {Services} from '../../../../../src/service';
+import {Services} from '#service';
 import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,

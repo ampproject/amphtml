@@ -20,15 +20,15 @@ import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/service';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict, getValueForExpr} from '../../../src/core/types/object';
+import {dict, getValueForExpr} from '#core/types/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
-import {isEnumValue, isObject} from '../../../src/core/types';
-import {isExperimentOn} from '../../../src/experiments';
-import {parseQueryString} from '../../../src/core/types/string/url';
+import {isEnumValue, isObject} from '#core/types';
+import {isExperimentOn} from '#experiments';
+import {parseQueryString} from '#core/types/string/url';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */

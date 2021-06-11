@@ -15,7 +15,7 @@
  */
 
 import '../amp-youtube';
-import {Services} from '../../../../src/service';
+import {Services} from '#service';
 import {VideoEvents} from '../../../../src/video-interface';
 import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';

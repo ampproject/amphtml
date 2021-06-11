@@ -18,17 +18,17 @@ import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {buildOpenAttachmentElementLinkIcon} from './amp-story-open-page-attachment';
-import {closest} from '../../../src/core/dom/query';
+import {closest} from '#core/dom/query';
 import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
-import {getState} from '../../../src/core/window/history';
-import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
+import {getState} from '#core/window/history';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
-import {removeElement} from '../../../src/core/dom';
-import {setImportantStyles, toggle} from '../../../src/core/dom/style';
+import {removeElement} from '#core/dom';
+import {setImportantStyles, toggle} from '#core/dom/style';
 
 import {triggerClickFromLightDom} from './utils';
 

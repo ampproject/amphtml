@@ -18,10 +18,10 @@
  * The entry point for AMP inabox runtime (inabox-v0.js).
  */
 
-import '../polyfills';
-import {Navigation} from '../service/navigation';
-import {Services} from '../service';
-import {TickLabel} from '../core/constants/enums';
+import '#polyfills';
+import {Navigation} from '#service/navigation';
+import {Services} from '#service';
+import {TickLabel} from '#core/constants/enums';
 import {adopt} from '../runtime';
 import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
@@ -33,11 +33,11 @@ import {installAmpdocServicesForInabox} from './inabox-services';
 import {
   installBuiltinElements,
   installRuntimeServices,
-} from '../service/core-services';
-import {installDocService} from '../service/ampdoc-impl';
+} from '#service/core-services';
+import {installDocService} from '#service/ampdoc-impl';
 import {installErrorReporting} from '../error-reporting';
-import {installPerformanceService} from '../service/performance-impl';
-import {installPlatformService} from '../service/platform-impl';
+import {installPerformanceService} from '#service/performance-impl';
+import {installPlatformService} from '#service/platform-impl';
 import {
   installStylesForDoc,
   makeBodyVisible,
@@ -46,7 +46,7 @@ import {
 import {internalRuntimeVersion} from '../internal-version';
 import {maybeRenderInaboxAsStoryAd} from './inabox-story-ad';
 import {maybeValidate} from '../validator-integration';
-import {stubElementsForDoc} from '../service/custom-element-registry';
+import {stubElementsForDoc} from '#service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
 getMode(self).a4aId = getA4AId(self);

@@ -15,7 +15,7 @@
  */
 
 import {LaterpayVendor} from './laterpay-impl';
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 
 AMP.extension('amp-access-laterpay', '0.1', function (AMP) {
   AMP.registerServiceForDoc(

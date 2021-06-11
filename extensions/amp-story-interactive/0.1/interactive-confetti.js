@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
-import {htmlFor} from '../../../src/core/dom/static-template';
-import {setStyles} from '../../../src/core/dom/style';
+import {Services} from '#service';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyles} from '#core/dom/style';
 
 /**
  * Generates the template for the confetti wrapper.

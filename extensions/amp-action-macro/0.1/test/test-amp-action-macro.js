@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
+import {ActionInvocation} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AmpActionMacro} from '../amp-action-macro';
-import {Services} from '../../../../src/service';
+import {Services} from '#service';
 
 describes.realWin(
   'amp-action-macro',

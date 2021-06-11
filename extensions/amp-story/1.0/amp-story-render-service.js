@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Services} from '../../../src/service';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Services} from '#service';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /**

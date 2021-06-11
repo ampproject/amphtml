@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {LocalizationService} from '../../../src/service/localization';
-import {Services} from '../../../src/service';
+import {LocalizationService} from '#service/localization';
+import {Services} from '#service';
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
 
 /**

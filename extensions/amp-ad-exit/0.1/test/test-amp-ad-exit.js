@@ -17,10 +17,10 @@
 import {AmpAdExit} from '../amp-ad-exit';
 import {FilterType} from '../filters/filter';
 import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {installTimerService} from '../../../../src/service/timer-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
 import {setParentWindow} from '../../../../src/service-helpers';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 
 const TEST_3P_VENDOR = '3p-vendor';
 

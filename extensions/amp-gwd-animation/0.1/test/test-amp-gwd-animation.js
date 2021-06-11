@@ -23,7 +23,7 @@ import {
   PlaybackCssClass,
 } from '../amp-gwd-animation-impl';
 import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
-import {Services} from '../../../../src/service';
+import {Services} from '#service';
 import {createCustomEvent} from '../../../../src/event-helper';
 import {getServiceForDocOrNull} from '../../../../src/service-helpers';
 

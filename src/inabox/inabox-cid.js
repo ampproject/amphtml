@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CidDef} from '../service/cid-impl';
+import {CidDef} from '#service/cid-impl';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /**

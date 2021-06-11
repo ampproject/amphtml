@@ -23,12 +23,12 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {Services} from '../../../src/service';
-import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
+import {Services} from '#service';
+import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, matches} from '../../../src/core/dom/query';
+import {closest, matches} from '#core/dom/query';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';

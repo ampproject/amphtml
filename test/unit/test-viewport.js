@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
-import {Services} from '../../src/service';
-import {ViewportBindingIosEmbedWrapper_} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
+import {AmpDocSingle, installDocService} from '#service/ampdoc-impl';
+import {Services} from '#service';
+import {ViewportBindingIosEmbedWrapper_} from '#service/viewport/viewport-binding-ios-embed-wrapper';
 import {
   ViewportImpl,
   installViewportServiceForDoc,
   parseViewportMeta,
   stringifyViewportMeta,
   updateViewportMetaString,
-} from '../../src/service/viewport/viewport-impl';
+} from '#service/viewport/viewport-impl';
 
 import {
   ViewportBindingDef,
   marginBottomOfLastChild,
-} from '../../src/service/viewport/viewport-binding-def';
-import {ViewportBindingNatural_} from '../../src/service/viewport/viewport-binding-natural';
+} from '#service/viewport/viewport-binding-def';
+import {ViewportBindingNatural_} from '#service/viewport/viewport-binding-natural';
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {installVsyncService} from '../../src/service/vsync-impl';
-import {layoutRectLtwh} from '../../src/core/math/layout-rect';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {installViewerServiceForDoc} from '#service/viewer-impl';
+import {installVsyncService} from '#service/vsync-impl';
+import {layoutRectLtwh} from '#core/math/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service-helpers';
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {userAssert} from '../../../src/log';
 

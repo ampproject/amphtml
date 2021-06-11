@@ -15,7 +15,7 @@
  */
 
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
-import {Services} from '../../../../src/service';
+import {Services} from '#service';
 import {
   assertHttpsUrl,
   getSourceOrigin,

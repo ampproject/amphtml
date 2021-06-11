@@ -16,7 +16,7 @@
 
 import {installResizeObserver} from '../../../third_party/resize-observer-polyfill/ResizeObserver.install';
 import {registerServiceBuilder} from '../../../src/service-helpers';
-import {upgradePolyfill} from '../../../src/polyfills/stubs/resize-observer-stub';
+import {upgradePolyfill} from '#polyfills/stubs/resize-observer-stub';
 
 const TAG = 'amp-resize-observer-polyfill';
 

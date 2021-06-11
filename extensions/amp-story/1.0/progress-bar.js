@@ -15,20 +15,20 @@
  */
 import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {debounce} from '../../../src/core/types/function';
+import {debounce} from '#core/types/function';
 import {dev, devAssert} from '../../../src/log';
-import {escapeCssSelectorNth} from '../../../src/core/dom/css-selectors';
-import {hasOwn, map} from '../../../src/core/types/object';
+import {escapeCssSelectorNth} from '#core/dom/css-selectors';
+import {hasOwn, map} from '#core/types/object';
 import {isExperimentOn} from 'src/experiments';
-import {removeChildren} from '../../../src/core/dom';
-import {scale, setImportantStyles} from '../../../src/core/dom/style';
-import {scopedQuerySelector} from '../../../src/core/dom/query';
+import {removeChildren} from '#core/dom';
+import {scale, setImportantStyles} from '#core/dom/style';
+import {scopedQuerySelector} from '#core/dom/query';
 
 /**
  * Transition used to show the progress of a media. Has to be linear so the

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/open-window-dialog';

@@ -15,8 +15,8 @@
  */
 
 import '../amp-dynamic-css-classes';
-import {Services} from '../../../../src/service';
-import {vsyncForTesting} from '../../../../src/service/vsync-impl';
+import {Services} from '#service';
+import {vsyncForTesting} from '#service/vsync-impl';
 
 const tcoReferrer = 'http://t.co/xyzabc123';
 const PinterestUA =

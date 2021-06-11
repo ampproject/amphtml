@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
-import {Services} from '../../../src/service';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {
@@ -27,21 +27,21 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-} from '../../../src/core/dom/fullscreen';
+} from '#core/dom/fullscreen';
 
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/core/dom/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
 const TAG = 'amp-brid-player';
 

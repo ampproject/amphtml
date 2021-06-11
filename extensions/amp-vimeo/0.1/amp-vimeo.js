@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
-import {Services} from '../../../src/service';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {
   VIMEO_EVENTS,
   getVimeoIframeSrc,
@@ -32,12 +32,12 @@ import {
   postMessageWhenAvailable,
   redispatch,
 } from '../../../src/iframe-video';
-import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isAutoplaySupported} from '../../../src/core/dom/video';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
-import {once} from '../../../src/core/types/function';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isAutoplaySupported} from '#core/dom/video';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {once} from '#core/types/function';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-vimeo';

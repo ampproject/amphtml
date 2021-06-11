@@ -19,12 +19,12 @@ import {
   ConsentInfoDef,
   PURPOSE_CONSENT_STATE,
 } from './consent-info';
-import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Observable} from '../../../src/core/data-structures/observable';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
+import {Observable} from '#core/data-structures/observable';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {hasOwn, map} from '../../../src/core/types/object';
-import {isFiniteNumber, isObject} from '../../../src/core/types';
+import {hasOwn, map} from '#core/types/object';
+import {isFiniteNumber, isObject} from '#core/types';
 
 import {user, userAssert} from '../../../src/log';
 

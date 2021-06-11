@@ -15,7 +15,7 @@
  */
 
 import '../amp-facebook-page';
-import {createElementWithAttributes} from '../../../../src/core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {doNotLoadExternalResourcesInTest} from 'testing/iframe';
 import {resetServiceForTesting} from '../../../../src/service-helpers';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';

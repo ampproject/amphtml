@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {getMode} from '../../../src/mode';
-import {includes} from '../../../src/core/types/string';
-import {map} from '../../../src/core/types/object';
-import {parseExtensionUrl} from '../../../src/service/extension-script';
+import {includes} from '#core/types/string';
+import {map} from '#core/types/object';
+import {parseExtensionUrl} from '#service/extension-script';
 import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
-import {removeElement, rootNodeFor} from '../../../src/core/dom';
+import {removeElement, rootNodeFor} from '#core/dom';
 import {urls} from '../../../src/config';
 
 /**

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
-import {dict} from '../../../src/core/types/object';
+import {Services} from '#service';
+import {dict} from '#core/types/object';
 import {evaluateExpr} from './expr';
 
 /**

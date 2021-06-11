@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
-import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
+import {Services} from '#service';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {removeElement} from '../../../src/core/dom';
+import {removeElement} from '#core/dom';
 import {removeFragment} from '../../../src/url';
-import {toggle} from '../../../src/core/dom/style';
+import {toggle} from '#core/dom/style';
 import {urls} from '../../../src/config';
 
 /** @private @const {string} */

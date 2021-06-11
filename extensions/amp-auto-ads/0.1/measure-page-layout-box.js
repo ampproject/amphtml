@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import {Services} from '.../../../src/service';
-import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
-import {toWin} from '../../../src/core/window';
+import {getPageLayoutBoxBlocking} from '#core/dom/page-layout-box';
+import {toWin} from '#core/window';
 
 /**
  * @param {!Element} element

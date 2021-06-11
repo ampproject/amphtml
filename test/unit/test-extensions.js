@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
+import {AmpDocShadow, installDocService} from '#service/ampdoc-impl';
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
-import {Extensions} from '../../src/service/extensions-impl';
-import {Services} from '../../src/service';
+import {Extensions} from '#service/extensions-impl';
+import {Services} from '#service';
 import {dev} from '../../src/log';
-import {dispatchCustomEvent} from '../../src/core/dom';
+import {dispatchCustomEvent} from '#core/dom';
 import {getServiceForDoc} from '../../src/service-helpers';
 import {
   getTemplateClassForTesting,
   installTemplatesServiceForDoc,
-} from '../../src/service/template-impl';
-import {installTimerService} from '../../src/service/timer-impl';
+} from '#service/template-impl';
+import {installTimerService} from '#service/timer-impl';
 
 class AmpTest extends BaseElement {}
 class AmpTestSub extends BaseElement {}

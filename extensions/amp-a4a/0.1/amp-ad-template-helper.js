@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {LruCache} from '../../../src/core/data-structures/lru-cache';
-import {Services} from '../../../src/service';
-import {createElementWithAttributes} from '../../../src/core/dom';
+import {LruCache} from '#core/data-structures/lru-cache';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
 import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
-import {isArray} from '../../../src/core/types';
+import {isArray} from '#core/types';
 import {parseUrlDeprecated} from '../../../src/url';
 import {urls} from '../../../src/config';
 

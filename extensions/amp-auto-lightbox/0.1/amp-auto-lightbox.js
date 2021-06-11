@@ -22,16 +22,16 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Services} from '../../../src/service';
-import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Services} from '#service';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dev} from '../../../src/log';
-import {dispatchCustomEvent} from '../../../src/core/dom';
+import {dispatchCustomEvent} from '#core/dom';
 import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
-import {toArray} from '../../../src/core/types/array';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {toArray} from '#core/types/array';
+import {tryParseJson} from '#core/types/object/json';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 const TAG = 'amp-auto-lightbox';

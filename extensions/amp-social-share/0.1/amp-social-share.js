@@ -15,16 +15,16 @@
  */
 
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/service';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {getDataParamsFromAttributes} from '../../../src/core/dom';
+import {dict} from '#core/types/object';
+import {getDataParamsFromAttributes} from '#core/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {openWindowDialog} from '../../../src/open-window-dialog';
-import {parseQueryString} from '../../../src/core/types/string/url';
-import {toggle} from '../../../src/core/dom/style';
+import {parseQueryString} from '#core/types/string/url';
+import {toggle} from '#core/dom/style';
 
 const TAG = 'amp-social-share';
 

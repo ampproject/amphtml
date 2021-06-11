@@ -15,18 +15,15 @@
  */
 
 import {CSS} from '../../../build/amp-tiktok-0.1.css';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/service';
-import {childElementByTag} from '../../../src/core/dom/query';
-import {
-  createElementWithAttributes,
-  removeElement,
-} from '../../../src/core/dom';
-import {debounce} from '../../../src/core/types/function';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
+import {childElementByTag} from '#core/dom/query';
+import {createElementWithAttributes, removeElement} from '#core/dom';
+import {debounce} from '#core/types/function';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
-import {px, resetStyles, setStyles} from '../../../src/core/dom/style';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {px, resetStyles, setStyles} from '#core/dom/style';
+import {tryParseJson} from '#core/types/object/json';
 
 let id = 0;
 const NAME_PREFIX = '__tt_embed__v';

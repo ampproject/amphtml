@@ -24,7 +24,7 @@ import {
 } from '../../../../third_party/subscriptions-project/config';
 import {PlatformStore} from '../platform-store';
 import {ServiceAdapter} from '../service-adapter';
-import {Services} from '../../../../src/service';
+import {Services} from '#service';
 import {SubscriptionAnalyticsEvents} from '../analytics';
 import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';

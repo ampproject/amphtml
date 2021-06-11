@@ -15,7 +15,7 @@
  */
 
 import {ElementStub} from '../element-stub';
-import {Services} from '../service';
+import {Services} from '#service';
 import {createCustomElementClass, stubbedElements} from '../custom-element';
 import {extensionScriptsInNode} from './extension-script';
 import {reportError} from '../error-reporting';

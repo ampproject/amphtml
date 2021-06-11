@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/core/dom/layout';
+import {Layout} from '#core/dom/layout';
 import {Variants, allocateVariant} from './variant';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {parseJson} from '../../../src/core/types/object/json';
+import {parseJson} from '#core/types/object/json';
 
 const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';

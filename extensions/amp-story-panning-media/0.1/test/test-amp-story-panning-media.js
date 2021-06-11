@@ -19,7 +19,7 @@ import {
   Action,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {createElementWithAttributes} from '../../../../src/core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 /**

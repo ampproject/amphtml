@@ -27,16 +27,13 @@
  * </code>
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/service';
-import {
-  createElementWithAttributes,
-  removeElement,
-} from '../../../src/core/dom';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
+import {createElementWithAttributes, removeElement} from '#core/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
-import {isObject} from '../../../src/core/types';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {isObject} from '#core/types';
+import {tryParseJson} from '#core/types/object/json';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-imgur';

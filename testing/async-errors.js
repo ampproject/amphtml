@@ -15,7 +15,7 @@
  */
 'use strict';
 
-import * as coreError from '../src/core/error';
+import * as coreError from '#core/error';
 import {reportError} from '../src/error-reporting';
 import {setReportError} from '../src/log';
 import sinon from 'sinon'; // eslint-disable-line local/no-import

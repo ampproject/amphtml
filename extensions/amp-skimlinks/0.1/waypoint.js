@@ -15,9 +15,9 @@
  */
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 
 /**
  * The waypoint class is responsible for building the URL to

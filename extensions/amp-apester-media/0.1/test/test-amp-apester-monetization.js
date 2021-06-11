@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../src/service';
+import {Services} from '#service';
 import {handleCompanionAds} from '../monetization/index';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,

@@ -15,10 +15,10 @@
  */
 
 import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
-import {Services} from '../../../../src/service';
-import {createElementWithAttributes} from '../../../../src/core/dom';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
 import {fetchCachedSources} from '../video-cache';
-import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
+import {xhrServiceForTesting} from '#service/xhr-impl';
 
 describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
   let cacheUrlService;

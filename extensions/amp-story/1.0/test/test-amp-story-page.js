@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-import * as MediaQueryProps from '../../../../src/core/dom/media-query-props';
-import * as VideoUtils from '../../../../src/core/dom/video';
+import * as MediaQueryProps from '#core/dom/media-query-props';
+import * as VideoUtils from '#core/dom/video';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
-import {Deferred} from '../../../../src/core/data-structures/promise';
-import {LocalizationService} from '../../../../src/service/localization';
+import {Deferred} from '#core/data-structures/promise';
+import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
-import {Services} from '../../../../src/service';
-import {Signals} from '../../../../src/core/data-structures/signals';
-import {
-  addAttributesToElement,
-  createElementWithAttributes,
-} from '../../../../src/core/dom';
-import {htmlFor} from '../../../../src/core/dom/static-template';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
+import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {scopedQuerySelectorAll} from '../../../../src/core/dom/query';
-import {toggleExperiment} from '../../../../src/experiments';
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {toggleExperiment} from '#experiments';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import '../amp-apester-media';
-import {Services} from '../../../../src/service';
+import {Services} from '#service';
 
 describes.realWin(
   'amp-apester-media',

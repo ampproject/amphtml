@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-stream-gallery-1.0.css';
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {createCustomEvent} from '../../../src/event-helper';
-import {isExperimentOn} from '../../../src/experiments';
-import {toWin} from '../../../src/core/window';
+import {isExperimentOn} from '#experiments';
+import {toWin} from '#core/window';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../../src/service';
+import {Services} from '#service';
 
 export class ScrollMonitor {
   /**

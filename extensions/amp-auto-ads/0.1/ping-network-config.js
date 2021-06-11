@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
-import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
-import {dict} from '../../../src/core/types/object';
+import {Services} from '#service';
+import {buildUrl} from '#ads/google/a4a/shared/url-builder';
+import {dict} from '#core/types/object';
 
 /**
  * A fake ad network integration that is mainly used for testing

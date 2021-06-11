@@ -18,8 +18,8 @@ import {
   PositionObserverFidelity, // eslint-disable-line no-unused-vars
   PositionObserverWorker,
 } from './position-observer-worker';
-import {Services} from '../../service';
-import {debounce} from '../../core/types/function';
+import {Services} from '#service';
+import {debounce} from '#core/types/function';
 import {dev} from '../../log';
 import {registerServiceBuilderForDoc} from '../../service-helpers';
 

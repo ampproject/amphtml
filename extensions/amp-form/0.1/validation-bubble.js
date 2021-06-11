@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
-import {removeChildren} from '../../../src/core/dom';
-import {setStyles, toggle} from '../../../src/core/dom/style';
+import {Services} from '#service';
+import {removeChildren} from '#core/dom';
+import {setStyles, toggle} from '#core/dom/style';
 
 /** @type {string} */
 const OBJ_PROP = '__BUBBLE_OBJ';

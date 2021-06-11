@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/service';
-import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {bezierCurve} from '#core/data-structures/curve';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent} from '../../../src/core/dom';
-import {getStyle, setStyle} from '../../../src/core/dom/style';
-import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber} from '../../../src/core/types';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent} from '#core/dom';
+import {getStyle, setStyle} from '#core/dom/style';
+import {isExperimentOn} from '#experiments';
+import {isFiniteNumber} from '#core/types';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {numeric} from '../../../src/transition';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/core/dom/size-observer';
+} from '#core/dom/size-observer';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,

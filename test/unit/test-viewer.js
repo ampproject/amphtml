@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/service';
-import {ViewerImpl} from '../../src/service/viewer-impl';
+import {Services} from '#service';
+import {ViewerImpl} from '#service/viewer-impl';
 import {dev} from '../../src/log';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {parseQueryString} from '../../src/core/types/string/url';
+import {installDocService} from '#service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {parseQueryString} from '#core/types/string/url';
 import {parseUrlDeprecated, removeFragment} from '../../src/url';
 
 describes.sandboxed('Viewer', {}, (env) => {

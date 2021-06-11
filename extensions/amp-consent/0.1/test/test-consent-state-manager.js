@@ -20,9 +20,9 @@ import {
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '../../../../src/core/constants/consent-state';
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {ConsentInstance, ConsentStateManager} from '../consent-state-manager';
-import {Services} from '../../../../src/service';
+import {Services} from '#service';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 import {

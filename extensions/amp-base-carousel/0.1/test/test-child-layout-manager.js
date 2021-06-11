@@ -15,8 +15,8 @@
  */
 
 import {ChildLayoutManager} from '../child-layout-manager';
-import {Services} from '../../../../src/service';
-import {setInitialDisplay, setStyles} from '../../../../src/core/dom/style';
+import {Services} from '#service';
+import {setInitialDisplay, setStyles} from '#core/dom/style';
 
 /**
  * @return {!Promise<undefined>} A Promise that resolves after the browser has

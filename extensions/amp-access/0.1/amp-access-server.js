@@ -15,14 +15,14 @@
  */
 
 import {AccessClientAdapter} from './amp-access-client';
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {dict} from '#core/types/object';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {fetchDocument} from '../../../src/document-fetcher';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
-import {parseJson} from '../../../src/core/types/object/json';
+import {parseJson} from '#core/types/object/json';
 
 /** @const {string} */
 const TAG = 'amp-access-server';

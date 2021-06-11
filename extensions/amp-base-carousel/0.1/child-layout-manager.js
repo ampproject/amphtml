@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 
 /**
  * Used for tracking whether or not an item is near the viewport. This is set

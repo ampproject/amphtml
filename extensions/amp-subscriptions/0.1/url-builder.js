@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
-import {getValueForExpr} from '../../../src/core/types/object';
+import {Services} from '#service';
+import {getValueForExpr} from '#core/types/object';
 
 export class UrlBuilder {
   /**

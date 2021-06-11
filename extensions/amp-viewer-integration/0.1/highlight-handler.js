@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/service';
-import {dict} from '../../../src/core/types/object';
+import {Services} from '#service';
+import {dict} from '#core/types/object';
 import {findSentences, markTextRangeList} from './findtext';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
 import {listenOnce} from '../../../src/event-helper';
-import {moveLayoutRect} from '../../../src/core/math/layout-rect';
-import {once} from '../../../src/core/types/function';
-import {parseJson} from '../../../src/core/types/object/json';
-import {parseQueryString} from '../../../src/core/types/string/url';
-import {
-  resetStyles,
-  setInitialDisplay,
-  setStyles,
-} from '../../../src/core/dom/style';
-import {whenDocumentReady} from '../../../src/core/document-ready';
+import {moveLayoutRect} from '#core/math/layout-rect';
+import {once} from '#core/types/function';
+import {parseJson} from '#core/types/object/json';
+import {parseQueryString} from '#core/types/string/url';
+import {resetStyles, setInitialDisplay, setStyles} from '#core/dom/style';
+import {whenDocumentReady} from '#core/document-ready';
 
 /**
  * The message name sent by viewers to dismiss highlights.

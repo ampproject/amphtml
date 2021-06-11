@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {Builder} from './web-animations';
 import {Pass} from '../../../src/pass';
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {WebAnimationPlayState} from './web-animation-types';
 import {WebAnimationService} from './web-animation-service';
-import {clamp} from '../../../src/core/math';
+import {clamp} from '#core/math';
 import {dev, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';
 import {installWebAnimationsIfNecessary} from './install-polyfill';
-import {isFiniteNumber} from '../../../src/core/types';
-import {
-  setInitialDisplay,
-  setStyles,
-  toggle,
-} from '../../../src/core/dom/style';
+import {isFiniteNumber} from '#core/types';
+import {setInitialDisplay, setStyles, toggle} from '#core/dom/style';
 
 const TAG = 'amp-animation';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../service';
+import {Services} from '#service';
 import {
   assertSuccess,
   getViewerInterceptResponse,
@@ -27,7 +27,7 @@ import {dev, user} from '../log';
 import {getCorsUrl, parseUrlDeprecated} from '../url';
 import {getService, registerServiceBuilder} from '../service-helpers';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {parseJson} from '../core/types/object/json';
+import {parseJson} from '#core/types/object/json';
 
 /**
  * A service that polyfills Fetch API for use within AMP.

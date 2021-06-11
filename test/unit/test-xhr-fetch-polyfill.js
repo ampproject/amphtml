@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Response, fetchPolyfill} from '../../src/polyfills/fetch';
-import {Services} from '../../src/service';
+import {Response, fetchPolyfill} from '#polyfills/fetch';
+import {Services} from '#service';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
 
 describes.sandboxed('fetch', {}, (env) => {

@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
-import {DomFingerprint} from '../../../src/core/dom/fingerprint';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {DomFingerprint} from '#core/dom/fingerprint';
 import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
-import {Services} from '../../../src/service';
+import {Services} from '#service';
 import {buildUrl} from './shared/url-builder';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {
-  getBinaryType,
-  isExperimentOn,
-  toggleExperiment,
-} from '../../../src/experiments';
+import {dict} from '#core/types/object';
+import {getBinaryType, isExperimentOn, toggleExperiment} from '#experiments';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
-import {getTimingDataSync} from '../../../src/service/variable-source';
+import {getPageLayoutBoxBlocking} from '#core/dom/page-layout-box';
+import {getTimingDataSync} from '#service/variable-source';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {parseJson} from '../../../src/core/types/object/json';
+import {parseJson} from '#core/types/object/json';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /** @type {string}  */

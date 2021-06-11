@@ -34,8 +34,8 @@
  */
 
 import {FontLoader} from './fontloader';
-import {Services} from '../../../src/service';
-import {isFiniteNumber} from '../../../src/core/types';
+import {Services} from '#service';
+import {isFiniteNumber} from '#core/types';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-font';

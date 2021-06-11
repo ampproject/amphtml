@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/service';
-import {
-  createElementWithAttributes,
-  removeElement,
-} from '../../../src/core/dom';
-import {toWin} from '../../../src/core/window';
+import {Services} from '#service';
+import {createElementWithAttributes, removeElement} from '#core/dom';
+import {toWin} from '#core/window';
 
 /** @private @const {string} */
 const TOAST_CLASSNAME = 'i-amphtml-story-toast';

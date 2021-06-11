@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as _3p from '../../../3p/3p';
+import * as _3p from '#3p/3p';
 import {
   ADUPTECH_API_URL,
   ADUPTECH_ELEMENT_ID,
   aduptech,
-} from '../../../ads/vendors/aduptech';
+} from '#ads/vendors/aduptech';
 import {createIframePromise} from '../../../testing/iframe';
 
 describes.fakeWin('amp-ad-aduptech-impl', {}, (env) => {

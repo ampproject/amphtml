@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpDocService} from '../../../../src/service/ampdoc-impl';
+import {AmpDocService} from '#service/ampdoc-impl';
 import {AmpList} from '../amp-list';
-import {Services} from '../../../../src/service';
+import {Services} from '#service';
 import {
   measureElementStub,
   measureMutateElementStub,

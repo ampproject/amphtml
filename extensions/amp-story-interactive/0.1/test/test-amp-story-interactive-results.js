@@ -25,8 +25,8 @@ import {
   processResultsPercentage,
 } from '../amp-story-interactive-results';
 import {InteractiveType} from '../amp-story-interactive-abstract';
-import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/service';
+import {LocalizationService} from '#service/localization';
+import {Services} from '#service';
 import {addConfigToInteractive} from './test-amp-story-interactive';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
