@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {data} from 'autoprefixer';
+
 /** @externs */
 
 // HACK. Define application types used in default AMP externs
@@ -371,6 +373,10 @@ data.onNoAds;
 
 // amoad.js
 data.sid;
+
+// amplified.js
+data.amplified_id;
+data.amplified_params;
 
 // appnexus.js
 data.tagid;
