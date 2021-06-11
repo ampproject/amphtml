@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  BranchToTimeValues,
+  StoryAdSegmentExp,
+} from '../../../src/experiments/story-ad-progress-segment';
 import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '#service';
@@ -24,10 +28,10 @@ import {
 import {debounce} from '#core/types/function';
 import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth} from '#core/dom/css-selectors';
+import {getExperimentBranch} from 'src/experiments';
 import {hasOwn, map} from '#core/types/object';
-import {isExperimentOn} from 'src/experiments';
 import {removeChildren} from '#core/dom';
-import {scale, setImportantStyles} from '#core/dom/style';
+import {scale, setImportantStyles, setStyle} from '#core/dom/style';
 import {scopedQuerySelector} from '#core/dom/query';
 
 /**
@@ -434,34 +438,43 @@ export class ProgressBar {
   /**
    * Show/hide ad progress bar treatment based on ad visibility.
    * @param {boolean} adState
+   * TODO(#33969) clean up experiment is launched.
    */
   onAdStateUpdate_(adState) {
-    // TODO(ccordry): follow up with branched experiment for different
-    // time intervals.
-    if (!isExperimentOn(this.win_, 'story-ad-progress-segment')) {
+    const segmentExpBranch = getExperimentBranch(
+      this.win_,
+      StoryAdSegmentExp.ID
+    );
+    if (!segmentExpBranch || segmentExpBranch === StoryAdSegmentExp.CONTROL) {
       return;
     }
     // Set CSS signal that we are in the experiment.
-    // TODO(#33969) delete when launched.
     if (!this.root_.hasAttribute('i-amphtml-ad-progress-exp')) {
       this.root_.setAttribute('i-amphtml-ad-progress-exp', '');
     }
-    adState ? this.createAdSegment_() : this.removeAdSegment_();
+    adState
+      ? this.createAdSegment_(BranchToTimeValues[segmentExpBranch])
+      : this.removeAdSegment_();
   }
 
   /**
    * Create ad progress segment that will be shown when ad is visible.
+   * TODO(#33969) remove variable animation duration when best value is chosen.
+   * @param {string} animationDuration
    */
-  createAdSegment_() {
-    // +2 because of zero-index and we want the chip after the ad.
-    const index = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX) + 2;
+  createAdSegment_(animationDuration) {
+    const index = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
+    // Fill in segment before ad segment.
+    this.updateProgressByIndex_(index, 1, false);
     const progressEl = this.getRoot()?.querySelector(
       `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
-        index
+        // +2 because of zero-index and we want the chip after the ad.
+        index + 2
       )})`
     );
     const adSegment = this.win_.document.createElement('div');
     adSegment.className = 'i-amphtml-story-ad-progress-value';
+    setStyle(adSegment, 'animationDuration', animationDuration);
     this.currentAdSegment_ = adSegment;
     progressEl.appendChild(adSegment);
   }
