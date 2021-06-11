@@ -203,6 +203,9 @@ const htmlFixtureGlobs = [
   // The following are not AMP documents and are not meant to validate.
   '!examples/amp-video-iframe/frame*.html',
   '!examples/bento.amp.html',
+  '!examples/viewer-iframe-poll.html',
+  '!examples/viewer-webview.html',
+  '!examples/viewer.html',
 
   // Mimicks a transformed cache document, so it does not pass validation for
   // untransformed documents.
@@ -260,7 +263,6 @@ const htmlFixtureGlobs = [
   '!examples/amp-redbull-player.amp.html',
   '!examples/amp-script/example.amp.html',
   '!examples/amp-script/example.sandboxed.amp.html',
-  '!examples/amp-script/hello-world.html',
   '!examples/amp-script/todomvc.amp.html',
   '!examples/amp-script/vue-todomvc.amp.html',
   '!examples/amp-skimlinks.html',
@@ -398,9 +400,6 @@ const htmlFixtureGlobs = [
   '!examples/user-notification.amp.html',
   '!examples/valueimpression.amp.html',
   '!examples/video-animation-sync.html',
-  '!examples/viewer-iframe-poll.html',
-  '!examples/viewer-webview.html',
-  '!examples/viewer.html',
   '!examples/visual-tests/amp-accordion/amp-accordion.html',
   '!examples/visual-tests/amp-date-picker/amp-date-picker.amp.html',
   '!examples/visual-tests/amp-inabox/amp-inabox-gpt.html',
