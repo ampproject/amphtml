@@ -37,7 +37,6 @@ import {
   removeParamsFromSearch,
   removeSearch,
   resolveRelativeUrl,
-  resolveRelativeUrlFallback_,
   serializeQueryString,
 } from '../../src/url';
 
@@ -848,10 +847,6 @@ describes.sandboxed('resolveRelativeUrl', {}, () => {
           expect(resolveRelativeUrl(href, baseHref)).to.equal(
             resolvedHref,
             'native or fallback'
-          );
-          expect(resolveRelativeUrlFallback_(href, baseHref)).to.equal(
-            resolvedHref,
-            'fallback'
           );
         }
       );

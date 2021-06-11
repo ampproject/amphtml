@@ -514,43 +514,6 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
 }
 
 /**
- * Fallback for URL resolver when URL class is not available.
- * @param {string} relativeUrlString
- * @param {string|!Location} baseUrl
- * @return {string}
- * @private @visibleForTesting
- */
-export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
-  if (typeof baseUrl == 'string') {
-    baseUrl = parseUrlDeprecated(baseUrl);
-  }
-  relativeUrlString = relativeUrlString.replace(/\\/g, '/');
-  const relativeUrl = parseUrlDeprecated(relativeUrlString);
-
-  // Absolute URL.
-  if (relativeUrlString.toLowerCase().startsWith(relativeUrl.protocol)) {
-    return relativeUrl.href;
-  }
-
-  // Protocol-relative URL.
-  if (relativeUrlString.startsWith('//')) {
-    return baseUrl.protocol + relativeUrlString;
-  }
-
-  // Absolute path.
-  if (relativeUrlString.startsWith('/')) {
-    return baseUrl.origin + relativeUrlString;
-  }
-
-  // Relative path.
-  return (
-    baseUrl.origin +
-    baseUrl.pathname.replace(/\/[^/]*$/, '/') +
-    relativeUrlString
-  );
-}
-
-/**
  * Add "__amp_source_origin" query parameter to the URL.
  * @param {!Window} win
  * @param {string} url
