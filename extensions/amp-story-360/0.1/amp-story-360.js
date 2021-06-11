@@ -31,7 +31,7 @@ import {Services} from '../../../src/services';
 import {closest} from '../../../src/core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/core/dom/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {listenOncePromise} from '../../../src/event-helper';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';

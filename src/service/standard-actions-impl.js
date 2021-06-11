@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from '../core/constants/action-constants';
-import {Layout, getLayoutClass} from '../layout';
+import {Layout, getLayoutClass} from '../core/dom/layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../core/dom/style';
 import {dev, user, userAssert} from '../log';

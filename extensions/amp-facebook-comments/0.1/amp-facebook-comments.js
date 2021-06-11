@@ -19,7 +19,7 @@ import {createLoaderLogo} from '../../amp-facebook/0.1/facebook-loader';
 import {dashToUnderline} from '../../../src/core/types/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {isObject} from '../../../src/core/types';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/core/dom';

@@ -18,7 +18,7 @@ import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/core/dom/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/core/dom';
 

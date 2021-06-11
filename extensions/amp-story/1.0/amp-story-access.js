@@ -19,7 +19,7 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {closest} from '../../../src/core/dom/query';
 import {copyChildren, removeChildren} from '../../../src/core/dom';
 import {dev, user} from '../../../src/log';

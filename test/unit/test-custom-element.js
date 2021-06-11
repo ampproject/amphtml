@@ -19,7 +19,7 @@ import {AmpEvents} from '../../src/core/constants/amp-events';
 import {BaseElement} from '../../src/base-element';
 import {CommonSignals} from '../../src/core/constants/common-signals';
 import {ElementStub} from '../../src/element-stub';
-import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
+import {LOADING_ELEMENTS_, Layout} from '../../src/core/dom/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {chunkInstanceForTesting} from '../../src/chunk';

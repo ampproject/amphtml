@@ -46,7 +46,7 @@ import {AnimationManager, hasAnimations} from './animation';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {EventType, dispatch} from './events';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {MediaPool} from './media-pool';

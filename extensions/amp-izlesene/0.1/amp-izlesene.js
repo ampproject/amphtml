@@ -20,7 +20,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getDataParamsFromAttributes} from '../../../src/core/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpIzlesene extends AMP.BaseElement {

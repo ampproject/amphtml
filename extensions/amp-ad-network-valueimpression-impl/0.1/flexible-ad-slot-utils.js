@@ -17,7 +17,7 @@ import {
   DomAncestorVisitor,
   VisitorCallbackTypeDef,
 } from '../../../src/utils/dom-ancestor-visitor';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 

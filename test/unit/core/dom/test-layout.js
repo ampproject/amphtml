@@ -16,7 +16,6 @@
 
 import {
   Layout,
-  applyStaticLayout,
   assertLength,
   assertLengthOrPercent,
   getLengthNumeral,
@@ -24,9 +23,12 @@ import {
   isLoadingAllowed,
   parseLayout,
   parseLength,
+} from '../../../../src/core/dom/layout';
+import {
+  applyStaticLayout,
   resetShouldUseAspectRatioCssForTesting,
-} from '../../src/layout';
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
+} from '../../../../src/static-layout';
+import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
 
 describes.sandboxed('Layout', {}, () => {
   let div;

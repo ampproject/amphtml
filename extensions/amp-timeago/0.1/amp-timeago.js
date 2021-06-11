@@ -15,7 +15,7 @@
  */
 
 import {format, getLocale} from './locales';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,

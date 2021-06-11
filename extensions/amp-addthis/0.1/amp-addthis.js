@@ -69,7 +69,7 @@ import {
 import {getOgImage} from './addthis-utils/meta';
 import {getWidgetOverload} from './addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '../../../src/core/dom/style';

@@ -28,7 +28,7 @@ import {
   Layout, // eslint-disable-line no-unused-vars
   LayoutPriority,
   isLayoutSizeDefined,
-} from '../../../src/layout';
+} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/core/math';

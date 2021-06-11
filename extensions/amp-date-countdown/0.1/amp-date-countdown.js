@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {removeChildren} from '../../../src/core/dom';
 import {user, userAssert} from '../../../src/log';
 

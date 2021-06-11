@@ -36,7 +36,7 @@ import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isAutoplaySupported} from '../../../src/core/dom/video';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {once} from '../../../src/core/types/function';
 import {userAssert} from '../../../src/log';
 

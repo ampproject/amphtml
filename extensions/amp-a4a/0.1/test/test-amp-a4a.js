@@ -44,7 +44,7 @@ import {Extensions} from '../../../../src/service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {LayoutPriority} from '../../../../src/layout';
+import {LayoutPriority} from '../../../../src/core/dom/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/core/data-structures/signals';

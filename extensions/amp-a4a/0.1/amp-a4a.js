@@ -24,7 +24,11 @@ import {
 } from '../../../src/core/dom/stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
-import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
+import {
+  Layout,
+  LayoutPriority,
+  isLayoutSizeDefined,
+} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {

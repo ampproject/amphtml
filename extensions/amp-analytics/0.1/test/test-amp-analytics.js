@@ -21,7 +21,7 @@ import {
   ImagePixelVerifier,
   mockWindowInterface,
 } from '../../../../testing/test-helper';
-import {LayoutPriority} from '../../../../src/layout';
+import {LayoutPriority} from '../../../../src/core/dom/layout';
 import {LinkerManager} from '../linker-manager';
 import {Services} from '../../../../src/services';
 import {Transport} from '../transport';

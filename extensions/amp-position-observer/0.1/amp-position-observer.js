@@ -27,7 +27,7 @@ import {
   getLengthNumeral,
   getLengthUnits,
   parseLength,
-} from '../../../src/layout';
+} from '../../../src/core/dom/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

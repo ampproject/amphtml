@@ -43,7 +43,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {setStyles} from '../../../src/core/dom/style';
 
 const TAG = 'amp-youtube';

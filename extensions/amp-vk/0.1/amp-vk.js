@@ -22,7 +22,7 @@ const EmbedType = {
   POLL: 'poll',
 };
 
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';

@@ -15,7 +15,7 @@
  */
 
 __css_import__;
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 
 const TAG = 'amp-__component_name_hyphenated__';
  

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Variants, allocateVariant} from './variant';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
