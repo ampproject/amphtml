@@ -181,10 +181,9 @@ describes.realWin(
 
     it('should handle the percentage pipeline with scrambled data', async () => {
       const NUM_OPTIONS = 4;
-      const scrambledData = getMockScrambledData();
       env.sandbox
         .stub(requestService, 'executeRequest')
-        .resolves(scrambledData);
+        .resolves(getMockScrambledData());
 
       ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -203,10 +202,9 @@ describes.realWin(
 
     it('should handle the percentage pipeline with incomplete data', async () => {
       const NUM_OPTIONS = 4;
-      const incompleteData = getMockIncompleteData();
       env.sandbox
         .stub(requestService, 'executeRequest')
-        .resolves(incompleteData);
+        .resolves(getMockIncompleteData());
 
       ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
 
