@@ -204,7 +204,8 @@ const htmlFixtureGlobs = [
   '!examples/amp-video-iframe/frame*.html',
   '!examples/bento.amp.html',
 
-  // This document mimicks a transformed cache document, which will not validate.
+  // Mimicks a transformed cache document, so it does not pass validation for
+  // untransformed documents.
   '!test/fixtures/e2e/amp-video/videos-cdn.html',
 
   // TODO(#25149): Fix these invalid files and remove them from this list.
