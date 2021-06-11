@@ -27,7 +27,7 @@ const {cyan, green, red} = require('../common/colors');
 const {getFilesToCheck} = require('../common/utils');
 const {getOutput} = require('../common/process');
 const {htmlFixtureGlobs} = require('../test-configs/config');
-const {readFile} = require('fs/promises');
+const {readFile} = require('fs-extra');
 
 const defaultFormat = 'AMP';
 
