@@ -19,7 +19,7 @@ import * as dom from '../../../../src/core/dom';
 import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {whenCalled} from '../../../../testing/test-helper.js';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 

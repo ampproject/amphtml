@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {debounce} from '../../../src/core/types/function';
 
 export class ReadDepthTracker {

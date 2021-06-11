@@ -18,7 +18,7 @@ import '../amp-accordion';
 import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {computedStyle} from '../../../../src/core/dom/style';
 import {createElementWithAttributes, tryFocus} from '../../../../src/core/dom';
 import {htmlFor} from '../../../../src/core/dom/static-template';

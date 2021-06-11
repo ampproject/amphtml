@@ -47,7 +47,7 @@ import {
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {ResponsiveState} from './responsive-state';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {StoryAdAutoAdvance} from '../../../src/experiments/story-ad-auto-advance';
 import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 import {

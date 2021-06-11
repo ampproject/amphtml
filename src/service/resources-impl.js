@@ -21,7 +21,7 @@ import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 
 import {Resource, ResourceState} from './resource';
-import {Services} from '../services';
+import {Services} from '../service';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../core/constants/visibility-state';
 import {dev, devAssert} from '../log';
@@ -33,7 +33,7 @@ import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error-reporting';
 import {listen, loadPromise} from '../event-helper';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {remove} from '../core/types/array';
 import {startupChunk} from '../chunk';
 import {throttle} from '../core/types/function';

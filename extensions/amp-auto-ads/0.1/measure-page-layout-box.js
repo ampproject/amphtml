@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '.../../../src/services';
+import {Services} from '.../../../src/service';
 import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
 import {toWin} from '../../../src/core/window';
 

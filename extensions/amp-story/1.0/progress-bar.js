@@ -15,7 +15,7 @@
  */
 import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   StateProperty,
   UIType,

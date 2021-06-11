@@ -26,7 +26,7 @@ import {
   VideoOrBaseElementDef,
   isDockable,
 } from '../../../src/video-interface';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
 import {

@@ -20,13 +20,13 @@ import {
   GWD_TIMELINE_EVENT,
 } from './amp-gwd-animation-impl';
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {getDetail} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
   getParentWindowFrameElement,
   getServiceForDocOrNull,
-} from '../../../src/service';
+} from '../../../src/service-helpers';
 import {userAssert} from '../../../src/log';
 
 /**

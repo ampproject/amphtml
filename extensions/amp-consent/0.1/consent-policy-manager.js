@@ -22,7 +22,7 @@ import {
 import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {Observable} from '../../../src/core/data-structures/observable';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {hasOwn, map} from '../../../src/core/types/object';
 import {isFiniteNumber, isObject} from '../../../src/core/types';
 

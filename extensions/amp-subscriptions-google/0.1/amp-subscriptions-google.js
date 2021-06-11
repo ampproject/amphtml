@@ -34,7 +34,7 @@ import {
   GrantReason,
 } from '../../amp-subscriptions/0.1/entitlement';
 import {GaaMeteringRegwall} from '../../../third_party/subscriptions-project/swg-gaa';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
 import {WindowInterface} from '../../../src/core/window/interface';

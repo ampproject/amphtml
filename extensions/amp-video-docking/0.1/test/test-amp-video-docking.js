@@ -36,7 +36,7 @@ import {
 } from '../../../../src/core/data-structures/promise';
 import {DirectionX, DirectionY} from '../def.js';
 import {PlayingStates} from '../../../../src/video-interface';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 import {htmlFor} from '../../../../src/core/dom/static-template';
 import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';

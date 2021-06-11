@@ -17,7 +17,7 @@
 import {Layout} from '../../../src/core/dom/layout';
 import {LinkRewriter} from './link-rewriter';
 import {Priority} from '../../../src/service/navigation';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 
 export class AmpLinkRewriter extends AMP.BaseElement {
   /** @param {!AmpElement} element */

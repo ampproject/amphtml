@@ -18,7 +18,7 @@ import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';

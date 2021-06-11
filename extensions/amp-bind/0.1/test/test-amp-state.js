@@ -16,7 +16,7 @@
 
 import '../amp-bind';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {UrlReplacementPolicy} from '../../../../src/batched-json';
 
 describes.realWin(

@@ -23,7 +23,7 @@ import {
   RTC_ERROR_ENUM,
   RealTimeConfigManager,
 } from '../../src/service/real-time-config/real-time-config-impl';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {Xhr} from '../../src/service/xhr-impl';
 import {cancellation} from '../../src/error-reporting';
 import {createElementWithAttributes} from '../../src/core/dom';

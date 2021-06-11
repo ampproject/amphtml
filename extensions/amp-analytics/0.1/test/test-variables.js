@@ -22,7 +22,7 @@ import {
   installVariableServiceForTesting,
   variableServiceForDoc,
 } from '../variables';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   installLinkerReaderService,

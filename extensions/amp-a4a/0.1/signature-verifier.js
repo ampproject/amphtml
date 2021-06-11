@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {base64DecodeToBytes} from '../../../src/core/types/string/base64';
 import {dev, devAssert, user} from '../../../src/log';
 import {isArray} from '../../../src/core/types';

@@ -17,7 +17,7 @@
 import * as DocumentReady from '../../../../src/core/document-ready';
 import {AmpSmartlinks} from '../amp-smartlinks';
 import {Linkmate} from '../linkmate';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {TwoStepsResponse} from '../../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
 
 const helpersFactory = (env) => {

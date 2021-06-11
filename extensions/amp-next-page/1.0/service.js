@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,

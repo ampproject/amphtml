@@ -15,7 +15,7 @@
  */
 
 import * as openWindowDialog from '../../../../src/open-window-dialog';
-import * as service from '../../../../src/service';
+import * as service from '../../../../src/service-helpers';
 import {
   Action,
   UIType,

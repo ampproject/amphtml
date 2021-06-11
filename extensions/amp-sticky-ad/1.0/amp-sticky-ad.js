@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   computedStyle,
   removeAlphaFromColor,

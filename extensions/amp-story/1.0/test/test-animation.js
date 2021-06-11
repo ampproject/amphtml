@@ -20,7 +20,7 @@ import {
   AnimationSequence,
 } from '../animation';
 import {Deferred} from '../../../../src/core/data-structures/promise';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';
 import {htmlFor, htmlRefs} from '../../../../src/core/dom/static-template';
 import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';

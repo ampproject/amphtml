@@ -19,7 +19,7 @@ import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {AmpSelector} from '../amp-selector';
 import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 

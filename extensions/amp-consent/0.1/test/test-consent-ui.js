@@ -23,14 +23,14 @@ import {
 } from '../consent-info';
 import {CONSENT_STRING_TYPE} from '../../../../src/core/constants/consent-state';
 import {ConsentUI, consentUiClasses} from '../consent-ui';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {dict} from '../../../../src/core/types/object';
 import {elementByTag} from '../../../../src/core/dom/query';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';

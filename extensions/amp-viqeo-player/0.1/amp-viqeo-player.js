@@ -17,7 +17,7 @@
 
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {dev, userAssert} from '../../../src/log';
 import {

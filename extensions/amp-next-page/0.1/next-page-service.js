@@ -17,11 +17,11 @@
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {MultidocManager} from '../../../src/multidoc-manager';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {VisibilityState} from '../../../src/core/constants/visibility-state';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {getAmpdoc} from '../../../src/service';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/core/math/layout-rect';

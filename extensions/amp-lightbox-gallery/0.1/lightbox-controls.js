@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

@@ -88,7 +88,7 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
-import {Services} from '../src/services';
+import {Services} from '../src/service';
 import {TestConfig} from './test-config';
 import {addParamsToUrl} from '../src/url';
 import {adopt, adoptShadowMode} from '../src/runtime';

@@ -15,7 +15,7 @@
  */
 
 import {Layout} from '../../../../src/core/dom/layout';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {getAdNetworkConfig} from '../ad-network-config';
 
 describes.realWin(

@@ -38,7 +38,7 @@ import {
   isProxyOrigin,
   serializeQueryString,
 } from '../../../src/url';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   ancestorElementsByTag,

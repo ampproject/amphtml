@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {COOKIELESS_API_SERVER} from '../constants';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 import {dict} from '../../../../src/core/types/object';

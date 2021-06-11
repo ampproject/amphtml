@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   VIMEO_EVENTS,
   getVimeoIframeSrc,

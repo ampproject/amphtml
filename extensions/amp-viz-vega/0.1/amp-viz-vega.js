@@ -16,7 +16,7 @@
 
 import * as dom from '../../../src/core/dom';
 import {CSS} from '../../../build/amp-viz-vega-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {assertHttpsUrl} from '../../../src/url';
 import {childElementsByTag} from '../../../src/core/dom/query';
 import {dev, devAssert, userAssert} from '../../../src/log';

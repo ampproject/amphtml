@@ -28,7 +28,7 @@ import {
 } from './development-ui';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   closest,
   matches,

@@ -24,7 +24,7 @@ import {
   getTimingDataSync,
 } from './variable-source';
 import {Expander} from './url-expander/expander';
-import {Services} from '../services';
+import {Services} from '../service';
 import {WindowInterface} from '../core/window/interface';
 import {
   addMissingParamsToUrl,
@@ -41,7 +41,7 @@ import {hasOwn} from '../core/types/object';
 import {
   installServiceInEmbedDoc,
   registerServiceBuilderForDoc,
-} from '../service';
+} from '../service-helpers';
 import {internalRuntimeVersion} from '../internal-version';
 import {parseQueryString} from '../core/types/string/url';
 

@@ -27,7 +27,7 @@ import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {closest} from '../../../src/core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/core/dom/static-template';

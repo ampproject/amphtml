@@ -25,7 +25,7 @@ import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';
 import {Deferred} from '../../../../../src/core/data-structures/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/core/constants/action-constants';
-import {Services} from '../../../../../src/services';
+import {Services} from '../../../../../src/service';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
 import {dev, user} from '../../../../../src/log';
 import {toArray} from '../../../../../src/core/types/array';

@@ -18,7 +18,7 @@ import {
   PolyfillFormDataWrapper,
   createFormDataWrapper,
 } from '../../src/form-data-wrapper';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {fromIterator} from '../../src/core/types/array';
 
 describes.realWin('FormDataWrapper', {}, (env) => {

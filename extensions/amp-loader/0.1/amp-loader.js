@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-loader-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isIframeVideoPlayerComponent} from '../../../src/core/dom/layout';

@@ -25,7 +25,7 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, distance, magnitude} from '../../../src/core/math';
 import {continueMotion} from '../../../src/motion';

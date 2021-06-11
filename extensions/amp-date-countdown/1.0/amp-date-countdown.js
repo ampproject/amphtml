@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';

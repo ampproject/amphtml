@@ -16,7 +16,7 @@
 
 import {Action, getStoreService} from '../amp-story-store-service';
 import {ProgressBar} from '../progress-bar';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {expect} from 'chai';
 import {toggleExperiment} from '../../../../src/experiments';
 

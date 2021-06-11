@@ -16,7 +16,7 @@
 
 import {AccessClientAdapter} from './amp-access-client';
 import {JwtHelper} from './jwt';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   assertHttpsUrl,
   isProxyOrigin,

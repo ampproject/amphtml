@@ -23,7 +23,7 @@ import {
 } from './events';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
 import {AnalyticsGroup} from './analytics-group';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {dict} from '../../../src/core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
@@ -31,7 +31,7 @@ import {
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
+} from '../../../src/service-helpers';
 
 const PROP = '__AMP_AN_ROOT';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Service from '../../src/service';
+import * as Service from '../../src/service-helpers';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {installAmpdocServices} from '../../src/service/core-services';
 import {installAmpdocServicesForInabox} from '../../src/inabox/inabox-services';

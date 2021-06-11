@@ -21,7 +21,7 @@ import '../amp-render';
 import * as BatchedJsonModule from '../../../../src/batched-json';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {htmlFor} from '../../../../src/core/dom/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';

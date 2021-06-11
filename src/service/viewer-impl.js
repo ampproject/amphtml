@@ -16,7 +16,7 @@
 
 import {Deferred, tryResolve} from '../core/data-structures/promise';
 import {Observable} from '../core/data-structures/observable';
-import {Services} from '../services';
+import {Services} from '../service';
 import {VisibilityState} from '../core/constants/visibility-state';
 import {dev, devAssert, stripUserError} from '../log';
 import {duplicateErrorIfNecessary} from '../core/error';
@@ -33,7 +33,7 @@ import {isIframed} from '../core/dom';
 import {listen} from '../event-helper';
 import {map} from '../core/types/object';
 import {parseQueryString} from '../core/types/string/url';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {reportError} from '../error-reporting';
 import {urls} from '../config';
 

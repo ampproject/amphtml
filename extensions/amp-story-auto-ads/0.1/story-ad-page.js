@@ -50,7 +50,7 @@ import {elementByTag} from '../../../src/core/dom/query';
 import {getData, listen} from '../../../src/event-helper';
 import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getFrameDoc, localizeCtaText} from './utils';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {parseJson} from '../../../src/core/types/object/json';
 import {setStyle} from '../../../src/core/dom/style';
 

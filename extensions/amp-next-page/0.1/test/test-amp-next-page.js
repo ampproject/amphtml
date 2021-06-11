@@ -15,9 +15,9 @@
  */
 import * as DocFetcher from '../../../../src/document-fetcher';
 import {AmpNextPage} from '../amp-next-page';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {getServicePromiseForDoc} from '../../../../src/service';
+import {getServicePromiseForDoc} from '../../../../src/service-helpers';
 import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 import {macroTask} from '../../../../testing/yield';
 import {setStyle} from '../../../../src/core/dom/style';

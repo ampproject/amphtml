@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '../service';
 import {devAssert, userAssert} from '../core/assert';
 import {dict, isObject, map} from '../core/types/object';
 import {fromIterator, isArray} from '../core/types/array';

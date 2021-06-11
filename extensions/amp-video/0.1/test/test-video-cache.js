@@ -15,7 +15,7 @@
  */
 
 import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 import {fetchCachedSources} from '../video-cache';
 import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';

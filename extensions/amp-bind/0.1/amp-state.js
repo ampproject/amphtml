@@ -17,7 +17,7 @@
 import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {LayoutPriority} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,

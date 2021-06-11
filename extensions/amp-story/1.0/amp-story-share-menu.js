@@ -28,12 +28,12 @@ import {
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {ShareWidget} from './amp-story-share';
 import {closest} from '../../../src/core/dom/query';
 import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
-import {getAmpdoc} from '../../../src/service';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {setStyles} from '../../../src/core/dom/style';

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {Util} from './util';
 import {dev, userAssert} from '../../../src/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';

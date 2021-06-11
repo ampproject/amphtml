@@ -16,7 +16,7 @@
 
 import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpList} from '../amp-list';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {
   measureElementStub,
   measureMutateElementStub,

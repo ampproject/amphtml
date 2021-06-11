@@ -24,7 +24,7 @@ import {
   getServicePromiseForDoc,
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
-} from './service';
+} from './service-helpers';
 import {userAssert} from './log';
 
 /**

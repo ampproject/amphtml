@@ -17,7 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {
   copyElementToChildWindow,
   getElementClassForTesting,

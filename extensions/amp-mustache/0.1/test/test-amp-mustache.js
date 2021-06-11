@@ -15,7 +15,7 @@
  */
 
 import * as sanitizer from '../../../../src/sanitizer';
-import * as service from '../../../../src/service';
+import * as service from '../../../../src/service-helpers';
 import {AmpMustache} from '../amp-mustache';
 import mustache from '../../../../third_party/mustache/mustache';
 

@@ -41,7 +41,7 @@ import {
 import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
 import {GEO_IN_GROUP} from '../../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {buildUrl} from '../shared/url-builder';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 import {createIframePromise} from '../../../../testing/iframe';

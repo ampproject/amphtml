@@ -21,7 +21,7 @@ import {AmpAccessEvaluator} from './access-expr';
 import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {Observable} from '../../../src/core/data-structures/observable';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {TickLabel} from '../../../src/core/constants/enums';
 import {cancellation} from '../../../src/error-reporting';
 import {dev, user, userAssert} from '../../../src/log';

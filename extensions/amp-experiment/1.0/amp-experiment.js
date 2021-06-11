@@ -16,11 +16,11 @@
 
 import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 import {Layout} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {applyExperimentToVariant} from './apply-experiment';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   installOriginExperimentsForDoc,
   originExperimentsForDoc,

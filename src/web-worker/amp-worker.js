@@ -15,11 +15,11 @@
  */
 
 import {ModeDef, getMode} from '../mode';
-import {Services} from '../services';
+import {Services} from '../service';
 import {calculateEntryPointScriptUrl} from '../service/extension-script';
 import {dev} from '../log';
 import {devAssert} from '../core/assert';
-import {getService, registerServiceBuilder} from '../service';
+import {getService, registerServiceBuilder} from '../service-helpers';
 
 const TAG = 'web-worker';
 

@@ -18,7 +18,7 @@ import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {buildOpenAttachmentElementLinkIcon} from './amp-story-open-page-attachment';
 import {closest} from '../../../src/core/dom/query';

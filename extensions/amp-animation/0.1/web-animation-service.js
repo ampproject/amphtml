@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Builder} from './web-animations';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {WebAnimationBuilderOptionsDef} from './web-animation-types';
 import {installWebAnimationsIfNecessary} from './install-polyfill';
 

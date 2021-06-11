@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {WebLoginDialog, openLoginDialog} from '../login-dialog';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 

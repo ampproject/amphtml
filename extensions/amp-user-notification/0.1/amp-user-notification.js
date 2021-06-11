@@ -21,14 +21,14 @@ import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
+} from '../../../src/service-helpers';
 import {rethrowAsync} from '../../../src/core/error';
 import {toggle} from '../../../src/core/dom/style';
 

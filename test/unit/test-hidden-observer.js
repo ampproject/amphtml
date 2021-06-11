@@ -15,7 +15,7 @@
  */
 
 import {FakeMutationObserver} from '../../testing/fake-dom';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 
 describes.fakeWin(
   'HiddenObserver',

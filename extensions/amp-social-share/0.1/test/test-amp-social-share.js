@@ -16,7 +16,7 @@
 
 import '../amp-social-share';
 import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {tryFocus} from '../../../../src/core/dom';
 
 const STRINGS = {

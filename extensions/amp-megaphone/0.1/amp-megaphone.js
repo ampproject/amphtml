@@ -28,7 +28,7 @@
  */
 
 import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';

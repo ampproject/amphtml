@@ -20,7 +20,7 @@ import {
   ImagePixelVerifier,
   mockWindowInterface,
 } from '../../../../testing/test-helper';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {Transport} from '../transport';
 import {getMode} from '../../../../src/mode';
 import {installDocService} from '../../../../src/service/ampdoc-impl';

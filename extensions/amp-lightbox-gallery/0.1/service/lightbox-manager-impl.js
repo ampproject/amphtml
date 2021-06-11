@@ -25,7 +25,7 @@ import {
   LIGHTBOX_THUMBNAIL_UNKNOWN,
   LIGHTBOX_THUMBNAIL_VIDEO,
 } from './lightbox-placeholders';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {
   childElement,
   childElementByAttr,

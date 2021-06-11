@@ -19,8 +19,8 @@ import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
-import {registerServiceBuilderForDoc} from '../../../src/service';
+import {Services} from '../../../src/service';
+import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsEn from './_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]

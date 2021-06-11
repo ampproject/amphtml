@@ -18,7 +18,7 @@ import {BaseElement} from '../../src/base-element';
 import {CommonSignals} from '../../src/core/constants/common-signals';
 import {ElementStub} from '../../src/element-stub';
 import {LayoutPriority} from '../../src/core/dom/layout';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,

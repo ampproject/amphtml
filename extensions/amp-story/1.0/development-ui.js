@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {LogLevel, dev} from '../../../src/log';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {isArray} from '../../../src/core/types';
 import {removeChildren} from '../../../src/core/dom';
 import {toggle} from '../../../src/core/dom/style';

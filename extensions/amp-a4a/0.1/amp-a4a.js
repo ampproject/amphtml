@@ -29,7 +29,7 @@ import {
   LayoutPriority,
   isLayoutSizeDefined,
 } from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
   applySandbox,

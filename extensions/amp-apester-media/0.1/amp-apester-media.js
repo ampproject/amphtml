@@ -15,7 +15,7 @@
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

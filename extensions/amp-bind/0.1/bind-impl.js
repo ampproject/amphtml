@@ -20,7 +20,7 @@ import {BindValidator} from './bind-validator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/core/constants/action-constants';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {Signals} from '../../../src/core/data-structures/signals';
 import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';

@@ -28,7 +28,7 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {WindowInterface} from '../../../src/core/window/interface';
 import {bezierCurve} from '../../../src/core/data-structures/curve';
 import {boundValue, clamp, distance, magnitude} from '../../../src/core/math';

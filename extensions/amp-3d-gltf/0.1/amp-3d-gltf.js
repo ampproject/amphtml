@@ -15,7 +15,7 @@
  */
 import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

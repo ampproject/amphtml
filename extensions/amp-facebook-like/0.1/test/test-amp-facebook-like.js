@@ -17,7 +17,7 @@
 import '../amp-facebook-like';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 import {facebook} from '../../../../3p/facebook';
-import {resetServiceForTesting} from '../../../../src/service';
+import {resetServiceForTesting} from '../../../../src/service-helpers';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 

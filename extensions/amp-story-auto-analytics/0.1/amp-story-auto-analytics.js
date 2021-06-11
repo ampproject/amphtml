@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {buildGtagConfig} from './auto-analytics-configs.js';
 import {devAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/core/dom/static-template';

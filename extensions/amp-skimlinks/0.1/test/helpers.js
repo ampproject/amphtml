@@ -17,7 +17,7 @@
 import {AmpSkimlinks} from '../amp-skimlinks';
 import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
 import {DEFAULT_SKIM_OPTIONS} from './constants';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {Tracking} from '../tracking';
 
 const helpersFactory = (env) => {

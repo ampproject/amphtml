@@ -21,9 +21,9 @@ import {
 } from '../amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
 import {ProgressBar} from '../progress-bar';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {SystemLayer} from '../amp-story-system-layer';
-import {registerServiceBuilder} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 const NOOP = () => {};
 

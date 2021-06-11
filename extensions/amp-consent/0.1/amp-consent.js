@@ -38,7 +38,7 @@ import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {TcfApiCommandManager} from './tcf-api-command-manager';
 import {
   assertHttpsUrl,
@@ -48,7 +48,7 @@ import {
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/core/types/object';
 import {getData} from '../../../src/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {isArray, isEnumValue, isObject} from '../../../src/core/types';
 
 import {isExperimentOn} from '../../../src/experiments';

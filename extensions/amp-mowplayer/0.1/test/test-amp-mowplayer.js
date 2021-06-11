@@ -15,7 +15,7 @@
  */
 
 import '../amp-mowplayer';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 import {listenOncePromise} from '../../../../src/event-helper';

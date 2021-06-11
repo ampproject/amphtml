@@ -15,7 +15,7 @@
  */
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
 

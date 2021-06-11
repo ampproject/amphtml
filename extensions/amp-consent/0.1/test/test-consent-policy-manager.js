@@ -36,7 +36,7 @@ import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 
 describes.realWin(
   'ConsentPolicyManager',

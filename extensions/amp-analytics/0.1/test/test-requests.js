@@ -19,7 +19,7 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import * as log from '../../../../src/log';
 import {ExpansionOptions, installVariableServiceForTesting} from '../variables';
 import {RequestHandler, expandPostMessage} from '../requests';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {installLinkerReaderService} from '../linker-reader';
 import {macroTask} from '../../../../testing/yield';
 

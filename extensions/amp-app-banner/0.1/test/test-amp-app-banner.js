@@ -20,7 +20,7 @@ import {
   AmpAppBanner,
   AmpIosAppBanner,
 } from '../amp-app-banner';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 
 describes.realWin(
   'amp-app-banner',

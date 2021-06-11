@@ -36,7 +36,7 @@
  */
 
 import {CSS} from '../../../build/amp-instagram-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {isObject} from '../../../src/core/types';

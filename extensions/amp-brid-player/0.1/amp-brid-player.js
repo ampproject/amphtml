@@ -17,7 +17,7 @@
 import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {VideoEvents} from '../../../src/video-interface';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {

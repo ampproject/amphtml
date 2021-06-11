@@ -20,7 +20,7 @@ import '../src/polyfills';
 import './setup_chai_sinon';
 
 import * as describes from './describes';
-import {Services} from '../src/services';
+import {Services} from '../src/service';
 import {TestConfig} from './test-config';
 import {activateChunkingForTesting} from '../src/chunk';
 import {adoptWithMultidocDeps} from '../src/runtime';

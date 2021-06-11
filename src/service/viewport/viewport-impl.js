@@ -16,7 +16,7 @@
 
 import {Animation} from '../../animation';
 import {Observable} from '../../core/data-structures/observable';
-import {Services} from '../../services';
+import {Services} from '../../service';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
@@ -32,7 +32,7 @@ import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
-} from '../../service';
+} from '../../service-helpers';
 import {getVerticalScrollbarWidth, isIframed} from '../../core/dom';
 import {isExperimentOn} from '../../experiments';
 import {

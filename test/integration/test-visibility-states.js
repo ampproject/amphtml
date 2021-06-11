@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {VisibilityState} from '../../src/core/constants/visibility-state';
 import {createCustomEvent} from '../../src/event-helper';
 import {getVendorJsPropertyName} from '../../src/core/dom/style';

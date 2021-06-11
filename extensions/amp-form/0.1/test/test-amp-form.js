@@ -30,7 +30,7 @@ import {
   AsyncInputClasses,
 } from '../../../../src/async-input';
 import {DIRTINESS_INDICATOR_CLASS} from '../form-dirtiness';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
 import {createCustomEvent} from '../../../../src/event-helper';
 import {createElementWithAttributes} from '../../../../src/core/dom';

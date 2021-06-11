@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {setStyles} from '../../../src/core/dom/style';
 

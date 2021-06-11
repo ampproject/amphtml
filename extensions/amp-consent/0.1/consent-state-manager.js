@@ -29,7 +29,7 @@ import {
   recalculateConsentStateValue,
 } from './consent-info';
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';

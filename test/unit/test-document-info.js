@@ -16,7 +16,7 @@
 
 import * as CID from '../../src/service/cid-impl';
 
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {createIframePromise} from '../../testing/iframe';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';

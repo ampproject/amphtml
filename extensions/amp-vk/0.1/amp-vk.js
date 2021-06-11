@@ -23,7 +23,7 @@ const EmbedType = {
 };
 
 import {Layout} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';

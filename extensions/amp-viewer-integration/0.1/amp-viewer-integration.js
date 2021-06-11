@@ -27,11 +27,11 @@ import {
   WindowPortEmulator,
   parseMessage,
 } from './messaging/messaging';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {TouchHandler} from './touch-handler';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {getAmpdoc} from '../../../src/service';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
 import {isIframed} from '../../../src/core/dom';

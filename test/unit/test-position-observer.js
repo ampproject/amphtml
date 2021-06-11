@@ -17,7 +17,7 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {PositionObserver} from '../../src/service/position-observer/position-observer-impl';
 import {PositionObserverFidelity} from '../../src/service/position-observer/position-observer-worker';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {layoutRectLtwh} from '../../src/core/math/layout-rect';
 import {macroTask} from '../../testing/yield';
 import {setStyles} from '../../src/core/dom/style';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {isAmp4Email} from '../../../src/format';
 import {
   observeWithSharedInOb,

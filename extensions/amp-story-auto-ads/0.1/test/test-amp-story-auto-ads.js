@@ -30,10 +30,10 @@ import {
   addStoryPages,
 } from './story-mock';
 import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {StoryAdPage} from '../story-ad-page';
 import {macroTask} from '../../../../testing/yield';
-import {registerServiceBuilder} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const NOOP = () => {};

@@ -15,7 +15,7 @@
  */
 
 import {Resource, ResourceState} from '../../src/service/resource';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 
 describes.realWin(
   'owners-impl',

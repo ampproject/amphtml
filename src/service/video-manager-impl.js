@@ -34,7 +34,7 @@ import {
   userInteractedWith,
   videoAnalyticsCustomEventTypeKey,
 } from '../video-interface';
-import {Services} from '../services';
+import {Services} from '../service';
 import {VideoSessionManager} from './video-session-manager';
 import {clamp} from '../core/math';
 import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
@@ -50,7 +50,7 @@ import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../core/types';
 import {measureIntersection} from '../utils/intersection';
 import {once} from '../core/types/function';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {toggle} from '../core/dom/style';
 

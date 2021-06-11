@@ -18,7 +18,7 @@ import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
 import {ServiceAdapter} from '../service-adapter';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 
 describes.realWin('local-subscriptions-rendering', {amp: true}, (env) => {

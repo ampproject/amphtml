@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '../service';
 import {closestAncestorElementBySelector} from '../core/dom/query';
 import {dev, user, userAssert} from '../log';
 import {dict} from '../core/types/object';
@@ -24,7 +24,7 @@ import {getMode} from '../mode';
 import {isIframed, tryFocus} from '../core/dom';
 import {isLocalhostOrigin} from '../url';
 import {openWindowDialog} from '../open-window-dialog';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {toWin} from '../core/window';
 import PriorityQueue from '../core/data-structures/priority-queue';
 

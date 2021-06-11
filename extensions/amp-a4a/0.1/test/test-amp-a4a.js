@@ -46,7 +46,7 @@ import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {LayoutPriority} from '../../../../src/core/dom/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {Signals} from '../../../../src/core/data-structures/signals';
 import {cancellation} from '../../../../src/error-reporting';
 import {createElementWithAttributes} from '../../../../src/core/dom';

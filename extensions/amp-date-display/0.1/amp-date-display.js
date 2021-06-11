@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from '../../../src/core/constants/amp-events';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dashToCamelCase} from '../../../src/core/types/string/index.js';
 import {dev, devAssert, user, userAssert} from '../../../src/log';

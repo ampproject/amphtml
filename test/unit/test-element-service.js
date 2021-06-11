@@ -16,7 +16,7 @@
 
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {FakeWindow} from '../../testing/fake-dom';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {createElementWithAttributes} from '../../src/core/dom';
 import {
   getElementServiceForDoc,
@@ -29,7 +29,7 @@ import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   setParentWindow,
-} from '../../src/service';
+} from '../../src/service-helpers';
 
 describes.realWin('getElementServiceIfAvailable()', {amp: true}, (env) => {
   let win, doc;

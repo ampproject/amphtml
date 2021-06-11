@@ -21,7 +21,7 @@ import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {AmpList} from '../amp-list';
 import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
 import {Deferred} from '../../../../src/core/data-structures/promise';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 import {
   resetExperimentTogglesForTesting,

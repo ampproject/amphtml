@@ -15,7 +15,7 @@
  */
 
 import {Observable} from '../../../src/core/data-structures/observable';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {devAssert} from '../../../src/log';
 
 /**

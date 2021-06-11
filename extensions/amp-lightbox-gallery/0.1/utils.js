@@ -16,7 +16,7 @@
 /**
  * @fileoverview Description of this file.
  */
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {padStart} from '../../../src/core/types/string';
 /**
  * Runs a delay after deferring to the event loop. This is useful to call from

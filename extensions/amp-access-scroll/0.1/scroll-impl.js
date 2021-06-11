@@ -20,7 +20,7 @@ import {PROTOCOL_VERSION} from './scroll-protocol';
 import {ReadDepthTracker} from './read-depth-tracker.js';
 import {Relay} from './scroll-relay';
 import {ScrollBar} from './scroll-bar';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {Sheet} from './scroll-sheet';
 import {addParamToUrl, isProxyOrigin} from '../../../src/url';
 import {buildUrl, connectHostname} from './scroll-url';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {TickLabel} from '../../../src/core/constants/enums';
 import {asyncStringReplace} from '../../../src/core/types/string';
 import {base64UrlEncodeFromString} from '../../../src/core/types/string/base64';
@@ -34,7 +34,7 @@ import {
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
+} from '../../../src/service-helpers';
 import {isArray, isFiniteNumber} from '../../../src/core/types';
 
 import {isInFie} from '../../../src/iframe-helper';

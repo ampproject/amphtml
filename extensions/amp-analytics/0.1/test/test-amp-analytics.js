@@ -23,14 +23,14 @@ import {
 } from '../../../../testing/test-helper';
 import {LayoutPriority} from '../../../../src/core/dom/layout';
 import {LinkerManager} from '../linker-manager';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {Transport} from '../transport';
 import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
 import {
   getService,
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installUserNotificationManagerForTesting} from '../../../amp-user-notification/0.1/amp-user-notification';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';

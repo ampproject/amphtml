@@ -18,10 +18,10 @@ import {
   PositionObserverFidelity, // eslint-disable-line no-unused-vars
   PositionObserverWorker,
 } from './position-observer-worker';
-import {Services} from '../../services';
+import {Services} from '../../service';
 import {debounce} from '../../core/types/function';
 import {dev} from '../../log';
-import {registerServiceBuilderForDoc} from '../../service';
+import {registerServiceBuilderForDoc} from '../../service-helpers';
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';

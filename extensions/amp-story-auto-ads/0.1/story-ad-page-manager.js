@@ -28,7 +28,7 @@ import {StoryAdLocalization} from './story-ad-localization';
 import {StoryAdPage} from './story-ad-page';
 import {devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/core/types/array';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page-manager';

@@ -16,7 +16,7 @@
 
 import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {closestAncestorElementBySelector} from '../../../../src/core/dom/query';
 import {createCustomEvent, getDetail} from '../../../../src/event-helper';
 

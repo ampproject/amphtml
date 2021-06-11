@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '../service';
 import {
   assertSuccess,
   getViewerInterceptResponse,
@@ -25,7 +25,7 @@ import {
 } from '../utils/xhr-utils';
 import {dev, user} from '../log';
 import {getCorsUrl, parseUrlDeprecated} from '../url';
-import {getService, registerServiceBuilder} from '../service';
+import {getService, registerServiceBuilder} from '../service-helpers';
 import {isFormDataWrapper} from '../form-data-wrapper';
 import {parseJson} from '../core/types/object/json';
 

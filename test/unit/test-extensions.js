@@ -18,10 +18,10 @@ import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {Extensions} from '../../src/service/extensions-impl';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {dev} from '../../src/log';
 import {dispatchCustomEvent} from '../../src/core/dom';
-import {getServiceForDoc} from '../../src/service';
+import {getServiceForDoc} from '../../src/service-helpers';
 import {
   getTemplateClassForTesting,
   installTemplatesServiceForDoc,

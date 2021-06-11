@@ -34,7 +34,7 @@ import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
 } from '../../../../src/core/constants/consent-state';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {
   addAttributesToElement,
   createElementWithAttributes,

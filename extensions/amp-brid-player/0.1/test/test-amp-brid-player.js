@@ -15,7 +15,7 @@
  */
 
 import '../amp-brid-player';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {VideoEvents} from '../../../../src/video-interface';
 import {listenOncePromise} from '../../../../src/event-helper';
 

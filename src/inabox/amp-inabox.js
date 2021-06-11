@@ -20,7 +20,7 @@
 
 import '../polyfills';
 import {Navigation} from '../service/navigation';
-import {Services} from '../services';
+import {Services} from '../service';
 import {TickLabel} from '../core/constants/enums';
 import {adopt} from '../runtime';
 import {allowLongTasksInChunking, startupChunk} from '../chunk';

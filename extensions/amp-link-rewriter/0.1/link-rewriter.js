@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {getConfigOpts} from './config-options';
 import {getDataParamsFromAttributes} from '../../../src/core/dom';
 import {getScopeElements, isElementInScope} from './scope';

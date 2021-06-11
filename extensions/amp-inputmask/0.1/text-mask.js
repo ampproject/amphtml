@@ -16,7 +16,7 @@
 
 import {Mask} from './mask-impl';
 import {OutputMode} from './constants';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {iterateCursor, removeElement} from '../../../src/core/dom';
 import {userAssert} from '../../../src/log';
 

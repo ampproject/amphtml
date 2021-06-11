@@ -29,7 +29,7 @@
 import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from '../../../build/amp-onetap-google-0.1.css';
 import {Layout} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

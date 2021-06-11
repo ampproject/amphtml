@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {openWindowDialog} from '../../../src/open-window-dialog';

@@ -21,7 +21,7 @@ import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, getValueForExpr} from '../../../src/core/types/object';

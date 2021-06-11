@@ -23,7 +23,7 @@ import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
 import {LayoutPriority} from '../../../../src/core/dom/layout';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {adConfig} from '../../../../ads/_config';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 import {macroTask} from '../../../../testing/yield';

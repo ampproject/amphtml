@@ -15,7 +15,7 @@
  */
 
 import {DomFingerprint} from '../../../src/core/dom/fingerprint';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {WindowInterface} from '../../../src/core/window/interface';
 import {
   addDataAndJsonAttributes_,

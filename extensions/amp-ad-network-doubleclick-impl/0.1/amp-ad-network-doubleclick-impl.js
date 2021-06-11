@@ -67,7 +67,7 @@ import {
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
 import {SafeframeHostApi} from './safeframe-host';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   TFCD,
   constructSRABlockParameters,

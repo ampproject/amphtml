@@ -20,7 +20,7 @@ import {
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';

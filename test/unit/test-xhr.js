@@ -15,7 +15,7 @@
  */
 
 import * as mode from '../../src/mode';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {assertSuccess} from '../../src/utils/xhr-utils';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
 import {fetchPolyfill} from '../../src/polyfills/fetch';

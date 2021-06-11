@@ -20,7 +20,7 @@ import {
   Performance,
   installPerformanceService,
 } from '../../src/service/performance-impl';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {VisibilityState} from '../../src/core/constants/visibility-state';
 import {getMode} from '../../src/mode';
 import {installPlatformService} from '../../src/service/platform-impl';

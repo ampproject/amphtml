@@ -21,7 +21,7 @@ import {AutocompleteBindingSingle} from './autocomplete-binding-single';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,

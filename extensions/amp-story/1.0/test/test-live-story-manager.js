@@ -20,9 +20,9 @@ import {AmpStoryPage} from '../amp-story-page';
 import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {LiveStoryManager} from '../live-story-manager';
 import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {addAttributesToElement} from '../../../../src/core/dom';
-import {registerServiceBuilder} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
   'LiveStoryManager',

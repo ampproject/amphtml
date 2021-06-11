@@ -18,7 +18,7 @@ import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {Animation} from '../../src/animation';
 import {FakeMutationObserver, FakeWindow} from '../../testing/fake-dom';
 import {FixedLayer} from '../../src/service/fixed-layer';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {endsWith} from '../../src/core/types/string';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
 import {installPlatformService} from '../../src/service/platform-impl';

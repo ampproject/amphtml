@@ -22,7 +22,7 @@ import {
 import {CSS} from '../../../build/amp-story-education-0.1.css';
 import {Layout} from '../../../src/core/dom/layout';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

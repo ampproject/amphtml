@@ -15,7 +15,7 @@
  */
 
 import * as analytics from '../../src/analytics';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {
   blockedByConsentError,
   cancellation,

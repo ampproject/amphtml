@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {createElementWithAttributes} from '../../../src/core/dom';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {loadScript} from '../../../src/validator-integration';

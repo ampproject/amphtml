@@ -29,7 +29,7 @@ import {
   LayoutPriority,
   isLayoutSizeDefined,
 } from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/core/math';
 import {computedStyle, setStyle} from '../../../src/core/dom/style';

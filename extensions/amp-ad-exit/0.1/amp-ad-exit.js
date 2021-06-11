@@ -22,14 +22,14 @@ import {
   deserializeMessage,
   listen,
 } from '../../../src/3p-frame-messaging';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {createFilter} from './filters/factory';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service';
+import {getTopWindow} from '../../../src/service-helpers';
 import {isJsonScriptTag} from '../../../src/core/dom';
 import {isObject} from '../../../src/core/types';
 import {makeClickDelaySpec} from './filters/click-delay';

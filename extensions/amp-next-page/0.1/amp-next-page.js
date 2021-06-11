@@ -18,7 +18,7 @@ import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {Layout} from '../../../src/core/dom/layout';
 import {NextPageService} from './next-page-service';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
@@ -33,7 +33,7 @@ import {dev, user, userAssert} from '../../../src/log';
 
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag, removeElement} from '../../../src/core/dom';
 import {parseJson, tryParseJson} from '../../../src/core/types/object/json';

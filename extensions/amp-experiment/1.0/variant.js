@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {dev, userAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/core/types/object';
 import {isArray, isObject} from '../../../src/core/types';

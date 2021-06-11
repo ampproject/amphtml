@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService, registerServiceBuilder} from '../../../src/service';
+import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {hasOwn} from '../../../src/core/types/object';
 import {parseLinker} from './linker';
 import {parseQueryString} from '../../../src/core/types/string/url';

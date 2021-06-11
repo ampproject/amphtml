@@ -15,7 +15,7 @@
  */
 
 import {DEFAULT_CONFIG} from './default-config';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {assertHttpsUrl} from '../../../src/url';
 import {calculateScriptBaseUrl} from '../../../src/service/extension-script';
 import {deepMerge, dict, hasOwn} from '../../../src/core/types/object';

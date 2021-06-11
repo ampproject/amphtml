@@ -24,7 +24,7 @@ import {
   MAX_HEIGHT_EXP,
   ResponsiveState,
 } from '../responsive-state';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {
   addAttributesToElement,
   createElementWithAttributes,

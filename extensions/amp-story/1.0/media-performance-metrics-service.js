@@ -18,12 +18,12 @@ import {
   MEDIA_LOAD_FAILURE_SRC_PROPERTY,
   listen,
 } from '../../../src/event-helper';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {TickLabel} from '../../../src/core/constants/enums';
 import {dev} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {lastChildElement, matches} from '../../../src/core/dom/query';
-import {registerServiceBuilder} from '../../../src/service';
+import {registerServiceBuilder} from '../../../src/service-helpers';
 import {urls} from '../../../src/config';
 
 /**

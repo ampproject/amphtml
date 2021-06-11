@@ -15,7 +15,7 @@
  */
 
 import {FIE_EMBED_PROP} from '../../../../src/iframe-helper';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
@@ -26,7 +26,7 @@ import {
   layoutRectLtwh,
   rectIntersection,
 } from '../../../../src/core/math/layout-rect';
-import {setParentWindow} from '../../../../src/service';
+import {setParentWindow} from '../../../../src/service-helpers';
 
 class IntersectionObserverStub {
   constructor(callback, options) {

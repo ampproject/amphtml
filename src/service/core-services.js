@@ -17,7 +17,7 @@
 import {
   adoptServiceFactoryForEmbedDoc,
   adoptServiceForEmbedDoc,
-} from '../service';
+} from '../service-helpers';
 import {devAssert} from '../log';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';

@@ -15,7 +15,7 @@
  */
 
 import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {Vsync} from '../../src/service/vsync-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 

@@ -15,7 +15,7 @@
  */
 
 import '../amp-call-tracking';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {clearResponseCacheForTesting} from '../amp-call-tracking';
 
 describes.realWin(

@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
@@ -23,7 +23,7 @@ import {elementByTag} from '../../../src/core/dom/query';
 import {expandConsentEndpointUrl} from './consent-config';
 import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {insertAtStart, removeElement, tryFocus} from '../../../src/core/dom';
 import {

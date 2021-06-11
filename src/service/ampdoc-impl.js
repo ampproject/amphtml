@@ -29,7 +29,7 @@ import {
   disposeServicesForDoc,
   getParentWindowFrameElement,
   registerServiceBuilder,
-} from '../service';
+} from '../service-helpers';
 import {isDocumentReady, whenDocumentReady} from '../core/document-ready';
 import {isEnumValue} from '../core/types';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../core/dom';

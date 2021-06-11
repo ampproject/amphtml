@@ -20,7 +20,7 @@ import {
   presets,
   setStyleForPreset,
 } from './animation-presets';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   StoryAnimationConfigDef,
   StoryAnimationDimsDef,

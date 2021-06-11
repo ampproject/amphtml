@@ -15,8 +15,8 @@
  */
 
 import {BaseTemplate} from '../../src/base-template';
-import {Services} from '../../src/services';
-import {getServiceForDoc} from '../../src/service';
+import {Services} from '../../src/service';
+import {getServiceForDoc} from '../../src/service-helpers';
 import {
   installTemplatesServiceForDoc,
   registerExtendedTemplateForDoc,

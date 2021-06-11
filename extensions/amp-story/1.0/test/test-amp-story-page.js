@@ -23,7 +23,7 @@ import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {Deferred} from '../../../../src/core/data-structures/promise';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {Signals} from '../../../../src/core/data-structures/signals';
 import {
   addAttributesToElement,
@@ -31,7 +31,7 @@ import {
 } from '../../../../src/core/dom';
 import {htmlFor} from '../../../../src/core/dom/static-template';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {registerServiceBuilder} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {scopedQuerySelectorAll} from '../../../../src/core/dom/query';
 import {toggleExperiment} from '../../../../src/experiments';
 

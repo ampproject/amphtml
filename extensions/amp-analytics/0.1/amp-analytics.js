@@ -33,7 +33,7 @@ import {
 import {LayoutPriority} from '../../../src/core/dom/layout';
 import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {Transport} from './transport';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/core/types/object';

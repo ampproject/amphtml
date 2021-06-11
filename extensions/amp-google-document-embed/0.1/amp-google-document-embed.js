@@ -27,7 +27,7 @@
  * </code>
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addParamToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/core/dom/layout';

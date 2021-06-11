@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '../service';
 import {closestAncestorElementBySelector} from '../core/dom/query';
 import {waitForChildPromise} from '../core/dom';
 

@@ -23,7 +23,7 @@ import {
 } from '../../../src/core/dom/layout';
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {base64EncodeFromBytes} from '../../../src/core/types/string/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';

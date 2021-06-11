@@ -18,7 +18,7 @@ import {
   OriginExperiments,
   TokenMaster,
 } from '../../src/service/origin-experiments-impl';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {bytesToString} from '../../src/core/types/string/bytes';
 import {user} from '../../src/log';
 

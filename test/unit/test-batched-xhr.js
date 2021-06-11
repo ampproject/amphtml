@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {batchedXhrServiceForTesting} from '../../src/service/batched-xhr-impl';
 
 describes.sandboxed('BatchedXhr', {}, (env) => {

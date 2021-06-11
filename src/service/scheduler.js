@@ -22,7 +22,10 @@ import {
   hasNextNodeInDocumentOrder,
   isIframed,
 } from '../core/dom';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
 import {removeItem} from '../core/types/array';
 
 const ID = 'scheduler';

@@ -15,7 +15,7 @@
  */
 
 import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {once} from '../../../src/core/types/function';
 
 import {Tracking} from './tracking';

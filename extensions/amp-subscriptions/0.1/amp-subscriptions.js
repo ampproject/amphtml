@@ -33,7 +33,7 @@ import {
 import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {SubscriptionPlatform as SubscriptionPlatformInterface} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';

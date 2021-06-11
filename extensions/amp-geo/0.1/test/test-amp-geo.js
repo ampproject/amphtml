@@ -16,7 +16,7 @@
 
 import {AmpGeo} from '../amp-geo';
 import {GEO_IN_GROUP} from '../amp-geo-in-group';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {urls} from '../../../../src/config';
 import {user} from '../../../../src/log';
 import {vsyncForTesting} from '../../../../src/service/vsync-impl';

@@ -27,7 +27,7 @@ import {
   preloadFriendlyIframeEmbedExtensions,
   setSrcdocSupportedForTesting,
 } from '../../src/friendly-iframe-embed';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {Signals} from '../../src/core/data-structures/signals';
 import {getFriendlyIframeEmbedOptional} from '../../src/iframe-helper';
 import {
@@ -35,7 +35,7 @@ import {
   registerServiceBuilder,
   registerServiceBuilderInEmbedWin,
   setParentWindow,
-} from '../../src/service';
+} from '../../src/service-helpers';
 import {installExtensionsService} from '../../src/service/extensions-impl';
 import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/core/math/layout-rect';

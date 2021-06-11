@@ -15,7 +15,7 @@
  */
 
 import {AmpVideo, isCachedByCdn} from '../amp-video';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {VideoEvents} from '../../../../src/video-interface';
 import {VisibilityState} from '../../../../src/core/constants/visibility-state';
 import {dispatchCustomEvent} from '../../../../src/core/dom';

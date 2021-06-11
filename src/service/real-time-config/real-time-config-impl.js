@@ -15,13 +15,13 @@
  */
 import {CONSENT_POLICY_STATE} from '../../core/constants/consent-state';
 import {RTC_VENDORS} from './callout-vendors';
-import {Services} from '../../services';
+import {Services} from '../../service';
 import {dev, user, userAssert} from '../../log';
 import {getMode} from '../../mode';
 import {isAmpScriptUri} from '../../../src/url';
 import {isArray, isObject} from '../../core/types';
 import {isCancellation} from '../../error-reporting';
-import {registerServiceBuilderForDoc} from '../../service';
+import {registerServiceBuilderForDoc} from '../../service-helpers';
 import {tryParseJson} from '../../core/types/object/json';
 
 /** @type {string} */

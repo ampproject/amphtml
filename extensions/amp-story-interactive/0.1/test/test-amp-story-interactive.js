@@ -28,13 +28,13 @@ import {
   AnalyticsVariable,
 } from '../../../amp-story/1.0/variable-service';
 import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {dict} from '../../../../src/core/types/object';
 import {getBackendSpecs} from '../interactive-disclaimer';
 import {htmlFor} from '../../../../src/core/dom/static-template';
 import {measureMutateElementStub} from '../../../../testing/test-helper';
-import {registerServiceBuilder} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '../../../../src/experiments';
 
 /**

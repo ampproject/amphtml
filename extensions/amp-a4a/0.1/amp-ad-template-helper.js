@@ -15,7 +15,7 @@
  */
 
 import {LruCache} from '../../../src/core/data-structures/lru-cache';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {createElementWithAttributes} from '../../../src/core/dom';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
@@ -23,7 +23,7 @@ import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
+} from '../../../src/service-helpers';
 import {isArray} from '../../../src/core/types';
 import {parseUrlDeprecated} from '../../../src/url';
 import {urls} from '../../../src/config';

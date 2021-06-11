@@ -34,7 +34,7 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
   setParentWindow,
-} from '../../src/service';
+} from '../../src/service-helpers';
 import {waitFor} from '../../testing/test-helper';
 
 describes.realWin('AmpDocService', {}, (env) => {

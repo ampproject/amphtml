@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {childElementByTag} from '../../../src/core/dom/query';
 import {createElementWithAttributes} from '../../../src/core/dom';
 import {dict} from '../../../src/core/types/object';

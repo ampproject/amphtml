@@ -15,7 +15,7 @@
  */
 
 import {Deferred, tryResolve} from '../core/data-structures/promise';
-import {Services} from '../services';
+import {Services} from '../service';
 import {dev, devAssert} from '../log';
 import {dict, map} from '../core/types/object';
 import {getMode} from '../mode';
@@ -23,7 +23,7 @@ import {
   getService,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
-} from '../service';
+} from '../service-helpers';
 import {getState} from '../core/window/history';
 
 /** @private @const {string} */

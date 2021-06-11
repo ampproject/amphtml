@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {createElementWithAttributes} from '../../../src/core/dom';
 import {dict} from '../../../src/core/types/object';
 import {user} from '../../../src/log';

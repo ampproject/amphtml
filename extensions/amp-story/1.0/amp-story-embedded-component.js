@@ -31,7 +31,7 @@ import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addAttributesToElement, tryFocus} from '../../../src/core/dom';
 import {closest, matches} from '../../../src/core/dom/query';
 import {
@@ -41,7 +41,7 @@ import {
 } from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {getAmpdoc} from '../../../src/service';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';

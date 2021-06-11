@@ -24,7 +24,7 @@ import {createElementWithAttributes} from '../../../../src/core/dom';
 import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-story-360',

@@ -15,7 +15,7 @@
  */
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {Toolbar} from '../toolbar';
 import {createIframePromise} from '../../../../testing/iframe';
 import {toArray} from '../../../../src/core/types/array';

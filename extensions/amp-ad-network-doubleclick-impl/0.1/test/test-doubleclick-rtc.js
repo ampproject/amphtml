@@ -22,7 +22,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {RTC_ERROR_ENUM} from '../../../../src/service/real-time-config/real-time-config-impl';
 import {RTC_VENDORS} from '../../../../src/service/real-time-config/callout-vendors';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 
 describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {

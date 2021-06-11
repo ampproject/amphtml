@@ -16,7 +16,7 @@
 
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {Messenger} from './iframe-api/messenger';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

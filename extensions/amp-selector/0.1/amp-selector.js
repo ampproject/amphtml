@@ -18,7 +18,7 @@ import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {areEqualOrdered, toArray} from '../../../src/core/types/array';
 import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';

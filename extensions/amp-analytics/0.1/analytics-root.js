@@ -15,7 +15,7 @@
  */
 
 import {ScrollManager} from './scroll-manager';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   closestAncestorElementBySelector,
   matches,

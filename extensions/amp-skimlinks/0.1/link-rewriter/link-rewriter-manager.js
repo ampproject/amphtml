@@ -18,7 +18,7 @@ import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {EVENTS, PRIORITY_META_TAG_NAME} from './constants';
 import {LinkRewriter} from './link-rewriter';
 import {Priority} from '../../../../src/service/navigation';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 
 /**
  * LinkRewriterManager works together with LinkRewriter to allow rewriting

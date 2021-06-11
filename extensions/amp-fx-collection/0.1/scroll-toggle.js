@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Observable} from '../../../src/core/data-structures/observable';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {devAssert, user} from '../../../src/log';
 import {once} from '../../../src/core/types/function';
 import {px, setImportantStyles} from '../../../src/core/dom/style';

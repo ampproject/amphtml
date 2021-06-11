@@ -23,7 +23,7 @@ import {Deferred} from '../../../src/core/data-structures/promise';
 import {FiniteStateMachine} from '../../../src/core/data-structures/finite-state-machine';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {Layout, isLayoutSizeDefined} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {
   closestAncestorElementBySelector,

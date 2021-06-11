@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from '../../../src/core/constants/amp-events';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {computedStyle, px, setStyle} from '../../../src/core/dom/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {iterateCursor, removeElement} from '../../../src/core/dom';

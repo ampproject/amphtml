@@ -41,7 +41,7 @@ import * as events from '../../../src/event-helper';
 import * as utils from './utils';
 import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
 import {Layout} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   parseUrlDeprecated,

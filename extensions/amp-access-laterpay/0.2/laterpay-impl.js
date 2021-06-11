@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-access-laterpay-0.2.css';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';

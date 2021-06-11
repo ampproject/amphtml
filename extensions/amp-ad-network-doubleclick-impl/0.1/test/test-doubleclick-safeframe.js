@@ -27,7 +27,7 @@ import {
   removeSafeframeListener,
   safeframeListener,
 } from '../safeframe-host';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 
 /**

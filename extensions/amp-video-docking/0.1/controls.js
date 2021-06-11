@@ -16,7 +16,7 @@
 
 import {HtmlLiteralTagDef} from './html';
 import {PlayingStates, VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {Timeout} from './timeout';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';

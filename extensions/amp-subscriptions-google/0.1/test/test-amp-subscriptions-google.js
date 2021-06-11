@@ -36,7 +36,7 @@ import {
 import {GaaMeteringRegwall} from '../../../../third_party/subscriptions-project/swg-gaa';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
 import {WindowInterface} from '../../../../src/core/window/interface';
 import {toggleExperiment} from '../../../../src/experiments';

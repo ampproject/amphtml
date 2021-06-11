@@ -15,7 +15,7 @@
  */
 
 import {MessageType} from '../../../src/3p-frame-messaging';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {isLayoutSizeDefined} from '../../../src/core/dom/layout';

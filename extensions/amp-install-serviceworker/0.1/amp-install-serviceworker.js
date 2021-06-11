@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

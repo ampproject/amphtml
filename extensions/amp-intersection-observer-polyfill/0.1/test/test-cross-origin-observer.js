@@ -21,7 +21,7 @@ import {
   maybeSetupCrossOriginObserver,
 } from '../cross-origin-observer';
 import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
-import {registerServiceBuilder} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.sandboxed('calculateIntersectionRect', {}, () => {
   it('when on screen', () => {

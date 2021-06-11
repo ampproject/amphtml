@@ -26,12 +26,12 @@ import {
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest, matches} from '../../../src/core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 import {dev} from '../../../src/log';
-import {getAmpdoc} from '../../../src/service';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/core/dom/static-template';
 

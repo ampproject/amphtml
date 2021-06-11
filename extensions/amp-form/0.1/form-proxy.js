@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {dev, devAssert} from '../../../src/log';
 import {toWin} from '../../../src/core/window';
 

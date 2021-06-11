@@ -18,7 +18,7 @@ import {AccessClientAdapter} from '../amp-access-client';
 import {AccessService} from '../amp-access';
 import {AmpEvents} from '../../../../src/core/constants/amp-events';
 import {Observable} from '../../../../src/core/data-structures/observable';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
 import {installPerformanceService} from '../../../../src/service/performance-impl';
 import {installPlatformService} from '../../../../src/service/platform-impl';

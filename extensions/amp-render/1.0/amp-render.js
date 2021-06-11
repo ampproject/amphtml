@@ -20,7 +20,7 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';

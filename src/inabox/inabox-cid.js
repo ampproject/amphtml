@@ -15,7 +15,7 @@
  */
 
 import {CidDef} from '../service/cid-impl';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * A dummy impl of CID service as CLIENT_ID is not supported

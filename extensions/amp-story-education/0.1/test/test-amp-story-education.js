@@ -22,8 +22,8 @@ import {
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryEducation, State} from '../amp-story-education';
 import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/services';
-import {registerServiceBuilder} from '../../../../src/service';
+import {Services} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-education', {amp: true}, (env) => {
   let ampdoc;

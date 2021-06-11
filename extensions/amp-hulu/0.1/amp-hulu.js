@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {devAssert, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {removeElement} from '../../../src/core/dom';

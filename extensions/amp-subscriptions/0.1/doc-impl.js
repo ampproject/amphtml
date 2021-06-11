@@ -15,7 +15,7 @@
  */
 
 import {Doc} from '../../../third_party/subscriptions-project/config';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {dev} from '../../../src/log';
 
 /**

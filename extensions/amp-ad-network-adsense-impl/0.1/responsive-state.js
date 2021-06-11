@@ -20,7 +20,7 @@ import {
   ADSENSE_RSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '../../../ads/google/utils';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
 import {clamp} from '../../../src/core/math';
 import {computedStyle, getStyle, setStyle} from '../../../src/core/dom/style';

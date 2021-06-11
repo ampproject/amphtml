@@ -15,8 +15,8 @@
  */
 
 import {LocalizationService} from '../../../src/service/localization';
-import {Services} from '../../../src/services';
-import {registerServiceBuilderForDoc} from '../../../src/service';
+import {Services} from '../../../src/service';
+import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
 
 /**
  * Util function to retrieve the localization service. Ensures we can retrieve

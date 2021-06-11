@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {ViewportBindingIosEmbedWrapper_} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from '../../src/service/viewport/viewport-binding-natural';
 import {installDocService} from '../../src/service/ampdoc-impl';

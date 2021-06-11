@@ -34,7 +34,7 @@
  */
 
 import {FontLoader} from './fontloader';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {isFiniteNumber} from '../../../src/core/types';
 import {user, userAssert} from '../../../src/log';
 

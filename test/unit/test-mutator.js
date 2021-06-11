@@ -20,7 +20,7 @@ import {LayoutPriority} from '../../src/core/dom/layout';
 import {MutatorImpl} from '../../src/service/mutator-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {ResourcesImpl} from '../../src/service/resources-impl';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {Signals} from '../../src/core/data-structures/signals';
 import {VisibilityState} from '../../src/core/constants/visibility-state';
 import {installInputService} from '../../src/input';

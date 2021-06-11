@@ -23,7 +23,7 @@ import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
 import {RelativePositions} from '../../../src/core/math/layout-rect';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {devAssert} from '../../../src/log';
 import {throttle} from '../../../src/core/types/function';
 

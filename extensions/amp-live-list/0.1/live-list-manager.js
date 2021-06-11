@@ -15,12 +15,12 @@
  */
 
 import {Poller} from './poller';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addParamToUrl} from '../../../src/url';
 import {extensionScriptsInNode} from '../../../src/service/extension-script';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

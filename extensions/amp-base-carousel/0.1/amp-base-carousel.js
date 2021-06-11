@@ -25,7 +25,7 @@ import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
 } from './responsive-attributes';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

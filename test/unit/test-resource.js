@@ -19,7 +19,7 @@ import {LayoutPriority} from '../../src/core/dom/layout';
 import {OwnersImpl} from '../../src/service/owners-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {ResourcesImpl} from '../../src/service/resources-impl';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {isCancellation} from '../../src/error-reporting';
 import {layoutRectLtwh} from '../../src/core/math/layout-rect';
 

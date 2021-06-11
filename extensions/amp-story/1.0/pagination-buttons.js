@@ -22,7 +22,7 @@ import {
 import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {dev, devAssert} from '../../../src/log';
 
 import {getLocalizationService} from './amp-story-localization-service';

@@ -15,7 +15,7 @@
  */
 
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {ViewportBindingIosEmbedWrapper_} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
 import {
   ViewportImpl,
@@ -38,7 +38,7 @@ import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {layoutRectLtwh} from '../../src/core/math/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import {setParentWindow} from '../../src/service';
+import {setParentWindow} from '../../src/service-helpers';
 
 const NOOP = () => {};
 

@@ -26,7 +26,7 @@ import {
   parseUrlWithA,
   resolveRelativeUrl,
 } from '../url';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {urls} from '../config';
 
 const SERVICE = 'url';

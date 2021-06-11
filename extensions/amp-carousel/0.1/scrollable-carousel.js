@@ -18,7 +18,7 @@ import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {dev} from '../../../src/log';
 import {isLayoutSizeFixed} from '../../../src/core/dom/layout';
 import {listen} from '../../../src/event-helper';

@@ -15,7 +15,7 @@
  */
 
 import {AccessClientAdapter} from './amp-access-client';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';

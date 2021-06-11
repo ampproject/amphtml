@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {FormEvents} from './form-events';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';

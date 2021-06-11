@@ -30,7 +30,7 @@ import {
 } from '../../testing/test-helper';
 
 import {Observable} from '../../src/core/data-structures/observable';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {createIframePromise} from '../../testing/iframe';
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
@@ -38,7 +38,7 @@ import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
 import {parseUrlDeprecated} from '../../src/url';
-import {registerServiceBuilder} from '../../src/service';
+import {registerServiceBuilder} from '../../src/service-helpers';
 import {setCookie} from '../../src/cookies';
 import {user} from '../../src/log';
 

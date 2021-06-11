@@ -26,7 +26,7 @@ import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/core/constants/key-codes';
 import {LightboxCaption, OverflowState} from './lightbox-caption';
 import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {SwipeToDismiss} from './swipe-to-dismiss';
 import {

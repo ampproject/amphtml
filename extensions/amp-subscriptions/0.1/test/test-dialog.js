@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from '../dialog';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 import {installStylesForDoc} from '../../../../src/style-installer';
 

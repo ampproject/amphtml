@@ -15,7 +15,7 @@
  */
 
 import {ADS_INITIAL_INTERSECTION_EXP} from '../../src/experiments/ads-initial-intersection-exp';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {createCustomEvent} from '../../src/event-helper';
 import {createFixtureIframe, poll} from '../../testing/iframe';
 import {forceExperimentBranch} from '../../src/experiments';

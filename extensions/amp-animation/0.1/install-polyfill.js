@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 
 /** @type {!WeakMap<!../../../src/service/ampdoc-impl.AmpDoc, !Promise>} */
 const polyfillPromiseMap = new WeakMap();

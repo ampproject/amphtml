@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {assertHttpsUrl} from '../../../src/url';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {clamp} from '../../../src/core/math';

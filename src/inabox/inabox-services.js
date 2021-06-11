@@ -31,7 +31,7 @@ import {installStandardActionsForDoc} from '../service/standard-actions-impl';
 import {installTemplatesServiceForDoc} from '../service/template-impl';
 import {installUrlForDoc} from '../service/url-impl';
 import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
-import {rejectServicePromiseForDoc} from '../service';
+import {rejectServicePromiseForDoc} from '../service-helpers';
 
 /**
  * Install ampdoc-level services.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '../service';
 import {Signals} from '../core/data-structures/signals';
 import {TickLabel} from '../core/constants/enums';
 import {VisibilityState} from '../core/constants/visibility-state';
@@ -22,7 +22,7 @@ import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
 import {dict, map} from '../core/types/object';
 import {getMode} from '../mode';
-import {getService, registerServiceBuilder} from '../service';
+import {getService, registerServiceBuilder} from '../service-helpers';
 import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../core/math/layout-rect';
 import {throttle} from '../core/types/function';

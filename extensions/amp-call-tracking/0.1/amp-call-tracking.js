@@ -15,7 +15,7 @@
  */
 
 import {Layout, isLayoutSizeDefined} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {assertHttpsUrl} from '../../../src/url';
 import {user} from '../../../src/log';
 

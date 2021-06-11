@@ -33,7 +33,7 @@
  */
 
 import {CSS} from '../../../build/amp-byside-content-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {
   createElementWithAttributes,

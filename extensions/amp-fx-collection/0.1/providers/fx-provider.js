@@ -26,7 +26,7 @@ import {
   installScrollToggleStyles,
   scrollToggleFloatIn,
 } from '../scroll-toggle';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {computedStyle, setStyles} from '../../../../src/core/dom/style';
 import {
@@ -42,7 +42,7 @@ import {devAssert} from '../../../../src/log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 import {installPositionObserverServiceForDoc} from '../../../../src/service/position-observer/position-observer-impl';
 
 /**

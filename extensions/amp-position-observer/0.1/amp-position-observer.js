@@ -21,7 +21,7 @@ import {
   layoutRectLtwh,
   layoutRectsRelativePos,
 } from '../../../src/core/math/layout-rect';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   assertLength,
   getLengthNumeral,

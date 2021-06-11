@@ -23,7 +23,7 @@ import {
 import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css';
 import {Layout} from '../../../src/core/dom/layout';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {closest} from '../../../src/core/dom/query';
 import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {createElementWithAttributes} from '../../../src/core/dom';
 import {devAssert} from '../../../src/log';

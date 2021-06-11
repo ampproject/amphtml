@@ -22,7 +22,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '../../../src/core/types/object';
 import {renderAsElement} from './simple-template';

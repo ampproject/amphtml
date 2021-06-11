@@ -18,13 +18,13 @@ import {AmpStoryInteractiveBinaryPoll} from '../amp-story-interactive-binary-pol
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {
   addConfigToInteractive,
   getMockInteractiveData,
 } from './test-amp-story-interactive';
 import {measureMutateElementStub} from '../../../../testing/test-helper';
-import {registerServiceBuilder} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-story-interactive-binary-poll',

@@ -16,7 +16,7 @@
 
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {ConsentLinkerReader} from './linker-reader';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/core/types/object';
 import {isInFie} from '../../../src/iframe-helper';

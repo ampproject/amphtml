@@ -17,7 +17,7 @@
 import {BaseElement} from '../../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../../src/core/dom/layout';
 import {ReadyState} from '../../src/core/constants/ready-state';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {dev} from '../../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../src/core/dom/img';
 import {listen} from '../../src/event-helper';

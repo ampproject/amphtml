@@ -31,10 +31,10 @@ import {Keys} from '../../../../src/core/constants/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {VisibilityState} from '../../../../src/core/constants/visibility-state';
 import {createElementWithAttributes} from '../../../../src/core/dom';
-import {registerServiceBuilder} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
 

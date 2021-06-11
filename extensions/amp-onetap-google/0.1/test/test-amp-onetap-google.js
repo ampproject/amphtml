@@ -18,7 +18,7 @@ import '../amp-onetap-google';
 import {ACTIONS, SENTINEL} from '../amp-onetap-google';
 import {AmpDoc} from '../../../../src/service/ampdoc-impl';
 import {BaseElement} from '../../../../src/base-element';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {
   createElementWithAttributes,
   waitForChild,

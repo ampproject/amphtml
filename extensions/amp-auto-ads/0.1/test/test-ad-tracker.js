@@ -20,7 +20,7 @@ import {
   getAdConstraintsFromConfigObj,
   getExistingAds,
 } from '../ad-tracker';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
 
 describes.realWin('ad-tracker', {amp: true}, (env) => {

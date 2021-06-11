@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {ViewerImpl} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';

@@ -15,7 +15,7 @@
  */
 
 import '../amp-dynamic-css-classes';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 
 const tcoReferrer = 'http://t.co/xyzabc123';

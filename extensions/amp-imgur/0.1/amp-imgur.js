@@ -28,7 +28,7 @@
  */
 
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   createElementWithAttributes,
   removeElement,

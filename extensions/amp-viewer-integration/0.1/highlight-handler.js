@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {dict} from '../../../src/core/types/object';
 import {findSentences, markTextRangeList} from './findtext';
 import {isExperimentOn} from '../../../src/experiments';

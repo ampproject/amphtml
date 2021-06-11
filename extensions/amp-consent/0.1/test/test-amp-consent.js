@@ -33,7 +33,7 @@ import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 import {removeSearch} from '../../../../src/url';
 import {toggleExperiment} from '../../../../src/experiments';
 import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';

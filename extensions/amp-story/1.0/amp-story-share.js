@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {Toast} from './toast';
 import {
   copyTextToClipboard,

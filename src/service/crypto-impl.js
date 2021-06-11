@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '../service';
 import {base64UrlEncodeFromBytes} from '../core/types/string/base64';
 import {dev, devAssert, user} from '../log';
-import {getService, registerServiceBuilder} from '../service';
+import {getService, registerServiceBuilder} from '../service-helpers';
 import {stringToBytes, utf8Encode} from '../core/types/string/bytes';
 
 /** @const {string} */

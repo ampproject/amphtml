@@ -19,7 +19,7 @@ import {getRandomString64} from './cid-impl';
 import {isArray} from '../core/types';
 import {map} from '../core/types/object';
 import {parseQueryString} from '../core/types/string/url';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /** @private @const {!Array<string>} */
 const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];

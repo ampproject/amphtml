@@ -20,7 +20,7 @@
  */
 
 import * as closure from '../../../third_party/closure-responding-channel/closure-bundle';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addAttributesToElement} from '../../../src/core/dom';
 import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 

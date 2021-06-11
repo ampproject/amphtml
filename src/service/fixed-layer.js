@@ -16,7 +16,7 @@
 
 import {Animation} from '../animation';
 import {Pass} from '../pass';
-import {Services} from '../services';
+import {Services} from '../service';
 import {assertDoesNotContainDisplay} from '../assert-display';
 import {closest, matches} from '../core/dom/query';
 import {

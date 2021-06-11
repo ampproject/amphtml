@@ -16,7 +16,7 @@
 
 import {MessageType} from '../../src/3p-frame-messaging';
 import {Observable} from '../core/data-structures/observable';
-import {Services} from '../services';
+import {Services} from '../service';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {ViewportInterface} from '../service/viewport/viewport-interface';
 import {canInspectWindow} from '../iframe-helper';
@@ -32,7 +32,7 @@ import {
   moveLayoutRect,
 } from '../core/math/layout-rect';
 import {px, resetStyles, setImportantStyles} from '../core/dom/style';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {throttle} from '../core/types/function';
 
 /** @const {string} */

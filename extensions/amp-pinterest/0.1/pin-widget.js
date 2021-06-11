@@ -15,7 +15,7 @@
  */
 
 import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {Util} from './util';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {measureIntersection} from '../../../src/utils/intersection';

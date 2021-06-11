@@ -15,7 +15,7 @@
  */
 
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {dispatchCustomEvent, waitForChildPromise} from '../../src/core/dom';
 import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
 import {

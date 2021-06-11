@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '../service';
 import {childElementsByTag} from '../core/dom/query';
 import {dev} from '../log';
 import {devAssert} from '../core/assert';

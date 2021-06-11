@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {API_SERVER} from '../constants';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 
 import {addParamsToUrl} from '../../../../src/url';
 import {dict} from '../../../../src/core/types/object';

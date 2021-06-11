@@ -21,7 +21,7 @@ import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../src/service';
+} from '../src/service-helpers';
 import {getStyle} from '../src/core/dom/style';
 import {poll} from './iframe';
 

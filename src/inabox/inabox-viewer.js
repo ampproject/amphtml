@@ -15,7 +15,7 @@
  */
 
 import {ViewerInterface} from '../service/viewer-interface';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * A dummy impl of ViewerInterface for inabox.

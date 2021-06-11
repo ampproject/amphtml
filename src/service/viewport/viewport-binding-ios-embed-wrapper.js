@@ -15,7 +15,7 @@
  */
 
 import {Observable} from '../../core/data-structures/observable';
-import {Services} from '../../services';
+import {Services} from '../../service';
 import {
   ViewportBindingDef,
   marginBottomOfLastChild,

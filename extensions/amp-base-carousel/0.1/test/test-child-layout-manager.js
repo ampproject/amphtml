@@ -15,7 +15,7 @@
  */
 
 import {ChildLayoutManager} from '../child-layout-manager';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {setInitialDisplay, setStyles} from '../../../../src/core/dom/style';
 
 /**

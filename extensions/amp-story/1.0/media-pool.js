@@ -28,7 +28,7 @@ import {
   UpdateSourcesTask,
 } from './media-tasks';
 import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../src/event-helper';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';

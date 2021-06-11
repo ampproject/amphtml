@@ -20,7 +20,7 @@ import {
 } from '../../../src/core/constants/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {createCustomEvent} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/core/window';

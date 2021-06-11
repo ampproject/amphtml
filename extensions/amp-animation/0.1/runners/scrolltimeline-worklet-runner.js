@@ -15,7 +15,7 @@
  */
 
 import {AnimationRunner} from './animation-runner';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {dev} from '../../../../src/log';
 import {getTotalDuration} from './utils';

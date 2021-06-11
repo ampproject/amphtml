@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {removeChildren} from '../../../src/core/dom';
 import {setStyles, toggle} from '../../../src/core/dom/style';
 

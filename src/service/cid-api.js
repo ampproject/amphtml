@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '../service';
 import {WindowInterface} from '../core/window/interface';
 import {dev} from '../log';
 import {dict} from '../core/types/object';

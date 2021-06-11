@@ -16,7 +16,7 @@
 
 import {Deferred} from '../core/data-structures/promise';
 import {Layout} from '../core/dom/layout';
-import {Services} from '../services';
+import {Services} from '../service';
 import {
   cancellation,
   isBlockedByConsent,

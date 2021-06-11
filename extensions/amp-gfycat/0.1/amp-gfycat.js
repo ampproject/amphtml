@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';

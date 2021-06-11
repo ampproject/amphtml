@@ -18,7 +18,7 @@ import * as cookie from '../../src/cookies';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import * as url from '../../src/url';
 import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
@@ -38,7 +38,7 @@ import {parseUrlDeprecated} from '../../src/url';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../src/service';
+} from '../../src/service-helpers';
 import {stubServiceForDoc} from '../../testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;

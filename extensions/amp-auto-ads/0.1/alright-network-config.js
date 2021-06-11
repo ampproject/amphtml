@@ -15,7 +15,7 @@
  */
 
 import {Layout} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/core/types/object';
 

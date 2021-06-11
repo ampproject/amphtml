@@ -21,7 +21,7 @@ import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {ImageViewer} from '../amp-image-lightbox';
 import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {WindowInterface} from '../../../../src/core/window/interface';
 import {parseSrcset} from '../../../../src/core/dom/srcset';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';

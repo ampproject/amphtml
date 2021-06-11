@@ -50,7 +50,7 @@ import {Layout} from '../../../src/core/dom/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {MediaPool} from './media-pool';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {addAttributesToElement, iterateCursor} from '../../../src/core/dom';
 import {
@@ -61,7 +61,7 @@ import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
 import {debounce} from '../../../src/core/types/function';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
-import {getAmpdoc} from '../../../src/service';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getLogEntries} from './logging';

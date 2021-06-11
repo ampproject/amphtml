@@ -15,7 +15,7 @@
  */
 
 import {Xhr} from './xhr-impl';
-import {getService, registerServiceBuilder} from '../service';
+import {getService, registerServiceBuilder} from '../service-helpers';
 import {getSourceOrigin, removeFragment, resolveRelativeUrl} from '../url';
 import {map} from '../core/types/object';
 

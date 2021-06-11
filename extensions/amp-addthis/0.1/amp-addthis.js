@@ -51,7 +51,7 @@ import {ConfigManager} from './config-manager';
 import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
 import {PostMessageDispatcher} from './post-message-dispatcher';
 import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';

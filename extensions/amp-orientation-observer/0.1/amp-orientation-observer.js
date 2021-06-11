@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {clamp, sum} from '../../../src/core/math';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../../src/services';
+import {Services} from '../../../../../src/service';
 const ALLOWED_AD_PROVIDER = 'sr';
 import {createElementWithAttributes} from '../../../../../src/core/dom';
 import {dict, getValueForExpr} from '../../../../../src/core/types/object';

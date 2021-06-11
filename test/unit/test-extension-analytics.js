@@ -20,12 +20,12 @@ import {
   insertAnalyticsElement,
   useAnalyticsInSandbox,
 } from '../../src/extension-analytics';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../../src/service';
+} from '../../src/service-helpers';
 import {macroTask} from '../../testing/yield';
 import {registerElement} from '../../src/service/custom-element-registry';
 

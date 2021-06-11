@@ -24,7 +24,7 @@ import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
 } from '../../amp-base-carousel/0.1/responsive-attributes';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

@@ -21,7 +21,7 @@ import {
   shouldLoadPolyfill,
   upgradePolyfill,
 } from '../../../src/polyfills/stubs/intersection-observer-stub';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   install,
   installForChildWin,

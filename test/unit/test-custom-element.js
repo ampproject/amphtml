@@ -21,7 +21,7 @@ import {CommonSignals} from '../../src/core/constants/common-signals';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/core/dom/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,

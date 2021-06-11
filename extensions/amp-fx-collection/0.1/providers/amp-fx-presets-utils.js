@@ -20,7 +20,7 @@
  */
 
 import {FxType} from '../fx-type';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {mapRange} from '../../../../src/core/math';
 import {userAssert} from '../../../../src/log';
 

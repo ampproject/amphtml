@@ -15,7 +15,7 @@
  */
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {allocateVariant} from '../variant';
 
 describes.sandboxed('allocateVariant', {}, (env) => {

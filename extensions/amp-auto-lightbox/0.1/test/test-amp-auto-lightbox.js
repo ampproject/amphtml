@@ -32,7 +32,7 @@ import {
   runCandidates,
   scan,
 } from '../amp-auto-lightbox';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {Signals} from '../../../../src/core/data-structures/signals';
 import {createElementWithAttributes} from '../../../../src/core/dom';
 import {htmlFor} from '../../../../src/core/dom/static-template';

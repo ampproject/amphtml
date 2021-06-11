@@ -19,7 +19,7 @@
  * endpoints to handle requests from custom elements.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addAttributesToElement} from '../../../src/core/dom';
 import {toggle} from '../../../src/core/dom/style';
 

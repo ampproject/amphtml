@@ -15,7 +15,7 @@
  */
 
 import * as Impression from '../../src/impression';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {addParamToUrl} from '../../src/url';
 import {createElementWithAttributes} from '../../src/core/dom';
 import {installUrlReplacementsServiceForDoc} from '../../src/service/url-replacements-impl';

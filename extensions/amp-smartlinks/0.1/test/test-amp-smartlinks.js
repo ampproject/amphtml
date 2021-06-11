@@ -18,7 +18,7 @@ import * as DocumentReady from '../../../../src/core/document-ready';
 import * as LinkmateOptions from '../linkmate-options';
 import {AmpSmartlinks} from '../amp-smartlinks';
 import {LinkRewriterManager} from '../../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 
 const helpersFactory = (env) => {
   return {

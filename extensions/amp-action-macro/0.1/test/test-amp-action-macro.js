@@ -17,7 +17,7 @@
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AmpActionMacro} from '../amp-action-macro';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 
 describes.realWin(
   'amp-action-macro',

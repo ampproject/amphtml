@@ -19,7 +19,7 @@
  * that enable 3P site users to interact with Google Assistant.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {addAttributesToElement} from '../../../src/core/dom';
 import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 

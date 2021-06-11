@@ -18,7 +18,7 @@ import {BaseElement} from '../../src/base-element';
 import {DEFAULT_ACTION} from '../../src/core/constants/action-constants';
 import {LayoutPriority} from '../../src/core/dom/layout';
 import {Resource} from '../../src/service/resource';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/core/math/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';

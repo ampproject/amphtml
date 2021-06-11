@@ -28,7 +28,7 @@ import {
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
 import {EventType, dispatch} from '../../amp-story/1.0/events';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   StateProperty,
   UIType,
@@ -42,7 +42,7 @@ import {dict} from '../../../src/core/types/object';
 import {divertStoryAdPlacements} from '../../../src/experiments/story-ad-placements';
 import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getPlacementAlgo} from './algorithm-utils';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
 import {setStyle} from '../../../src/core/dom/style';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';

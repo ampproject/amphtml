@@ -16,7 +16,10 @@
 
 import {VisibilityState} from '../core/constants/visibility-state';
 import {containsNotSelf} from '../core/dom';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
 import {pushIfNotExist, removeItem} from '../core/types/array';
 import {rethrowAsync} from '../core/error';
 

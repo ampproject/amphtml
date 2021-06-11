@@ -17,7 +17,7 @@
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-auto-ads';
 import {BaseElement} from '../../../../src/base-element';
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/service';
 import {getA4ARegistry} from '../../../../ads/_a4a-config';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitForChild} from '../../../../src/core/dom';

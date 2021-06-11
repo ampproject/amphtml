@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {includes} from '../../../src/core/types/string';
 import {map} from '../../../src/core/types/object';

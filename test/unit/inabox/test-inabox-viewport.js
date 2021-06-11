@@ -18,7 +18,7 @@ import * as iframeHelper from '../../../src/iframe-helper';
 import {FrameOverlayManager} from '../../../ads/inabox/frame-overlay-manager';
 import {Observable} from '../../../src/core/data-structures/observable';
 import {PositionObserver} from '../../../ads/inabox/position-observer';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/service';
 import {
   ViewportBindingInabox,
   prepareBodyForOverlay,

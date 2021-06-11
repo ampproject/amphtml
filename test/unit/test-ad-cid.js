@@ -15,7 +15,7 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {Services} from '../../src/services';
+import {Services} from '../../src/service';
 import {adConfig} from '../../ads/_config';
 import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {getAdCid} from '../../src/ad-cid';

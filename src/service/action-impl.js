@@ -21,7 +21,7 @@ import {
   actionTrustToString,
 } from '../core/constants/action-constants';
 import {Keys} from '../core/constants/key-codes';
-import {Services} from '../services';
+import {Services} from '../service';
 import {debounce, throttle} from '../core/types/function';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, getValueForExpr, hasOwn, map} from '../core/types/object';
@@ -31,7 +31,7 @@ import {isAmp4Email} from '../format';
 import {isArray, toArray} from '../core/types/array';
 import {isEnabled} from '../core/dom';
 import {isFiniteNumber} from '../core/types';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {reportError} from '../error-reporting';
 import {toWin} from '../core/window';
 
