@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {VideoWrapper} from '../video-wrapper';
+import {VideoWrapper} from '../component';
 import {WithAmpContext} from '../../../../src/preact/context';
 import {createRef} from '../../../../src/preact';
 import {forwardRef} from '../../../../src/preact/compat';

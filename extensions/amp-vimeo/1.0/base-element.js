@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {VideoBaseElement} from '../../amp-video/1.0/base-element';
+import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 import {Vimeo} from './component';
 
 export class BaseElement extends VideoBaseElement {}

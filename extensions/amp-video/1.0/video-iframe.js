@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {Deferred} from '../../../src/core/data-structures/promise';
-import {VideoWrapper} from './video-wrapper';
+import {VideoWrapper} from './component';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   useCallback,

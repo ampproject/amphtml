@@ -21,7 +21,7 @@ import {
   AccordionHeader,
   AccordionSection,
 } from '../../../amp-accordion/1.0/component';
-import {VideoWrapper} from '../video-wrapper';
+import {VideoWrapper} from '../component';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
