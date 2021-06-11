@@ -95,7 +95,7 @@ import {endsWith} from '../../../src/core/types/string';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {findIndex, lastItem, toArray} from '../../../src/core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getDetail} from '../../../src/event-helper';
+import {getDetail, listenOncePromise} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
@@ -2216,6 +2216,27 @@ export class AmpStory extends AMP.BaseElement {
     return map;
   }
 
+  // /** @private */
+  // preloadPagesByDistance_() {
+  //   if (this.platform_.isBot()) {
+  //     this.pages_.forEach((page) => {
+  //       page.setDistance(0);
+  //     });
+  //     return;
+  //   }
+
+  //   const pagesByDistance = this.getPagesByDistance_();
+
+  //   this.mutateElement(() => {
+  //     pagesByDistance.forEach((pageIds, distance) => {
+  //       pageIds.forEach((pageId) => {
+  //         const page = this.getPageById(pageId);
+  //         page.setDistance(distance);
+  //       });
+  //     });
+  //   });
+  // }
+
   /** @private */
   preloadPagesByDistance_() {
     if (this.platform_.isBot()) {
@@ -2227,11 +2248,20 @@ export class AmpStory extends AMP.BaseElement {
 
     const pagesByDistance = this.getPagesByDistance_();
 
+    // Load page with distance 0 first, and then load the other ones.
     this.mutateElement(() => {
-      pagesByDistance.forEach((pageIds, distance) => {
-        pageIds.forEach((pageId) => {
+      Promise.all(
+        pagesByDistance[0].map((pageId) => {
           const page = this.getPageById(pageId);
-          page.setDistance(distance);
+          page.setDistance(0);
+          return listenOncePromise(page.element, EventType.PAGE_LOADED);
+        })
+      ).then(() => {
+        pagesByDistance.slice(1).forEach((pageIds, distance) => {
+          pageIds.forEach((pageId) => {
+            const page = this.getPageById(pageId);
+            page.setDistance(distance);
+          });
         });
       });
     });

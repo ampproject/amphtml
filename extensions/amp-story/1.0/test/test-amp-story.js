@@ -27,6 +27,7 @@ import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {CommonSignals} from '../../../../src/core/constants/common-signals';
+import {EventType} from '../events';
 import {Keys} from '../../../../src/core/constants/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
@@ -34,6 +35,7 @@ import {PageState} from '../amp-story-page';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/core/constants/visibility-state';
 import {createElementWithAttributes} from '../../../../src/core/dom';
+import {expect} from 'chai';
 import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
@@ -57,6 +59,8 @@ describes.realWin(
     let story;
     let replaceStateStub;
     let win;
+
+    const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
     /**
      * @param {number} count
@@ -1835,6 +1839,41 @@ describes.realWin(
             StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
           )
         ).to.be.false;
+      });
+    });
+
+    describe('page loading', () => {
+      it('should load the active page on layout', async () => {
+        const pages = await createStoryWithPages(
+          2,
+          ['page-1', 'page-2'],
+          false
+        );
+        env.sandbox.stub(story, 'mutateElement').callsFake((mutator) => {
+          mutator();
+          return Promise.resolve();
+        });
+        await story.buildCallback();
+        await story.layoutCallback();
+        expect(pages[0].hasAttribute('distance')).to.be.true;
+      });
+
+      it('should load the inactive pages after the active page is loaded', async () => {
+        const pages = await createStoryWithPages(
+          2,
+          ['page-1', 'page-2'],
+          false
+        );
+        env.sandbox.stub(story, 'mutateElement').callsFake((mutator) => {
+          mutator();
+          return Promise.resolve();
+        });
+        await story.buildCallback();
+        await story.layoutCallback();
+        expect(pages[1].hasAttribute('distance')).to.be.false;
+        pages[0].dispatchEvent(new CustomEvent(EventType.PAGE_LOADED));
+        await nextTick();
+        expect(pages[1].hasAttribute('distance')).to.be.true;
       });
     });
   }
