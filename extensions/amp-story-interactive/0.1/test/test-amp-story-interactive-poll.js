@@ -21,7 +21,9 @@ import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {
   addConfigToInteractive,
+  getMockIncompleteData,
   getMockInteractiveData,
+  getMockScrambledData,
 } from './test-amp-story-interactive';
 import {measureMutateElementStub} from '../../../../testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -127,6 +129,48 @@ describes.realWin(
 
       expect(ampStoryPoll.getOptionElements()[0].innerText).to.contain('50 %');
       expect(ampStoryPoll.getOptionElements()[1].innerText).to.contain('50 %');
+    });
+
+    it('should handle the percentage pipeline with scrambled data', async () => {
+      const NUM_OPTIONS = 4;
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockScrambledData());
+
+      ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      addConfigToInteractive(ampStoryPoll, NUM_OPTIONS);
+      await ampStoryPoll.buildCallback();
+      await ampStoryPoll.layoutCallback();
+
+      const expectedPercentages = [10, 20, 30, 40];
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        const expectedText = `${expectedPercentages[i]} %`;
+        expect(ampStoryPoll.getOptionElements()[i].innerText).to.contain(
+          expectedText
+        );
+      }
+    });
+
+    it('should handle the percentage pipeline with incomplete data', async () => {
+      const NUM_OPTIONS = 4;
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockIncompleteData());
+
+      ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      addConfigToInteractive(ampStoryPoll, NUM_OPTIONS);
+      await ampStoryPoll.buildCallback();
+      await ampStoryPoll.layoutCallback();
+
+      const expectedPercentages = [0, 50, 50, 0];
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        const expectedText = `${expectedPercentages[i]} %`;
+        expect(ampStoryPoll.getOptionElements()[i].innerText).to.contain(
+          expectedText
+        );
+      }
     });
 
     it('should have large font size if options are short', async () => {
