@@ -15,7 +15,7 @@
  */
 
 import * as docready from '../../src/core/document-ready';
-import * as dom from '../../src/dom';
+import * as dom from '../../src/core/dom';
 import {
   AmpDocFie,
   AmpDocService,

@@ -16,8 +16,8 @@
 import {Services} from './services';
 import {VideoEvents} from './video-interface';
 import {dev} from './log';
-import {dispatchCustomEvent} from './dom';
-import {htmlFor} from './static-template';
+import {dispatchCustomEvent} from './core/dom';
+import {htmlFor} from './core/dom/static-template';
 import {isArray, isObject} from './core/types';
 import {tryParseJson} from './core/types/object/json';
 

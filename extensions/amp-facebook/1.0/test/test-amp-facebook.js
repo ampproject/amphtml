@@ -15,7 +15,7 @@
  */
 
 import '../amp-facebook';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
 import {facebook} from '../../../../3p/facebook';
 import {resetServiceForTesting} from '../../../../src/service';

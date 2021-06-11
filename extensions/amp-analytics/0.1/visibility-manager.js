@@ -28,7 +28,7 @@ import {
   layoutPositionRelativeToScrolledViewport,
   layoutRectLtwh,
 } from '../../../src/core/math/layout-rect';
-import {rootNodeFor} from '../../../src/dom';
+import {rootNodeFor} from '../../../src/core/dom';
 
 const TAG = 'amp-analytics/visibility-manager';
 

@@ -40,13 +40,13 @@ import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {divertStoryAdPlacements} from '../../../src/experiments/story-ad-placements';
-import {getExperimentBranch} from '../../../src/experiments';
+import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getPlacementAlgo} from './algorithm-utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
-import {toggleAttribute} from '../../../src/dom';
+import {toggleAttribute} from '../../../src/core/dom';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads';
@@ -346,6 +346,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * Create progress bar if auto advance exp is on.
    */
   maybeCreateProgressBar_() {
+    // TODO(ccordry): add viewer enabling of yellow segment.
+    if (isExperimentOn(this.win, 'story-ad-progress-segment')) {
+      // Ad progress bar creation handled in progress-bar.js.
+      return;
+    }
+
     const autoAdvanceExpBranch = getExperimentBranch(
       this.win,
       StoryAdAutoAdvance.ID

@@ -20,7 +20,7 @@ import {BaseElement} from '../../../../src/base-element';
 import {Services} from '../../../../src/services';
 import {getA4ARegistry} from '../../../../ads/_a4a-config';
 import {toggleExperiment} from '../../../../src/experiments';
-import {waitForChild} from '../../../../src/dom';
+import {waitForChild} from '../../../../src/core/dom';
 
 class FakeA4A extends BaseElement {
   isLayoutSupported(unusedLayout) {

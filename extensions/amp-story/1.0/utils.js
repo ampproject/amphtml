@@ -29,7 +29,7 @@ import {createShadowRoot} from '../../../src/shadow-embed';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 
-import {setStyle, toggle} from '../../../src/style';
+import {setStyle, toggle} from '../../../src/core/dom/style';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)

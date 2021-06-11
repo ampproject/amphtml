@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from '../../src/core/constants/amp-events.js';
-import {computedStyle} from '../../src/style.js';
+import {computedStyle} from '../../src/core/dom/style.js';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,

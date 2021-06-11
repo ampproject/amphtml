@@ -16,7 +16,7 @@
 
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {getMode} from '../../../src/mode';
-import {isIframed} from '../../../src/dom';
+import {isIframed} from '../../../src/core/dom';
 import {memo} from '../../../src/core/types/object';
 import {toWin} from '../../../src/core/window';
 
