@@ -3,7 +3,7 @@
   multiple extensions through the server task.
 -->
 <!doctype html>
-<html ⚡ lang="en">
+<html ⚡>
 
 <head>
   <meta charset="utf-8">
@@ -194,6 +194,14 @@
               This is a fallback
             </div>
           </amp-video>
+          <amp-video data-substitutable data-removable-attrs="src" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" width="358" height="204" layout="responsive" id="my-video-2" controls>
+            <div placeholder>
+              This is a placeholder
+            </div>
+            <div fallback>
+              This is a fallback
+            </div>
+          </amp-video>
         </div>
         <aside>
           <div class="dropdown-container"></div>
@@ -220,6 +228,7 @@
           </thead>
         </table>
       </div>
+
     </div>
     <div class="analytics-events-container">
       <div class="main">
@@ -238,6 +247,7 @@
       </div>
     </div>
   </div>
+
   <amp-analytics>
     <script type="application/json">
       {
@@ -253,66 +263,73 @@
           "myVideoPlay": {
             "on": "video-play",
             "request": "event",
-            "selector": "#my-video",
+            "selector": ["#my-video", "#my-video-2"],
             "vars": {
               "eventType": "video-play"
+            },
+            "extraUrlParams": {
+              "videoId": "${id}"
             }
           },
           "myVideoPause": {
             "on": "video-pause",
             "request": "event",
-            "selector": "#my-video",
+            "selector": ["#my-video", "#my-video-2"],
             "vars": {
               "eventType": "video-pause"
-            }
-          },
-          "myVideoSecondsPlayed": {
-            "on": "video-seconds-played",
-            "request": "event",
-            "selector": "#my-video",
-            "vars": {
-              "eventType": "video-seconds-played"
-            },
-            "videoSpec": {
-              "interval": 2
             },
             "extraUrlParams": {
-              "currentTime": "VIDEO_STATE(my-video,currentTime)"
-            }
-          },
-          "myVideoSession": {
-            "on": "video-session",
-            "request": "event",
-            "selector": "#my-video",
-            "vars": {
-              "eventType": "video-session"
+              "videoId": "${id}"
             }
           },
           "myVideoEnded": {
             "on": "video-ended",
             "request": "event",
-            "selector": "#my-video",
+            "selector": ["#my-video", "#my-video-2"],
             "vars": {
               "eventType": "video-ended"
+            },
+            "extraUrlParams": {
+              "videoId": "${id}"
+            }
+          },
+          "myVideoSession": {
+            "on": "video-session",
+            "request": "event",
+            "selector": ["#my-video", "#my-video-2"],
+            "vars": {
+              "eventType": "video-session"
+            },
+            "extraUrlParams": {
+              "videoId": "${id}"
+            }
+          },
+          "myVideoSecondsPlayed": {
+            "on": "video-seconds-played",
+            "request": "event",
+            "selector": ["#my-video", "#my-video-2"],
+            "vars": {
+              "eventType": "video-secs"
+            },
+            "videoSpec": {
+              "interval": 7
+            },
+            "extraUrlParams": {
+              "videoId": "${id}"
             }
           },
           "myVideoPercentagePlayed": {
             "on": "video-percentage-played",
             "request": "event",
-            "selector": "#my-video",
+            "selector": ["#my-video", "#my-video-2"],
             "vars": {
-              "eventType": "video-percentage-played"
+              "eventType": "video-percentage"
             },
             "videoSpec": {
-              "percentages": [25, 50, 75, 100]
-            }
-          },
-          "myVideoCustom": {
-            "on": "video-custom-foo",
-            "request": "event",
-            "selector": "#my-video",
-            "vars": {
-              "eventType": "video-custom-foo"
+              "percentages": [5, 50]
+            },
+            "extraUrlParams": {
+              "videoId": "${id}"
             }
           }
         }

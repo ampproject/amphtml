@@ -14,19 +14,43 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Observable} from '../../../src/core/data-structures/observable';
+import {
+  CommonSignals
+} from '../../../src/core/constants/common-signals';
+import {
+  Deferred
+} from '../../../src/core/data-structures/promise';
+import {
+  Observable
+} from '../../../src/core/data-structures/observable';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
-import {deepMerge, dict, hasOwn} from '../../../src/core/types/object';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {getData} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
-import {isArray, isEnumValue, isFiniteNumber} from '../../../src/core/types';
+import {
+  deepMerge,
+  dict,
+  hasOwn
+} from '../../../src/core/types/object';
+import {
+  dev,
+  devAssert,
+  user,
+  userAssert
+} from '../../../src/log';
+import {
+  getData
+} from '../../../src/event-helper';
+import {
+  getDataParamsFromAttributes,
+  isAmpElement
+} from '../../../src/dom';
+import {
+  isArray,
+  isEnumValue,
+  isFiniteNumber
+} from '../../../src/core/types';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -34,7 +58,7 @@ const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 const MIN_TIMER_INTERVAL_SECONDS = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
-const NO_UNLISTEN = function () {};
+const NO_UNLISTEN = function() {};
 const TAG = 'amp-analytics/events';
 
 /**
@@ -70,70 +94,70 @@ const TRACKER_TYPE = Object.freeze({
     name: AnalyticsEventType.CLICK,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     // Escape the temporal dead zone by not referencing a class directly.
-    klass: function (root) {
+    klass: function(root) {
       return new ClickEventTracker(root);
     },
   },
   [AnalyticsEventType.CUSTOM]: {
     name: AnalyticsEventType.CUSTOM,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function (root) {
+    klass: function(root) {
       return new CustomEventTracker(root);
     },
   },
   [AnalyticsEventType.HIDDEN]: {
     name: AnalyticsEventType.VISIBLE, // Reuse tracker with visibility
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function (root) {
+    klass: function(root) {
       return new VisibilityTracker(root);
     },
   },
   [AnalyticsEventType.INI_LOAD]: {
     name: AnalyticsEventType.INI_LOAD,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
-    klass: function (root) {
+    klass: function(root) {
       return new IniLoadTracker(root);
     },
   },
   [AnalyticsEventType.RENDER_START]: {
     name: AnalyticsEventType.RENDER_START,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
-    klass: function (root) {
+    klass: function(root) {
       return new SignalTracker(root);
     },
   },
   [AnalyticsEventType.SCROLL]: {
     name: AnalyticsEventType.SCROLL,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function (root) {
+    klass: function(root) {
       return new ScrollEventTracker(root);
     },
   },
   [AnalyticsEventType.STORY]: {
     name: AnalyticsEventType.STORY,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: function (root) {
+    klass: function(root) {
       return new AmpStoryEventTracker(root);
     },
   },
   [AnalyticsEventType.TIMER]: {
     name: AnalyticsEventType.TIMER,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: function (root) {
+    klass: function(root) {
       return new TimerEventTracker(root);
     },
   },
   [AnalyticsEventType.VIDEO]: {
     name: AnalyticsEventType.VIDEO,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function (root) {
+    klass: function(root) {
       return new VideoEventTracker(root);
     },
   },
   [AnalyticsEventType.VISIBLE]: {
     name: AnalyticsEventType.VISIBLE,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function (root) {
+    klass: function(root) {
       return new VisibilityTracker(root);
     },
   },
@@ -180,9 +204,9 @@ export function getTrackerKeyName(eventType) {
   if (!isReservedTriggerType(eventType)) {
     return AnalyticsEventType.CUSTOM;
   }
-  return hasOwn(TRACKER_TYPE, eventType)
-    ? TRACKER_TYPE[eventType].name
-    : eventType;
+  return hasOwn(TRACKER_TYPE, eventType) ?
+    TRACKER_TYPE[eventType].name :
+    eventType;
 }
 
 /**
@@ -212,7 +236,8 @@ export function getTrackerTypesForParentType(parentType) {
 function mergeDataVars(target, eventVars) {
   const vars = getDataParamsFromAttributes(
     target,
-    /* computeParamNameFunc */ undefined,
+    /* computeParamNameFunc */
+    undefined,
     VARIABLE_DATA_ATTRIBUTE_KEY
   );
   // Merge eventVars into vars, depth=0 because
@@ -354,9 +379,9 @@ export class CustomEventTracker extends EventTracker {
     const isSandboxEvent = eventType.startsWith('sandbox-');
 
     // Push recent events if any.
-    const buffer = isSandboxEvent
-      ? this.sandboxBuffer_ && this.sandboxBuffer_[eventType]
-      : this.buffer_ && this.buffer_[eventType];
+    const buffer = isSandboxEvent ?
+      this.sandboxBuffer_ && this.sandboxBuffer_[eventType] :
+      this.buffer_ && this.buffer_[eventType];
 
     if (buffer) {
       const bufferLength = buffer.length;
@@ -646,7 +671,10 @@ export class ScrollEventTracker extends EventTracker {
   scrollHandler_(boundsH, boundsV, useInitialPageSize, listener, e) {
     // Calculates percentage scrolled by adding screen height/width to
     // top/left and dividing by the total scroll height/width.
-    const {scrollHeight, scrollWidth} = useInitialPageSize ? e.initialSize : e;
+    const {
+      scrollHeight,
+      scrollWidth
+    } = useInitialPageSize ? e.initialSize : e;
 
     this.triggerScrollEvents_(
       boundsV,
@@ -725,7 +753,8 @@ export class ScrollEventTracker extends EventTracker {
           this.root_.getRootElement(),
           AnalyticsEventType.SCROLL,
           vars,
-          /** enableDataVars */ false
+          /** enableDataVars */
+          false
         )
       );
     }
@@ -885,9 +914,9 @@ class TimerEventHandler {
 
     /** @private @const {number} */
     this.maxTimerLength_ =
-      'maxTimerLength' in timerSpec
-        ? Number(timerSpec['maxTimerLength'])
-        : DEFAULT_MAX_TIMER_LENGTH_SECONDS;
+      'maxTimerLength' in timerSpec ?
+      Number(timerSpec['maxTimerLength']) :
+      DEFAULT_MAX_TIMER_LENGTH_SECONDS;
     userAssert(this.maxTimerLength_ > 0, 'Bad maxTimerLength specification');
 
     /** @private @const {boolean} */
@@ -1128,7 +1157,8 @@ export class TimerEventTracker extends EventTracker {
     }
 
     const timerHandler = new TimerEventHandler(
-      /** @type {!JsonObject} */ (timerSpec),
+      /** @type {!JsonObject} */
+      (timerSpec),
       startBuilder,
       stopBuilder
     );
@@ -1223,7 +1253,8 @@ export class TimerEventTracker extends EventTracker {
       this.root.getRootElement(),
       eventType,
       this.trackers_[timerId].getTimerVars(),
-      /** enableDataVars */ false
+      /** enableDataVars */
+      false
     );
   }
 
@@ -1280,11 +1311,22 @@ export class VideoEventTracker extends EventTracker {
     const videoSpec = config['videoSpec'] || {};
     const selector = config['selector'] || videoSpec['selector'];
     const selectionMethod = config['selectionMethod'] || null;
-    const targetReady = this.root.getElement(
-      context,
-      selector,
-      selectionMethod
-    );
+
+    const targetReady = [];
+    if (Array.isArray(selector)) {
+      selector.forEach((item, i) => {
+        targetReady.push(
+          this.root.getElement(
+            context,
+            item,
+            selectionMethod
+          )
+        )
+      });
+    }
+
+    //TODO: check for uniqueness
+    //this.assertUniqueSelectors_(selector);
 
     const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
     const excludeAutoplay = videoSpec['exclude-autoplay'];
@@ -1299,7 +1341,9 @@ export class VideoEventTracker extends EventTracker {
     let lastPercentage = 0;
 
     return this.sessionObservable_.add((event) => {
-      const {type} = event;
+      const {
+        type
+      } = event;
       const details = /** @type {?JsonObject|undefined} */ (getData(event));
       const normalizedType = normalizeVideoEventType(type, details);
 
@@ -1338,7 +1382,7 @@ export class VideoEventTracker extends EventTracker {
             user().error(
               TAG,
               'Percentages must be set in increments of %s with non-zero ' +
-                'values',
+              'values',
               percentageInterval
             );
 
@@ -1383,14 +1427,36 @@ export class VideoEventTracker extends EventTracker {
         event.target,
         'No target specified by video session event.'
       );
-      targetReady.then((target) => {
-        if (!target.contains(el)) {
-          return;
-        }
-        const normalizedDetails = removeInternalVars(details);
-        listener(new AnalyticsEvent(target, normalizedType, normalizedDetails));
+
+      targetReady.forEach((item, i) => {
+        item.then((target) => {
+          if (!target.contains(el)) {
+            return;
+          }
+          const normalizedDetails = removeInternalVars(details);
+          listener(new AnalyticsEvent(target, normalizedType, normalizedDetails));
+        });
       });
+
     });
+    const unlistenPromise = this.root
+      .getElements(context.parentElement || context, selector, selectionMethod)
+      .then((elements) => {
+        const unlistenCallbacks = [];
+        for (let i = 0; i < elements.length; i++) {
+          unlistenCallbacks.push(
+            element
+          )
+        }
+        return unlistenCallbacks;
+      });
+    return function() {
+      unlistenPromise.then((unlistenCallbacks) => {
+        for (let i = 0; i < unlistenCallbacks.length; i++) {
+          unlistenCallbacks[i]();
+        }
+      });
+    };
   }
 }
 
@@ -1423,7 +1489,9 @@ function removeInternalVars(details) {
   if (!details) {
     return dict();
   }
-  const clean = {...details};
+  const clean = {
+    ...details
+  };
   delete clean[videoAnalyticsCustomEventTypeKey];
   return /** @type {!JsonObject} */ (clean);
 }
@@ -1529,7 +1597,7 @@ export class VisibilityTracker extends EventTracker {
         return unlistenCallbacks;
       });
 
-    return function () {
+    return function() {
       unlistenPromise.then((unlistenCallbacks) => {
         for (let i = 0; i < unlistenCallbacks.length; i++) {
           unlistenCallbacks[i]();
@@ -1563,7 +1631,9 @@ export class VisibilityTracker extends EventTracker {
    * @private
    */
   createReportReadyPromiseForDocumentHidden_() {
-    const {ampdoc} = this.root;
+    const {
+      ampdoc
+    } = this.root;
 
     if (!ampdoc.isVisible()) {
       return Promise.resolve();
@@ -1586,7 +1656,9 @@ export class VisibilityTracker extends EventTracker {
    */
   createReportReadyPromiseForDocumentExit_() {
     const deferred = new Deferred();
-    const {win} = this.root.ampdoc;
+    const {
+      win
+    } = this.root.ampdoc;
     let unloadListener, pageHideListener;
 
     // Do not add an unload listener unless pagehide is not available.
@@ -1598,7 +1670,8 @@ export class VisibilityTracker extends EventTracker {
     // behavior, we should not add an unload listener.
     if (!this.supportsPageHide_()) {
       win.addEventListener(
-        /*OK*/ 'unload',
+        /*OK*/
+        'unload',
         (unloadListener = () => {
           win.removeEventListener('unload', unloadListener);
           deferred.resolve();
@@ -1676,9 +1749,9 @@ export class VisibilityTracker extends EventTracker {
     }
 
     // Wait for root signal if there's no element selected.
-    return opt_element
-      ? waitForTracker.getElementSignal(waitForSpec, opt_element)
-      : waitForTracker.getRootSignal(waitForSpec);
+    return opt_element ?
+      waitForTracker.getElementSignal(waitForSpec, opt_element) :
+      waitForTracker.getRootSignal(waitForSpec);
   }
 
   /**
@@ -1692,7 +1765,8 @@ export class VisibilityTracker extends EventTracker {
     // TODO: Verify usage and change behavior to have state override data-vars
     const attr = getDataParamsFromAttributes(
       target,
-      /* computeParamNameFunc */ undefined,
+      /* computeParamNameFunc */
+      undefined,
       VARIABLE_DATA_ATTRIBUTE_KEY
     );
     for (const key in attr) {
