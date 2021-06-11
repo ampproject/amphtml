@@ -22,7 +22,7 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
-import {LayoutPriority} from '../../../../src/layout';
+import {LayoutPriority} from '../../../../src/core/dom/layout';
 import {Services} from '../../../../src/services';
 import {adConfig} from '../../../../ads/_config';
 import {createElementWithAttributes} from '../../../../src/core/dom';

@@ -61,7 +61,7 @@ import {Gestures} from '../../../src/gesture';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/core/constants/key-codes';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {LiveStoryManager} from './live-story-manager';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
@@ -1761,6 +1761,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   maybeTriggerViewportWarning_(isLandscape) {
+    if (isDesktopOnePanelExperimentOn(this.win)) {
+      return;
+    }
     if (
       isLandscape ===
       this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE)

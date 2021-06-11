@@ -32,7 +32,7 @@ import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/core/types/object';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeFixed} from '../../../src/layout';
+import {isLayoutSizeFixed} from '../../../src/core/dom/layout';
 import {isObject} from '../../../src/core/types';
 import {removeElement} from '../../../src/core/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';

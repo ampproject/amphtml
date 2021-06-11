@@ -15,7 +15,7 @@
  */
 
 import {AmpAdCustom} from '../amp-ad-custom';
-import {LayoutPriority} from '../../../../src/layout';
+import {LayoutPriority} from '../../../../src/core/dom/layout';
 import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,
