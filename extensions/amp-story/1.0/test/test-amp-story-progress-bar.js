@@ -16,9 +16,9 @@
 
 import {Action, getStoreService} from '../amp-story-store-service';
 import {ProgressBar} from '../progress-bar';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {expect} from 'chai';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin('amp-story-progress-bar', {amp: true}, (env) => {
   let win;

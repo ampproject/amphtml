@@ -142,7 +142,7 @@ exports.rules = [
       'ads/google/a4a/**->src/consent.js',
       'ads/google/a4a/**->src/amp-element-helpers.js',
       'ads/google/a4a/**->src/experiments/index.js',
-      'ads/google/a4a/**->src/services.js',
+      'ads/google/a4a/**->src/service/index.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
       'ads/google/a4a/utils.js->src/core/dom/page-layout-box.js',
@@ -321,6 +321,7 @@ exports.rules = [
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/service/**/*.js',
     allowlist: [
+      'extensions/**/*.js->src/service/index.js',
       'extensions/amp-a4a/0.1/a4a-variable-source.js->' +
         'src/service/variable-source.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->' +

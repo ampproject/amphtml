@@ -22,8 +22,8 @@ import {
   installVariableServiceForTesting,
   variableServiceForDoc,
 } from '../variables';
-import {Services} from '../../../../src/services';
-import {forceExperimentBranch} from '../../../../src/experiments';
+import {Services} from '#service';
+import {forceExperimentBranch} from '#experiments';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,

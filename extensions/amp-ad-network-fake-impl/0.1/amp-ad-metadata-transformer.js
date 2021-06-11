@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/core/types/object';
-import {parseJson} from '../../../src/core/types/object/json';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 import {user} from '../../../src/log';
 
 export class AmpAdMetadataTransformer {

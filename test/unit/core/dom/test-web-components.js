@@ -19,7 +19,7 @@ import {
   getShadowDomSupportedVersion,
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
-} from '../../../../src/core/dom/web-components';
+} from '#core/dom/web-components';
 
 describes.sandboxed('DOM - web components', {}, () => {
   beforeEach(() => {
