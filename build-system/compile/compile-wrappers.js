@@ -63,9 +63,8 @@ exports.extension = function (name, version, latest, isModule, loadPriority) {
     // The `function` is wrapped in `()` to avoid lazy parsing it, since it will
     // be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
-    // TODO(wg-performance): At some point in history, the build pipeline
-    // began stripping out these parentheses.
-    // Is this optimization still relevant?
+    // TODO(wg-performance): At some point, the build pipeline began stripping
+    // out these parentheses. Is this optimization still relevant?
     `v:"${VERSION}",m:${m},f:(function(AMP,_){\n` +
     '<%= contents %>\n})});'
   );
