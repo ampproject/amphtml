@@ -30,14 +30,14 @@ import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {handleAutoscroll} from './autoscroll';
-import {isRTL, tryFocus} from '../../../src/dom';
+import {isRTL, tryFocus} from '../../../src/core/dom';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {setStyles, toggle} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 import {unmountAll} from '../../../src/utils/resource-container-helper';
 

@@ -46,12 +46,15 @@ import {dict} from '../../../src/core/types/object';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
-import {getVerticalScrollbarWidth, toggleAttribute} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
+import {
+  getVerticalScrollbarWidth,
+  toggleAttribute,
+} from '../../../src/core/dom';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error-reporting';
-import {setStyle, setStyles, toggle} from '../../../src/style';
+import {setStyle, setStyles, toggle} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -360,10 +363,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.mutateElement(() => {
       const {length} = this.elementsMetadata_[lightboxGroupId];
       this.maybeEnableMultipleItemControls_(length);
-      this.carousel_.getImpl().then((implementation) => {
-        implementation.unlayoutCallback();
-        toggle(this.carousel_, true);
-      });
+      const owners = Services.ownersForDoc(this.element);
+      owners./*OK*/ scheduleUnlayout(this.element, this.carousel_);
+      toggle(this.carousel_, true);
     });
   }
 

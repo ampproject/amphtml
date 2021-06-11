@@ -26,7 +26,7 @@ import {
 import {Services} from '../../src/services';
 import {Xhr} from '../../src/service/xhr-impl';
 import {cancellation} from '../../src/error-reporting';
-import {createElementWithAttributes} from '../../src/dom';
+import {createElementWithAttributes} from '../../src/core/dom';
 import {dev, user} from '../../src/log';
 import {isFiniteNumber} from '../../src/core/types';
 

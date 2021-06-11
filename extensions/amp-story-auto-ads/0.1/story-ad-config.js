@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isJsonScriptTag} from '../../../src/dom';
+import {isJsonScriptTag} from '../../../src/core/dom';
 import {isObject} from '../../../src/core/types';
 import {parseJson} from '../../../src/core/types/object/json';
 import {user, userAssert} from '../../../src/log';
