@@ -42,7 +42,7 @@ export const TrackId = () => {
   // Render Preact Component
   return (
     <amp-soundcloud
-      color={hex}
+      data-color={hex}
       data-trackid={trackid}
       data-visual={visual}
       height={height}
@@ -91,7 +91,7 @@ export const MediaQuery = () => {
   return (
     <>
       <amp-soundcloud
-        color={hex}
+        data-color={hex}
         data-trackid={trackid1}
         data-visual={visual}
         height="240"
@@ -100,7 +100,7 @@ export const MediaQuery = () => {
         width="240"
       />
       <amp-soundcloud
-        color={hex}
+        data-color={hex}
         data-trackid={trackid2}
         data-visual={visual}
         height="180"
@@ -125,7 +125,7 @@ export const ResponsiveLayout = () => {
   // Render Preact Component
   return (
     <amp-soundcloud
-      color={hex}
+      data-color={hex}
       data-trackid={trackid}
       data-visual={visual}
       height="340"
