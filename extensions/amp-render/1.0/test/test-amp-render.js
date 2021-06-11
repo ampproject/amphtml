@@ -230,8 +230,9 @@ describes.realWin(
       doc.body.appendChild(element);
 
       await getRenderedData();
-      expect(errorSpy.callCount).to.equal(6);
-      expect(errorSpy.getCall(4).args[1]).to.match(
+      // TODO: Called once again in template-impl.js. Investigate the error "Type must be specified: %s".
+      expect(errorSpy).to.be.calledTwice;
+      expect(errorSpy.getCall(0).args[1]).to.match(
         /placeholder required with layout="container"/
       );
     });
