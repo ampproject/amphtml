@@ -1404,26 +1404,26 @@ export class VideoEventTracker extends EventTracker {
           listener(new AnalyticsEvent(target, normalizedType, normalizedDetails));
         });
       });
-
+      const unlistenPromise = this.root
+        .getElements(context.parentElement || context, selector, selectionMethod)
+        .then((elements) => {
+          const unlistenCallbacks = [];
+          for (let i = 0; i < elements.length; i++) {
+            unlistenCallbacks.push(
+              element
+            )
+          }
+          return unlistenCallbacks;
+        });
+      return function() {
+        unlistenPromise.then((unlistenCallbacks) => {
+          for (let i = 0; i < unlistenCallbacks.length; i++) {
+            unlistenCallbacks[i]();
+          }
+        });
+      };
     });
-    const unlistenPromise = this.root
-      .getElements(context.parentElement || context, selector, selectionMethod)
-      .then((elements) => {
-        const unlistenCallbacks = [];
-        for (let i = 0; i < elements.length; i++) {
-          unlistenCallbacks.push(
-            element
-          )
-        }
-        return unlistenCallbacks;
-      });
-    return function() {
-      unlistenPromise.then((unlistenCallbacks) => {
-        for (let i = 0; i < unlistenCallbacks.length; i++) {
-          unlistenCallbacks[i]();
-        }
-      });
-    };
+
   }
 }
 
