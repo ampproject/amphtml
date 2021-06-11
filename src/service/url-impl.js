@@ -57,7 +57,11 @@ export class Url {
    * @return {!Location}
    */
   parse(url, opt_nocache) {
-    return parseUrlWithA(this.anchor_, url);
+    return parseUrlWithA(
+      this.anchor_,
+      url,
+      IS_ESM || opt_nocache ? null : this.cache_
+    );
   }
 
   /**

@@ -1143,14 +1143,8 @@ export class UrlReplacements {
    * @return {string}
    */
   ensureProtocolMatches_(url, replacement) {
-    const newProtocol = parseUrlDeprecated(
-      replacement,
-      /* opt_nocache */ true
-    ).protocol;
-    const oldProtocol = parseUrlDeprecated(
-      url,
-      /* opt_nocache */ true
-    ).protocol;
+    const newProtocol = parseUrlDeprecated(replacement).protocol;
+    const oldProtocol = parseUrlDeprecated(url).protocol;
     if (newProtocol != oldProtocol) {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;

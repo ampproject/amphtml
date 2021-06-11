@@ -89,11 +89,10 @@ export function getWinOrigin(win) {
  * the URL gets resolved.
  * Consider the returned object immutable.
  * @param {string} url
- * @param {boolean=} opt_nocache
  *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  */
-export function parseUrlDeprecated(url, opt_nocache) {
+export function parseUrlDeprecated(url) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
     cache = IS_ESM
