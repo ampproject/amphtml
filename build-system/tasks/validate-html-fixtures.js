@@ -86,12 +86,10 @@ async function runCheck(filesToCheck) {
   if (foundValidationErrors) {
     throw new Error(
       'Please address the errors listed above.\n' +
-        `- 💡 If a failing file is a ${cyan(
-          'Bento document'
-        )}, it's not meant to validate.\n` +
-        `  Place it under a directory in any location named "${cyan(
-          'bento'
-        )}", like examples/bento/, so that it's not validated.`
+        `  - 💡 If a failing file is a ${cyan('Bento')} document,` +
+        `it's not meant to be valid AMP.\n` +
+        `    Place it under any directory named "${cyan('bento')}",` +
+        `like ${cyan('examples/bento/')}, so that it's not validated.`
     );
   }
   log(green('SUCCESS:'), 'All HTML fixtures are valid.');
