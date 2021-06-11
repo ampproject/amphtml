@@ -20,7 +20,7 @@ import {
   installImg,
 } from '../../builtins/amp-img/amp-img';
 import {BaseElement} from '../../src/base-element';
-import {Layout, LayoutPriority} from '../../src/layout';
+import {Layout, LayoutPriority} from '../../src/core/dom/layout';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';

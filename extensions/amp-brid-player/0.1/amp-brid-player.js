@@ -41,7 +41,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 
 const TAG = 'amp-brid-player';

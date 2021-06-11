@@ -39,7 +39,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {once} from '../../../src/core/types/function';
 import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 

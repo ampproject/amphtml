@@ -30,7 +30,7 @@
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
 import {removeElement} from '../../../src/core/dom';
 

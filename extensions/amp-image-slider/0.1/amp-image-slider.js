@@ -23,7 +23,7 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/core/math';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/core/dom/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {listen, loadPromise} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
