@@ -36,7 +36,7 @@ import {
 } from '../../../src/core/dom';
 import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {setStyle} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 

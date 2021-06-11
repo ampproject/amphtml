@@ -28,7 +28,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {dispatchCustomEvent} from '../../../src/core/dom';
 import {htmlFor} from '../../../src/core/dom/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /**

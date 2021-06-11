@@ -29,7 +29,7 @@ import {
   getLayoutClass,
   isLayoutSizeDefined,
   parseLayout,
-} from '../../../src/layout';
+} from '../../../src/core/dom/layout';
 import {LoadMoreService} from './service/load-more-service';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';

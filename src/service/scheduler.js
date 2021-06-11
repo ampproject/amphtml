@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LayoutPriority} from '../layout';
+import {LayoutPriority} from '../core/dom/layout';
 import {READY_SCAN_SIGNAL} from './resources-interface';
 import {VisibilityState} from '../core/constants/visibility-state';
 import {

@@ -19,7 +19,7 @@ import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';

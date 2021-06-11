@@ -27,7 +27,7 @@
  * </code>
  */
 
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';

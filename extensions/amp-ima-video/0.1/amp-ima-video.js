@@ -33,7 +33,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isEnumValue, isObject} from '../../../src/core/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,

@@ -26,7 +26,10 @@ import {
   setFullscreenOff,
   setFullscreenOn,
 } from './utils';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {
+  getLengthNumeral,
+  isLayoutSizeDefined,
+} from '../../../src/core/dom/layout';
 import {handleCompanionAds} from './monetization';
 import {
   observeWithSharedInOb,

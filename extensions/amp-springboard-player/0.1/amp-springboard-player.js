@@ -16,7 +16,7 @@
 
 import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 

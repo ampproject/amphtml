@@ -21,7 +21,7 @@ import {
 } from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/core/dom/query';
 import {deepEquals} from '../../../src/core/types/object/json';

@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../core/data-structures/promise';
-import {Layout} from '../layout';
+import {Layout} from '../core/dom/layout';
 import {Services} from '../services';
 import {
   cancellation,

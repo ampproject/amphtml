@@ -21,7 +21,7 @@
 
 import {Services} from '../../../src/services';
 import {addAttributesToElement} from '../../../src/core/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 
 export class AmpGoogleAssistantVoiceButton extends AMP.BaseElement {
   /** @param {!AmpElement} element */

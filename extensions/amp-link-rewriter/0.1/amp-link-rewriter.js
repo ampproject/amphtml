@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {LinkRewriter} from './link-rewriter';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';

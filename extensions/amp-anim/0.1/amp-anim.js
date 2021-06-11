@@ -17,7 +17,7 @@
 import * as st from '../../../src/core/dom/style';
 import {dev} from '../../../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/core/dom/img';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,

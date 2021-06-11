@@ -16,7 +16,10 @@
 
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
+import {
+  LayoutPriority,
+  isLayoutSizeDefined,
+} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {

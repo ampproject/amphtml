@@ -16,7 +16,7 @@
 
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/layout';
+import {LayoutPriority} from '../../src/core/dom/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {ResourcesImpl} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';

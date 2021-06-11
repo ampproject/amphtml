@@ -22,7 +22,7 @@ import {
   setMediaSession,
   validateMediaMetadata,
 } from '../../../src/mediasession-helper';
-import {Layout, isLayoutSizeFixed} from '../../../src/layout';
+import {Layout, isLayoutSizeFixed} from '../../../src/core/dom/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
 import {dev, user} from '../../../src/log';

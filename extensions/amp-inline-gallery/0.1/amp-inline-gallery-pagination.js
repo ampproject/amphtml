@@ -15,7 +15,7 @@
  */
 
 import {InlineGalleryEvents} from './inline-gallery-events';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';

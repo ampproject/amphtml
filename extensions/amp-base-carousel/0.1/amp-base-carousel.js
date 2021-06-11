@@ -36,7 +36,7 @@ import {
   toggleAttribute,
 } from '../../../src/core/dom';
 import {htmlFor} from '../../../src/core/dom/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {scopedQuerySelectorAll} from '../../../src/core/dom/query';
 import {toArray} from '../../../src/core/types/array';
 

@@ -22,7 +22,7 @@ import {
   isAutoplaySupported,
   resetIsAutoplaySupported,
 } from '../../src/core/dom/video';
-import {isLayoutSizeDefined} from '../../src/layout';
+import {isLayoutSizeDefined} from '../../src/core/dom/layout';
 import {listenOncePromise} from '../../src/event-helper';
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 import {toArray} from '../../src/core/types/array';

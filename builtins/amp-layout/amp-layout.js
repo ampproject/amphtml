@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {Layout, isLayoutSizeDefined} from '../../src/layout';
+import {Layout, isLayoutSizeDefined} from '../../src/core/dom/layout';
 import {registerElement} from '../../src/service/custom-element-registry';
 
 class AmpLayout extends BaseElement {

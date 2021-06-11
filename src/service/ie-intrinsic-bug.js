@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {closestAncestorElementBySelector} from '../core/dom/query';
-import {getLengthNumeral} from '../layout';
+import {getLengthNumeral} from '../core/dom/layout';
 import {transparentPng} from '../core/dom/img';
 
 /**

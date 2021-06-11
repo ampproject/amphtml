@@ -16,7 +16,7 @@
 
 import {BaseElement} from '../../src/base-element';
 import {DEFAULT_ACTION} from '../../src/core/constants/action-constants';
-import {LayoutPriority} from '../../src/layout';
+import {LayoutPriority} from '../../src/core/dom/layout';
 import {Resource} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {createAmpElementForTesting} from '../../src/custom-element';

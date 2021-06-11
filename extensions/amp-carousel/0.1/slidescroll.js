@@ -28,7 +28,7 @@ import {dispatchCustomEvent} from '../../../src/core/dom';
 import {getStyle, setStyle} from '../../../src/core/dom/style';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/core/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {numeric} from '../../../src/transition';
 import {
   observeContentSize,

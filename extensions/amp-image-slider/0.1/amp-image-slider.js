@@ -22,7 +22,7 @@ import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/core/math';
 import {dev, user, userAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {listen} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,

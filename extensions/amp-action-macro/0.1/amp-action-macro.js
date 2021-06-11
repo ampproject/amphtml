@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LayoutPriority} from '../../../src/layout';
+import {LayoutPriority} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {userAssert} from '../../../src/log';
 

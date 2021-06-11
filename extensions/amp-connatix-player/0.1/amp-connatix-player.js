@@ -30,7 +30,7 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,
