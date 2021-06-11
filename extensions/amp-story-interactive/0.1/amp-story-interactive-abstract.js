@@ -764,12 +764,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     );
 
     this.optionsData_ = data;
-    data.forEach((response, index) => {
+    data.forEach((response) => {
       if (response.selected) {
         this.hasUserSelection_ = true;
-        this.updateStoryStoreState_(index);
+        this.updateStoryStoreState_(response.index);
         this.mutateElement(() => {
-          this.updateToPostSelectionState_(options[index]);
+          this.updateToPostSelectionState_(options[response.index]);
         });
       }
     });
