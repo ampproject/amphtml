@@ -649,19 +649,18 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
   const filename = options.filename || name + '.js';
   const latest = version === latestVersion;
 
-  const {wrapper = 'extension'} = options;
-  if (!wrappers[wrapper]) {
+  const wrapperName = options.wrapper || 'extension';
+  const wrapperOrFn = wrappers[wrapperName];
+  if (!wrapperOrFn) {
     throw new Error(
-      `Unknown options.wrapper "${wrapper}" (${name}:${version})\n` +
+      `Unknown options.wrapper "${wrapperName}" (${name}:${version})\n` +
         `Expected one of: ${Object.keys(wrappers).join(', ')}`
     );
   }
-  const wrapperOrFn = wrappers[wrapper];
-  const wrapperString =
+  const wrapper =
     typeof wrapperOrFn === 'function'
       ? wrapperOrFn(name, version, latest, argv.esm, options.loadPriority)
       : wrapperOrFn;
-
   await compileJs(
     extDir + '/',
     filename,
@@ -670,7 +669,7 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
       toName: `${name}-${version}.max.js`,
       minifiedName: `${name}-${version}.js`,
       latestName: latest ? `${name}-latest.js` : '',
-      wrapper: wrapperString,
+      wrapper,
     })
   );
 
