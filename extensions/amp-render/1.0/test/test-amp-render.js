@@ -20,14 +20,13 @@ import '../../../amp-script/0.1/amp-script';
 import '../amp-render';
 import * as BatchedJsonModule from '../../../../src/batched-json';
 import * as Style from '../../../../src/core/dom/style';
+import * as log from '../../../../src/log';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Services} from '../../../../src/services';
 import {htmlFor} from '../../../../src/core/dom/static-template';
-import * as log from '../../../../src/log';
 import {waitFor} from '../../../../testing/test-helper';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
-import {expect} from 'chai';
 
 describes.realWin(
   'amp-render-v1.0',
@@ -153,7 +152,6 @@ describes.realWin(
         measureMutateElement: (unusedElement, measurer, mutator) =>
           Promise.resolve().then(measurer).then(mutator),
         requestChangeSize: () => {
-          console.log('fake rcs');
           return Promise.resolve();
         },
       };
