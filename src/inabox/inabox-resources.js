@@ -23,7 +23,7 @@ import {Services} from '../services';
 import {VisibilityState} from '../core/constants/visibility-state';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {hasNextNodeInDocumentOrder} from '../dom';
+import {hasNextNodeInDocumentOrder} from '../core/dom';
 import {registerServiceBuilderForDoc} from '../service';
 
 const TAG = 'inabox-resources';

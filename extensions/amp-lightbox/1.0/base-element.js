@@ -18,8 +18,8 @@ import {CSS as COMPONENT_CSS} from './component.jss';
 import {Lightbox} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/core/types/object';
-import {toggle} from '../../../src/style';
-import {toggleAttribute} from '../../../src/dom';
+import {toggle} from '../../../src/core/dom/style';
+import {toggleAttribute} from '../../../src/core/dom';
 import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 export class BaseElement extends PreactBaseElement {

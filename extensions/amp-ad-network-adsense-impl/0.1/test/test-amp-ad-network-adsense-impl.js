@@ -38,7 +38,7 @@ import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
   createElementWithAttributes,
-} from '../../../../src/dom';
+} from '../../../../src/core/dom';
 import {
   forceExperimentBranch,
   toggleExperiment,

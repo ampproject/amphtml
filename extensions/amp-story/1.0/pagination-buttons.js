@@ -26,7 +26,7 @@ import {Services} from '../../../src/services';
 import {dev, devAssert} from '../../../src/log';
 
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase

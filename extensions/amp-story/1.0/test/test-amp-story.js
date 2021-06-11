@@ -33,7 +33,7 @@ import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
@@ -354,6 +354,21 @@ describes.realWin(
       await story.layoutCallback();
       expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
         UIType.DESKTOP_PANELS
+      );
+    });
+
+    it('should default to the one panel UI desktop experience when axperiment is active', async () => {
+      toggleExperiment(win, 'amp-story-desktop-one-panel', true);
+      await createStoryWithPages(4, ['cover', '1', '2', '3']);
+
+      // Don't do this at home. :(
+      story.desktopMedia_ = {matches: true};
+
+      story.buildCallback();
+
+      await story.layoutCallback();
+      expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
+        UIType.DESKTOP_ONE_PANEL
       );
     });
 

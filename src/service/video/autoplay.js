@@ -15,8 +15,8 @@
  */
 
 import {dev} from '../../log';
-import {htmlFor} from '../../static-template';
-import {removeElement} from '../../dom';
+import {htmlFor} from '../../core/dom/static-template';
+import {removeElement} from '../../core/dom';
 
 /**
  * @param {!Element} node

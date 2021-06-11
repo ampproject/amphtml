@@ -19,7 +19,7 @@ import {
   ActionTrust,
   DEFAULT_ACTION,
 } from '../../../../src/core/constants/action-constants';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {poll} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 import {whenCalled} from '../../../../testing/test-helper';

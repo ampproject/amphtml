@@ -24,7 +24,7 @@ import {Services} from '../../../src/services';
 import {Sheet} from './scroll-sheet';
 import {addParamToUrl, isProxyOrigin} from '../../../src/url';
 import {buildUrl, connectHostname} from './scroll-url';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {dict} from '../../../src/core/types/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseQueryString} from '../../../src/core/types/string/url';
