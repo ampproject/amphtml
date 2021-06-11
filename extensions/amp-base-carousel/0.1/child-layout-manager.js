@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {isAmpElement} from '../../../src/dom';
 
 /**
  * Used for tracking whether or not an item is near the viewport. This is set
@@ -67,6 +68,8 @@ const ViewportChangeState = {
   ENTER: 0,
   LEAVE: 1,
 };
+
+const SLIDE_ID = 'i-amphtml-child-layout-manager-slide-id';
 
 /**
  * Manages scheduling layout/unlayout for children of an AMP component as they
@@ -165,6 +168,9 @@ export class ChildLayoutManager {
     /** @private {?IntersectionObserver} */
     this.inViewportObserver_ = null;
 
+    /** @private {!JsonObject<string, Element>} */
+    this.slideElementMap_ = {};
+
     /** @private {boolean} */
     this.laidOut_ = false;
   }
@@ -261,7 +267,22 @@ export class ChildLayoutManager {
         return isIntersecting;
       })
       .forEach((entry) => {
-        const {target} = entry;
+        let {target} = entry;
+        // Check if the target is an AMP element--the child of a slide.
+        // If it is an AMP element, then make sure the nearing viewport 
+        // flag for the parent is on. 
+        // Then unobserve the AMP element.
+        // Otherwise, mark the slide as nearing the viewport.
+        if (
+          target.hasAttribute(SLIDE_ID) &&
+          this.slideElementMap_[target.getAttribute(SLIDE_ID)] &&
+          isAmpElement(target)
+        ) {
+          this.nearingViewportObserver_.unobserve(target);
+          target = this.slideElementMap_[
+            target.getAttribute(SLIDE_ID)
+          ];
+        }
         target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.ENTER;
       });
 
@@ -387,10 +408,43 @@ export class ChildLayoutManager {
       return;
     }
 
+    // Find all underlying AMP elements and observe
     for (let i = 0; i < this.children_.length; i++) {
-      this.nearingViewportObserver_.observe(this.children_[i]);
-      this.backingAwayViewportObserver_.observe(this.children_[i]);
-      this.inViewportObserver_.observe(this.children_[i]);
+      const child = this.children_[i];
+      this.owners_.findClosestAmpElements(
+        child,
+        (ampElement) => {
+          // Don't observe the child slide, will do later.
+          if (ampElement === child) {
+            return;
+          }
+          const id = child.getAttribute(SLIDE_ID);
+          ampElement.setAttribute(SLIDE_ID, id);
+          this.slideElementMap_[id] = child;
+          // Only need to observe nearing AMP elements whose layout
+          // may not have been scheduled initially (otherwise,
+          // slide child will not be scheduled).
+          this.observeElement_(ampElement, true);
+        },
+        false
+      );
+    }
+
+    // Observe slides
+    for (let i = 0; i < this.children_.length; i++) {
+      this.observeElement_(this.children_[i]);
+    }
+  }
+
+  /**
+   * @param {Element} element
+   * @param {boolean=} opt_onlyNearingViewport
+   */
+  observeElement_(element, opt_onlyNearingViewport = false) {
+    this.nearingViewportObserver_.observe(element);
+    if (!opt_onlyNearingViewport) {
+      this.backingAwayViewportObserver_.observe(element);
+      this.inViewportObserver_.observe(element);
     }
   }
 
@@ -406,7 +460,9 @@ export class ChildLayoutManager {
       return;
     }
 
+    this.slideElementMap_ = {};
     for (let i = 0; i < this.children_.length; i++) {
+      this.children_[i].setAttribute(SLIDE_ID, `${i}`);
       this.owners_.setOwner(this.children_[i], this.ampElement_.element);
     }
 
