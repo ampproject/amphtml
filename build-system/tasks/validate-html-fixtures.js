@@ -41,20 +41,19 @@ const formatSuffixes = ['4ads', '4email'];
  * @return {string}
  */
 function posthtmlGetAmpFormat(tree) {
-  const rootChildren = Array.isArray(tree) ? tree : [tree];
-  for (const node of rootChildren) {
-    if (node?.tag === 'html') {
-      for (const prefix of formatPrefixes) {
-        for (const suffix of formatSuffixes) {
-          const attrValue = node.attrs[prefix + suffix];
-          if (attrValue === '' || attrValue === true) {
-            return 'AMP' + suffix.toUpperCase();
-          }
+  let format = defaultFormat;
+  tree.match({tag: 'html'}, (node) => {
+    for (const prefix of formatPrefixes) {
+      for (const suffix of formatSuffixes) {
+        const attrValue = node.attrs[prefix + suffix];
+        if (attrValue === '' || attrValue === true) {
+          format = 'AMP' + suffix.toUpperCase();
         }
       }
     }
-  }
-  return defaultFormat;
+    return node;
+  });
+  return format;
 }
 
 /**
