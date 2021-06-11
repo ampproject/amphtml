@@ -275,6 +275,10 @@ amp-story-page[distance="2"] {
   transform: translateY(100%) !important;
 }
 
+.i-amphtml-story-desktop-one-panel amp-story-page[distance="2"] {
+  transform: translateY(100vh) !important;
+}
+
 amp-story-page [data-text-background-color] {
   border-radius: 3px !important;
   line-height: 1.5em !important;
