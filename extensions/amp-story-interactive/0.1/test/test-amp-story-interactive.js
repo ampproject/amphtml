@@ -353,7 +353,7 @@ describes.realWin(
       );
       const selectedIndex = scrambledData.options.filter(
         (option) => option.selected
-      ).index;
+      )[0].index;
       for (let i = 0; i < NUM_OPTIONS; i++) {
         if (i === selectedIndex) {
           expect(ampStoryInteractive.getOptionElements()[i]).to.have.class(
@@ -386,7 +386,7 @@ describes.realWin(
       );
       const selectedIndex = incompleteData.options.filter(
         (option) => option.selected
-      ).index;
+      )[0].index;
       for (let i = 0; i < NUM_OPTIONS; i++) {
         if (i === selectedIndex) {
           expect(ampStoryInteractive.getOptionElements()[i]).to.have.class(
