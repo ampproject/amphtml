@@ -15,15 +15,9 @@
  */
 const path = require('path');
 const {DefinePlugin} = require('webpack');
-const {getImportResolver} = require('../../../babel-config/import-resolver');
+const {getRelativeAliasMap} = require('../../../babel-config/import-resolver');
 
 const rootDir = path.join(__dirname, '../../../..');
-const aliasMap = Object.fromEntries(
-  Object.entries(getImportResolver().alias).map(([alias, destPath]) => [
-    alias,
-    path.join(rootDir, destPath),
-  ])
-);
 
 module.exports = ({config}) => {
   config.resolveLoader = {
@@ -40,7 +34,7 @@ module.exports = ({config}) => {
     alias: {
       'react': 'preact/compat',
       'react-dom': 'preact/compat',
-      ...aliasMap,
+      ...getRelativeAliasMap(rootDir),
     },
   };
   config.module = {

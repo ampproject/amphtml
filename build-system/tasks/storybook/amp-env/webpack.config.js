@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 const path = require('path');
-const {getImportResolver} = require('../../../babel-config/import-resolver');
+const {getRelativeAliasMap} = require('../../../babel-config/import-resolver');
 
 const rootDir = path.join(__dirname, '../../../..');
-const aliasMap = Object.fromEntries(
-  Object.entries(getImportResolver().alias).map(([alias, destPath]) => [
-    alias,
-    path.join(rootDir, destPath),
-  ])
-);
 
 module.exports = ({config}) => {
   config.resolveLoader = {
@@ -36,7 +30,7 @@ module.exports = ({config}) => {
       path.join(__dirname, '../node_modules'),
       path.join(rootDir, 'node_modules'),
     ],
-    alias: aliasMap,
+    alias: getRelativeAliasMap(rootDir),
   };
   config.module = {
     rules: [
