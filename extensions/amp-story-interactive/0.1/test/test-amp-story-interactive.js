@@ -75,7 +75,7 @@ export const getMockInteractiveData = () => {
  *
  * @return {Object}
  */
-const getMockScrambledData = () => {
+export const getMockScrambledData = () => {
   return {
     options: [
       {
@@ -107,7 +107,7 @@ const getMockScrambledData = () => {
  *
  * @return {Object}
  */
-const getMockIncompleteData = () => {
+export const getMockIncompleteData = () => {
   return {
     options: [
       {
