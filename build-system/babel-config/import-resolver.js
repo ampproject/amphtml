@@ -19,7 +19,7 @@ const fs = require('fs');
 const path = require('path');
 
 const JSCONFIG_PATH = path.join(__dirname, '..', '..', 'jsconfig.json');
-let aliasPaths = null;
+let jsConfigPaths = null;
 
 /**
  * Reads import paths from jsconfig.json. This file is used by VSCode for
@@ -38,18 +38,20 @@ let aliasPaths = null;
  * @return {!Object<string, string>}
  */
 function readJsconfigPaths() {
-  if (!aliasPaths) {
+  if (!jsConfigPaths) {
     const jsConfig = JSON.parse(fs.readFileSync(JSCONFIG_PATH, 'utf8'));
-    aliasPaths = jsConfig.compilerOptions.paths;
+    const aliasPaths = jsConfig.compilerOptions.paths;
+
+    const stripSuffix = (s) => s.replace(/\/\*$/, '');
+    const aliases = Object.entries(aliasPaths).map(([alias, [dest]]) => [
+      stripSuffix(alias),
+      stripSuffix(dest),
+    ]);
+
+    jsConfigPaths = Object.fromEntries(aliases);
   }
 
-  const stripSuffix = (s) => s.replace(/\/\*$/, '');
-  const aliases = Object.entries(aliasPaths).map(([alias, [dest]]) => [
-    stripSuffix(alias),
-    stripSuffix(dest),
-  ]);
-
-  return Object.fromEntries(aliases);
+  return jsConfigPaths;
 }
 
 /**
@@ -64,6 +66,20 @@ function getImportResolver() {
 }
 
 /**
+ * Produces an alias map with paths relative to the provided root.
+ * @param {string} rootDir
+ * @return {!Object<string, string>}
+ */
+function getRelativeAliasMap(rootDir) {
+  return Object.fromEntries(
+    Object.entries(getImportResolver().alias).map(([alias, destPath]) => [
+      alias,
+      path.join(rootDir, destPath),
+    ])
+  );
+}
+
+/**
  * Import resolver Babel plugin configuration.
  * @return {!Array}
  */
@@ -71,4 +87,8 @@ function getImportResolverPlugin() {
   return ['module-resolver', getImportResolver()];
 }
 
-module.exports = {getImportResolver, getImportResolverPlugin};
+module.exports = {
+  getImportResolver,
+  getImportResolverPlugin,
+  getRelativeAliasMap,
+};
