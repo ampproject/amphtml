@@ -384,8 +384,11 @@ describes.realWin(
       expect(ampStoryInteractive.getRootElement()).to.have.class(
         'i-amphtml-story-interactive-post-selection'
       );
+      const selectedIndex = incompleteData.options.filter(
+        (option) => option.selected
+      ).index;
       for (let i = 0; i < NUM_OPTIONS; i++) {
-        if (i === incompleteData[0].index) {
+        if (i === selectedIndex) {
           expect(ampStoryInteractive.getOptionElements()[i]).to.have.class(
             'i-amphtml-story-interactive-option-selected'
           );
