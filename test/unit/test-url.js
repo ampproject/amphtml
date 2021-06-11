@@ -220,10 +220,6 @@ describes.sandboxed('parseUrlDeprecated', {}, () => {
     );
   });
 
-  it('should parse origin data:12345', () => {
-    expect(parseUrlDeprecated('data:12345').origin).to.equal('data:12345');
-  });
-
   it('should parse relative', () => {
     expect(parseUrlDeprecated('chilaquiles/rojos')).to.include({
       pathname: '/chilaquiles/rojos',
