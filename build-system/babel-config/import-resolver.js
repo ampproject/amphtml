@@ -71,4 +71,7 @@ function getImportResolverPlugin() {
   return ['module-resolver', getImportResolver()];
 }
 
-module.exports = {getImportResolver, getImportResolverPlugin};
+module.exports = {
+  getImportResolver,
+  getImportResolverPlugin,
+};

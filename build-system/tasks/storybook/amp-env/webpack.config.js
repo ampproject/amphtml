@@ -17,6 +17,12 @@ const path = require('path');
 const {getImportResolver} = require('../../../babel-config/import-resolver');
 
 const rootDir = path.join(__dirname, '../../../..');
+const aliasMap = Object.fromEntries(
+  Object.entries(getImportResolver().alias).map(([alias, destPath]) => [
+    alias,
+    path.join(rootDir, destPath),
+  ])
+);
 
 module.exports = ({config}) => {
   config.resolveLoader = {
@@ -30,12 +36,7 @@ module.exports = ({config}) => {
       path.join(__dirname, '../node_modules'),
       path.join(rootDir, 'node_modules'),
     ],
-    alias: Object.fromEntries(
-      Object.entries(getImportResolver().alias).map(([alias, destPath]) => [
-        alias,
-        path.join(rootDir, destPath),
-      ])
-    ),
+    alias: aliasMap,
   };
   config.module = {
     rules: [
