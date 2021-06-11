@@ -661,6 +661,7 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
     typeof wrapperOrFn === 'function'
       ? wrapperOrFn(name, version, latest, argv.esm, options.loadPriority)
       : wrapperOrFn;
+
   await compileJs(
     extDir + '/',
     filename,
