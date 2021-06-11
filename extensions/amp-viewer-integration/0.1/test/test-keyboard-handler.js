@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {KeyCodes, Keys} from '../../../../src/core/constants/key-codes';
+import {KeyCodes, Keys} from '#core/constants/key-codes';
 import {KeyboardHandler} from '../keyboard-handler';
 import {Messaging} from '../messaging/messaging';
 

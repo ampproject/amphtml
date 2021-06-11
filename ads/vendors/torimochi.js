@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseJson} from '../../src/core/types/object/json';
-import {validateData, writeScript} from '../../3p/3p';
+import {parseJson} from '#core/types/object/json';
+import {validateData, writeScript} from '#3p/3p';
 
 /**
  * @param {!Window} global

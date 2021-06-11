@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
-import {areEqualOrdered, toArray} from '../../../src/core/types/array';
-import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {areEqualOrdered, toArray} from '#core/types/array';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {isEnumValue} from '../../../src/core/types';
-import {isRTL, tryFocus} from '../../../src/core/dom';
-import {mod} from '../../../src/core/math';
+import {dict} from '#core/types/object';
+import {isEnumValue} from '#core/types';
+import {isRTL, tryFocus} from '#core/dom';
+import {mod} from '#core/math';
 
 const TAG = 'amp-selector';
 

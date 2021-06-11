@@ -21,7 +21,7 @@ import {
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {createElementWithAttributes} from '../../../../src/core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {smartAdsIsA4AEnabled} from '../../../amp-ad-network-smartads-impl/0.1/smartads-a4a-config';
 
 describes.realWin('smartads-a4a-config', {amp: false}, (env) => {

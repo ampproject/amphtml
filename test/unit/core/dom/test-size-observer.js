@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../../src/core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {
   measureBorderBoxSize,
   measureContentSize,
@@ -22,8 +22,8 @@ import {
   observeContentSize,
   unobserveBorderBoxSize,
   unobserveContentSize,
-} from '../../../../src/core/dom/size-observer';
-import {removeItem} from '../../../../src/core/types/array';
+} from '#core/dom/size-observer';
+import {removeItem} from '#core/types/array';
 
 describes.realWin('DOM - size-observer', {}, (env) => {
   let win, doc;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {computedStyle} from '../../src/core/dom/style';
+import {computedStyle} from '#core/dom/style';
 import {createIframePromise} from '../../testing/iframe';
 import {getAdContainer, isAdPositionAllowed} from '../../src/ad-helper';
 

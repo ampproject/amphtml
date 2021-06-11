@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {map} from '../types/object';
+import {map} from '#core/types/object';
 
 /**
  * @template T

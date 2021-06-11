@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {Lightbox} from './../../amp-lightbox/1.0/component';
 import {LightboxGalleryContext} from './context';
-import {useCallback, useRef} from '../../../src/preact';
+import {useCallback, useRef} from '#preact';
 
 /**
  * @param {!LightboxGalleryDef.Props} props

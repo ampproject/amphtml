@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {doubleclick} from '../../ads/google/doubleclick';
-import {hasOwn} from '../../src/core/types/object';
-import {loadScript, writeScript} from '../../3p/3p';
+import {doubleclick} from '#ads/google/doubleclick';
+import {hasOwn} from '#core/types/object';
+import {loadScript, writeScript} from '#3p/3p';
 
 const DEFAULT_TIMEOUT = 500; // ms
 const EVENT_SUCCESS = 0;

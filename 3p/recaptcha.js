@@ -27,10 +27,10 @@ import {
   setReportError,
   user,
 } from '../src/log';
-import {dict, hasOwn} from '../src/core/types/object';
+import {dict, hasOwn} from '#core/types/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {loadScript} from './3p';
-import {parseJson} from '../src/core/types/object/json';
+import {parseJson} from '#core/types/object/json';
 
 /**
  * @fileoverview

@@ -21,17 +21,17 @@ import {
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '../../../../src/core/constants/consent-state';
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {ConsentUI, consentUiClasses} from '../consent-ui';
-import {Services} from '../../../../src/services';
-import {dict} from '../../../../src/core/types/object';
-import {elementByTag} from '../../../../src/core/dom/query';
+import {Services} from '#service';
+import {dict} from '#core/types/object';
+import {elementByTag} from '#core/dom/query';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+} from '../../../../src/service-helpers';
+import {toggleExperiment} from '#experiments';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 

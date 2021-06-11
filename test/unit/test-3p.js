@@ -21,7 +21,7 @@ import {
   validateData,
   validateSrcContains,
   validateSrcPrefix,
-} from '../../3p/3p';
+} from '#3p/3p';
 
 describes.sandboxed('3p', {}, (env) => {
   let clock;

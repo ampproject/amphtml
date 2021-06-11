@@ -308,12 +308,12 @@ const forbiddenTermsGlobal = {
       'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',
       'src/element-service.js',
-      'src/service.js',
+      'src/service-helpers.js',
+      'src/service/index.js',
       'src/service/scheduler.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
       'src/service/template-impl.js',
-      'src/services.js',
       'src/utils/display-observer.js',
       'testing/test-helper.js',
     ],
@@ -390,7 +390,7 @@ const forbiddenTermsGlobal = {
       // in extensions listed in the amp4ads spec:
       // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/ad-cid.js',
-      'src/services.js',
+      'src/service/index.js',
       'src/service/standard-actions-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
@@ -444,7 +444,7 @@ const forbiddenTermsGlobal = {
       // Storage service is not allowed in amp4ads. No usage should there be
       // in extensions listed in the amp4ads spec:
       // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
-      'src/services.js',
+      'src/service/index.js',
       'src/service/cid-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',

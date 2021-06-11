@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getDate, parseDate} from '../../../../src/core/types/date';
+import {getDate, parseDate} from '#core/types/date';
 
 describes.sandboxed('type helpers - dates', {}, (env) => {
   describe('parseDate', () => {

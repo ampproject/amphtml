@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {
   Accordion,
   AccordionContent,
@@ -23,7 +23,7 @@ import {
 } from '../../../amp-accordion/1.0/component';
 import {Youtube} from '../component';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
-import {useRef, useState} from '../../../../src/preact';
+import {useRef, useState} from '#preact';
 
 export default {
   title: 'YouTube',

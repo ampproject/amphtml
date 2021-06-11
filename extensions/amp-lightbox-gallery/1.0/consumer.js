@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {LightboxGalleryContext} from './context';
-import {sequentialIdGenerator} from '../../../src/core/math/id-generator';
-import {
-  useContext,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from '../../../src/preact';
+import {sequentialIdGenerator} from '#core/math/id-generator';
+import {useContext, useLayoutEffect, useMemo, useState} from '#preact';
 
 const generateLightboxItemKey = sequentialIdGenerator();
 

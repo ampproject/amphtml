@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseQueryString} from '../../../../../src/core/types/string/url';
+import {parseQueryString} from '#core/types/string/url';
 
 describes.sandboxed('type helpers - strings - urls', {}, () => {
   describe('parseQueryString', () => {

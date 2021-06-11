@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {CSS} from './autoplay.jss';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {PreactBaseElement} from '#preact/base-element';
 import {VideoWrapper} from './component';
 
 export class BaseElement extends PreactBaseElement {}

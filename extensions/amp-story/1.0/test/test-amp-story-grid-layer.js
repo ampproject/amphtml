@@ -15,12 +15,12 @@
  */
 
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryGridLayer} from '../amp-story-grid-layer';
 import {AmpStoryPage} from '../amp-story-page';
 import {MediaType} from '../media-pool';
-import {Services} from '../../../../src/services';
-import {registerServiceBuilder} from '../../../../src/service';
+import {Services} from '#service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
   let win;

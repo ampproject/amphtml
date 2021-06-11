@@ -15,8 +15,8 @@
  */
 
 import {Facebook} from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {dashToUnderline} from '../../../src/core/types/string';
+import {PreactBaseElement} from '#preact/base-element';
+import {dashToUnderline} from '#core/types/string';
 
 export class FacebookBaseElement extends PreactBaseElement {}
 

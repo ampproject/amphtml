@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {BaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {LightboxGalleryProvider, WithLightbox} from '../component';
 import {withKnobs} from '@storybook/addon-knobs';

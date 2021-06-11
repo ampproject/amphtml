@@ -15,7 +15,7 @@
  */
 
 import {READY_SCAN_SIGNAL} from './service/resources-interface';
-import {Services} from './services';
+import {Services} from './service';
 import {isIframed} from './core/dom';
 
 /** @const {!Array<string>} */

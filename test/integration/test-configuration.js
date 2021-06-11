@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {createFixtureIframe} from '../../testing/iframe.js';
 
 describes.sandboxed('Configuration', {}, function () {

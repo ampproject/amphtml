@@ -20,7 +20,7 @@ import {
 } from '../affiliate-link-resolver';
 import {DEFAULT_CONFIG} from '../constants';
 import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {Waypoint} from '../waypoint';
 import helpersFactory from './helpers';
 

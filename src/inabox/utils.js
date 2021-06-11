@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '#service';
 import {createCustomEvent} from '../event-helper.js';
 import {whenContentIniLoadMeasure} from '../ini-load';
 

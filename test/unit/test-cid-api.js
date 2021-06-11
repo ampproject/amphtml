@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {GoogleCidApi} from '../../src/service/cid-api';
+import {GoogleCidApi} from '#service/cid-api';
 import {getCookie, setCookie} from '../../src/cookies';
 import {mockWindowInterface, stubService} from '../../testing/test-helper';
 

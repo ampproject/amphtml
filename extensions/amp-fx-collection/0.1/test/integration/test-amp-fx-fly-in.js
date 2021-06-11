@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isExperimentOn, toggleExperiment} from '../../../../../src/experiments';
+import {isExperimentOn, toggleExperiment} from '#experiments';
 
 describes.sandboxed.skip('amp-fx-collection', {}, function () {
   const css = `

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {endsWith} from '../../../../src/core/types/string';
-import {toWin} from '../../../../src/core/window';
+import {endsWith} from '#core/types/string';
+import {toWin} from '#core/window';
 
 /**
  * Finds and extracts keyframes definition for Web Animations from CSS styles.

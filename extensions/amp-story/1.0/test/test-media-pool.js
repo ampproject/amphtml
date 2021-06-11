@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import {MediaPool, MediaType} from '../media-pool';
-import {Services} from '../../../../src/services';
-import {findIndex} from '../../../../src/core/types/array';
+import {Services} from '#service';
+import {findIndex} from '#core/types/array';
 
 const NOOP = () => {};
 

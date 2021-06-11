@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import * as _3p from '../../../3p/3p';
+import * as _3p from '#3p/3p';
 import {
   AD_TYPE,
   callbackWithBackfill,
   callbackWithNoBackfill,
   csa,
   resizeIframe,
-} from '../../../ads/vendors/csa';
+} from '#ads/vendors/csa';
 import {createIframePromise} from '../../../testing/iframe';
 
 function getAds(type) {

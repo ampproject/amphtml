@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {Wrapper, useRenderer} from '../../../src/preact/component';
-import {forwardRef} from '../../../src/preact/compat';
-import {
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useState,
-} from '../../../src/preact';
-import {useResourcesNotify} from '../../../src/preact/utils';
+import * as Preact from '#preact';
+import {Wrapper, useRenderer} from '#preact/component';
+import {forwardRef} from '#preact/compat';
+import {useCallback, useEffect, useImperativeHandle, useState} from '#preact';
+import {useResourcesNotify} from '#preact/utils';
 
 /**
  * @param {!JsonObject} data

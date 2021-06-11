@@ -15,7 +15,7 @@
  */
 
 import {TwoStepsResponse} from './link-rewriter/two-steps-response';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getNormalizedHostnameFromAnchor, isExcludedDomain} from './utils';
 
 /**

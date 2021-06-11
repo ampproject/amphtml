@@ -15,7 +15,7 @@
  */
 
 import {AnimationRunner} from './animation-runner';
-import {Observable} from '../../../../src/core/data-structures/observable';
+import {Observable} from '#core/data-structures/observable';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -31,7 +31,7 @@ import {
 import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
 import {devAssert} from '../../../../src/log';
 import {getTotalDuration} from './utils';
-import {setStyles} from '../../../../src/core/dom/style';
+import {setStyles} from '#core/dom/style';
 
 /**
  */

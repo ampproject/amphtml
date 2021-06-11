@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {InaboxResources} from '../../../src/inabox/inabox-resources';
-import {ResourceState} from '../../../src/service/resource';
+import {Deferred} from '#core/data-structures/promise';
+import {InaboxResources} from '#inabox/inabox-resources';
+import {ResourceState} from '#service/resource';
 import {macroTask} from '../../../testing/yield';
-import {toggleExperiment} from '../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin('inabox-resources', {amp: true}, (env) => {
   let win;

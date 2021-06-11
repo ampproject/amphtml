@@ -16,15 +16,15 @@
 
 import * as Preact from './index';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
-import {Loading} from '../core/loading-instructions';
-import {devAssert} from '../core/assert';
-import {isElement} from '../core/types';
+import {Loading} from '#core/loading-instructions';
+import {devAssert} from '#core/assert';
+import {isElement} from '#core/types';
 import {
   loadAll,
   pauseAll,
   unmountAll,
 } from '../utils/resource-container-helper';
-import {objectsEqualShallow} from '../core/types/object';
+import {objectsEqualShallow} from '#core/types/object';
 import {rediscoverChildren, removeProp, setProp} from '../context';
 import {useAmpContext} from './context';
 import {useEffect, useLayoutEffect, useRef} from './index';

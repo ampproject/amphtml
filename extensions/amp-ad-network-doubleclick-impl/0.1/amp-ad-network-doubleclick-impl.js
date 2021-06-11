@@ -20,8 +20,8 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import '../../../src/service/real-time-config/real-time-config-impl';
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
+import '#service/real-time-config/real-time-config-impl';
+import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
 import {
   AmpA4A,
   ConsentTupleDef,
@@ -49,83 +49,76 @@ import {
   isReportingEnabled,
   maybeAppendErrorParameter,
   truncAndTimeUrl,
-} from '../../../ads/google/a4a/utils';
+} from '#ads/google/a4a/utils';
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../src/core/constants/consent-state';
-import {Deferred} from '../../../src/core/data-structures/promise';
+} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
-import {Layout, isLayoutSizeDefined} from '../../../src/core/dom/layout';
-import {Navigation} from '../../../src/service/navigation';
-import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
+import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Navigation} from '#service/navigation';
+import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
 import {SafeframeHostApi} from './safeframe-host';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   TFCD,
   constructSRABlockParameters,
   serializeTargeting,
   sraBlockCallbackHandler,
 } from './sra-utils';
-import {WindowInterface} from '../../../src/core/window/interface';
+import {WindowInterface} from '#core/window/interface';
 import {
   addAmpExperimentIdToElement,
   addExperimentIdToElement,
   extractUrlExperimentId,
   isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
+} from '#ads/google/a4a/traffic-experiments';
 import {assertDoesNotContainDisplay} from '../../../src/assert-display';
-import {
-  createElementWithAttributes,
-  isRTL,
-  removeElement,
-} from '../../../src/core/dom';
-import {deepMerge, dict} from '../../../src/core/types/object';
+import {createElementWithAttributes, isRTL, removeElement} from '#core/dom';
+import {deepMerge, dict} from '#core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
-import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {domFingerprintPlain} from '#core/dom/fingerprint';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
-import {
-  getCryptoRandomBytesArray,
-  utf8Decode,
-} from '../../../src/core/types/string/bytes';
+import {getCryptoRandomBytesArray, utf8Decode} from '#core/types/string/bytes';
 import {
   getExperimentBranch,
   isExperimentOn,
   randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
+} from '#experiments';
 import {getMode} from '../../../src/mode';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
-import {setImportantStyles, setStyles} from '../../../src/core/dom/style';
+import {getMultiSizeDimensions} from '#ads/google/utils';
+import {setImportantStyles, setStyles} from '#core/dom/style';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
-import {StoryAdAutoAdvance} from '../../../src/experiments/story-ad-auto-advance';
-import {StoryAdPlacements} from '../../../src/experiments/story-ad-placements';
-import {getPageLayoutBoxBlocking} from '../../../src/core/dom/page-layout-box';
+import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+import {StoryAdPlacements} from '#experiments/story-ad-placements';
+import {getPageLayoutBoxBlocking} from '#core/dom/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {isArray} from '../../../src/core/types';
+import {isArray} from '#core/types';
 import {isCancellation} from '../../../src/error-reporting';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
-} from '../../../ads/google/a4a/line-delimited-response-handler';
-import {parseQueryString} from '../../../src/core/types/string/url';
-import {stringHash32} from '../../../src/core/types/string';
-import {tryParseJson} from '../../../src/core/types/object/json';
+} from '#ads/google/a4a/line-delimited-response-handler';
+import {parseQueryString} from '#core/types/string/url';
+import {stringHash32} from '#core/types/string';
+import {tryParseJson} from '#core/types/object/json';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as imaVideoObj from '../../../../ads/google/ima/ima-video';
-import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
+import * as imaVideoObj from '#ads/google/ima/ima-video';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 
 describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   const srcUrl = 'http://rmcdn.2mdn.net/Demo/vast_inspector/android.mp4';

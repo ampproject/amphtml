@@ -15,18 +15,18 @@
  */
 
 import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
-import {Layout} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
 import {applyExperimentToVariant} from './apply-experiment';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {dict} from '#core/types/object';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   installOriginExperimentsForDoc,
   originExperimentsForDoc,
-} from '../../../src/service/origin-experiments-impl';
-import {isExperimentOn} from '../../../src/experiments';
-import {parseJson} from '../../../src/core/types/object/json';
+} from '#service/origin-experiments-impl';
+import {isExperimentOn} from '#experiments';
+import {parseJson} from '#core/types/object/json';
 
 const TAG = 'amp-experiment';
 

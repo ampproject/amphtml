@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../../3p/3p';
+import {loadScript, validateData} from '#3p/3p';
 
 const WIDGET_DEFAULT_NODE_ID = 'rcm-widget';
 

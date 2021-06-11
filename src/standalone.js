@@ -15,7 +15,7 @@
  */
 
 import {ChunkPriority, chunk} from './chunk';
-import {Services} from './services';
+import {Services} from './service';
 import {isAmphtml} from './format';
 
 /**

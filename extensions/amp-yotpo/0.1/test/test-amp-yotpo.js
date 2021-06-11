@@ -15,7 +15,7 @@
  */
 
 import '../amp-yotpo';
-import {yotpo} from '../../../../3p/yotpo';
+import {yotpo} from '#3p/yotpo';
 
 describes.realWin(
   'amp-yotpo',

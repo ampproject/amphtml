@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {map} from '../object';
+import {map} from '#core/types/object';
 
 const QUERY_STRING_REGEX = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
 

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 import {
   createElementWithAttributes,
   iterateCursor,
   removeElement,
-} from '../../../src/core/dom';
-import {matches} from '../../../src/core/dom/query';
-import {toArray} from '../../../src/core/types/array';
+} from '#core/dom';
+import {matches} from '#core/dom/query';
+import {toArray} from '#core/types/array';
 import {user} from '../../../src/log';
 
 /**

@@ -17,10 +17,10 @@
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-auto-ads';
 import {BaseElement} from '../../../../src/base-element';
-import {Services} from '../../../../src/services';
-import {getA4ARegistry} from '../../../../ads/_a4a-config';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitForChild} from '../../../../src/core/dom';
+import {Services} from '#service';
+import {getA4ARegistry} from '#ads/_a4a-config';
+import {toggleExperiment} from '#experiments';
+import {waitForChild} from '#core/dom';
 
 class FakeA4A extends BaseElement {
   isLayoutSupported(unusedLayout) {

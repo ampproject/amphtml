@@ -15,7 +15,7 @@
  */
 
 import '../amp-minute-media-player';
-import * as fullscreen from '../../../../src/core/dom/fullscreen';
+import * as fullscreen from '#core/dom/fullscreen';
 
 const WIDTH = '16';
 const HEIGHT = '9';

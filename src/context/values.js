@@ -15,9 +15,9 @@
  */
 
 import {deepScan, findParent} from './scan';
-import {devAssert} from '../core/assert';
-import {pushIfNotExist, removeItem} from '../core/types/array';
-import {rethrowAsync} from '../core/error';
+import {devAssert} from '#core/assert';
+import {pushIfNotExist, removeItem} from '#core/types/array';
+import {rethrowAsync} from '#core/error';
 import {throttleTail} from './scheduler';
 
 // typedef imports

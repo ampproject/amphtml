@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict, omit} from '../../../src/core/types/object';
+import {dict, omit} from '#core/types/object';
 import {requireExternal} from '../../../src/module';
 
 /**

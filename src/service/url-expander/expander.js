@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../../core/types/object';
-import {rethrowAsync} from '../../core/error';
-import {trimStart} from '../../core/types/string';
-import {tryResolve} from '../../core/data-structures/promise';
+import {hasOwn} from '#core/types/object';
+import {rethrowAsync} from '#core/error';
+import {trimStart} from '#core/types/string';
+import {tryResolve} from '#core/data-structures/promise';
 import {user} from '../../log';
 
 /** @private @const {string} */

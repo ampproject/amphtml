@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseDateAttrs as parseDateAttrsBase} from '../../../../src/core/dom/parse-date-attributes';
+import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attributes';
 
 describes.sandboxed('DOM - parse date attributes', {}, (env) => {
   describe('parseDateAttrs', () => {

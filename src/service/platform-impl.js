@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilder} from '../service';
+import {registerServiceBuilder} from '../service-helpers';
 
 /**
  * A helper class that provides information about device/OS/browser currently

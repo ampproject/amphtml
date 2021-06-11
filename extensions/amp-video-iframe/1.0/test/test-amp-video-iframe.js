@@ -15,9 +15,9 @@
  */
 
 import '../amp-video-iframe';
-import {dispatchCustomEvent} from '../../../../src/core/dom';
-import {htmlFor} from '../../../../src/core/dom/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
+import {dispatchCustomEvent} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {toggleExperiment} from '#experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
 describes.realWin(

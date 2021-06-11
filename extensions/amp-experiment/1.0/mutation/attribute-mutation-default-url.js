@@ -16,7 +16,7 @@
 
 import {assertAttributeMutationFormat} from './mutation';
 import {assertHttpsUrl} from '../../../../src/url';
-import {map} from '../../../../src/core/types/object';
+import {map} from '#core/types/object';
 import {user} from '../../../../src/log';
 
 const TAG = 'amp-experiment attribute-mutation-default-url';

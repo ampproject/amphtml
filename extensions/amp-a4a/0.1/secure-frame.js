@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {createElementWithAttributes, escapeHtml} from '../../../src/core/dom';
-import {dict} from '../../../src/core/types/object';
+import {createElementWithAttributes, escapeHtml} from '#core/dom';
+import {dict} from '#core/types/object';
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
 // If making changes also change ALLOWED_FONT_REGEX in head-validation.js

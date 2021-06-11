@@ -15,12 +15,12 @@
  */
 
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
-import {createElementWithAttributes} from '../../../src/core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {hasOwn} from '../../../src/core/types/object';
+import {hasOwn} from '#core/types/object';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {toggle} from '../../../src/core/dom/style';
+import {toggle} from '#core/dom/style';
 import {urls} from '../../../src/config';
 
 /** @private @const {string} */

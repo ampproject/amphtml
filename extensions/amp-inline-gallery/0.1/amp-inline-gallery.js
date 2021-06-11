@@ -25,14 +25,11 @@ import {AmpInlineGalleryThumbnails} from './amp-inline-gallery-thumbnails';
 import {CSS as AmpInlineGalleryThumbnailsCSS} from '../../../build/amp-inline-gallery-thumbnails-0.1.css';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {InlineGalleryEvents} from './inline-gallery-events';
-import {Layout} from '../../../src/core/dom/layout';
+import {Layout} from '#core/dom/layout';
 import {getDetail} from '../../../src/event-helper';
-import {iterateCursor} from '../../../src/core/dom';
-import {
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '../../../src/core/dom/query';
-import {toArray} from '../../../src/core/types/array';
+import {iterateCursor} from '#core/dom';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
+import {toArray} from '#core/types/array';
 
 /**
  * The selector of children to update the progress on as the gallery's carousel

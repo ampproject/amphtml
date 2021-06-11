@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
-import {FiniteStateMachine} from '../core/data-structures/finite-state-machine';
+import {Deferred} from '#core/data-structures/promise';
+import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 
 import {Resource, ResourceState} from './resource';
-import {Services} from '../services';
+import {Services} from '#service';
 import {TaskQueue} from './task-queue';
-import {VisibilityState} from '../core/constants/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {dev, devAssert} from '../log';
-import {dict} from '../core/types/object';
-import {expandLayoutRect} from '../core/math/layout-rect';
+import {dict} from '#core/types/object';
+import {expandLayoutRect} from '#core/math/layout-rect';
 import {getSourceUrl} from '../url';
-import {hasNextNodeInDocumentOrder} from '../core/dom';
+import {hasNextNodeInDocumentOrder} from '#core/dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error-reporting';
 import {listen, loadPromise} from '../event-helper';
-import {registerServiceBuilderForDoc} from '../service';
-import {remove} from '../core/types/array';
+import {registerServiceBuilderForDoc} from '../service-helpers';
+import {remove} from '#core/types/array';
 import {startupChunk} from '../chunk';
-import {throttle} from '../core/types/function';
+import {throttle} from '#core/types/function';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';

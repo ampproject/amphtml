@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Deferred,
-  LastAddedResolver,
-} from '../../../../src/core/data-structures/promise';
+import {Deferred, LastAddedResolver} from '#core/data-structures/promise';
 
 describes.sandboxed('data structures - PromiseUtils', {}, () => {
   const getPromiseObject = () => new Deferred();

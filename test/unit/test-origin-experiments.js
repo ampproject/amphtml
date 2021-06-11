@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  OriginExperiments,
-  TokenMaster,
-} from '../../src/service/origin-experiments-impl';
-import {Services} from '../../src/services';
-import {bytesToString} from '../../src/core/types/string/bytes';
+import {OriginExperiments, TokenMaster} from '#service/origin-experiments-impl';
+import {Services} from '#service';
+import {bytesToString} from '#core/types/string/bytes';
 import {user} from '../../src/log';
 
 describes.fakeWin('OriginExperiments', {amp: true}, (env) => {

@@ -27,8 +27,8 @@ import {
   randomlySelectUnsetExperiments,
   resetExperimentTogglesForTesting,
   toggleExperiment,
-} from '../../src/experiments';
-import {createElementWithAttributes} from '../../src/core/dom';
+} from '#experiments';
+import {createElementWithAttributes} from '#core/dom';
 
 function fakeLocalStorage(initial = {}) {
   const state = {...initial};

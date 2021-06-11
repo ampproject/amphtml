@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {TaskQueue} from '../../src/service/task-queue';
+import {TaskQueue} from '#service/task-queue';
 
 describes.sandboxed('TaskQueue', {}, (env) => {
   let clock;

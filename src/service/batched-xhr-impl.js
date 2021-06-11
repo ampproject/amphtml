@@ -15,9 +15,9 @@
  */
 
 import {Xhr} from './xhr-impl';
-import {getService, registerServiceBuilder} from '../service';
+import {getService, registerServiceBuilder} from '../service-helpers';
 import {getSourceOrigin, removeFragment, resolveRelativeUrl} from '../url';
-import {map} from '../core/types/object';
+import {map} from '#core/types/object';
 
 /**
  * A wrapper around the Xhr service which batches the result of GET requests

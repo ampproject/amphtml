@@ -19,12 +19,12 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   Performance,
   installPerformanceService,
-} from '../../src/service/performance-impl';
-import {Services} from '../../src/services';
-import {VisibilityState} from '../../src/core/constants/visibility-state';
+} from '#service/performance-impl';
+import {Services} from '#service';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {getMode} from '../../src/mode';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installRuntimeServices} from '../../src/service/core-services';
+import {installPlatformService} from '#service/platform-impl';
+import {installRuntimeServices} from '#service/core-services';
 
 describes.realWin('performance', {amp: false}, (env) => {
   it('should be resilient to unsupported PerformanceObserver entry types', () => {

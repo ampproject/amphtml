@@ -18,7 +18,7 @@ import {
   LayoutType,
   getAutoConfig,
   getPubControlConfig,
-} from '../content-recommendation.js';
+} from '#ads/google/a4a/shared/content-recommendation.js';
 
 describes.sandboxed('getAutoConfig', {}, function () {
   it('should use image_stacked on wide slots', function () {

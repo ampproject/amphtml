@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../../3p/3p';
-import {setStyle} from '../../src/core/dom/style';
+import {loadScript, validateData} from '#3p/3p';
+import {setStyle} from '#core/dom/style';
 
 /**
  * @typedef FeedAdGlobal

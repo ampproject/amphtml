@@ -15,10 +15,10 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {CommonSignals} from '../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {ElementStub} from '../../src/element-stub';
-import {LayoutPriority} from '../../src/core/dom/layout';
-import {Services} from '../../src/services';
+import {LayoutPriority} from '#core/dom/layout';
+import {Services} from '#service';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
@@ -26,7 +26,7 @@ import {
   getImplClassSyncForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
-import {getSchedulerForDoc} from '../../src/service/scheduler';
+import {getSchedulerForDoc} from '#service/scheduler';
 
 describes.realWin('CustomElement V1', {amp: true}, (env) => {
   let win, doc, ampdoc;

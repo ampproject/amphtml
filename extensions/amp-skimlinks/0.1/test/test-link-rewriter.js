@@ -15,7 +15,7 @@
  */
 
 import * as chunkModule from '../../../../src/chunk';
-import {AmpEvents} from '../../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {LinkReplacementCache} from '../link-rewriter/link-replacement-cache';
 import {LinkRewriter} from '../link-rewriter/link-rewriter';
 import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';

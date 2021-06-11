@@ -15,7 +15,7 @@
  */
 
 import '../amp-beopinion';
-import {beopinion} from '../../../../3p/beopinion';
+import {beopinion} from '#3p/beopinion';
 
 describes.realWin(
   'amp-beopinion',

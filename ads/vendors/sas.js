@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {getMultiSizeDimensions} from '../../ads/google/utils';
-import {parseJson} from '../../src/core/types/object/json';
-import {validateData, writeScript} from '../../3p/3p';
+import {getMultiSizeDimensions} from '#ads/google/utils';
+import {parseJson} from '#core/types/object/json';
+import {validateData, writeScript} from '#3p/3p';
 
 /**
  * @param {!Window} global

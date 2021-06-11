@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData, validateSrcPrefix, writeScript} from '../../3p/3p';
+import {validateData, validateSrcPrefix, writeScript} from '#3p/3p';
 
 /**
  * @param {!Window} global

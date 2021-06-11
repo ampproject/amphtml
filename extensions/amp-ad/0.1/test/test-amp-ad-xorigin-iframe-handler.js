@@ -17,14 +17,14 @@
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
-import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/core/data-structures/signals';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
 import {
   createIframeWithMessageStub,
   expectPostMessage,
 } from '../../../../testing/iframe';
-import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
-import {toggleExperiment} from '../../../../src/experiments';
+import {layoutRectLtwh} from '#core/math/layout-rect';
+import {toggleExperiment} from '#experiments';
 
 describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
   let ampdoc;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import '../amp-timeago';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 import {waitFor} from '../../../../testing/test-helper.js';
 
 describes.realWin(

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getUniqueId} from './utils';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 

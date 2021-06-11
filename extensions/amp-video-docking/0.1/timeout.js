@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 
 /** Timeout that can be postponed, repeated or cancelled. */
 export class Timeout {

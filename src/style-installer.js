@@ -15,10 +15,10 @@
  */
 
 import {CommonSignals} from './core/constants/common-signals';
-import {Services} from './services';
+import {Services} from './service';
 import {TickLabel} from './core/constants/enums';
 import {dev, devAssert} from './log';
-import {getAmpdoc} from './service';
+import {getAmpdoc} from './service-helpers';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from './core/dom';
 import {map} from './core/types/object';
 import {rethrowAsync} from './core/error';

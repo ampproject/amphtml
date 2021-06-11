@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  LayoutRectDef,
-  layoutRectLtwh,
-} from '../../../src/core/math/layout-rect';
+import {LayoutRectDef, layoutRectLtwh} from '#core/math/layout-rect';
 
 /**
  * @param {function():T} get

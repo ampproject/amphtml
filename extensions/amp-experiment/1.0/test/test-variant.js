@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {Services} from '../../../../src/services';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {Services} from '#service';
 import {allocateVariant} from '../variant';
 
 describes.sandboxed('allocateVariant', {}, (env) => {

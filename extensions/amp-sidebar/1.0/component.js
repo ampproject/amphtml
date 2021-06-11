@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Keys} from '../../../src/core/constants/key-codes';
+import * as Preact from '#preact';
+import {ContainWrapper, useValueRef} from '#preact/component';
+import {Keys} from '#core/constants/key-codes';
 import {Side} from './sidebar-config';
-import {forwardRef} from '../../../src/preact/compat';
-import {isRTL} from '../../../src/core/dom';
+import {forwardRef} from '#preact/compat';
+import {isRTL} from '#core/dom';
 import {
   useCallback,
   useEffect,
@@ -27,7 +27,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
 import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './component.jss';
 import {useToolbarHook} from './sidebar-toolbar-hook';

@@ -16,10 +16,10 @@
 
 import {BrowserController} from '../../testing/test-helper';
 import {applyStaticLayout} from '../../src/static-layout';
-import {createElementWithAttributes} from '../../src/core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {createIframePromise} from '../../testing/iframe';
-import {installImg} from '../../builtins/amp-img/amp-img';
-import {toArray} from '../../src/core/types/array';
+import {installImg} from '#builtins/amp-img/amp-img';
+import {toArray} from '#core/types/array';
 
 describes.sandboxed('amp-img layout intrinsic', {}, () => {
   let fixture;

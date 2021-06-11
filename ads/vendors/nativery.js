@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {toArray} from '../../src/core/types/array';
-import {validateData, writeScript} from '../../3p/3p';
+import {toArray} from '#core/types/array';
+import {validateData, writeScript} from '#3p/3p';
 
 /**
  * @param {!Window} global

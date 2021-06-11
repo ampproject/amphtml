@@ -15,17 +15,14 @@
  */
 
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
-import {Services} from '../../src/services';
-import {dispatchCustomEvent, waitForChildPromise} from '../../src/core/dom';
-import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
-import {
-  isAutoplaySupported,
-  resetIsAutoplaySupported,
-} from '../../src/core/dom/video';
-import {isLayoutSizeDefined} from '../../src/core/dom/layout';
+import {Services} from '#service';
+import {dispatchCustomEvent, waitForChildPromise} from '#core/dom';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isAutoplaySupported, resetIsAutoplaySupported} from '#core/dom/video';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {listenOncePromise} from '../../src/event-helper';
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
-import {toArray} from '../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.
 // See #11588.

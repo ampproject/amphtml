@@ -15,7 +15,7 @@
  */
 
 import {CtaTypes} from './story-ad-localization';
-import {getCryptoRandomBytesArray} from '../../../src/core/types/string/bytes';
+import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
 /**
  * Returns an string with a total of 128 of random values based on the
