@@ -34,6 +34,9 @@ exports.mainBinary =
   's.animation="none";' +
   's.WebkitAnimation="none;"},1000);throw e};';
 
+/** @type {'high'} */
+let ExtensionLoadPriorityDef;
+
 /**
  * Wrapper that either registers the extension or schedules it for execution
  * by the main binary
@@ -41,7 +44,7 @@ exports.mainBinary =
  * @param {string} version
  * @param {boolean} latest
  * @param {boolean=} isModule
- * @param {'high'=} loadPriority
+ * @param {ExtensionLoadPriorityDef=} loadPriority
  * @return {string}
  */
 exports.extension = function (name, version, latest, isModule, loadPriority) {
