@@ -1296,6 +1296,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.isAd()) {
       distance = Math.min(distance, 2);
     }
+    if (distance == this.getDistance()) {
+      return;
+    }
 
     this.element.setAttribute('distance', distance);
     this.element.setAttribute('aria-hidden', distance != 0);

@@ -1529,7 +1529,7 @@ export class AmpStory extends AMP.BaseElement {
       // the navigation happened, like preloading the following pages, or
       // sending analytics events.
       () => {
-        this.preloadPagesByDistance_();
+        this.preloadPagesByDistance_(/* prioritizeActivePage */ !oldPage);
         this.triggerActiveEventForPage_();
 
         this.systemLayer_.resetDeveloperLogs();
@@ -2216,29 +2216,11 @@ export class AmpStory extends AMP.BaseElement {
     return map;
   }
 
-  // /** @private */
-  // preloadPagesByDistance_() {
-  //   if (this.platform_.isBot()) {
-  //     this.pages_.forEach((page) => {
-  //       page.setDistance(0);
-  //     });
-  //     return;
-  //   }
-
-  //   const pagesByDistance = this.getPagesByDistance_();
-
-  //   this.mutateElement(() => {
-  //     pagesByDistance.forEach((pageIds, distance) => {
-  //       pageIds.forEach((pageId) => {
-  //         const page = this.getPageById(pageId);
-  //         page.setDistance(distance);
-  //       });
-  //     });
-  //   });
-  // }
-
-  /** @private */
-  preloadPagesByDistance_() {
+  /**
+   * @param {=boolean} prioritizeActivePage
+   * @private
+   */
+  preloadPagesByDistance_(prioritizeActivePage = false) {
     if (this.platform_.isBot()) {
       this.pages_.forEach((page) => {
         page.setDistance(0);
@@ -2248,22 +2230,27 @@ export class AmpStory extends AMP.BaseElement {
 
     const pagesByDistance = this.getPagesByDistance_();
 
-    // Load page with distance 0 first, and then load the other ones.
-    this.mutateElement(() => {
-      Promise.all(
-        pagesByDistance[0].map((pageId) => {
+    const preloadAllPages = () => {
+      pagesByDistance.forEach((pageIds, distance) => {
+        pageIds.forEach((pageId) => {
           const page = this.getPageById(pageId);
-          page.setDistance(0);
-          return listenOncePromise(page.element, EventType.PAGE_LOADED);
-        })
-      ).then(() => {
-        pagesByDistance.slice(1).forEach((pageIds, distance) => {
-          pageIds.forEach((pageId) => {
-            const page = this.getPageById(pageId);
-            page.setDistance(distance);
-          });
+          page.setDistance(distance);
         });
       });
+    };
+
+    this.mutateElement(() => {
+      if (prioritizeActivePage) {
+        // Load page with distance 0 first, and then load the other ones.
+        Promise.all(
+          pagesByDistance[0].map((pageId) => {
+            const page = this.getPageById(pageId);
+            page.setDistance(0);
+            return listenOncePromise(page.element, EventType.PAGE_LOADED);
+          })
+        ).then(() => preloadAllPages());
+      }
+      preloadAllPages();
     });
   }
 
