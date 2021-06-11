@@ -105,8 +105,8 @@ describes.sandboxed('parseUrlDeprecated', {}, () => {
     // `new URL(...)` to `JSON.stringify` results in the URL string, not the
     // URL object-string.
     const parsed = parseUrlDeprecated(url);
-    Object.entries(result).forEach(([key, value]) =>
-      expect(JSON.stringify(parsed[key])).to.equal(JSON.stringify(value))
+    Object.keys(result).forEach((key) =>
+      expect(JSON.stringify(parsed[key])).to.equal(JSON.stringify(result[key]))
     );
   }
 
