@@ -240,7 +240,6 @@ window.__AMP_TAG;
 window.__AMP_TOP;
 window.__AMP_PARENT;
 window.__AMP_WEAKREF_ID;
-window.__AMP_URL_CACHE;
 window.__AMP_LOG;
 
 /** @type {undefined|boolean} */

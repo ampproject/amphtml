@@ -37,7 +37,6 @@ import {
   removeParamsFromSearch,
   removeSearch,
   resolveRelativeUrl,
-  resolveRelativeUrlFallback_,
   serializeQueryString,
 } from '../../src/url';
 
@@ -102,10 +101,13 @@ describes.sandboxed('parseUrlDeprecated', {}, () => {
 
   function compareParse(url, result) {
     // Using JSON string comparison because Chai's deeply equal
-    // errors are impossible to debug.
-    const parsed = JSON.stringify(parseUrlDeprecated(url));
-    const expected = JSON.stringify(result);
-    expect(parsed).to.equal(expected);
+    // errors are impossible to debug. Doing it in a forEach because passing a
+    // `new URL(...)` to `JSON.stringify` results in the URL string, not the
+    // URL object-string.
+    const parsed = parseUrlDeprecated(url);
+    Object.keys(result).forEach((key) =>
+      expect(JSON.stringify(parsed[key])).to.equal(JSON.stringify(result[key]))
+    );
   }
 
   it('should parse correctly', () => {
@@ -120,35 +122,6 @@ describes.sandboxed('parseUrlDeprecated', {}, () => {
       hash: '#foo',
       origin: 'https://foo.com',
     });
-  });
-  it('caches results', () => {
-    const url = 'https://foo.com:123/abc?123#foo';
-    parseUrlDeprecated(url);
-    const a1 = parseUrlDeprecated(url);
-    const a2 = parseUrlDeprecated(url);
-    expect(a1).to.equal(a2);
-  });
-
-  // TODO(#14349): unskip flaky test
-  it.skip('caches up to 100 results', () => {
-    const url = 'https://foo.com:123/abc?123#foo';
-    const a1 = parseUrlDeprecated(url);
-
-    // should grab url from the cache
-    expect(a1).to.equal(parseUrlDeprecated(url));
-
-    // cache 99 more urls in order to reach max capacity of LRU cache: 100
-    for (let i = 0; i < 100; i++) {
-      parseUrlDeprecated(`${url}-${i}`);
-    }
-
-    const a2 = parseUrlDeprecated(url);
-
-    // the old cached url should not be in the cache anymore
-    // the newer instance should
-    expect(a1).to.not.equal(parseUrlDeprecated(url));
-    expect(a2).to.equal(parseUrlDeprecated(url));
-    expect(a1).to.not.equal(a2);
   });
   it('should handle ports', () => {
     compareParse('https://foo.com:123/abc?123#foo', {
@@ -245,10 +218,6 @@ describes.sandboxed('parseUrlDeprecated', {}, () => {
     expect(parseUrlDeprecated('https://twitter.com/path#abc').origin).to.equal(
       'https://twitter.com'
     );
-  });
-
-  it('should parse origin data:12345', () => {
-    expect(parseUrlDeprecated('data:12345').origin).to.equal('data:12345');
   });
 
   it('should parse relative', () => {
@@ -848,10 +817,6 @@ describes.sandboxed('resolveRelativeUrl', {}, () => {
           expect(resolveRelativeUrl(href, baseHref)).to.equal(
             resolvedHref,
             'native or fallback'
-          );
-          expect(resolveRelativeUrlFallback_(href, baseHref)).to.equal(
-            resolvedHref,
-            'fallback'
           );
         }
       );

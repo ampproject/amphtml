@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {LruCache} from './core/data-structures/lru-cache';
 import {dict, hasOwn} from './core/types/object';
 import {endsWith} from './core/types/string';
-import {getMode} from './mode';
 import {isArray} from './core/types';
 import {parseQueryString} from './core/types/string/url';
 import {urls} from './config';
@@ -42,14 +40,6 @@ const SERVING_TYPE_PREFIX = dict({
  * @type {HTMLAnchorElement}
  */
 let a;
-
-/**
- * We cached all parsed URLs. As of now there are no use cases
- * of AMP docs that would ever parse an actual large number of URLs,
- * but we often parse the same one over and over again.
- * @type {LruCache}
- */
-let cache;
 
 /** @private @const Matches amp_js_* parameters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
@@ -87,102 +77,35 @@ export function getWinOrigin(win) {
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
- * Consider the returned object immutable. This is enforced during
- * testing by freezing the object.
+ * Consider the returned object immutable.
  * @param {string} url
- * @param {boolean=} opt_nocache
  *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  */
-export function parseUrlDeprecated(url, opt_nocache) {
+export function parseUrlDeprecated(url) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = IS_ESM
-      ? null
-      : self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
-  return parseUrlWithA(a, url, IS_ESM || opt_nocache ? null : cache);
+  return parseUrlWithA(a, url);
 }
 
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
- * Consider the returned object immutable. This is enforced during
- * testing by freezing the object.
+ * Consider the returned object immutable.
  * @param {!HTMLAnchorElement} a
  * @param {string} url
- * @param {LruCache=} opt_cache
- *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  * @restricted
  */
-export function parseUrlWithA(a, url, opt_cache) {
-  if (IS_ESM) {
-    a.href = '';
-    return /** @type {?} */ (new URL(url, a.href));
-  }
-
-  if (opt_cache && opt_cache.has(url)) {
-    return opt_cache.get(url);
-  }
-
-  a.href = url;
-
-  // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick #3449.
-  if (!a.protocol) {
-    a.href = a.href;
-  }
-
-  const info = /** @type {!Location} */ ({
-    href: a.href,
-    protocol: a.protocol,
-    host: a.host,
-    hostname: a.hostname,
-    port: a.port == '0' ? '' : a.port,
-    pathname: a.pathname,
-    search: a.search,
-    hash: a.hash,
-    origin: null, // Set below.
-  });
-
-  // Some IE11 specific polyfills.
-  // 1) IE11 strips out the leading '/' in the pathname.
-  if (info.pathname[0] !== '/') {
-    info.pathname = '/' + info.pathname;
-  }
-
-  // 2) For URLs with implicit ports, IE11 parses to default ports while
-  // other browsers leave the port field empty.
-  if (
-    (info.protocol == 'http:' && info.port == 80) ||
-    (info.protocol == 'https:' && info.port == 443)
-  ) {
-    info.port = '';
-    info.host = info.hostname;
-  }
-
-  // For data URI a.origin is equal to the string 'null' which is not useful.
-  // We instead return the actual origin which is the full URL.
-  let origin;
-  if (a.origin && a.origin != 'null') {
-    origin = a.origin;
-  } else if (info.protocol == 'data:' || !info.host) {
-    origin = info.href;
-  } else {
-    origin = info.protocol + '//' + info.host;
-  }
-  info.origin = origin;
-
-  // Freeze during testing to avoid accidental mutation.
-  const frozen = getMode().test && Object.freeze ? Object.freeze(info) : info;
-
-  if (opt_cache) {
-    opt_cache.put(url, frozen);
-  }
-
-  return frozen;
+export function parseUrlWithA(a, url) {
+  // This href value gets set to the window's `baseUrl` automatically
+  a.href = '';
+  // In Safari 14 and earlier, calling the URL constructor with a base URL whose
+  // value is undefined causes Safari to throw a TypeError;
+  // see https://webkit.org/b/216841
+  return /** @type {?} */ (new URL(url, a.href));
 }
 
 /**
@@ -570,47 +493,12 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
   if (typeof baseUrl == 'string') {
     baseUrl = parseUrlDeprecated(baseUrl);
   }
-  if (IS_ESM || typeof URL == 'function') {
-    return new URL(relativeUrlString, baseUrl.href).toString();
-  }
-  return resolveRelativeUrlFallback_(relativeUrlString, baseUrl);
-}
 
-/**
- * Fallback for URL resolver when URL class is not available.
- * @param {string} relativeUrlString
- * @param {string|!Location} baseUrl
- * @return {string}
- * @private @visibleForTesting
- */
-export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
-  if (typeof baseUrl == 'string') {
-    baseUrl = parseUrlDeprecated(baseUrl);
-  }
-  relativeUrlString = relativeUrlString.replace(/\\/g, '/');
-  const relativeUrl = parseUrlDeprecated(relativeUrlString);
-
-  // Absolute URL.
-  if (relativeUrlString.toLowerCase().startsWith(relativeUrl.protocol)) {
-    return relativeUrl.href;
-  }
-
-  // Protocol-relative URL.
-  if (relativeUrlString.startsWith('//')) {
-    return baseUrl.protocol + relativeUrlString;
-  }
-
-  // Absolute path.
-  if (relativeUrlString.startsWith('/')) {
-    return baseUrl.origin + relativeUrlString;
-  }
-
-  // Relative path.
-  return (
-    baseUrl.origin +
-    baseUrl.pathname.replace(/\/[^/]*$/, '/') +
-    relativeUrlString
-  );
+  // In Safari 14 and earlier, calling the URL constructor with a base URL whose
+  // value is undefined causes Safari to throw a TypeError;
+  // see https://webkit.org/b/216841. Since Location#href or URL#href should
+  // never be undefined, this is safe.
+  return new URL(relativeUrlString, baseUrl.href).toString();
 }
 
 /**
