@@ -20,7 +20,7 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {computedStyle, setStyles} from '../../../src/core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
