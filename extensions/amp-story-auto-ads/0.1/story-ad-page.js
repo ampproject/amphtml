@@ -32,6 +32,10 @@ import {
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
 import {CommonSignals} from '#core/constants/common-signals';
+import {
+  BranchToTimeValues,
+  StoryAdSegmentExp,
+} from '#experiments/story-ad-progress-segment';
 import {Gestures} from '../../../src/gesture';
 import {
   StateProperty,
@@ -48,7 +52,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, map} from '#core/types/object';
 import {elementByTag} from '#core/dom/query';
 import {getData, listen} from '../../../src/event-helper';
-import {getExperimentBranch, isExperimentOn} from '#experiments';
+import {getExperimentBranch} from '#experiments';
 import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {parseJson} from '#core/types/object/json';
@@ -321,9 +325,13 @@ export class StoryAdPage {
       this.win_,
       StoryAdAutoAdvance.ID
     );
-    // TODO(ccordry): move to viewer set branched experiment.
-    if (isExperimentOn(this.win_, 'story-ad-progress-segment')) {
-      attributes['auto-advance-after'] = '8s';
+    const segmentExpBranch = getExperimentBranch(
+      this.win_,
+      StoryAdSegmentExp.ID
+    );
+
+    if (segmentExpBranch && segmentExpBranch !== StoryAdSegmentExp.CONTROL) {
+      attributes['auto-advance-after'] = BranchToTimeValues[segmentExpBranch];
     } else if (
       autoAdvanceExpBranch &&
       autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
