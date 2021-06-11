@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/core/types/array';
 import {userAssert} from '../../../src/log';

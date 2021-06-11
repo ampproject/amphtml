@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from './core/data-structures/promise';
-import {dev, devAssert} from './log';
-import {dict} from './core/types/object';
-import {includes} from './core/types/string';
-import {matches} from './core/dom/query';
-import {toWin} from './core/window';
+import {dict} from '../types/object';
+import {matches} from './query';
+import {toWin} from '../window';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -30,12 +27,6 @@ const HTML_ESCAPE_CHARS = {
   '`': '&#x60;',
 };
 const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
-
-/** @const {string} */
-export const UPGRADE_TO_CUSTOMELEMENT_PROMISE = '__AMP_UPG_PRM';
-
-/** @const {string} */
-export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER = '__AMP_UPG_RES';
 
 /**
  * @typedef {{
@@ -54,17 +45,15 @@ const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
  * @param {!Element} parent
  * @param {function(!Element):boolean} checkFunc
  * @param {function()} callback
- * @suppress {suspiciousCode}
+ * @suppress {suspiciousCode} due to IS_ESM
  */
 export function waitForChild(parent, checkFunc, callback) {
   if (checkFunc(parent)) {
     callback();
     return;
   }
-  /** @const {!Window} */
   const win = toWin(parent.ownerDocument.defaultView);
   if (IS_ESM || win.MutationObserver) {
-    /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
         observer.disconnect();
@@ -73,7 +62,6 @@ export function waitForChild(parent, checkFunc, callback) {
     });
     observer.observe(parent, {childList: true});
   } else {
-    /** @const {number} */
     const interval = win.setInterval(() => {
       if (checkFunc(parent)) {
         win.clearInterval(interval);
@@ -119,9 +107,7 @@ export function waitForBodyOpenPromise(doc) {
  * @param {!Element} element
  */
 export function removeElement(element) {
-  if (element.parentElement) {
-    element.parentElement.removeChild(element);
-  }
+  element.parentElement?.removeChild(element);
 }
 
 /**
@@ -247,7 +233,7 @@ export function rootNodeFor(node) {
 
 /**
  * Determines if value is actually a `ShadowRoot` node.
- * @param {HTMLElement} value
+ * @param {?HTMLElement} value
  * @return {boolean}
  */
 export function isShadowRoot(value) {
@@ -282,7 +268,7 @@ export function getDataParamsFromAttributes(
   const computeParamNameFunc = opt_computeParamNameFunc || ((key) => key);
   const {dataset} = element;
   const params = dict();
-  const paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
+  const paramPattern = opt_paramPattern || /^param(.+)/;
   for (const key in dataset) {
     const matches = key.match(paramPattern);
     if (matches) {
@@ -349,37 +335,6 @@ export function iterateCursor(iterable, cb) {
 }
 
 /**
- * This method wraps around window's open method. It first tries to execute
- * `open` call with the provided target and if it fails, it retries the call
- * with the `_top` target. This is necessary given that in some embedding
- * scenarios, such as iOS' WKWebView, navigation to `_blank` and other targets
- * is blocked by default.
- *
- * @param {!Window} win
- * @param {string} url
- * @param {string} target
- * @param {string=} opt_features
- * @return {?Window}
- */
-export function openWindowDialog(win, url, target, opt_features) {
-  // Try first with the specified target. If we're inside the WKWebView or
-  // a similar environments, this method is expected to fail by default for
-  // all targets except `_top`.
-  let res;
-  try {
-    res = win.open(url, target, opt_features);
-  } catch (e) {
-    dev().error('DOM', 'Failed to open url on target: ', target, e);
-  }
-
-  // Then try with `_top` target.
-  if (!res && target != '_top' && !includes(opt_features || '', 'noopener')) {
-    res = win.open(url, '_top');
-  }
-  return res;
-}
-
-/**
  * Whether the element is a script tag with application/json type.
  * @param {!Element} element
  * @return {boolean}
@@ -387,8 +342,7 @@ export function openWindowDialog(win, url, target, opt_features) {
 export function isJsonScriptTag(element) {
   return (
     element.tagName == 'SCRIPT' &&
-    element.hasAttribute('type') &&
-    element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON'
+    element.getAttribute('type')?.toUpperCase() == 'APPLICATION/JSON'
   );
 }
 
@@ -400,7 +354,7 @@ export function isJsonScriptTag(element) {
 export function isJsonLdScriptTag(element) {
   return (
     element.tagName == 'SCRIPT' &&
-    element.getAttribute('type').toUpperCase() == 'APPLICATION/LD+JSON'
+    element.getAttribute('type')?.toUpperCase() == 'APPLICATION/LD+JSON'
   );
 }
 
@@ -457,45 +411,6 @@ export function tryFocus(element) {
  */
 export function isIframed(win) {
   return win.parent && win.parent != win;
-}
-
-/**
- * Determines if this element is an AMP element
- * @param {!Element} element
- * @return {boolean}
- */
-export function isAmpElement(element) {
-  const tag = element.tagName;
-  // Use prefix to recognize AMP element. This is necessary because stub
-  // may not be attached yet.
-  return (
-    tag.startsWith('AMP-') &&
-    // Some "amp-*" elements are not really AMP elements. :smh:
-    !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY')
-  );
-}
-
-/**
- * Return a promise that resolve when an AMP element upgrade from HTMLElement
- * to CustomElement
- * @param {!HTMLElement} element
- * @return {!Promise<!AmpElement>}
- */
-export function whenUpgradedToCustomElement(element) {
-  devAssert(isAmpElement(element), 'element is not AmpElement');
-  if (element.createdCallback) {
-    // Element already is CustomElement;
-    return Promise.resolve(/**@type {!AmpElement} */ (element));
-  }
-  // If Element is still HTMLElement, wait for it to upgrade to customElement
-  // Note: use pure string to avoid obfuscation between versions.
-  if (!element[UPGRADE_TO_CUSTOMELEMENT_PROMISE]) {
-    const deferred = new Deferred();
-    element[UPGRADE_TO_CUSTOMELEMENT_PROMISE] = deferred.promise;
-    element[UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = deferred.resolve;
-  }
-
-  return element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
 }
 
 /**
@@ -604,7 +519,7 @@ export function dispatchCustomEvent(node, name, opt_data, opt_options) {
   const event = node.ownerDocument.createEvent('Event');
 
   // Technically .data is not a property of Event.
-  /**@type {?}*/ (event).data = data;
+  event.data = data;
 
   const {bubbles, cancelable} = opt_options || DEFAULT_CUSTOM_EVENT_OPTIONS;
   event.initEvent(name, bubbles, cancelable);

@@ -34,9 +34,9 @@ import {
   isRTL,
   iterateCursor,
   toggleAttribute,
-} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+} from '../../../src/core/dom';
+import {htmlFor} from '../../../src/core/dom/static-template';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {scopedQuerySelectorAll} from '../../../src/core/dom/query';
 import {toArray} from '../../../src/core/types/array';
 

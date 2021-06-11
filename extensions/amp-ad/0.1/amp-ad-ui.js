@@ -16,13 +16,16 @@
 
 import {Services} from '../../../src/services';
 import {ancestorElementsByTag} from '../../../src/core/dom/query';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  removeElement,
+} from '../../../src/core/dom';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 
 import {getAdContainer} from '../../../src/ad-helper';
 import {listen} from '../../../src/event-helper';
-import {setStyle, setStyles} from '../../../src/style';
+import {setStyle, setStyles} from '../../../src/core/dom/style';
 
 const STICKY_AD_MAX_SIZE_LIMIT = 0.2;
 const STICKY_AD_MAX_HEIGHT_LIMIT = 0.5;

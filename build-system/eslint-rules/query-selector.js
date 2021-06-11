@@ -78,7 +78,7 @@ module.exports = function (context) {
         'globally and filtered to just the elements inside the element. ' +
         'This leads to obscure bugs if you attempt to match a descendant ' +
         'of a descendant (ie querySelector("div div")). Instead, use the ' +
-        'scopedQuerySelector in src/dom.js',
+        'scopedQuerySelector in src/core/dom/query.js',
     });
   }
 

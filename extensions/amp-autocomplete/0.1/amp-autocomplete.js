@@ -20,7 +20,7 @@ import {AutocompleteBindingInline} from './autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from './autocomplete-binding-single';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys} from '../../../src/core/constants/key-codes';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
@@ -46,13 +46,13 @@ import {tryParseJson} from '../../../src/core/types/object/json';
 
 import {mod} from '../../../src/core/math';
 import {once} from '../../../src/core/types/function';
-import {removeChildren, tryFocus} from '../../../src/dom';
+import {removeChildren, tryFocus} from '../../../src/core/dom';
 import {
   setupAMPCors,
   setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
-import {toggle} from '../../../src/style';
+import {toggle} from '../../../src/core/dom/style';
 import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
 /**

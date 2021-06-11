@@ -20,7 +20,7 @@ import {
   createElementWithAttributes,
   iterateCursor,
   removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {matches} from '../../../src/core/dom/query';
 import {toArray} from '../../../src/core/types/array';
 import {user} from '../../../src/log';

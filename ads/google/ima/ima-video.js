@@ -16,9 +16,13 @@
 
 import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
-import {camelCaseToTitleCase, setStyle, toggle} from '../../../src/style';
+import {
+  camelCaseToTitleCase,
+  setStyle,
+  toggle,
+} from '../../../src/core/dom/style';
 import {getData} from '../../../src/event-helper';
-import {htmlFor, htmlRefs, svgFor} from '../../../src/static-template';
+import {htmlFor, htmlRefs, svgFor} from '../../../src/core/dom/static-template';
 import {isArray, isObject} from '../../../src/core/types';
 import {loadScript} from '../../../3p/3p';
 import {throttle} from '../../../src/core/types/function';

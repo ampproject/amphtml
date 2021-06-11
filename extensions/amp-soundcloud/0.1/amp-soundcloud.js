@@ -27,10 +27,10 @@
  * </amp-soundcloud>
  */
 
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/core/types/object';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 

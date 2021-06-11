@@ -27,7 +27,7 @@ import {devAssert} from '../../../src/log';
 import {dict, memo} from '../../../src/core/types/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {toArray} from '../../../src/core/types/array';
-import {toggleAttribute} from '../../../src/dom';
+import {toggleAttribute} from '../../../src/core/dom';
 import {useDOMHandle} from '../../../src/preact/component';
 import {useLayoutEffect, useRef} from '../../../src/preact';
 import {useSlotContext} from '../../../src/preact/slot';

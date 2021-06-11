@@ -40,7 +40,7 @@
 import * as events from '../../../src/event-helper';
 import * as utils from './utils';
 import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {
   assertAbsoluteHttpOrHttpsUrl,
@@ -54,7 +54,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 
 class AmpPlaybuzz extends AMP.BaseElement {
   /** @param {!AmpElement} element */

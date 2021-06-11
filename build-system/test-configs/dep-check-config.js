@@ -94,7 +94,7 @@ exports.rules = [
       '3p/**->src/core/types/string/index.js',
       '3p/**->src/core/types/string/url.js',
       '3p/**->src/log.js',
-      '3p/**->src/style.js',
+      '3p/**->src/core/dom/style.js',
       '3p/**->src/url.js',
       '3p/**->src/config.js',
       '3p/**->src/mode.js',
@@ -133,14 +133,14 @@ exports.rules = [
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
-      'ads/**->src/static-template.js',
-      'ads/**->src/style.js',
+      'ads/**->src/core/dom/static-template.js',
+      'ads/**->src/core/dom/style.js',
       'ads/**->src/internal-version.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
       'ads/google/a4a/**->src/consent.js',
-      'ads/google/a4a/**->src/dom.js',
+      'ads/google/a4a/**->src/amp-element-helpers.js',
       'ads/google/a4a/**->src/experiments/index.js',
       'ads/google/a4a/**->src/services.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
@@ -256,7 +256,7 @@ exports.rules = [
       'extensions/amp-facebook-page/1.0/base-element.js->extensions/amp-facebook/1.0/facebook-base-element.js',
 
       // VideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
-      'extensions/**->extensions/amp-video/1.0/base-element.js',
+      'extensions/**->extensions/amp-video/1.0/video-base-element.js',
       'extensions/**->extensions/amp-video/1.0/video-iframe.js',
 
       // <amp-video-iframe> versions share this message API definition.

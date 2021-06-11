@@ -21,7 +21,7 @@ import {dict} from '../../../src/core/types/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {listen} from '../../../src/event-helper';
-import {removeChildren} from '../../../src/dom';
+import {removeChildren} from '../../../src/core/dom';
 
 const TAG = 'amp-access-laterpay';
 

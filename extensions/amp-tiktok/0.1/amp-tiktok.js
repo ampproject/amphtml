@@ -18,11 +18,14 @@ import {CSS} from '../../../build/amp-tiktok-0.1.css';
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/core/dom/query';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  removeElement,
+} from '../../../src/core/dom';
 import {debounce} from '../../../src/core/types/function';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {px, resetStyles, setStyles} from '../../../src/style';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {px, resetStyles, setStyles} from '../../../src/core/dom/style';
 import {tryParseJson} from '../../../src/core/types/object/json';
 
 let id = 0;

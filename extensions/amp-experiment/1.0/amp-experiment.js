@@ -15,7 +15,7 @@
  */
 
 import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {applyExperimentToVariant} from './apply-experiment';
 import {devAssert, user, userAssert} from '../../../src/log';

@@ -15,11 +15,11 @@
  */
 
 import {TAG as KEY_TAG} from './amp-embedly-key';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/core/dom';
 import {userAssert} from '../../../src/log';
 
 /**

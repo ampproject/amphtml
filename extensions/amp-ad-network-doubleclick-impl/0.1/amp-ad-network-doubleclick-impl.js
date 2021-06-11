@@ -59,7 +59,7 @@ import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Layout, isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
 import {
@@ -81,16 +81,12 @@ import {
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {
-  assertDoesNotContainDisplay,
-  setImportantStyles,
-  setStyles,
-} from '../../../src/style';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
   createElementWithAttributes,
   isRTL,
   removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {deepMerge, dict} from '../../../src/core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/core/dom/fingerprint';
@@ -112,6 +108,7 @@ import {
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {setImportantStyles, setStyles} from '../../../src/core/dom/style';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 

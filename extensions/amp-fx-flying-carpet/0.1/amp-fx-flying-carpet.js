@@ -16,10 +16,10 @@
 
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 
 const TAG = 'amp-fx-flying-carpet';
 
