@@ -382,7 +382,6 @@ const htmlFixtureGlobs = [
   '!examples/metadata-examples/video-json-ld.amp.html',
   '!examples/mraid/inabox-mraid.html',
   '!examples/multiple-docs.html',
-  '!examples/old-boilerplate.amp.html',
   '!examples/pwa-multidoc-loader.html',
   '!examples/pwa/pwa-sd-polyfill.html',
   '!examples/pwa/pwa.html',
