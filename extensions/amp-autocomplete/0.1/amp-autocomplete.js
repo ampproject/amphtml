@@ -40,7 +40,6 @@ import {
 } from '../../../src/core/types/object';
 
 import {includes} from '../../../src/core/types/string';
-import {isAmp4Email} from '../../../src/format';
 import {isArray, isEnumValue} from '../../../src/core/types';
 import {tryParseJson} from '../../../src/core/types/object/json';
 
@@ -245,15 +244,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.templates_ = Services.templatesForDoc(this.element);
-
-    const doc = this.element.ownerDocument;
-    const isEmail = doc && isAmp4Email(doc);
-    userAssert(
-      !isEmail ||
-        doc.documentElement.hasAttribute('data-amp-autocomplete-opt-in'),
-      '<amp-autocomplete> is not currently available in AMP4Email.'
-    );
-
     this.action_ = Services.actionServiceForDoc(this.element);
     this.viewport_ = Services.viewportForDoc(this.element);
 
