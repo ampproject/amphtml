@@ -272,10 +272,6 @@ amp-story-page[distance="1"] {
 }
 
 amp-story-page[distance="2"] {
-  transform: translateY(100%) !important;
-}
-
-.i-amphtml-story-desktop-one-panel amp-story-page[distance="2"] {
   transform: translateY(100vh) !important;
 }
 
