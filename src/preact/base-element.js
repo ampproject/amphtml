@@ -19,7 +19,7 @@ import {ActionTrust} from '../core/constants/action-constants';
 import {AmpEvents} from '../core/constants/amp-events';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Deferred} from '../core/data-structures/promise';
-import {Layout, isLayoutSizeDefined} from '../layout';
+import {Layout, isLayoutSizeDefined} from '../core/dom/layout';
 import {Loading} from '../core/loading-instructions';
 import {MediaQueryProps} from '../core/dom/media-query-props';
 import {PauseHelper} from '../core/dom/video/pause-helper';

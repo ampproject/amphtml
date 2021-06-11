@@ -20,7 +20,7 @@ import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {
   observeContentSize,

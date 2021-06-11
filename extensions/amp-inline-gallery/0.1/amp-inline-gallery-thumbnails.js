@@ -19,7 +19,7 @@ import {InlineGalleryEvents} from './inline-gallery-events';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/core/types/object';
 import {htmlFor} from '../../../src/core/dom/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {matches, scopedQuerySelector} from '../../../src/core/dom/query';
 import {setStyle} from '../../../src/core/dom/style';
 
