@@ -7,7 +7,7 @@
 <head>
   <meta charset="utf-8">
   <title>AMP #0</title>
-  <link rel="canonical" href="amps.html">
+  <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-custom>
     body {
@@ -17,8 +17,7 @@
 
     [fallback] {
       display: block;
-      /* @alternative */
-      display: flex;
+      /* @alternative */ display: flex;
       flex-direction: column;
       flex-wrap: nowrap;
       justify-content: center;
@@ -56,9 +55,7 @@
       flex-wrap: wrap;
     }
 
-    .main,
-    h1,
-    .wrap {
+    .main, h1, .wrap {
       max-width: 960px;
       margin-left: auto;
       margin-right: auto;
@@ -73,7 +70,6 @@
       margin: 40px auto 20px;
       font-size: 24px;
     }
-
     h2 {
       font-weight: bold;
       margin: 40px 0 20px;
@@ -98,7 +94,7 @@
       padding: 6px 10px 0 0;
     }
 
-    .empty>td {
+    .empty > td {
       padding-top: 0;
     }
 
@@ -106,86 +102,29 @@
       margin-right: 10px;
     }
   </style>
-  <style amp-boilerplate>
-    body {
-      -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-      -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-      -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-      animation: -amp-start 8s steps(1, end) 0s 1 normal both
-    }
-
-    @-webkit-keyframes -amp-start {
-      from {
-        visibility: hidden
-      }
-
-      to {
-        visibility: visible
-      }
-    }
-
-    @-moz-keyframes -amp-start {
-      from {
-        visibility: hidden
-      }
-
-      to {
-        visibility: visible
-      }
-    }
-
-    @-ms-keyframes -amp-start {
-      from {
-        visibility: hidden
-      }
-
-      to {
-        visibility: visible
-      }
-    }
-
-    @-o-keyframes -amp-start {
-      from {
-        visibility: hidden
-      }
-
-      to {
-        visibility: visible
-      }
-    }
-
-    @keyframes -amp-start {
-      from {
-        visibility: hidden
-      }
-
-      to {
-        visibility: visible
-      }
-    }
-  </style><noscript>
-    <style amp-boilerplate>
-      body {
-        -webkit-animation: none;
-        -moz-animation: none;
-        -ms-animation: none;
-        animation: none
-      }
-    </style>
-  </noscript>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
-
 <body>
+
+  <amp-pixel src="https://donot.worry/?ct=VIDEO_STATE(my-video,currentTime)&r=TOTAL_ENGAGED_TIME&b=BACKGROUND_STATE"></amp-pixel>
 
   <div style="display: flex; flex-direction: column; height: 100vh">
     <div>
       <h1>AMP Video Players</h1>
       <div class="main">
         <div class="video-container">
-          <amp-video data-substitutable data-removable-attrs="src" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" width="358" height="204" layout="responsive" id="my-video" controls>
+          <amp-video
+              data-substitutable
+              data-removable-attrs="src"
+              src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+              width="358"
+              height="204"
+              layout="responsive"
+              id="my-video"
+              controls>
             <div placeholder>
               This is a placeholder
             </div>
@@ -237,6 +176,7 @@
       </div>
     </div>
   </div>
+
   <amp-analytics>
     <script type="application/json">
       {
@@ -319,5 +259,4 @@
     </script>
   </amp-analytics>
 </body>
-
 </html>
