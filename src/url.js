@@ -87,8 +87,7 @@ export function getWinOrigin(win) {
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
- * Consider the returned object immutable. This is enforced during
- * testing by freezing the object.
+ * Consider the returned object immutable.
  * @param {string} url
  * @param {boolean=} opt_nocache
  *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
@@ -108,8 +107,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
- * Consider the returned object immutable. This is enforced during
- * testing by freezing the object.
+ * Consider the returned object immutable.
  * @param {!HTMLAnchorElement} a
  * @param {string} url
  * @param {LruCache=} opt_cache
@@ -118,71 +116,8 @@ export function parseUrlDeprecated(url, opt_nocache) {
  * @restricted
  */
 export function parseUrlWithA(a, url, opt_cache) {
-  if (IS_ESM) {
-    a.href = '';
-    return /** @type {?} */ (new URL(url, a.href));
-  }
-
-  if (opt_cache && opt_cache.has(url)) {
-    return opt_cache.get(url);
-  }
-
-  a.href = url;
-
-  // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick #3449.
-  if (!a.protocol) {
-    a.href = a.href;
-  }
-
-  const info = /** @type {!Location} */ ({
-    href: a.href,
-    protocol: a.protocol,
-    host: a.host,
-    hostname: a.hostname,
-    port: a.port == '0' ? '' : a.port,
-    pathname: a.pathname,
-    search: a.search,
-    hash: a.hash,
-    origin: null, // Set below.
-  });
-
-  // Some IE11 specific polyfills.
-  // 1) IE11 strips out the leading '/' in the pathname.
-  if (info.pathname[0] !== '/') {
-    info.pathname = '/' + info.pathname;
-  }
-
-  // 2) For URLs with implicit ports, IE11 parses to default ports while
-  // other browsers leave the port field empty.
-  if (
-    (info.protocol == 'http:' && info.port == 80) ||
-    (info.protocol == 'https:' && info.port == 443)
-  ) {
-    info.port = '';
-    info.host = info.hostname;
-  }
-
-  // For data URI a.origin is equal to the string 'null' which is not useful.
-  // We instead return the actual origin which is the full URL.
-  let origin;
-  if (a.origin && a.origin != 'null') {
-    origin = a.origin;
-  } else if (info.protocol == 'data:' || !info.host) {
-    origin = info.href;
-  } else {
-    origin = info.protocol + '//' + info.host;
-  }
-  info.origin = origin;
-
-  // Freeze during testing to avoid accidental mutation.
-  const frozen = getMode().test && Object.freeze ? Object.freeze(info) : info;
-
-  if (opt_cache) {
-    opt_cache.put(url, frozen);
-  }
-
-  return frozen;
+  a.href = '';
+  return /** @type {?} */ (new URL(url, a.href));
 }
 
 /**
