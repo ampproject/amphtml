@@ -16,8 +16,8 @@
 
 import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {removeElement} from '../../../src/core/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpHulu extends AMP.BaseElement {

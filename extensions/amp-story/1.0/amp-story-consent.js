@@ -21,7 +21,7 @@ import {
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/core/constants/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
@@ -31,7 +31,7 @@ import {
   closestAncestorElementBySelector,
   matches,
 } from '../../../src/core/dom/query';
-import {computedStyle, setImportantStyles} from '../../../src/style';
+import {computedStyle, setImportantStyles} from '../../../src/core/dom/style';
 import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,
@@ -41,7 +41,7 @@ import {
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from './../../../src/core/types/object';
 import {isArray} from '../../../src/core/types';
-import {isJsonScriptTag} from '../../../src/dom';
+import {isJsonScriptTag} from '../../../src/core/dom';
 
 import {parseJson} from '../../../src/core/types/object/json';
 import {renderAsElement} from './simple-template';

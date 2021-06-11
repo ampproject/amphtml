@@ -17,7 +17,7 @@
 import {AmpEvents} from '../../../src/core/constants/amp-events';
 import {CSS} from '../../../build/amp-mega-menu-0.1.css';
 import {Keys} from '../../../src/core/constants/key-codes';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {
   closest,
@@ -26,7 +26,7 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/core/dom/query';
 import {dev, userAssert} from '../../../src/log';
-import {isConnectedNode, isRTL, tryFocus} from '../../../src/dom';
+import {isConnectedNode, isRTL, tryFocus} from '../../../src/core/dom';
 import {mod} from '../../../src/core/math';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {toArray} from '../../../src/core/types/array';

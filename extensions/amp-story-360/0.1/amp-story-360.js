@@ -30,11 +30,11 @@ import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {htmlFor} from '../../../src/core/dom/static-template';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {listenOncePromise} from '../../../src/event-helper';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';

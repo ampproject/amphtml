@@ -25,7 +25,7 @@ import {
 } from './core/3p-frame';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn} from './experiments';
-import {setStyle} from './style';
+import {setStyle} from './core/dom/style';
 import {tryParseJson} from './core/types/object/json';
 import {urls} from './config';
 

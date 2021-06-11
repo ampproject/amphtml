@@ -28,7 +28,7 @@ const POLL_PARAMS = {
 };
 
 import '../amp-vk';
-import {Layout} from '../../../../src/layout';
+import {Layout} from '../../../../src/core/dom/layout';
 import {Resource} from '../../../../src/service/resource';
 
 describes.realWin(

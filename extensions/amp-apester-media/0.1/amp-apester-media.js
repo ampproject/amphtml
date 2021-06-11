@@ -26,14 +26,17 @@ import {
   setFullscreenOff,
   setFullscreenOn,
 } from './utils';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {
+  getLengthNumeral,
+  isLayoutSizeDefined,
+} from '../../../src/core/dom/layout';
 import {handleCompanionAds} from './monetization';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {px, setStyles} from '../../../src/style';
-import {removeElement} from '../../../src/dom';
+import {px, setStyles} from '../../../src/core/dom/style';
+import {removeElement} from '../../../src/core/dom';
 
 /** @const */
 const TAG = 'amp-apester-media';

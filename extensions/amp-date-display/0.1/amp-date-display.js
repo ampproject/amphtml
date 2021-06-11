@@ -19,8 +19,8 @@ import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dashToCamelCase} from '../../../src/core/types/string/index.js';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeChildren} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {removeChildren} from '../../../src/core/dom';
 
 /** @const {string} */
 const TAG = 'amp-date-display';

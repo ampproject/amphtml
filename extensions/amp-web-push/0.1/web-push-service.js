@@ -31,7 +31,7 @@ import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {openWindowDialog} from '../../../src/dom';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseQueryString} from '../../../src/core/types/string/url';
 import {parseUrlDeprecated} from '../../../src/url';
 

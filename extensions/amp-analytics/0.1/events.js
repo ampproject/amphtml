@@ -28,29 +28,12 @@ import {
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
-import {
-  deepMerge,
-  dict,
-  hasOwn
-} from '../../../src/core/types/object';
-import {
-  dev,
-  devAssert,
-  user,
-  userAssert
-} from '../../../src/log';
-import {
-  getData
-} from '../../../src/event-helper';
-import {
-  getDataParamsFromAttributes,
-  isAmpElement
-} from '../../../src/dom';
-import {
-  isArray,
-  isEnumValue,
-  isFiniteNumber
-} from '../../../src/core/types';
+import {deepMerge, dict, hasOwn} from '../../../src/core/types/object';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {getData} from '../../../src/event-helper';
+import {getDataParamsFromAttributes} from '../../../src/core/dom';
+import {isAmpElement} from '../../../src/amp-element-helpers';
+import {isArray, isEnumValue, isFiniteNumber} from '../../../src/core/types';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -1309,24 +1292,22 @@ export class VideoEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const videoSpec = config['videoSpec'] || {};
-    const selector = config['selector'] || videoSpec['selector'];
+    const selectorValue = config['selector'] || videoSpec['selector'];
+    const selector = isArray(selectorValue) ? selectorValue : selectorValue.split();
     const selectionMethod = config['selectionMethod'] || null;
 
     const targetReady = [];
-    if (Array.isArray(selector)) {
-      selector.forEach((item, i) => {
-        targetReady.push(
-          this.root.getElement(
-            context,
-            item,
-            selectionMethod
-          )
+    selector.forEach((item, i) => {
+      targetReady.push(
+        this.root.getElement(
+          context,
+          item,
+          selectionMethod
         )
-      });
-    }
+      )
+    });
 
-    //TODO: check for uniqueness
-    //this.assertUniqueSelectors_(selector);
+    //TODO: check for uniqueness of selectors
 
     const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
     const excludeAutoplay = videoSpec['exclude-autoplay'];

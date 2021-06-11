@@ -17,12 +17,10 @@
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
 import {CommonSignals} from '../../../../src/core/constants/common-signals';
-import {LayoutPriority} from '../../../../src/layout';
+import {LayoutPriority} from '../../../../src/core/dom/layout';
 import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {isAdLike} from '../../../../src/iframe-helper';

@@ -19,7 +19,7 @@ import {dict, hasOwn} from '../../../src/core/types/object';
 import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
 import {scopedQuerySelector} from '../../../src/core/dom/query';
 import {toArray} from '../../../src/core/types/array';
-import {waitForChild} from '../../../src/dom';
+import {waitForChild} from '../../../src/core/dom';
 
 /**
  * CSS class used to deactivate animations.

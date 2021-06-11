@@ -24,7 +24,11 @@ import {
 } from '../../../src/core/dom/stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
-import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
+import {
+  Layout,
+  LayoutPriority,
+  isLayoutSizeDefined,
+} from '../../../src/core/dom/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -34,7 +38,7 @@ import {
 } from '../../../src/3p-frame';
 import {assertHttpsUrl} from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/core/dom';
 import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
@@ -77,7 +81,7 @@ import {
 import {padStart} from '../../../src/core/types/string';
 import {parseJson} from '../../../src/core/types/object/json';
 import {processHead} from './head-validation';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/core/dom/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
