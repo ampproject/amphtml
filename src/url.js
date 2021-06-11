@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {LruCache} from './core/data-structures/lru-cache';
 import {dict, hasOwn} from './core/types/object';
 import {endsWith} from './core/types/string';
 import {getMode} from './mode';
@@ -42,14 +41,6 @@ const SERVING_TYPE_PREFIX = dict({
  * @type {HTMLAnchorElement}
  */
 let a;
-
-/**
- * We cached all parsed URLs. As of now there are no use cases
- * of AMP docs that would ever parse an actual large number of URLs,
- * but we often parse the same one over and over again.
- * @type {LruCache}
- */
-let cache;
 
 /** @private @const Matches amp_js_* parameters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
@@ -95,9 +86,6 @@ export function getWinOrigin(win) {
 export function parseUrlDeprecated(url) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = IS_ESM
-      ? null
-      : self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
   return parseUrlWithA(a, url);
@@ -113,6 +101,7 @@ export function parseUrlDeprecated(url) {
  * @restricted
  */
 export function parseUrlWithA(a, url) {
+  // This href value gets set to the window's `baseUrl` automatically
   a.href = '';
   // In Safari 14 and earlier, calling the URL constructor with a base URL whose
   // value is undefined causes Safari to throw a TypeError;

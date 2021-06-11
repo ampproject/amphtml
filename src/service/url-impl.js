@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {LruCache} from '../core/data-structures/lru-cache';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -43,9 +42,6 @@ export class Url {
 
     /** @private @const {!HTMLAnchorElement} */
     this.anchor_ = /** @type {!HTMLAnchorElement} */ (doc.createElement('a'));
-
-    /** @private @const {?LruCache} */
-    this.cache_ = IS_ESM ? null : new LruCache(100);
   }
 
   /**
@@ -57,11 +53,7 @@ export class Url {
    * @return {!Location}
    */
   parse(url, opt_nocache) {
-    return parseUrlWithA(
-      this.anchor_,
-      url,
-      IS_ESM || opt_nocache ? null : this.cache_
-    );
+    return parseUrlWithA(this.anchor_, url);
   }
 
   /**
