@@ -52,4 +52,7 @@ exports.extension = function (name, version, latest, isModule, loadPriority) {
   );
 };
 
+// TODO(alanorozco): Implement with Bento Auto-Envelope.
+exports.bento = exports.extension;
+
 exports.none = '<%= contents %>';
