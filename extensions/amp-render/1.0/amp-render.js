@@ -231,6 +231,7 @@ export class AmpRender extends BaseElement {
         }
 
         let componentHeight, contentHeight;
+        // TODO(dmanek): Look into using measureIntersection instead
         this.measureMutateElement(
           () => {
             componentHeight = computedStyle(
