@@ -19,14 +19,15 @@ import '../../../amp-mustache/0.2/amp-mustache';
 import '../../../amp-script/0.1/amp-script';
 import '../amp-render';
 import * as BatchedJsonModule from '../../../../src/batched-json';
+import * as Style from '../../../../src/core/dom/style';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Services} from '../../../../src/services';
 import {htmlFor} from '../../../../src/core/dom/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {waitFor} from '../../../../testing/test-helper';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+import {expect} from 'chai';
 
 describes.realWin(
   'amp-render-v1.0',
@@ -84,7 +85,6 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       html = htmlFor(doc);
-      toggleExperiment(win, 'amp-render', true, true);
     });
 
     it('renders from amp-state', async () => {
@@ -147,9 +147,17 @@ describes.realWin(
         .stub(BatchedJsonModule, 'batchFetchJsonFor')
         .resolves({name: 'Joe'});
 
-      const mutatorStub = env.sandbox
-        .stub(Services, 'mutatorForDoc')
-        .callThrough();
+      const setStylesStub = env.sandbox.spy(Style, 'setStyles');
+
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) =>
+          Promise.resolve().then(measurer).then(mutator),
+        requestChangeSize: () => {
+          console.log('fake rcs');
+          return Promise.resolve();
+        },
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
 
       element = html`
         <amp-render
@@ -163,8 +171,44 @@ describes.realWin(
       `;
       doc.body.appendChild(element);
 
+      // We do this twice to flush out vsync
       await getRenderedData();
-      expect(mutatorStub).to.be.called;
+      await getRenderedData();
+
+      expect(setStylesStub).to.be.calledTwice;
+    });
+
+    it('layout=container does not resize', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      const setStylesStub = env.sandbox.stub(Style, 'setStyles');
+
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) =>
+          Promise.resolve().then(measurer).then(mutator),
+        requestChangeSize: () => Promise.reject(),
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          layout="container"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+          <div placeholder>Placeholder text</div>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      // We do this twice to flush out vsync
+      await getRenderedData();
+      await getRenderedData();
+
+      expect(setStylesStub).to.be.calledOnce;
     });
 
     it('should error when layout=container is used without placeholder', async () => {
