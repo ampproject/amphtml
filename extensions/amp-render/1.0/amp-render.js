@@ -184,8 +184,11 @@ export class AmpRender extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    if (layout === Layout.CONTAINER && !this.getPlaceholder()) {
-      user().error(TAG, 'placeholder required with layout="container"');
+    if (layout === Layout.CONTAINER) {
+      userAssert(
+        this.getPlaceholder(),
+        'placeholder required with layout="container"'
+      );
     }
     return super.isLayoutSupported(layout);
   }

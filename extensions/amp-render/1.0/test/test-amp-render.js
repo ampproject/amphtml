@@ -24,7 +24,7 @@ import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/core/constants/action-constants';
 import {Services} from '../../../../src/services';
 import {htmlFor} from '../../../../src/core/dom/static-template';
-import {user} from '../../../../src/log';
+import * as log from '../../../../src/log';
 import {waitFor} from '../../../../testing/test-helper';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 import {expect} from 'chai';
@@ -172,6 +172,7 @@ describes.realWin(
       doc.body.appendChild(element);
 
       // We do this twice to flush out vsync
+      // TODO(dmanek): investigate if this can be done with one call
       await getRenderedData();
       await getRenderedData();
 
@@ -205,6 +206,7 @@ describes.realWin(
       doc.body.appendChild(element);
 
       // We do this twice to flush out vsync
+      // TODO(dmanek): investigate if this can be done with one call
       await getRenderedData();
       await getRenderedData();
 
@@ -212,7 +214,7 @@ describes.realWin(
     });
 
     it('should error when layout=container is used without placeholder', async () => {
-      const errorSpy = env.sandbox.stub(user(), 'error');
+      const errorSpy = env.sandbox.stub(log, 'userAssert');
 
       env.sandbox
         .stub(BatchedJsonModule, 'batchFetchJsonFor')
@@ -231,8 +233,7 @@ describes.realWin(
 
       await getRenderedData();
       expect(errorSpy).to.be.called;
-      expect(errorSpy.args[0][0]).to.match(/amp-render/);
-      expect(errorSpy.args[0][1]).to.match(
+      expect(errorSpy.getCall(4).args[1]).to.match(
         /placeholder required with layout="container"/
       );
     });
