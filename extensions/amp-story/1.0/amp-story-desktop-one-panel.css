@@ -18,13 +18,13 @@
 
 
 .i-amphtml-story-desktop-one-panel {
-  --large-desktop-ratio: 69 / 116;
-  --small-desktop-ratio: 3 / 4;
+  --i-amphtml-story-page-large-desktop-ratio: 69 / 116;
+  --i-amphtml-story-page-small-desktop-ratio: 3 / 4;
 }
 
 .i-amphtml-story-desktop-one-panel amp-story-page {
-  margin: auto auto !important;
-  aspect-ratio: var(--large-desktop-ratio) !important;
+  margin: auto !important;
+  aspect-ratio: var(--i-amphtml-story-page-large-desktop-ratio) !important;
   height: calc(100vh - 148px) !important;
   max-height: 752px !important;
   width: auto !important; 
@@ -33,7 +33,7 @@
 
 @media(max-height: 756px) {
   .i-amphtml-story-desktop-one-panel amp-story-page {
-    aspect-ratio: var(--small-desktop-ratio) !important;
+    aspect-ratio: var(--i-amphtml-story-page-small-desktop-ratio) !important;
     height: 100vh !important;
   }
 }
