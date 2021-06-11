@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  CommonSignals
-} from '../../../src/core/constants/common-signals';
-import {
-  Deferred
-} from '../../../src/core/data-structures/promise';
-import {
-  Observable
-} from '../../../src/core/data-structures/observable';
+import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {Deferred} from '../../../src/core/data-structures/promise';
+import {Observable} from '../../../src/core/data-structures/observable';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
@@ -187,9 +181,9 @@ export function getTrackerKeyName(eventType) {
   if (!isReservedTriggerType(eventType)) {
     return AnalyticsEventType.CUSTOM;
   }
-  return hasOwn(TRACKER_TYPE, eventType) ?
-    TRACKER_TYPE[eventType].name :
-    eventType;
+  return hasOwn(TRACKER_TYPE, eventType)
+    ? TRACKER_TYPE[eventType].name
+    : eventType;
 }
 
 /**
@@ -362,9 +356,9 @@ export class CustomEventTracker extends EventTracker {
     const isSandboxEvent = eventType.startsWith('sandbox-');
 
     // Push recent events if any.
-    const buffer = isSandboxEvent ?
-      this.sandboxBuffer_ && this.sandboxBuffer_[eventType] :
-      this.buffer_ && this.buffer_[eventType];
+    const buffer = isSandboxEvent
+      ? this.sandboxBuffer_ && this.sandboxBuffer_[eventType]
+      : this.buffer_ && this.buffer_[eventType];
 
     if (buffer) {
       const bufferLength = buffer.length;
@@ -654,10 +648,7 @@ export class ScrollEventTracker extends EventTracker {
   scrollHandler_(boundsH, boundsV, useInitialPageSize, listener, e) {
     // Calculates percentage scrolled by adding screen height/width to
     // top/left and dividing by the total scroll height/width.
-    const {
-      scrollHeight,
-      scrollWidth
-    } = useInitialPageSize ? e.initialSize : e;
+    const {scrollHeight, scrollWidth} = useInitialPageSize ? e.initialSize : e;
 
     this.triggerScrollEvents_(
       boundsV,
@@ -736,8 +727,7 @@ export class ScrollEventTracker extends EventTracker {
           this.root_.getRootElement(),
           AnalyticsEventType.SCROLL,
           vars,
-          /** enableDataVars */
-          false
+          /** enableDataVars */ false
         )
       );
     }
@@ -897,9 +887,9 @@ class TimerEventHandler {
 
     /** @private @const {number} */
     this.maxTimerLength_ =
-      'maxTimerLength' in timerSpec ?
-      Number(timerSpec['maxTimerLength']) :
-      DEFAULT_MAX_TIMER_LENGTH_SECONDS;
+      'maxTimerLength' in timerSpec
+        ? Number(timerSpec['maxTimerLength'])
+        : DEFAULT_MAX_TIMER_LENGTH_SECONDS;
     userAssert(this.maxTimerLength_ > 0, 'Bad maxTimerLength specification');
 
     /** @private @const {boolean} */
@@ -1140,8 +1130,7 @@ export class TimerEventTracker extends EventTracker {
     }
 
     const timerHandler = new TimerEventHandler(
-      /** @type {!JsonObject} */
-      (timerSpec),
+      /** @type {!JsonObject} */ (timerSpec),
       startBuilder,
       stopBuilder
     );
@@ -1236,8 +1225,7 @@ export class TimerEventTracker extends EventTracker {
       this.root.getRootElement(),
       eventType,
       this.trackers_[timerId].getTimerVars(),
-      /** enableDataVars */
-      false
+      /** enableDataVars */ false
     );
   }
 
@@ -1322,9 +1310,7 @@ export class VideoEventTracker extends EventTracker {
     let lastPercentage = 0;
 
     return this.sessionObservable_.add((event) => {
-      const {
-        type
-      } = event;
+      const {type} = event;
       const details = /** @type {?JsonObject|undefined} */ (getData(event));
       const normalizedType = normalizeVideoEventType(type, details);
 
@@ -1470,9 +1456,7 @@ function removeInternalVars(details) {
   if (!details) {
     return dict();
   }
-  const clean = {
-    ...details
-  };
+  const clean = {...details};
   delete clean[videoAnalyticsCustomEventTypeKey];
   return /** @type {!JsonObject} */ (clean);
 }
@@ -1612,9 +1596,7 @@ export class VisibilityTracker extends EventTracker {
    * @private
    */
   createReportReadyPromiseForDocumentHidden_() {
-    const {
-      ampdoc
-    } = this.root;
+    const {ampdoc} = this.root;
 
     if (!ampdoc.isVisible()) {
       return Promise.resolve();
@@ -1637,9 +1619,7 @@ export class VisibilityTracker extends EventTracker {
    */
   createReportReadyPromiseForDocumentExit_() {
     const deferred = new Deferred();
-    const {
-      win
-    } = this.root.ampdoc;
+    const {win} = this.root.ampdoc;
     let unloadListener, pageHideListener;
 
     // Do not add an unload listener unless pagehide is not available.
@@ -1651,8 +1631,7 @@ export class VisibilityTracker extends EventTracker {
     // behavior, we should not add an unload listener.
     if (!this.supportsPageHide_()) {
       win.addEventListener(
-        /*OK*/
-        'unload',
+        /*OK*/ 'unload',
         (unloadListener = () => {
           win.removeEventListener('unload', unloadListener);
           deferred.resolve();
@@ -1730,9 +1709,9 @@ export class VisibilityTracker extends EventTracker {
     }
 
     // Wait for root signal if there's no element selected.
-    return opt_element ?
-      waitForTracker.getElementSignal(waitForSpec, opt_element) :
-      waitForTracker.getRootSignal(waitForSpec);
+    return opt_element
+    ? waitForTracker.getElementSignal(waitForSpec, opt_element)
+    : waitForTracker.getRootSignal(waitForSpec);
   }
 
   /**
@@ -1746,8 +1725,7 @@ export class VisibilityTracker extends EventTracker {
     // TODO: Verify usage and change behavior to have state override data-vars
     const attr = getDataParamsFromAttributes(
       target,
-      /* computeParamNameFunc */
-      undefined,
+      /* computeParamNameFunc */ undefined,
       VARIABLE_DATA_ATTRIBUTE_KEY
     );
     for (const key in attr) {
