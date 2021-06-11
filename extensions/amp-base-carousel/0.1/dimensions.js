@@ -15,7 +15,7 @@
  */
 
 import {mod} from '../../../src/core/math';
-import {setImportantStyles, setStyle} from '../../../src/style';
+import {setImportantStyles, setStyle} from '../../../src/core/dom/style';
 
 /**
  * @enum {number}

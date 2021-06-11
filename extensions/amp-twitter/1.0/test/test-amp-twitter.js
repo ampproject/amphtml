@@ -15,7 +15,7 @@
  */
 
 import '../amp-twitter';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/core/dom';
 import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
 import {toggleExperiment} from '../../../../src/experiments';

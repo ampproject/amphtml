@@ -16,7 +16,7 @@
 
 import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
 import {CSS} from '../../../build/amp-next-page-0.1.css';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {NextPageService} from './next-page-service';
 import {Services} from '../../../src/services';
 import {
@@ -35,7 +35,7 @@ import {fetchDocument} from '../../../src/document-fetcher';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
-import {isJsonScriptTag, removeElement} from '../../../src/dom';
+import {isJsonScriptTag, removeElement} from '../../../src/core/dom';
 import {parseJson, tryParseJson} from '../../../src/core/types/object/json';
 
 const TAG = 'amp-next-page';

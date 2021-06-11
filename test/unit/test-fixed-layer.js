@@ -24,7 +24,7 @@ import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-imp
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {toggle} from '../../src/style';
+import {toggle} from '../../src/core/dom/style';
 import {user} from '../../src/log';
 
 describes.sandboxed('FixedLayer', {}, (env) => {

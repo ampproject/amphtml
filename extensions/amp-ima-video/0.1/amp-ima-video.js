@@ -16,7 +16,7 @@
 
 import {Deferred} from '../../../src/core/data-structures/promise';
 import {ImaPlayerData} from '../../../ads/google/ima/ima-player-data';
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
@@ -27,17 +27,17 @@ import {
   dispatchCustomEvent,
   isJsonScriptTag,
   removeElement,
-} from '../../../src/dom';
+} from '../../../src/core/dom';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isEnumValue, isObject} from '../../../src/core/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '../../../src/core/dom/size-observer';
 import {toArray} from '../../../src/core/types/array';
 
 /** @const */

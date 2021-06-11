@@ -33,11 +33,11 @@ import {
   isRTL,
   iterateCursor,
   toggleAttribute,
-} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
+} from '../../../src/core/dom';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyle} from '../../../src/style';
+import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {setStyle} from '../../../src/core/dom/style';
 import {toArray} from '../../../src/core/types/array';
 
 /** @enum {number} */

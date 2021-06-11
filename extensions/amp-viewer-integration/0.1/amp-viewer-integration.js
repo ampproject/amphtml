@@ -34,7 +34,7 @@ import {dict} from '../../../src/core/types/object';
 import {getAmpdoc} from '../../../src/service';
 import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
-import {isIframed} from '../../../src/dom';
+import {isIframed} from '../../../src/core/dom';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';

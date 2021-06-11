@@ -25,8 +25,9 @@ import {debounce} from '../../../src/core/types/function';
 import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth} from '../../../src/core/dom/css-selectors';
 import {hasOwn, map} from '../../../src/core/types/object';
-import {removeChildren} from '../../../src/dom';
-import {scale, setImportantStyles} from '../../../src/style';
+import {isExperimentOn} from 'src/experiments';
+import {removeChildren} from '../../../src/core/dom';
+import {scale, setImportantStyles} from '../../../src/core/dom/style';
 import {scopedQuerySelector} from '../../../src/core/dom/query';
 
 /**
@@ -125,6 +126,9 @@ export class ProgressBar {
 
     /** @private {!Element} */
     this.storyEl_ = storyEl;
+
+    /** @private {?Element} */
+    this.currentAdSegment_ = null;
   }
 
   /**
@@ -197,6 +201,10 @@ export class ProgressBar {
       },
       true /** callToInitialize */
     );
+
+    this.storeService_.subscribe(StateProperty.AD_STATE, (adState) => {
+      this.onAdStateUpdate_(adState);
+    });
 
     Services.viewportForDoc(this.ampdoc_).onResize(
       debounce(this.win_, () => this.onResize_(), 300)
@@ -421,6 +429,49 @@ export class ProgressBar {
       default:
         MAX_SEGMENTS = 20;
     }
+  }
+
+  /**
+   * Show/hide ad progress bar treatment based on ad visibility.
+   * @param {boolean} adState
+   */
+  onAdStateUpdate_(adState) {
+    // TODO(ccordry): follow up with branched experiment for different
+    // time intervals.
+    if (!isExperimentOn(this.win_, 'story-ad-progress-segment')) {
+      return;
+    }
+    // Set CSS signal that we are in the experiment.
+    // TODO(#33969) delete when launched.
+    if (!this.root_.hasAttribute('i-amphtml-ad-progress-exp')) {
+      this.root_.setAttribute('i-amphtml-ad-progress-exp', '');
+    }
+    adState ? this.createAdSegment_() : this.removeAdSegment_();
+  }
+
+  /**
+   * Create ad progress segment that will be shown when ad is visible.
+   */
+  createAdSegment_() {
+    // +2 because of zero-index and we want the chip after the ad.
+    const index = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX) + 2;
+    const progressEl = this.getRoot()?.querySelector(
+      `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
+        index
+      )})`
+    );
+    const adSegment = this.win_.document.createElement('div');
+    adSegment.className = 'i-amphtml-story-ad-progress-value';
+    this.currentAdSegment_ = adSegment;
+    progressEl.appendChild(adSegment);
+  }
+
+  /**
+   * Remove active ad progress segment when ad is navigated away from
+   */
+  removeAdSegment_() {
+    this.currentAdSegment_?.parentNode.removeChild(this.currentAdSegment_);
+    this.currentAdSegment_ = null;
   }
 
   /**

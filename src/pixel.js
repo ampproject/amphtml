@@ -15,7 +15,7 @@
  */
 
 import {WindowInterface} from '../src/core/window/interface';
-import {createElementWithAttributes} from '../src/dom';
+import {createElementWithAttributes} from '../src/core/dom';
 import {dict} from '../src/core/types/object';
 import {user} from '../src/log';
 

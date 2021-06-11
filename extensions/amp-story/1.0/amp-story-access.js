@@ -19,15 +19,15 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/core/dom/layout';
 import {closest} from '../../../src/core/dom/query';
-import {copyChildren, removeChildren} from '../../../src/dom';
+import {copyChildren, removeChildren} from '../../../src/core/dom';
 import {dev, user} from '../../../src/log';
 import {getStoryAttributeSrc} from './utils';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor} from '../../../src/core/dom/static-template';
 import {isArray, isObject} from '../../../src/core/types';
 import {parseJson} from '../../../src/core/types/object/json';
-import {setImportantStyles} from '../../../src/style';
+import {setImportantStyles} from '../../../src/core/dom/style';
 
 /** @const {string} */
 const TAG = 'amp-story-access';
