@@ -35,12 +35,16 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {StoryAdConfig} from './story-ad-config';
 import {StoryAdPageManager} from './story-ad-page-manager';
+import {
+  StoryAdSegmentExp,
+  ViewerSetTimeToBranch,
+} from '../../../src/experiments/story-ad-progress-segment';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
-import {getExperimentBranch, isExperimentOn} from '#experiments';
+import {getExperimentBranch, getExperimentBranch} from '#experiments';
 import {getPlacementAlgo} from './algorithm-utils';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
@@ -344,23 +348,24 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /**
    * Create progress bar if auto advance exp is on.
+   * TODO(#33969) move to chosen UI and delete the others.
    */
   maybeCreateProgressBar_() {
-    // TODO(ccordry): add viewer enabling of yellow segment.
-    if (isExperimentOn(this.win, 'story-ad-progress-segment')) {
-      // Ad progress bar creation handled in progress-bar.js.
-      return;
-    }
-
     const autoAdvanceExpBranch = getExperimentBranch(
       this.win,
       StoryAdAutoAdvance.ID
     );
-    // TODO(ccordry): move to experiment id when viewer is able to share.
     const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
       'storyNextUp'
     );
-    if (
+    if (storyNextUpParam && ViewerSetTimeToBranch[storyNextUpParam]) {
+      // Actual progress bar creation handled in progress-bar.js.
+      forceExperimentBranch(
+        this.win,
+        StoryAdSegmentExp.ID,
+        ViewerSetTimeToBranch[storyNextUpParam]
+      );
+    } else if (
       autoAdvanceExpBranch &&
       autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
     ) {
