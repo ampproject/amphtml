@@ -86,7 +86,7 @@ export const getMockScrambledData = () => {
       {
         index: 0,
         count: 1,
-        selected: true,
+        selected: false,
       },
       {
         index: 1,
