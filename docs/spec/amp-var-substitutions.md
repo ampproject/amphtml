@@ -499,7 +499,7 @@ Provides the `amp-carousel` slide from which the traversal happens. The value is
 -   **platform variable**: N/A
 -   **amp-analytics variable**: `${fromSlide}`
 
-For more information on analytics for `amp-carousel`, see [AMP Carousel and Analytics](../extensions/amp-carousel/amp-carousel-analytics.md).
+For more information on analytics for `amp-carousel`, see [AMP Carousel and Analytics](../../extensions/amp-carousel/amp-carousel-analytics.md).
 
 #### Carousel To Slide
 
@@ -508,7 +508,7 @@ Provides the `amp-carousel` slide to which the traversal happens. The value is e
 -   **platform variable**: N/A
 -   **amp-analytics variable**: `${toSlide}`
 
-For more information on analytics for `amp-carousel`, see [AMP Carousel and Analytics](../extensions/amp-carousel/amp-carousel-analytics.md).
+For more information on analytics for `amp-carousel`, see [AMP Carousel and Analytics](../../extensions/amp-carousel/amp-carousel-analytics.md).
 
 #### Client ID
 
@@ -549,7 +549,7 @@ Provides a per document-source-origin (the origin of the website where you publi
 You can pass the following arguments into the Client ID variable like a function. Spaces between arguments and values are not allowed.
 
 -   `cid scope` (Required): The namespace for the Client ID.
--   `amp-user-notification id` (Optional): Use this argument to make the Client ID substitution dependent on the dismissal of a user notification shown to the visitor of the page. In amp-analytics, this is the same as using the [`data-consent-notification-id`](../extensions/amp-analytics/amp-analytics.md) attribute -- you may choose to use either one for the amp-analytics component.
+-   `amp-user-notification id` (Optional): Use this argument to make the Client ID substitution dependent on the dismissal of a user notification shown to the visitor of the page. In amp-analytics, this is the same as using the [`data-consent-notification-id`](../../extensions/amp-analytics/amp-analytics.md) attribute -- you may choose to use either one for the amp-analytics component.
 -   `cookie name` (Optional): The name of the fallback cookie when the document is not served by an AMP proxy. If not provided, `cid scope` will be used as the cookie name.
 -   `disable backup` (Optional): If set to `true`, then will opt-out of storing the AMP generated CID in Storage as a backup when the document is not served by an AMP proxy. Otherwise, will default into this behavior.
 
@@ -700,7 +700,7 @@ Analytics vendor might prefer this value to Document Referrer for better session
 
 #### Extra URL Parameters
 
-Provides all the parameters that are defined in the [`extraUrlParams`](../extensions/amp-analytics/amp-analytics.md#extra-url-params) block of the amp-analytics config as a variable. If you use the `extraUrlParams` variable, the parameters are not appended to the end of the URL.
+Provides all the parameters that are defined in the [`extraUrlParams`](../../extensions/amp-analytics/amp-analytics.md#extra-url-params) block of the amp-analytics config as a variable. If you use the `extraUrlParams` variable, the parameters are not appended to the end of the URL.
 
 -   **platform variable**: N/A
 -   **amp-analytics variable**: `${extraUrlParams}`
@@ -722,7 +722,7 @@ Provides the time when the element met visibility conditions for the first time 
 
 #### Geolocation
 
-Provides the approximate, country level, location of the user provided by the [`amp-geo`](../extensions/amp-geo/amp-geo.md#variable-substitution) extension.
+Provides the approximate, country level, location of the user provided by the [`amp-geo`](../../extensions/amp-geo/amp-geo.md#variable-substitution) extension.
 
 -   **platform variable**: AMP_GEO
     -   Example: <br>
@@ -1211,7 +1211,7 @@ Provides the user's IANA time-zone code (if available).
 
 #### Total Engaged Time
 
-Provides the total time (in seconds) the user has been engaged with the page since the page first became visible in the viewport. Total engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
+Provides the total time (in seconds) the user has been engaged with the page since the page first became visible in the viewport. Total engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
 
 -   **platform variable**: `TOTAL_ENGAGED_TIME`
 -   **amp-analytics variable**: `${totalEngagedTime}`
@@ -1219,7 +1219,7 @@ Provides the total time (in seconds) the user has been engaged with the page sin
 
 #### Incremental Engaged Time
 
-Provides the time (in seconds) the user has been engaged with the page since the last time it was reset. It takes two arguments. The first is the name of the timer, the second is whether or not to reset it (it is optional and defaults to true). Incremental engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
+Provides the time (in seconds) the user has been engaged with the page since the last time it was reset. It takes two arguments. The first is the name of the timer, the second is whether or not to reset it (it is optional and defaults to true). Incremental engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
 
 -   **platform variable**: `INCREMENTAL_ENGAGED_TIME`
 -   **amp-analytics variable**: `${incrementalEngagedTime(foo,false)}`
