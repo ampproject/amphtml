@@ -13,7 +13,10 @@
       "#polyfills/*": ["./src/polyfills/*"],
       "#preact/*": ["./src/preact/*"],
       "#purifier/*": ["./src/purifier/*"],
-      "#service/*": ["./src/service/*"]
+      "#service/*": ["./src/service/*"],
+
+      "#test/*": ["./test/*"],
+      "#testing/*": ["./testing/*"]
     }
   }
 }
