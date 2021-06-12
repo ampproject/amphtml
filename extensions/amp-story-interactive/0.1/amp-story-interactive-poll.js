@@ -22,6 +22,7 @@ import {CSS} from '../../../build/amp-story-interactive-poll-0.1.css';
 import {computedStyle, setStyle} from '../../../src/core/dom/style';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/core/dom/static-template';
+import {orderData} from './utils';
 import {toArray} from '../../../src/core/types/array';
 
 /**
@@ -133,10 +134,12 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
       return;
     }
 
-    const percentages = this.preprocessPercentages_(optionsData);
+    const optionElements = this.getOptionElements();
+    const orderedData = orderData(optionsData, optionElements);
+    const percentages = this.preprocessPercentages_(orderedData);
 
-    this.getOptionElements().forEach((el, index) => {
-      if (optionsData[index].selected) {
+    optionElements.forEach((el, index) => {
+      if (orderedData[index].selected) {
         const textEl = el.querySelector(
           '.i-amphtml-story-interactive-option-text'
         );

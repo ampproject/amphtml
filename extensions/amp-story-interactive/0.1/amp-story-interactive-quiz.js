@@ -21,6 +21,7 @@ import {
 import {CSS} from '../../../build/amp-story-interactive-quiz-0.1.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {htmlFor} from '../../../src/core/dom/static-template';
+import {orderData} from './utils';
 import {setStyle} from '../../../src/core/dom/style';
 import objstr from 'obj-str';
 
@@ -156,29 +157,7 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     }
 
     const optionElements = this.getOptionElements();
-    // Accounts for any scrambled or incomplete data
-    const orderedData = new Array(optionElements.length);
-    for (let i = 0; i < optionsData.length; i++) {
-      orderedData[optionsData[i].index] = optionsData[i];
-    }
-    /**
-     * Object constructor for default option data.
-     * Useful if the response from the backend gives incomplete data.
-     *
-     * @constructor
-     * @param {number} index
-     * @private
-     */
-    function OptionData_(index) {
-      this.count = 0;
-      this.index = index;
-      this.selected = false;
-    }
-    for (let i = 0; i < orderedData.length; i++) {
-      if (typeof orderedData[i] === 'undefined') {
-        orderedData[i] = new OptionData_(i);
-      }
-    }
+    const orderedData = orderData(optionsData, optionElements);
     const percentages = this.preprocessPercentages_(orderedData);
 
     optionElements.forEach((el, index) => {

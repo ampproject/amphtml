@@ -47,3 +47,38 @@ export const deduplicateInteractiveIds = (doc) => {
     }
   }
 };
+
+/**
+ * Reorders options data to account for scrambled or incomplete data.
+ *
+ * @param {!Array<!InteractiveOptionType>} optionsData
+ * @param {!Array<!Element>} optionElements
+ * @return {!Array<!InteractiveOptionType>}
+ */
+export const orderData = (optionsData, optionElements) => {
+  const orderedData = new Array(optionElements.length);
+  for (let i = 0; i < optionsData.length; i++) {
+    orderedData[optionsData[i].index] = optionsData[i];
+  }
+
+  /**
+   * Object constructor for default option data.
+   * Useful if the response from the backend gives incomplete data.
+   *
+   * @constructor
+   * @param {number} index
+   */
+  function OptionData(index) {
+    this.count = 0;
+    this.index = index;
+    this.selected = false;
+  }
+
+  for (let i = 0; i < orderedData.length; i++) {
+    if (typeof orderedData[i] === 'undefined') {
+      orderedData[i] = new OptionData(i);
+    }
+  }
+
+  return orderedData;
+};
