@@ -22,6 +22,7 @@ import {CSS} from '../../../build/amp-story-interactive-binary-poll-0.1.css';
 import {computedStyle, setStyle} from '../../../src/core/dom/style';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/core/dom/static-template';
+import {orderData} from './utils';
 import {toArray} from '../../../src/core/types/array';
 
 /** @const @enum {number} */
@@ -227,9 +228,11 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
       return;
     }
 
-    const percentages = this.preprocessPercentages_(responseData);
+    const optionElements = this.getOptionElements();
+    const orderedData = orderData(responseData, optionElements);
+    const percentages = this.preprocessPercentages_(orderedData);
 
-    this.getOptionElements().forEach((el, index) => {
+    optionElements.forEach((el, index) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
       const percentage = percentages[index];
       const percentageEl = el.querySelector(
@@ -254,7 +257,7 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
           this.getTransformVal_(percentage) * (index === 0 ? 1 : -1)
         }%) !important`
       );
-      if (responseData[index].selected) {
+      if (orderedData[index].selected) {
         textContainer.setAttribute(
           'aria-label',
           'selected ' + textContainer.textContent
