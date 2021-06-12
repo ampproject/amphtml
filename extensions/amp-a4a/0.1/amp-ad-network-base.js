@@ -16,8 +16,8 @@
 
 import {FailureType, RecoveryModeType} from './amp-ad-type-defs';
 import {dev, devAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
-import {map} from '../../../src/core/types/object';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {map} from '#core/types/object';
 import {sendXhrRequest} from './amp-ad-utils';
 
 const TAG = 'amp-ad-network-base';

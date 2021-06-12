@@ -15,7 +15,7 @@
  */
 
 import {BrowserController, RequestBank} from '../../testing/test-helper';
-import {parseQueryString} from '../../src/core/types/string/url';
+import {parseQueryString} from '#core/types/string/url';
 
 const config = describes.sandboxed.configure().skipEdge().skipSafari();
 

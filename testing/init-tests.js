@@ -16,21 +16,21 @@
 'use strict';
 
 // These two imports must precede all others.
-import '../src/polyfills';
+import '#polyfills';
 import './setup_chai_sinon';
 
 import * as describes from './describes';
-import {Services} from '../src/services';
+import {Services} from '#service';
 import {TestConfig} from './test-config';
 import {activateChunkingForTesting} from '../src/chunk';
 import {adoptWithMultidocDeps} from '../src/runtime';
-import {cancelTimersForTesting} from '../src/service/timer-impl';
+import {cancelTimersForTesting} from '#service/timer-impl';
 import {configure as configureEnzyme} from 'enzyme';
 import {
   installAmpdocServices,
   installRuntimeServices,
-} from '../src/service/core-services';
-import {installDocService} from '../src/service/ampdoc-impl';
+} from '#service/core-services';
+import {installDocService} from '#service/ampdoc-impl';
 import {installYieldIt} from './yield';
 import {
   maybeStubConsoleInfoLogWarn,
@@ -41,10 +41,10 @@ import {
   warnForConsoleError,
 } from './console-logging-setup';
 import {preventAsyncErrorThrows} from './async-errors';
-import {removeElement} from '../src/core/dom';
+import {removeElement} from '#core/dom';
 import {resetAccumulatedErrorMessagesForTesting} from '../src/error-reporting';
-import {resetEvtListenerOptsSupportForTesting} from '../src/core/dom/event-helper-listen';
-import {resetExperimentTogglesForTesting} from '../src/experiments';
+import {resetEvtListenerOptsSupportForTesting} from '#core/dom/event-helper-listen';
+import {resetExperimentTogglesForTesting} from '#experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import AMP_CONFIG from '../build-system/global-configs/prod-config.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import PreactEnzyme from 'enzyme-adapter-preact-pure';

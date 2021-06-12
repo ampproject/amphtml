@@ -22,11 +22,11 @@ import {
   StorageLocation,
 } from '../../amp-script';
 import {FakeWindow} from '../../../../../testing/fake-dom';
-import {Services} from '../../../../../src/services';
+import {Services} from '#service';
 import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../../../../../src/service';
+} from '../../../../../src/service-helpers';
 import {user} from '../../../../../src/log';
 
 describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {

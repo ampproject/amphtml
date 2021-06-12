@@ -16,7 +16,7 @@
 
 import {ActionTrust, DEFAULT_ACTION} from './core/constants/action-constants';
 import {Layout, LayoutPriority, applyFillContent} from './core/dom/layout';
-import {Services} from './services';
+import {Services} from './service';
 import {devAssert, user, userAssert} from './log';
 import {dispatchCustomEvent} from './core/dom';
 import {getData, listen, loadPromise} from './event-helper';

@@ -19,7 +19,7 @@ import {
   forceExperimentBranch,
   getExperimentBranch,
   randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
+} from '#experiments';
 import {addExperimentIdToElement} from './traffic-experiments';
 
 /**

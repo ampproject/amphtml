@@ -17,27 +17,27 @@
 import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {VisibilityState} from '../../../src/core/constants/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {
   childElementByAttr,
   childElementsByTag,
   scopedQuerySelector,
-} from '../../../src/core/dom/query';
+} from '#core/dom/query';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
-import {findIndex, toArray} from '../../../src/core/types/array';
-import {htmlFor, htmlRefs} from '../../../src/core/dom/static-template';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {findIndex, toArray} from '#core/types/array';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {
   insertAtStart,
   isJsonScriptTag,
   removeChildren,
   removeElement,
-} from '../../../src/core/dom';
+} from '#core/dom';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   parseFavicon,
@@ -45,10 +45,10 @@ import {
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
 
-import {setStyles, toggle} from '../../../src/core/dom/style';
+import {setStyles, toggle} from '#core/dom/style';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {tryParseJson} from '#core/types/object/json';
 import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 

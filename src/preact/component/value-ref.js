@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {useRef} from '../';
+import {useRef} from '#preact';
 
 /**
  * @param {T} current

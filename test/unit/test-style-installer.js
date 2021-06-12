@@ -16,14 +16,14 @@
 
 import * as rds from '../../src/render-delaying-services';
 import * as styles from '../../src/style-installer';
-import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Services} from '../../src/services';
+import {AmpDocShadow, AmpDocSingle} from '#service/ampdoc-impl';
+import {Services} from '#service';
 import {createShadowRoot} from '../../src/shadow-embed';
-import {getStyle} from '../../src/core/dom/style';
-import {installPerformanceService} from '../../src/service/performance-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
+import {getStyle} from '#core/dom/style';
+import {installPerformanceService} from '#service/performance-impl';
+import {installPlatformService} from '#service/platform-impl';
 import {isAnimationNone} from '../../testing/test-helper';
-import {setShadowDomSupportedVersionForTesting} from '../../src/core/dom/web-components';
+import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
 
 describes.sandboxed('Styles', {}, () => {
   describes.realWin('makeBodyVisible', {amp: true}, (env) => {

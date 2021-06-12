@@ -36,7 +36,7 @@
  *
  */
 
-import {HostServices} from '../../../src/inabox/host-services';
+import {HostServices} from '#inabox/host-services';
 import {MraidService} from './mraid-service';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
