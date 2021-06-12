@@ -509,7 +509,7 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/service/custom-element-registry.js',
     allowlist: [
-      'builtins/**->src/service/custom-element-registry.js',
+      'src/builtins/**->src/service/custom-element-registry.js',
       'src/amp.js->src/service/custom-element-registry.js',
       'src/runtime.js->src/service/custom-element-registry.js',
       'src/service/extensions-impl.js->src/service/custom-element-registry.js',
