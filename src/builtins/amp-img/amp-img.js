@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../../src/base-element';
+import {BaseElement} from '../../base-element';
 import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {ReadyState} from '#core/constants/ready-state';
 import {Services} from '#service';
-import {dev} from '../../src/log';
+import {dev} from '../../log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
-import {listen} from '../../src/event-helper';
+import {listen} from '../../event-helper';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {propagateObjectFitStyles, setImportantStyles} from '#core/dom/style';
 import {registerElement} from '#service/custom-element-registry';

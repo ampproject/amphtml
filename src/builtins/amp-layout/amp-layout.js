@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../../src/base-element';
 import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {BaseElement} from '../../base-element';
 import {realChildNodes} from '#core/dom/query';
 import {registerElement} from '#service/custom-element-registry';
 
