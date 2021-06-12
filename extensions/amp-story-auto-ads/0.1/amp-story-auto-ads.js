@@ -38,13 +38,13 @@ import {StoryAdPageManager} from './story-ad-page-manager';
 import {
   StoryAdSegmentExp,
   ViewerSetTimeToBranch,
-} from '#experiments/story-ad-progress-segment';
+} from '../../../src/experiments/story-ad-progress-segment';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
-import {getExperimentBranch, getExperimentBranch} from '#experiments';
+import {forceExperimentBranch, getExperimentBranch} from '#experiments';
 import {getPlacementAlgo} from './algorithm-utils';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
