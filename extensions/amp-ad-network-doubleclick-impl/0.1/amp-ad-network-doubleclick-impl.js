@@ -108,6 +108,7 @@ import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 import {getPageLayoutBoxBlocking} from '#core/dom/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '#core/types';
@@ -524,6 +525,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     );
     if (autoAdvanceExpBranch) {
       addExperimentIdToElement(autoAdvanceExpBranch, this.element);
+    }
+
+    const storyAdSegmentBranch = getExperimentBranch(
+      this.win,
+      StoryAdSegmentExp.ID
+    );
+    if (storyAdSegmentBranch) {
+      addExperimentIdToElement(storyAdSegmentBranch, this.element);
     }
   }
 
