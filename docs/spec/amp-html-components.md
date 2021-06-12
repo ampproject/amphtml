@@ -171,6 +171,6 @@ In these cases, services may set up endpoints that produce data that conforms to
 
 ## Components
 
-Built-in components include [amp-img](../../builtins/amp-img/amp-img.md), [amp-layout](../../builtins/amp-layout/amp-layout.md) and [amp-pixel](../../builtins/amp-pixel/amp-pixel.md).
+Built-in components include [amp-img](../../src/builtins/amp-img/amp-img.md), [amp-layout](../../src/builtins/amp-layout/amp-layout.md) and [amp-pixel](../../src/builtins/amp-pixel/amp-pixel.md).
 
 AMP HTML extensions include [extended components](../../extensions) and extended templates.

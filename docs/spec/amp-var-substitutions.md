@@ -52,7 +52,7 @@ The following table lists the features that enable variable substitutions, as we
     <td width="25%">None</td>
   </tr>
   <tr>
-    <td width="25%"><code>amp-pixel</code><br><a href="https://github.com/ampproject/amphtml/blob/main/builtins/amp-pixel/amp-pixel.md#substitutions">Detailed documentation</a></td>
+    <td width="25%"><code>amp-pixel</code><br><a href="https://github.com/ampproject/amphtml/blob/main/src/builtins/amp-pixel/amp-pixel.md#substitutions">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
     <td width="25%">No</td>
     <td width="25%">None</td>

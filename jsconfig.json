@@ -5,7 +5,7 @@
       "#3p/*": ["./3p/*"],
       "#ads/*": ["./ads/*"],
       "#build/*": ["./build/*"],
-      "#builtins/*": ["./builtins/*"],
+      "#builtins/*": ["./src/builtins/*"],
 
       "#core/*": ["./src/core/*"],
       "#experiments/*": ["./src/experiments/*"],
