@@ -194,7 +194,8 @@
 }
 
 .i-amphtml-story-ad-progress-value {
-  animation: i-amphtml-story-ad-value 8s linear !important;
+  animation-name: i-amphtml-story-ad-value !important;
+  animation-timing-function: linear !important;
   background-color: #fbc02d !important;
   height: 100% !important;
   position: relative !important;
