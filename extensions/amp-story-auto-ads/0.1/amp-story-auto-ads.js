@@ -38,7 +38,7 @@ import {StoryAdPageManager} from './story-ad-page-manager';
 import {
   StoryAdSegmentExp,
   ViewerSetTimeToBranch,
-} from '../../../src/experiments/story-ad-progress-segment';
+} from '#experiments/story-ad-progress-segment';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
