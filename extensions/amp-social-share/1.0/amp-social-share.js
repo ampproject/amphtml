@@ -15,18 +15,18 @@
  */
 
 import {CSS} from '../../../build/amp-social-share-1.0.css';
-import {Layout} from '../../../src/layout';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Services} from '../../../src/services';
+import {Layout} from '#core/dom/layout';
+import {PreactBaseElement} from '#preact/base-element';
+import {Services} from '#service';
 import {SocialShare} from './social-share';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/core/types/object';
-import {getDataParamsFromAttributes} from '../../../src/core/dom';
+import {dict} from '#core/types/object';
+import {getDataParamsFromAttributes} from '#core/dom';
 import {getSocialConfig} from './social-share-config';
-import {isExperimentOn} from '../../../src/experiments';
-import {parseQueryString} from '../../../src/core/types/string/url';
-import {toWin} from '../../../src/core/window';
-import {toggle} from '../../../src/core/dom/style';
+import {isExperimentOn} from '#experiments';
+import {parseQueryString} from '#core/types/string/url';
+import {toWin} from '#core/window';
+import {toggle} from '#core/dom/style';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

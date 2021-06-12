@@ -19,11 +19,11 @@ import {
   InteractiveType,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-poll-0.1.css';
-import {computedStyle, setStyle} from '../../../src/core/dom/style';
+import {computedStyle, setStyle} from '#core/dom/style';
 import {dev} from '../../../src/log';
-import {htmlFor} from '../../../src/core/dom/static-template';
+import {htmlFor} from '#core/dom/static-template';
 import {orderData} from './utils';
-import {toArray} from '../../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 /**
  * Generates the template for the poll.

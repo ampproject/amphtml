@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {map} from '../../../src/core/types/object';
+import {map} from '#core/types/object';
 import {user} from '../../../src/log';
 
 /** @private Whether ids are deduplicated or not */

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {DomBasedWeakRef} from '../../../../src/core/data-structures/dom-based-weakref';
+import {DomBasedWeakRef} from '#core/data-structures/dom-based-weakref';
 
 describes.realWin('data structures - DOM-based weakref', {}, (env) => {
   let element;

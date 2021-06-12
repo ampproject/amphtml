@@ -20,14 +20,14 @@ import {
   UIType,
 } from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {closest} from '../../../src/core/dom/query';
-import {deepEquals} from '../../../src/core/types/object/json';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
+import {closest} from '#core/dom/query';
+import {deepEquals} from '#core/types/object/json';
 import {dev, user} from '../../../src/log';
-import {prefersReducedMotion} from '../../../src/core/dom/media-query-props';
-import {setImportantStyles} from '../../../src/core/dom/style';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
+import {setImportantStyles} from '#core/dom/style';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /** @const {string} */

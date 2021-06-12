@@ -20,9 +20,9 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-quiz-0.1.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {htmlFor} from '../../../src/core/dom/static-template';
+import {htmlFor} from '#core/dom/static-template';
 import {orderData} from './utils';
-import {setStyle} from '../../../src/core/dom/style';
+import {setStyle} from '#core/dom/style';
 import objstr from 'obj-str';
 
 /**

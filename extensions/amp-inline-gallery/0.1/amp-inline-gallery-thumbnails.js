@@ -17,11 +17,11 @@
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {InlineGalleryEvents} from './inline-gallery-events';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/core/types/object';
-import {htmlFor} from '../../../src/core/dom/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {matches, scopedQuerySelector} from '../../../src/core/dom/query';
-import {setStyle} from '../../../src/core/dom/style';
+import {dict} from '#core/types/object';
+import {htmlFor} from '#core/dom/static-template';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {matches, scopedQuerySelector} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
 
 /**
  * Renders a carousel of thumbnails for an inline gallery.

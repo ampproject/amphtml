@@ -19,7 +19,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as experiments from '../../../../src/experiments';
+import * as experiments from '#experiments';
 import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
 import {AmpA4A, MODULE_NOMODULE_PARAMS_EXP} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
@@ -33,18 +33,12 @@ import {
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '../../../../src/core/constants/consent-state';
-import {Services} from '../../../../src/services';
-import {
-  addAttributesToElement,
-  createElementWithAttributes,
-} from '../../../../src/core/dom';
-import {
-  forceExperimentBranch,
-  toggleExperiment,
-} from '../../../../src/experiments';
-import {toWin} from '../../../../src/core/window';
-import {utf8Decode, utf8Encode} from '../../../../src/core/types/string/bytes';
+} from '#core/constants/consent-state';
+import {Services} from '#service';
+import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import {forceExperimentBranch, toggleExperiment} from '#experiments';
+import {toWin} from '#core/window';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
