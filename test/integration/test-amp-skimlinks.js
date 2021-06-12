@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BrowserController, RequestBank} from '../../testing/test-helper';
+import {BrowserController, RequestBank} from '#testing/test-helper';
 import {PLATFORM_NAME} from '../../extensions/amp-skimlinks/0.1/constants';
 import {parseQueryString} from '#core/types/string/url';
 

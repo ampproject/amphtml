@@ -19,7 +19,7 @@ import {LayoutPriority} from '#core/dom/layout';
 import {READY_SCAN_SIGNAL} from '#service/resources-interface';
 import {Scheduler} from '#service/scheduler';
 import {createElementWithAttributes} from '#core/dom';
-import {installIntersectionObserverStub} from '../../testing/intersection-observer-stub';
+import {installIntersectionObserverStub} from '#testing/intersection-observer-stub';
 
 describes.realWin('Scheduler', {amp: true}, (env) => {
   let win, doc, ampdoc;

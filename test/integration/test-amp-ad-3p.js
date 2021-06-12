@@ -17,7 +17,7 @@
 import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
 import {Services} from '#service';
 import {createCustomEvent} from '../../src/event-helper';
-import {createFixtureIframe, poll} from '../../testing/iframe';
+import {createFixtureIframe, poll} from '#testing/iframe';
 import {forceExperimentBranch} from '#experiments';
 import {installPlatformService} from '#service/platform-impl';
 import {layoutRectLtwh} from '#core/math/layout-rect';
