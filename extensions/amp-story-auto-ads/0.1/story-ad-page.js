@@ -31,11 +31,11 @@ import {
   AnalyticsVars,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
-import {CommonSignals} from '#core/constants/common-signals';
 import {
   BranchToTimeValues,
   StoryAdSegmentExp,
 } from '#experiments/story-ad-progress-segment';
+import {CommonSignals} from '#core/constants/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {
   StateProperty,

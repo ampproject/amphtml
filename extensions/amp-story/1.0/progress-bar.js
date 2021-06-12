@@ -16,7 +16,7 @@
 import {
   BranchToTimeValues,
   StoryAdSegmentExp,
-} from '../../../src/experiments/story-ad-progress-segment';
+} from '#experiments/story-ad-progress-segment';
 import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '#service';
