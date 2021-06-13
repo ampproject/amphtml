@@ -1217,6 +1217,14 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-wordpress-embed",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "amp-yotpo",
     "version": "0.1",
     "latestVersion": "0.1"
