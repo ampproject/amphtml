@@ -473,7 +473,8 @@ export class PreactBaseElement extends BaseElement {
 
   /**
    * Register an action for AMP documents to execute an API handler.
-   * This has no effect on Bento documents, since they lack an actions system.
+   *
+   * This has no effect on Bento documents, since they lack an Actions system.
    * Instead, they should use `(await element.getApi()).action()`
    * @param {string} alias
    * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
