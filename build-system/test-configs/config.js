@@ -207,10 +207,6 @@ const htmlFixtureGlobs = [
   '!examples/viewer-webview.html',
   '!examples/viewer.html',
 
-  // Mimicks a transformed cache document, so it does not pass validation for
-  // untransformed documents.
-  '!test/fixtures/e2e/amp-video/videos-cdn.html',
-
   // TODO(#25149): Fix these invalid files and remove them from this list.
   '!examples/accordion.amp.html',
   '!examples/ad-lightbox.amp.html',
@@ -495,6 +491,7 @@ const htmlFixtureGlobs = [
   '!test/fixtures/e2e/amp-story-player/pre-rendering.html',
   '!test/fixtures/e2e/amp-story/amp-story.amp.html',
   '!test/fixtures/e2e/amp-subscriptions-google/swg.amp.html',
+  '!test/fixtures/e2e/amp-video/videos-cdn.html',
   '!test/fixtures/e2e/amp-viewer-integration/viewer.html',
   '!test/fixtures/e2e/amp4email/element-size-race.html',
   '!test/fixtures/e2e/amp4email/viewport-size-race.html',
