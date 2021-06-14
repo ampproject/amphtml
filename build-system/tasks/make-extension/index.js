@@ -55,7 +55,7 @@ let ArgsDef;
  *   name: string,
  *   version: string,
  *   latestVersion?: (string|undefined)
- *   options?: ({hasCss: boolean}|undefined)
+ *   options?: ({hasCss?: boolean, wrapper?: string}|undefined)
  * }}
  */
 let BundleDef;
@@ -305,7 +305,10 @@ async function makeExtensionFromTemplates(
   };
 
   if (!options.nocss) {
-    bundleConfig.options = {hasCss: true};
+    bundleConfig.options = {...bundleConfig.options, hasCss: true};
+  }
+  if (options.bento) {
+    bundleConfig.options = {...bundleConfig.options, wrapper: 'bento'};
   }
 
   await insertExtensionBundlesConfig(
