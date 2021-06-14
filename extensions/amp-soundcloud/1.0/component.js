@@ -17,7 +17,6 @@
 import * as Preact from '../../../src/preact';
 import {dict} from '../../../src/core/types/object';
 import {useEffect, useRef} from '../../../src/preact';
-import {user} from '../../../src/log';
 
 /**
  * @param {!SoundcloudDef.Props} props
@@ -34,12 +33,9 @@ export function Soundcloud({
   // Property and Reference Variables
   const iframeRef = useRef(null);
 
-  // Perform manual checking as assertion is not available for Bento: Issue #32739
-  if (playlistId == undefined && trackId === undefined) {
-    user().warn(
-      'AMP-SOUNDCLOUD',
-      'data-trackid or data-playlistid is required for <amp-soundcloud>'
-    );
+  // Checking for valid props
+  if (!checkProps(trackId, playlistId)) {
+    return null;
   }
 
   // Build Base URL
@@ -93,4 +89,29 @@ export function Soundcloud({
       title={'Soundcloud Widget - ' + mediaId}
     ></iframe>
   );
+}
+
+/**
+ * Verify required props and throw error if necessary.
+ * @param {string|undefined} trackId
+ * @param {string|undefined} playlistId
+ * @return {boolean} true on valid
+ */
+function checkProps(trackId, playlistId) {
+  // Perform manual checking as assertion is not available for Bento: Issue #32739
+  if (playlistId == undefined && trackId === undefined) {
+    displayWarning(
+      'data-trackid or data-playlistid is required for <amp-soundcloud>'
+    );
+    return false;
+  }
+  return true;
+}
+
+/**
+ * @param {?string} message
+ */
+function displayWarning(message) {
+  console /*OK*/
+    .warn(message);
 }
