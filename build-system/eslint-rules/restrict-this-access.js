@@ -107,6 +107,11 @@ module.exports = function (context) {
         return;
       }
 
+      // Optional users are ok
+      if (node.parent.optional) {
+        return;
+      }
+
       const {name} = property;
       if (allowed.includes(name)) {
         return;

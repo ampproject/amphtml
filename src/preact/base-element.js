@@ -636,12 +636,7 @@ export class PreactBaseElement extends BaseElement {
             SERVICE_SLOT_ATTRS
           );
           shadowRoot.appendChild(serviceSlot);
-          // TODO(alanorozco): Consider updating local/restrict-this-access
-          // so that it ignores the left side of an optional chain opt
-          // (this.getPlaceholder?.())
-          // eslint-disable-next-line local/restrict-this-access
           this.getPlaceholder?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
-          // eslint-disable-next-line local/restrict-this-access
           this.getFallback?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
         }
         this.container_ = container;
@@ -1081,15 +1076,14 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
 }
 
 /**
+ * Get an element's child nodes. On the AMP layer, returns the original nodes of
+ * the custom element without any service nodes that could have been added for
+ * markup.
  * @param {Element} element
  * @return {Array<Node>}
  */
 function getChildNodes(element) {
-  if (element.getRealChildNodes) {
-    // AMP only
-    return element.getRealChildNodes();
-  }
-  return toArray(element.childNodes);
+  return element.getRealChildNodes?.() ?? toArray(element.childNodes);
 }
 
 /**
