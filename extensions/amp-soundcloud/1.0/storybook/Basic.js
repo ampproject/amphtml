@@ -38,8 +38,7 @@ export const track = () => {
   return (
     <Soundcloud
       color={hex}
-      height="240"
-      layout="fixed-height"
+      style={{height: '240px'}}
       trackId={trackid}
       visual={visual}
     />
@@ -59,8 +58,7 @@ export const playlist = () => {
   return (
     <Soundcloud
       color={hex}
-      height="240"
-      layout="fixed-height"
+      style={{height: '240px'}}
       playlistId={playlistid}
       visual={visual}
     />
