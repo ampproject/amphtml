@@ -42,5 +42,21 @@ describes.fakeWin('amp-ad-network-dianomi-impl', {amp: true}, (env) => {
         `https://www.dianomi.com/smartads.pl?format=a4a&id=${requestParamId}`
       );
     });
+
+    it('should throw an error when requestParamId is empty', () => {
+      const requestParamId = '';
+      element.setAttribute('data-request-param-id', requestParamId);
+      allowConsoleError(() => {
+        expect(() => impl.getAdUrl()).to.throw('The Dianomi request parameter ID provided is invalid');
+      });
+    });
+
+    it('should throw an error if an incorrect request param id', () => {
+      const requestParamId = '145a2';
+      element.setAttribute('data-request-param-id', requestParamId);
+      allowConsoleError(() => {
+        expect(() => impl.getAdUrl()).to.throw('The Dianomi request parameter ID provided is invalid');
+      });
+    });
   });
 });
