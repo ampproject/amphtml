@@ -17,7 +17,7 @@
 import * as Preact from '../../../../src/preact';
 import {Soundcloud} from '../component';
 import {boolean, color, text, withKnobs} from '@storybook/addon-knobs';
-import {rgba2hex} from '../converter';
+import {rgba2hex} from './converter';
 
 export default {
   title: 'Soundcloud',

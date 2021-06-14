@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {boolean, color, text, withKnobs} from '@storybook/addon-knobs';
-import {rgba2hex} from '../converter';
+import {rgba2hex} from './converter';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
