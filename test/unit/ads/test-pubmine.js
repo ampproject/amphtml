@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {pubmine} from '../../../ads/vendors/pubmine';
+import {pubmine} from '#ads/vendors/pubmine';
 
 describes.fakeWin('pubmine', {}, (env) => {
   let win;

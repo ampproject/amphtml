@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Platform} from '../../src/service/platform-impl';
+import {Platform} from '#service/platform-impl';
 
 describes.sandboxed('Platform', {}, (env) => {
   let isIos;

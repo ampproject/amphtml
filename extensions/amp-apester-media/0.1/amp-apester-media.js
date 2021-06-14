@@ -15,10 +15,10 @@
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {
   extractTags,
   getPlatform,
@@ -26,17 +26,14 @@ import {
   setFullscreenOff,
   setFullscreenOn,
 } from './utils';
-import {
-  getLengthNumeral,
-  isLayoutSizeDefined,
-} from '../../../src/core/dom/layout';
+import {getLengthNumeral, isLayoutSizeDefined} from '#core/dom/layout';
 import {handleCompanionAds} from './monetization';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {px, setStyles} from '../../../src/core/dom/style';
-import {removeElement} from '../../../src/core/dom';
+import {px, setStyles} from '#core/dom/style';
+import {removeElement} from '#core/dom';
 
 /** @const */
 const TAG = 'amp-apester-media';

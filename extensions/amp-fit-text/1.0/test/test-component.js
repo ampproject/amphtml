@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {FitText, calculateFontSize, setOverflowStyle} from '../component';
-import {computedStyle} from '../../../../src/core/dom/style';
+import {computedStyle} from '#core/dom/style';
 import {mount} from 'enzyme';
 import {useStyles} from '../component.jss';
 import {waitFor} from '../../../../testing/test-helper';

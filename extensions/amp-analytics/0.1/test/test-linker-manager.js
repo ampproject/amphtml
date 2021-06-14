@@ -20,8 +20,8 @@ import {
   areFriendlyDomains,
   isWildCardMatch,
 } from '../linker-manager';
-import {Priority} from '../../../../src/service/navigation';
-import {Services} from '../../../../src/services';
+import {Priority} from '#service/navigation';
+import {Services} from '#service';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,

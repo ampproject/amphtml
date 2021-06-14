@@ -21,8 +21,8 @@
  * @see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/106812/
  */
 
-import {LayoutRectDef, layoutRectLtwh} from '../core/math/layout-rect';
-import {isConnectedNode} from '../core/dom';
+import {LayoutRectDef, layoutRectLtwh} from '#core/math/layout-rect';
+import {isConnectedNode} from '#core/dom';
 
 /**
  * Stores the native getBoundingClientRect before we patch it, so that the

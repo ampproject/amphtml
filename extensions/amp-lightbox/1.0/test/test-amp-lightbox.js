@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 import '../amp-lightbox';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {
-  ActionTrust,
-  DEFAULT_ACTION,
-} from '../../../../src/core/constants/action-constants';
-import {htmlFor} from '../../../../src/core/dom/static-template';
+import {ActionInvocation} from '#service/action-impl';
+import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {htmlFor} from '#core/dom/static-template';
 import {poll} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 import {whenCalled} from '../../../../testing/test-helper';
 
 describes.realWin(

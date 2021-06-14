@@ -16,6 +16,7 @@
 'using strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const posthtml = require('posthtml');
 const {
   log,
   logLocalDev,
@@ -26,7 +27,34 @@ const {cyan, green, red} = require('../common/colors');
 const {getFilesToCheck} = require('../common/utils');
 const {getOutput} = require('../common/process');
 const {htmlFixtureGlobs} = require('../test-configs/config');
-const {JSDOM} = require('jsdom');
+const {readFile} = require('fs-extra');
+
+const defaultFormat = 'AMP';
+
+// Note that the two lightning bolt emojis are encoded differently.
+// https://github.com/ampproject/amphtml/issues/25990
+const formatPrefixes = ['amp', '⚡️', '⚡'];
+const formatSuffixes = ['4ads', '4email'];
+
+/**
+ * @param {posthtml.Node} tree
+ * @return {string}
+ */
+function posthtmlGetAmpFormat(tree) {
+  let format = defaultFormat;
+  tree.match({tag: 'html'}, (node) => {
+    for (const prefix of formatPrefixes) {
+      for (const suffix of formatSuffixes) {
+        const attrValue = node.attrs[prefix + suffix];
+        if (attrValue === '' || attrValue === true) {
+          format = 'AMP' + suffix.toUpperCase();
+        }
+      }
+    }
+    return node;
+  });
+  return format;
+}
 
 /**
  * Gets the AMP format type for the given HTML file by parsing its contents and
@@ -35,11 +63,12 @@ const {JSDOM} = require('jsdom');
  * @return {Promise<string>}
  */
 async function getAmpFormat(file) {
-  const jsdom = await JSDOM.fromFile(file);
-  const {documentElement} = jsdom.window.document;
-  const isAds = documentElement.hasAttribute('amp4ads');
-  const isEmail = documentElement.hasAttribute('amp4email');
-  return isAds ? 'AMP4ADS' : isEmail ? 'AMP4EMAIL' : 'AMP';
+  const source = await readFile(file, 'utf8');
+  if (!formatSuffixes.some((suffix) => source.includes(suffix))) {
+    return defaultFormat;
+  }
+  const result = await posthtml([posthtmlGetAmpFormat]).process(source);
+  return result.html.trim();
 }
 
 /**

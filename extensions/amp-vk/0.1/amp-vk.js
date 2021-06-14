@@ -22,13 +22,13 @@ const EmbedType = {
   POLL: 'poll',
 };
 
-import {Layout} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
 import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getData, listen} from '../../../src/event-helper';
-import {isEnumValue} from '../../../src/core/types';
-import {removeElement} from '../../../src/core/dom';
+import {isEnumValue} from '#core/types';
+import {removeElement} from '#core/dom';
 import {userAssert} from '../../../src/log';
 
 export class AmpVk extends AMP.BaseElement {
