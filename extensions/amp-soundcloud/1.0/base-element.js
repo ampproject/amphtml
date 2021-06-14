@@ -19,7 +19,6 @@ import {Services} from '../../../src/services';
 import {Soundcloud} from './component';
 
 export class BaseElement extends PreactBaseElement {
-  /** @override @nocollapse */
   /** @override */
   static getPreconnects() {
     return ['https://api.soundcloud.com/'];
