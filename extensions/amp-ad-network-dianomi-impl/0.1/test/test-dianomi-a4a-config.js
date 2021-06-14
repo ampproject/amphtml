@@ -18,7 +18,7 @@
 import '../../../amp-ad/0.1/amp-ad-ui';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {AmpAdNetworkDianomiImpl} from '../amp-ad-network-dianomi-impl';
-import {createElementWithAttributes} from '../../../../src/core/dom';
+import {createElementWithAttributes} from 'src/core/dom';
 
 describes.fakeWin('amp-ad-network-dianomi-impl', {amp: true}, (env) => {
   let win, doc, element, impl;
