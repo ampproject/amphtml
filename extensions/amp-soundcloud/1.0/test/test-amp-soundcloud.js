@@ -15,7 +15,7 @@
  */
 
 import '../amp-soundcloud';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '../../../../src/core/dom/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
@@ -158,6 +158,7 @@ describes.realWin(
     it('renders secret token', async () => {
       element = html`
         <amp-soundcloud
+          data-trackid="243169232"
           data-visual="false"
           data-secret-token="c-af"
         ></amp-soundcloud>
@@ -254,7 +255,11 @@ describes.realWin(
 
     it('ignores color in visual mode', async () => {
       element = html`
-        <amp-soundcloud data-visual="true" data-color="00FF00">
+        <amp-soundcloud
+          data-trackid="243169232"
+          data-visual="true"
+          data-color="00FF00"
+        >
         </amp-soundcloud>
       `;
 
