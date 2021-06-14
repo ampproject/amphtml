@@ -47,7 +47,9 @@ describes.fakeWin('amp-ad-network-dianomi-impl', {amp: true}, (env) => {
       const requestParamId = '';
       element.setAttribute('data-request-param-id', requestParamId);
       allowConsoleError(() => {
-        expect(() => impl.getAdUrl()).to.throw('The Dianomi request parameter ID provided is invalid');
+        expect(() => impl.getAdUrl()).to.throw(
+          'The Dianomi request parameter ID provided is invalid'
+        );
       });
     });
 
@@ -55,7 +57,9 @@ describes.fakeWin('amp-ad-network-dianomi-impl', {amp: true}, (env) => {
       const requestParamId = '145a2';
       element.setAttribute('data-request-param-id', requestParamId);
       allowConsoleError(() => {
-        expect(() => impl.getAdUrl()).to.throw('The Dianomi request parameter ID provided is invalid');
+        expect(() => impl.getAdUrl()).to.throw(
+          'The Dianomi request parameter ID provided is invalid'
+        );
       });
     });
   });
