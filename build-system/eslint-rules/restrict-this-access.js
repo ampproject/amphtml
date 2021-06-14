@@ -34,6 +34,7 @@ module.exports = function (context) {
   const destructureSelector = `${matchingClassSelector} VariableDeclarator[init.type=ThisExpression]`;
 
   class NoPushArray extends Array {
+    /** */
     push() {}
   }
 
