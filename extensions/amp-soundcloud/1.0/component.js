@@ -27,7 +27,7 @@ export function Soundcloud({
   playlistId,
   secretToken,
   trackId,
-  visual,
+  visual = false,
   ...rest
 }) {
   // Property and Reference Variables
