@@ -23,11 +23,6 @@ const TAG = 'amp-soundcloud';
 
 class AmpSoundcloud extends BaseElement {
   /** @override */
-  init() {
-    return super.init();
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
