@@ -61,6 +61,10 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
           this.implementation.buildCallback();
           this.implementation.layoutCallback();
         }
+
+        getApi() {
+          return this.implementation.getApi();
+        }
       };
     }
 
@@ -71,23 +75,10 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
       Promise.resolve().then(cb);
     }
 
-    /**
-     * @param {string} alias
-     * @param {function(!../service/action-impl.ActionInvocation)} handler
-     * @param {*} unusedMinTrust
-     * @public
-     */
-    // registerAction(alias, handler, unusedMinTrust) {
-    //   this.element.addEventListener(alias, (e) => {
-    //     //TODO
-    //     handler(/** @type {!../service/action-impl.ActionInvocation} */ ({
-    //       node: this.element,
-    //     }));
-    //   });
-    // }
-
     /** */
-    isLayoutSupported() {}
+    isLayoutSupported() {
+      return true;
+    }
 
     /** */
     buildCallback() {}
