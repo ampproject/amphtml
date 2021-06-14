@@ -37,6 +37,7 @@ import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {layoutRectLtwh} from '#core/math/layout-rect';
+import layout from '#core/dom/layout';
 
 const slotId = 'my-slot-element';
 
@@ -48,6 +49,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
   let querySelectorStub;
   let any;
   let slotAttr = '';
+  let applyFillContent;
 
   const viewportSize = {width: 0, height: 0};
 
@@ -57,7 +59,6 @@ describes.realWin('video docking', {amp: true}, (env) => {
     const impl = {
       element,
       mutateElement: (cb) => tryResolve(cb),
-      applyFillContent: env.sandbox.spy(),
     };
     stubLayoutBox(impl, defaultLayoutRect);
     return impl;
@@ -190,6 +191,8 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
     docking = new VideoDocking(ampdoc);
 
+    applyFillContent = env.sandbox.stub(layout, 'applyFillContent');
+
     env.sandbox.stub(docking, 'getTimer_').returns({
       promise: () => Promise.resolve(),
     });
@@ -271,13 +274,13 @@ describes.realWin('video docking', {amp: true}, (env) => {
       await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
       expect(
-        video.applyFillContent.withArgs(
+        applyFillContent.withArgs(
           videoLayerElement('.amp-video-docked-placeholder-background')
         )
       ).to.have.been.calledOnce;
 
       expect(
-        video.applyFillContent.withArgs(
+        applyFillContent.withArgs(
           videoLayerElement('.amp-video-docked-placeholder-background-poster')
         )
       ).to.have.been.calledOnce;

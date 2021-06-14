@@ -22,7 +22,7 @@ import {
   setMediaSession,
   validateMediaMetadata,
 } from '../../../src/mediasession-helper';
-import {Layout, isLayoutSizeFixed} from '#core/dom/layout';
+import {Layout, applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dev, user} from '../../../src/log';
@@ -134,7 +134,7 @@ export class AmpAudio extends AMP.BaseElement {
       audio
     );
 
-    this.applyFillContent(audio);
+    applyFillContent(audio);
     this.getRealChildNodes().forEach((child) => {
       if (child.getAttribute && child.getAttribute('src')) {
         assertHttpsUrl(child.getAttribute('src'), dev().assertElement(child));
