@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {IframeEmbed} from '../../../src/preact/component/iframe';
 import {dict} from '../../../src/core/types/object';
 import {useEffect, useRef} from '../../../src/preact';
 
@@ -79,15 +80,15 @@ export function Soundcloud({
     };
   }, []);
   return (
-    <iframe
-      {...rest}
+    <IframeEmbed
       allow="autoplay"
       frameborder="no"
       ref={iframeRef}
       scrolling="no"
       src={iframeSrc}
       title={'Soundcloud Widget - ' + mediaId}
-    ></iframe>
+      {...rest}
+    />
   );
 }
 
