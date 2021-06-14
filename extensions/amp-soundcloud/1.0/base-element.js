@@ -31,7 +31,7 @@ BaseElement['Component'] = Soundcloud;
 
 /** @override */
 BaseElement['props'] = {
-  'children': {passthrough: true},
+  'children': {passthroughNonEmpty: true},
   'color': {attr: 'data-color'},
   'height': {attr: 'height'},
   'heights': {attr: 'heights'},
