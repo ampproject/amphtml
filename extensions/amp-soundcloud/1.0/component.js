@@ -45,7 +45,7 @@ export function Soundcloud({
     '/';
 
   // Extract Media ID
-  const mediaId = playlistId ? playlistId : trackId;
+  const mediaId = trackId ?? playlistId;
 
   // Prepare Soundcloud Widget URL for iFrame
   let iframeSrc =
