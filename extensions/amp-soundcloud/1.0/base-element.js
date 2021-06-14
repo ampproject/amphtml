@@ -20,21 +20,9 @@ import {Soundcloud} from './component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override @nocollapse */
-  static R1() {
-    // Required to execute 'preconnectCallback'
-    return false;
-  }
-
-  /**
-   * @param {boolean=} opt_onLayout
-   * @override
-   */
-  preconnectCallback(opt_onLayout) {
-    Services.preconnectFor(this.win).url(
-      this.getAmpDoc(),
-      'https://api.soundcloud.com/',
-      opt_onLayout
-    );
+  /** @override */
+  static getPreconnects() {
+    return ['https://api.soundcloud.com/'];
   }
 }
 
