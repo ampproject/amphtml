@@ -29,6 +29,3 @@ var SoundcloudDef = {};
  * }}
  */
 SoundcloudDef.Props;
-
-/** @interface */
-SoundcloudDef.SoundcloudApi = class {};
