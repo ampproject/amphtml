@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as layout from '#core/dom/layout';
 import {
   Actions,
   BASE_CLASS_NAME,
@@ -37,7 +38,6 @@ import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {layoutRectLtwh} from '#core/math/layout-rect';
-import layout from '#core/dom/layout';
 
 const slotId = 'my-slot-element';
 
