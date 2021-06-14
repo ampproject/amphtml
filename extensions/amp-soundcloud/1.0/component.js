@@ -59,7 +59,7 @@ export function Soundcloud({
     iframeSrc += encodeURIComponent('?secret_token=' + secretToken);
   }
 
-  if (visual === true) {
+  if (visual) {
     iframeSrc += '&visual=true';
   } else if (color) {
     iframeSrc += '&color=' + encodeURIComponent(color);
