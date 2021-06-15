@@ -234,7 +234,7 @@ export class AmpScript extends AMP.BaseElement {
     let container;
     if (this.element.sizerElement) {
       container = this.win.document.createElement('div');
-      applyFillContent(container, true);
+      applyFillContent(container, /* replacedContent */ true);
       // Reparent all real children to the container.
       const realChildren = this.getRealChildren();
       for (let i = 0; i < realChildren.length; i++) {
