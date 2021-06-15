@@ -454,7 +454,7 @@ export function runCandidates(ampdoc, candidates) {
       return measureIntersectionNoRoot(candidate).then(
         ({boundingClientRect}) => {
           if (
-            !candidate.tagName === 'IMG' &&
+            candidate.tagName !== 'IMG' &&
             !candidate.signals().get(CommonSignals.LOAD_END)
           ) {
             // <amp-img> will change the img's src inline data on unlayout and
