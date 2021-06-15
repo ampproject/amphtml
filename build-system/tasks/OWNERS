@@ -10,7 +10,7 @@
       pattern: 'check-types.js',
       owners: [
         {name: 'ampproject/wg-performance'},
-        {name: 'rcebulko', notify: true},
+        {name: 'rcebulko', required: true},
       ],
     },
   ],
