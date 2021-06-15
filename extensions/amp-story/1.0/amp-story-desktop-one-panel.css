@@ -27,7 +27,7 @@
   /* 752px is the max height on desktop. */
   height: min(752px, calc(100vh - 148px)) !important;
   /* 447px is the max width on desktop. */
-  width: min(447px, calc((100vh - 148px) * var(--i-amphtml-story-page-large-desktop-ratio))) !important; 
+  width: min(447px, calc((100vh - 148px) * var(--i-amphtml-story-page-large-desktop-ratio))) !important;
   border-radius: 10px !important;
 }
 
