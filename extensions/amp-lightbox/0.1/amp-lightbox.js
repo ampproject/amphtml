@@ -22,6 +22,7 @@ import {Gestures} from '../../../src/gesture';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {applyFillContent} from '#core/dom/layout';
 import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
   computedStyle,
@@ -237,7 +238,7 @@ class AmpLightbox extends AMP.BaseElement {
 
     this.container_ = element.ownerDocument.createElement('div');
     if (!this.isScrollable_) {
-      this.applyFillContent(this.container_);
+      applyFillContent(this.container_);
     }
     element.appendChild(this.container_);
 

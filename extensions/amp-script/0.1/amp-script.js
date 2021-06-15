@@ -17,7 +17,7 @@
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {Purifier} from '#purifier/purifier';
 import {Services} from '#service';
 import {UserActivationTracker} from './user-activation-tracker';
@@ -235,7 +235,7 @@ export class AmpScript extends AMP.BaseElement {
     let container;
     if (this.element.sizerElement) {
       container = this.win.document.createElement('div');
-      this.applyFillContent(container, true);
+      applyFillContent(container, /* replacedContent */ true);
       // Reparent all real children to the container.
       const realChildren = realChildElements(this.element);
       for (let i = 0; i < realChildren.length; i++) {

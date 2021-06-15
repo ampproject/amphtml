@@ -15,7 +15,11 @@
  */
 
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
-import {getLengthNumeral, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  applyFillContent,
+  getLengthNumeral,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
 import {px, setStyle, setStyles} from '#core/dom/style';
 import {realChildNodes} from '#core/dom/query';
 import {throttle} from '#core/types/function';
@@ -68,7 +72,7 @@ class AmpFitText extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.content_ = this.element.ownerDocument.createElement('div');
-    this.applyFillContent(this.content_);
+    applyFillContent(this.content_);
     this.content_.classList.add('i-amphtml-fit-text-content');
     setStyles(this.content_, {zIndex: 2});
 
