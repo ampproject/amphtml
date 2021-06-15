@@ -73,7 +73,7 @@ exports.extension = function (name, version, latest, isModule, loadPriority) {
  * @param {ExtensionLoadPriorityDef=} loadPriority
  * @return {string}
  */
- function extensionPayload(name, version, latest, isModule, loadPriority) {
+function extensionPayload(name, version, latest, isModule, loadPriority) {
   let priority = '';
   if (loadPriority) {
     if (loadPriority != 'high') {
@@ -101,8 +101,8 @@ exports.extension = function (name, version, latest, isModule, loadPriority) {
   );
 }
 
-const bentoTemplate = removeWhitespace(`
-(function (p) {
+const bentoLoaderFn = removeWhitespace(`
+function (p) {
   self.AMP
     ? self.AMP.push(p)
     : document.head.querySelector('script[src$="v0.js"],script[src$="v0.mjs"]')
@@ -116,7 +116,7 @@ const bentoTemplate = removeWhitespace(`
           customElements.define(n, b.CustomElement(b));
         },
       });
-})(__PAYLOAD__);
+}
 `);
 
 exports.bento = function (name, version, latest, isModule, loadPriority) {
@@ -127,7 +127,7 @@ exports.bento = function (name, version, latest, isModule, loadPriority) {
     isModule,
     loadPriority
   );
-  return bentoTemplate.replace('__PAYLOAD__', payload);
+  return `(${bentoLoaderFn})(${payload});`;
 };
 
 exports.none = '<%= contents %>';
