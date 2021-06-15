@@ -17,15 +17,15 @@
 import {
   PositionInViewportEntryDef,
   PositionObserverFidelity,
-} from '../../../src/service/position-observer/position-observer-worker';
+} from '#service/position-observer/position-observer-worker';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
   installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
-import {RelativePositions} from '../../../src/layout-rect';
-import {Services} from '../../../src/services';
+} from '#service/position-observer/position-observer-impl';
+import {RelativePositions} from '#core/math/layout-rect';
+import {Services} from '#service';
 import {devAssert} from '../../../src/log';
-import {throttle} from '../../../src/core/types/function';
+import {throttle} from '#core/types/function';
 
 /** @enum {number} */
 export const ViewportRelativePos = {
@@ -316,7 +316,7 @@ export default class VisibilityObserver {
    */
   getRelativePosFromScroll(entry) {
     // Measure the position of the host page (edge case)
-    const {viewportHeight_: vh, lastScrollTop_: scroll} = this;
+    const {lastScrollTop_: scroll, viewportHeight_: vh} = this;
     // Document height is the same as the distance from the top
     // to the <amp-next-page> element
     // TODO(wassgha): Synchronous access to position updates will
@@ -341,8 +341,8 @@ export default class VisibilityObserver {
    * @return {?ViewportRelativePos}
    */
   getRelativePosFromSentinel(entry) {
-    const {top, bottom} = entry;
-    const {INSIDE, TOP, BOTTOM} = RelativePositions;
+    const {bottom, top} = entry;
+    const {BOTTOM, INSIDE, TOP} = RelativePositions;
     if (!top && !bottom) {
       // Early exit if this an intersection change happening before a
       // sentinel position change

@@ -11,9 +11,9 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_READ
-  error_message: 'Use getStyle, setStyle, or setStyles in src/style.js'
+  error_message: 'Use getStyle, setStyle, or setStyles in src/core/dom/style.js'
   value: 'Element.prototype.style'
-  allowlist: 'src/style.js'
+  allowlist: 'src/core/dom/style.js'
   allowlist: 'src/layout.js'
 }
 
@@ -25,28 +25,27 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'Use closestAncestorElementBySelector in src/dom.js'
+  error_message: 'Use closestAncestorElementBySelector in src/core/dom/query.js'
   value: 'Element.prototype.closest'
-  allowlist: 'src/dom.js'
+  allowlist: 'src/core/dom/query.js'
 }
 
 # CSSStyleDeclaration
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'Use setStyle or setStyles in src/style.js'
+  error_message: 'Use setStyle or setStyles in src/core/dom/style.js'
   value: 'CSSStyleDeclaration.prototype.setProperty'
-  allowlist: 'src/style.js'
+  allowlist: 'src/core/dom/style.js'
 }
 
 # History
 
 requirement: {
   type: BANNED_PROPERTY
-  error_message: 'History.p.state is broken in IE11. Please use the helper methods provided in src/history.js'
+  error_message: 'History.p.state is broken in IE11. Please use the helper methods provided in src/core/window/history.js'
   value: 'History.prototype.state'
-  allowlist: 'src/history.js'
-  allowlist: 'extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js'
+  allowlist: 'src/core/window/history.js'
 }
 
 # Strings
@@ -104,7 +103,7 @@ requirement: {
   error_message: 'string.prototype.trimStart is not allowed'
   value: 'string.prototype.trimStart'
   value: 'string.prototype.trimLeft'
-  allowlist: 'src/core/types/string.js'
+  allowlist: 'src/core/types/string/index.js'
 }
 
 requirement: {
@@ -112,7 +111,7 @@ requirement: {
   error_message: 'string.prototype.trimEnd is not allowed'
   value: 'string.prototype.trimEnd'
   value: 'string.prototype.trimRight'
-  allowlist: 'src/core/types/string.js'
+  allowlist: 'src/core/types/string/index.js'
 }
 
 requirement: {
@@ -391,7 +390,7 @@ requirement: {
   allowlist: 'ads/google/ima/ima-video.js'
   allowlist: 'ads/vendors/zen.js'
   allowlist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
-  allowlist: 'src/json.js' # Where parseJson itself is implemented.
+  allowlist: 'src/core/types/object/json.js' # Where parseJson itself is implemented.
   allowlist_regexp: '.*\\.jss\\.js'
 }
 
@@ -468,7 +467,7 @@ requirement: {
   value: 'module$src$cookies.getCookie'
   value: 'module$src$cookies.setCookie'
   allowlist: 'src/cookies.js'
-  allowlist: 'src/experiments.js'
+  allowlist: 'src/experiments/index.js'
   allowlist: 'src/service/cid-api.js'
   allowlist: 'src/service/cid-impl.js'
   allowlist: 'extensions/amp-analytics/0.1/cookie-writer.js'

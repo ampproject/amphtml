@@ -14,29 +14,30 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {
   AutoLightboxEvents,
   isActionableByTap,
 } from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {
   LIGHTBOX_THUMBNAIL_AD,
   LIGHTBOX_THUMBNAIL_UNKNOWN,
   LIGHTBOX_THUMBNAIL_VIDEO,
 } from './lightbox-placeholders';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {
   childElement,
   childElementByAttr,
   closestAncestorElementBySelector,
   elementByTag,
-  iterateCursor,
-} from '../../../../src/dom';
+} from '#core/dom/query';
 import {dev, devAssert, userAssert} from '../../../../src/log';
-import {map} from '../../../../src/core/types/object';
-import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
-import {toArray} from '../../../../src/core/types/array';
+
+import {iterateCursor} from '#core/dom';
+import {map} from '#core/types/object';
+import {srcsetFromElement, srcsetFromSrc} from '#core/dom/srcset';
+import {toArray} from '#core/types/array';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
   'AMP-IMG': true,

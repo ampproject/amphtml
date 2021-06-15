@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {
@@ -28,20 +28,19 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {
-  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '#core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {once} from '../../../src/core/types/function';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {once} from '#core/types/function';
 
 const JWPLAYER_EVENTS = {
   'ready': VideoEvents.LOAD,
@@ -185,7 +184,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    const {win, playlistItem_} = this;
+    const {playlistItem_, win} = this;
     if (win.MediaMetadata && playlistItem_['meta']) {
       try {
         return new win.MediaMetadata(playlistItem_['meta']);
@@ -348,15 +347,9 @@ class AmpJWPlayer extends AMP.BaseElement {
     if (!this.element.hasAttribute('data-media-id')) {
       return;
     }
-    const placeholder = this.win.document.createElement('amp-img');
+    const placeholder = this.win.document.createElement('img');
     this.propagateAttributes(['aria-label'], placeholder);
-    placeholder.setAttribute(
-      'src',
-      'https://content.jwplatform.com/thumbs/' +
-        encodeURIComponent(this.contentid_) +
-        '-720.jpg'
-    );
-    placeholder.setAttribute('layout', 'fill');
+    this.applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {
@@ -367,6 +360,13 @@ class AmpJWPlayer extends AMP.BaseElement {
     } else {
       placeholder.setAttribute('alt', 'Loading video');
     }
+    placeholder.setAttribute('loading', 'lazy');
+    placeholder.setAttribute(
+      'src',
+      'https://content.jwplatform.com/thumbs/' +
+        encodeURIComponent(this.contentid_) +
+        '-720.jpg'
+    );
     return placeholder;
   }
 
@@ -445,7 +445,7 @@ class AmpJWPlayer extends AMP.BaseElement {
           }
           break;
         case 'meta':
-          const {metadataType, duration} = detail;
+          const {duration, metadataType} = detail;
           if (metadataType === 'media') {
             this.duration_ = duration;
           }

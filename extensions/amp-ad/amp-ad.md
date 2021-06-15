@@ -133,7 +133,7 @@ To enable this, copy the file [remote.html](../../3p/remote.html) to your web se
 />
 ```
 
-The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It cannot reside on the same origin as your AMP files. For example, if you host AMP files on `www.example.com`, this URL must not be on `www.example.com` but `something-else.example.com` is OK. See ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
+The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It cannot reside on the same origin as your AMP files. For example, if you host AMP files on `www.example.com`, this URL must not be on `www.example.com` but `something-else.example.com` is OK. See ["Iframe origin policy"](../../docs/spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
 
 #### Security
 
@@ -457,6 +457,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Sulvo](../../ads/vendors/sulvo.md)
 -   [SunMedia](../../ads/vendors/sunmedia.md)
 -   [Swoop](../../ads/vendors/swoop.md)
+-   [Tail](../../ads/vendors/tail.md)
 -   [TcsEmotion](../../ads/vendors/tcsemotion.md)
 -   [Teads](../../ads/vendors/teads.md)
 -   [torimochi](../../ads/vendors/torimochi.md)
@@ -500,6 +501,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Dable](../../ads/vendors/dable.md)
 -   [Engageya](../../ads/vendors/engageya.md)
 -   [Epeex](../../ads/vendors/epeex.md)
+-   [Gecko](../../ads/vendors/gecko.md)
 -   [Idealmedia](../../ads/vendors/idealmedia.md)
 -   [Insticator](../../ads/vendors/insticator.md)
 -   [Jubna](../../ads/vendors/jubna.md)

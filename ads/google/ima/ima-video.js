@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
-import {
-  camelCaseToTitleCase,
-  px,
-  setStyle,
-  setStyles,
-} from '../../../src/style';
+import {camelCaseToTitleCase, setStyle, toggle} from '#core/dom/style';
 import {getData} from '../../../src/event-helper';
-import {isArray, isObject} from '../../../src/core/types';
-import {loadScript} from '../../../3p/3p';
-import {throttle} from '../../../src/core/types/function';
-import {tryParseJson} from '../../../src/json';
+import {htmlFor, htmlRefs, svgFor} from '#core/dom/static-template';
+import {isArray, isObject} from '#core/types';
+import {loadScript} from '#3p/3p';
+import {throttle} from '#core/types/function';
+import {tryParseJson} from '#core/types/object/json';
+// Source for this constant is css/amp-ima-video-iframe.css
+import {cssText} from '../../../build/amp-ima-video-iframe.css';
 
 /**
  * Possible player states.
@@ -43,74 +41,45 @@ const PlayerStates = {
  * https://material.io/tools/icons
  */
 const icons = {
-  'play': `<path d="M8 5v14l11-7z"></path>
-     <path d="M0 0h24v24H0z" fill="none"></path>`,
-  'pause': `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
-     <path d="M0 0h24v24H0z" fill="none"></path>`,
-  'fullscreen': `<path d="M0 0h24v24H0z" fill="none"/>
-     <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>`,
-  'mute': `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>
-     <path d="M0 0h24v24H0z" fill="none"></path>`,
-  'volume_max': `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
-     <path d="M0 0h24v24H0z" fill="none"></path>`,
-  'seek': `<circle cx="12" cy="12" r="12" />`,
+  play: (svg) => svg`
+    <svg viewBox="0 0 24 24">
+      <path d="M8 5v14l11-7z"></path>
+    </svg>
+  `,
+  pause: (svg) => svg`
+    <svg viewBox="0 0 24 24">
+      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+    </svg>
+  `,
+  fullscreen: (svg) => svg`
+    <svg viewBox="0 0 24 24">
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path
+        d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"
+      ></path>
+    </svg>
+  `,
+  muted: (svg) => svg`
+    <svg viewBox="0 0 24 24">
+      <path
+        d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"
+      ></path>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+    </svg>
+  `,
+  volumeMax: (svg) => svg`
+    <svg viewBox="0 0 24 24">
+      <path
+        d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+      ></path>
+      <path d="M0 0h24v24H0z" fill="none"></path>
+    </svg>
+  `,
 };
 
-const bigPlayDivDisplayStyle = 'table-cell';
-
-// Div wrapping our entire DOM.
-let wrapperDiv;
-
-// Div containing big play button. Rendered before player starts.
-let bigPlayDiv;
-
-// Div contianing play button. Double-nested for alignment.
-let playButtonDiv;
-
-// Div containing player controls.
-let controlsDiv;
-
-// Wrapper for ad countdown element.
-let countdownWrapperDiv;
-
-// Div containing ad countdown timer.
-let countdownDiv;
-
-// Div containing play or pause button.
-let playPauseDiv;
-
-// Div containing player time.
-let timeDiv;
-
-// Node containing the player time text.
-let timeNode;
-
-// Wrapper for progress bar DOM elements.
-let progressBarWrapperDiv;
-
-// Line for progress bar.
-let progressLine;
-
-// Line for total time in progress bar.
-let totalTimeLine;
-
-// Div containing the marker for the progress.
-let progressMarkerDiv;
-
-// Div for fullscreen icon.
-let fullscreenDiv;
-
-// Div for mute/unmute icon.
-let muteUnmuteDiv;
-
-// Div for ad container.
-let adContainerDiv;
-
-// Div for content player.
-let contentDiv;
-
-// Content player.
-let videoPlayer;
+// References to rendered elements. See renderElements().
+let elements;
 
 // Event indicating user interaction.
 let interactEvent;
@@ -217,7 +186,7 @@ const playerData = new ImaPlayerData();
 // Flag used to track if ads have been requested or not.
 let adsRequested;
 
-// Flag that tracks if the user tapped and dragged on the big play button.
+// Flag that tracks if the user tapped and dragged on the overlay button.
 let userTappedAndDragged;
 
 // User consent state.
@@ -227,20 +196,126 @@ let consentState;
 let showControlsThrottled = throttle(window, showControls, 1000);
 
 /**
+ * @param {!Node} parent
+ * @param {string} css
+ */
+function insertCss(parent, css) {
+  const style = parent.ownerDocument.createElement('style');
+  style./*OK*/ textContent = css;
+  parent.appendChild(style);
+}
+
+/**
+ * @param {string} state
+ * @param {boolean} active
+ */
+function toggleRootDataAttribute(state, active) {
+  const {'root': root} = elements;
+  const attributeName = `data-${state}`;
+  if (active) {
+    root.setAttribute(attributeName, '');
+  } else {
+    root.removeAttribute(attributeName);
+  }
+}
+
+/**
+ * @param {Document} elementOrDoc
+ * @return {!Object<string, !Element>}
+ */
+function renderElements(elementOrDoc) {
+  const html = htmlFor(elementOrDoc);
+
+  // Elements annotated with `ref="name"` are referenced as `elements['name']`.
+  // They also have their `ref` copied as a classname, so they can be selected
+  // from CSS using that exact value.
+  const root = html`
+    <div class="fill">
+      <div class="fill">
+        <video
+          ref="video"
+          playsinline
+          controlslist="nodownload nofullscreen noremoteplayback"
+        >
+          <!-- Video children are later propagated from the iframe's name. -->
+        </video>
+      </div>
+
+      <div ref="adContainer" class="fill" hidden>
+        <!-- This subtree may be modified by the IMA SDK. -->
+      </div>
+
+      <div ref="controls" hidden>
+        <button ref="playButton"></button>
+
+        <div class="countdownWrapper">
+          <div ref="countdown">
+            <!-- Text content updated using data-ad-label onAdProgress(). -->
+          </div>
+        </div>
+
+        <div ref="time">
+          <!-- Text content must match format in updateTime(). -->
+          -:- / 0:00
+        </div>
+
+        <div ref="progress">
+          <div ref="progressLine"></div>
+          <div ref="progressMarker"></div>
+        </div>
+
+        <button ref="muteButton"></button>
+        <button ref="fullscreenButton"></button>
+      </div>
+
+      <button ref="overlayButton" class="fill"></button>
+    </div>
+  `;
+
+  const elements = htmlRefs(root);
+
+  // The root element cannot be referenced by `ref="root"`, so we insert it.
+  elements['root'] = root;
+
+  // For a smaller template, we copy each element's `ref` value as a classname.
+  for (const ref in elements) {
+    elements[ref].classList.add(ref);
+  }
+
+  // Adding SVGs separately because they require a different namespace, and the
+  // HTML template must be static.
+  const svg = svgFor(elementOrDoc);
+
+  elements['overlayButton'].appendChild(icons.play(svg));
+  elements['fullscreenButton'].appendChild(icons.fullscreen(svg));
+
+  // Buttons toggle SVGs by including two each, one is displayed at a time.
+  // See CSS selectors for buttons under .root[data-*].
+  const {'muteButton': muteButton, 'playButton': playButton} = elements;
+
+  playButton.appendChild(icons.play(svg));
+  playButton.appendChild(icons.pause(svg));
+
+  muteButton.appendChild(icons.volumeMax(svg));
+  muteButton.appendChild(icons.muted(svg));
+
+  return elements;
+}
+
+/**
  * @param {!Document} document
+ * @param {!Element} parent
  * @param {?Array<Array<string|Object>>} childrenDef
  *   an array of [tagName, attributes] items like:
  *     [
  *       ['SOURCE', {'src': 'foo.mp4'}],
  *       ['TRACK', {'src': 'bar.mp4'}],
  *     ]
- * @return {?Node} Optional DocumentFragment containing created children
  */
-function maybeCreateChildren(document, childrenDef) {
+function maybeAppendChildren(document, parent, childrenDef) {
   if (!isArray(childrenDef)) {
-    return null;
+    return;
   }
-  const fragment = document.createDocumentFragment();
   childrenDef.forEach((child) => {
     const tagName = child[0];
     const attributes = child[1];
@@ -257,8 +332,8 @@ function maybeCreateChildren(document, childrenDef) {
     for (const attr in attributes) {
       element.setAttribute(attr, attributes[attr]);
     }
+    parent.appendChild(element);
   });
-  return fragment;
 }
 
 /**
@@ -266,236 +341,40 @@ function maybeCreateChildren(document, childrenDef) {
  * @param {!Object} data
  */
 export function imaVideo(global, data) {
+  insertCss(global.document.head, cssText);
+
   videoWidth = global./*OK*/ innerWidth;
   videoHeight = global./*OK*/ innerHeight;
   adLabel = data.adLabel || 'Ad (%s of %s)';
 
-  // Wraps *everything*.
-  wrapperDiv = global.document.createElement('div');
-  wrapperDiv.id = 'ima-wrapper';
-  setStyle(wrapperDiv, 'width', px(videoWidth));
-  setStyle(wrapperDiv, 'height', px(videoHeight));
-  setStyle(wrapperDiv, 'background-color', 'black');
+  elements = renderElements(global.document);
 
-  // Wraps the big play button we show before video start.
-  bigPlayDiv = global.document.createElement('div');
-  bigPlayDiv.id = 'ima-big-play';
-  setStyles(bigPlayDiv, {
-    'position': 'relative',
-    'width': px(videoWidth),
-    'height': px(videoHeight),
-    'display': bigPlayDivDisplayStyle,
-    'vertical-align': 'middle',
-    'text-align': 'center',
-    'cursor': 'pointer',
-  });
-  // Inner div so we can v and h align.
-  playButtonDiv = createIcon(global, 'play');
-  playButtonDiv.id = 'ima-play-button';
-  setStyles(playButtonDiv, {
-    'display': 'inline-block',
-    'max-width': '120px',
-    'max-height': '120px',
-  });
-  bigPlayDiv.appendChild(playButtonDiv);
-
-  // Video controls.
-  controlsDiv = global.document.createElement('div');
-  controlsDiv.id = 'ima-controls';
-  setStyles(controlsDiv, {
-    'position': 'absolute',
-    'bottom': '0px',
-    'width': '100%',
-    'height': '100px',
-    'background-color': 'rgba(7, 20, 30, .7)',
-    'background':
-      'linear-gradient(0, rgba(7, 20, 30, .7) 0%, rgba(7, 20, 30, 0) 100%)',
-    'box-sizing': 'border-box',
-    'padding': '10px',
-    'padding-top': '60px',
-    'color': 'white',
-    'display': 'none',
-    'font-family': 'Helvetica, Arial, Sans-serif',
-    'justify-content': 'center',
-    'align-items': 'center',
-    'user-select': 'none',
-    'z-index': '1',
-  });
   controlsVisible = false;
 
-  // Play button
-  playPauseDiv = createIcon(global, 'play');
-  playPauseDiv.id = 'ima-play-pause';
-  setStyles(playPauseDiv, {
-    'width': '30px',
-    'height': '30px',
-    'margin-right': '20px',
-    'font-size': '1.25em',
-    'cursor': 'pointer',
-  });
-  controlsDiv.appendChild(playPauseDiv);
-  // Ad progress
-  countdownWrapperDiv = global.document.createElement('div');
-  countdownWrapperDiv.id = 'ima-countdown';
-  setStyles(countdownWrapperDiv, {
-    'align-items': 'center',
-    'box-sizing': 'border-box',
-    'display': 'none',
-    'flex-grow': '1',
-    'font-size': '12px',
-    'height': '20px',
-    'overflow': 'hidden',
-    'padding': '5px',
-    'text-shadow': '0px 0px 10px black',
-    'white-space': 'nowrap',
-  });
-  countdownDiv = global.document.createElement('div');
-  countdownWrapperDiv.appendChild(countdownDiv);
-  controlsDiv.appendChild(countdownWrapperDiv);
-  // Current time and duration.
-  timeDiv = global.document.createElement('div');
-  timeDiv.id = 'ima-time';
-  setStyles(timeDiv, {
-    'margin-right': '20px',
-    'text-align': 'center',
-    'font-size': '14px',
-    'text-shadow': '0px 0px 10px black',
-  });
-  timeNode = global.document.createTextNode('-:- / 0:00');
-  timeDiv.appendChild(timeNode);
-  controlsDiv.appendChild(timeDiv);
-  // Progress bar.
-  progressBarWrapperDiv = global.document.createElement('div');
-  progressBarWrapperDiv.id = 'ima-progress-wrapper';
-  setStyles(progressBarWrapperDiv, {
-    'height': '30px',
-    'flex-grow': '1',
-    'position': 'relative',
-    'margin-right': '20px',
-  });
-  progressLine = global.document.createElement('div');
-  progressLine.id = 'progress-line';
-  setStyles(progressLine, {
-    'background-color': 'rgb(255, 255, 255)',
-    'height': '2px',
-    'margin-top': '14px',
-    'width': '0%',
-    'float': 'left',
-  });
-  totalTimeLine = global.document.createElement('div');
-  totalTimeLine.id = 'total-time-line';
-  setStyles(totalTimeLine, {
-    'background-color': 'rgba(255, 255, 255, 0.45)',
-    'height': '2px',
-    'width': '100%',
-    'margin-top': '14px',
-  });
-  progressMarkerDiv = global.document.createElement('div');
-  progressMarkerDiv.id = 'ima-progress-marker';
-  setStyles(progressMarkerDiv, {
-    'height': '14px',
-    'width': '14px',
-    'position': 'absolute',
-    'left': '0%',
-    'top': '50%',
-    'margin-top': '-7px',
-    'cursor': 'pointer',
-  });
-  progressMarkerDiv.appendChild(createIcon(global, 'seek'));
-  progressBarWrapperDiv.appendChild(progressLine);
-  progressBarWrapperDiv.appendChild(progressMarkerDiv);
-  progressBarWrapperDiv.appendChild(totalTimeLine);
-  controlsDiv.appendChild(progressBarWrapperDiv);
-
-  // Mute/Unmute button
-  muteUnmuteDiv = createIcon(global, 'volume_max');
-  muteUnmuteDiv.id = 'ima-mute-unmute';
-  setStyles(muteUnmuteDiv, {
-    'width': '30px',
-    'height': '30px',
-    'flex-shrink': '0',
-    'margin-right': '20px',
-    'font-size': '1.25em',
-    'cursor': 'pointer',
-  });
-  controlsDiv.appendChild(muteUnmuteDiv);
-
-  // Fullscreen button
-  fullscreenDiv = createIcon(global, 'fullscreen');
-  fullscreenDiv.id = 'ima-fullscreen';
-  setStyles(fullscreenDiv, {
-    'width': '30px',
-    'height': '30px',
-    'flex-shrink': '0',
-    'font-size': '1.25em',
-    'cursor': 'pointer',
-    'text-align': 'center',
-    'font-weight': 'bold',
-    'line-height': '1.4em',
-  });
-  controlsDiv.appendChild(fullscreenDiv);
-
-  // Ad container.
-  adContainerDiv = global.document.createElement('div');
-  adContainerDiv.id = 'ima-ad-container';
-  setStyles(adContainerDiv, {
-    'position': 'absolute',
-    'top': '0px',
-    'left': '0px',
-    'width': '100%',
-    'height': '100%',
-  });
-
-  // Wraps our content video.
-  contentDiv = global.document.createElement('div');
-  contentDiv.id = 'ima-content';
-  setStyles(contentDiv, {
-    'position': 'absolute',
-    'top': '0px',
-    'left': '0px',
-    'width': '100%',
-    'height': '100%',
-  });
-  // The video player
-  videoPlayer = global.document.createElement('video');
-  videoPlayer.id = 'ima-content-player';
-  setStyles(videoPlayer, {
-    'width': '100%',
-    'height': '100%',
-    'background-color': 'black',
-  });
-  videoPlayer.setAttribute('poster', data.poster);
+  // Propagate settings and video element's children.
+  const {'video': video} = elements;
+  video.setAttribute('poster', data.poster);
   if (data['crossorigin'] != null) {
-    videoPlayer.setAttribute('crossorigin', data['crossorigin']);
+    video.setAttribute('crossorigin', data['crossorigin']);
   }
-  videoPlayer.setAttribute('playsinline', true);
-  videoPlayer.setAttribute(
-    'controlsList',
-    'nodownload nofullscreen noremoteplayback'
-  );
   if (data.src) {
     const sourceElement = document.createElement('source');
     sourceElement.setAttribute('src', data.src);
-    videoPlayer.appendChild(sourceElement);
+    video.appendChild(sourceElement);
   }
-  const childrenFragment = maybeCreateChildren(
+  maybeAppendChildren(
     global.document,
-    data['_context']?.['sourceChildren']
+    video,
+    tryParseJson(data['sourceChildren'])
   );
-  if (childrenFragment) {
-    videoPlayer.appendChild(childrenFragment);
-  }
 
   if (data.imaSettings) {
     imaSettings = tryParseJson(data.imaSettings);
   }
 
-  contentDiv.appendChild(videoPlayer);
-  wrapperDiv.appendChild(contentDiv);
-  wrapperDiv.appendChild(adContainerDiv);
-  wrapperDiv.appendChild(controlsDiv);
-  wrapperDiv.appendChild(bigPlayDiv);
-  global.document.getElementById('c').appendChild(wrapperDiv);
+  global.document.getElementById('c').appendChild(elements['root']);
+
+  // Attach events and configure IMA SDK.
 
   window.addEventListener('message', onMessage.bind(null, global));
 
@@ -507,6 +386,13 @@ export function imaVideo(global, data) {
   playbackStarted = false;
   nativeFullscreen = false;
   imaLoadAllowed = true;
+
+  const {
+    'fullscreenButton': fullscreenButton,
+    'muteButton': muteButton,
+    'playButton': playButton,
+    'progress': progress,
+  } = elements;
 
   let mobileBrowser = false;
   interactEvent = 'click';
@@ -524,24 +410,25 @@ export function imaVideo(global, data) {
     mouseMoveEvent = 'touchmove';
     mouseUpEvent = 'touchend';
   }
+  const {'overlayButton': overlayButton} = elements;
   if (mobileBrowser) {
     // Create our own tap listener that ignores tap and drag.
-    bigPlayDiv.addEventListener(mouseMoveEvent, onBigPlayTouchMove);
-    bigPlayDiv.addEventListener(mouseUpEvent, onBigPlayTouchEnd);
-    bigPlayDiv.addEventListener(
+    overlayButton.addEventListener(mouseMoveEvent, onOverlayButtonTouchMove);
+    overlayButton.addEventListener(mouseUpEvent, onOverlayButtonTouchEnd);
+    overlayButton.addEventListener(
       'tapwithoutdrag',
-      onBigPlayClick.bind(null, global)
+      onOverlayButtonInteract.bind(null, global)
     );
   } else {
-    bigPlayDiv.addEventListener(
+    overlayButton.addEventListener(
       interactEvent,
-      onBigPlayClick.bind(null, global)
+      onOverlayButtonInteract.bind(null, global)
     );
   }
-  playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
-  progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
-  muteUnmuteDiv.addEventListener(interactEvent, onMuteUnmuteClick);
-  fullscreenDiv.addEventListener(
+  playButton.addEventListener(interactEvent, onPlayPauseClick);
+  progress.addEventListener(mouseDownEvent, onProgressClick);
+  muteButton.addEventListener(interactEvent, onMuteUnmuteClick);
+  fullscreenButton.addEventListener(
     interactEvent,
     toggleFullscreen.bind(null, global)
   );
@@ -627,9 +514,11 @@ function onImaLoadSuccess(global, data) {
     }
   }
 
+  const {'adContainer': adContainer, 'video': video} = elements;
+
   adDisplayContainer = new global.google.ima.AdDisplayContainer(
-    adContainerDiv,
-    videoPlayer
+    adContainer,
+    video
   );
 
   adsLoader = new global.google.ima.AdsLoader(adDisplayContainer);
@@ -666,7 +555,7 @@ function onImaLoadSuccess(global, data) {
     false
   );
 
-  videoPlayer.addEventListener('ended', onContentEnded);
+  video.addEventListener('ended', onContentEnded);
 
   adsRequest = new global.google.ima.AdsRequest();
   adsRequest.adTagUrl = data.tag;
@@ -690,7 +579,7 @@ function onImaLoadFail() {
   // Something blocked ima3.js from loading - ignore all IMA stuff and just play
   // content.
   addHoverEventToElement(
-    /** @type {!Element} */ (videoPlayer),
+    /** @type {!Element} */ (elements['video']),
     showControlsThrottled
   );
   imaLoadAllowed = false;
@@ -698,41 +587,12 @@ function onImaLoadFail() {
 }
 
 /**
- * @param {!Object} global
- * @param {string} name
- * @param {string} [fill='#FFFFFF']
- * @return {!Element}
- */
-function createIcon(global, name, fill = '#FFFFFF') {
-  const doc = global.document;
-  const icon = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  icon.setAttributeNS(null, 'fill', fill);
-  icon.setAttributeNS(null, 'height', '100%');
-  icon.setAttributeNS(null, 'width', '100%');
-  icon.setAttributeNS(null, 'viewBox', '0 0 24 24');
-  setStyle(icon, 'filter', 'drop-shadow(0px 0px 14px rgba(0,0,0,0.4))');
-  icon./*OK*/ innerHTML = icons[name];
-  return icon;
-}
-
-/**
- * @param {!Element} element
- * @param {string} name
- * @param {string} [fill='#FFFFFF']
- */
-function changeIcon(element, name, fill = '#FFFFFF') {
-  element./*OK*/ innerHTML = icons[name];
-  if (fill != element.getAttributeNS(null, 'fill')) {
-    element.setAttributeNS(null, 'fill', fill);
-  }
-}
-
-/**
- * Triggered when the user clicks on the big play button div.
+ * Triggered when the user clicks on the overlay button.
  * @param {!Object} global
  * @visibleForTesting
  */
-export function onBigPlayClick(global) {
+export function onOverlayButtonInteract(global) {
+  const {'overlayButton': overlayButton, 'video': video} = elements;
   if (playbackStarted) {
     // Resart the video
     playVideo();
@@ -744,30 +604,34 @@ export function onBigPlayClick(global) {
     if (adDisplayContainer) {
       adDisplayContainer.initialize();
     }
-    videoPlayer.load();
+    video.load();
     playAds(global);
   }
 
-  setStyle(bigPlayDiv, 'display', 'none');
+  toggle(overlayButton, false);
 }
 
+// TODO(alanorozco): Update name on test's end.
+export const onBigPlayClick = onOverlayButtonInteract;
+
 /**
- * Triggered when the user ends a tap on the big play button.
+ * Triggered when the user ends a tap on the overlay button.
+ * @param {Event} event
  */
-function onBigPlayTouchEnd() {
+function onOverlayButtonTouchEnd(event) {
   if (userTappedAndDragged) {
     // Reset state and ignore this tap.
     userTappedAndDragged = false;
   } else {
     const tapWithoutDragEvent = new Event('tapwithoutdrag');
-    bigPlayDiv.dispatchEvent(tapWithoutDragEvent);
+    event.currentTarget.dispatchEvent(tapWithoutDragEvent);
   }
 }
 
 /**
- * Triggered when the user moves a tap on the big play button.
+ * Triggered when the user moves a tap on the overlay button.
  */
-function onBigPlayTouchMove() {
+function onOverlayButtonTouchMove() {
   userTappedAndDragged = true;
 }
 
@@ -838,9 +702,9 @@ export function onContentEnded() {
   }
 
   // If all ads are not completed,
-  // onContentResume will show the bigPlayDiv
+  // onContentResume will show the elements['overlayButton']
   if (allAdsCompleted) {
-    setStyle(bigPlayDiv, 'display', bigPlayDivDisplayStyle);
+    toggle(elements['overlayButton'], true);
   }
 
   postMessage({event: VideoEvents.PAUSE});
@@ -857,7 +721,7 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   const adsRenderingSettings = new global.google.ima.AdsRenderingSettings();
   adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
   adsManager = adsManagerLoadedEvent.getAdsManager(
-    videoPlayer,
+    elements['video'],
     adsRenderingSettings
   );
   adsManager.addEventListener(
@@ -907,7 +771,7 @@ export function onAdsLoaderError() {
   // playback is concerned because our content will be ready to play.
   postMessage({event: VideoEvents.LOAD});
   addHoverEventToElement(
-    /** @type {!Element} */ (videoPlayer),
+    /** @type {!Element} */ (elements['video']),
     showControlsThrottled
   );
   if (playbackStarted) {
@@ -927,7 +791,7 @@ export function onAdError() {
     adsManager.destroy();
   }
   addHoverEventToElement(
-    /** @type {!Element} */ (videoPlayer),
+    /** @type {!Element} */ (elements['video']),
     showControlsThrottled
   );
   playVideo();
@@ -958,7 +822,8 @@ export function onAdProgress(unusedEvent) {
     remainingSeconds = '0' + remainingSeconds;
   }
   const label = adLabel.replace('%s', adPosition).replace('%s', totalAds);
-  countdownDiv.textContent = `${label}: ${remainingMinutes}:${remainingSeconds}`;
+  const {'countdown': countdown} = elements;
+  countdown.textContent = `${label}: ${remainingMinutes}:${remainingSeconds}`;
 }
 
 /**
@@ -977,15 +842,18 @@ export function onContentPauseRequested(global) {
     adsManagerHeightOnLoad = null;
   }
   adsActive = true;
+  playerState = PlayerStates.PLAYING;
   postMessage({event: VideoEvents.AD_START});
+  toggle(elements['adContainer'], true);
+  showAdControls();
+
+  const {'video': video} = elements;
+  video.removeEventListener('ended', onContentEnded);
+  video.pause();
   removeHoverEventFromElement(
-    /** @type {!Element} */ (videoPlayer),
+    /** @type {!Element} */ (video),
     showControlsThrottled
   );
-  setStyle(adContainerDiv, 'display', 'block');
-  videoPlayer.removeEventListener('ended', onContentEnded);
-  showAdControls();
-  videoPlayer.pause();
 }
 
 /**
@@ -994,9 +862,10 @@ export function onContentPauseRequested(global) {
  * @visibleForTesting
  */
 export function onContentResumeRequested() {
+  const {'overlayButton': overlayButton, 'video': video} = elements;
   adsActive = false;
   addHoverEventToElement(
-    /** @type {!Element} */ (videoPlayer),
+    /** @type {!Element} */ (video),
     showControlsThrottled
   );
   postMessage({event: VideoEvents.AD_END});
@@ -1006,10 +875,10 @@ export function onContentResumeRequested() {
     // resume content in that case.
     playVideo();
   } else {
-    setStyle(bigPlayDiv, 'display', bigPlayDivDisplayStyle);
+    toggle(overlayButton, true);
   }
 
-  videoPlayer.addEventListener('ended', onContentEnded);
+  video.addEventListener('ended', onContentEnded);
 }
 
 /**
@@ -1020,8 +889,8 @@ export function onContentResumeRequested() {
  * @visibleForTesting
  */
 export function onAdPaused() {
-  // show play button while ad is paused
-  changeIcon(playPauseDiv, 'play');
+  toggleRootDataAttribute('playing', false);
+  playerState = PlayerStates.PAUSE;
 }
 
 /**
@@ -1032,8 +901,8 @@ export function onAdPaused() {
  * @visibleForTesting
  */
 export function onAdResumed() {
-  // show pause button when ad resumes
-  changeIcon(playPauseDiv, 'pause');
+  toggleRootDataAttribute('playing', true);
+  playerState = PlayerStates.PLAYING;
 }
 
 /**
@@ -1050,7 +919,8 @@ export function onAllAdsCompleted() {
  * Called when our ui timer goes off. Updates the player UI.
  */
 function uiTickerClick() {
-  updateUi(videoPlayer.currentTime, videoPlayer.duration);
+  const {currentTime, duration} = elements['video'];
+  updateTime(currentTime, duration);
 }
 
 /**
@@ -1061,8 +931,9 @@ function playerDataTick() {
   // Skip while ads are active in case of custom playback. No harm done for
   // non-custom playback because content won't be progressing while ads are
   // playing.
-  if (videoPlayer && !adsActive) {
-    playerData.update(videoPlayer);
+  const {'video': video} = elements;
+  if (video && !adsActive) {
+    playerData.update(video);
     postMessage({
       event: ImaPlayerData.IMA_PLAYER_DATA,
       data: playerData,
@@ -1071,16 +942,21 @@ function playerDataTick() {
 }
 
 /**
- * Updates the video player UI.
+ * Updates the time and progress.
  * @param {number} currentTime
  * @param {number} duration
  * @visibleForTesting
  */
-export function updateUi(currentTime, duration) {
-  timeNode.textContent = formatTime(currentTime) + ' / ' + formatTime(duration);
+export function updateTime(currentTime, duration) {
+  const {
+    'progressLine': progressLine,
+    'progressMarker': progressMarker,
+    'time': time,
+  } = elements;
+  time.textContent = formatTime(currentTime) + ' / ' + formatTime(duration);
   const progressPercent = Math.floor((currentTime / duration) * 100);
   setStyle(progressLine, 'width', progressPercent + '%');
-  setStyle(progressMarkerDiv, 'left', progressPercent - 1 + '%');
+  setStyle(progressMarker, 'left', progressPercent - 1 + '%');
 }
 
 /**
@@ -1144,7 +1020,8 @@ function onProgressClickEnd() {
   document.removeEventListener(mouseMoveEvent, onProgressMove);
   document.removeEventListener(mouseUpEvent, onProgressClickEnd);
   uiTicker = setInterval(uiTickerClick, 500);
-  videoPlayer.currentTime = videoPlayer.duration * seekPercent;
+  const {'video': video} = elements;
+  video.currentTime = video.duration * seekPercent;
   // Reset hide controls timeout.
   showControls();
 }
@@ -1154,9 +1031,10 @@ function onProgressClickEnd() {
  * @param {!Event} event
  */
 function onProgressMove(event) {
-  const progressWrapperPosition = getPagePosition(progressBarWrapperDiv);
+  const {'progress': progress, 'video': video} = elements;
+  const progressWrapperPosition = getPagePosition(progress);
   const progressListStart = progressWrapperPosition.x;
-  const progressListWidth = progressBarWrapperDiv./*OK*/ offsetWidth;
+  const progressListWidth = progress./*OK*/ offsetWidth;
 
   // Handle Android Chrome touch events.
   const eventX = event.clientX || event.touches[0].pageX;
@@ -1167,7 +1045,7 @@ function onProgressMove(event) {
   } else if (seekPercent > 1) {
     seekPercent = 1;
   }
-  updateUi(videoPlayer.duration * seekPercent, videoPlayer.duration);
+  updateTime(video.duration * seekPercent, video.duration);
 }
 
 /**
@@ -1206,17 +1084,18 @@ export function onPlayPauseClick() {
  * @visibleForTesting
  */
 export function playVideo() {
+  const {'adContainer': adContainer, 'video': video} = elements;
   if (adsActive) {
     adsManager.resume();
   } else {
-    setStyle(adContainerDiv, 'display', 'none');
+    toggle(adContainer, false);
     // Kick off the hide controls timer.
     showControls();
-    videoPlayer.play();
+    video.play();
   }
   playerState = PlayerStates.PLAYING;
   postMessage({event: VideoEvents.PLAYING});
-  changeIcon(playPauseDiv, 'pause');
+  toggleRootDataAttribute('playing', true);
 }
 
 /**
@@ -1228,26 +1107,27 @@ export function pauseVideo(event = null) {
   if (adsActive) {
     adsManager.pause();
   } else {
-    videoPlayer.pause();
+    const {'video': video} = elements;
+    video.pause();
     // Show controls and keep them there because we're paused.
     clearTimeout(hideControlsTimeout);
     showControls();
     if (event && event.type == 'webkitendfullscreen') {
       // Video was paused because we exited fullscreen.
-      videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
+      video.removeEventListener('webkitendfullscreen', pauseVideo);
       fullscreen = false;
     }
   }
   playerState = PlayerStates.PAUSED;
   postMessage({event: VideoEvents.PAUSE});
-  changeIcon(playPauseDiv, 'play');
+  toggleRootDataAttribute('playing', false);
 }
 
 /**
  * Handler when the mute/unmute button is clicked
  */
 export function onMuteUnmuteClick() {
-  if (videoPlayer.muted) {
+  if (elements['video'].muted) {
     unmuteVideo();
   } else {
     muteVideo();
@@ -1258,34 +1138,35 @@ export function onMuteUnmuteClick() {
  * Function to mute the video
  */
 export function muteVideo() {
-  if (!videoPlayer.muted) {
-    videoPlayer.volume = 0;
-    videoPlayer.muted = true;
-    if (adsManager) {
-      adsManager.setVolume(0);
-    } else {
-      muteAdsManagerOnLoaded = true;
-    }
-    changeIcon(muteUnmuteDiv, 'mute');
-    postMessage({event: VideoEvents.MUTED});
-  }
+  toggleMuted(elements['video'], true);
 }
 
 /**
  * Function to unmute the video
  */
 export function unmuteVideo() {
-  if (videoPlayer.muted) {
-    videoPlayer.volume = 1;
-    videoPlayer.muted = false;
-    if (adsManager) {
-      adsManager.setVolume(1);
-    } else {
-      muteAdsManagerOnLoaded = false;
-    }
-    changeIcon(muteUnmuteDiv, 'volume_max');
-    postMessage({event: VideoEvents.UNMUTED});
+  toggleMuted(elements['video'], false);
+}
+
+/**
+ * Mutes or unmutes the video.
+ * @param {!HTMLMediaElement} video
+ * @param {boolean} muted
+ */
+export function toggleMuted(video, muted) {
+  if (video.muted == muted) {
+    return;
   }
+  const volume = muted ? 0 : 1;
+  video.volume = volume;
+  video.muted = muted;
+  if (adsManager) {
+    adsManager.setVolume(volume);
+  } else {
+    muteAdsManagerOnLoaded = muted;
+  }
+  toggleRootDataAttribute('muted', muted);
+  postMessage({event: muted ? VideoEvents.MUTED : VideoEvents.UNMUTED});
 }
 
 /**
@@ -1320,12 +1201,13 @@ function enterFullscreen(global) {
     fullscreenHeight = window.screen.height;
     requestFullscreen.call(global.document.documentElement);
   } else {
+    const {'video': video} = elements;
     // Use native fullscreen (iPhone)
-    videoPlayer.webkitEnterFullscreen();
+    video.webkitEnterFullscreen();
     // Pause the video when we leave fullscreen. iPhone does this
     // automatically, but we still use pauseVideo as an event handler to
     // sync the UI.
-    videoPlayer.addEventListener('webkitendfullscreen', pauseVideo);
+    video.addEventListener('webkitendfullscreen', pauseVideo);
     nativeFullscreen = true;
     onFullscreenChange(global);
   }
@@ -1358,9 +1240,6 @@ function onFullscreenChange(global) {
       adsManagerWidthOnLoad = null;
       adsManagerHeightOnLoad = null;
     }
-    // Return the video to its original size and position
-    setStyle(wrapperDiv, 'width', px(videoWidth));
-    setStyle(wrapperDiv, 'height', px(videoHeight));
     fullscreen = false;
   } else {
     // The user just entered fullscreen
@@ -1375,9 +1254,6 @@ function onFullscreenChange(global) {
         adsManagerWidthOnLoad = null;
         adsManagerHeightOnLoad = null;
       }
-      // Make the video take up the entire screen
-      setStyle(wrapperDiv, 'width', px(fullscreenWidth));
-      setStyle(wrapperDiv, 'height', px(fullscreenHeight));
       hideControls();
     }
     fullscreen = true;
@@ -1387,33 +1263,18 @@ function onFullscreenChange(global) {
 
 /**
  * Show a subset of controls when ads are playing.
- * Visible controls are countdownDiv, playPauseDiv, muteUnmuteDiv, and fullscreenDiv
+ * See CSS for selectors affected by -controls-ads and -controls-ads-mini
  *
  * @visibleForTesting
  */
 export function showAdControls() {
-  const hasMobileStyles = videoWidth <= 400;
-  const isSkippable = currentAd ? currentAd.getSkipTimeOffset() !== -1 : false;
-  const miniControls = hasMobileStyles && isSkippable;
-  // hide non-ad controls
-  [timeDiv, progressBarWrapperDiv].forEach((button) => {
-    setStyle(button, 'display', 'none');
-  });
-  // set ad control styles
-  setStyles(controlsDiv, {
-    'height': miniControls ? '20px' : '30px',
-    'justify-content': 'flex-end',
-    'padding': '10px',
-  });
-  [fullscreenDiv, playPauseDiv, muteUnmuteDiv].forEach((button) => {
-    setStyles(button, {'height': miniControls ? '18px' : '22px'});
-  });
-  setStyles(muteUnmuteDiv, {'margin-right': '10px'});
-  // show pause button while ad begins playing
-  changeIcon(playPauseDiv, 'pause');
-  // show ad controls
-  setStyle(countdownWrapperDiv, 'display', 'flex');
   showControls(true);
+  toggleRootDataAttribute('playing', true);
+  toggleRootDataAttribute('ad', true);
+  toggleRootDataAttribute(
+    'skippable',
+    currentAd ? currentAd?.getSkipTimeOffset() !== -1 : false
+  );
 }
 
 /**
@@ -1422,22 +1283,8 @@ export function showAdControls() {
  * @visibleForTesting
  */
 export function resetControlsAfterAd() {
-  // hide ad controls
-  setStyle(countdownWrapperDiv, 'display', 'none');
-  // set non-ad control styles
-  setStyles(controlsDiv, {
-    'justify-content': 'center',
-    'height': '100px',
-    'padding': '60px 10px 10px',
-  });
-  [fullscreenDiv, playPauseDiv, muteUnmuteDiv].forEach((button) => {
-    setStyles(button, {'height': '30px'});
-  });
-  setStyles(muteUnmuteDiv, {'margin-right': '20px'});
-  // show non-ad controls
-  [timeDiv, progressBarWrapperDiv].forEach((button) => {
-    setStyle(button, 'display', 'block');
-  });
+  toggleRootDataAttribute('ad', false);
+  toggleRootDataAttribute('skippable', false);
 }
 
 /**
@@ -1454,7 +1301,7 @@ export function showControls(opt_adsForce) {
       hideControlsQueued = false;
       return;
     }
-    setStyle(controlsDiv, 'display', 'flex');
+    toggle(elements['controls'], true);
     controlsVisible = true;
   }
 
@@ -1474,7 +1321,7 @@ export function showControls(opt_adsForce) {
  */
 export function hideControls() {
   if (controlsVisible && !adsActive) {
-    setStyle(controlsDiv, 'display', 'none');
+    toggle(elements['controls'], false);
     controlsVisible = false;
   } else if (!showControlsFirstCalled) {
     // showControls has not been called yet,
@@ -1507,7 +1354,7 @@ function onMessage(global, event) {
         playVideo();
       } else {
         // Auto-play support
-        onBigPlayClick(global);
+        onOverlayButtonInteract(global);
       }
       break;
     case 'pause':
@@ -1532,14 +1379,6 @@ function onMessage(global, event) {
     case 'resize':
       const args = msg['args'];
       if (args && args.width && args.height) {
-        setStyles(wrapperDiv, {
-          'width': px(args.width),
-          'height': px(args.height),
-        });
-        setStyles(bigPlayDiv, {
-          'width': px(args.width),
-          'height': px(args.height),
-        });
         if (adsActive && !fullscreen) {
           adsManager.resize(
             args.width,
@@ -1588,16 +1427,13 @@ function postMessage(data) {
  */
 export function getPropertiesForTesting() {
   return {
-    adContainerDiv,
     allAdsCompleted,
     adRequestFailed,
     adsActive,
     adsManagerWidthOnLoad,
     adsManagerHeightOnLoad,
     adsRequest,
-    bigPlayDiv,
     contentComplete,
-    controlsDiv,
     controlsVisible,
     hideControlsTimeout,
     imaLoadAllowed,
@@ -1605,14 +1441,23 @@ export function getPropertiesForTesting() {
     playbackStarted,
     playerState,
     PlayerStates,
-    playPauseDiv,
-    progressLine,
-    progressMarkerDiv,
-    timeNode,
     uiTicker,
-    videoPlayer,
     hideControlsQueued,
     icons,
+    // TODO(alanorozco): Update names on test's end to pass `elements` instead.
+    elements,
+    videoPlayer: elements['video'],
+    adContainerDiv: elements['adContainer'],
+    controlsDiv: elements['controls'],
+    playPauseDiv: elements['playButton'],
+    countdownDiv: elements['countdown'],
+    timeDiv: elements['time'],
+    progressBarWrapper: elements['progress'],
+    progressLine: elements['progressLine'],
+    progressMarkerDiv: elements['progressMarker'],
+    muteUnmuteDiv: elements['muteButton'],
+    fullscreenDiv: elements['fullscreenButton'],
+    bigPlayDiv: elements['overlayButton'],
   };
 }
 
@@ -1626,12 +1471,12 @@ export function getShowControlsThrottledForTesting() {
 }
 
 /**
- * Sets the big play button div.
+ * Sets the overlay button.
  * @param {!Element} div
  * @visibleForTesting
  */
 export function setBigPlayDivForTesting(div) {
-  bigPlayDiv = div;
+  elements['overlayButton'] = div;
 }
 
 /**
@@ -1660,7 +1505,7 @@ export function setVideoWidthAndHeightForTesting(width, height) {
  * @visibleForTesting
  */
 export function setVideoPlayerMutedForTesting(shouldMute) {
-  videoPlayer.muted = shouldMute;
+  elements['video'].muted = shouldMute;
 }
 
 /**
@@ -1743,7 +1588,7 @@ export function setContentCompleteForTesting(newContentComplete) {
  * @visibleForTesting
  */
 export function setVideoPlayerForTesting(newPlayer) {
-  videoPlayer = newPlayer;
+  elements['video'] = newPlayer;
 }
 
 /**

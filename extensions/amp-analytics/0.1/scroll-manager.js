@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../../src/core/data-structures/observable';
-import {Services} from '../../../src/services';
+import {Observable} from '#core/data-structures/observable';
+import {Services} from '#service';
 import {devAssert} from '../../../src/log';
 
 /**
@@ -95,10 +95,10 @@ export class ScrollManager {
       // In the case of shadow/embedded documents, the root element's
       // layoutRect is relative to the parent doc's origin
       const {
-        top: scrollTop,
-        left: scrollLeft,
-        width: scrollWidth,
         height: scrollHeight,
+        left: scrollLeft,
+        top: scrollTop,
+        width: scrollWidth,
       } = initRootElementRect;
 
       /** {./scroll-manager.ScrollEventDef} */
@@ -143,10 +143,10 @@ export class ScrollManager {
       const {height: initialScrollHeight, width: initialScrollWidth} = rects[0];
       // Current root layout rectangle
       const {
-        top: scrollTop,
-        left: scrollLeft,
-        width: scrollWidth,
         height: scrollHeight,
+        left: scrollLeft,
+        top: scrollTop,
+        width: scrollWidth,
       } = rects[1];
       /** {./scroll-manager.ScrollEventDef} */
       const scrollEvent = {

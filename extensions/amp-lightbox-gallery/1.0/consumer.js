@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {LightboxGalleryContext} from './context';
-import {sequentialIdGenerator} from '../../../src/utils/id-generator';
-import {
-  useContext,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from '../../../src/preact';
+import {sequentialIdGenerator} from '#core/math/id-generator';
+import {useContext, useLayoutEffect, useMemo, useState} from '#preact';
 
 const generateLightboxItemKey = sequentialIdGenerator();
 
@@ -46,7 +41,7 @@ export function WithLightbox({
   ...rest
 }) {
   const [genKey] = useState(generateLightboxItemKey);
-  const {open, register, deregister} = useContext(LightboxGalleryContext);
+  const {deregister, open, register} = useContext(LightboxGalleryContext);
   useLayoutEffect(() => {
     register(genKey, render);
     return () => deregister(genKey);

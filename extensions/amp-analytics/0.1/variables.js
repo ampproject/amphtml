@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/core/constants/enums';
-import {asyncStringReplace} from '../../../src/core/types/string';
-import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {Services} from '#service';
+import {TickLabel} from '#core/constants/enums';
+import {asyncStringReplace} from '#core/types/string';
+import {base64UrlEncodeFromString} from '#core/types/string/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {
-  getActiveExperimentBranches,
-  getExperimentBranch,
-} from '../../../src/experiments';
+import {dict} from '#core/types/object';
+import {getActiveExperimentBranches, getExperimentBranch} from '#experiments';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -34,9 +31,9 @@ import {
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
-import {isArray} from '../../../src/core/types';
-import {isFiniteNumber} from '../../../src/types';
+} from '../../../src/service-helpers';
+import {isArray, isFiniteNumber} from '#core/types';
+
 import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';
 
@@ -397,7 +394,7 @@ export class VariableService {
 
       // Split the key to name and args
       // e.g.: name='SOME_MACRO', args='(arg1, arg2)'
-      const {name, argList} = getNameArgs(key);
+      const {argList, name} = getNameArgs(key);
       if (options.freezeVars[name]) {
         // Do nothing with frozen params
         return match;
@@ -502,7 +499,7 @@ export function encodeVars(raw) {
     return raw.map(encodeVars).join(',');
   }
   // Separate out names and arguments from the value and encode the value.
-  const {name, argList} = getNameArgs(String(raw));
+  const {argList, name} = getNameArgs(String(raw));
   return encodeURIComponent(name) + argList;
 }
 

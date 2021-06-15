@@ -34,20 +34,17 @@ import {
   GrantReason,
 } from '../../amp-subscriptions/0.1/entitlement';
 import {GaaMeteringRegwall} from '../../../third_party/subscriptions-project/swg-gaa';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
-import {WindowInterface} from '../../../src/window-interface';
-import {
-  assertHttpsUrl,
-  parseQueryString,
-  parseUrlDeprecated,
-} from '../../../src/url';
-import {experimentToggles, isExperimentOn} from '../../../src/experiments';
+import {WindowInterface} from '#core/window/interface';
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
+import {experimentToggles, isExperimentOn} from '#experiments';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {getValueForExpr} from '../../../src/json';
+import {getValueForExpr} from '#core/types/object';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {parseQueryString} from '#core/types/string/url';
 
 import {devAssert, user, userAssert} from '../../../src/log';
 

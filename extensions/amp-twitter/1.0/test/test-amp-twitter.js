@@ -15,10 +15,10 @@
  */
 
 import '../amp-twitter';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
 describes.realWin(

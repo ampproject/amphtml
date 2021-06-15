@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseQueryString} from '../../src/url';
-import {validateData, writeScript} from '../../3p/3p';
+import {parseQueryString} from '#core/types/string/url';
+import {validateData, writeScript} from '#3p/3p';
 
 /**
  * @param {!Window} global

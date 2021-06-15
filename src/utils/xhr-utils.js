@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {devAssert, user, userAssert} from '../log';
-import {dict, isObject, map} from '../core/types/object';
-import {fromIterator, isArray} from '../core/types/array';
+import {Services} from '#service';
+import {devAssert, userAssert} from '#core/assert';
+import {dict, isObject, map} from '#core/types/object';
+import {fromIterator, isArray} from '#core/types/array';
 import {
   getCorsUrl,
   getWinOrigin,
@@ -26,8 +26,9 @@ import {
   serializeQueryString,
 } from '../url';
 import {getMode} from '../mode';
+import {user} from '../log';
 
-import {isExperimentOn} from '../experiments';
+import {isExperimentOn} from '#experiments';
 import {isFormDataWrapper} from '../form-data-wrapper';
 
 /** @private @const {!Array<string>} */

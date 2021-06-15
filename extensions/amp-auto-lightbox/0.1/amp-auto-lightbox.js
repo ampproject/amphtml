@@ -22,19 +22,17 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Services} from '../../../src/services';
-import {
-  closestAncestorElementBySelector,
-  dispatchCustomEvent,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Services} from '#service';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dev} from '../../../src/log';
+import {dispatchCustomEvent} from '#core/dom';
 import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
-import {toArray} from '../../../src/core/types/array';
-import {tryParseJson} from '../../../src/json';
+import {toArray} from '#core/types/array';
+import {tryParseJson} from '#core/types/object/json';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -160,12 +158,12 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsSizingCriteria(element, renderWidth, renderHeight) {
-    const {naturalWidth, naturalHeight} = getMaxNaturalDimensions(
+    const {naturalHeight, naturalWidth} = getMaxNaturalDimensions(
       dev().assertElement(element.querySelector('img'))
     );
 
     const viewport = Services.viewportForDoc(element);
-    const {width: vw, height: vh} = viewport.getSize();
+    const {height: vh, width: vw} = viewport.getSize();
 
     return meetsSizingCriteria(
       renderWidth,
@@ -191,7 +189,7 @@ const srcsetWidthRe = /\s+([0-9]+)w(,|[\S\s]*$)/g;
  * @return {number} -1 if no srcset, or if srcset is defined by dpr instead of
  *   width. (This value is useful for comparisons, see getMaxNaturalDimensions.)
  */
-export function getMaxWidthFromSrcset(img) {
+function getMaxWidthFromSrcset(img) {
   let max = -1;
 
   const srcsetAttr = img.getAttribute('srcset');
@@ -216,8 +214,8 @@ export function getMaxWidthFromSrcset(img) {
  * @param {!Element} img
  * @return {{naturalWidth: number, naturalHeight: number}}
  */
-export function getMaxNaturalDimensions(img) {
-  const {naturalWidth, naturalHeight} = img;
+function getMaxNaturalDimensions(img) {
+  const {naturalHeight, naturalWidth} = img;
   const ratio = naturalWidth / naturalHeight;
   const maxWidthFromSrcset = getMaxWidthFromSrcset(img);
   if (maxWidthFromSrcset > naturalWidth) {
@@ -445,7 +443,7 @@ export function runCandidates(ampdoc, candidates) {
           if (!candidate.signals().get(CommonSignals.LOAD_END)) {
             return;
           }
-          const {width, height} = boundingClientRect;
+          const {height, width} = boundingClientRect;
           if (!Criteria.meetsAll(candidate, width, height)) {
             return;
           }

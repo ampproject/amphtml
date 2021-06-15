@@ -16,15 +16,14 @@
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
-import {Deferred} from '../core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from './page-scroller';
-import {VisibilityState} from '../core/constants/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {
   addParamsToUrl,
   getFragment,
   isProxyOrigin,
-  parseQueryString,
   parseUrlWithA,
   removeFragment,
   removeSearch,
@@ -32,15 +31,16 @@ import {
 } from '../url';
 import {applySandbox} from '../3p-frame';
 import {createCustomEvent, listenOnce} from '../event-helper';
-import {dict} from '../core/types/object';
-import {isJsonScriptTag, tryFocus} from '../dom';
+import {dict} from '#core/types/object';
+import {isJsonScriptTag, tryFocus} from '#core/dom';
+import {parseQueryString} from '#core/types/string/url';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
-import {dev} from '../log';
-import {findIndex, toArray} from '../core/types/array';
+import {devAssertElement} from '#core/assert';
+import {findIndex, toArray} from '#core/types/array';
 import {getMode} from '../../src/mode';
-import {parseJson} from '../json';
-import {resetStyles, setStyle, setStyles} from '../style';
+import {parseJson} from '#core/types/object/json';
+import {resetStyles, setStyle, setStyles} from '#core/dom/style';
 import {urls} from '../config';
 
 /** @enum {string} */
@@ -247,7 +247,7 @@ export class AmpStoryPlayer {
     this.pageScroller_ = new PageScroller(win);
 
     /** @private {boolean} */
-    this.autoplay_ = true;
+    this.playing_ = true;
 
     /** @private {?string} */
     this.attribution_ = null;
@@ -338,6 +338,9 @@ export class AmpStoryPlayer {
    * @public
    */
   play() {
+    if (!this.element_.isLaidOut_) {
+      this.layoutPlayer();
+    }
     this.togglePaused_(false);
   }
 
@@ -355,6 +358,7 @@ export class AmpStoryPlayer {
    * @private
    */
   togglePaused_(paused) {
+    this.playing_ = !paused;
     const currentStory = this.stories_[this.currentIdx_];
 
     this.updateVisibilityState_(
@@ -1096,7 +1100,7 @@ export class AmpStoryPlayer {
           .then(() => this.visibleDeferred_.promise)
           // 4. Update the visibility state of the story.
           .then(() => {
-            if (story.distance === 0 && this.autoplay_) {
+            if (story.distance === 0 && this.playing_) {
               this.updateVisibilityState_(story, VisibilityState.VISIBLE);
             }
 
@@ -1702,16 +1706,13 @@ export class AmpStoryPlayer {
     const currentIframe = this.stories_[this.currentIdx_].iframe;
 
     requestAnimationFrame(() => {
-      resetStyles(dev().assertElement(currentIframe), [
-        'transform',
-        'transition',
-      ]);
+      resetStyles(devAssertElement(currentIframe), ['transform', 'transition']);
     });
 
     const secondaryStory = this.getSecondaryStory_();
     if (secondaryStory) {
       requestAnimationFrame(() => {
-        resetStyles(dev().assertElement(secondaryStory.iframe), [
+        resetStyles(devAssertElement(secondaryStory.iframe), [
           'transform',
           'transition',
         ]);
@@ -1756,7 +1757,7 @@ export class AmpStoryPlayer {
     const {behavior} = this.playerConfig_;
 
     if (behavior && typeof behavior.autoplay === 'boolean') {
-      this.autoplay_ = behavior.autoplay;
+      this.playing_ = behavior.autoplay;
     }
   }
 
@@ -1833,7 +1834,7 @@ export class AmpStoryPlayer {
     const translate = `translate3d(${deltaX}px, 0, 0)`;
 
     requestAnimationFrame(() => {
-      setStyles(dev().assertElement(iframe), {
+      setStyles(devAssertElement(iframe), {
         transform: translate,
         transition: 'none',
       });
@@ -1845,7 +1846,7 @@ export class AmpStoryPlayer {
     }
 
     requestAnimationFrame(() => {
-      setStyles(dev().assertElement(secondaryStory.iframe), {
+      setStyles(devAssertElement(secondaryStory.iframe), {
         transform: secondaryTranslate,
         transition: 'none',
       });
@@ -1864,7 +1865,7 @@ export class AmpStoryPlayer {
       return null;
     }
 
-    const {screenX, screenY, clientX, clientY} = touches[0];
+    const {clientX, clientY, screenX, screenY} = touches[0];
     return {screenX, screenY, clientX, clientY};
   }
 }

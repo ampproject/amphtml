@@ -36,12 +36,6 @@
   height: 96px !important;
 }
 
-.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
-  opacity: 0.3 !important;
-  z-index: 1 !important;
-  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
-}
-
 .i-amphtml-story-hidden.i-amphtml-story-system-layer {
   opacity: 0 !important;
   transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
@@ -49,10 +43,6 @@
 
 .i-amphtml-story-hidden.i-amphtml-story-system-layer * {
   pointer-events: none !important;
-}
-
-.i-amphtml-story-desktop-panels.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
-  opacity: 0 !important;
 }
 
 .i-amphtml-story-attribution {
@@ -167,7 +157,8 @@
   z-index: 100001 !important;
 }
 
-[ad-showing] .i-amphtml-story-progress-bar,
+/* TODO(#33969): clean up when ad progress bar is finalized. */
+[ad-showing] .i-amphtml-story-progress-bar:not([i-amphtml-ad-progress-exp]),
 [ad-showing] .i-amphtml-story-attribution {
   visibility: hidden !important;
 }
@@ -202,7 +193,32 @@
   transform-origin: left !important;
 }
 
-[dir=rtl] .i-amphtml-story-page-progress-value {
+.i-amphtml-story-ad-progress-value {
+  animation-name: i-amphtml-story-ad-value !important;
+  animation-timing-function: linear !important;
+  background-color: #fbc02d !important;
+  height: 100% !important;
+  position: relative !important;
+  top: -2px !important;
+  transform-origin: left !important;
+  width: 100% !important;
+}
+
+@keyframes i-amphtml-story-ad-value {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+[paused] .i-amphtml-story-ad-progress-value {
+  animation-play-state: paused !important;
+}
+
+[dir=rtl] .i-amphtml-story-page-progress-value,
+[dir=rtl] .i-amphtml-story-ad-progress-value {
   transform-origin: right !important;
 }
 

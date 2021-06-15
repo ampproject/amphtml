@@ -16,9 +16,9 @@
 
 import '../amp-carousel';
 import * as Listen from '../../../../src/event-helper';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
@@ -98,9 +98,9 @@ describes.realWin(
     });
 
     async function getCarousel({
+      dir = null,
       loop = false,
       slideCount = 5,
-      dir = null,
     } = {}) {
       const imgUrl =
         'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +

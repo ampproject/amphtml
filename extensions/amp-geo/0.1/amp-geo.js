@@ -35,8 +35,8 @@
  * the amp-geo element's layout type is nodisplay.
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
 
 /**
  * GOOGLE AND THE AMP PROJECT ARE PROVIDING THIS INFORMATION AS A COURTESY BUT
@@ -50,11 +50,11 @@ import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
 import {GEO_IN_GROUP} from './amp-geo-in-group';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/core/types';
-import {isCanary} from '../../../src/experiments';
-import {isJsonScriptTag} from '../../../src/dom';
+import {isArray, isObject} from '#core/types';
+import {isCanary} from '#experiments';
+import {isJsonScriptTag} from '#core/dom';
 
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '#core/types/object/json';
 import {urls} from '../../../src/config';
 
 /** @const */

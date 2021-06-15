@@ -21,9 +21,9 @@
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpA4A} from '../amp-a4a';
-import {htmlFor} from '../../../../src/static-template';
-import {pushIfNotExist, removeItem} from '../../../../src/core/types/array';
-import {upgradeOrRegisterElement} from '../../../../src/service/custom-element-registry';
+import {htmlFor} from '#core/dom/static-template';
+import {pushIfNotExist, removeItem} from '#core/types/array';
+import {upgradeOrRegisterElement} from '#service/custom-element-registry';
 
 describes.realWin(
   'amp-a4a: whenWithinViewport',
@@ -72,7 +72,7 @@ describes.realWin(
 
     function notifyIntersection(rootMargin, isIntersecting) {
       for (let i = 0; i < observers.length; i++) {
-        const {elements, callback, options} = observers[i];
+        const {callback, elements, options} = observers[i];
         if (
           elements.includes(element) &&
           options.root === doc &&

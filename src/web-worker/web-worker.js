@@ -24,7 +24,7 @@
 import './web-worker-polyfills';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 import {dev, initLogConstructor, setReportError} from '../log';
-import {exponentialBackoff} from '../exponential-backoff';
+import {exponentialBackoff} from '#core/types/function/exponential-backoff';
 import {reportError} from '../error-reporting';
 import {urls} from '../config';
 
@@ -61,7 +61,7 @@ self.addEventListener('error', errorHandler_);
 
 self.addEventListener('message', function (event) {
   const messageEvent = /** @type {!MessageEvent} */ (event);
-  const {method, args, id, scope} = /** @type {ToWorkerMessageDef} */ (
+  const {args, id, method, scope} = /** @type {ToWorkerMessageDef} */ (
     messageEvent.data
   );
   let returnValue;

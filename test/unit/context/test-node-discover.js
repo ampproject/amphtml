@@ -16,7 +16,7 @@
 
 import {ContextNode} from '../../../src/context/node';
 import {deepScan, findParent} from '../../../src/context/scan';
-import {domOrderComparator} from '../../../src/dom';
+import {domOrderComparator} from '#core/dom';
 
 describes.realWin('ContextNode', {}, (env) => {
   let win, doc;

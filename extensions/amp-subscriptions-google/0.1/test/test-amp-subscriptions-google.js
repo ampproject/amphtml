@@ -36,10 +36,10 @@ import {
 import {GaaMeteringRegwall} from '../../../../third_party/subscriptions-project/swg-gaa';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
-import {WindowInterface} from '../../../../src/window-interface';
-import {toggleExperiment} from '../../../../src/experiments';
+import {WindowInterface} from '#core/window/interface';
+import {toggleExperiment} from '#experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';
@@ -438,7 +438,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     });
     env.sandbox
       .stub(serviceAdapter, 'loadMeteringState')
-      .resolves({key: 'value'});
+      .resolves({id: 'abc123'});
     const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
       Promise.resolve({
         json: () =>
@@ -459,7 +459,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
 
     const fetchUrl = fetchStub.getCall(0).args[0];
     expect(fetchUrl).to.equal(
-      'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements?encodedParams=eyJtZXRlcmluZyI6eyJjbGllbnRUeXBlcyI6WzFdLCJvd25lciI6ImV4YW1wbGUub3JnIiwicmVzb3VyY2UiOnsiaGFzaGVkQ2Fub25pY2FsVXJsIjoiMjcwM2YyYjZlZjBlYWFhODEzNzZhMThmYWE3N2E1OTAwOTc1Zjc3MDVkNWQ4YjZlMWEzNzJkNWY2YzJiOTdiYjU5ZjI4M2Q3MzdiNmQ5YWI3N2M1YTNkODQ4YzZlY2UyMDdjZDYwMzU4M2NjMzIyZGQ4MGFiMGI5MzA5MmM2NTAifSwic3RhdGUiOnsiYXR0cmlidXRlcyI6W119fX0'
+      'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements?encodedParams=eyJtZXRlcmluZyI6eyJjbGllbnRUeXBlcyI6WzFdLCJvd25lciI6ImV4YW1wbGUub3JnIiwicmVzb3VyY2UiOnsiaGFzaGVkQ2Fub25pY2FsVXJsIjoiMjcwM2YyYjZlZjBlYWFhODEzNzZhMThmYWE3N2E1OTAwOTc1Zjc3MDVkNWQ4YjZlMWEzNzJkNWY2YzJiOTdiYjU5ZjI4M2Q3MzdiNmQ5YWI3N2M1YTNkODQ4YzZlY2UyMDdjZDYwMzU4M2NjMzIyZGQ4MGFiMGI5MzA5MmM2NTAifSwic3RhdGUiOnsiaWQiOiJhYmMxMjMiLCJhdHRyaWJ1dGVzIjpbXX19fQ'
     );
   });
 

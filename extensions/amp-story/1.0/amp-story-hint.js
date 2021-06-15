@@ -22,9 +22,9 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {renderAsElement} from './simple-template';
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -191,10 +191,6 @@ export class AmpStoryHint {
       }
     );
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isOpen) => {
-      this.onBookendStateUpdate_(isOpen);
-    });
-
     this.storeService_.subscribe(
       StateProperty.INTERACTIVE_COMPONENT_STATE,
       /** @param {./amp-story-store-service.InteractiveComponentDef} component */ (
@@ -320,17 +316,6 @@ export class AmpStoryHint {
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (!isVisible) {
-      this.hideAllNavigationHint();
-    }
-  }
-
-  /**
-   * Reacts to bookend state updates.
-   * @param {boolean} isOpen
-   * @private
-   */
-  onBookendStateUpdate_(isOpen) {
-    if (isOpen) {
       this.hideAllNavigationHint();
     }
   }

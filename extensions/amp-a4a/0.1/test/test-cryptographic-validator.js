@@ -22,7 +22,7 @@ import {
 import {VerificationStatus} from '../signature-verifier';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 import {user} from '../../../../src/log';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Encode} from '#core/types/string/bytes';
 
 const realWinConfig = {
   amp: {},

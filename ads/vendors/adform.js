@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData, validateSrcPrefix, writeScript} from '../../3p/3p';
+import {validateData, validateSrcPrefix, writeScript} from '#3p/3p';
 
 // Valid adform ad source hosts
 const hosts = {
@@ -33,7 +33,7 @@ const hosts = {
 export function adform(global, data) {
   validateData(data, [['src', 'bn', 'mid']]);
   global.Adform = {ampData: data};
-  const {src, bn, mid} = data;
+  const {bn, mid, src} = data;
   let url;
 
   // Custom ad url using "data-src" attribute

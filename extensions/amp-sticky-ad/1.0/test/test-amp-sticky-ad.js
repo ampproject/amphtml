@@ -16,8 +16,8 @@
 
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-sticky-ad';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
 import {macroTask} from '../../../../testing/yield';
 import {poll} from '../../../../testing/iframe';
 

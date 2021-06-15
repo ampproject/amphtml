@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {
   Accordion,
   AccordionContent,
@@ -22,7 +22,7 @@ import {
   AccordionSection,
 } from '../component';
 import {mount} from 'enzyme';
-import {useAmpContext} from '../../../../src/preact/context';
+import {useAmpContext} from '#preact/context';
 import {waitFor} from '../../../../testing/test-helper';
 
 const ContextReader = (props) => {
@@ -667,7 +667,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     beforeEach(() => {
       onExpandStateChange = env.sandbox.spy();
-      ref = Preact.useRef();
+      ref = Preact.createRef();
 
       wrapper = mount(
         <Accordion ref={ref}>
@@ -877,7 +877,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     describe('single-expand accordion', () => {
       beforeEach(() => {
-        ref = Preact.useRef();
+        ref = Preact.createRef();
         wrapper = mount(
           <Accordion ref={ref} expandSingleSection>
             <AccordionSection key={1} expanded header="header1" id="section1">

@@ -19,8 +19,8 @@
 
 import {Carousel} from '../carousel';
 import {dev} from '../../../../src/log';
-import {setInitialDisplay, setStyle, setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/core/types/array';
+import {setInitialDisplay, setStyle, setStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 
 describes.realWin('carousel implementation', {}, (env) => {
   let win;
@@ -70,10 +70,10 @@ describes.realWin('carousel implementation', {}, (env) => {
    * }} options
    */
   async function createCarousel({
-    slideCount,
-    loop,
     forwards = true,
     initialIndex,
+    loop,
+    slideCount,
   }) {
     const carousel = new Carousel({
       win,

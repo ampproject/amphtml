@@ -15,7 +15,7 @@
  */
 
 import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {
   Criteria,
   DocMetaAnnotations,
@@ -32,12 +32,12 @@ import {
   runCandidates,
   scan,
 } from '../amp-auto-lightbox';
-import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/core/data-structures/signals';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
-import {isArray} from '../../../../src/core/types';
-import {tryResolve} from '../../../../src/core/data-structures/promise';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isArray} from '#core/types';
+import {tryResolve} from '#core/data-structures/promise';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -133,7 +133,7 @@ describes.realWin(
         `Criteria.meetsTreeShapeCriteria(html\`${outerHtml}\`)`;
 
       function itAcceptsOrRejects(scenarios) {
-        scenarios.forEach(({rejects, accepts, mutate, wrapWith}) => {
+        scenarios.forEach(({accepts, mutate, rejects, wrapWith}) => {
           const maybeWrap = (root) =>
             wrapWith ? wrap(root, wrapWith()) : root;
           const maybeMutate = (root) => mutate && mutate(root);
@@ -259,7 +259,7 @@ describes.realWin(
 
     describe('meetsSizingCriteria', () => {
       const areaDeltaPerc = RENDER_AREA_RATIO * 100;
-      const {vw, vh} = {vw: 1000, vh: 600};
+      const {vh, vw} = {vw: 1000, vh: 600};
 
       const expectMeetsSizingCriteria = (
         renderWidth,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonConfiguration} from '../src/json';
+import {jsonConfiguration} from '#core/types/object/json';
 
 /**
  * @typedef {{
@@ -539,6 +539,8 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
   },
 
+  'gecko': {},
+
   'genieessp': {
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
   },
@@ -888,7 +890,9 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'opinary': {},
+  'opinary': {
+    renderStartImplemented: true,
+  },
 
   'outbrain': {
     renderStartImplemented: true,
@@ -1190,6 +1194,10 @@ const adConfig = jsonConfiguration({
   },
 
   'taboola': {},
+
+  'tail': {
+    renderStartImplemented: true,
+  },
 
   'tcsemotion': {
     prefetch: 'https://ads.tcsemotion.com/www/delivery/amphb.js',

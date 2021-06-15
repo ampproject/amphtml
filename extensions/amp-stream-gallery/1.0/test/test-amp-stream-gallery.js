@@ -15,17 +15,14 @@
  */
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-stream-gallery';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {
-  createElementWithAttributes,
-  waitForChildPromise,
-} from '../../../../src/dom';
+import {ActionInvocation} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
 import {poll} from '../../../../testing/iframe';
-import {setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/core/types/array';
-import {toggleExperiment} from '../../../../src/experiments';
-import {useStyles} from '../../../amp-base-carousel/1.0/base-carousel.jss';
+import {setStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+import {toggleExperiment} from '#experiments';
+import {useStyles} from '../../../amp-base-carousel/1.0/component.jss';
 import {waitFor} from '../../../../testing/test-helper';
 
 describes.realWin(

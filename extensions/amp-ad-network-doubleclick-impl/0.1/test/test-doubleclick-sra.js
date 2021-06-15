@@ -26,9 +26,9 @@ import {
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {BaseElement} from '../../../../src/base-element';
-import {Deferred} from '../../../../src/core/data-structures/promise';
-import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
-import {MANUAL_EXPERIMENT_ID} from '../../../../ads/google/a4a/traffic-experiments';
+import {Deferred} from '#core/data-structures/promise';
+import {EXPERIMENT_ATTRIBUTE} from '#ads/google/a4a/utils';
+import {MANUAL_EXPERIMENT_ID} from '#ads/google/a4a/traffic-experiments';
 import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
 import {
   TFCD,
@@ -48,11 +48,11 @@ import {
   isAdTest,
   sraBlockCallbackHandler,
 } from '../sra-utils';
-import {Xhr} from '../../../../src/service/xhr-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {Xhr} from '#service/xhr-impl';
+import {createElementWithAttributes} from '#core/dom';
 import {devAssert} from '../../../../src/log';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
+import {layoutRectLtwh} from '#core/math/layout-rect';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 const config = {amp: true, allowExternalResources: true};
 
@@ -89,7 +89,7 @@ describes.realWin('Doubleclick SRA', config, (env) => {
     return el;
   }
 
-  function setElementRect(el, {top, left, width, height}) {
+  function setElementRect(el, {height, left, top, width}) {
     env.sandbox.stub(el, 'offsetParent').value(null);
     env.sandbox.stub(el, 'offsetLeft').value(left);
     env.sandbox.stub(el, 'offsetTop').value(top);
@@ -866,7 +866,7 @@ describes.realWin('Doubleclick SRA', config, (env) => {
       const promises = [];
       const resolvers = blocks.map((block) => block.deferred.resolve);
       for (let i = 1; i <= blocks.length; i++) {
-        const {creative, headers, deferred} = blocks[i - 1];
+        const {creative, deferred, headers} = blocks[i - 1];
         sraBlockCallbackHandler(
           creative,
           headers,

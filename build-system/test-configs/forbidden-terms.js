@@ -220,7 +220,7 @@ const forbiddenTermsGlobal = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
-      'testing/_init_tests.js',
+      'testing/init-tests.js',
       'testing/describes.js',
       'testing/iframe.js',
     ],
@@ -308,12 +308,12 @@ const forbiddenTermsGlobal = {
       'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',
       'src/element-service.js',
-      'src/service.js',
+      'src/service-helpers.js',
+      'src/service/index.js',
       'src/service/scheduler.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
       'src/service/template-impl.js',
-      'src/services.js',
       'src/utils/display-observer.js',
       'testing/test-helper.js',
     ],
@@ -333,8 +333,8 @@ const forbiddenTermsGlobal = {
       'src/runtime.js',
       'src/log.js',
       'src/web-worker/web-worker.js',
+      'testing/async-errors.js',
       'tools/experiments/experiments.js',
-      'testing/_init_tests.js',
     ],
   },
   'parseUrlWithA': {
@@ -390,7 +390,7 @@ const forbiddenTermsGlobal = {
       // in extensions listed in the amp4ads spec:
       // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/ad-cid.js',
-      'src/services.js',
+      'src/service/index.js',
       'src/service/standard-actions-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
@@ -444,7 +444,7 @@ const forbiddenTermsGlobal = {
       // Storage service is not allowed in amp4ads. No usage should there be
       // in extensions listed in the amp4ads spec:
       // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
-      'src/services.js',
+      'src/service/index.js',
       'src/service/cid-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
@@ -460,10 +460,10 @@ const forbiddenTermsGlobal = {
       'extensions/amp-story/1.0/history.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
-      'src/experiments.js',
+      'src/experiments/index.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
-      'testing/_init_tests.js',
+      'testing/init-tests.js',
       'testing/fake-dom.js',
     ],
   },
@@ -512,7 +512,7 @@ const forbiddenTermsGlobal = {
       'src/inabox/inabox-viewer.js',
       'src/service/viewer-impl.js',
       'src/error-reporting.js',
-      'src/window-interface.js',
+      'src/core/window/interface.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -532,7 +532,7 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
-      'src/event-helper-listen.js',
+      'src/core/dom/event-helper-listen.js',
     ],
   },
   'setTimeout.*throw': {
@@ -578,8 +578,8 @@ const forbiddenTermsGlobal = {
     allowlist: ['src/custom-element.js', 'src/service/resources-impl.js'],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
-    message: 'Use dom.openWindowDialog',
-    allowlist: ['src/dom.js'],
+    message: 'Use src/open-window-dialog',
+    allowlist: ['src/open-window-dialog.js'],
   },
   '\\.getWin\\(': {
     message: backwardCompat,
@@ -605,6 +605,14 @@ const forbiddenTermsGlobal = {
       'src/service/resources-impl.js',
     ],
   },
+  '\\b(__)?AMP_EXP\\b': {
+    message:
+      'Do not access AMP_EXP directly. Use isExperimentOn() to access config',
+    allowlist: [
+      'src/experiments/index.js',
+      'src/experiments/experiments.extern.js',
+    ],
+  },
   'AMP_CONFIG': {
     message:
       'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
@@ -625,10 +633,11 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
       'src/config.js',
-      'src/experiments.js',
+      'src/experiments/index.js',
+      'src/experiments/shame.extern.js',
       'src/mode.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
-      'testing/_init_tests.js',
+      'testing/init-tests.js',
       'tools/experiments/experiments.js',
     ],
   },
@@ -664,7 +673,7 @@ const forbiddenTermsGlobal = {
       'Use of `this.skip()` is forbidden in test files. Use ' +
       '`this.skipTest()` from within a `before()` block instead. See #17245.',
     checkInTestFolder: true,
-    allowlist: ['testing/_init_tests.js'],
+    allowlist: ['testing/init-tests.js'],
   },
   '[^\\.]makeBodyVisible\\(': {
     message:
@@ -702,7 +711,6 @@ const forbiddenTermsGlobal = {
       'build-system/server/app-index/test/test-self.js',
       'build-system/server/app-index/test/test-template.js',
       'build-system/server/app-index/test/test.js',
-      'testing/_init_tests.js',
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
       'validator/js/engine/amp4ads-parse-css_test.js',
@@ -794,7 +802,10 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Due to various bugs in Firefox, you must use the computedStyle ' +
       'helper in style.js.',
-    allowlist: ['src/style.js', 'build-system/tasks/coverage-map/index.js'],
+    allowlist: [
+      'src/core/dom/style.js',
+      'build-system/tasks/coverage-map/index.js',
+    ],
   },
   'decodeURIComponent\\(': {
     message:
@@ -807,8 +818,8 @@ const forbiddenTermsSrcInclusive = {
       'validator/js/engine/validator.js',
       'validator/js/webui/webui.js',
       'src/url.js',
-      'src/url-try-decode-uri-component.js',
-      'src/utils/bytes.js',
+      'src/core/types/string/url.js',
+      'src/core/types/string/bytes.js',
     ],
   },
   'Text(Encoder|Decoder)\\(': {
@@ -818,8 +829,8 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
-      'src/utils/bytes.js',
-      'src/utils/stream-response.js',
+      'src/core/dom/stream/response.js',
+      'src/core/types/string/bytes.js',
     ],
   },
   'contentHeightChanged': {
@@ -873,7 +884,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     allowlist: [
-      '.github/workflows/create-design-review-issue.js',
+      'build-system/common/update-design-review-issues.js',
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/1.0/component.js',
       'src/core/types/date.js',
@@ -916,7 +927,6 @@ const forbiddenTermsSrcInclusive = {
       'ads/_a4a-config.js',
       'build-system/server/amp4test.js',
       'build-system/server/app-index/amphtml-helpers.js',
-      'build-system/server/app-utils.js',
       'build-system/server/app-video-testbench.js',
       'build-system/server/app.js',
       'build-system/server/shadow-viewer.js',
@@ -943,18 +953,11 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unresolved merge conflict.',
   },
   '\\.indexOf\\([\'"][^)]+\\)\\s*===?\\s*0\\b': {
-    message: 'use startsWith helper in src/string.js',
+    message: 'use startsWith helper in src/core/types/string',
     allowlist: ['build-system/server/app.js'],
   },
-  '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
-  '/url-parse-query-string': {
-    message: 'Import parseQueryString from `src/url.js`',
-    allowlist: [
-      'build-system/tasks/check-types.js',
-      'src/mode.js',
-      'src/url.js',
-    ],
-  },
+  '\\.indexOf\\(.*===?.*\\.length':
+    'use endsWith helper in src/core/types/string',
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
@@ -964,7 +967,7 @@ const forbiddenTermsSrcInclusive = {
       'Do not directly use CI-specific environment vars. Instead, add a ' +
       'function to build-system/common/ci.js',
   },
-  '\\.matches\\(': 'Please use matches() helper in src/dom.js',
+  '\\.matches\\(': 'Please use matches() helper in src/core/dom/query.js',
   '\\.getLayoutBox': {
     message: measurementApiDeprecated,
     allowlist: [
@@ -1047,7 +1050,7 @@ const forbiddenTermsSrcInclusive = {
       'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',
     allowlist: [
       // The function itself is defined here.
-      'src/utils/video.js',
+      'src/core/dom/video/index.js',
     ],
   },
 };
@@ -1108,10 +1111,10 @@ function matchForbiddenTerms(srcFile, contents, terms) {
   return Object.entries(terms)
     .map(([term, messageOrDef]) => {
       const {
-        message,
         allowlist = null,
         checkInTestFolder = false,
         checkProse = false,
+        message,
       } = typeof messageOrDef === 'string'
         ? {message: messageOrDef}
         : messageOrDef;

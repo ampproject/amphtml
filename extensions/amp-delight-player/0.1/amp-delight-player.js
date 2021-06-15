@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {
   createFrameFor,
@@ -24,8 +24,8 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent, removeElement} from '../../../src/dom';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -33,14 +33,14 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData, listen, listenOncePromise} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {setStyle} from '../../../src/style';
+import {setStyle} from '#core/dom/style';
 import {userAssert} from '../../../src/log';
 
 /** @const */
@@ -235,12 +235,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
   createPlaceholderCallback() {
     const html = htmlFor(this.element);
     const placeholder = html`
-      <div placeholder><amp-img layout="fill"></amp-img></div>
+      <img placeholder referrerpolicy="origin" loading="lazy" />
     `;
 
-    const src = `${this.baseURL_}/poster/${this.contentID_}`;
+    this.applyFillContent(placeholder);
 
-    placeholder.firstElementChild.setAttribute('src', src);
+    const src = `${this.baseURL_}/poster/${this.contentID_}`;
+    placeholder.setAttribute('src', src);
 
     this.placeholderEl_ = /** @type {HTMLElement} */ (placeholder);
 

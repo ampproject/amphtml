@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {dict} from '../../src/core/types/object';
-import {listenParent, nonSensitiveDataPostMessage} from '../messaging';
-import {loadScript} from '../3p';
-import {parseJson} from '../../src/json';
+import {dict} from '#core/types/object';
+import {listenParent, nonSensitiveDataPostMessage} from '#3p/messaging';
+import {loadScript} from '#3p/3p';
+import {parseJson} from '#core/types/object/json';
 import {user} from '../../src/log';
 
 import GltfViewer from './viewer';

@@ -22,21 +22,20 @@ import {
   StateProperty,
   UIType,
 } from '../amp-story-store-service';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
-import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
-import {CommonSignals} from '../../../../src/core/constants/common-signals';
-import {Keys} from '../../../../src/core/constants/key-codes';
-import {LocalizationService} from '../../../../src/service/localization';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Keys} from '#core/constants/key-codes';
+import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
-import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {registerServiceBuilder} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+import {Services} from '#service';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {createElementWithAttributes} from '#core/dom';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {toggleExperiment} from '#experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
@@ -104,9 +103,6 @@ describes.realWin(
       ampdoc = env.ampdoc;
 
       replaceStateStub = env.sandbox.stub(win.history, 'replaceState');
-      // Required by the bookend code.
-      win.document.title = 'Story';
-      env.ampdoc.defaultView = env.win;
 
       const localizationService = new LocalizationService(win.document.body);
       env.sandbox
@@ -174,28 +170,6 @@ describes.realWin(
       expect(story.element.innerText).to.not.have.string(textToRemove);
     });
 
-    it('should preload the bookend if navigating to the last page', async () => {
-      await createStoryWithPages(1, ['cover']);
-
-      const buildBookendStub = env.sandbox.stub(
-        story,
-        'buildAndPreloadBookend_'
-      );
-      await story.layoutCallback();
-      expect(buildBookendStub).to.have.been.calledOnce;
-    });
-
-    it('should not preload the bookend if not on the last page', async () => {
-      await createStoryWithPages(2, ['cover']);
-
-      const buildBookendStub = env.sandbox.stub(
-        story,
-        'buildAndPreloadBookend_'
-      );
-      await story.layoutCallback();
-      expect(buildBookendStub).to.not.have.been.called;
-    });
-
     it('should prerender/load the share menu', async () => {
       await createStoryWithPages(2);
 
@@ -222,7 +196,6 @@ describes.realWin(
 
     it('should pause/resume pages when switching pages', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
-      env.sandbox.stub(story, 'maybePreloadBookend_').returns();
 
       await story.layoutCallback();
       // Getting all the AmpStoryPage objects.
@@ -349,26 +322,6 @@ describes.realWin(
       );
     });
 
-    it('should not block layoutCallback when bookend xhr fails', async () => {
-      await createStoryWithPages(1, ['page-1']);
-      env.sandbox.stub(AmpStoryBookend.prototype, 'build');
-
-      const bookendXhr = env.sandbox
-        .stub(AmpStoryBookend.prototype, 'loadConfigAndMaybeRenderBookend')
-        .returns(Promise.reject());
-
-      story.buildCallback();
-
-      return story
-        .layoutCallback()
-        .then(() => {
-          expect(bookendXhr).to.have.been.calledOnce;
-        })
-        .catch((error) => {
-          expect(error).to.be.undefined;
-        });
-    });
-
     it('should NOT update page id in browser history if ad', async () => {
       const firstPageId = 'i-amphtml-ad-page-1';
       const pageCount = 2;
@@ -401,6 +354,21 @@ describes.realWin(
       await story.layoutCallback();
       expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
         UIType.DESKTOP_PANELS
+      );
+    });
+
+    it('should default to the one panel UI desktop experience when axperiment is active', async () => {
+      toggleExperiment(win, 'amp-story-desktop-one-panel', true);
+      await createStoryWithPages(4, ['cover', '1', '2', '3']);
+
+      // Don't do this at home. :(
+      story.desktopMedia_ = {matches: true};
+
+      story.buildCallback();
+
+      await story.layoutCallback();
+      expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
+        UIType.DESKTOP_ONE_PANEL
       );
     });
 
@@ -960,7 +928,6 @@ describes.realWin(
       });
 
       it('should add previous visited attribute', async () => {
-        env.sandbox.stub(story, 'maybePreloadBookend_').returns();
         env.sandbox
           .stub(utils, 'setAttributeInMutate')
           .callsFake((el, attr) => el.element.setAttribute(attr, ''));
@@ -1181,20 +1148,6 @@ describes.realWin(
       });
 
       describe('amp-story NO_NEXT_PAGE', () => {
-        describe('without #cap=swipe', () => {
-          it('should open the bookend when tapping on the last page', async () => {
-            await createStoryWithPages(1, ['cover']);
-
-            await story.layoutCallback();
-            // Click on right side of the screen to trigger page advancement.
-            const clickEvent = new MouseEvent('click', {clientX: 200});
-            story.activePage_.element.dispatchEvent(clickEvent);
-            await waitFor(() => {
-              return !!story.storeService_.get(StateProperty.BOOKEND_STATE);
-            }, 'BOOKEND_STATE should be true');
-          });
-        });
-
         describe('with #cap=swipe', () => {
           before(() => {
             hasSwipeCapability = true;
@@ -1242,42 +1195,15 @@ describes.realWin(
 
             story.activePage_.advancement_.onAdvance();
 
-            await waitFor(() => {
-              if (sendMessageStub.calledOnce) {
-                expect(sendMessageStub).to.be.calledWithExactly(
-                  'selectDocument',
-                  {
-                    next: true,
-                    advancementMode: AdvancementMode.AUTO_ADVANCE_TIME,
-                  }
-                );
-                return true;
-              }
-              return false;
-            }, 'sendMessageStub should be called');
+            expect(sendMessageStub).to.be.calledWithExactly('selectDocument', {
+              next: true,
+              advancementMode: AdvancementMode.AUTO_ADVANCE_TIME,
+            });
           });
         });
       });
 
       describe('amp-story NO_PREVIOUS_PAGE', () => {
-        describe('without #cap=swipe', () => {
-          it('should open the bookend when tapping on the last page', async () => {
-            await createStoryWithPages(1, ['cover']);
-            const showPageHintStub = env.sandbox.stub(
-              story.ampStoryHint_,
-              'showFirstPageHintOverlay'
-            );
-
-            await story.layoutCallback();
-            // Click on left side of the screen to trigger page advancement.
-            const clickEvent = new MouseEvent('click', {clientX: 10});
-            story.activePage_.element.dispatchEvent(clickEvent);
-            await waitFor(() => {
-              return showPageHintStub.calledOnce;
-            }, 'showPageHintStub should be called');
-          });
-        });
-
         describe('with #cap=swipe', () => {
           before(() => {
             hasSwipeCapability = true;

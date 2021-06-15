@@ -15,7 +15,7 @@
  */
 
 import * as assertions from './base';
-import {isMinifiedMode} from '../minified-mode';
+import {isMinifiedMode} from '#core/minified-mode';
 
 /**
  * @fileoverview This file provides the entrypoint for dev assertions. It's
@@ -54,7 +54,7 @@ function devAssertDceCheck() {
  * @throws {Error} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
  */
-export function assert(
+export function devAssert(
   shouldBeTruthy,
   opt_message,
   opt_1,
@@ -99,14 +99,14 @@ export function assert(
  * @throws {Error} when shouldBeElement is not an Element
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertElement(shouldBeElement, opt_message) {
+export function devAssertElement(shouldBeElement, opt_message) {
   if (isMinifiedMode()) {
     return /** @type {!Element} */ (shouldBeElement);
   }
   devAssertDceCheck();
 
   return assertions.assertElement(
-    /** @type {!AssertionFunction} */ (assert),
+    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     shouldBeElement,
     opt_message
   );
@@ -124,14 +124,14 @@ export function assertElement(shouldBeElement, opt_message) {
  * @throws {Error} when shouldBeString is not an String
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertString(shouldBeString, opt_message) {
+export function devAssertString(shouldBeString, opt_message) {
   if (isMinifiedMode()) {
     return /** @type {string} */ (shouldBeString);
   }
   devAssertDceCheck();
 
   return assertions.assertString(
-    /** @type {!AssertionFunction} */ (assert),
+    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     shouldBeString,
     opt_message
   );
@@ -150,14 +150,14 @@ export function assertString(shouldBeString, opt_message) {
  * @throws {Error} when shouldBeNumber is not an Number
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertNumber(shouldBeNumber, opt_message) {
+export function devAssertNumber(shouldBeNumber, opt_message) {
   if (isMinifiedMode()) {
     return /** @type {number} */ (shouldBeNumber);
   }
   devAssertDceCheck();
 
   return assertions.assertNumber(
-    /** @type {!AssertionFunction} */ (assert),
+    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     shouldBeNumber,
     opt_message
   );
@@ -175,14 +175,14 @@ export function assertNumber(shouldBeNumber, opt_message) {
  * @throws {Error} when shouldBeArray is not an Array
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertArray(shouldBeArray, opt_message) {
+export function devAssertArray(shouldBeArray, opt_message) {
   if (isMinifiedMode()) {
     return /** @type {!Array} */ (shouldBeArray);
   }
   devAssertDceCheck();
 
   return assertions.assertArray(
-    /** @type {!AssertionFunction} */ (assert),
+    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     shouldBeArray,
     opt_message
   );
@@ -199,40 +199,15 @@ export function assertArray(shouldBeArray, opt_message) {
  * @throws {Error} when shouldBeBoolean is not an Boolean
  * @closurePrimitive {asserts.matchesReturn}
  */
-export function assertBoolean(shouldBeBoolean, opt_message) {
+export function devAssertBoolean(shouldBeBoolean, opt_message) {
   if (isMinifiedMode()) {
     return /** @type {boolean} */ (shouldBeBoolean);
   }
   devAssertDceCheck();
 
   return assertions.assertBoolean(
-    /** @type {!AssertionFunction} */ (assert),
+    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     shouldBeBoolean,
     opt_message
-  );
-}
-
-/**
- * Asserts and returns the enum value. If the enum doesn't contain such a
- * value, the error is thrown.
- *
- * @param {!Object<T>} enumObj
- * @param {*} shouldBeEnum
- * @param {string=} opt_enumName
- * @return {T}
- * @template T
- * @closurePrimitive {asserts.matchesReturn}
- */
-export function assertEnumValue(enumObj, shouldBeEnum, opt_enumName) {
-  if (isMinifiedMode()) {
-    return shouldBeEnum;
-  }
-  devAssertDceCheck();
-
-  return assertions.assertEnumValue(
-    /** @type {!AssertionFunction} */ (assert),
-    enumObj,
-    shouldBeEnum,
-    opt_enumName
   );
 }

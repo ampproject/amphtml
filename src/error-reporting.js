@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from './core/constants/amp-events';
-import {Services} from './services';
+import {Services} from './service';
 import {
   USER_ERROR_SENTINEL,
   dev,
@@ -25,7 +25,7 @@ import {
 import {dict} from './core/types/object';
 import {duplicateErrorIfNecessary} from './core/error';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
-import {exponentialBackoff} from './exponential-backoff';
+import {exponentialBackoff} from './core/types/function/exponential-backoff';
 import {findIndex} from './core/types/array';
 import {getMode} from './mode';
 import {isLoadErrorMessage} from './event-helper';
@@ -360,7 +360,7 @@ function onError(message, filename, line, col, error) {
 
 /**
  * Determines the error reporting endpoint which should be used.
- * If changing this URL, keep `/spec/amp-errors.md` in sync.
+ * If changing this URL, keep `docs/spec/amp-errors.md` in sync.
  * @return {string} error reporting endpoint URL.
  */
 function chooseReportingUrl_() {

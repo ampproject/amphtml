@@ -15,17 +15,14 @@
  */
 
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
-import {Services} from '../../src/services';
-import {dispatchCustomEvent} from '../../src/dom';
-import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
-import {
-  isAutoplaySupported,
-  resetIsAutoplaySupported,
-} from '../../src/utils/video';
-import {isLayoutSizeDefined} from '../../src/layout';
+import {Services} from '#service';
+import {dispatchCustomEvent, waitForChildPromise} from '#core/dom';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isAutoplaySupported, resetIsAutoplaySupported} from '#core/dom/video';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {listenOncePromise} from '../../src/event-helper';
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
-import {toArray} from '../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.
 // See #11588.
@@ -213,25 +210,82 @@ describes.sandboxed
           expect(videoManager.userInteracted(impl)).to.be.false;
         });
 
-        it('autoplay - there should be user interaction if the ad was unmuted', () => {
+        it('autoplay - there should be user interaction if the ad was unmuted', async () => {
           video.setAttribute('autoplay', '');
+
+          const playingPromise = listenOncePromise(video, VideoEvents.PLAYING);
+          const unmutedPromise = listenOncePromise(video, VideoEvents.UNMUTED);
 
           videoManager.register(impl);
           const entry = videoManager.getEntry_(impl);
           entry.isVisible_ = true;
           entry.loaded_ = true;
-          entry.videoVisibilityChanged_();
+          entry.autoplayLoadedVideoVisibilityChanged_();
 
-          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-            expect(videoManager.userInteracted(impl)).to.be.false;
+          expect(videoManager.userInteracted(impl)).to.be.false;
 
-            listenOncePromise(video, VideoEvents.UNMUTED).then(() => {
-              expect(videoManager.userInteracted(impl)).to.be.true;
-            });
+          dispatchCustomEvent(video, VideoEvents.AD_START);
 
-            dispatchCustomEvent(video, VideoEvents.AD_START);
-            dispatchCustomEvent(video, VideoEvents.UNMUTED);
+          await playingPromise;
+
+          impl.unmute();
+          await unmutedPromise;
+
+          expect(videoManager.userInteracted(impl)).to.be.true;
+        });
+
+        it('autoplay - hide autoplay elements when PLAYING after AD_START', async () => {
+          video.setAttribute('autoplay', '');
+          video.setAttribute('controls', '');
+
+          const playingPromise = listenOncePromise(video, VideoEvents.PLAYING);
+
+          videoManager.register(impl);
+          const entry = videoManager.getEntry_(impl);
+          entry.isVisible_ = true;
+          entry.loaded_ = true;
+
+          dispatchCustomEvent(video, VideoEvents.AD_START);
+
+          entry.autoplayLoadedVideoVisibilityChanged_();
+
+          await playingPromise;
+
+          let eq, mask;
+          await waitForChildPromise(video, () => {
+            eq = eq || video.querySelector('.amp-video-eq');
+            mask = mask || video.querySelector('.i-amphtml-video-mask');
+            return eq && mask;
           });
+
+          expect(eq).to.have.attribute('hidden');
+          expect(mask).to.have.attribute('hidden');
+        });
+
+        it('autoplay - show autoplay elements when PLAYING', async () => {
+          video.setAttribute('autoplay', '');
+          video.setAttribute('controls', '');
+
+          const playingPromise = listenOncePromise(video, VideoEvents.PLAYING);
+
+          videoManager.register(impl);
+          const entry = videoManager.getEntry_(impl);
+          entry.isVisible_ = true;
+          entry.loaded_ = true;
+
+          entry.autoplayLoadedVideoVisibilityChanged_();
+
+          await playingPromise;
+
+          let eq, mask;
+          await waitForChildPromise(video, () => {
+            eq = eq || video.querySelector('.amp-video-eq');
+            mask = mask || video.querySelector('.i-amphtml-video-mask');
+            return eq && mask;
+          });
+
+          expect(eq).to.not.have.attribute('hidden');
+          expect(mask).to.not.have.attribute('hidden');
         });
 
         it('autoplay - PAUSED if autoplaying and video is outside of view', () => {
@@ -537,6 +591,11 @@ function createFakeVideoPlayerClass(win) {
 
     /** @override */
     preimplementsMediaSessionAPI() {
+      return false;
+    }
+
+    /** @override */
+    preimplementsAutoFullscreen() {
       return false;
     }
 

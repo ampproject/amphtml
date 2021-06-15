@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-import {elementStringOrPassThru} from '../error-message-helpers';
-import {includes} from '../types/string';
-import {isArray, isElement, isEnumValue, isString} from '../types';
-import {remove} from '../types/array';
+import {elementStringOrPassThru} from '#core/error/message-helpers';
+import {includes} from '#core/types/string';
+import {isArray, isElement, isString} from '#core/types';
+import {remove} from '#core/types/array';
 
 /**
  * @fileoverview This file provides the base implementation for assertion
  * functions. Most files should never import from this; instead, import from
  * `dev` or `user`. It is also used by the Log class for its assertions.
  */
+
+/**
+ * A base assertion function, provided to various assertion helpers.
+ * @typedef {function(?, string=, ...*):?|function(?, !Array<*>)}
+ */
+export let AssertionFunctionDef;
 
 /**
  * Throws an error if the second argument isn't trueish.
@@ -80,9 +86,7 @@ export function assert(
   // __AMP_REPORT_ERROR is installed globally per window in the entry point in
   // AMP documents. It may not be present for Bento/Preact elements on non-AMP
   // pages.
-  if (self.__AMP_REPORT_ERROR) {
-    self.__AMP_REPORT_ERROR(error);
-  }
+  self.__AMP_REPORT_ERROR?.(error);
   throw error;
 }
 
@@ -94,7 +98,7 @@ export function assert(
  * Otherwise creates a sprintf syntax string containing the optional message or the
  * default. The `subject` of the assertion is added at the end.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {T} subject
  * @param {*} shouldBeTruthy
  * @param {string} defaultMessage
@@ -127,7 +131,7 @@ function assertType_(
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeElement
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {!Element} The value of shouldBeTrueish.
@@ -152,7 +156,7 @@ export function assertElement(assertFn, shouldBeElement, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeString
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {string} The string value. Can be an empty string.
@@ -177,7 +181,7 @@ export function assertString(assertFn, shouldBeString, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeNumber
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {number} The number value. The allowed values include `0`
@@ -203,7 +207,7 @@ export function assertNumber(assertFn, shouldBeNumber, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeArray
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {!Array} The array value
@@ -227,7 +231,7 @@ export function assertArray(assertFn, shouldBeArray, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeBoolean
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {boolean} The boolean value.
@@ -243,31 +247,5 @@ export function assertBoolean(assertFn, shouldBeBoolean, opt_message) {
       'Boolean expected',
       opt_message
     )
-  );
-}
-
-/**
- * Asserts and returns the enum value. If the enum doesn't contain such a
- * value, the error is thrown.
- *
- * @param {!AssertionFunction} assertFn underlying assertion function to call
- * @param {!Object<T>} enumObj
- * @param {*} shouldBeEnum
- * @param {string=} opt_enumName
- * @return {T}
- * @template T
- * @closurePrimitive {asserts.matchesReturn}
- */
-export function assertEnumValue(
-  assertFn,
-  enumObj,
-  shouldBeEnum,
-  opt_enumName = 'enum'
-) {
-  return assertType_(
-    assertFn,
-    shouldBeEnum,
-    isEnumValue(enumObj, shouldBeEnum),
-    `Unknown ${opt_enumName} value: "${shouldBeEnum}"`
   );
 }

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {childElementByTag, createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/core/types/object';
+import {Services} from '#service';
+import {childElementByTag} from '#core/dom/query';
+import {createElementWithAttributes} from '#core/dom';
+import {dict} from '#core/types/object';
 
 const CSS_PREFIX = 'i-amphtml-subs';
 

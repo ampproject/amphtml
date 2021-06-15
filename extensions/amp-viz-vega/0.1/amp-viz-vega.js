@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import * as dom from '../../../src/dom';
+import * as dom from '#core/dom';
 import {CSS} from '../../../build/amp-viz-vega-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';
+import {childElementsByTag} from '#core/dom/query';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber} from '../../../src/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/core/types';
+import {dict} from '#core/types/object';
+import {isExperimentOn} from '#experiments';
+import {isFiniteNumber, isObject} from '#core/types';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {tryParseJson} from '../../../src/json';
+} from '#core/dom/size-observer';
+import {tryParseJson} from '#core/types/object/json';
 
 export class AmpVizVega extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -199,7 +200,7 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   getInlineData_() {
-    const scripts = dom.childElementsByTag(this.element, 'SCRIPT');
+    const scripts = childElementsByTag(this.element, 'SCRIPT');
     if (scripts.length == 0) {
       return;
     }

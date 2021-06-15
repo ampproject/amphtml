@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseQueryString} from '../../../src/url';
+import {parseQueryString} from '#core/types/string/url';
 
 /**
  * Updates the hashString with the dictionary<string, string> passed in

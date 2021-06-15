@@ -25,9 +25,10 @@ import {
   isValidAttr,
   markElementForDiffing,
 } from './sanitation';
-import {dev, user} from '../log';
+import {devAssertElement} from '#core/assert';
 import {isAmp4Email} from '../format';
-import {removeElement} from '../dom';
+import {removeElement} from '#core/dom';
+import {user} from '../log';
 import purify from 'dompurify';
 
 /** @private @const {string} */
@@ -244,7 +245,7 @@ export class Purifier {
       }
       // Set `target` attribute for <a> tags if necessary.
       if (tagName === 'a') {
-        const element = dev().assertElement(node);
+        const element = devAssertElement(node);
         if (element.hasAttribute('href') && !element.hasAttribute('target')) {
           element.setAttribute('target', '_top');
         }
@@ -253,7 +254,7 @@ export class Purifier {
       const allowlist = ALLOWLISTED_TAGS_BY_ATTRS[tagName];
       if (allowlist) {
         const {attribute, values} = allowlist;
-        const element = dev().assertElement(node);
+        const element = devAssertElement(node);
         if (
           element.hasAttribute(attribute) &&
           values.includes(element.getAttribute(attribute))

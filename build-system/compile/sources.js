@@ -70,6 +70,7 @@ const COMMON_GLOBS = [
   'node_modules/preact/hooks/dist/*.js',
   'node_modules/preact/compat/package.json',
   'node_modules/preact/compat/dist/*.js',
+  'node_modules/@babel/runtime/helpers/*.js',
 ];
 
 /**
@@ -124,8 +125,10 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-experiment/**/*.js',
   // Needed to access form impl from other extensions
   'extensions/amp-form/**/*.js',
-  // Needed by amp-facebook-* for the loader logo
+  // Needed by amp-facebook-* for the loader logo and base implementations
   'extensions/amp-facebook/0.1/facebook-loader.js',
+  'extensions/amp-facebook/1.0/facebook-base-element.js',
+  'extensions/amp-facebook/1.0/component.js',
   // Needed to access inputmask impl from other extensions
   'extensions/amp-inputmask/**/*.js',
   // Needed for AccessService

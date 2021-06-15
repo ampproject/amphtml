@@ -16,8 +16,12 @@
 
 import {MessageType} from '../3p-frame-messaging';
 import {SubscriptionApi} from '../iframe-helper';
-import {dict} from '../core/types/object';
-import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../layout-rect';
+import {dict} from '#core/types/object';
+import {
+  layoutRectLtwh,
+  moveLayoutRect,
+  rectIntersection,
+} from '#core/math/layout-rect';
 
 /**
  * The structure that defines the rectangle used in intersection observers.

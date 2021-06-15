@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {userAssert} from '../../../src/log';
 
 class AmpVine extends AMP.BaseElement {

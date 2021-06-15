@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {Services} from '../../../src/services';
-import {clamp, sum} from '../../../src/utils/math';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Services} from '#service';
+import {clamp, sum} from '#core/math';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
@@ -142,7 +142,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       const {screen} = this.win;
 
       const {alpha} = event;
-      let {gamma, beta} = event;
+      let {beta, gamma} = event;
 
       // Detect the implementation of orientation angle
       const angle =

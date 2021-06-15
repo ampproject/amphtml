@@ -17,9 +17,9 @@
 import {
   base64DecodeToBytes,
   base64UrlDecodeToBytes,
-} from '../../../src/utils/base64';
-import {stringToBytes, utf8Decode} from '../../../src/utils/bytes';
-import {tryParseJson} from '../../../src/json';
+} from '#core/types/string/base64';
+import {stringToBytes, utf8Decode} from '#core/types/string/bytes';
+import {tryParseJson} from '#core/types/object/json';
 
 /**
  * @typedef {{

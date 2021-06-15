@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {VideoWrapper} from './video-wrapper';
-import {forwardRef} from '../../../src/preact/compat';
+import * as Preact from '#preact';
+import {Deferred} from '#core/data-structures/promise';
+import {VideoWrapper} from './component';
+import {forwardRef} from '#preact/compat';
 import {
   useCallback,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
-} from '../../../src/preact';
+} from '#preact';
 
 const DEFAULT_SANDBOX = [
   'allow-scripts',

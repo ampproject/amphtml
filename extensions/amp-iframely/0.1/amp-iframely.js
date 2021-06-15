@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 import {addParamsToUrl} from '../../../src/url';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {createElementWithAttributes, removeElement} from '#core/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {measureIntersection} from '../../../src/utils/intersection';
-import {omit} from '../../../src/core/types/object';
-import {setStyle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
+import {omit} from '#core/types/object';
+import {setStyle} from '#core/dom/style';
+import {tryParseJson} from '#core/types/object/json';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -122,15 +122,17 @@ export class AmpIframely extends AMP.BaseElement {
         this.constructSrc_('/thumbnail'),
         this.options_
       );
-      return createElementWithAttributes(
+      const element = createElementWithAttributes(
         this.element.ownerDocument,
-        'amp-img',
+        'img',
         {
           'src': src,
+          'loading': 'lazy',
           'placeholder': '',
-          'layout': 'fill',
         }
       );
+      this.applyFillContent(element);
+      return element;
     }
     return null;
   }

@@ -28,8 +28,8 @@ import {
 } from './development-ui';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
-import {Services} from '../../../src/services';
-import {closest, matches, scopedQuerySelector} from '../../../src/dom';
+import {Services} from '#service';
+import {closest, matches, scopedQuerySelector} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
@@ -37,13 +37,15 @@ import {
   triggerClickFromLightDom,
 } from './utils';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {dict} from '#core/types/object';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
+
 import {renderAsElement} from './simple-template';
-import {setImportantStyles} from '../../../src/style';
-import {toArray} from '../../../src/core/types/array';
+
+import {setImportantStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -340,7 +342,6 @@ const VIEWER_CONTROL_DEFAULTS = {
  * Chrome contains:
  *   - mute/unmute button
  *   - story progress bar
- *   - bookend close button
  *   - share button
  *   - domain info button
  *   - sidebar
@@ -559,10 +560,6 @@ export class SystemLayer {
       this.onAdStateUpdate_(isAd);
     });
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.onBookendStateUpdate_(isActive);
-    });
-
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_AUDIO_UI,
       (show) => {
@@ -711,18 +708,6 @@ export class SystemLayer {
     isAd
       ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
       : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
-  }
-
-  /**
-   * Reacts to the bookend state updates and updates the UI accordingly.
-   * @param {boolean} isActive
-   * @private
-   */
-  onBookendStateUpdate_(isActive) {
-    this.getShadowRoot().classList.toggle(
-      'i-amphtml-story-bookend-active',
-      isActive
-    );
   }
 
   /**

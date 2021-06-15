@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ViewerInterface} from '../service/viewer-interface';
-import {registerServiceBuilderForDoc} from '../service';
+import {ViewerInterface} from '#service/viewer-interface';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * A dummy impl of ViewerInterface for inabox.

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
+import * as st from '#core/dom/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-viewer-0.1.css';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {
   DoubletapRecognizer,
   PinchRecognizer,
@@ -27,12 +27,12 @@ import {
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
-import {bezierCurve} from '../../../src/curve';
-import {boundValue, distance, magnitude} from '../../../src/utils/math';
-import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
+import {WindowInterface} from '#core/window/interface';
+import {bezierCurve} from '#core/data-structures/curve';
+import {boundValue, distance, magnitude} from '#core/math';
+import {closestAncestorElementBySelector, elementByTag} from '#core/dom/query';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
@@ -41,13 +41,13 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../../src/layout-rect';
+} from '#core/math/layout-rect';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {setStyles} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
+} from '#core/dom/size-observer';
+import {setStyles} from '#core/dom/style';
+import {srcsetFromElement} from '#core/dom/srcset';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';

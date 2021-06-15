@@ -22,7 +22,7 @@ import {
 import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 import {getAmpAdTemplateHelper} from '../amp-ad-template-helper';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Encode} from '#core/types/string/bytes';
 
 const realWinConfig = {
   amp: {},

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {handleCompanionAds} from '../monetization/index';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 describes.realWin('amp-apester-media-monetization', {}, (env) => {
   let win, doc;
   let baseElement;
@@ -114,10 +114,10 @@ describes.realWin('amp-apester-media-monetization', {}, (env) => {
 });
 
 function createCampaignData({
+  disabledAmpCompanionAds,
   display,
   srAbove,
   srBelow,
-  disabledAmpCompanionAds,
 }) {
   const media = {};
   const campaignData = {

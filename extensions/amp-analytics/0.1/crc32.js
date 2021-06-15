@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {utf8Encode} from '../../../src/utils/bytes';
+import {utf8Encode} from '#core/types/string/bytes';
 
 /**
  * Standard key for CRC32

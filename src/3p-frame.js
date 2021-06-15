@@ -25,8 +25,8 @@ import {
 } from './core/3p-frame';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn} from './experiments';
-import {setStyle} from './style';
-import {tryParseJson} from './json';
+import {setStyle} from './core/dom/style';
+import {tryParseJson} from './core/types/object/json';
 import {urls} from './config';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
@@ -386,7 +386,7 @@ function getCustomBootstrapBaseUrl(
       parsed.origin != parseUrlDeprecated(parentWindow.location.href).origin,
     '3p iframe url must not be on the same origin as the current document ' +
       '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
-      '/blob/main/spec/amp-iframe-origin-policy.md for details.',
+      '/blob/main/docs/spec/amp-iframe-origin-policy.md for details.',
     url,
     parsed.origin,
     meta

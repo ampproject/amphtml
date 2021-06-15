@@ -45,6 +45,11 @@
     "trackingIdentifier": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues",
     "defaultTrackingValues": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues&sourceUrl=_source_url_&canonicalUrl=_canonical_url_&referrer=_document_referrer_&title=_title_&visitDate=_timestamp_&geoLocation=_amp_geo(ISOCountry)_&userAgent=_user_agent_"
   },
+  "bluetriangle": {
+    "host": "https://d.btttag.com",
+    "endpoint": "https://d.btttag.com/btt.gif",
+    "pageview": "https://d.btttag.com/btt.gif?gID=_client_id(bluetriangle_guid)_&sID=_client_id(bluetriangle_sessionid)_&siteID=!siteID&pageName=!pageName&txnName=!trafficSegment&thisURL=_canonical_url_&RefURL=_document_referrer_&dom=_nav_timing(domLoading%2CdomComplete)_&domContentLoadedEnd=_nav_timing(domContentLoadedEventEnd)_&domContentLoadedStart=_nav_timing(domContentLoadedEventStart)_&domInteractive=_nav_timing(domInteractive)_&domLoading=_nav_timing(domLoading)_&domainLookupStart=_nav_timing(domainLookupStart)_&elementCount=0&fByte=_nav_timing(requestStart%2CresponseStart)_&fCPnt=FIRST_CONTENTFUL_PAINT&fetchStart=_nav_timing(fetchStart)_&firstPaint=0&fmp=0&fps=0&fps_tti=0&loadEventStart=_nav_timing(loadEventStart)_&lt_tti=0&nst=_nav_timing(navigationStart)_&orderTND=0&pSz=0&pWSz=0&pageValue=&pgTm=_nav_timing(navigationStart%2CloadEventStart)_&redirectCount=_nav_redirect_count_&redirectStart=_nav_timing(redirectStart)_&requestStart=_nav_timing(requestStart)_&responseStart=_nav_timing(responseStart)_&secureConnectionStart=_nav_timing(secureConnectionStart)_&ssl=_nav_timing(secureConnectionStart%2CresponseStart)_&tcp=_nav_timing(connectStart%2CconnectEnd)_&top=0&totRD=0&tti=0&tul=0&unloadEventStart=_nav_timing(unloadEventStart)_&largestContentfulPaint=LARGEST_CONTENTFUL_PAINT&cumulativeLayoutShift=CUMULATIVE_LAYOUT_SHIFT&firstInputDelay=FIRST_INPUT_DELAY&wcd=0&eT=1&navigationType=1"
+  },
   "browsi": {
     "host": "https://events.browsiprod.com/events/amp",
     "base": "https://events.browsiprod.com/events/amp?pk=!pubKey&sk=!siteKey&et=!type&pvid=_page_view_id_64_&aid=_ampdoc_url_&now=_timestamp_",
@@ -413,10 +418,10 @@
     "goal": "https://!host/ppms.php?idgoal=!goal_id&revenue=!revenue&idsite=!website_id&rec=1&r=_substr(_replace(_random_%2C0.%2C)_%2C0%2C6)_&url=_source_url_&_id=_if(_match(_replace(_client_id(_pk_id.!website_id.!website_hash)__%2C%5C.%5BA-Za-z0-9%5D*%5C.%5BA-Za-z0-9%5D*%5C.%5BA-Za-z0-9%5D*%5C.%5BA-Za-z0-9%5D*%5C.%2C)__%2Camp-%2C0)%2C_substr(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_replace(_substr(_tolowercase(_replace(_client_id(_pk_id.!website_id.!website_hash)__%2C%5C.%5BA-Za-z0-9%5D*%5C.%5BA-Za-z0-9%5D*%5C.%5BA-Za-z0-9%5D*%5C.%5BA-Za-z0-9%5D*%5C.%2C)__)_%2C4%2C16)_%2Cg%2C10)_%2Ch%2C11)_%2Ci%2C12)_%2Cj%2C13)_%2Ck%2C14)_%2Cl%2C15)_%2Cm%2C16)_%2Cn%2C17)_%2Co%2C18)_%2Cp%2C19)_%2Cq%2C1a)_%2Cr%2C1b)_%2Cs%2C1c)_%2Ct%2C1d)_%2Cu%2C1e)_%2Cv%2C1f)_%2Cw%2C20)_%2Cx%2C21)_%2Cy%2C22)_%2Cz%2C23)_%2CA%2C24)_%2CB%2C25)_%2CC%2C26)_%2CD%2C27)_%2CE%2C28)_%2CF%2C29)_%2CG%2C2a)_%2CH%2C2b)_%2CI%2C2c)_%2CJ%2C2d)_%2CK%2C2e)_%2CL%2C2f)_%2CM%2C30)_%2CN%2C31)_%2CO%2C32)_%2CP%2C33)_%2CQ%2C34)_%2CR%2C35)_%2CS%2C36)_%2CT%2C37)_%2CU%2C38)_%2CV%2C39)_%2CW%2C3a)_%2CX%2C3b)_%2CY%2C3c)_%2CZ%2C3d)_%2C_%2C3e)_%2C-%2C3f)%2C0%2C16)%2C_replace(_client_id(_pk_id.!website_id.!website_hash)_%2C%5C.%5BA-Za-z0-9%5D*%5C.%5BA-Za-z0-9%5D*%5C.%5BA-Za-z0-9%5D*%5C.%5BA-Za-z0-9%5D*%5C.%2C)_)&apiv=1&urlref=_document_referrer_&res=_screen_width_x_screen_height_&lang=_browser_language_&gt_ms=_server_response_time_&cs=_document_charset_&pv_id=_substr(_page_view_id_64_%2C0%2C6)_"
   },
   "pressboard": {
-    "host": "https://adserver.pressboard.ca",
-    "common_params": "&amp=1&url=_canonical_url_&referrer=_document_referrer_&ts=_timestamp_&ua=_user_agent_&rand=_random_&uid=_client_id(_pressboardmedia)_&mid=!mediaId&cid=!campaignId&sid=!storyRequestId&geoid=!geoNameId&cn=!country&rg=!region&ct=!city&dbi=!dbInstance&tz=!timeZoneOffset",
-    "conversion_params": "&hbt=1&pvid=_page_view_id_&asurl=_source_url_&ash=_scroll_height_&asnh=_screen_height_&aasnh=_available_screen_height_&avh=_viewport_height_&ast=_scroll_top_&atet=_total_engaged_time_",
-    "conversion": "https://adserver.pressboard.ca/track/attention-amp?&amp=1&url=_canonical_url_&referrer=_document_referrer_&ts=_timestamp_&ua=_user_agent_&rand=_random_&uid=_client_id(_pressboardmedia)_&mid=!mediaId&cid=!campaignId&sid=!storyRequestId&geoid=!geoNameId&cn=!country&rg=!region&ct=!city&dbi=!dbInstance&tz=!timeZoneOffset&hbt=1&pvid=_page_view_id_&asurl=_source_url_&ash=_scroll_height_&asnh=_screen_height_&aasnh=_available_screen_height_&avh=_viewport_height_&ast=_scroll_top_&atet=_total_engaged_time_"
+    "host": "https://sr.studiostack.com",
+    "common_params": "&amp=1&url=_canonical_url_&referrer=_document_referrer_&ts=_timestamp_&ua=_user_agent_&rand=_random_&uid=_client_id(_pbss)_&mid=!mediaId&geoid=!geoNameId&cn=!country&rg=!region&ct=!city",
+    "conversion_params": "&hbt=1&pvid=_page_view_id_64_&asurl=_source_url_&ash=_scroll_height_&asnh=_screen_height_&aasnh=_available_screen_height_&avh=_viewport_height_&ast=_scroll_top_&atet=_total_engaged_time_",
+    "conversion": "https://sr.studiostack.com/track/attention-amp?&amp=1&url=_canonical_url_&referrer=_document_referrer_&ts=_timestamp_&ua=_user_agent_&rand=_random_&uid=_client_id(_pbss)_&mid=!mediaId&geoid=!geoNameId&cn=!country&rg=!region&ct=!city&hbt=1&pvid=_page_view_id_64_&asurl=_source_url_&ash=_scroll_height_&asnh=_screen_height_&aasnh=_available_screen_height_&avh=_viewport_height_&ast=_scroll_top_&atet=_total_engaged_time_"
   },
   "subscriptions-propensity": {
     "baseParams": "u_tz=240&v=1&cookie=_client_id(__gads)_&cdm=!sourceHostName&_amp_source_origin=_source_host_&extrainfo=",
@@ -510,10 +515,10 @@
   },
   "top100": {
     "host": "https://kraken.rambler.ru",
-    "base": "https://kraken.rambler.ru/cnt/?pid=!pid&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id(ruid)_&ct=amp",
-    "pageview": "https://kraken.rambler.ru/cnt/?pid=!pid&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id(ruid)_&ct=amp&et=pv&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
+    "base": "https://kraken.rambler.ru/cnt/?pid=!pid&rid=_page_view_id_&v=1.0.1&rn=_random_&tid=_client_id(top100_id)_&ct=amp",
+    "pageview": "https://kraken.rambler.ru/cnt/?pid=!pid&rid=_page_view_id_&v=1.0.1&rn=_random_&tid=_client_id(top100_id)_&ct=amp&et=pv&url=_canonical_url_&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
     "_screenData": "&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
-    "_pageData": "&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_"
+    "_pageData": "&url=_canonical_url_&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_"
   },
   "topmailru": {
     "pageView": "https://top-fwz1.mail.ru/counter?js=13;id=!id;u=_source_url_;r=_document_referrer_;s=_screen_width_*_screen_height_;vp=_viewport_width_*_viewport_height_;st=!start;gender=!gender;age=!age;pid=!pid;userid=!userid;device=!device;params=!params;_=_random_;title=_title_",

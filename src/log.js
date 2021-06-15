@@ -18,7 +18,9 @@ import * as assertions from './core/assert/base';
 import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
-} from './core/error-message-helpers';
+  isUserErrorMessage,
+  stripUserError,
+} from './core/error/message-helpers';
 import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
@@ -28,7 +30,9 @@ import {urls} from './config';
 
 const noop = () => {};
 
-export {USER_ERROR_SENTINEL};
+// These are exported here despite being defined in core to avoid updating
+// imports for now.
+export {USER_ERROR_SENTINEL, isUserErrorMessage, stripUserError};
 
 /**
  * Four zero width space.
@@ -36,22 +40,6 @@ export {USER_ERROR_SENTINEL};
  * @const {string}
  */
 export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
-
-/**
- * @param {string} message
- * @return {boolean} Whether this message was a user error.
- */
-export function isUserErrorMessage(message) {
-  return message.indexOf(USER_ERROR_SENTINEL) >= 0;
-}
-
-/**
- * @param {string} message
- * @return {string} The new message without USER_ERROR_SENTINEL
- */
-export function stripUserError(message) {
-  return message.replace(USER_ERROR_SENTINEL, '');
-}
 
 /**
  * @param {string} message
@@ -73,7 +61,7 @@ export const LogLevel = {
 };
 
 /**
- * Sets reportError function. Called from error.js to break cyclic
+ * Sets reportError function. Called from error-reporting.js to break cyclic
  * dependency.
  * @param {function(this:Window, Error, (?Element)=): ?|undefined} fn
  */
@@ -187,7 +175,7 @@ export class Log {
     // migrated to an AMP-independent form for use in core. This binding allows
     // Log assertion helpers to maintain message-extraction capabilities until
     // that logic can be moved to core.
-    this.boundAssertFn_ = /** @type {!AssertionFunction} */ (
+    this.boundAssertFn_ = /** @type {!assertions.AssertionFunctionDef} */ (
       this.assert.bind(this)
     );
   }
@@ -239,30 +227,33 @@ export class Log {
 
   /**
    * @param {string} tag
-   * @param {string} level
+   * @param {!LogLevel} level
    * @param {!Array} messages
+   * @return {boolean} true if a message was logged
    */
   msg_(tag, level, messages) {
-    if (this.getLevel_() != LogLevel.OFF) {
-      let fn = this.win.console.log;
-      if (level == 'ERROR') {
-        fn = this.win.console.error || fn;
-      } else if (level == 'INFO') {
-        fn = this.win.console.info || fn;
-      } else if (level == 'WARN') {
-        fn = this.win.console.warn || fn;
-      }
-      const args = this.maybeExpandMessageArgs_(messages);
-      // Prefix console message with "[tag]".
-      const prefix = `[${tag}]`;
-      if (typeof args[0] === 'string') {
-        // Prepend string to avoid breaking string substitutions e.g. %s.
-        args[0] = prefix + ' ' + args[0];
-      } else {
-        args.unshift(prefix);
-      }
-      fn.apply(this.win.console, args);
+    if (this.getLevel_() < level) {
+      return false;
     }
+    let fn = this.win.console.log;
+    if (level == LogLevel.ERROR) {
+      fn = this.win.console.error || fn;
+    } else if (level == LogLevel.INFO) {
+      fn = this.win.console.info || fn;
+    } else if (level == LogLevel.WARN) {
+      fn = this.win.console.warn || fn;
+    }
+    const args = this.maybeExpandMessageArgs_(messages);
+    // Prefix console message with "[tag]".
+    const prefix = `[${tag}]`;
+    if (typeof args[0] === 'string') {
+      // Prepend string to avoid breaking string substitutions e.g. %s.
+      args[0] = prefix + ' ' + args[0];
+    } else {
+      args.unshift(prefix);
+    }
+    fn.apply(this.win.console, args);
+    return true;
   }
 
   /**
@@ -276,54 +267,41 @@ export class Log {
   /**
    * Reports a fine-grained message.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    */
-  fine(tag, var_args) {
-    if (this.getLevel_() >= LogLevel.FINE) {
-      this.msg_(tag, 'FINE', Array.prototype.slice.call(arguments, 1));
-    }
+  fine(tag, ...args) {
+    this.msg_(tag, LogLevel.FINE, args);
   }
 
   /**
    * Reports a informational message.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    */
-  info(tag, var_args) {
-    if (this.getLevel_() >= LogLevel.INFO) {
-      this.msg_(tag, 'INFO', Array.prototype.slice.call(arguments, 1));
-    }
+  info(tag, ...args) {
+    this.msg_(tag, LogLevel.INFO, args);
   }
 
   /**
    * Reports a warning message.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    */
-  warn(tag, var_args) {
-    if (this.getLevel_() >= LogLevel.WARN) {
-      this.msg_(tag, 'WARN', Array.prototype.slice.call(arguments, 1));
-    }
+  warn(tag, ...args) {
+    this.msg_(tag, LogLevel.WARN, args);
   }
 
   /**
    * Reports an error message. If the logging is disabled, the error is rethrown
    * asynchronously.
    * @param {string} tag
-   * @param {...*} var_args
+   * @param {...*} args
    * @return {!Error|undefined}
    * @private
    */
-  error_(tag, var_args) {
-    if (this.getLevel_() >= LogLevel.ERROR) {
-      this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
-    } else {
-      const error = createErrorVargs.apply(
-        null,
-        Array.prototype.slice.call(arguments, 1)
-      );
-      this.prepareError_(error);
-      return error;
+  error_(tag, ...args) {
+    if (!this.msg_(tag, LogLevel.ERROR, args)) {
+      return this.createError.apply(this, args);
     }
   }
 
@@ -335,6 +313,7 @@ export class Log {
   error(tag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
+      // TODO(rcebulko): Determine if/how this Error#name property is used.
       error.name = tag || error.name;
       // __AMP_REPORT_ERROR is installed globally per window in the entry point.
       self.__AMP_REPORT_ERROR(error);
@@ -505,26 +484,6 @@ export class Log {
       this.boundAssertFn_,
       shouldBeBoolean,
       opt_message
-    );
-  }
-
-  /**
-   * Asserts and returns the enum value. If the enum doesn't contain such a
-   * value, the error is thrown.
-   *
-   * @param {!Object<T>} enumObj
-   * @param {string} s
-   * @param {string=} opt_enumName
-   * @return {T}
-   * @template T
-   * @closurePrimitive {asserts.matchesReturn}
-   */
-  assertEnumValue(enumObj, s, opt_enumName) {
-    return assertions.assertEnumValue(
-      this.boundAssertFn_,
-      enumObj,
-      s,
-      opt_enumName
     );
   }
 

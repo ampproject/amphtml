@@ -16,8 +16,8 @@
 
 import {RequestBank} from '../../testing/test-helper';
 import {maybeSwitchToCompiledJs} from '../../testing/iframe';
-import {parseQueryString} from '../../src/url';
-import {xhrServiceForTesting} from '../../src/service/xhr-impl';
+import {parseQueryString} from '#core/types/string/url';
+import {xhrServiceForTesting} from '#service/xhr-impl';
 
 // TODO(wg-monetization, #29112): Unskip on Safari.
 const t = describes.sandboxed.configure().skipSafari();

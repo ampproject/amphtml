@@ -24,20 +24,23 @@
 
 import {CacheCidApi} from './cache-cid-api';
 import {GoogleCidApi, TokenStatus} from './cid-api';
-import {Services} from '../services';
+import {Services} from '#service';
 import {ViewerCidApi} from './viewer-cid-api';
-import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
 import {dev, user, userAssert} from '../log';
-import {dict} from '../core/types/object';
+import {dict} from '#core/types/object';
 import {getCookie, setCookie} from '../cookies';
-import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
+import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
 import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
-import {isExperimentOn} from '../../src/experiments';
-import {isIframed} from '../dom';
-import {parseJson, tryParseJson} from '../json';
-import {rethrowAsync} from '../core/error';
-import {tryResolve} from '../core/data-structures/promise';
+import {isExperimentOn} from '#experiments';
+import {isIframed} from '#core/dom';
+import {parseJson, tryParseJson} from '#core/types/object/json';
+import {rethrowAsync} from '#core/error';
+import {tryResolve} from '#core/data-structures/promise';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -458,9 +461,9 @@ function maybeGetCidFromCookieOrBackup(cid, getCidStruct) {
  * @return {!Promise<?string>}
  */
 function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
-  const {isBackupCidExpOn, ampdoc} = cid;
+  const {ampdoc, isBackupCidExpOn} = cid;
   const {win} = ampdoc;
-  const {scope, disableBackup} = getCidStruct;
+  const {disableBackup, scope} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
 
   return maybeGetCidFromCookieOrBackup(cid, getCidStruct).then(

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {
   boolean,
   color,
@@ -76,6 +76,57 @@ export const _default = () => {
         <button on="tap:sidebar.open()">open</button>
         <button on="tap:sidebar.close()">close</button>
       </div>
+    </main>
+  );
+};
+
+export const toolbar = () => {
+  const sideConfigurations = ['left', 'right', undefined];
+  const side = select('side', sideConfigurations, sideConfigurations[0]);
+  const foregroundColor = color('color');
+  const backgroundColor = color('background');
+  const backdropColor = color('backdrop color');
+  const toolbarMedia = text('toolbar media', '(max-width: 500px)');
+
+  return (
+    <main>
+      <style>
+        {`
+          amp-sidebar {
+              color: ${foregroundColor};
+              background-color: ${backgroundColor};
+          }
+          amp-sidebar::part(backdrop) {
+              background-color: ${backdropColor};
+          }
+          `}
+      </style>
+      <amp-sidebar layout="nodisplay" id="sidebar" side={side}>
+        <span>
+          Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
+          inermis reprehendunt.
+        </span>
+        <ul>
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+        </ul>
+        <nav toolbar={toolbarMedia} toolbar-target="toolbar-target">
+          <ul>
+            <li>Toolbar Item 1</li>
+            <li>Toolbar Item 2</li>
+          </ul>
+        </nav>
+        <button on="tap:sidebar.toggle()">toggle</button>
+        <button on="tap:sidebar.open()">open</button>
+        <button on="tap:sidebar.close()">close</button>
+      </amp-sidebar>
+      <div class="buttons" style={{margin: 8}}>
+        <button on="tap:sidebar.toggle()">toggle</button>
+        <button on="tap:sidebar.open()">open</button>
+        <button on="tap:sidebar.close()">close</button>
+      </div>
+      <div id="toolbar-target"></div>
     </main>
   );
 };

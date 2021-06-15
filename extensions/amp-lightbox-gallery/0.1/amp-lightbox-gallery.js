@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {
   ELIGIBLE_TAP_TAGS,
   LightboxManager,
@@ -23,10 +23,10 @@ import {
   VIDEO_TAGS,
 } from './service/lightbox-manager-impl';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/core/constants/key-codes';
+import {Keys} from '#core/constants/key-codes';
 import {LightboxCaption, OverflowState} from './lightbox-caption';
 import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {SwipeToDismiss} from './swipe-to-dismiss';
 import {
@@ -34,26 +34,25 @@ import {
   closest,
   closestAncestorElementBySelector,
   elementByTag,
-  getVerticalScrollbarWidth,
   scopedQuerySelectorAll,
-  toggleAttribute,
-} from '../../../src/dom';
-import {clamp} from '../../../src/utils/math';
+} from '#core/dom/query';
+import {clamp} from '#core/math';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
 } from './utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {dict} from '#core/types/object';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
+import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isExperimentOn} from '#experiments';
 import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error-reporting';
-import {setStyle, setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/core/types/array';
+import {setStyle, setStyles, toggle} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
@@ -352,6 +351,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
+   * Show an existing carousel. Ensure it's been unlayed out before displaying again.
    * @param {string} lightboxGroupId
    * @return {!Promise}
    * @private
@@ -360,7 +360,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.mutateElement(() => {
       const {length} = this.elementsMetadata_[lightboxGroupId];
       this.maybeEnableMultipleItemControls_(length);
-      toggle(dev().assertElement(this.carousel_), true);
+      const owners = Services.ownersForDoc(this.element);
+      owners./*OK*/ scheduleUnlayout(this.element, this.carousel_);
+      toggle(this.carousel_, true);
     });
   }
 
@@ -848,7 +850,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.getCurrentElement_()
       .imageViewer.getImpl()
       .then((imageViewer) => {
-        const {width, height} = imageViewer.getImageBoxWithOffset() || {};
+        const {height, width} = imageViewer.getImageBoxWithOffset() || {};
 
         // Check if our imageBox has a width or height. We may be in the
         // gallery view if not, and we do not want to animate.

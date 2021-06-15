@@ -34,9 +34,9 @@ const {
   logOnSameLineLocalDev,
   logWithoutTimestamp,
 } = require('../common/logging');
+const {cyan, green, red, yellow} = require('../common/colors');
 const {exec} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
-const {green, cyan, red, yellow} = require('../common/colors');
 const {prettifyGlobs} = require('../test-configs/config');
 
 const rootDir = path.dirname(path.dirname(__dirname));
@@ -111,7 +111,7 @@ function printFixMessages() {
     yellow('NOTE 4:'),
     'For more information, read',
     cyan(
-      'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#code-quality-and-style\n'
+      'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md#code-quality-and-style\n'
     )
   );
 }
@@ -160,9 +160,9 @@ module.exports = {
 };
 
 prettify.description =
-  'Checks several non-JS files in the repo for formatting using prettier';
+  'Check several non-JS files in the repo for formatting using prettier';
 prettify.flags = {
-  'files': 'Checks only the specified files',
-  'local_changes': 'Checks just the files changed in the local branch',
-  'fix': 'Fixes formatting errors',
+  'files': 'Check only the specified files',
+  'local_changes': 'Check just the files changed in the local branch',
+  'fix': 'Fix all auto-fixable formatting errors',
 };

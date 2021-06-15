@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {dict} from '../../../src/core/types/object';
-import {registerServiceBuilder} from '../../../src/service';
+import {dict} from '#core/types/object';
+import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /**
  * @typedef {!JsonObject}
@@ -25,9 +25,6 @@ export let StoryVariableDef;
 
 /** @enum {string} */
 export const AnalyticsVariable = {
-  BOOKEND_COMPONENT_POSITION: 'storyBookendComponentPosition',
-  BOOKEND_COMPONENT_TYPE: 'storyBookendComponentType',
-  BOOKEND_TARGET_HREF: 'storyBookendTargetHref',
   STORY_INTERACTIVE_ID: 'storyInteractiveId',
   STORY_INTERACTIVE_RESPONSE: 'storyInteractiveResponse',
   STORY_INTERACTIVE_TYPE: 'storyInteractiveType',
@@ -72,9 +69,6 @@ export class AmpStoryVariableService {
   constructor(win) {
     /** @private {!StoryVariableDef} */
     this.variables_ = dict({
-      [AnalyticsVariable.BOOKEND_COMPONENT_POSITION]: null,
-      [AnalyticsVariable.BOOKEND_COMPONENT_TYPE]: null,
-      [AnalyticsVariable.BOOKEND_TARGET_HREF]: null,
       [AnalyticsVariable.STORY_INTERACTIVE_ID]: null,
       [AnalyticsVariable.STORY_INTERACTIVE_RESPONSE]: null,
       [AnalyticsVariable.STORY_INTERACTIVE_TYPE]: null,

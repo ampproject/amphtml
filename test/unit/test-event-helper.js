@@ -23,13 +23,13 @@ import {
   listenOncePromise,
   loadPromise,
 } from '../../src/event-helper';
-import {Observable} from '../../src/core/data-structures/observable';
+import {Observable} from '#core/data-structures/observable';
 import {
   detectEvtListenerOptsSupport,
   resetEvtListenerOptsSupportForTesting,
   resetPassiveSupportedForTesting,
   supportsPassiveEventListener,
-} from '../../src/event-helper-listen';
+} from '#core/dom/event-helper-listen';
 
 describes.sandboxed('EventHelper', {}, (env) => {
   function getEvent(name, target) {

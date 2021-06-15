@@ -24,9 +24,9 @@ import {dev, devAssert} from '../../../src/log';
 import {getAmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {getMode} from '../../../src/mode';
 import {mergeExtensionsMetadata} from '../../amp-a4a/0.1/amp-ad-utils';
-import {tryParseJson} from '../../../src/json';
-import {tryResolve} from '../../../src/core/data-structures/promise';
-import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
+import {tryParseJson} from '#core/types/object/json';
+import {tryResolve} from '#core/data-structures/promise';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-adzerk-impl';

@@ -15,17 +15,15 @@
  */
 
 import {CSS} from '../../../build/amp-truncate-text-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css';
-import {
-  closestAncestorElementBySelector,
-  iterateCursor,
-} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {createShadowRoot} from './shadow-utils';
 import {dev} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/core/types/array';
+import {htmlFor} from '#core/dom/static-template';
+import {isExperimentOn} from '#experiments';
+import {iterateCursor} from '#core/dom';
+import {toArray} from '#core/types/array';
 import {truncateText} from './truncate-text';
 
 /**

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {
@@ -27,21 +27,21 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {
-  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '#core/dom/fullscreen';
+
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
 const TAG = 'amp-brid-player';
 
@@ -240,17 +240,21 @@ class AmpBridPlayer extends AMP.BaseElement {
       return;
     }
 
-    const {partnerID_: partnerID, feedID_: feedID} = this;
+    const {feedID_: feedID, partnerID_: partnerID} = this;
 
-    const placeholder = htmlFor(element)`
-      <amp-img referrerpolicy=origin layout=fill placeholder>
-        <amp-img referrerpolicy=origin layout=fill fallback
-            src="https://cdn.brid.tv/live/default/defaultSnapshot.png">
-        </amp-img>
-      </amp-img>`;
+    const html = htmlFor(element);
+    const placeholder = html`
+      <img placeholder referrerpolicy="origin" loading="lazy" />
+    `;
 
     this.propagateAttributes(['aria-label'], placeholder);
     this.applyFillContent(placeholder);
+
+    const altText = placeholder.hasAttribute('aria-label')
+      ? 'Loading video - ' + placeholder.getAttribute('aria-label')
+      : 'Loading video';
+
+    placeholder.setAttribute('alt', altText);
 
     placeholder.setAttribute(
       'src',
@@ -258,11 +262,9 @@ class AmpBridPlayer extends AMP.BaseElement {
         `/snapshot/${encodeURIComponent(feedID)}.jpg`
     );
 
-    const altText = placeholder.hasAttribute('aria-label')
-      ? 'Loading video - ' + placeholder.getAttribute('aria-label')
-      : 'Loading video';
-
-    placeholder.setAttribute('alt', altText);
+    this.loadPromise(placeholder).catch(() => {
+      placeholder.src = 'https://cdn.brid.tv/live/default/defaultSnapshot.png';
+    });
 
     return placeholder;
   }

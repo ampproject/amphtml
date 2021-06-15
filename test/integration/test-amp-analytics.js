@@ -15,7 +15,7 @@
  */
 
 import {BrowserController, RequestBank} from '../../testing/test-helper';
-import {parseQueryString} from '../../src/url';
+import {parseQueryString} from '#core/types/string/url';
 
 // TODO(wg-analytics): These tests time out on Firefox and Safari.
 describes.sandboxed

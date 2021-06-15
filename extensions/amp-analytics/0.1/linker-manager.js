@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {AMPDOC_SINGLETON_NAME} from '../../../src/core/constants/enums';
+import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {Priority} from '../../../src/service/navigation';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {Priority} from '#service/navigation';
+import {Services} from '#service';
+import {WindowInterface} from '#core/window/interface';
 import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {createLinker} from './linker';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getHighestAvailableDomain} from '../../../src/cookies';
-import {isObject} from '../../../src/core/types';
+import {isObject} from '#core/types';
 import {user} from '../../../src/log';
 
 /** @const {string} */
@@ -324,7 +324,7 @@ export class LinkerManager {
     }
 
     // Fallback to default behavior
-    const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.ampdoc_);
+    const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(this.ampdoc_);
     const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
     const isFriendlyCanonicalOrigin = areFriendlyDomains(
       canonicalOrigin,
@@ -403,7 +403,7 @@ export class LinkerManager {
    * @param {!../../amp-form/0.1/form-submit-service.FormSubmitEventDef} event
    */
   handleFormSubmit_(event) {
-    const {form, actionXhrMutator} = event;
+    const {actionXhrMutator, form} = event;
 
     for (const linkerName in this.config_) {
       const config = this.config_[linkerName];

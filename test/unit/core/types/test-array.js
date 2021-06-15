@@ -22,7 +22,7 @@ import {
   pushIfNotExist,
   remove,
   toArray,
-} from '../../../../src/core/types/array';
+} from '#core/types/array';
 
 describes.sandboxed('type helpers - arrays', {}, () => {
   describe('toArray', () => {

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../core/constants/action-constants';
-import {Layout, getLayoutClass} from '../layout';
-import {Services} from '../services';
-import {computedStyle, toggle} from '../style';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Layout, getLayoutClass} from '#core/dom/layout';
+import {Services} from '#service';
+import {computedStyle, toggle} from '#core/dom/style';
 import {dev, user, userAssert} from '../log';
-import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
-import {isFiniteNumber, toWin} from '../types';
-import {tryFocus} from '../dom';
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
+import {isFiniteNumber} from '#core/types';
+import {toWin} from '#core/window';
+import {tryFocus} from '#core/dom';
 
 /**
  * @param {!Element} element
@@ -123,7 +124,7 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
       return null;
     }
-    const {node, method, args} = invocation;
+    const {args, method, node} = invocation;
     const win = getWin(node);
     switch (method) {
       case 'pushState':
@@ -178,7 +179,7 @@ export class StandardActions {
    * @private Visible to tests only.
    */
   handleNavigateTo_(invocation) {
-    const {node, caller, method, args} = invocation;
+    const {args, caller, method, node} = invocation;
     const win = getWin(node);
     // Some components have additional constraints on allowing navigation.
     let permission = Promise.resolve();

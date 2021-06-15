@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-import {
-  getProxyServingType,
-  getSourceUrl,
-  parseQueryString,
-  parseUrlDeprecated,
-} from '../url';
-
+import {getProxyServingType, getSourceUrl, parseUrlDeprecated} from '../url';
 import {getRandomString64} from './cid-impl';
-import {isArray} from '../core/types';
-import {map} from '../core/types/object';
-import {registerServiceBuilderForDoc} from '../service';
+import {isArray} from '#core/types';
+import {map} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /** @private @const {!Array<string>} */
 const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];

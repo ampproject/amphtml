@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from './services';
+import {Services} from './service';
 import {VideoEvents} from './video-interface';
 import {dev} from './log';
-import {dispatchCustomEvent} from './dom';
-import {htmlFor} from './static-template';
+import {dispatchCustomEvent} from './core/dom';
+import {htmlFor} from './core/dom/static-template';
 import {isArray, isObject} from './core/types';
-
-import {tryParseJson} from './json';
+import {tryParseJson} from './core/types/object/json';
 
 /** @enum {string} */
 export const SandboxOptions = {

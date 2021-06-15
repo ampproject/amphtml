@@ -81,39 +81,39 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {CSS} from '../build/amp-ad-0.1.css.js';
+import {CSS} from '#build/amp-ad-0.1.css.js';
 import {
   FakeCustomElements,
   FakeLocation,
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
-import {Services} from '../src/services';
+import {Services} from '#service';
 import {TestConfig} from './test-config';
 import {addParamsToUrl} from '../src/url';
 import {adopt, adoptShadowMode} from '../src/runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {createAmpElementForTesting} from '../src/custom-element';
-import {createElementWithAttributes} from '../src/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {
   installAmpdocServices,
   installBuiltinElements,
   installRuntimeServices,
-} from '../src/service/core-services';
-import {install as installCustomElements} from '../src/polyfills/custom-elements';
-import {installDocService} from '../src/service/ampdoc-impl';
-import {installExtensionsService} from '../src/service/extensions-impl';
+} from '#service/core-services';
+import {install as installCustomElements} from '#polyfills/custom-elements';
+import {installDocService} from '#service/ampdoc-impl';
+import {installExtensionsService} from '#service/extensions-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
-import {install as installIntersectionObserver} from '../src/polyfills/intersection-observer';
-import {install as installResizeObserver} from '../src/polyfills/resize-observer';
+import {install as installIntersectionObserver} from '#polyfills/intersection-observer';
+import {install as installResizeObserver} from '#polyfills/resize-observer';
 import {
   maybeTrackImpression,
   resetTrackImpressionPromiseForTesting,
 } from '../src/impression';
-import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
-import {setStyles} from '../src/style';
+import {resetScheduledElementForTesting} from '#service/custom-element-registry';
+import {setStyles} from '#core/dom/style';
 import {stubService} from './test-helper';
 import fetchMock from 'fetch-mock/es5/client-bundle';
 import sinon from /*OK*/ 'sinon';

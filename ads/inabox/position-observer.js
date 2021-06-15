@@ -19,9 +19,9 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../src/layout-rect';
-import {Observable} from '../../src/core/data-structures/observable';
-import {throttle} from '../../src/core/types/function';
+} from '#core/math/layout-rect';
+import {Observable} from '#core/data-structures/observable';
+import {throttle} from '#core/types/function';
 
 /**
  * @typedef {{

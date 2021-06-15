@@ -15,12 +15,12 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {DEFAULT_ACTION} from '../../src/core/constants/action-constants';
-import {LayoutPriority} from '../../src/layout';
-import {Resource} from '../../src/service/resource';
-import {Services} from '../../src/services';
+import {DEFAULT_ACTION} from '#core/constants/action-constants';
+import {LayoutPriority} from '#core/dom/layout';
+import {Resource} from '#service/resource';
+import {Services} from '#service';
 import {createAmpElementForTesting} from '../../src/custom-element';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {layoutRectLtwh} from '#core/math/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
 
 describes.realWin('BaseElement', {amp: true}, (env) => {

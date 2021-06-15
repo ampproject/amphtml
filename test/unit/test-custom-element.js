@@ -15,20 +15,20 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpEvents} from '../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {BaseElement} from '../../src/base-element';
-import {CommonSignals} from '../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {ElementStub} from '../../src/element-stub';
-import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {Services} from '../../src/services';
+import {LOADING_ELEMENTS_, Layout} from '#core/dom/layout';
+import {Resource, ResourceState} from '#service/resource';
+import {Services} from '#service';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
-import {elementConnectedCallback} from '../../src/service/custom-element-registry';
-import {toggleExperiment} from '../../src/experiments';
+import {elementConnectedCallback} from '#service/custom-element-registry';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -2047,6 +2047,33 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
       getResourceForElement: (element) => {
         return element.resource;
       },
+    };
+    element.getAmpDoc = () => doc;
+    const owners = Services.ownersForDoc(doc);
+    owners.scheduleLayout = env.sandbox.mock();
+    const fallback = element.appendChild(createWithAttr('fallback'));
+    element.toggleFallback(true);
+    expect(element).to.have.class('amp-notsupported');
+    expect(owners.scheduleLayout).to.be.calledOnce;
+    expect(owners.scheduleLayout).to.have.been.calledWith(element, fallback);
+
+    element.toggleFallback(false);
+    expect(element).to.not.have.class('amp-notsupported');
+  });
+
+  it('toggleFallback should toggle unsupported class on R1 elements', () => {
+    element.resource = {
+      getState: () => {
+        return ResourceState.NOT_LAID_OUT;
+      },
+    };
+    element.resources_ = {
+      getResourceForElement: (element) => {
+        return element.resource;
+      },
+    };
+    element.R1 = () => {
+      return true;
     };
     element.getAmpDoc = () => doc;
     const owners = Services.ownersForDoc(doc);

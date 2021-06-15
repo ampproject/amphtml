@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
+import * as Preact from '#preact';
+import {BaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {InlineGallery} from '../component';
 import {Pagination} from '../pagination';
 import {Thumbnails} from '../thumbnails';

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../../src/core/types/object';
-import {tryParseJson} from '../../src/json.js';
-import {validateData} from '../../3p/3p';
+import {hasOwn} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+import {validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global

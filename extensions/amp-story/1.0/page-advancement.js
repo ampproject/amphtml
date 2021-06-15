@@ -23,13 +23,13 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {Services} from '../../../src/services';
-import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
+import {Services} from '#service';
+import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, matches} from '../../../src/dom';
+import {closest, matches} from '#core/dom/query';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {getAmpdoc} from '../../../src/service';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
 import {listenOnce} from '../../../src/event-helper';
@@ -62,6 +62,9 @@ const PROTECTED_SCREEN_EDGE_PERCENT = 12;
  * @private
  */
 const MINIMUM_PROTECTED_SCREEN_EDGE_PX = 48;
+
+/** @private @const {number} */
+const MINIMUM_TIME_BASED_AUTO_ADVANCE_MS = 500;
 
 /**
  * Maximum percent of screen that can be occupied by a single link
@@ -810,6 +813,14 @@ export class TimeBasedAdvancement extends AdvancementConfig {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
+    if (delayMs < MINIMUM_TIME_BASED_AUTO_ADVANCE_MS) {
+      user().warn(
+        'AMP-STORY-PAGE',
+        `${element.id} has an auto advance duration that is too short. ` +
+          `${MINIMUM_TIME_BASED_AUTO_ADVANCE_MS}ms is used instead.`
+      );
+      delayMs = MINIMUM_TIME_BASED_AUTO_ADVANCE_MS;
+    }
     /** @private @const {number} */
     this.delayMs_ = delayMs;
 

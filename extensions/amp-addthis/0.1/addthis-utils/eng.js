@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 import {API_SERVER} from '../constants';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 
 import {addParamsToUrl} from '../../../../src/url';
-import {dict} from '../../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getSessionId} from './session';
 import {pixelDrop} from './pixel';
 
@@ -27,10 +27,10 @@ import {pixelDrop} from './pixel';
  * @return {{al: (string|undefined), amp: number, dc: number, dp: string, dt: string, fp: string, ict: string, ivh: number, pct: number, pfm: number, ph: number, pub: string, sh: number, sid: string}}
  */
 const getEngData = (params) => {
-  const {monitors, loc, ampDoc, pubId} = params;
-  const {dwellMonitor, scrollMonitor, clickMonitor, activeToolsMonitor} =
+  const {ampDoc, loc, monitors, pubId} = params;
+  const {activeToolsMonitor, clickMonitor, dwellMonitor, scrollMonitor} =
     monitors;
-  const {host, pathname, hash} = loc;
+  const {hash, host, pathname} = loc;
   const viewport = Services.viewportForDoc(ampDoc);
 
   return {

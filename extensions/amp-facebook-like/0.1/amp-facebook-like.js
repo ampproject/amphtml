@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dashToUnderline} from '../../../src/core/types/string';
+import {Services} from '#service';
+import {dashToUnderline} from '#core/types/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/core/types';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {isObject} from '#core/types';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
+import {removeElement} from '#core/dom';
+import {tryParseJson} from '#core/types/object/json';
 
 const TYPE = 'facebook';
 
@@ -74,6 +74,7 @@ class AmpFacebookLike extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.element.setAttribute('data-embed-as', 'like');
     const iframe = getIframe(this.win, this.element, TYPE);
     iframe.title = this.element.title || 'Facebook like button';
     this.applyFillContent(iframe);

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/core/types/object';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {dict} from '#core/types/object';
+import {getDataParamsFromAttributes} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
@@ -124,8 +124,20 @@ class AmpKaltura extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
+    const placeholder = this.win.document.createElement('img');
     this.propagateAttributes(['aria-label'], placeholder);
+    this.applyFillContent(placeholder);
+    placeholder.setAttribute('loading', 'lazy');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    if (placeholder.hasAttribute('aria-label')) {
+      placeholder.setAttribute(
+        'alt',
+        'Loading video - ' + placeholder.getAttribute('aria-label')
+      );
+    } else {
+      placeholder.setAttribute('alt', 'Loading video');
+    }
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
     let src = `https://${encodeURIComponent(
@@ -140,17 +152,6 @@ class AmpKaltura extends AMP.BaseElement {
       src += `/height/${height}`;
     }
     placeholder.setAttribute('src', src);
-    placeholder.setAttribute('layout', 'fill');
-    placeholder.setAttribute('placeholder', '');
-    placeholder.setAttribute('referrerpolicy', 'origin');
-    if (placeholder.hasAttribute('aria-label')) {
-      placeholder.setAttribute(
-        'alt',
-        'Loading video - ' + placeholder.getAttribute('aria-label')
-      );
-    } else {
-      placeholder.setAttribute('alt', 'Loading video');
-    }
     return placeholder;
   }
 
