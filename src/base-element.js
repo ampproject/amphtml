@@ -869,25 +869,6 @@ export class BaseElement {
   }
 
   /**
-   * Configures the supplied element to have a "fill content" layout. The
-   * exact interpretation of "fill content" depends on the element's layout.
-   *
-   * If `opt_replacedContent` is specified, it indicates whether the "replaced
-   * content" styling should be applied. Replaced content is not allowed to
-   * have its own paddings or border.
-   *
-   * @param {!Element} element
-   * @param {boolean=} opt_replacedContent
-   * @public @final
-   *
-   * TODO(alanorozco): Remove from BaseElement, change users to call
-   * `applyFillContent() directly.
-   */
-  applyFillContent(element, opt_replacedContent) {
-    applyFillContent(element, opt_replacedContent);
-  }
-
-  /**
    * Returns the viewport within which the element operates.
    * @return {!./service/viewport/viewport-interface.ViewportInterface}
    */

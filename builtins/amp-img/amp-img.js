@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {ReadyState} from '#core/constants/ready-state';
 import {Services} from '#service';
 import {dev} from '../../src/log';
@@ -222,7 +222,7 @@ export class AmpImg extends BaseElement {
     if (!IS_ESM) {
       guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     }
-    this.applyFillContent(this.img_, true);
+    applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
     if (!serverRendered) {
