@@ -20,7 +20,7 @@ const path = require('path');
 // Enforces importing a Preact namespace specifier if using JSX
 //
 // Good
-// import * as Preact from 'path/to/preact';
+// import * as Preact from '#preact-ns';
 // <div />
 //
 // Bad
@@ -39,10 +39,7 @@ module.exports = {
      * @param {*} node
      */
     function requirePreact(node) {
-      if (imported) {
-        return;
-      }
-      if (warned) {
+      if (imported || warned) {
         return;
       }
       warned = true;
@@ -51,27 +48,19 @@ module.exports = {
         node,
         message: [
           'Using JSX requires importing the Preact namespace',
-          "Eg, `import * as Preact from 'src/preact'`",
+          "Eg, `import * as Preact from '#preact-ns'`",
         ].join('\n\t'),
 
         fix(fixer) {
-          const fileName = context.getFilename();
-          const absolutePath = path
-            .relative(path.dirname(fileName), './src/preact')
-            .replace(/\.js$/, '');
-
           const ancestors = context.getAncestors();
           const program = ancestors[0];
-          let firstImport = program.body.find(
-            (node) => node.type === 'ImportDeclaration'
-          );
-          if (!firstImport) {
-            firstImport = ancestors[1];
-          }
+          const firstImport =
+            program.body.find((node) => node.type === 'ImportDeclaration') ||
+            ancestors[1];
 
           return fixer.insertTextBefore(
             firstImport,
-            `import * as Preact from '${absolutePath}';\n`
+            `import * as Preact from '#preact-ns';\n`
           );
         },
       });

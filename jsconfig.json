@@ -12,6 +12,7 @@
       "#inabox/*": ["./src/inabox/*"],
       "#polyfills/*": ["./src/polyfills/*"],
       "#preact/*": ["./src/preact/*"],
+      "#preact-ns": ["./src/preact/index.js"],
       "#purifier/*": ["./src/purifier/*"],
       "#service/*": ["./src/service/*"]
     }
