@@ -15,10 +15,10 @@
  */
 
 __css_import__;
-import {Layout} from '../../../src/core/dom/layout';
+import {Layout, applyFillContent} from '#core/dom/layout';
 
 const TAG = 'amp-__component_name_hyphenated__';
- 
+
 export class Amp__component_name_pascalcase__ extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -37,7 +37,7 @@ export class Amp__component_name_pascalcase__ extends AMP.BaseElement {
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.textContent = this.myText_;
     this.element.appendChild(this.container_);
-    this.applyFillContent(this.container_, /* replacedContent */ true);
+    applyFillContent(this.container_, /* replacedContent */ true);
   }
 
   /** @override */
