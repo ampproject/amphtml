@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-/** @externs */
+import {createUseStyles} from 'react-jss';
 
-/**
- * @typedef {{
- *   type: (string),
- *   endpoint: (string|undefined),
- *   params: (JsonObject|Object|undefined),
- *   target: (string|undefined),
- *   width: (number|string|undefined),
- *   height: (number|string|undefined),
- *   color: (string|undefined),
- *   background: (string|undefined),
- *   tabIndex: (number|string|undefined),
- *   style: (string|undefined),
- *   children: (?PreactDef.Renderable|undefined),
- * }}
- */
-var SocialSharePropsDef;
+const button = {
+  'textDecoration': 'none',
+  'cursor': 'pointer',
+  'position': 'relative',
+  '&:focus': {
+    outline: '#0389ff solid 2px',
+    outlineOffset: '2px',
+  },
+};
+
+const JSS = {
+  button,
+};
+
+// useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
+// eslint-disable-next-line local/no-export-side-effect
+export const useStyles = createUseStyles(JSS);
