@@ -22,7 +22,7 @@ import {ViewportInterface} from '#service/viewport/viewport-interface';
 import {canInspectWindow} from '../iframe-helper';
 import {dev} from '../log';
 import {devAssert, devAssertElement} from '#core/assert';
-import {getFrameOverlayManager} from '#ads/inabox/frame-overlay-manager.js';
+import {getFrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
 import {getPositionObserver} from '#ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isIframed} from '#core/dom';

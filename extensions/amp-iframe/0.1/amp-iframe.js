@@ -25,7 +25,7 @@ import {
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
-import {base64EncodeFromBytes} from '#core/types/string/base64.js';
+import {base64EncodeFromBytes} from '#core/types/string/base64';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
@@ -44,7 +44,7 @@ import {removeElement} from '#core/dom';
 import {removeFragment} from '../../../src/url';
 import {setStyle} from '#core/dom/style';
 import {urls} from '../../../src/config';
-import {utf8Encode} from '#core/types/string/bytes.js';
+import {utf8Encode} from '#core/types/string/bytes';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';

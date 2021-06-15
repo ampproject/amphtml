@@ -35,7 +35,7 @@ import {
 } from '../../amp-subscriptions/0.1/entitlement';
 import {GaaMeteringRegwall} from '../../../third_party/subscriptions-project/swg-gaa';
 import {Services} from '#service';
-import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
+import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
 import {WindowInterface} from '#core/window/interface';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';

@@ -51,7 +51,7 @@ const {
   assertAliases,
   singletonFunctions,
   transformableMethods,
-} = require('../log-module-metadata.js');
+} = require('../log-module-metadata');
 
 // Considered default for this transform, configurable only for tests.
 // For other files output from this transform see linked module.

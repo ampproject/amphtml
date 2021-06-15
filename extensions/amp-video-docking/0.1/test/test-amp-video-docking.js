@@ -31,7 +31,7 @@ import {
   getPosterImageSrc,
 } from '../amp-video-docking';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {DirectionX, DirectionY} from '../def.js';
+import {DirectionX, DirectionY} from '../def';
 import {PlayingStates} from '../../../../src/video-interface';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';

@@ -26,7 +26,7 @@ const JasmineRunner = require('jasmine');
 const {execFile} = require('child_process');
 const jasmine = new JasmineRunner();
 
-const ampValidator = require('./index.js');
+const ampValidator = require('./index');
 
 it('deployed validator rejects the empty file', function(done) {
   // Note: This will fetch and use the validator from

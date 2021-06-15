@@ -15,7 +15,7 @@
  */
 
 import {CommonSignals} from '#core/constants/common-signals';
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
 import {getData} from './../../../src/event-helper';

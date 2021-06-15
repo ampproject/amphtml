@@ -15,7 +15,7 @@
  */
 import '../amp-timeago';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '#testing/test-helper.js';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-timeago 1.0',
