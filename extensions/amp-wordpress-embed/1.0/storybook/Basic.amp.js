@@ -28,19 +28,15 @@ export default {
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const ExampleUseCase = () => {
+export const BasicEmbedExample = () => {
   return (
     <amp-wordpress-embed
-      width="300"
-      height="200"
-      example-property="example string property value"
-    >
-      This text is inside.
-    </amp-wordpress-embed>
+      data-url="https://wordpress.org/news/2021/06/gutenberg-highlights"
+      height="250"
+    ></amp-wordpress-embed>
   );
 };
 
-ExampleUseCase.story = {
-  name: 'Example use case story',
+BasicEmbedExample.story = {
+  name: 'Basic example',
 };

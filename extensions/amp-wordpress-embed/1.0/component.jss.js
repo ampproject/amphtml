@@ -16,13 +16,12 @@
 
 import {createUseStyles} from 'react-jss';
 
-// DO NOT SUBMIT: Example class used for styling
-const exampleContentHidden = {
-  display: 'none',
+const iframe = {
+  border: 0,
 };
 
 const JSS = {
-  exampleContentHidden,
+  iframe,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

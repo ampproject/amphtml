@@ -25,13 +25,10 @@ export default {
 };
 
 export const _default = () => {
-  // DO NOT SUBMIT: This is example code only.
   return (
     <WordpressEmbed
-      style={{width: 300, height: 200}}
-      example-property="example string property value"
-    >
-      This text is inside.
-    </WordpressEmbed>
+      url="https://wordpress.org/news/2021/06/gutenberg-highlights"
+      height="250"
+    />
   );
 };

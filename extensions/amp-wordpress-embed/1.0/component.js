@@ -16,44 +16,118 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '../../../src/preact';
+import {addParamToUrl} from '../../../src/url';
+import {getData, listen} from '../../../src/event-helper';
 import {useStyles} from './component.jss';
+
+const {useCallback, useEffect, useRef, useState} = Preact;
 
 /**
  * @param {!WordpressEmbedDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function WordpressEmbed({exampleTagNameProp, ...rest}) {
-  // Examples of state and hooks
-  // DO NOT SUBMIT: This is example code only.
-  const [exampleValue, setExampleValue] = useState(0);
-  const exampleRef = useRef(null);
-  const styles = useStyles();
+export function WordpressEmbed({className, height, style, url}) {
+  const wrapperRef = useRef(wrapperRef);
+  const iframeRef = useRef(null);
 
-  useCallback(() => {
-    /* Do things */
-  }, []);
+  const [iframeURL, setIframeURL] = useState('');
+  const [containerStyle, setContianerStyle] = useState({
+    width: 'auto',
+    height,
+    ...style,
+  });
+
+  const classes = useStyles();
+
   useEffect(() => {
-    /* Do things */
-  }, []);
-  useLayoutEffect(() => {
-    /* Do things */
-  }, []);
-  useMemo(() => {
-    /* Do things */
-  }, []);
+    const unlisten = listen(window, 'message', handleMessageEvent);
+
+    return () => {
+      unlisten();
+    };
+  }, [handleMessageEvent]);
+
+  useEffect(() => {
+    setIframeURL(addParamToUrl(url, 'embed', 'true'));
+  }, [url]);
+
+  /**
+   * Check if the supplied URL has the same origin as the embedded iframe.
+   *
+   * @param {string} testURL
+   * @return {boolean}
+   * @private
+   */
+  const hasSameOrigin = useCallback(
+    (testURL) => {
+      const embeddedUrl = new URL(url);
+      const checkedUrl = new URL(testURL);
+      return embeddedUrl.origin === checkedUrl.origin;
+    },
+    [url]
+  );
+
+  /**
+   * Handle message event.
+   *
+   * @param {Event|MessageEvent} event
+   * @private
+   */
+  const handleMessageEvent = useCallback(
+    (event) => {
+      if (event.source !== iframeRef.current.contentWindow) {
+        return;
+      }
+
+      const data = getData(event);
+
+      if (
+        typeof data?.message === 'undefined' ||
+        typeof data?.value === 'undefined'
+      ) {
+        return;
+      }
+
+      switch (data.message) {
+        case 'height':
+          if (typeof data.value === 'number') {
+            // Make sure the new height is between 200px and 1000px.
+            // This replicates a constraint in WordPress's wp.receiveEmbedMessage() function.
+            const newHeight = Math.min(Math.max(data.value, 200), 1000);
+            setContianerStyle({
+              ...containerStyle,
+              height: newHeight,
+            });
+          }
+          break;
+        case 'link':
+          // Only follow a link message for the currently-active iframe if the link is for the same origin.
+          // This replicates a constraint in WordPress's wp.receiveEmbedMessage() function.
+          if (hasSameOrigin(data.value)) {
+            window.top.location.href = data.value;
+          }
+          break;
+      }
+    },
+    [containerStyle, hasSameOrigin]
+  );
 
   return (
-    <ContainWrapper layout size paint {...rest}>
-      {{exampleTagNameProp}}
-      <div className={`${styles.exampleContentHidden}`}>This is hidden</div>
+    <ContainWrapper
+      contentRef={wrapperRef}
+      className={className}
+      style={containerStyle}
+      size
+      layout
+      paint
+    >
+      <iframe
+        className={classes.iframe}
+        ref={iframeRef}
+        src={iframeURL}
+        height="100%"
+        width="100%"
+      />
     </ContainWrapper>
   );
 }

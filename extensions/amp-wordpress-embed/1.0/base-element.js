@@ -15,8 +15,8 @@
  */
 
 import {CSS as COMPONENT_CSS} from './component.jss';
-import {WordpressEmbed} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {WordpressEmbed} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -25,9 +25,8 @@ BaseElement['Component'] = WordpressEmbed;
 
 /** @override */
 BaseElement['props'] = {
-  'children': {passthrough: true},
-  // 'children': {passthroughNonEmpty: true},
-  // 'children': {selector: '...'},
+  url: {attr: 'data-url'},
+  height: {attr: 'height'},
 };
 
 /** @override */
@@ -36,9 +35,5 @@ BaseElement['layoutSizeDefined'] = true;
 /** @override */
 BaseElement['usesShadowDom'] = true;
 
-// DO NOT SUBMIT: If BaseElement['shadowCss']  is set to `null`, remove the
-// following declaration.
-// Otherwise, keep it when defined to an actual value like `COMPONENT_CSS`.
-// Once addressed, remove this set of comments.
 /** @override */
 BaseElement['shadowCss'] = COMPONENT_CSS;
