@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {getData, listen} from './../../../src/event-helper';
 import {isFiniteNumber, isObject} from '#core/types';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 
 import {removeElement} from '#core/dom';
 import {userAssert} from '../../../src/log';
@@ -91,7 +91,7 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
     iframe.src =
       'https://www.riddle.com/a/iframe/' + encodeURIComponent(this.riddleId_);
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
 
     return this.loadPromise(iframe);

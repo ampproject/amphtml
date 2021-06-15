@@ -18,7 +18,7 @@ import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   pollForLayout,
-} from '../../testing/iframe.js';
+} from '#testing/iframe.js';
 
 describes.sandboxed('released components: ', {}, function () {
   runTest.call(this, false);

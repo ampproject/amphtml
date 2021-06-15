@@ -21,7 +21,7 @@ import {
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {CountPagesAlgorithm} from '../algorithm-count-pages';
 import {InsertionState, StoryAdPageManager} from '../story-ad-page-manager';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 
 describes.realWin('CountPagesAlgorithm', {amp: true}, (env) => {
   let storeService;

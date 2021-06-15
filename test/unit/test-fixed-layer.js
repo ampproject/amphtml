@@ -16,7 +16,7 @@
 
 import {AmpDocSingle, installDocService} from '#service/ampdoc-impl';
 import {Animation} from '../../src/animation';
-import {FakeMutationObserver, FakeWindow} from '../../testing/fake-dom';
+import {FakeMutationObserver, FakeWindow} from '#testing/fake-dom';
 import {FixedLayer} from '#service/fixed-layer';
 import {Services} from '#service';
 import {endsWith} from '#core/types/string';

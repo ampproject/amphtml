@@ -16,7 +16,7 @@
 
 import * as Preact from '#preact';
 import {Render} from '../component';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {mount} from 'enzyme';
 
 describes.sandboxed('Render 1.0 preact component', {}, () => {

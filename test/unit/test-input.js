@@ -16,7 +16,7 @@
 
 import {Input} from '../../src/input';
 import {installTimerService} from '#service/timer-impl.js';
-import {stubService} from '../../testing/test-helper';
+import {stubService} from '#testing/test-helper';
 
 describes.sandboxed('Input', {}, (env) => {
   let clock;

@@ -21,12 +21,12 @@ import {Slot} from '#preact/slot';
 import {forwardRef} from '#preact/compat';
 import {getSchedulerForDoc} from '#service/scheduler';
 import {htmlFor} from '#core/dom/static-template';
-import {installResizeObserverStub} from '../../../testing/resize-observer-stub';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {removeElement} from '#core/dom';
 import {subscribe} from '../../../src/context';
 import {upgradeOrRegisterElement} from '#service/custom-element-registry';
 import {useAmpContext, useLoading} from '#preact/context';
-import {waitFor} from '../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin('PreactBaseElement', {amp: true}, (env) => {
   let win, doc, html;

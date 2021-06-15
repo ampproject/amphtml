@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-import {createUseStyles} from 'react-jss';
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
+ */
+ amp-facebook-comments {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
 
-const button = {
-  '&:focus': {
-    outline: '#0389ff solid 2px',
-    outlineOffset: '2px',
-  },
-};
+/* Pre-upgrade: size-defining element - hide text. */
+amp-facebook-comments:not(.i-amphtml-built) {
+  color: transparent !important;
+}
 
-const JSS = {
-  button,
-};
-
-// useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
-// eslint-disable-next-line local/no-export-side-effect
-export const useStyles = createUseStyles(JSS);
+/* Pre-upgrade: size-defining element - hide children. */
+amp-facebook-comments:not(.i-amphtml-built)
+  > :not([placeholder]):not(.i-amphtml-svc) {
+  display: none;
+  content-visibility: hidden;
+}
