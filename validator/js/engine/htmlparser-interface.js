@@ -16,7 +16,7 @@
  */
 
 goog.module('amp.htmlparser.interface');
-const googArray = goog.require('goog.array');
+
 
 /**
  * @param {string} str The string to lower case.
@@ -110,7 +110,7 @@ const ParsedHtmlTag = class {
       this.attrs_.push(attr);
     }
     // Sort the attribute array by (lower case) name.
-    googArray.sort(this.attrs_, function(a, b) {
+    this.attrs_.sort(function(a, b) {
       if (a.name > b.name) {
         return 1;
       }
