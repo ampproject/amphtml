@@ -15,9 +15,9 @@
  */
 
 import * as st from '#core/dom/style';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev} from '../../../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
@@ -57,7 +57,7 @@ export class AmpAnim extends AMP.BaseElement {
     this.img_ = new Image();
     this.img_.setAttribute('decoding', 'async');
     propagateAttributes(BUILD_ATTRIBUTES, this.element, this.img_);
-    this.applyFillContent(this.img_, true);
+    applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
     // Remove role=img otherwise this breaks screen-readers focus and

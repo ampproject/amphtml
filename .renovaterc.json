@@ -21,22 +21,22 @@
     {
       "groupName": "subpackage devDependencies",
       "matchPaths": ["**/*"],
-      "automerge": true,
-      "assignAutomerge": true
+      "rebaseWhen": "never",
+      "automerge": true
     },
     {
       "groupName": "build-system devDependencies",
       "matchPaths": ["build-system/**"],
       "labels": ["WG: infra"],
-      "automerge": true,
-      "assignAutomerge": true
+      "rebaseWhen": "never",
+      "automerge": true
     },
     {
       "groupName": "validator devDependencies",
       "matchPaths": ["validator/**"],
       "labels": ["WG: caching"],
-      "automerge": true,
-      "assignAutomerge": true
+      "rebaseWhen": "never",
+      "automerge": true
     },
     {
       "groupName": "validator webui",
@@ -47,16 +47,16 @@
       "groupName": "core devDependencies",
       "matchFiles": ["package.json"],
       "labels": ["WG: infra"],
-      "automerge": true,
-      "assignAutomerge": true
+      "rebaseWhen": "never",
+      "automerge": true
     },
     {
       "groupName": "linting devDependencies",
       "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\b(prettier|eslint)\\b"],
       "labels": ["WG: infra"],
-      "automerge": true,
-      "assignAutomerge": true
+      "rebaseWhen": "never",
+      "automerge": true
     },
     {
       "groupName": "babel devDependencies",
@@ -64,16 +64,16 @@
       "matchPackagePatterns": ["\\bbabel"],
       "major": {"automerge": false, "assignAutomerge": false},
       "labels": ["WG: infra", "WG: performance"],
-      "automerge": true,
-      "assignAutomerge": true
+      "rebaseWhen": "never",
+      "automerge": true
     },
     {
       "groupName": "esbuild devDependencies",
       "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\besbuild\\b"],
       "labels": ["WG: infra", "WG: performance"],
-      "automerge": true,
-      "assignAutomerge": true
+      "rebaseWhen": "never",
+      "automerge": true
     },
     {
       "groupName": "ampproject devDependencies",
@@ -81,8 +81,8 @@
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["devDependencies"],
       "labels": ["WG: bento", "WG: components", "WG: performance"],
-      "automerge": true,
-      "assignAutomerge": true
+      "rebaseWhen": "never",
+      "automerge": true
     },
     {
       "groupName": "ampproject dependencies",
@@ -90,8 +90,8 @@
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
       "labels": ["WG: bento", "WG: components", "WG: performance"],
-      "automerge": false,
-      "assignAutomerge": false
+      "rebaseWhen": "never",
+      "automerge": false
     },
     {
       "groupName": "core dependencies",
@@ -99,8 +99,8 @@
       "excludePackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
       "labels": ["WG: bento", "WG: components", "WG: performance"],
-      "automerge": false,
-      "assignAutomerge": false
+      "rebaseWhen": "never",
+      "automerge": false
     }
   ]
 }

@@ -15,8 +15,8 @@
  */
 
 import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {userAssert} from '../../../src/log';
 
@@ -78,7 +78,7 @@ class AmpReddit extends AMP.BaseElement {
       allowFullscreen: true,
     });
     iframe.title = this.element.title || 'Reddit';
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     listenFor(
       iframe,
       'embed-size',

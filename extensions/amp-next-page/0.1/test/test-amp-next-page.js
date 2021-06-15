@@ -19,7 +19,7 @@ import {Services} from '#service';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {getServicePromiseForDoc} from '../../../../src/service-helpers';
 import {layoutRectLtwh} from '#core/math/layout-rect';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {setStyle} from '#core/dom/style';
 import {toggleExperiment} from '#experiments';
 

@@ -16,7 +16,7 @@
 
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
-import {isLayoutSizeDefined} from '#core/dom/layout';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
@@ -125,7 +125,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
       encodeURIComponent(this.domain_) +
       '/' +
       encodeURIComponent(items);
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     this.element.appendChild(iframe);
 
@@ -156,7 +156,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('img');
     propagateAttributes(['aria-label'], this.element, placeholder);
-    this.applyFillContent(placeholder);
+    applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {

@@ -23,7 +23,7 @@ import {BaseElement} from '../../src/base-element';
 import {Layout, LayoutPriority} from '#core/dom/layout';
 import {Services} from '#service';
 import {createCustomEvent} from '../../src/event-helper';
-import {createIframePromise} from '../../testing/iframe';
+import {createIframePromise} from '#testing/iframe';
 
 describes.sandboxed('amp-img', {}, (env) => {
   let sandbox;

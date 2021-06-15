@@ -19,7 +19,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Deferred} from '#core/data-structures/promise';
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {Loading} from '#core/loading-instructions';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import {PauseHelper} from '#core/dom/video/pause-helper';
@@ -33,7 +33,12 @@ import {
   setParent,
   subscribe,
 } from '../context';
-import {childElementByAttr, childElementByTag, matches} from '#core/dom/query';
+import {
+  childElementByAttr,
+  childElementByTag,
+  matches,
+  realChildNodes,
+} from '#core/dom/query';
 import {
   createElementWithAttributes,
   dispatchCustomEvent,
@@ -48,7 +53,6 @@ import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
 import {isElement} from '#core/types';
 import {sequentialIdGenerator} from '#core/math/id-generator';
-import {toArray} from '#core/types/array';
 
 /**
  * The following combinations are allowed.
@@ -658,7 +662,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       } else {
         const container = doc.createElement('i-amphtml-c');
         this.container_ = container;
-        this.applyFillContent(container);
+        applyFillContent(container);
         if (!isDetached) {
           this.element.appendChild(container);
         }
@@ -1083,9 +1087,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     // as separate properties. Thus in a carousel the plain "children" are
     // slides, and the "arrowNext" children are passed via a "arrowNext"
     // property.
-    const nodes = element.getRealChildNodes
-      ? element.getRealChildNodes()
-      : toArray(element.childNodes);
+    const nodes = realChildNodes(element);
     for (let i = 0; i < nodes.length; i++) {
       const childElement = nodes[i];
       const match = matchChild(childElement, propDefs);
@@ -1157,7 +1159,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       devAssert(Ctor['usesShadowDom']);
       // Use lazy loading inside the passthrough by default due to too many
       // elements.
-      value = element.getRealChildNodes().every(IS_EMPTY_TEXT_NODE)
+      value = realChildNodes(element).every(IS_EMPTY_TEXT_NODE)
         ? null
         : [<Slot loading={Loading.LAZY} />];
     } else if (def.attr) {

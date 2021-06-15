@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BrowserController} from '../../testing/test-helper';
+import {BrowserController} from '#testing/test-helper';
 
 describes.integration(
   'amp-ad type=custom',

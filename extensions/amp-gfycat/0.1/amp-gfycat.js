@@ -17,6 +17,7 @@
 import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev, userAssert} from '../../../src/log';
 import {
   dispatchCustomEvent,
@@ -25,7 +26,6 @@ import {
 } from '#core/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 
 const TAG = 'amp-gfycat';
@@ -90,7 +90,7 @@ class AmpGfycat extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('img');
     const videoid = dev().assertString(this.videoid_);
-    this.applyFillContent(placeholder);
+    applyFillContent(placeholder);
     propagateAttributes(['alt', 'aria-label'], this.element, placeholder);
     placeholder.setAttribute('loading', 'lazy');
     placeholder.setAttribute('placeholder', '');
@@ -154,7 +154,7 @@ class AmpGfycat extends AMP.BaseElement {
 
     iframe.setAttribute('frameborder', '0');
     iframe.src = src;
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(

@@ -29,6 +29,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
+import {realChildElements} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
 
 const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
@@ -110,7 +111,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
 
     for (const child of children) {
       if (VALID_IMAGE_TAGNAMES.has(child.tagName)) {

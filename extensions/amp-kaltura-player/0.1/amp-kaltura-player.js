@@ -17,9 +17,9 @@
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 import {getDataParamsFromAttributes} from '#core/dom';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
@@ -103,7 +103,7 @@ class AmpKaltura extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
@@ -127,7 +127,7 @@ class AmpKaltura extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('img');
     propagateAttributes(['aria-label'], this.element, placeholder);
-    this.applyFillContent(placeholder);
+    applyFillContent(placeholder);
     placeholder.setAttribute('loading', 'lazy');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');

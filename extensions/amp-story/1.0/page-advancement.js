@@ -752,8 +752,10 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   getStoryPageRect_() {
+    const uiState = this.storeService_.get(StateProperty.UI_STATE);
     if (
-      this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS
+      uiState !== UIType.DESKTOP_PANELS &&
+      uiState !== UIType.DESKTOP_ONE_PANEL
     ) {
       return this.element_.getLayoutBox();
     } else {

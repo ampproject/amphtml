@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createPointerEvent} from '../../../../../testing/test-helper';
+import {createPointerEvent} from '#testing/test-helper';
 
 const t = describes.sandboxed.configure().ifChrome();
 
