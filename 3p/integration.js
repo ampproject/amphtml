@@ -35,7 +35,7 @@ import {bodymovinanimation} from './bodymovinanimation';
 import {embedly} from './embedly';
 import {facebook} from './facebook';
 import {github} from './github';
-import {gltfViewer} from './3d-gltf/index';
+import {gltfViewer} from './3d-gltf';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
 import {twitter} from './twitter';

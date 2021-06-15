@@ -15,7 +15,7 @@
  */
 
 const {expect} = require('chai');
-const {serveIndexForTesting} = require('../index');
+const {serveIndexForTesting} = require('..');
 
 const NOOP = () => {};
 

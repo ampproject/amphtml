@@ -17,7 +17,7 @@
 import {AmpEvents} from '#core/constants/amp-events';
 import {Services} from '#service';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dashToCamelCase} from '#core/types/string/index';
+import {dashToCamelCase} from '#core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {removeChildren} from '#core/dom';
