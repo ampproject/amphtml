@@ -1318,6 +1318,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'wunderkind': {
+    preconnect: ['https://tag.wknd.ai', 'https://api.bounceexchange.com'],
+    renderStartImplemented: true,
+  },
+
   'xlift': {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
     renderStartImplemented: true,

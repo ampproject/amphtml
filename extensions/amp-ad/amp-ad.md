@@ -477,6 +477,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Widespace](../../ads/vendors/widespace.md)
 -   [Wisteria](../../ads/vendors/wisteria.md)
 -   [WPMedia](../../ads/vendors/wpmedia.md)
+-   [Wunderkind](../../ads/vendors/wunderkind.md)
 -   [Xlift](../../ads/vendors/xlift.md)
 -   [Yahoo](../../ads/vendors/yahoo.md)
 -   [YahooJP](../../ads/vendors/yahoojp.md)
