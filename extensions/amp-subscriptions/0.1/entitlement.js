@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 
 /** @enum {string} */
 export const GrantReason = {

@@ -22,9 +22,9 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {renderAsElement} from './simple-template';
 
 /** @private @const {!./simple-template.ElementDef} */

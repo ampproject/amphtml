@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from '../core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {createViewportObserver} from '../viewport-observer';
-import {toWin} from '../core/window';
+import {toWin} from '#core/window';
 
 /**
  * @fileoverview

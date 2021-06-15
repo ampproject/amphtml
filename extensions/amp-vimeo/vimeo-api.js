@@ -15,7 +15,7 @@
  */
 import {VideoEvents} from '../../src/video-interface';
 import {addParamsToUrl} from '../../src/url';
-import {dict} from '../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {postMessageWhenAvailable} from '../../src/iframe-video';
 
 /**
