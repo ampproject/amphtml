@@ -752,8 +752,10 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   getStoryPageRect_() {
+    const uiState = this.storeService_.get(StateProperty.UI_STATE);
     if (
-      this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS
+      uiState !== UIType.DESKTOP_PANELS &&
+      uiState !== UIType.DESKTOP_ONE_PANEL
     ) {
       return this.element_.getLayoutBox();
     } else {
@@ -1166,9 +1168,9 @@ export class MediaBasedAdvancement extends AdvancementConfig {
       // are eligible for media based auto advance.
       let element = pageEl.querySelector(
         `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
-          amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
+           amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
+           amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+           amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
       );
       if (
         matches(
