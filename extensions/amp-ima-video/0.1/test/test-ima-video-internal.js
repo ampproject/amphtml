@@ -850,11 +850,25 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     expect(elements.progressLine.style.width).to.eql('100%');
     expect(elements.progressMarker.style.left).to.eql('99%');
 
-    // Livestreams
-    imaVideoObj.updateTime(61, Infinity);
+    const livestreamDuration = Infinity;
+
+    // Compare against current progress state since livestreams should not change it.
+    const progressLineWidth = elements.progressLine.style.width;
+    const progressMarkerLeft = elements.progressMarker.style.left;
+
+    imaVideoObj.updateTime(61, livestreamDuration);
     expect(elements.time.textContent).to.eql('1:01');
     expect(elements.progress).to.have.attribute('hidden');
     expect(elements.progress.getAttribute('aria-hidden')).to.equal('true');
+    expect(elements.progressLine.style.width).to.eql(progressLineWidth);
+    expect(elements.progressMarker.style.left).to.eql(progressMarkerLeft);
+
+    imaVideoObj.updateTime(122, livestreamDuration);
+    expect(elements.time.textContent).to.eql('2:02');
+    expect(elements.progress).to.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('true');
+    expect(elements.progressLine.style.width).to.eql(progressLineWidth);
+    expect(elements.progressMarker.style.left).to.eql(progressMarkerLeft);
   });
 
   it('formats time', () => {
