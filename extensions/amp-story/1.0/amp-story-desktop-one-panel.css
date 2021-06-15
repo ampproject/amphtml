@@ -24,16 +24,14 @@
 
 .i-amphtml-story-desktop-one-panel amp-story-page {
   margin: auto !important;
-  aspect-ratio: var(--i-amphtml-story-page-large-desktop-ratio) !important;
-  height: calc(100vh - 148px) !important;
-  max-height: 752px !important;
-  width: auto !important; 
+  height: min(752px, calc(100vh - 148px)) !important;
+  width: min(447px, calc((100vh - 148px) * var(--i-amphtml-story-page-large-desktop-ratio))) !important; 
   border-radius: 10px !important;
 }
 
 @media(max-height: 756px) {
   .i-amphtml-story-desktop-one-panel amp-story-page {
-    aspect-ratio: var(--i-amphtml-story-page-small-desktop-ratio) !important;
     height: 100vh !important;
+    width: calc(100vh * var(--i-amphtml-story-page-small-desktop-ratio)) !important;
   }
 }
