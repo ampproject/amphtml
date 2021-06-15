@@ -20,7 +20,7 @@ import {WithAmpContext} from '#preact/context';
 import {createRef} from '#preact';
 import {mount} from 'enzyme';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
   it('should render', () => {

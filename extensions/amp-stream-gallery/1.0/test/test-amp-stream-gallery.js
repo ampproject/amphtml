@@ -18,12 +18,12 @@ import '../amp-stream-gallery';
 import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
 import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
-import {poll} from '../../../../testing/iframe';
+import {poll} from '#testing/iframe';
 import {setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {toggleExperiment} from '#experiments';
 import {useStyles} from '../../../amp-base-carousel/1.0/component.jss';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-stream-gallery',

@@ -15,7 +15,7 @@
  */
 
 import {computedStyle} from '#core/dom/style';
-import {createIframePromise} from '../../testing/iframe';
+import {createIframePromise} from '#testing/iframe';
 import {getAdContainer, isAdPositionAllowed} from '../../src/ad-helper';
 
 describes.sandboxed('ad-helper', {}, () => {

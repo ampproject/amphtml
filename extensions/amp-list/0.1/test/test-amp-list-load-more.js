@@ -21,7 +21,7 @@ import {
   measureElementStub,
   measureMutateElementStub,
   mutateElementStub,
-} from '../../../../testing/test-helper';
+} from '#testing/test-helper';
 import {toggleExperiment} from '#experiments';
 
 const HAS_MORE_ITEMS_PAYLOAD = {
