@@ -20,6 +20,7 @@ tags: {  # amp-cache-url
   extension_spec: {
     name: "amp-cache-url"
     version: "0.1"
+    requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"
 }
