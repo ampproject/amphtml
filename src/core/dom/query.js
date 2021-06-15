@@ -364,15 +364,16 @@ export function isInternalOrServiceNode(node) {
   if (isInternalElement(node)) {
     return true;
   }
-  if (
-    node.tagName &&
-    (node.hasAttribute('placeholder') ||
-      node.hasAttribute('fallback') ||
-      node.hasAttribute('overflow'))
-  ) {
-    return true;
+  if (node.nodeType !== Node.ELEMENT_NODE) {
+    return false;
   }
-  return false;
+  devAssertElement(node);
+
+  return (
+    node.hasAttribute('placeholder') ||
+    node.hasAttribute('fallback') ||
+    node.hasAttribute('overflow')
+  );
 }
 
 /**
