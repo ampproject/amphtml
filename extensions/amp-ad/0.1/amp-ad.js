@@ -16,10 +16,10 @@
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
 import {CSS} from '../../../build/amp-ad-0.1.css';
-import {Services} from '../../../src/services';
-import {adConfig} from '../../../ads/_config';
-import {getA4ARegistry} from '../../../ads/_a4a-config';
-import {hasOwn} from '../../../src/core/types/object';
+import {Services} from '#service';
+import {adConfig} from '#ads/_config';
+import {getA4ARegistry} from '#ads/_a4a-config';
+import {hasOwn} from '#core/types/object';
 import {userAssert} from '../../../src/log';
 
 /**

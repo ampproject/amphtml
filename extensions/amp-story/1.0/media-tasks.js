@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../../../src/core/data-structures/promise';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {Sources} from './sources';
-import {isConnectedNode} from '../../../src/core/dom';
+import {isConnectedNode} from '#core/dom';
 
 /**
  * The name for a boolean property on an element indicating whether that element

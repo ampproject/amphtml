@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Keys} from '../../../src/core/constants/key-codes';
-import {dict} from '../../../src/core/types/object';
+import {Keys} from '#core/constants/key-codes';
+import {dict} from '#core/types/object';
 import {listen} from '../../../src/event-helper';
 
 /**

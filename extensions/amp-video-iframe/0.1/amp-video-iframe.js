@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
-import {Deferred} from '../../../src/core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   VideoEvents,
 } from '../../../src/video-interface';
-import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 import {
   SandboxOptions,
   createFrameFor,
@@ -27,10 +27,10 @@ import {
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {
   disableScrollingOnIframe,
   looksLikeTrackingIframe,
@@ -39,14 +39,14 @@ import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
   removeElement,
-} from '../../../src/core/dom';
+} from '#core/dom';
 import {getConsentDataToForward} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isFullscreenElement} from '../../../src/core/dom/fullscreen';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isFullscreenElement} from '#core/dom/fullscreen';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {measureIntersection} from '../../../src/utils/intersection';
-import {once} from '../../../src/core/types/function';
+import {once} from '#core/types/function';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';

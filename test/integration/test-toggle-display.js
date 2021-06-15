@@ -15,7 +15,7 @@
  */
 
 import {BrowserController} from '../../testing/test-helper';
-import {setInitialDisplay, toggle} from '../../src/core/dom/style';
+import {setInitialDisplay, toggle} from '#core/dom/style';
 
 describes.integration
   .configure()

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LayoutRectDef, layoutRectLtwh} from '../math/layout-rect';
+import {LayoutRectDef, layoutRectLtwh} from '#core/math/layout-rect';
 
 /**
  * @param {!Element} element

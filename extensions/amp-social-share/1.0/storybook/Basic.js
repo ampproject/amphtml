@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {SocialShare} from '../component';
 import {color, object, select, text, withKnobs} from '@storybook/addon-knobs';
 

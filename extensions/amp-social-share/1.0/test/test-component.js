@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {SocialShare} from '../component';
-import {dict} from '../../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {mount} from 'enzyme';
 
 describes.sandboxed('SocialShare 1.0 preact component', {}, () => {

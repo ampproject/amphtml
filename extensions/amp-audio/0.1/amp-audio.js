@@ -22,9 +22,9 @@ import {
   setMediaSession,
   validateMediaMetadata,
 } from '../../../src/mediasession-helper';
-import {Layout, isLayoutSizeFixed} from '../../../src/core/dom/layout';
+import {Layout, isLayoutSizeFixed} from '#core/dom/layout';
 import {assertHttpsUrl} from '../../../src/url';
-import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';

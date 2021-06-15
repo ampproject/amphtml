@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {Keys} from '../../../src/core/constants/key-codes';
+import * as Preact from '#preact';
+import {Keys} from '#core/constants/key-codes';
 import {SocialShareIcon} from './social-share-svgs';
-import {Wrapper} from '../../../src/preact/component';
+import {Wrapper} from '#preact/component';
 import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getSocialConfig} from './social-share-config';
 import {openWindowDialog} from '../../../src/open-window-dialog';
-import {parseQueryString} from '../../../src/core/types/string/url';
-import {useResourcesNotify} from '../../../src/preact/utils';
+import {parseQueryString} from '#core/types/string/url';
+import {useResourcesNotify} from '#preact/utils';
 import {useStyles} from './component.jss';
 
 const NAME = 'SocialShare';

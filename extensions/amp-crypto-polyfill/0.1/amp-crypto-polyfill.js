@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilder} from '../../../src/service';
+import {registerServiceBuilder} from '../../../src/service-helpers';
 import {sha384} from '../../../third_party/closure-library/sha384-generated';
 
 /**
