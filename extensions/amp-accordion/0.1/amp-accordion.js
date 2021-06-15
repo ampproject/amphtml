@@ -14,30 +14,26 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-accordion-0.1.css';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {clamp} from '../../../src/core/math';
-import {closest} from '../../../src/core/dom/query';
+import {Keys} from '#core/constants/key-codes';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
+import {bezierCurve} from '#core/data-structures/curve';
+import {clamp} from '#core/math';
+import {closest} from '#core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent, tryFocus} from '../../../src/core/dom';
-import {
-  getStyle,
-  setImportantStyles,
-  setStyles,
-} from '../../../src/core/dom/style';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent, tryFocus} from '#core/dom';
+import {getStyle, setImportantStyles, setStyles} from '#core/dom/style';
 import {
   numeric,
   px,
   setStyles as setStylesTransition,
 } from '../../../src/transition';
-import {parseJson} from '../../../src/core/types/object/json';
+import {parseJson} from '#core/types/object/json';
 import {removeFragment} from '../../../src/url';
 
 const TAG = 'amp-accordion';

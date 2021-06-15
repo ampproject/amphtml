@@ -15,7 +15,7 @@
  */
 
 import '../amp-__component_name_hyphenated__';
-import {htmlFor} from '../../../../src/core/dom/static-template';
+import {htmlFor} from '#core/dom/static-template';
 
 describes.realWin(
   'amp-__component_name_hyphenated__-v__component_version__',

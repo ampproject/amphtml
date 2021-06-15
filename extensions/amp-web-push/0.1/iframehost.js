@@ -15,7 +15,7 @@
  */
 
 import {loadPromise} from '../../../src/event-helper';
-import {toggle} from '../../../src/core/dom/style';
+import {toggle} from '#core/dom/style';
 
 /** @fileoverview
  * Wraps the creation of an invisible sandboxed IFrame. Exposes a load() method

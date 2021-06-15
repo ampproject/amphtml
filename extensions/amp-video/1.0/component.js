@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Loading} from '../../../src/core/loading-instructions';
+import * as Preact from '#preact';
+import {ContainWrapper, useValueRef} from '#preact/component';
+import {Deferred} from '#core/data-structures/promise';
+import {Loading} from '#core/loading-instructions';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {
   MetadataDef,
@@ -26,11 +26,11 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {ReadyState} from '../../../src/core/constants/ready-state';
-import {dict} from '../../../src/core/types/object';
-import {forwardRef} from '../../../src/preact/compat';
-import {once} from '../../../src/core/types/function';
-import {useAmpContext, useLoading} from '../../../src/preact/context';
+import {ReadyState} from '#core/constants/ready-state';
+import {dict} from '#core/types/object';
+import {forwardRef} from '#preact/compat';
+import {once} from '#core/types/function';
+import {useAmpContext, useLoading} from '#preact/context';
 import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {
   useCallback,
@@ -40,8 +40,8 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
-import {useResourcesNotify} from '../../../src/preact/utils';
+} from '#preact';
+import {useResourcesNotify} from '#preact/utils';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 

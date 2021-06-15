@@ -18,7 +18,7 @@ import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
 } from '../../testing/iframe';
-import {getStyle} from '../../src/core/dom/style';
+import {getStyle} from '#core/dom/style';
 import {isAnimationNone} from '../../testing/test-helper';
 
 const timeout = window.ampTestRuntimeConfig.mochaTimeout;

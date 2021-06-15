@@ -17,24 +17,24 @@
 import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
-} from '../../../ads/google/utils';
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
+} from '#ads/google/utils';
+import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/core/constants/consent-state';
+} from '#core/constants/consent-state';
 import {
   Layout, // eslint-disable-line no-unused-vars
   LayoutPriority,
   isLayoutSizeDefined,
-} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {adConfig} from '../../../ads/_config';
-import {clamp} from '../../../src/core/math';
-import {computedStyle, setStyle} from '../../../src/core/dom/style';
+} from '#core/dom/layout';
+import {Services} from '#service';
+import {adConfig} from '#ads/_config';
+import {clamp} from '#core/math';
+import {computedStyle, setStyle} from '#core/dom/style';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
 import {
@@ -48,18 +48,18 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getExperimentBranch} from '../../../src/experiments';
+import {getExperimentBranch} from '#experiments';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {
   intersectionEntryToJson,
   measureIntersection,
 } from '../../../src/utils/intersection';
-import {moveLayoutRect} from '../../../src/core/math/layout-rect';
+import {moveLayoutRect} from '#core/math/layout-rect';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {toWin} from '../../../src/core/window';
+import {toWin} from '#core/window';
 
 /** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';

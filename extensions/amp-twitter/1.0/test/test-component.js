@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {Twitter} from '../component';
-import {WithAmpContext} from '../../../../src/preact/context';
-import {createRef} from '../../../../src/preact';
+import {WithAmpContext} from '#preact/context';
+import {createRef} from '#preact';
 import {mount} from 'enzyme';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
 import {waitFor} from '../../../../testing/test-helper';

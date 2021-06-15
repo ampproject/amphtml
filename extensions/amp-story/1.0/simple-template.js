@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 import {LocalizedStringId} from '../../../src/localized-strings'; // eslint-disable-line no-unused-vars
-import {createElementWithAttributes} from '../../../src/core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
-import {hasOwn} from '../../../src/core/types/object';
-import {isArray} from '../../../src/core/types';
+import {hasOwn} from '#core/types/object';
+import {isArray} from '#core/types';
 
 /**
  * @typedef {{

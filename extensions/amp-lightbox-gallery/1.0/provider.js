@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {BaseCarousel} from './../../amp-base-carousel/1.0/component';
 import {Lightbox} from './../../amp-lightbox/1.0/component';
 import {LightboxGalleryContext} from './context';
-import {useCallback, useRef, useState} from '../../../src/preact';
+import {useCallback, useRef, useState} from '#preact';
 import {useStyles} from './component.jss';
-import objStr from 'obj-str';
+import objstr from 'obj-str';
 
 /**
  * @param {!LightboxGalleryDef.Props} props
@@ -60,7 +60,7 @@ export function LightboxGalleryProvider({children, render}) {
   return (
     <>
       <Lightbox
-        className={objStr({
+        className={objstr({
           [classes.lightbox]: true,
           [classes.showControls]: showControls,
           [classes.hideControls]: !showControls,

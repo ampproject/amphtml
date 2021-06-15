@@ -20,7 +20,7 @@ import {classifyPage, classifyReferrer, getKeywordsString} from './classify';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
 import {parseUrlDeprecated} from '../../../../src/url';
-import {toArray} from '../../../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 // "gen" value for shares
 const SHARE = 300;
