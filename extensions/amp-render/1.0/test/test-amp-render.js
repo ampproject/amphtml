@@ -24,7 +24,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(

@@ -20,7 +20,7 @@ import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
-} from '../../testing/iframe.js';
+} from '#testing/iframe.js';
 
 describes.sandboxed
   .configure()

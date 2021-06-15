@@ -48,7 +48,7 @@
     },
     {
       // Locked down to minimize new import aliases being added
-      pattern: 'jsconfig.json',
+      pattern: 'tsconfig.json',
       owners: [{name: 'ampproject/wg-performance', required: true}],
     },
   ],

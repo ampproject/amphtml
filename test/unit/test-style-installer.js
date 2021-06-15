@@ -22,7 +22,7 @@ import {createShadowRoot} from '../../src/shadow-embed';
 import {getStyle} from '#core/dom/style';
 import {installPerformanceService} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';
-import {isAnimationNone} from '../../testing/test-helper';
+import {isAnimationNone} from '#testing/test-helper';
 import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
 
 describes.sandboxed('Styles', {}, () => {

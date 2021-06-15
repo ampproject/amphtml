@@ -15,7 +15,7 @@
  */
 
 import * as _3p from '#3p/3p';
-import {createIframePromise} from '../../../testing/iframe';
+import {createIframePromise} from '#testing/iframe';
 import {
   handlePosition,
   handlePositionResponsive,

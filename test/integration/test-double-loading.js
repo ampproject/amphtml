@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events.js';
-import {createFixtureIframe} from '../../testing/iframe.js';
+import {createFixtureIframe} from '#testing/iframe.js';
 
 function checkElementUpgrade(element) {
   expect(element).to.have.class('i-amphtml-element');

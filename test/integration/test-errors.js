@@ -18,7 +18,7 @@ import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
-} from '../../testing/iframe.js';
+} from '#testing/iframe.js';
 
 /** @const {number} */
 const TIMEOUT = window.ampTestRuntimeConfig.mochaTimeout;

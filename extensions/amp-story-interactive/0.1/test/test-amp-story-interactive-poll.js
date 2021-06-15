@@ -23,7 +23,7 @@ import {
   addConfigToInteractive,
   getMockInteractiveData,
 } from './test-amp-story-interactive';
-import {measureMutateElementStub} from '../../../../testing/test-helper';
+import {measureMutateElementStub} from '#testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(

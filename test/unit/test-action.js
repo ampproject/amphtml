@@ -30,7 +30,7 @@ import {AmpDocSingle} from '#service/ampdoc-impl';
 import {Keys} from '#core/constants/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {htmlFor} from '#core/dom/static-template';
-import {whenCalled} from '../../testing/test-helper.js';
+import {whenCalled} from '#testing/test-helper.js';
 
 /**
  * @return {!ActionService}

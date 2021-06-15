@@ -18,7 +18,7 @@ import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
-import {mockWindowInterface} from '../../../../testing/test-helper';
+import {mockWindowInterface} from '#testing/test-helper';
 
 describes.sandboxed('LinkerReader', {}, (env) => {
   let linkerReader;

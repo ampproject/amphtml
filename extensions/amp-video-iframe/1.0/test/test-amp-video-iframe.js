@@ -18,7 +18,7 @@ import '../amp-video-iframe';
 import {dispatchCustomEvent} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-video-iframe-v1.0',

@@ -24,7 +24,7 @@ import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
-} from '../../testing/iframe';
+} from '#testing/iframe';
 import {detectIsAutoplaySupported} from '#core/dom/video';
 import {getData, listenOncePromise} from '../../src/event-helper';
 import {removeElement} from '#core/dom';

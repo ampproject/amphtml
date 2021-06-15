@@ -24,7 +24,7 @@ import {
 import {cidServiceForDocForTesting} from '#service/cid-impl';
 import {htmlFor} from '#core/dom/static-template';
 import {installHistoryServiceForDoc} from '#service/history-impl';
-import {macroTask} from '../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {toggle} from '#core/dom/style';
 import {user} from '../../src/log';
 

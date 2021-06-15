@@ -27,7 +27,7 @@ import {
   linkerReaderServiceFor,
 } from '../linker-reader';
 import {installVariableServiceForTesting} from '../variables';
-import {mockWindowInterface} from '../../../../testing/test-helper';
+import {mockWindowInterface} from '#testing/test-helper';
 
 // TODO(ccordry): Refactor all these tests with async/await.
 describes.realWin('Linker Manager', {amp: true}, (env) => {

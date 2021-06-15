@@ -19,7 +19,7 @@ import {Services} from '#service';
 import {addParamToUrl} from '../../src/url';
 import {createElementWithAttributes} from '#core/dom';
 import {installUrlReplacementsServiceForDoc} from '#service/url-replacements-impl';
-import {macroTask} from '../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {maybeExpandUrlParamsForTesting} from '#service/navigation';
 
 describes.sandboxed('Navigation', {}, () => {

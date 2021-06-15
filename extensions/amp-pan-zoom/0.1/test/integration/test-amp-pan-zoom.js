@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events';
-import {createFixtureIframe} from '../../../../../testing/iframe';
+import {createFixtureIframe} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
 
 describes.sandboxed

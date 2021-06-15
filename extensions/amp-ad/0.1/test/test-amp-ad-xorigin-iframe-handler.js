@@ -19,10 +19,7 @@ import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
 import {Services} from '#service';
 import {Signals} from '#core/data-structures/signals';
-import {
-  createIframeWithMessageStub,
-  expectPostMessage,
-} from '../../../../testing/iframe';
+import {createIframeWithMessageStub, expectPostMessage} from '#testing/iframe';
 import {layoutRectLtwh} from '#core/math/layout-rect';
 import {toggleExperiment} from '#experiments';
 

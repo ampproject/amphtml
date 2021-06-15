@@ -17,9 +17,9 @@
 import '../amp-youtube';
 import {createElementWithAttributes} from '#core/dom';
 
-import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-youtube-v1.0',

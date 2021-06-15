@@ -19,7 +19,7 @@ import * as fullscreen from '#core/dom/fullscreen';
 import {Services} from '#service';
 import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '#core/dom';
-import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
 
 describes.realWin(

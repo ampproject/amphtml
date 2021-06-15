@@ -19,7 +19,7 @@ import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {InsertionState, StoryAdPageManager} from '../story-ad-page-manager';
 import {StoryAdPage} from '../story-ad-page';
 import {getServiceForDoc} from '../../../../src/service-helpers';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 
 // TODO(ccordry): add tests for analytics events.
 describes.realWin('StoryAdPageManager', {amp: true}, (env) => {

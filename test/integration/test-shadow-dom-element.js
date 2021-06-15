@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe} from '../../testing/iframe';
+import {createFixtureIframe} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
 import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
 

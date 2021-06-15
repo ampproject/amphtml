@@ -21,7 +21,7 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';
 
-import {poll} from '../../../../testing/iframe';
+import {poll} from '#testing/iframe';
 import {user} from '../../../../src/log';
 
 describes.realWin('MeasureScanner', {amp: 1}, (env) => {

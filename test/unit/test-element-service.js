@@ -15,7 +15,7 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {FakeWindow} from '../../testing/fake-dom';
+import {FakeWindow} from '#testing/fake-dom';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {BrowserController} from '../../testing/test-helper';
-import {poll} from '../../testing/iframe.js';
+import {BrowserController} from '#testing/test-helper';
+import {poll} from '#testing/iframe.js';
 
 describes.integration(
   'on="..."',

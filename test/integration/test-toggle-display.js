@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BrowserController} from '../../testing/test-helper';
+import {BrowserController} from '#testing/test-helper';
 import {setInitialDisplay, toggle} from '#core/dom/style';
 
 describes.integration

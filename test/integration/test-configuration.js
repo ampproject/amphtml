@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events';
-import {createFixtureIframe} from '../../testing/iframe.js';
+import {createFixtureIframe} from '#testing/iframe.js';
 
 describes.sandboxed('Configuration', {}, function () {
   let fixture;
