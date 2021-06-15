@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {applyFillContent} from "#core/dom/layout";
 __css_import__;
-import {Layout} from '../../../src/core/dom/layout';
+import {Layout, applyFillContent} from '#core/dom/layout';
 
 const TAG = 'amp-__component_name_hyphenated__';
 
