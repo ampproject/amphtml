@@ -28,7 +28,7 @@ import {
 import {MediaQueryProps} from './core/dom/media-query-props';
 import {ReadyState} from './core/constants/ready-state';
 import {ResourceState} from './service/resource';
-import {Services} from './services';
+import {Services} from './service';
 import {Signals} from './core/data-structures/signals';
 import {
   UPGRADE_TO_CUSTOMELEMENT_PROMISE,

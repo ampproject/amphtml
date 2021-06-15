@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {devAssert, userAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
-import {removeElement} from '../../../src/core/dom';
+import {removeElement} from '#core/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpHulu extends AMP.BaseElement {
@@ -52,7 +52,7 @@ class AmpHulu extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
 

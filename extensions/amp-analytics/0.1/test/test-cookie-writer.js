@@ -17,7 +17,7 @@
 import * as cookie from '../../../../src/cookies';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {CookieWriter} from '../cookie-writer';
-import {dict} from '../../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {installLinkerReaderService} from '../linker-reader';
 import {installVariableServiceForTesting} from '../variables';
 import {stubService} from '../../../../testing/test-helper';

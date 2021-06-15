@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as imaVideoObj from '../../../../ads/google/ima/ima-video';
-import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
+import * as imaVideoObj from '#ads/google/ima/ima-video';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 
 describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   const srcUrl = 'http://rmcdn.2mdn.net/Demo/vast_inspector/android.mp4';
@@ -827,50 +827,51 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       tag: adTagUrl,
     });
 
+    const {elements} = imaVideoObj.getPropertiesForTesting();
+
     imaVideoObj.updateTime(0, 60);
-    expect(imaVideoObj.getPropertiesForTesting().timeDiv.textContent).to.eql(
-      '0:00 / 1:00'
-    );
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressLine.style.width
-    ).to.eql('0%');
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left
-    ).to.eql('-1%');
+    expect(elements.time.textContent).to.eql('0:00 / 1:00');
+    expect(elements.progress).to.not.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('false');
+    expect(elements.progressLine.style.width).to.eql('0%');
+    expect(elements.progressMarker.style.left).to.eql('-1%');
+
     imaVideoObj.updateTime(30, 60);
-    expect(imaVideoObj.getPropertiesForTesting().timeDiv.textContent).to.eql(
-      '0:30 / 1:00'
-    );
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressLine.style.width
-    ).to.eql('50%');
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left
-    ).to.eql('49%');
+    expect(elements.time.textContent).to.eql('0:30 / 1:00');
+    expect(elements.progress).to.not.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('false');
+    expect(elements.progressLine.style.width).to.eql('50%');
+    expect(elements.progressMarker.style.left).to.eql('49%');
+
     imaVideoObj.updateTime(60, 60);
-    expect(imaVideoObj.getPropertiesForTesting().timeDiv.textContent).to.eql(
-      '1:00 / 1:00'
-    );
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressLine.style.width
-    ).to.eql('100%');
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left
-    ).to.eql('99%');
+    expect(elements.time.textContent).to.eql('1:00 / 1:00');
+    expect(elements.progress).to.not.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('false');
+    expect(elements.progressLine.style.width).to.eql('100%');
+    expect(elements.progressMarker.style.left).to.eql('99%');
+
+    const livestreamDuration = Infinity;
+
+    // Compare against current progress state since livestreams should not change it.
+    const progressLineWidth = elements.progressLine.style.width;
+    const progressMarkerLeft = elements.progressMarker.style.left;
+
+    imaVideoObj.updateTime(61, livestreamDuration);
+    expect(elements.time.textContent).to.eql('1:01');
+    expect(elements.progress).to.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('true');
+    expect(elements.progressLine.style.width).to.eql(progressLineWidth);
+    expect(elements.progressMarker.style.left).to.eql(progressMarkerLeft);
+
+    imaVideoObj.updateTime(122, livestreamDuration);
+    expect(elements.time.textContent).to.eql('2:02');
+    expect(elements.progress).to.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('true');
+    expect(elements.progressLine.style.width).to.eql(progressLineWidth);
+    expect(elements.progressMarker.style.left).to.eql(progressMarkerLeft);
   });
 
   it('formats time', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
-    imaVideoObj.imaVideo(win, {
-      width: 640,
-      height: 360,
-      src: srcUrl,
-      tag: adTagUrl,
-    });
-
     let formattedTime = imaVideoObj.formatTime(0);
     expect(formattedTime).to.eql('0:00');
     formattedTime = imaVideoObj.formatTime(55);
