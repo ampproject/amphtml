@@ -91,10 +91,8 @@ module.exports = {
       },
     },
     {
-      'files': ['**/rollup.config.js'],
-      'rules': {
-        'import/no-nodejs-modules': 0,
-      },
-    }
+      'files': ['**/storybook/*.js', '**/rollup.config.js'],
+      'rules': {'import/no-nodejs-modules': 0},
+    },
   ],
 };

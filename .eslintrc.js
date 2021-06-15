@@ -106,7 +106,7 @@ module.exports = {
     'curly': 2,
     'google-camelcase/google-camelcase': 2,
 
-    // 'import/no-unresolved': 2,
+    'import/no-unresolved': 2,
     'import/named': 2,
     'import/namespace': 2,
     'import/no-useless-path-segments': 2,
@@ -348,9 +348,16 @@ module.exports = {
     },
     {
       'files': ['**/storybook/*.js'],
+      'settings': {
+        'import/core-modules': [
+          '@storybook/addon-knobs',
+          '@storybook/addon-a11y',
+          '@ampproject/storybook-addon',
+        ],
+      },
       'rules': {
-        'require-jsdoc': 0,
         'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
+        'require-jsdoc': 0,
       },
     },
     {
@@ -386,9 +393,13 @@ module.exports = {
     },
     {
       'files': ['**/rollup.config.js'],
-      'rules': {
-        'import/no-default': 0,
+      'settings': {
+        'import/core-modules': [
+          '@rollup/plugin-alias',
+          'rollup-plugin-babel',
+          'rollup-plugin-cleanup',
+        ],
       },
-    }
+    },
   ],
 };
