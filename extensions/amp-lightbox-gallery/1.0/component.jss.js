@@ -18,12 +18,12 @@ import {createUseStyles} from 'react-jss';
 
 const gallery = {
   position: 'absolute !important',
-  left: '0 important',
-  right: '0 important',
+  left: '0 !important',
+  right: '0 !important',
   top: '0 !important' /* Matches height of top-bar */,
   height: '100%',
   width: '100%',
-  bottom: '0 important',
+  bottom: '0 !important',
   overflow: 'auto !important',
 };
 
