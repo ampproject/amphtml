@@ -28,10 +28,10 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '#core/dom/static-template';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {listenOncePromise} from '../../../src/event-helper';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
@@ -354,7 +354,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.canvas_ = this.element.ownerDocument.createElement('canvas');
     this.element.appendChild(container);
     container.appendChild(this.canvas_);
-    this.applyFillContent(container, /* replacedContent */ true);
+    applyFillContent(container, /* replacedContent */ true);
 
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};

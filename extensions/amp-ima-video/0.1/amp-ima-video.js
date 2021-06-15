@@ -20,6 +20,7 @@ import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {childElementsByTag} from '#core/dom/query';
 import {dict} from '#core/types/object';
@@ -29,7 +30,6 @@ import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isEnumValue, isObject} from '#core/types';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,
@@ -216,7 +216,7 @@ class AmpImaVideo extends AMP.BaseElement {
       );
       iframe.title = this.element.title || 'IMA video';
 
-      this.applyFillContent(iframe);
+      applyFillContent(iframe);
 
       // This is temporary until M74 launches.
       // TODO(aghassemi, #21247)
@@ -358,7 +358,7 @@ class AmpImaVideo extends AMP.BaseElement {
     img.src = poster;
     img.setAttribute('placeholder', '');
     img.setAttribute('loading', 'lazy');
-    this.applyFillContent(img);
+    applyFillContent(img);
     return img;
   }
 

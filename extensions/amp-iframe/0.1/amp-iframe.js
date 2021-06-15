@@ -17,7 +17,11 @@
 import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
 import {ActionTrust} from '#core/constants/action-constants';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
-import {LayoutPriority, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  LayoutPriority,
+  applyFillContent,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
@@ -407,7 +411,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     iframe.name = 'amp_iframe' + count++;
 
     if (this.isClickToPlay_) {

@@ -19,7 +19,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Deferred} from '#core/data-structures/promise';
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {Loading} from '#core/loading-instructions';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import {PauseHelper} from '#core/dom/video/pause-helper';
@@ -658,7 +658,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       } else {
         const container = doc.createElement('i-amphtml-c');
         this.container_ = container;
-        this.applyFillContent(container);
+        applyFillContent(container);
         if (!isDetached) {
           this.element.appendChild(container);
         }

@@ -15,6 +15,7 @@
  */
 import {Services} from './service';
 import {VideoEvents} from './video-interface';
+import {applyFillContent} from '#core/dom/layout';
 import {dev} from './log';
 import {dispatchCustomEvent} from './core/dom';
 import {htmlFor} from './core/dom/static-template';
@@ -94,7 +95,7 @@ export function createFrameFor(video, src, opt_name, opt_sandbox) {
 
   frame.src = Services.urlForDoc(element).assertHttpsUrl(src, element);
 
-  video.applyFillContent(frame);
+  applyFillContent(frame);
   element.appendChild(frame);
 
   return frame;

@@ -25,6 +25,7 @@ import {
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
+import {applyFillContent} from '#core/dom/layout';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {getData} from '../../../src/event-helper';
@@ -101,7 +102,7 @@ export class AmpAdXOriginIframeHandler {
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
     if (!this.uiHandler_.isStickyAd()) {
-      this.baseInstance_.applyFillContent(this.iframe);
+      applyFillContent(this.iframe);
     }
     const timer = Services.timerFor(this.baseInstance_.win);
 

@@ -29,6 +29,7 @@ import {
 import {Services} from '#service';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
+import {applyFillContent} from '#core/dom/layout';
 import {
   calculateLeftJustifiedX,
   calculateRightJustifiedX,
@@ -1009,8 +1010,8 @@ export class VideoDocking {
       toggle(shadowLayer, true);
       toggle(overlay, true);
 
-      video.applyFillContent(this.getPlaceholderRefs_()['poster']);
-      video.applyFillContent(placeholderBackground);
+      applyFillContent(this.getPlaceholderRefs_()['poster']);
+      applyFillContent(placeholderBackground);
       this.setPosterImage_(video);
 
       element.appendChild(placeholderBackground);

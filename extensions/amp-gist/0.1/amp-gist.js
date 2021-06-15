@@ -27,7 +27,7 @@
  * </code>
  */
 
-import {Layout} from '#core/dom/layout';
+import {Layout, applyFillContent} from '#core/dom/layout';
 import {Services} from '#service';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
@@ -64,7 +64,7 @@ export class AmpGist extends AMP.BaseElement {
     /* the third parameter 'github' ties it to the 3p/github.js */
     const iframe = getIframe(this.win, this.element, 'github');
     iframe.title = this.element.title || 'Github gist';
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     // Triggered by window.context.requestResize() inside the iframe.
     listenFor(
       iframe,
