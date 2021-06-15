@@ -34,7 +34,12 @@ import {
   setParent,
   subscribe,
 } from '../context';
-import {childElementByAttr, childElementByTag, matches} from '#core/dom/query';
+import {
+  childElementByAttr,
+  childElementByTag,
+  matches,
+  realChildNodes,
+} from '#core/dom/query';
 import {
   createElementWithAttributes,
   dispatchCustomEvent,
@@ -49,7 +54,6 @@ import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
 import {isElement} from '#core/types';
 import {sequentialIdGenerator} from '#core/math/id-generator';
-import {toArray} from '#core/types/array';
 
 /**
  * The following combinations are allowed.
@@ -1077,17 +1081,6 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
 }
 
 /**
- * Get an element's child nodes. On the AMP layer, returns the original nodes of
- * the custom element without any service nodes that could have been added for
- * markup.
- * @param {Element} element
- * @return {Array<Node>}
- */
-function getChildNodes(element) {
-  return element.getRealChildNodes?.() ?? toArray(element.childNodes);
-}
-
-/**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!Object} props
  * @param {!Object} propDefs
@@ -1101,7 +1094,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     // as separate properties. Thus in a carousel the plain "children" are
     // slides, and the "arrowNext" children are passed via a "arrowNext"
     // property.
-    const nodes = getChildNodes(element);
+    const nodes = realChildNodes(element);
     for (let i = 0; i < nodes.length; i++) {
       const childElement = nodes[i];
       const match = matchChild(childElement, propDefs);
@@ -1173,7 +1166,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       devAssert(Ctor['usesShadowDom']);
       // Use lazy loading inside the passthrough by default due to too many
       // elements.
-      value = getChildNodes(element).every(IS_EMPTY_TEXT_NODE)
+      value = realChildNodes(element).every(IS_EMPTY_TEXT_NODE)
         ? null
         : [<Slot loading={Loading.LAZY} />];
     } else if (def.attr) {
