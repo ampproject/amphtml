@@ -1168,9 +1168,9 @@ export class MediaBasedAdvancement extends AdvancementConfig {
       // are eligible for media based auto advance.
       let element = pageEl.querySelector(
         `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-           amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
-           amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-           amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
+          amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
+          amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+          amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
       );
       if (
         matches(
