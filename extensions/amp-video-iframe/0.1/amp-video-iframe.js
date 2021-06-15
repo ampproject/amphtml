@@ -29,6 +29,7 @@ import {
 } from '../../../src/iframe-video';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {
@@ -44,7 +45,6 @@ import {getConsentDataToForward} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isFullscreenElement} from '#core/dom/fullscreen';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {measureIntersection} from '../../../src/utils/intersection';
 import {once} from '#core/types/function';
 
@@ -200,7 +200,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     img.src = addDataParamsToUrl(poster, element);
     img.setAttribute('loading', 'lazy');
     img.setAttribute('placeholder', '');
-    this.applyFillContent(img);
+    applyFillContent(img);
     return img;
   }
 

@@ -15,8 +15,8 @@
  */
 
 import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {getIframe} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '#core/dom';
 import {userAssert} from '../../../src/log';
@@ -85,7 +85,7 @@ export class AmpYotpo extends AMP.BaseElement {
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'yotpo');
     iframe.title = this.element.title || 'Yotpo widget';
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
 
     const unlisten = listenFor(
       iframe,

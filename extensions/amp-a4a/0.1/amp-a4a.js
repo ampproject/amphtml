@@ -21,7 +21,12 @@ import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
-import {Layout, LayoutPriority, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  Layout,
+  LayoutPriority,
+  applyFillContent,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
 import {Services} from '#service';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -1817,7 +1822,7 @@ export class AmpA4A extends AMP.BaseElement {
       width
     );
     if (!this.uiHandler.isStickyAd()) {
-      this.applyFillContent(this.iframe);
+      applyFillContent(this.iframe);
     }
 
     let body = '';
@@ -1908,7 +1913,7 @@ export class AmpA4A extends AMP.BaseElement {
       )
     );
     if (!this.uiHandler.isStickyAd()) {
-      this.applyFillContent(this.iframe);
+      applyFillContent(this.iframe);
     }
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {

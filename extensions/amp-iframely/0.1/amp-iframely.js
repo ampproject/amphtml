@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import {addParamsToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {measureIntersection} from '../../../src/utils/intersection';
 import {omit} from '#core/types/object';
 import {setStyle} from '#core/dom/style';
@@ -131,7 +131,7 @@ export class AmpIframely extends AMP.BaseElement {
           'placeholder': '',
         }
       );
-      this.applyFillContent(element);
+      applyFillContent(element);
       return element;
     }
     return null;
@@ -148,7 +148,7 @@ export class AmpIframely extends AMP.BaseElement {
     );
     this.src_ = addParamsToUrl(this.src_, this.options_);
     this.iframe_.src = this.src_;
-    this.applyFillContent(this.iframe_);
+    applyFillContent(this.iframe_);
     this.element.appendChild(this.iframe_);
 
     this.unlistener_ = listen(this.win, 'message', (event) => {

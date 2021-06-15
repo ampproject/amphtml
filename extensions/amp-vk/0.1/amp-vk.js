@@ -22,7 +22,7 @@ const EmbedType = {
   POLL: 'poll',
 };
 
-import {Layout} from '#core/dom/layout';
+import {Layout, applyFillContent} from '#core/dom/layout';
 import {Services} from '#service';
 import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dict} from '#core/types/object';
@@ -225,7 +225,7 @@ export class AmpVk extends AMP.BaseElement {
       iframe.setAttribute('frameborder', '0');
       iframe.setAttribute('allowfullscreen', 'true');
 
-      this.applyFillContent(iframe);
+      applyFillContent(iframe);
       this.element.appendChild(iframe);
 
       return this.loadPromise(iframe);

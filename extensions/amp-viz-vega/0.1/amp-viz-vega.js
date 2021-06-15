@@ -17,13 +17,13 @@
 import * as dom from '#core/dom';
 import {CSS} from '../../../build/amp-viz-vega-0.1.css';
 import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {childElementsByTag} from '#core/dom/query';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {isFiniteNumber, isObject} from '#core/types';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 
 import {
   observeContentSize,
@@ -155,7 +155,7 @@ export class AmpVizVega extends AMP.BaseElement {
   initialize_() {
     this.container_ = this.element.ownerDocument.createElement('div');
 
-    this.applyFillContent(this.container_, true);
+    applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
   }
 

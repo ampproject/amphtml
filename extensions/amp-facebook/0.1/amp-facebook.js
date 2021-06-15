@@ -15,12 +15,12 @@
  */
 
 import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {createLoaderLogo} from './facebook-loader';
 import {dashToUnderline} from '#core/types/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {isObject} from '#core/types';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '#core/dom';
@@ -94,7 +94,7 @@ class AmpFacebook extends AMP.BaseElement {
     );
     const iframe = getIframe(this.win, this.element, TYPE);
     iframe.title = this.element.title || 'Facebook';
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     if (this.element.hasAttribute('data-allowfullscreen')) {
       iframe.setAttribute('allowfullscreen', 'true');
     }
