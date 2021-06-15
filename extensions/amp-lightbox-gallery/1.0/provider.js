@@ -100,7 +100,7 @@ function CloseButtonIcon(props) {
     <svg
       {...props}
       aria-label="Close the lightbox"
-      className={objStr({
+      className={objstr({
         [classes.control]: true,
         [classes.topControl]: true,
         [classes.closeButton]: true,
@@ -129,7 +129,7 @@ function NavButtonIcon({by, ...rest}) {
   return (
     <svg
       {...rest}
-      className={objStr({
+      className={objstr({
         [classes.arrow]: true,
         [classes.control]: true,
         [classes.prevArrow]: by < 0,
