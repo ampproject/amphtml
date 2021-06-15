@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {WordpressEmbed} from '../component';
-import {withKnobs} from '@storybook/addon-knobs';
+import {number, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'WordpressEmbed',
@@ -25,10 +25,12 @@ export default {
 };
 
 export const _default = () => {
-  return (
-    <WordpressEmbed
-      url="https://wordpress.org/news/2021/06/gutenberg-highlights"
-      height="250"
-    />
+  const url = text(
+    'url',
+    'https://wordpress.org/news/2021/06/gutenberg-highlights'
   );
+  const width = number('width', 500);
+  const height = number('height', 200);
+
+  return <WordpressEmbed url={url} style={{width, height}} />;
 };

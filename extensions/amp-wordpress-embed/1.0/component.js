@@ -15,50 +15,34 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
+import {IframeEmbed} from '../../../src/preact/component/iframe';
 import {addParamToUrl} from '../../../src/url';
-import {getData, listen} from '../../../src/event-helper';
-import {useStyles} from './component.jss';
+import {dict} from '../../../src/core/types/object';
+import {forwardRef} from '../../../src/preact/compat';
+import {getData} from '../../../src/event-helper';
 
-const {useCallback, useEffect, useRef, useState} = Preact;
+const {useCallback, useEffect, useState} = Preact;
+
+const NO_HEIGHT_STYLE = dict();
 
 /**
  * @param {!WordpressEmbedDef.Props} props
+ * @param {{current: ?WordpressEmbedDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-export function WordpressEmbed({className, height, style, url}) {
-  const wrapperRef = useRef(wrapperRef);
-  const iframeRef = useRef(null);
-
+function WordpressEmbedWithRef(
+  {requestResize, title = 'WordpressEmbed', url, ...rest},
+  ref
+) {
   const [iframeURL, setIframeURL] = useState('');
-  const [containerStyle, setContianerStyle] = useState({
-    width: 'auto',
-    height,
-    ...style,
-  });
-
-  const classes = useStyles();
-
-  useEffect(() => {
-    const unlisten = listen(window, 'message', handleMessageEvent);
-
-    return () => {
-      unlisten();
-    };
-  }, [handleMessageEvent]);
+  const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
+  const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
     setIframeURL(addParamToUrl(url, 'embed', 'true'));
   }, [url]);
 
-  /**
-   * Check if the supplied URL has the same origin as the embedded iframe.
-   *
-   * @param {string} testURL
-   * @return {boolean}
-   * @private
-   */
-  const hasSameOrigin = useCallback(
+  const matchesMessagingOrigin = useCallback(
     (testURL) => {
       const embeddedUrl = new URL(url);
       const checkedUrl = new URL(testURL);
@@ -67,67 +51,77 @@ export function WordpressEmbed({className, height, style, url}) {
     [url]
   );
 
-  /**
-   * Handle message event.
-   *
-   * @param {Event|MessageEvent} event
-   * @private
-   */
-  const handleMessageEvent = useCallback(
+  const messageHandler = useCallback(
     (event) => {
-      if (event.source !== iframeRef.current.contentWindow) {
-        return;
-      }
-
       const data = getData(event);
-
-      if (
-        typeof data?.message === 'undefined' ||
-        typeof data?.value === 'undefined'
-      ) {
-        return;
-      }
 
       switch (data.message) {
         case 'height':
           if (typeof data.value === 'number') {
             // Make sure the new height is between 200px and 1000px.
             // This replicates a constraint in WordPress's wp.receiveEmbedMessage() function.
-            const newHeight = Math.min(Math.max(data.value, 200), 1000);
-            setContianerStyle({
-              ...containerStyle,
-              height: newHeight,
-            });
+            const height = Math.min(Math.max(data.value, 200), 1000);
+            if (requestResize) {
+              requestResize(height);
+            }
+            setHeightStyle(dict({'height': height}));
+            setOpacity(1);
           }
           break;
         case 'link':
           // Only follow a link message for the currently-active iframe if the link is for the same origin.
           // This replicates a constraint in WordPress's wp.receiveEmbedMessage() function.
-          if (hasSameOrigin(data.value)) {
+          if (matchesMessagingOrigin(data.value)) {
             window.top.location.href = data.value;
           }
           break;
       }
     },
-    [containerStyle, hasSameOrigin]
+    [requestResize, matchesMessagingOrigin]
   );
 
+  // Checking for valid props
+  if (!checkProps(url)) {
+    return null;
+  }
+
   return (
-    <ContainWrapper
-      contentRef={wrapperRef}
-      className={className}
-      style={containerStyle}
-      size
-      layout
-      paint
-    >
-      <iframe
-        className={classes.iframe}
-        ref={iframeRef}
-        src={iframeURL}
-        height="100%"
-        width="100%"
-      />
-    </ContainWrapper>
+    <IframeEmbed
+      allowTransparency
+      iframeStyle={{opacity}}
+      matchesMessagingOrigin={matchesMessagingOrigin}
+      messageHandler={messageHandler}
+      ref={ref}
+      src={iframeURL}
+      wrapperStyle={heightStyle}
+      title={title}
+      {...rest}
+    />
   );
+}
+
+const WordpressEmbed = forwardRef(WordpressEmbedWithRef);
+WordpressEmbed.displayName = 'WordpressEmbed'; // Make findable for tests.
+export {WordpressEmbed};
+
+/**
+ * Verify required props and throw error if necessary.
+ * @param {string|undefined} url
+ * @return {boolean} true on valid
+ */
+function checkProps(url) {
+  // Perform manual checking as assertion is not available for Bento: Issue #32739
+  if (url === undefined) {
+    displayWarning('data-url is required for <amp-wordpress-embed>');
+    return false;
+  }
+  return true;
+}
+
+/**
+ * @param {?string} message
+ */
+function displayWarning(message) {
+  console /*OK*/
+    .warn(message);
 }

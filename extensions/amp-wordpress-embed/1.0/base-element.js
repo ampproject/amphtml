@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {CSS as COMPONENT_CSS} from './component.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {WordpressEmbed} from './component';
 
@@ -26,7 +25,7 @@ BaseElement['Component'] = WordpressEmbed;
 /** @override */
 BaseElement['props'] = {
   url: {attr: 'data-url'},
-  height: {attr: 'height'},
+  title: {attr: 'title'},
 };
 
 /** @override */
@@ -34,6 +33,3 @@ BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
-
-/** @override */
-BaseElement['shadowCss'] = COMPONENT_CSS;

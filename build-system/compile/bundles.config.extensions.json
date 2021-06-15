@@ -1219,10 +1219,7 @@
   {
     "name": "amp-wordpress-embed",
     "version": "1.0",
-    "latestVersion": "1.0",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "1.0"
   },
   {
     "name": "amp-yotpo",

@@ -21,13 +21,17 @@ var WordpressEmbedDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   url: string,
+ *   title: (string|undefined),
+ *   requestResize: (function(number):*|undefined),
+ *   loading: (string|undefined),
+ *   onReadyState: (function(string, *=)|undefined),
  * }}
  */
 WordpressEmbedDef.Props;
 
-/** @interface */
-WordpressEmbedDef.WordpressEmbedApi = class {
-  /** Example: API method to toggle the component */
-  exampleToggle() {} // DO NOT SUBMIT
-};
+/** @constructor */
+WordpressEmbedDef.Api = function () {};
+
+/** @type {string} */
+WordpressEmbedDef.Api.prototype.readyState;

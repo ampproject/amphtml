@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-wordpress-embed-1.0.css';
 import {dict} from '../../../src/core/types/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
@@ -25,19 +24,6 @@ const TAG = 'amp-wordpress-embed';
 
 class AmpWordpressEmbed extends BaseElement {
   /** @override */
-  init() {
-    // DO NOT SUBMIT: This is example code only.
-    this.registerApiAction('exampleToggle', (api) =>
-      api./*OK*/ exampleToggle()
-    );
-
-    return dict({
-      // Extra props passed by wrapper AMP component
-      'exampleTagNameProp': this.element.tagName,
-    });
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
@@ -46,8 +32,17 @@ class AmpWordpressEmbed extends BaseElement {
     );
     return super.isLayoutSupported(layout);
   }
+
+  /** @override */
+  init() {
+    return dict({
+      'requestResize': (height) => {
+        this.forceChangeHeight(height);
+      },
+    });
+  }
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpWordpressEmbed, CSS);
+  AMP.registerElement(TAG, AmpWordpressEmbed);
 });

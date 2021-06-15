@@ -15,8 +15,8 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {number, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-wordpress-embed-1_0',
@@ -29,10 +29,20 @@ export default {
 };
 
 export const BasicEmbedExample = () => {
+  const url = text(
+    'url',
+    'https://wordpress.org/news/2021/06/gutenberg-highlights'
+  );
+  const width = number('width', 500);
+  const height = number('height', 200);
+  const layout = text('layout', 'fixed');
+
   return (
     <amp-wordpress-embed
-      data-url="https://wordpress.org/news/2021/06/gutenberg-highlights"
-      height="250"
+      data-url={url}
+      width={width}
+      height={height}
+      layout={layout}
     ></amp-wordpress-embed>
   );
 };
