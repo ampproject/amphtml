@@ -21,6 +21,7 @@
     {
       "groupName": "subpackage devDependencies",
       "matchPaths": ["**/*"],
+      "rebaseWhen": "never",
       "automerge": true,
       "assignAutomerge": true
     },
@@ -28,6 +29,7 @@
       "groupName": "build-system devDependencies",
       "matchPaths": ["build-system/**"],
       "labels": ["WG: infra"],
+      "rebaseWhen": "never",
       "automerge": true,
       "assignAutomerge": true
     },
@@ -35,6 +37,7 @@
       "groupName": "validator devDependencies",
       "matchPaths": ["validator/**"],
       "labels": ["WG: caching"],
+      "rebaseWhen": "never",
       "automerge": true,
       "assignAutomerge": true
     },
@@ -47,6 +50,7 @@
       "groupName": "core devDependencies",
       "matchFiles": ["package.json"],
       "labels": ["WG: infra"],
+      "rebaseWhen": "never",
       "automerge": true,
       "assignAutomerge": true
     },
@@ -55,6 +59,7 @@
       "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\b(prettier|eslint)\\b"],
       "labels": ["WG: infra"],
+      "rebaseWhen": "never",
       "automerge": true,
       "assignAutomerge": true
     },
@@ -64,6 +69,7 @@
       "matchPackagePatterns": ["\\bbabel"],
       "major": {"automerge": false, "assignAutomerge": false},
       "labels": ["WG: infra", "WG: performance"],
+      "rebaseWhen": "never",
       "automerge": true,
       "assignAutomerge": true
     },
@@ -72,6 +78,7 @@
       "matchFiles": ["package.json"],
       "matchPackagePatterns": ["\\besbuild\\b"],
       "labels": ["WG: infra", "WG: performance"],
+      "rebaseWhen": "never",
       "automerge": true,
       "assignAutomerge": true
     },
@@ -81,6 +88,7 @@
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["devDependencies"],
       "labels": ["WG: bento", "WG: components", "WG: performance"],
+      "rebaseWhen": "never",
       "automerge": true,
       "assignAutomerge": true
     },
@@ -90,6 +98,7 @@
       "matchPackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
       "labels": ["WG: bento", "WG: components", "WG: performance"],
+      "rebaseWhen": "never",
       "automerge": false,
       "assignAutomerge": false
     },
@@ -99,6 +108,7 @@
       "excludePackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
       "labels": ["WG: bento", "WG: components", "WG: performance"],
+      "rebaseWhen": "never",
       "automerge": false,
       "assignAutomerge": false
     }
