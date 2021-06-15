@@ -830,31 +830,31 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     const {elements} = imaVideoObj.getPropertiesForTesting();
 
     imaVideoObj.updateTime(0, 60);
+    expect(elements.time.textContent).to.eql('0:00 / 1:00');
     expect(elements.progress).to.not.have.attribute('hidden');
     expect(elements.progress.getAttribute('aria-hidden')).to.equal('false');
-    expect(elements.time.textContent).to.eql('0:00 / 1:00');
     expect(elements.progressLine.style.width).to.eql('0%');
     expect(elements.progressMarker.style.left).to.eql('-1%');
 
     imaVideoObj.updateTime(30, 60);
+    expect(elements.time.textContent).to.eql('0:30 / 1:00');
     expect(elements.progress).to.not.have.attribute('hidden');
     expect(elements.progress.getAttribute('aria-hidden')).to.equal('false');
-    expect(elements.time.textContent).to.eql('0:30 / 1:00');
     expect(elements.progressLine.style.width).to.eql('50%');
     expect(elements.progressMarker.style.left).to.eql('49%');
 
     imaVideoObj.updateTime(60, 60);
+    expect(elements.time.textContent).to.eql('1:00 / 1:00');
     expect(elements.progress).to.not.have.attribute('hidden');
     expect(elements.progress.getAttribute('aria-hidden')).to.equal('false');
-    expect(elements.time.textContent).to.eql('1:00 / 1:00');
     expect(elements.progressLine.style.width).to.eql('100%');
     expect(elements.progressMarker.style.left).to.eql('99%');
 
     // Livestreams
     imaVideoObj.updateTime(61, Infinity);
+    expect(elements.time.textContent).to.eql('1:01');
     expect(elements.progress).to.have.attribute('hidden');
     expect(elements.progress.getAttribute('aria-hidden')).to.equal('true');
-    expect(elements.time.textContent).to.eql('1:01');
   });
 
   it('formats time', () => {
