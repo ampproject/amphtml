@@ -18,8 +18,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const JSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.json');
-let jsConfigPaths = null;
+const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.json');
+let tsConfigPaths = null;
 
 /**
  * Reads import paths from tsconfig.json. This file is used by VSCode for
@@ -38,9 +38,9 @@ let jsConfigPaths = null;
  * @return {!Object<string, string>}
  */
 function readJsconfigPaths() {
-  if (!jsConfigPaths) {
-    const jsConfig = JSON.parse(fs.readFileSync(JSCONFIG_PATH, 'utf8'));
-    const aliasPaths = jsConfig.compilerOptions.paths;
+  if (!tsConfigPaths) {
+    const tsConfig = JSON.parse(fs.readFileSync(TSCONFIG_PATH, 'utf8'));
+    const aliasPaths = tsConfig.compilerOptions.paths;
 
     const stripSuffix = (s) => s.replace(/\/\*$/, '');
     const aliases = Object.entries(aliasPaths).map(([alias, [dest]]) => [
@@ -48,10 +48,10 @@ function readJsconfigPaths() {
       stripSuffix(dest),
     ]);
 
-    jsConfigPaths = Object.fromEntries(aliases);
+    tsConfigPaths = Object.fromEntries(aliases);
   }
 
-  return jsConfigPaths;
+  return tsConfigPaths;
 }
 
 /**
