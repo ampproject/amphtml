@@ -17,9 +17,9 @@ import '../amp-lightbox';
 import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
 import {htmlFor} from '#core/dom/static-template';
-import {poll} from '../../../../testing/iframe';
+import {poll} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
-import {whenCalled} from '../../../../testing/test-helper';
+import {whenCalled} from '#testing/test-helper';
 
 describes.realWin(
   'amp-lightbox:1.0',

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {BrowserController} from '../../../../../testing/test-helper';
-import {poll as classicPoll} from '../../../../../testing/iframe';
+import {BrowserController} from '#testing/test-helper';
+import {poll as classicPoll} from '#testing/iframe';
 
 const TIMEOUT = 10000;
 

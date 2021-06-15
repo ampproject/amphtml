@@ -21,7 +21,7 @@ import {BaseElement} from '../../../../src/base-element';
 import {Services} from '#service';
 import {createElementWithAttributes, waitForChild} from '#core/dom';
 import {loadPromise} from '../../../../src/event-helper';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {user} from '../../../../src/log';
 
 const TAG = 'amp-onetap-google';

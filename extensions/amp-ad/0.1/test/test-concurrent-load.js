@@ -23,7 +23,7 @@ import {
   waitFor3pThrottle,
 } from '../concurrent-load';
 import {installTimerService} from '#service/timer-impl';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 
 describes.realWin('concurrent-load', {}, (env) => {
   describe('getAmpAdRenderOutsideViewport', () => {

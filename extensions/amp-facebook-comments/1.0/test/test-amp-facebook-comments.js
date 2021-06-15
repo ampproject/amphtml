@@ -16,12 +16,12 @@
 
 import '../amp-facebook-comments';
 import {createElementWithAttributes} from '#core/dom';
-import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {resetServiceForTesting} from '../../../../src/service-helpers';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-facebook-comments',

@@ -23,7 +23,7 @@ import {
 } from '../component';
 import {mount} from 'enzyme';
 import {useAmpContext} from '#preact/context';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 const ContextReader = (props) => {
   const {renderable} = useAmpContext();

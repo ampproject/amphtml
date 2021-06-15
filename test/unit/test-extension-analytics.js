@@ -26,7 +26,7 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../src/service-helpers';
-import {macroTask} from '../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {registerElement} from '#service/custom-element-registry';
 
 /* eslint-disable react-hooks/rules-of-hooks */

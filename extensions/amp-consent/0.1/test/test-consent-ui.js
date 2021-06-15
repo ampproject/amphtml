@@ -26,14 +26,14 @@ import {ConsentUI, consentUiClasses} from '../consent-ui';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
 import {elementByTag} from '#core/dom/query';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments';
 import {user} from '../../../../src/log';
-import {whenCalled} from '../../../../testing/test-helper.js';
+import {whenCalled} from '#testing/test-helper.js';
 
 describes.realWin(
   'consent-ui',

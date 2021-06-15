@@ -22,7 +22,7 @@ import {
   csa,
   resizeIframe,
 } from '#ads/vendors/csa';
-import {createIframePromise} from '../../../testing/iframe';
+import {createIframePromise} from '#testing/iframe';
 
 function getAds(type) {
   const generic = {ampSlotIndex: '0', height: 300, type: 'csa'};

@@ -15,7 +15,7 @@
  */
 
 import {MediaQueryProps} from '#core/dom/media-query-props';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'DOM - MediaQueryProps',

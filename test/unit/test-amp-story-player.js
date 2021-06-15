@@ -20,7 +20,7 @@ import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from '../../src/amp-story-player/page-scroller';
 import {expect} from 'chai';
 import {listenOncePromise} from '../../src/event-helper';
-import {macroTask} from '../../testing/yield';
+import {macroTask} from '#testing/yield';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;

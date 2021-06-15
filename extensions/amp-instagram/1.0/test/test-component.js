@@ -19,7 +19,7 @@ import {Instagram} from '../component';
 import {WithAmpContext} from '#preact/context';
 import {createRef} from '#preact';
 import {mount} from 'enzyme';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
   it('Normal render', () => {

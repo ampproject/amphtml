@@ -16,7 +16,7 @@
 import {Deferred} from '#core/data-structures/promise';
 import {InaboxResources} from '#inabox/inabox-resources';
 import {ResourceState} from '#service/resource';
-import {macroTask} from '../../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {toggleExperiment} from '#experiments';
 
 describes.realWin('inabox-resources', {amp: true}, (env) => {

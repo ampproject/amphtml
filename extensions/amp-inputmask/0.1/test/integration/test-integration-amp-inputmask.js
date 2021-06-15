@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {poll} from '../../../../../testing/iframe';
+import {poll} from '#testing/iframe';
 import {simulateKeyboardInteraction} from './utils';
 
 const config = describes.sandboxed.configure().ifChrome();

@@ -15,7 +15,7 @@
  */
 
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {installResizeObserverStub} from '../../../../../testing/resize-observer-stub';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 
 describes.realWin('DOM - video - PauseHelper', {}, (env) => {
   let win, doc;

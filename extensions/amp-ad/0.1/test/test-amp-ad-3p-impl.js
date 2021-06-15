@@ -26,7 +26,7 @@ import {LayoutPriority} from '#core/dom/layout';
 import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {createElementWithAttributes} from '#core/dom';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {

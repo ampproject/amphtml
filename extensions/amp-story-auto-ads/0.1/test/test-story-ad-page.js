@@ -29,7 +29,7 @@ import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 import {StoryAdLocalization} from '../story-ad-localization';
 import {StoryAdPage} from '../story-ad-page';
 import {forceExperimentBranch} from '#experiments';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 
 const NOOP = () => {};
 
