@@ -62,6 +62,7 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
           this.implementation.layoutCallback();
         }
 
+        /** @return {Promise<*>} */
         getApi() {
           return this.implementation.getApi();
         }
@@ -75,7 +76,7 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
       Promise.resolve().then(cb);
     }
 
-    /** */
+    /** @return {boolean} */
     isLayoutSupported() {
       return true;
     }
