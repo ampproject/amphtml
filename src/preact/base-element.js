@@ -36,8 +36,8 @@ import {
 import {
   childElementByAttr,
   childElementByTag,
-  getRealChildNodes,
   matches,
+  realChildNodes,
 } from '#core/dom/query';
 import {
   createElementWithAttributes,
@@ -49,7 +49,6 @@ import {devAssert} from '#core/assert';
 import {dict, hasOwn, map} from '#core/types/object';
 import {getDate} from '#core/types/date';
 import {getMode} from '../mode';
-
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
 import {isElement} from '#core/types';
@@ -1088,7 +1087,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     // as separate properties. Thus in a carousel the plain "children" are
     // slides, and the "arrowNext" children are passed via a "arrowNext"
     // property.
-    const nodes = getRealChildNodes(element);
+    const nodes = realChildNodes(element);
     for (let i = 0; i < nodes.length; i++) {
       const childElement = nodes[i];
       const match = matchChild(childElement, propDefs);
@@ -1160,7 +1159,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       devAssert(Ctor['usesShadowDom']);
       // Use lazy loading inside the passthrough by default due to too many
       // elements.
-      value = getRealChildNodes(element).every(IS_EMPTY_TEXT_NODE)
+      value = realChildNodes(element).every(IS_EMPTY_TEXT_NODE)
         ? null
         : [<Slot loading={Loading.LAZY} />];
     } else if (def.attr) {

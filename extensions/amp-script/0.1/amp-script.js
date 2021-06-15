@@ -27,8 +27,8 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '#core/types/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
-import {getRealChildren} from '#core/dom/query';
 import {getService, registerServiceBuilder} from '../../../src/service-helpers';
+import {realChildElements} from '#core/dom/query';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {tryParseJson} from '#core/types/object/json';
 import {urls} from '../../../src/config';
@@ -237,7 +237,7 @@ export class AmpScript extends AMP.BaseElement {
       container = this.win.document.createElement('div');
       this.applyFillContent(container, true);
       // Reparent all real children to the container.
-      const realChildren = getRealChildren(this.element);
+      const realChildren = realChildElements(this.element);
       for (let i = 0; i < realChildren.length; i++) {
         container.appendChild(realChildren[i]);
       }

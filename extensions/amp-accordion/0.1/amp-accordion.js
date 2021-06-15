@@ -22,7 +22,7 @@ import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
 import {bezierCurve} from '#core/data-structures/curve';
 import {clamp} from '#core/math';
-import {closest, getRealChildren} from '#core/dom/query';
+import {closest, realChildElements} from '#core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
@@ -89,7 +89,7 @@ class AmpAccordion extends AMP.BaseElement {
     this.sessionId_ = this.getSessionStorageKey_();
     this.currentState_ = this.getSessionState_();
 
-    this.sections_ = getRealChildren(this.element);
+    this.sections_ = realChildElements(this.element);
     this.sections_.forEach((section, index) => {
       userAssert(
         section.tagName.toLowerCase() == 'section',

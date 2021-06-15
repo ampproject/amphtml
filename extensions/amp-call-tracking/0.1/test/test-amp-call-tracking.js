@@ -17,7 +17,7 @@
 import '../amp-call-tracking';
 import {Services} from '#service';
 import {clearResponseCacheForTesting} from '../amp-call-tracking';
-import {getRealChildren} from '#core/dom/query';
+import {realChildElements} from '#core/dom/query';
 
 describes.realWin(
   'amp-call-tracking',
@@ -78,7 +78,7 @@ describes.realWin(
     }
 
     function expectHyperlinkToBe(callTrackingEl, href, textContent) {
-      const hyperlink = getRealChildren(callTrackingEl)[0];
+      const hyperlink = realChildElements(callTrackingEl)[0];
 
       expect(hyperlink.getAttribute('href')).to.equal(href);
       expect(hyperlink.textContent).to.equal(textContent);

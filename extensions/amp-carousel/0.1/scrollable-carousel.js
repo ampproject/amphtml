@@ -20,7 +20,6 @@ import {BaseCarousel} from './base-carousel';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {dev} from '../../../src/log';
-import {getRealChildren} from '#core/dom/query';
 import {isLayoutSizeFixed} from '#core/dom/layout';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
@@ -28,6 +27,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
+import {realChildElements} from '#core/dom/query';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
@@ -60,7 +60,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
-    this.cells_ = getRealChildren(this.element);
+    this.cells_ = realChildElements(this.element);
 
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');

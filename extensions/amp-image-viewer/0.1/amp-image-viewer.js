@@ -35,7 +35,7 @@ import {boundValue, distance, magnitude} from '#core/math';
 import {
   closestAncestorElementBySelector,
   elementByTag,
-  getRealChildren,
+  realChildElements,
 } from '#core/dom/query';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -137,7 +137,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.element.classList.add('i-amphtml-image-viewer');
-    const children = getRealChildren(this.element);
+    const children = realChildElements(this.element);
 
     userAssert(
       children.length == 1,

@@ -33,7 +33,6 @@ import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
-import {getRealChildren} from '#core/dom/query';
 import {layoutRectFromDomRect, layoutRectLtwh} from '#core/math/layout-rect';
 import {numeric} from '../../../src/transition';
 import {
@@ -41,6 +40,7 @@ import {
   unobserveContentSize,
 } from '#core/dom/size-observer';
 import {px, scale, setStyles, translate} from '#core/dom/style';
+import {realChildElements} from '#core/dom/query';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';
@@ -167,7 +167,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
-    const children = getRealChildren(this.element);
+    const children = realChildElements(this.element);
 
     userAssert(
       children.length == 1,

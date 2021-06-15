@@ -22,13 +22,12 @@ import {Services} from '#service';
 import {bezierCurve} from '#core/data-structures/curve';
 import {
   closestAncestorElementBySelector,
-  getRealChildren,
+  realChildElements,
 } from '#core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
-
 import {getStyle, setStyle} from '#core/dom/style';
 import {isExperimentOn} from '#experiments';
 import {isFiniteNumber} from '#core/types';
@@ -178,7 +177,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.element.classList.add('i-amphtml-slidescroll');
 
-    this.slides_ = getRealChildren(this.element);
+    this.slides_ = realChildElements(this.element);
 
     this.noOfSlides_ = this.slides_.length;
 

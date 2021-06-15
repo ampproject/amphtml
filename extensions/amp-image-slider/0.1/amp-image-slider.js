@@ -22,13 +22,13 @@ import {Services} from '#service';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '#core/math';
 import {dev, user, userAssert} from '../../../src/log';
-import {getRealChildren} from '#core/dom/query';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {listen} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
+import {realChildElements} from '#core/dom/query';
 import {setStyles} from '#core/dom/style';
 
 export class AmpImageSlider extends AMP.BaseElement {
@@ -111,7 +111,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const children = getRealChildren(this.element);
+    const children = realChildElements(this.element);
 
     for (let i = 0; i < children.length; i++) {
       const child = children[i];

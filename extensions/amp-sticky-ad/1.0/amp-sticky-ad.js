@@ -24,7 +24,7 @@ import {
   toggle,
 } from '#core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
-import {getRealChildren} from '#core/dom/query';
+import {realChildElements} from '#core/dom/query';
 import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
@@ -60,7 +60,7 @@ class AmpStickyAd extends AMP.BaseElement {
     this.viewport_ = this.getViewport();
     this.element.classList.add('i-amphtml-sticky-ad-layout');
 
-    const children = getRealChildren(this.element);
+    const children = realChildElements(this.element);
     userAssert(
       children.length == 1 && children[0].tagName == 'AMP-AD',
       'amp-sticky-ad must have a single amp-ad child'

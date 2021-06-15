@@ -340,7 +340,7 @@ export function elementByTag(element, tagName) {
  * @param {!Node} element
  * @return {!Array<!Node>}
  */
-export function getRealChildNodes(element) {
+export function realChildNodes(element) {
   return childNodes(element, (node) => !isInternalOrServiceNode(node));
 }
 
@@ -350,9 +350,8 @@ export function getRealChildNodes(element) {
  *
  * @param {!Element} element
  * @return {!Array<!Element>}
- * @package @final
  */
-export function getRealChildren(element) {
+export function realChildElements(element) {
   return childElements(element, (element) => !isInternalOrServiceNode(element));
 }
 

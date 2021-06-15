@@ -16,9 +16,8 @@
 
 import * as dom from '#core/dom';
 import {createElementWithAttributes} from '#core/dom';
-import {getRealChildNodes, getRealChildren, matches} from '#core/dom/query';
 import {loadPromise} from '../../../../src/event-helper';
-
+import {matches, realChildElements, realChildNodes} from '#core/dom/query';
 import {setScopeSelectorSupportedForTesting} from '#core/dom/css-selectors';
 import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
 
@@ -507,18 +506,18 @@ describes.sandboxed('DOM', {}, (env) => {
     });
   });
 
-  describe('getRealChildren and getRealChildNodes', () => {
+  describe('realChildElements and realChildNodes', () => {
     let element;
     beforeEach(() => {
       element = document.createElement('div');
     });
 
-    it('getRealChildren should return nothing', () => {
-      expect(getRealChildNodes(element).length).to.equal(0);
-      expect(getRealChildren(element).length).to.equal(0);
+    it('realChildElements should return nothing', () => {
+      expect(realChildNodes(element).length).to.equal(0);
+      expect(realChildElements(element).length).to.equal(0);
     });
 
-    it('getRealChildren should return content-only nodes', () => {
+    it('realChildElements should return content-only nodes', () => {
       const createWithAttr = (attr) =>
         createElementWithAttributes(document, 'div', {[attr]: ''});
 
@@ -529,12 +528,12 @@ describes.sandboxed('DOM', {}, (env) => {
       element.appendChild(document.createTextNode('abc'));
       element.appendChild(document.createElement('content'));
 
-      const nodes = getRealChildNodes(element);
+      const nodes = realChildNodes(element);
       expect(nodes.length).to.equal(2);
       expect(nodes[0].textContent).to.equal('abc');
       expect(nodes[1].tagName.toLowerCase()).to.equal('content');
 
-      const elements = getRealChildren(element);
+      const elements = realChildElements(element);
       expect(elements.length).to.equal(1);
       expect(elements[0].tagName.toLowerCase()).to.equal('content');
     });

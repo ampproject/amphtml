@@ -26,7 +26,7 @@ import {Layout, isLayoutSizeFixed} from '#core/dom/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {
   closestAncestorElementBySelector,
-  getRealChildNodes,
+  realChildNodes,
 } from '#core/dom/query';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -138,7 +138,7 @@ export class AmpAudio extends AMP.BaseElement {
     );
 
     this.applyFillContent(audio);
-    getRealChildNodes(this.element).forEach((child) => {
+    realChildNodes(this.element).forEach((child) => {
       if (child.getAttribute && child.getAttribute('src')) {
         assertHttpsUrl(child.getAttribute('src'), dev().assertElement(child));
       }

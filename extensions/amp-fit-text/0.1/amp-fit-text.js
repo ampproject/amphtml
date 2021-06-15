@@ -16,8 +16,8 @@
 
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '#core/dom/layout';
-import {getRealChildNodes} from '#core/dom/query';
 import {px, setStyle, setStyles} from '#core/dom/style';
+import {realChildNodes} from '#core/dom/query';
 import {throttle} from '#core/types/function';
 
 const TAG = 'amp-fit-text';
@@ -87,7 +87,7 @@ class AmpFitText extends AMP.BaseElement {
       lineHeight: `${LINE_HEIGHT_EM_}em`,
     });
 
-    getRealChildNodes(this.element).forEach((node) => {
+    realChildNodes(this.element).forEach((node) => {
       this.contentWrapper_.appendChild(node);
     });
     this.updateMeasurerContent_();
