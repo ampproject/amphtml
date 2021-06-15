@@ -15,12 +15,12 @@
  */
 
 import {MessageType} from '../../../src/3p-frame-messaging';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {htmlFor} from '../../../src/core/dom/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/core/dom';
+import {removeElement} from '#core/dom';
 
 const TYPE = 'twitter';
 

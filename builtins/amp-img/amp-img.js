@@ -15,19 +15,16 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {Layout, isLayoutSizeDefined} from '../../src/layout';
-import {ReadyState} from '../../src/core/constants/ready-state';
-import {Services} from '../../src/services';
+import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {ReadyState} from '#core/constants/ready-state';
+import {Services} from '#service';
 import {dev} from '../../src/log';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../src/core/dom/img';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
 import {listen} from '../../src/event-helper';
-import {
-  propagateObjectFitStyles,
-  setImportantStyles,
-} from '../../src/core/dom/style';
-import {registerElement} from '../../src/service/custom-element-registry';
-import {removeElement} from '../../src/core/dom';
-import {scopedQuerySelector} from '../../src/core/dom/query';
+import {propagateObjectFitStyles, setImportantStyles} from '#core/dom/style';
+import {registerElement} from '#service/custom-element-registry';
+import {removeElement} from '#core/dom';
+import {scopedQuerySelector} from '#core/dom/query';
 
 /** @const {string} */
 const TAG = 'amp-img';

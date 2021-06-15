@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from './autocomplete-binding-single';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Keys} from '#core/constants/key-codes';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
@@ -37,22 +37,22 @@ import {
   hasOwn,
   map,
   ownProperty,
-} from '../../../src/core/types/object';
+} from '#core/types/object';
 
-import {includes} from '../../../src/core/types/string';
+import {includes} from '#core/types/string';
 import {isAmp4Email} from '../../../src/format';
-import {isArray, isEnumValue} from '../../../src/core/types';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {isArray, isEnumValue} from '#core/types';
+import {tryParseJson} from '#core/types/object/json';
 
-import {mod} from '../../../src/core/math';
-import {once} from '../../../src/core/types/function';
-import {removeChildren, tryFocus} from '../../../src/core/dom';
+import {mod} from '#core/math';
+import {once} from '#core/types/function';
+import {removeChildren, tryFocus} from '#core/dom';
 import {
   setupAMPCors,
   setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
-import {toggle} from '../../../src/core/dom/style';
+import {toggle} from '#core/dom/style';
 import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
 /**

@@ -19,9 +19,9 @@
  * that enable 3P site users to interact with Google Assistant.
  */
 
-import {Services} from '../../../src/services';
-import {addAttributesToElement} from '../../../src/core/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '#service';
+import {addAttributesToElement} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
 export class AmpGoogleAssistantInlineSuggestionBar extends AMP.BaseElement {
   /** @param {!AmpElement} element */

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {InaboxMutator} from '../../../src/inabox/inabox-mutator';
-import {Services} from '../../../src/services';
+import {InaboxMutator} from '#inabox/inabox-mutator';
+import {Services} from '#service';
 
 describes.realWin('inabox-mutator', {amp: true}, (env) => {
   let mutator;

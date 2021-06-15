@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {dict} from '../core/types/object';
+import {Services} from '#service';
+import {dict} from '#core/types/object';
 import {parseUrlDeprecated} from '../url';
 
 /**

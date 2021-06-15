@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Loading} from '../../../src/core/loading-instructions';
+import * as Preact from '#preact';
+import {ContainWrapper, useValueRef} from '#preact/component';
+import {Deferred} from '#core/data-structures/promise';
+import {Loading} from '#core/loading-instructions';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {
   MetadataDef,
@@ -26,12 +26,11 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {ReadyState} from '../../../src/core/constants/ready-state';
-import {dict} from '../../../src/core/types/object';
-import {fillContentOverlay, fillStretch} from './video-wrapper.css';
-import {forwardRef} from '../../../src/preact/compat';
-import {once} from '../../../src/core/types/function';
-import {useAmpContext, useLoading} from '../../../src/preact/context';
+import {ReadyState} from '#core/constants/ready-state';
+import {dict} from '#core/types/object';
+import {forwardRef} from '#preact/compat';
+import {once} from '#core/types/function';
+import {useAmpContext, useLoading} from '#preact/context';
 import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {
   useCallback,
@@ -41,8 +40,9 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
-import {useResourcesNotify} from '../../../src/preact/utils';
+} from '#preact';
+import {useResourcesNotify} from '#preact/utils';
+import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
 /**
@@ -111,6 +111,8 @@ function VideoWrapperWithRef(
 
   const wrapperRef = useRef(null);
   const playerRef = useRef(null);
+
+  const classes = useStyles();
 
   // TODO(alanorozco): We might need an API to notify reload, like when
   // <source>s change.
@@ -292,7 +294,7 @@ function VideoWrapperWithRef(
             setReadyState(ReadyState.ERROR, e);
             readyDeferred.reject(e);
           }}
-          style={fillStretch}
+          className={classes.fillStretch}
           src={src}
           poster={poster}
         >
@@ -330,7 +332,8 @@ function Autoplay({
   wrapperRef,
 }) {
   const {playable} = useAmpContext();
-  const classes = useAutoplayStyles();
+  const autoplayClasses = useAutoplayStyles();
+  const classes = useStyles();
 
   useEffect(() => {
     if (!playable) {
@@ -364,8 +367,8 @@ function Autoplay({
       {displayIcon && (
         <div
           className={objstr({
-            [classes.eq]: true,
-            [classes.eqPlaying]: playing,
+            [autoplayClasses.eq]: true,
+            [autoplayClasses.eqPlaying]: playing,
           })}
         >
           <AutoplayIconContent />
@@ -376,8 +379,10 @@ function Autoplay({
         <button
           aria-label={(metadata && metadata.title) || 'Unmute video'}
           tabindex="0"
-          className={classes.autoplayMaskButton}
-          style={fillContentOverlay}
+          className={objstr({
+            [autoplayClasses.autoplayMaskButton]: true,
+            [classes.fillContentOverlay]: true,
+          })}
           onClick={onOverlayClick}
         ></button>
       )}

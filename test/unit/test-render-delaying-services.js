@@ -15,7 +15,7 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import * as service from '../../src/service';
+import * as service from '../../src/service-helpers';
 import {createIframePromise} from '../../testing/iframe';
 import {
   hasRenderDelayingServices,

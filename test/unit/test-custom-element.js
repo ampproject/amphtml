@@ -15,20 +15,20 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpEvents} from '../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {BaseElement} from '../../src/base-element';
-import {CommonSignals} from '../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {ElementStub} from '../../src/element-stub';
-import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {Services} from '../../src/services';
+import {LOADING_ELEMENTS_, Layout} from '#core/dom/layout';
+import {Resource, ResourceState} from '#service/resource';
+import {Services} from '#service';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
-import {elementConnectedCallback} from '../../src/service/custom-element-registry';
-import {toggleExperiment} from '../../src/experiments';
+import {elementConnectedCallback} from '#service/custom-element-registry';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
