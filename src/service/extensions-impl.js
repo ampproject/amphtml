@@ -342,14 +342,14 @@ export class Extensions {
    * extension registration.
    * @param {string} name
    * @param {typeof ../base-element.BaseElement} implementationClass
-   * @param {string=} opt_css
+   * @param {?string|undefined} css
    * @restricted
    */
-  addElement(name, implementationClass, opt_css) {
+  addElement(name, implementationClass, css) {
     const holder = this.getCurrentExtensionHolder_(name);
-    holder.extension.elements[name] = {implementationClass, opt_css};
+    holder.extension.elements[name] = {implementationClass, css};
     this.addDocFactory((ampdoc) => {
-      this.installElement_(ampdoc, name, implementationClass, opt_css);
+      this.installElement_(ampdoc, name, implementationClass, css);
     });
   }
 

@@ -126,7 +126,7 @@ function adoptShared(global, callback) {
    * Registers an extended element and installs its styles.
    * @param {string} name
    * @param {typeof BaseElement} implementationClass
-   * @param {string=} opt_css
+   * @param {?string|undefined} css
    */
   global.AMP.registerElement = extensions.addElement.bind(extensions);
 
