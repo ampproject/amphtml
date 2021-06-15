@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,25 @@
  * limitations under the License.
  */
 
-export const BASE_STYLE = {
-  'textDecoration': 'none',
-  'cursor': 'pointer',
-  'position': 'relative',
-};
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
+ */
+amp-date-display {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Pre-upgrade: size-defining element - hide text. */
+amp-date-display:not(.i-amphtml-built) {
+  color: transparent !important;
+}
+
+/* Pre-upgrade: size-defining element - hide children. */
+amp-date-display:not(.i-amphtml-built)
+  > :not([placeholder]):not(.i-amphtml-svc) {
+  display: none;
+  content-visibility: hidden;
+}

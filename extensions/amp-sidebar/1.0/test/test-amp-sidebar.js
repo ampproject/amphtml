@@ -19,7 +19,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
-import {waitFor, whenCalled} from '../../../../testing/test-helper';
+import {waitFor, whenCalled} from '#testing/test-helper';
 
 describes.realWin(
   'amp-sidebar:1.0',

@@ -32,7 +32,7 @@ import {
 import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
 import {Services} from '#service';
 import {StoryAdPage} from '../story-ad-page';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments';
 

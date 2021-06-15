@@ -33,7 +33,7 @@ import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {dict} from '#core/types/object';
 import {getBackendSpecs} from '../interactive-disclaimer';
 import {htmlFor} from '#core/dom/static-template';
-import {measureMutateElementStub} from '../../../../testing/test-helper';
+import {measureMutateElementStub} from '#testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments';
 

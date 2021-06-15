@@ -22,6 +22,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 import {
   getConsentMetadata,
@@ -30,7 +31,6 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,
@@ -292,7 +292,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     iframe.src = src;
 
     // applyFillContent so that frame covers the entire component.
-    this.applyFillContent(iframe, /* replacedContent */ true);
+    applyFillContent(iframe, /* replacedContent */ true);
 
     // append child iframe for element
     element.appendChild(iframe);

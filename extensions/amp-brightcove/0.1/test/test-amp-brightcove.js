@@ -22,7 +22,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '#core/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {parseUrlDeprecated} from '../../../../src/url';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
