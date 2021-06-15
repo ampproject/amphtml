@@ -1,5 +1,5 @@
 /**
- * Copyright __current_year__ The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,34 @@
  * limitations under the License.
  */
 
-__jss_import_component_css__;
-import {__component_name_pascalcase__} from './component';
 import {PreactBaseElement} from '#preact/base-element';
+import {SocialShare} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = __component_name_pascalcase__;
-
-/** @override */
-BaseElement['props'] = {
-  'children': {passthrough: true},
-  // 'children': {passthroughNonEmpty: true},
-  // 'children': {selector: '...'},
-};
+BaseElement['Component'] = SocialShare;
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['delegatesFocus'] = true;
 
-// __do_not_submit__: If BaseElement['shadowCss']  is set to `null`, remove the
-// following declaration.
-// Otherwise, keep it when defined to an actual value like `COMPONENT_CSS`.
-// Once addressed, remove this set of comments.
 /** @override */
-BaseElement['shadowCss'] = __jss_component_css__;
+BaseElement['props'] = {
+  'children': {passthroughNonEmpty: true},
+  'height': {attr: 'height'},
+  'tabIndex': {attr: 'tabindex'},
+  'type': {attr: 'type'},
+  'width': {attr: 'width'},
+};
+
+/** @override */
+BaseElement['staticProps'] = {
+  'color': 'currentColor',
+  'background': 'inherit',
+};
+
+/** @override */
+BaseElement['usesShadowDom'] = true;
