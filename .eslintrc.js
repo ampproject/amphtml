@@ -96,6 +96,7 @@ module.exports = {
       'babel-module': getImportResolver(),
     },
     'import/external-module-folders': ['node_modules', 'third_party'],
+    'import/ignore': ['node_modules', '\\.jss\\.js$'],
   },
   'reportUnusedDisableDirectives': true,
   'rules': {
@@ -106,7 +107,7 @@ module.exports = {
     'google-camelcase/google-camelcase': 2,
 
     // 'import/no-unresolved': 2,
-    // 'import/named': 2,
+    'import/named': 2,
     'import/namespace': 2,
     // 'import/no-useless-path-segments': 2,
     'import/no-absolute-path': 2,
