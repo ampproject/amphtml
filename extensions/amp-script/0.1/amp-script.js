@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint disable-next-line import/extensions */
+/* eslint-disable-next-line import/extensions */
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
