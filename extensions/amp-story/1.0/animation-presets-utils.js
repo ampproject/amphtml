@@ -20,7 +20,7 @@
  */
 
 import {StoryAnimationDimsDef, WebKeyframesDef} from './animation-types';
-import {rotate, scale, translate} from '../../../src/style';
+import {rotate, scale, translate} from '#core/dom/style';
 
 /**
  * Translates the element on the 2d plane according to the given points.

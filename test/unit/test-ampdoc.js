@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import * as docready from '../../src/core/document-ready';
-import * as dom from '../../src/dom';
+import * as docready from '#core/document-ready';
+import * as dom from '#core/dom';
 import {
   AmpDocFie,
   AmpDocService,
   AmpDocShadow,
   AmpDocSingle,
-} from '../../src/service/ampdoc-impl';
+} from '#service/ampdoc-impl';
 import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
-} from '../../src/core/dom/web-components';
-import {Signals} from '../../src/core/data-structures/signals';
+} from '#core/dom/web-components';
+import {Signals} from '#core/data-structures/signals';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
   setParentWindow,
-} from '../../src/service';
+} from '../../src/service-helpers';
 import {waitFor} from '../../testing/test-helper';
 
 describes.realWin('AmpDocService', {}, (env) => {

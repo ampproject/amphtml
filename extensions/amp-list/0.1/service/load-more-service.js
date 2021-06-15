@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {childElementByAttr} from '../../../../src/core/dom/query';
+import {childElementByAttr} from '#core/dom/query';
 import {dev} from '../../../../src/log';
-import {htmlFor} from '../../../../src/static-template';
-import {setStyles} from '../../../../src/style';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyles} from '#core/dom/style';
 
 export class LoadMoreService {
   /**

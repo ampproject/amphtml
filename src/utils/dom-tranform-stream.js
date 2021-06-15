@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
-import {devAssert, devAssertElement} from '../core/assert/dev';
+import {Deferred} from '#core/data-structures/promise';
+import {devAssert, devAssertElement} from '#core/assert';
 import {removeNoScriptElements} from './dom-writer';
 
 /**

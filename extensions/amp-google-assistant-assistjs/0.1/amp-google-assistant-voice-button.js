@@ -19,9 +19,9 @@
  * to Google Assistant.
  */
 
-import {Services} from '../../../src/services';
-import {addAttributesToElement} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '#service';
+import {addAttributesToElement} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
 export class AmpGoogleAssistantVoiceButton extends AMP.BaseElement {
   /** @param {!AmpElement} element */

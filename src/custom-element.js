@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as dom from './dom';
+import * as dom from './core/dom';
 import * as query from './core/dom/query';
 import {AmpEvents} from './core/constants/amp-events';
 import {CommonSignals} from './core/constants/common-signals';
@@ -22,15 +22,19 @@ import {ElementStub} from './element-stub';
 import {
   Layout,
   LayoutPriority,
-  applyStaticLayout,
   isInternalElement,
   isLoadingAllowed,
-} from './layout';
+} from './core/dom/layout';
 import {MediaQueryProps} from './core/dom/media-query-props';
 import {ReadyState} from './core/constants/ready-state';
 import {ResourceState} from './service/resource';
-import {Services} from './services';
+import {Services} from './service';
 import {Signals} from './core/data-structures/signals';
+import {
+  UPGRADE_TO_CUSTOMELEMENT_PROMISE,
+  UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
+} from './amp-element-helpers';
+import {applyStaticLayout} from './static-layout';
 import {
   blockedByConsentError,
   cancellation,
@@ -44,7 +48,7 @@ import {getMode} from './mode';
 import {getSchedulerForDoc} from './service/scheduler';
 import {isExperimentOn} from './experiments';
 import {rethrowAsync} from './core/error';
-import {setStyle} from './style';
+import {setStyle} from './core/dom/style';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
 import {toWin} from './core/window';
@@ -293,10 +297,10 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       /** @private {?MediaQueryProps} */
       this.mediaQueryProps_ = null;
 
-      if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
-        nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
-        delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
-        delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_PROMISE];
+      if (nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
+        nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
+        delete nonStructThis[UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
+        delete nonStructThis[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
       }
     }
 

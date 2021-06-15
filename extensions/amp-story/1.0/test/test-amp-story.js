@@ -22,20 +22,20 @@ import {
   StateProperty,
   UIType,
 } from '../amp-story-store-service';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
-import {CommonSignals} from '../../../../src/core/constants/common-signals';
-import {Keys} from '../../../../src/core/constants/key-codes';
-import {LocalizationService} from '../../../../src/service/localization';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Keys} from '#core/constants/key-codes';
+import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
-import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {registerServiceBuilder} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+import {Services} from '#service';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {createElementWithAttributes} from '#core/dom';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {toggleExperiment} from '#experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
@@ -354,6 +354,21 @@ describes.realWin(
       await story.layoutCallback();
       expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
         UIType.DESKTOP_PANELS
+      );
+    });
+
+    it('should default to the one panel UI desktop experience when axperiment is active', async () => {
+      toggleExperiment(win, 'amp-story-desktop-one-panel', true);
+      await createStoryWithPages(4, ['cover', '1', '2', '3']);
+
+      // Don't do this at home. :(
+      story.desktopMedia_ = {matches: true};
+
+      story.buildCallback();
+
+      await story.layoutCallback();
+      expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
+        UIType.DESKTOP_ONE_PANEL
       );
     });
 

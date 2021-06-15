@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import * as dom from '../../../src/dom';
-import * as query from '../../../src/core/dom/query';
-import * as st from '../../../src/style';
+import * as dom from '#core/dom';
+import * as query from '#core/dom/query';
+import * as st from '#core/dom/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
@@ -27,11 +27,11 @@ import {
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/core/window/interface';
-import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {boundValue, clamp, distance, magnitude} from '../../../src/core/math';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {WindowInterface} from '#core/window/interface';
+import {bezierCurve} from '#core/data-structures/curve';
+import {boundValue, clamp, distance, magnitude} from '#core/math';
 import {continueMotion} from '../../../src/motion';
 import {dev, userAssert} from '../../../src/log';
 import {isLoaded} from '../../../src/event-helper';
@@ -39,9 +39,9 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../../src/core/math/layout-rect';
-import {setStyles, toggle} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/core/dom/srcset';
+} from '#core/math/layout-rect';
+import {setStyles, toggle} from '#core/dom/style';
+import {srcsetFromElement} from '#core/dom/srcset';
 
 const TAG = 'amp-image-lightbox';
 

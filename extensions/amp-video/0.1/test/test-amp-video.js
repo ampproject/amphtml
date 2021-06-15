@@ -15,14 +15,14 @@
  */
 
 import {AmpVideo, isCachedByCdn} from '../amp-video';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {VideoEvents} from '../../../../src/video-interface';
-import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {dispatchCustomEvent} from '../../../../src/dom';
-import {installPerformanceService} from '../../../../src/service/performance-impl';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {dispatchCustomEvent} from '#core/dom';
+import {installPerformanceService} from '#service/performance-impl';
 import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin(
   'amp-video',

@@ -17,16 +17,14 @@
 import '../amp-brightcove';
 import * as consent from '../../../../src/consent';
 import {BaseElement} from '../../../../src/base-element';
-import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
-import {CommonSignals} from '../../../../src/core/constants/common-signals';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CommonSignals} from '#core/constants/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {macroTask} from '../../../../testing/yield';
 import {parseUrlDeprecated} from '../../../../src/url';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(
   'amp-brightcove',

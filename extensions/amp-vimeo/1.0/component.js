@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {
   VIMEO_EVENTS,
   getVimeoIframeSrc,
@@ -23,13 +23,13 @@ import {
   makeVimeoMessage,
 } from '../vimeo-api';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {dispatchCustomEvent} from '../../../src/dom';
-import {forwardRef} from '../../../src/preact/compat';
+import {dispatchCustomEvent} from '#core/dom';
+import {forwardRef} from '#preact/compat';
 import {
   objOrParseJson,
   postMessageWhenAvailable,
 } from '../../../src/iframe-video';
-import {useCallback, useMemo, useRef} from '../../../src/preact';
+import {useCallback, useMemo, useRef} from '#preact';
 
 /**
  * @param {!HTMLIframeElement} iframe

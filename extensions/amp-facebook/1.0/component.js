@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {
-  MessageType,
-  ProxyIframeEmbed,
-} from '../../../src/preact/component/3p-frame';
-import {dashToUnderline} from '../../../src/core/types/string';
+import * as Preact from '#preact';
+import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
+import {dashToUnderline} from '#core/types/string';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
-import {forwardRef} from '../../../src/preact/compat';
-import {tryParseJson} from '../../../src/core/types/object/json';
-import {useCallback, useLayoutEffect, useState} from '../../../src/preact';
+import {forwardRef} from '#preact/compat';
+import {tryParseJson} from '#core/types/object/json';
+import {useCallback, useLayoutEffect, useState} from '#preact';
 
 /** @const {string} */
 const TYPE = 'facebook';
@@ -38,17 +35,28 @@ const DEFAULT_TITLE = 'Facebook comments';
  */
 function FacebookWithRef(
   {
-    colorScheme,
+    action,
+    colorscheme,
     embedAs,
+    hideCover,
+    hideCta,
     href,
     includeCommentParent,
+    kdSite,
+    layout,
     locale: localeProp,
     numPosts,
     onReady,
     orderBy,
+    refLabel,
     requestResize,
+    share,
+    showFacepile,
     showText,
+    size,
+    smallHeader,
     style,
+    tabs,
     title = DEFAULT_TITLE,
     ...rest
   },
@@ -90,14 +98,25 @@ function FacebookWithRef(
   return (
     <ProxyIframeEmbed
       options={{
-        colorScheme,
+        action,
+        colorscheme,
         embedAs,
+        hideCover,
+        hideCta,
         href,
         includeCommentParent,
+        'kd_site': kdSite,
+        layout,
         locale,
         numPosts,
         orderBy,
+        ref: refLabel,
+        share,
+        showFacepile,
         showText,
+        size,
+        smallHeader,
+        tabs,
       }}
       ref={ref}
       title={title}

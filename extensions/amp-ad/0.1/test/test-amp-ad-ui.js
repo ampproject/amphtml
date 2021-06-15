@@ -15,12 +15,12 @@
  */
 
 import * as adHelper from '../../../../src/ad-helper';
-import * as domQuery from '../../../../src/core/dom/query';
+import * as domQuery from '#core/dom/query';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {macroTask} from '../../../../testing/yield';
-import {setStyles} from '../../../../src/style';
+import {setStyles} from '#core/dom/style';
 
 describes.realWin(
   'amp-ad-ui handler',

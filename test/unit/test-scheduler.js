@@ -15,10 +15,10 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {LayoutPriority} from '../../src/layout';
-import {READY_SCAN_SIGNAL} from '../../src/service/resources-interface';
-import {Scheduler} from '../../src/service/scheduler';
-import {createElementWithAttributes} from '../../src/dom';
+import {LayoutPriority} from '#core/dom/layout';
+import {READY_SCAN_SIGNAL} from '#service/resources-interface';
+import {Scheduler} from '#service/scheduler';
+import {createElementWithAttributes} from '#core/dom';
 import {installIntersectionObserverStub} from '../../testing/intersection-observer-stub';
 
 describes.realWin('Scheduler', {amp: true}, (env) => {

@@ -36,13 +36,13 @@
  */
 
 import {CSS} from '../../../build/amp-instagram-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/core/types';
-import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {isObject} from '#core/types';
+import {removeElement} from '#core/dom';
+import {setStyle} from '#core/dom/style';
+import {tryParseJson} from '#core/types/object/json';
 import {userAssert} from '../../../src/log';
 
 export class AmpInstagram extends AMP.BaseElement {

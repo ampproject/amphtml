@@ -18,17 +18,17 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import {CONSENT_POLICY_STATE} from '../../src/core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {
   RTC_ERROR_ENUM,
   RealTimeConfigManager,
-} from '../../src/service/real-time-config/real-time-config-impl';
-import {Services} from '../../src/services';
-import {Xhr} from '../../src/service/xhr-impl';
+} from '#service/real-time-config/real-time-config-impl';
+import {Services} from '#service';
+import {Xhr} from '#service/xhr-impl';
 import {cancellation} from '../../src/error-reporting';
-import {createElementWithAttributes} from '../../src/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {dev, user} from '../../src/log';
-import {isFiniteNumber} from '../../src/core/types';
+import {isFiniteNumber} from '#core/types';
 
 describes.realWin('real-time-config service', {amp: true}, (env) => {
   let element;

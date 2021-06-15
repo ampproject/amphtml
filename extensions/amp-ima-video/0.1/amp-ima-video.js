@@ -14,31 +14,27 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {ImaPlayerData} from '../../../ads/google/ima/ima-player-data';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {ImaPlayerData} from '#ads/google/ima/ima-player-data';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
-import {childElementsByTag} from '../../../src/core/dom/query';
-import {dict} from '../../../src/core/types/object';
-import {
-  dispatchCustomEvent,
-  isJsonScriptTag,
-  removeElement,
-} from '../../../src/dom';
+import {childElementsByTag} from '#core/dom/query';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent, isJsonScriptTag, removeElement} from '#core/dom';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isEnumValue, isObject} from '../../../src/core/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isEnumValue, isObject} from '#core/types';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {toArray} from '../../../src/core/types/array';
+} from '#core/dom/size-observer';
+import {toArray} from '#core/types/array';
 
 /** @const */
 const TAG = 'amp-ima-video';

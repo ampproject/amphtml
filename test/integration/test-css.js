@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/core/constants/amp-events.js';
-import {computedStyle} from '../../src/style.js';
+import {AmpEvents} from '#core/constants/amp-events.js';
+import {computedStyle} from '#core/dom/style.js';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,

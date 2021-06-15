@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {getMode} from '../../../src/mode';
-import {isIframed} from '../../../src/dom';
-import {memo} from '../../../src/core/types/object';
-import {toWin} from '../../../src/core/window';
+import {isIframed} from '#core/dom';
+import {memo} from '#core/types/object';
+import {toWin} from '#core/window';
 
 const OBSERVERS_MAP_PROP = '__AMP_A4A_VP_MAP';
 

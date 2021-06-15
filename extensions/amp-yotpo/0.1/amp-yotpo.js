@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {getIframe} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '#core/dom';
 import {userAssert} from '../../../src/log';
 
 export class AmpYotpo extends AMP.BaseElement {

@@ -15,9 +15,9 @@
  */
 
 import '../amp-facebook-comments';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
-import {resetServiceForTesting} from '../../../../src/service';
+import {resetServiceForTesting} from '../../../../src/service-helpers';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 

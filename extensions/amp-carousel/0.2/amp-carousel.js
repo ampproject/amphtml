@@ -15,20 +15,20 @@
  */
 
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
-import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
-import {computedStyle} from '../../../src/style';
+import {Services} from '#service';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {computedStyle} from '#core/dom/style';
 import {createCustomEvent, getDetail, listen} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /**

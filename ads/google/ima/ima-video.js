@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
-import {camelCaseToTitleCase, setStyle, toggle} from '../../../src/style';
+import {camelCaseToTitleCase, setStyle, toggle} from '#core/dom/style';
 import {getData} from '../../../src/event-helper';
-import {htmlFor, htmlRefs, svgFor} from '../../../src/static-template';
-import {isArray, isObject} from '../../../src/core/types';
-import {loadScript} from '../../../3p/3p';
-import {throttle} from '../../../src/core/types/function';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {htmlFor, htmlRefs, svgFor} from '#core/dom/static-template';
+import {isArray, isObject} from '#core/types';
+import {loadScript} from '#3p/3p';
+import {throttle} from '#core/types/function';
+import {tryParseJson} from '#core/types/object/json';
 // Source for this constant is css/amp-ima-video-iframe.css
 import {cssText} from '../../../build/amp-ima-video-iframe.css';
 

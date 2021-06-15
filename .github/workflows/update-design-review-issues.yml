@@ -1,9 +1,14 @@
 name: Update Design Review Issues
 
 on:
+  # This schedule should match the time rotation configured on
+  # update-design-review-issues.js.
+  # Times correspond to session end, and additionally 1 hour earlier to account
+  # for Daylight Savings.
   schedule:
-    # At minute 1 on Wednesday (every hour).
-    - cron: '1 * * * 3'
+    - cron: '30 16,17 * * 3' # Africa/Europe/western Asia
+    - cron: '0 21,22 * * 3' # Americas
+    - cron: '0 1,2 * * 4' # Asia/Oceania
 
 jobs:
   update-design-review-issues:

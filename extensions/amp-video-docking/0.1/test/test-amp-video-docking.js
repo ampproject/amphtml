@@ -30,16 +30,13 @@ import {
   VideoDocking,
   getPosterImageSrc,
 } from '../amp-video-docking';
-import {
-  Deferred,
-  tryResolve,
-} from '../../../../src/core/data-structures/promise';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {DirectionX, DirectionY} from '../def.js';
 import {PlayingStates} from '../../../../src/video-interface';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
-import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {layoutRectLtwh} from '#core/math/layout-rect';
 
 const slotId = 'my-slot-element';
 

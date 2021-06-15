@@ -15,15 +15,16 @@
  */
 
 import '../amp-image-lightbox';
-import * as dom from '../../../../src/dom';
+import * as dom from '#core/dom';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
+import {ActionService} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
 import {ImageViewer} from '../amp-image-lightbox';
-import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
-import {WindowInterface} from '../../../../src/core/window/interface';
-import {parseSrcset} from '../../../../src/core/dom/srcset';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {WindowInterface} from '#core/window/interface';
+import {parseSrcset} from '#core/dom/srcset';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(
   'amp-image-lightbox component',
@@ -263,7 +264,7 @@ describes.realWin(
       env.win.document.body.appendChild(element);
       env.sandbox.spy(element, 'enqueAction');
       env.sandbox.stub(element, 'getDefaultActionAlias');
-      await dom.whenUpgradedToCustomElement(element);
+      await whenUpgradedToCustomElement(element);
 
       const impl = await element.getImpl();
       env.sandbox.stub(impl, 'open_');

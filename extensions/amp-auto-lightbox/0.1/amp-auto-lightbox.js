@@ -22,19 +22,17 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Services} from '#service';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dev} from '../../../src/log';
-import {
-  dispatchCustomEvent,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {dispatchCustomEvent} from '#core/dom';
 import {measureIntersectionNoRoot} from '../../../src/utils/intersection-no-root';
-import {toArray} from '../../../src/core/types/array';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {toArray} from '#core/types/array';
+import {tryParseJson} from '#core/types/object/json';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -191,7 +189,7 @@ const srcsetWidthRe = /\s+([0-9]+)w(,|[\S\s]*$)/g;
  * @return {number} -1 if no srcset, or if srcset is defined by dpr instead of
  *   width. (This value is useful for comparisons, see getMaxNaturalDimensions.)
  */
-export function getMaxWidthFromSrcset(img) {
+function getMaxWidthFromSrcset(img) {
   let max = -1;
 
   const srcsetAttr = img.getAttribute('srcset');
@@ -216,7 +214,7 @@ export function getMaxWidthFromSrcset(img) {
  * @param {!Element} img
  * @return {{naturalWidth: number, naturalHeight: number}}
  */
-export function getMaxNaturalDimensions(img) {
+function getMaxNaturalDimensions(img) {
   const {naturalHeight, naturalWidth} = img;
   const ratio = naturalWidth / naturalHeight;
   const maxWidthFromSrcset = getMaxWidthFromSrcset(img);

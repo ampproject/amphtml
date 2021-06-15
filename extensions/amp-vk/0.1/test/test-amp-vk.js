@@ -28,8 +28,8 @@ const POLL_PARAMS = {
 };
 
 import '../amp-vk';
-import {Layout} from '../../../../src/layout';
-import {Resource} from '../../../../src/service/resource';
+import {Layout} from '#core/dom/layout';
+import {Resource} from '#service/resource';
 
 describes.realWin(
   'amp-vk',
