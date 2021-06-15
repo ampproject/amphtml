@@ -95,6 +95,7 @@ module.exports = {
       // exported, etc.
       'babel-module': getImportResolver(),
     },
+    'import/external-module-folders': ['node_modules', 'third_party'],
   },
   'reportUnusedDisableDirectives': true,
   'rules': {
@@ -103,6 +104,20 @@ module.exports = {
     'chai-expect/terminating-properties': 2,
     'curly': 2,
     'google-camelcase/google-camelcase': 2,
+
+    // 'import/no-unresolved': 2,
+    // 'import/named': 2,
+    'import/namespace': 2,
+    // 'import/no-useless-path-segments': 2,
+    'import/no-absolute-path': 2,
+    'import/export': 2,
+    // 'import/no-deprecated': 2,
+    // 'import/no-mutable-exports': 2,
+    // 'import/first': 2,
+    // 'import/extensions': 2,
+    // 'import/newline-after-import': 2,
+    // 'import/no-default-export': 2,
+
     'jsdoc/check-param-names': 2,
     'jsdoc/check-tag-names': [
       2,
@@ -137,6 +152,7 @@ module.exports = {
     'jsdoc/require-param-type': 2,
     'jsdoc/require-returns': 2,
     'jsdoc/require-returns-type': 2,
+
     'local/await-expect': 2,
     'local/closure-type-primitives': 2,
     'local/dict-string-keys': 2,
@@ -190,6 +206,7 @@ module.exports = {
     'local/unused-private-field': 2,
     'local/vsync': 0,
     'local/window-property-name': 2,
+
     'module-resolver/use-alias': [
       'error',
       {'alias': getImportResolver().alias},
@@ -367,5 +384,11 @@ module.exports = {
         'google-camelcase/google-camelcase': 0,
       },
     },
+    {
+      'files': ['**/rollup.config.js'],
+      'rules': {
+        'import/no-default': 0,
+      },
+    }
   ],
 };
