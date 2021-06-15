@@ -28,6 +28,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
+import {realChildElements} from '#core/dom/query';
 import {setStyles} from '#core/dom/style';
 
 export class AmpImageSlider extends AMP.BaseElement {
@@ -110,7 +111,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
 
     for (let i = 0; i < children.length; i++) {
       const child = children[i];

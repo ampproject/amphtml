@@ -23,7 +23,10 @@ import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
-import {closestAncestorElementBySelector} from '#core/dom/query';
+import {
+  closestAncestorElementBySelector,
+  realChildElements,
+} from '#core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '#core/types/function';
 import {descendsFromStory} from '../../../src/utils/story';
@@ -450,7 +453,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   updateForOpened_(trust) {
     // On open sidebar
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
     const owners = Services.ownersForDoc(this.element);
     owners.scheduleLayout(this.element, children);
     owners.scheduleResume(this.element, children);
@@ -501,7 +504,7 @@ export class AmpSidebar extends AMP.BaseElement {
     toggle(this.getMaskElement_(), /* display */ false);
     Services.ownersForDoc(this.element).schedulePause(
       this.element,
-      this.getRealChildren()
+      realChildElements(this.element)
     );
     // TODO(#25080): update history manipulation based on resolution of this issue.
     if (this.historyId_ != -1) {

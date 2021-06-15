@@ -27,6 +27,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
+import {realChildElements} from '#core/dom/query';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
@@ -59,7 +60,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
-    this.cells_ = this.getRealChildren();
+    this.cells_ = realChildElements(this.element);
 
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');

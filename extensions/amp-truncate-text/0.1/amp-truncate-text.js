@@ -17,7 +17,10 @@
 import {CSS} from '../../../build/amp-truncate-text-0.1.css';
 import {Services} from '#service';
 import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css';
-import {closestAncestorElementBySelector} from '#core/dom/query';
+import {
+  closestAncestorElementBySelector,
+  realChildNodes,
+} from '#core/dom/query';
 import {createShadowRoot} from './shadow-utils';
 import {dev} from '../../../src/log';
 import {htmlFor} from '#core/dom/static-template';
@@ -146,7 +149,7 @@ export class AmpTruncateText extends AMP.BaseElement {
         this.persistentSlot_.appendChild(el);
       }
     );
-    this.getRealChildNodes().forEach((node) => {
+    realChildNodes(this.element).forEach((node) => {
       defaultSlot.appendChild(node);
     });
 

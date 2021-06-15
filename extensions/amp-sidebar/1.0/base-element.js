@@ -20,6 +20,7 @@ import {PreactBaseElement} from '#preact/base-element';
 import {Sidebar} from './component';
 import {dict} from '#core/types/object';
 import {pauseAll} from '../../../src/utils/resource-container-helper';
+import {realChildNodes} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {toggleAttribute} from '#core/dom';
 import {useToolbarHook} from './sidebar-toolbar-hook';
@@ -50,7 +51,7 @@ export class BaseElement extends PreactBaseElement {
 
   /** @override */
   updatePropsForRendering(props) {
-    this.getRealChildNodes().map((child) => {
+    realChildNodes(this.element).map((child) => {
       if (
         child.nodeName === 'NAV' &&
         child.hasAttribute('toolbar') &&

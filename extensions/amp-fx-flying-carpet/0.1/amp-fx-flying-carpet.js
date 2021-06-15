@@ -19,6 +19,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
 import {dev, userAssert} from '../../../src/log';
+import {realChildElements, realChildNodes} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
 
 const TAG = 'amp-fx-flying-carpet';
@@ -75,10 +76,10 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     const doc = this.element.ownerDocument;
     const container = doc.createElement('div');
 
-    this.children_ = this.getRealChildren();
+    this.children_ = realChildElements(this.element);
     this.container_ = container;
 
-    const childNodes = this.getRealChildNodes();
+    const childNodes = realChildNodes(this.element);
     this.totalChildren_ = this.visibileChildren_(childNodes).length;
 
     const owners = Services.ownersForDoc(this.element);
