@@ -18,11 +18,11 @@
 const fs = require('fs');
 const path = require('path');
 
-const JSCONFIG_PATH = path.join(__dirname, '..', '..', 'jsconfig.json');
+const JSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.json');
 let jsConfigPaths = null;
 
 /**
- * Reads import paths from jsconfig.json. This file is used by VSCode for
+ * Reads import paths from tsconfig.json. This file is used by VSCode for
  * Intellisense/auto-import. Rather than duplicate and require updating both
  * files, we can read from it directly. JSConfig format looks like:
  * { compilerOptions: { paths: {
