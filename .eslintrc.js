@@ -112,7 +112,7 @@ module.exports = {
     'import/no-useless-path-segments': 2,
     'import/no-absolute-path': 2,
     'import/export': 2,
-    // 'import/no-deprecated': 2,
+    'import/no-deprecated': 2,
     // 'import/no-mutable-exports': 2,
     'import/first': 2,
     // 'import/extensions': 2,
