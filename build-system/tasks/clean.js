@@ -52,7 +52,6 @@ async function clean() {
     'extensions/**/dist',
     'release',
     'result-reports',
-    'src/purifier/dist',
     'test/coverage',
     'test/coverage-e2e',
     'validator/**/dist',

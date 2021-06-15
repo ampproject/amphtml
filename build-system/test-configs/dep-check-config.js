@@ -43,9 +43,9 @@ exports.rules = [
     allowlist: [
       // WARNING: Importing purifier.js will also bundle DOMPurify (13KB).
       'extensions/amp-list/0.1/amp-list.js->src/purifier/sanitation.js',
-      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier/purifier.js',
-      'extensions/amp-script/0.1/amp-script.js->src/purifier/purifier.js',
-      'src/purifier/purifier.js->src/purifier/sanitation.js',
+      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier/index.js',
+      'extensions/amp-script/0.1/amp-script.js->src/purifier/index.js',
+      'src/purifier/index.js->src/purifier/sanitation.js',
       'src/sanitizer.js->src/purifier/sanitation.js',
     ],
   },
