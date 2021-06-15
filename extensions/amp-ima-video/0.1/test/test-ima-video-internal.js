@@ -827,50 +827,37 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       tag: adTagUrl,
     });
 
+    const {elements} = imaVideoObj.getPropertiesForTesting();
+
     imaVideoObj.updateTime(0, 60);
-    expect(imaVideoObj.getPropertiesForTesting().timeDiv.textContent).to.eql(
-      '0:00 / 1:00'
-    );
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressLine.style.width
-    ).to.eql('0%');
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left
-    ).to.eql('-1%');
+    expect(elements.progress).to.not.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('false');
+    expect(elements.time.textContent).to.eql('0:00 / 1:00');
+    expect(elements.progressLine.style.width).to.eql('0%');
+    expect(elements.progressMarker.style.left).to.eql('-1%');
+
     imaVideoObj.updateTime(30, 60);
-    expect(imaVideoObj.getPropertiesForTesting().timeDiv.textContent).to.eql(
-      '0:30 / 1:00'
-    );
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressLine.style.width
-    ).to.eql('50%');
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left
-    ).to.eql('49%');
+    expect(elements.progress).to.not.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('false');
+    expect(elements.time.textContent).to.eql('0:30 / 1:00');
+    expect(elements.progressLine.style.width).to.eql('50%');
+    expect(elements.progressMarker.style.left).to.eql('49%');
+
     imaVideoObj.updateTime(60, 60);
-    expect(imaVideoObj.getPropertiesForTesting().timeDiv.textContent).to.eql(
-      '1:00 / 1:00'
-    );
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressLine.style.width
-    ).to.eql('100%');
-    expect(
-      imaVideoObj.getPropertiesForTesting().progressMarkerDiv.style.left
-    ).to.eql('99%');
+    expect(elements.progress).to.not.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('false');
+    expect(elements.time.textContent).to.eql('1:00 / 1:00');
+    expect(elements.progressLine.style.width).to.eql('100%');
+    expect(elements.progressMarker.style.left).to.eql('99%');
+
+    // Livestreams
+    imaVideoObj.updateTime(61, Infinity);
+    expect(elements.progress).to.have.attribute('hidden');
+    expect(elements.progress.getAttribute('aria-hidden')).to.equal('true');
+    expect(elements.time.textContent).to.eql('1:01');
   });
 
   it('formats time', () => {
-    const div = doc.createElement('div');
-    div.setAttribute('id', 'c');
-    doc.body.appendChild(div);
-
-    imaVideoObj.imaVideo(win, {
-      width: 640,
-      height: 360,
-      src: srcUrl,
-      tag: adTagUrl,
-    });
-
     let formattedTime = imaVideoObj.formatTime(0);
     expect(formattedTime).to.eql('0:00');
     formattedTime = imaVideoObj.formatTime(55);

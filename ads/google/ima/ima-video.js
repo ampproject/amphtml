@@ -259,7 +259,7 @@ function renderElements(elementOrDoc) {
           -:- / 0:00
         </div>
 
-        <div ref="progress">
+        <div ref="progress" hidden>
           <div ref="progressLine"></div>
           <div ref="progressMarker"></div>
         </div>
@@ -949,14 +949,35 @@ function playerDataTick() {
  */
 export function updateTime(currentTime, duration) {
   const {
+    'progress': progress,
     'progressLine': progressLine,
     'progressMarker': progressMarker,
     'time': time,
   } = elements;
-  time.textContent = formatTime(currentTime) + ' / ' + formatTime(duration);
-  const progressPercent = Math.floor((currentTime / duration) * 100);
-  setStyle(progressLine, 'width', progressPercent + '%');
-  setStyle(progressMarker, 'left', progressPercent - 1 + '%');
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/duration
+  const isLivestream = duration === Infinity;
+
+  // Progress bar should not be displayed on livestreams.
+  // TODO(alanorozco): This is likely handled by native controls, so we wouldn't
+  // need this clause if we switch. https://go.amp.dev/issue/8841
+  if (progress.hasAttribute('hidden') !== isLivestream) {
+    toggle(progress, !isLivestream);
+    progress.setAttribute('aria-hidden', isLivestream ? 'true' : 'false');
+  }
+
+  // TODO(alanorozco): Consider adding a label for livestreams to display next
+  // to the current time.
+  const currentTimeFormatted = formatTime(currentTime);
+  time.textContent = isLivestream
+    ? currentTimeFormatted
+    : `${currentTimeFormatted} / ${formatTime(duration)}`;
+
+  if (!isLivestream) {
+    const progressPercent = Math.floor((currentTime / duration) * 100);
+    setStyle(progressLine, 'width', progressPercent + '%');
+    setStyle(progressMarker, 'left', progressPercent - 1 + '%');
+  }
 }
 
 /**
@@ -1452,9 +1473,6 @@ export function getPropertiesForTesting() {
     playPauseDiv: elements['playButton'],
     countdownDiv: elements['countdown'],
     timeDiv: elements['time'],
-    progressBarWrapper: elements['progress'],
-    progressLine: elements['progressLine'],
-    progressMarkerDiv: elements['progressMarker'],
     muteUnmuteDiv: elements['muteButton'],
     fullscreenDiv: elements['fullscreenButton'],
     bigPlayDiv: elements['overlayButton'],
