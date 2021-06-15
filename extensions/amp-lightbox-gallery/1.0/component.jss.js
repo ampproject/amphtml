@@ -16,6 +16,9 @@
 
 import {createUseStyles} from 'react-jss';
 
+const DEFAULT_LARGE_DIMENSION = 40;
+const DEFAULT_LARGE_PADDING = 20;
+
 const gallery = {
   position: 'absolute !important',
   left: '0 !important',
@@ -62,13 +65,13 @@ const control = {
 };
 
 const topControl = {
-  width: '24px',
-  height: '24px',
-  padding: '16px',
+  width: 24,
+  height: 24,
+  padding: 16,
   '@media (min-width:1024px)': {
-    width: '40px',
-    height: '40px',
-    padding: '20px',
+    width: DEFAULT_LARGE_DIMENSION,
+    height: DEFAULT_LARGE_DIMENSION,
+    padding: DEFAULT_LARGE_PADDING,
   },
 };
 
@@ -86,9 +89,9 @@ const arrow = {
   bottom: '0 !important',
   margin: 'auto !important',
   filter: 'drop-shadow(0 0 1px black) !important',
-  width: '40px',
-  height: '40px',
-  padding: '20px',
+  width: DEFAULT_LARGE_DIMENSION,
+  height: DEFAULT_LARGE_DIMENSION,
+  padding: DEFAULT_LARGE_PADDING,
   '&$nextArrow': {
     right: '0 !important',
     /* Needed for screen reader mode to size correctly. */
