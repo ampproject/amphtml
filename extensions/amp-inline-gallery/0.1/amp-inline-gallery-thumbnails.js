@@ -17,20 +17,12 @@
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {InlineGalleryEvents} from './inline-gallery-events';
 import {createCustomEvent} from '../../../src/event-helper';
-<<<<<<< HEAD
-import {dict} from '../../../src/core/types/object';
-import {htmlFor} from '../../../src/core/dom/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {matches, scopedQuerySelector} from '../../../src/core/dom/query';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
-import {setStyle} from '../../../src/core/dom/style';
-=======
 import {dict} from '#core/types/object';
 import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {matches, scopedQuerySelector} from '#core/dom/query';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setStyle} from '#core/dom/style';
->>>>>>> bafe128873c59aeb1e77d750c44a4f53aed8d713
 
 /**
  * Renders a carousel of thumbnails for an inline gallery.
