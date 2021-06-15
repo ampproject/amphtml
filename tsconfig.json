@@ -1,6 +1,6 @@
 {
-  "allowJs": true,
   "compilerOptions": {
+    "allowJs": true,
     "baseUrl": ".",
     "paths": {
       "#3p/*": ["./3p/*"],
