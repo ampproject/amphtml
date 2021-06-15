@@ -18,9 +18,9 @@
 /* eslint-disable import/no-restricted-paths */
 /* eslint-disable local/no-forbidden-terms */
 
-import {applyStaticLayout} from '../layout';
+import {applyStaticLayout} from 'src/static-layout';
 import {initLogConstructor} from '../log';
-import {toWin} from '../core/window';
+import {toWin} from '#core/window';
 
 /** @type {typeof AMP.BaseElement} */
 let BaseElement;
