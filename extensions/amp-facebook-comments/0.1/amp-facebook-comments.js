@@ -15,11 +15,11 @@
  */
 
 import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {createLoaderLogo} from '../../amp-facebook/0.1/facebook-loader';
 import {dashToUnderline} from '#core/types/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {isObject} from '#core/types';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '#core/dom';
@@ -83,7 +83,7 @@ class AmpFacebookComments extends AMP.BaseElement {
     this.element.setAttribute('data-embed-as', 'comments');
     const iframe = getIframe(this.win, this.element, TYPE);
     iframe.title = this.element.title || 'Facebook comments';
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(
       iframe,

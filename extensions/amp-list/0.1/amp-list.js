@@ -26,6 +26,7 @@ import {
 import {Deferred} from '#core/data-structures/promise';
 import {
   Layout,
+  applyFillContent,
   getLayoutClass,
   isLayoutSizeDefined,
   parseLayout,
@@ -559,7 +560,7 @@ export class AmpList extends AMP.BaseElement {
     // to take the height of its children instead,
     // whereas fill-content forces height:0
     if (!this.loadMoreEnabled_ && !this.enableManagedResizing_) {
-      this.applyFillContent(container, true);
+      applyFillContent(container, true);
     }
     return container;
   }
