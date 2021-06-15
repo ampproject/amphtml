@@ -16,7 +16,6 @@
 
 const {VERSION} = require('./internal-version');
 
-// TODO(alanorozco): Use real minification
 const removeWhitespace = (str) => str.replace(/\s+/g, '');
 
 // If there is a sync JS error during initial load,
@@ -50,7 +49,7 @@ let ExtensionLoadPriorityDef;
  * @param {ExtensionLoadPriorityDef=} loadPriority
  * @return {string}
  */
-exports.extension = function (name, version, latest, isModule, loadPriority) {
+function extension(name, version, latest, isModule, loadPriority) {
   const payload = extensionPayload(
     name,
     version,
@@ -59,13 +58,17 @@ exports.extension = function (name, version, latest, isModule, loadPriority) {
     loadPriority
   );
   return `(self.AMP=self.AMP||[]).push(${payload});`;
-};
+}
+
+exports.extension = extension;
 
 /**
  * Wrap in a structure that allows lazy execution and provides extension
  * metadata.
  * The returned code corresponds to an object. A bundle is not complete until
  * this object is wrapped in a loader like `AMP.push`.
+ * @see {@link extension}
+ * @see {@link bento}
  * @param {string} name
  * @param {string} version
  * @param {boolean} latest
@@ -103,15 +106,7 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
 
 /**
  * Anonymous function to load a Bento extension's payload (p).
- *
- * It tries to use AMP's loading mechanism (`(self.AMP = self.AMP || []).push)
- * when detecting the runtime either by a global, or the presence of a `script`
- * tag.
- *
- * On Bento documents, the extension's function (f) is executed immediately.
- * In this case, a barebones `AMP.registerElement` is also provided.
- * It uses a CustomElement implementation provided by the extension class
- * itself, and installs extension-specific CSS as soon as possible.
+ * @see {@link bento}
  */
 const bentoLoaderFn = removeWhitespace(`
 function (p) {
@@ -131,7 +126,25 @@ function (p) {
 }
 `);
 
-exports.bento = function (name, version, latest, isModule, loadPriority) {
+/**
+ * Wraps to load an extension's payload (p) as a Bento component.
+ *
+ * It tries to use AMP's loading mechanism (`(self.AMP = self.AMP || []).push`)
+ * when detecting the runtime either by a global, or the presence of a `script`
+ * tag.
+ *
+ * On Bento documents, the extension's function (f) is executed immediately.
+ * In this case, a barebones `AMP.registerElement` is also provided.
+ * It uses a CustomElement implementation provided by the extension class
+ * itself, and installs extension-specific CSS as soon as possible.
+ * @param {string} name
+ * @param {string} version
+ * @param {boolean} latest
+ * @param {boolean=} isModule
+ * @param {ExtensionLoadPriorityDef=} loadPriority
+ * @return {string}
+ */
+function bento(name, version, latest, isModule, loadPriority) {
   const payload = extensionPayload(
     name,
     version,
@@ -140,6 +153,8 @@ exports.bento = function (name, version, latest, isModule, loadPriority) {
     loadPriority
   );
   return `(${bentoLoaderFn})(${payload});`;
-};
+}
+
+exports.bento = bento;
 
 exports.none = '<%= contents %>';
