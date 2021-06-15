@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-import {createUseStyles} from 'react-jss';
+/** @externs */
 
-const button = {
-  '&:focus': {
-    outline: '#0389ff solid 2px',
-    outlineOffset: '2px',
-  },
-};
+/** @const */
+var SocialShareDef = {};
 
-const JSS = {
-  button,
-};
-
-// useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
-// eslint-disable-next-line local/no-export-side-effect
-export const useStyles = createUseStyles(JSS);
+/**
+ * @typedef {{
+ *   type: (string),
+ *   endpoint: (string|undefined),
+ *   params: (JsonObject|Object|undefined),
+ *   target: (string|undefined),
+ *   width: (number|string|undefined),
+ *   height: (number|string|undefined),
+ *   color: (string|undefined),
+ *   background: (string|undefined),
+ *   tabIndex: (number|string|undefined),
+ *   style: (string|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+SocialShareDef.Props;

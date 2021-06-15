@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '#preact';
-import {SocialShare} from '../social-share';
+import {SocialShare} from '../component';
 import {color, object, select, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
