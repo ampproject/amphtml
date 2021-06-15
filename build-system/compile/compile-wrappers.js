@@ -101,6 +101,18 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
   );
 }
 
+/**
+ * Anonymous function to load a Bento extension's payload (p).
+ *
+ * It tries to use AMP's loading mechanism (`(self.AMP = self.AMP || []).push)
+ * when detecting the runtime either by a global, or the presence of a `script`
+ * tag.
+ *
+ * On Bento documents, the extension's function (f) is executed immediately.
+ * In this case, a barebones `AMP.registerElement` is also provided.
+ * It uses a CustomElement implementation provided by the extension class
+ * itself, and installs extension-specific CSS as soon as possible.
+ */
 const bentoLoaderFn = removeWhitespace(`
 function (p) {
   self.AMP
