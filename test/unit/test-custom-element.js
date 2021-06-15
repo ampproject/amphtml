@@ -28,7 +28,6 @@ import {
   getImplSyncForTesting,
 } from '../../src/custom-element';
 import {elementConnectedCallback} from '#service/custom-element-registry';
-import {getRealChildNodes, getRealChildren} from '#core/dom/query';
 import {toggleExperiment} from '#experiments';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
@@ -1978,29 +1977,6 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
     child.setAttribute(attr, '');
     return child;
   }
-
-  it('getRealChildren should return nothing', () => {
-    expect(getRealChildNodes(element).length).to.equal(0);
-    expect(getRealChildren(element).length).to.equal(0);
-  });
-
-  it('getRealChildren should return content-only nodes', () => {
-    element.appendChild(doc.createElement('i-amp-service'));
-    element.appendChild(createWithAttr('placeholder'));
-    element.appendChild(createWithAttr('fallback'));
-    element.appendChild(createWithAttr('overflow'));
-    element.appendChild(doc.createTextNode('abc'));
-    element.appendChild(doc.createElement('content'));
-
-    const nodes = getRealChildNodes(element);
-    expect(nodes.length).to.equal(2);
-    expect(nodes[0].textContent).to.equal('abc');
-    expect(nodes[1].tagName.toLowerCase()).to.equal('content');
-
-    const elements = getRealChildren(element);
-    expect(elements.length).to.equal(1);
-    expect(elements[0].tagName.toLowerCase()).to.equal('content');
-  });
 
   it('getPlaceholder should return nothing', () => {
     expect(element.getPlaceholder()).to.be.null;

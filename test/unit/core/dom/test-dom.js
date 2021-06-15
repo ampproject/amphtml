@@ -15,8 +15,10 @@
  */
 
 import * as dom from '#core/dom';
+import {createElementWithAttributes} from '#core/dom';
+import {getRealChildNodes, getRealChildren, matches} from '#core/dom/query';
 import {loadPromise} from '../../../../src/event-helper';
-import {matches} from '#core/dom/query';
+
 import {setScopeSelectorSupportedForTesting} from '#core/dom/css-selectors';
 import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
 
@@ -502,6 +504,39 @@ describes.sandboxed('DOM', {}, (env) => {
       const focusSpy = env.sandbox.spy(element, 'focus');
       expect(() => dom.tryFocus(element)).to.not.throw();
       expect(focusSpy).to.have.been.called;
+    });
+  });
+
+  describe('getRealChildren and getRealChildNodes', () => {
+    let element;
+    beforeEach(() => {
+      element = document.createElement('div');
+    });
+
+    it('getRealChildren should return nothing', () => {
+      expect(getRealChildNodes(element).length).to.equal(0);
+      expect(getRealChildren(element).length).to.equal(0);
+    });
+
+    it('getRealChildren should return content-only nodes', () => {
+      const createWithAttr = (attr) =>
+        createElementWithAttributes(document, 'div', {[attr]: ''});
+
+      element.appendChild(document.createElement('i-amp-service'));
+      element.appendChild(createWithAttr('placeholder'));
+      element.appendChild(createWithAttr('fallback'));
+      element.appendChild(createWithAttr('overflow'));
+      element.appendChild(document.createTextNode('abc'));
+      element.appendChild(document.createElement('content'));
+
+      const nodes = getRealChildNodes(element);
+      expect(nodes.length).to.equal(2);
+      expect(nodes[0].textContent).to.equal('abc');
+      expect(nodes[1].tagName.toLowerCase()).to.equal('content');
+
+      const elements = getRealChildren(element);
+      expect(elements.length).to.equal(1);
+      expect(elements[0].tagName.toLowerCase()).to.equal('content');
     });
   });
 
