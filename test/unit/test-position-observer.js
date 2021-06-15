@@ -19,7 +19,7 @@ import {PositionObserver} from '#service/position-observer/position-observer-imp
 import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
 import {Services} from '#service';
 import {layoutRectLtwh} from '#core/math/layout-rect';
-import {macroTask} from '../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {setStyles} from '#core/dom/style';
 
 describes.realWin('PositionObserver', {amp: 1}, (env) => {

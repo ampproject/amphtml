@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {BrowserController, RequestBank} from '../../testing/test-helper';
+import {BrowserController, RequestBank} from '#testing/test-helper';
 import {Deferred} from '#core/data-structures/promise';
-import {poll} from '../../testing/iframe';
+import {poll} from '#testing/iframe';
 
 // TODO(wg-components): These tests are broken on Firefox (as of v77). They
 // also fail on Safari.

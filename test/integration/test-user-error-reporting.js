@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BrowserController, RequestBank} from '../../testing/test-helper';
+import {BrowserController, RequestBank} from '#testing/test-helper';
 
 // TODO(zhouyx, #11459): Unskip the test on Safari and Firefox.
 const t = describes.sandboxed.configure().skipSafari().skipFirefox().skipEdge();

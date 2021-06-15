@@ -45,7 +45,7 @@ import {
   setReportValiditySupportedForTesting,
 } from '../form-validators';
 import {user} from '../../../../src/log';
-import {whenCalled} from '../../../../testing/test-helper.js';
+import {whenCalled} from '#testing/test-helper.js';
 
 describes.repeated(
   '',
