@@ -254,10 +254,7 @@ function renderElements(elementOrDoc) {
           </div>
         </div>
 
-        <div ref="time">
-          <!-- Text content must match format in updateTime(). -->
-          -:- / 0:00
-        </div>
+        <div ref="time">-:-</div>
 
         <div ref="progress" hidden>
           <div ref="progressLine"></div>
