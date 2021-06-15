@@ -18,7 +18,7 @@ import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs'
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
 import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {Purifier} from '#purifier/purifier';
+import {Purifier} from '#purifier';
 import {Services} from '#service';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '#service/extension-script';
