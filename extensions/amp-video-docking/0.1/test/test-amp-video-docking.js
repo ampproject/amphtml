@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as layout from '#core/dom/layout';
 import {
   Actions,
   BASE_CLASS_NAME,
@@ -49,7 +48,6 @@ describes.realWin('video docking', {amp: true}, (env) => {
   let querySelectorStub;
   let any;
   let slotAttr = '';
-  let applyFillContent;
 
   const viewportSize = {width: 0, height: 0};
 
@@ -191,8 +189,6 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
     docking = new VideoDocking(ampdoc);
 
-    applyFillContent = env.sandbox.stub(layout, 'applyFillContent');
-
     env.sandbox.stub(docking, 'getTimer_').returns({
       promise: () => Promise.resolve(),
     });
@@ -274,16 +270,12 @@ describes.realWin('video docking', {amp: true}, (env) => {
       await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
       expect(
-        applyFillContent.withArgs(
-          videoLayerElement('.amp-video-docked-placeholder-background')
-        )
-      ).to.have.been.calledOnce;
+        videoLayerElement('.amp-video-docked-placeholder-background')
+      ).to.have.class('i-amphtml-fill-content');
 
       expect(
-        applyFillContent.withArgs(
-          videoLayerElement('.amp-video-docked-placeholder-background-poster')
-        )
-      ).to.have.been.calledOnce;
+        videoLayerElement('.amp-video-docked-placeholder-background-poster')
+      ).to.have.class('i-amphtml-fill-content');
     });
 
     it('styles and transforms elements into docked area', async () => {
