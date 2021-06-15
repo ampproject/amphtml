@@ -8,7 +8,7 @@ to sanitize rendered Mustache.js templates before displaying them.
 ## Usage
 
 ```js
-import {Purifier} from './src/purifier/purifier';
+import {Purifier} from '#purifier';
 
 const purifier = new Purifier(document);
 purifier.purifyHtml('a<script>b</script>c'); // "ac"
@@ -18,7 +18,7 @@ purifier.purifyHtml('a<script>b</script>c'); // "ac"
 
 ```js
 import Mustache from 'mustache';
-import {Purifier} from '../../../src/purifier/purifier';
+import {Purifier} from '#purifier';
 
 const purifier = new Purifier(document);
 const _unescapedValue = Mustache.Writer.prototype.unescapedValue;
