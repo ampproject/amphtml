@@ -50,6 +50,7 @@ import {dict, hasOwn} from '#core/types/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {isArray, isEnumValue, isObject} from '#core/types';
+import {realChildElements} from '#core/dom/query';
 
 import {isExperimentOn} from '#experiments';
 
@@ -223,7 +224,7 @@ export class AmpConsent extends AMP.BaseElement {
       /** @type {string} */ (this.consentId_)
     );
 
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       toggle(child, false);

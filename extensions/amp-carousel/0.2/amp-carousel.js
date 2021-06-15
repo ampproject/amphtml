@@ -21,7 +21,10 @@ import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
 import {Services} from '#service';
-import {closestAncestorElementBySelector} from '#core/dom/query';
+import {
+  closestAncestorElementBySelector,
+  realChildElements,
+} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 import {createCustomEvent, getDetail, listen} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
@@ -142,7 +145,7 @@ class AmpCarousel extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(this.element);
 
     const {element, win} = this;
-    const slides = this.getRealChildren();
+    const slides = realChildElements(this.element);
 
     element.appendChild(this.renderContainerDom_());
     this.scrollContainer_ = this.element.querySelector(

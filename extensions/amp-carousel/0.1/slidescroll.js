@@ -20,7 +20,10 @@ import {BaseSlides} from './base-slides';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {bezierCurve} from '#core/data-structures/curve';
-import {closestAncestorElementBySelector} from '#core/dom/query';
+import {
+  closestAncestorElementBySelector,
+  realChildElements,
+} from '#core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '#core/types/object';
@@ -174,7 +177,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.element.classList.add('i-amphtml-slidescroll');
 
-    this.slides_ = this.getRealChildren();
+    this.slides_ = realChildElements(this.element);
 
     this.noOfSlides_ = this.slides_.length;
 
