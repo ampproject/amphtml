@@ -20,6 +20,7 @@ module.exports = {
     'local/no-global': 2,
 
     // These rules should apply to all AMP code. For now, they apply only to src
+    'import/newline-after-import': 2,
     'import/no-dynamic-require': 2,
     'import/no-unused-modules': 2,
     'import/no-commonjs': 2,

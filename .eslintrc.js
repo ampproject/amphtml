@@ -116,7 +116,6 @@ module.exports = {
     // 'import/no-mutable-exports': 2,
     'import/first': 2,
     // 'import/extensions': 2,
-    // 'import/newline-after-import': 2,
     // 'import/no-default-export': 2,
 
     'jsdoc/check-param-names': 2,
