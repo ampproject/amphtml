@@ -103,6 +103,7 @@ module.exports = {
     'chai-expect/terminating-properties': 2,
     'curly': 2,
     'google-camelcase/google-camelcase': 2,
+    'import/extensions': 2,
     'jsdoc/check-param-names': 2,
     'jsdoc/check-tag-names': [
       2,
