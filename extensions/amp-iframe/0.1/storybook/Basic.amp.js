@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
 

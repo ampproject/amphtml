@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {Keys} from '#core/constants/key-codes';
 import {Option, Selector} from '../component';
 import {mount} from 'enzyme';

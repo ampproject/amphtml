@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {ContainWrapper} from '#preact/component';
 import {LINE_HEIGHT_EM_, useStyles} from './component.jss';
 import {px, resetStyles, setStyle, setStyles} from '#core/dom/style';

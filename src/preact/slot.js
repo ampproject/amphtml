@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from './index';
+import * as Preact from '#preact-ns';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Loading} from '#core/loading-instructions';
 import {devAssert} from '#core/assert';

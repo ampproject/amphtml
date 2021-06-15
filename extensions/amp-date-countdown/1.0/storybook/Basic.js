@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {DateCountdown} from '../component';
 import {boolean, date, select, withKnobs} from '@storybook/addon-knobs';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {Keys} from '#core/constants/key-codes';
 import {SocialShareIcon} from './social-share-svgs';
 import {Wrapper} from '#preact/component';

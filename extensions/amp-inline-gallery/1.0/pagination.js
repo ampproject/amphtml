@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {Wrapper} from '#preact/component';
 import {useContext} from '#preact';

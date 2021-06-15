@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {ContainWrapper, useValueRef} from '#preact/component';
 import {Keys} from '#core/constants/key-codes';
 import {forwardRef} from '#preact/compat';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {Wrapper, useRenderer} from '#preact/component';
 import {dict} from '#core/types/object';
 import {getDate} from '#core/types/date';

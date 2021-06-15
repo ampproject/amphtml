@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {Timeago} from '../component';
 import {mount} from 'enzyme';
 import {waitFor} from '../../../../testing/test-helper';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {Instagram} from '../component';
 import {WithAmpContext} from '#preact/context';
 import {createRef} from '#preact';

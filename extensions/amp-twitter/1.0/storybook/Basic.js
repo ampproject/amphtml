@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {Twitter} from '../component';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 

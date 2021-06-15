@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from './index';
+import * as Preact from '#preact-ns';
 import {Loading, reducer as loadingReducer} from '#core/loading-instructions';
 import {createContext, useContext, useMemo} from './index';
 

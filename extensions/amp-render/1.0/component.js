@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {Wrapper, useRenderer} from '#preact/component';
 import {forwardRef} from '#preact/compat';
 import {useCallback, useEffect, useImperativeHandle, useState} from '#preact';

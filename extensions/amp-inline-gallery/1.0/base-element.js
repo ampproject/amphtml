@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {InlineGallery} from './component';
 import {PreactBaseElement} from '#preact/base-element';

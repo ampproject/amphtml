@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact/index';
+import * as Preact from '#preact-ns';
 import {WithAmpContext, useAmpContext, useLoading} from '#preact/context';
 import {mount} from 'enzyme';
 

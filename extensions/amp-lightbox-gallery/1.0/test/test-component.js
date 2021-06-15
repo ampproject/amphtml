@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {LightboxGalleryProvider, WithLightbox} from '../component';
 import {mount} from 'enzyme';
 

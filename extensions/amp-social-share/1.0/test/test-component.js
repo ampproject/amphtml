@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {SocialShare} from '../component';
 import {dict} from '#core/types/object';
 import {mount} from 'enzyme';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {BaseCarousel} from '../component';
 import {mount} from 'enzyme';
 import {useStyles} from '../component.jss';

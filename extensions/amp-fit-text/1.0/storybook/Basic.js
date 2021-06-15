@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {FitText} from '../component';
 import {number, text, withKnobs} from '@storybook/addon-knobs';
 

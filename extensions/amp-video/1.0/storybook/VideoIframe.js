@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {
   Accordion,
   AccordionContent,

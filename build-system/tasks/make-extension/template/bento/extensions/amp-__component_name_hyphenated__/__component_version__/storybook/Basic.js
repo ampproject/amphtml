@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {__component_name_pascalcase__} from '../component'
 import {withKnobs} from '@storybook/addon-knobs';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from './index';
+import * as Preact from '#preact-ns';
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';

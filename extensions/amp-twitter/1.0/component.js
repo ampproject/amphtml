@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';

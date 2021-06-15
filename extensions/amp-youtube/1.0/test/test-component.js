@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
+import * as Preact from '#preact-ns';
 import {Youtube} from '../component';
 import {createRef} from '#preact';
 import {dispatchCustomEvent} from '#core/dom';
