@@ -24,7 +24,7 @@ import {clamp} from '#core/math';
 import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {listen} from '../../../src/event-helper';
+import {listen, loadPromise} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
