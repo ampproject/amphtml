@@ -960,7 +960,7 @@ export function updateTime(currentTime, duration) {
   // need this clause if we switch. https://go.amp.dev/issue/8841
   if (progress.hasAttribute('hidden') !== isLivestream) {
     toggle(progress, !isLivestream);
-    progress.setAttribute('aria-hidden', isLivestream ? 'true' : 'false');
+    progress.setAttribute('aria-hidden', String(isLivestream));
   }
 
   // TODO(alanorozco): Consider adding a label for livestreams to display next
