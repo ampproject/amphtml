@@ -1282,12 +1282,14 @@ export class VideoEventTracker extends EventTracker {
     const videoSpec = config['videoSpec'] || {};
     const selectorValue = config['selector'] || videoSpec['selector'];
     const selector = isArray(selectorValue) ? selectorValue : selectorValue.split();
+    this.assertUniqueSelectors_(selector);
+    console.log(selectorValue)
     const selectionMethod = config['selectionMethod'] || null;
 
-    const targetReady = [];
+    const targetReadyPromise = [];
     selector.forEach((item, i) => {
-      targetReady.push(
-        this.root.getElement(
+      targetReadyPromise.push(
+        this.root.getElements(
           context,
           item,
           selectionMethod
@@ -1395,35 +1397,37 @@ export class VideoEventTracker extends EventTracker {
         'No target specified by video session event.'
       );
 
-      targetReady.forEach((item, i) => {
-        item.then((target) => {
-          if (!target.contains(el)) {
-            return;
-          }
-          const normalizedDetails = removeInternalVars(details);
-          listener(new AnalyticsEvent(target, normalizedType, normalizedDetails));
-        });
+      Promise.all(targetReadyPromise)
+      .then((targetReady) => {
+        targetReady.forEach((target, i) => {
+            if (!target[0].contains(el)) {
+              return;
+            }
+            const normalizedDetails = removeInternalVars(details);
+            listener(new AnalyticsEvent(target, normalizedType, normalizedDetails));
+        })
       });
-      const unlistenPromise = this.root
-        .getElements(context.parentElement || context, selector, selectionMethod)
-        .then((elements) => {
-          const unlistenCallbacks = [];
-          for (let i = 0; i < elements.length; i++) {
-            unlistenCallbacks.push(
-              element
-            )
-          }
-          return unlistenCallbacks;
-        });
-      return function() {
-        unlistenPromise.then((unlistenCallbacks) => {
-          for (let i = 0; i < unlistenCallbacks.length; i++) {
-            unlistenCallbacks[i]();
-          }
-        });
-      };
+
     });
 
+  }
+
+  /**
+   * Assert that the selectors are all unique
+   * @param {!Array<string>|string} selectors
+   */
+  assertUniqueSelectors_(selectors) {
+    if (isArray(selectors)) {
+      const map = {};
+      for (let i = 0; i < selectors.length; i++) {
+        userAssert(
+          !map[selectors[i]],
+          'Cannot have duplicate selectors in selectors list: %s',
+          selectors
+        );
+        map[selectors[i]] = selectors[i];
+      }
+    }
   }
 }
 
