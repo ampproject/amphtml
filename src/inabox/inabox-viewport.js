@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {MessageType} from '../../src/3p-frame-messaging';
+import {MessageType} from '../3p-frame-messaging';
 import {Observable} from '#core/data-structures/observable';
 import {Services} from '#service';
 import {ViewportBindingDef} from '#service/viewport/viewport-binding-def';
