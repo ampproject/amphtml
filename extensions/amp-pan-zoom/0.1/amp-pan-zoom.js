@@ -33,6 +33,7 @@ import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
+import {getRealChildren} from '#core/dom/query';
 import {layoutRectFromDomRect, layoutRectLtwh} from '#core/math/layout-rect';
 import {numeric} from '../../../src/transition';
 import {
@@ -166,7 +167,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
-    const children = this.getRealChildren();
+    const children = getRealChildren(this.element);
 
     userAssert(
       children.length == 1,

@@ -48,6 +48,7 @@ import {
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '#core/types/object';
 import {getData} from '../../../src/event-helper';
+import {getRealChildren} from '#core/dom/query';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {isArray, isEnumValue, isObject} from '#core/types';
 
@@ -223,7 +224,7 @@ export class AmpConsent extends AMP.BaseElement {
       /** @type {string} */ (this.consentId_)
     );
 
-    const children = this.getRealChildren();
+    const children = getRealChildren(this.element);
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       toggle(child, false);

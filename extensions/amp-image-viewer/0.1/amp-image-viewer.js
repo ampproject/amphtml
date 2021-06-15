@@ -32,7 +32,11 @@ import {Services} from '#service';
 import {WindowInterface} from '#core/window/interface';
 import {bezierCurve} from '#core/data-structures/curve';
 import {boundValue, distance, magnitude} from '#core/math';
-import {closestAncestorElementBySelector, elementByTag} from '#core/dom/query';
+import {
+  closestAncestorElementBySelector,
+  elementByTag,
+  getRealChildren,
+} from '#core/dom/query';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
@@ -133,7 +137,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.element.classList.add('i-amphtml-image-viewer');
-    const children = this.getRealChildren();
+    const children = getRealChildren(this.element);
 
     userAssert(
       children.length == 1,

@@ -37,6 +37,7 @@ import {debounce} from '#core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '#core/types/object';
 import {getMode} from '../../../src/mode';
+import {getRealChildren} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 import {isInFie} from '../../../src/iframe-helper';
 import {toArray} from '#core/types/array';
@@ -232,7 +233,7 @@ class AmpLightbox extends AMP.BaseElement {
 
     this.isScrollable_ = element.hasAttribute('scrollable');
 
-    const children = this.getRealChildren();
+    const children = getRealChildren(this.element);
 
     this.container_ = element.ownerDocument.createElement('div');
     if (!this.isScrollable_) {
