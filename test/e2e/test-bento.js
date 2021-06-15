@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-describes.endtoend('Bento', {fixture: 'bento/index.html'}, async (env) => {
+describes.endtoend('Bento', {fixture: 'bento/minimal.html'}, async (env) => {
   it('applies static layout without v0.js', async () => {
     const layoutSizedDefined = await env.controller.findElement(
       '.i-amphtml-layout-size-defined'
