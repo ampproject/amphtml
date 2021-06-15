@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../../../src/services';
-import {createElementWithAttributes} from '../../../../../src/dom';
-import {dict, getValueForExpr} from '../../../../../src/core/types/object';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {dict, getValueForExpr} from '#core/types/object';
 const ALLOWED_AD_PROVIDER = 'gpt';
 
 /**
