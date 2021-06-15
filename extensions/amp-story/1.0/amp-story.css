@@ -272,7 +272,7 @@ amp-story-page[distance="1"] {
 }
 
 amp-story-page[distance="2"] {
-  transform: translateY(100%) !important;
+  transform: translateY(100vh) !important;
 }
 
 amp-story-page [data-text-background-color] {
