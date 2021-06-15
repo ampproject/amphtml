@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
 import {
   ATTRIBUTES_TO_PROPAGATE,
   AmpImg,
   installImg,
-} from '../../builtins/amp-img/amp-img';
-=======
-import {AmpImg, installImg} from '#builtins/amp-img/amp-img';
->>>>>>> bafe128873c59aeb1e77d750c44a4f53aed8d713
+} from '#builtins/amp-img/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {Layout, LayoutPriority} from '#core/dom/layout';
 import {Services} from '#service';
