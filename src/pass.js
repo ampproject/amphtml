@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
+import {Services} from './service';
 
 /**
  * Pass class helps to manage single-pass process. A pass is scheduled using

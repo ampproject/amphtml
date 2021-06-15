@@ -15,22 +15,22 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Services} from '#service';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-} from '../../../src/core/dom/fullscreen';
+} from '#core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe} from '../../../src/3p-frame';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {redispatch} from '../../../src/iframe-video';
-import {removeElement} from '../../../src/core/dom';
+import {removeElement} from '#core/dom';
 
 const TAG = 'amp-viqeo-player';
 

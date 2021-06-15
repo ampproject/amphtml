@@ -15,7 +15,7 @@
  */
 
 import {cssEscape} from '../../../third_party/css-escape/css-escape';
-import {devAssert} from '../assert';
+import {devAssert} from '#core/assert';
 
 /**
  * @type {boolean|undefined}

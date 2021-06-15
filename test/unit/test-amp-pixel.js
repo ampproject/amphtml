@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {VariableSource} from '../../src/service/variable-source';
-import {installUrlReplacementsForEmbed} from '../../src/service/url-replacements-impl';
+import {VariableSource} from '#service/variable-source';
+import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 
 describes.realWin('amp-pixel', {amp: true}, (env) => {
   const urlErrorRegex = /src attribute must start with/;

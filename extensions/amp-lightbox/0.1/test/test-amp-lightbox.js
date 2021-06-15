@@ -15,11 +15,11 @@
  */
 
 import '../amp-lightbox';
-import * as dom from '../../../../src/core/dom';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
+import * as dom from '#core/dom';
+import {ActionService} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
 import {whenCalled} from '../../../../testing/test-helper.js';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {
   ConsentConfig,
   expandConsentEndpointUrl,
   expandPolicyConfig,
 } from '../consent-config';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {Services} from '../../../../src/services';
-import {dict} from '../../../../src/core/types/object';
+import {Services} from '#service';
+import {dict} from '#core/types/object';
 
 describes.realWin('ConsentConfig', {amp: 1}, (env) => {
   let doc;
