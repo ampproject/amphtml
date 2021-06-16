@@ -23,7 +23,7 @@
 }
 
 .i-amphtml-story-desktop-one-panel amp-story-page {
-  /* Calculates height by factoring in vertical margin. */
+  /* Calculates height by factoring in responsive vertical margin. */
   --i-amphtml-story-desktop-one-panel-large-height: calc(100vh - max(148px, 16.5vh));
   height: var(--i-amphtml-story-desktop-one-panel-large-height) !important;
   width: calc(var(--i-amphtml-story-desktop-one-panel-large-height) * var(--i-amphtml-story-desktop-one-panel-large-ratio)) !important;
