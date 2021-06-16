@@ -16,8 +16,16 @@
 
 import * as Preact from '#preact';
 import {LightboxGalleryContext} from './context';
+import {
+  cloneElement,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from '#preact';
 import {sequentialIdGenerator} from '#core/math/id-generator';
-import {useContext, useLayoutEffect, useMemo, useState} from '#preact';
+import {toChildArray} from '#preact/compat';
 
 const generateLightboxItemKey = sequentialIdGenerator();
 
@@ -36,15 +44,23 @@ export function WithLightbox({
   as: Comp = 'div',
   children,
   enableActivation = true,
-  render = () => children,
+  render: renderProp,
   ...rest
 }) {
   const [genKey] = useState(generateLightboxItemKey);
   const {deregister, open, register} = useContext(LightboxGalleryContext);
+  const render = useCallback(
+    () =>
+      renderProp
+        ? renderProp()
+        : toChildArray(children).map((child) => cloneElement(child)),
+    [renderProp, children]
+  );
+
   useLayoutEffect(() => {
     register(genKey, render);
     return () => deregister(genKey);
-  }, [genKey, deregister, register, render]);
+  }, [register, deregister, genKey, render]);
 
   const activationProps = useMemo(
     () =>

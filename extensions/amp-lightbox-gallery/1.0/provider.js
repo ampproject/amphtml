@@ -17,7 +17,8 @@ import * as Preact from '#preact';
 import {BaseCarousel} from './../../amp-base-carousel/1.0/component';
 import {Lightbox} from './../../amp-lightbox/1.0/component';
 import {LightboxGalleryContext} from './context';
-import {useCallback, useRef, useState} from '#preact';
+import {mod} from '#core/math';
+import {useCallback, useLayoutEffect, useRef, useState} from '#preact';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
@@ -31,28 +32,52 @@ export function LightboxGalleryProvider({children, render}) {
   const carouselRef = useRef(null);
   const [index, setIndex] = useState(0);
   const renderers = useRef([]);
-  const lightboxElements = useRef([]);
+  const carouselElements = useRef([]);
+  const gridElements = useRef([]);
   const register = (key, render) => {
-    renderers.current[key] = render;
+    // Given key is 1-indexed.
+    renderers.current[key - 1] = render;
   };
   const deregister = (key) => {
-    delete lightboxElements.current[key];
-    delete renderers.current[key];
+    // Given key is 1-indexed.
+    delete renderers.current[key - 1];
   };
   const context = {
     deregister,
     register,
-    open: (genKey) => {
-      setIndex(genKey);
+    open: (index) => {
+      setViewCarousel(true);
+      setIndex(index);
       lightboxRef.current.open();
     },
   };
 
+  useLayoutEffect(() => {
+    carouselRef.current?.goToSlide(index);
+  }, [index]);
+
+  const [viewCarousel, setViewCarousel] = useState(true);
   const [showControls, setShowControls] = useState(true);
   const renderElements = useCallback(() => {
+    // Prefer counting elements over retrieving array length because
+    // array can contain empty values that have been deregistered.
+    let count = 0;
     renderers.current.forEach((render, index) => {
-      if (!lightboxElements.current[index]) {
-        lightboxElements.current[index] = render();
+      if (!carouselElements.current[index]) {
+        carouselElements.current[index] = render();
+        gridElements.current[index] = (
+          <div
+            role="button"
+            aria-label="View in carousel"
+            onClick={() => {
+              setViewCarousel(true);
+              setIndex(mod(index, count));
+            }}
+          >
+            {render()}
+          </div>
+        );
+        count++;
       }
     });
   }, []);
@@ -68,20 +93,28 @@ export function LightboxGalleryProvider({children, render}) {
         closeButtonAs={CloseButtonIcon}
         onBeforeOpen={() => renderElements()}
         onAfterOpen={() => setShowControls(true)}
-        onClick={() => setShowControls(!showControls)}
         ref={lightboxRef}
       >
-        <div className={classes.controlsPanel}></div>
+        <div className={classes.controlsPanel}>
+          <button onClick={() => setViewCarousel(!viewCarousel)}>
+            toggle view
+          </button>
+        </div>
         <BaseCarousel
           arrowPrevAs={NavButtonIcon}
           arrowNextAs={NavButtonIcon}
           className={classes.gallery}
           defaultSlide={index}
+          hidden={!viewCarousel}
           loop
+          onClick={() => setShowControls(!showControls)}
           ref={carouselRef}
         >
-          {lightboxElements.current}
+          {viewCarousel && carouselElements.current}
         </BaseCarousel>
+        <div className={classes.gallery} hidden={viewCarousel}>
+          {!viewCarousel && gridElements.current}
+        </div>
       </Lightbox>
       <LightboxGalleryContext.Provider value={context}>
         {render ? render() : children}
