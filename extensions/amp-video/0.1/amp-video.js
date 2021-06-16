@@ -45,7 +45,7 @@ import {htmlFor} from '#core/dom/static-template';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {
   propagateObjectFitStyles,
   setImportantStyles,

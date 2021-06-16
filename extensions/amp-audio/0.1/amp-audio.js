@@ -31,7 +31,7 @@ import {
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
