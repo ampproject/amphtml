@@ -31,7 +31,9 @@ limitations under the License.
 
 ## Usage
 
-The `amp-render` component renders content in a specified template. It can fetch content from a CORS JSON endpoint or inline from `amp-state` or `amp-script`.
+The `amp-render` component fetches JSON data, then renders that data using a template. `amp-render` can use data from a CORS JSON endpoint, from an `amp-state` state variable, or from `amp-script`.
+
+Since `amp-render`'s data can come from `amp-script`, you can use your own JavaScript to filter data, cap its size, create list functionality, and otherwise customize the component's behavior and appearance. If you prefer to use HTML attributes, `amp-list` provides a richer feature set.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
