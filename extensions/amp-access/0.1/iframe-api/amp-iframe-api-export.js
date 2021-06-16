@@ -19,7 +19,7 @@
  */
 
 /* eslint-disable-next-line module-resolver/use-alias */
-import '../../../../src/polyfills/index.js';
+import '../../../../src/polyfills';
 import {AmpAccessIframeApi} from './iframe-api';
 
 export default AmpAccessIframeApi;
