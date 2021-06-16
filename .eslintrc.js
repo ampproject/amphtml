@@ -97,7 +97,11 @@ module.exports = {
     },
     'import/extensions': ['.js', '.jsx'],
     'import/external-module-folders': ['node_modules', 'third_party'],
-    'import/ignore': ['node_modules'],
+    'import/ignore': [
+      'node_modules',
+      // Imports of `CSS` from JSS files are created at build time
+      '\\.jss\\.js',
+    ],
   },
   'reportUnusedDisableDirectives': true,
   'rules': {
@@ -107,10 +111,16 @@ module.exports = {
     'curly': 2,
     'google-camelcase/google-camelcase': 2,
 
-    'import/no-unresolved': ['error', {ignore: ['\\./build/.*']}],
+    'import/no-unresolved': [
+      'error',
+      {
+        // Ignore unresolved imports of build files
+        'ignore': ['(\\./|#)build/.*'],
+      },
+    ],
     'import/named': 2,
     'import/namespace': 2,
-    'import/no-useless-path-segments': 2,
+    'import/no-useless-path-segments': ['error', {'noUselessIndex': true}],
     'import/no-absolute-path': 2,
     'import/export': 2,
     'import/no-deprecated': 2,
