@@ -14,138 +14,178 @@
  * limitations under the License.
  */
 
-const {expect} = require('chai');
+const posthtml = require('posthtml');
+const test = require('ava');
+const {extractMatching, getElementChildren} = require('./helpers');
 const {FileList} = require('../file-list');
-const {getBoundAttr, parseHtmlChunk} = require('./helpers');
 
-describe('devdash', () => {
-  describe('FileList', () => {
-    it('wraps', () => {
-      const root = parseHtmlChunk(
-        FileList({
-          basepath: 'basepath',
-          fileSet: [],
-          selectModePrefix: '/',
-        })
-      );
+test('wraps', async (t) => {
+  const document = FileList({
+    basepath: 'basepath',
+    fileSet: [],
+    selectModePrefix: '/',
+  });
 
-      expect(root.className).to.equal('file-list-container');
+  await posthtml([
+    (tree) => {
+      const elements = getElementChildren(tree);
+      t.is(elements.length, 1);
 
-      const {firstElementChild} = root;
+      const [root] = elements;
+      t.is(root.attrs.class, 'file-list-container');
 
-      expect(firstElementChild.className).to.equal('wrap');
-    });
+      const [firstElementChild] = getElementChildren(root.content);
+      t.is(firstElementChild.attrs.class, 'wrap');
+    },
+  ]).process(document);
+});
 
-    it('creates amp-list', () => {
-      const root = parseHtmlChunk(
-        FileList({
-          basepath: 'basepath',
-          fileSet: [],
-          selectModePrefix: '/',
-        })
-      );
+test('creates amp-list', async (t) => {
+  const document = FileList({
+    basepath: 'basepath',
+    fileSet: [],
+    selectModePrefix: '/',
+  });
 
-      const {length} = root.getElementsByTagName('amp-list');
-      expect(length).to.equal(1);
-    });
+  const elements = [];
+  await posthtml([
+    (tree) =>
+      tree.match({tag: 'amp-list'}, (node) => {
+        elements.push(node);
+        return node;
+      }),
+  ]).process(document);
 
-    it('creates placeholder inside amp-list with rendered data', () => {
-      const fileSet = ['foo.bar', 'tacos.al.pastor'];
+  const {length} = elements;
+  t.is(length, 1);
+});
 
-      const root = parseHtmlChunk(
-        FileList({
-          fileSet,
-          basepath: 'basepath',
-          selectModePrefix: '/',
-        })
-      );
+test('creates placeholder inside amp-list with rendered data', async (t) => {
+  const fileSet = ['foo.bar', 'tacos.al.pastor'];
 
-      const els = root.querySelectorAll('amp-list > [placeholder]');
+  const document = FileList({
+    fileSet,
+    basepath: 'basepath',
+    selectModePrefix: '/',
+  });
 
-      expect(els).to.have.length(1);
+  const extractedAmplist = await extractMatching(document, {
+    tag: 'amp-list',
+  });
+  t.truthy(extractedAmplist);
 
-      const [placeholder] = els;
-      const {firstElementChild} = placeholder;
+  const extractedPlaceholder = await extractMatching(extractedAmplist, {
+    attrs: {placeholder: ''},
+  });
+  t.truthy(extractedPlaceholder);
 
-      expect(firstElementChild.getAttribute('role')).to.equal('list');
-
-      const items = firstElementChild.querySelectorAll('.file-link-container');
-
-      expect(items).to.have.length(fileSet.length);
-    });
-
-    it('binds /examples hrefs', () => {
-      const fileSet = ['asada.html', 'adobada.html', 'pastor.html'];
-      const basepath = '/examples/';
-
-      const root = parseHtmlChunk(
-        FileList({
-          fileSet,
-          basepath,
-          selectModePrefix: '/',
-        })
-      );
-
-      const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
-
-      expect(els).to.have.length(fileSet.length);
-
-      Array.from(els).forEach((el, i) => {
-        expect(getBoundAttr(el, 'href')).to.be.ok;
-        expect(el.getAttribute('href')).to.equal(basepath + fileSet[i]);
-      });
-    });
-
-    it('does not bind non-/examples hrefs', () => {
-      const fileSet = ['asada.html', 'adobada.html', 'pastor.html'];
-      const basepath = '/potato/';
-
-      const root = parseHtmlChunk(
-        FileList({
-          fileSet,
-          basepath,
-          selectModePrefix: '/',
-        })
-      );
-
-      const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
-
-      expect(els).to.have.length(fileSet.length);
-
-      Array.from(els).forEach((el, i) => {
-        expect(getBoundAttr(el, 'href')).to.be.undefined;
-        expect(el.getAttribute('href')).to.equal(basepath + fileSet[i]);
-      });
-    });
-
-    it('binds/does not bind mixed', () => {
-      const bound = ['asada.html', 'adobada.html', 'pastor.html'];
-      const notBound = ['chabbuddy.g', 'dj.beats', 'mc.grindah'];
-      const basepath = '/examples/';
-
-      const root = parseHtmlChunk(
-        FileList({
-          fileSet: [...bound, ...notBound],
-          basepath,
-          selectModePrefix: '/',
-        })
-      );
-
-      const els = root.querySelectorAll('amp-list [role=listitem] > a[href]');
-
-      expect(els).to.have.length(bound.length + notBound.length);
-
-      bound.forEach((expectedHref, i) => {
-        const el = els[i];
-        expect(getBoundAttr(el, 'href')).to.be.ok;
-        expect(el.getAttribute('href')).to.equal(basepath + expectedHref);
+  let placeholders = [];
+  const fileLinkContainers = [];
+  await posthtml([
+    (tree) => {
+      placeholders = getElementChildren(tree);
+      tree.match({attrs: {class: /file-link-container/}}, (node) => {
+        const [a] = getElementChildren(node.content);
+        if (a && a.tag === 'a' && !a.attrs?.['[href]']) {
+          fileLinkContainers.push(node);
+        }
       });
 
-      notBound.forEach((expectedHref, i) => {
-        const el = els[bound.length + i];
-        expect(getBoundAttr(el, 'href')).to.be.undefined;
-        expect(el.getAttribute('href')).to.equal(basepath + expectedHref);
-      });
-    });
+      return tree;
+    },
+  ]).process(extractedPlaceholder);
+
+  const [placeholder] = placeholders;
+  const [firstElementChild] = getElementChildren(placeholder.content || []);
+
+  t.is(firstElementChild.attrs?.role, 'list');
+  t.is(fileLinkContainers.length, fileSet.length);
+});
+
+async function getListitemAElements(document) {
+  const extractedList = await extractMatching(document, {
+    attrs: {role: 'list'},
+  });
+
+  const elements = [];
+  await posthtml([
+    (tree) =>
+      tree.match({attrs: {role: 'listitem'}}, (node) => {
+        const [a] = getElementChildren(node.content);
+        if (a && a.tag === 'a' && a.attrs?.href) {
+          elements.push(a);
+        }
+        return node;
+      }),
+  ]).process(extractedList);
+
+  return elements;
+}
+
+test('binds /examples hrefs', async (t) => {
+  const fileSet = ['asada.html', 'adobada.html', 'pastor.html'];
+  const basepath = '/examples/';
+
+  const document = FileList({
+    fileSet,
+    basepath,
+    selectModePrefix: '/',
+  });
+
+  const elements = await getListitemAElements(document);
+
+  t.is(elements.length, fileSet.length);
+
+  for (const [i, element] of elements.entries()) {
+    t.truthy(element.attrs?.['[href]']);
+    t.is(element.attrs?.href, basepath + fileSet[i]);
+  }
+});
+
+test('does not bind non-/examples hrefs', async (t) => {
+  const fileSet = ['asada.html', 'adobada.html', 'pastor.html'];
+  const basepath = '/potato/';
+
+  const document = FileList({
+    fileSet,
+    basepath,
+    selectModePrefix: '/',
+  });
+
+  const elements = await getListitemAElements(document);
+
+  t.is(elements.length, fileSet.length);
+
+  for (const [i, element] of elements.entries()) {
+    t.falsy(element.attrs?.['[href]']);
+    t.is(element.attrs?.href, basepath + fileSet[i]);
+  }
+});
+
+test('binds/does not bind mixed', async (t) => {
+  const bound = ['asada.html', 'adobada.html', 'pastor.html'];
+  const notBound = ['chabbuddy.g', 'dj.beats', 'mc.grindah'];
+  const basepath = '/examples/';
+
+  const document = FileList({
+    fileSet: [...bound, ...notBound],
+    basepath,
+    selectModePrefix: '/',
+  });
+
+  const elements = await getListitemAElements(document);
+
+  t.is(elements.length, bound.length + notBound.length);
+
+  bound.forEach((expectedHref, i) => {
+    const element = elements[i];
+    t.truthy(element.attrs?.['[href]']);
+    t.is(element.attrs?.href, basepath + expectedHref);
+  });
+
+  notBound.forEach((expectedHref, i) => {
+    const element = elements[bound.length + i];
+    t.falsy(element.attrs?.['[href]']);
+    t.is(element.attrs?.href, basepath + expectedHref);
   });
 });
