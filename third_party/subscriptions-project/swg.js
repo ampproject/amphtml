@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.169 */
+/** Version: 0.1.22.170 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4556,7 +4556,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.169',
+    '_client': 'SwG 0.1.22.170',
   });
 }
 
@@ -5190,10 +5190,8 @@ class OffersFlow {
 
     this.activityIframeView_ = null;
 
-    let isClosable = options && options.isClosable;
-    if (isClosable == undefined) {
-      isClosable = false; // Default is to hide Close button.
-    }
+    // Default to hiding close button.
+    const isClosable = options?.isClosable ?? false;
 
     const feArgsObj = deps.activities().addDefaultArguments({
       'showNative': deps.callbacks().hasSubscribeRequestCallback(),
@@ -5775,7 +5773,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.169',
+        '_client': 'SwG 0.1.22.170',
         'supportsEventManager': true,
       },
       args || {}
@@ -6621,7 +6619,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.169');
+    context.setClientVersion('SwG 0.1.22.170');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -8126,7 +8124,8 @@ class ContributionsFlow {
 
     this.activityIframeView_ = null;
 
-    const isClosable = (options && options.isClosable) || true;
+    // Default to showing close button.
+    const isClosable = options?.isClosable ?? true;
 
     /** @private @const {!Promise<!ActivityIframeView>} */
     this.activityIframeViewPromise_ = this.getUrl_(
@@ -10959,6 +10958,7 @@ class EntitlementsManager {
                   id: meteringStateId,
                   attributes: [],
                 },
+                token: this.getGaaToken_(),
               },
             };
 
