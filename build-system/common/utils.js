@@ -145,6 +145,10 @@ function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
       log(green('INFO: ') + 'No files to check in this PR');
       return [];
     }
+    // forbidden-terms always needs to be checked.
+    if (!filesChanged.includes('build-system/test-configs/forbidden-terms.js')) {
+      filesChanged.push('build-system/test-configs/forbidden-terms.js');
+    }
     return logFiles(filesChanged);
   }
   return ignored.filter(globby.sync(globs, options));
