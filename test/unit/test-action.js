@@ -20,17 +20,17 @@ import {
   DeferredEvent,
   dereferenceArgsVariables,
   parseActionMap,
-} from '../../src/service/action-impl';
+} from '#service/action-impl';
 import {
   ActionTrust,
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
-} from '../../src/core/constants/action-constants';
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Keys} from '../../src/core/constants/key-codes';
+} from '#core/constants/action-constants';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {Keys} from '#core/constants/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
-import {htmlFor} from '../../src/core/dom/static-template';
-import {whenCalled} from '../../testing/test-helper.js';
+import {htmlFor} from '#core/dom/static-template';
+import {whenCalled} from '#testing/test-helper.js';
 
 /**
  * @return {!ActionService}

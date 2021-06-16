@@ -15,10 +15,10 @@
  */
 
 import '../amp-instagram';
-import {createElementWithAttributes} from '../../../../src/core/dom';
-import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {createElementWithAttributes} from '#core/dom';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
+import {toggleExperiment} from '#experiments';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-instagram-v1.0',

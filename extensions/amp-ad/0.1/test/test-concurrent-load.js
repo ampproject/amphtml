@@ -15,15 +15,15 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {createElementWithAttributes} from '../../../../src/core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
   waitFor3pThrottle,
 } from '../concurrent-load';
-import {installTimerService} from '../../../../src/service/timer-impl';
-import {macroTask} from '../../../../testing/yield';
+import {installTimerService} from '#service/timer-impl';
+import {macroTask} from '#testing/yield';
 
 describes.realWin('concurrent-load', {}, (env) => {
   describe('getAmpAdRenderOutsideViewport', () => {

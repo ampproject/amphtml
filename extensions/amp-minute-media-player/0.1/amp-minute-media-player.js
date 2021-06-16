@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Layout, isLayoutSizeDefined} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {
@@ -28,15 +28,15 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-} from '../../../src/core/dom/fullscreen';
+} from '#core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 /** @const */
 const TAG = 'amp-minute-media-player';

@@ -15,9 +15,9 @@
  */
 
 import {addParamsToUrl} from '../../src/url';
-import {dict, hasOwn} from '../../src/core/types/object';
-import {endsWith} from '../../src/core/types/string';
-import {loadScript, validateData, writeScript} from '../../3p/3p';
+import {dict, hasOwn} from '#core/types/object';
+import {endsWith} from '#core/types/string';
+import {loadScript, validateData, writeScript} from '#3p/3p';
 
 /**
  * @param {!Window} global

@@ -19,8 +19,8 @@
  * details.
  */
 
-import {devAssertElement, userAssert} from '../assert';
-import {isFiniteNumber} from '../types';
+import {isFiniteNumber} from '#core/types';
+import {userAssert} from '#core/assert';
 
 /**
  * @enum {string}
@@ -145,23 +145,6 @@ export function isLayoutSizeFixed(layout) {
 }
 
 /**
- * Whether the tag is an internal (service) AMP tag.
- * @param {!Node|string} nodeOrTagName
- * @return {boolean}
- */
-export function isInternalElement(nodeOrTagName) {
-  /** @type string */
-  let tagName;
-  if (typeof nodeOrTagName == 'string') {
-    tagName = nodeOrTagName;
-  } else if (nodeOrTagName.nodeType === Node.ELEMENT_NODE) {
-    tagName = devAssertElement(nodeOrTagName).tagName;
-  }
-
-  return !!tagName && tagName.toLowerCase().startsWith('i-');
-}
-
-/**
  * Parses the CSS length value. If no units specified, the assumed value is
  * "px". Returns undefined in case of parsing error.
  * @param {string|undefined|null} s
@@ -263,4 +246,22 @@ export function isIframeVideoPlayerComponent(tagName) {
     return false;
   }
   return videoPlayerTagNameRe.test(tagName);
+}
+
+/**
+ * Configures the supplied element to have a "fill content" layout. The
+ * exact interpretation of "fill content" depends on the element's layout.
+ *
+ * If `opt_replacedContent` is specified, it indicates whether the "replaced
+ * content" styling should be applied. Replaced content is not allowed to
+ * have its own paddings or border.
+ *
+ * @param {!Element} element
+ * @param {boolean=} opt_replacedContent
+ */
+export function applyFillContent(element, opt_replacedContent) {
+  element.classList.add('i-amphtml-fill-content');
+  if (opt_replacedContent) {
+    element.classList.add('i-amphtml-replaced-content');
+  }
 }

@@ -15,7 +15,7 @@
  */
 
 import '../amp-3d-gltf';
-import {createIframeWithMessageStub} from '../../../../testing/iframe';
+import {createIframeWithMessageStub} from '#testing/iframe';
 
 describes.realWin(
   'amp-3d-gltf',

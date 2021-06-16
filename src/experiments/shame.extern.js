@@ -42,7 +42,7 @@ let dev$$module$src$log;
 let getMode$$module$src$mode;
 
 /** @type {function(!Window):!Window} */
-let getTopWindow$$module$src$service;
+let getTopWindow$$module$src$service_helpers;
 
 /** @type {function(string):!JsonObject} */
 let parseQueryString$$module$src$url;

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
-import {Services} from '../../../src/services';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {getDataParamsFromAttributes} from '../../../src/core/dom';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {dict} from '#core/types/object';
+import {getDataParamsFromAttributes} from '#core/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpIzlesene extends AMP.BaseElement {
@@ -104,7 +104,7 @@ class AmpIzlesene extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
 

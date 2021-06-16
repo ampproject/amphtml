@@ -15,7 +15,7 @@
  */
 
 import '../amp-ooyala-player';
-import * as fullscreen from '../../../../src/core/dom/fullscreen';
+import * as fullscreen from '#core/dom/fullscreen';
 
 describes.realWin(
   'amp-ooyala-player',

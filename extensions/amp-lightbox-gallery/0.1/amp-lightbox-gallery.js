@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {
   ELIGIBLE_TAP_TAGS,
   LightboxManager,
@@ -23,10 +23,10 @@ import {
   VIDEO_TAGS,
 } from './service/lightbox-manager-impl';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/core/constants/key-codes';
+import {Keys} from '#core/constants/key-codes';
 import {LightboxCaption, OverflowState} from './lightbox-caption';
 import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {SwipeToDismiss} from './swipe-to-dismiss';
 import {
@@ -35,27 +35,24 @@ import {
   closestAncestorElementBySelector,
   elementByTag,
   scopedQuerySelectorAll,
-} from '../../../src/core/dom/query';
-import {clamp} from '../../../src/core/math';
+} from '#core/dom/query';
+import {clamp} from '#core/math';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
 } from './utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {dict} from '#core/types/object';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
-import {
-  getVerticalScrollbarWidth,
-  toggleAttribute,
-} from '../../../src/core/dom';
-import {htmlFor} from '../../../src/core/dom/static-template';
-import {isExperimentOn} from '../../../src/experiments';
+import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isExperimentOn} from '#experiments';
 import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error-reporting';
-import {setStyle, setStyles, toggle} from '../../../src/core/dom/style';
-import {toArray} from '../../../src/core/types/array';
+import {setStyle, setStyles, toggle} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */

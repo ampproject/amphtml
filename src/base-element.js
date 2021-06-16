@@ -16,7 +16,7 @@
 
 import {ActionTrust, DEFAULT_ACTION} from './core/constants/action-constants';
 import {Layout, LayoutPriority} from './core/dom/layout';
-import {Services} from './services';
+import {Services} from './service';
 import {devAssert, user, userAssert} from './log';
 import {dispatchCustomEvent} from './core/dom';
 import {getData, listen, loadPromise} from './event-helper';
@@ -845,46 +845,6 @@ export class BaseElement {
    */
   renderStarted() {
     this.element.renderStarted();
-  }
-
-  /**
-   * Returns the original nodes of the custom element without any service nodes
-   * that could have been added for markup. These nodes can include Text,
-   * Comment and other child nodes.
-   * @return {!Array<!Node>}
-   * @public @final
-   */
-  getRealChildNodes() {
-    return this.element.getRealChildNodes();
-  }
-
-  /**
-   * Returns the original children of the custom element without any service
-   * nodes that could have been added for markup.
-   * @return {!Array<!Element>}
-   * @public @final
-   */
-  getRealChildren() {
-    return this.element.getRealChildren();
-  }
-
-  /**
-   * Configures the supplied element to have a "fill content" layout. The
-   * exact interpretation of "fill content" depends on the element's layout.
-   *
-   * If `opt_replacedContent` is specified, it indicates whether the "replaced
-   * content" styling should be applied. Replaced content is not allowed to
-   * have its own paddings or border.
-   *
-   * @param {!Element} element
-   * @param {boolean=} opt_replacedContent
-   * @public @final
-   */
-  applyFillContent(element, opt_replacedContent) {
-    element.classList.add('i-amphtml-fill-content');
-    if (opt_replacedContent) {
-      element.classList.add('i-amphtml-replaced-content');
-    }
   }
 
   /**

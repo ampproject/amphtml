@@ -15,10 +15,10 @@
  */
 
 import '../amp-video';
-import {dispatchCustomEvent} from '../../../../src/core/dom';
-import {htmlFor} from '../../../../src/core/dom/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {dispatchCustomEvent} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {toggleExperiment} from '#experiments';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-video-v1.0',
