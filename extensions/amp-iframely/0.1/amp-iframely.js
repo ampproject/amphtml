@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 import {addParamsToUrl} from '../../../src/url';
-import {
-  createElementWithAttributes,
-  removeElement,
-} from '../../../src/core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {createElementWithAttributes, removeElement} from '#core/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {measureIntersection} from '../../../src/utils/intersection';
-import {omit} from '../../../src/core/types/object';
-import {setStyle} from '../../../src/core/dom/style';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {omit} from '#core/types/object';
+import {setStyle} from '#core/dom/style';
+import {tryParseJson} from '#core/types/object/json';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -134,7 +131,7 @@ export class AmpIframely extends AMP.BaseElement {
           'placeholder': '',
         }
       );
-      this.applyFillContent(element);
+      applyFillContent(element);
       return element;
     }
     return null;
@@ -151,7 +148,7 @@ export class AmpIframely extends AMP.BaseElement {
     );
     this.src_ = addParamsToUrl(this.src_, this.options_);
     this.iframe_.src = this.src_;
-    this.applyFillContent(this.iframe_);
+    applyFillContent(this.iframe_);
     this.element.appendChild(this.iframe_);
 
     this.unlistener_ = listen(this.win, 'message', (event) => {

@@ -15,21 +15,21 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {Services} from '#service';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-} from '../../../src/core/dom/fullscreen';
+} from '#core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe} from '../../../src/3p-frame';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {redispatch} from '../../../src/iframe-video';
-import {removeElement} from '../../../src/core/dom';
+import {removeElement} from '#core/dom';
 
 const TAG = 'amp-viqeo-player';
 
@@ -152,7 +152,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     return this.mutateElement(() => {
       this.element.appendChild(iframe);
       this.iframe_ = iframe;
-      this.applyFillContent(iframe);
+      applyFillContent(iframe);
     }).then(() => {
       return this.playerReadyPromise_;
     });
@@ -205,7 +205,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.element.ownerDocument.createElement('img');
     this.propagateAttributes(['aria-label'], placeholder);
-    this.applyFillContent(placeholder);
+    applyFillContent(placeholder);
     placeholder.setAttribute('loading', 'lazy');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');

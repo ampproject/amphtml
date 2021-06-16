@@ -35,14 +35,14 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
@@ -55,23 +55,23 @@ import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
 import {InfoDialog} from './amp-story-info-dialog';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Layout} from '../../../src/layout';
+import {Keys} from '#core/constants/key-codes';
+import {Layout} from '#core/dom/layout';
 import {LiveStoryManager} from './live-story-manager';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {ShareMenu} from './amp-story-share-menu';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
-import {VisibilityState} from '../../../src/core/constants/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {
   childElement,
   childElementByTag,
@@ -81,32 +81,28 @@ import {
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '../../../src/core/dom/query';
-import {
-  computedStyle,
-  setImportantStyles,
-  toggle,
-} from '../../../src/core/dom/style';
+} from '#core/dom/query';
+import {computedStyle, setImportantStyles, toggle} from '#core/dom/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
-import {debounce} from '../../../src/core/types/function';
+import {debounce} from '#core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, map} from '../../../src/core/types/object';
-import {endsWith} from '../../../src/core/types/string';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
-import {findIndex, lastItem, toArray} from '../../../src/core/types/array';
+import {dict, map} from '#core/types/object';
+import {endsWith} from '#core/types/string';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {findIndex, lastItem, toArray} from '#core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
-import {getState} from '../../../src/core/window/history';
+import {getState} from '#core/window/history';
 import {isDesktopOnePanelExperimentOn} from './amp-story-desktop-one-panel';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
-import {isRTL} from '../../../src/core/dom';
+import {isRTL} from '#core/dom';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
-import {parseQueryString} from '../../../src/core/types/string/url';
+import {parseQueryString} from '#core/types/string/url';
 import {
   removeAttributeInMutate,
   setAttributeInMutate,

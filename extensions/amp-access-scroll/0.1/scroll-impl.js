@@ -20,14 +20,14 @@ import {PROTOCOL_VERSION} from './scroll-protocol';
 import {ReadDepthTracker} from './read-depth-tracker.js';
 import {Relay} from './scroll-relay';
 import {ScrollBar} from './scroll-bar';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {Sheet} from './scroll-sheet';
 import {addParamToUrl, isProxyOrigin} from '../../../src/url';
 import {buildUrl, connectHostname} from './scroll-url';
-import {createElementWithAttributes} from '../../../src/core/dom';
-import {dict} from '../../../src/core/types/object';
+import {createElementWithAttributes} from '#core/dom';
+import {dict} from '#core/types/object';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {parseQueryString} from '../../../src/core/types/string/url';
+import {parseQueryString} from '#core/types/string/url';
 
 const TAG = 'amp-access-scroll-elt';
 /**

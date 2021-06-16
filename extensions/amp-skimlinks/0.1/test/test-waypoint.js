@@ -17,7 +17,7 @@
 import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
 import {Waypoint} from '../waypoint';
 import {XCUST_ATTRIBUTE_NAME} from '../constants';
-import {parseQueryString} from '../../../../src/core/types/string/url';
+import {parseQueryString} from '#core/types/string/url';
 import {parseUrlDeprecated} from '../../../../src/url';
 import helpersFactory from './helpers';
 

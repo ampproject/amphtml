@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/core/dom';
-import {htmlFor} from '../../../src/core/dom/static-template';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
 import {loadScript} from '../../../src/validator-integration';
 import {urls} from '../../../src/config';
 import {user, userAssert} from '../../../src/log';

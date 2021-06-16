@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
-import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {userAssert} from '../../../src/log';
 
 class AmpVine extends AMP.BaseElement {
@@ -67,7 +67,7 @@ class AmpVine extends AMP.BaseElement {
     iframe.src =
       'https://vine.co/v/' + encodeURIComponent(vineid) + '/embed/simple';
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
 
     this.iframe_ = iframe;

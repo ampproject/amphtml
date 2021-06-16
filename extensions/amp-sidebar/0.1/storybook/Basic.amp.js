@@ -16,7 +16,7 @@
 
 // To do: how to add CSS
 //import '!style-loader!css-loader!./Basic-styles.css';
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
 

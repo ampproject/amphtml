@@ -17,7 +17,7 @@
 import {AttributeMutationDefaultClass} from '../mutation/attribute-mutation-default-class';
 import {AttributeMutationDefaultStyle} from '../mutation/attribute-mutation-default-style';
 import {AttributeMutationDefaultUrl} from '../mutation/attribute-mutation-default-url';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin(
   'amp-experiment attribute-mutation-*',

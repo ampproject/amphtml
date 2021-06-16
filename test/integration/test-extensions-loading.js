@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/core/constants/amp-events';
-import {createFixtureIframe} from '../../testing/iframe';
+import {AmpEvents} from '#core/constants/amp-events';
+import {createFixtureIframe} from '#testing/iframe';
 
 // Checks if an amp element gets upgraded.
 function checkElementUpgrade(element) {

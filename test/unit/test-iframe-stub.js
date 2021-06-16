@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  createIframeWithMessageStub,
-  expectPostMessage,
-} from '../../testing/iframe';
+import {createIframeWithMessageStub, expectPostMessage} from '#testing/iframe';
 
 describes.sandboxed
   .configure()

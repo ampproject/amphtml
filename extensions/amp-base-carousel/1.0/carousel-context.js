@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {createContext} from '../../../src/preact';
+import {createContext} from '#preact';
 
 const CarouselContext = createContext(
   /** @type {BaseCarouselDef.ContextProps} */ ({

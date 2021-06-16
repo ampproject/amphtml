@@ -15,9 +15,9 @@
  */
 
 import '../amp-mowplayer';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {VideoEvents} from '../../../../src/video-interface';
-import {createElementWithAttributes} from '../../../../src/core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
 
 const EXAMPLE_VIDEOID = 'v-myfwarfx4tb';

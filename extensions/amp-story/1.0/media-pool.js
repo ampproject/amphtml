@@ -28,14 +28,14 @@ import {
   UpdateSourcesTask,
 } from './media-tasks';
 import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../src/event-helper';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
-import {findIndex} from '../../../src/core/types/array';
-import {isConnectedNode} from '../../../src/core/dom';
-import {matches} from '../../../src/core/dom/query';
-import {toWin} from '../../../src/core/window';
+import {findIndex} from '#core/types/array';
+import {isConnectedNode} from '#core/dom';
+import {matches} from '#core/dom/query';
+import {toWin} from '#core/window';
 import {userInteractedWith} from '../../../src/video-interface';
 
 /** @const @enum {string} */
