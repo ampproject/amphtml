@@ -36,7 +36,6 @@ export function WithLightbox({
   as: Comp = 'div',
   children,
   enableActivation = true,
-  onClick: customOnClick,
   render = () => children,
   ...rest
 }) {
@@ -51,14 +50,10 @@ export function WithLightbox({
     () =>
       enableActivation && {
         ...DEFAULT_ACTIVATION_PROPS,
-        onClick: () => {
-          if (customOnClick) {
-            customOnClick();
-          }
-          open();
-        },
+        /* genKey is 1-indexed, gallery is 0-indexed */
+        onClick: () => open(Number(genKey) - 1),
       },
-    [customOnClick, enableActivation, open]
+    [enableActivation, genKey, open]
   );
   return (
     <Comp {...activationProps} {...rest}>
