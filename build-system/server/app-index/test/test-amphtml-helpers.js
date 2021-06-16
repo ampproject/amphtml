@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-const amphtmlValidator = require('amphtml-validator');
-
-const {expectValidAmphtml, parseHtmlChunk} = require('./helpers');
-const {expect} = require('chai');
-const {html} = require('../html');
-const {JSDOM} = require('jsdom');
-
+const posthtml = require('posthtml');
+const test = require('ava');
 const {
   AmpDoc,
   AmpState,
@@ -28,381 +23,307 @@ const {
   ampStateKey,
   ternaryExpr,
 } = require('../amphtml-helpers');
+const {getElementChildren, posthtmlGetTextContent} = require('./helpers');
+const {html} = require('../html');
 
-describe('devdash', () => {
-  describe('AMPHTML helpers', () => {
-    describe('AmpDoc', () => {
-      it('fails without args', () => {
-        expect(() => AmpDoc()).to.throw();
+test('AmpDoc fails without args', (t) => {
+  t.throws(() => AmpDoc());
+});
+
+test('AmpDoc fails without min required fields', (t) => {
+  t.throws(() => AmpDoc({}));
+});
+
+test('ampStateKey concats arguments', (t) => {
+  t.is(ampStateKey('foo', 'bar'), 'foo.bar');
+  t.is(ampStateKey('tacos', 'al', 'pastor'), 'tacos.al.pastor');
+});
+
+test('ternaryExpr creates expression', (t) => {
+  t.is(ternaryExpr('a', 'b', 'c'), 'a ? b : c');
+});
+
+function containsExtension(scripts, expectedExtension) {
+  return scripts.some(
+    (s) =>
+      s.attrs?.['custom-element'] == expectedExtension &&
+      s.attrs?.['custom-template'] == null
+  );
+}
+
+function containsTemplate(scripts, expectedTemplate) {
+  return scripts.some(
+    (s) =>
+      s.attrs?.['custom-template'] == expectedTemplate &&
+      s.attrs?.['custom-extension'] == null
+  );
+}
+
+async function getScriptNodes(document) {
+  const scripts = [];
+
+  await posthtml([
+    (tree) => {
+      tree.match({tag: 'script'}, (node) => {
+        scripts.push(node);
+        return node;
       });
-
-      it('fails without min required fields', () => {
-        expect(() => AmpDoc({})).to.throw();
-      });
-
-      it('creates valid doc with min required fields', async () => {
-        expectValidAmphtml(
-          await amphtmlValidator.getInstance(),
-          AmpDoc({
-            canonical: '/',
-          })
-        );
-      }).timeout(5000);
-
-      it('creates valid doc with set fields', async () => {
-        expectValidAmphtml(
-          await amphtmlValidator.getInstance(),
-          AmpDoc({
-            canonical: '/',
-            css: 'body { font-family:sans-serif; } ',
-            head: html` <script type="application/ld+json">
-              {
-                "@context": "http://schema.org",
-                "@type": "NewsArticle",
-                "mainEntityOfPage": "http://tacos.al.pastor/",
-                "headline": "Lorem Ipsum",
-                "datePublished": "1907-05-05T12:02:41Z",
-                "dateModified": "1907-05-05T12:02:41Z",
-                "description": "What is love?",
-                "author": {
-                  "@type": "Baby",
-                  "name": "Don't hurt me"
-                },
-                "publisher": {
-                  "@type": "Organization",
-                  "name": "No more",
-                  "logo": {
-                    "@type": "ImageObject",
-                    "url": "http://perritos.haciendo.cosas/1.png",
-                    "width": 600,
-                    "height": 60
-                  }
-                },
-                "image": {
-                  "@type": "ImageObject",
-                  "url": "http://perritos.haciendo.cosas/2.png",
-                  "height": 2000,
-                  "width": 800
-                }
-              }
-            </script>`,
-            body: html`<div>Hola</div>`,
-          })
-        );
-      }).timeout(5000);
-    });
-
-    describe('ampStateKey', () => {
-      it('concats arguments', () => {
-        expect(ampStateKey('foo', 'bar')).to.equal('foo.bar');
-        expect(ampStateKey('tacos', 'al', 'pastor')).to.equal(
-          'tacos.al.pastor'
-        );
-      });
-    });
-
-    describe('ternaryExpr', () => {
-      it('creates expression', () => {
-        expect(ternaryExpr('a', 'b', 'c')).to.equal('a ? b : c');
-      });
-    });
-
-    describe('AmpState', () => {
-      it('generates tree', () => {
-        const id = 'foo';
-        const state = 'bar';
-        const root = parseHtmlChunk(AmpState(id, state));
-
-        expect(root.tagName).to.equal('AMP-STATE');
-        expect(root.getAttribute('id')).to.equal(id);
-
-        expect(root.children).to.have.length(1);
-
-        const {firstElementChild} = root;
-        expect(firstElementChild.tagName).to.equal('SCRIPT');
-        expect(firstElementChild.getAttribute('type')).to.equal(
-          'application/json'
-        );
-      });
-
-      it('renders json object', () => {
-        const id = 'whatever';
-        const state = {foo: 'bar', baz: {yes: 'no'}};
-
-        const {textContent} = parseHtmlChunk(
-          AmpState(id, state)
-        ).firstElementChild;
-
-        expect(JSON.parse(textContent)).to.deep.equal(state);
-      });
-
-      it('renders string literal', () => {
-        const id = 'whatever';
-        const state = 'foo';
-
-        const {textContent} = parseHtmlChunk(
-          AmpState(id, state)
-        ).firstElementChild;
-
-        expect(JSON.parse(textContent)).to.equal(state);
-      });
-
-      it('renders array', () => {
-        const id = 'whatever';
-        const state = ['foo', 'bar', 'baz'];
-
-        const {textContent} = parseHtmlChunk(
-          AmpState(id, state)
-        ).firstElementChild;
-
-        expect(JSON.parse(textContent)).to.deep.equal(state);
-      });
-    });
-
-    describe('addRequiredExtensionsToHead', () => {
-      function containsExtension(scripts, expectedExtension) {
-        return scripts.some(
-          (s) =>
-            s.getAttribute('custom-element') == expectedExtension &&
-            s.getAttribute('custom-template') == null
-        );
-      }
-
-      function containsTemplate(scripts, expectedTemplate) {
-        return scripts.some(
-          (s) =>
-            s.getAttribute('custom-template') == expectedTemplate &&
-            s.getAttribute('custom-extension') == null
-        );
-      }
-
-      it('renders ok', () => {
-        // eslint-disable-next-line local/html-template
-        const rawStr = html` <html>
-          <head></head>
-          <body>
-            <amp-foo foo="bar"></amp-foo>
-          </body>
-        </html>`;
-
-        expect(new JSDOM(addRequiredExtensionsToHead(rawStr))).to.be.ok;
-      });
-
-      it('adds mixed', () => {
-        const expectedExtensions = [
-          'amp-foo',
-          'amp-bar',
-          'amp-foo-bar-baz',
-          'amp-bind',
-          'amp-form',
-        ];
-
-        const expectedTemplates = ['amp-mustache'];
-
-        // eslint-disable-next-line local/html-template
-        const rawStr = html` <html>
-          <head></head>
-          <body>
-            <amp-foo foo="bar"></amp-foo>
-            <amp-foo foo="bar"></amp-foo>
-            <amp-foo foo="bar"></amp-foo>
-            <div>
-              <amp-bar></amp-bar>
-              <div>
-                <amp-foo-bar-baz many="1" attributes="2">
-                  Text content
-                </amp-foo-bar-baz>
-              </div>
-              <input />
-              <amp-state id="myState"></amp-state>
-              <template type="amp-mustache"></template>
-            </div>
-          </body>
-        </html>`;
-
-        const {document} = new JSDOM(addRequiredExtensionsToHead(rawStr))
-          .window;
-
-        const scripts = Array.from(
-          document.head.getElementsByTagName('script')
-        );
-
-        expect(scripts).to.have.length(
-          expectedExtensions.length + expectedTemplates.length
-        );
-
-        scripts.forEach((script) => {
-          expect(script.getAttribute('src')).to.be.ok;
-          expect(script.getAttribute('async')).to.equal('');
-        });
-
-        expectedExtensions.forEach((expectedScript) => {
-          expect(scripts).to.satisfy((scripts) =>
-            containsExtension(scripts, expectedScript)
-          );
-        });
-
-        expectedTemplates.forEach((expectedScript) => {
-          expect(scripts).to.satisfy((scripts) =>
-            containsTemplate(scripts, expectedScript)
-          );
-        });
-      });
-
-      it('adds extensions', () => {
-        const expected = ['amp-foo', 'amp-bar', 'amp-foo-bar-baz'];
-
-        // eslint-disable-next-line local/html-template
-        const rawStr = html` <html>
-          <head></head>
-          <body>
-            <amp-foo foo="bar"></amp-foo>
-            <amp-foo foo="bar"></amp-foo>
-            <amp-foo foo="bar"></amp-foo>
-            <div>
-              <amp-bar></amp-bar>
-              <div>
-                <amp-foo-bar-baz many="1" attributes="2">
-                  Text content
-                </amp-foo-bar-baz>
-              </div>
-            </div>
-          </body>
-        </html>`;
-
-        const {document} = new JSDOM(addRequiredExtensionsToHead(rawStr))
-          .window;
-
-        const scripts = Array.from(
-          document.head.getElementsByTagName('script')
-        );
-
-        expect(scripts).to.have.length(expected.length);
-
-        scripts.forEach((script) => {
-          expect(script.getAttribute('src')).to.be.ok;
-          expect(script.getAttribute('async')).to.equal('');
-          expect(script.getAttribute('custom-template')).to.be.null;
-        });
-
-        expected.forEach((expectedScript) => {
-          expect(scripts).to.satisfy((scripts) =>
-            containsExtension(scripts, expectedScript)
-          );
-        });
-      });
-
-      it('adds template', () => {
-        const expected = 'amp-mustache';
-
-        // eslint-disable-next-line local/html-template
-        const rawStr = html`
-          <html>
-            <head></head>
-            <body>
-              <div>
-                <template type="amp-mustache"></template>
-                <template type="amp-mustache"></template>
-                <template type="amp-mustache"></template>
-                </div>
-              </div>
-            </body>
-          </html>`;
-
-        const {document} = new JSDOM(addRequiredExtensionsToHead(rawStr))
-          .window;
-
-        const scripts = document.head.getElementsByTagName('script');
-
-        expect(scripts).to.have.length(1);
-
-        const [script] = scripts;
-
-        expect(script.getAttribute('custom-element')).to.be.null;
-        expect(script.getAttribute('src')).to.be.ok;
-        expect(script.getAttribute('async')).to.equal('');
-        expect(script.getAttribute('custom-template')).to.equal(expected);
-      });
-
-      it('adds <amp-form> per <form>', () => {
-        const expected = 'amp-form';
-
-        // eslint-disable-next-line local/html-template
-        const rawStr = html` <html>
-          <head></head>
-          <body>
-            <form action="whatever.com"></form>
-          </body>
-        </html>`;
-
-        const {document} = new JSDOM(addRequiredExtensionsToHead(rawStr))
-          .window;
-
-        const scripts = document.head.getElementsByTagName('script');
-
-        expect(scripts).to.have.length(1);
-
-        const [script] = scripts;
-
-        expect(script.getAttribute('custom-template')).to.be.null;
-        expect(script.getAttribute('src')).to.be.ok;
-        expect(script.getAttribute('async')).to.equal('');
-        expect(script.getAttribute('custom-element')).to.equal(expected);
-      });
-
-      it('adds <amp-form> per <input>', () => {
-        const expected = 'amp-form';
-
-        // eslint-disable-next-line local/html-template
-        const rawStr = html` <html>
-          <head></head>
-          <body>
-            <input />
-            <input />
-            <input />
-          </body>
-        </html>`;
-
-        const {document} = new JSDOM(addRequiredExtensionsToHead(rawStr))
-          .window;
-
-        const scripts = document.head.getElementsByTagName('script');
-
-        expect(scripts).to.have.length(1);
-
-        const [script] = scripts;
-
-        expect(script.getAttribute('custom-template')).to.be.null;
-        expect(script.getAttribute('src')).to.be.ok;
-        expect(script.getAttribute('async')).to.equal('');
-        expect(script.getAttribute('custom-element')).to.equal(expected);
-      });
-
-      it('adds <amp-form> per <select>', () => {
-        const expected = 'amp-form';
-
-        // eslint-disable-next-line local/html-template
-        const rawStr = html` <html>
-          <head></head>
-          <body>
-            <select></select>
-          </body>
-        </html>`;
-
-        const {document} = new JSDOM(addRequiredExtensionsToHead(rawStr))
-          .window;
-
-        const scripts = document.head.getElementsByTagName('script');
-
-        expect(scripts).to.have.length(1);
-
-        const [script] = scripts;
-
-        expect(script.getAttribute('custom-template')).to.be.null;
-        expect(script.getAttribute('src')).to.be.ok;
-        expect(script.getAttribute('async')).to.equal('');
-        expect(script.getAttribute('custom-element')).to.equal(expected);
-      });
-    });
+      return tree;
+    },
+  ]).process(document);
+
+  return scripts;
+}
+
+test('AmpState generates tree', async (t) => {
+  const id = 'foo';
+  const state = 'bar';
+  const document = AmpState(id, state);
+
+  await posthtml([
+    (tree) => {
+      const nodes = getElementChildren(tree);
+      t.is(nodes.length, 1);
+      const [root] = nodes;
+      t.is(root.tag, 'amp-state');
+      const rootChildren = getElementChildren(root.content);
+      t.is(rootChildren.length, 1);
+      const [firstElementChild] = rootChildren;
+      t.is(firstElementChild.tag, 'script');
+      t.is(firstElementChild.attrs?.type, 'application/json');
+    },
+  ]).process(document);
+});
+
+test('AmpState renders json object', async (t) => {
+  const id = 'whatever';
+  const state = {foo: 'bar', baz: {yes: 'no'}};
+
+  const document = AmpState(id, state);
+
+  const textContent = await posthtmlGetTextContent(document, {
+    tag: 'script',
   });
+
+  t.deepEqual(JSON.parse(textContent), state);
+});
+
+test('AmpState renders string literal', async (t) => {
+  const id = 'whatever';
+  const state = 'foo';
+
+  const document = AmpState(id, state);
+
+  const textContent = await posthtmlGetTextContent(document, {
+    tag: 'script',
+  });
+
+  t.is(JSON.parse(textContent), state);
+});
+
+test('AmpState renders array', async (t) => {
+  const id = 'whatever';
+  const state = ['foo', 'bar', 'baz'];
+
+  const document = AmpState(id, state);
+
+  const textContent = await posthtmlGetTextContent(document, {
+    tag: 'script',
+  });
+
+  t.deepEqual(JSON.parse(textContent), state);
+});
+
+test('addRequiredExtensionsToHead adds mixed', async (t) => {
+  const expectedExtensions = [
+    'amp-foo',
+    'amp-bar',
+    'amp-foo-bar-baz',
+    'amp-bind',
+    'amp-form',
+  ];
+
+  const expectedTemplates = ['amp-mustache'];
+
+  // eslint-disable-next-line local/html-template
+  const rawStr = html`
+    <html>
+      <head></head>
+      <body>
+        <amp-foo foo="bar"></amp-foo>
+        <amp-foo foo="bar"></amp-foo>
+        <amp-foo foo="bar"></amp-foo>
+        <div>
+          <amp-bar></amp-bar>
+          <div>
+            <amp-foo-bar-baz many="1" attributes="2">
+              Text content
+            </amp-foo-bar-baz>
+          </div>
+          <input />
+          <amp-state id="myState"></amp-state>
+          <template type="amp-mustache"></template>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const scripts = await getScriptNodes(addRequiredExtensionsToHead(rawStr));
+
+  t.is(scripts.length, expectedExtensions.length + expectedTemplates.length);
+
+  scripts.forEach((script) => {
+    t.truthy(script.attrs?.src);
+    t.is(script.attrs?.async, '');
+  });
+
+  expectedExtensions.forEach((expectedScript) => {
+    t.assert(containsExtension(scripts, expectedScript));
+  });
+
+  expectedTemplates.forEach((expectedScript) => {
+    t.assert(containsTemplate(scripts, expectedScript));
+  });
+});
+
+test('addRequiredExtensionsToHead adds extensions', async (t) => {
+  const expected = ['amp-foo', 'amp-bar', 'amp-foo-bar-baz'];
+
+  // eslint-disable-next-line local/html-template
+  const rawStr = html`
+    <html>
+      <head></head>
+      <body>
+        <amp-foo foo="bar"></amp-foo>
+        <amp-foo foo="bar"></amp-foo>
+        <amp-foo foo="bar"></amp-foo>
+        <div>
+          <amp-bar></amp-bar>
+          <div>
+            <amp-foo-bar-baz many="1" attributes="2">
+              Text content
+            </amp-foo-bar-baz>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const scripts = await getScriptNodes(addRequiredExtensionsToHead(rawStr));
+
+  t.is(scripts.length, expected.length);
+
+  scripts.forEach((script) => {
+    t.truthy(script.attrs?.src);
+    t.is(script.attrs?.async, '');
+    t.falsy(script.attrs?.['custom-template']);
+  });
+
+  expected.forEach((expectedScript) => {
+    t.assert(containsExtension(scripts, expectedScript));
+  });
+});
+
+test('addRequiredExtensionsToHead adds template', async (t) => {
+  const expected = 'amp-mustache';
+
+  // eslint-disable-next-line local/html-template
+  const rawStr = html`
+    <html>
+      <head></head>
+      <body>
+        <div>
+          <template type="amp-mustache"></template>
+          <template type="amp-mustache"></template>
+          <template type="amp-mustache"></template>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const scripts = await getScriptNodes(addRequiredExtensionsToHead(rawStr));
+
+  t.is(scripts.length, 1);
+
+  const [script] = scripts;
+
+  t.truthy(script.attrs?.src);
+  t.is(script.attrs?.async, '');
+  t.falsy(script.attrs?.['custom-element']);
+  t.is(script.attrs?.['custom-template'], expected);
+});
+
+test('addRequiredExtensionsToHead adds <amp-form> per <form>', async (t) => {
+  const expected = 'amp-form';
+
+  // eslint-disable-next-line local/html-template
+  const rawStr = html` <html>
+    <head></head>
+    <body>
+      <form action="whatever.com"></form>
+    </body>
+  </html>`;
+
+  const scripts = await getScriptNodes(addRequiredExtensionsToHead(rawStr));
+
+  t.is(scripts.length, 1);
+
+  const [script] = scripts;
+
+  t.truthy(script.attrs?.src);
+  t.is(script.attrs?.async, '');
+  t.falsy(script.attrs?.['custom-template']);
+  t.is(script.attrs?.['custom-element'], expected);
+});
+
+test('addRequiredExtensionsToHead adds <amp-form> per <input>', async (t) => {
+  const expected = 'amp-form';
+
+  // eslint-disable-next-line local/html-template
+  const rawStr = html`
+    <html>
+      <head></head>
+      <body>
+        <input />
+        <input />
+        <input />
+      </body>
+    </html>
+  `;
+
+  const scripts = await getScriptNodes(addRequiredExtensionsToHead(rawStr));
+
+  t.is(scripts.length, 1);
+
+  const [script] = scripts;
+
+  t.truthy(script.attrs?.src);
+  t.is(script.attrs?.async, '');
+  t.falsy(script.attrs?.['custom-template']);
+  t.is(script.attrs?.['custom-element'], expected);
+});
+
+test('addRequiredExtensionsToHead adds <amp-form> per <select>', async (t) => {
+  const expected = 'amp-form';
+
+  // eslint-disable-next-line local/html-template
+  const rawStr = html`
+    <html>
+      <head></head>
+      <body>
+        <select></select>
+      </body>
+    </html>
+  `;
+
+  const scripts = await getScriptNodes(addRequiredExtensionsToHead(rawStr));
+
+  t.is(scripts.length, 1);
+
+  const [script] = scripts;
+
+  t.truthy(script.attrs?.src);
+  t.is(script.attrs?.async, '');
+  t.falsy(script.attrs?.['custom-template']);
+  t.is(script.attrs?.['custom-element'], expected);
 });

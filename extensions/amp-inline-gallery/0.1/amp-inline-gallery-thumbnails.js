@@ -21,6 +21,7 @@ import {dict} from '#core/types/object';
 import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {matches, scopedQuerySelector} from '#core/dom/query';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setStyle} from '#core/dom/style';
 
 /**
@@ -242,11 +243,13 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
       >
       </amp-base-carousel>
     `;
-    thumbnails.forEach((t) => this.carousel_.appendChild(t));
+    for (const thumbnail of thumbnails) {
+      this.carousel_.appendChild(thumbnail);
+    }
 
     // We create with loop defaulting to false above, and allow it to be
     // overwriten.
-    this.propagateAttributes(['loop'], this.carousel_);
+    propagateAttributes(['loop'], this.element, this.carousel_);
     this.element.appendChild(this.carousel_);
   }
 }

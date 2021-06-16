@@ -862,7 +862,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [default = ERROR];
-  // NEXT AVAILABLE TAG: 121
+  // NEXT AVAILABLE TAG: 122
   enum Code {
     UNKNOWN_CODE = 0;
     INVALID_DOCTYPE_HTML = 111;
@@ -876,6 +876,7 @@ message ValidationError {
     NON_LTS_SCRIPT_AFTER_LTS = 112;
     LTS_SCRIPT_AFTER_NON_LTS = 113;
     INCORRECT_SCRIPT_RELEASE_VERSION = 119;
+    DISALLOWED_AMP_DOMAIN = 121;
     ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;
