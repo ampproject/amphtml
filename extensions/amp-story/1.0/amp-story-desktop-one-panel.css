@@ -18,22 +18,29 @@
 
 
 .i-amphtml-story-desktop-one-panel {
-  --i-amphtml-story-page-large-desktop-ratio: 69 / 116;
-  --i-amphtml-story-page-small-desktop-ratio: 3 / 4;
+  --i-amphtml-story-desktop-one-panel-large-ratio: 69 / 116;
+  --i-amphtml-story-desktop-one-panel-small-ratio: 3 / 4;
 }
 
 .i-amphtml-story-desktop-one-panel amp-story-page {
-  margin: auto !important;
-  /* 752px is the max height on desktop. */
-  height: min(752px, calc(100vh - 148px)) !important;
-  /* 447px is the max width on desktop. */
-  width: min(447px, calc((100vh - 148px) * var(--i-amphtml-story-page-large-desktop-ratio))) !important;
+  /* Calculates height by factoring in vertical margin. */
+  --i-amphtml-story-desktop-one-panel-large-height: calc(100vh - max(148px, 16.5vh));
+  height: var(--i-amphtml-story-desktop-one-panel-large-height) !important;
+  width: calc(var(--i-amphtml-story-desktop-one-panel-large-height) * var(--i-amphtml-story-desktop-one-panel-large-ratio)) !important;
   border-radius: 10px !important;
+  margin: auto !important;
 }
 
 @media(max-height: 756px) {
   .i-amphtml-story-desktop-one-panel amp-story-page {
     height: 100vh !important;
-    width: calc(100vh * var(--i-amphtml-story-page-small-desktop-ratio)) !important;
+    width: calc(100vh * var(--i-amphtml-story-desktop-one-panel-large-ratio)) !important;
+    border-radius: 0 !important;
+  }
+}
+
+@media(max-height: 538px) {
+  .i-amphtml-story-desktop-one-panel amp-story-page {
+    width: calc(100vh * var(--i-amphtml-story-desktop-one-panel-small-ratio)) !important;
   }
 }
