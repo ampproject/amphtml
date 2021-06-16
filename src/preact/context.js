@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import * as Preact from '.';
+import * as Preact from './';
 import {Loading, reducer as loadingReducer} from '#core/loading-instructions';
-import {createContext, useContext, useMemo} from '.';
+import {createContext, useContext, useMemo} from './';
 
 /** @type {PreactDef.Context} */
 let context;
