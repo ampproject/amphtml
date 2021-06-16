@@ -837,15 +837,15 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   orderData_() {
     const numOptionElements = this.getOptionElements().length;
     const orderedData = new Array(numOptionElements);
-    for (let i = 0; i < this.optionsData_.length; i++) {
-      const {index} = this.optionsData_[i];
+    this.optionsData_.forEach((option) => {
+      const {index} = option;
       if (index >= 0 && index < numOptionElements) {
-        orderedData[this.optionsData_[i].index] = this.optionsData_[i];
+        orderedData[index] = option;
       }
-    }
+    });
 
     for (let i = 0; i < orderedData.length; i++) {
-      if (typeof orderedData[i] === 'undefined') {
+      if (!orderedData[i]) {
         orderedData[i] = {
           count: 0,
           index: i,
