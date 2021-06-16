@@ -183,10 +183,11 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
 
       // Children are given to carousel
       const imgs = carousel.find('img');
-      expect(imgs).to.have.lengthOf(3); // Carousel only renders 3 items.
+      expect(imgs).to.have.lengthOf(4);
       expect(imgs.at(0).hasClass('rendered-img')).to.be.false;
       expect(imgs.at(1).hasClass('rendered-img')).to.be.true;
       expect(imgs.at(2).hasClass('rendered-img')).to.be.false;
+      expect(imgs.at(3).hasClass('rendered-img')).to.be.true;
     });
   });
 
@@ -350,10 +351,11 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
 
       // Children are given to carousel
       const imgs = carousel.find('img');
-      expect(imgs).to.have.lengthOf(3); // Carousel only renders 3 items.
+      expect(imgs).to.have.lengthOf(4);
       expect(imgs.at(0).hasClass('rendered-img')).to.be.false;
       expect(imgs.at(1).hasClass('rendered-img')).to.be.true;
       expect(imgs.at(2).hasClass('rendered-img')).to.be.false;
+      expect(imgs.at(3).hasClass('rendered-img')).to.be.true;
     });
   });
 });

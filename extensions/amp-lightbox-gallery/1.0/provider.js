@@ -32,6 +32,10 @@ export function LightboxGalleryProvider({children, render}) {
   const carouselRef = useRef(null);
   const [index, setIndex] = useState(0);
   const renderers = useRef([]);
+
+  // Prefer counting elements over retrieving array length because
+  // array can contain empty values that have been deregistered.
+  const count = useRef(0);
   const carouselElements = useRef([]);
   const gridElements = useRef([]);
   const register = (key, render) => {
@@ -53,15 +57,12 @@ export function LightboxGalleryProvider({children, render}) {
   };
 
   useLayoutEffect(() => {
-    carouselRef.current?.goToSlide(index);
+    carouselRef.current?.goToSlide(mod(index, count.current));
   }, [index]);
 
   const [showCarousel, setShowCarousel] = useState(true);
   const [showControls, setShowControls] = useState(true);
   const renderElements = useCallback(() => {
-    // Prefer counting elements over retrieving array length because
-    // array can contain empty values that have been deregistered.
-    let count = 0;
     renderers.current.forEach((render, index) => {
       if (!carouselElements.current[index]) {
         carouselElements.current[index] = render();
@@ -69,12 +70,12 @@ export function LightboxGalleryProvider({children, render}) {
           <Thumbnail
             onClick={() => {
               setShowCarousel(true);
-              setIndex(mod(index, count));
+              setIndex(index);
             }}
             render={render}
           />
         );
-        count++;
+        count.current += 1;
       }
     });
   }, []);
