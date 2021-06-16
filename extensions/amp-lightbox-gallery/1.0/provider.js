@@ -109,7 +109,7 @@ export function LightboxGalleryProvider({children, render}) {
           onClick={() => setShowControls(!showControls)}
           ref={carouselRef}
         >
-          {showCarousel && carouselElements.current}
+          {carouselElements.current}
         </BaseCarousel>
         {!showCarousel && (
           <div
