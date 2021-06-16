@@ -26,7 +26,6 @@ const {
   AmpState,
   addRequiredExtensionsToHead,
   ampStateKey,
-  containsExpr,
   ternaryExpr,
 } = require('../amphtml-helpers');
 
@@ -105,20 +104,6 @@ describe('devdash', () => {
     describe('ternaryExpr', () => {
       it('creates expression', () => {
         expect(ternaryExpr('a', 'b', 'c')).to.equal('a ? b : c');
-      });
-    });
-
-    describe('containsExpr', () => {
-      it('creates expression with literals', () => {
-        expect(containsExpr("'a'", "'b'", "'c'", "'d'")).to.equal(
-          "'a'.indexOf('b') > -1 ? 'c' : 'd'"
-        );
-      });
-
-      it('creates expression with vars', () => {
-        expect(containsExpr('a', 'b', 'c', 'd')).to.equal(
-          'a.indexOf(b) > -1 ? c : d'
-        );
       });
     });
 

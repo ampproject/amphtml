@@ -164,7 +164,7 @@ a.find-icon:hover {
 }
 code,
 .code,
-.file-list .file-link, .file-list-search  {
+.file-list .file-link  {
   font-family: 'Fira Code', 'Inconsolata', Menlo, Consolas, monospace;
 }
 a {
@@ -228,28 +228,6 @@ a.underlined::before {
 
 .file-list-right-section {
   margin-left: auto;
- }
-
-.file-list-search {
-  flex: 1;
-  font-size: 18px;
-  padding: 4px 0;
-  font-weight: normal;
-  border: none;
-  border-bottom: solid #ddd 1px;
-  background: transparent;
-  margin: 0 20px 0 8px;
-}
-
-.file-list-search:focus {
-  outline: none;
-  border-color: #0389ff;
-  border-bottom-width: 2px;
-  margin-bottom: -1px;
-}
-
-.file-list-search::placeholder {
-  font-weight: normal;
 }
 
 .file-list {
