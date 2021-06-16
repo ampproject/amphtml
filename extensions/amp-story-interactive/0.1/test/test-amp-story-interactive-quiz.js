@@ -23,6 +23,7 @@ import {
   addConfigToInteractive,
   getMockIncompleteData,
   getMockInteractiveData,
+  getMockOutOfBoundsData,
   getMockScrambledData,
 } from './test-amp-story-interactive';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -213,6 +214,27 @@ describes.realWin(
       await ampStoryQuiz.layoutCallback();
 
       const expectedPercentages = [0, 50, 50, 0];
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        const expectedText = `${expectedPercentages[i]}%`;
+        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+          expectedText
+        );
+      }
+    });
+
+    it('should handle the percentage pipeline with out of bounds data', async () => {
+      const NUM_OPTIONS = 4;
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockOutOfBoundsData());
+
+      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      populateQuiz(ampStoryQuiz, NUM_OPTIONS);
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const expectedPercentages = [20, 0, 0, 80];
       for (let i = 0; i < NUM_OPTIONS; i++) {
         const expectedText = `${expectedPercentages[i]}%`;
         expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(

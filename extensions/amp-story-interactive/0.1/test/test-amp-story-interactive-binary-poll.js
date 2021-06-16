@@ -162,6 +162,24 @@ describes.realWin(
       expect(ampStoryPoll.getOptionElements()[1].innerText).to.contain('100%');
     });
 
+    it('should handle the percentage pipeline with out of bounds data', async () => {
+      env.sandbox.stub(requestService, 'executeRequest').resolves({
+        options: [
+          {index: 1, count: 2, selected: true},
+          {index: 2, count: 1, selected: false},
+        ],
+      });
+
+      ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      addConfigToInteractive(ampStoryPoll, 2);
+      await ampStoryPoll.buildCallback();
+      await ampStoryPoll.layoutCallback();
+
+      expect(ampStoryPoll.getOptionElements()[0].innerText).to.contain('0%');
+      expect(ampStoryPoll.getOptionElements()[1].innerText).to.contain('100%');
+    });
+
     it('should change the font-size wih the emoji content', async () => {
       ampStoryPoll.element.setAttribute('option-1-text', '🧛');
       ampStoryPoll.element.setAttribute('option-2-text', '🧛');
