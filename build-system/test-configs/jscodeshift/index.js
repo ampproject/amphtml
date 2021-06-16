@@ -17,6 +17,7 @@
 const {execScriptAsync} = require('../../common/exec');
 const {getOutput} = require('../../common/process');
 
+// Useless comment for demonstration purposes.
 const command = (args = []) =>
   [
     'npx jscodeshift',
