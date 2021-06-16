@@ -139,6 +139,9 @@ const DESKTOP_WIDTH_THRESHOLD = 1024;
 /** @private @const {number} */
 const DESKTOP_HEIGHT_THRESHOLD = 550;
 
+/** @private @const {string} */
+const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '3 / 4';
+
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
@@ -284,6 +287,11 @@ export class AmpStory extends AMP.BaseElement {
     this.desktopMedia_ = this.win.matchMedia(
       `(min-width: ${DESKTOP_WIDTH_THRESHOLD}px) and ` +
         `(min-height: ${DESKTOP_HEIGHT_THRESHOLD}px)`
+    );
+
+    /** @private @const */
+    this.desktopOnePanelMedia_ = this.win.matchMedia(
+      `(min-aspect-ratio: ${DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD})`
     );
 
     /** @private @const */
@@ -1918,6 +1926,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isDesktop_() {
+    if (isDesktopOnePanelExperimentOn(this.win)) {
+      return this.desktopOnePanelMedia_.matches && !this.platform_.isBot();
+    }
     return this.desktopMedia_.matches && !this.platform_.isBot();
   }
 
