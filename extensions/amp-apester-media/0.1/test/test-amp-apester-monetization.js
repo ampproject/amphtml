@@ -15,7 +15,7 @@
  */
 
 import {Services} from '#service';
-import {handleCompanionAds} from '../monetization/index';
+import {handleCompanionAds} from '../monetization';
 import {installDocService} from '#service/ampdoc-impl';
 import {
   registerServiceBuilderForDoc,
