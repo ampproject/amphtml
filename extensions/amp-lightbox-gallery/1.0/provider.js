@@ -46,7 +46,7 @@ export function LightboxGalleryProvider({children, render}) {
     deregister,
     register,
     open: (index) => {
-      setViewCarousel(true);
+      setShowCarousel(true);
       setIndex(index);
       lightboxRef.current.open();
     },
@@ -56,7 +56,7 @@ export function LightboxGalleryProvider({children, render}) {
     carouselRef.current?.goToSlide(index);
   }, [index]);
 
-  const [viewCarousel, setViewCarousel] = useState(true);
+  const [showCarousel, setShowCarousel] = useState(true);
   const [showControls, setShowControls] = useState(true);
   const renderElements = useCallback(() => {
     // Prefer counting elements over retrieving array length because
@@ -68,7 +68,7 @@ export function LightboxGalleryProvider({children, render}) {
         gridElements.current[index] = (
           <Thumbnail
             onClick={() => {
-              setViewCarousel(true);
+              setShowCarousel(true);
               setIndex(mod(index, count));
             }}
             render={render}
@@ -93,25 +93,26 @@ export function LightboxGalleryProvider({children, render}) {
         ref={lightboxRef}
       >
         <div className={classes.controlsPanel}>
-          <button onClick={() => setViewCarousel(!viewCarousel)}>
-            toggle view
-          </button>
+          <ToggleViewIcon
+            onClick={() => setShowCarousel(!showCarousel)}
+            showCarousel={showCarousel}
+          />
         </div>
         <BaseCarousel
           arrowPrevAs={NavButtonIcon}
           arrowNextAs={NavButtonIcon}
           className={classes.gallery}
           defaultSlide={index}
-          hidden={!viewCarousel}
+          hidden={!showCarousel}
           loop
           onClick={() => setShowControls(!showControls)}
           ref={carouselRef}
         >
-          {viewCarousel && carouselElements.current}
+          {showCarousel && carouselElements.current}
         </BaseCarousel>
-        <div className={classes.grid} hidden={viewCarousel}>
-          {!viewCarousel && gridElements.current}
-        </div>
+        {!showCarousel && (
+          <div className={classes.grid}>{gridElements.current}</div>
+        )}
       </Lightbox>
       <LightboxGalleryContext.Provider value={context}>
         {render ? render() : children}
@@ -176,6 +177,55 @@ function NavButtonIcon({by, ...rest}) {
         stroke-linejoin="round"
         stroke-linecap="round"
       />
+    </svg>
+  );
+}
+
+/**
+ * @param {!BaseCarouselDef.ArrowProps} props
+ * @return {PreactDef.Renderable}
+ */
+function ToggleViewIcon({showCarousel, ...rest}) {
+  const classes = useStyles();
+  return (
+    <svg
+      aria-label={`Switch to ${showCarousel ? 'grid view' : 'carousel view'}`}
+      className={objstr({
+        [classes.control]: true,
+        [classes.topControl]: true,
+      })}
+      role="button"
+      tabIndex="0"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
+      {showCarousel ? (
+        <g fill="#fff">
+          <rect x="3" y="3" width="6" height="8" rx="1" ry="1" />
+          <rect x="15" y="13" width="6" height="8" rx="1" ry="1" />
+          <rect x="11" y="3" width="10" height="8" rx="1" ry="1" />
+          <rect x="3" y="13" width="10" height="8" rx="1" ry="1" />
+        </g>
+      ) : (
+        <>
+          <rect
+            x="4"
+            y="4"
+            width="16"
+            height="16"
+            rx="1"
+            stroke-width="2"
+            stroke="#fff"
+            fill="none"
+          />
+          <circle fill="#fff" cx="15.5" cy="8.5" r="1.5" />
+          <polygon
+            fill="#fff"
+            points="5,19 5,13 8,10 13,15 16,12 19,15 19,19"
+          />
+        </>
+      )}
     </svg>
   );
 }
