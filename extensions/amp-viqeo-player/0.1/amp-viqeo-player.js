@@ -28,6 +28,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {redispatch} from '../../../src/iframe-video';
 import {removeElement} from '#core/dom';
 
@@ -204,7 +205,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.element.ownerDocument.createElement('img');
-    this.propagateAttributes(['aria-label'], placeholder);
+    propagateAttributes(['aria-label'], this.element, placeholder);
     applyFillContent(placeholder);
     placeholder.setAttribute('loading', 'lazy');
     placeholder.setAttribute('placeholder', '');

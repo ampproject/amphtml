@@ -22,6 +22,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {propagateObjectFitStyles} from '#core/dom/style';
 
 const TAG = 'amp-anim';
@@ -55,7 +56,7 @@ export class AmpAnim extends AMP.BaseElement {
   buildCallback() {
     this.img_ = new Image();
     this.img_.setAttribute('decoding', 'async');
-    this.propagateAttributes(BUILD_ATTRIBUTES, this.img_);
+    propagateAttributes(BUILD_ATTRIBUTES, this.element, this.img_);
     applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
@@ -88,8 +89,9 @@ export class AmpAnim extends AMP.BaseElement {
     const img = dev().assertElement(this.img_);
     // Remove missing attributes to remove the placeholder srcset if none is
     // specified on the element.
-    this.propagateAttributes(
+    propagateAttributes(
       LAYOUT_ATTRIBUTES,
+      this.element,
       img,
       /* opt_removeMissingAttrs */ true
     );
