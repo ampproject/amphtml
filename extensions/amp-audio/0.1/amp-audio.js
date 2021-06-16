@@ -31,6 +31,7 @@ import {
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -88,7 +89,11 @@ export class AmpAudio extends AMP.BaseElement {
       if (src !== undefined) {
         assertHttpsUrl(src, this.element);
       }
-      this.propagateAttributes(['src', 'loop', 'controlsList'], this.audio_);
+      propagateAttributes(
+        ['src', 'loop', 'controlsList'],
+        this.element,
+        this.audio_
+      );
     }
 
     const artist = mutations['artist'];
@@ -122,7 +127,7 @@ export class AmpAudio extends AMP.BaseElement {
     if (src) {
       assertHttpsUrl(src, this.element);
     }
-    this.propagateAttributes(
+    propagateAttributes(
       [
         'src',
         'preload',
@@ -134,6 +139,7 @@ export class AmpAudio extends AMP.BaseElement {
         'aria-labelledby',
         'controlsList',
       ],
+      this.element,
       audio
     );
 
