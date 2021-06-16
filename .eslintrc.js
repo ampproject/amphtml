@@ -95,8 +95,9 @@ module.exports = {
       // exported, etc.
       'babel-module': getImportResolver(),
     },
+    'import/extensions': ['.js', '.jsx'],
     'import/external-module-folders': ['node_modules', 'third_party'],
-    'import/ignore': ['node_modules', '\\.jss\\.js$'],
+    'import/ignore': ['node_modules'],
   },
   'reportUnusedDisableDirectives': true,
   'rules': {
@@ -106,7 +107,7 @@ module.exports = {
     'curly': 2,
     'google-camelcase/google-camelcase': 2,
 
-    'import/no-unresolved': 2,
+    'import/no-unresolved': ['error', {ignore: ['\\./build/.*']}],
     'import/named': 2,
     'import/namespace': 2,
     'import/no-useless-path-segments': 2,
@@ -114,7 +115,15 @@ module.exports = {
     'import/export': 2,
     'import/no-deprecated': 2,
     'import/first': 2,
-    'import/extensions': 2,
+    'import/extensions': [
+      'error',
+      {
+        'js': 'never',
+        'mjs': 'always',
+        'css': 'always',
+        'jss': 'always',
+      },
+    ],
     // TODO(rcebulko): enable
     'import/no-mutable-exports': 0,
     'import/no-default-export': 0,
