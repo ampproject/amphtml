@@ -69,7 +69,7 @@ const FileListItem = ({boundHref, href, name}) =>
     </div>
   `;
 
-const PlaceholderFileListItem = ({href, name, selectModePrefix}) =>
+const FileListItemBound = ({href, name, selectModePrefix}) =>
   linksToExample(href)
     ? FileListItem({
         name,
@@ -113,7 +113,7 @@ const FileList = ({basepath, fileSet, selectModePrefix}) =>
         <div class="file-list">
           <div role="list">
             ${joinFragments(fileSet, (name) =>
-              PlaceholderFileListItem({
+              FileListItemBound({
                 name,
                 href: maybePrefixExampleDocHref(
                   basepath,
