@@ -15,12 +15,12 @@
  */
 
 // src/polyfills.js must be the first import.
-import '../polyfills';
+import '#3p/polyfills';
 
-import {draw3p, init} from '../integration-lib';
-import {register} from '../3p';
+import {draw3p, init} from '#3p/integration-lib';
+import {register} from '#3p/3p';
 
-import {onead} from '../../ads/vendors/onead';
+import {onead} from '#ads/vendors/onead';
 
 init(window);
 register('onead', onead);

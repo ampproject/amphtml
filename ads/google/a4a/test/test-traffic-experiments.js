@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {AMP_EXPERIMENT_ATTRIBUTE, EXPERIMENT_ATTRIBUTE} from '../utils';
+import {
+  AMP_EXPERIMENT_ATTRIBUTE,
+  EXPERIMENT_ATTRIBUTE,
+} from '#ads/google/a4a/utils';
 import {
   addAmpExperimentIdToElement,
   addExperimentIdToElement,
   isInExperiment,
   validateExperimentIds,
-} from '../traffic-experiments';
+} from '#ads/google/a4a/traffic-experiments';
 
 describes.sandboxed('all-traffic-experiments-tests', {}, () => {
   describe('#validateExperimentIds', () => {

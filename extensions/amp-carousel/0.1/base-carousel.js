@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
 import {isAmp4Email} from '../../../src/format';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {toggleAttribute} from '../../../src/dom';
+import {toggleAttribute} from '#core/dom';
 
 const _CONTROL_HIDE_ATTRIBUTE = 'i-amphtml-carousel-hide-buttons';
 const _HAS_CONTROL_CLASS = 'i-amphtml-carousel-has-controls';

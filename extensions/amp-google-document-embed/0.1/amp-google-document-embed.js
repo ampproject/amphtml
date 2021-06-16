@@ -27,11 +27,12 @@
  * </code>
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {addParamToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev, userAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {removeElement} from '#core/dom';
 
 export const TAG = 'amp-google-document-embed';
 
@@ -90,11 +91,11 @@ export class AmpDriveViewer extends AMP.BaseElement {
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', '');
-    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, iframe);
+    propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.element, iframe);
 
     iframe.src = this.getSrc_(this.element.getAttribute('src'));
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
   }
@@ -105,7 +106,12 @@ export class AmpDriveViewer extends AMP.BaseElement {
       (value) => mutations[value] !== undefined
     );
     const iframe = dev().assertElement(this.iframe_);
-    this.propagateAttributes(attrs, iframe, /* opt_removeMissingAttrs */ true);
+    propagateAttributes(
+      attrs,
+      this.element,
+      iframe,
+      /* opt_removeMissingAttrs */ true
+    );
     const src = mutations['src'];
     if (src) {
       iframe.src = this.getSrc_(src);

@@ -15,13 +15,20 @@
  */
 'use strict';
 
+const {
+  verifySelectorsVisible,
+} = require('../../../build-system/tasks/visual-diff/helpers');
+
 module.exports = {
   'open attachment UI element': async (page, unusedName) => {
     await page.waitForTimeout(1600);
   },
 
-  'open attachment': async (page, unusedName) => {
-    await page.tap('.i-amphtml-story-page-open-attachment-label');
+  'open attachment': async (page, name) => {
+    await verifySelectorsVisible(page, name, [
+      '.i-amphtml-story-page-open-attachment[active]',
+    ]);
+    await page.tap('.i-amphtml-story-page-attachment-label');
     await page.waitForTimeout(410);
   },
 };

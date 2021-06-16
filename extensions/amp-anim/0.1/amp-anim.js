@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
+import * as st from '#core/dom/style';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev} from '../../../src/log';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/core/dom/img';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {propagateObjectFitStyles} from '../../../src/style';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {propagateObjectFitStyles} from '#core/dom/style';
 
 const TAG = 'amp-anim';
 const BUILD_ATTRIBUTES = [
@@ -55,8 +56,8 @@ export class AmpAnim extends AMP.BaseElement {
   buildCallback() {
     this.img_ = new Image();
     this.img_.setAttribute('decoding', 'async');
-    this.propagateAttributes(BUILD_ATTRIBUTES, this.img_);
-    this.applyFillContent(this.img_, true);
+    propagateAttributes(BUILD_ATTRIBUTES, this.element, this.img_);
+    applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
     // Remove role=img otherwise this breaks screen-readers focus and
@@ -88,8 +89,9 @@ export class AmpAnim extends AMP.BaseElement {
     const img = dev().assertElement(this.img_);
     // Remove missing attributes to remove the placeholder srcset if none is
     // specified on the element.
-    this.propagateAttributes(
+    propagateAttributes(
       LAYOUT_ATTRIBUTES,
+      this.element,
       img,
       /* opt_removeMissingAttrs */ true
     );

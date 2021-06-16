@@ -49,12 +49,6 @@ const AmpState = (id, state) => html`
   </amp-state>
 `;
 
-const ternaryExpr = (condition, onTrue, onFalse) =>
-  `${condition} ? ${onTrue} : ${onFalse}`;
-
-const containsExpr = (haystack, needle, onTrue, onFalse) =>
-  ternaryExpr(`${haystack}.indexOf(${needle}) > -1`, onTrue, onFalse);
-
 const ampStateKey = (...keys) => keys.join('.');
 
 /**
@@ -71,7 +65,7 @@ const AmpDoc = ({body, canonical, css, head}) => {
   assert(canonical);
   return html`
     <!DOCTYPE html>
-    <html ⚡>
+    <html ⚡ lang="en">
       <head>
         <title>AMP Dev Server</title>
         <meta charset="utf-8" />
@@ -156,6 +150,4 @@ module.exports = {
   AmpState,
   addRequiredExtensionsToHead,
   ampStateKey,
-  containsExpr,
-  ternaryExpr,
 };

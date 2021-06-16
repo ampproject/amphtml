@@ -27,13 +27,13 @@
  * </code>
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/services';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {createElementWithAttributes, removeElement} from '#core/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/core/types';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {isObject} from '#core/types';
+import {tryParseJson} from '#core/types/object/json';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-imgur';
@@ -131,7 +131,7 @@ export class AmpImgur extends AMP.BaseElement {
     this.iframe_ = iframe;
     element.appendChild(iframe);
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
 
     // We're sure we've loaded when we receive the first message.
     const {promise, resolve} = new Deferred();

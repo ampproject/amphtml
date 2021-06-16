@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
-import {ContainWrapper} from '../../../src/preact/component';
-import {useMemo, useState} from '../../../src/preact';
+import {ContainWrapper} from '#preact/component';
+import {useMemo, useState} from '#preact';
 
 /**
  * @param {!InlineGalleryDef.Props} props

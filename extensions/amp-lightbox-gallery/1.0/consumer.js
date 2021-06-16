@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {LightboxGalleryContext} from './context';
-import {sequentialIdGenerator} from '../../../src/core/math/id-generator';
-import {
-  useContext,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from '../../../src/preact';
+import {sequentialIdGenerator} from '#core/math/id-generator';
+import {useContext, useLayoutEffect, useMemo, useState} from '#preact';
 
 const generateLightboxItemKey = sequentialIdGenerator();
 
@@ -41,7 +36,6 @@ export function WithLightbox({
   as: Comp = 'div',
   children,
   enableActivation = true,
-  onClick: customOnClick,
   render = () => children,
   ...rest
 }) {
@@ -56,14 +50,10 @@ export function WithLightbox({
     () =>
       enableActivation && {
         ...DEFAULT_ACTIVATION_PROPS,
-        onClick: () => {
-          if (customOnClick) {
-            customOnClick();
-          }
-          open();
-        },
+        /* genKey is 1-indexed, gallery is 0-indexed */
+        onClick: () => open(Number(genKey) - 1),
       },
-    [customOnClick, enableActivation, open]
+    [enableActivation, genKey, open]
   );
   return (
     <Comp {...activationProps} {...rest}>

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {Toast} from './toast';
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
 } from '../../../src/clipboard';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, map} from './../../../src/core/types/object';
+import {dict, map} from '#core/types/object';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
-import {isObject} from '../../../src/core/types';
+import {isObject} from '#core/types';
 import {listen} from '../../../src/event-helper';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 

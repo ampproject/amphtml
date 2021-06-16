@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact/index';
+import * as Preact from '#preact/index';
 import {CanRender} from '../../../src/context/contextprops';
-import {
-  PreactBaseElement,
-  whenUpgraded,
-} from '../../../src/preact/base-element';
-import {Slot} from '../../../src/preact/slot';
-import {forwardRef} from '../../../src/preact/compat';
-import {getSchedulerForDoc} from '../../../src/service/scheduler';
-import {htmlFor} from '../../../src/static-template';
-import {installResizeObserverStub} from '../../../testing/resize-observer-stub';
-import {removeElement} from '../../../src/dom';
+import {PreactBaseElement, whenUpgraded} from '#preact/base-element';
+import {Slot} from '#preact/slot';
+import {forwardRef} from '#preact/compat';
+import {getSchedulerForDoc} from '#service/scheduler';
+import {htmlFor} from '#core/dom/static-template';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+import {removeElement} from '#core/dom';
 import {subscribe} from '../../../src/context';
-import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
-import {useAmpContext, useLoading} from '../../../src/preact/context';
-import {waitFor} from '../../../testing/test-helper';
+import {upgradeOrRegisterElement} from '#service/custom-element-registry';
+import {useAmpContext, useLoading} from '#preact/context';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin('PreactBaseElement', {amp: true}, (env) => {
   let win, doc, html;

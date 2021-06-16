@@ -30,16 +30,13 @@ import {
   VideoDocking,
   getPosterImageSrc,
 } from '../amp-video-docking';
-import {
-  Deferred,
-  tryResolve,
-} from '../../../../src/core/data-structures/promise';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {DirectionX, DirectionY} from '../def.js';
 import {PlayingStates} from '../../../../src/video-interface';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
-import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {layoutRectLtwh} from '#core/math/layout-rect';
 
 const slotId = 'my-slot-element';
 
@@ -60,7 +57,6 @@ describes.realWin('video docking', {amp: true}, (env) => {
     const impl = {
       element,
       mutateElement: (cb) => tryResolve(cb),
-      applyFillContent: env.sandbox.spy(),
     };
     stubLayoutBox(impl, defaultLayoutRect);
     return impl;
@@ -274,16 +270,12 @@ describes.realWin('video docking', {amp: true}, (env) => {
       await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
       expect(
-        video.applyFillContent.withArgs(
-          videoLayerElement('.amp-video-docked-placeholder-background')
-        )
-      ).to.have.been.calledOnce;
+        videoLayerElement('.amp-video-docked-placeholder-background')
+      ).to.have.class('i-amphtml-fill-content');
 
       expect(
-        video.applyFillContent.withArgs(
-          videoLayerElement('.amp-video-docked-placeholder-background-poster')
-        )
-      ).to.have.been.calledOnce;
+        videoLayerElement('.amp-video-docked-placeholder-background-poster')
+      ).to.have.class('i-amphtml-fill-content');
     });
 
     it('styles and transforms elements into docked area', async () => {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as _3p from '../../../3p/3p';
-import {createIframePromise} from '../../../testing/iframe';
+import * as _3p from '#3p/3p';
+import {createIframePromise} from '#testing/iframe';
 import {
   handlePosition,
   handlePositionResponsive,
@@ -23,7 +23,7 @@ import {
   runWhenFetchingSettled,
   sizeAgainstWindow,
   ssp,
-} from '../../../ads/vendors/ssp';
+} from '#ads/vendors/ssp';
 
 describes.fakeWin('amp-ad-ssp', {}, (env) => {
   let sandbox;
