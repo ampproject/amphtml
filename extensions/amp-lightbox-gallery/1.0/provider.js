@@ -66,16 +66,13 @@ export function LightboxGalleryProvider({children, render}) {
       if (!carouselElements.current[index]) {
         carouselElements.current[index] = render();
         gridElements.current[index] = (
-          <div
-            role="button"
-            aria-label="View in carousel"
+          <Thumbnail
             onClick={() => {
               setViewCarousel(true);
               setIndex(mod(index, count));
             }}
-          >
-            {render()}
-          </div>
+            render={render}
+          />
         );
         count++;
       }
@@ -112,7 +109,7 @@ export function LightboxGalleryProvider({children, render}) {
         >
           {viewCarousel && carouselElements.current}
         </BaseCarousel>
-        <div className={classes.gallery} hidden={viewCarousel}>
+        <div className={classes.grid} hidden={viewCarousel}>
           {!viewCarousel && gridElements.current}
         </div>
       </Lightbox>
@@ -180,5 +177,23 @@ function NavButtonIcon({by, ...rest}) {
         stroke-linecap="round"
       />
     </svg>
+  );
+}
+
+/**
+ * @param {!LightboxGalleryDef.ThumbnailProps} props
+ * @return {PreactDef.Renderable}
+ */
+function Thumbnail({onClick, render}) {
+  const classes = useStyles();
+  return (
+    <div
+      aria-label="View in carousel"
+      className={classes.thumbnail}
+      onClick={onClick}
+      role="button"
+    >
+      {render()}
+    </div>
   );
 }

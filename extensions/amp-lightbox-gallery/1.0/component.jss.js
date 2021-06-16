@@ -52,6 +52,37 @@ const lightbox = {
   },
 };
 
+const grid = {
+  ...gallery,
+  display: 'grid !important',
+  justifyContent: 'center !important',
+  gridGap: '5px !important',
+  gridTemplateColumns: 'repeat(3, 1fr)',
+  gridAutoRows: 'min-content !important',
+  padding: '0px 5px !important',
+  top: '56px !important',
+  height: 'calc(100% - 56px) !important',
+  width: 'calc(100% - 10px) !important',
+  '@media (min-width: 1024px)': {
+    gridTemplateColumns: 'repeat(4, calc(1024px/4 - 5px * 5 / 4))',
+    top: '80px !important' /* Matches height of top-bar */,
+    height: 'calc(100% - 80px) !important',
+  },
+};
+
+const thumbnail = {
+  position: 'relative !important',
+  paddingTop: '100% !important',
+  '& > img': {
+    width: '100% !important',
+    height: '100% !important',
+    position: 'absolute !important',
+    top: '0 !important',
+    objectFit: 'cover !important',
+    cursor: 'pointer !important',
+  },
+};
+
 const showControls = {};
 const hideControls = {};
 
@@ -126,9 +157,11 @@ const JSS = {
   hideControls,
   lightbox,
   gallery,
+  grid,
   nextArrow,
   prevArrow,
   showControls,
+  thumbnail,
   topControl,
 };
 
