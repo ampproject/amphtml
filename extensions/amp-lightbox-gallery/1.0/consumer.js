@@ -54,13 +54,13 @@ export function WithLightbox({
       renderProp
         ? renderProp()
         : toChildArray(children).map((child) => cloneElement(child)),
-    [renderProp, children]
+    [children, renderProp]
   );
 
   useLayoutEffect(() => {
     register(genKey, render);
     return () => deregister(genKey);
-  }, [register, deregister, genKey, render]);
+  }, [genKey, deregister, register, render]);
 
   const activationProps = useMemo(
     () =>
