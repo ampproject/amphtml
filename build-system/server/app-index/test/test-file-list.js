@@ -16,8 +16,8 @@
 
 const posthtml = require('posthtml');
 const test = require('ava');
-const {extractMatching, getElementChildren} = require('./helpers');
 const {FileList} = require('../file-list');
+const {getElementChildren} = require('./helpers');
 
 test('wraps', async (t) => {
   const document = FileList({
@@ -40,7 +40,7 @@ test('wraps', async (t) => {
   ]).process(document);
 });
 
-test('creates amp-list', async (t) => {
+test('creates [role=list]', async (t) => {
   const document = FileList({
     basepath: 'basepath',
     fileSet: [],
@@ -50,7 +50,7 @@ test('creates amp-list', async (t) => {
   const elements = [];
   await posthtml([
     (tree) =>
-      tree.match({tag: 'amp-list'}, (node) => {
+      tree.match({attrs: {role: 'list'}}, (node) => {
         elements.push(node);
         return node;
       }),
@@ -60,7 +60,7 @@ test('creates amp-list', async (t) => {
   t.is(length, 1);
 });
 
-test('creates placeholder inside amp-list with rendered data', async (t) => {
+test('creates placeholder inside [role=list] with rendered data', async (t) => {
   const fileSet = ['foo.bar', 'tacos.al.pastor'];
 
   const document = FileList({
@@ -69,45 +69,30 @@ test('creates placeholder inside amp-list with rendered data', async (t) => {
     selectModePrefix: '/',
   });
 
-  const extractedAmplist = await extractMatching(document, {
-    tag: 'amp-list',
-  });
-  t.truthy(extractedAmplist);
-
-  const extractedPlaceholder = await extractMatching(extractedAmplist, {
-    attrs: {placeholder: ''},
-  });
-  t.truthy(extractedPlaceholder);
-
-  let placeholders = [];
-  const fileLinkContainers = [];
+  const items = [];
   await posthtml([
     (tree) => {
-      placeholders = getElementChildren(tree);
       tree.match({attrs: {class: /file-link-container/}}, (node) => {
-        const [a] = getElementChildren(node.content);
-        if (a && a.tag === 'a' && !a.attrs?.['[href]']) {
-          fileLinkContainers.push(node);
-        }
+        items.push(node);
+
+        const children = getElementChildren(node.content);
+        t.is(children.length, 1);
+
+        const [a] = children;
+        t.is(a.tag, 'a');
+        t.truthy(a.attrs?.href);
       });
 
       return tree;
     },
-  ]).process(extractedPlaceholder);
+  ]).process(document);
 
-  const [placeholder] = placeholders;
-  const [firstElementChild] = getElementChildren(placeholder.content || []);
-
-  t.is(firstElementChild.attrs?.role, 'list');
-  t.is(fileLinkContainers.length, fileSet.length);
+  t.is(items.length, fileSet.length);
 });
 
 async function getListitemAElements(document) {
-  const extractedList = await extractMatching(document, {
-    attrs: {role: 'list'},
-  });
-
   const elements = [];
+
   await posthtml([
     (tree) =>
       tree.match({attrs: {role: 'listitem'}}, (node) => {
@@ -117,7 +102,7 @@ async function getListitemAElements(document) {
         }
         return node;
       }),
-  ]).process(extractedList);
+  ]).process(document);
 
   return elements;
 }

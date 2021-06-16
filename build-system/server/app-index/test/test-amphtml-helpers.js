@@ -21,8 +21,6 @@ const {
   AmpState,
   addRequiredExtensionsToHead,
   ampStateKey,
-  containsExpr,
-  ternaryExpr,
 } = require('../amphtml-helpers');
 const {getElementChildren, posthtmlGetTextContent} = require('./helpers');
 const {html} = require('../html');
@@ -38,21 +36,6 @@ test('AmpDoc fails without min required fields', (t) => {
 test('ampStateKey concats arguments', (t) => {
   t.is(ampStateKey('foo', 'bar'), 'foo.bar');
   t.is(ampStateKey('tacos', 'al', 'pastor'), 'tacos.al.pastor');
-});
-
-test('ternaryExpr creates expression', (t) => {
-  t.is(ternaryExpr('a', 'b', 'c'), 'a ? b : c');
-});
-
-test('containsExpr creates expression with literals', (t) => {
-  t.is(
-    containsExpr("'a'", "'b'", "'c'", "'d'"),
-    "'a'.indexOf('b') > -1 ? 'c' : 'd'"
-  );
-});
-
-test('containsExpr creates expression with vars', (t) => {
-  t.is(containsExpr('a', 'b', 'c', 'd'), 'a.indexOf(b) > -1 ? c : d');
 });
 
 function containsExtension(scripts, expectedExtension) {

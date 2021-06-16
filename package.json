@@ -115,7 +115,6 @@
     "fetch-mock": "9.11.0",
     "formidable": "1.2.2",
     "fs-extra": "10.0.0",
-    "fuse.js": "6.4.6",
     "globby": "11.0.3",
     "gulp-connect": "5.7.0",
     "html-minifier": "4.0.0",

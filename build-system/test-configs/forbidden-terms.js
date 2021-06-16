@@ -705,12 +705,6 @@ const forbiddenTermsGlobal = {
       'Use "describes.{realWin|sandboxed|fakeWin|integration}".',
     allowlist: [
       // Non test files. These can remain.
-      'build-system/server/app-index/test/test-amphtml-helpers.js',
-      'build-system/server/app-index/test/test-file-list.js',
-      'build-system/server/app-index/test/test-html.js',
-      'build-system/server/app-index/test/test-self.js',
-      'build-system/server/app-index/test/test-template.js',
-      'build-system/server/app-index/test/test.js',
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
       'validator/js/engine/amp4ads-parse-css_test.js',
