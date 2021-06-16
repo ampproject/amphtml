@@ -61,7 +61,6 @@ module.exports = {
         './preact/slot.js',
         './context/node.js',
         './polyfills/fetch.js',
-        './polyfills/get-bounding-client-rect.js',
         // TEMPORARY, follow tracking issue #33631
         './preact/component/3p-frame.js',
       ],
