@@ -124,6 +124,8 @@ function getFilesFromArgv() {
  * Gets a list of files to be checked based on command line args and the given
  * file matching globs. Used by tasks like prettify, lint, check-links, etc.
  * Optionally takes in options for globbing and a file containing ignore rules.
+ * When local changes are linted (e.g. during CI), we also check if the list of
+ * forbidden terms needs to be updated.
  *
  * @param {!Array<string>} globs
  * @param {Object=} options
@@ -145,9 +147,12 @@ function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
       log(green('INFO: ') + 'No files to check in this PR');
       return [];
     }
-    // forbidden-terms always needs to be checked.
-    const forbiddenTerms = 'build-system/test-configs/forbidden-terms.js';
-    filesChanged.includes(forbiddenTerms) && filesChanged.push(forbiddenTerms);
+    /** forbidden-terms always needs to be checked. */
+    if (
+      !filesChanged.includes('build-system/test-configs/forbidden-terms.js')
+    ) {
+      filesChanged.push('build-system/test-configs/forbidden-terms.js');
+    }
     return logFiles(filesChanged);
   }
   return ignored.filter(globby.sync(globs, options));
