@@ -113,10 +113,11 @@ module.exports = {
     'import/no-absolute-path': 2,
     'import/export': 2,
     'import/no-deprecated': 2,
-    // 'import/no-mutable-exports': 2,
     'import/first': 2,
-    // 'import/extensions': 2,
-    // 'import/no-default-export': 2,
+    'import/extensions': 2,
+    // TODO(rcebulko): enable
+    'import/no-mutable-exports': 0,
+    'import/no-default-export': 0,
 
     'jsdoc/check-param-names': 2,
     'jsdoc/check-tag-names': [
