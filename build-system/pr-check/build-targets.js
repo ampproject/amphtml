@@ -232,7 +232,18 @@ const targetMatchers = {
     );
   },
   [Targets.LINT_RULES]: (file) => {
-    return file.endsWith('.eslintrc.js') || file == 'package.json';
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file.startsWith('build-system/eslint-rules') ||
+      file.endsWith('.eslintrc.js') ||
+      file == '.eslintignore' ||
+      file == '.prettierrc' ||
+      file == '.prettierignore' ||
+      file == 'build-system/test-configs/forbidden-terms.js' ||
+      file == 'package.json'
+    );
   },
   [Targets.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
