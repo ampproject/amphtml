@@ -21,7 +21,6 @@ const {
   AmpState,
   addRequiredExtensionsToHead,
   ampStateKey,
-  ternaryExpr,
 } = require('../amphtml-helpers');
 const {getElementChildren, posthtmlGetTextContent} = require('./helpers');
 const {html} = require('../html');
@@ -37,10 +36,6 @@ test('AmpDoc fails without min required fields', (t) => {
 test('ampStateKey concats arguments', (t) => {
   t.is(ampStateKey('foo', 'bar'), 'foo.bar');
   t.is(ampStateKey('tacos', 'al', 'pastor'), 'tacos.al.pastor');
-});
-
-test('ternaryExpr creates expression', (t) => {
-  t.is(ternaryExpr('a', 'b', 'c'), 'a ? b : c');
 });
 
 function containsExtension(scripts, expectedExtension) {

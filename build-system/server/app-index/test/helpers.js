@@ -38,21 +38,7 @@ async function posthtmlGetTextContent(document, matcher) {
   return textContent;
 }
 
-async function extractMatching(document, matcher) {
-  const {html} = await posthtml([
-    (tree) => {
-      let matching = '';
-      tree.match(matcher, (node) => {
-        matching = node;
-      });
-      return [matching];
-    },
-  ]).process(document);
-  return html.trim() || null;
-}
-
 module.exports = {
-  extractMatching,
   getElementChildren,
   posthtmlGetTextContent,
 };
