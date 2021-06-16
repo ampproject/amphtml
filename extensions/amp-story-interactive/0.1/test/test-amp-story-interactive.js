@@ -31,7 +31,6 @@ import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {dict} from '#core/types/object';
-import {expect} from 'chai';
 import {getBackendSpecs} from '../interactive-disclaimer';
 import {htmlFor} from '#core/dom/static-template';
 import {measureMutateElementStub} from '#testing/test-helper';
