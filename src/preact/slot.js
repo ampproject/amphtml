@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from './';
+import * as Preact from '#preact';
 import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
 import {Loading} from '#core/loading-instructions';
 import {devAssert} from '#core/assert';
@@ -27,7 +27,7 @@ import {
 import {objectsEqualShallow} from '#core/types/object';
 import {rediscoverChildren, removeProp, setProp} from '../context';
 import {useAmpContext} from './context';
-import {useEffect, useLayoutEffect, useRef} from './';
+import {useEffect, useLayoutEffect, useRef} from '#preact';
 
 const EMPTY = {};
 
