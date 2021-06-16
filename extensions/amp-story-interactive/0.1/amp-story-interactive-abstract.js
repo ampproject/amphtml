@@ -765,7 +765,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     this.optionsData_ = data;
     this.orderData_();
-    data.forEach((response) => {
+    this.optionsData_.forEach((response) => {
       if (response.selected) {
         this.hasUserSelection_ = true;
         this.updateStoryStoreState_(response.index);
