@@ -173,16 +173,6 @@ const targetMatchers = {
       file == 'build-system/global-configs/caches.json'
     );
   },
-  [Targets.DEV_DASHBOARD]: (file) => {
-    if (isOwnersFile(file)) {
-      return false;
-    }
-    return (
-      file == 'build-system/tasks/dev-dashboard-tests.js' ||
-      file == 'build-system/server/app.js' ||
-      file.startsWith('build-system/server/app-index/')
-    );
-  },
   [Targets.DOCS]: (file) => {
     if (isOwnersFile(file)) {
       return false;

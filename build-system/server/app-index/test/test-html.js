@@ -14,30 +14,26 @@
  * limitations under the License.
  */
 
-const {expect} = require('chai');
+const test = require('ava');
 const {html, joinFragments} = require('../html');
 
-describe('devdash', () => {
-  describe('html helpers', () => {
-    describe('joinFragments', () => {
-      it('joins simple fragments', () => {
-        expect(joinFragments(['a', 'b', 'c'])).to.equal('abc');
-      });
-      it('joins mapped fragments', () => {
-        expect(joinFragments([1, 2, 3], (a) => a + 1)).to.equal('234');
-      });
-    });
+test('joinFragments joins simple fragments', (t) => {
+  t.is(joinFragments(['a', 'b', 'c']), 'abc');
+});
 
-    describe('html', () => {
-      it('passes through simple string', () => {
-        expect(html`foo`).to.equal('foo');
-      });
+test('joinFragments joins mapped fragments', (t) => {
+  t.is(
+    joinFragments([1, 2, 3], (a) => a + 1),
+    '234'
+  );
+});
 
-      it('concatenates interpolated args', () => {
-        // eslint-disable-next-line local/html-template
-        const interpolated = html`quesadilla ${'de'} chicharrón ${'con'} queso`;
-        expect(interpolated).to.equal('quesadilla de chicharrón con queso');
-      });
-    });
-  });
+test('tagged literal passes through simple string', (t) => {
+  t.is(html`foo`, 'foo');
+});
+
+test('tagged literal concatenates interpolated args', (t) => {
+  // eslint-disable-next-line local/html-template
+  const interpolated = html`quesadilla ${'de'} chicharrón ${'con'} queso`;
+  t.is(interpolated, 'quesadilla de chicharrón con queso');
 });
