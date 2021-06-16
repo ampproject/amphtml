@@ -143,6 +143,16 @@ async function lint() {
     return;
   }
   await runLinter(filesToCheck);
+
+
+
+
+
+
+
+
+
+
 }
 
 module.exports = {
