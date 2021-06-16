@@ -238,6 +238,7 @@ const targetMatchers = {
     return (
       file.startsWith('build-system/eslint-rules') ||
       file.endsWith('.eslintrc.js') ||
+      file.endsWith('.prettierrc') ||
       file == 'build-system/test-configs/forbidden-terms.js' ||
       file == 'package.json'
     );
