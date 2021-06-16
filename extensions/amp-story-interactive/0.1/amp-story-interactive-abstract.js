@@ -840,22 +840,13 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       orderedData[this.optionsData_[i].index] = this.optionsData_[i];
     }
 
-    /**
-     * Object constructor for default option data.
-     * Useful if the response from the backend gives incomplete data.
-     *
-     * @constructor
-     * @param {number} index
-     */
-    function OptionData(index) {
-      this.count = 0;
-      this.index = index;
-      this.selected = false;
-    }
-
     for (let i = 0; i < orderedData.length; i++) {
       if (typeof orderedData[i] === 'undefined') {
-        orderedData[i] = new OptionData(i);
+        orderedData[i] = {
+          count: 0,
+          index: i,
+          selected: false,
+        };
       }
     }
 
