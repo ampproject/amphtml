@@ -764,6 +764,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     );
 
     this.optionsData_ = data;
+    this.orderData_();
     data.forEach((response) => {
       if (response.selected) {
         this.hasUserSelection_ = true;
@@ -826,5 +827,38 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         el.setAttribute('tabindex', toggle ? 0 : -1);
       }
     });
+  }
+
+  /**
+   * Reorders options data to account for scrambled or incomplete data.
+   *
+   * @private
+   */
+  orderData_() {
+    const orderedData = new Array(this.getOptionElements().length);
+    for (let i = 0; i < this.optionsData_.length; i++) {
+      orderedData[this.optionsData_[i].index] = this.optionsData_[i];
+    }
+
+    /**
+     * Object constructor for default option data.
+     * Useful if the response from the backend gives incomplete data.
+     *
+     * @constructor
+     * @param {number} index
+     */
+    function OptionData(index) {
+      this.count = 0;
+      this.index = index;
+      this.selected = false;
+    }
+
+    for (let i = 0; i < orderedData.length; i++) {
+      if (typeof orderedData[i] === 'undefined') {
+        orderedData[i] = new OptionData(i);
+      }
+    }
+
+    this.optionsData_ = orderedData;
   }
 }

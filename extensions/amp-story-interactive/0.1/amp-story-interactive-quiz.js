@@ -21,7 +21,6 @@ import {
 import {CSS} from '../../../build/amp-story-interactive-quiz-0.1.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {htmlFor} from '#core/dom/static-template';
-import {orderData} from './utils';
 import {setStyle} from '#core/dom/style';
 import objstr from 'obj-str';
 
@@ -156,14 +155,12 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
       return;
     }
 
-    const optionElements = this.getOptionElements();
-    const orderedData = orderData(optionsData, optionElements);
-    const percentages = this.preprocessPercentages_(orderedData);
+    const percentages = this.preprocessPercentages_(optionsData);
 
-    optionElements.forEach((el, index) => {
+    this.getOptionElements().forEach((el, index) => {
       // Update the aria-label so they read "selected" and "correct" or "incorrect"
       const ariaDescription = objstr({
-        selected: orderedData[index].selected,
+        selected: optionsData[index].selected,
         correct: el.hasAttribute('correct'),
         incorrect: !el.hasAttribute('correct'),
       });
