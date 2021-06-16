@@ -111,7 +111,11 @@ export function LightboxGalleryProvider({children, render}) {
           {showCarousel && carouselElements.current}
         </BaseCarousel>
         {!showCarousel && (
-          <div className={classes.grid}>{gridElements.current}</div>
+          <div
+            className={objstr({[classes.gallery]: true, [classes.grid]: true})}
+          >
+            {gridElements.current}
+          </div>
         )}
       </Lightbox>
       <LightboxGalleryContext.Provider value={context}>

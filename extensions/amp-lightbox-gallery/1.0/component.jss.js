@@ -53,7 +53,6 @@ const lightbox = {
 };
 
 const grid = {
-  ...gallery,
   display: 'grid !important',
   justifyContent: 'center !important',
   gridGap: '5px !important',
