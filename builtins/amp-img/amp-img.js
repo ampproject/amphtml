@@ -21,6 +21,7 @@ import {Services} from '#service';
 import {dev} from '../../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
 import {listen} from '../../src/event-helper';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {propagateObjectFitStyles, setImportantStyles} from '#core/dom/style';
 import {registerElement} from '#service/custom-element-registry';
 import {removeElement} from '#core/dom';
@@ -33,7 +34,7 @@ const TAG = 'amp-img';
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
  */
-const ATTRIBUTES_TO_PROPAGATE = [
+export const ATTRIBUTES_TO_PROPAGATE = [
   'alt',
   'aria-describedby',
   'aria-label',
@@ -131,8 +132,9 @@ export class AmpImg extends BaseElement {
           this.element
         );
       }
-      this.propagateAttributes(
+      propagateAttributes(
         attrs,
+        this.element,
         this.img_,
         /* opt_removeMissingAttrs */ true
       );
@@ -217,7 +219,7 @@ export class AmpImg extends BaseElement {
 
     // It is important to call this before setting `srcset` attribute.
     this.maybeGenerateSizes_(/* sync setAttribute */ true);
-    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
+    propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.element, this.img_);
     this.propagateDataset(this.img_);
     if (!IS_ESM) {
       guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
