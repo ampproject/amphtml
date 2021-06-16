@@ -96,6 +96,7 @@ function BaseCarouselWithRef(
     lightbox = false,
     loop,
     mixedLength = false,
+    onClick,
     onFocus,
     onMouseEnter,
     onSlideChange,
@@ -344,6 +345,7 @@ function BaseCarouselWithRef(
         lightbox={lightbox}
         loop={loop}
         mixedLength={mixedLength}
+        onClick={onClick}
         restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
         snap={snap}
