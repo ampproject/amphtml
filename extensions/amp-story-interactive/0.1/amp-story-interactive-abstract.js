@@ -763,8 +763,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       '.i-amphtml-story-interactive-option'
     );
 
-    this.optionsData_ = data;
-    this.orderData_();
+    this.optionsData_ = this.orderData_(data);
     this.optionsData_.forEach((response) => {
       if (response.selected) {
         this.hasUserSelection_ = true;
@@ -833,11 +832,13 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * Reorders options data to account for scrambled or incomplete data.
    *
    * @private
+   * @param {!Array<!InteractiveOptionType>} optionsData
+   * @return {!Array<!InteractiveOptionType>}
    */
-  orderData_() {
+  orderData_(optionsData) {
     const numOptionElements = this.getOptionElements().length;
     const orderedData = new Array(numOptionElements);
-    this.optionsData_.forEach((option) => {
+    optionsData.forEach((option) => {
       const {index} = option;
       if (index >= 0 && index < numOptionElements) {
         orderedData[index] = option;
@@ -854,6 +855,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       }
     }
 
-    this.optionsData_ = orderedData;
+    return orderedData;
   }
 }
