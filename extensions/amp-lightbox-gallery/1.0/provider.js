@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 import * as Preact from '#preact';
+import {BaseCarousel} from './../../amp-base-carousel/1.0/component';
 import {Lightbox} from './../../amp-lightbox/1.0/component';
 import {LightboxGalleryContext} from './context';
-import {useCallback, useRef} from '#preact';
+import {useCallback, useRef, useState} from '#preact';
+import {useStyles} from './component.jss';
+import objstr from 'obj-str';
 
 /**
  * @param {!LightboxGalleryDef.Props} props
  * @return {PreactDef.Renderable}
  */
 export function LightboxGalleryProvider({children, render}) {
+  const classes = useStyles();
   const lightboxRef = useRef(null);
+  const carouselRef = useRef(null);
+  const [index, setIndex] = useState(0);
   const renderers = useRef([]);
   const lightboxElements = useRef([]);
   const register = (key, render) => {
@@ -36,9 +42,13 @@ export function LightboxGalleryProvider({children, render}) {
   const context = {
     deregister,
     register,
-    open: () => lightboxRef.current.open(),
+    open: (genKey) => {
+      setIndex(genKey);
+      lightboxRef.current.open();
+    },
   };
 
+  const [showControls, setShowControls] = useState(true);
   const renderElements = useCallback(() => {
     renderers.current.forEach((render, index) => {
       if (!lightboxElements.current[index]) {
@@ -46,27 +56,96 @@ export function LightboxGalleryProvider({children, render}) {
       }
     });
   }, []);
+
   return (
     <>
       <Lightbox
+        className={objstr({
+          [classes.lightbox]: true,
+          [classes.showControls]: showControls,
+          [classes.hideControls]: !showControls,
+        })}
+        closeButtonAs={CloseButtonIcon}
         onBeforeOpen={() => renderElements()}
+        onAfterOpen={() => setShowControls(true)}
+        onClick={() => setShowControls(!showControls)}
         ref={lightboxRef}
-        scrollable
       >
-        {/* TODO: This needs an actual close button UI */}
-        <div
-          aria-label="Close the lightbox"
-          role="button"
-          tabIndex="0"
-          onClick={() => lightboxRef.current.close()}
+        <div className={classes.controlsPanel}></div>
+        <BaseCarousel
+          arrowPrevAs={NavButtonIcon}
+          arrowNextAs={NavButtonIcon}
+          className={classes.gallery}
+          defaultSlide={index}
+          loop
+          ref={carouselRef}
         >
-          Close lightbox
-        </div>
-        <div>{lightboxElements.current}</div>
+          {lightboxElements.current}
+        </BaseCarousel>
       </Lightbox>
       <LightboxGalleryContext.Provider value={context}>
         {render ? render() : children}
       </LightboxGalleryContext.Provider>
     </>
+  );
+}
+
+/**
+ * @param {!LightboxDef.CloseButtonProps} props
+ * @return {PreactDef.Renderable}
+ */
+function CloseButtonIcon(props) {
+  const classes = useStyles();
+  return (
+    <svg
+      {...props}
+      aria-label="Close the lightbox"
+      className={objstr({
+        [classes.control]: true,
+        [classes.topControl]: true,
+        [classes.closeButton]: true,
+      })}
+      role="button"
+      tabIndex="0"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M6.4 6.4 L17.6 17.6 Z M17.6 6.4 L6.4 17.6 Z"
+        stroke="#fff"
+        stroke-width="2"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+}
+
+/**
+ * @param {!BaseCarouselDef.ArrowProps} props
+ * @return {PreactDef.Renderable}
+ */
+function NavButtonIcon({by, ...rest}) {
+  const classes = useStyles();
+  return (
+    <svg
+      {...rest}
+      className={objstr({
+        [classes.arrow]: true,
+        [classes.control]: true,
+        [classes.prevArrow]: by < 0,
+        [classes.nextArrow]: by > 0,
+      })}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d={by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'}
+        fill="none"
+        stroke="#fff"
+        stroke-width="2"
+        stroke-linejoin="round"
+        stroke-linecap="round"
+      />
+    </svg>
   );
 }
