@@ -70,26 +70,20 @@ const FileListHeading = ({basepath}) => html`
 `;
 
 const FileList = ({basepath, fileSet, htmlEnvelopePrefix}) =>
-  joinFragments([
-    FileListHeading({basepath}),
-    html`
-      <div class="file-list">
-        <div role="list">
-          ${joinFragments(fileSet, (name) =>
-            FileListItemBound({
-              name,
-              href: maybePrefixExampleDocHref(
-                basepath,
-                name,
-                htmlEnvelopePrefix
-              ),
-              htmlEnvelopePrefix,
-            })
-          )}
-        </div>
+  html`
+    <div class="file-list">
+      ${FileListHeading({basepath})}
+      <div role="list">
+        ${joinFragments(fileSet, (name) =>
+          FileListItemBound({
+            name,
+            href: maybePrefixExampleDocHref(basepath, name, htmlEnvelopePrefix),
+            htmlEnvelopePrefix,
+          })
+        )}
       </div>
-    `,
-  ]);
+    </div>
+  `;
 
 module.exports = {
   FileList,
