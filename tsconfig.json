@@ -2,6 +2,7 @@
   "compilerOptions": {
     "allowJs": true,
     "baseUrl": ".",
+    "exclude": ["node_modules"],
     "paths": {
       "#3p/*": ["./3p/*"],
       "#ads/*": ["./ads/*"],
