@@ -888,6 +888,7 @@ export class SystemLayer {
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
       shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+      shadowRoot.classList.remove('i-amphtml-story-desktop-one-panel');
       shadowRoot.removeAttribute('desktop');
 
       switch (uiState) {
@@ -898,6 +899,9 @@ export class SystemLayer {
         case UIType.DESKTOP_FULLBLEED:
           shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
+          break;
+        case UIType.DESKTOP_ONE_PANEL:
+          shadowRoot.classList.add('i-amphtml-story-desktop-one-panel');
           break;
       }
     });
