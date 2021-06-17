@@ -15,7 +15,8 @@
  */
 
 import '../amp-wordpress-embed';
-import {htmlFor} from '../../../../src/static-template';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
@@ -29,20 +30,74 @@ describes.realWin(
   (env) => {
     let win;
     let doc;
-    let html;
+    let element;
 
-    beforeEach(async () => {
+    const waitForRender = async () => {
+      await element.buildInternal();
+      const loadPromise = element.layoutCallback();
+      const shadow = element.shadowRoot;
+      await waitFor(() => shadow.querySelector('iframe'), 'iframe mounted');
+      await loadPromise;
+    };
+
+    beforeEach(() => {
       win = env.win;
       doc = win.document;
-      html = htmlFor(doc);
       toggleExperiment(win, 'bento-wordpress-embed', true, true);
+      // Override global window here because Preact uses global `createElement`.
+      doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
 
-    it('example test renders', async () => {
-      const element = html` <amp-wordpress-embed></amp-wordpress-embed> `;
+    it('renders', async () => {
+      element = createElementWithAttributes(
+        win.document,
+        'amp-wordpress-embed',
+        {
+          'data-url': 'https://wordpress.org/news/2021/06/gutenberg-highlights',
+          'amp': true,
+          'height': 200,
+          'width': 500,
+          'layout': 'responsive',
+        }
+      );
       doc.body.appendChild(element);
-      await waitFor(() => element.isConnected, 'element connected');
-      expect(element.parentNode).to.equal(doc.body);
+      await waitForRender();
+
+      expect(element.shadowRoot.querySelector('iframe').src).to.equal(
+        'https://wordpress.org/news/2021/06/gutenberg-highlights?embed=true'
+      );
+    });
+
+    it("container's height is changed", async () => {
+      const initialHeight = 300;
+      element = createElementWithAttributes(
+        win.document,
+        'amp-wordpress-embed',
+        {
+          'data-url': 'https://wordpress.org/news/2021/06/gutenberg-highlights',
+          'amp': true,
+          'height': initialHeight,
+          'width': 500,
+          'layout': 'responsive',
+        }
+      );
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const impl = await element.getImpl(false);
+      const forceChangeHeightStub = env.sandbox.stub(impl, 'forceChangeHeight');
+
+      const mockEvent = new CustomEvent('message');
+      mockEvent.origin = 'https://wordpress.org';
+      mockEvent.data = {
+        message: 'height',
+        value: 1000,
+      };
+      mockEvent.source =
+        element.shadowRoot.querySelector('iframe').contentWindow;
+      win.dispatchEvent(mockEvent);
+
+      expect(forceChangeHeightStub).to.be.calledOnce.calledWith(1000);
     });
   }
 );

@@ -21,7 +21,7 @@ import {dict} from '../../../src/core/types/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {getData} from '../../../src/event-helper';
 
-const {useCallback, useEffect, useState} = Preact;
+const {useCallback, useState} = Preact;
 
 const NO_HEIGHT_STYLE = dict();
 
@@ -34,12 +34,11 @@ function WordpressEmbedWithRef(
   {requestResize, title = 'WordpressEmbed', url, ...rest},
   ref
 ) {
-  const [iframeURL, setIframeURL] = useState('');
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
   const [opacity, setOpacity] = useState(0);
 
-  useEffect(() => {
-    setIframeURL(addParamToUrl(url, 'embed', 'true'));
+  const iframeURL = useCallback(() => {
+    return addParamToUrl(url, 'embed', 'true');
   }, [url]);
 
   const matchesMessagingOrigin = useCallback(
@@ -92,7 +91,7 @@ function WordpressEmbedWithRef(
       matchesMessagingOrigin={matchesMessagingOrigin}
       messageHandler={messageHandler}
       ref={ref}
-      src={iframeURL}
+      src={iframeURL()}
       wrapperStyle={heightStyle}
       title={title}
       {...rest}
