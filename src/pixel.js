@@ -17,7 +17,7 @@
 import {WindowInterface} from '#core/window/interface';
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
-import {user} from '../src/log';
+import {user} from './log';
 
 /** @const {string} */
 const TAG = 'pixel';

@@ -17,7 +17,7 @@
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 import {dev, devAssert, user, userAssert} from './log';
 import {dict} from './core/types/object';
-import {getContextMetadata} from '../src/iframe-attributes';
+import {getContextMetadata} from './iframe-attributes';
 import {getMode} from './mode';
 import {
   getOptionalSandboxFlags,

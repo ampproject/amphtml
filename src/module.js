@@ -15,6 +15,7 @@
  */
 
 import {dev} from './log';
+
 const TAG = 'AMP.require';
 
 /**

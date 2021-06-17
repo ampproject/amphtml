@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * @enum {string}
- */
-const EmbedType = {
-  POST: 'post',
-  POLL: 'poll',
-};
-
 import {Layout, applyFillContent} from '#core/dom/layout';
 import {Services} from '#service';
 import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
@@ -30,6 +22,14 @@ import {getData, listen} from '../../../src/event-helper';
 import {isEnumValue} from '#core/types';
 import {removeElement} from '#core/dom';
 import {userAssert} from '../../../src/log';
+
+/**
+ * @enum {string}
+ */
+const EmbedType = {
+  POST: 'post',
+  POLL: 'poll',
+};
 
 export class AmpVk extends AMP.BaseElement {
   /** @param {!AmpElement} element */

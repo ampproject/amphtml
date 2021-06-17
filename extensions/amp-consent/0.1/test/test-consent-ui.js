@@ -33,7 +33,7 @@ import {
 } from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments';
 import {user} from '../../../../src/log';
-import {whenCalled} from '#testing/test-helper.js';
+import {whenCalled} from '#testing/test-helper';
 
 describes.realWin(
   'consent-ui',

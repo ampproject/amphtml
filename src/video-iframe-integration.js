@@ -16,8 +16,8 @@
 /* eslint-disable local/window-property-name */
 
 import {dict} from '#core/types/object';
-import {getData, listen} from '../src/event-helper';
-import {getMode} from '../src/mode';
+import {getData, listen} from './event-helper';
+import {getMode} from './mode';
 import {isFiniteNumber} from '#core/types';
 import {once} from '#core/types/function';
 import {tryParseJson} from '#core/types/object/json';

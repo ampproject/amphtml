@@ -25,7 +25,7 @@ import {
   setTransformTranslateStyle,
   updateLengthStyle,
   updateScrollPosition,
-} from './dimensions.js';
+} from './dimensions';
 import {AutoAdvance} from './auto-advance';
 import {CarouselAccessibility} from './carousel-accessibility';
 import {CarouselEvents} from './carousel-events';

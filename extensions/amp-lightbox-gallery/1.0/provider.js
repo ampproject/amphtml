@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import * as Preact from '#preact';
-import {BaseCarousel} from './../../amp-base-carousel/1.0/component';
-import {Lightbox} from './../../amp-lightbox/1.0/component';
+import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
+import {Lightbox} from '../../amp-lightbox/1.0/component';
 import {LightboxGalleryContext} from './context';
 import {useCallback, useRef, useState} from '#preact';
 import {useStyles} from './component.jss';

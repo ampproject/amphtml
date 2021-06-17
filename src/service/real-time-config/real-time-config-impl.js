@@ -18,7 +18,7 @@ import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '#service';
 import {dev, user, userAssert} from '../../log';
 import {getMode} from '../../mode';
-import {isAmpScriptUri} from '../../../src/url';
+import {isAmpScriptUri} from '../../url';
 import {isArray, isObject} from '#core/types';
 import {isCancellation} from '../../error-reporting';
 import {registerServiceBuilderForDoc} from '../../service-helpers';

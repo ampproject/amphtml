@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
+import {A4AVariableSource} from './a4a-variable-source';
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 import {getExtensionsFromMetadata} from './amp-ad-utils';

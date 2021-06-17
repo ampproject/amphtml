@@ -27,8 +27,8 @@ import {
   isWidgetId,
 } from '../addthis-utils/mode';
 import {getConfigManager} from '../amp-addthis';
-import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
-import {getKeywordsString} from './../addthis-utils/classify';
+import {getDetailsForMeta, getMetaElements} from '../addthis-utils/meta';
+import {getKeywordsString} from '../addthis-utils/classify';
 import {getSessionId} from '../addthis-utils/session';
 import {getWidgetOverload} from '../addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
 import {toArray} from '#core/types/array';

@@ -15,11 +15,11 @@
  */
 
 import {ContextNode} from './node';
-export {contextProp} from './prop';
-export {subscribe, unsubscribe} from './subscriber';
-
 // typedef imports
 import {ContextPropDef} from './prop.type';
+
+export {contextProp} from './prop';
+export {subscribe, unsubscribe} from './subscriber';
 
 /**
  * Direct slot assignment. Works the same way as shadow slots, but does not

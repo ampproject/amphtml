@@ -39,7 +39,7 @@
 
 import * as events from '../../../src/event-helper';
 import * as utils from './utils';
-import {CSS} from '#build/amp-playbuzz-0.1.css.js';
+import {CSS} from '#build/amp-playbuzz-0.1.css';
 import {Layout, applyFillContent} from '#core/dom/layout';
 import {Services} from '#service';
 import {

@@ -15,7 +15,7 @@
  */
 
 const test = require('ava');
-const {serveIndexForTesting} = require('../index');
+const {serveIndexForTesting} = require('../');
 
 const NOOP = () => {};
 

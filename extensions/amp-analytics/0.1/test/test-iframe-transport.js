@@ -19,7 +19,7 @@ import {
   getIframeTransportScriptUrlForTesting,
 } from '../iframe-transport';
 import {addParamsToUrl} from '../../../../src/url';
-import {expectPostMessage} from '#testing/iframe.js';
+import {expectPostMessage} from '#testing/iframe';
 import {urls} from '../../../../src/config';
 import {user} from '../../../../src/log';
 

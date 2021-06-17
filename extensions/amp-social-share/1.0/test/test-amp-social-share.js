@@ -16,7 +16,7 @@
 
 import '../amp-social-share';
 import {toggleExperiment} from '#experiments';
-import {waitFor, whenCalled} from '#testing/test-helper.js';
+import {waitFor, whenCalled} from '#testing/test-helper';
 import {waitForChildPromise} from '#core/dom';
 
 const BUTTON_SELECTOR = 'div[role="button"]';
