@@ -46,6 +46,8 @@ Read this document to learn how to create a new Bento AMP component.
 
 The first step to creating a new Bento AMP component is familiarizing yourself with [AMP's contributor guidelines](https://go.amp.dev/contribute/code). Adding new components follow the [process for making a significant change](https://go.amp.dev/contribute/code#process-for-significant-changes). This process includes filing an ["Intent to Implement" issue](https://go.amp.dev/i2i) and working with an assigned AMP developer guide before starting significant work.
 
+If the contribution of a Bento component involves a conversion of an existing component with a version bump, and is expected to span multiple PRs, it is recommended to track progress with a [Bento tracking issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=WG%3A+bento&template=bento-component-tracker.yml&title=%F0%9F%8D%B1+%5Bamp-component-name%3Aversion%5D+Bento+tracking+issue).
+
 To bootstrap the creation of a new component (or the Bento version of an existing component), the following command will create the directory structure and boilerplate code for you:
 
 ```shell
@@ -92,15 +94,14 @@ In most cases you'll only create the required (req'd) files. If your element doe
 
 ## Extend AMP.PreactBaseElement
 
-Most AMP component extend `AMP.BaseElement`. `AMP.BaseElement` provides hookups and callbacks needed to implement and customize behavior. Callback explanations are in the BaseElement Callbacks section of [Building an AMP Extension](https://github.com/ampproject/amphtml/blob/main/docs/building-an-amp-extension.md), and inlined in the [BaseElement](https://github.com/ampproject/amphtml/blob/main/src/base-element.js)
-class.
+Most AMP components extend `AMP.BaseElement`. `AMP.BaseElement` provides hookups and callbacks needed to implement and customize behavior. Callback explanations are in the BaseElement Callbacks section of [Building an AMP Extension](https://github.com/ampproject/amphtml/blob/main/docs/building-an-amp-extension.md), and inlined in the [BaseElement](https://github.com/ampproject/amphtml/blob/main/src/base-element.js) class.
 
 Important: Bento-enabled AMP components built upon a Preact component must also be usable in insolation in React development contexts.
 
 All Preact-based Bento AMP extensions extend `AMP.PreactBaseElement`, which builds upon
 `BaseElement` to extricate the component implementation from the aforementioned
 callbacks. Bento AMP extensions differ from AMP extensions because they are self-managing and independent, and therefore usable in a wider range of contexts beyond AMP pages, while still being fully integrated with the AMP environment
-in a fully AMP document.
+when used in a fully AMP document.
 
 The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the [AMP/Preact Bridge](#amppreact-bridge) section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the [PreactBaseElement Callbacks](#preactbaseelement-callbacks) section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/main/src/preact/base-element.js) class.
 
@@ -111,7 +112,7 @@ file (`extensions/amp-my-element/0.1/amp-my-element.js`). See [Experiments](#exp
 
 ```js
 import {func1, func2} from '../../../src/module';
-import {BaseElement} from './my-element'; // Preact base element.
+import {BaseElement} from './base-element'; // Preact base element.
 import {CSS} from '../../../build/amp-my-element-0.1.css';
 // more ES2015-style import statements.
 
@@ -147,13 +148,13 @@ AMP.extension('amp-my-element', '0.1', (AMP) => {
 });
 ```
 
-The following shows the corresponding overall structure of your Preact base element implementation file (extensions/amp-my-element/0.1/base-element.js).
+The following shows the corresponding overall structure of your Preact base element implementation file (`extensions/amp-my-element/0.1/base-element.js`).
 
 ```js
 import {MyElement} from './component'; // Preact component.
 import {PreactBaseElement} from '../../../src/preact/base-element'; // Preact component.
 
-export class BaseElement extends PreactBaseElement;
+export class BaseElement extends PreactBaseElement {}
 
 BaseElement['Component'] = MyElement;            // Component definition.
 
@@ -165,10 +166,10 @@ BaseElement['props'] = {  // Map DOM attributes and children to Preact Component
 };
 ```
 
-The following shows the corresponding overall structure of your Preact functional component implementation file (extensions/amp-my-element/0.1/component.js).
+The following shows the corresponding overall structure of your Preact functional component implementation file (`extensions/amp-my-element/0.1/component.js`).
 
 ```js
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {func1, func2} from '../../../src/module';
 // more ES2015-style import statements.
 
@@ -390,13 +391,17 @@ One of AMP's features is documentation validation checks to confirm it's valid A
 to include rules for your element. Otherwise documents using your extended component become invalid. Create your own rules by following the directions at
 [Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/main/docs/component-validator-rules.md).
 
+When converting an existing component to Bento with a version bump, it suffices to copy existing validator tests if applicable for APIs that stay stable between versions. When copying test files, be sure to change the version of the extension being imported.
+
+In some cases, the validator rules for a `0.1` counterpart may allow for less strict usage of the component, such as with `requires_usage: EXEMPTED` or `deprecated_allow_duplicates: true`. The `1.0` version should reintroduce these restrictions by differentiating the versions via `satisfies` and `excludes`. [The validation PR for `amp-social-share`](https://github.com/ampproject/amphtml/pull/33478) serves as a useful reference and example for how to execute this change.
+
 ## Performance considerations
 
 ### Loading external resources
 
 You may need to add third party integration for extended components that need to load external resources, such as an SDK. Loading resources is only allowed inside a third party iframe. AMP serves this on a different domain for security and performance reasons. Take a look at adding
-[`amp-facebook`](https://github.com/ampproject/amphtml/pull/1479/files)
-extension PR for examples of third party integration.
+[`amp-facebook`](https://github.com/ampproject/amphtml/pull/1479/)
+extension PR for examples of third party integration, and pair it with the [Bento contribution for `amp-facebook`](https://github.com/ampproject/amphtml/pull/34585/) to see how their impementations may differ.
 
 Read about [Inclusion of third party software, embeds and services into
 AMP](https://github.com/ampproject/amphtml/blob/main/3p/README.md).
@@ -676,3 +681,6 @@ $ amp check-types
     -   [amp-youtube](https://github.com/ampproject/amphtml/pull/30444)
 -   Adding iframe based embeds
     -   [amp-instagram](https://github.com/ampproject/amphtml/pull/30230)
+-   Adding third party iframe based embeds
+    -   [amp-facebook](https://github.com/ampproject/amphtml/pull/34585)
+    -   [amp-twitter](https://github.com/ampproject/amphtml/pull/33335)
