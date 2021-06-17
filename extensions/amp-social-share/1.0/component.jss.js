@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,22 @@
  * limitations under the License.
  */
 
-export const BASE_STYLE = {
+import {createUseStyles} from 'react-jss';
+
+const button = {
   'textDecoration': 'none',
   'cursor': 'pointer',
   'position': 'relative',
+  '&:focus': {
+    outline: '#0389ff solid 2px',
+    outlineOffset: '2px',
+  },
 };
+
+const JSS = {
+  button,
+};
+
+// useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
+// eslint-disable-next-line local/no-export-side-effect
+export const useStyles = createUseStyles(JSS);

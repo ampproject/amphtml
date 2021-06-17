@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/core/dom';
+import {removeElement} from '#core/dom';
 
 /** @const */
 const TAG = 'amp-beopinion';
@@ -72,7 +72,7 @@ class AmpBeOpinion extends AMP.BaseElement {
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, TYPE);
     iframe.title = this.element.title || 'BeOpinion content';
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     listenFor(
       iframe,
       'embed-size',

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {createCustomEvent} from '../../src/event-helper';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
-} from '../../testing/iframe.js';
+} from '#testing/iframe.js';
 
 describes.sandboxed
   .configure()

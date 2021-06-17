@@ -68,7 +68,7 @@ Use the `amp-story-panning-media` to transition an image between pages. The comp
 Add the following script tag to the head of your Web Story:
 
 ```html
-<script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"><script>
+<script async custom-element="amp-story-panning-media" src="https://cdn.ampproject.org/v0/amp-story-panning-media-0.1.js"></script>
 ```
 
 #### Configuration

@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {IframeEmbed} from './iframe';
-import {dict} from '../../core/types/object';
-import {forwardRef} from '../compat';
+import {dict} from '#core/types/object';
+import {forwardRef} from '#preact/compat';
 import {
   generateSentinel,
   getBootstrapUrl,
   getDefaultBootstrapBaseUrl,
 } from '../../3p-frame';
-import {
-  getOptionalSandboxFlags,
-  getRequiredSandboxFlags,
-} from '../../core/3p-frame';
-import {includes} from '../../core/types/string';
+import {getOptionalSandboxFlags, getRequiredSandboxFlags} from '#core/3p-frame';
+import {includes} from '#core/types/string';
 import {parseUrlDeprecated} from '../../url';
-import {sequentialIdGenerator} from '../../core/math/id-generator';
+import {sequentialIdGenerator} from '#core/math/id-generator';
 import {
   useEffect,
   useImperativeHandle,
@@ -37,7 +34,7 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
 
 /** @type {!Object<string,function():void>} 3p frames for that type. */
 export const countGenerators = {};

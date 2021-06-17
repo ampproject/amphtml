@@ -15,9 +15,9 @@
  */
 
 import '../amp-social-share';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor, whenCalled} from '../../../../testing/test-helper.js';
-import {waitForChildPromise} from '../../../../src/core/dom';
+import {toggleExperiment} from '#experiments';
+import {waitFor, whenCalled} from '#testing/test-helper.js';
+import {waitForChildPromise} from '#core/dom';
 
 const BUTTON_SELECTOR = 'div[role="button"]';
 const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';

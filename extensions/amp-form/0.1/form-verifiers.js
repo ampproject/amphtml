@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {LastAddedResolver} from '../../../src/core/data-structures/promise';
+import {LastAddedResolver} from '#core/data-structures/promise';
 import {formElementsQuerySelector} from './amp-form.js';
 import {isFieldDefault} from '../../../src/form';
-import {iterateCursor} from '../../../src/core/dom';
+import {iterateCursor} from '#core/dom';
 import {user} from '../../../src/log';
 
 export const FORM_VERIFY_PARAM = '__amp_form_verify';

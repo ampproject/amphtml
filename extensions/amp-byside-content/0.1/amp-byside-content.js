@@ -33,17 +33,14 @@
  */
 
 import {CSS} from '../../../build/amp-byside-content-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {
-  createElementWithAttributes,
-  removeElement,
-} from '../../../src/core/dom';
-import {debounce} from '../../../src/core/types/function';
-import {dict} from '../../../src/core/types/object';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {createElementWithAttributes, removeElement} from '#core/dom';
+import {debounce} from '#core/types/function';
+import {dict} from '#core/types/object';
 import {listenFor} from '../../../src/iframe-helper';
-import {setStyles} from '../../../src/core/dom/style';
+import {setStyles} from '#core/dom/style';
 import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -173,7 +170,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     placeholder.setAttribute('placeholder', '');
     placeholder.appendChild(this.createBySideLoader_());
 
-    this.applyFillContent(placeholder);
+    applyFillContent(placeholder);
 
     return placeholder;
   }
@@ -200,7 +197,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     });
 
     this.element.appendChild(this.getOverflowElement_());
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
 
     return this.composeSrcUrl_()
       .then((src) => {

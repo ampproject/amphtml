@@ -5113,100 +5113,101 @@ error_specificity { code: WARNING_EXTENSION_DEPRECATED_VERSION specificity: 17 }
 error_specificity { code: NON_LTS_SCRIPT_AFTER_LTS specificity: 18 }
 error_specificity { code: LTS_SCRIPT_AFTER_NON_LTS specificity: 19 }
 error_specificity { code: INCORRECT_SCRIPT_RELEASE_VERSION specificity: 20 }
-error_specificity { code: DISALLOWED_TAG specificity: 21 }
-error_specificity { code: DISALLOWED_ATTR specificity: 22 }
-error_specificity { code: INVALID_ATTR_VALUE specificity: 23 }
-error_specificity { code: DUPLICATE_ATTRIBUTE specificity: 24 }
-error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 25 }
-error_specificity { code: MANDATORY_ATTR_MISSING specificity: 26 }
-error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 27 }
-error_specificity { code: MANDATORY_ANYOF_ATTR_MISSING specificity: 28 }
-error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 29 }
-error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 30 }
-error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 31 }
-error_specificity { code: STYLESHEET_TOO_LONG specificity: 32 }
-error_specificity { code: STYLESHEET_AND_INLINE_STYLE_TOO_LONG specificity: 33 }
-error_specificity { code: INLINE_STYLE_TOO_LONG specificity: 34 }
-error_specificity { code: INLINE_SCRIPT_TOO_LONG specificity: 35 }
-error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 36 }
+error_specificity { code: DISALLOWED_AMP_DOMAIN specificity: 21 }
+error_specificity { code: DISALLOWED_TAG specificity: 22 }
+error_specificity { code: DISALLOWED_ATTR specificity: 23 }
+error_specificity { code: INVALID_ATTR_VALUE specificity: 24 }
+error_specificity { code: DUPLICATE_ATTRIBUTE specificity: 25 }
+error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 26 }
+error_specificity { code: MANDATORY_ATTR_MISSING specificity: 27 }
+error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 28 }
+error_specificity { code: MANDATORY_ANYOF_ATTR_MISSING specificity: 29 }
+error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 30 }
+error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 31 }
+error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 32 }
+error_specificity { code: STYLESHEET_TOO_LONG specificity: 33 }
+error_specificity { code: STYLESHEET_AND_INLINE_STYLE_TOO_LONG specificity: 34 }
+error_specificity { code: INLINE_STYLE_TOO_LONG specificity: 35 }
+error_specificity { code: INLINE_SCRIPT_TOO_LONG specificity: 36 }
+error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 37 }
 error_specificity {
-  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 37
+  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 38
 }
-error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 38 }
-error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 39 }
-error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 40 }
-error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 41 }
-error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 42 }
-error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 43 }
+error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 39 }
+error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 40 }
+error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 41 }
+error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 42 }
+error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 43 }
+error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 44 }
 error_specificity {
-  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 44
+  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 45
 }
-error_specificity { code: MISSING_LAYOUT_ATTRIBUTES specificity: 45 }
-error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 46 }
-error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 47 }
-error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 48 }
-error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 49 }
-error_specificity { code: DUPLICATE_DIMENSION specificity: 50 }
-error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 51 }
-error_specificity { code: MISSING_URL specificity: 52 }
-error_specificity { code: DISALLOWED_DOMAIN specificity: 53 }
-error_specificity { code: INVALID_URL_PROTOCOL specificity: 54 }
-error_specificity { code: INVALID_URL specificity: 55 }
-error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 56 }
-error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 57 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 58 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 59 }
-error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 60 }
+error_specificity { code: MISSING_LAYOUT_ATTRIBUTES specificity: 46 }
+error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 47 }
+error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 48 }
+error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 49 }
+error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 50 }
+error_specificity { code: DUPLICATE_DIMENSION specificity: 51 }
+error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 52 }
+error_specificity { code: MISSING_URL specificity: 53 }
+error_specificity { code: DISALLOWED_DOMAIN specificity: 54 }
+error_specificity { code: INVALID_URL_PROTOCOL specificity: 55 }
+error_specificity { code: INVALID_URL specificity: 56 }
+error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 57 }
+error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 58 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 59 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 60 }
+error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 61 }
 error_specificity {
-  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 61
+  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 62
 }
-error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 62 }
-error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 63 }
-error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 64 }
-error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 65 }
-error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 66 }
+error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 63 }
+error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 64 }
+error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 65 }
+error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 66 }
+error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 67 }
 error_specificity {
-  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 67
+  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 68
 }
-error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 68 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 69 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 70 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 71 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 72 }
-error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 73 }
-error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 74 }
-error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 75 }
-error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 76 }
+error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 69 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 70 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 71 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 72 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 73 }
+error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 74 }
+error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 75 }
+error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 76 }
+error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 77 }
 error_specificity {
-  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 77
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 78
 }
-error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 78 }
-error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 79 }
-error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 80 }
+error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 79 }
+error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 80 }
+error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 81 }
 error_specificity {
   code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
-  specificity: 81
+  specificity: 82
 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 82 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 83 }
 error_specificity {
   code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
-  specificity: 83
-}
-error_specificity {
-  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
   specificity: 84
 }
 error_specificity {
-  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
   specificity: 85
 }
 error_specificity {
-  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
   specificity: 86
 }
 error_specificity {
-  code: BASE_TAG_MUST_PRECEED_ALL_URLS
+  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
   specificity: 87
+}
+error_specificity {
+  code: BASE_TAG_MUST_PRECEED_ALL_URLS
+  specificity: 88
 }
 error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 102 }
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 103 }
@@ -5339,6 +5340,10 @@ error_formats {
   code: INCORRECT_SCRIPT_RELEASE_VERSION
   format: "The script version for '%1' is a %2 version which mismatches "
           "with the first script on the page using the %3 version."
+}
+error_formats {
+  code: DISALLOWED_AMP_DOMAIN
+  format: "The script tag includes an invalid AMP domain in the src attribute."
 }
 error_formats {
   code: NON_LTS_SCRIPT_AFTER_LTS

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {TextMask} from './text-mask';
-import {iterateCursor} from '../../../src/core/dom';
+import {iterateCursor} from '#core/dom';
 import {listen} from '../../../src/event-helper';
 
 const SERVICE = 'inputmask';

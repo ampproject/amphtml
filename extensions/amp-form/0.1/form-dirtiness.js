@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {dev, devAssert} from '../../../src/log';
-import {dict, map} from '../../../src/core/types/object';
 import {getServiceForDocOrNull} from '../../../src/service';
+import {dict, map} from '#core/types/object';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';

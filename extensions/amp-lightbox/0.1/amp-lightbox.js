@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
-import {Deferred} from '../../../src/core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {applyFillContent} from '#core/dom/layout';
 import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
   computedStyle,
@@ -31,16 +32,17 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '../../../src/core/dom/style';
+} from '#core/dom/style';
 import {createCustomEvent} from '../../../src/event-helper';
-import {debounce} from '../../../src/core/types/function';
+import {debounce} from '#core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/core/types/object';
+import {dict, hasOwn} from '#core/types/object';
 import {getMode} from '../../../src/mode';
-import {htmlFor} from '../../../src/core/dom/static-template';
+import {htmlFor} from '#core/dom/static-template';
 import {isInFie} from '../../../src/iframe-helper';
-import {toArray} from '../../../src/core/types/array';
-import {tryFocus} from '../../../src/core/dom';
+import {realChildElements} from '#core/dom/query';
+import {toArray} from '#core/types/array';
+import {tryFocus} from '#core/dom';
 import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 /** @const {string} */
@@ -232,11 +234,11 @@ class AmpLightbox extends AMP.BaseElement {
 
     this.isScrollable_ = element.hasAttribute('scrollable');
 
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
 
     this.container_ = element.ownerDocument.createElement('div');
     if (!this.isScrollable_) {
-      this.applyFillContent(this.container_);
+      applyFillContent(this.container_);
     }
     element.appendChild(this.container_);
 

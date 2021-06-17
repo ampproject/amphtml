@@ -15,19 +15,17 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {Layout, isLayoutSizeDefined} from '../../src/core/dom/layout';
-import {ReadyState} from '../../src/core/constants/ready-state';
-import {Services} from '../../src/services';
+import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {ReadyState} from '#core/constants/ready-state';
+import {Services} from '#service';
 import {dev} from '../../src/log';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../src/core/dom/img';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
 import {listen} from '../../src/event-helper';
-import {
-  propagateObjectFitStyles,
-  setImportantStyles,
-} from '../../src/core/dom/style';
-import {registerElement} from '../../src/service/custom-element-registry';
-import {removeElement} from '../../src/core/dom';
-import {scopedQuerySelector} from '../../src/core/dom/query';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {propagateObjectFitStyles, setImportantStyles} from '#core/dom/style';
+import {registerElement} from '#service/custom-element-registry';
+import {removeElement} from '#core/dom';
+import {scopedQuerySelector} from '#core/dom/query';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -36,7 +34,7 @@ const TAG = 'amp-img';
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
  */
-const ATTRIBUTES_TO_PROPAGATE = [
+export const ATTRIBUTES_TO_PROPAGATE = [
   'alt',
   'aria-describedby',
   'aria-label',
@@ -134,8 +132,9 @@ export class AmpImg extends BaseElement {
           this.element
         );
       }
-      this.propagateAttributes(
+      propagateAttributes(
         attrs,
+        this.element,
         this.img_,
         /* opt_removeMissingAttrs */ true
       );
@@ -220,12 +219,12 @@ export class AmpImg extends BaseElement {
 
     // It is important to call this before setting `srcset` attribute.
     this.maybeGenerateSizes_(/* sync setAttribute */ true);
-    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
+    propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.element, this.img_);
     this.propagateDataset(this.img_);
     if (!IS_ESM) {
       guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     }
-    this.applyFillContent(this.img_, true);
+    applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
     if (!serverRendered) {

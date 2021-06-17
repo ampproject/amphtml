@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {observeBorderBoxSize, unobserveBorderBoxSize} from '../size-observer';
+import {
+  observeBorderBoxSize,
+  unobserveBorderBoxSize,
+} from '#core/dom/size-observer';
 
 // typedef imports
 import {PausableInterface} from './pausable-interface';
