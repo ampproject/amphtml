@@ -30,6 +30,14 @@ tags: {  # <amp-wordpress-embed>
   requires_extension: "amp-wordpress-embed"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-wordpress-embed/"
+  attrs: {
+    name: "data-url"
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+    mandatory: true
+  }
   amp_layout: {
     supported_layouts: CONTAINER
     supported_layouts: FILL
