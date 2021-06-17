@@ -311,7 +311,41 @@ want users (publishers and developers using your element) to customize
 the default styling you're providing and allow for easy CSS classes
 and/or well-structure DOM elements.
 
-Element styles load with the element script inside an AMP document. You tell AMP which CSS or JSS belongs to this element when registering the element (see below).
+Element styles load with the element script inside an AMP document. You tell AMP which CSS or JSS belongs to this element when [registering the element](#register-element-with-AMP).
+
+### Pre-upgrade CSS
+
+Bento components must specify certain layout properties in order to prevent
+[Cumulative Layout Shift (CLS)](https://web.dev/cls) when in use on non-AMP pages.
+The following are a standard set of pre-upgrade styles to be used when no AMP
+runtime or boilerplate--which typically provides this measure of stability for
+the document author--are not in use:
+
+```css
+/* amp-my-element.css */
+
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
+ */
+amp-my-element {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Pre-upgrade: size-defining element - hide text. */
+amp-my-element:not(.i-amphtml-built) {
+  color: transparent !important;
+}
+
+/* Pre-upgrade: size-defining element - hide children. */
+amp-my-element:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
+  display: none;
+  content-visibility: hidden;
+}
+```
 
 ## Register element with AMP
 
