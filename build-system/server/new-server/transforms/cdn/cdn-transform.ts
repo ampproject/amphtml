@@ -16,9 +16,9 @@
 
 import posthtml from 'posthtml';
 import {
+  getCdnUrlAttr,
   isJsonScript,
-  isValidCssLink,
-  isValidScript,
+  isValidOrigin,
   tryGetUrl,
 } from '../utilities/cdn-tag';
 import {CDNURLToLocalHostRelativeAbsoluteDist} from '../utilities/cdn';
@@ -28,54 +28,32 @@ import {parse} from 'path';
 /**
  * Replace the `src` of <script> tags pointing to the CDN.
  */
-function modifySrc(script: posthtml.Node, options: OptionSet): posthtml.Node {
-  // Make sure that isJsonScript is used before `isValidScript`. We bail out
+function maybeModifyCdnUrl(node: posthtml.Node, options: OptionSet): posthtml.Node {
+  // Make sure that isJsonScript is used before `tryGetUrl`. We bail out
   // early if the ScriptNode is of type="application/json" since it wouldn't
   // have any src url to modify.
-  if (isJsonScript(script)) {
-    return script;
-  }
-
-  if (!isValidScript(script, options.looseScriptSrcCheck)) {
-    return script;
-  }
-
-  const url = tryGetUrl(script.attrs.src || '');
-  const parsedPath = parse(url.pathname);
-  const src = CDNURLToLocalHostRelativeAbsoluteDist(
-    url,
-    [null, null],
-    parsedPath.ext,
-    options.port,
-    options.useMaxNames
-  ).toString();
-  script.attrs.src = src;
-  return script;
-}
-
-/**
- * Replace the `href` of <link> tags pointing to the CDN.
- */
-function modifyCssLinkHref(
-  node: posthtml.Node,
-  options: OptionSet
-): posthtml.Node {
-  if (!isValidCssLink(node)) {
+  if (isJsonScript(node)) {
     return node;
   }
-
-  const url = tryGetUrl(node.attrs.href || '');
-
-  const href = CDNURLToLocalHostRelativeAbsoluteDist(
+  if (!node.attrs) {
+    return node;
+  }
+  const attr = getCdnUrlAttr(node);
+  if (!attr) {
+    return node;
+  }
+  const url = tryGetUrl(node.attrs[attr] || '');
+  if (!isValidOrigin(url, options.looseScriptSrcCheck)) {
+    return node;
+  }
+  const {ext} = parse(url.pathname);
+  node.attrs[attr] = CDNURLToLocalHostRelativeAbsoluteDist(
     url,
     [null, null],
-    '.css',
+    ext,
     options.port,
-    /* useMaxNames */ false
-  ).toString();
-
-  node.attrs.href = href;
-
+    options.useMaxNames && ext !== '.css'
+  );
   return node;
 }
 
@@ -87,11 +65,11 @@ export default function (
   options: OptionSet = {}
 ): (tree: posthtml.Node) => void {
   return function (tree: posthtml.Node) {
-    tree.match({tag: 'script'}, (node) => {
-      return modifySrc(node, options);
-    });
-    tree.match({tag: 'link'}, (node) => {
-      return modifyCssLinkHref(node, options);
+    tree.match([
+      {tag: 'script'},
+      {tag: 'link', attrs: {rel: 'stylesheet'}},
+    ], (node) => {
+      return maybeModifyCdnUrl(node, options);
     });
   };
 }
