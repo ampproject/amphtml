@@ -88,7 +88,7 @@ import {upgradeBackgroundAudio} from './audio';
  * CSS class for an amp-story-page that indicates the entire page is loaded.
  * @const {string}
  */
-const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
+export const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
 
 /**
  * Selectors for media elements.
@@ -892,6 +892,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       /* payload */ undefined,
       {bubbles: true}
     );
+    console.log('marked page as loaded');
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });

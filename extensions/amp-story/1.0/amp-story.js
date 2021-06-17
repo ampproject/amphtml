@@ -49,7 +49,7 @@ import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
+import {AmpStoryPage, NavigationDirection, PageState, PAGE_LOADED_CLASS_NAME} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
@@ -2241,6 +2241,7 @@ export class AmpStory extends AMP.BaseElement {
     const pagesByDistance = this.getPagesByDistance_();
 
     const preloadAllPages = () => {
+      console.log('load all other pages');
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach((pageId) => {
           const page = this.getPageById(pageId);
@@ -2256,6 +2257,9 @@ export class AmpStory extends AMP.BaseElement {
           pagesByDistance[0].map((pageId) => {
             const page = this.getPageById(pageId);
             page.setDistance(0);
+            if (page.element.classList.contains(PAGE_LOADED_CLASS_NAME)) {
+              return Promise.resolve();
+            }
             return listenOncePromise(page.element, EventType.PAGE_LOADED);
           })
         ).then(() => preloadAllPages());
