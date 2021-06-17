@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact/index';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Slot} from '../../../src/preact/slot';
-import {createElementWithAttributes} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
-import {omit} from '../../../src/core/types/object';
-import {testElementR1} from '../../../testing/element-v1';
-import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
-import {waitFor} from '../../../testing/test-helper';
+import * as Preact from '#preact/index';
+import {PreactBaseElement} from '#preact/base-element';
+import {Slot} from '#preact/slot';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {omit} from '#core/types/object';
+import {testElementR1} from '#testing/element-v1';
+import {upgradeOrRegisterElement} from '#service/custom-element-registry';
+import {waitFor} from '#testing/test-helper';
 
 const spec = {amp: true, frameStyle: {width: '300px'}};
 

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
-import {Observable} from '../core/data-structures/observable';
+import {Deferred} from '#core/data-structures/promise';
+import {Observable} from '#core/data-structures/observable';
 import {Pass} from '../pass';
-import {READY_SCAN_SIGNAL} from '../service/resources-interface';
-import {Resource, ResourceState} from '../service/resource';
-import {Services} from '../services';
-import {VisibilityState} from '../core/constants/visibility-state';
+import {READY_SCAN_SIGNAL} from '#service/resources-interface';
+import {Resource, ResourceState} from '#service/resource';
+import {Services} from '#service';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {hasNextNodeInDocumentOrder} from '../dom';
-import {registerServiceBuilderForDoc} from '../service';
+import {hasNextNodeInDocumentOrder} from '#core/dom';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 const TAG = 'inabox-resources';
 const FOUR_FRAME_DELAY = 70;

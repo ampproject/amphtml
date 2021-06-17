@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonConfiguration} from '../src/core/types/object/json';
+import {jsonConfiguration} from '#core/types/object/json';
 
 /**
  * @typedef {{

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {forwardRef} from '../../../src/preact/compat';
-import {setStyle} from '../../../src/style';
-import {toWin} from '../../../src/core/window';
+import {forwardRef} from '#preact/compat';
+import {setStyle} from '#core/dom/style';
+import {toWin} from '#core/window';
 import {
   useCallback,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 

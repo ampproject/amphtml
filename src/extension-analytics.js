@@ -15,8 +15,8 @@
  */
 
 import {CommonSignals} from './core/constants/common-signals';
-import {Services} from './services';
-import {createElementWithAttributes, removeElement} from './dom';
+import {Services} from './service';
+import {createElementWithAttributes, removeElement} from './core/dom';
 import {devAssert} from './log';
 import {dict} from './core/types/object';
 import {isArray} from './core/types';

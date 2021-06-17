@@ -15,7 +15,7 @@
  */
 
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-stream-gallery-0.1.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
@@ -24,21 +24,21 @@ import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
 } from '../../amp-base-carousel/0.1/responsive-attributes';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
   isRTL,
   iterateCursor,
   toggleAttribute,
-} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyle} from '../../../src/style';
-import {toArray} from '../../../src/core/types/array';
+} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isExperimentOn} from '#experiments';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {setStyle} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 
 /** @enum {number} */
 const InsetArrowVisibility = {

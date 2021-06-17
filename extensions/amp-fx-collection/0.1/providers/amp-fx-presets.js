@@ -15,12 +15,9 @@
  */
 
 import {FxType} from '../fx-type';
-import {Services} from '../../../../src/services';
-import {
-  assertDoesNotContainDisplay,
-  computedStyle,
-  setStyles,
-} from '../../../../src/style';
+import {Services} from '#service';
+import {assertDoesNotContainDisplay} from '../../../../src/assert-display';
+import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, devAssert, userAssert} from '../../../../src/log';
 
 /**

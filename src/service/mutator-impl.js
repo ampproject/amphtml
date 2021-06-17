@@ -17,13 +17,13 @@
 import {FocusHistory} from '../focus-history';
 import {MutatorInterface} from './mutator-interface';
 import {Resource} from './resource';
-import {Services} from '../services';
-import {areMarginsChanged} from '../core/math/layout-rect';
-import {closest} from '../core/dom/query';
-import {computedStyle} from '../style';
+import {Services} from '#service';
+import {areMarginsChanged} from '#core/math/layout-rect';
+import {closest} from '#core/dom/query';
+import {computedStyle} from '#core/dom/style';
 import {dev} from '../log';
-import {isExperimentOn} from '../experiments';
-import {registerServiceBuilderForDoc} from '../service';
+import {isExperimentOn} from '#experiments';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 const FOUR_FRAME_DELAY_ = 70;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min

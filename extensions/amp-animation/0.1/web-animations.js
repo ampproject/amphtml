@@ -38,19 +38,19 @@ import {
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '../../../src/core/dom/query';
-import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
-import {dashToCamelCase} from '../../../src/core/types/string';
+} from '#core/dom/query';
+import {computedStyle, getVendorJsPropertyName} from '#core/dom/style';
+import {dashToCamelCase} from '#core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
-import {isArray, toArray} from '../../../src/core/types/array';
-import {isEnumValue, isObject} from '../../../src/core/types';
-import {isExperimentOn} from '../../../src/experiments';
+import {isArray, toArray} from '#core/types/array';
+import {isEnumValue, isObject} from '#core/types';
+import {isExperimentOn} from '#experiments';
 import {isInFie} from '../../../src/iframe-helper';
-import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
-import {map} from '../../../src/core/types/object';
+import {layoutRectLtwh} from '#core/math/layout-rect';
+import {map} from '#core/types/object';
 
 import {parseCss} from './parsers/css-expr';
 

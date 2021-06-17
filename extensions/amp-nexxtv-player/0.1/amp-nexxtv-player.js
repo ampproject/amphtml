@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {
@@ -25,17 +25,17 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-} from '../../../src/core/dom/fullscreen';
+} from '#core/dom/fullscreen';
 import {getConsentPolicyInfo} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {removeElement} from '#core/dom';
 
 const TAG = 'amp-nexxtv-player';
 

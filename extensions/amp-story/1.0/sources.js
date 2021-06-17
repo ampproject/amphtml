@@ -15,8 +15,8 @@
  */
 
 import {ampMediaElementFor} from './utils';
-import {removeElement} from '../../../src/dom';
-import {toArray} from '../../../src/core/types/array';
+import {removeElement} from '#core/dom';
+import {toArray} from '#core/types/array';
 
 /**
  * Class handling HTMLMediaElements sources.

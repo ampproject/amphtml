@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
-import {Wrapper} from '../../../src/preact/component';
-import {useContext} from '../../../src/preact';
+import {Wrapper} from '#preact/component';
+import {useContext} from '#preact';
 import {useStyles} from './pagination.jss';
 
 /**

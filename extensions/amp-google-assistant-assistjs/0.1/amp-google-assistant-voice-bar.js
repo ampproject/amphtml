@@ -20,9 +20,9 @@
  */
 
 import * as closure from '../../../third_party/closure-responding-channel/closure-bundle';
-import {Services} from '../../../src/services';
-import {addAttributesToElement} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '#service';
+import {addAttributesToElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 
 export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -58,7 +58,7 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
       });
 
       // applyFillContent so that frame covers the entire component.
-      this.applyFillContent(iframe, /* replacedContent */ true);
+      applyFillContent(iframe, /* replacedContent */ true);
 
       this.element.appendChild(iframe);
     });

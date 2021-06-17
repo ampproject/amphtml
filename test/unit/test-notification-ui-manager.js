@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {NotificationUiManager} from '../../src/service/notification-ui-manager';
-import {macroTask} from '../../testing/yield';
+import {NotificationUiManager} from '#service/notification-ui-manager';
+import {macroTask} from '#testing/yield';
 
 describes.realWin('NotificationUiManager', {amp: 1}, (env) => {
   describe('Notification UI Manager', () => {
