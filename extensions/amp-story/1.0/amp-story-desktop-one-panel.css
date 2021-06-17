@@ -16,7 +16,7 @@
 
 @import './amp-story-desktop-user-overridable.css';
 
-/** Variables shared between page and system layer */
+/** Variables shared between page and system layer. */
 .i-amphtml-story-desktop-one-panel {
   --i-amphtml-story-desktop-one-panel-ratio: 69 / 116;
   --i-amphtml-story-desktop-one-panel-responsive-margin: max(74px, 8.25vh);
