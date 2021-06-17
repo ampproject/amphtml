@@ -52,6 +52,7 @@ const PanelSelectorButton = ({expression, type, value}) =>
     <button
       class="settings-panel-button"
       [class]="'settings-panel-button' + (${panelKey} != '${type}' ? '' : ' open')"
+      data-type="${type}"
       tabindex="0"
       on="tap: AMP.setState({
         ${stateId}: {
@@ -123,7 +124,7 @@ const JsModeSelector = ({jsMode}) =>
   });
 
 const SettingsPanelButtons = ({htmlEnvelopePrefix, jsMode}) => html`
-  <div style="flex: 1; max-width: 420px">
+  <div style="flex: 1">
     <div class="settings-panel-button-container">
       ${PanelSelectorButton({
         type: 'HTML',
