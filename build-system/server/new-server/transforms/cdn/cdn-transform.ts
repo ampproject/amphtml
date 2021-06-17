@@ -25,9 +25,6 @@ import {CDNURLToLocalHostRelativeAbsoluteDist} from '../utilities/cdn';
 import {OptionSet} from '../utilities/option-set';
 import {parse} from 'path';
 
-/**
- * Replace the `src` of <script> tags pointing to the CDN.
- */
 function maybeModifyCdnUrl(node: posthtml.Node, options: OptionSet): posthtml.Node {
   // Make sure that isJsonScript is used before `tryGetUrl`. We bail out
   // early if the ScriptNode is of type="application/json" since it wouldn't
@@ -58,8 +55,10 @@ function maybeModifyCdnUrl(node: posthtml.Node, options: OptionSet): posthtml.No
 }
 
 /**
- * Replace the src/href for every <script> and <link> tag pointing to a CDN
- * URL, so that they point to a local URL.
+ * Replace the resource URLs in tags pointing to the CDN, so that they point to
+ * a local URL instead.
+ *  - `<script>` tags have their `src` attributes replaced
+ *  - `<link>` tags have their `href` attributes replaced
  */
 export default function (
   options: OptionSet = {}
