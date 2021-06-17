@@ -30,6 +30,7 @@
  * structure since the Github Action downloads this file only.
  */
 const https = require('https');
+const {log} = console;
 
 /** @typedef {0|1|2|3|4|5|6} */
 let DayOfWeekDef; // sunday = 0, monday = 1, ...
@@ -160,14 +161,18 @@ function httpsRequest(url, options, data) {
  * @param {string} path
  * @param {Object=} data
  * @param {Object=} options
- * @return {!Promise<Object>}
+ * @return {!Promise<?Object>}
  */
 async function requestGithub(token, path, data, options = {}) {
+  const method = options.method || 'GET';
+  if (isDryRun && method !== 'GET') {
+    return data || null;
+  }
   const {body, res} = await httpsRequest(
     `https://api.github.com/${path.replace(/^\//, '')}`,
     {
       ...options,
-      method: options.method || 'GET',
+      method,
       headers: {
         ...options.headers,
         'Authorization': `token ${token}`,
@@ -190,11 +195,11 @@ async function requestGithub(token, path, data, options = {}) {
 /**
  * @param {string} token
  * @param {string} query
- * @return {Promise<Object>}
+ * @return {Promise<?Object>}
  */
 async function graphqlQueryGithub(token, query) {
-  const {data} = await postGithub(token, '/graphql', {query});
-  return data;
+  const result = await postGithub(token, '/graphql', {query});
+  return result?.data;
 }
 
 /**
@@ -222,10 +227,10 @@ function postGithubIssue(token, repo, data) {
  * @param {string} token
  * @param {string} repo
  * @param {string|number} number
- * @return {Promise<Object>}
+ * @return {Promise<void>}
  */
-function closeGithubIssue(token, repo, number) {
-  return requestGithub(
+async function closeGithubIssue(token, repo, number) {
+  await requestGithub(
     token,
     `/repos/${repo}/issues/${number}`,
     {state: 'closed'},
@@ -250,7 +255,7 @@ async function getGithubIssues(token, repo, labels) {
  * @param {string} token
  * @param {string} repo
  * @param {number|string} number
- * @return {Promise<string>}
+ * @return {Promise<?string>}
  */
 async function getGraphqlIssueId(token, repo, number) {
   const [owner, name] = repo.split('/');
@@ -263,8 +268,8 @@ async function getGraphqlIssueId(token, repo, number) {
       }
     }
   `;
-  const {repository} = await graphqlQueryGithub(token, query);
-  return repository.issue.id;
+  const result = await graphqlQueryGithub(token, query);
+  return result?.repository?.issue?.id;
 }
 
 /** @enum {string} */
@@ -275,7 +280,7 @@ const PinUnpinOpDef = {pin: 'pin', unpin: 'unpin'};
  * @param {string} repo
  * @param {string|number} number
  * @param {PinUnpinOpDef=} op
- * @return {Promise<Object>}
+ * @return {Promise<void>}
  */
 async function pinOrUnpinGithubIssue(token, repo, number, op = 'pin') {
   if (op !== 'pin' && op !== 'unpin') {
@@ -292,14 +297,14 @@ async function pinOrUnpinGithubIssue(token, repo, number, op = 'pin') {
       }
     }
   `;
-  return graphqlQueryGithub(token, mutation);
+  await graphqlQueryGithub(token, mutation);
 }
 
 /**
  * @param {string} token
  * @param {string} repo
  * @param {string|number} number
- * @return {Promise<Object>}
+ * @return {Promise<void>}
  */
 function pinGithubIssue(token, repo, number) {
   return pinOrUnpinGithubIssue(token, repo, number);
@@ -309,7 +314,7 @@ function pinGithubIssue(token, repo, number) {
  * @param {string} token
  * @param {string} repo
  * @param {string|number} number
- * @return {Promise<Object>}
+ * @return {Promise<void>}
  */
 function unpinGithubIssue(token, repo, number) {
   return pinOrUnpinGithubIssue(token, repo, number, 'unpin');
@@ -470,18 +475,14 @@ async function closeStaleIssues(token, repo, issuesWithSessionDate) {
   // We may run matching a session's end by the minute, this prevents off-by-one.
   now.setSeconds(Math.max(1, now.getSeconds()));
 
-  console./*OK*/ log('Session close cutoff:', now);
-
   const issues = issuesWithSessionDate.filter(
     ({sessionDate}) => sessionDate < now.getTime()
   );
   for (const {issue} of issues) {
-    const {'html_url': htmlUrl, number, title} = issue;
-    if (!isDryRun) {
-      await unpinGithubIssue(token, repo, number);
-      await closeGithubIssue(token, repo, number);
-    }
-    console./*OK*/ log('Unpinned & closed: ', title, `(${htmlUrl})`);
+    const {number} = issue;
+    await unpinGithubIssue(token, repo, number);
+    await closeGithubIssue(token, repo, number);
+    logOperationDone('🚫 Closed & unpinned', issue);
   }
   return issues;
 }
@@ -495,7 +496,7 @@ async function closeStalePinUpcoming(token, repo, existing) {
   const staleIssues = await closeStaleIssues(token, repo, existing);
   if (!staleIssues.length) {
     // If there aren't any open stale issues, the newer issue has been pinned.
-    console./*OK*/ log('(Zero issues to close, pin or unpin.)');
+    logOperationDone('⏩ No issues to close, pin or unpin.');
     return;
   }
 
@@ -508,12 +509,9 @@ async function closeStalePinUpcoming(token, repo, existing) {
       "Could not find next session issue to pin. If it's created later, it will NOT be pinned."
     );
   }
-
-  const {'html_url': htmlUrl, number, title} = upcoming.issue;
-  if (!isDryRun) {
-    await pinGithubIssue(token, repo, number);
-  }
-  console./*OK*/ log('Pinned: ', title, `(${htmlUrl})`);
+  const {issue} = upcoming;
+  await pinGithubIssue(token, repo, issue.number);
+  logOperationDone('📌 Pinned', issue);
 }
 
 /**
@@ -529,25 +527,42 @@ async function createScheduledIssue(token, repo, existing) {
     ({sessionDate}) => sessionDate == dateFromTitle
   );
   if (existingIssue) {
-    const {'html_url': htmlUrl, title} = existingIssue.issue;
-    console./*OK*/ log(
-      '(Skipping creation of next issue since it exists.)\n' +
-        `- ${title}\n  ${htmlUrl}`
-    );
+    logOperationDone(`⏩ Skipped creating`, existingIssue.issue);
     return;
   }
 
+  const createdIssue = await postGithubIssue(token, repo, issueData);
+  logOperationDone('✨ Created', createdIssue);
+
   if (isDryRun) {
-    console./*OK*/ log(issueData);
-    return;
+    log(createdIssue);
   }
-  const {'html_url': htmlUrl, title} = await postGithubIssue(
-    token,
-    repo,
-    issueData
-  );
-  console./*OK*/ log(title);
-  console./*OK*/ log(htmlUrl);
+}
+
+/**
+ * @param {string} line
+ * @param {string} underline
+ * @return {string}
+ */
+const header = (line, underline = /* em-dash */ '\u2014') =>
+  `\n${line}\n${new Array(line.length).fill(underline).join('')}`;
+
+/**
+ * @param {string} action
+ * @param {Object=} issue
+ */
+function logOperationDone(action, issue) {
+  if (issue) {
+    const {'html_url': url, title} = issue;
+    log(header(action));
+    log(title);
+    if (url) {
+      log(url);
+    }
+  } else {
+    log();
+    log(action);
+  }
 }
 
 /**
@@ -558,6 +573,10 @@ async function updateDesignReviewIssues(token, repo) {
   const existing = await getExistingIssuesWithSessionDate(token, repo);
   await createScheduledIssue(token, repo, existing);
   await closeStalePinUpcoming(token, repo, existing);
+  if (isDryRun) {
+    logOperationDone('🤫 This was a --dry-run. No changes were made.');
+  }
+  log();
 }
 
 updateDesignReviewIssues(env('GITHUB_TOKEN'), env('GITHUB_REPOSITORY')).catch(
