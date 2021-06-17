@@ -503,8 +503,8 @@
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-desktop-one-panel.html",
-      "name": "amp-story: desktop one panel very short screen no margin",
-      "viewport": {"width": 1440, "height": 300},
+      "name": "amp-story: desktop one panel small square screen",
+      "viewport": {"width": 400, "height": 400},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
       ],
