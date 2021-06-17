@@ -26,7 +26,7 @@
 import './polyfills';
 
 import {draw3p, init} from './integration-lib';
-import {getMode} from '#src/mode';
+import {getMode} from '../src/mode';
 import {register} from './3p';
 
 // 3P - please keep in alphabetic order
