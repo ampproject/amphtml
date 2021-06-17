@@ -94,11 +94,6 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
     `ev:"${version}",` +
     `l:${latest},` +
     priority +
-    // The `function` is wrapped in `()` to avoid lazy parsing it, since it will
-    // be immediately executed anyway.
-    // See https://github.com/ampproject/amphtml/issues/3977
-    // TODO(wg-performance): At some point, the build pipeline began stripping
-    // out these parentheses. Is this optimization still relevant?
     `f:(function(AMP,_){<%= contents %>})` +
     '}'
   );
