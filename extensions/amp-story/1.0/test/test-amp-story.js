@@ -36,12 +36,8 @@ import {VisibilityState} from '#core/constants/visibility-state';
 import {createElementWithAttributes} from '#core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments';
-<<<<<<< HEAD
-import {waitFor} from '../../../../testing/test-helper';
-import { EventType } from '../events';
-=======
 import {waitFor} from '#testing/test-helper';
->>>>>>> 806d9e69932d5142ece17a8f635ebbd8c677f8b2
+import { EventType } from '../events';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
