@@ -152,7 +152,7 @@ The following shows the corresponding overall structure of your Preact base elem
 
 ```js
 import {MyElement} from './component'; // Preact component.
-import {PreactBaseElement} from '../../../src/preact/base-element'; // Preact component.
+import {PreactBaseElement} from '#preact/base-element'; // Preact component.
 
 export class BaseElement extends PreactBaseElement {}
 
