@@ -16,18 +16,21 @@
 
 @import './amp-story-desktop-user-overridable.css';
 
-
+/** Variables shared between page and system layer */
 .i-amphtml-story-desktop-one-panel {
   --i-amphtml-story-desktop-one-panel-large-ratio: 69 / 116;
   --i-amphtml-story-desktop-one-panel-small-ratio: 3 / 4;
+  --i-amphtml-story-desktop-one-panel-min-margin: 74px;
+  --i-amphtml-story-desktop-one-panel-max-margin: 8.25vh;
+  --i-amphtml-story-desktop-one-panel-border-radius: 10px;
+  /** Calculates panel height by subtracting responsive vertical margin. */
+  --i-amphtml-story-desktop-one-panel-large-height: calc(100vh - max(var(--i-amphtml-story-desktop-one-panel-min-margin) * 2, var(--i-amphtml-story-desktop-one-panel-max-margin) * 2));
 }
 
 .i-amphtml-story-desktop-one-panel amp-story-page {
-  /* Calculates height by factoring in responsive vertical margin. */
-  --i-amphtml-story-desktop-one-panel-large-height: calc(100vh - max(148px, 16.5vh));
   height: var(--i-amphtml-story-desktop-one-panel-large-height) !important;
   width: calc(var(--i-amphtml-story-desktop-one-panel-large-height) * var(--i-amphtml-story-desktop-one-panel-large-ratio)) !important;
-  border-radius: 10px !important;
+  border-radius: var(--i-amphtml-story-desktop-one-panel-border-radius) !important;
   margin: auto !important;
 }
 
