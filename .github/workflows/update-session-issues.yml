@@ -18,7 +18,6 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-
       - name: Update Session Issues
         run: |
           node ./build-system/common/update-session-issues
