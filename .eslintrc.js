@@ -111,6 +111,7 @@ module.exports = {
     'curly': 2,
     'google-camelcase/google-camelcase': 2,
 
+    // Rules restricting/standardizing import statements
     'import/no-unresolved': [
       'error',
       {
@@ -138,6 +139,7 @@ module.exports = {
     'import/no-mutable-exports': 0,
     'import/no-default-export': 0,
 
+    // Rules validating JSDoc syntax, separate from type-checking
     'jsdoc/check-param-names': 2,
     'jsdoc/check-tag-names': [
       2,
@@ -173,6 +175,7 @@ module.exports = {
     'jsdoc/require-returns': 2,
     'jsdoc/require-returns-type': 2,
 
+    // Custom repo rules defined in build-system/eslint-rules
     'local/await-expect': 2,
     'local/closure-type-primitives': 2,
     'local/dict-string-keys': 2,
