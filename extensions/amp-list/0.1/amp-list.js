@@ -56,7 +56,7 @@ import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '#core/types/array';
 import {isExperimentOn} from '#experiments';
 import {px, setImportantStyles, setStyles, toggle} from '#core/dom/style';
-import {setDOM} from '../../../third_party/set-dom/set-dom';
+import {setDOM} from '#third_party/set-dom/set-dom';
 import {
   setupAMPCors,
   setupInput,
