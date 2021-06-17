@@ -15,9 +15,9 @@
  */
 
 import {computedStyle} from '#core/dom/style';
+import {tryCallback} from '#core/error';
 import {remove} from '#core/types/array';
 import {toWin} from '#core/window';
-import {tryCallback} from '#core/error';
 
 // typedef imports
 import {LayoutSizeDef} from './rect';

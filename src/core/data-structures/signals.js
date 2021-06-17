@@ -17,7 +17,6 @@
 import {Deferred} from './promise';
 import {map} from '#core/types/object';
 
-// typedef imports
 import {TimestampDef} from '#core/types/date';
 
 /**

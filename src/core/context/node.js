@@ -20,7 +20,6 @@ import {devAssert, devAssertElement} from '#core/assert';
 import {pushIfNotExist, removeItem} from '#core/types/array';
 import {throttleTail} from './scheduler';
 
-// typedef imports
 import {ContextPropDef} from './prop.type';
 
 // Properties set on the DOM nodes to track the context state.

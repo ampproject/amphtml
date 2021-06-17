@@ -20,7 +20,6 @@ import {pushIfNotExist, removeItem} from '#core/types/array';
 import {rethrowAsync} from '#core/error';
 import {throttleTail} from './scheduler';
 
-// typedef imports
 import {ContextPropDef} from './prop.type';
 
 const EMPTY_ARRAY = [];
