@@ -28,10 +28,22 @@ export interface ScriptNode extends posthtml.Node {
   };
 }
 
+export interface CssLinkNode extends posthtml.Node {
+  tag: 'link';
+  attrs: {
+    [key: string]: string | undefined;
+    href: string;
+  };
+}
+
 const VALID_SCRIPT_EXTENSIONS = ['.js', '.mjs'];
 
 function isValidScriptExtension(url: URL): boolean {
   return VALID_SCRIPT_EXTENSIONS.includes(extname(url.pathname));
+}
+
+function isValidOrigin(url: URL,  looseScriptSrcCheck?: boolean): boolean {
+  return looseScriptSrcCheck || url.origin === VALID_CDN_ORIGIN;
 }
 
 /**
@@ -43,12 +55,19 @@ export function isValidScript(node: posthtml.Node, looseScriptSrcCheck?: boolean
     return false;
   }
 
-  const attrs = node.attrs || {};
-  const url = tryGetUrl(attrs.src || '');
-  if (looseScriptSrcCheck) {
-    return isValidScriptExtension(url);
+  const {src = ''} = node.attrs || {};
+  const url = tryGetUrl(src);
+  return isValidOrigin(url, looseScriptSrcCheck) && isValidScriptExtension(url);
+}
+
+export function isValidCssLink(node: posthtml.Node, looseScriptSrcCheck?: boolean): node is CssLinkNode {
+  if (node.tag !== 'link') {
+    return false;
   }
-  return url.origin === VALID_CDN_ORIGIN && isValidScriptExtension(url);
+
+  const {href = ''} = node.attrs || {};
+  const url = tryGetUrl(href);
+  return isValidOrigin(url, looseScriptSrcCheck) && url.pathname.endsWith('.css');
 }
 
 export function isJsonScript(node: posthtml.Node): boolean {

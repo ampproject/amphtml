@@ -86,8 +86,11 @@ const isRtvMode = (serveMode) => {
  * @param {string=} pathPattern
  * @return {RegExp}
  */
-const getCdnJsRegExp = (pathPattern = '[^\'">]+') =>
-  new RegExp(`(https://cdn\\.ampproject\\.org)/${pathPattern}(\\.m?js)`, 'g');
+const getCdnUrlRegExp = (pathPattern = '[^\'">]+') =>
+  new RegExp(
+    `(https://cdn\\.ampproject\\.org)/${pathPattern}(\\.m?js|\\.css)`,
+    'g'
+  );
 
 /**
  * @param  {string} html
@@ -96,7 +99,7 @@ const getCdnJsRegExp = (pathPattern = '[^\'">]+') =>
 const toInaboxDocument = (html) =>
   html
     .replace(/<html [^>]*>/, '<html amp4ads>')
-    .replace(getCdnJsRegExp('v0'), '$1/amp4ads-v0$2');
+    .replace(getCdnUrlRegExp('v0'), '$1/amp4ads-v0$2');
 
 /**
  * @param {URL} url
@@ -124,13 +127,15 @@ function replaceCdnJsUrls(mode, html, hostName, useMaxNames) {
 
   // TODO(alanorozco): Match --esm in output extension and/or allow
   // `.mjs` to be lazily built regardless of --esm
-  return html.replace(getCdnJsRegExp(), (urlString, _cdnPrefix, extension) => {
+  return html.replace(getCdnUrlRegExp(), (urlString, _cdnPrefix, extension) => {
     const url = new URL(urlString);
     if (isRtv) {
       return CDNURLToRTVURL(url, mode, pathnames, extension).href;
     }
+    // CSS files are not output as .max.css
+    const useMaxNamesForFile = useMaxNames && extension !== '.css';
     const href = getHrefWithoutHost(
-      replaceCDNURLPath(url, pathnames, extension, useMaxNames)
+      replaceCDNURLPath(url, pathnames, extension, useMaxNamesForFile)
     );
     return hostName + href;
   });
