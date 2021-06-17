@@ -49,6 +49,7 @@ createTask('check-owners', 'checkOwners');
 createTask('check-renovate-config', 'checkRenovateConfig');
 createTask('check-sourcemaps', 'checkSourcemaps');
 createTask('check-types', 'checkTypes');
+createTask('check-update-design-review-issues', 'check');
 createTask('check-video-interface-list', 'checkVideoInterfaceList');
 createTask('cherry-pick', 'cherryPick');
 createTask('clean');

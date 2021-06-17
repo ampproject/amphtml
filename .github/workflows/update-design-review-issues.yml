@@ -1,10 +1,11 @@
 name: Update Design Review Issues
 
 on:
-  # This schedule should match the time rotation configured on
-  # update-design-review-issues.js.
   # Times correspond to session end, and additionally 1 hour earlier to account
   # for Daylight Savings.
+  #
+  # Update this list by running:
+  #     amp check-update-design-review-issues --fix
   schedule:
     - cron: '30 16,17 * * 3' # Africa/Europe/western Asia
     - cron: '0 21,22 * * 3' # Americas

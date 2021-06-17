@@ -41,8 +41,11 @@ let RotationItemDef;
 
 /**
  * Times in this rotation are adjusted according to Daylight Savings.
- * If these are updated, the schedule on update-design-review-issues.yml should
- * also be updated correspondingly.
+ *
+ * If these are updated, the correspoding Workflow schedule should be updated as
+ * well. Update it by running:
+ *     amp check-update-design-review-issues --fix
+ *
  * @type {Array<RotationItemDef>}
  */
 const timeRotationUtc = [
@@ -560,9 +563,18 @@ async function updateDesignReviewIssues(token, repo) {
   await closeStalePinUpcoming(token, repo, existing);
 }
 
-updateDesignReviewIssues(env('GITHUB_TOKEN'), env('GITHUB_REPOSITORY')).catch(
-  (e) => {
-    console./*OK*/ error(e);
-    process.exit(1);
-  }
-);
+if (require.main === module) {
+  updateDesignReviewIssues(env('GITHUB_TOKEN'), env('GITHUB_REPOSITORY')).catch(
+    (e) => {
+      console./*OK*/ error(e);
+      process.exit(1);
+    }
+  );
+}
+
+module.exports = {
+  DayOfWeekDef,
+  RotationItemDef,
+  timeRotationUtc,
+  sessionDurationHours,
+};

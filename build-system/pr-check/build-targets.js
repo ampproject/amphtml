@@ -161,7 +161,8 @@ const targetMatchers = {
       (file.startsWith('build-system') &&
         (file.endsWith('.js') ||
           file.endsWith('.ts') ||
-          file.endsWith('.json')))
+          file.endsWith('.json'))) ||
+      file.startsWith('.github/workflows/')
     );
   },
   [Targets.CACHES_JSON]: (file) => {
