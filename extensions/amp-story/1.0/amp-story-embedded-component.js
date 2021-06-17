@@ -29,24 +29,24 @@ import {
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
-import {Keys} from '../../../src/core/constants/key-codes';
+import {Keys} from '#core/constants/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
-import {addAttributesToElement, tryFocus} from '../../../src/dom';
-import {closest, matches} from '../../../src/core/dom/query';
+import {Services} from '#service';
+import {addAttributesToElement, tryFocus} from '#core/dom';
+import {closest, matches} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getSourceOriginForElement,
   triggerClickFromLightDom,
 } from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {getAmpdoc} from '../../../src/service';
+import {dict} from '#core/types/object';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
-import {px, resetStyles, setImportantStyles, toggle} from '../../../src/style';
+import {px, resetStyles, setImportantStyles, toggle} from '#core/dom/style';
 
 /**
  * Action icons to be placed in tooltip.

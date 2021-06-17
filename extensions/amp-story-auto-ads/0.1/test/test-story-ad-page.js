@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import * as dom from '../../../../src/dom';
-import * as service from '../../../../src/service';
+import * as openWindowDialog from '../../../../src/open-window-dialog';
+import * as service from '../../../../src/service-helpers';
 import {
   Action,
   UIType,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
-import {CommonSignals} from '../../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {Gestures} from '../../../../src/gesture';
 import {StoryAdAnalytics} from '../story-ad-analytics';
-import {StoryAdAutoAdvance} from '../../../../src/experiments/story-ad-auto-advance';
+import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 import {StoryAdLocalization} from '../story-ad-localization';
 import {StoryAdPage} from '../story-ad-page';
-import {forceExperimentBranch} from '../../../../src/experiments';
-import {macroTask} from '../../../../testing/yield';
+import {forceExperimentBranch} from '#experiments';
+import {macroTask} from '#testing/yield';
 
 const NOOP = () => {};
 
@@ -402,7 +402,10 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         'https://googleads.g.doubleclick.net/pagead/images/mtad/ad_choices_blue.png'
       );
 
-      const openWindowDialogStub = env.sandbox.stub(dom, 'openWindowDialog');
+      const openWindowDialogStub = env.sandbox.stub(
+        openWindowDialog,
+        'openWindowDialog'
+      );
       attribution.click();
       expect(openWindowDialogStub).to.be.calledOnce;
       expect(openWindowDialogStub).to.be.calledWithExactly(

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '#service';
 import {dev} from '../log';
-import {dict} from '../core/types/object';
+import {dict} from '#core/types/object';
 import {getSourceOrigin} from '../url';
 
 /**

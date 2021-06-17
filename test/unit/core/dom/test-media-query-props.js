@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {MediaQueryProps} from '../../../../src/core/dom/media-query-props';
-import {waitFor} from '../../../../testing/test-helper';
+import {MediaQueryProps} from '#core/dom/media-query-props';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'DOM - MediaQueryProps',

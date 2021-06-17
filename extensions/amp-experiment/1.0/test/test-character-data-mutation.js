@@ -15,7 +15,7 @@
  */
 
 import {CharacterDataMutation} from '../mutation/character-data-mutation';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 
 const TEST_VALUE = 'TEST_VALUE';
 

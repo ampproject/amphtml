@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/core/types/object';
+import {dict, map} from '#core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {isArray, isFiniteNumber} from '../../../src/core/types';
+import {getParentWindowFrameElement} from '../../../src/service-helpers';
+import {isArray, isFiniteNumber} from '#core/types';
 
 import {
   layoutPositionRelativeToScrolledViewport,
   layoutRectLtwh,
-} from '../../../src/core/math/layout-rect';
-import {rootNodeFor} from '../../../src/dom';
+} from '#core/math/layout-rect';
+import {rootNodeFor} from '#core/dom';
 
 const TAG = 'amp-analytics/visibility-manager';
 

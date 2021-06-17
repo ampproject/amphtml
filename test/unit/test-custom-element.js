@@ -15,20 +15,20 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpEvents} from '../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {BaseElement} from '../../src/base-element';
-import {CommonSignals} from '../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {ElementStub} from '../../src/element-stub';
-import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {Services} from '../../src/services';
+import {LOADING_ELEMENTS_, Layout} from '#core/dom/layout';
+import {Resource, ResourceState} from '#service/resource';
+import {Services} from '#service';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
-import {elementConnectedCallback} from '../../src/service/custom-element-registry';
-import {toggleExperiment} from '../../src/experiments';
+import {elementConnectedCallback} from '#service/custom-element-registry';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -1977,29 +1977,6 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
     child.setAttribute(attr, '');
     return child;
   }
-
-  it('getRealChildren should return nothing', () => {
-    expect(element.getRealChildNodes().length).to.equal(0);
-    expect(element.getRealChildren().length).to.equal(0);
-  });
-
-  it('getRealChildren should return content-only nodes', () => {
-    element.appendChild(doc.createElement('i-amp-service'));
-    element.appendChild(createWithAttr('placeholder'));
-    element.appendChild(createWithAttr('fallback'));
-    element.appendChild(createWithAttr('overflow'));
-    element.appendChild(doc.createTextNode('abc'));
-    element.appendChild(doc.createElement('content'));
-
-    const nodes = element.getRealChildNodes();
-    expect(nodes.length).to.equal(2);
-    expect(nodes[0].textContent).to.equal('abc');
-    expect(nodes[1].tagName.toLowerCase()).to.equal('content');
-
-    const elements = element.getRealChildren();
-    expect(elements.length).to.equal(1);
-    expect(elements[0].tagName.toLowerCase()).to.equal('content');
-  });
 
   it('getPlaceholder should return nothing', () => {
     expect(element.getPlaceholder()).to.be.null;

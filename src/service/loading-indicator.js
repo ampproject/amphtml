@@ -16,9 +16,9 @@
 
 import {createLoaderElement} from './loader-element';
 import {createViewportObserver} from '../viewport-observer';
-import {htmlFor} from '../static-template';
-import {registerServiceBuilderForDoc} from '../service';
-import {removeElement} from '../dom';
+import {htmlFor} from '#core/dom/static-template';
+import {registerServiceBuilderForDoc} from '../service-helpers';
+import {removeElement} from '#core/dom';
 
 const MIN_SIZE = 20;
 

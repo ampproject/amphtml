@@ -16,8 +16,8 @@
 
 import '../../../amp-mustache/0.2/amp-mustache';
 import '../amp-date-countdown';
-import {waitFor} from '../../../../testing/test-helper.js';
-import {whenUpgradedToCustomElement} from '../../../../src/dom';
+import {waitFor} from '#testing/test-helper.js';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(
   'amp-date-countdown 1.0',

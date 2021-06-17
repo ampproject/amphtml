@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe, poll, pollForLayout} from '../../testing/iframe';
+import {createFixtureIframe, poll, pollForLayout} from '#testing/iframe';
 
 describes.sandboxed
   .configure()

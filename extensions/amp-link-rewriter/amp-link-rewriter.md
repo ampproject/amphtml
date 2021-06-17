@@ -76,7 +76,7 @@ The final code should look like:
 
 ```html
 <!DOCTYPE html>
-<html ⚡>
+<html ⚡ lang="en">
   <head>
     ...
     <script
