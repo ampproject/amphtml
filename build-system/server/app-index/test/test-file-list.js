@@ -19,32 +19,11 @@ const test = require('ava');
 const {FileList} = require('../file-list');
 const {getElementChildren} = require('./helpers');
 
-test('wraps', async (t) => {
-  const document = FileList({
-    basepath: 'basepath',
-    fileSet: [],
-    selectModePrefix: '/',
-  });
-
-  await posthtml([
-    (tree) => {
-      const elements = getElementChildren(tree);
-      t.is(elements.length, 1);
-
-      const [root] = elements;
-      t.is(root.attrs.class, 'file-list-container');
-
-      const [firstElementChild] = getElementChildren(root.content);
-      t.is(firstElementChild.attrs.class, 'wrap');
-    },
-  ]).process(document);
-});
-
 test('creates [role=list]', async (t) => {
   const document = FileList({
     basepath: 'basepath',
     fileSet: [],
-    selectModePrefix: '/',
+    htmlEnvelopePrefix: '/',
   });
 
   const elements = [];
@@ -66,7 +45,7 @@ test('creates placeholder inside [role=list] with rendered data', async (t) => {
   const document = FileList({
     fileSet,
     basepath: 'basepath',
-    selectModePrefix: '/',
+    htmlEnvelopePrefix: '/',
   });
 
   const items = [];
@@ -114,7 +93,7 @@ test('binds /examples hrefs', async (t) => {
   const document = FileList({
     fileSet,
     basepath,
-    selectModePrefix: '/',
+    htmlEnvelopePrefix: '/',
   });
 
   const elements = await getListitemAElements(document);
@@ -134,7 +113,7 @@ test('does not bind non-/examples hrefs', async (t) => {
   const document = FileList({
     fileSet,
     basepath,
-    selectModePrefix: '/',
+    htmlEnvelopePrefix: '/',
   });
 
   const elements = await getListitemAElements(document);
@@ -155,7 +134,7 @@ test('binds/does not bind mixed', async (t) => {
   const document = FileList({
     fileSet: [...bound, ...notBound],
     basepath,
-    selectModePrefix: '/',
+    htmlEnvelopePrefix: '/',
   });
 
   const elements = await getListitemAElements(document);

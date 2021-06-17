@@ -15,42 +15,16 @@
  */
 
 /* eslint-disable local/html-template */
-
-const documentModes = require('./document-modes');
-const {AmpState, ampStateKey} = require('./amphtml-helpers');
 const {html, joinFragments} = require('./html');
-const {KeyValueOptions} = require('./form');
+const {htmlEnvelopePrefixKey} = require('./settings');
 const {replaceLeadingSlash} = require('./url');
 
 const examplesPathRegex = /^\/examples\//;
 const htmlDocRegex = /\.html$/;
 
-const selectModeStateId = 'documentMode';
-const selectModeStateKey = 'selectModePrefix';
-const selectModeKey = ampStateKey(selectModeStateId, selectModeStateKey);
-
-const ExamplesDocumentModeSelect = () => html`
-  <label for="examples-mode-select">
-    Document mode:
-    <select
-      id="examples-mode-select"
-      on="change:AMP.setState({
-          ${selectModeStateId}: {
-            ${selectModeStateKey}: event.value
-          }
-        })"
-    >
-      ${KeyValueOptions(documentModes)}
-    </select>
-  </label>
-`;
-
 const linksToExample = (shouldContainBasepath, opt_name) =>
   examplesPathRegex.test(shouldContainBasepath) &&
   htmlDocRegex.test(opt_name || shouldContainBasepath);
-
-const ExamplesSelectModeOptional = ({basepath}) =>
-  !examplesPathRegex.test(basepath + '/') ? '' : ExamplesDocumentModeSelect();
 
 /**
  * @param {{ name: string, href: string, boundHref?: string|undefined }} config
@@ -69,64 +43,54 @@ const FileListItem = ({boundHref, href, name}) =>
     </div>
   `;
 
-const FileListItemBound = ({href, name, selectModePrefix}) =>
+const FileListItemBound = ({href, htmlEnvelopePrefix, name}) =>
   linksToExample(href)
     ? FileListItem({
         name,
-        href: selectModePrefix + replaceLeadingSlash(href, ''),
-        boundHref: `(${selectModeKey} || '${selectModePrefix}') + '${replaceLeadingSlash(
+        href: htmlEnvelopePrefix + replaceLeadingSlash(href, ''),
+        boundHref: `(${htmlEnvelopePrefixKey} || '${htmlEnvelopePrefix}') + '${replaceLeadingSlash(
           href,
           ''
         )}'`,
       })
     : FileListItem({href, name});
 
-const maybePrefixExampleDocHref = (basepath, name, selectModePrefix) =>
+const maybePrefixExampleDocHref = (basepath, name, htmlEnvelopePrefix) =>
   (linksToExample(basepath, name)
-    ? replaceLeadingSlash(basepath, selectModePrefix)
+    ? replaceLeadingSlash(basepath, htmlEnvelopePrefix)
     : basepath) + name;
 
-const FileListHeading = ({basepath, selectModePrefix}) => html`
+const FileListHeading = ({basepath}) => html`
   <div class="file-list-heading">
     <h3 class="code" id="basepath">${basepath}</h3>
     <div class="file-list-right-section">
-      ${AmpState(selectModeStateId, {
-        [selectModeStateKey]: selectModePrefix,
-      })}
-      ${ExamplesSelectModeOptional({basepath})}
       <a href="/~" class="underlined">List root directory</a>
     </div>
   </div>
 `;
 
-const wrapFileList = (rendered) => html`
-  <div class="file-list-container">
-    <div class="wrap">${rendered}</div>
-  </div>
-`;
-
-const FileList = ({basepath, fileSet, selectModePrefix}) =>
-  wrapFileList(
-    joinFragments([
-      FileListHeading({basepath, selectModePrefix}),
-      html`
-        <div class="file-list">
-          <div role="list">
-            ${joinFragments(fileSet, (name) =>
-              FileListItemBound({
+const FileList = ({basepath, fileSet, htmlEnvelopePrefix}) =>
+  joinFragments([
+    FileListHeading({basepath}),
+    html`
+      <div class="file-list">
+        <div role="list">
+          ${joinFragments(fileSet, (name) =>
+            FileListItemBound({
+              name,
+              href: maybePrefixExampleDocHref(
+                basepath,
                 name,
-                href: maybePrefixExampleDocHref(
-                  basepath,
-                  name,
-                  selectModePrefix
-                ),
-                selectModePrefix,
-              })
-            )}
-          </div>
+                htmlEnvelopePrefix
+              ),
+              htmlEnvelopePrefix,
+            })
+          )}
         </div>
-      `,
-    ])
-  );
+      </div>
+    `,
+  ]);
 
-module.exports = {FileList};
+module.exports = {
+  FileList,
+};

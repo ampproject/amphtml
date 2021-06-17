@@ -51,7 +51,7 @@ async function serveIndex({url}, res, next) {
 
   const renderedHtml = renderTemplate({
     fileSet,
-    selectModePrefix: '/',
+    htmlEnvelopePrefix: '/',
     isMainPage: isMainPageFromUrl(url),
     basepath: formatBasepath(mappedPath),
     serveMode: getServeMode(),

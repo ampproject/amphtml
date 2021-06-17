@@ -23,7 +23,7 @@ const ProxyForm = require('./proxy-form');
 const {AmpDoc, addRequiredExtensionsToHead} = require('./amphtml-helpers');
 const {FileList} = require('./file-list');
 const {html, joinFragments} = require('./html');
-const {SettingsModal, SettingsOpenButton} = require('./settings');
+const {SettingsPanelButtons} = require('./settings');
 
 const ampLogoSvg = html`<svg
   id="logo"
@@ -43,34 +43,31 @@ const ampLogoSvg = html`<svg
   </g>
 </svg>`;
 
-const HeaderLink = ({divider, href, name}) => html`
-  <li class="${divider ? 'divider' : ''}">
-    <a target="_blank" rel="noopener noreferrer" href="${href}"> ${name} </a>
-  </li>
-`;
-
-const Header = ({isMainPage, links}) => html`
-  <header>
-    <h1 class="amp-logo">${ampLogoSvg} AMP</h1>
-    <div class="right-of-logo">
-      ${!isMainPage ? HeaderBackToMainLink() : ''}
+const TopLevelWrap = (content) =>
+  html`
+    <div style="border-bottom: 1px solid #ddd">
+      <div class="wrap">${content}</div>
     </div>
+  `;
+
+const Header = ({htmlEnvelopePrefix, jsMode, links}) => html`
+  <header>
+    <h1 class="amp-logo">${ampLogoSvg}</h1>
+    ${SettingsPanelButtons({htmlEnvelopePrefix, jsMode})}
     <ul class="right-nav">
-      ${joinFragments(links, ({divider, href, name}, i) =>
-        HeaderLink({
-          divider: divider || i == links.length - 1,
-          name,
-          href,
-        })
+      ${joinFragments(
+        links,
+        ({href, name}) => html`
+          <li>
+            <a target="_blank" rel="noopener noreferrer" href="${href}">
+              ${name}
+            </a>
+          </li>
+        `
       )}
-      <li>${SettingsOpenButton()}</li>
     </ul>
   </header>
 `;
-
-const HeaderBackToMainLink = () => html` <a href="/">← Back to main</a> `;
-
-const ProxyFormOptional = ({isMainPage}) => (isMainPage ? ProxyForm() : '');
 
 /**
  * @param {{
@@ -79,7 +76,7 @@ const ProxyFormOptional = ({isMainPage}) => (isMainPage ? ProxyForm() : '');
  *  isMainPage?: boolean,
  *  fileSet?: Array,
  *  serveMode?: string,
- *  selectModePrefix?: string,
+ *  htmlEnvelopePrefix?: string,
  * }=} opt_params
  * @return {string}
  */
@@ -90,18 +87,15 @@ function renderTemplate(opt_params = {}) {
     isMainPage = false,
     fileSet = [],
     serveMode = 'default',
-    selectModePrefix = '/',
+    htmlEnvelopePrefix = '/',
   } = opt_params;
 
   const body = joinFragments([
-    html`
-      <div class="wrap">
-        ${Header({isMainPage, links: headerLinks})}
-        ${ProxyFormOptional({isMainPage})}
-      </div>
-    `,
-
-    FileList({basepath, selectModePrefix, fileSet}),
+    TopLevelWrap(
+      Header({htmlEnvelopePrefix, jsMode: serveMode, links: headerLinks})
+    ),
+    TopLevelWrap(ProxyForm({htmlEnvelopePrefix})),
+    TopLevelWrap(FileList({basepath, htmlEnvelopePrefix, fileSet})),
 
     html`
       <div class="center">
@@ -109,8 +103,6 @@ function renderTemplate(opt_params = {}) {
         <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
       </div>
     `,
-
-    SettingsModal({serveMode}),
   ]);
 
   const docWithoutExtensions = AmpDoc({canonical: basepath, css, body});
