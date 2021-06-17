@@ -556,23 +556,23 @@ exports.extensionBundles = [
 ];
 ```
 
-Note, if you are providing a version upgrade (pre-existing 0.1 to Bento 1.0, for example), it is important to note that the latest version is the 0.1 until the 1.0 version is no longer experimental and fully launched. The following is the most straight-forward way to specify this:
+The entry for your component must have `options.wrapper = "bento"`, and may optionally include `options.npm = true` to opt the Preact component portion for automated npm publishing on AMP's release schedule.
 
 ```javascript
 exports.extensionBundles = [
 ...
-  {name: 'amp-my-element', version: ['0.1', '1.0'], latestVersion: '0.1', options: {hasCss: true}},
+  {name: 'amp-my-element', version: '1.0', latestVersion: '0.1', options: {npm: true, wrapper: "bento"}},
 ...
 ];
 ```
 
-However, note that if one version is `hasCss: true` and the other is `hasCss: false`, they will require two separate entries:
+Note, if you are providing a version upgrade (pre-existing 0.1 to Bento 1.0, for example), it is important to note that the latest version is the 0.1 until the 1.0 version is no longer experimental and fully launched. The following is an example of two version entries for one component:
 
 ```javascript
 exports.extensionBundles = [
 ...
   {name: 'amp-my-element', version: '0.1', latestVersion: '0.1', options: {hasCss: true}},
-  {name: 'amp-my-element', version: '1.0', latestVersion: '0.1'},
+  {name: 'amp-my-element', version: '1.0', latestVersion: '0.1', options: {npm: true, wrapper: "bento"}},
 ...
 ];
 ```
