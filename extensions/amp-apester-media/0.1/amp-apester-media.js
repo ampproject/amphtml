@@ -17,6 +17,11 @@ import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
+import {
+  applyFillContent,
+  getLengthNumeral,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {
@@ -26,7 +31,6 @@ import {
   setFullscreenOff,
   setFullscreenOn,
 } from './utils';
-import {getLengthNumeral, isLayoutSizeDefined} from '#core/dom/layout';
 import {handleCompanionAds} from './monetization';
 import {
   observeWithSharedInOb,
@@ -245,7 +249,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     iframe.height = this.height_;
     iframe.width = this.width_;
     iframe.classList.add('amp-apester-iframe');
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     return iframe;
   }
 

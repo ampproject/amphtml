@@ -16,11 +16,11 @@
 import {ActionTrust} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
 import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {
   observeContentSize,
@@ -166,7 +166,7 @@ export class Amp3dGltf extends AMP.BaseElement {
 
     const iframe = getIframe(this.win, this.element, TYPE, this.context_);
     iframe.title = this.element.title || 'GLTF 3D model';
-    this.applyFillContent(iframe, true);
+    applyFillContent(iframe, true);
     this.iframe_ = iframe;
     this.unlistenMessage_ = devAssert(this.listenGltfViewerMessages_());
 

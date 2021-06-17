@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const api = require('./api/api');
 const basepathMappings = require('./basepath-mappings');
 const fs = require('fs');
 const path = require('path');
@@ -68,8 +67,6 @@ async function serveIndex({url}, res, next) {
  * @param {*} app require('express')
  */
 function installExpressMiddleware(app) {
-  api.installExpressMiddleware(app);
-
   app.get(['/', '/*'], serveIndex);
 }
 

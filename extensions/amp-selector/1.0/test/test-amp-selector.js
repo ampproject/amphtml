@@ -18,7 +18,7 @@ import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-selector:1.0',

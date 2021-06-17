@@ -15,7 +15,7 @@
  */
 
 import {LocalizedStringId} from '../../../../src/localized-strings';
-import localesObjs from '../_locales/index';
+import localesObjs from '../_locales';
 
 describes.fakeWin('amp-story-localization-strings', {amp: true}, () => {
   describe('localized strings', () => {

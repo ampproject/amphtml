@@ -15,7 +15,7 @@
  */
 
 import {TAG as KEY_TAG} from './amp-embedly-key';
-import {Layout} from '#core/dom/layout';
+import {Layout, applyFillContent} from '#core/dom/layout';
 import {Services} from '#service';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
@@ -87,7 +87,7 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
       opt_is3P
     );
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.getVsync().mutate(() => {
       this.element.appendChild(iframe);
     });

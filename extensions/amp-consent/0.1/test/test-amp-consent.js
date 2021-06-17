@@ -29,7 +29,7 @@ import {ConsentStateManager} from '../consent-state-manager';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {dev, user} from '../../../../src/log';
 import {dict} from '#core/types/object';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {
   registerServiceBuilder,
   resetServiceForTesting,

@@ -18,6 +18,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   createFrameFor,
   objOrParseJson,
@@ -35,7 +36,6 @@ import {
 import {getData, listen, listenOncePromise} from '../../../src/event-helper';
 import {htmlFor} from '#core/dom/static-template';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
@@ -238,7 +238,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
       <img placeholder referrerpolicy="origin" loading="lazy" />
     `;
 
-    this.applyFillContent(placeholder);
+    applyFillContent(placeholder);
 
     const src = `${this.baseURL_}/poster/${this.contentID_}`;
     placeholder.setAttribute('src', src);

@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-mathml-0.1.css';
-import {Layout} from '#core/dom/layout';
+import {Layout, applyFillContent} from '#core/dom/layout';
 import {Services} from '#service';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
@@ -68,7 +68,7 @@ export class AmpMathml extends AMP.BaseElement {
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'mathml');
     iframe.title = this.element.title || 'MathML formula';
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(
       iframe,

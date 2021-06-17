@@ -22,7 +22,7 @@ import {Services} from '#service';
 import {computedStyle} from '#core/dom/style';
 import {createElementWithAttributes, tryFocus} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
-import {poll} from '../../../../testing/iframe';
+import {poll} from '#testing/iframe';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(

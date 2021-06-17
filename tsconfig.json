@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "baseUrl": ".",
+    "exclude": ["node_modules"],
     "paths": {
       "#3p/*": ["./3p/*"],
       "#ads/*": ["./ads/*"],
@@ -13,7 +15,10 @@
       "#polyfills/*": ["./src/polyfills/*"],
       "#preact/*": ["./src/preact/*"],
       "#purifier/*": ["./src/purifier/*"],
-      "#service/*": ["./src/service/*"]
+      "#service/*": ["./src/service/*"],
+
+      "#test/*": ["./test/*"],
+      "#testing/*": ["./testing/*"]
     }
   }
 }

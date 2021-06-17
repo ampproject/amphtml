@@ -34,6 +34,7 @@ import {
   isFullscreenElement,
 } from '#core/dom/fullscreen';
 
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
@@ -41,7 +42,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '#core/dom/static-template';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 
 const TAG = 'amp-brid-player';
 
@@ -247,8 +248,8 @@ class AmpBridPlayer extends AMP.BaseElement {
       <img placeholder referrerpolicy="origin" loading="lazy" />
     `;
 
-    this.propagateAttributes(['aria-label'], placeholder);
-    this.applyFillContent(placeholder);
+    propagateAttributes(['aria-label'], this.element, placeholder);
+    applyFillContent(placeholder);
 
     const altText = placeholder.hasAttribute('aria-label')
       ? 'Loading video - ' + placeholder.getAttribute('aria-label')

@@ -530,3 +530,10 @@
   top: 0 !important;
   width: 100vw !important;
 }
+
+.i-amphtml-story-desktop-one-panel.i-amphtml-story-system-layer {
+  width: var(--i-amphtml-story-desktop-one-panel-width) !important;
+  margin: auto !important;
+  margin-top: var(--i-amphtml-story-desktop-one-panel-responsive-margin) !important;
+  border-radius: var(--i-amphtml-story-desktop-one-panel-border-radius) !important;
+}

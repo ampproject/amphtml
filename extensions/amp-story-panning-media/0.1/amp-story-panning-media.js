@@ -18,7 +18,7 @@ import {
   Action,
   StateProperty,
   UIType,
-} from '../../../extensions/amp-story/1.0/amp-story-store-service';
+} from '../../amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Layout} from '#core/dom/layout';

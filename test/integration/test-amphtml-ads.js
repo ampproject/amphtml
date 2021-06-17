@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {RequestBank} from '../../testing/test-helper';
-import {maybeSwitchToCompiledJs} from '../../testing/iframe';
+import {RequestBank} from '#testing/test-helper';
+import {maybeSwitchToCompiledJs} from '#testing/iframe';
 import {parseQueryString} from '#core/types/string/url';
 import {xhrServiceForTesting} from '#service/xhr-impl';
 
