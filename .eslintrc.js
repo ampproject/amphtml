@@ -193,10 +193,13 @@ module.exports = {
         allowed: [
           'element',
           'getProp',
+          'loadable',
           'mutateElement',
           'mutateProps',
           'registerApiAction',
           'setReadyState',
+          'usesLoading',
+          'usesShadowDom',
           'win',
         ],
       },
