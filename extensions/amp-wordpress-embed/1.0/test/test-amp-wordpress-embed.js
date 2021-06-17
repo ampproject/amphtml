@@ -15,10 +15,10 @@
  */
 
 import '../amp-wordpress-embed';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {createElementWithAttributes} from '#core/dom';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
+import {toggleExperiment} from '#experiments';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-wordpress-embed-v1.0',
@@ -98,6 +98,30 @@ describes.realWin(
       win.dispatchEvent(mockEvent);
 
       expect(forceChangeHeightStub).to.be.calledOnce.calledWith(1000);
+    });
+
+    it('should show a warning message when data-url is missing', async () => {
+      const originalWarn = console.warn;
+      const consoleOutput = [];
+      const mockedWarn = (output) => consoleOutput.push(output);
+      console.warn = mockedWarn;
+
+      element = createElementWithAttributes(
+        win.document,
+        'amp-wordpress-embed',
+        {}
+      );
+      doc.body.appendChild(element);
+
+      await element.buildInternal();
+      await element.layoutCallback();
+
+      expect(consoleOutput.length).to.equal(1);
+      expect(consoleOutput[0]).to.equal(
+        'data-url is required for <amp-wordpress-embed>'
+      );
+
+      console.warn = originalWarn;
     });
   }
 );
