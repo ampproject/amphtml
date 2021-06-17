@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Service from '../../../../../src/service-helpers'
+import * as Service from '../../../../../src/service-helpers';
 import {AmpEvents} from '#core/constants/amp-events';
 import {AmpForm, AmpFormService} from '../../amp-form';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';

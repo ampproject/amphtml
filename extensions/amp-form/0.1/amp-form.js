@@ -38,10 +38,14 @@ import {
   isProxyOrigin,
   serializeQueryString,
 } from '../../../src/url';
-import {Services} from '#service';
+import {Services, getServiceForDocOrNull} from '#service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
-import {ancestorElementsByTag, childElementByAttr, closestAncestorElementBySelector,
-  matches,} from '#core/dom/query';
+import {
+  ancestorElementsByTag,
+  childElementByAttr,
+  closestAncestorElementBySelector,
+  matches,
+} from '#core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {
   createElementWithAttributes,
@@ -50,7 +54,7 @@ import {
   tryFocus,
 } from '#core/dom';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {deepMerge, dict} from '#core/types/object';
+import {deepMerge, dict, hasOwn} from '#core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
@@ -60,7 +64,6 @@ import {
 } from '../../../src/form';
 import {getFormValidator, isCheckValiditySupported} from './form-validators';
 import {getMode} from '../../../src/mode';
-import {getServiceForDocOrNull} from '../../../src/service';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';

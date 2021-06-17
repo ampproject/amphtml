@@ -19,7 +19,7 @@ import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
 import {Services} from '#service';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {createCustomEvent, getDetail} from '../../../../src/event-helper';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 
 function getForm(doc) {
   const form = doc.createElement('form');

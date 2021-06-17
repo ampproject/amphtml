@@ -19,8 +19,8 @@ import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {dev, devAssert} from '../../../src/log';
-import {getServiceForDocOrNull} from '../../../src/service';
 import {dict, map} from '#core/types/object';
+import {getServiceForDocOrNull} from '#service';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
