@@ -2241,7 +2241,7 @@ export class AmpStory extends AMP.BaseElement {
     this.mutateElement(() => {
       if (prioritizeActivePage) {
         // Load page with distance 0 first, and then load the other ones.
-        Promise.all(
+        return Promise.all(
           pagesByDistance[0].map((pageId) => {
             const page = this.getPageById(pageId);
             page.setDistance(0);
