@@ -674,5 +674,5 @@ $ amp check-types
     -   [amp-video](https://github.com/ampproject/amphtml/pull/30280)
     -   [amp-vimeo](https://github.com/ampproject/amphtml/pull/33971)
     -   [amp-youtube](https://github.com/ampproject/amphtml/pull/30444)
--   Adding iframe based embeds
+-   Adding iframe based embeds [You may also follow the guide to Building a Bento Video Component.](./building-a-bento-iframe-component.md)
     -   [amp-instagram](https://github.com/ampproject/amphtml/pull/30230)
