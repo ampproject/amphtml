@@ -54,14 +54,6 @@ async function getListing(rootPath, basepath) {
 }
 
 /**
- * @param {string} url
- * @return {boolean}
- */
-function isMainPageFromUrl(url) {
-  return url == '/';
-}
-
-/**
  * Adds a trailing slash if missing.
  * @param {string} basepath
  * @return {string}
@@ -73,6 +65,5 @@ function formatBasepath(basepath) {
 module.exports = {
   isMaliciousPath,
   getListing,
-  isMainPageFromUrl,
   formatBasepath,
 };
