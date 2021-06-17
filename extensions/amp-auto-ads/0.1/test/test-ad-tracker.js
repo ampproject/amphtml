@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import * as Utils from '../../../../src/utils/page-layout-box';
+import * as MeasurePageLayoutBox from '../measure-page-layout-box';
 import {
   AdTracker,
   getAdConstraintsFromConfigObj,
   getExistingAds,
 } from '../ad-tracker';
-import {Services} from '../../../../src/services';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {Services} from '#service';
+import {layoutRectLtwh} from '#core/math/layout-rect';
 
 describes.realWin('ad-tracker', {amp: true}, (env) => {
   let win, doc;
@@ -31,9 +31,11 @@ describes.realWin('ad-tracker', {amp: true}, (env) => {
     win = env.win;
     doc = win.document;
 
-    env.sandbox.stub(Utils, 'measurePageLayoutBox').callsFake((element) => {
-      return Promise.resolve(element.layoutBox);
-    });
+    env.sandbox
+      .stub(MeasurePageLayoutBox, 'measurePageLayoutBox')
+      .callsFake((element) => {
+        return Promise.resolve(element.layoutBox);
+      });
 
     container = doc.createElement('div');
     doc.body.appendChild(container);

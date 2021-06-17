@@ -19,6 +19,9 @@ const {
   forbiddenTermsGlobal,
   forbiddenTermsSrcInclusive,
 } = require('./build-system/test-configs/forbidden-terms');
+const {
+  getImportResolver,
+} = require('./build-system/babel-config/import-resolver');
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -45,10 +48,12 @@ module.exports = {
     'import',
     'jsdoc',
     'local',
+    'module-resolver',
     'notice',
     'prettier',
     'react',
     'react-hooks',
+    'sort-destructure-keys',
     'sort-imports-es6-autofix',
     'sort-requires',
   ],
@@ -83,6 +88,12 @@ module.exports = {
     },
     'react': {
       'pragma': 'Preact',
+    },
+    'import/resolver': {
+      // This makes it possible to eventually enable the built-in import linting
+      // rules to detect invalid imports, imports of things that aren't
+      // exported, etc.
+      'babel-module': getImportResolver(),
     },
   },
   'reportUnusedDisableDirectives': true,
@@ -179,6 +190,10 @@ module.exports = {
     'local/unused-private-field': 2,
     'local/vsync': 0,
     'local/window-property-name': 2,
+    'module-resolver/use-alias': [
+      'error',
+      {'alias': getImportResolver().alias},
+    ],
     'no-alert': 2,
     'no-cond-assign': 2,
     'no-debugger': 2,
@@ -251,6 +266,7 @@ module.exports = {
         },
       },
     ],
+    'sort-destructure-keys/sort-destructure-keys': 2,
     'sort-imports-es6-autofix/sort-imports-es6': [
       2,
       {
@@ -269,6 +285,7 @@ module.exports = {
         'extensions/**/test-e2e/*.js',
         'ads/**/test/**/*.js',
         'testing/**/*.js',
+        'build-system/**/test/*.js',
       ],
       'rules': {
         'require-jsdoc': 0,

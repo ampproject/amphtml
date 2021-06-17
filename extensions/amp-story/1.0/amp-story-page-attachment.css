@@ -114,8 +114,8 @@ amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-pa
   background: var(--i-amphtml-outlink-cta-background-color) !important;
 }
 
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-img,
-.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-open-attachment-link-icon {
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-content .i-amphtml-story-page-attachment-remote-img,
+.i-amphtml-amp-story-page-attachment-ui-v2 .i-amphtml-story-page-attachment-remote-content .i-amphtml-story-page-open-attachment-link-icon {
   width: 32px !important;
   height: 32px !important;
   flex-shrink: 0 !important;
@@ -162,6 +162,11 @@ amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-pa
   background: none !important;
 }
 
+.i-amphtml-story-page-attachment-remote > a:first-child {
+  /* Hides the element child in amp-story-page-outlink which is always the first direct child a element. */
+  display: none !important;
+}
+
 .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:after {
   content: "" !important;
   position: absolute !important;
@@ -172,7 +177,7 @@ amp-story[desktop] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-pa
   background-color: var(--i-amphtml-outlink-cta-text-color) !important;
   opacity: .6 !important;
   transform-origin: left !important;
-  animation: progress-bar-animation both 1s !important;
+  animation: progress-bar-animation .6s both cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
 [dir="rtl"] .i-amphtml-amp-story-page-attachment-ui-v2.i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:after {

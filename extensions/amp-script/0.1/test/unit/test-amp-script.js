@@ -21,12 +21,12 @@ import {
   SanitizerImpl,
   StorageLocation,
 } from '../../amp-script';
-import {FakeWindow} from '../../../../../testing/fake-dom';
-import {Services} from '../../../../../src/services';
+import {FakeWindow} from '#testing/fake-dom';
+import {Services} from '#service';
 import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../../../../../src/service';
+} from '../../../../../src/service-helpers';
 import {user} from '../../../../../src/log';
 
 describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
@@ -349,7 +349,7 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
     win = new FakeWindow();
     el = win.document.createElement('div');
 
-    getSanitizer = ({byUserGesture, byFixedSize}) =>
+    getSanitizer = ({byFixedSize, byUserGesture}) =>
       new SanitizerImpl(
         {
           win,

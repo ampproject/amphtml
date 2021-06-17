@@ -16,10 +16,10 @@
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
-import {Deferred} from '../core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {PageScroller} from './page-scroller';
-import {VisibilityState} from '../core/constants/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {
   addParamsToUrl,
   getFragment,
@@ -31,16 +31,16 @@ import {
 } from '../url';
 import {applySandbox} from '../3p-frame';
 import {createCustomEvent, listenOnce} from '../event-helper';
-import {dict} from '../core/types/object';
-import {isJsonScriptTag, tryFocus} from '../dom';
-import {parseQueryString} from '../core/types/string/url';
+import {dict} from '#core/types/object';
+import {isJsonScriptTag, tryFocus} from '#core/dom';
+import {parseQueryString} from '#core/types/string/url';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
-import {devAssertElement} from '../core/assert';
-import {findIndex, toArray} from '../core/types/array';
+import {devAssertElement} from '#core/assert';
+import {findIndex, toArray} from '#core/types/array';
 import {getMode} from '../../src/mode';
-import {parseJson} from '../core/types/object/json';
-import {resetStyles, setStyle, setStyles} from '../style';
+import {parseJson} from '#core/types/object/json';
+import {resetStyles, setStyle, setStyles} from '#core/dom/style';
 import {urls} from '../config';
 
 /** @enum {string} */
@@ -1865,7 +1865,7 @@ export class AmpStoryPlayer {
       return null;
     }
 
-    const {screenX, screenY, clientX, clientY} = touches[0];
+    const {clientX, clientY, screenX, screenY} = touches[0];
     return {screenX, screenY, clientX, clientY};
   }
 }

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
-import {childElement, childElementsByTag} from '../../../src/dom';
+import {DomBasedWeakRef} from '#core/data-structures/dom-based-weakref';
+import {Services} from '#service';
+import {childElement, childElementsByTag} from '#core/dom/query';
 import {dev, devAssert} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
 import {listen, listenOnce} from '../../../src/event-helper';
-import {toArray} from '../../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 const TAG = 'amp-video';
 
@@ -53,6 +54,11 @@ export function getBitrateManager(win) {
   if (instance) {
     return instance;
   }
+
+  if (isExperimentOn(win, 'flexible-bitrate')) {
+    Services.performanceFor(win).addEnabledExperiment('flexible-bitrate');
+  }
+
   return (instance = new BitrateManager(win));
 }
 

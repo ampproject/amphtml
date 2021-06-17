@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-import * as MediaQueryProps from '../../../../src/utils/media-query-props';
-import * as VideoUtils from '../../../../src/utils/video';
+import * as MediaQueryProps from '#core/dom/media-query-props';
+import * as VideoUtils from '#core/dom/video';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
-import {Deferred} from '../../../../src/core/data-structures/promise';
-import {LocalizationService} from '../../../../src/service/localization';
+import {Deferred} from '#core/data-structures/promise';
+import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
-import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/core/data-structures/signals';
-import {
-  addAttributesToElement,
-  createElementWithAttributes,
-  scopedQuerySelectorAll,
-} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
+import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {registerServiceBuilder} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {toggleExperiment} from '#experiments';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 
@@ -876,6 +873,47 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     );
 
     expect(openAttachmentLabelEl.textContent).to.equal('CTA text');
+  });
+
+  it('should propogate the amp-story-page-attachment title attribute to the cta button', async () => {
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('title', 'cta title');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(openAttachmentEl.getAttribute('title')).to.equal('cta title');
+  });
+
+  it('should propogate the amp-story-page-outlink title attribute to the cta button', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+    const attachmentEl = win.document.createElement('amp-story-page-outlink');
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    element.appendChild(attachmentEl);
+
+    const anchorChild = win.document.createElement('a');
+    anchorChild.setAttribute('href', 'google.com');
+    anchorChild.setAttribute('title', 'cta title');
+    attachmentEl.appendChild(anchorChild);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(openAttachmentEl.getAttribute('title')).to.equal('cta title');
   });
 
   it('should start tracking media performance when entering the page', async () => {

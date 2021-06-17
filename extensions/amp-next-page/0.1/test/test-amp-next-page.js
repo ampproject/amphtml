@@ -15,13 +15,13 @@
  */
 import * as DocFetcher from '../../../../src/document-fetcher';
 import {AmpNextPage} from '../amp-next-page';
-import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {getServicePromiseForDoc} from '../../../../src/service';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {macroTask} from '../../../../testing/yield';
-import {setStyle} from '../../../../src/style';
-import {toggleExperiment} from '../../../../src/experiments';
+import {Services} from '#service';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {getServicePromiseForDoc} from '../../../../src/service-helpers';
+import {layoutRectLtwh} from '#core/math/layout-rect';
+import {macroTask} from '#testing/yield';
+import {setStyle} from '#core/dom/style';
+import {toggleExperiment} from '#experiments';
 
 const EXAMPLE_PAGE = `
     <header>Header</header>

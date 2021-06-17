@@ -61,7 +61,6 @@ module.exports = {
         './preact/slot.js',
         './context/node.js',
         './polyfills/fetch.js',
-        './polyfills/get-bounding-client-rect.js',
         // TEMPORARY, follow tracking issue #33631
         './preact/component/3p-frame.js',
       ],
@@ -69,7 +68,7 @@ module.exports = {
     },
     {
       'files': [
-        './core/window.extern.js',
+        './core/window/window.extern.js',
         './polyfills/custom-elements.extern.js',
         './experiments/experiments.extern.js',
         './experiments/shame.extern.js',

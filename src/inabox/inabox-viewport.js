@@ -15,25 +15,25 @@
  */
 
 import {MessageType} from '../../src/3p-frame-messaging';
-import {Observable} from '../core/data-structures/observable';
-import {Services} from '../services';
-import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
-import {ViewportInterface} from '../service/viewport/viewport-interface';
+import {Observable} from '#core/data-structures/observable';
+import {Services} from '#service';
+import {ViewportBindingDef} from '#service/viewport/viewport-binding-def';
+import {ViewportInterface} from '#service/viewport/viewport-interface';
 import {canInspectWindow} from '../iframe-helper';
 import {dev} from '../log';
-import {devAssert, devAssertElement} from '../core/assert';
-import {getFrameOverlayManager} from '../../ads/inabox/frame-overlay-manager.js';
-import {getPositionObserver} from '../../ads/inabox/position-observer';
+import {devAssert, devAssertElement} from '#core/assert';
+import {getFrameOverlayManager} from '#ads/inabox/frame-overlay-manager.js';
+import {getPositionObserver} from '#ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {isIframed} from '../dom';
+import {isIframed} from '#core/dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../layout-rect';
-import {px, resetStyles, setImportantStyles} from '../style';
-import {registerServiceBuilderForDoc} from '../service';
-import {throttle} from '../core/types/function';
+} from '#core/math/layout-rect';
+import {px, resetStyles, setImportantStyles} from '#core/dom/style';
+import {registerServiceBuilderForDoc} from '../service-helpers';
+import {throttle} from '#core/types/function';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';

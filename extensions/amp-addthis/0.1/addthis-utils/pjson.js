@@ -20,7 +20,7 @@ import {classifyPage, classifyReferrer, getKeywordsString} from './classify';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
 import {parseUrlDeprecated} from '../../../../src/url';
-import {toArray} from '../../../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 // "gen" value for shares
 const SHARE = 300;
@@ -37,8 +37,8 @@ const SHARE = 300;
  * @return {{amp: number, cb: number, dc: number, dest: *, gen: number, mk: string, pub: *, rb: number, sid, url}}
  */
 const getPjsonData = (pjson) => {
-  const {loc, referrer, title, ampDoc, pubId, data} = pjson;
-  const {href, hostname, search, pathname, hash, protocol, port} = loc;
+  const {ampDoc, data, loc, pubId, referrer, title} = pjson;
+  const {hash, hostname, href, pathname, port, protocol, search} = loc;
   /** @typedef {{
    * du: string,
    * hostname: string,

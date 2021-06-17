@@ -17,13 +17,13 @@ import {
   LayoutRectDef,
   layoutRectFromDomRect,
   layoutRectLtwh,
-} from '../../src/layout-rect';
+} from '#core/math/layout-rect';
 import {
   centerFrameUnderVsyncMutate,
   collapseFrameUnderVsyncMutate,
   expandFrameUnderVsyncMutate,
-} from '../../src/full-overlay-frame-helper';
-import {resetStyles, setImportantStyles} from '../../src/style';
+} from './full-overlay-frame-helper';
+import {resetStyles, setImportantStyles} from '#core/dom/style';
 import {restrictedVsync, timer} from './util';
 
 const CENTER_TRANSITION_TIME_MS = 150;
@@ -50,7 +50,7 @@ const expandFrameImpl = function (win, iframe, onFinish) {
         );
       },
       mutate(state) {
-        const {width, height} = state.viewportSize;
+        const {height, width} = state.viewportSize;
         const expandedRect = layoutRectLtwh(0, 0, width, height);
 
         centerFrameUnderVsyncMutate(

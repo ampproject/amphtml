@@ -15,13 +15,13 @@
  */
 /* eslint-disable local/window-property-name */
 
-import {dict} from '../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getData, listen} from '../src/event-helper';
 import {getMode} from '../src/mode';
-import {isFiniteNumber} from '../src/types';
-import {once} from '../src/core/types/function';
-import {tryParseJson} from '../src/core/types/object/json';
-import {tryResolve} from '../src/core/data-structures/promise';
+import {isFiniteNumber} from '#core/types';
+import {once} from '#core/types/function';
+import {tryParseJson} from '#core/types/object/json';
+import {tryResolve} from '#core/data-structures/promise';
 
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 

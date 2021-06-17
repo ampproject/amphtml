@@ -19,13 +19,13 @@ import {
   ConsentInfoDef,
   PURPOSE_CONSENT_STATE,
 } from './consent-info';
-import {CONSENT_POLICY_STATE} from '../../../src/core/constants/consent-state';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Observable} from '../../../src/core/data-structures/observable';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {hasOwn, map} from '../../../src/core/types/object';
-import {isFiniteNumber} from '../../../src/types';
-import {isObject} from '../../../src/core/types';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Deferred} from '#core/data-structures/promise';
+import {Observable} from '#core/data-structures/observable';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {hasOwn, map} from '#core/types/object';
+import {isFiniteNumber, isObject} from '#core/types';
+
 import {user, userAssert} from '../../../src/log';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -196,8 +196,8 @@ export class ConsentPolicyManager {
     const consentMetadata = info['consentMetadata'];
     const purposeConsents = info['purposeConsents'];
     const {
-      consentString_: prevConsentStr,
       consentMetadata_: prevConsentMetadata,
+      consentString_: prevConsentStr,
       purposeConsents_: prevPurposeConsents,
     } = this;
 

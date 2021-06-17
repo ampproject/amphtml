@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {
   Accordion,
   AccordionContent,
@@ -22,8 +22,8 @@ import {
   AccordionSection,
 } from '../component';
 import {mount} from 'enzyme';
-import {useAmpContext} from '../../../../src/preact/context';
-import {waitFor} from '../../../../testing/test-helper';
+import {useAmpContext} from '#preact/context';
+import {waitFor} from '#testing/test-helper';
 
 const ContextReader = (props) => {
   const {renderable} = useAmpContext();

@@ -39,22 +39,22 @@
 
 import * as events from '../../../src/event-helper';
 import * as utils from './utils';
-import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {CSS} from '#build/amp-playbuzz-0.1.css.js';
+import {Layout, applyFillContent} from '#core/dom/layout';
+import {Services} from '#service';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   parseUrlDeprecated,
   removeFragment,
 } from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {logo, showMoreArrow} from './images';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '#core/dom';
 
 class AmpPlaybuzz extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -199,7 +199,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
     this.element.appendChild(this.getOverflowElement_());
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
 
     return (this.iframePromise_ = this.loadPromise(iframe).then(() => {

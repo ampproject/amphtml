@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData} from '../../3p/3p';
+import {validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -25,7 +25,7 @@ export function vmfive(global, data) {
   const mandatory_fields = ['appKey', 'placementId', 'adType'];
   const optional_fields = [];
 
-  const {appKey, placementId, adType} = data;
+  const {adType, appKey, placementId} = data;
 
   global._vmfive_amp = {appKey, placementId, adType};
 

@@ -1,5 +1,5 @@
 import {devAssert} from './log';
-import {isConnectedNode, rootNodeFor} from './dom';
+import {isConnectedNode, rootNodeFor} from './core/dom';
 import {isElement} from './core/types';
 import {toArray} from './core/types/array';
 
@@ -224,9 +224,9 @@ export function setModalAsOpen(element) {
 export function setModalAsClosed(element) {
   const {
     element: topModalElement,
-    hiddenElementInfos,
     focusableExternalElements,
     focusableInternalElements,
+    hiddenElementInfos,
   } = modalEntryStack.pop();
 
   devAssert(isConnectedNode(element));

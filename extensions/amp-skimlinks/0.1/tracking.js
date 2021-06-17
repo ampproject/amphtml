@@ -15,7 +15,7 @@
  */
 
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
@@ -93,7 +93,7 @@ export class Tracking {
     if (!this.tracking_) {
       return;
     }
-    const {pageImpressionId, timezone, pubcode, pageUrl, guid} =
+    const {guid, pageImpressionId, pageUrl, pubcode, timezone} =
       this.trackingInfo_;
 
     // This data is common to both page & link impression requests.
@@ -125,12 +125,12 @@ export class Tracking {
       return;
     }
     const {
-      pageImpressionId,
-      timezone,
-      pubcode,
-      pageUrl,
-      referrer,
       customTrackingId,
+      pageImpressionId,
+      pageUrl,
+      pubcode,
+      referrer,
+      timezone,
     } = this.trackingInfo_;
 
     const data = dict({
@@ -239,7 +239,7 @@ export class Tracking {
    */
   setupAnalytics_(element) {
     const analyticsBuilder = new CustomEventReporterBuilder(element);
-    const {pageTrackingUrl, linksTrackingUrl, nonAffiliateTrackingUrl} =
+    const {linksTrackingUrl, nonAffiliateTrackingUrl, pageTrackingUrl} =
       this.skimOptions_.config;
 
     // Configure analytics to send POST request when receiving
@@ -281,7 +281,7 @@ export class Tracking {
     const urls = dict({});
 
     anchorReplacementList.forEach((anchorReplacement) => {
-      const {replacementUrl, anchor} = anchorReplacement;
+      const {anchor, replacementUrl} = anchorReplacement;
       const isExcluded = isExcludedAnchorUrl(anchor, this.skimOptions_);
       const isAffiliate = Boolean(replacementUrl);
       // Do not track na-links since the backend doesn't use them.

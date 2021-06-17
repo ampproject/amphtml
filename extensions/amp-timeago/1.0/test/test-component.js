@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {Timeago} from '../component';
 import {mount} from 'enzyme';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin('Timeago 1.0 preact component', {}, (env) => {
   function getTime(wrapper) {

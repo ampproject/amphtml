@@ -4,14 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        {
-          name: 'enriqe',
-          notify: true,
-        },
-        {name: 'gmajoulet'},
-        {name: 'newmuis'},
-      ],
+      owners: [{name: 'enriqe'}, {name: 'gmajoulet'}, {name: 'newmuis'}],
     },
   ],
 }

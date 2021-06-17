@@ -22,13 +22,14 @@ const EmbedType = {
   POLL: 'poll',
 };
 
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Layout, applyFillContent} from '#core/dom/layout';
+import {Services} from '#service';
 import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getData, listen} from '../../../src/event-helper';
-import {removeElement} from '../../../src/dom';
-import {user, userAssert} from '../../../src/log';
+import {isEnumValue} from '#core/types';
+import {removeElement} from '#core/dom';
+import {userAssert} from '../../../src/log';
 
 export class AmpVk extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -158,7 +159,10 @@ export class AmpVk extends AMP.BaseElement {
       this.element
     );
 
-    user().assertEnumValue(EmbedType, this.embedType_, 'data-embedtype');
+    userAssert(
+      isEnumValue(EmbedType, this.embedType_),
+      `Unknown data-embedtype: ${this.embedType_}`
+    );
 
     if (this.embedType_ === EmbedType.POST) {
       this.postBuildCallback_();
@@ -221,7 +225,7 @@ export class AmpVk extends AMP.BaseElement {
       iframe.setAttribute('frameborder', '0');
       iframe.setAttribute('allowfullscreen', 'true');
 
-      this.applyFillContent(iframe);
+      applyFillContent(iframe);
       this.element.appendChild(iframe);
 
       return this.loadPromise(iframe);

@@ -22,13 +22,16 @@ import {
   setMediaSession,
   validateMediaMetadata,
 } from '../../../src/mediasession-helper';
-import {Layout, isLayoutSizeFixed} from '../../../src/layout';
+import {Layout, applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
 import {assertHttpsUrl} from '../../../src/url';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  realChildNodes,
+} from '#core/dom/query';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -140,8 +143,8 @@ export class AmpAudio extends AMP.BaseElement {
       audio
     );
 
-    this.applyFillContent(audio);
-    this.getRealChildNodes().forEach((child) => {
+    applyFillContent(audio);
+    realChildNodes(this.element).forEach((child) => {
       if (child.getAttribute && child.getAttribute('src')) {
         assertHttpsUrl(child.getAttribute('src'), dev().assertElement(child));
       }

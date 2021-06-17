@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
-import {areEqualOrdered, toArray} from '../../../src/core/types/array';
-import {
-  closestAncestorElementBySelector,
-  isRTL,
-  tryFocus,
-} from '../../../src/dom';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {areEqualOrdered, toArray} from '#core/types/array';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {mod} from '../../../src/utils/math';
+import {dev, userAssert} from '../../../src/log';
+import {dict} from '#core/types/object';
+import {isEnumValue} from '#core/types';
+import {isRTL, tryFocus} from '#core/dom';
+import {mod} from '#core/math';
 
 const TAG = 'amp-selector';
 
@@ -105,7 +103,10 @@ export class AmpSelector extends AMP.BaseElement {
     let kbSelectMode = this.element.getAttribute('keyboard-select-mode');
     if (kbSelectMode) {
       kbSelectMode = kbSelectMode.toLowerCase();
-      user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
+      userAssert(
+        isEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode),
+        `Unknown keyboard-select-mode: ${kbSelectMode}`
+      );
       userAssert(
         !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
         '[keyboard-select-mode=select] not supported for multiple ' +
@@ -710,7 +711,7 @@ export class AmpSelector extends AMP.BaseElement {
  * @return {boolean}
  */
 function isElementHidden(element, rect) {
-  const {width, height} = rect;
+  const {height, width} = rect;
   return element.hidden || width == 0 || height == 0;
 }
 

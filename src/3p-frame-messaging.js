@@ -16,7 +16,7 @@
 
 import {dev, devAssert} from './log';
 import {dict} from './core/types/object';
-import {internalListenImplementation} from './event-helper-listen';
+import {internalListenImplementation} from './core/dom/event-helper-listen';
 import {tryParseJson} from './core/types/object/json';
 
 /** @const */

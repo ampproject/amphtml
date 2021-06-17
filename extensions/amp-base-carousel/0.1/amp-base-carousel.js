@@ -15,30 +15,30 @@
  */
 
 import {ActionSource} from './action-source';
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-base-carousel-0.1.css';
 import {Carousel} from './carousel.js';
 import {CarouselEvents} from './carousel-events';
 import {ChildLayoutManager} from './child-layout-manager';
-import {Keys} from '../../../src/core/constants/key-codes';
+import {Keys} from '#core/constants/key-codes';
 import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
 } from './responsive-attributes';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
   isRTL,
   iterateCursor,
-  scopedQuerySelectorAll,
   toggleAttribute,
-} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {toArray} from '../../../src/core/types/array';
+} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {toArray} from '#core/types/array';
 
 /**
  * @enum {number}
@@ -245,7 +245,7 @@ class AmpCarousel extends AMP.BaseElement {
    * }=} options
    */
   goToSlide(index, options = {}) {
-    const {smoothScroll = false, actionSource} = options;
+    const {actionSource, smoothScroll = false} = options;
     this.carousel_.goToSlide(index, {smoothScroll, actionSource});
   }
 

@@ -30,16 +30,13 @@ import {
   VideoDocking,
   getPosterImageSrc,
 } from '../amp-video-docking';
-import {
-  Deferred,
-  tryResolve,
-} from '../../../../src/core/data-structures/promise';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {DirectionX, DirectionY} from '../def.js';
 import {PlayingStates} from '../../../../src/video-interface';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {layoutRectLtwh} from '#core/math/layout-rect';
 
 const slotId = 'my-slot-element';
 
@@ -60,7 +57,6 @@ describes.realWin('video docking', {amp: true}, (env) => {
     const impl = {
       element,
       mutateElement: (cb) => tryResolve(cb),
-      applyFillContent: env.sandbox.spy(),
     };
     stubLayoutBox(impl, defaultLayoutRect);
     return impl;
@@ -274,16 +270,12 @@ describes.realWin('video docking', {amp: true}, (env) => {
       await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
       expect(
-        video.applyFillContent.withArgs(
-          videoLayerElement('.amp-video-docked-placeholder-background')
-        )
-      ).to.have.been.calledOnce;
+        videoLayerElement('.amp-video-docked-placeholder-background')
+      ).to.have.class('i-amphtml-fill-content');
 
       expect(
-        video.applyFillContent.withArgs(
-          videoLayerElement('.amp-video-docked-placeholder-background-poster')
-        )
-      ).to.have.been.calledOnce;
+        videoLayerElement('.amp-video-docked-placeholder-background-poster')
+      ).to.have.class('i-amphtml-fill-content');
     });
 
     it('styles and transforms elements into docked area', async () => {
@@ -310,7 +302,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
       const expectedTransform = transformMatrix(x, y, scale);
 
       [internalElement, overlay, shadow].forEach((el) => {
-        const {transform, width, height, minWidth, minHeight} =
+        const {height, minHeight, minWidth, transform, width} =
           getComputedStyle(el);
         expect(transform).to.equal(expectedTransform);
         expect(width).to.equal(expectedWidth + 'px');
@@ -399,7 +391,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
     [
       {step: 0, fn: 'ease-in'},
       {step: 1, fn: 'ease-out'},
-    ].forEach(({step, fn}) => {
+    ].forEach(({fn, step}) => {
       it(`sets transition timing on elements for step = ${step}`, async () => {
         const {overlay} = stubControls();
 
@@ -430,7 +422,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
       });
     });
 
-    PLACEHOLDER_ICON_BREAKPOINTS.forEach(({minWidth, className}) => {
+    PLACEHOLDER_ICON_BREAKPOINTS.forEach(({className, minWidth}) => {
       const width = Math.max(200, minWidth);
 
       const iconMargin =
@@ -483,7 +475,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
           relativeXTextual: 'left',
           expectedIconX: -width + iconWidth + iconMargin * 2,
         },
-      ].forEach(({relativeX, relativeXTextual, expectedIconX}) => {
+      ].forEach(({expectedIconX, relativeX, relativeXTextual}) => {
         it(`translates placeholder icon horizontally for posX=${relativeXTextual} in threshold for .${className}`, async () => {
           stubControls();
           enableComputedStyle(video.element);
@@ -610,7 +602,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
         directionTextual: 'right to left',
         hasAmpRtl: true,
       },
-    ].forEach(({relativeX, directionTextual, hasAmpRtl}) => {
+    ].forEach(({directionTextual, hasAmpRtl, relativeX}) => {
       const setsOrUnsets = hasAmpRtl ? 'sets' : 'unsets';
 
       it(
@@ -741,7 +733,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
         posXTextual: 'left',
         expectedXFn: (unusedVw, margin, unusedWidth) => margin,
       },
-    ].forEach(({posX, posXTextual, expectedXFn}) => {
+    ].forEach(({expectedXFn, posX, posXTextual}) => {
       const videoWidth = 600;
       const videoHeight = 400;
 
@@ -764,7 +756,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
         mockAreaHeight(200);
 
-        const {width, height} = docking.getTargetAreaFromPos_(
+        const {height, width} = docking.getTargetAreaFromPos_(
           video,
           posX,
           DirectionY.TOP
@@ -845,7 +837,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
       env.sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
 
-      const {x, y, width, height} = docking.getTargetAreaFromSlot_(
+      const {height, width, x, y} = docking.getTargetAreaFromSlot_(
         video,
         slot.element
       );
@@ -888,7 +880,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
       env.sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
 
-      const {x, y, width, height} = docking.getTargetAreaFromSlot_(
+      const {height, width, x, y} = docking.getTargetAreaFromSlot_(
         video,
         slot.element
       );
@@ -932,7 +924,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
       env.sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
 
-      const {x, y, width, height} = docking.getTargetAreaFromSlot_(
+      const {height, width, x, y} = docking.getTargetAreaFromSlot_(
         video,
         slot.element
       );
@@ -973,7 +965,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
     it('returns starting position for step = 0', () => {
       const step = 0;
-      const {x, y, scale} = docking.getDims_(video, target, step);
+      const {scale, x, y} = docking.getDims_(video, target, step);
 
       expect(x, 'x').to.equal(videoX);
       expect(y, 'y').to.equal(videoY);
@@ -982,7 +974,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
     it('returns final position for step = 1', () => {
       const step = 1;
-      const {x, y, scale} = docking.getDims_(video, target, step);
+      const {scale, x, y} = docking.getDims_(video, target, step);
 
       expect(x, 'x').to.equal(targetX);
       expect(y, 'y').to.equal(targetY);
@@ -1002,7 +994,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
         videoX: 10,
         targetX: 0,
       },
-    ].forEach(({expectedRelativeX, placementTextual, videoX, targetX}) => {
+    ].forEach(({expectedRelativeX, placementTextual, targetX, videoX}) => {
       it(
         `returns relativeX=${placementTextual.toUpperCase()} when target ` +
           `placed ${placementTextual} of component`,
@@ -1062,7 +1054,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
       await docking.dock_(video, target, step);
 
-      const {x, y, scale, relativeX} = targetDims;
+      const {relativeX, scale, x, y} = targetDims;
 
       expect(
         placeAt.withArgs(
@@ -1242,7 +1234,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
     });
 
     it('hides and disables docked controls', async () => {
-      const {hide, disable} = stubControls();
+      const {disable, hide} = stubControls();
 
       await docking.undock_(video);
 
@@ -1255,7 +1247,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
       await docking.undock_(video);
 
-      const {x, y, scale, relativeX} = targetDims;
+      const {relativeX, scale, x, y} = targetDims;
 
       expect(
         placeAt.withArgs(
@@ -1407,7 +1399,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
         topBoundary: 20,
       },
     },
-    (name, {useSlot, topBoundary}) => {
+    (name, {topBoundary, useSlot}) => {
       const DocktargetType = useSlot ? 'slot element' : 'corner';
 
       function maybeCreateSlotElementLtwh(left, top, width, height) {

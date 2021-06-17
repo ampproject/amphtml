@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../../3p/3p';
+import {loadScript, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -24,7 +24,7 @@ export function adpushup(global, data) {
   validateData(
     data,
     ['siteid', 'slotpath', 'width', 'height'],
-    ['totalampslots']
+    ['totalampslots', 'jsontargeting', 'extras']
   );
   loadScript(
     global,
@@ -40,7 +40,9 @@ export function adpushup(global, data) {
             data.height,
             data.siteid,
             data.slotpath,
-            data.totalampslots
+            data.totalampslots,
+            data.jsontargeting,
+            data.extras
           );
         }
       );

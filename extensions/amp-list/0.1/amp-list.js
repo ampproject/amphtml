@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
 import {CSS} from '../../../build/amp-list-0.1.css';
 import {
   DIFFABLE_AMP_ELEMENTS,
   DIFF_IGNORE,
   DIFF_KEY,
   markElementForDiffing,
-} from '../../../src/purifier/sanitation';
-import {Deferred} from '../../../src/core/data-structures/promise';
+} from '#purifier/sanitation';
+import {Deferred} from '#core/data-structures/promise';
 import {
   Layout,
+  applyFillContent,
   getLayoutClass,
   isLayoutSizeDefined,
   parseLayout,
-} from '../../../src/layout';
+} from '#core/dom/layout';
 import {LoadMoreService} from './service/load-more-service';
 import {Pass} from '../../../src/pass';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
@@ -41,21 +42,20 @@ import {
 } from '../../../src/batched-json';
 import {
   childElementByAttr,
-  removeChildren,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-  tryFocus,
-} from '../../../src/dom';
+} from '#core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, getValueForExpr} from '../../../src/core/types/object';
+import {dict, getValueForExpr} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
+import {removeChildren, tryFocus} from '#core/dom';
 
 import {isAmp4Email} from '../../../src/format';
-import {isArray, toArray} from '../../../src/core/types/array';
-import {isExperimentOn} from '../../../src/experiments';
-import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
+import {isArray, toArray} from '#core/types/array';
+import {isExperimentOn} from '#experiments';
+import {px, setImportantStyles, setStyles, toggle} from '#core/dom/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {
   setupAMPCors,
@@ -560,7 +560,7 @@ export class AmpList extends AMP.BaseElement {
     // to take the height of its children instead,
     // whereas fill-content forces height:0
     if (!this.loadMoreEnabled_ && !this.enableManagedResizing_) {
-      this.applyFillContent(container, true);
+      applyFillContent(container, true);
     }
     return container;
   }
@@ -728,7 +728,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetchList_(options = {}) {
-    const {refresh = false, append = false} = options;
+    const {append = false, refresh = false} = options;
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
       return Promise.resolve();
@@ -900,7 +900,7 @@ export class AmpList extends AMP.BaseElement {
    */
   scheduleRender_(data, opt_append, opt_payload) {
     const deferred = new Deferred();
-    const {promise, resolve: resolver, reject: rejecter} = deferred;
+    const {promise, reject: rejecter, resolve: resolver} = deferred;
 
     // If there's nothing currently being rendered, schedule a render pass.
     if (!this.renderItems_) {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {hasOwn, ownProperty} from '../../../src/core/types/object';
-import {parseSrcset} from '../../../src/srcset';
+import {hasOwn, ownProperty} from '#core/types/object';
+import {parseSrcset} from '#core/dom/srcset';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-bind';

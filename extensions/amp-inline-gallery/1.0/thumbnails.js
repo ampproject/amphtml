@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
-import {px} from '../../../src/style';
+import {px} from '#core/dom/style';
 import {
   useContext,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
 import {useStyles} from './thumbnails.jss';
 
 /**
@@ -42,7 +42,7 @@ export function Thumbnails({
   const [pointerFine, setPointerFine] = useState(false);
   const ref = useRef(null);
   const [height, setHeight] = useState(0);
-  const {slides, setCurrentSlide} = useContext(CarouselContext);
+  const {setCurrentSlide, slides} = useContext(CarouselContext);
 
   useEffect(() => {
     const win = getWin(ref);

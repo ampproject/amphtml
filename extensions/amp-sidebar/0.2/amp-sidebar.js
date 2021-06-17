@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
 import {CSS} from '../../../build/amp-sidebar-0.2.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Services} from '../../../src/services';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
 import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
 import {
   closestAncestorElementBySelector,
-  isRTL,
-  tryFocus,
-} from '../../../src/dom';
+  realChildElements,
+} from '#core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
-import {debounce} from '../../../src/core/types/function';
+import {debounce} from '#core/types/function';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {handleAutoscroll} from './autoscroll';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
+import {isRTL, tryFocus} from '#core/dom';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '#core/dom/size-observer';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/core/types/array';
+import {setStyles, toggle} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 import {unmountAll} from '../../../src/utils/resource-container-helper';
 
 /** @private @const {string} */
@@ -246,14 +246,14 @@ export class AmpSidebar extends AMP.BaseElement {
     element.appendChild(this.createScreenReaderCloseButton());
 
     this.registerDefaultAction((invocation) => {
-      const {trust, caller} = invocation;
+      const {caller, trust} = invocation;
       this.open_(trust, caller);
     }, 'open');
     this.registerAction('close', (invocation) => {
       this.close_(invocation.trust);
     });
     this.registerAction('toggle', (invocation) => {
-      const {trust, caller} = invocation;
+      const {caller, trust} = invocation;
       if (this.opened_) {
         this.close_(trust);
       } else {
@@ -453,7 +453,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   updateForOpened_(trust) {
     // On open sidebar
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
     const owners = Services.ownersForDoc(this.element);
     owners.scheduleLayout(this.element, children);
     owners.scheduleResume(this.element, children);
@@ -504,7 +504,7 @@ export class AmpSidebar extends AMP.BaseElement {
     toggle(this.getMaskElement_(), /* display */ false);
     Services.ownersForDoc(this.element).schedulePause(
       this.element,
-      this.getRealChildren()
+      realChildElements(this.element)
     );
     // TODO(#25080): update history manipulation based on resolution of this issue.
     if (this.historyId_ != -1) {

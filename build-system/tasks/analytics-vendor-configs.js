@@ -20,8 +20,8 @@ const debounce = require('debounce');
 const fs = require('fs-extra');
 const globby = require('globby');
 const jsonminify = require('jsonminify');
+const {basename, dirname, extname, join} = require('path');
 const {endBuildStep} = require('./helpers');
-const {join, basename, dirname, extname} = require('path');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
 
@@ -92,4 +92,4 @@ module.exports = {
   analyticsVendorConfigs,
 };
 
-analyticsVendorConfigs.description = 'Compile analytics vendor configs to dist';
+analyticsVendorConfigs.description = 'Compile all analytics vendor configs';

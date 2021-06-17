@@ -19,13 +19,16 @@
  * @fileoverview Script that runs various checks during CI.
  */
 
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 const {timedExecOrDie} = require('./utils');
 
 const jobName = 'checks.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   timedExecOrDie('amp presubmit');
   timedExecOrDie('amp check-invalid-whitespaces');
@@ -33,9 +36,9 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp lint');
   timedExecOrDie('amp prettify');
   timedExecOrDie('amp ava');
+  timedExecOrDie('amp check-build-system');
   timedExecOrDie('amp babel-plugin-tests');
   timedExecOrDie('amp caches-json');
-  timedExecOrDie('amp dev-dashboard-tests');
   timedExecOrDie('amp check-exact-versions');
   timedExecOrDie('amp check-renovate-config');
   timedExecOrDie('amp server-tests');
@@ -52,6 +55,7 @@ function pushBuildWorkflow() {
 }
 
 /**
+ * Steps to run during PR builds.
  * @return {Promise<void>}
  */
 async function prBuildWorkflow() {
@@ -69,8 +73,10 @@ async function prBuildWorkflow() {
     timedExecOrDie('amp validate-html-fixtures');
   }
 
-  if (buildTargetsInclude(Targets.LINT)) {
+  if (buildTargetsInclude(Targets.LINT_RULES)) {
     timedExecOrDie('amp lint');
+  } else if (buildTargetsInclude(Targets.LINT)) {
+    timedExecOrDie('amp lint --local_changes');
   }
 
   if (buildTargetsInclude(Targets.PRETTIFY)) {
@@ -79,6 +85,10 @@ async function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.AVA)) {
     timedExecOrDie('amp ava');
+  }
+
+  if (buildTargetsInclude(Targets.BUILD_SYSTEM)) {
+    timedExecOrDie('amp check-build-system');
   }
 
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
@@ -92,10 +102,6 @@ async function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.DOCS)) {
     timedExecOrDie('amp check-links --local_changes'); // only for PR builds
     timedExecOrDie('amp markdown-toc');
-  }
-
-  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
-    timedExecOrDie('amp dev-dashboard-tests');
   }
 
   if (buildTargetsInclude(Targets.OWNERS)) {

@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
-import {FiniteStateMachine} from '../core/data-structures/finite-state-machine';
+import {Deferred} from '#core/data-structures/promise';
+import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 
 import {Resource, ResourceState} from './resource';
-import {Services} from '../services';
+import {Services} from '#service';
 import {TaskQueue} from './task-queue';
-import {VisibilityState} from '../core/constants/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {dev, devAssert} from '../log';
-import {dict} from '../core/types/object';
-import {expandLayoutRect} from '../layout-rect';
+import {dict} from '#core/types/object';
+import {expandLayoutRect} from '#core/math/layout-rect';
 import {getSourceUrl} from '../url';
-import {hasNextNodeInDocumentOrder} from '../dom';
+import {hasNextNodeInDocumentOrder} from '#core/dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error-reporting';
 import {listen, loadPromise} from '../event-helper';
-import {registerServiceBuilderForDoc} from '../service';
-import {remove} from '../core/types/array';
+import {registerServiceBuilderForDoc} from '../service-helpers';
+import {remove} from '#core/types/array';
 import {startupChunk} from '../chunk';
-import {throttle} from '../core/types/function';
+import {throttle} from '#core/types/function';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';
@@ -760,7 +760,7 @@ export class ResourcesImpl {
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
-        const {resource, event} =
+        const {event, resource} =
           /** @type {!./resources-interface.ChangeSizeRequestDef} */ (request);
         const box = resource.getLayoutBox();
 
@@ -768,7 +768,7 @@ export class ResourcesImpl {
         let bottomMarginDiff = 0;
         let leftMarginDiff = 0;
         let rightMarginDiff = 0;
-        let {top: topUnchangedBoundary, bottom: bottomDisplacedBoundary} = box;
+        let {bottom: bottomDisplacedBoundary, top: topUnchangedBoundary} = box;
         let newMargins = undefined;
         if (request.marginChange) {
           newMargins = request.marginChange.newMargins;
@@ -1067,9 +1067,9 @@ export class ResourcesImpl {
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
     const {
+      elementsThatScrolled_: elementsThatScrolled,
       relayoutAll_: relayoutAll,
       relayoutTop_: relayoutTop,
-      elementsThatScrolled_: elementsThatScrolled,
     } = this;
     this.relayoutAll_ = false;
     this.relayoutTop_ = -1;
@@ -1646,11 +1646,11 @@ export class ResourcesImpl {
    */
   setupVisibilityStateMachine_(vsm) {
     const {
+      HIDDEN: hidden,
+      INACTIVE: inactive,
+      PAUSED: paused,
       PRERENDER: prerender,
       VISIBLE: visible,
-      HIDDEN: hidden,
-      PAUSED: paused,
-      INACTIVE: inactive,
     } = VisibilityState;
     const doWork = () => {
       // If viewport size is 0, the manager will wait for the resize event.

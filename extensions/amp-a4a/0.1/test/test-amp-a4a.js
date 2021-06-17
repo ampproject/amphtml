@@ -38,30 +38,30 @@ import {
   protectFunctionWrapper,
 } from '../amp-a4a';
 import {AmpAdXOriginIframeHandler} from '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {AmpDoc, installDocService} from '../../../../src/service/ampdoc-impl';
-import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
-import {Extensions} from '../../../../src/service/extensions-impl';
+import {AmpDoc, installDocService} from '#service/ampdoc-impl';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Extensions} from '#service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {LayoutPriority} from '../../../../src/layout';
+import {LayoutPriority} from '#core/dom/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
-import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/core/data-structures/signals';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
 import {cancellation} from '../../../../src/error-reporting';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {createIframePromise} from '../../../../testing/iframe';
+import {createElementWithAttributes} from '#core/dom';
+import {createIframePromise} from '#testing/iframe';
 import {dev, user} from '../../../../src/log';
 import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
-import {installRealTimeConfigServiceForDoc} from '../../../../src/service/real-time-config/real-time-config-impl';
-import {layoutRectLtwh, layoutSizeFromRect} from '../../../../src/layout-rect';
-import {macroTask} from '../../../../testing/yield';
-import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
+import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
+import {layoutRectLtwh, layoutSizeFromRect} from '#core/math/layout-rect';
+import {macroTask} from '#testing/yield';
+import {resetScheduledElementForTesting} from '#service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 
 describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
@@ -3471,7 +3471,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
       {type: 'otherNetwork', prefVal: true},
     ].forEach((test) =>
       it(JSON.stringify(test), () => {
-        const {type, prefVal, expected} = test;
+        const {expected, prefVal, type} = test;
         if (type) {
           a4a.element.setAttribute('type', type);
         }

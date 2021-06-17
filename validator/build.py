@@ -276,7 +276,7 @@ def GenValidatorGeneratedJs(out_dir):
 
 
 def CompileWithClosure(js_files, definitions, entry_points, output_file):
-  """Compiles the arguments with the Closure compiler for transpilation to ES5.
+  """Compiles the arguments with AMP's Closure compiler for transpilation to ES5.
 
   Args:
     js_files: list of files to compile
@@ -286,17 +286,18 @@ def CompileWithClosure(js_files, definitions, entry_points, output_file):
   """
 
   cmd = [
-      'java', '-jar', 'node_modules/google-closure-compiler-java/compiler.jar',
+      'java', '-jar',
+      '../node_modules/@ampproject/google-closure-compiler-java/compiler.jar',
       '--language_out=ES5_STRICT', '--dependency_mode=PRUNE',
       '--js_output_file=%s' % output_file
   ]
   cmd += ['--entry_point=%s' % e for e in entry_points]
   cmd += ['--output_manifest=%s' % ('%s.manifest' % output_file)]
   cmd += [
-      'node_modules/google-closure-library/closure/**.js',
-      '!node_modules/google-closure-library/closure/**_test.js',
-      'node_modules/google-closure-library/third_party/closure/**.js',
-      '!node_modules/google-closure-library/third_party/closure/**_test.js'
+      '../node_modules/google-closure-library/closure/**.js',
+      '!../node_modules/google-closure-library/closure/**_test.js',
+      '../node_modules/google-closure-library/third_party/closure/**.js',
+      '!../node_modules/google-closure-library/third_party/closure/**_test.js'
   ]
   cmd += js_files
   cmd += definitions

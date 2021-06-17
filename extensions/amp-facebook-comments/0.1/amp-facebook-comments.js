@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {createLoaderLogo} from '../../amp-facebook/0.1/facebook-loader';
-import {dashToUnderline} from '../../../src/core/types/string';
+import {dashToUnderline} from '#core/types/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/core/types';
+import {isObject} from '#core/types';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {removeElement} from '#core/dom';
+import {tryParseJson} from '#core/types/object/json';
 
 const TYPE = 'facebook';
 
@@ -80,9 +80,10 @@ class AmpFacebookComments extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.element.setAttribute('data-embed-as', 'comments');
     const iframe = getIframe(this.win, this.element, TYPE);
     iframe.title = this.element.title || 'Facebook comments';
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(
       iframe,

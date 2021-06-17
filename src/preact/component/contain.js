@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as Preact from '../';
-import {forwardRef} from '../compat';
+import * as Preact from '#preact';
+import {forwardRef} from '#preact/compat';
 
 const CONTAIN = [
   null, // 0: none
@@ -53,19 +53,19 @@ const SIZE_CONTENT_STYLE = {
 function ContainWrapperWithRef(
   {
     as: Comp = 'div',
-    size = false,
-    layout = false,
-    paint = false,
-    wrapperClassName,
-    wrapperStyle,
-    contentAs: ContentComp = 'div',
-    contentRef,
-    contentClassName,
-    contentProps,
-    contentStyle,
     children,
     'className': className,
+    contentAs: ContentComp = 'div',
+    contentClassName,
+    contentProps,
+    contentRef,
+    contentStyle,
+    layout = false,
+    paint = false,
+    size = false,
     'style': style,
+    wrapperClassName,
+    wrapperStyle,
     ...rest
   },
   ref

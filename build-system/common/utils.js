@@ -19,11 +19,11 @@ const experimentsConfig = require('../global-configs/experiments-config.json');
 const fs = require('fs-extra');
 const globby = require('globby');
 const {clean} = require('../tasks/clean');
+const {cyan, green, red, yellow} = require('./colors');
 const {default: ignore} = require('ignore');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
 const {gitDiffNameOnlyMain} = require('./git');
-const {green, cyan, red, yellow} = require('./colors');
 const {log, logLocalDev} = require('./logging');
 
 /**
@@ -124,6 +124,8 @@ function getFilesFromArgv() {
  * Gets a list of files to be checked based on command line args and the given
  * file matching globs. Used by tasks like prettify, lint, check-links, etc.
  * Optionally takes in options for globbing and a file containing ignore rules.
+ * When local changes are linted (e.g. during CI), we also check if the list of
+ * forbidden terms needs to be updated.
  *
  * @param {!Array<string>} globs
  * @param {Object=} options
@@ -144,6 +146,10 @@ function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
     if (filesChanged.length == 0) {
       log(green('INFO: ') + 'No files to check in this PR');
       return [];
+    }
+    const forbiddenTerms = 'build-system/test-configs/forbidden-terms.js';
+    if (!filesChanged.includes(forbiddenTerms)) {
+      filesChanged.push(forbiddenTerms);
     }
     return logFiles(filesChanged);
   }

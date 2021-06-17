@@ -16,7 +16,7 @@
 import {CONFIGURATION_EVENT, ORIGIN} from './constants';
 import {getAddThisMode} from './addthis-utils/mode';
 
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 
 /**
  * Configuration request status enum.
@@ -91,12 +91,12 @@ export class ConfigManager {
 
     iframeData.forEach((iframeDatum) => {
       const {
-        iframe,
-        widgetId,
-        shareConfig,
         atConfig,
-        productCode,
         containerClassName,
+        iframe,
+        productCode,
+        shareConfig,
+        widgetId,
       } = iframeDatum;
       this.sendConfiguration_({
         iframe,
@@ -128,13 +128,13 @@ export class ConfigManager {
    */
   sendConfiguration_(input) {
     const {
+      atConfig,
+      containerClassName,
       iframe,
-      widgetId,
+      productCode,
       pubId,
       shareConfig,
-      atConfig,
-      productCode,
-      containerClassName,
+      widgetId,
     } = input;
     const pubData = this.dataForPubId_[pubId];
     const {config: dashboardConfig, requestStatus: configRequestStatus} =
@@ -209,15 +209,15 @@ export class ConfigManager {
    */
   register(config) {
     const {
-      pubId,
-      widgetId,
-      productCode,
+      activeToolsMonitor,
+      atConfig,
       containerClassName,
       iframe,
       iframeLoadPromise,
+      productCode,
+      pubId,
       shareConfig,
-      atConfig,
-      activeToolsMonitor,
+      widgetId,
     } = config;
     if (!this.activeToolsMonitor_) {
       this.activeToolsMonitor_ = activeToolsMonitor;
@@ -264,7 +264,7 @@ export class ConfigManager {
    * @param {{pubId:string, iframe:Element}} param
    */
   unregister(param) {
-    const {pubId, iframe} = param;
+    const {iframe, pubId} = param;
     this.configProviderIframes_ = this.configProviderIframes_.filter(
       (providerFrame) => providerFrame !== iframe
     );

@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  OriginExperiments,
-  TokenMaster,
-} from '../../src/service/origin-experiments-impl';
-import {Services} from '../../src/services';
-import {bytesToString} from '../../src/core/types/string/bytes';
+import {OriginExperiments, TokenMaster} from '#service/origin-experiments-impl';
+import {Services} from '#service';
+import {bytesToString} from '#core/types/string/bytes';
 import {user} from '../../src/log';
 
 describes.fakeWin('OriginExperiments', {amp: true}, (env) => {
@@ -35,7 +32,7 @@ describes.fakeWin('OriginExperiments', {amp: true}, (env) => {
   let error;
 
   beforeEach(() => {
-    ({win, ampdoc} = env);
+    ({ampdoc, win} = env);
 
     const crypto = Services.cryptoFor(win);
     isPkcsAvailable = env.sandbox.stub(crypto, 'isPkcsAvailable').returns(true);
@@ -139,7 +136,7 @@ describes.fakeWin('TokenMaster', {amp: true}, (env) => {
         tokenMaster = new TokenMaster(crypto, url);
 
         return tokenMaster.generateKeys().then((keyPair) => {
-          ({publicKey, privateKey} = keyPair);
+          ({privateKey, publicKey} = keyPair);
 
           const config = {
             origin: 'https://origin.com',

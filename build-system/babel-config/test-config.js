@@ -16,7 +16,8 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {getReplacePlugin, getReplaceGlobalsPlugin} = require('./helpers');
+const {getImportResolverPlugin} = require('./import-resolver');
+const {getReplaceGlobalsPlugin, getReplacePlugin} = require('./helpers');
 
 /**
  * Gets the config for babel transforms run during `amp [unit|integration|e2e]`.
@@ -57,9 +58,11 @@ function getTestConfig() {
   const replacePlugin = getReplacePlugin();
   const replaceGlobalsPlugin = getReplaceGlobalsPlugin();
   const testPlugins = [
+    getImportResolverPlugin(),
     argv.coverage ? instanbulPlugin : null,
     replacePlugin,
     replaceGlobalsPlugin,
+    './build-system/babel-plugins/babel-plugin-imported-helpers',
     './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',

@@ -25,7 +25,7 @@ import {installVariableServiceForTesting} from '../variables';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 import {user} from '../../../../src/log';
 
 describes.realWin('Session Manager', {amp: true}, (env) => {

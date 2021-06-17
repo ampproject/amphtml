@@ -32,7 +32,7 @@ const containsByRegex = (str, re) => str.search(re) > -1;
 // TODO(alanorozco): Expand
 const formTypes = ['input', 'select', 'form'];
 
-const ExtensionScript = ({name, version, isTemplate}) =>
+const ExtensionScript = ({isTemplate, name, version}) =>
   html`
     <script
       async
@@ -49,12 +49,6 @@ const AmpState = (id, state) => html`
   </amp-state>
 `;
 
-const ternaryExpr = (condition, onTrue, onFalse) =>
-  `${condition} ? ${onTrue} : ${onFalse}`;
-
-const containsExpr = (haystack, needle, onTrue, onFalse) =>
-  ternaryExpr(`${haystack}.indexOf(${needle}) > -1`, onTrue, onFalse);
-
 const ampStateKey = (...keys) => keys.join('.');
 
 /**
@@ -67,11 +61,11 @@ const ampStateKey = (...keys) => keys.join('.');
  * }} param0
  * @return {string}
  */
-const AmpDoc = ({body, css, head, canonical}) => {
+const AmpDoc = ({body, canonical, css, head}) => {
   assert(canonical);
   return html`
     <!DOCTYPE html>
-    <html ⚡>
+    <html ⚡ lang="en">
       <head>
         <title>AMP Dev Server</title>
         <meta charset="utf-8" />
@@ -156,6 +150,4 @@ module.exports = {
   AmpState,
   addRequiredExtensionsToHead,
   ampStateKey,
-  containsExpr,
-  ternaryExpr,
 };

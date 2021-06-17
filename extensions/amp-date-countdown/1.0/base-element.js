@@ -15,8 +15,8 @@
  */
 
 import {DateCountdown} from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
+import {PreactBaseElement} from '#preact/base-element';
+import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attributes';
 
 export class BaseElement extends PreactBaseElement {}
 

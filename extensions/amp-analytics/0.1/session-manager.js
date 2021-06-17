@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {dev, user} from '../../../src/log';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
-import {hasOwn, map} from '../../../src/core/types/object';
-import {isObject} from '../../../src/core/types';
+} from '../../../src/service-helpers';
+import {hasOwn, map} from '#core/types/object';
+import {isObject} from '#core/types';
 
 /** @const {string} */
 const TAG = 'amp-analytics/session-manager';
@@ -103,7 +103,7 @@ export class SessionManager {
 
     if (
       hasOwn(this.sessions_, type) &&
-      !this.isSessionExpired_(this.sessions_[type])
+      !isSessionExpired(this.sessions_[type])
     ) {
       this.setSession_(type, this.sessions_[type]);
       this.sessions_[type].lastAccessTimestamp = Date.now();
@@ -134,10 +134,7 @@ export class SessionManager {
       })
       .then((session) => {
         // Avoid multiple session creation race
-        if (
-          type in this.sessions_ &&
-          !this.isSessionExpired_(this.sessions_[type])
-        ) {
+        if (type in this.sessions_ && !isSessionExpired(this.sessions_[type])) {
           return this.sessions_[type];
         }
         this.setSession_(type, session);
@@ -160,15 +157,15 @@ export class SessionManager {
       storage.setNonBoolean(storageKey, session);
     });
   }
+}
 
-  /**
-   * Checks if a session has expired
-   * @param {SessionInfoDef} session
-   * @return {boolean}
-   */
-  isSessionExpired_(session) {
-    return session.lastAccessTimestamp + SESSION_MAX_AGE_MILLIS < Date.now();
-  }
+/**
+ * Checks if a session has expired
+ * @param {SessionInfoDef} session
+ * @return {boolean}
+ */
+function isSessionExpired(session) {
+  return session.lastAccessTimestamp + SESSION_MAX_AGE_MILLIS < Date.now();
 }
 
 /**

@@ -15,7 +15,7 @@
  */
 
 import * as Preact from './index';
-import {Loading, reducer as loadingReducer} from '../core/loading-instructions';
+import {Loading, reducer as loadingReducer} from '#core/loading-instructions';
 import {createContext, useContext, useMemo} from './index';
 
 /** @type {PreactDef.Context} */
@@ -50,11 +50,11 @@ function getAmpContext() {
  * @return {!PreactDef.VNode}
  */
 export function WithAmpContext({
-  renderable: renderableProp = true,
-  playable: playableProp = true,
+  children,
   loading: loadingProp = 'auto',
   notify: notifyProp,
-  children,
+  playable: playableProp = true,
+  renderable: renderableProp = true,
 }) {
   const parent = useAmpContext();
   const renderable = renderableProp && parent.renderable;

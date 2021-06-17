@@ -15,9 +15,9 @@
  */
 
 import '../amp-truncate-text';
-import {setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/core/types/array';
-import {toggleExperiment} from '../../../../src/experiments';
+import {setStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+import {toggleExperiment} from '#experiments';
 
 // Lint complains about a template string due to lines being too long.
 const loremText =
