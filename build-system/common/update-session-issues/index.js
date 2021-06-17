@@ -16,68 +16,39 @@
 
 /**
  * @fileoverview
- * Creates a Github issue for an upcoming design review.
+ * Updates Github issues for scheduled public sessions, like
+ * Design Reviews (https://go.amp.dev/design-reviews). This involves:
  *
- * https://go.amp.dev/design-reviews
+ *  1. Creating issues for future sessions.
+ *  2. Pinning the issue for the next upcoming session.
+ *  3. Unpinning and closing issues for sessions that have ended.
  *
- * A Github Action runs this once a week. See update-design-review-issues.yml
+ * A Github Workflow runs this on a matching schedule.
+ * See update-session-issues.yml
  */
 
 /*
  * ⚠️ Only use standard node modules.
- *
- * This file runs by itself. It cannot depend on `npm install` nor file
- * structure since the Github Action downloads this file only.
+ * This file cannot depend on `npm install`.
  */
 const https = require('https');
+const {readdir} = require('fs').promises;
+const {relative} = require('path');
+const {RotationItemDef, TemplateDef} = require('./types');
 
-/** @typedef {0|1|2|3|4|5|6} */
-let DayOfWeekDef; // sunday = 0, monday = 1, ...
-
-const sessionDurationHours = 1;
-
-/** @typedef {[DayOfWeekDef, string, string]} */
-let RotationItemDef;
-
-/**
- * Times in this rotation are adjusted according to Daylight Savings.
- * If these are updated, the schedule on update-design-review-issues.yml should
- * also be updated correspondingly.
- * @type {Array<RotationItemDef>}
- */
-const timeRotationUtc = [
-  [/* wed */ 3, '16:30', 'Africa/Europe/western Asia'],
-  [/* wed */ 3, '21:00', 'Americas'],
-  [/* thu */ 4, '01:00', 'Asia/Oceania'],
-];
-
-const timeRotationStart = new Date('2021-04-14');
-
-// All previous weeks have already been handled.
-const generateWeeksFromNow = 3;
-
-const labels = ['Type: Design Review'];
-
-const createTitle = ({datetimeUtc, region}) =>
-  `Design Review ${datetimeUtc} UTC (${region})`;
-
-const vcUrl = 'https://bit.ly/amp-dr';
-const calendarEventTitle = 'AMP Project Design Review';
-const calendarEventDetails = vcUrl;
-
-const createBody = ({calendarUrl, timeUrl, timeUtc}) =>
-  `
-Time: [${timeUtc} UTC](${timeUrl}) ([add to Google Calendar](${calendarUrl}))
-Location: [Video conference via Google Meet](${vcUrl})
-
-The AMP community holds weekly engineering [design reviews](https://github.com/ampproject/amphtml/blob/main/docs/design-reviews.md). **We encourage everyone in the community to participate in these design reviews.**
-
-If you are interested in bringing your design to design review, read the [design review documentation](https://github.com/ampproject/amphtml/blob/main/docs/design-reviews.md) and add a link to your design doc or issue by the Monday before your design review.
-
-When attending a design review please read through the designs _before_ the design review starts. This allows us to spend more time on discussion of the design.
-
-We rotate our design review between times that work better for different parts of the world as described in our [design review documentation](https://github.com/ampproject/amphtml/blob/main/docs/design-reviews.md), but you are welcome to attend any design review. If you cannot make any of the design reviews but have a design to discuss please let mrjoro@ know on [Slack](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) and we will find a time that works for you.
-`.trim();
+/** @return {Promise<Object<string, TemplateDef>>} */
+async function getTemplates() {
+  const dir = relative(process.cwd(), __dirname) + '/template';
+  const files = (await readdir(dir)).filter((basename) =>
+    basename.endsWith('.js')
+  );
+  const entries = files.map((basename) => {
+    const name = basename.replace(/\.js$/, '');
+    const template = require(`./template/${basename}`);
+    return [name, template];
+  });
+  return Object.fromEntries(entries);
+}
 
 const isDryRun = process.argv.includes('--dry-run');
 
@@ -327,11 +298,12 @@ function addDays(date, days = 1) {
 }
 
 /**
+ * @param {Array<RotationItemDef>} timeRotationUtc
  * @param {Date} nextDay
  * @param {Date} start
  * @return {RotationItemDef}
  */
-function getRotation(nextDay, start) {
+function getRotation(timeRotationUtc, nextDay, start) {
   // @ts-ignore date calc
   const delta = nextDay - start;
   const weeks = Math.round(delta / (7 * 24 * 60 * 60 * 1000));
@@ -342,12 +314,26 @@ const timeZ = (yyyy, mm, dd, hours, minutes) =>
   `${yyyy + mm + dd}T${leadingZero(hours) + leadingZero(minutes)}00Z`;
 
 /**
+ * @param {TemplateDef} template
  * @return {Object}
  */
-function getNextIssueData() {
+function getNextIssueData(template) {
+  const {
+    calendarEventDetails,
+    calendarEventTitle,
+    createBody,
+    createTitle,
+    generateWeeksFromNow,
+    labels,
+    sessionDurationHours,
+    timeRotationStart,
+    timeRotationUtc,
+  } = template;
+
   const upcomingWeekday = addDays(new Date(), generateWeeksFromNow * 7);
 
   const [dayOfWeek, timeUtcNoDst, region] = getRotation(
+    timeRotationUtc,
     upcomingWeekday,
     timeRotationStart
   );
@@ -384,8 +370,8 @@ function getNextIssueData() {
     calendarUrl,
   };
 
-  const title = createTitle(templateData);
-  const body = createBody(templateData);
+  const title = createTitle(templateData).trim();
+  const body = createBody(templateData).trim();
 
   return {title, labels, body};
 }
@@ -443,9 +429,10 @@ let IssueWithSessionDateDef;
 /**
  * @param {string} token
  * @param {string} repo
+ * @param {Array<string>} labels
  * @return {Promise<Array<IssueWithSessionDateDef>>}
  */
-async function getExistingIssuesWithSessionDate(token, repo) {
+async function getExistingIssuesWithSessionDate(token, repo, labels) {
   const issues = await getGithubIssues(token, repo, labels);
   return issues
     .map((issue) => ({
@@ -458,10 +445,16 @@ async function getExistingIssuesWithSessionDate(token, repo) {
 /**
  * @param {string} token
  * @param {string} repo
+ * @param {number} sessionDurationHours
  * @param {Array<IssueWithSessionDateDef>} issuesWithSessionDate
  * @return {Promise<Array<Object>>}
  */
-async function closeStaleIssues(token, repo, issuesWithSessionDate) {
+async function closeStaleIssues(
+  token,
+  repo,
+  sessionDurationHours,
+  issuesWithSessionDate
+) {
   const now = new Date();
 
   // Compensate duration so that we swap only once the session has ended.
@@ -469,8 +462,6 @@ async function closeStaleIssues(token, repo, issuesWithSessionDate) {
 
   // We may run matching a session's end by the minute, this prevents off-by-one.
   now.setSeconds(Math.max(1, now.getSeconds()));
-
-  console./*OK*/ log('Session close cutoff:', now);
 
   const issues = issuesWithSessionDate.filter(
     ({sessionDate}) => sessionDate < now.getTime()
@@ -489,10 +480,21 @@ async function closeStaleIssues(token, repo, issuesWithSessionDate) {
 /**
  * @param {string} token
  * @param {string} repo
+ * @param {number} sessionDurationHours
  * @param {Array<IssueWithSessionDateDef>} existing
  */
-async function closeStalePinUpcoming(token, repo, existing) {
-  const staleIssues = await closeStaleIssues(token, repo, existing);
+async function closeStalePinUpcoming(
+  token,
+  repo,
+  sessionDurationHours,
+  existing
+) {
+  const staleIssues = await closeStaleIssues(
+    token,
+    repo,
+    sessionDurationHours,
+    existing
+  );
   if (!staleIssues.length) {
     // If there aren't any open stale issues, the newer issue has been pinned.
     console./*OK*/ log('(Zero issues to close, pin or unpin.)');
@@ -519,10 +521,11 @@ async function closeStalePinUpcoming(token, repo, existing) {
 /**
  * @param {string} token
  * @param {string} repo
+ * @param {TemplateDef} template
  * @param {Array<IssueWithSessionDateDef>} existing
  */
-async function createScheduledIssue(token, repo, existing) {
-  const issueData = getNextIssueData();
+async function createScheduledIssue(token, repo, template, existing) {
+  const issueData = getNextIssueData(template);
   const dateFromTitle = getSessionDateFromTitle(issueData.title);
 
   const existingIssue = existing.find(
@@ -551,13 +554,34 @@ async function createScheduledIssue(token, repo, existing) {
 }
 
 /**
+ * @param {string} line
+ * @param {string} underline
+ * @return {string}
+ */
+const header = (line, underline = /* em-dash */ '\u2014') =>
+  `\n${line}\n${new Array(line.length).fill(underline).join('')}`;
+
+/**
  * @param {string} token
  * @param {string} repo
  */
 async function updateDesignReviewIssues(token, repo) {
-  const existing = await getExistingIssuesWithSessionDate(token, repo);
-  await createScheduledIssue(token, repo, existing);
-  await closeStalePinUpcoming(token, repo, existing);
+  const templates = await getTemplates();
+
+  for (const name in templates) {
+    const template = templates[name];
+    const {labels, sessionDurationHours} = template;
+
+    console./*OK*/ log(header(name, '='));
+
+    const existing = await getExistingIssuesWithSessionDate(
+      token,
+      repo,
+      labels
+    );
+    await createScheduledIssue(token, repo, template, existing);
+    await closeStalePinUpcoming(token, repo, sessionDurationHours, existing);
+  }
 }
 
 updateDesignReviewIssues(env('GITHUB_TOKEN'), env('GITHUB_REPOSITORY')).catch(
