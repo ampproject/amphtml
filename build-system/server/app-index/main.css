@@ -201,7 +201,7 @@ a.underlined {
   position: absolute;
   pointer-events: none;
   content: "";
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M79.7 43.5L74 37.9 50.2 62.2 25.9 38.4l-5.6 5.8 30.1 29.3z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M79.7 43.5L74 37.9 50.2 62.2 25.9 38.4l-5.6 5.8 30.1 29.3z'/%3E%3C/svg%3E");
   background-position: center center;
   background-size: 100% 100%;
   right: 4px;
@@ -217,7 +217,7 @@ a.underlined {
   color: #005af0;
 }
 .settings-panel-button.open::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23005af0' viewBox='0 0 100 100'%3E%3Cpath d='M79.7 43.5L74 37.9 50.2 62.2 25.9 38.4l-5.6 5.8 30.1 29.3z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23005af0' viewBox='0 0 100 100'%3E%3Cpath d='M79.7 43.5L74 37.9 50.2 62.2 25.9 38.4l-5.6 5.8 30.1 29.3z'/%3E%3C/svg%3E");
   transform: translate(0, -50%) rotate(180deg); 
 }
 .settings-panel-button > span {
