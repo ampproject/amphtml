@@ -18,32 +18,31 @@
 
 /** Variables shared between page and system layer */
 .i-amphtml-story-desktop-one-panel {
-  --i-amphtml-story-desktop-one-panel-large-ratio: 69 / 116;
-  --i-amphtml-story-desktop-one-panel-small-ratio: 3 / 4;
-  --i-amphtml-story-desktop-one-panel-min-margin: 74px;
-  --i-amphtml-story-desktop-one-panel-max-margin: 8.25vh;
+  --i-amphtml-story-desktop-one-panel-ratio: 69 / 116;
+  --i-amphtml-story-desktop-one-panel-responsive-margin: max(74px, 8.25vh);
+    /** Calculates panel height by subtracting responsive vertical margin. */
+  --i-amphtml-story-desktop-one-panel-height: calc(100vh - var(--i-amphtml-story-desktop-one-panel-responsive-margin) * 2);
+  --i-amphtml-story-desktop-one-panel-width: calc(var(--i-amphtml-story-desktop-one-panel-height) * var(--i-amphtml-story-desktop-one-panel-ratio));
   --i-amphtml-story-desktop-one-panel-border-radius: 10px;
-  /** Calculates panel height by subtracting responsive vertical margin. */
-  --i-amphtml-story-desktop-one-panel-large-height: calc(100vh - max(var(--i-amphtml-story-desktop-one-panel-min-margin) * 2, var(--i-amphtml-story-desktop-one-panel-max-margin) * 2));
-}
-
-.i-amphtml-story-desktop-one-panel amp-story-page {
-  height: var(--i-amphtml-story-desktop-one-panel-large-height) !important;
-  width: calc(var(--i-amphtml-story-desktop-one-panel-large-height) * var(--i-amphtml-story-desktop-one-panel-large-ratio)) !important;
-  border-radius: var(--i-amphtml-story-desktop-one-panel-border-radius) !important;
-  margin: auto !important;
 }
 
 @media(max-height: 756px) {
-  .i-amphtml-story-desktop-one-panel amp-story-page {
-    height: 100vh !important;
-    width: calc(100vh * var(--i-amphtml-story-desktop-one-panel-large-ratio)) !important;
-    border-radius: 0 !important;
+  .i-amphtml-story-desktop-one-panel {
+    --i-amphtml-story-desktop-one-panel-responsive-margin: 0;
+    --i-amphtml-story-desktop-one-panel-width: calc(100vh * var(--i-amphtml-story-desktop-one-panel-ratio));
+    --i-amphtml-story-desktop-one-panel-border-radius: 0;
   }
 }
 
 @media(max-height: 538px) {
-  .i-amphtml-story-desktop-one-panel amp-story-page {
-    width: calc(100vh * var(--i-amphtml-story-desktop-one-panel-small-ratio)) !important;
+  .i-amphtml-story-desktop-one-panel {
+    --i-amphtml-story-desktop-one-panel-ratio: 3 / 4;
   }
+}
+
+.i-amphtml-story-desktop-one-panel amp-story-page {
+  width: var(--i-amphtml-story-desktop-one-panel-width) !important;
+  height: var(--i-amphtml-story-desktop-one-panel-height) !important;
+  border-radius: var(--i-amphtml-story-desktop-one-panel-border-radius) !important;
+  margin: auto !important;
 }
