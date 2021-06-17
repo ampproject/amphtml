@@ -18,7 +18,6 @@ import {
   SESSION_MAX_AGE_MILLIS,
   SESSION_VALUES,
   SessionManager,
-  composeStorageSessionValue,
   installSessionServiceForTesting,
 } from '../session-manager';
 import {expect} from 'chai';
@@ -126,7 +125,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       expect(storageSetSpy).to.be.calledOnce;
       expect(storageSetSpy).to.be.calledWith(
         'amp-session:' + vendorType,
-        composeStorageSessionValue(session)
+        session
       );
     });
 
@@ -160,14 +159,17 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       expect(storageSetSpy).to.be.calledOnce;
       expect(storageSetSpy).to.be.calledWith(
         'amp-session:' + vendorType,
-        composeStorageSessionValue(session)
+        session
       );
     });
 
     it('should retrieve a non-expired session from storage', async () => {
       const vendorType = 'myVendorType';
       storageValue = {
-        ['amp-session:' + vendorType]: {'ssid': 5000, 'ct': 1555555555555},
+        ['amp-session:' + vendorType]: {
+          'sessionId': 5000,
+          'creationTimestamp': 1555555555555,
+        },
       };
 
       clock.tick(1);
