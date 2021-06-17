@@ -132,7 +132,7 @@ function replaceCdnJsUrls(mode, html, hostName, useMaxNames) {
     if (isRtv) {
       return CDNURLToRTVURL(url, mode, pathnames, extension).href;
     }
-    // CSS files are not output as .max.css
+    // CSS files are never output as .max.css
     const useMaxNamesForFile = useMaxNames && extension !== '.css';
     const href = getHrefWithoutHost(
       replaceCDNURLPath(url, pathnames, extension, useMaxNamesForFile)

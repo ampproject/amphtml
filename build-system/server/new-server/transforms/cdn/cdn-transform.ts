@@ -49,6 +49,7 @@ function maybeModifyCdnUrl(node: posthtml.Node, options: OptionSet): posthtml.No
     [null, null],
     ext,
     options.port,
+    // CSS files are never output as .max.css
     options.useMaxNames && ext !== '.css'
   );
   return node;
