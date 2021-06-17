@@ -487,8 +487,8 @@
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-desktop-one-panel.html",
-      "name": "amp-story: desktop one panel desktop panel max height",
-      "viewport": {"width": 1440, "height": 1000},
+      "name": "amp-story: desktop one panel desktop panel responsive margin",
+      "viewport": {"width": 1440, "height": 1300},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
       ],
@@ -500,7 +500,15 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
       ],
-    },    
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-desktop-one-panel.html",
+      "name": "amp-story: desktop one panel small square screen",
+      "viewport": {"width": 400, "height": 400},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+    },
     {
       "url": "examples/visual-tests/amp-story/basic.rtl.html",
       "name": "amp-story: basic (rtl)",
