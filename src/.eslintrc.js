@@ -19,6 +19,15 @@ module.exports = {
   'rules': {
     'local/no-global': 2,
 
+    // These rules should apply to all AMP code. For now, they apply only to src
+    'import/newline-after-import': 2,
+    'import/no-dynamic-require': 2,
+    'import/no-unused-modules': 2,
+    'import/no-commonjs': 2,
+    'import/no-amd': 2,
+    'import/no-nodejs-modules': 2,
+    'import/no-import-module-exports': 2,
+
     'import/no-restricted-paths': [
       'error',
       {
@@ -80,6 +89,10 @@ module.exports = {
       'rules': {
         'local/no-private-props': 2,
       },
+    },
+    {
+      'files': ['**/storybook/*.js', '**/rollup.config.js'],
+      'rules': {'import/no-nodejs-modules': 0},
     },
   ],
 };
