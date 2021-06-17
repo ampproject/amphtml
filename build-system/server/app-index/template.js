@@ -73,7 +73,6 @@ const Header = ({htmlEnvelopePrefix, jsMode, links}) => html`
  * @param {{
  *  basepath?: string,
  *  css?: string
- *  isMainPage?: boolean,
  *  fileSet?: Array,
  *  serveMode?: string,
  *  htmlEnvelopePrefix?: string,
@@ -84,7 +83,6 @@ function renderTemplate(opt_params = {}) {
   const {
     basepath = '/',
     css,
-    isMainPage = false,
     fileSet = [],
     serveMode = 'default',
     htmlEnvelopePrefix = '/',
