@@ -15,10 +15,10 @@
  */
 
 import {CommonSignals} from '#core/constants/common-signals';
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
-import {getData} from './../../../src/event-helper';
+import {getData} from '../../../src/event-helper';
 
 import {ENDPOINTS} from './constants';
 import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';

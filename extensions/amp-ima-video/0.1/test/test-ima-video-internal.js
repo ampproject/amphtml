@@ -1172,7 +1172,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       src: srcUrl,
       tag: adTagUrl,
     });
-    imaVideoObj.adsActive = false;
 
     imaVideoObj.hideControls();
     expect(imaVideoObj.getPropertiesForTesting().controlsDiv).to.have.attribute(
@@ -1199,7 +1198,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       src: srcUrl,
       tag: adTagUrl,
     });
-    imaVideoObj.adsActive = false;
 
     imaVideoObj.hideControls();
     expect(imaVideoObj.getPropertiesForTesting().controlsDiv).to.have.attribute(
@@ -1347,7 +1345,6 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       tag: adTagUrl,
     });
 
-    imaVideoObj.imaLoadAllowed = true;
     imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.UNKNOWN);
     imaVideoObj.requestAds();
 

@@ -15,7 +15,7 @@
  */
 
 import {Services} from '#service';
-import {buildGtagConfig} from './auto-analytics-configs.js';
+import {buildGtagConfig} from './auto-analytics-configs';
 import {devAssert} from '../../../src/log';
 import {htmlFor} from '#core/dom/static-template';
 

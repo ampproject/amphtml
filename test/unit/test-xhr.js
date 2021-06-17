@@ -22,7 +22,7 @@ import {fetchPolyfill} from '#polyfills/fetch';
 import {getCookie} from '../../src/cookies';
 import {toggleExperiment} from '#experiments';
 import {user} from '../../src/log';
-import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
+import {utf8Decode} from '#core/types/string/bytes';
 import {xhrServiceForTesting} from '#service/xhr-impl';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
@@ -522,7 +522,7 @@ describes.sandboxed
               expect(response.headers.get('X-bar-header')).to.equal('bar data');
               response
                 .arrayBuffer()
-                .then((bytes) => utf8FromArrayBuffer(bytes))
+                .then((bytes) => utf8Decode(bytes))
                 .then((text) => {
                   expect(text).to.equal(creative);
                 });

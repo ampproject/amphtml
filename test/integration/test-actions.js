@@ -15,7 +15,7 @@
  */
 
 import {BrowserController} from '#testing/test-helper';
-import {poll} from '#testing/iframe.js';
+import {poll} from '#testing/iframe';
 
 describes.integration(
   'on="..."',

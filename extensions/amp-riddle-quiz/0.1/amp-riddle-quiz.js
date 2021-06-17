@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {getData, listen} from './../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {isFiniteNumber, isObject} from '#core/types';
-
 import {removeElement} from '#core/dom';
 import {userAssert} from '../../../src/log';
 

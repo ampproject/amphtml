@@ -36,7 +36,7 @@ import {
   removeFragment,
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
-import {getTrackImpressionPromise} from '../impression.js';
+import {getTrackImpressionPromise} from '../impression';
 import {hasOwn} from '#core/types/object';
 import {
   installServiceInEmbedDoc,

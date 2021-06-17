@@ -81,7 +81,7 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {CSS} from '#build/amp-ad-0.1.css.js';
+import {CSS} from '#build/amp-ad-0.1.css';
 import {
   FakeCustomElements,
   FakeLocation,

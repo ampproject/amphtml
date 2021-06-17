@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact/index';
+import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
 import {Slot} from '#preact/slot';
 import {createElementWithAttributes} from '#core/dom';

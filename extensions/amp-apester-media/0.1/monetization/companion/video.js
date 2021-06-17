@@ -15,9 +15,10 @@
  */
 
 import {Services} from '#service';
-const ALLOWED_AD_PROVIDER = 'sr';
 import {createElementWithAttributes} from '#core/dom';
 import {dict, getValueForExpr} from '#core/types/object';
+
+const ALLOWED_AD_PROVIDER = 'sr';
 
 /**
  * @param {!JsonObject} media

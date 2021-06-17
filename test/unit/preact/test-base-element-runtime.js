@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact/index';
+import * as Preact from '#preact';
 import {CanRender} from '../../../src/context/contextprops';
 import {PreactBaseElement, whenUpgraded} from '#preact/base-element';
 import {Slot} from '#preact/slot';
