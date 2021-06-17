@@ -307,7 +307,9 @@ module.exports = {
     ],
     'sort-destructure-keys/sort-destructure-keys': 2,
     'import/order': [
-      'error',
+      // Disabled for now, so individual folders can opt-in one PR at a time and
+      // minimize disruption/merge conflicts
+      0,
       {
         // Split up imports groups with exactly one newline
         'newlines-between': 'always',
