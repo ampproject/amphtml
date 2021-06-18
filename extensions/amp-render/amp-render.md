@@ -129,6 +129,10 @@ Your endpoint must implement the requirements specified in the [CORS Requests in
 
 The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supports URL and non-URL expression values.
 
+### `template`
+
+References an ID of a defined templating element. 
+
 ### `credentials`
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
