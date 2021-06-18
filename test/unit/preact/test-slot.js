@@ -16,11 +16,7 @@
 
 import * as Preact from '#preact';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {
-  CanPlay,
-  CanRender,
-  LoadingProp,
-} from '../../../src/context/contextprops';
+import {CanPlay, CanRender, LoadingProp} from '#preact/contextprops';
 import {Slot, createSlot, useSlotContext} from '#preact/slot';
 import {WithAmpContext} from '#preact/context';
 import {createElementWithAttributes} from '#core/dom';

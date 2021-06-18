@@ -16,7 +16,7 @@
 import '../amp-accordion';
 import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
-import {CanRender} from '../../../../src/context/contextprops';
+import {CanRender} from '#preact/contextprops';
 import {htmlFor} from '#core/dom/static-template';
 import {subscribe, unsubscribe} from '../../../../src/context';
 import {toggleExperiment} from '#experiments';

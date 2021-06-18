@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '#preact';
-import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
+import {CanPlay, CanRender, LoadingProp} from './contextprops';
 import {Loading} from '#core/loading-instructions';
 import {devAssert} from '#core/assert';
 import {isElement} from '#core/types';
