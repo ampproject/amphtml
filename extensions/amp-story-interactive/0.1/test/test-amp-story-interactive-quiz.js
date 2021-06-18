@@ -21,7 +21,10 @@ import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {
   addConfigToInteractive,
+  getMockIncompleteData,
   getMockInteractiveData,
+  getMockOutOfBoundsData,
+  getMockScrambledData,
 } from './test-amp-story-interactive';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
@@ -175,6 +178,69 @@ describes.realWin(
 
       expect(ampStoryQuiz.getOptionElements()[0].innerText).to.contain('30%');
       expect(ampStoryQuiz.getOptionElements()[3].innerText).to.contain('10%');
+    });
+
+    it('should handle the percentage pipeline with scrambled data', async () => {
+      const NUM_OPTIONS = 4;
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockScrambledData());
+
+      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      populateQuiz(ampStoryQuiz, NUM_OPTIONS);
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const expectedPercentages = [10, 20, 30, 40];
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        const expectedText = `${expectedPercentages[i]}%`;
+        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+          expectedText
+        );
+      }
+    });
+
+    it('should handle the percentage pipeline with incomplete data', async () => {
+      const NUM_OPTIONS = 4;
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockIncompleteData());
+
+      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      populateQuiz(ampStoryQuiz, NUM_OPTIONS);
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const expectedPercentages = [0, 50, 50, 0];
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        const expectedText = `${expectedPercentages[i]}%`;
+        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+          expectedText
+        );
+      }
+    });
+
+    it('should handle the percentage pipeline with out of bounds data', async () => {
+      const NUM_OPTIONS = 4;
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockOutOfBoundsData());
+
+      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      populateQuiz(ampStoryQuiz, NUM_OPTIONS);
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const expectedPercentages = [20, 0, 0, 80];
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        const expectedText = `${expectedPercentages[i]}%`;
+        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+          expectedText
+        );
+      }
     });
   }
 );
