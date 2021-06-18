@@ -121,16 +121,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.element.hasAttribute('href');
     this.type_ = isOutlink ? AttachmentType.OUTLINK : AttachmentType.INLINE;
 
+    // Inline attachments are pre-built so their content can be re-parented
+    // in draggable-drawer's layoutCallback.
     if (this.type_ === AttachmentType.INLINE) {
       this.buildInline_();
-    }
-
-    if (this.type_ === AttachmentType.OUTLINK) {
-      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-        this.buildRemoteV2_();
-      } else {
-        this.buildRemote_();
-      }
     }
 
     this.win.addEventListener('pageshow', (event) => {
@@ -144,6 +138,18 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     toggle(this.element, true);
     this.element.setAttribute('aria-live', 'assertive');
+  }
+
+  layoutCallback() {
+    super.layoutCallback();
+
+    if (this.type_ === AttachmentType.OUTLINK) {
+      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+        this.buildRemoteV2_();
+      } else {
+        this.buildRemote_();
+      }
+    }
   }
 
   /**
