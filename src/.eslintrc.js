@@ -68,7 +68,6 @@ module.exports = {
       'files': [
         './preact/base-element.js',
         './preact/slot.js',
-        './context/node.js',
         './polyfills/fetch.js',
         // TEMPORARY, follow tracking issue #33631
         './preact/component/3p-frame.js',
