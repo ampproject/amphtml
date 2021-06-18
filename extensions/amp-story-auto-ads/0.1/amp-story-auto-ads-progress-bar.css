@@ -42,7 +42,7 @@
   transition: opacity 0.1s linear 0.3s;
 }
 
-.i-amphtml-story-ad-progress-background[desktop-one-panel] { 
+.i-amphtml-story-ad-progress-background[desktop-one-panel] {
   top: var(--i-amphtml-story-desktop-one-panel-responsive-margin) !important;
   /* Calculates position by factoring in page width. */
   left: calc(50vw - var(--i-amphtml-story-desktop-one-panel-width) / 2 + 4px) !important;
