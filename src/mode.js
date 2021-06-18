@@ -63,15 +63,11 @@ export function getMode(opt_win) {
 function getMode_(win) {
   // TODO(erwinmombay): simplify the logic here
   const AMP_CONFIG = self.AMP_CONFIG || {};
-
-  // Magic constants that are replaced by closure compiler.
-  // while IS_FORTESTING is only replaced when `amp dist` is called without the
-  // --fortesting flag.
-  const IS_FORTESTING = true;
+  const isFortesting = coreMode.isFortestingMode();
 
   const runningTests =
-    IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
-  const isLocalDev = IS_FORTESTING && (!!AMP_CONFIG.localDev || runningTests);
+    isFortesting && !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
+  const isLocalDev = isFortesting && (!!AMP_CONFIG.localDev || runningTests);
   const hashQuery = parseQueryString(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.

@@ -14,5 +14,15 @@
  * limitations under the License.
  */
 
-export {isMinified} from './minified';
-export {isFortesting} from './for-testing';
+// Magic constant that is replaced by babel.
+// IS_FORTESTING is only replaced when `amp dist` is called without the
+// --fortesting flag.
+const IS_FORTESTING = true;
+
+/**
+ * Returns true whenever closure compiler is used with --fortesting.
+ * @return {boolean}
+ */
+export function isFortesting() {
+  return IS_FORTESTING;
+}
