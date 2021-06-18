@@ -125,7 +125,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.buildInline_();
     }
 
-    if (this.type_ === AttachmentType.OUTLINK) {
+    if (
+      this.type_ === AttachmentType.OUTLINK &&
+      !isPageAttachmentUiV2ExperimentOn(this.win)
+    ) {
       this.buildRemote_();
     }
 
