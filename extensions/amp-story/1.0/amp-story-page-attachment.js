@@ -145,6 +145,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.element.setAttribute('aria-live', 'assertive');
   }
 
+  /**
+   * @override
+   */
   layoutCallback() {
     super.layoutCallback();
     // Outlink attachment v2 renders an image and must be built in layoutCallback.
