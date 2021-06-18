@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  CanPlay,
-  CanRender,
-  LoadingProp,
-} from '../../../src/context/contextprops';
+import {CanPlay, CanRender, LoadingProp} from '#preact/contextprops';
 
 describes.sandboxed('contextprops - common props', {}, () => {
   describe('CanRender', () => {

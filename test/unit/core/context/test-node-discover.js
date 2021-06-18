@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ContextNode} from '../../../src/context/node';
-import {deepScan, findParent} from '../../../src/context/scan';
+import {ContextNode} from '#core/context/node';
+import {deepScan, findParent} from '#core/context/scan';
 import {domOrderComparator} from '#core/dom';
 
 describes.realWin('ContextNode', {}, (env) => {
