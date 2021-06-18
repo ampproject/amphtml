@@ -34,6 +34,7 @@ import {LayoutPriority} from '#core/dom/layout';
 import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
 import {Services} from '#service';
+import {SessionManager} from './session-manager';
 import {Transport} from './transport';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '#core/types/object';
@@ -844,6 +845,7 @@ AMP.extension(TAG, '0.1', (AMP) => {
   );
   AMP.registerServiceForDoc('activity', Activity);
   installLinkerReaderService(AMP.win);
+  AMP.registerServiceForDoc('amp-analytics-session', SessionManager);
   AMP.registerServiceForDoc('amp-analytics-variables', VariableService);
   // Register the element.
   AMP.registerElement(TAG, AmpAnalytics);
