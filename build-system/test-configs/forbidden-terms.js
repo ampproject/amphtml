@@ -147,10 +147,12 @@ const forbiddenTermsGlobal = {
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
   '(?:var|let|const) +IS_FORTESTING +=': {
-    message:
-      'IS_FORTESTING local var only allowed in mode.js and ' +
-      'dist.3p/current/integration.js',
+    message: 'IS_FORTESTING local var only allowed in mode.js.',
     allowlist: ['src/mode.js'],
+  },
+  '(?:var|let|const) +IS_MINIFIED +=': {
+    message: 'IS_MINIFIED local var only allowed in core/mode/minified.js',
+    allowlist: ['src/core/mode/minified.js'],
   },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',

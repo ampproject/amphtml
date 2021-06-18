@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as coreMode from './core/mode';
 import {internalRuntimeVersion} from './internal-version';
 import {parseQueryString} from './core/types/string/url';
 
@@ -64,11 +65,9 @@ function getMode_(win) {
   const AMP_CONFIG = self.AMP_CONFIG || {};
 
   // Magic constants that are replaced by closure compiler.
-  // IS_MINIFIED is always replaced with true when closure compiler is used
   // while IS_FORTESTING is only replaced when `amp dist` is called without the
   // --fortesting flag.
   const IS_FORTESTING = true;
-  const IS_MINIFIED = false;
 
   const runningTests =
     IS_FORTESTING && !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
@@ -94,7 +93,7 @@ function getMode_(win) {
     esm: IS_ESM,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
-    minified: IS_MINIFIED,
+    minified: coreMode.isMinified(),
     test: runningTests,
     log: hashQuery['log'],
     version: internalRuntimeVersion(),
