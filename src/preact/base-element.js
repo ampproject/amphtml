@@ -17,7 +17,7 @@
 import * as Preact from '#preact';
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
+import {CanPlay, CanRender, LoadingProp} from './contextprops';
 import {Deferred} from '#core/data-structures/promise';
 import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {Loading} from '#core/loading-instructions';
@@ -32,7 +32,7 @@ import {
   setGroupProp,
   setParent,
   subscribe,
-} from '../context';
+} from '#core/context';
 import {
   childElementByAttr,
   childElementByTag,

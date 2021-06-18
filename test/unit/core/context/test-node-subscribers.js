@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ContextNode} from '../../../src/context/node';
-import {contextProp} from '../../../src/context/prop';
-import {subscribe, unsubscribe} from '../../../src/context/subscriber';
+import {ContextNode} from '#core/context/node';
+import {contextProp} from '#core/context/prop';
+import {subscribe, unsubscribe} from '#core/context/subscriber';
 
 const NonRecursive = contextProp('NonRecursive');
 
