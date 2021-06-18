@@ -96,16 +96,13 @@ body:not(.amp-mode-keyboard-active) amp-story:not([desktop]):not(.i-amphtml-stor
 }
 
 amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-container {
-  pointer-events: all !important;
-  display: flex !important;;
-  align-items: center !important;;
-  width: 40px !important;
-  --i-amphtml-story-desktop-one-panel-button-margin: calc(50vw - 72px - var(--i-amphtml-story-desktop-one-panel-width) / 2); 
-  top: 50% !important;
-  transform: translateY(-50%) !important;
   height: 40px !important;
-  bottom: auto !important;
   width: 40px !important;
+  transform: translateY(-50%) !important;
+  top: 50% !important;
+  bottom: auto !important;
+  pointer-events: all !important;
+  --i-amphtml-story-desktop-one-panel-button-margin: calc(50vw - 72px - var(--i-amphtml-story-desktop-one-panel-width) / 2); 
 }
 
 amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-container.prev-container {
