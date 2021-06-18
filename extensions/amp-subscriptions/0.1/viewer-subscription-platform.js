@@ -17,7 +17,7 @@
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
-import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
+import {PageConfig as PageConfigInterface} from '#third_party/subscriptions-project/config';
 import {Services} from '#service';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';

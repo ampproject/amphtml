@@ -17,7 +17,7 @@
 import {Action, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';
-import {PageConfig} from '../../../../third_party/subscriptions-project/config';
+import {PageConfig} from '#third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 

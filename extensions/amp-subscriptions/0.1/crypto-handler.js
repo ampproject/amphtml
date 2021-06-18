@@ -18,7 +18,7 @@ import {
   base64Decode,
   decryptAesGcmImpl,
   safeAesGcmImportKey,
-} from '../../../third_party/subscriptions-project/aes_gcm';
+} from '#third_party/subscriptions-project/aes_gcm';
 import {iterateCursor} from '#core/dom';
 import {padStart} from '#core/types/string';
 import {toArray} from '#core/types/array';

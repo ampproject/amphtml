@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PageConfig} from '../../../../third_party/subscriptions-project/config';
+import {PageConfig} from '#third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionService} from '../amp-subscriptions';
 

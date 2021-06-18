@@ -28,13 +28,13 @@ import {
   Entitlements,
   SubscribeResponse,
   Entitlement as SwgEntitlement,
-} from '../../../../third_party/subscriptions-project/swg';
+} from '#third_party/subscriptions-project/swg';
 import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
-import {GaaMeteringRegwall} from '../../../../third_party/subscriptions-project/swg-gaa';
-import {PageConfig} from '../../../../third_party/subscriptions-project/config';
+import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
+import {PageConfig} from '#third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '#service';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';

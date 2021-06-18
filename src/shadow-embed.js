@@ -16,7 +16,7 @@
 
 import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
 import {Services} from './service';
-import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
+import {ShadowCSS} from '#third_party/webcomponentsjs/ShadowCSS';
 import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
