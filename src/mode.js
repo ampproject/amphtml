@@ -74,10 +74,6 @@ function getMode_(win) {
     win.location['originalHash'] || win.location.hash
   );
 
-  if (!rtvVersion) {
-    rtvVersion = getRtvVersion(win);
-  }
-
   // The `minified`, `test` and `localDev` properties are replaced
   // as boolean literals when we run `amp dist` without the `--fortesting`
   // flags. This improved DCE on the production file we deploy as the code
@@ -93,7 +89,7 @@ function getMode_(win) {
     test: runningTests,
     log: hashQuery['log'],
     version: internalRuntimeVersion(),
-    rtvVersion,
+    rtvVersion: getRtvVersion(win),
   };
 }
 
@@ -105,16 +101,15 @@ function getMode_(win) {
  * @return {string}
  */
 function getRtvVersion(win) {
-  if (win.AMP_CONFIG && win.AMP_CONFIG.v) {
-    return win.AMP_CONFIG.v;
+  if (!rtvVersion) {
+    // Currently `internalRuntimeVersion` and thus `mode.version` contain only
+    // major version. The full version however must also carry the minor version.
+    // We will default to production default `01` minor version for now.
+    // TODO(erwinmombay): decide whether internalRuntimeVersion should contain
+    // minor version.
+    rtvVersion = win.AMP_CONFIG?.v || `01${internalRuntimeVersion()}`;
   }
-
-  // Currently `internalRuntimeVersion` and thus `mode.version` contain only
-  // major version. The full version however must also carry the minor version.
-  // We will default to production default `01` minor version for now.
-  // TODO(erwinmombay): decide whether internalRuntimeVersion should contain
-  // minor version.
-  return `01${internalRuntimeVersion()}`;
+  return rtvVersion;
 }
 
 /**
