@@ -14,7 +14,6 @@ requirement: {
   error_message: 'Use getStyle, setStyle, or setStyles in src/core/dom/style.js'
   value: 'Element.prototype.style'
   allowlist: 'src/core/dom/style.js'
-  allowlist: 'src/layout.js'
 }
 
 requirement: {
