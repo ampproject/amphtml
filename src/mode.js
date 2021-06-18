@@ -72,14 +72,14 @@ function getMode_(win) {
   // flags. This improved DCE on the production file we deploy as the code
   // paths for localhost/testing/development are eliminated.
   return {
-    localDev: coreMode.isLocalDev(),
+    localDev: coreMode.isLocalDev(win),
     development: isModeDevelopment(win),
     examiner: hashQuery['development'] == '2',
     esm: IS_ESM,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
     minified: coreMode.isMinified(),
-    test: coreMode.isTest(),
+    test: coreMode.isTest(win),
     log: hashQuery['log'],
     version: internalRuntimeVersion(),
     rtvVersion: getRtvVersion(win),
