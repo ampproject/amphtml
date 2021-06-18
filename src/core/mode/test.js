@@ -19,12 +19,13 @@ import {isFortesting} from './for-testing';
 /**
  * Returns true if executing in a testing environment. Calls may be DCE'd when
  * compiled based on isFortesting.
- * @param {!Window} win
+ * @param {!Window=} opt_win
  * @return {boolean}
  */
-export function isTest(win) {
-  return (
-    isFortesting() &&
-    !!(self.AMP_CONFIG?.test || win.__AMP_TEST || win['__karma__'])
-  );
+export function isTest(opt_win) {
+  if (!isFortesting()) {
+    return false;
+  }
+  const win = opt_win || self;
+  return !!(self.AMP_CONFIG?.test || win.__AMP_TEST || win['__karma__']);
 }
