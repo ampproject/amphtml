@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const ANIMATION_TIME = 50;
 const config = describes.sandboxed.configure().ifChrome();
 config.run('amp-fx-collection', {}, function () {
   const css = `
@@ -59,29 +60,29 @@ config.run('amp-fx-collection', {}, function () {
         expect(getOpacity(win)).to.equal(0);
         win.scrollTo(0, 0.1 * getViewportHeight(win));
         return Promise.resolve()
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             // Since the animation is spread over 50% of the viewport,
             // scrolling 10% of the viewport should change the opacity by 20%
             expect(getOpacity(win)).to.equal(0.2);
             win.scrollTo(0, 0.4 * getViewportHeight(win));
           })
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             expect(getOpacity(win)).to.equal(0.8);
             win.scrollTo(0, 0.5 * getViewportHeight(win));
           })
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             expect(getOpacity(win)).to.equal(1);
             win.scrollTo(0, 0.7 * getViewportHeight(win));
           })
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             expect(getOpacity(win)).to.equal(1);
             win.scrollTo(0, 0.4 * getViewportHeight(win));
           })
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             expect(getOpacity(win)).to.equal(1);
           });
@@ -117,17 +118,17 @@ config.run('amp-fx-collection', {}, function () {
         expect(getOpacity(win)).to.equal(0);
         win.scrollTo(0, 0.1 * getViewportHeight(win));
         return Promise.resolve()
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             expect(getOpacity(win)).to.equal(0);
             win.scrollTo(0, 0.2 * getViewportHeight(win));
           })
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             expect(getOpacity(win)).to.equal(0);
             win.scrollTo(0, 0.4 * getViewportHeight(win));
           })
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             expect(getOpacity(win)).to.equal(0.4);
           });
@@ -162,27 +163,27 @@ config.run('amp-fx-collection', {}, function () {
         expect(getOpacity(win)).to.equal(0);
         win.scrollTo(0, 0.1 * getViewportHeight(win));
         return Promise.resolve()
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             expect(getOpacity(win)).to.equal(0.2);
             win.scrollTo(0, 0.4 * getViewportHeight(win));
           })
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             expect(getOpacity(win)).to.equal(0.8);
             win.scrollTo(0, 0.5 * getViewportHeight(win));
           })
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             expect(getOpacity(win)).to.equal(1);
             win.scrollTo(0, 0.7 * getViewportHeight(win));
           })
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             expect(getOpacity(win)).to.equal(1);
             win.scrollTo(0, 0.4 * getViewportHeight(win));
           })
-          .then(timeout(2000))
+          .then(timeout(ANIMATION_TIME))
           .then(() => {
             expect(getOpacity(win)).to.equal(0.8);
           });
