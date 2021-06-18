@@ -525,6 +525,10 @@ The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supp
 
 [filter formats="websites, stories"]
 
+### `template`
+
+References an ID of a defined templating element.
+
 ### `credentials`
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
