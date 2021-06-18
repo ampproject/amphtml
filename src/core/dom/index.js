@@ -267,7 +267,6 @@ export function getDataParamsFromAttributes(
 ) {
   const computeParamNameFunc = opt_computeParamNameFunc || ((key) => key);
   const {dataset} = element;
-  //console.log({dataset})
   const params = dict();
   const paramPattern = opt_paramPattern || /^param(.+)/;
   for (const key in dataset) {
