@@ -102,6 +102,7 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-container {
   top: 50% !important;
   bottom: auto !important;
   pointer-events: all !important;
+  /* Calculates position of button by factoring in page width. */
   --i-amphtml-story-desktop-one-panel-button-margin: calc(50vw - 72px - var(--i-amphtml-story-desktop-one-panel-width) / 2); 
 }
 
