@@ -49,7 +49,12 @@ import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryPage, NavigationDirection, PageState, PAGE_LOADED_CLASS_NAME} from './amp-story-page';
+import {
+  AmpStoryPage,
+  NavigationDirection,
+  PAGE_LOADED_CLASS_NAME,
+  PageState,
+} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
@@ -91,7 +96,7 @@ import {endsWith} from '#core/types/string';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getDetail, listenOncePromise} from '../../../src/event-helper';
+import {getDetail} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
@@ -2269,9 +2274,9 @@ export class AmpStory extends AMP.BaseElement {
             page.setDistance(0);
             return page.signals().whenSignal(CommonSignals.LOAD_END);
           })
-        ).then(() => preloadAllPages(/* overrideDistances */false));
+        ).then(() => preloadAllPages(/* overrideDistances */ false));
       }
-      preloadAllPages(/* overrideDistances */true);
+      preloadAllPages(/* overrideDistances */ true);
     });
   }
 

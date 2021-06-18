@@ -892,7 +892,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       /* payload */ undefined,
       {bubbles: true}
     );
-    console.log('marked page as loaded');
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
@@ -1292,7 +1291,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * @return {boolean} Whether it has a distance.
    */
-   hasDistance() {
+  hasDistance() {
     return this.element.hasAttribute('distance');
   }
 
