@@ -42,14 +42,7 @@ module.exports = {
             // Disallow importing AMP dependencies into preact/Bento
             'target': 'src/preact',
             'from': 'src',
-            'except': ['./core', './context', './preact'],
-          },
-          {
-            // Disallow importing AMP dependencies into context module
-            // TODO(rcebulko): Try to migrate src/context into src/preact
-            'target': 'src/context',
-            'from': 'src',
-            'except': ['./core', './context'],
+            'except': ['./core', './preact'],
           },
           {
             // Disallow importing non-core dependencies into polyfills
