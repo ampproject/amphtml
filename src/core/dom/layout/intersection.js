@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Deferred} from '#core/data-structures/promise';
-import {createViewportObserver} from '../viewport-observer';
+import {createViewportObserver} from '#core/dom/layout/viewport-observer';
 import {dict} from '#core/types/object';
 import {layoutRectFromDomRect} from '#core/dom/layout/rect';
 import {toWin} from '#core/window';

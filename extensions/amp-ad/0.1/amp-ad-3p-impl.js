@@ -58,7 +58,7 @@ import {moveLayoutRect} from '#core/dom/layout/rect';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {toWin} from '#core/window';
 
 /** @const {string} Tag name for 3P AD implementation. */

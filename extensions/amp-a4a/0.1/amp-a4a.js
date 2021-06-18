@@ -75,7 +75,7 @@ import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {padStart} from '#core/types/string';
 import {parseJson} from '#core/types/object/json';
 import {processHead} from './head-validation';

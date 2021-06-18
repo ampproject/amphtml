@@ -38,7 +38,7 @@ import {Services} from '#service';
 import {VideoSessionManager} from './video-session-manager';
 import {clamp} from '#core/math';
 import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
-import {createViewportObserver} from '../viewport-observer';
+import {createViewportObserver} from '#core/dom/layout/viewport-observer';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from '#core/types/object';
 import {dispatchCustomEvent, removeElement} from '#core/dom';

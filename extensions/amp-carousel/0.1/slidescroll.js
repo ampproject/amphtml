@@ -40,7 +40,7 @@ import {
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
