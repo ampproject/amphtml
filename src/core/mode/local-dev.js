@@ -20,9 +20,9 @@ import {isTest} from './test';
 /**
  * Returns true if executing in a local development or testing environment.
  * Calls may be DCE'd when compiled based on isFortesting and isTest.
- * @param {!Window} win
+ * @param {!Window=} opt_win
  * @return {boolean}
  */
-export function isLocalDev(win) {
-  return isFortesting() && (!!self.AMP_CONFIG?.localDev || isTest(win));
+export function isLocalDev(opt_win) {
+  return isFortesting() && (!!self.AMP_CONFIG?.localDev || isTest(opt_win));
 }
