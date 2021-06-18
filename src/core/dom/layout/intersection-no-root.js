@@ -19,7 +19,7 @@ import {toWin} from '#core/window';
 
 /**
  * @fileoverview
- * This utility is similar to the `src/utils/intersection`, but it doesn't
+ * This utility is similar to the `./intersection`, but it doesn't
  * require the `rootBounds` and thus can use a simpler version of the
  * intersection observer that's supported natively on more platforms.
  *
@@ -27,10 +27,10 @@ import {toWin} from '#core/window';
  * support is better.
  */
 
-/** @type {WeakMap<!Element, Deferred>} */
+/** @type {WeakMap<!Element, !Deferred<!IntersectionObserverEntry>>} */
 let intersectionDeferreds;
 
-/** @type {WeakMap<!Window, IntersectionObserver>} */
+/** @type {WeakMap<!Window, !IntersectionObserver>} */
 let intersectionObservers;
 
 /**
@@ -75,10 +75,10 @@ function getInOb(win) {
  * dedupe to the same promise.
  *
  * @param {!Element} el
- * @return {!Promise<IntersectionObserverEntry>}
+ * @return {!Promise<!IntersectionObserverEntry>}
  */
 export function measureIntersectionNoRoot(el) {
-  if (intersectionDeferreds && intersectionDeferreds.has(el)) {
+  if (intersectionDeferreds?.has(el)) {
     return intersectionDeferreds.get(el).promise;
   }
 

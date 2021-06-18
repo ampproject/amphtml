@@ -35,7 +35,7 @@ export function createViewportObserver(ioCallback, win, opts = {}) {
   // `IntersectionObserver` constructor extern that only accepts `Element`.
   const root =
     isIframed(win) && needsRootBounds
-      ? /** @type {!Element} */ (win.document)
+      ? /** @type {?} */ (win.document)
       : undefined;
   return new win.IntersectionObserver(ioCallback, {
     threshold,
