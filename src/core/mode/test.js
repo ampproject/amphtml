@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-// Magic constant that is replaced by babel.
-// IS_MINIFIED is always replaced with true when closure compiler is used
-const IS_MINIFIED = false;
+import {isFortesting} from './for-testing';
 
 /**
- * Returns true whenever closure compiler is used.
+ * Returns true if executing in a testing environment. Calls may be DCE'd when
+ * compiled based on isFortesting.
+ * @param {!Window} win
  * @return {boolean}
  */
-export function isMinifiedMode() {
-  return IS_MINIFIED;
+export function isTest(win) {
+  return (
+    isFortesting() &&
+    !!(self.AMP_CONFIG?.test || win.__AMP_TEST || win['__karma__'])
+  );
 }

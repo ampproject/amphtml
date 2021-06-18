@@ -147,10 +147,12 @@ const forbiddenTermsGlobal = {
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
   '(?:var|let|const) +IS_FORTESTING +=': {
-    message:
-      'IS_FORTESTING local var only allowed in mode.js and ' +
-      'dist.3p/current/integration.js',
-    allowlist: ['src/mode.js'],
+    message: 'IS_FORTESTING local var only allowed in mode.js.',
+    allowlist: ['src/core/mode/for-testing.js'],
+  },
+  '(?:var|let|const) +IS_MINIFIED +=': {
+    message: 'IS_MINIFIED local var only allowed in core/mode/minified.js',
+    allowlist: ['src/core/mode/minified.js'],
   },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
@@ -634,9 +636,12 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
       'src/config.js',
+      'src/core/window/window.extern.js',
       'src/experiments/index.js',
       'src/experiments/shame.extern.js',
       'src/mode.js',
+      'src/core/mode/test.js',
+      'src/core/mode/local-dev.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'testing/init-tests.js',
       'tools/experiments/experiments.js',
