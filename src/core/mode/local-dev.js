@@ -24,5 +24,5 @@ import {isTest} from './test';
  * @return {boolean}
  */
 export function isLocalDev(win) {
-  return isFortesting() && (!!AMP_CONFIG.localDev || isTest());
+  return isFortesting() && (!!self.AMP_CONFIG?.localDev || isTest(win));
 }

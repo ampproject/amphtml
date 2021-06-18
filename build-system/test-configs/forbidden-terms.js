@@ -639,6 +639,8 @@ const forbiddenTermsGlobal = {
       'src/experiments/index.js',
       'src/experiments/shame.extern.js',
       'src/mode.js',
+      'src/core/mode/test.js',
+      'src/core/mode/local-dev.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'testing/init-tests.js',
       'tools/experiments/experiments.js',
