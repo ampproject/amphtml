@@ -16,13 +16,12 @@
 
 import * as Preact from '#preact';
 import {Loading} from '#core/loading-instructions';
-import {MediaQueryProps} from '#core/dom/media-query-props';
 import {Slot, createSlot} from './slot';
-import {matches, realChildNodes} from '#core/dom/query';
-import {parseBooleanAttribute} from '#core/dom';
 import {dashToCamelCase} from '#core/types/string';
 import {devAssert} from '#core/assert';
 import {getDate} from '#core/types/date';
+import {matches, realChildNodes} from '#core/dom/query';
+import {parseBooleanAttribute} from '#core/dom';
 import {sequentialIdGenerator} from '#core/math/id-generator';
 
 /**

@@ -1,14 +1,26 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import * as Preact from './';
+
 import {MediaQueryProps} from '#core/dom/media-query-props';
-import {Loading} from '#core/loading-instructions';
-import * as Preact from 'preact';
 import {collectProps} from './parse-props';
 
 /**
- * Goals
- * 1.
- */
-
-/**
+ * @param Ctor
  * @return {function() => void}
  */
 export function getBuildDom(Ctor) {
@@ -19,21 +31,27 @@ export function getBuildDom(Ctor) {
     const props = collectProps(
       Ctor,
       element,
-      {current: null},
-      {},
+      /* ref */ {current: null},
+      /* default props */ {},
       mediaQueryProps
     );
 
-    const PreactComponent = Ctor['Component'];
-    const vdom = PreactComponent(props);
-    const realDom = renderToDom(doc, element, vdom);
-    element.appendChild(realDom);
+    const Component = function () {
+      let state = 42; // WORKS, line below this breaks :(
+      // const [state, setState] = Preact.useState(42);
+      return <button>{state}</button>;
+    };
+    const vNode = Preact.createElement(Component, props);
+    const realNode = renderToDom(doc, element, vNode);
+    element.appendChild(realNode);
   };
 }
 
 export function renderToDom(doc, domNode, node, context = {}) {
   // these values render nothing, which we represent as empty Text nodes:
-  if (node == null || typeof node === 'boolean') return;
+  if (node == null || typeof node === 'boolean') {
+    return document.createTextNode();
+  }
 
   // number and string are DOM plaintext (`.textContent`):
   if (typeof node !== 'object') {
@@ -44,7 +62,7 @@ export function renderToDom(doc, domNode, node, context = {}) {
   if (Array.isArray(node)) {
     return node
       .flat(Infinity)
-      .map((node) => renderToProto(doc, domNode, node, context));
+      .map((node) => renderToDom(doc, domNode, node, context));
   }
 
   // recurse into component functions:
@@ -62,27 +80,32 @@ export function renderToDom(doc, domNode, node, context = {}) {
       // class components:
       inst = Object.assign(new node.type(inst.props, inst.context), inst);
       rendered = inst.render(inst.props, inst.state, inst.context);
-      if (inst.getChildContext)
-        context = Object.assign({}, inst.getChildContext());
+      if (inst.getChildContext) {
+        context = {...inst.getChildContext()};
+      }
     } else {
       // function components:
       rendered = node.type.call(inst, node.props, node.context);
     }
-    return renderToProto(doc, domNode, rendered, context);
+    return renderToDom(doc, domNode, rendered, context);
   }
 
   // "Render" VDOM to DOM Proto:
-  let {children, dangerouslySetInnerHTML, ref, key, ...props} = node.props;
+  let {children, dangerouslySetInnerHTML, key, ref, ...props} = node.props;
   if (dangerouslySetInnerHTML) {
+    // TODO: this should do a real parse
     const temp = document.createElement('div');
     temp.innerHTML = String(dangerouslySetInnerHTML.__html || '');
-    children = temp.childNodes;
+    children = Array.from(temp.childNodes);
+  } else {
+    children = []
+      .concat(children)
+      .flat(Infinity)
+      .map((c) => renderToDom(doc, domNode, c, context));
   }
-  if (Array.isArray(children)) children = children.flat(Infinity);
-  else children = [children];
 
   const elem = doc.createElement(node.type);
-  for (let [name, val] of Object.entries(props)) {
+  for (const [name, val] of Object.entries(props)) {
     elem.setAttribute(name, val);
   }
 

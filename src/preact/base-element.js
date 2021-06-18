@@ -33,6 +33,7 @@ import {
   subscribe,
 } from '../context';
 import {childElementByAttr, childElementByTag} from '#core/dom/query';
+import {collectProps} from './parse-props';
 import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
 import {devAssert} from '#core/assert';
 import {dict, hasOwn, map} from '#core/types/object';
@@ -41,7 +42,6 @@ import {hydrate, render} from '#preact';
 import {installShadowStyle} from '../shadow-embed';
 import {isElement} from '#core/types';
 import {sequentialIdGenerator} from '#core/math/id-generator';
-import {collectProps} from './parse-props';
 
 /**
  * The following combinations are allowed.
@@ -108,18 +108,6 @@ const RENDERED_ATTR = 'i-amphtml-rendered';
 const RENDERED_ATTRS = dict({'i-amphtml-rendered': ''});
 
 /**
- * The same as `applyFillContent`, but inside the shadow.
- * @const {!Object}
- */
-const SIZE_DEFINED_STYLE = {
-  'position': 'absolute',
-  'top': '0',
-  'left': '0',
-  'width': '100%',
-  'height': '100%',
-};
-
-/**
  * This is an internal property that marks light DOM nodes that were rendered
  * by AMP/Preact bridge and thus must be ignored by the mutation observer to
  * avoid mutate->rerender->mutate loops.
@@ -130,12 +118,6 @@ const UNSLOTTED_GROUP = 'unslotted';
 
 /** @return {boolean} */
 const MATCH_ANY = () => true;
-
-const childIdGenerator = sequentialIdGenerator();
-
-const ONE_OF_ERROR_MESSAGE =
-  'Only one of "attr", "attrs", "attrPrefix", "passthrough", ' +
-  '"passthroughNonEmpty", or "selector" must be given';
 
 /**
  * @param {!Object<string, !AmpElementPropDef>} propDefs
@@ -163,13 +145,6 @@ const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
  * @return {boolean}
  */
 const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
-
-/**
- * @param {Node} node
- * @return {boolean}
- */
-const IS_EMPTY_TEXT_NODE = (node) =>
-  node.nodeType === /* TEXT_NODE */ 3 && node.nodeValue.trim().length === 0;
 
 /**
  * Wraps a Preact Component in a BaseElement class.

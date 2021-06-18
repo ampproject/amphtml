@@ -14,52 +14,32 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {PreactBaseElement} from '#preact/base-element';
+import {BaseElement as AmpInstagramBE} from '../../../extensions/amp-instagram/1.0/base-element';
 import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {getBuildDom} from '../../../src/preact/build-dom';
+import {getBuildDom} from '#preact/build-dom';
+import {expect} from 'chai';
 
 const spec = {amp: true, frameStyle: {width: '300px'}};
 
 describes.realWin('collectProps', spec, (env) => {
-  let win, doc, html;
-  let Impl, component, lastProps;
+  let win, doc;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    html = htmlFor(doc);
-
-    Impl = class extends PreactBaseElement {};
-    Impl['loadable'] = true;
-    Impl['unloadOnPause'] = true;
-    Impl['props'] = {
-      'captioned': {attr: 'data-captioned'},
-      'shortcode': {attr: 'data-shortcode'},
-      'title': {attr: 'title'},
-      'minFontSize': {attr: 'min-font-size', type: 'number', media: true},
-    };
-    Impl['usesShadowDom'] = true;
-    Impl['layoutSizeDefined'] = true;
-
-    component = env.sandbox.stub().callsFake((props) => {
-      lastProps = props;
-      return Preact.createElement('div', {id: 'component'});
-    });
-    Impl['Component'] = component;
   });
 
   it('should collect props', () => {
-    const el = createElementWithAttributes(doc, 'amp-element', {
+    const el = createElementWithAttributes(doc, 'amp-instagram', {
       'data-shortcode': 'fBwFP',
-      'min-font-size': '(max-width: 301px) 72, 84',
       'title': 'Testing testing 123',
       'width': '381',
       'height': '381',
       'layout': 'responsive',
     });
-    const props = getBuildDom(Impl, doc, el);
-    console.error(JSON.stringify(props));
+
+    const buildDom = getBuildDom(AmpInstagramBE);
+    buildDom(doc, el);
+    expect(el.innerHTML).equals(`<button>42</button>`);
   });
 });
