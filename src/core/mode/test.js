@@ -17,7 +17,8 @@
 import {isFortesting} from './for-testing';
 
 /**
- * Returns true if executing in a testing environment.
+ * Returns true if executing in a testing environment. Calls may be DCE'd when
+ * compiled based on isFortesting.
  * @param {!Window} win
  * @return {boolean}
  */

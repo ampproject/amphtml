@@ -20,7 +20,8 @@
 const IS_FORTESTING = true;
 
 /**
- * Returns true whenever closure compiler is used with --fortesting.
+ * Returns true whenever closure compiler is used with --fortesting. Calls are
+ * DCE'd when compiled.
  * @return {boolean}
  */
 export function isFortesting() {

@@ -19,6 +19,7 @@ import {isTest} from './test';
 
 /**
  * Returns true if executing in a local development or testing environment.
+ * Calls may be DCE'd when compiled based on isFortesting and isTest.
  * @param {!Window} win
  * @return {boolean}
  */
