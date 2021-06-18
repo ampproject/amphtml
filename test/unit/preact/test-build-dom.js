@@ -40,6 +40,8 @@ describes.realWin('collectProps', spec, (env) => {
 
     const buildDom = getBuildDom(AmpInstagramBE);
     buildDom(doc, el);
-    expect(el.innerHTML).equals(`<button>42</button>`);
+    expect(el.innerHTML).equals(
+      `<div style="position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; contain: strict;"><div style="position: relative; width: 100%; height: 100%; overflow: hidden;"><iframe allowtransparency="true" frameborder="0" loading="auto" part="iframe" scrolling="no" src="https://www.instagram.com/p/fBwFP/embed/?cr=1&amp;v=12" title="Testing testing 123" style="opacity: 0; width: 100%; height: 100%; content-visibility: auto;"></iframe></div></div>`
+    );
   });
 });
