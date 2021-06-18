@@ -20,7 +20,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {CarouselContextProp} from '../../../amp-base-carousel/1.0/carousel-props';
 import {createElementWithAttributes} from '#core/dom';
 import {setStyles} from '#core/dom/style';
-import {subscribe} from '../../../../src/context';
+import {subscribe} from '#core/context';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ContextNode} from '../../../src/context/node';
-import {Values} from '../../../src/context/values';
-import {contextProp} from '../../../src/context/prop';
+import {ContextNode} from '#core/context/node';
+import {Values} from '#core/context/values';
+import {contextProp} from '#core/context/prop';
 
 const NonRecursive = contextProp('NonRecursive');
 
