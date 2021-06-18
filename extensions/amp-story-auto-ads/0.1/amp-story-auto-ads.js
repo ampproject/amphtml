@@ -65,6 +65,7 @@ const MUSTACHE_TAG = 'amp-mustache';
 export const Attributes = {
   AD_SHOWING: 'ad-showing',
   DESKTOP_PANELS: 'desktop-panels',
+  DESKTOP_ONE_PANEL: 'desktop-one-panel',
   DIR: 'dir',
   PAUSED: 'paused',
 };
@@ -315,14 +316,20 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      const {DESKTOP_PANELS} = Attributes;
+      const {DESKTOP_PANELS, DESKTOP_ONE_PANEL} = Attributes;
       this.adBadgeContainer_.removeAttribute(DESKTOP_PANELS);
+      this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
       // TODO(#33969) can no longer be null when launched.
       this.progressBarBackground_?.removeAttribute(DESKTOP_PANELS);
+      this.progressBarBackground_?.removeAttribute(DESKTOP_ONE_PANEL);
 
       if (uiState === UIType.DESKTOP_PANELS) {
         this.adBadgeContainer_.setAttribute(DESKTOP_PANELS, '');
         this.progressBarBackground_?.setAttribute(DESKTOP_PANELS, '');
+      }
+      if (uiState === UIType.DESKTOP_ONE_PANEL) {
+        this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');
+        this.progressBarBackground_?.setAttribute(DESKTOP_ONE_PANEL, '');
       }
     });
   }
