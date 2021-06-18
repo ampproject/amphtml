@@ -65,7 +65,7 @@
   opacity: 1 !important;
 }
 
-.i-amphtml-ad-overlay-container[desktop-one-panel] { 
+.i-amphtml-ad-overlay-container[desktop-one-panel] {
   top: var(--i-amphtml-story-desktop-one-panel-responsive-margin) !important;
   /* Calculates position by factoring in page width. */
   left: calc(50vw - var(--i-amphtml-story-desktop-one-panel-width) / 2) !important;
