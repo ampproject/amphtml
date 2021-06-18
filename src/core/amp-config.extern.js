@@ -15,30 +15,19 @@
  */
 
 /**
- * @fileoverview Externs for values expected to be on global self/window.
+ * @fileoverview Externs for properties on global AMP_CONFIG.
  * @externs
  */
 
 /**
- * Never exists; used as part of post-compilation checks to verify DCE.
- * @type {undefined}
+ * AMP configuration and runtime settings structure.
+ * @typedef {{
+ *   test: (boolean|undefined)
+ * }}
  */
-window.__AMP_ASSERTION_CHECK;
+let AmpConfigDef;
 
 /**
- * Global error reporting handler; only present in AMP pages.
- * @type {undefined|function(this:Window,!Error,Element=)}
+ * @type {!AmpConfigDef|undefined}
  */
-window.__AMP_REPORT_ERROR;
-
-/**
- * Global property set by test some harnesses to signal a testing environment
- * @type {undefined|boolean}
- */
-window.__AMP_TEST;
-
-/**
- * Counter for the DomBaseWeakRef polyfill.
- * @type {undefined|number}
- */
-window.__AMP_WEAKREF_ID;
+window.AMP_CONFIG;

@@ -16,3 +16,4 @@
 
 export {isMinified} from './minified';
 export {isFortesting} from './for-testing';
+export {isTest} from './test';

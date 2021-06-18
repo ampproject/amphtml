@@ -14,31 +14,16 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Externs for values expected to be on global self/window.
- * @externs
- */
+import {isFortesting} from './for-testing';
 
 /**
- * Never exists; used as part of post-compilation checks to verify DCE.
- * @type {undefined}
+ * Returns true if executing in a testing environment.
+ * @param {!Window} win
+ * @return {boolean}
  */
-window.__AMP_ASSERTION_CHECK;
-
-/**
- * Global error reporting handler; only present in AMP pages.
- * @type {undefined|function(this:Window,!Error,Element=)}
- */
-window.__AMP_REPORT_ERROR;
-
-/**
- * Global property set by test some harnesses to signal a testing environment
- * @type {undefined|boolean}
- */
-window.__AMP_TEST;
-
-/**
- * Counter for the DomBaseWeakRef polyfill.
- * @type {undefined|number}
- */
-window.__AMP_WEAKREF_ID;
+export function isTest(win) {
+  return (
+    isFortesting() &&
+    !!(self.AMP_CONFIG?.test || win.__AMP_TEST || win['__karma__'])
+  );
+}
