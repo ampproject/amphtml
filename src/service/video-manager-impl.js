@@ -45,7 +45,7 @@ import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {getInternalVideoElementFor, isAutoplaySupported} from '#core/dom/video';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '#core/types';
-import {measureIntersection} from '../utils/intersection';
+import {measureIntersection} from '#core/dom/layout/intersection';
 import {once} from '#core/types/function';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';

@@ -53,7 +53,7 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {
   intersectionEntryToJson,
   measureIntersection,
-} from '../../../src/utils/intersection';
+} from '#core/dom/layout/intersection';
 import {moveLayoutRect} from '#core/dom/layout/rect';
 import {
   observeWithSharedInOb,

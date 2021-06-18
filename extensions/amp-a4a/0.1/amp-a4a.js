@@ -66,7 +66,7 @@ import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 import {
   intersectionEntryToJson,
   measureIntersection,
-} from '../../../src/utils/intersection';
+} from '#core/dom/layout/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '#core/types';
 import {tryDecodeUriComponent} from '#core/types/string/url';
