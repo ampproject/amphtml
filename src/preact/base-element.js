@@ -24,7 +24,6 @@ import {Loading} from '#core/loading-instructions';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {ReadyState} from '#core/constants/ready-state';
-import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {
   addGroup,
@@ -33,26 +32,16 @@ import {
   setParent,
   subscribe,
 } from '../context';
-import {
-  childElementByAttr,
-  childElementByTag,
-  matches,
-  realChildNodes,
-} from '#core/dom/query';
-import {
-  createElementWithAttributes,
-  dispatchCustomEvent,
-  parseBooleanAttribute,
-} from '#core/dom';
-import {dashToCamelCase} from '#core/types/string';
+import {childElementByAttr, childElementByTag} from '#core/dom/query';
+import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
 import {devAssert} from '#core/assert';
 import {dict, hasOwn, map} from '#core/types/object';
-import {getDate} from '#core/types/date';
 import {getMode} from '../mode';
 import {hydrate, render} from '#preact';
 import {installShadowStyle} from '../shadow-embed';
 import {isElement} from '#core/types';
 import {sequentialIdGenerator} from '#core/math/id-generator';
+import {collectProps} from './parse-props';
 
 /**
  * The following combinations are allowed.
@@ -83,17 +72,6 @@ import {sequentialIdGenerator} from '#core/math/id-generator';
  * }|string}
  */
 let AmpElementPropDef;
-
-/**
- * @typedef {{
- *   name: string,
- *   selector: string,
- *   single: (boolean|undefined),
- *   clone: (boolean|undefined),
- *   props: (!JsonObject|undefined),
- * }}
- */
-let ChildDef;
 
 /** @const {!MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
@@ -1018,229 +996,6 @@ function matchesAttrPrefix(attributeName, attributePrefix) {
     attributeName.startsWith(attributePrefix) &&
     attributeName !== attributePrefix
   );
-}
-
-/**
- * @param {typeof PreactBaseElement} Ctor
- * @param {!AmpElement} element
- * @param {{current: ?}} ref
- * @param {!JsonObject|null|undefined} defaultProps
- * @param {?MediaQueryProps} mediaQueryProps
- * @return {!JsonObject}
- */
-function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
-  const {
-    'className': className,
-    'layoutSizeDefined': layoutSizeDefined,
-    'lightDomTag': lightDomTag,
-    'props': propDefs,
-  } = Ctor;
-
-  if (mediaQueryProps) {
-    mediaQueryProps.start();
-  }
-
-  const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
-
-  // Light DOM.
-  if (lightDomTag) {
-    props[RENDERED_ATTR] = true;
-    props[RENDERED_PROP] = true;
-    props['as'] = lightDomTag;
-  }
-
-  // Class.
-  if (className) {
-    props['className'] = className;
-  }
-
-  // Common styles.
-  if (layoutSizeDefined) {
-    if (Ctor['usesShadowDom']) {
-      props['style'] = SIZE_DEFINED_STYLE;
-    } else {
-      props['className'] =
-        `i-amphtml-fill-content ${className || ''}`.trim() || null;
-    }
-  }
-
-  // Props.
-  parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps);
-  if (mediaQueryProps) {
-    mediaQueryProps.complete();
-  }
-
-  return props;
-}
-
-/**
- * @param {typeof PreactBaseElement} Ctor
- * @param {!Object} props
- * @param {!Object} propDefs
- * @param {!Element} element
- * @param {?MediaQueryProps} mediaQueryProps
- */
-function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
-  // Match all children defined with "selector".
-  if (checkPropsFor(propDefs, HAS_SELECTOR)) {
-    // There are plain "children" and there're slotted children assigned
-    // as separate properties. Thus in a carousel the plain "children" are
-    // slides, and the "arrowNext" children are passed via a "arrowNext"
-    // property.
-    const nodes = realChildNodes(element);
-    for (let i = 0; i < nodes.length; i++) {
-      const childElement = nodes[i];
-      const match = matchChild(childElement, propDefs);
-      if (!match) {
-        continue;
-      }
-      const def = propDefs[match];
-      const {
-        as = false,
-        single,
-        name = match,
-        clone,
-        props: slotProps = {},
-      } = def;
-      devAssert(clone || Ctor['usesShadowDom']);
-      const parsedSlotProps = {};
-      parsePropDefs(
-        Ctor,
-        parsedSlotProps,
-        slotProps,
-        childElement,
-        mediaQueryProps
-      );
-
-      // TBD: assign keys, reuse slots, etc.
-      if (single) {
-        props[name] = createSlot(
-          childElement,
-          childElement.getAttribute('slot') || `i-amphtml-${name}`,
-          parsedSlotProps,
-          as
-        );
-      } else {
-        const list = props[name] || (props[name] = []);
-        devAssert(!as);
-        list.push(
-          clone
-            ? createShallowVNodeCopy(childElement)
-            : createSlot(
-                childElement,
-                childElement.getAttribute('slot') ||
-                  `i-amphtml-${name}-${childIdGenerator()}`,
-                parsedSlotProps
-              )
-        );
-      }
-    }
-  }
-
-  for (const name in propDefs) {
-    const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
-    devAssert(
-      !!def.attr +
-        !!def.attrs +
-        !!def.attrPrefix +
-        !!def.selector +
-        !!def.passthrough +
-        !!def.passthroughNonEmpty <=
-        1,
-      ONE_OF_ERROR_MESSAGE
-    );
-    let value;
-    if (def.passthrough) {
-      devAssert(Ctor['usesShadowDom']);
-      // Use lazy loading inside the passthrough by default due to too many
-      // elements.
-      value = [<Slot loading={Loading.LAZY} />];
-    } else if (def.passthroughNonEmpty) {
-      devAssert(Ctor['usesShadowDom']);
-      // Use lazy loading inside the passthrough by default due to too many
-      // elements.
-      value = realChildNodes(element).every(IS_EMPTY_TEXT_NODE)
-        ? null
-        : [<Slot loading={Loading.LAZY} />];
-    } else if (def.attr) {
-      value = element.getAttribute(def.attr);
-      if (def.media && value != null) {
-        value = mediaQueryProps.resolveListQuery(String(value));
-      }
-    } else if (def.parseAttrs) {
-      devAssert(def.attrs);
-      value = def.parseAttrs(element);
-    } else if (def.attrPrefix) {
-      const currObj = {};
-      let objContains = false;
-      const attrs = element.attributes;
-      for (let i = 0; i < attrs.length; i++) {
-        const attrib = attrs[i];
-        if (matchesAttrPrefix(attrib.name, def.attrPrefix)) {
-          currObj[dashToCamelCase(attrib.name.slice(def.attrPrefix.length))] =
-            attrib.value;
-          objContains = true;
-        }
-      }
-      if (objContains) {
-        value = currObj;
-      }
-    }
-    if (value == null) {
-      if (def.default != null) {
-        props[name] = def.default;
-      }
-    } else {
-      const v =
-        def.type == 'number'
-          ? parseFloat(value)
-          : def.type == 'boolean'
-          ? parseBooleanAttribute(/** @type {string} */ (value))
-          : def.type == 'date'
-          ? getDate(value)
-          : value;
-      props[name] = v;
-    }
-  }
-}
-
-/**
- * Copies an Element into a VNode representation.
- * (Interpretation into VNode is not recursive, so it excludes children.)
- * @param {!Element} element
- * @return {!PreactDef.Renderable}
- */
-function createShallowVNodeCopy(element) {
-  const props = {
-    // Setting `key` to an object is fine in Preact, but not React.
-    'key': element,
-  };
-  // We need to read element.attributes and element.attributes.length only once,
-  // since reading a live NamedNodeMap repeatedly is expensive.
-  const {attributes, localName} = element;
-  const {length} = attributes;
-  for (let i = 0; i < length; i++) {
-    const {name, value} = attributes[i];
-    props[name] = value;
-  }
-  return Preact.createElement(localName, props);
-}
-
-/**
- * @param {!Element} element
- * @param {!Object} defs
- * @return {?ChildDef}
- */
-function matchChild(element, defs) {
-  // TODO: a little slow to do this repeatedly.
-  for (const match in defs) {
-    const def = defs[match];
-    const selector = typeof def == 'string' ? def : def.selector;
-    if (matches(element, selector)) {
-      return match;
-    }
-  }
-  return null;
 }
 
 /**
