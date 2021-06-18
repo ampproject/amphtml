@@ -72,19 +72,11 @@ export class NativeWebAnimationRunner extends AnimationRunner {
   }
 
   /**
-   * Whether the runner is initialized or not.
-   * @return {boolean}
-   */
-  isInitialized_() {
-    return !!this.players_;
-  }
-
-  /**
    * @override
    * Initializes the players but does not change the state.
    */
   init() {
-    devAssert(!this.isInitialized_());
+    devAssert(!this.players_);
     this.players_ = this.requests_.map((request) => {
       // Apply vars.
       if (request.vars) {
@@ -112,7 +104,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    * Initialize if not initialized already.
    */
   maybeInit() {
-    this.isInitialized_() || this.init();
+    this.players_ || this.init();
   }
 
   /**
@@ -129,7 +121,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    * @override
    */
   pause() {
-    devAssert(this.isInitialized_());
+    devAssert(!!this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach((player) => {
       if (player.playState == WebAnimationPlayState.RUNNING) {
@@ -139,17 +131,10 @@ export class NativeWebAnimationRunner extends AnimationRunner {
   }
 
   /**
-   * Pause if runner was initialized.
-   */
-  maybePause() {
-    this.isInitialized_() && this.pause();
-  }
-
-  /**
    * @override
    */
   resume() {
-    devAssert(this.isInitialized_());
+    devAssert(!!this.players_);
     const oldRunnerPlayState = this.playState_;
     if (oldRunnerPlayState == WebAnimationPlayState.RUNNING) {
       return;
@@ -180,14 +165,14 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    * Resume if runner was initialized.
    */
   maybeResume() {
-    this.isInitialized_() && this.resume();
+    this.players_ && this.resume();
   }
 
   /**
    * @override
    */
   reverse() {
-    devAssert(this.isInitialized_());
+    devAssert(!!this.players_);
     // TODO(nainar) there is no reverse call on WorkletAnimation
     this.players_.forEach((player) => {
       player.reverse();
@@ -199,7 +184,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    * @param {time} time
    */
   seekTo(time) {
-    if (!this.isInitialized_()) {
+    if (!this.players_) {
       return;
     }
     this.setPlayState_(WebAnimationPlayState.PAUSED);
@@ -226,7 +211,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    * @override
    */
   finish(pauseOnError = false) {
-    if (!this.isInitialized_()) {
+    if (!this.players_) {
       return;
     }
     const players = this.players_;
@@ -250,7 +235,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    * @override
    */
   cancel() {
-    if (!this.isInitialized_()) {
+    if (!this.players_) {
       return;
     }
     this.setPlayState_(WebAnimationPlayState.IDLE);

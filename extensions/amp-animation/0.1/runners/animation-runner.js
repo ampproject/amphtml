@@ -61,10 +61,6 @@ export class AnimationRunner {
 
   /**
    */
-  maybePause() {}
-
-  /**
-   */
   resume() {}
 
   /**
