@@ -35,7 +35,7 @@ module.exports = function (context) {
 
       for (const terms of context.options) {
         for (const report of matchForbiddenTerms(filename, contents, terms)) {
-          const {match, message, loc} = report;
+          const {loc, match, message} = report;
           const formattedMatch = cyan(`"${match}"`);
           context.report({
             loc,

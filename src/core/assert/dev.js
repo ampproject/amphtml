@@ -15,7 +15,7 @@
  */
 
 import * as assertions from './base';
-import {isMinifiedMode} from '../minified-mode';
+import {isMinifiedMode} from '#core/minified-mode';
 
 /**
  * @fileoverview This file provides the entrypoint for dev assertions. It's
@@ -209,30 +209,5 @@ export function devAssertBoolean(shouldBeBoolean, opt_message) {
     /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     shouldBeBoolean,
     opt_message
-  );
-}
-
-/**
- * Asserts and returns the enum value. If the enum doesn't contain such a
- * value, the error is thrown.
- *
- * @param {!Object<T>} enumObj
- * @param {*} shouldBeEnum
- * @param {string=} opt_enumName
- * @return {T}
- * @template T
- * @closurePrimitive {asserts.matchesReturn}
- */
-export function devAssertEnumValue(enumObj, shouldBeEnum, opt_enumName) {
-  if (isMinifiedMode()) {
-    return shouldBeEnum;
-  }
-  devAssertDceCheck();
-
-  return assertions.assertEnumValue(
-    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
-    enumObj,
-    shouldBeEnum,
-    opt_enumName
   );
 }

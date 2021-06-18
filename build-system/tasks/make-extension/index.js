@@ -15,18 +15,50 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2), {string: ['version']});
 const del = require('del');
 const fs = require('fs-extra');
+const minimist = require('minimist');
 const objstr = require('obj-str');
 const path = require('path');
 const {cyan, green, red, yellow} = require('../../common/colors');
 const {format} = require('./format');
-const {getStdout, getOutput} = require('../../common/process');
+const {getOutput, getStdout} = require('../../common/process');
 const {log, logLocalDev, logWithoutTimestamp} = require('../../common/logging');
+
+const argv = minimist(process.argv.slice(2), {string: ['version']});
 
 const extensionBundlesJson =
   'build-system/compile/bundles.config.extensions.json';
+
+/**
+ * @typedef {{
+ *   bundleConfig: Object,
+ *   modified: !Array<string>,
+ *   created: !Array<string>,
+ * }}
+ */
+let MakeExtensionResultDef;
+
+/**
+ * @typedef {{
+ *   version?: (string|undefined),
+ *   bento?: (boolean|undefined),
+ *   name?: (string|undefined),
+ *   nocss?: (string|undefined),
+ *   nojss?: (string|undefined),
+ * }}
+ */
+let ArgsDef;
+
+/**
+ * @typedef {{
+ *   name: string,
+ *   version: string,
+ *   latestVersion?: (string|undefined)
+ *   options?: ({hasCss?: boolean, wrapper?: string}|undefined)
+ * }}
+ */
+let BundleDef;
 
 /**
  * Convert dash-case-name to PascalCaseName.
@@ -41,7 +73,7 @@ function dashToPascalCase(name) {
  * Replaces from a map of keys/values.
  * @param {string} inputText
  * @param {Object<string, string>} replacements
- * @return {function(string): string}
+ * @return {string}
  */
 const replace = (inputText, replacements) =>
   Object.keys(replacements).reduce(
@@ -73,7 +105,7 @@ const getTemplateDir = (template) =>
  * @param {string} templateDir
  * @param {Object<string, string>} replacements
  * @param {string=} destinationDir
- * @return {Array<string>}
+ * @return {Promise<Array<string>>}
  */
 async function writeFromTemplateDir(
   templateDir,
@@ -129,12 +161,7 @@ async function writeFromTemplateDir(
 /**
  * Inserts an extension entry into bundles.config.extensions.json
  *
- * @param {{
- *   name: string,
- *   version: string,
- *   latestVersion?: (string|undefined)
- *   options: ({hasCss: boolean}|undefined)
- * }} bundle
+ * @param {BundleDef} bundle
  * @param {string=} destination
  */
 async function insertExtensionBundlesConfig(
@@ -150,12 +177,15 @@ async function insertExtensionBundlesConfig(
     ({name}) => name === bundle.name
   );
 
+  const {latestVersion, name, version, ...rest} = bundle;
   extensionBundles.push({
-    ...bundle,
+    name,
+    version,
     latestVersion:
       (existingOrNull && existingOrNull.latestVersion) ||
-      bundle.latestVersion ||
-      bundle.version,
+      latestVersion ||
+      version,
+    ...rest,
   });
 
   await fs.mkdirp(path.dirname(destination));
@@ -170,31 +200,21 @@ async function insertExtensionBundlesConfig(
         return -1;
       }
       return a.name.localeCompare(b.name);
-    })
+    }),
+    {
+      // Written file is parsed by prettier as `json-stringify`, which means
+      // that default formatting by `spaces` is fine.
+      spaces: 2,
+    }
   );
-
-  format([destination]);
 
   logLocalDev(green('SUCCESS:'), 'Wrote', cyan(path.basename(destination)));
 }
 
 /**
- * @typedef {{
- *   bundleConfig: Object,
- *   modified: !Array<string>,
- *   created: !Array<string>,
- * }}
- */
-let MakeExtensionResultDef;
-
-/**
  * @param {Array<string>} templateDirs
  * @param {string=} destinationDir
- * @param {{
- *   version: (string|undefined),
- *   bento: (boolean|undefined),
- *   name: (string|undefined),
- * }} options
+ * @param {ArgsDef|minimist.ParsedArgs} options
  * @return {Promise<?MakeExtensionResultDef>}
  */
 async function makeExtensionFromTemplates(
@@ -285,7 +305,10 @@ async function makeExtensionFromTemplates(
   };
 
   if (!options.nocss) {
-    bundleConfig.options = {hasCss: true};
+    bundleConfig.options = {...bundleConfig.options, hasCss: true};
+  }
+  if (options.bento) {
+    bundleConfig.options = {...bundleConfig.options, wrapper: 'bento'};
   }
 
   await insertExtensionBundlesConfig(
@@ -330,13 +353,13 @@ async function makeExtensionFromTemplates(
 }
 
 /**
- * @param {function(...*):?{modified: ?Array<string>, created: ?Array<string>}} fn
+ * @param {function():?{modified: ?Array<string>, created: ?Array<string>}} fn
  * @return {Promise}
  */
 async function affectsWorkingTree(fn) {
   const stashStdout = getStdout(`git stash push --keep-index`);
 
-  const {modified, created} = (await fn()) || {};
+  const {created, modified} = (await fn()) || {};
 
   if (created) {
     await del(created);
@@ -356,7 +379,7 @@ async function affectsWorkingTree(fn) {
  * Generates an extension with the given name and runs all unit tests located in
  * the generated extension directory.
  * @param {string} name
- * @return {!Promise{?string}} stderr if failing, null if passing
+ * @return {Promise<?string>} stderr if failing, null if passing
  */
 async function runExtensionTests(name) {
   for (const command of [
@@ -380,6 +403,7 @@ async function makeExtension() {
 
   const {bento, nocss, nojss} = argv;
 
+  // @ts-ignore
   const templateDirs = objstr({
     shared: true,
     bento,
@@ -429,16 +453,16 @@ module.exports = {
   writeFromTemplateDir,
 };
 
-makeExtension.description = 'Create an extension skeleton';
+makeExtension.description = 'Create the skeleton for a new extension';
 makeExtension.flags = {
-  name: 'The name of the extension. The prefix `amp-*` is added if necessary',
-  cleanup: 'Undo file changes before exiting. This is useful alongside --test',
+  name: 'Name of the extension (the amp-* prefix is added if necessary)',
+  cleanup: 'Undo file changes before exiting (useful with --test)',
   bento: 'Generate a Bento component',
   nocss:
-    'Exclude extension-specific CSS. (If specifying --bento, JSS is still generated unless combined with --nojss)',
-  nojss: 'Exclude extension-specific JSS when specifying --bento.',
+    'Exclude extension-specific CSS (JSS is generated for --bento unless combined with --nojss)',
+  nojss: 'Exclude extension-specific JSS (used with --bento)',
   test: 'Build and test the generated extension',
-  version: 'Sets the version number (default: 0.1; or 1.0 with --bento)',
+  version: 'Set the version number (default: 0.1; or 1.0 with --bento)',
   overwrite:
-    'Overwrites existing files at the destination, if present. Otherwise skips them',
+    'Overwrite existing files at the destination if present, otherwise skip',
 };

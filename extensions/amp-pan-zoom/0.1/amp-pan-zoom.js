@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-pan-zoom-0.1.css';
 import {
@@ -24,23 +24,24 @@ import {
   TapRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/core/data-structures/curve';
-import {boundValue, distance, magnitude} from '../../../src/utils/math';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
+import {bezierCurve} from '#core/data-structures/curve';
+import {boundValue, distance, magnitude} from '#core/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
-import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {layoutRectFromDomRect, layoutRectLtwh} from '#core/math/layout-rect';
 import {numeric} from '../../../src/transition';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {px, scale, setStyles, translate} from '../../../src/style';
+} from '#core/dom/size-observer';
+import {px, scale, setStyles, translate} from '#core/dom/style';
+import {realChildElements} from '#core/dom/query';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';
@@ -168,7 +169,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
 
     userAssert(
       children.length == 1,
@@ -344,7 +345,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   updateMaxScale_(sourceAspectRatio) {
-    const {width, height} = this.elementBox_;
+    const {height, width} = this.elementBox_;
     const elementBoxRatio = width / height;
     const maxScale = Math.max(
       elementBoxRatio / sourceAspectRatio,
@@ -731,12 +732,12 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   updatePanZoomBounds_(scale) {
     const {
-      width: cWidth,
-      left: xOffset,
       height: cHeight,
+      left: xOffset,
       top: yOffset,
+      width: cWidth,
     } = this.contentBox_;
-    const {width: eWidth, height: eHeight} = this.elementBox_;
+    const {height: eHeight, width: eWidth} = this.elementBox_;
 
     this.minX_ = Math.min(0, eWidth - (xOffset + (cWidth * (scale + 1)) / 2));
     this.maxX_ = Math.max(0, (cWidth * scale - cWidth) / 2 - xOffset);
@@ -750,7 +751,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   updatePanZoom_() {
-    const {scale_: s, posX_: x, posY_: y, content_: content} = this;
+    const {content_: content, posX_: x, posY_: y, scale_: s} = this;
     return this.mutateElement(() => {
       setStyles(dev().assertElement(content), {
         transform: translate(x, y) + ' ' + scale(s),
@@ -857,7 +858,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     if (dir == 0) {
       return Promise.resolve();
     }
-    const {width, height} = this.elementBox_;
+    const {height, width} = this.elementBox_;
     const dist = magnitude(deltaX, deltaY);
     const newScale = this.startScale_ * (1 + (dir * dist) / 100);
     const deltaCenterX = width / 2 - this.getOffsetX_(centerClientX);

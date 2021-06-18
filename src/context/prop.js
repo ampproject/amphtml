@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert} from '../core/assert';
+import {devAssert} from '#core/assert';
 
 // typedef imports
 import {ContextPropDef} from './prop.type';

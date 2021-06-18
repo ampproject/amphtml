@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/core/types/object';
+import {dict, hasOwn} from '#core/types/object';
 import {getData} from '../../../src/event-helper';
-import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
-import {getStyle, setStyles} from '../../../src/style';
+import {getPageLayoutBoxBlocking} from '#core/dom/page-layout-box';
+import {getStyle, setStyles} from '#core/dom/style';
 import {parseUrlDeprecated} from '../../../src/url';
-import {throttle} from '../../../src/core/types/function';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {throttle} from '#core/types/function';
+import {tryParseJson} from '#core/types/object/json';
 
 /**
  * Used to manage messages for different Safeframe ad slots.
@@ -751,7 +751,7 @@ export class SafeframeHostApi {
       })
       .catch((err) => {
         user().warn(TAG, err);
-        const {width, height} = this.baseInstance_.getSlotSize();
+        const {height, width} = this.baseInstance_.getSlotSize();
         if (width && height) {
           this.onFluidResize_(height);
         }

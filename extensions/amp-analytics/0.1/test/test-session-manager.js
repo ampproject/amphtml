@@ -18,7 +18,6 @@ import {
   SESSION_MAX_AGE_MILLIS,
   SESSION_VALUES,
   SessionManager,
-  composeStorageSessionValue,
   installSessionServiceForTesting,
 } from '../session-manager';
 import {expect} from 'chai';
@@ -26,7 +25,7 @@ import {installVariableServiceForTesting} from '../variables';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 import {user} from '../../../../src/log';
 
 describes.realWin('Session Manager', {amp: true}, (env) => {
@@ -126,7 +125,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       expect(storageSetSpy).to.be.calledOnce;
       expect(storageSetSpy).to.be.calledWith(
         'amp-session:' + vendorType,
-        composeStorageSessionValue(session)
+        session
       );
     });
 
@@ -137,20 +136,24 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         'creationTimestamp': 1555555555555,
         'lastAccessTimestamp': 1555555555555,
       };
-      await sessionManager.get(vendorType)
+      await sessionManager.get(vendorType);
 
       clock.tick(1);
       session.lastAccessTimestamp = 1555555555556;
-      
+
       storageSetSpy.resetHistory();
-      const storedSession = await sessionManager.get(vendorType)
-      expect(storedSession['creationTimestamp']).to.equal(session.creationTimestamp);
-      expect(sessionManager.sessions_[vendorType]['creationTimestamp']).to.equal(session.creationTimestamp);
+      const storedSession = await sessionManager.get(vendorType);
+      expect(storedSession['creationTimestamp']).to.equal(
+        session.creationTimestamp
+      );
+      expect(
+        sessionManager.sessions_[vendorType]['creationTimestamp']
+      ).to.equal(session.creationTimestamp);
 
       expect(storageSetSpy).to.be.calledOnce;
       expect(storageSetSpy).to.be.calledWith(
         'amp-session:' + vendorType,
-        composeStorageSessionValue(session)
+        session
       );
     });
 
@@ -184,14 +187,17 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       expect(storageSetSpy).to.be.calledOnce;
       expect(storageSetSpy).to.be.calledWith(
         'amp-session:' + vendorType,
-        composeStorageSessionValue(session)
+        session
       );
     });
 
     it('should retrieve a non-expired session from storage', async () => {
       const vendorType = 'myVendorType';
       storageValue = {
-        ['amp-session:' + vendorType]: {'ssid': 5000, 'ct': 1555555555555},
+        ['amp-session:' + vendorType]: {
+          'sessionId': 5000,
+          'creationTimestamp': 1555555555555,
+        },
       };
 
       clock.tick(1);

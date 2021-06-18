@@ -20,6 +20,7 @@ tags: {  # amp-facebook-like
   extension_spec: {
     name: "amp-facebook-like"
     version: "0.1"
+    version: "1.0"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"

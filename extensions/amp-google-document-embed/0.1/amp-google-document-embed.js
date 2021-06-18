@@ -27,12 +27,12 @@
  * </code>
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {addParamToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev, userAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
-import {removeElement} from '../../../src/dom';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {removeElement} from '#core/dom';
 
 export const TAG = 'amp-google-document-embed';
 
@@ -95,7 +95,7 @@ export class AmpDriveViewer extends AMP.BaseElement {
 
     iframe.src = this.getSrc_(this.element.getAttribute('src'));
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
   }

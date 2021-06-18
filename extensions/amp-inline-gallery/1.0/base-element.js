@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {InlineGallery} from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {dict} from '../../../src/core/types/object';
+import {PreactBaseElement} from '#preact/base-element';
+import {dict} from '#core/types/object';
 import {setProp} from '../../../src/context';
-import {useContext, useLayoutEffect} from '../../../src/preact';
+import {useContext, useLayoutEffect} from '#preact';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */

@@ -45,10 +45,10 @@ function logClosureCompilerError(message) {
  * Handles a closure error during compilation and type checking. Passes through
  * the error except in watch mode, where we want to print a failure message and
  * continue.
- * @param {!PluginError} err
+ * @param {!compiler.PluginError} err
  * @param {string} outputFilename
  * @param {?Object} options
- * @return {!PluginError|undefined}
+ * @return {!compiler.PluginError|undefined}
  */
 function handleClosureCompilerError(err, outputFilename, options) {
   if (options.typeCheckOnly) {

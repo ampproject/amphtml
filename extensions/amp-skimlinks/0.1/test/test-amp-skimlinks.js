@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as DocumentReady from '../../../../src/document-ready';
+import * as DocumentReady from '#core/document-ready';
 import * as SkimOptionsModule from '../skim-options';
 import * as chunkModule from '../../../../src/chunk';
-import {Deferred} from '../../../../src/core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
 import {SKIMLINKS_REWRITER_ID} from '../constants';
 import {EVENTS as linkRewriterEvents} from '../link-rewriter/constants';
@@ -329,8 +329,8 @@ describes.fakeWin(
         it('Should update tracking info with the guid', () => {
           return ampSkimlinks.onPageScanned_().then(() => {
             const {
-              setTrackingInfo: setTrackingInfoStub,
               sendImpressionTracking: sendImpressionTrackingStub,
+              setTrackingInfo: setTrackingInfoStub,
             } = ampSkimlinks.trackingService_;
             expect(setTrackingInfoStub.withArgs({guid}).calledOnce).to.be.true;
             expect(setTrackingInfoStub.calledBefore(sendImpressionTrackingStub))
@@ -385,8 +385,8 @@ describes.fakeWin(
         it('Should update tracking info with the guid', () => {
           return ampSkimlinks.onPageScanned_().then(() => {
             const {
-              setTrackingInfo: setTrackingInfoStub,
               sendImpressionTracking: sendImpressionTrackingStub,
+              setTrackingInfo: setTrackingInfoStub,
             } = ampSkimlinks.trackingService_;
             expect(setTrackingInfoStub.withArgs({guid}).calledOnce).to.be.true;
             expect(setTrackingInfoStub.calledBefore(sendImpressionTrackingStub))

@@ -17,8 +17,8 @@
 const debounce = require('debounce');
 const globby = require('globby');
 const {compileJsWithEsbuild} = require('./helpers');
+const {cyan, red} = require('../common/colors');
 const {endBuildStep} = require('./helpers');
-const {red, cyan} = require('../common/colors');
 const {VERSION} = require('../compile/internal-version');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');

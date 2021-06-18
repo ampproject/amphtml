@@ -34,10 +34,10 @@ const jscodeshift = (args = [], opts) => getOutput(command(args), opts);
 
 /**
  * @param {Array<string>} args
- * @param {Object} opts
+ * @param {Object=} opts
  * @return {ReturnType<execScriptAsync>}
  */
-const jscodeshiftAsync = (args = [], opts) =>
+const jscodeshiftAsync = (args = [], opts = {}) =>
   execScriptAsync(command(args), opts);
 
 const stripColors = (str) => str.replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');

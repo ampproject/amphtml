@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {Builder} from './web-animations';
 import {Pass} from '../../../src/pass';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {WebAnimationPlayState} from './web-animation-types';
 import {WebAnimationService} from './web-animation-service';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '#core/math';
 import {dev, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';
 import {installWebAnimationsIfNecessary} from './install-polyfill';
-import {isFiniteNumber} from '../../../src/types';
-import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
+import {isFiniteNumber} from '#core/types';
+import {setInitialDisplay, setStyles, toggle} from '#core/dom/style';
 
 const TAG = 'amp-animation';
 
@@ -372,7 +372,7 @@ export class AmpAnimation extends AMP.BaseElement {
   onResize_() {
     // Store the previous `triggered` and `pausedByAction` value since
     // `cancel` may reset it.
-    const {triggered_: triggered, pausedByAction_: pausedByAction} = this;
+    const {pausedByAction_: pausedByAction, triggered_: triggered} = this;
 
     // Stop animation right away.
     if (this.runner_) {

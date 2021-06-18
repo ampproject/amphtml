@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {DomFingerprint} from './utils/dom-fingerprint';
-import {Services} from './services';
+import {DomFingerprint} from './core/dom/fingerprint';
+import {Services} from './service';
 import {dict} from './core/types/object';
 import {experimentToggles, isCanary} from './experiments';
-import {getLengthNumeral} from './layout';
+import {getLengthNumeral} from './core/dom/layout';
 import {getModeObject} from './mode-object';
-import {getPageLayoutBoxBlocking} from './utils/page-layout-box';
+import {getPageLayoutBoxBlocking} from './core/dom/page-layout-box';
 import {internalRuntimeVersion} from './internal-version';
 import {urls} from './config';
 

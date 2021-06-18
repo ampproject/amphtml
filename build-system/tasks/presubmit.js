@@ -19,8 +19,8 @@ const fs = require('fs');
 const globby = require('globby');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const {
-  matchForbiddenTerms,
   forbiddenTermsGlobal,
+  matchForbiddenTerms,
 } = require('../test-configs/forbidden-terms');
 const {cyan, red, yellow} = require('../common/colors');
 const {log} = require('../common/logging');
@@ -53,7 +53,7 @@ const requiredTermsExcluded = new RegExp('/make-extension(/.+)?/template/');
 function hasForbiddenTerms(srcFile) {
   const contents = fs.readFileSync(srcFile, 'utf-8');
   const terms = matchForbiddenTerms(srcFile, contents, forbiddenTermsGlobal);
-  for (const {match, loc, message} of terms) {
+  for (const {loc, match, message} of terms) {
     log(
       red('ERROR:'),
       'Found forbidden',

@@ -15,26 +15,27 @@
  */
 
 import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Deferred} from '../../../src/core/data-structures/promise';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Deferred} from '#core/data-structures/promise';
 import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   SubscriptionApi,
   listenFor,
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
+import {applyFillContent} from '#core/dom/layout';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getData} from '../../../src/event-helper';
-import {getHtml} from '../../../src/get-html';
-import {isExperimentOn} from '../../../src/experiments';
-import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {removeElement} from '../../../src/dom';
+import {getHtml} from '#core/dom/get-html';
+import {isExperimentOn} from '#experiments';
+import {isGoogleAdsA4AValidEnvironment} from '#ads/google/a4a/utils';
+import {removeElement} from '#core/dom';
 import {reportErrorToAnalytics} from '../../../src/error-reporting';
-import {setStyle} from '../../../src/style';
-import {throttle} from '../../../src/core/types/function';
+import {setStyle} from '#core/dom/style';
+import {throttle} from '#core/types/function';
 
 const VISIBILITY_TIMEOUT = 10000;
 
@@ -101,7 +102,7 @@ export class AmpAdXOriginIframeHandler {
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
     if (!this.uiHandler_.isStickyAd()) {
-      this.baseInstance_.applyFillContent(this.iframe);
+      applyFillContent(this.iframe);
     }
     const timer = Services.timerFor(this.baseInstance_.win);
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+import {DomFingerprint} from '#core/dom/fingerprint';
+import {Services} from '#service';
+import {WindowInterface} from '#core/window/interface';
 import {
   addDataAndJsonAttributes_,
   applySandbox,
@@ -33,7 +33,7 @@ import {
   serializeMessage,
 } from '../../../src/3p-frame-messaging';
 import {dev} from '../../../src/log';
-import {toggleExperiment} from '../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin('3p-frame', {amp: true}, (env) => {
   let window, document;
@@ -85,7 +85,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           return Services.ampdoc(window.document);
         };
 
-        const {innerWidth: width, innerHeight: height} = window;
+        const {innerHeight: height, innerWidth: width} = window;
         div.getIntersectionChangeEntry = function () {
           return {
             time: 1234567888,

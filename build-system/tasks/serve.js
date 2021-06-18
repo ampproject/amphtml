@@ -25,16 +25,16 @@ const open = require('open');
 const os = require('os');
 const path = require('path');
 const {
-  buildNewServer,
-  SERVER_TRANSFORM_PATH,
-} = require('../server/typescript-compile');
-const {
+  lazyBuild3pVendor,
   lazyBuildExtensions,
   lazyBuildJs,
-  lazyBuild3pVendor,
-  preBuildRuntimeFiles,
   preBuildExtensions,
+  preBuildRuntimeFiles,
 } = require('../server/lazy-build');
+const {
+  SERVER_TRANSFORM_PATH,
+  buildNewServer,
+} = require('../server/typescript-compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('../common/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
@@ -245,10 +245,10 @@ module.exports = {
 
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-serve.description = 'Starts a webserver at the project root directory';
+serve.description = 'Start a webserver at the project root directory';
 serve.flags = {
   host: 'Hostname or IP address to bind to (default: localhost)',
-  port: 'Specifies alternative port (default: 8000)',
+  port: 'Specify alternative port (default: 8000)',
   https: 'Use HTTPS server',
   quiet: "Run in quiet mode and don't log HTTP requests",
   cache: 'Make local resources cacheable by the browser',
@@ -258,6 +258,5 @@ serve.flags = {
   cdn: 'Serve current prod JS',
   rtv: 'Serve JS from the RTV provided',
   coverage:
-    'Serve instrumented code to collect coverage info; use ' +
-    '--coverage=live to auto-report coverage on page unload',
+    'Serve instrumented code to collect coverage info (use --coverage=live to auto-report coverage on page unload)',
 };

@@ -119,7 +119,7 @@ async function getTransform(inputFile, extraOptions) {
  * @return {Promise<string>}
  */
 async function getOutput(transform, input) {
-  return (await posthtml(transform).process(input)).html;
+  return (await posthtml(/** @type {*} */ (transform)).process(input)).html;
 }
 
 /**
@@ -208,4 +208,4 @@ module.exports = {
   serverTests,
 };
 
-serverTests.description = "Runs tests for the AMP server's custom transforms";
+serverTests.description = "Run tests for the AMP server's custom transforms";

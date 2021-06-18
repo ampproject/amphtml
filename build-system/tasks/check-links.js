@@ -18,9 +18,9 @@
 const fs = require('fs-extra');
 const markdownLinkCheck = require('markdown-link-check');
 const path = require('path');
+const {cyan, green, red, yellow} = require('../common/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {gitDiffAddedNameOnlyMain} = require('../common/git');
-const {green, cyan, red, yellow} = require('../common/colors');
 const {linkCheckGlobs} = require('../test-configs/config');
 const {log, logLocalDev} = require('../common/logging');
 
@@ -36,7 +36,7 @@ async function checkLinks() {
   if (!usesFilesOrLocalChanges('check-links')) {
     return;
   }
-  const filesToCheck = getFilesToCheck(linkCheckGlobs);
+  const filesToCheck = getFilesToCheck(linkCheckGlobs, {dot: true});
   if (filesToCheck.length == 0) {
     return;
   }
@@ -177,8 +177,8 @@ module.exports = {
   checkLinks,
 };
 
-checkLinks.description = 'Detects dead links in markdown files';
+checkLinks.description = 'Check markdown files for dead links';
 checkLinks.flags = {
-  'files': 'Checks only the specified files',
-  'local_changes': 'Checks just the files changed in the local branch',
+  'files': 'Check only the specified files',
+  'local_changes': 'Check just the files changed in the local branch',
 };

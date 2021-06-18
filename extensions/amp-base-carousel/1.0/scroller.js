@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {
   Alignment,
   Axis,
@@ -22,11 +22,11 @@ import {
   scrollContainerToElement,
 } from './dimensions';
 import {LightboxGalleryContext} from '../../amp-lightbox-gallery/1.0/context';
-import {debounce} from '../../../src/core/types/function';
-import {forwardRef} from '../../../src/preact/compat';
-import {mod} from '../../../src/utils/math';
-import {setStyle} from '../../../src/style';
-import {toWin} from '../../../src/types';
+import {debounce} from '#core/types/function';
+import {forwardRef} from '#preact/compat';
+import {mod} from '#core/math';
+import {setStyle} from '#core/dom/style';
+import {toWin} from '#core/window';
 import {
   useCallback,
   useContext,
@@ -34,7 +34,7 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
-} from '../../../src/preact';
+} from '#preact';
 import {useStyles} from './component.jss';
 
 /**
@@ -55,6 +55,7 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  */
 function ScrollerWithRef(
   {
+    _thumbnails,
     advanceCount,
     alignment,
     axis,
@@ -67,7 +68,6 @@ function ScrollerWithRef(
     snap,
     snapBy = 1,
     visibleCount,
-    _thumbnails,
     ...rest
   },
   ref
@@ -340,18 +340,18 @@ export {Scroller};
  */
 function renderSlides(
   {
+    _thumbnails,
     alignment,
     children,
     loop,
     mixedLength,
-    restingIndex,
     offsetRef,
     openLightbox,
     pivotIndex,
+    restingIndex,
     snap,
     snapBy,
     visibleCount,
-    _thumbnails,
   },
   classes
 ) {

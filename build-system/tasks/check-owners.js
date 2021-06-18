@@ -25,7 +25,7 @@
 const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const JSON5 = require('json5');
-const {cyan, red, green} = require('../common/colors');
+const {cyan, green, red} = require('../common/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {log, logLocalDev} = require('../common/logging');
 
@@ -84,7 +84,7 @@ async function checkFile(file) {
       );
     }
 
-    const {requestErrors, fileErrors, rules} = await response.json();
+    const {fileErrors, requestErrors, rules} = await response.json();
 
     if (requestErrors) {
       requestErrors.forEach((err) => log(red(err)));
@@ -112,8 +112,8 @@ module.exports = {
   checkOwners,
 };
 
-checkOwners.description = 'Checks all OWNERS files in the repo for correctness';
+checkOwners.description = 'Check all OWNERS files in the repo for correctness';
 checkOwners.flags = {
-  'files': 'Checks only the specified OWNERS files',
-  'local_changes': 'Checks just the OWNERS files changed in the local branch',
+  'files': 'Check only the specified OWNERS files',
+  'local_changes': 'Check just the OWNERS files changed in the local branch',
 };

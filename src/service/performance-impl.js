@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {Signals} from '../core/data-structures/signals';
-import {TickLabel} from '../core/constants/enums';
-import {VisibilityState} from '../core/constants/visibility-state';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
+import {TickLabel} from '#core/constants/enums';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
-import {dict, map} from '../core/types/object';
+import {dict, map} from '#core/types/object';
 import {getMode} from '../mode';
-import {getService, registerServiceBuilder} from '../service';
+import {getService, registerServiceBuilder} from '../service-helpers';
 import {isStoryDocument} from '../utils/story';
-import {layoutRectLtwh} from '../layout-rect';
-import {throttle} from '../core/types/function';
+import {layoutRectLtwh} from '#core/math/layout-rect';
+import {throttle} from '#core/types/function';
 import {whenContentIniLoad} from '../ini-load';
-import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
+import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance

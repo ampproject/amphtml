@@ -25,7 +25,7 @@ The automated matching system is an algorithm developed by Opinary which matches
 ```html
 <amp-embed
   width="500"
-  height="500"
+  height="1"
   type="opinary"
   layout="intrinsic"
   data-client="test-success"

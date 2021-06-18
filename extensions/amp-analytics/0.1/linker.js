@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '#core/window/interface';
 import {
   base64UrlDecodeFromString,
   base64UrlEncodeFromString,
-} from '../../../src/core/types/string/base64';
+} from '#core/types/string/base64';
 import {crc32} from './crc32';
 import {user} from '../../../src/log';
 

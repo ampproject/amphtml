@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {Gestures} from '../../../src/gesture';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {clamp} from '../../../src/utils/math';
+import {clamp} from '#core/math';
 import {dev, user, userAssert} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {listen, loadPromise} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {setStyle, setStyles} from '../../../src/style';
+import {realChildElements} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
 
 const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
 
@@ -110,7 +111,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
 
     for (const child of children) {
       if (VALID_IMAGE_TAGNAMES.has(child.tagName)) {
@@ -699,9 +700,11 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   updateTranslateX_(element, percentage) {
-    setStyles(dev().assertElement(element), {
-      transform: `translateX(${percentage * 100}%)`,
-    });
+    setStyle(
+      dev().assertElement(element),
+      'transform',
+      `translateX(${percentage * 100}%)`
+    );
   }
 
   /** @override */

@@ -19,12 +19,12 @@
  * @fileoverview Script that builds and tests on Linux, macOS, and Windows during CI.
  */
 
-const {buildTargetsInclude, Targets} = require('./build-targets');
+const {cyan, red} = require('../common/colors');
 const {log} = require('../common/logging');
-const {red, cyan} = require('../common/colors');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
 const {skipDependentJobs, timedExecOrDie} = require('./utils');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'cross-browser-tests.js';
 
@@ -98,7 +98,9 @@ function runUnitTestsForPlatform() {
       );
   }
 }
-
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   runUnitTestsForPlatform();
   timedExecOrDie('amp dist --fortesting');
@@ -106,6 +108,7 @@ function pushBuildWorkflow() {
 }
 
 /**
+ * Steps to run during PR builds.
  * @return {Promise<void>}
  */
 async function prBuildWorkflow() {

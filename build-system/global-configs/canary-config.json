@@ -1,5 +1,7 @@
 {
-  "allow-doc-opt-in": ["amp-next-page"],
+  "allow-doc-opt-in": [
+    "amp-next-page"
+  ],
   "allow-url-opt-in": [],
   "canary": 1,
   "a4aProfilingRate": 0.01,
@@ -7,8 +9,8 @@
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "dfp-render-on-idle-cwv-exp": 1,
-  "expand-json-targeting": 1,
   "flexAdSlots": 0.05,
+  "flexible-bitrate": 0.5,
   "ios-fixed-no-transfer": 1,
   "visibility-trigger-improvements": 1,
   "ads-initialIntersection": 1,
@@ -19,5 +21,6 @@
   "disable-a4a-non-sd": 1,
   "3p-vendor-split": 1,
   "story-ad-auto-advance": 1,
-  "story-ad-placements": 1
+  "story-ad-placements": 1,
+  "amp-story-page-attachment-ui-v2": 1
 }

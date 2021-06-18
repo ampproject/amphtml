@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.166 */
+/** Version: 0.1.22.170 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -406,6 +406,7 @@ class ErrorLogger {
 const userLogger = new ErrorLogger(
   self.__AMP_TOP ? AMP_USER_ERROR_SENTINEL : ''
 );
+new ErrorLogger();
 
 const user = () => userLogger;
 

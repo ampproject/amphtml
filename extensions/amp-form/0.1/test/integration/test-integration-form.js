@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import * as Service from '../../../../../src/service';
-import {AmpEvents} from '../../../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {AmpForm, AmpFormService} from '../../amp-form';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
-import {Services} from '../../../../../src/services';
+import {Services} from '#service';
 import {installGlobalSubmitListenerForDoc} from '../../../../../src/document-submit';
 import {listenOncePromise} from '../../../../../src/event-helper';
-import {poll} from '../../../../../testing/iframe';
-import {registerExtendedTemplateForDoc} from '../../../../../src/service/template-impl';
-import {stubElementsForDoc} from '../../../../../src/service/custom-element-registry';
+import {poll} from '#testing/iframe';
+import {registerExtendedTemplateForDoc} from '#service/template-impl';
+import {stubElementsForDoc} from '#service/custom-element-registry';
 
 /** @const {number} */
 const RENDER_TIMEOUT = 15000;
@@ -35,14 +34,12 @@ describes.realWin(
       runtimeOn: true,
       ampdoc: 'single',
     },
-    extensions: ['amp-form'], // amp-form is installed as service.
     mockFetch: false,
   },
   (env) => {
     const {testServerPort} = window.ampTestRuntimeConfig;
     const baseUrl = `http://localhost:${testServerPort || '9876'}`;
     let doc;
-    let ampFormService;
 
     const realSetTimeout = window.setTimeout;
     const stubSetTimeout = (callback, delay) => {
@@ -77,17 +74,7 @@ describes.realWin(
 
       stubElementsForDoc(env.ampdoc);
 
-      ampFormService = new AmpFormService(env.ampdoc);
-      const originalGetServiceForDocOrNull = Service.getServiceForDocOrNull;
-
-      env.sandbox
-        .stub(Service, 'getServiceForDocOrNull')
-        .callsFake((ampdoc, id) => {
-          if (id === 'amp-form') {
-            return ampFormService;
-          }
-          return originalGetServiceForDocOrNull(ampdoc, id);
-        });
+      new AmpFormService(env.ampdoc);
 
       // Wait for submit listener to be installed before starting tests.
       return installGlobalSubmitListenerForDoc(env.ampdoc);

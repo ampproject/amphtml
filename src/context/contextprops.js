@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Loading, reducer as loadingReducer} from '../core/loading-instructions';
+import {Loading, reducer as loadingReducer} from '#core/loading-instructions';
 import {contextProp} from './prop';
 
 // typedef imports

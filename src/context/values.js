@@ -15,9 +15,9 @@
  */
 
 import {deepScan, findParent} from './scan';
-import {devAssert} from '../core/assert';
-import {pushIfNotExist, removeItem} from '../core/types/array';
-import {rethrowAsync} from '../core/error';
+import {devAssert} from '#core/assert';
+import {pushIfNotExist, removeItem} from '#core/types/array';
+import {rethrowAsync} from '#core/error';
 import {throttleTail} from './scheduler';
 
 // typedef imports
@@ -390,7 +390,7 @@ export class Values {
    * @template DEF
    */
   startUsed_(prop) {
-    const {key, deps} = prop;
+    const {deps, key} = prop;
     const usedByKey = this.usedByKey_ || (this.usedByKey_ = new Map());
     let used = usedByKey.get(key);
     if (!used) {
@@ -452,8 +452,8 @@ export class Values {
       return;
     }
 
-    const {prop, pingDep} = used;
-    const {key, deps} = prop;
+    const {pingDep, prop} = used;
+    const {deps, key} = prop;
 
     this.usedByKey_.delete(key);
 
@@ -576,8 +576,8 @@ export class Values {
   calc_(used, refreshParent) {
     devAssert(this.isConnected_());
 
-    const {prop, depValues} = used;
-    const {key, compute, defaultValue} = prop;
+    const {depValues, prop} = used;
+    const {compute, defaultValue, key} = prop;
 
     const inputValues = this.inputsByKey_?.get(key)?.values;
 
@@ -644,7 +644,7 @@ export class Values {
    * @private
    */
   updateParentContextNode_(used, newParentContextNode) {
-    const {prop, parentContextNode: oldParentContextNode, pingParent} = used;
+    const {parentContextNode: oldParentContextNode, pingParent, prop} = used;
     if (newParentContextNode != oldParentContextNode) {
       used.parentContextNode = newParentContextNode;
       used.parentValue = undefined;
@@ -715,7 +715,7 @@ function isRecursive(prop) {
  * @template T
  */
 function calcRecursive(prop, inputs) {
-  const {recursive, compute} = prop;
+  const {compute, recursive} = prop;
   if (typeof recursive == 'function') {
     return inputs ? recursive(inputs) : true;
   }

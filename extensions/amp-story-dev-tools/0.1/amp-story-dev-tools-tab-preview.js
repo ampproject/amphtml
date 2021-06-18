@@ -20,11 +20,11 @@ import {
   removeAfterTimeout,
   updateHash,
 } from './utils';
-import {closest} from '../../../src/dom';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {htmlFor} from '../../../src/static-template';
-import {observeContentSize} from '../../../src/utils/size-observer';
-import {setStyles} from '../../../src/style';
+import {closest} from '#core/dom/query';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {htmlFor} from '#core/dom/static-template';
+import {observeContentSize} from '#core/dom/size-observer';
+import {setStyles} from '#core/dom/style';
 
 /**
  * Creates a tab content, will be deleted when the tabs get implemented.
@@ -695,7 +695,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @private
    * */
   repositionDevices_() {
-    const {offsetWidth: width, offsetHeight: height} =
+    const {offsetHeight: height, offsetWidth: width} =
       this.element.querySelector(
         '.i-amphtml-story-dev-tools-devices-container'
       );

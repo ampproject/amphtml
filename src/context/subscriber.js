@@ -15,9 +15,9 @@
  */
 
 import {ContextNode} from './node';
-import {arrayOrSingleItemToArray} from '../core/types/array';
+import {arrayOrSingleItemToArray} from '#core/types/array';
 import {throttleTail} from './scheduler';
-import {tryCallback} from '../core/error';
+import {tryCallback} from '#core/error';
 
 // typedef imports
 import {ContextPropDef} from './prop.type';

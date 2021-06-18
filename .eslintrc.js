@@ -19,6 +19,9 @@ const {
   forbiddenTermsGlobal,
   forbiddenTermsSrcInclusive,
 } = require('./build-system/test-configs/forbidden-terms');
+const {
+  getImportResolver,
+} = require('./build-system/babel-config/import-resolver');
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -45,10 +48,12 @@ module.exports = {
     'import',
     'jsdoc',
     'local',
+    'module-resolver',
     'notice',
     'prettier',
     'react',
     'react-hooks',
+    'sort-destructure-keys',
     'sort-imports-es6-autofix',
     'sort-requires',
   ],
@@ -84,6 +89,19 @@ module.exports = {
     'react': {
       'pragma': 'Preact',
     },
+    'import/resolver': {
+      // This makes it possible to eventually enable the built-in import linting
+      // rules to detect invalid imports, imports of things that aren't
+      // exported, etc.
+      'babel-module': getImportResolver(),
+    },
+    'import/extensions': ['.js', '.jsx'],
+    'import/external-module-folders': ['node_modules', 'third_party'],
+    'import/ignore': [
+      'node_modules',
+      // Imports of `CSS` from JSS files are created at build time
+      '\\.jss\\.js',
+    ],
   },
   'reportUnusedDisableDirectives': true,
   'rules': {
@@ -92,6 +110,36 @@ module.exports = {
     'chai-expect/terminating-properties': 2,
     'curly': 2,
     'google-camelcase/google-camelcase': 2,
+
+    // Rules restricting/standardizing import statements
+    'import/no-unresolved': [
+      'error',
+      {
+        // Ignore unresolved imports of build files
+        'ignore': ['(\\./|#)build/.*'],
+      },
+    ],
+    'import/named': 2,
+    'import/namespace': 2,
+    'import/no-useless-path-segments': ['error', {'noUselessIndex': true}],
+    'import/no-absolute-path': 2,
+    'import/export': 2,
+    'import/no-deprecated': 2,
+    'import/first': 2,
+    'import/extensions': [
+      'error',
+      {
+        'js': 'never',
+        'mjs': 'always',
+        'css': 'always',
+        'jss': 'always',
+      },
+    ],
+    // TODO(rcebulko): enable
+    'import/no-mutable-exports': 0,
+    'import/no-default-export': 0,
+
+    // Rules validating JSDoc syntax, separate from type-checking
     'jsdoc/check-param-names': 2,
     'jsdoc/check-tag-names': [
       2,
@@ -126,6 +174,8 @@ module.exports = {
     'jsdoc/require-param-type': 2,
     'jsdoc/require-returns': 2,
     'jsdoc/require-returns-type': 2,
+
+    // Custom repo rules defined in build-system/eslint-rules
     'local/await-expect': 2,
     'local/closure-type-primitives': 2,
     'local/dict-string-keys': 2,
@@ -179,6 +229,11 @@ module.exports = {
     'local/unused-private-field': 2,
     'local/vsync': 0,
     'local/window-property-name': 2,
+
+    'module-resolver/use-alias': [
+      'error',
+      {'alias': getImportResolver().alias},
+    ],
     'no-alert': 2,
     'no-cond-assign': 2,
     'no-debugger': 2,
@@ -251,6 +306,7 @@ module.exports = {
         },
       },
     ],
+    'sort-destructure-keys/sort-destructure-keys': 2,
     'sort-imports-es6-autofix/sort-imports-es6': [
       2,
       {
@@ -269,6 +325,7 @@ module.exports = {
         'extensions/**/test-e2e/*.js',
         'ads/**/test/**/*.js',
         'testing/**/*.js',
+        'build-system/**/test/*.js',
       ],
       'rules': {
         'require-jsdoc': 0,
@@ -314,9 +371,16 @@ module.exports = {
     },
     {
       'files': ['**/storybook/*.js'],
+      'settings': {
+        'import/core-modules': [
+          '@storybook/addon-knobs',
+          '@storybook/addon-a11y',
+          '@ampproject/storybook-addon',
+        ],
+      },
       'rules': {
-        'require-jsdoc': 0,
         'local/no-forbidden-terms': [2, forbiddenTermsGlobal],
+        'require-jsdoc': 0,
       },
     },
     {
@@ -348,6 +412,16 @@ module.exports = {
         'local/closure-type-primitives': 0,
         'local/no-duplicate-name-typedef': 0,
         'google-camelcase/google-camelcase': 0,
+      },
+    },
+    {
+      'files': ['**/rollup.config.js'],
+      'settings': {
+        'import/core-modules': [
+          '@rollup/plugin-alias',
+          'rollup-plugin-babel',
+          'rollup-plugin-cleanup',
+        ],
       },
     },
   ],

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {dev, user} from '../../../src/log';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
-import {hasOwn, map} from '../../../src/core/types/object';
-import {isObject} from '../../../src/core/types';
+} from '../../../src/service-helpers';
+import {hasOwn, map} from '#core/types/object';
+import {isObject} from '#core/types';
 
 /** @const {string} */
 const TAG = 'amp-analytics/session-manager';
@@ -48,8 +48,9 @@ export const SESSION_VALUES = {
  * @enum {string}
  */
 const SESSION_STORAGE_KEYS = {
-  SESSION_ID: 'ssid',
-  CREATION_TIMESTAMP: 'ct',
+  SESSION_ID: 'sessionId',
+  CREATION_TIMESTAMP: 'creationTimestamp',
+  LAST_ACCESS_TIMESTAMP: 'lastAccessTimestamp',
 };
 
 /**
@@ -93,7 +94,7 @@ export class SessionManager {
    * Get the session for the vendor, checking if it exists or
    * creating it if necessary.
    * @param {string|undefined} type
-   * @return {!Promise<SessionInfoDef|null>}
+   * @return {!Promise<?SessionInfoDef>}
    */
   get(type) {
     if (!type) {
@@ -103,7 +104,7 @@ export class SessionManager {
 
     if (
       hasOwn(this.sessions_, type) &&
-      !this.isSessionExpired_(this.sessions_[type])
+      !isSessionExpired(this.sessions_[type])
     ) {
       this.setSession_(type, this.sessions_[type]);
       this.sessions_[type].lastAccessTimestamp = Date.now();
@@ -133,6 +134,10 @@ export class SessionManager {
           : constructSessionFromStoredValue(session);
       })
       .then((session) => {
+        // Avoid multiple session creation race
+        if (type in this.sessions_ && !isSessionExpired(this.sessions_[type])) {
+          return this.sessions_[type];
+        }
         this.setSession_(type, session);
         session.lastAccessTimestamp = Date.now();
         this.sessions_[type] = session;
@@ -150,19 +155,18 @@ export class SessionManager {
   setSession_(type, session) {
     return this.storagePromise_.then((storage) => {
       const storageKey = getStorageKey(type);
-      const value = composeStorageSessionValue(session);
-      storage.setNonBoolean(storageKey, value);
+      storage.setNonBoolean(storageKey, session);
     });
   }
+}
 
-  /**
-   * Checks if a session has expired
-   * @param {SessionInfoDef} session
-   * @return {!Promise}
-   */
-  isSessionExpired_(session) {
-    return session.lastAccessTimestamp + SESSION_MAX_AGE_MILLIS < Date.now();
-  }
+/**
+ * Checks if a session has expired
+ * @param {SessionInfoDef} session
+ * @return {boolean}
+ */
+function isSessionExpired(session) {
+  return session.lastAccessTimestamp + SESSION_MAX_AGE_MILLIS < Date.now();
 }
 
 /**
@@ -170,7 +174,7 @@ export class SessionManager {
  * @return {number}
  */
 function generateSessionId() {
-  return Math.floor(10000 * Math.random());
+  return Math.round(10000 * Math.random());
 }
 
 /**
@@ -199,17 +203,6 @@ function constructSessionFromStoredValue(storedSession) {
 }
 
 /**
- * @param {!SessionInfoDef} session
- * @return {!Object}
- */
-export function composeStorageSessionValue(session) {
-  const obj = map();
-  obj[SESSION_STORAGE_KEYS.SESSION_ID] = session.sessionId;
-  obj[SESSION_STORAGE_KEYS.CREATION_TIMESTAMP] = session.creationTimestamp;
-  return obj;
-}
-
-/**
  * Construct the session info object from values
  * @param {number} sessionId
  * @param {number} creationTimestamp
@@ -222,9 +215,9 @@ function constructSessionInfo(
   lastAccessTimestamp
 ) {
   return {
-    'sessionId': sessionId,
-    'creationTimestamp': creationTimestamp,
-    'lastAccessTimestamp': lastAccessTimestamp,
+    [SESSION_STORAGE_KEYS.SESSION_ID]: sessionId,
+    [SESSION_STORAGE_KEYS.CREATION_TIMESTAMP]: creationTimestamp,
+    [SESSION_STORAGE_KEYS.LAST_ACCESS_TIMESTAMP]: lastAccessTimestamp,
   };
 }
 

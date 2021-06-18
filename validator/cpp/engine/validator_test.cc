@@ -80,9 +80,6 @@ TEST(ValidatorTest, Testdata_ValidatorTest_TestCases) {
     output = RenderInlineResult(
         /*filename=*/test_case.name, test_case.input_content, result);
 
-    // If this fails, then an integrate command into a branch probably
-    // went wrong.
-    EXPECT_LE(55, result.spec_file_revision());
     MaybeGenerateFailuresFor(output, test_case.output_content,
                              test_case.output_file);
   }

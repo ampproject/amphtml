@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../services';
+import {Services} from '#service';
 import {devAssert} from '../../log';
 import {
   layoutRectEquals,
   layoutRectLtwh,
   layoutRectsRelativePos,
   rectsOverlap,
-} from '../../layout-rect';
+} from '#core/math/layout-rect';
 
 /** @enum {number} */
 export const PositionObserverFidelity = {

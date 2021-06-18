@@ -16,9 +16,10 @@
 
 import {Animation} from '../animation';
 import {Pass} from '../pass';
-import {Services} from '../services';
+import {Services} from '#service';
+import {assertDoesNotContainDisplay} from '../assert-display';
+import {closest, matches} from '#core/dom/query';
 import {
-  assertDoesNotContainDisplay,
   computedStyle,
   getStyle,
   getVendorJsPropertyName,
@@ -27,12 +28,12 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '../style';
-import {closest, domOrderComparator, matches} from '../dom';
+} from '#core/dom/style';
 import {dev, user} from '../log';
-import {endsWith} from '../core/types/string';
+import {domOrderComparator} from '#core/dom';
+import {endsWith} from '#core/types/string';
 import {getMode} from '../mode';
-import {remove} from '../core/types/array';
+import {remove} from '#core/types/array';
 
 const TAG = 'FixedLayer';
 
@@ -463,8 +464,8 @@ export class FixedLayer {
               const {element, forceTransfer} = fe;
               const style = computedStyle(win, element);
 
-              const {offsetWidth, offsetHeight, offsetTop} = element;
-              const {position = '', display = '', bottom, zIndex} = style;
+              const {offsetHeight, offsetTop, offsetWidth} = element;
+              const {bottom, display = '', position = '', zIndex} = style;
               const opacity = parseFloat(style.opacity);
               const transform =
                 style[getVendorJsPropertyName(style, 'transform')];

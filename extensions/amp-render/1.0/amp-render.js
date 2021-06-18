@@ -20,16 +20,24 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-render';
 
+/** @const {string} */
 const AMP_STATE_URI_SCHEME = 'amp-state:';
+
+/** @enum {string}  */
+const Binding = {
+  ALWAYS: 'always',
+  REFRESH: 'refresh',
+  NEVER: 'never',
+  NO: 'no',
+};
 
 /**
  * Returns true if element's src points to amp-state.
@@ -71,6 +79,24 @@ const getAmpStateJson = (element, src) => {
     });
 };
 
+/**
+ * @param {string} bindingValue
+ * @param {boolean} isFirstMutation
+ * @return {boolean} Whether bind should evaluate and apply changes.
+ */
+function getUpdateValue(bindingValue, isFirstMutation) {
+  if (!bindingValue || bindingValue === Binding.REFRESH) {
+    // default is 'refresh', so check that its not the first mutation
+    return !isFirstMutation;
+  }
+  if (bindingValue === Binding.ALWAYS) {
+    // TODO(dmanek): add link to amp-render docs that elaborates on performance implications of "always"
+    user().warn(TAG, 'binding="always" has performance implications.');
+    return true;
+  }
+  return false;
+}
+
 export class AmpRender extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -87,15 +113,6 @@ export class AmpRender extends BaseElement {
 
     /** @private {?string} */
     this.src_ = null;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'amp-render'),
-      'Experiment "amp-render" is not turned on.'
-    );
-    return super.isLayoutSupported(layout);
   }
 
   /**
@@ -168,6 +185,11 @@ export class AmpRender extends BaseElement {
     this.initialSrc_ = this.element.getAttribute('src');
     this.src_ = this.initialSrc_;
 
+    const hasAriaLive = this.element.hasAttribute('aria-live');
+    if (!hasAriaLive) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
+
     this.registerApiAction('refresh', (api) => {
       const src = this.element.getAttribute('src');
       // There is an alternative way to do this using `mutationObserverCallback` while using a boolean
@@ -181,6 +203,9 @@ export class AmpRender extends BaseElement {
     });
 
     return dict({
+      'ariaLiveValue': hasAriaLive
+        ? this.element.getAttribute('aria-live')
+        : 'polite',
       'getJson': this.getFetchJsonFn(),
       'onLoading': () => {
         this.toggleLoading(true);
@@ -188,10 +213,6 @@ export class AmpRender extends BaseElement {
       'onReady': () => {
         this.toggleLoading(false);
         this.togglePlaceholder(false);
-      },
-      'onRefresh': () => {
-        this.togglePlaceholder(true);
-        this.toggleFallback(false);
       },
       'onError': () => {
         this.toggleLoading(false);
@@ -208,14 +229,6 @@ export class AmpRender extends BaseElement {
   }
 
   /** @override */
-  buildCallback() {
-    super.buildCallback();
-    if (!this.element.hasAttribute('aria-live')) {
-      this.element.setAttribute('aria-live', 'polite');
-    }
-  }
-
-  /** @override */
   mutationObserverCallback() {
     const src = this.element.getAttribute('src');
     if (src === this.src_) {
@@ -226,11 +239,17 @@ export class AmpRender extends BaseElement {
   }
 
   /**
-   * TODO: this implementation is identical to one in amp-date-display &
-   * amp-date-countdown. Move it to a common file and import it.
-   *
-   * @override
+   * @param {!JsonObject} data
+   * @return {!Promise<!Element>}
+   * @private
    */
+  renderTemplateAsString_(data) {
+    return this.templates_
+      .renderTemplateAsString(dev().assertElement(this.template_), data)
+      .then((html) => dict({'__html': html}));
+  }
+
+  /** @override */
   checkPropsPostMutations() {
     const templates =
       this.templates_ ||
@@ -244,6 +263,7 @@ export class AmpRender extends BaseElement {
       this.mutateProps(dict({'render': null}));
       return;
     }
+
     // Only overwrite `render` when template is ready to minimize FOUC.
     templates.whenReady(template).then(() => {
       if (template != this.template_) {
@@ -253,9 +273,30 @@ export class AmpRender extends BaseElement {
       this.mutateProps(
         dict({
           'render': (data) => {
-            return templates
-              .renderTemplateAsString(dev().assertElement(template), data)
-              .then((html) => dict({'__html': html}));
+            const bindingValue = this.element.getAttribute('binding');
+            if (bindingValue === Binding.NEVER || bindingValue === Binding.NO) {
+              return this.renderTemplateAsString_(data);
+            }
+            return Services.bindForDocOrNull(this.element).then((bind) => {
+              if (!bind) {
+                return this.renderTemplateAsString_(data);
+              }
+              return templates
+                .renderTemplate(dev().assertElement(template), data)
+                .then((element) => {
+                  return bind
+                    .rescan([element], [], {
+                      'fast': true,
+                      'update': getUpdateValue(
+                        bindingValue,
+                        // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
+                        // mutation occured, which is null for the initial render
+                        bind.signals().get('FIRST_MUTATE') === null
+                      ),
+                    })
+                    .then(() => dict({'__html': element./* OK */ innerHTML}));
+                });
+            });
           },
         })
       );

@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {
-  closestAncestorElementBySelector,
-  isIframed,
-  openWindowDialog,
-  tryFocus,
-} from '../dom';
+import {Services} from '#service';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dev, user, userAssert} from '../log';
-import {dict} from '../core/types/object';
-import {escapeCssSelectorIdent} from '../core/dom/css';
+import {dict} from '#core/types/object';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
+import {isIframed, tryFocus} from '#core/dom';
 import {isLocalhostOrigin} from '../url';
-import {registerServiceBuilderForDoc} from '../service';
-import {toWin} from '../types';
-import PriorityQueue from '../core/data-structures/priority-queue';
+import {openWindowDialog} from '../open-window-dialog';
+import {registerServiceBuilderForDoc} from '../service-helpers';
+import {toWin} from '#core/window';
+import PriorityQueue from '#core/data-structures/priority-queue';
 
 const TAG = 'navigation';
 
@@ -249,7 +246,7 @@ export class Navigation {
    * }=} options
    */
   navigateTo(win, url, opt_requestedBy, options = {}) {
-    const {target = '_top', opener = false} = options;
+    const {opener = false, target = '_top'} = options;
     url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {

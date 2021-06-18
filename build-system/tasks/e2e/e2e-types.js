@@ -52,6 +52,7 @@ const Key = {
   'ArrowLeft': 'ArrowLeft',
   'ArrowRight': 'ArrowRight',
   'ArrowUp': 'ArrowUp',
+  'Backspace': 'Backspace',
   'Enter': 'Enter',
   'Escape': 'Escape',
   'Tab': 'Tab',
@@ -80,13 +81,8 @@ let WindowRectDef;
  */
 let DOMRectDef;
 
-/** @enum {string} */
-// export let ScrollBehavior = {
-//   AUTO: 'auto',
-//   SMOOTH: 'smooth',
-// }
-
-/** @typedef {{
+/**
+ * @typedef {{
  *   left: number,
  *   top: number,
  *   behavior: ScrollBehavior

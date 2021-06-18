@@ -27,9 +27,9 @@ const path = require('path');
 const {
   ciBuildId,
   ciBuildUrl,
+  ciCommitSha,
   ciJobId,
   ciJobUrl,
-  ciCommitSha,
   ciRepoSlug,
 } = require('../common/ci');
 const {log} = require('../common/logging');
@@ -139,4 +139,5 @@ module.exports = {
   testReportUpload,
 };
 
-testReportUpload.description = 'Sends test results to test result database';
+testReportUpload.description =
+  'Send results from a test run to the AMP test result database';
