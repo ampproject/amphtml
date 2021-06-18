@@ -2227,7 +2227,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @param {=boolean} prioritizeActivePage
+   * @param {boolean=} prioritizeActivePage
    * @private
    */
   preloadPagesByDistance_(prioritizeActivePage = false) {
@@ -2240,12 +2240,22 @@ export class AmpStory extends AMP.BaseElement {
 
     const pagesByDistance = this.getPagesByDistance_();
 
-    const preloadAllPages = () => {
-      console.log('load all other pages');
-      pagesByDistance.forEach((pageIds, distance) => {
+    if (!isExperimentOn(this.win, 'amp-story-load-first-only')) {
+      return pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach((pageId) => {
           const page = this.getPageById(pageId);
           page.setDistance(distance);
+        });
+      });
+    }
+
+    const preloadAllPages = (overrideDistances) => {
+      pagesByDistance.forEach((pageIds, distance) => {
+        pageIds.forEach((pageId) => {
+          const page = this.getPageById(pageId);
+          if (overrideDistances || !page.hasDistance()) {
+            page.setDistance(distance);
+          }
         });
       });
     };
@@ -2257,14 +2267,11 @@ export class AmpStory extends AMP.BaseElement {
           pagesByDistance[0].map((pageId) => {
             const page = this.getPageById(pageId);
             page.setDistance(0);
-            if (page.element.classList.contains(PAGE_LOADED_CLASS_NAME)) {
-              return Promise.resolve();
-            }
-            return listenOncePromise(page.element, EventType.PAGE_LOADED);
+            return page.signals().whenSignal(CommonSignals.LOAD_END);
           })
-        ).then(() => preloadAllPages());
+        ).then(() => preloadAllPages(/* overrideDistances */false));
       }
-      preloadAllPages();
+      preloadAllPages(/* overrideDistances */true);
     });
   }
 
