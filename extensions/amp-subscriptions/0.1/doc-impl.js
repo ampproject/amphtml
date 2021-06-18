@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Doc} from '../../../third_party/subscriptions-project/config';
+import {Doc} from '#third_party/subscriptions-project/config';
 import {Services} from '#service';
 import {dev} from '../../../src/log';
 
