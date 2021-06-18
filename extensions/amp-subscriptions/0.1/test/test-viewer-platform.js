@@ -18,7 +18,7 @@ import {Action, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from '../constants';
 import {Entitlement, GrantReason} from '../entitlement';
-import {PageConfig} from '../../../../third_party/subscriptions-project/config';
+import {PageConfig} from '#third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {Services} from '#service';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';

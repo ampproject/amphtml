@@ -22,7 +22,7 @@ import {
   sanitizeTagsForTripleMustache,
 } from '../../../src/sanitizer';
 import {user} from '../../../src/log';
-import mustache from '../../../third_party/mustache/mustache';
+import mustache from '#third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
 

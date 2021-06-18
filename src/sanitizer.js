@@ -25,7 +25,7 @@ import {
   isValidAttr,
 } from './purifier/sanitation';
 import {dict} from './core/types/object';
-import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
+import {htmlSanitizer} from '#third_party/caja/html-sanitizer';
 import {isAmp4Email} from './format';
 import {rewriteAttributeValue} from './url-rewrite';
 import {user} from './log';

@@ -29,7 +29,7 @@ import {Metering} from './metering';
 import {
   PageConfig as PageConfigInterface,
   PageConfigResolver,
-} from '../../../third_party/subscriptions-project/config';
+} from '#third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';

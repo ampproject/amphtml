@@ -19,7 +19,7 @@
  * suggestion chips that enable 3P site users to interact with Google Assistant.
  */
 
-import * as closure from '../../../third_party/closure-responding-channel/closure-bundle';
+import * as closure from '#third_party/closure-responding-channel/closure-bundle';
 import {Services} from '#service';
 import {addAttributesToElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
