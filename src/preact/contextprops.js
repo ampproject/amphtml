@@ -15,10 +15,10 @@
  */
 
 import {Loading, reducer as loadingReducer} from '#core/loading-instructions';
-import {contextProp} from '../context/prop';
+import {contextProp} from '#core/context/prop';
 
 // typedef imports
-import {ContextPropDef} from '../context/prop.type';
+import {ContextPropDef} from '#core/context/prop.type';
 
 /**
  * Defines whether a DOM subtree can be currently seen by the user. A subtree

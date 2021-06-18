@@ -23,7 +23,7 @@ import {getSchedulerForDoc} from '#service/scheduler';
 import {htmlFor} from '#core/dom/static-template';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {removeElement} from '#core/dom';
-import {subscribe} from '../../../src/context';
+import {subscribe} from '#core/context';
 import {upgradeOrRegisterElement} from '#service/custom-element-registry';
 import {useAmpContext, useLoading} from '#preact/context';
 import {waitFor} from '#testing/test-helper';

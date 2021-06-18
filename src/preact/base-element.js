@@ -32,7 +32,7 @@ import {
   setGroupProp,
   setParent,
   subscribe,
-} from '../context';
+} from '#core/context';
 import {
   childElementByAttr,
   childElementByTag,

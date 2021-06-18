@@ -23,7 +23,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {createRef, useLayoutEffect, useRef} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {mount} from 'enzyme';
-import {setIsRoot, subscribe} from '../../../src/context';
+import {setIsRoot, subscribe} from '#core/context';
 
 describes.sandboxed('Slot', {}, () => {
   let wrapper;

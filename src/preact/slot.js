@@ -25,7 +25,7 @@ import {
   unmountAll,
 } from '../utils/resource-container-helper';
 import {objectsEqualShallow} from '#core/types/object';
-import {rediscoverChildren, removeProp, setProp} from '../context';
+import {rediscoverChildren, removeProp, setProp} from '#core/context';
 import {useAmpContext} from './context';
 import {useEffect, useLayoutEffect, useRef} from '#preact';
 
