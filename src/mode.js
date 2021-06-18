@@ -61,12 +61,6 @@ export function getMode(opt_win) {
  * @return {!ModeDef}
  */
 function getMode_(win) {
-  // TODO(erwinmombay): simplify the logic here
-  const AMP_CONFIG = self.AMP_CONFIG || {};
-  const isFortesting = coreMode.isFortestingMode();
-
-  const runningTests = coreMode.isTest();
-  const isLocalDev = isFortesting && (!!AMP_CONFIG.localDev || runningTests);
   const hashQuery = parseQueryString(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
@@ -78,14 +72,14 @@ function getMode_(win) {
   // flags. This improved DCE on the production file we deploy as the code
   // paths for localhost/testing/development are eliminated.
   return {
-    localDev: isLocalDev,
+    localDev: coreMode.isLocalDev(),
     development: isModeDevelopment(win),
     examiner: hashQuery['development'] == '2',
     esm: IS_ESM,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
     minified: coreMode.isMinified(),
-    test: runningTests,
+    test: coreMode.isTest(),
     log: hashQuery['log'],
     version: internalRuntimeVersion(),
     rtvVersion: getRtvVersion(win),

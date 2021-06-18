@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-export {isFortesting} from './for-testing';
-export {isLocalDev} from './local-dev';
-export {isMinified} from './minified';
-export {isTest} from './test';
+import {isFortesting} from './for-testing';
+import {isTest} from './test';
+
+/**
+ * Returns true if executing in a local development or testing environment.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isLocalDev(win) {
+  return isFortesting() && (!!AMP_CONFIG.localDev || isTest());
+}
