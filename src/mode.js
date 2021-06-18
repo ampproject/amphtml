@@ -94,7 +94,8 @@ function getMode_(win) {
  * @return {string}
  */
 function getRtvVersion(win) {
-  if (!rtvVersion) {
+  // Ignore memoized copy during testing to allow override.
+  if (!rtvVersion && !coreMode.isTest(win)) {
     // Currently `internalRuntimeVersion` and thus `mode.version` contain only
     // major version. The full version however must also carry the minor version.
     // We will default to production default `01` minor version for now.
