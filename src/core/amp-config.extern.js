@@ -27,8 +27,3 @@
  * }}
  */
 let AmpConfigDef;
-
-/**
- * @type {!AmpConfigDef|undefined}
- */
-window.AMP_CONFIG;

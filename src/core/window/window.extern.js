@@ -32,7 +32,7 @@ window.__AMP_ASSERTION_CHECK;
 window.__AMP_REPORT_ERROR;
 
 /**
- * Global property set by test some harnesses to signal a testing environment
+ * Global property set by test some harnesses to signal a testing environment.
  * @type {undefined|boolean}
  */
 window.__AMP_TEST;
@@ -42,3 +42,9 @@ window.__AMP_TEST;
  * @type {undefined|number}
  */
 window.__AMP_WEAKREF_ID;
+
+/**
+ * AMP Runtime settings, configuration, and environment/build constants.
+ * @type {!AmpConfigDef|undefined}
+ */
+window.AMP_CONFIG;
