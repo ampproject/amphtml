@@ -30,7 +30,7 @@ import {
   layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
-} from '#core/math/layout-rect';
+} from '#core/dom/layout/rect';
 import {toWin} from '#core/window';
 
 const TAG = 'Resource';

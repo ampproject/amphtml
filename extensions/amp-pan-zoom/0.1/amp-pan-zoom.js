@@ -34,7 +34,7 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
-import {layoutRectFromDomRect, layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectFromDomRect, layoutRectLtwh} from '#core/dom/layout/rect';
 import {numeric} from '../../../src/transition';
 import {
   observeContentSize,
