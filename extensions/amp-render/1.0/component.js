@@ -69,7 +69,6 @@ export function RenderWithRef(
       .then((data) => {
         if (!cancelled) {
           setData(data);
-          onReady?.();
         }
       })
       .catch((e) => {
@@ -78,7 +77,7 @@ export function RenderWithRef(
     return () => {
       cancelled = true;
     };
-  }, [getJson, src, onLoading, onReady, onError]);
+  }, [getJson, src, onError, onLoading]);
 
   const refresh = useCallback(() => {
     onRefresh?.();
@@ -105,8 +104,19 @@ export function RenderWithRef(
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
 
+  const refFn = useCallback(
+    (node) => {
+      if (!node?.firstElementChild || !rendered) {
+        return;
+      }
+      onReady?.();
+    },
+    [rendered, onReady]
+  );
+
   return (
     <Wrapper
+      ref={refFn}
       {...rest}
       dangerouslySetInnerHTML={isHtml ? rendered : null}
       aria-live={ariaLiveValue}
