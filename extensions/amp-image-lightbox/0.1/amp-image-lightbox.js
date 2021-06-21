@@ -39,7 +39,7 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '#core/math/layout-rect';
+} from '#core/dom/layout/rect';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setStyles, toggle} from '#core/dom/style';
 import {srcsetFromElement} from '#core/dom/srcset';

@@ -38,7 +38,7 @@ import {
 } from '../../src/service-helpers';
 import {installExtensionsService} from '#service/extensions-impl';
 import {isAnimationNone} from '#testing/test-helper';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {loadPromise} from '../../src/event-helper';
 import {resetScheduledElementForTesting} from '#service/custom-element-registry';
 import {setStyles} from '#core/dom/style';
