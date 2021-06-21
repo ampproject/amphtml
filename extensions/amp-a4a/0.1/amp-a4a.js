@@ -75,7 +75,7 @@ import {
   unobserveWithSharedInOb,
 } from '#core/dom/layout/viewport-observer';
 import {padStart, utf8Decode} from '#core/types/string';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {processHead} from './head-validation';
 import {setStyle} from '#core/dom/style';
 import {signingServerURLs} from '#ads/_a4a-config';

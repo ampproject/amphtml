@@ -20,7 +20,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {measureIntersection} from '#core/dom/layout/intersection';
 import {omit} from '#core/types/object';
 import {setStyle} from '#core/dom/style';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

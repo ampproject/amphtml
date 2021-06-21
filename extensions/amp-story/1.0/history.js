@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {dict} from '#core/types/object';
+import {dict, parseJson} from '#core/types/object';
 import {getHistoryState as getWindowHistoryState} from '#core/window';
-import {parseJson} from '#core/types/object/json';
 
 const EXPIRATION_DURATION_MILLIS = 10 * 60 * 1000; // 10 Minutes
 const CREATION_TIME = 'time';

@@ -22,7 +22,7 @@ import {isAmpScriptUri} from '../../url';
 import {isArray, isObject} from '#core/types';
 import {isCancellation} from '../../error-reporting';
 import {registerServiceBuilderForDoc} from '../../service-helpers';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 
 /** @type {string} */
 const TAG = 'real-time-config';

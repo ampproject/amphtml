@@ -33,7 +33,7 @@ import {
   px,
   setStyles as setStylesTransition,
 } from '../../../src/transition';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {removeFragment} from '../../../src/url';
 
 const TAG = 'amp-accordion';

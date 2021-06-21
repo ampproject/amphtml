@@ -37,7 +37,7 @@ import {
 } from '#core/dom/layout/size-observer';
 import {removeElement} from '#core/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 import {userAssert} from '../../../src/log';
 
 /**

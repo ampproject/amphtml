@@ -19,7 +19,7 @@ import {AMP_TEMPLATED_CREATIVE_HEADER_NAME} from '../../../amp-a4a/0.1/template-
 import {AmpAdTemplate} from '../amp-ad-custom';
 import {data} from '../../../amp-a4a/0.1/test/testdata/valid_css_at_rules_amp.reserialized';
 import {getAmpAdTemplateHelper} from '../../../amp-a4a/0.1/amp-ad-template-helper';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 import {utf8Encode} from '#core/types/string';
 
 const realWinConfig = {

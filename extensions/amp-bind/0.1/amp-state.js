@@ -28,7 +28,7 @@ import {dict, map} from '#core/types/object';
 import {getSourceOrigin} from '../../../src/url';
 import {isJsonScriptTag} from '#core/dom';
 import {toggle} from '#core/dom/style';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 
 export class AmpState extends AMP.BaseElement {
   /**

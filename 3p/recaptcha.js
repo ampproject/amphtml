@@ -30,7 +30,7 @@ import {
 import {dict, hasOwn} from '#core/types/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {loadScript} from './3p';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 
 /**
  * @fileoverview

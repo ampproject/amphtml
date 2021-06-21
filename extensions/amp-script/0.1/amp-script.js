@@ -30,7 +30,7 @@ import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {realChildElements} from '#core/dom/query';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 import {urls} from '../../../src/config';
 import {utf8Encode} from '#core/types/string';
 

@@ -24,7 +24,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
 import {closest} from '#core/dom/query';
-import {deepEquals} from '#core/types/object/json';
+import {deepEquals} from '#core/types/object';
 import {dev, user} from '../../../src/log';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {setImportantStyles} from '#core/dom/style';

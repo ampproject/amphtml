@@ -26,7 +26,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isFiniteNumber, isObject} from '#core/types';
 
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {removeElement} from '#core/dom';
 import {userAssert} from '../../../src/log';
 

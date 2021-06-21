@@ -19,7 +19,7 @@ import {isArray, isObject} from '#core/types';
 
 import {isSecureUrlDeprecated} from '../../../src/url';
 import {parseExtensionUrl} from '#service/extension-script';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {urls} from '../../../src/config';
 
 const TAG = 'amp-ad-util';

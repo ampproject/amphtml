@@ -48,7 +48,7 @@ import {
 import {setStyles, toggle} from '#core/dom/style';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 

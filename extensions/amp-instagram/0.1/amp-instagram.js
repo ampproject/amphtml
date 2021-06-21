@@ -42,7 +42,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {isObject} from '#core/types';
 import {removeElement} from '#core/dom';
 import {setStyle} from '#core/dom/style';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 import {userAssert} from '../../../src/log';
 
 export class AmpInstagram extends AMP.BaseElement {

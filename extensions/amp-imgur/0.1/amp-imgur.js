@@ -33,7 +33,7 @@ import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {isObject} from '#core/types';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-imgur';

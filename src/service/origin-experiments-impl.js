@@ -21,7 +21,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service-helpers';
 import {getSourceOrigin} from '../url';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {user} from '../log';
 
 /** @const {string} */

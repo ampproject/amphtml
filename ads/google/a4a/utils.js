@@ -29,7 +29,7 @@ import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {getTimingDataSync} from '#service/variable-source';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /** @type {string}  */

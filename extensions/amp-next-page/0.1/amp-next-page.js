@@ -36,7 +36,7 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {isExperimentOn} from '#experiments';
 import {isJsonScriptTag, removeElement} from '#core/dom';
-import {parseJson, tryParseJson} from '#core/types/object/json';
+import {parseJson, tryParseJson} from '#core/types/object';
 
 const TAG = 'amp-next-page';
 

@@ -15,7 +15,7 @@
  */
 
 import {isJsonLdScriptTag} from '#core/dom';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 import {user} from '../../../src/log';
 
 const TAG = 'getJsonLd';

@@ -20,7 +20,7 @@ import {
   getExistingServiceOrNull,
   registerServiceBuilder,
 } from '../service-helpers';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 
 /**
  * @param {!Window} win

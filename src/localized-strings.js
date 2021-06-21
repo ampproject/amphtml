@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {parseJson} from './core/types/object/json';
+import {parseJson} from './core/types/object';
 
 /**
  * A unique identifier for each localized string.  Localized string IDs should:

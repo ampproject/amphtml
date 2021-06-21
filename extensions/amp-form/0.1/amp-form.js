@@ -71,7 +71,7 @@ import {
 } from '../../../src/utils/xhr-utils';
 import {toWin} from '#core/window';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 
 /** @const {string} */
 const TAG = 'amp-form';

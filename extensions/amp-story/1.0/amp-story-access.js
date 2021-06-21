@@ -26,7 +26,7 @@ import {dev, user} from '../../../src/log';
 import {getStoryAttributeSrc} from './utils';
 import {htmlFor} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {setImportantStyles} from '#core/dom/style';
 
 /** @const {string} */

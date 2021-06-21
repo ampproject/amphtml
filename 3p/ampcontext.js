@@ -21,7 +21,7 @@ import {dev, devAssert} from '../src/log';
 import {dict, map} from '#core/types/object';
 import {isObject} from '#core/types';
 import {parseUrlDeprecated} from '../src/url';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 
 export class AbstractAmpContext {
   /**

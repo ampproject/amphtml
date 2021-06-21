@@ -21,15 +21,13 @@ import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {childElementsByTag} from '#core/dom/query';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {dict, tryParseJson} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {isFiniteNumber, isObject} from '#core/types';
-
 import {
   observeContentSize,
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
-import {tryParseJson} from '#core/types/object/json';
 
 export class AmpVizVega extends AMP.BaseElement {
   /** @param {!AmpElement} element */

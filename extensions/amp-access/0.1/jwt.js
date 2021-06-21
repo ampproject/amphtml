@@ -21,7 +21,7 @@ import {
   utf8Decode,
 } from '#core/types/string';
 
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 
 /**
  * @typedef {{

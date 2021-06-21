@@ -16,7 +16,7 @@
 
 import {childElementsByTag} from './core/dom/query';
 import {isJsonScriptTag} from './core/dom';
-import {parseJson} from './core/types/object/json';
+import {parseJson} from './core/types/object';
 
 /**
  * Helper method to get the json config from an element <script> tag

@@ -24,7 +24,7 @@ import {getMode} from '../../../src/mode';
 import {isObject} from '#core/types';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '#core/dom';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 import {userAssert} from '../../../src/log';
 
 const TYPE = 'facebook';

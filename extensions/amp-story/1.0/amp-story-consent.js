@@ -43,7 +43,7 @@ import {dict} from '#core/types/object';
 import {isArray} from '#core/types';
 import {isJsonScriptTag} from '#core/dom';
 
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {renderAsElement} from './simple-template';
 
 /** @const {string} */

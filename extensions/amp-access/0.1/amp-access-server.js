@@ -22,7 +22,7 @@ import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {isExperimentOn} from '#experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 
 /** @const {string} */
 const TAG = 'amp-access-server';

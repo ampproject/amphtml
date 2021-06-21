@@ -28,8 +28,7 @@ import {Services} from '#service';
 import {base64EncodeFromBytes, endsWith, utf8Encode} from '#core/types/string';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-
+import {dict, parseJson} from '#core/types/object';
 import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,
@@ -39,7 +38,6 @@ import {
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '#experiments';
 import {moveLayoutRect} from '#core/dom/layout/rect';
-import {parseJson} from '#core/types/object/json';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {removeElement} from '#core/dom';
 import {removeFragment} from '../../../src/url';

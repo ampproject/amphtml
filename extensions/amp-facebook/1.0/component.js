@@ -19,7 +19,7 @@ import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {dashToUnderline} from '#core/types/string';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 import {useCallback, useLayoutEffect, useState} from '#preact';
 
 /** @const {string} */

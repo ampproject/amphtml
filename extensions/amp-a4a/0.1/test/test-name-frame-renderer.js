@@ -15,7 +15,7 @@
  */
 
 import {NameFrameRenderer} from '../name-frame-renderer';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {utf8Encode} from '#core/types/string';
 
 const realWinConfig = {

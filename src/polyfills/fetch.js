@@ -17,7 +17,7 @@ import {dev, user} from '../log';
 import {devAssert} from '#core/assert';
 import {hasOwn, map} from '#core/types/object';
 import {isArray, isObject} from '#core/types';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {utf8Encode} from '#core/types/string';
 
 /** @enum {number} Allowed fetch responses. */

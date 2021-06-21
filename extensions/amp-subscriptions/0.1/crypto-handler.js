@@ -22,7 +22,7 @@ import {
 import {iterateCursor} from '#core/dom';
 import {padStart, utf8Encode} from '#core/types/string';
 import {toArray} from '#core/types/array';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 
 export class CryptoHandler {
   /**

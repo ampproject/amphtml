@@ -42,7 +42,7 @@ import {
 import {includes} from '#core/types/string';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, isEnumValue} from '#core/types';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 
 import {mod} from '#core/math';
 import {once} from '#core/types/function';

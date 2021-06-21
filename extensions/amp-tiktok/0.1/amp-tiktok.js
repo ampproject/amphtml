@@ -23,7 +23,7 @@ import {debounce} from '#core/types/function';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {px, resetStyles, setStyles} from '#core/dom/style';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 
 let id = 0;
 const NAME_PREFIX = '__tt_embed__v';

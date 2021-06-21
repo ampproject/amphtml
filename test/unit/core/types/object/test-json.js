@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {deepEquals, tryParseJson} from '#core/types/object/json';
+import {deepEquals, tryParseJson} from '#core/types/object';
 
 describes.sandboxed('type helpers - objects - json', {}, () => {
   describe('tryParseJson', () => {

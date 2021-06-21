@@ -41,7 +41,7 @@ import {
 import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
 import {isExperimentOn} from '#experiments';
 import {isIframed} from '#core/dom';
-import {parseJson, tryParseJson} from '#core/types/object/json';
+import {parseJson, tryParseJson} from '#core/types/object';
 import {rethrowAsync} from '#core/error';
 import {tryResolve} from '#core/data-structures/promise';
 

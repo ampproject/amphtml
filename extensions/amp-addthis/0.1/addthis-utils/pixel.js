@@ -20,7 +20,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 import {getData} from '../../../../src/event-helper';
 import {isObject} from '#core/types';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 
 import {setStyles, toggle} from '#core/dom/style';
 

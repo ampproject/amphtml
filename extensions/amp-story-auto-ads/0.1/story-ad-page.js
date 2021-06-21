@@ -55,7 +55,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {getExperimentBranch} from '#experiments';
 import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {setStyle} from '#core/dom/style';
 
 /** @const {string} */

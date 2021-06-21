@@ -123,7 +123,7 @@ import {
 } from '#ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '#core/types/string/url';
 
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';

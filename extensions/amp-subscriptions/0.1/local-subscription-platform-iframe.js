@@ -21,7 +21,7 @@ import {Messenger} from '../../amp-access/0.1/iframe-api/messenger';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
 import {isArray} from '#core/types';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {toggle} from '#core/dom/style';
 
 /**

@@ -15,7 +15,7 @@
  */
 
 import {getMultiSizeDimensions} from '#ads/google/utils';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {validateData, writeScript} from '#3p/3p';
 
 /**

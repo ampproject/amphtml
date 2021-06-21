@@ -32,7 +32,7 @@ import {isArray} from '#core/types';
 import {isJsonScriptTag} from '#core/dom';
 import {listenOnce} from '../../../src/event-helper';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 
 /** @const */
 const TAG = 'amp-access';

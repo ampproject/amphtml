@@ -35,7 +35,7 @@ import {isObject} from '#core/types';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 import {openWindowDialog} from '../../../src/open-window-dialog';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {parseUrlDeprecated} from '../../../src/url';
 
 const TAG = 'amp-ad-exit';

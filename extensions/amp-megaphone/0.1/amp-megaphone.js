@@ -36,7 +36,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {isObject} from '#core/types';
 import {removeElement} from '#core/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from '#core/types/object';
 import {userAssert} from '../../../src/log';
 
 class AmpMegaphone extends AMP.BaseElement {

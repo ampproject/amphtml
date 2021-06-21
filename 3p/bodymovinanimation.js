@@ -17,7 +17,7 @@
 import {dict} from '#core/types/object';
 import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {setStyles} from '#core/dom/style';
 
 const libSourceUrl = dict({

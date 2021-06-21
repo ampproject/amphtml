@@ -39,7 +39,7 @@ import {cssText} from '../../build/amp-story-player-iframe.css';
 import {devAssertElement} from '#core/assert';
 import {findIndex, toArray} from '#core/types/array';
 import {getMode} from '../mode';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from '#core/types/object';
 import {resetStyles, setStyle, setStyles} from '#core/dom/style';
 import {urls} from '../config';
 

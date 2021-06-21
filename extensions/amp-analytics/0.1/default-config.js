@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonConfiguration} from '#core/types/object/json';
+import {jsonConfiguration} from '#core/types/object';
 
 // TODO(zhouyx@: Rename file and object name)
 const defaultConfig = jsonConfiguration({
