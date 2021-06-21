@@ -20,6 +20,7 @@ import {ContextPropDef} from './prop.type';
 
 export {contextProp} from './prop';
 export {subscribe, unsubscribe} from './subscriber';
+export {ContextPropDef};
 
 /**
  * Direct slot assignment. Works the same way as shadow slots, but does not
