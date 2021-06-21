@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 import {Deferred} from '#core/data-structures/promise';
-import {createViewportObserver} from '#core/dom/layout/viewport-observer';
+import {LayoutRectDef, layoutRectFromDomRect} from './rect';
+import {createViewportObserver} from './viewport-observer';
 import {dict} from '#core/types/object';
-import {layoutRectFromDomRect} from '#core/dom/layout/rect';
 import {toWin} from '#core/window';
 
 // typedef imports
-import {LayoutRectDef} from './rect';
 
 /** @type {!WeakMap<!Element, !Deferred<!IntersectionObserverEntry>>|undefined} */
 let intersectionDeferreds;
