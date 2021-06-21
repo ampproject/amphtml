@@ -59,7 +59,20 @@ module.exports = {
                   }
                 }
 
-                return [fixer.remove(node), fixer.insertTextAfter(last, text)];
+                const fixes = [
+                  fixer.remove(node),
+                  fixer.insertTextAfter(last, text),
+                ];
+
+                // If removing the import creates a blank line, remove that line
+                const nextToken = context.getTokenAfter(node);
+                if (nextToken) {
+                  fixes.unshift(
+                    fixer.removeRange([node.range[1], nextToken.range[0]])
+                  );
+                }
+
+                return fixes;
               },
             });
           }
