@@ -17,13 +17,14 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {userAssert} from '../../../src/log';
 
+const REQUEST_PARAM_ID = new RegExp(/^.[0-9]*$/);
+
 export class AmpAdNetworkDianomiImpl extends AmpA4A {
   /** @override */
   getAdUrl() {
     const paramId = this.element.getAttribute('data-request-param-id');
-    const isValid = new RegExp(/^.[0-9]*$/);
     userAssert(
-      isValid.test(paramId),
+      REQUEST_PARAM_ID.test(paramId),
       'The Dianomi request parameter ID provided is invalid'
     );
     return `https://www.dianomi.com/smartads.pl?format=a4a&id=${paramId}`;

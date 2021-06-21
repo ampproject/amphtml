@@ -44,8 +44,7 @@ describes.fakeWin('amp-ad-network-dianomi-impl', {amp: true}, (env) => {
     });
 
     it('should throw an error when requestParamId is empty', () => {
-      const requestParamId = '';
-      element.setAttribute('data-request-param-id', requestParamId);
+      element.setAttribute('data-request-param-id', '');
       allowConsoleError(() => {
         expect(() => impl.getAdUrl()).to.throw(
           'The Dianomi request parameter ID provided is invalid'
