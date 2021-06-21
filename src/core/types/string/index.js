@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+export * from './bytes';
+export * from './base64';
+
 /**
  * @param {string} _match
  * @param {string} character
