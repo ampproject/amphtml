@@ -198,7 +198,9 @@ If we just want to display the German cars from the response, we can use the `ke
 </amp-render>
 ```
 
-Note that they `key` attribute is valid only when `src` is a URL.
+[tip type="important"]
+Note that the `key` attribute is valid only when `src` is a URL. To access a sub-object in data fetched via JavaScript, use your own code to locate that sub-object before passing it to `<amp-render>`.
+[/tip]
 
 ### `binding`
 
