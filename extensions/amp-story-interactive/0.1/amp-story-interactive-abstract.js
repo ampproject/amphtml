@@ -237,7 +237,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback(concreteCSS = '') {
+  buildCallback(concreteCSS = '', extraCSS = '') {
     this.loadFonts_();
     this.options_ = this.parseOptions_();
     this.element.classList.add('i-amphtml-story-interactive-component');
@@ -269,7 +269,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       createShadowRootWithStyle(
         this.element,
         dev().assertElement(this.rootEl_),
-        CSS + concreteCSS
+        CSS + concreteCSS + extraCSS
       );
       return Promise.resolve();
     });
