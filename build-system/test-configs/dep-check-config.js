@@ -84,8 +84,7 @@ exports.rules = [
     mustNotDependOn: 'src/**/*.js',
     allowlist: [
       '3p/**->src/core/constants/amp-events.js',
-      '3p/**->src/core/data-structures/observable.js',
-      '3p/**->src/core/data-structures/promise.js',
+      '3p/**->src/core/data-structures/index.js',
       '3p/**->src/core/error/index.js',
       '3p/**->src/core/types/enum.js',
       '3p/**->src/core/types/function/index.js',
@@ -98,7 +97,7 @@ exports.rules = [
       '3p/**->src/url.js',
       '3p/**->src/config.js',
       '3p/**->src/mode.js',
-      '3p/**->src/core/types/object/json.js',
+      '3p/**->src/core/types/object/index.js',
       '3p/**->src/3p-frame-messaging.js',
       '3p/**->src/internal-version.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
@@ -147,7 +146,7 @@ exports.rules = [
       'ads/google/a4a/utils.js->src/ini-load.js',
       'ads/google/a4a/utils.js->src/core/dom/layout/page-layout-box.js',
       // Some ads need to depend on json.js
-      'ads/**->src/core/types/object/json.js',
+      'ads/**->src/core/types/object/index.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
       'ads/google/ima/ima-video.js->src/event-helper.js',
     ],
