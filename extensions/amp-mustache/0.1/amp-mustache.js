@@ -15,14 +15,14 @@
  */
 
 import {BaseTemplate} from '../../../src/base-template';
-import {dict} from '../../../src/core/types/object';
-import {iterateCursor, templateContentClone} from '../../../src/core/dom';
+import {dict} from '#core/types/object';
+import {iterateCursor, templateContentClone} from '#core/dom';
 import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
 } from '../../../src/sanitizer';
 import {user} from '../../../src/log';
-import mustache from '../../../third_party/mustache/mustache';
+import mustache from '#third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
 

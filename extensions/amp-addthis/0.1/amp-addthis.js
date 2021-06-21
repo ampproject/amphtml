@@ -51,15 +51,13 @@ import {ConfigManager} from './config-manager';
 import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
 import {PostMessageDispatcher} from './post-message-dispatcher';
 import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
-import {
-  createElementWithAttributes,
-  removeElement,
-} from '../../../src/core/dom';
-import {dict} from '../../../src/core/types/object';
+import {createElementWithAttributes, removeElement} from '#core/dom';
+import {dict} from '#core/types/object';
 import {
   getAddThisMode,
   isProductCode,
@@ -69,10 +67,9 @@ import {
 import {getOgImage} from './addthis-utils/meta';
 import {getWidgetOverload} from './addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
-import {setStyle} from '../../../src/core/dom/style';
+import {setStyle} from '#core/dom/style';
 import {userAssert} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
@@ -313,7 +310,7 @@ class AmpAddThis extends AMP.BaseElement {
     );
     const iframeLoadPromise = this.loadPromise(iframe);
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 

@@ -23,9 +23,9 @@ import {
   TAG as THUMBNAILS_TAG,
 } from './amp-inline-gallery-thumbnails';
 import {BaseElement} from './base-element';
-import {Layout} from '../../../src/core/dom/layout';
+import {Layout} from '#core/dom/layout';
 import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-pagination-1.0.css';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

@@ -20,11 +20,11 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {Layout} from '../../../src/core/dom/layout';
-import {Services} from '../../../src/services';
-import {computedStyle, setStyles} from '../../../src/core/dom/style';
+import {Services} from '#service';
+import {computedStyle, setStyles} from '#core/dom/style';
+import {Layout} from '#core/dom/layout';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 
 /** @const {string} */

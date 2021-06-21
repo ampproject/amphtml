@@ -36,7 +36,7 @@ import {
   rejectServicePromiseForDoc,
   resetServiceForTesting,
   setParentWindow,
-} from '../../src/service';
+} from '../../src/service-helpers';
 import {loadPromise} from '../../src/event-helper';
 
 describes.sandboxed('service', {}, (env) => {

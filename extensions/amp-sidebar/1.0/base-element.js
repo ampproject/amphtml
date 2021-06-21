@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {CSS as COMPONENT_CSS} from './component.jss';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {PreactBaseElement} from '#preact/base-element';
 import {Sidebar} from './component';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {pauseAll} from '../../../src/utils/resource-container-helper';
-import {toggle} from '../../../src/core/dom/style';
-import {toggleAttribute} from '../../../src/core/dom';
+import {realChildNodes} from '#core/dom/query';
+import {toggle} from '#core/dom/style';
+import {toggleAttribute} from '#core/dom';
 import {useToolbarHook} from './sidebar-toolbar-hook';
-import {useValueRef} from '../../../src/preact/component';
+import {useValueRef} from '#preact/component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
@@ -50,7 +51,7 @@ export class BaseElement extends PreactBaseElement {
 
   /** @override */
   updatePropsForRendering(props) {
-    this.getRealChildNodes().map((child) => {
+    realChildNodes(this.element).map((child) => {
       if (
         child.nodeName === 'NAV' &&
         child.hasAttribute('toolbar') &&

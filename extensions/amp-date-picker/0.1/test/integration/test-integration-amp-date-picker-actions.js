@@ -15,7 +15,7 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {poll} from '../../../../../testing/iframe';
+import {poll} from '#testing/iframe';
 
 const config = describes.sandboxed.configure().ifChrome();
 config.skip('amp-date-picker', {}, function () {

@@ -15,13 +15,13 @@
  */
 import {Builder} from '../web-animations';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {WebAnimationPlayState} from '../web-animation-types';
-import {closestAncestorElementBySelector} from '../../../../src/core/dom/query';
-import {htmlFor, htmlRefs} from '../../../../src/core/dom/static-template';
-import {isArray, isObject} from '../../../../src/core/types';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {isArray, isObject} from '#core/types';
 
-import {poll} from '../../../../testing/iframe';
+import {poll} from '#testing/iframe';
 import {user} from '../../../../src/log';
 
 describes.realWin('MeasureScanner', {amp: 1}, (env) => {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {createElementWithAttributes, escapeHtml} from '../../../src/core/dom';
-import {dict} from '../../../src/core/types/object';
+import {createElementWithAttributes, escapeHtml} from '#core/dom';
+import {dict} from '#core/types/object';
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
 // If making changes also change ALLOWED_FONT_REGEX in head-validation.js
@@ -88,7 +88,6 @@ export function createSecureFrame(win, title, height, width) {
       dict({
         // NOTE: It is possible for either width or height to be 'auto',
         // a non-numeric value.
-        'allow': `attribution-reporting 'src'`,
         'height': height,
         'width': width,
         'title': title,
@@ -100,5 +99,10 @@ export function createSecureFrame(win, title, height, width) {
       })
     )
   );
+
+  if (document.featurePolicy?.features().includes('attribution-reporting')) {
+    iframe.setAttribute('allow', `attribution-reporting 'src'`);
+  }
+
   return iframe;
 }

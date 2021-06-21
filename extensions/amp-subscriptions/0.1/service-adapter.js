@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
+import {PageConfig as PageConfigInterface} from '#third_party/subscriptions-project/config';
 
 export class ServiceAdapter {
   /**

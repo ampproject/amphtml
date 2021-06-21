@@ -15,17 +15,17 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/core/dom/layout';
-import {MutatorImpl} from '../../src/service/mutator-impl';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {ResourcesImpl} from '../../src/service/resources-impl';
-import {Services} from '../../src/services';
-import {Signals} from '../../src/core/data-structures/signals';
-import {VisibilityState} from '../../src/core/constants/visibility-state';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LayoutPriority} from '#core/dom/layout';
+import {MutatorImpl} from '#service/mutator-impl';
+import {Resource, ResourceState} from '#service/resource';
+import {ResourcesImpl} from '#service/resources-impl';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {installInputService} from '../../src/input';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {layoutRectLtwh} from '../../src/core/math/layout-rect';
+import {installPlatformService} from '#service/platform-impl';
+import {layoutRectLtwh} from '#core/math/layout-rect';
 
 /** @type {?Event|undefined} */
 const NO_EVENT = undefined;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {PreactBaseElement} from '#preact/base-element';
 import {Twitter} from './component';
 
 export class BaseElement extends PreactBaseElement {}

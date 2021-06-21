@@ -17,8 +17,8 @@
 import {
   PositionObserver,
   getPositionObserver,
-} from '../../../ads/inabox/position-observer';
-import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
+} from '#ads/inabox/position-observer';
+import {layoutRectLtwh} from '#core/math/layout-rect';
 
 describes.realWin('inabox-host:position-observer', {}, (env) => {
   let win;

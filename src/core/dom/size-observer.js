@@ -15,12 +15,12 @@
  */
 
 import {computedStyle} from './style';
-import {remove} from '../types/array';
-import {toWin} from '../window';
-import {tryCallback} from '../error';
+import {remove} from '#core/types/array';
+import {toWin} from '#core/window';
+import {tryCallback} from '#core/error';
 
 // typedef imports
-import {LayoutSizeDef} from '../math/layout-rect';
+import {LayoutSizeDef} from '#core/math/layout-rect';
 
 /** @typedef {!LayoutSizeDef|!ResizeObserverSize} TargetSize */
 

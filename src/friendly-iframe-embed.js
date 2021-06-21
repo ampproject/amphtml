@@ -17,7 +17,7 @@
 import {CommonSignals} from './core/constants/common-signals';
 import {Deferred} from './core/data-structures/promise';
 import {FIE_EMBED_PROP} from './iframe-helper';
-import {Services} from './services';
+import {Services} from './service';
 import {Signals} from './core/data-structures/signals';
 import {VisibilityState} from './core/constants/visibility-state';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
@@ -26,7 +26,7 @@ import {
   disposeServicesForEmbed,
   getTopWindow,
   setParentWindow,
-} from './service';
+} from './service-helpers';
 import {escapeHtml} from './core/dom';
 import {getMode} from './mode';
 import {install as installAbortController} from './polyfills/abort-controller';
