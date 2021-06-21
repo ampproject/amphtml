@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+export * from './history';
+export * from './interface';
+
 /**
  * Externs declare that access `defaultView` from `document` or
  * `ownerDocument` is of type `(Window|null)` but most of our parameter types
