@@ -15,7 +15,7 @@
  */
 
 import {dict} from '#core/types/object';
-import {getWindowHistoryState} from '#core/window/history';
+import {getHistoryState as getWindowHistoryState} from '#core/window';
 import {parseJson} from '#core/types/object/json';
 
 const EXPIRATION_DURATION_MILLIS = 10 * 60 * 1000; // 10 Minutes
