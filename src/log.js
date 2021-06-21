@@ -17,11 +17,11 @@
 import * as assertions from './core/assert/base';
 import {
   USER_ERROR_SENTINEL,
-  elementStringOrPassThru,
+  createErrorVargs,
+  duplicateErrorIfNecessary,
   isUserErrorMessage,
   stripUserError,
-} from './core/error/message-helpers';
-import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
+} from './core/error';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray} from './core/types';
@@ -115,7 +115,7 @@ const externalMessagesSimpleTableUrl = () =>
  * @return {string}
  */
 const messageArgToEncodedComponent = (arg) =>
-  encodeURIComponent(String(elementStringOrPassThru(arg)));
+  encodeURIComponent(String(assertions.elementStringOrPassThru(arg)));
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev

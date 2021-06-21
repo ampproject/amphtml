@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {elementStringOrPassThru} from '#core/error/message-helpers';
 import {isArray, isElement, isString} from '#core/types';
 import {remove} from '#core/types/array';
 
@@ -23,6 +22,20 @@ import {remove} from '#core/types/array';
  * functions. Most files should never import from this; instead, import from
  * `dev` or `user`. It is also used by the Log class for its assertions.
  */
+
+/**
+ * Converts an element to a readable string; all other types are unchanged.
+ * @param {*} val
+ * @return {*}
+ */
+export function elementStringOrPassThru(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (isElement(val)) {
+    val = /** @type {Element} */ (val);
+    return val.tagName.toLowerCase() + (val.id ? `#${val.id}` : '');
+  }
+  return val;
+}
 
 /**
  * A base assertion function, provided to various assertion helpers.

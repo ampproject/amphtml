@@ -26,21 +26,6 @@
 export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
 
 /**
- * Converts an element to a readable string; all other types are unchanged.
- * TODO(rcebulko): Unify with log.js
- * @param {*} val
- * @return {*}
- */
-export function elementStringOrPassThru(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (isElement(val)) {
-    val = /** @type {Element} */ (val);
-    return val.tagName.toLowerCase() + (val.id ? `#${val.id}` : '');
-  }
-  return val;
-}
-
-/**
  * Tests if an error message contains the user sentinel.
  * @param {string} message
  * @return {boolean} Whether this message was a user error.

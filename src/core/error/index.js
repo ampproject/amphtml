@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+export * from './message-helpers';
+
 /**
  * Some exceptions (DOMException, namely) have read-only message.
  * @param {!Error} error
