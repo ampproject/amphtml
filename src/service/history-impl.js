@@ -24,7 +24,7 @@ import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from '../service-helpers';
-import {getState} from '#core/window/history';
+import {getHistoryState} from '#core/window/history';
 
 /** @private @const {string} */
 const TAG_ = 'History';
@@ -390,7 +390,7 @@ export class HistoryBindingNatural_ {
 
     /** @private {number} */
     this.startIndex_ = history.length - 1;
-    const state = getState(history);
+    const state = getHistoryState(history);
     if (state && state[HISTORY_PROP_] !== undefined) {
       this.startIndex_ = Math.min(state[HISTORY_PROP_], this.startIndex_);
     }
@@ -651,7 +651,7 @@ export class HistoryBindingNatural_ {
   /** @private */
   getState_() {
     if (this.supportsState_) {
-      return getState(this.win.history);
+      return getHistoryState(this.win.history);
     }
     return this.unsupportedState_;
   }
