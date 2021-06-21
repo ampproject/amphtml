@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getMode, isModeDevelopment} from './mode';
+import {isModeDevelopment} from './mode';
 import {loadPromise} from './event-helper';
 import {parseQueryString} from './core/types/string/url';
 import {urls} from './config';
