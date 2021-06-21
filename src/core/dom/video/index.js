@@ -16,6 +16,8 @@
 import {devAssertElement} from '#core/assert';
 import {setStyles} from '#core/dom/style';
 
+export * from './pause-helper';
+
 /**
  * @param {!Window} win
  * @return {!Promise<boolean>}
