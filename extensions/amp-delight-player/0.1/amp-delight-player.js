@@ -15,7 +15,7 @@
  */
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {PauseHelper} from '#core/dom/video';
 import {Services} from '#service';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';

@@ -16,7 +16,7 @@
 
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {MessageType} from '../../../src/3p-frame-messaging';
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {PauseHelper} from '#core/dom/video';
 import {Services} from '#service';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dict} from '#core/types/object';

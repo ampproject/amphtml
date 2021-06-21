@@ -23,7 +23,7 @@ import {
   isLayoutSizeDefined,
 } from '#core/dom/layout';
 import {MessageType} from '../../../src/3p-frame-messaging';
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {PauseHelper} from '#core/dom/video';
 import {Services} from '#service';
 import {base64EncodeFromBytes, endsWith, utf8Encode} from '#core/types/string';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';

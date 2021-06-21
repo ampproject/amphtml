@@ -19,7 +19,7 @@ import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   VideoEvents,
 } from '../../../src/video-interface';
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {PauseHelper} from '#core/dom/video';
 import {
   SandboxOptions,
   createFrameFor,

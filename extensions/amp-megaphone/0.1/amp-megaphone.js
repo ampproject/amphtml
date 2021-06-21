@@ -27,7 +27,7 @@
  * </amp-megaphone>
  */
 
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {PauseHelper} from '#core/dom/video';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
 import {applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';

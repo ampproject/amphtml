@@ -19,7 +19,7 @@ import {
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {PauseHelper} from '#core/dom/video';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';

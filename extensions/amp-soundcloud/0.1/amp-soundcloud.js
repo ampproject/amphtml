@@ -27,7 +27,7 @@
  * </amp-soundcloud>
  */
 
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {PauseHelper} from '#core/dom/video';
 import {Services} from '#service';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dict} from '#core/types/object';

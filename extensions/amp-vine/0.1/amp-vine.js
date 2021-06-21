@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {PauseHelper} from '#core/dom/video';
 import {Services} from '#service';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {userAssert} from '../../../src/log';
