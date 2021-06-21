@@ -26,7 +26,7 @@ import {
   resetTrackImpressionPromiseForTesting,
   shouldAppendExtraParams,
 } from '../../src/impression';
-import {macroTask} from '../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {toggleExperiment} from '#experiments';
 
 describes.realWin('impression', {amp: true}, (env) => {

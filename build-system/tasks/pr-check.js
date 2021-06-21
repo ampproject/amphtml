@@ -93,10 +93,6 @@ async function prCheck() {
     runCheck('amp check-links --local_changes');
   }
 
-  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
-    runCheck('amp dev-dashboard-tests');
-  }
-
   if (buildTargetsInclude(Targets.OWNERS)) {
     runCheck('amp check-owners');
   }

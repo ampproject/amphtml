@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+/* eslint-disable import/no-deprecated */
+
 import {Services} from '#service';
-import {createIframePromise} from '../../../testing/iframe';
+import {createIframePromise} from '#testing/iframe';
 import {listenParent} from '#3p/messaging';
 import {postMessage} from '../../../src/iframe-helper';
 

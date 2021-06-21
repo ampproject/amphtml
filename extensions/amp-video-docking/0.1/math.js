@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {DirectionX, RectDef} from './def';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {mapRange} from '#core/math';
 
 /**

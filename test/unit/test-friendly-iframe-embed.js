@@ -18,7 +18,7 @@ import {AmpDocFie} from '#service/ampdoc-impl';
 import {BaseElement} from '../../src/base-element';
 import {Deferred} from '#core/data-structures/promise';
 import {ElementStub} from '../../src/element-stub';
-import {FakeWindow} from '../../testing/fake-dom';
+import {FakeWindow} from '#testing/fake-dom';
 import {
   FriendlyIframeEmbed,
   Installers,
@@ -37,8 +37,8 @@ import {
   setParentWindow,
 } from '../../src/service-helpers';
 import {installExtensionsService} from '#service/extensions-impl';
-import {isAnimationNone} from '../../testing/test-helper';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {isAnimationNone} from '#testing/test-helper';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {loadPromise} from '../../src/event-helper';
 import {resetScheduledElementForTesting} from '#service/custom-element-registry';
 import {setStyles} from '#core/dom/style';

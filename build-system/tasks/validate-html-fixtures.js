@@ -113,7 +113,20 @@ async function runCheck(filesToCheck) {
     }
   }
   if (foundValidationErrors) {
-    throw new Error('Please address the errors listed above.');
+    log('Please address the errors listed above.');
+    log(
+      '⤷ If a failing fixture is a',
+      cyan('Bento'),
+      'document, it is not meant to be valid AMP.'
+    );
+    log(
+      '⤷ Place it under any directory named',
+      cyan('bento'),
+      'like',
+      cyan('examples/bento/'),
+      'so that it is not validated.'
+    );
+    throw new Error('Validation failed.');
   }
   log(green('SUCCESS:'), 'All HTML fixtures are valid.');
 }

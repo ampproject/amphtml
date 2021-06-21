@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert} from '#core/assert';
+import {devAssert, devAssertElement} from '#core/assert';
 import {isScopeSelectorSupported, prependSelectorsWith} from './css-selectors';
 
 /** @fileoverview Helper functions for DOM queries. */
@@ -330,4 +330,65 @@ export function childElementsByTag(parent, tagName) {
 export function elementByTag(element, tagName) {
   assertIsName(tagName);
   return element./*OK*/ querySelector(tagName);
+}
+
+/**
+ * Returns the original nodes of the custom element without any service
+ * nodes that could have been added for markup. These nodes can include
+ * Text, Comment and other child nodes.
+ *
+ * @param {!Node} element
+ * @return {!Array<!Node>}
+ */
+export function realChildNodes(element) {
+  return childNodes(element, (node) => !isInternalOrServiceNode(node));
+}
+
+/**
+ * Returns the original children of the custom element without any service
+ * nodes that could have been added for markup.
+ *
+ * @param {!Element} element
+ * @return {!Array<!Element>}
+ */
+export function realChildElements(element) {
+  return childElements(element, (element) => !isInternalOrServiceNode(element));
+}
+
+/**
+ * Returns "true" for internal AMP nodes or for placeholder elements.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+export function isInternalOrServiceNode(node) {
+  if (isInternalElement(node)) {
+    return true;
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) {
+    return false;
+  }
+  devAssertElement(node);
+
+  return (
+    node.hasAttribute('placeholder') ||
+    node.hasAttribute('fallback') ||
+    node.hasAttribute('overflow')
+  );
+}
+
+/**
+ * Whether the tag is an internal (service) AMP tag.
+ * @param {!Node|string} nodeOrTagName
+ * @return {boolean}
+ */
+function isInternalElement(nodeOrTagName) {
+  /** @type string */
+  let tagName;
+  if (typeof nodeOrTagName == 'string') {
+    tagName = nodeOrTagName;
+  } else if (nodeOrTagName.nodeType === Node.ELEMENT_NODE) {
+    tagName = devAssertElement(nodeOrTagName).tagName;
+  }
+
+  return !!tagName && tagName.toLowerCase().startsWith('i-');
 }

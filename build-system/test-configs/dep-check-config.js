@@ -43,9 +43,9 @@ exports.rules = [
     allowlist: [
       // WARNING: Importing purifier.js will also bundle DOMPurify (13KB).
       'extensions/amp-list/0.1/amp-list.js->src/purifier/sanitation.js',
-      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier/purifier.js',
-      'extensions/amp-script/0.1/amp-script.js->src/purifier/purifier.js',
-      'src/purifier/purifier.js->src/purifier/sanitation.js',
+      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier/index.js',
+      'extensions/amp-script/0.1/amp-script.js->src/purifier/index.js',
+      'src/purifier/index.js->src/purifier/sanitation.js',
       'src/sanitizer.js->src/purifier/sanitation.js',
     ],
   },
@@ -145,7 +145,7 @@ exports.rules = [
       'ads/google/a4a/**->src/service/index.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
-      'ads/google/a4a/utils.js->src/core/dom/page-layout-box.js',
+      'ads/google/a4a/utils.js->src/core/dom/layout/page-layout-box.js',
       // Some ads need to depend on json.js
       'ads/**->src/core/types/object/json.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
@@ -243,6 +243,7 @@ exports.rules = [
       'extensions/amp-base-carousel/1.0/component.js->extensions/amp-lightbox-gallery/1.0/component.js',
       'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/context.js',
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/component.js',
+      'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-base-carousel/1.0/component.js',
 
       // Facebook components
       'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',

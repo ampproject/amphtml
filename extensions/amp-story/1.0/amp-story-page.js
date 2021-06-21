@@ -75,6 +75,7 @@ import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {px, toggle} from '#core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
@@ -1910,7 +1911,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         childImgNode &&
           ampImgNode
             .getImpl()
-            .then((ampImg) => ampImg.propagateAttributes('alt', childImgNode));
+            .then((impl) =>
+              propagateAttributes('alt', impl.element, childImgNode)
+            );
       }
     });
   }

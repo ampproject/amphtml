@@ -21,7 +21,7 @@ import {
   measureElementStub,
   measureMutateElementStub,
   mutateElementStub,
-} from '../../../../testing/test-helper';
+} from '#testing/test-helper';
 
 describes.realWin(
   'amp-list layout container',

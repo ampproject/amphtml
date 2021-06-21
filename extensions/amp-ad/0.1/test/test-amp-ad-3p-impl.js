@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
+import '../amp-ad';
 import * as adCid from '../../../../src/ad-cid';
 import * as consent from '../../../../src/consent';
 import * as fakeTimers from '@sinonjs/fake-timers';
@@ -26,7 +26,7 @@ import {LayoutPriority} from '#core/dom/layout';
 import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {createElementWithAttributes} from '#core/dom';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
