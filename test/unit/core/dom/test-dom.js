@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as dom from '../../../../src/core/dom';
+import * as dom from '#core/dom';
 import {loadPromise} from '../../../../src/event-helper';
-import {matches} from '../../../../src/core/dom/query';
-import {setScopeSelectorSupportedForTesting} from '../../../../src/core/dom/css-selectors';
-import {setShadowDomSupportedVersionForTesting} from '../../../../src/core/dom/web-components';
+import {matches} from '#core/dom/query';
+import {setScopeSelectorSupportedForTesting} from '#core/dom/css-selectors';
+import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
 
 describes.sandboxed('DOM', {}, (env) => {
   afterEach(() => {

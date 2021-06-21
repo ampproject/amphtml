@@ -849,7 +849,7 @@
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
-      "noWrapper": true
+      "wrapper": "none"
     }
   },
   {
@@ -903,6 +903,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
+      "npm": true,
       "wrapper": "bento"
     }
   },

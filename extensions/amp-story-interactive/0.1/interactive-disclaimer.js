@@ -23,7 +23,7 @@
  */
 
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {htmlFor} from '../../../src/core/dom/static-template';
+import {htmlFor} from '#core/dom/static-template';
 import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 
 /**

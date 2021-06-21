@@ -22,7 +22,7 @@ import {
   memo,
   ownProperty,
   recreateNonProtoObject,
-} from '../../../../../src/core/types/object';
+} from '#core/types/object';
 
 describes.sandboxed('type helpers - objects', {}, () => {
   it('hasOwn', () => {

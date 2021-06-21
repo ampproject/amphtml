@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dict} from '../types/object';
+import {dict} from '#core/types/object';
 import {matches} from './query';
-import {toWin} from '../window';
+import {toWin} from '#core/window';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',

@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/core/dom/video/pause-helper';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   createFrameFor,
   objOrParseJson,
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dict} from '../../../src/core/types/object';
-import {dispatchCustomEvent, removeElement} from '../../../src/core/dom';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -33,14 +34,13 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData, listen, listenOncePromise} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/core/dom/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/core/dom/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {setStyle} from '../../../src/core/dom/style';
+import {setStyle} from '#core/dom/style';
 import {userAssert} from '../../../src/log';
 
 /** @const */
@@ -238,7 +238,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
       <img placeholder referrerpolicy="origin" loading="lazy" />
     `;
 
-    this.applyFillContent(placeholder);
+    applyFillContent(placeholder);
 
     const src = `${this.baseURL_}/poster/${this.contentID_}`;
     placeholder.setAttribute('src', src);

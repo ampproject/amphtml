@@ -16,13 +16,13 @@
 
 import '../amp-sidebar';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
-import {assertScreenReaderElement} from '../../../../testing/test-helper';
+import {ActionService} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {assertScreenReaderElement} from '#testing/test-helper';
 import {clearModalStack, getModalStackLength} from '../../../../src/modal';
-import {createElementWithAttributes} from '../../../../src/core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 // Represents the correct value of KeyboardEvent.which for the Escape key

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkOblivkiImpl} from '../../../amp-ad-network-oblivki-impl/0.1/amp-ad-network-oblivki-impl';
+import {AmpAdNetworkOblivkiImpl} from '../amp-ad-network-oblivki-impl';
 import {
   AmpAdUIHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-ui';
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {createElementWithAttributes} from '../../../../src/core/dom';
-import {oblivkiIsA4AEnabled} from '../../../amp-ad-network-oblivki-impl/0.1/oblivki-a4a-config';
+import {createElementWithAttributes} from '#core/dom';
+import {oblivkiIsA4AEnabled} from '../oblivki-a4a-config';
 
 describes.realWin('oblivki-a4a-config', {amp: false}, (env) => {
   let win, doc;

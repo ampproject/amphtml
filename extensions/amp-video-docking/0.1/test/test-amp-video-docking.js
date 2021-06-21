@@ -16,11 +16,7 @@
 import {
   Actions,
   BASE_CLASS_NAME,
-  DOCKED_TO_CORNER_SIZING_RATIO,
   DockTargetType,
-  MARGIN_AREA_WIDTH_PERC,
-  MARGIN_MAX,
-  MIN_WIDTH,
   PLACEHOLDER_ICON_BREAKPOINTS,
   PLACEHOLDER_ICON_LARGE_MARGIN,
   PLACEHOLDER_ICON_LARGE_WIDTH,
@@ -30,16 +26,13 @@ import {
   VideoDocking,
   getPosterImageSrc,
 } from '../amp-video-docking';
-import {
-  Deferred,
-  tryResolve,
-} from '../../../../src/core/data-structures/promise';
-import {DirectionX, DirectionY} from '../def.js';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {DirectionX, DirectionY} from '../def';
 import {PlayingStates} from '../../../../src/video-interface';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/core/dom';
-import {htmlFor} from '../../../../src/core/dom/static-template';
-import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {layoutRectLtwh} from '#core/math/layout-rect';
 
 const slotId = 'my-slot-element';
 
@@ -60,7 +53,6 @@ describes.realWin('video docking', {amp: true}, (env) => {
     const impl = {
       element,
       mutateElement: (cb) => tryResolve(cb),
-      applyFillContent: env.sandbox.spy(),
     };
     stubLayoutBox(impl, defaultLayoutRect);
     return impl;
@@ -274,16 +266,12 @@ describes.realWin('video docking', {amp: true}, (env) => {
       await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
       expect(
-        video.applyFillContent.withArgs(
-          videoLayerElement('.amp-video-docked-placeholder-background')
-        )
-      ).to.have.been.calledOnce;
+        videoLayerElement('.amp-video-docked-placeholder-background')
+      ).to.have.class('i-amphtml-fill-content');
 
       expect(
-        video.applyFillContent.withArgs(
-          videoLayerElement('.amp-video-docked-placeholder-background-poster')
-        )
-      ).to.have.been.calledOnce;
+        videoLayerElement('.amp-video-docked-placeholder-background-poster')
+      ).to.have.class('i-amphtml-fill-content');
     });
 
     it('styles and transforms elements into docked area', async () => {
@@ -726,95 +714,6 @@ describes.realWin('video docking', {amp: true}, (env) => {
       await docking.dockInTransferLayerStep_(video, target);
 
       expect(dock).to.have.been.called;
-    });
-  });
-
-  describe.skip('getTargetAreaFromPos_', () => {
-    [
-      {
-        posX: DirectionX.RIGHT,
-        posXTextual: 'right',
-        expectedXFn: (vw, margin, width) => vw - margin - width,
-      },
-      {
-        posX: DirectionX.LEFT,
-        posXTextual: 'left',
-        expectedXFn: (unusedVw, margin, unusedWidth) => margin,
-      },
-    ].forEach(({expectedXFn, posX, posXTextual}) => {
-      const videoWidth = 600;
-      const videoHeight = 400;
-
-      const aspectRatio = videoWidth / videoHeight;
-
-      let video;
-
-      beforeEach(() => {
-        video = createVideo();
-        placeElementLtwh(video, 0, 0, videoWidth, videoHeight);
-      });
-
-      it('sizes the dock area relative to viewport area', () => {
-        const vw = mockAreaWidth(
-          Math.max(MIN_WIDTH / DOCKED_TO_CORNER_SIZING_RATIO)
-        );
-
-        const expectedWidth = vw * DOCKED_TO_CORNER_SIZING_RATIO;
-        const expectedHeight = expectedWidth / aspectRatio;
-
-        mockAreaHeight(200);
-
-        const {height, width} = docking.getTargetAreaFromPos_(
-          video,
-          posX,
-          DirectionY.TOP
-        );
-
-        expect(width, 'width').to.equal(expectedWidth);
-        expect(height, 'height').to.equal(expectedHeight);
-      });
-
-      it(`sets relative margin for posX = ${posXTextual}`, () => {
-        const vw = mockAreaWidth(
-          Math.max(MIN_WIDTH / DOCKED_TO_CORNER_SIZING_RATIO)
-        );
-
-        mockAreaHeight(200);
-
-        const expectedMargin = MARGIN_AREA_WIDTH_PERC * vw;
-        const expectedY = expectedMargin;
-        const expectedWidth = vw * DOCKED_TO_CORNER_SIZING_RATIO;
-
-        placeElementLtwh(video, 0, 0, videoWidth, videoHeight);
-
-        const expectedX = expectedXFn(vw, expectedMargin, expectedWidth);
-
-        const pos = docking.getTargetAreaFromPos_(video, posX, DirectionY.TOP);
-
-        expect(pos.x, 'x').to.equal(expectedX);
-        expect(pos.y, 'y').to.equal(expectedY);
-      });
-
-      it(`limits margin for posX = ${posXTextual}`, () => {
-        const video = createVideo();
-
-        const vw = mockAreaWidth(10000);
-
-        mockAreaHeight(8000);
-
-        const expectedMargin = MARGIN_MAX;
-        const expectedY = expectedMargin;
-        const expectedWidth = vw * DOCKED_TO_CORNER_SIZING_RATIO;
-
-        placeElementLtwh(video, 0, 0, videoWidth, videoHeight);
-
-        const expectedX = expectedXFn(vw, expectedMargin, expectedWidth);
-
-        const pos = docking.getTargetAreaFromPos_(video, posX, DirectionY.TOP);
-
-        expect(pos.x, 'x').to.equal(expectedX);
-        expect(pos.y, 'y').to.equal(expectedY);
-      });
     });
   });
 

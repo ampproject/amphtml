@@ -17,24 +17,21 @@
 import {AmpAnalytics} from '../amp-analytics';
 import {AnalyticsConfig} from '../config';
 import {ClickEventTracker, VisibilityTracker} from '../events';
-import {
-  ImagePixelVerifier,
-  mockWindowInterface,
-} from '../../../../testing/test-helper';
-import {LayoutPriority} from '../../../../src/core/dom/layout';
+import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
+import {LayoutPriority} from '#core/dom/layout';
 import {LinkerManager} from '../linker-manager';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {Transport} from '../transport';
-import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
 import {
   getService,
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
-import {installCryptoService} from '../../../../src/service/crypto-impl';
+} from '../../../../src/service-helpers';
+import {installCryptoService} from '#service/crypto-impl';
 import {installUserNotificationManagerForTesting} from '../../../amp-user-notification/0.1/amp-user-notification';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 
 describes.realWin(
   'amp-analytics',

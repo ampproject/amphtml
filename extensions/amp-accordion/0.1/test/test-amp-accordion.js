@@ -15,14 +15,14 @@
  */
 
 import '../amp-accordion';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
-import {computedStyle} from '../../../../src/core/dom/style';
-import {createElementWithAttributes, tryFocus} from '../../../../src/core/dom';
-import {htmlFor} from '../../../../src/core/dom/static-template';
-import {poll} from '../../../../testing/iframe';
+import {ActionService} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {computedStyle} from '#core/dom/style';
+import {createElementWithAttributes, tryFocus} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {poll} from '#testing/iframe';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(

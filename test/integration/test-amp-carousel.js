@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
 
 const t = describes.sandboxed.configure().ifChrome();

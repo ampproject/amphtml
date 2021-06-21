@@ -1,4 +1,4 @@
-import {computedStyle} from '../../core/dom/style';
+import {computedStyle} from '#core/dom/style';
 
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.

@@ -21,10 +21,10 @@ import {AccessServerAdapter} from '../amp-access-server';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {AccessSource} from '../amp-access-source';
 import {AccessVendorAdapter} from '../amp-access-vendor';
-import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
-import {installPerformanceService} from '../../../../src/service/performance-impl';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {toggleExperiment} from '../../../../src/experiments';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+import {installPerformanceService} from '#service/performance-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {toggleExperiment} from '#experiments';
 
 describes.fakeWin(
   'AccessSource',
