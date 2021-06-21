@@ -15,33 +15,33 @@
  */
 
 import {Animation} from '../../animation';
-import {Observable} from '../../core/data-structures/observable';
-import {Services} from '../../services';
+import {Observable} from '#core/data-structures/observable';
+import {Services} from '#service';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
-import {VisibilityState} from '../../core/constants/visibility-state';
-import {clamp} from '../../core/math';
-import {closestAncestorElementBySelector} from '../../core/dom/query';
-import {computedStyle, setStyle} from '../../style';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {clamp} from '#core/math';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {computedStyle, setStyle} from '#core/dom/style';
 import {dev, devAssert} from '../../log';
-import {dict} from '../../core/types/object';
+import {dict} from '#core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
 import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
-} from '../../service';
-import {getVerticalScrollbarWidth, isIframed} from '../../dom';
-import {isExperimentOn} from '../../experiments';
+} from '../../service-helpers';
+import {getVerticalScrollbarWidth, isIframed} from '#core/dom';
+import {isExperimentOn} from '#experiments';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../core/math/layout-rect';
+} from '#core/math/layout-rect';
 import {numeric} from '../../transition';
-import {tryResolve} from '../../core/data-structures/promise';
+import {tryResolve} from '#core/data-structures/promise';
 
 const TAG_ = 'Viewport';
 const SCROLL_POS_TO_BLOCK = {

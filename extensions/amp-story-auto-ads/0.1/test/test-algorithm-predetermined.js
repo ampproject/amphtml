@@ -25,7 +25,7 @@ import {
   getNumberOfAds,
 } from '../algorithm-predetermined';
 import {StoryAdPageManager} from '../story-ad-page-manager';
-import {StoryAdPlacements} from '../../../../src/experiments/story-ad-placements';
+import {StoryAdPlacements} from '#experiments/story-ad-placements';
 
 describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
   let storeService;

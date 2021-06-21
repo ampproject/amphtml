@@ -15,7 +15,7 @@
  */
 
 import {dev} from '../../src/log';
-import {loadScript} from '../../3p/3p';
+import {loadScript} from '#3p/3p';
 
 /* global Criteo: false */
 

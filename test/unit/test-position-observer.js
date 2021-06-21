@@ -15,12 +15,12 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {PositionObserver} from '../../src/service/position-observer/position-observer-impl';
-import {PositionObserverFidelity} from '../../src/service/position-observer/position-observer-worker';
-import {Services} from '../../src/services';
-import {layoutRectLtwh} from '../../src/core/math/layout-rect';
-import {macroTask} from '../../testing/yield';
-import {setStyles} from '../../src/style';
+import {PositionObserver} from '#service/position-observer/position-observer-impl';
+import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
+import {Services} from '#service';
+import {layoutRectLtwh} from '#core/math/layout-rect';
+import {macroTask} from '#testing/yield';
+import {setStyles} from '#core/dom/style';
 
 describes.realWin('PositionObserver', {amp: 1}, (env) => {
   let win;

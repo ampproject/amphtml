@@ -26,9 +26,9 @@ import {
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {BaseElement} from '../../../../src/base-element';
-import {Deferred} from '../../../../src/core/data-structures/promise';
-import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
-import {MANUAL_EXPERIMENT_ID} from '../../../../ads/google/a4a/traffic-experiments';
+import {Deferred} from '#core/data-structures/promise';
+import {EXPERIMENT_ATTRIBUTE} from '#ads/google/a4a/utils';
+import {MANUAL_EXPERIMENT_ID} from '#ads/google/a4a/traffic-experiments';
 import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
 import {
   TFCD,
@@ -48,11 +48,11 @@ import {
   isAdTest,
   sraBlockCallbackHandler,
 } from '../sra-utils';
-import {Xhr} from '../../../../src/service/xhr-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {Xhr} from '#service/xhr-impl';
+import {createElementWithAttributes} from '#core/dom';
 import {devAssert} from '../../../../src/log';
-import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
-import {utf8Decode, utf8Encode} from '../../../../src/core/types/string/bytes';
+import {layoutRectLtwh} from '#core/math/layout-rect';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 const config = {amp: true, allowExternalResources: true};
 

@@ -160,4 +160,4 @@ module.exports = {
   cssEntryPoints,
 };
 
-css.description = 'Recompile css to build directory';
+css.description = 'Compile all css files to the build directory';

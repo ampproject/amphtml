@@ -18,20 +18,17 @@ import {
   ADSENSE_MCRSPV_TAG,
   ADSENSE_RSPV_ALLOWED_HEIGHT,
   ADSENSE_RSPV_TAG,
-} from '../../../../ads/google/utils';
+} from '#ads/google/utils';
 import {
   AD_SIZE_OPTIMIZATION_EXP,
   MAX_HEIGHT_EXP,
   ResponsiveState,
 } from '../responsive-state';
-import {Services} from '../../../../src/services';
-import {
-  addAttributesToElement,
-  createElementWithAttributes,
-} from '../../../../src/dom';
-import {forceExperimentBranch} from '../../../../src/experiments';
-import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
-import {toWin} from '../../../../src/core/window';
+import {Services} from '#service';
+import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import {forceExperimentBranch} from '#experiments';
+import {layoutRectLtwh} from '#core/math/layout-rect';
+import {toWin} from '#core/window';
 
 const AD_CLIENT_ID = 'ca-pub-123';
 

@@ -105,9 +105,6 @@ const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
   'utf8'
 );
 
-// Browser instance that runs all visual tests.
-let browser_;
-
 /**
  * @typedef {{
  *  name: string,
@@ -245,14 +242,7 @@ async function launchBrowser(browserFetcher) {
     executablePath: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
       .executablePath,
   };
-
-  try {
-    browser_ = await puppeteer.launch(browserOptions);
-  } catch (error) {
-    log('fatal', error);
-  }
-
-  return browser_;
+  return await puppeteer.launch(browserOptions);
 }
 
 /**
@@ -876,21 +866,21 @@ module.exports = {
   visualDiff,
 };
 
-visualDiff.description = 'Runs the AMP visual diff tests.';
+visualDiff.description = 'Run the AMP visual diff tests';
 visualDiff.flags = {
-  'main': 'Includes a blank snapshot (baseline for skipped builds)',
-  'empty': 'Creates a dummy Percy build with only a blank snapshot',
+  'main': 'Include a blank snapshot (baseline for skipped builds)',
+  'empty': 'Create a dummy Percy build with only a blank snapshot',
   'config':
-    'Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
-  'chrome_debug': 'Prints debug info from Chrome',
-  'webserver_debug': 'Prints debug info from the local amp webserver',
-  'percy_agent_debug': 'Prints debug info from the @percy/agent instance',
-  'debug': 'Sets all debugging flags',
-  'verbose': 'Prints verbose log statements',
-  'grep': 'Runs tests that match the pattern',
+    'Set the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
+  'chrome_debug': 'Print debug info from Chrome',
+  'webserver_debug': 'Print debug info from the local amp webserver',
+  'percy_agent_debug': 'Print debug info from the @percy/agent instance',
+  'debug': 'Set all debugging flags',
+  'verbose': 'Print verbose log statements',
+  'grep': 'Run tests that match the pattern',
   'percy_token': 'Override the PERCY_TOKEN environment variable',
   'percy_branch': 'Override the PERCY_BRANCH environment variable',
   'percy_disabled':
-    'Disables Percy integration (for testing local changes only)',
+    'Disable Percy integration (for testing local changes only)',
   'nobuild': 'Skip build',
 };

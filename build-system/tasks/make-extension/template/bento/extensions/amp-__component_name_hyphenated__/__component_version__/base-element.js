@@ -16,7 +16,7 @@
 
 __jss_import_component_css__;
 import {__component_name_pascalcase__} from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {PreactBaseElement} from '#preact/base-element';
 
 export class BaseElement extends PreactBaseElement {}
 

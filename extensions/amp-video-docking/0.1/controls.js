@@ -16,23 +16,23 @@
 
 import {HtmlLiteralTagDef} from './html';
 import {PlayingStates, VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {Timeout} from './timeout';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
-import {closestAncestorElementBySelector} from '../../../src/core/dom/query';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {iterateCursor} from '../../../src/dom';
-import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
-import {once} from '../../../src/core/types/function';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {iterateCursor} from '#core/dom';
+import {layoutRectLtwh} from '#core/math/layout-rect';
+import {once} from '#core/types/function';
 import {
   resetStyles,
   setImportantStyles,
   toggle,
   translate,
-} from '../../../src/style';
+} from '#core/dom/style';
 
 /**
  * A single controls set can be displayed at a time on the controls layer.

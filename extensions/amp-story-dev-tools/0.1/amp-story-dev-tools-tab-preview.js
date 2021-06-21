@@ -20,11 +20,11 @@ import {
   removeAfterTimeout,
   updateHash,
 } from './utils';
-import {closest} from '../../../src/core/dom/query';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
-import {htmlFor} from '../../../src/static-template';
-import {observeContentSize} from '../../../src/utils/size-observer';
-import {setStyles} from '../../../src/style';
+import {closest} from '#core/dom/query';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {htmlFor} from '#core/dom/static-template';
+import {observeContentSize} from '#core/dom/size-observer';
+import {setStyles} from '#core/dom/style';
 
 /**
  * Creates a tab content, will be deleted when the tabs get implemented.

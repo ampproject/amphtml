@@ -15,11 +15,11 @@
  */
 
 import '../amp-twitter';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {doNotLoadExternalResourcesInTest} from '../../../../testing/iframe';
+import {createElementWithAttributes} from '#core/dom';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {toggleExperiment} from '#experiments';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-twitter-v1.0',

@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  VariableSource,
-  getTimingDataAsync,
-} from '../../src/service/variable-source';
+import {VariableSource, getTimingDataAsync} from '#service/variable-source';
 
 describes.fakeWin(
   'VariableSource',

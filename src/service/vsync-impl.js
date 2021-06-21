@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {Pass} from '../pass';
-import {Services} from '../services';
+import {Services} from '#service';
 import {
   addDocumentVisibilityChangeListener,
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
-} from '../utils/document-visibility';
+} from '#core/document-visibility';
 import {cancellation} from '../error-reporting';
 import {dev, devAssert} from '../log';
-import {getService, registerServiceBuilder} from '../service';
+import {getService, registerServiceBuilder} from '../service-helpers';
 import {installTimerService} from './timer-impl';
-import {rethrowAsync} from '../core/error';
+import {rethrowAsync} from '#core/error';
 
 /** @const {time} */
 const FRAME_TIME = 16;

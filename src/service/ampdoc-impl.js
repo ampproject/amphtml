@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
-import {Observable} from '../core/data-structures/observable';
-import {Signals} from '../core/data-structures/signals';
-import {VisibilityState} from '../core/constants/visibility-state';
-import {WindowInterface} from '../core/window/interface';
+import {Deferred} from '#core/data-structures/promise';
+import {Observable} from '#core/data-structures/observable';
+import {Signals} from '#core/data-structures/signals';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {WindowInterface} from '#core/window/interface';
 import {
   addDocumentVisibilityChangeListener,
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
-} from '../utils/document-visibility';
+} from '#core/document-visibility';
 import {dev, devAssert} from '../log';
 import {
   disposeServicesForDoc,
   getParentWindowFrameElement,
   registerServiceBuilder,
-} from '../service';
-import {isDocumentReady, whenDocumentReady} from '../core/document-ready';
-import {isEnumValue} from '../core/types';
-import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
-import {map} from '../core/types/object';
-import {parseQueryString} from '../core/types/string/url';
+} from '../service-helpers';
+import {isDocumentReady, whenDocumentReady} from '#core/document-ready';
+import {isEnumValue} from '#core/types';
+import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '#core/dom';
+import {map} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';

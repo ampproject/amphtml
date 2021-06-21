@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../core/data-structures/observable';
-import {Services} from '../../services';
+import {Observable} from '#core/data-structures/observable';
+import {Services} from '#service';
 import {
   ViewportBindingDef,
   marginBottomOfLastChild,
 } from './viewport-binding-def';
-import {computedStyle, px, setImportantStyles} from '../../style';
+import {computedStyle, px, setImportantStyles} from '#core/dom/style';
 import {dev} from '../../log';
-import {layoutRectLtwh} from '../../core/math/layout-rect';
+import {layoutRectLtwh} from '#core/math/layout-rect';
 
 const TAG_ = 'Viewport';
 
