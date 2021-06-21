@@ -17,7 +17,7 @@
 import {
   observeBorderBoxSize,
   unobserveBorderBoxSize,
-} from '#core/dom/size-observer';
+} from '#core/dom/layout/size-observer';
 
 // typedef imports
 import {PausableInterface} from './pausable-interface';

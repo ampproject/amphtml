@@ -45,11 +45,11 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '#core/math/layout-rect';
+} from '#core/dom/layout/rect';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '#core/dom/size-observer';
+} from '#core/dom/layout/size-observer';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setStyles} from '#core/dom/style';
 import {srcsetFromElement} from '#core/dom/srcset';

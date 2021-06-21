@@ -19,7 +19,7 @@ import {isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {userAssert} from '../../../src/log';
 
 export class AmpTimeAgo extends AMP.BaseElement {

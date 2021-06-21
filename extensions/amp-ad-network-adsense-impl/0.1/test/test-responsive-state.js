@@ -27,7 +27,7 @@ import {
 import {Services} from '#service';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
 import {forceExperimentBranch} from '#experiments';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {toWin} from '#core/window';
 
 const AD_CLIENT_ID = 'ca-pub-123';

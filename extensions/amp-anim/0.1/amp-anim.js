@@ -21,7 +21,7 @@ import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {propagateObjectFitStyles} from '#core/dom/style';
 

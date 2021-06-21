@@ -20,7 +20,7 @@ import {LayoutPriority} from '#core/dom/layout';
 import {Resource} from '#service/resource';
 import {Services} from '#service';
 import {createAmpElementForTesting} from '../../src/custom-element';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {listenOncePromise} from '../../src/event-helper';
 
 describes.realWin('BaseElement', {amp: true}, (env) => {

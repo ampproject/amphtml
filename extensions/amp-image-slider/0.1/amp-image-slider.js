@@ -28,7 +28,7 @@ import {listen, loadPromise} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {realChildElements} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
 

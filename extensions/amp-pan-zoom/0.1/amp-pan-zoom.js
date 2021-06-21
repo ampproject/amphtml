@@ -34,12 +34,12 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
-import {layoutRectFromDomRect, layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectFromDomRect, layoutRectLtwh} from '#core/dom/layout/rect';
 import {numeric} from '../../../src/transition';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '#core/dom/size-observer';
+} from '#core/dom/layout/size-observer';
 import {px, scale, setStyles, translate} from '#core/dom/style';
 import {realChildElements} from '#core/dom/query';
 

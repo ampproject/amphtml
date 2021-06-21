@@ -32,7 +32,7 @@ import {PlayingStates} from '../../../../src/video-interface';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 const slotId = 'my-slot-element';
 

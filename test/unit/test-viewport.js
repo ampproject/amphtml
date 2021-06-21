@@ -36,7 +36,7 @@ import {installPlatformService} from '#service/platform-impl';
 import {installTimerService} from '#service/timer-impl';
 import {installViewerServiceForDoc} from '#service/viewer-impl';
 import {installVsyncService} from '#service/vsync-impl';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service-helpers';
 

@@ -66,7 +66,7 @@ import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 import {
   intersectionEntryToJson,
   measureIntersection,
-} from '../../../src/utils/intersection';
+} from '#core/dom/layout/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '#core/types';
 import {tryDecodeUriComponent} from '#core/types/string/url';
@@ -75,7 +75,7 @@ import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {padStart} from '#core/types/string';
 import {parseJson} from '#core/types/object/json';
 import {processHead} from './head-validation';
