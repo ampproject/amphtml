@@ -95,7 +95,7 @@ import {getDetail} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
-import {getState} from '#core/window/history';
+import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isDesktopOnePanelExperimentOn} from './amp-story-desktop-one-panel';
 import {isExperimentOn} from '#experiments';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
@@ -814,7 +814,7 @@ export class AmpStory extends AMP.BaseElement {
         href = href.slice(0, -1);
       }
       this.win.history.replaceState(
-        (this.win.history && getState(this.win.history)) || {} /** data */,
+        (this.win.history && getWindowHistoryState(this.win.history)) || {} /** data */,
         this.win.document.title /** title */,
         href /** URL */
       );
