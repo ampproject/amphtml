@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+export * from './json';
+
 /* @const */
 const {hasOwnProperty: hasOwn_, toString: toString_} = Object.prototype;
 
