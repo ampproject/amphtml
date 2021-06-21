@@ -93,7 +93,11 @@ import {
   is3pThrottled,
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
-import {getCryptoRandomBytesArray, utf8Decode} from '#core/types/string/bytes';
+import {
+  getCryptoRandomBytesArray,
+  stringHash32,
+  utf8Decode,
+} from '#core/types/string';
 import {
   getExperimentBranch,
   isExperimentOn,
@@ -118,7 +122,7 @@ import {
   metaJsonCreativeGrouper,
 } from '#ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '#core/types/string/url';
-import {stringHash32} from '#core/types/string';
+
 import {tryParseJson} from '#core/types/object/json';
 
 /** @type {string} */

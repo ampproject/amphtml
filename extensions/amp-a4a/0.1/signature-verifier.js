@@ -15,7 +15,7 @@
  */
 
 import {Services} from '#service';
-import {base64DecodeToBytes} from '#core/types/string/base64';
+import {base64DecodeToBytes} from '#core/types/string';
 import {dev, devAssert, user} from '../../../src/log';
 import {isArray} from '#core/types';
 

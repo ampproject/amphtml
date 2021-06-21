@@ -26,7 +26,7 @@ import {
 } from '../amp-ad-network-adzerk-impl';
 import {Xhr} from '#service/xhr-impl';
 import {createElementWithAttributes} from '#core/dom';
-import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
+import {utf8Decode, utf8Encode} from '#core/types/string';
 
 describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
   let win, doc;

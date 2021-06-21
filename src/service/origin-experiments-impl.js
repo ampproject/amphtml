@@ -15,7 +15,7 @@
  */
 
 import {Services} from '#service';
-import {bytesToString, stringToBytes} from '#core/types/string/bytes';
+import {bytesToString, stringToBytes} from '#core/types/string';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,

@@ -16,7 +16,7 @@
 
 import {OriginExperiments, TokenMaster} from '#service/origin-experiments-impl';
 import {Services} from '#service';
-import {bytesToString} from '#core/types/string/bytes';
+import {bytesToString} from '#core/types/string';
 import {user} from '../../src/log';
 
 describes.fakeWin('OriginExperiments', {amp: true}, (env) => {

@@ -21,8 +21,10 @@ import {
   base64UrlDecodeToBytes,
   base64UrlEncodeFromBytes,
   base64UrlEncodeFromString,
-} from '#core/types/string/base64';
-import {stringToBytes, utf8Decode, utf8Encode} from '#core/types/string/bytes';
+  stringToBytes,
+  utf8Decode,
+  utf8Encode,
+} from '#core/types/string';
 
 describes.sandboxed('type helpers - strings - base64', {}, () => {
   // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.

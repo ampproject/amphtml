@@ -21,7 +21,7 @@ import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {isInManualExperiment} from '#ads/google/a4a/traffic-experiments';
 import {isObject} from '#core/types';
 import {tryResolve} from '#core/data-structures/promise';
-import {utf8Encode} from '#core/types/string/bytes';
+import {utf8Encode} from '#core/types/string';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';

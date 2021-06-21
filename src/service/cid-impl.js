@@ -26,11 +26,14 @@ import {CacheCidApi} from './cache-cid-api';
 import {GoogleCidApi, TokenStatus} from './cid-api';
 import {Services} from '#service';
 import {ViewerCidApi} from './viewer-cid-api';
-import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
+import {
+  base64UrlEncodeFromBytes,
+  getCryptoRandomBytesArray,
+} from '#core/types/string';
 import {dev, user, userAssert} from '../log';
 import {dict} from '#core/types/object';
 import {getCookie, setCookie} from '../cookies';
-import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
+
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,

@@ -17,8 +17,11 @@
 import {SESSION_VALUES, sessionServicePromiseForDoc} from './session-manager';
 import {Services} from '#service';
 import {TickLabel} from '#core/constants/enums';
-import {asyncStringReplace} from '#core/types/string';
-import {base64UrlEncodeFromString} from '#core/types/string/base64';
+import {
+  asyncStringReplace,
+  base64UrlEncodeFromString,
+} from '#core/types/string';
+
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';

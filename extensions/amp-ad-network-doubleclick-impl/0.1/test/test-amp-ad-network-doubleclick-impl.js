@@ -19,7 +19,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as bytesUtils from '#core/types/string/bytes';
+import * as bytesUtils from '#core/types/string';
 import {AMP_EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '#ads/google/a4a/utils';
 import {
   AMP_SIGNATURE_HEADER,

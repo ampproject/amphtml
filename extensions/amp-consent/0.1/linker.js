@@ -18,7 +18,7 @@ import {WindowInterface} from '#core/window/interface';
 import {
   base64UrlDecodeFromString,
   base64UrlEncodeFromString,
-} from '#core/types/string/base64';
+} from '#core/types/string';
 import {crc32} from './crc32';
 import {user} from '../../../src/log';
 

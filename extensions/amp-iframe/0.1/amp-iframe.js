@@ -25,11 +25,11 @@ import {
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
-import {base64EncodeFromBytes} from '#core/types/string/base64';
+import {base64EncodeFromBytes, endsWith, utf8Encode} from '#core/types/string';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
-import {endsWith} from '#core/types/string';
+
 import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,
@@ -45,7 +45,6 @@ import {removeElement} from '#core/dom';
 import {removeFragment} from '../../../src/url';
 import {setStyle} from '#core/dom/style';
 import {urls} from '../../../src/config';
-import {utf8Encode} from '#core/types/string/bytes';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';

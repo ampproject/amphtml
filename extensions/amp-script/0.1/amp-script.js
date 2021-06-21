@@ -32,7 +32,7 @@ import {realChildElements} from '#core/dom/query';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {tryParseJson} from '#core/types/object/json';
 import {urls} from '../../../src/config';
-import {utf8Encode} from '#core/types/string/bytes';
+import {utf8Encode} from '#core/types/string';
 
 /** @const {string} */
 const TAG = 'amp-script';

@@ -69,21 +69,20 @@ import {
 } from '#core/dom/layout/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '#core/types';
-import {tryDecodeUriComponent} from '#core/types/string/url';
-
 import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '#core/dom/layout/viewport-observer';
-import {padStart} from '#core/types/string';
+import {padStart, utf8Decode} from '#core/types/string';
 import {parseJson} from '#core/types/object/json';
 import {processHead} from './head-validation';
 import {setStyle} from '#core/dom/style';
 import {signingServerURLs} from '#ads/_a4a-config';
+import {tryDecodeUriComponent} from '#core/types/string/url';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {utf8Decode} from '#core/types/string/bytes';
+
 import {whenWithinViewport} from './within-viewport';
 
 /** @type {Array<string>} */

@@ -22,7 +22,7 @@ import {fetchPolyfill} from '#polyfills/fetch';
 import {getCookie} from '../../src/cookies';
 import {toggleExperiment} from '#experiments';
 import {user} from '../../src/log';
-import {utf8Decode} from '#core/types/string/bytes';
+import {utf8Decode} from '#core/types/string';
 import {xhrServiceForTesting} from '#service/xhr-impl';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.

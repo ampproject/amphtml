@@ -38,7 +38,7 @@ import {Services} from '#service';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
 import {forceExperimentBranch, toggleExperiment} from '#experiments';
 import {toWin} from '#core/window';
-import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
+import {utf8Decode, utf8Encode} from '#core/types/string';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
