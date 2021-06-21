@@ -287,6 +287,10 @@ amp-story[standalone] {
   position: relative !important;
 }
 
+amp-story[standalone].i-amphtml-story-desktop-one-panel {
+  background-color: #000 !important;
+}
+
 amp-story-page {
   background-color: #757575;
 }
