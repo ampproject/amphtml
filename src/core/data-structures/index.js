@@ -17,6 +17,7 @@
 export * from './curve';
 export * from './dom-based-weakref';
 export * from './finite-state-machine';
+export * from './id-generator';
 export * from './lru-cache';
 export * from './observable';
 export * from './priority-queue';
