@@ -35,7 +35,7 @@ const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 const MIN_TIMER_INTERVAL_SECONDS = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
-const NO_UNLISTEN = function() {};
+const NO_UNLISTEN = function () {};
 const TAG = 'amp-analytics/events';
 
 /**
@@ -71,70 +71,70 @@ const TRACKER_TYPE = Object.freeze({
     name: AnalyticsEventType.CLICK,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     // Escape the temporal dead zone by not referencing a class directly.
-    klass: function(root) {
+    klass: function (root) {
       return new ClickEventTracker(root);
     },
   },
   [AnalyticsEventType.CUSTOM]: {
     name: AnalyticsEventType.CUSTOM,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
+    klass: function (root) {
       return new CustomEventTracker(root);
     },
   },
   [AnalyticsEventType.HIDDEN]: {
     name: AnalyticsEventType.VISIBLE, // Reuse tracker with visibility
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
+    klass: function (root) {
       return new VisibilityTracker(root);
     },
   },
   [AnalyticsEventType.INI_LOAD]: {
     name: AnalyticsEventType.INI_LOAD,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
-    klass: function(root) {
+    klass: function (root) {
       return new IniLoadTracker(root);
     },
   },
   [AnalyticsEventType.RENDER_START]: {
     name: AnalyticsEventType.RENDER_START,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
-    klass: function(root) {
+    klass: function (root) {
       return new SignalTracker(root);
     },
   },
   [AnalyticsEventType.SCROLL]: {
     name: AnalyticsEventType.SCROLL,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
+    klass: function (root) {
       return new ScrollEventTracker(root);
     },
   },
   [AnalyticsEventType.STORY]: {
     name: AnalyticsEventType.STORY,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: function(root) {
+    klass: function (root) {
       return new AmpStoryEventTracker(root);
     },
   },
   [AnalyticsEventType.TIMER]: {
     name: AnalyticsEventType.TIMER,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: function(root) {
+    klass: function (root) {
       return new TimerEventTracker(root);
     },
   },
   [AnalyticsEventType.VIDEO]: {
     name: AnalyticsEventType.VIDEO,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
+    klass: function (root) {
       return new VideoEventTracker(root);
     },
   },
   [AnalyticsEventType.VISIBLE]: {
     name: AnalyticsEventType.VISIBLE,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
+    klass: function (root) {
       return new VisibilityTracker(root);
     },
   },
@@ -468,7 +468,6 @@ export class AmpStoryEventTracker extends CustomEventTracker {
    * @param {!AnalyticsEvent} event
    * @param {!Element} rootTarget
    * @param {!JsonObject} config
-
    * @param {function(!AnalyticsEvent)} listener
    */
   fireListener_(event, rootTarget, config, listener) {
@@ -1280,21 +1279,21 @@ export class VideoEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const videoSpec = config['videoSpec'] || {};
-    const selectorValue = config['selector'] || videoSpec['selector'];
-    const selector = isArray(selectorValue) ? selectorValue : selectorValue.split();
+    const selectorValue = userAssert(
+      config['selector'] || videoSpec['selector'],
+      'Missing required selector on click trigger'
+    );
+    const selector = isArray(selectorValue)
+      ? selectorValue
+      : selectorValue.split();
     this.assertUniqueSelectors_(selector);
-    console.log(selectorValue)
     const selectionMethod = config['selectionMethod'] || null;
 
     const targetReadyPromise = [];
-    selector.forEach((item, i) => {
+    selector.forEach((item) => {
       targetReadyPromise.push(
-        this.root.getElements(
-          context,
-          item,
-          selectionMethod
-        )
-      )
+        this.root.getElements(context, item, selectionMethod)
+      );
     });
 
     //TODO: check for uniqueness of selectors
@@ -1351,7 +1350,7 @@ export class VideoEventTracker extends EventTracker {
             user().error(
               TAG,
               'Percentages must be set in increments of %s with non-zero ' +
-              'values',
+                'values',
               percentageInterval
             );
 
@@ -1397,19 +1396,18 @@ export class VideoEventTracker extends EventTracker {
         'No target specified by video session event.'
       );
 
-      Promise.all(targetReadyPromise)
-      .then((targetReady) => {
-        targetReady.forEach((target, i) => {
-            if (!target[0].contains(el)) {
-              return;
-            }
-            const normalizedDetails = removeInternalVars(details);
-            listener(new AnalyticsEvent(target, normalizedType, normalizedDetails));
-        })
+      Promise.all(targetReadyPromise).then((targetReady) => {
+        targetReady.forEach((target) => {
+          if (!target[0].contains(el)) {
+            return;
+          }
+          const normalizedDetails = removeInternalVars(details);
+          listener(
+            new AnalyticsEvent(target, normalizedType, normalizedDetails)
+          );
+        });
       });
-
     });
-
   }
 
   /**
@@ -1566,7 +1564,7 @@ export class VisibilityTracker extends EventTracker {
         return unlistenCallbacks;
       });
 
-    return function() {
+    return function () {
       unlistenPromise.then((unlistenCallbacks) => {
         for (let i = 0; i < unlistenCallbacks.length; i++) {
           unlistenCallbacks[i]();
@@ -1714,8 +1712,8 @@ export class VisibilityTracker extends EventTracker {
 
     // Wait for root signal if there's no element selected.
     return opt_element
-    ? waitForTracker.getElementSignal(waitForSpec, opt_element)
-    : waitForTracker.getRootSignal(waitForSpec);
+      ? waitForTracker.getElementSignal(waitForSpec, opt_element)
+      : waitForTracker.getRootSignal(waitForSpec);
   }
 
   /**
