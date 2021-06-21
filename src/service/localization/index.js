@@ -17,9 +17,11 @@
 // compiler does not output types for enums, but we want to distinguish between
 // LocalizedStringId enum values and any other strings.
 // eslint-disable-next-line no-unused-vars
-import {LocalizedStringId} from '../../localized-strings';
+import {LocalizedStringBundleDef, LocalizedStringId} from './strings';
 import {Services} from '#service';
 import {closest} from '#core/dom/query';
+
+export * from './strings';
 
 /**
  * Language code used if there is no language code specified by the document.
@@ -35,7 +37,7 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
 /**
  * Gets the string matching the specified localized string ID in the language
  * specified.
- * @param {!Object<string, !../localized-strings.LocalizedStringBundleDef>} localizedStringBundles
+ * @param {!Object<string, !LocalizedStringBundleDef>} localizedStringBundles
  * @param {!Array<string>} languageCodes
  * @param {!LocalizedStringId} localizedStringId
  * @return {?string}
@@ -102,7 +104,7 @@ export class LocalizationService {
 
     /**
      * A mapping of language code to localized string bundle.
-     * @private @const {!Object<string, !../localized-strings.LocalizedStringBundleDef>}
+     * @private @const {!Object<string, !LocalizedStringBundleDef>}
      */
     this.localizedStringBundles_ = {};
   }
@@ -127,7 +129,7 @@ export class LocalizationService {
   /**
    * @param {string} languageCode The language code to associate with the
    *     specified localized string bundle.
-   * @param {!../localized-strings.LocalizedStringBundleDef} localizedStringBundle
+   * @param {!LocalizedStringBundleDef} localizedStringBundle
    *     The localized string bundle to register.
    * @return {!LocalizationService} For chaining.
    */
