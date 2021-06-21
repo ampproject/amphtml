@@ -153,14 +153,20 @@ export class CookieWriter {
    * Retrieves cookieMaxAge from given config, provides default value if no
    * value is found or value is invalid
    * @param {JsonObject} inputConfig
-   * @return {number}
+   * @return {number|undefined} cookieMaxAge in ms or undefined for Session cookies
    */
   getCookieMaxAgeMs_(inputConfig) {
     if (!hasOwn(inputConfig, 'cookieMaxAge')) {
       return BASE_CID_MAX_AGE_MILLIS;
     }
 
-    const cookieMaxAgeNumber = Number(inputConfig['cookieMaxAge']);
+    const cookieMaxAge = inputConfig['cookieMaxAge'];
+
+    if (cookieMaxAge === 'Session') {
+      return undefined;
+    }
+
+    const cookieMaxAgeNumber = Number(cookieMaxAge);
 
     // 0 is a special case which we allow
     if (!cookieMaxAgeNumber && cookieMaxAgeNumber !== 0) {
@@ -218,7 +224,7 @@ export class CookieWriter {
    * Expand the value and write to cookie if necessary
    * @param {string} cookieName
    * @param {string} cookieValue
-   * @param {number} cookieExpireDateMs
+   * @param {number|undefined} cookieExpireDateMs
    * @param {!SameSite=} sameSite
    * @return {!Promise}
    */
@@ -231,7 +237,7 @@ export class CookieWriter {
         // Note: We ignore empty cookieValue, that means currently we don't
         // provide a way to overwrite or erase existing cookie
         if (value) {
-          const expireDate = Date.now() + cookieExpireDateMs;
+          const expireDate = cookieExpireDateMs ? Date.now() + cookieExpireDateMs : undefined;
           // SameSite=None must be secure as per
           // https://web.dev/samesite-cookies-explained/#samesitenone-must-be-secure
           const secure = sameSite === SameSite.NONE;
