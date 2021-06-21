@@ -16,7 +16,7 @@
 
 import * as Preact from '#preact';
 import {LightboxGalleryContext} from './context';
-import {sequentialIdGenerator} from '#core/data-structures/id-generator';
+import {sequentialIdGenerator} from '#core/data-structures';
 import {useContext, useLayoutEffect, useMemo, useState} from '#preact';
 
 const generateLightboxItemKey = sequentialIdGenerator();
