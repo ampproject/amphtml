@@ -45,8 +45,6 @@ export function maybeValidate(win) {
       /* global amp: false */
       amp.validator.validateUrlAndLog(filename, win.document);
     });
-  } else if (getMode().examiner) {
-    loadScript(win.document, `${urls.cdn}/examiner.js`);
   }
 }
 
