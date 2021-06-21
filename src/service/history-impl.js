@@ -24,7 +24,7 @@ import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from '../service-helpers';
-import {getHistoryState} from '#core/window/history';
+import {getHistoryState} from '#core/window';
 
 /** @private @const {string} */
 const TAG_ = 'History';

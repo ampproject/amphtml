@@ -16,7 +16,7 @@
 
 import {DomFingerprint} from '#core/dom/fingerprint';
 import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from '#core/window';
 import {
   addDataAndJsonAttributes_,
   applySandbox,

@@ -16,7 +16,7 @@
 
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from '#core/window';
 import {dev, user} from '../../src/log';
 import {
   getExtraParamsUrl,

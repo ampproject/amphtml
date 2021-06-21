@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from '#core/window';
 import {
   base64UrlDecodeFromString,
   base64UrlEncodeFromString,

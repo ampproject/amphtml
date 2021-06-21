@@ -74,7 +74,7 @@ import {
   serializeTargeting,
   sraBlockCallbackHandler,
 } from './sra-utils';
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from '#core/window';
 import {
   addAmpExperimentIdToElement,
   addExperimentIdToElement,

@@ -23,7 +23,7 @@ import {
 } from './transport-serializer';
 import {IframeTransport} from './iframe-transport';
 import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from '#core/window';
 import {
   assertHttpsUrl,
   checkCorsUrl,

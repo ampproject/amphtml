@@ -29,7 +29,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from '#core/window';
 import {bezierCurve} from '#core/data-structures/curve';
 import {boundValue, distance, magnitude} from '#core/math';
 import {

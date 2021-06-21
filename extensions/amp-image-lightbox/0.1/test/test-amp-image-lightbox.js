@@ -22,7 +22,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {ImageViewer} from '../amp-image-lightbox';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from '#core/window';
 import {parseSrcset} from '#core/dom/srcset';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 

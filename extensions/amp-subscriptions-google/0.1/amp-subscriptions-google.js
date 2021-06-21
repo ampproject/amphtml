@@ -37,7 +37,7 @@ import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
 import {Services} from '#service';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from '#core/window';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {experimentToggles, isExperimentOn} from '#experiments';
 import {getData} from '../../../src/event-helper';

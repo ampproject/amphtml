@@ -18,7 +18,7 @@ import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {Priority} from '#service/navigation';
 import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from '#core/window';
 import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
 import {createElementWithAttributes} from '#core/dom';
 import {createLinker} from './linker';

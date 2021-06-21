@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from '#core/window';
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 import {user} from './log';

@@ -25,7 +25,7 @@ import {
 } from './variable-source';
 import {Expander} from './url-expander/expander';
 import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from '#core/window';
 import {
   addMissingParamsToUrl,
   addParamsToUrl,

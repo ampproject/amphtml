@@ -15,7 +15,7 @@
  */
 
 import {MessageType} from '../../../../src/3p-frame-messaging';
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from '#core/window';
 import {
   calculateIntersectionRect,
   maybeSetupCrossOriginObserver,
