@@ -26,7 +26,7 @@ import {numeric} from '../../../src/transition';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {realChildElements} from '#core/dom/query';
 
 /** @const {string} */

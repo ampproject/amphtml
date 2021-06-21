@@ -17,7 +17,7 @@
 import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 import {dev, devAssert} from '../../../src/log';
 import {getEnclosingContainerTypes} from '#ads/google/a4a/utils';
-import {getPageLayoutBoxBlocking} from '#core/dom/page-layout-box';
+import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {isInManualExperiment} from '#ads/google/a4a/traffic-experiments';
 import {isObject} from '#core/types';
 import {tryResolve} from '#core/data-structures/promise';

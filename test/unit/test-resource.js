@@ -21,7 +21,7 @@ import {Resource, ResourceState} from '#service/resource';
 import {ResourcesImpl} from '#service/resources-impl';
 import {Services} from '#service';
 import {isCancellation} from '../../src/error-reporting';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 describes.realWin('Resource', {amp: true}, (env) => {
   let win, doc;

@@ -27,7 +27,7 @@ import {isArray, isFiniteNumber} from '#core/types';
 import {
   layoutPositionRelativeToScrolledViewport,
   layoutRectLtwh,
-} from '#core/math/layout-rect';
+} from '#core/dom/layout/rect';
 import {rootNodeFor} from '#core/dom';
 
 const TAG = 'amp-analytics/visibility-manager';

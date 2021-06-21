@@ -53,12 +53,12 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {
   intersectionEntryToJson,
   measureIntersection,
-} from '../../../src/utils/intersection';
-import {moveLayoutRect} from '#core/math/layout-rect';
+} from '#core/dom/layout/intersection';
+import {moveLayoutRect} from '#core/dom/layout/rect';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {toWin} from '#core/window';
 
 /** @const {string} Tag name for 3P AD implementation. */

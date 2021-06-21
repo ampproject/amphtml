@@ -22,7 +22,7 @@ import {
   observeContentSize,
   unobserveBorderBoxSize,
   unobserveContentSize,
-} from '#core/dom/size-observer';
+} from '#core/dom/layout/size-observer';
 import {removeItem} from '#core/types/array';
 
 describes.realWin('DOM - size-observer', {}, (env) => {

@@ -18,7 +18,7 @@ import {Services} from '#service';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '#core/types/object';
 import {getData} from '../../../src/event-helper';
-import {getPageLayoutBoxBlocking} from '#core/dom/page-layout-box';
+import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {getStyle, setStyles} from '#core/dom/style';
 import {parseUrlDeprecated} from '../../../src/url';
 import {throttle} from '#core/types/function';

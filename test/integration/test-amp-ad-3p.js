@@ -20,7 +20,7 @@ import {createCustomEvent} from '../../src/event-helper';
 import {createFixtureIframe, poll} from '#testing/iframe';
 import {forceExperimentBranch} from '#experiments';
 import {installPlatformService} from '#service/platform-impl';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 const IFRAME_HEIGHT = 3000;
 function createFixture() {

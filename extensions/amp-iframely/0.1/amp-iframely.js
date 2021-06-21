@@ -17,7 +17,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {measureIntersection} from '../../../src/utils/intersection';
+import {measureIntersection} from '#core/dom/layout/intersection';
 import {omit} from '#core/types/object';
 import {setStyle} from '#core/dom/style';
 import {tryParseJson} from '#core/types/object/json';

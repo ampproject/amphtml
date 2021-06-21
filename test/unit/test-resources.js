@@ -22,7 +22,7 @@ import {ResourcesImpl} from '#service/resources-impl';
 import {Services} from '#service';
 import {Signals} from '#core/data-structures/signals';
 import {VisibilityState} from '#core/constants/visibility-state';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {loadPromise} from '../../src/event-helper';
 
 /*eslint "google-camelcase/google-camelcase": 0*/

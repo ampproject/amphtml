@@ -23,7 +23,7 @@ import {
 import {closest} from '#core/dom/query';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {htmlFor} from '#core/dom/static-template';
-import {observeContentSize} from '#core/dom/size-observer';
+import {observeContentSize} from '#core/dom/layout/size-observer';
 import {setStyles} from '#core/dom/style';
 
 /**

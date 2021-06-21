@@ -25,7 +25,7 @@ import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {iterateCursor} from '#core/dom';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {once} from '#core/types/function';
 import {
   resetStyles,

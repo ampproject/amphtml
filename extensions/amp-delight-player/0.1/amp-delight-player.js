@@ -39,7 +39,7 @@ import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {setStyle} from '#core/dom/style';
 import {userAssert} from '../../../src/log';
 

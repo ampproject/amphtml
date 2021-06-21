@@ -18,7 +18,7 @@ import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {Util} from './util';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
-import {measureIntersection} from '../../../src/utils/intersection';
+import {measureIntersection} from '#core/dom/layout/intersection';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {toWin} from '#core/window';
 import {user, userAssert} from '../../../src/log';

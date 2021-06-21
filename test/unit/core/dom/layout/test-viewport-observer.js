@@ -18,7 +18,7 @@ import {
   createViewportObserver,
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 
 describes.sandboxed('Viewport Observer', {}, (env) => {
   describe('createViewportObserver', () => {

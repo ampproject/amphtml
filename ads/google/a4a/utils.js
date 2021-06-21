@@ -26,7 +26,7 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {getPageLayoutBoxBlocking} from '#core/dom/page-layout-box';
+import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {getTimingDataSync} from '#service/variable-source';
 import {internalRuntimeVersion} from '../../../src/internal-version';
 import {parseJson} from '#core/types/object/json';

@@ -18,7 +18,7 @@ import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {
   LayoutMarginsChangeDef,
   cloneLayoutMarginsChangeDef,
-} from '#core/math/layout-rect';
+} from '#core/dom/layout/rect';
 import {Services} from '#service';
 import {
   closestAncestorElementBySelector,

@@ -34,7 +34,7 @@ import {getData} from '../../../src/event-helper';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '#core/dom/size-observer';
+} from '#core/dom/layout/size-observer';
 import {removeElement} from '#core/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {tryParseJson} from '#core/types/object/json';

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {computedStyle} from './style';
+import {computedStyle} from '#core/dom/style';
 import {remove} from '#core/types/array';
 import {toWin} from '#core/window';
 import {tryCallback} from '#core/error';
 
 // typedef imports
-import {LayoutSizeDef} from '#core/math/layout-rect';
+import {LayoutSizeDef} from './rect';
 
 /** @typedef {!LayoutSizeDef|!ResizeObserverSize} TargetSize */
 

@@ -25,11 +25,11 @@ import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '#core/dom/size-observer';
+} from '#core/dom/layout/size-observer';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {removeElement} from '#core/dom';
 
 const TAG = 'amp-3d-gltf';

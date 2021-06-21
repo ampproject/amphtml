@@ -19,7 +19,7 @@ import {dict} from '#core/types/object';
 import {findSentences, markTextRangeList} from './findtext';
 import {isExperimentOn} from '#experiments';
 import {listenOnce} from '../../../src/event-helper';
-import {moveLayoutRect} from '#core/math/layout-rect';
+import {moveLayoutRect} from '#core/dom/layout/rect';
 import {once} from '#core/types/function';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';

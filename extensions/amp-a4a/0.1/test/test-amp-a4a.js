@@ -57,7 +57,7 @@ import {
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
-import {layoutRectLtwh, layoutSizeFromRect} from '#core/math/layout-rect';
+import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
 import {macroTask} from '#testing/yield';
 import {resetScheduledElementForTesting} from '#service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';

@@ -19,7 +19,7 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '#core/math/layout-rect';
+} from '#core/dom/layout/rect';
 import {Observable} from '#core/data-structures/observable';
 import {throttle} from '#core/types/function';
 

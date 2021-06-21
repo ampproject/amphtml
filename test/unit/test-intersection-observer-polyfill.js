@@ -21,7 +21,7 @@ import {
   intersectionRatio,
 } from '../../src/utils/intersection-observer-3p-host';
 import {installHiddenObserverForDoc} from '#service/hidden-observer-impl';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 const fakeAmpDoc = {
   getRootNode: () => {

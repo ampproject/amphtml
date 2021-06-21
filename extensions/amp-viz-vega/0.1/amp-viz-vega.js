@@ -28,7 +28,7 @@ import {isFiniteNumber, isObject} from '#core/types';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '#core/dom/size-observer';
+} from '#core/dom/layout/size-observer';
 import {tryParseJson} from '#core/types/object/json';
 
 export class AmpVizVega extends AMP.BaseElement {
