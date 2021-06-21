@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,16 @@ import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
-import {CSS} from '../../../build/amp-story-interactive-img-quiz-0.1.css';
+import {CSS} from '../../../build/amp-story-interactive-img-poll-0.1.css';
 import {ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
 
-export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
+export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
   /**
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, InteractiveType.QUIZ);
+    super(element, InteractiveType.POLL);
   }
 
   /** @override */
@@ -37,7 +37,7 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
 
   /** @override */
   buildComponent() {
-    this.rootEl_ = htmlFor(this.element)`<p>Image quiz component</p>`;
+    this.rootEl_ = htmlFor(this.element)`<p>Image poll component</p>`;
     return this.rootEl_;
   }
 }
