@@ -36,17 +36,13 @@ export class AmpStoryBackgroundBlur {
 
     /** @private @const {!Element} */
     this.canvas_ = null;
-
-    /** @private @const {!Element} */
-    this.context_ = null;
   }
 
   /**
-   * Setup canvas, context and attach it to the document.
+   * Setup canvas and attach it to the document.
    */
   attach() {
     this.canvas_ = document.createElement('canvas');
-    this.context_ = this.canvas_.getContext('2d');
     this.canvas_.width = this.canvas_.height = CANVAS_SIZE;
     setStyles(this.canvas_, {
       width: '100%',
@@ -73,6 +69,7 @@ export class AmpStoryBackgroundBlur {
    * @param {?Element} fillElement
    */
   animate_(fillElement) {
+    const context = this.canvas_.getContext('2d');
     let startTime;
     const nextFrame = (currTime) => {
       if (!startTime) {
@@ -81,11 +78,11 @@ export class AmpStoryBackgroundBlur {
       const elapsed = currTime - startTime;
       if (elapsed < DURATION_MS) {
         const easing = 1 - Math.pow(1 - elapsed / DURATION_MS, 2);
-        this.context_.globalAlpha = easing;
+        context.globalAlpha = easing;
         if (fillElement) {
-          this.context_.drawImage(fillElement, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+          context.drawImage(fillElement, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
         } else {
-          this.context_.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+          context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
         }
         requestAnimationFrame(nextFrame);
       }
