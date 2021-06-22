@@ -35,36 +35,36 @@ export const Default = () => {
   return (
     <>
       <div lightbox> invalid lightboxed div element </div>
-      <amp-img
+      <img
         width="360"
         height="240"
         src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
         lightbox
-      ></amp-img>
+      />
       <amp-img
         width="360"
         height="240"
         src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
         lightbox
       ></amp-img>
-      <amp-img
+      <img
         width="360"
         height="240"
         src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
         lightbox
-      ></amp-img>
+      />
       <amp-img
         width="360"
         height="240"
         src="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
         lightbox
       ></amp-img>
-      <amp-img
+      <img
         width="360"
         height="240"
         src="https://images.unsplash.com/photo-1598133893773-de3574464ef0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
         lightbox
-      ></amp-img>
+      />
       <amp-img
         width="360"
         height="240"
@@ -78,36 +78,36 @@ export const Default = () => {
 export const Carousel = () => {
   return (
     <amp-base-carousel width="360" height="240">
-      <amp-img
+      <img
         width="360"
         height="240"
         src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
         lightbox
-      ></amp-img>
+      />
       <amp-img
         width="360"
         height="240"
         src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
         lightbox
       ></amp-img>
-      <amp-img
+      <img
         width="360"
         height="240"
         src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
         lightbox
-      ></amp-img>
+      />
       <amp-img
         width="360"
         height="240"
         src="https://images.unsplash.com/photo-1583512603806-077998240c7a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
         lightbox
       ></amp-img>
-      <amp-img
+      <img
         width="360"
         height="240"
         src="https://images.unsplash.com/photo-1598133893773-de3574464ef0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
         lightbox
-      ></amp-img>
+      />
       <amp-img
         width="360"
         height="240"
