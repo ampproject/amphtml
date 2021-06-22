@@ -266,7 +266,7 @@ export class AnalyticsRoot {
             elementArray.push(nodeList[j]);
           }
         }
-        elementArray = this.getDataVarsElements(elementArray, selector);
+        elementArray = this.getDataVarsElements_(elementArray, selector);
         userAssert(elementArray.length, `Element "${selector}" not found`);
         elements = elements.concat(elementArray);
       }
@@ -283,7 +283,7 @@ export class AnalyticsRoot {
    * @param {string} selector
    * @return {!Array<!Element>}
    */
-  getDataVarsElements(elementArray, selector) {
+  getDataVarsElements_(elementArray, selector) {
     let removedCount = 0;
     const dataVarsArray = [];
     for (let i = 0; i < elementArray.length; i++) {

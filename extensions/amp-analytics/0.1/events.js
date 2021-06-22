@@ -1281,28 +1281,24 @@ export class VideoEventTracker extends EventTracker {
     const videoSpec = config['videoSpec'] || {};
     const selectorValue = userAssert(
       config['selector'] || videoSpec['selector'],
-      'Missing required selector on click trigger'
+      'Missing required selector on video trigger'
     );
-    const selector = isArray(selectorValue)
-      ? selectorValue
-      : selectorValue.split();
-    this.assertUniqueSelectors_(selector);
-    const selectionMethod = config['selectionMethod'] || null;
+    const selector = isArray(selectorValue) ? selectorValue : [selectorValue];
 
-    const targetReadyPromise = [];
+    this.assertValidSelectors_(selector);
+    const selectionMethod = config['selectionMethod'] || null;
+    const targetReadyPromises = [];
+
     selector.forEach((item) => {
-      targetReadyPromise.push(
+      targetReadyPromises.push(
         this.root.getElements(context, item, selectionMethod)
       );
     });
-
-    //TODO: check for uniqueness of selectors
 
     const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
     const excludeAutoplay = videoSpec['exclude-autoplay'];
     const interval = videoSpec['interval'];
     const percentages = videoSpec['percentages'];
-
     const on = config['on'];
 
     const percentageInterval = 5;
@@ -1396,14 +1392,14 @@ export class VideoEventTracker extends EventTracker {
         'No target specified by video session event.'
       );
 
-      Promise.all(targetReadyPromise).then((targetReady) => {
+      Promise.all(targetReadyPromises).then((targetReady) => {
         targetReady.forEach((target) => {
           if (!target[0].contains(el)) {
             return;
           }
           const normalizedDetails = removeInternalVars(details);
           listener(
-            new AnalyticsEvent(target, normalizedType, normalizedDetails)
+            new AnalyticsEvent(target[0], normalizedType, normalizedDetails)
           );
         });
       });
@@ -1411,11 +1407,17 @@ export class VideoEventTracker extends EventTracker {
   }
 
   /**
-   * Assert that the selectors are all unique
+   * Assert that the selectors are all unique and are non-empty
    * @param {!Array<string>|string} selectors
    */
-  assertUniqueSelectors_(selectors) {
+  assertValidSelectors_(selectors) {
     if (isArray(selectors)) {
+      if (selectors.length === 0) {
+        userAssert(
+          selectors.length,
+          'Missing required selector on video trigger'
+        );
+      }
       const map = {};
       for (let i = 0; i < selectors.length; i++) {
         userAssert(
