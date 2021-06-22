@@ -12,7 +12,6 @@
   "flexAdSlots": 0.05,
   "flexible-bitrate": 0.5,
   "ios-fixed-no-transfer": 1,
-  "visibility-trigger-improvements": 1,
   "ads-initialIntersection": 1,
   "amp-cid-backup": 1,
   "layout-aspect-ratio-css": 1,

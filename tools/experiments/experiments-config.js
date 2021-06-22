@@ -159,12 +159,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
   },
   {
-    id: 'visibility-trigger-improvements',
-    name: 'AMP Analytics Visibility Trigger Improvements',
-    spec: 'https://github.com/ampproject/amphtml/issues/26823',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
-  },
-  {
     id: 'a4a-no-signing',
     name: 'Remove signing requirement for AMPHTML ads',
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
