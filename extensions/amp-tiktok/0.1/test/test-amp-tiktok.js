@@ -150,7 +150,7 @@ describes.realWin(
       expect(ariaTitle).to.equal('TikTok');
     });
 
-    it('renders aria title with oEmbed request', async () => {
+    it.skip('renders aria title with oEmbed request', async () => {
       const videoSrc =
         'https://www.tiktok.com/@scout2015/video/6948210747285441798';
       const player = await getTiktok({'data-src': videoSrc});
