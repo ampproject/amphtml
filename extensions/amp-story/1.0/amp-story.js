@@ -2245,7 +2245,7 @@ export class AmpStory extends AMP.BaseElement {
 
     const pagesByDistance = this.getPagesByDistance_();
 
-    if (!isExperimentOn(this.win, 'amp-story-load-first-only')) {
+    if (!isExperimentOn(this.win, 'amp-story-load-first-page-only')) {
       return pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach((pageId) => {
           const page = this.getPageById(pageId);
@@ -2254,13 +2254,11 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
 
-    const preloadAllPages = (overrideDistances) => {
+    const preloadAllPages = () => {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach((pageId) => {
           const page = this.getPageById(pageId);
-          if (overrideDistances || !page.hasDistance()) {
-            page.setDistance(distance);
-          }
+          page.setDistance(distance);
         });
       });
     };
@@ -2274,9 +2272,17 @@ export class AmpStory extends AMP.BaseElement {
             page.setDistance(0);
             return page.signals().whenSignal(CommonSignals.LOAD_END);
           })
-        ).then(() => preloadAllPages(/* overrideDistances */ false));
+        ).then(() => {
+          if (
+            pagesByDistance[0].every(
+              (curr) => this.getPageById(curr).getDistance() == 0
+            )
+          ) {
+            preloadAllPages();
+          }
+        });
       }
-      preloadAllPages(/* overrideDistances */ true);
+      preloadAllPages();
     });
   }
 
