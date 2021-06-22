@@ -20,10 +20,10 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {Layout} from '#core/dom/layout';
+import {Layout, getLayoutClass, parseLayout} from '#core/dom/layout';
 import {Services} from '#service';
 import {computedStyle, setStyles} from '#core/dom/style';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 
@@ -193,6 +193,70 @@ export class AmpRender extends BaseElement {
     return super.isLayoutSupported(layout);
   }
 
+  /**
+   * Undoes previous size-defined layout, must be called in mutation context.
+   * @param {string} layoutString
+   * @see src/core/dom/layout/index.js
+   */
+  undoLayout_(layoutString) {
+    const layout = parseLayout(layoutString);
+    const layoutClass = getLayoutClass(devAssert(layout));
+    this.element.classList.remove(layoutClass, 'i-amphtml-layout-size-defined');
+
+    // TODO(amphtml): Remove [width] and [height] attributes too?
+    if (
+      [
+        Layout.FILL,
+        Layout.FIXED,
+        Layout.FLEX_ITEM,
+        // Layout.FLUID,
+        // Layout.INTRINSIC,
+        Layout.RESPONSIVE,
+      ].includes(layout)
+    ) {
+      setStyles(this.element, {width: '', height: ''});
+    } else if (layout == Layout.FIXED_HEIGHT) {
+      setStyles(this.element, {height: ''});
+    }
+
+    // TODO(wg-performance): Use a new, unprivileged API.
+    // The applySize() call removes the sizer element.
+    this.element./*OK*/ applySize();
+  }
+
+  /**
+   * Handles the `changeToLayoutContainer` action.
+   * @return {!Promise}
+   * @private
+   */
+  handleChangeToLayoutContainer_() {
+    const previousLayout = this.element.getAttribute('i-amphtml-layout');
+    // If we have already changed to layout container, no need to run again.
+    if (previousLayout === Layout.CONTAINER) {
+      return Promise.resolve();
+    }
+    return this.mutateElement(() => {
+      this.undoLayout_(previousLayout);
+      const container = this.element.querySelector('.i-amphtml-fill-content');
+      container.classList.remove(
+        'i-amphtml-fill-content',
+        'i-amphtml-replaced-content'
+      );
+
+      // The overflow element is generally hidden with visibility hidden,
+      // but after changing to layout container, this causes an undesirable
+      // empty white space so we hide it with "display: none" instead.
+      // const overflowElement = this.getOverflowElement();
+      // if (overflowElement) {
+      //   toggle(overflowElement, false);
+      // }
+
+      this.element.setAttribute('layout', 'container');
+      this.element.setAttribute('i-amphtml-layout', 'container');
+      this.element.classList.add('i-amphtml-layout-container');
+    });
+  }
+
   /** @override */
   init() {
     this.initialSrc_ = this.element.getAttribute('src');
@@ -216,9 +280,7 @@ export class AmpRender extends BaseElement {
     });
 
     this.registerAction('changeToLayoutContainer', () => {
-      if (this.element.getAttribute('i-amphtml-layout') === Layout.CONTAINER) {
-        return Promise.resolve();
-      }
+      this.handleChangeToLayoutContainer_();
     });
 
     return dict({
