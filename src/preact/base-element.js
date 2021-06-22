@@ -52,7 +52,7 @@ import {getMode} from '../mode';
 import {hydrate, render} from '#preact';
 import {installShadowStyle} from '../shadow-embed';
 import {isElement} from '#core/types';
-import {sequentialIdGenerator} from '#core/data-structures';
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 
 /**
  * The following combinations are allowed.

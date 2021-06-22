@@ -22,7 +22,7 @@ import {omit} from '#core/types/object';
 import {
   randomIdGenerator,
   sequentialIdGenerator,
-} from '#core/data-structures';
+} from '#core/data-structures/id-generator';
 import {
   useCallback,
   useContext,
