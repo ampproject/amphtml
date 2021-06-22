@@ -698,7 +698,6 @@
     {
       "url": "examples/visual-tests/amp-story/amp-story-interactive-img-poll.html",
       "name": "amp-story-interactive-img-poll: basic test",
-      "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
       ],
@@ -706,7 +705,6 @@
     {
       "url": "examples/visual-tests/amp-story/amp-story-interactive-img-quiz.html",
       "name": "amp-story-interactive-img-quiz: basic test",
-      "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
       ],
