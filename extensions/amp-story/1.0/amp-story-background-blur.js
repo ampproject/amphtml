@@ -88,7 +88,6 @@ export class AmpStoryBackgroundBlur {
           this.context_.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
         }
         requestAnimationFrame(nextFrame);
-        console.log('running');
       }
     };
     requestAnimationFrame(nextFrame);
