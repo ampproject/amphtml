@@ -32,7 +32,7 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
 
   /** @override */
   buildCallback() {
-    return super.buildCallback(CSS, ImgCSS);
+    return super.buildCallback(CSS + ImgCSS);
   }
 
   /** @override */
