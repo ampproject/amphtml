@@ -215,6 +215,12 @@ export class AmpRender extends BaseElement {
       api.refresh();
     });
 
+    this.registerAction('changeToLayoutContainer', () => {
+      if (this.element.getAttribute('i-amphtml-layout') === Layout.CONTAINER) {
+        return Promise.resolve();
+      }
+    });
+
     return dict({
       'ariaLiveValue': hasAriaLive
         ? this.element.getAttribute('aria-live')
