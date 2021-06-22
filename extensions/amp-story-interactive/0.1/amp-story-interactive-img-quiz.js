@@ -20,7 +20,49 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-img-quiz-0.1.css';
 import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {htmlFor} from '#core/dom/static-template';
+
+/**
+ * Generates the template for the image quiz.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildQuizTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-interactive-img-container">
+      <div class="i-amphtml-story-interactive-prompt-container"></div>
+      <div class="i-amphtml-story-interactive-img-option-container"></div>
+    </div>
+  `;
+};
+
+/**
+ * Generates the template for each option.
+ *
+ * @param {!Element} option
+ * @return {!Element}
+ */
+const buildOptionTemplate = (option) => {
+  const html = htmlFor(option);
+  return html`
+		<div
+      class="i-amphtml-story-interactive-img-quiz-option i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
+      aria-live="polite"
+    >
+			<button class="i-amphtml-story-interactive-img-option-button">
+				<img class="i-amphtml-story-interactive-img-option-img" />
+				<div class="i-amphtml-story-interactive-img-option-percentage-fill"></div>
+				<span class="i-amphtml-story-interactive-img-option-percentage-text"></span>
+			</button>
+      <div class="i-amphtml-story-interactive-img-quiz-answer-choice-container">
+        <span class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"></span>
+      </div>
+		</div>
+  `;
+};
 
 export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
   /**
@@ -28,6 +70,9 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
    */
   constructor(element) {
     super(element, InteractiveType.QUIZ);
+
+    /** @private {!Array<string>} */
+    this.localizedAnswerChoices_ = [];
   }
 
   /** @override */
@@ -37,7 +82,66 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
 
   /** @override */
   buildComponent() {
-    this.rootEl_ = htmlFor(this.element)`<p>Image quiz component</p>`;
+    this.rootEl_ = buildQuizTemplate(this.element);
+    this.attachContent_(this.rootEl_);
     return this.rootEl_;
+  }
+
+  /**
+   * Finds the prompt and options content
+   * and adds it to the quiz element.
+   *
+   * @private
+   * @param {Element} root
+   */
+  attachContent_(root) {
+    this.attachPrompt_(root);
+
+    // Localize the answer choice options
+    this.localizedAnswerChoices_ = [
+      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A,
+      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B,
+      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C,
+      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D,
+    ].map((choice) => this.localizationService.getLocalizedString(choice));
+    const optionContainer = this.rootEl_.querySelector(
+      '.i-amphtml-story-interactive-img-option-container'
+    );
+    this.options_.forEach((option, index) =>
+      optionContainer.appendChild(this.configureOption_(option, index))
+    );
+  }
+
+  /**
+   * Creates an option container with option content,
+   * adds styling and answer choices,
+   * and adds it to the quiz element.
+   *
+   * @param {!./amp-story-interactive-abstract.OptionConfigType} option
+   * @param {number} index
+   * @return {!Element}
+   * @private
+   */
+  configureOption_(option, index) {
+    const convertedOption = buildOptionTemplate(this.element);
+
+    // Fill in the answer choice and set the option ID
+    const answerChoiceEl = convertedOption.querySelector(
+      '.i-amphtml-story-interactive-img-quiz-answer-choice'
+    );
+    answerChoiceEl.textContent = this.localizedAnswerChoices_[index];
+    convertedOption.optionIndex_ = option['optionIndex'];
+
+    // Extract and structure the option information
+    const imgEl = convertedOption.querySelector(
+      '.i-amphtml-story-interactive-img-option-img'
+    );
+    imgEl.setAttribute('src', option['image']);
+
+    if ('correct' in option) {
+      convertedOption.setAttribute('correct', 'correct');
+    }
+
+    return convertedOption;
   }
 }
