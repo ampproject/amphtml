@@ -76,6 +76,13 @@ const cssEntryPoints = [
     append: false,
   },
   {
+    // Internal CSS used for the desktop panels experiment iframes inside `src/amp-story-player/amp-story-player.js`.
+    path: 'amp-story-player-iframe-desktop-panels.css',
+    outJs: 'amp-story-player-iframe-desktop-panels.css.js',
+    outCss: 'amp-story-player-iframe-desktop-panels-v0.css',
+    append: false,
+  },
+  {
     path: 'amp-ima-video-iframe.css',
     outJs: 'amp-ima-video-iframe.css.js',
     outCss: 'amp-ima-video-iframe-v0.css',

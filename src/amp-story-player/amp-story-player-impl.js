@@ -36,6 +36,8 @@ import {isJsonScriptTag, tryFocus} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
+// Source for this constant is css/amp-story-player-iframe-desktop-panels.css
+import {cssText as cssTextDesktopPanels} from '../../build/amp-story-player-iframe-desktop-panels.css';
 import {devAssertElement} from '#core/assert';
 import {findIndex, toArray} from '#core/types/array';
 import {getMode} from '../mode';
@@ -183,6 +185,12 @@ const TAG = 'amp-story-player';
 const LOG_TYPE = {
   DEV: 'amp-story-player-dev',
 };
+
+/**
+ * Flag to show or hide the desktop panels player experiment.
+ * @const {boolean}
+ */
+const DESKTOP_PANELS_STORY_PLAYER_EXP_ON = false;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -445,7 +453,13 @@ export class AmpStoryPlayer {
   /** @private */
   initializeShadowRoot_() {
     this.rootEl_ = this.doc_.createElement('div');
-    this.rootEl_.classList.add('i-amphtml-story-player-main-container');
+    if (DESKTOP_PANELS_STORY_PLAYER_EXP_ON) {
+      this.rootEl_.classList.add(
+        'i-amphtml-story-player-main-container-desktop-panels'
+      );
+    } else {
+      this.rootEl_.classList.add('i-amphtml-story-player-main-container');
+    }
 
     const shadowContainer = this.doc_.createElement('div');
 
@@ -464,7 +478,11 @@ export class AmpStoryPlayer {
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
-    styleEl.textContent = cssText;
+    if (DESKTOP_PANELS_STORY_PLAYER_EXP_ON) {
+      styleEl.textContent = cssTextDesktopPanels;
+    } else {
+      styleEl.textContent = cssText;
+    }
     containerToUse.appendChild(styleEl);
     containerToUse.insertBefore(this.rootEl_, containerToUse.firstElementChild);
   }
@@ -542,7 +560,11 @@ export class AmpStoryPlayer {
     if (story.posterImage) {
       setStyle(iframeEl, 'backgroundImage', story.posterImage);
     }
-    iframeEl.classList.add('story-player-iframe');
+    if (DESKTOP_PANELS_STORY_PLAYER_EXP_ON) {
+      iframeEl.classList.add('story-player-iframe-desktop-panels');
+    } else {
+      iframeEl.classList.add('story-player-iframe');
+    }
     iframeEl.setAttribute('allow', 'autoplay');
 
     applySandbox(iframeEl);
@@ -1020,7 +1042,9 @@ export class AmpStoryPlayer {
 
     requestAnimationFrame(() => {
       const {iframe} = story;
-      resetStyles(iframe, ['transform', 'transition']);
+      if (!DESKTOP_PANELS_STORY_PLAYER_EXP_ON) {
+        resetStyles(iframe, ['transform', 'transition']);
+      }
       iframe.setAttribute('i-amphtml-iframe-position', position);
     });
   }
