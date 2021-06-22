@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import '../amp-date-countdown';
-//import {Services} from '../../../../src/services';
+//import {Services} from '../../../../src/service';
 
 describes.realWin(
   'amp-date-countdown',

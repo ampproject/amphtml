@@ -16,8 +16,8 @@
 
 import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from '../dialog';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/core/dom';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
 import {installStylesForDoc} from '../../../../src/style-installer';
 
 describes.realWin('AmpSubscriptions Dialog', {amp: true}, (env) => {

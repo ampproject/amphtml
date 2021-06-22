@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {DomBasedWeakRef} from '../../../src/core/data-structures/dom-based-weakref';
-import {Services} from '../../../src/services';
-import {childElement, childElementsByTag} from '../../../src/core/dom/query';
+import {DomBasedWeakRef} from '#core/data-structures/dom-based-weakref';
+import {Services} from '#service';
+import {childElement, childElementsByTag} from '#core/dom/query';
 import {dev, devAssert} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
 import {listen, listenOnce} from '../../../src/event-helper';
-import {toArray} from '../../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 const TAG = 'amp-video';
 

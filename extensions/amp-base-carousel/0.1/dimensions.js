@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {mod} from '../../../src/core/math';
-import {setImportantStyles, setStyle} from '../../../src/core/dom/style';
+import {mod} from '#core/math';
+import {setImportantStyles, setStyle} from '#core/dom/style';
 
 /**
  * @enum {number}

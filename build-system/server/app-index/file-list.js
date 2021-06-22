@@ -15,65 +15,16 @@
  */
 
 /* eslint-disable local/html-template */
-
-const documentModes = require('./document-modes');
-const {AmpState, ampStateKey, containsExpr} = require('./amphtml-helpers');
-const {appendQueryParamsToUrl, replaceLeadingSlash} = require('./url');
 const {html, joinFragments} = require('./html');
-const {KeyValueOptions} = require('./form');
+const {htmlEnvelopePrefixKey} = require('./settings');
+const {replaceLeadingSlash} = require('./url');
 
 const examplesPathRegex = /^\/examples\//;
 const htmlDocRegex = /\.html$/;
 
-const endpoint = (q) => appendQueryParamsToUrl('/dashboard/api/listing', q);
-
-const selectModeStateId = 'documentMode';
-const selectModeStateKey = 'selectModePrefix';
-const selectModeKey = ampStateKey(selectModeStateId, selectModeStateKey);
-
-const endpointStateId = 'listingEndpoint';
-const endpointStateKey = 'src';
-const endpointKey = ampStateKey(endpointStateId, endpointStateKey);
-
-const FileListSearchInput = ({basepath}) => html`
-  <input
-    type="text"
-    class="file-list-search"
-    placeholder="Fuzzy Search"
-    pattern="[a-zA-Z0-9-]+"
-    on="input-debounced: AMP.setState({
-      ${endpointStateId}: {
-        ${endpointStateKey}: '${endpoint({
-      path: basepath,
-      search: '',
-    })}' + event.value
-      }
-    })"
-  />
-`;
-
-const ExamplesDocumentModeSelect = () => html`
-  <label for="examples-mode-select">
-    Document mode:
-    <select
-      id="examples-mode-select"
-      on="change:AMP.setState({
-          ${selectModeStateId}: {
-            ${selectModeStateKey}: event.value
-          }
-        })"
-    >
-      ${KeyValueOptions(documentModes)}
-    </select>
-  </label>
-`;
-
 const linksToExample = (shouldContainBasepath, opt_name) =>
   examplesPathRegex.test(shouldContainBasepath) &&
   htmlDocRegex.test(opt_name || shouldContainBasepath);
-
-const ExamplesSelectModeOptional = ({basepath}) =>
-  !examplesPathRegex.test(basepath + '/') ? '' : ExamplesDocumentModeSelect();
 
 /**
  * @param {{ name: string, href: string, boundHref?: string|undefined }} config
@@ -92,105 +43,48 @@ const FileListItem = ({boundHref, href, name}) =>
     </div>
   `;
 
-const PlaceholderFileListItem = ({href, name, selectModePrefix}) =>
+const FileListItemBound = ({href, htmlEnvelopePrefix, name}) =>
   linksToExample(href)
     ? FileListItem({
         name,
-        href: selectModePrefix + replaceLeadingSlash(href, ''),
-        boundHref: `(${selectModeKey} || '${selectModePrefix}') + '${replaceLeadingSlash(
+        href: htmlEnvelopePrefix + replaceLeadingSlash(href, ''),
+        boundHref: `(${htmlEnvelopePrefixKey} || '${htmlEnvelopePrefix}') + '${replaceLeadingSlash(
           href,
           ''
         )}'`,
       })
     : FileListItem({href, name});
 
-const maybePrefixExampleDocHref = (basepath, name, selectModePrefix) =>
+const maybePrefixExampleDocHref = (basepath, name, htmlEnvelopePrefix) =>
   (linksToExample(basepath, name)
-    ? replaceLeadingSlash(basepath, selectModePrefix)
+    ? replaceLeadingSlash(basepath, htmlEnvelopePrefix)
     : basepath) + name;
 
-const FileListHeading = ({basepath, selectModePrefix}) => html`
+const FileListHeading = ({basepath}) => html`
   <div class="file-list-heading">
     <h3 class="code" id="basepath">${basepath}</h3>
-    ${FileListSearchInput({basepath})}
     <div class="file-list-right-section">
-      ${AmpState(selectModeStateId, {
-        [selectModeStateKey]: selectModePrefix,
-      })}
-      ${ExamplesSelectModeOptional({basepath})}
       <a href="/~" class="underlined">List root directory</a>
     </div>
   </div>
 `;
 
-const wrapFileList = (rendered) => html`
-  <div class="file-list-container">
-    <div class="wrap">${rendered}</div>
-  </div>
-`;
+const FileList = ({basepath, fileSet, htmlEnvelopePrefix}) =>
+  html`
+    <div class="file-list">
+      ${FileListHeading({basepath})}
+      <div role="list">
+        ${joinFragments(fileSet, (name) =>
+          FileListItemBound({
+            name,
+            href: maybePrefixExampleDocHref(basepath, name, htmlEnvelopePrefix),
+            htmlEnvelopePrefix,
+          })
+        )}
+      </div>
+    </div>
+  `;
 
-const FileList = ({basepath, fileSet, selectModePrefix}) =>
-  wrapFileList(
-    joinFragments([
-      AmpState(endpointStateId, {
-        [endpointStateKey]: endpoint({path: basepath}),
-      }),
-
-      FileListHeading({basepath, selectModePrefix}),
-
-      html`
-        <amp-list
-          [src]="${endpointKey}"
-          src="${endpoint({path: basepath})}"
-          items="."
-          layout="fixed-height"
-          width="auto"
-          height="568px"
-          class="file-list custom-loader"
-        >
-          <div fallback>Failed to load data.</div>
-
-          <div placeholder>
-            <div role="list">
-              ${joinFragments(fileSet, (name) =>
-                PlaceholderFileListItem({
-                  name,
-                  href: maybePrefixExampleDocHref(
-                    basepath,
-                    name,
-                    selectModePrefix
-                  ),
-                  selectModePrefix,
-                })
-              )}
-            </div>
-          </div>
-
-          <template type="amp-mustache">
-            ${FileListItem({
-              href: `${basepath}{{.}}`,
-              boundHref: containsExpr(
-                "'{{.}}'",
-                "'.html'",
-                `(${selectModeKey} || '${selectModePrefix}') +` +
-                  `'${replaceLeadingSlash(basepath, '')}{{.}}'`,
-                `'${basepath}{{.}}'`
-              ),
-              name: '{{.}}',
-            })}
-          </template>
-
-          <div
-            overflow
-            role="button"
-            aria-label="Show more"
-            class="list-overflow"
-          >
-            Show more
-          </div>
-        </amp-list>
-      `,
-    ])
-  );
-
-module.exports = {FileList};
+module.exports = {
+  FileList,
+};

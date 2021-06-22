@@ -28,12 +28,8 @@ import {
 } from './development-ui';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
-import {Services} from '../../../src/services';
-import {
-  closest,
-  matches,
-  scopedQuerySelector,
-} from '../../../src/core/dom/query';
+import {Services} from '#service';
+import {closest, matches, scopedQuerySelector} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
@@ -41,15 +37,15 @@ import {
   triggerClickFromLightDom,
 } from './utils';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css-selectors';
+import {dict} from '#core/types/object';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 
 import {renderAsElement} from './simple-template';
 
-import {setImportantStyles} from '../../../src/core/dom/style';
-import {toArray} from '../../../src/core/types/array';
+import {setImportantStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -892,6 +888,7 @@ export class SystemLayer {
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
       shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+      shadowRoot.classList.remove('i-amphtml-story-desktop-one-panel');
       shadowRoot.removeAttribute('desktop');
 
       switch (uiState) {
@@ -902,6 +899,9 @@ export class SystemLayer {
         case UIType.DESKTOP_FULLBLEED:
           shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
+          break;
+        case UIType.DESKTOP_ONE_PANEL:
+          shadowRoot.classList.add('i-amphtml-story-desktop-one-panel');
           break;
       }
     });

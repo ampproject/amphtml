@@ -15,8 +15,8 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {Services} from '../../src/services';
-import {createLoaderElement} from '../../src/service/loader-element';
+import {Services} from '#service';
+import {createLoaderElement} from '#service/loader-element';
 
 describes.fakeWin('Loader', {amp: true}, (env) => {
   let clock;

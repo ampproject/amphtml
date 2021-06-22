@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isFiniteNumber} from '../../../../src/core/types';
+import {isFiniteNumber} from '#core/types';
 
 describes.sandboxed('type helpers', {}, () => {
   describe('isFiniteNumber', () => {
