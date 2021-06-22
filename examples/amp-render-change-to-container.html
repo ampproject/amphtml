@@ -11,6 +11,9 @@
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
     <script async custom-element="amp-render" src="https://cdn.ampproject.org/v0/amp-render-1.0.js"></script>
     <style amp-custom>
+      .product {
+        margin: 12px;
+      }
       .product .image-placeholder {
         width: 150px;
         height: 100px;
@@ -25,7 +28,7 @@
     <h1>amp-render changeToLayoutContainer example</h1>
     <amp-render
       id="my-amp-render"
-      layout="fixed-height" height="300"
+      layout="fixed-height" height="250"
       src="https://amp.dev/documentation/examples/api/slow-json-with-items?delay=2000"
       [src]="srcUrl"
       style="border:1px red solid;"
@@ -33,11 +36,6 @@
       <template type="amp-mustache">
         {{#items}}
         <div class="product" tabindex="0">
-          <div>
-            <div>{{name}}</div>
-            <div>{{{stars}}}</div>
-            <div>${{price}}</div>
-          </div>
           <div>
             <div>{{name}}</div>
             <div>{{{stars}}}</div>

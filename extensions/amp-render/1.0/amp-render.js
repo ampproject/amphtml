@@ -195,11 +195,11 @@ export class AmpRender extends BaseElement {
 
   /**
    * Undoes previous size-defined layout, must be called in mutation context.
-   * @param {string} layoutString
-   * @see src/core/dom/layout/index.js
+   * @param {string} layout
+   * @private
    */
-  undoLayout_(layoutString) {
-    const layout = parseLayout(layoutString);
+  undoLayout_(layout) {
+    const layout = parseLayout(layout);
     const layoutClass = getLayoutClass(devAssert(layout));
     this.element.classList.remove(layoutClass, 'i-amphtml-layout-size-defined');
 
@@ -209,8 +209,6 @@ export class AmpRender extends BaseElement {
         Layout.FILL,
         Layout.FIXED,
         Layout.FLEX_ITEM,
-        // Layout.FLUID,
-        // Layout.INTRINSIC,
         Layout.RESPONSIVE,
       ].includes(layout)
     ) {
@@ -242,14 +240,6 @@ export class AmpRender extends BaseElement {
         'i-amphtml-fill-content',
         'i-amphtml-replaced-content'
       );
-
-      // The overflow element is generally hidden with visibility hidden,
-      // but after changing to layout container, this causes an undesirable
-      // empty white space so we hide it with "display: none" instead.
-      // const overflowElement = this.getOverflowElement();
-      // if (overflowElement) {
-      //   toggle(overflowElement, false);
-      // }
 
       this.element.setAttribute('layout', 'container');
       this.element.setAttribute('i-amphtml-layout', 'container');
