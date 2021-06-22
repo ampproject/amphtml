@@ -289,6 +289,7 @@ const htmlFixtureGlobs = [
   '!examples/amp-story/interactive_quizzes.html',
   '!examples/amp-story/interactive_results.html',
   '!examples/amp-story/interactives.html',
+  '!examples/amp-story/lcp.html',
   '!examples/amp-story/player-local-stories.html',
   '!examples/amp-story/player-story-attribution.html',
   '!examples/amp-story/player-with-button.html',
