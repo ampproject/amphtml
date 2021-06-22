@@ -53,7 +53,7 @@ import {logo, showMoreArrow} from './images';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {removeElement} from '#core/dom';
 
 class AmpPlaybuzz extends AMP.BaseElement {

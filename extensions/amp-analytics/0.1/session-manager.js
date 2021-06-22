@@ -40,6 +40,7 @@ export const SESSION_MAX_AGE_MILLIS = 30 * 60 * 1000;
  */
 export const SESSION_VALUES = {
   SESSION_ID: 'sessionId',
+  TIMESTAMP: 'creationTimestamp',
 };
 
 /**

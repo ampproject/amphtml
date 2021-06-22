@@ -25,7 +25,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {getMode} from '../../../src/mode';
 import {isArray} from '#core/types';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {map} from '#core/types/object';
 
 import {provideVisibilityManager} from './visibility-manager';
