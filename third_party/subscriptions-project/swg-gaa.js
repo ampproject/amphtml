@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.168 */
+/** Version: 0.1.22.170 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -189,6 +189,8 @@ const AnalyticsEvent = {
   ACTION_SWG_SUBSCRIPTION_MINI_PROMPT_CLOSE: 1032,
   ACTION_SWG_CONTRIBUTION_MINI_PROMPT_CLOSE: 1033,
   ACTION_CONTRIBUTION_OFFER_SELECTED: 1034,
+  ACTION_SHOWCASE_REGWALL_GSI_CLICK: 1035,
+  ACTION_SHOWCASE_REGWALL_EXISTING_ACCOUNT_CLICK: 1036,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,

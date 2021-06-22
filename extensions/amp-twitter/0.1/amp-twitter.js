@@ -15,12 +15,12 @@
  */
 
 import {MessageType} from '../../../src/3p-frame-messaging';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {htmlFor} from '#core/dom/static-template';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {removeElement} from '#core/dom';
 
 const TYPE = 'twitter';
 
@@ -101,7 +101,7 @@ class AmpTwitter extends AMP.BaseElement {
       allowFullscreen: true,
     });
     iframe.title = this.element.title || 'Twitter';
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.updateForLoadingState_();
     listenFor(
       iframe,

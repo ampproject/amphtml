@@ -16,7 +16,7 @@ FAIL
 |    Tests for the amp-story-twitter component inside amp-story.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>

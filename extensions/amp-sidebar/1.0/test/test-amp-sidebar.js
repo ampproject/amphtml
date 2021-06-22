@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 import '../amp-sidebar';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor, whenCalled} from '../../../../testing/test-helper';
+import {ActionInvocation} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {toggleExperiment} from '#experiments';
+import {waitFor, whenCalled} from '#testing/test-helper';
 
 describes.realWin(
   'amp-sidebar:1.0',

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as service from '../../../../src/service';
+import * as service from '../../../../src/service-helpers';
 import {AmpMustache} from '../amp-mustache';
-import {Purifier} from '../../../../src/purifier/purifier';
-import mustache from '../../../../third_party/mustache/mustache';
+import {Purifier} from '#purifier';
+import mustache from '#third_party/mustache/mustache';
 
 describes.repeated(
   'amp-mustache 0.2',

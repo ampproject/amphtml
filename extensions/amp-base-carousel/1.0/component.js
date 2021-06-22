@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {
   Alignment,
   Axis,
@@ -24,14 +24,14 @@ import {
 } from './dimensions';
 import {Arrow} from './arrow';
 import {CarouselContext} from './carousel-context';
-import {ContainWrapper} from '../../../src/preact/component';
+import {ContainWrapper} from '#preact/component';
 import {Scroller} from './scroller';
-import {WithAmpContext} from '../../../src/preact/context';
+import {WithAmpContext} from '#preact/context';
 import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
-import {forwardRef, toChildArray} from '../../../src/preact/compat';
-import {isRTL} from '../../../src/dom';
-import {mod} from '../../../src/core/math';
-import {toWin} from '../../../src/core/window';
+import {forwardRef, toChildArray} from '#preact/compat';
+import {isRTL} from '#core/dom';
+import {mod} from '#core/math';
+import {toWin} from '#core/window';
 import {
   useCallback,
   useContext,
@@ -41,7 +41,7 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
 import {useStyles} from './component.jss';
 
 /**

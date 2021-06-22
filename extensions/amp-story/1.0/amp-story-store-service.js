@@ -15,12 +15,12 @@
  */
 
 import {EmbedMode, parseEmbedMode} from './embed-mode';
-import {Observable} from '../../../src/core/data-structures/observable';
-import {Services} from '../../../src/services';
-import {deepEquals} from '../../../src/core/types/object/json';
+import {Observable} from '#core/data-structures/observable';
+import {Services} from '#service';
+import {deepEquals} from '#core/types/object/json';
 import {dev} from '../../../src/log';
-import {hasOwn} from '../../../src/core/types/object';
-import {registerServiceBuilder} from '../../../src/service';
+import {hasOwn} from '#core/types/object';
+import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -51,8 +51,9 @@ export const getStoreService = (win) => {
  */
 export const UIType = {
   MOBILE: 0,
-  DESKTOP_PANELS: 1, // Default desktop UI.
+  DESKTOP_PANELS: 1, // Default desktop UI displaying previous and next pages.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
+  DESKTOP_ONE_PANEL: 4, // Desktop UI with one panel and space around story.
   VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
 };
 

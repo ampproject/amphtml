@@ -15,7 +15,7 @@
  */
 
 const test = require('ava');
-const {replaceUrls} = require('../app-utils');
+const {replaceUrls, toInaboxDocument} = require('../app-utils');
 
 test('replaceUrls("compiled", ...)', async (t) => {
   const mode = 'compiled';
@@ -274,46 +274,65 @@ test('replaceUrls(rtv, ...)', async (t) => {
   );
 });
 
-test('replaceUrls("compiled", ..., inabox)', async (t) => {
+test('toInaboxDocument(...)', async (t) => {
+  t.is(
+    toInaboxDocument(
+      `<html amp>
+        <head>
+          <script src="https://cdn.ampproject.org/v0.js"></script>
+          <script src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+        </head>
+      </html>`
+    ),
+    `<html amp4ads>
+        <head>
+          <script src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+          <script src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+        </head>
+      </html>`
+  );
+});
+
+test('replaceUrls("compiled", toInaboxDocument(...))', async (t) => {
   const mode = 'compiled';
   const hostName = '';
-  const inabox = true;
   t.is(
     replaceUrls(
       mode,
-      '<script src="https://cdn.ampproject.org/v0.js"></script>',
-      hostName,
-      inabox
+      toInaboxDocument(
+        '<script src="https://cdn.ampproject.org/v0.js"></script>'
+      ),
+      hostName
     ),
     '<script src="/dist/amp4ads-v0.js"></script>'
   );
 });
 
-test('replaceUrls("default", ..., inabox)', async (t) => {
+test('replaceUrls("default", toInaboxDocument(...))', async (t) => {
   const mode = 'default';
   const hostName = '';
-  const inabox = true;
   t.is(
     replaceUrls(
       mode,
-      '<script src="https://cdn.ampproject.org/v0.js"></script>',
-      hostName,
-      inabox
+      toInaboxDocument(
+        '<script src="https://cdn.ampproject.org/v0.js"></script>'
+      ),
+      hostName
     ),
     '<script src="/dist/amp-inabox.js"></script>'
   );
 });
 
-test('replaceUrls(rtv, ..., inabox)', async (t) => {
+test('replaceUrls(rtv, toInaboxDocument(...))', async (t) => {
   const mode = '123456789012345';
   const hostName = '';
-  const inabox = true;
   t.is(
     replaceUrls(
       mode,
-      '<script src="https://cdn.ampproject.org/v0.js"></script>',
-      hostName,
-      inabox
+      toInaboxDocument(
+        '<script src="https://cdn.ampproject.org/v0.js"></script>'
+      ),
+      hostName
     ),
     '<script src="https://cdn.ampproject.org/rtv/123456789012345/amp4ads-v0.js"></script>'
   );

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {dev} from '../../../src/log';
-import {dict} from './../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {renderAsElement} from './simple-template';
 
 /** @const {string} */

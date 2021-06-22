@@ -55,7 +55,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -192,7 +193,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -282,7 +284,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -295,7 +298,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -342,16 +346,23 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
     "name": "amp-facebook-comments",
-    "version": [
-      "0.1",
-      "1.0"
-    ],
+    "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-facebook-comments",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "wrapper": "bento"
+    }
   },
   {
     "name": "amp-facebook-like",
@@ -363,7 +374,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -376,7 +388,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -393,7 +406,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -531,7 +545,8 @@
       "cssBinaries": [
         "amp-inline-gallery-pagination"
       ],
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -553,7 +568,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -595,7 +611,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -786,7 +803,10 @@
   {
     "name": "amp-render",
     "version": "1.0",
-    "latestVersion": "1.0"
+    "latestVersion": "1.0",
+    "options": {
+      "wrapper": "bento"
+    }
   },
   {
     "name": "amp-resize-observer-polyfill",
@@ -820,7 +840,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -828,19 +849,27 @@
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
-      "noWrapper": true
+      "wrapper": "none"
     }
   },
   {
     "name": "amp-sidebar",
     "version": [
       "0.1",
-      "0.2",
-      "1.0"
+      "0.2"
     ],
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-sidebar",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -873,7 +902,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -1009,7 +1040,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -1046,7 +1078,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -1071,7 +1104,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -1092,7 +1126,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -1114,7 +1149,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -1140,7 +1176,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {
@@ -1195,7 +1232,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "npm": true
+      "npm": true,
+      "wrapper": "bento"
     }
   }
 ]

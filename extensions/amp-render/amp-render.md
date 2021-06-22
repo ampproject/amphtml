@@ -31,7 +31,9 @@ limitations under the License.
 
 ## Usage
 
-The `amp-render` component renders content in a specified template. It can fetch content from a CORS JSON endpoint or inline from `amp-state` or `amp-script`.
+The `amp-render` component fetches JSON data, then renders that data using a template. `amp-render` can use data from a CORS JSON endpoint, from an `amp-state` state variable, or from `amp-script`.
+
+Since `amp-render`'s data can come from `amp-script`, you can use your own JavaScript to filter data, cap its size, create list functionality, and otherwise customize the component's behavior and appearance. If you prefer to use HTML attributes, `amp-list` provides a richer feature set.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
@@ -91,8 +93,8 @@ Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-an
 The `<amp-render>` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes.
 
 ```html
-<button on="tap:myList.refresh">Refresh List</button>
-<amp-render id="myList" src="https://example.com/data.json">
+<button on="tap:myComponent.refresh">Refresh</button>
+<amp-render id="myComponent" src="https://example.com/data.json">
   <template type="amp-mustache">
     <div>{{title}}</div>
   </template>
@@ -107,10 +109,10 @@ See the [Substitutions Guide](../../docs/spec/amp-var-substitutions.md) for more
 For example:
 
 ```html
-<amp-render src="https://foo.com/list.json?RANDOM"></amp-render>
+<amp-render src="https://example.com/data.json?RANDOM"></amp-render>
 ```
 
-may make a request to something like `https://foo.com/list.json?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
+may make a request to something like `https://example.com/data.json?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
 
 ## Attributes
 
@@ -120,8 +122,8 @@ The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-render>`. There are three valid protocols for the `src` attribute.
 
 1. **https**: This must refer to a CORS HTTP service. Insecure HTTP is not supported.
-2. **amp-state**: For initializing from `<amp-state>` data. See [Initialization from `<amp-state>`](#initialization-from-amp-state) for more details.
-3. **amp-script**: For using `<amp-script>` functions as the data source. See [Using `<amp-script>` as a data source](#using-amp-script-as-a-data-source) for more details.
+2. **amp-state**: For initializing from `<amp-state>` data. See [Initialization from `<amp-state>`](https://amp.dev/documentation/components/amp-list/#initialization-from-amp-state) section from `amp-list` for more details.
+3. **amp-script**: For using `<amp-script>` functions as the data source. See [Using `<amp-script>` as a data source](https://amp.dev/documentation/components/amp-list/#using-amp-script-as-a-data-source) section from `amp-list` for more details.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
@@ -198,7 +200,9 @@ If we just want to display the German cars from the response, we can use the `ke
 </amp-render>
 ```
 
-Note that they `key` attribute is valid only when `src` is a URL.
+[tip type="important"]
+Note that the `key` attribute is valid only when `src` is a URL. To access a sub-object in data fetched via JavaScript, use your own code to locate that sub-object before passing it to `<amp-render>`.
+[/tip]
 
 ### `binding`
 
@@ -217,19 +221,6 @@ If `binding` attribute is not provided, default is `refresh`. This is a departur
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
-
-## Actions
-
-The `<amp-render>` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes.
-
-```html
-<button on="tap:myList.refresh">Refresh List</button>
-<amp-render id="myList" src="https://foo.com/data.json">
-  <template type="amp-mustache">
-    <div>{{title}}</div>
-  </template>
-</amp-render>
-```
 
 ## Accessibility
 

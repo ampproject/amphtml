@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {VideoWrapper} from '../video-wrapper';
-import {WithAmpContext} from '../../../../src/preact/context';
-import {createRef} from '../../../../src/preact';
-import {forwardRef} from '../../../../src/preact/compat';
+import * as Preact from '#preact';
+import {VideoWrapper} from '../component';
+import {WithAmpContext} from '#preact/context';
+import {createRef} from '#preact';
+import {forwardRef} from '#preact/compat';
 import {mount} from 'enzyme';
-import {omit} from '../../../../src/core/types/object';
+import {omit} from '#core/types/object';
 
 import {useStyles as useAutoplayStyles} from '../autoplay.jss';
 

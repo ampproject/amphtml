@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {elementStringOrPassThru} from '../error/message-helpers';
-import {includes} from '../types/string';
-import {isArray, isElement, isString} from '../types';
-import {remove} from '../types/array';
+import {elementStringOrPassThru} from '#core/error/message-helpers';
+import {includes} from '#core/types/string';
+import {isArray, isElement, isString} from '#core/types';
+import {remove} from '#core/types/array';
 
 /**
  * @fileoverview This file provides the base implementation for assertion
