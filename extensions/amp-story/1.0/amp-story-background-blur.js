@@ -68,7 +68,7 @@ export class AmpStoryBackgroundBlur {
   }
 
   /**
-   * Animated background image transition.
+   * Animated background transition.
    * @private
    * @param {?Element} fillElement
    */
