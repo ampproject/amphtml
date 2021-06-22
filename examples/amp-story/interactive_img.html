@@ -1,0 +1,43 @@
+<!doctype html>
+<html ⚡ lang="es">
+  <head>
+    <meta charset="utf-8">
+    <title>Interactive Image Story</title>
+    <link rel="canonical" href="interactives.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Rubik', sans-serif;
+      }
+      amp-story-interactive-quiz, amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-results {
+        justify-self: center;
+      }
+    </style>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <!--<script async custom-element="amp-story-interactive" src="/dist/v0/amp-story-interactive-0.1.max.js"></script>-->
+    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <amp-story
+        standalone
+        title="Interactive Image Story"
+        publisher="AMP Story testing"
+        publisher-logo-src="example.com/logo.png"
+        poster-portrait-src="example.com/poster.jpg">
+        <amp-story-page id="cover">
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-img-quiz option-1-text option-2-text></amp-story-interactive-img-quiz>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="img-poll">
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-img-poll option-1-text option-2-text></amp-story-interactive-img-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+    </amp-story>
+  </body>
+</html>

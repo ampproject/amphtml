@@ -19,7 +19,7 @@ import {
   InteractiveType,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-img-poll-0.1.css';
-import {ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
+import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
 
 export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
