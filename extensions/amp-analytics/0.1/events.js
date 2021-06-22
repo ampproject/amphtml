@@ -1301,7 +1301,6 @@ export class VideoEventTracker extends EventTracker {
       ? selectorValue
       : [selectorValue];
 
-    //this.assertValidSelectors_(selector);
     userAssert(
       selectorArray.length,
       'Missing required selector on video trigger'

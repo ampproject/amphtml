@@ -133,7 +133,7 @@ describes.realWin(
           undefined,
           AnalyticsEventType.VIDEO,
           defaultVideoConfig,
-          {}
+          () => {}
         );
 
         expect(tracker.sessionObservable_.getHandlerCount()).to.equal(1);
