@@ -104,7 +104,9 @@ export function useSlotContext(ref, opt_props) {
       slot,
       LoadingProp,
       Slot,
-      /** @type {!./core/constants/loading-instructions.Loading} */ (context.loading)
+      /** @type {!./core/constants/loading-instructions.Loading} */ (
+        context.loading
+      )
     );
 
     if (!context.playable) {
