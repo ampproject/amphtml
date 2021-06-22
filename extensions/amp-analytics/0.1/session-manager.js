@@ -143,7 +143,7 @@ export class SessionManager {
    * @return {!SessionInfoDef}
    */
   updateSession_(session) {
-    if (this.isSessionExpired_(session)) {
+    if (isSessionExpired(session)) {
       const newSessionCount =
         session.count === undefined ? 1 : session.count + 1;
       session = constructSessionInfo(
@@ -187,7 +187,7 @@ function isSessionExpired(session) {
  * @return {number}
  */
 function generateSessionId() {
-  return Math.floor(10000 * Math.random());
+  return Math.round(10000 * Math.random());
 }
 
 /**
