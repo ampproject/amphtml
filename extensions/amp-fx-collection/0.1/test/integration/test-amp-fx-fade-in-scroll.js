@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-const config = describe.configure().ifChrome();
-config.run('amp-fx-collection', function () {
+const config = describes.sandboxed.configure().ifChrome();
+config.run('amp-fx-collection', {}, function () {
   const css = `
     .spacer {
       height: 100vh;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -46,9 +46,7 @@ export const Default = () => {
       <div style="height: 300px;">
         <amp-lightbox id="lightbox" layout="nodisplay" animation={animation}>
           <p>Test</p>
-          <button slot="close-button" on="tap:lightbox.close">
-            Close
-          </button>
+          <button slot="close-button">Close</button>
         </amp-lightbox>
         <div class="buttons">
           <button on="tap:lightbox">Open</button>

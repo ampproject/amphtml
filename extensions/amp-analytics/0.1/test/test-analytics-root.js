@@ -15,7 +15,7 @@
  */
 
 import * as IniLoad from '../../../../src/ini-load';
-import {AmpDocShadow} from '../../../../src/service/ampdoc-impl';
+import {AmpDocShadow} from '#service/ampdoc-impl';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
 import {AnalyticsEventType, CustomEventTracker} from '../events';
 import {ScrollManager} from '../scroll-manager';
@@ -23,7 +23,7 @@ import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
 } from '../visibility-manager';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 import {user} from '../../../../src/log';
 
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
@@ -356,9 +356,9 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         ]);
         // Check that non-experiment works
         toggleExperiment(win, 'visibility-trigger-improvements', false);
-        expect(
-          await root.getElements(body, '.notMyClass', null)
-        ).to.deep.equal([child3]);
+        expect(await root.getElements(body, '.notMyClass', null)).to.deep.equal(
+          [child3]
+        );
       });
 
       it('should only find elements with data-vars-*', async () => {

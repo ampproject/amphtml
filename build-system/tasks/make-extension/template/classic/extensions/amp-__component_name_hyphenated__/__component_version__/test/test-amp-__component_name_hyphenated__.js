@@ -15,14 +15,14 @@
  */
 
 import '../amp-__component_name_hyphenated__';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '#core/dom/static-template';
 
 describes.realWin(
   'amp-__component_name_hyphenated__-v__component_version__',
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-__component_name_hyphenated__:__component_version__:'],
+      extensions: ['amp-__component_name_hyphenated__:__component_version__'],
     },
   },
   (env) => {
@@ -38,7 +38,12 @@ describes.realWin(
     
     it('should contain "hello world" when built', async () => {
       const element = html`
-        <amp-__component_name_hyphenated__></amp-__component_name_hyphenated__>
+        <amp-__component_name_hyphenated__
+          width="100"
+          height="10"
+          layout="responsive"
+        >
+        </amp-__component_name_hyphenated__>
       `;
       doc.body.appendChild(element);
       await element.whenBuilt();

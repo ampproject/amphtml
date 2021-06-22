@@ -21,23 +21,23 @@ const globby = require('globby');
 const path = require('path');
 const url = require('url');
 const {
-  gitCommitHash,
+  ciPushBranch,
+  ciRepoSlug,
+  circleciPrMergeCommit,
+  isPullRequestBuild,
+  isPushBuild,
+} = require('../../common/ci');
+const {
   gitCiMainBaseline,
+  gitCommitHash,
   shortSha,
 } = require('../../common/git');
 const {
-  isPullRequestBuild,
-  isPushBuild,
-  ciPushBranch,
-  circleciPrMergeCommit,
-  ciRepoSlug,
-} = require('../../common/ci');
-const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
-const {cyan, red, yellow} = require('kleur/colors');
+const {cyan, red, yellow} = require('../../common/colors');
 const {log, logWithoutTimestamp} = require('../../common/logging');
-const {report, NoTTYReport} = require('@ampproject/filesize');
+const {NoTTYReport, report} = require('@ampproject/filesize');
 
 const filesizeConfigPath = require.resolve('./filesize.json');
 const fileGlobs = require(filesizeConfigPath).filesize.track;
@@ -276,13 +276,12 @@ module.exports = {
 };
 
 bundleSize.description =
-  'Checks if the minified AMP binary has exceeded its size cap';
+  'Check if minified AMP binaries have exceeded their size caps';
 bundleSize.flags = {
   'on_push_build':
     'Store bundle sizes in the AMP build artifacts repo for main branch builds',
   'on_pr_build': 'Report the bundle sizes for this pull request to GitHub',
   'on_skipped_build':
-    "Set the status of this pull request's bundle " +
-    'size check in GitHub to `skipped`',
-  'on_local_build': 'Compute bundle sizes for the locally built runtime',
+    "Set the status of a PR's bundle size check in GitHub to skipped",
+  'on_local_build': 'Compute bundle sizes for the locally built AMP binaries',
 };

@@ -49,7 +49,7 @@
 
 'use strict';
 
-const {cyan, red, green} = require('kleur/colors');
+const {cyan, green, red} = require('../common/colors');
 const {getOutput} = require('../common/process');
 const {log} = require('../common/logging');
 
@@ -101,4 +101,4 @@ module.exports = {
 };
 
 checkRenovateConfig.description =
-  'Checks the Renovate config file for correctness';
+  'Check the Renovate config file for correctness';

@@ -22,12 +22,13 @@ import {
   installVariableServiceForTesting,
   variableServiceForDoc,
 } from '../variables';
-import {Services} from '../../../../src/services';
-import {forceExperimentBranch} from '../../../../src/experiments';
+import {Services} from '#service';
+import {forceExperimentBranch} from '#experiments';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
+import {installSessionServiceForTesting} from '../session-manager';
 
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
   let fakeElement;
@@ -36,6 +37,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
   beforeEach(() => {
     fakeElement = env.win.document.documentElement;
     installLinkerReaderService(env.win);
+    installSessionServiceForTesting(env.ampdoc);
     variables = new VariableService(env.ampdoc);
   });
 
@@ -269,6 +271,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       win = env.win;
       doc = win.document;
       installLinkerReaderService(win);
+      installSessionServiceForTesting(doc);
       installVariableServiceForTesting(doc);
       variables = variableServiceForDoc(doc);
       const {documentElement} = win.document;
@@ -479,7 +482,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
     });
 
     it('replaces CONSENT_METADATA', () => {
-      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+      env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
         Promise.resolve({
           getConsentMetadataInfo: () => {
             return Promise.resolve({
@@ -498,7 +501,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
     });
 
     it('replaces CONSENT_STRING', () => {
-      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+      env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
         Promise.resolve({
           getConsentStringInfo: () => {
             return Promise.resolve('userConsentString');

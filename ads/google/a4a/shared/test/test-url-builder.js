@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {buildUrl} from '../url-builder';
+import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
-describe('buildUrl', () => {
+describes.sandboxed('buildUrl', {}, () => {
   it('should build a simple URL', () => {
     expect(
       buildUrl('https://example.test', {'key': 'value'}, Infinity)

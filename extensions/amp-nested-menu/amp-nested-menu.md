@@ -30,7 +30,7 @@ limitations under the License.
 
 The `<amp-nested-menu>` component must be placed inside `<amp-sidebar>`. The component may contain the following AMP elements:
 
--   [`<amp-img>`](../../builtins/amp-img.md)
+-   [`<amp-img>`](../../builtins/amp-img/amp-img.md)
 -   [`<amp-list>`](../amp-list/amp-list.md)
 -   [`<amp-accordion>`](../amp-accordion/amp-accordion.md)
 

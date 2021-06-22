@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
-import {Services} from '../services';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
   upgradeOrRegisterElement,
 } from './custom-element-registry';
 import {createExtensionScript, getExtensionScripts} from './extension-script';
-import {dev, devAssert} from '../log';
+import {dev, devAssert, user} from '../log';
 import {getMode} from '../mode';
 import {installStylesForDoc} from '../style-installer';
-import {map} from '../core/types/object';
+import {map} from '#core/types/object';
 import {registerExtendedTemplateForDoc} from './template-impl';
-import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
-import {rethrowAsync} from '../core/error';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
+import {rethrowAsync} from '#core/error';
 
 export const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const TAG = 'extensions';
@@ -37,13 +40,6 @@ const LATEST_VERSION = 'latest';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const LOADER_PROP = '__AMP_EXT_LDR';
 const SCRIPT_LOADED_PROP = '__AMP_SCR_LOADED';
-
-/**
- * Default milliseconds to wait for all extensions to load before erroring.
- * (8 seconds is the same as the CSS boilerplate timoeout)
- * @const
- */
-const LOAD_TIMEOUT = 16000;
 
 /**
  * Contains data for the declaration of a custom element.
@@ -203,17 +199,21 @@ export class Extensions {
    * loading/registration.
    * @param {string} extensionId
    * @param {string} version
-   * @param {number=} opt_timeout
    * @return {!Promise<?ExtensionDef>}
    */
-  waitForExtension(extensionId, version, opt_timeout) {
-    return /** @type {!Promise<?ExtensionDef>} */ (Services.timerFor(
-      this.win
-    ).timeoutPromise(
-      opt_timeout || LOAD_TIMEOUT,
-      this.waitFor_(this.getExtensionHolder_(extensionId, version)),
-      `Render timeout waiting for extension ${extensionId} to be load.`
-    ));
+  waitForExtension(extensionId, version) {
+    const wait = this.waitFor_(this.getExtensionHolder_(extensionId, version));
+
+    return Services.timerFor(this.win)
+      .timeoutPromise(16000, wait)
+      .catch((err) => {
+        if (!err.message.includes('timeout')) {
+          throw err;
+        }
+
+        user().error(TAG, `Waited over 16s to load extension ${extensionId}.`);
+        return wait;
+      });
   }
 
   /**

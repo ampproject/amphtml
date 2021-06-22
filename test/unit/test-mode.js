@@ -21,7 +21,7 @@ import {
 } from '../../src/mode';
 import {parseUrlDeprecated} from '../../src/url';
 
-describe('getMode', () => {
+describes.sandboxed('getMode', {}, () => {
   function getWin(url) {
     const win = {
       location: parseUrlDeprecated(url),
@@ -52,7 +52,7 @@ describe('getMode', () => {
   });
 });
 
-describe('getRtvVersion', () => {
+describes.sandboxed('getRtvVersion', {}, () => {
   afterEach(() => {
     resetRtvVersionForTesting();
   });

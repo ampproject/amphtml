@@ -27,10 +27,11 @@ const {Base} = mocha.reporters;
  */
 function ciReporter(runner, options) {
   Base.call(this, runner, options);
-  this._mochaDotsReporter = new MochaDotsReporter(runner, options);
-  this._jsonReporter = new JsonReporter(runner, options);
+  this._mochaDotsReporter = new MochaDotsReporter(runner);
+  this._jsonReporter = new JsonReporter(runner);
   this._mochaJunitReporter = new MochaJUnitReporter(runner, options);
-  return this;
+  // TODO(#28387) clean up this typing.
+  return /** @type {*} */ (this);
 }
 ciReporter.prototype.__proto__ = Base.prototype;
 

@@ -33,5 +33,30 @@
         {name: 'ampproject/wg-components'},
       ],
     },
+    {
+      pattern: 'localized-strings.js',
+      owners: [
+        {
+          name: 'gmajoulet',
+          notify: true,
+        },
+        {
+          name: 'newmuis',
+          notify: true,
+        },
+        {
+          name: 'enriqe',
+        },
+        {
+          name: 'processprocess',
+        },
+        {
+          name: 'mszylkowski',
+        },
+        {
+          name: 'raxsha',
+        },
+      ],
+    },
   ],
 }

@@ -89,7 +89,7 @@ The AMP runtime provides the following information to the ad:
     </ul>
   </dd>
   <dt><code>window.context.sourceUrl</code></dt>
-  <dd>Contains the source URL of the original AMP document. See details <a href="../spec/amp-var-substitutions.md#source-url">here</a></code>.</dd>
+  <dd>Contains the source URL of the original AMP document. See details <a href="../docs/spec/amp-var-substitutions.md#source-url">here</a></code>.</dd>
   <dt><code>window.context.startTime</code></dt>
   <dd>Contains the time at which processing of the amp-ad element started.</dd>
 </dl>
@@ -335,7 +335,7 @@ If the publisher would like to add custom JavaScript in the `remote.html` file t
 
 ## Developer guidelines for a pull request
 
-Please read through [DEVELOPING.md](../contributing/DEVELOPING.md) before contributing to this code repository.
+Please read through [developing.md](../docs/developing.md) before contributing to this code repository.
 
 ### Files to change
 
@@ -380,7 +380,7 @@ To speed up the review process, please run `amp lint` and `amp check-types`, the
 -   Add **cc ampproject/wg-monetization** in all pull request's descriptions.
 -   It's highly recommended to maintain [an integration test outside AMP repo](../3p/README.md#adding-proper-integration-tests).
 -   Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
--   [CLA](../CONTRIBUTING.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are:
+-   [CLA](../docs/contributing.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are:
     1. Using a different email address in the git commit.
     2. Not providing the exact company name in the PR thread.
 

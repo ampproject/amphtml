@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {Pass} from '../pass';
-import {Services} from '../services';
+import {Services} from '#service';
 import {
   addDocumentVisibilityChangeListener,
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
-} from '../utils/document-visibility';
+} from '#core/document-visibility';
 import {cancellation} from '../error-reporting';
 import {dev, devAssert} from '../log';
-import {getService, registerServiceBuilder} from '../service';
+import {getService, registerServiceBuilder} from '../service-helpers';
 import {installTimerService} from './timer-impl';
-import {rethrowAsync} from '../core/error';
+import {rethrowAsync} from '#core/error';
 
 /** @const {time} */
 const FRAME_TIME = 16;
@@ -212,9 +212,11 @@ export class Vsync {
    * @return {function(!VsyncStateDef=)}
    */
   createTask(task) {
-    return /** @type {function(!VsyncStateDef=)} */ ((opt_state) => {
-      this.run(task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=)} */ (
+      (opt_state) => {
+        this.run(task, opt_state);
+      }
+    );
   }
 
   /**
@@ -328,9 +330,11 @@ export class Vsync {
    * @return {function(!VsyncStateDef=):boolean}
    */
   createAnimTask(contextNode, task) {
-    return /** @type {function(!VsyncStateDef=):boolean} */ ((opt_state) => {
-      return this.runAnim(contextNode, task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=):boolean} */ (
+      (opt_state) => {
+        return this.runAnim(contextNode, task, opt_state);
+      }
+    );
   }
 
   /**
@@ -402,7 +406,7 @@ export class Vsync {
     this.backupPass_.cancel();
     this.scheduled_ = false;
 
-    const {tasks_: tasks, states_: states, nextFrameResolver_: resolver} = this;
+    const {nextFrameResolver_: resolver, states_: states, tasks_: tasks} = this;
     this.nextFrameResolver_ = null;
     this.nextFramePromise_ = null;
     // Double buffering

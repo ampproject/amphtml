@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-__component_name_hyphenated__-__component_version__.css';
-import {Layout} from '../../../src/layout';
+__css_import__;
+import {Layout, applyFillContent} from '#core/dom/layout';
 
 const TAG = 'amp-__component_name_hyphenated__';
- 
+
 export class Amp__component_name_pascalcase__ extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -37,7 +37,7 @@ export class Amp__component_name_pascalcase__ extends AMP.BaseElement {
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.textContent = this.myText_;
     this.element.appendChild(this.container_);
-    this.applyFillContent(this.container_, /* replacedContent */ true);
+    applyFillContent(this.container_, /* replacedContent */ true);
   }
 
   /** @override */
@@ -47,5 +47,5 @@ export class Amp__component_name_pascalcase__ extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '__component_version__', AMP => {
-  AMP.registerElement(TAG, Amp__component_name_pascalcase__, CSS);
+  AMP.registerElement(__register_element_args__);
 });

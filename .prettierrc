@@ -9,12 +9,6 @@
       "options": {"parser": "json5"}
     },
     {
-      "files": "build-system/tasks/make-extension/template/**",
-      "options": {
-        "requirePragma": true
-      }
-    },
-    {
       "files": "*.md",
       "options": {
         "parser": "markdown",
@@ -27,14 +21,14 @@
       "options": {"parser": "json"}
     },
     {
-      "files": [
-        ".circleci/config.yml",
-        ".codecov.yml",
-        ".github/workflows/continuous-integration-workflow.yml",
-        ".lando.yml",
-        ".lgtm.yml"
-      ],
-      "options": {"parser": "yaml"}
+      "files": "build-system/**/*.json",
+      "options": {"parser": "json-stringify"}
+    },
+    {
+      "files": "build-system/tasks/make-extension/template/**",
+      "options": {
+        "requirePragma": true
+      }
     }
   ]
 }

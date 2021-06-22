@@ -17,8 +17,8 @@
 
 const {
   staticTemplateFactories,
-  staticTemplateTags,
   staticTemplateFactoryFns,
+  staticTemplateTags,
 } = require('../babel-plugins/static-template-metadata');
 
 /**
@@ -125,7 +125,7 @@ module.exports = function (context) {
       const {start} = template;
 
       for (let i = 0; i < invalids.length; i++) {
-        const {tag, offset} = invalids[i];
+        const {offset, tag} = invalids[i];
         context.report({
           node: template,
           loc: sourceCode.getLocFromIndex(start + offset),
@@ -145,7 +145,8 @@ module.exports = function (context) {
   function invalidVoidTag(string) {
     // Void tags are defined at
     // https://html.spec.whatwg.org/multipage/syntax.html#void-elements
-    const invalid = /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)([a-zA-Z-]+)( [^>]*)?\/>/g;
+    const invalid =
+      /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)([a-zA-Z-]+)( [^>]*)?\/>/g;
     const matches = [];
 
     let match;

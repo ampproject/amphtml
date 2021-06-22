@@ -133,7 +133,7 @@ Remote configurations require the server to return a JSON object with the `pages
 
 ##### URL substitutions
 
-The `amp-next-page` `src` allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info. For example:
+The `amp-next-page` `src` allows all standard URL variable substitutions. See the [Substitutions Guide](../../docs/spec/amp-var-substitutions.md) for more info. For example:
 
 ```html
 <amp-next-page src="https://foo.com/config.json?RANDOM"></amp-next-page>
@@ -341,7 +341,7 @@ Each document loads with a full-width gray horizontal line to separate it from t
 The `<amp-next-page>` component supports analytics on the hosted page as well as on subsequently loaded articles. We recommend using the same analytics triggers used on standalone articles, including scroll-bound triggers.
 
 [tip type="important"]
-Tracking page views is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md) or `<amp-analytics>` on the host page. It is recommended to use the `useInitialPageSize` property of `<amp-analytics>` to get a more accurate measurement of the scroll triggers otherwise the host page's `100%` trigger point would only be fired after the user scrolled past all sub-documents. Note that this will also ignore the size changes caused by other extensions (such as expanding embedded content) so some scroll events might fire prematurely instead.
+Tracking page views is supported through [`<amp-pixel>`](../../builtins/amp-pixel/amp-pixel.md) or `<amp-analytics>` on the host page. It is recommended to use the `useInitialPageSize` property of `<amp-analytics>` to get a more accurate measurement of the scroll triggers otherwise the host page's `100%` trigger point would only be fired after the user scrolled past all sub-documents. Note that this will also ignore the size changes caused by other extensions (such as expanding embedded content) so some scroll events might fire prematurely instead.
 [/tip]
 
 Two custom analytics events are also provided on the host page to indicate transitioning between pages. These events can be tracked in the [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config as follows:

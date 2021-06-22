@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const colors = require('kleur/colors');
+const colors = require('../common/colors');
 const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');
@@ -47,7 +47,7 @@ const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
 const {VERSION} = require('../compile/internal-version');
 
-const {green, cyan} = colors;
+const {cyan, green} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
 /**
@@ -378,35 +378,33 @@ module.exports = {
 /* eslint "google-camelcase/google-camelcase": 0 */
 
 dist.description =
-  'Compiles AMP production binaries and applies AMP_CONFIG to runtime files';
+  'Compile AMP production binaries and apply AMP_CONFIG to runtime files';
 dist.flags = {
   pseudo_names:
-    'Compiles with readable names. ' +
-    'Great for profiling and debugging production code.',
+    'Compile with readable names (useful while profiling / debugging production code)',
   pretty_print:
-    'Outputs compiled code with whitespace. ' +
-    'Great for debugging production code.',
-  fortesting: 'Compiles production binaries for local testing',
-  noconfig: 'Compiles production binaries without applying AMP_CONFIG',
-  config: 'Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  coverage: 'Instruments compiled code for collecting coverage information',
-  extensions: 'Builds only the listed extensions.',
-  extensions_from: 'Builds only the extensions from the listed AMP(s).',
-  noextensions: 'Builds with no extensions.',
-  core_runtime_only: 'Builds only the core runtime.',
-  full_sourcemaps: 'Includes source code content in sourcemaps',
-  sourcemap_url: 'Sets a custom sourcemap URL with placeholder {version}',
-  type: 'Points sourcemap to fetch files from the correct GitHub tag',
-  esm: 'Does not transpile down to ES5',
+    'Output compiled code with whitespace (useful while profiling / debugging production code)',
+  fortesting: 'Compile production binaries for local testing',
+  noconfig: 'Compile production binaries without applying AMP_CONFIG',
+  config: 'Set the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  coverage: 'Instrument compiled code for collecting coverage information',
+  extensions: 'Build only the listed extensions',
+  extensions_from: 'Build only the extensions from the listed AMP(s)',
+  noextensions: 'Build with no extensions',
+  core_runtime_only: 'Build only the core runtime',
+  full_sourcemaps: 'Include source code content in sourcemaps',
+  sourcemap_url: 'Set a custom sourcemap URL with placeholder {version}',
+  type: 'Point sourcemap to fetch files from the correct GitHub tag',
+  esm: 'Do not transpile down to ES5',
   version_override: 'Override the version written to AMP_CONFIG',
-  watch: 'Watches for changes in files, re-compiles when detected',
-  closure_concurrency: 'Sets the number of concurrent invocations of closure',
-  debug: 'Outputs the file contents during compilation lifecycles',
+  watch: 'Watch for changes in files, re-compiles when detected',
+  closure_concurrency: 'Set the number of concurrent invocations of closure',
+  debug: 'Output the file contents during compilation lifecycles',
   define_experiment_constant:
-    'Builds runtime with the EXPERIMENT constant set to true',
+    'Build runtime with the EXPERIMENT constant set to true',
   sanitize_vars_for_diff:
-    'Sanitize the output to diff build results. Requires --pseudo_names',
-  sxg: 'Outputs the compiled code for the SxG build',
+    'Sanitize the output to diff build results (requires --pseudo_names)',
+  sxg: 'Output the compiled code for the SxG build',
   warning_level:
-    "Optionally sets closure's warning level to one of [quiet, default, verbose]",
+    "Optionally set closure's warning level to one of [quiet, default, verbose]",
 };

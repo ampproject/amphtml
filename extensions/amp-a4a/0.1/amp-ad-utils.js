@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {dev} from '../../../src/log';
-import {isArray, isObject} from '../../../src/core/types';
+import {isArray, isObject} from '#core/types';
 
 import {isSecureUrlDeprecated} from '../../../src/url';
-import {parseExtensionUrl} from '../../../src/service/extension-script';
-import {parseJson} from '../../../src/json';
+import {parseExtensionUrl} from '#service/extension-script';
+import {parseJson} from '#core/types/object/json';
 import {urls} from '../../../src/config';
 
 const TAG = 'amp-ad-util';
@@ -167,7 +167,7 @@ export function getAmpAdMetadata(creative) {
 /**
  * Merges any elements from customElementExtensions array into extensions array if
  * the element is not present.
- * @param {!Array<{custom-element: string, 'src': string}} extensions
+ * @param {!Array<{custom-element: string, 'src': string}>} extensions
  * @param {!Array<string>} customElementExtensions
  */
 export function mergeExtensionsMetadata(extensions, customElementExtensions) {

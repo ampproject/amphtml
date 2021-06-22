@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {VideoBaseElement} from '../../amp-video/1.0/base-element';
+import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 import {Youtube} from './component';
 
 export class BaseElement extends VideoBaseElement {}

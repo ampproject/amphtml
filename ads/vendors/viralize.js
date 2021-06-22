@@ -15,8 +15,8 @@
  */
 
 import {addParamsToUrl} from '../../src/url';
-import {loadScript, validateData} from '../../3p/3p';
-import {parseJson} from '../../src/json';
+import {loadScript, validateData} from '#3p/3p';
+import {parseJson} from '#core/types/object/json';
 
 /**
  * @param {!Window} global

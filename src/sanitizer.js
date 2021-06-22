@@ -25,7 +25,7 @@ import {
   isValidAttr,
 } from './purifier/sanitation';
 import {dict} from './core/types/object';
-import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
+import {htmlSanitizer} from '#third_party/caja/html-sanitizer';
 import {isAmp4Email} from './format';
 import {rewriteAttributeValue} from './url-rewrite';
 import {user} from './log';
@@ -134,10 +134,9 @@ export function sanitizeHtml(html, doc) {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
-        const scrubbed = /** @type {!JsonObject} */ (tagPolicy(
-          tagName,
-          attribs
-        ));
+        const scrubbed = /** @type {!JsonObject} */ (
+          tagPolicy(tagName, attribs)
+        );
         if (!scrubbed) {
           ignore++;
         } else {

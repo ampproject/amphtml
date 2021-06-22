@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../../core/types/object';
-import {rethrowAsync} from '../../core/error';
-import {trimStart} from '../../core/types/string';
-import {tryResolve} from '../../core/data-structures/promise';
+import {hasOwn} from '#core/types/object';
+import {rethrowAsync} from '#core/error';
+import {trimStart} from '#core/types/string';
+import {tryResolve} from '#core/data-structures/promise';
 import {user} from '../../log';
 
 /** @private @const {string} */
@@ -333,11 +333,9 @@ export class Expander {
       const result = this.evaluateBindingSync_(binding, name, opt_args);
       return encode ? encodeURIComponent(result) : result;
     } else {
-      return this.evaluateBindingAsync_(
-        binding,
-        name,
-        opt_args
-      ).then((result) => (encode ? encodeURIComponent(result) : result));
+      return this.evaluateBindingAsync_(binding, name, opt_args).then(
+        (result) => (encode ? encodeURIComponent(result) : result)
+      );
     }
   }
 

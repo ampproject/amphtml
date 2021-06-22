@@ -33,7 +33,7 @@ const HOST = 'http://localhost:8000';
 
 const EnvironmentBehaviorMap = {
   [AmpdocEnvironment.SINGLE]: {
-    ready(unusedController) {
+    ready() {
       return Promise.resolve();
     },
 
@@ -162,7 +162,7 @@ function getViewerUrl(url, {isEmail} = {isEmail: false}) {
  */
 class AmpDriver {
   /**
-   * @param {!./functional-test-controller.FunctionalTestController} controller
+   * @param {!*} controller
    */
   constructor(controller) {
     /** @private @const */

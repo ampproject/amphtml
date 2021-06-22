@@ -15,7 +15,7 @@
  */
 
 import {AmpAnimation} from '../amp-animation';
-import {DEFAULT_ACTION} from '../../../../src/core/constants/action-constants';
+import {DEFAULT_ACTION} from '#core/constants/action-constants';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
 import {WebAnimationPlayState} from '../web-animation-types';
 

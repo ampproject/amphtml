@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Signals} from '../../../../src/core/data-structures/signals';
+import {Signals} from '#core/data-structures/signals';
 
-describes.sandboxed('Signals', {}, (env) => {
+describes.sandboxed('data structures - Signals', {}, (env) => {
   let clock;
   let signals;
 

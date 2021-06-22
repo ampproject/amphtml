@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from '../../../src/core/data-structures/promise';
+import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
+import {Deferred} from '#core/data-structures/promise';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   VideoEvents,
 } from '../../../src/video-interface';
-import {PauseHelper} from '../../../src/utils/pause-helper';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 import {
   SandboxOptions,
   createFrameFor,
@@ -26,10 +27,11 @@ import {
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {
   disableScrollingOnIframe,
   looksLikeTrackingIframe,
@@ -37,15 +39,14 @@ import {
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
-  isFullscreenElement,
   removeElement,
-} from '../../../src/dom';
+} from '#core/dom';
 import {getConsentDataToForward} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {measureIntersection} from '../../../src/utils/intersection';
-import {once} from '../../../src/core/types/function';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isFullscreenElement} from '#core/dom/fullscreen';
+import {measureIntersection} from '#core/dom/layout/intersection';
+import {once} from '#core/types/function';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';
@@ -60,20 +61,6 @@ const SANDBOX = [
   SandboxOptions.ALLOW_POPUPS,
   SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
   SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
-];
-
-/**
- * Events allowed to be dispatched from messages.
- * @private @const
- */
-const ALLOWED_EVENTS = [
-  VideoEvents.PLAYING,
-  VideoEvents.PAUSE,
-  VideoEvents.ENDED,
-  VideoEvents.MUTED,
-  VideoEvents.UNMUTED,
-  VideoEvents.AD_START,
-  VideoEvents.AD_END,
 ];
 
 /**
@@ -113,7 +100,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {!UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.unlistenFrame_ = null;
 
     /** @private {?Deferred} */
@@ -184,8 +171,8 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   getMetadata_() {
-    const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
-    const {title, documentElement} = this.getAmpDoc().getRootNode();
+    const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(this.element);
+    const {documentElement, title} = this.getAmpDoc().getRootNode();
 
     return dict({
       'sourceUrl': sourceUrl,
@@ -211,8 +198,9 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
     const img = new Image();
     img.src = addDataParamsToUrl(poster, element);
+    img.setAttribute('loading', 'lazy');
     img.setAttribute('placeholder', '');
-    this.applyFillContent(img);
+    applyFillContent(img);
     return img;
   }
 
@@ -360,7 +348,7 @@ class AmpVideoIframe extends AMP.BaseElement {
         break;
     }
 
-    if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
+    if (BUBBLE_MESSAGE_EVENTS.indexOf(eventReceived) > -1) {
       dispatchCustomEvent(this.element, eventReceived);
       return;
     }

@@ -18,13 +18,13 @@ import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   pollForLayout,
-} from '../../testing/iframe.js';
+} from '#testing/iframe';
 
-describe('released components: ', function () {
+describes.sandboxed('released components: ', {}, function () {
   runTest.call(this, false);
 });
 
-describe('released components with polyfills: ', function () {
+describes.sandboxed('released components with polyfills: ', {}, function () {
   runTest.call(this, true);
 });
 

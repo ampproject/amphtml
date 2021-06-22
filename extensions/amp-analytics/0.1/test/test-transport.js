@@ -15,16 +15,13 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpScriptService} from '../../../../extensions/amp-script/0.1/amp-script';
-import {
-  ImagePixelVerifier,
-  mockWindowInterface,
-} from '../../../../testing/test-helper';
-import {Services} from '../../../../src/services';
+import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
+import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
+import {Services} from '#service';
 import {Transport} from '../transport';
 import {getMode} from '../../../../src/mode';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {installTimerService} from '../../../../src/service/timer-impl';
+import {installDocService} from '#service/ampdoc-impl';
+import {installTimerService} from '#service/timer-impl';
 import {loadPromise} from '../../../../src/event-helper';
 
 describes.realWin(
@@ -453,9 +450,8 @@ describes.realWin(
           '<amp-analytics type="bg"></amp-analytics>'
         );
         frame.contentWindow.__AMP_TOP = win;
-        const ampAnalyticsEl = frame.contentWindow.document.querySelector(
-          'amp-analytics'
-        );
+        const ampAnalyticsEl =
+          frame.contentWindow.document.querySelector('amp-analytics');
 
         transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;
@@ -479,9 +475,8 @@ describes.realWin(
           '<amp-analytics type="bg"></amp-analytics>'
         );
         frame.contentWindow.__AMP_TOP = win;
-        const ampAnalyticsEl = frame.contentWindow.document.querySelector(
-          'amp-analytics'
-        );
+        const ampAnalyticsEl =
+          frame.contentWindow.document.querySelector('amp-analytics');
 
         transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;

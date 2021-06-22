@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 import {COOKIELESS_API_SERVER} from '../constants';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {dict} from '../../../../src/core/types/object';
+import {createElementWithAttributes} from '#core/dom';
+import {dict} from '#core/types/object';
 import {getData} from '../../../../src/event-helper';
-import {isObject} from '../../../../src/core/types';
-import {parseJson} from '../../../../src/json';
+import {isObject} from '#core/types';
+import {parseJson} from '#core/types/object/json';
 
-import {setStyles, toggle} from '../../../../src/style';
+import {setStyles, toggle} from '#core/dom/style';
 
 const RE_IFRAME = /#iframe$/;
 const pixelatorFrameTitle = 'Pxltr Frame';
@@ -134,7 +134,7 @@ const dropPixelatorPixel = (url, ampDoc) => {
  * @param  {{sid: string, ampDoc: *}} options
  */
 const dropPixelGroups = (pixels, options) => {
-  const {sid, ampDoc} = options;
+  const {ampDoc, sid} = options;
   const pixelGroups = groupPixelsByTime(pixels);
   pixelGroups.forEach((pixelGroup) => {
     const {delay, pixels} = pixelGroup;

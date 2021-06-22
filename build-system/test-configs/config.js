@@ -24,7 +24,7 @@
  *   watched: boolean
  * }>
  */
-const initTestsPath = ['test/_init_tests.js'];
+const initTestsPath = ['testing/init-tests.js'];
 
 const karmaHtmlFixturesPath = 'test/fixtures/*.html';
 
@@ -105,8 +105,11 @@ const unitTestPaths = [
   'extensions/**/test/unit/*.js',
 ];
 
-// TODO(rsimha, #28838): Refine this opt-in mechanism.
-const unitTestCrossBrowserPaths = ['test/unit/test-error.js'];
+// TODO(amphtml): Opt-in more unit tests to run on Safari / FF / Edge.
+const unitTestCrossBrowserPaths = [
+  'test/unit/core/test-error.js',
+  'test/unit/test-log.js',
+];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
@@ -155,25 +158,22 @@ const presubmitGlobs = [
  * 2. Make sure it is listed in .vscode/settings.json (for auto-fix-on-save)
  */
 const prettifyGlobs = [
-  '.circleci/config.yml',
-  '.codecov.yml',
-  '.lando.yml',
-  '.lgtm.yml',
   '.prettierrc',
   '.renovaterc.json',
-  '.circleci/config.yml',
   '.vscode/settings.json',
   '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
+  '**/*.yml',
 ];
 
 /**
- * List of markdown files that may be checked by `amp check-links` (using
- * markdown-link-check).
+ * List of markdown and yaml files that may be checked by `amp check-links`
+ * (using markdown-link-check).
  */
 const linkCheckGlobs = [
+  '.github/ISSUE_TEMPLATE/*.yml',
   '**/*.md',
   '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
@@ -199,6 +199,13 @@ const invalidWhitespaceGlobs = [
 const htmlFixtureGlobs = [
   'examples/**/*.html',
   'test/fixtures/e2e/**/*.html',
+
+  // The following are not AMP documents and are not meant to validate.
+  '!**/bento/**/*.html',
+  '!examples/amp-video-iframe/frame*.html',
+  '!examples/viewer-iframe-poll.html',
+  '!examples/viewer-webview.html',
+  '!examples/viewer.html',
 
   // TODO(#25149): Fix these invalid files and remove them from this list.
   '!examples/accordion.amp.html',
@@ -252,7 +259,6 @@ const htmlFixtureGlobs = [
   '!examples/amp-redbull-player.amp.html',
   '!examples/amp-script/example.amp.html',
   '!examples/amp-script/example.sandboxed.amp.html',
-  '!examples/amp-script/hello-world.html',
   '!examples/amp-script/todomvc.amp.html',
   '!examples/amp-script/vue-todomvc.amp.html',
   '!examples/amp-skimlinks.html',
@@ -264,6 +270,7 @@ const htmlFixtureGlobs = [
   '!examples/amp-story/amp-story-animation.html',
   '!examples/amp-story/amp-story-auto-ads.html',
   '!examples/amp-story/amp-story-branching.html',
+  '!examples/amp-story/amp-story-desktop-one-panel.html',
   '!examples/amp-story/amp-story-panning-media.html',
   '!examples/amp-story/ampconf.html',
   '!examples/amp-story/analytics.html',
@@ -305,13 +312,6 @@ const htmlFixtureGlobs = [
   '!examples/amp-subscriptions-google/amp-subscriptions.amp.html',
   '!examples/amp-subscriptions-rtp.amp.html',
   '!examples/amp-tiktok.amp.html',
-  '!examples/amp-video-iframe/consent.html',
-  '!examples/amp-video-iframe/frame-consent-es2015.html',
-  '!examples/amp-video-iframe/frame-consent.html',
-  '!examples/amp-video-iframe/frame-es2015.html',
-  '!examples/amp-video-iframe/frame-videojs.html',
-  '!examples/amp-video-iframe/frame.html',
-  '!examples/amp-video/multi-bitrate/multi-bitrate.html',
   '!examples/ampcontext-creative-json.html',
   '!examples/ampcontext-creative.html',
   '!examples/amphtml-ads/adchoices-1.a4a.html',
@@ -341,7 +341,6 @@ const htmlFixtureGlobs = [
   '!examples/article-super-short.amp.html',
   '!examples/article.amp.html',
   '!examples/auto-ads.amp.html',
-  '!examples/bento.amp.html',
   '!examples/beopinion.amp.html',
   '!examples/beopinion.article.amp.html',
   '!examples/bind/carousels.amp.html',
@@ -353,7 +352,6 @@ const htmlFixtureGlobs = [
   '!examples/bind/sandbox.amp.html',
   '!examples/bind/svgimage.amp.html',
   '!examples/bodymovin-animation.amp.html',
-  '!examples/brightcove.amp.html',
   '!examples/csa.amp.html',
   '!examples/csp.amp.html',
   '!examples/date-picker.amp.html',
@@ -365,10 +363,8 @@ const htmlFixtureGlobs = [
   '!examples/forms.amp.html',
   '!examples/gfk-sensic-analytics.amp.html',
   '!examples/gwd.amp.html',
-  '!examples/ima-video.amp.html',
   '!examples/image-lightbox.amp.html',
   '!examples/img.amp.html',
-  '!examples/jwplayer.amp.html',
   '!examples/linkers.html',
   '!examples/live-blog-non-floating-button.amp.html',
   '!examples/live-list.amp.html',
@@ -383,10 +379,6 @@ const htmlFixtureGlobs = [
   '!examples/metadata-examples/video-json-ld.amp.html',
   '!examples/mraid/inabox-mraid.html',
   '!examples/multiple-docs.html',
-  '!examples/old-boilerplate.amp.html',
-  '!examples/ooyalaplayer.amp.html',
-  '!examples/playbuzz.amp.html',
-  '!examples/powr-player.amp.html',
   '!examples/pwa-multidoc-loader.html',
   '!examples/pwa/pwa-sd-polyfill.html',
   '!examples/pwa/pwa.html',
@@ -404,11 +396,6 @@ const htmlFixtureGlobs = [
   '!examples/user-notification.amp.html',
   '!examples/valueimpression.amp.html',
   '!examples/video-animation-sync.html',
-  '!examples/viewer-iframe-poll.html',
-  '!examples/viewer-webview.html',
-  '!examples/viewer.html',
-  '!examples/vimeo.amp.html',
-  '!examples/viqeo.amp.html',
   '!examples/visual-tests/amp-accordion/amp-accordion.html',
   '!examples/visual-tests/amp-date-picker/amp-date-picker.amp.html',
   '!examples/visual-tests/amp-inabox/amp-inabox-gpt.html',
@@ -425,22 +412,21 @@ const htmlFixtureGlobs = [
   '!examples/visual-tests/amp-story-player/player-local-story.html',
   '!examples/visual-tests/amp-story-player/story-attribution.html',
   '!examples/visual-tests/amp-story/amp-story-360-image.html',
-  '!examples/visual-tests/amp-story/amp-story-bookend.html',
-  '!examples/visual-tests/amp-story/amp-story-bookend.rtl.html',
   '!examples/visual-tests/amp-story/amp-story-bot-rendering.html',
   '!examples/visual-tests/amp-story/amp-story-consent.html',
   '!examples/visual-tests/amp-story/amp-story-consent.rtl.html',
   '!examples/visual-tests/amp-story/amp-story-cta-layer.html',
+  '!examples/visual-tests/amp-story/amp-story-desktop-one-panel.html',
   '!examples/visual-tests/amp-story/amp-story-dev-tools.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-presets.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-horizontal.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-thirds.html',
   '!examples/visual-tests/amp-story/amp-story-grid-layer-template-vertical.html',
-  '!examples/visual-tests/amp-story/amp-story-inline-page-attachment-dark-theme.html',
   '!examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html',
   '!examples/visual-tests/amp-story/amp-story-landscape-templates.html',
   '!examples/visual-tests/amp-story/amp-story-page-attachment.html',
+  '!examples/visual-tests/amp-story/amp-story-page-attachment-v2.html',
   '!examples/visual-tests/amp-story/amp-story-sidebar.html',
   '!examples/visual-tests/amp-story/amp-story-tooltip.html',
   '!examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html',
@@ -505,8 +491,7 @@ const htmlFixtureGlobs = [
   '!test/fixtures/e2e/amp-story-player/pre-rendering.html',
   '!test/fixtures/e2e/amp-story/amp-story.amp.html',
   '!test/fixtures/e2e/amp-subscriptions-google/swg.amp.html',
-  '!test/fixtures/e2e/amp-video/analytics-triggers.html',
-  '!test/fixtures/e2e/amp-video/autoplay.html',
+  '!test/fixtures/e2e/amp-video/videos-cdn.html',
   '!test/fixtures/e2e/amp-viewer-integration/viewer.html',
   '!test/fixtures/e2e/amp4email/element-size-race.html',
   '!test/fixtures/e2e/amp4email/viewport-size-race.html',

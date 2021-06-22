@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {ancestorElementsByTag, iterateCursor} from './dom';
+import {ancestorElementsByTag} from './core/dom/query';
+import {iterateCursor} from './core/dom';
 
 /** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';
@@ -52,7 +53,7 @@ export function getFormAsObject(form) {
 
   for (let i = 0; i < elements.length; i++) {
     const input = elements[i];
-    const {checked, name, multiple, options, tagName, type, value} = input;
+    const {checked, multiple, name, options, tagName, type, value} = input;
     if (
       !name ||
       isDisabled(input) ||

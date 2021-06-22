@@ -21,7 +21,7 @@ import {
   getSlides,
   sleep,
 } from './helpers';
-import {useStyles} from '../base-carousel.jss';
+import {useStyles} from '../component.jss';
 
 const pageWidth = 500;
 const pageHeight = 800;

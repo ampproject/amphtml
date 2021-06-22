@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Observable} from '../../../src/core/data-structures/observable';
-import {Services} from '../../../src/services';
+import {Observable} from '#core/data-structures/observable';
+import {Services} from '#service';
 import {devAssert, user} from '../../../src/log';
-import {once} from '../../../src/core/types/function';
-import {px, setImportantStyles} from '../../../src/style';
+import {once} from '#core/types/function';
+import {px, setImportantStyles} from '#core/dom/style';
 
 const TAG = 'amp-fx';
 
@@ -253,7 +253,7 @@ function assertStyleOrWarn(computed, prop, expected, element, opt_suffix) {
  * @return {string}
  */
 function elementShorthand(element, depth = 0) {
-  const {tagName, id, classList, parentElement} = element;
+  const {classList, id, parentElement, tagName} = element;
   if (id) {
     return `#${id}`;
   }
