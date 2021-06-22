@@ -39,7 +39,7 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '#core/math/layout-rect';
+} from '#core/dom/layout/rect';
 import {numeric} from '../../transition';
 import {tryResolve} from '#core/data-structures/promise';
 

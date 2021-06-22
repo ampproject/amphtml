@@ -27,7 +27,7 @@ import {
 import {
   applyStaticLayout,
   resetShouldUseAspectRatioCssForTesting,
-} from '../../../../src/static-layout';
+} from '../../../../../src/static-layout';
 import {isExperimentOn, toggleExperiment} from '#experiments';
 
 describes.sandboxed('Layout', {}, () => {
