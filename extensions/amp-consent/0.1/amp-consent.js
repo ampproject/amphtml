@@ -125,12 +125,6 @@ export class AmpConsent extends AMP.BaseElement {
     this.matchedGeoGroup_ = null;
 
     /** @private {?boolean} */
-    this.isTcfPostMessageProxyExperimentOn_ = isExperimentOn(
-      this.win,
-      'tcf-post-message-proxy-api'
-    );
-
-    /** @private {?boolean} */
     this.isGranularConsentExperimentOn_ = isExperimentOn(
       this.win,
       'amp-consent-granular-consent'
@@ -142,9 +136,7 @@ export class AmpConsent extends AMP.BaseElement {
       : Promise.resolve();
 
     /** @private @const {?Function} */
-    this.boundHandleIframeMessages_ = this.isTcfPostMessageProxyExperimentOn_
-      ? this.handleIframeMessages_.bind(this)
-      : null;
+    this.boundHandleIframeMessages_ = this.handleIframeMessages_.bind(this);
   }
 
   /** @override */
@@ -991,10 +983,7 @@ export class AmpConsent extends AMP.BaseElement {
    * that the document supports the tcfPostMessage API.
    */
   maybeSetUpTcfPostMessageProxy_() {
-    if (
-      !this.isTcfPostMessageProxyExperimentOn_ ||
-      !this.consentConfig_['exposesTcfApi']
-    ) {
+    if (!this.consentConfig_['exposesTcfApi']) {
       return;
     }
     // Check if __tcfApiLocator API already exists (dirty AMP)
