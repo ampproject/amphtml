@@ -19,9 +19,9 @@
  * endpoints to handle requests from custom elements.
  */
 
-import {Services} from '../../../src/services';
-import {addAttributesToElement} from '../../../src/dom';
-import {toggle} from '../../../src/style';
+import {Services} from '#service';
+import {addAttributesToElement} from '#core/dom';
+import {toggle} from '#core/dom/style';
 
 export class AssistjsFrameService {
   /**

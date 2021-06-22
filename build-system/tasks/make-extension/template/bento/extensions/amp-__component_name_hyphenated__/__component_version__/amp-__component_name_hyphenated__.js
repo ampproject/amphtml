@@ -16,8 +16,8 @@
 
 import {BaseElement} from './base-element';
 __css_import__;
-import {dict} from '../../../src/core/types/object';
-import {isExperimentOn} from '../../../src/experiments';
+import {dict} from '#core/types/object';
+import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

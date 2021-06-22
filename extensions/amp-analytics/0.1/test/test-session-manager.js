@@ -18,7 +18,6 @@ import {
   SESSION_MAX_AGE_MILLIS,
   SESSION_VALUES,
   SessionManager,
-  composeStorageSessionValue,
   installSessionServiceForTesting,
 } from '../session-manager';
 import {expect} from 'chai';
@@ -26,7 +25,7 @@ import {installVariableServiceForTesting} from '../variables';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 import {user} from '../../../../src/log';
 
 describes.realWin('Session Manager', {amp: true}, (env) => {
@@ -34,7 +33,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
   let storageValue;
   let storageGetSpy, storageSetSpy, storageRemoveSpy;
   let sessionManager;
-  let clock, randomVal;
+  let clock, randomVal, defaultTime;
 
   beforeEach(() => {
     win = env.win;
@@ -46,7 +45,8 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
 
     randomVal = 0.5;
     env.sandbox.stub(Math, 'random').callsFake(() => randomVal);
-    clock = env.sandbox.useFakeTimers(1555555555555);
+    defaultTime = 1555555555555;
+    clock = env.sandbox.useFakeTimers(defaultTime);
 
     resetServiceForTesting(win, 'storage');
     registerServiceBuilder(win, 'storage', function () {
@@ -86,10 +86,10 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
     it('should create new sessions', async () => {
       const vendorType = 'myVendorType';
       const session = {
-        'sessionId': 5000,
-        'creationTimestamp': 1555555555555,
-        'lastAccessTimestamp': 1555555555555,
-        'count': 1,
+        [SESSION_VALUES.SESSION_ID]: 5000,
+        [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.COUNT]: 1,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -98,10 +98,10 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       randomVal = 0.6;
       const vendorType2 = 'myVendorType2';
       const session2 = {
-        'sessionId': 6000,
-        'creationTimestamp': 1555555555556,
-        'lastAccessTimestamp': 1555555555556,
-        'count': 1,
+        [SESSION_VALUES.SESSION_ID]: 6000,
+        [SESSION_VALUES.CREATION_TIMESTAMP]: 1555555555556,
+        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: 1555555555556,
+        [SESSION_VALUES.COUNT]: 1,
       };
       expect(await sessionManager.get(vendorType2)).to.deep.equals(session2);
       expect(sessionManager.sessions_[vendorType2]).to.deep.equals(session2);
@@ -111,10 +111,10 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
     it('should update an existing session in memory and storage', async () => {
       const vendorType = 'myVendorType';
       const session = {
-        'sessionId': 5000,
-        'creationTimestamp': 1555555555555,
-        'lastAccessTimestamp': 1555555555555,
-        'count': 1,
+        [SESSION_VALUES.SESSION_ID]: 5000,
+        [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.COUNT]: 1,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -129,17 +129,17 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       expect(storageSetSpy).to.be.calledOnce;
       expect(storageSetSpy).to.be.calledWith(
         'amp-session:' + vendorType,
-        composeStorageSessionValue(session)
+        session
       );
     });
 
     it('should not change creationTimestamp on update', async () => {
       const vendorType = 'myVendorType';
       const session = {
-        'sessionId': 5000,
-        'creationTimestamp': 1555555555555,
-        'lastAccessTimestamp': 1555555555555,
-        'count': 1,
+        [SESSION_VALUES.SESSION_ID]: 5000,
+        [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.COUNT]: 1,
       };
       await sessionManager.get(vendorType);
 
@@ -148,27 +148,27 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
 
       storageSetSpy.resetHistory();
       const storedSession = await sessionManager.get(vendorType);
-      expect(storedSession['creationTimestamp']).to.equal(
+      expect(storedSession[SESSION_VALUES.CREATION_TIMESTAMP]).to.equal(
         session.creationTimestamp
       );
       expect(
-        sessionManager.sessions_[vendorType]['creationTimestamp']
+        sessionManager.sessions_[vendorType][SESSION_VALUES.CREATION_TIMESTAMP]
       ).to.equal(session.creationTimestamp);
 
       expect(storageSetSpy).to.be.calledOnce;
       expect(storageSetSpy).to.be.calledWith(
         'amp-session:' + vendorType,
-        composeStorageSessionValue(session)
+        session
       );
     });
 
     it('should create a new session for an expired session', async () => {
       const vendorType = 'myVendorType';
       let session = {
-        'sessionId': 5000,
-        'creationTimestamp': 1555555555555,
-        'lastAccessTimestamp': 1555555555555,
-        'count': 1,
+        [SESSION_VALUES.SESSION_ID]: 5000,
+        [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.COUNT]: 1,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -180,10 +180,10 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
 
       storageSetSpy.resetHistory();
       session = {
-        'sessionId': 6000,
-        'creationTimestamp': 1555557355556,
-        'lastAccessTimestamp': 1555557355556,
-        'count': 2,
+        [SESSION_VALUES.SESSION_ID]: 6000,
+        [SESSION_VALUES.CREATION_TIMESTAMP]: 1555557355556,
+        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: 1555557355556,
+        [SESSION_VALUES.COUNT]: 2,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -192,40 +192,42 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       expect(storageSetSpy).to.be.calledOnce;
       expect(storageSetSpy).to.be.calledWith(
         'amp-session:' + vendorType,
-        composeStorageSessionValue(session)
+        session
       );
     });
 
     it('should update count for a newly created a new session for an expired session', async () => {
       const vendorType = 'myVendorType';
       let storedSession = await sessionManager.get(vendorType);
-      expect(storedSession['count']).to.equal(1);
+      expect(storedSession[SESSION_VALUES.COUNT]).to.equal(1);
 
       // Go past expiration
       clock.tick(SESSION_MAX_AGE_MILLIS + 1);
 
       storedSession = await sessionManager.get(vendorType);
-      expect(storedSession['count']).to.equal(2);
-      expect(sessionManager.sessions_[vendorType]['count']).to.equal(2);
+      expect(storedSession[SESSION_VALUES.COUNT]).to.equal(2);
+      expect(
+        sessionManager.sessions_[vendorType][SESSION_VALUES.COUNT]
+      ).to.equal(2);
     });
 
     it('should retrieve a non-expired session from storage', async () => {
       const vendorType = 'myVendorType';
       storageValue = {
         ['amp-session:' + vendorType]: {
-          'ssid': 5000,
-          'ct': 1555555555555,
-          'lat': 1555555555555,
-          'c': 1,
+          [SESSION_VALUES.SESSION_ID]: 5000,
+          [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.COUNT]: 1,
         },
       };
 
       clock.tick(1);
       const parsedSession = {
-        'sessionId': 5000,
-        'creationTimestamp': 1555555555555,
-        'lastAccessTimestamp': 1555555555556,
-        'count': 1,
+        [SESSION_VALUES.SESSION_ID]: 5000,
+        [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: 1555555555556,
+        [SESSION_VALUES.COUNT]: 1,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
         parsedSession
@@ -240,20 +242,20 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       const vendorType = 'myVendorType';
       storageValue = {
         ['amp-session:' + vendorType]: {
-          'ssid': 5000,
-          'ct': 1555555555555,
-          'lat': 1555555555555,
-          'c': 1,
+          [SESSION_VALUES.SESSION_ID]: 5000,
+          [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.COUNT]: 1,
         },
       };
 
       randomVal = 0.7;
       clock.tick(SESSION_MAX_AGE_MILLIS + 1);
       const parsedSession = {
-        'sessionId': 7000,
-        'creationTimestamp': 1555557355556,
-        'lastAccessTimestamp': 1555557355556,
-        'count': 2,
+        [SESSION_VALUES.SESSION_ID]: 7000,
+        [SESSION_VALUES.CREATION_TIMESTAMP]: 1555557355556,
+        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: 1555557355556,
+        [SESSION_VALUES.COUNT]: 2,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
         parsedSession
@@ -264,23 +266,23 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       expect(Object.keys(sessionManager.sessions_).length).to.equal(1);
     });
 
-    // Not expected to be called
+    // Not expected to be called (i.e for testing)
     it('should set count for a session without a count', async () => {
       const vendorType = 'myVendorType';
       storageValue = {
         ['amp-session:' + vendorType]: {
-          'ssid': 5000,
-          'ct': 1555555555555,
-          'lat': 1555555555555,
+          [SESSION_VALUES.SESSION_ID]: 5000,
+          [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
         },
       };
 
       randomVal = 0.7;
       const parsedSession = {
-        'sessionId': 5000,
-        'creationTimestamp': 1555555555555,
-        'lastAccessTimestamp': 1555555555555,
-        'count': 1,
+        [SESSION_VALUES.SESSION_ID]: 5000,
+        [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.COUNT]: 1,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
         parsedSession
@@ -324,25 +326,26 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       expect(id).to.equal(9000);
     });
 
-    it('should return SESSION_VALUE.TIMESTAMP', async () => {
+    it('should return SESSION_VALUE.CREATION_TIMESTAMP', async () => {
       let timestamp = await sessionManager.getSessionValue(
         'myVendorType',
-        SESSION_VALUES.TIMESTAMP
+        SESSION_VALUES.CREATION_TIMESTAMP
       );
-      expect(timestamp).to.equal(1555555555555);
+      expect(timestamp).to.equal(defaultTime);
 
       clock.tick(1);
       timestamp = await sessionManager.getSessionValue(
         'myVendorType',
-        SESSION_VALUES.TIMESTAMP
+        SESSION_VALUES.CREATION_TIMESTAMP
       );
-      expect(timestamp).to.equal(1555555555555);
+      expect(timestamp).to.equal(defaultTime);
 
       clock.tick(SESSION_MAX_AGE_MILLIS + 1);
       timestamp = await sessionManager.getSessionValue(
         'myVendorType',
-        SESSION_VALUES.TIMESTAMP
+        SESSION_VALUES.CREATION_TIMESTAMP
       );
+      // defaultTime + SESSION_MAX_AGE_MILLIS + 1
       expect(timestamp).to.equal(1555557355557);
     });
 

@@ -24,9 +24,9 @@ import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   AmpAdNetworkAdzerkImpl,
 } from '../amp-ad-network-adzerk-impl';
-import {Xhr} from '../../../../src/service/xhr-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {utf8Decode, utf8Encode} from '../../../../src/core/types/string/bytes';
+import {Xhr} from '#service/xhr-impl';
+import {createElementWithAttributes} from '#core/dom';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
   let win, doc;
@@ -100,7 +100,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
           IMG_SRC: 'https://some.img.com?a=b',
         },
       };
-      const template = `<!doctype html><html ⚡><head>
+      const template = `<!doctype html><html ⚡ lang="en"><head>
           <script async src="https://cdn.ampproject.org/v0.js"></script>
           <script async custom-template="amp-mustache"
             src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
@@ -166,7 +166,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
     let template;
 
     beforeEach(() => {
-      template = `<!doctype html><html ⚡><head>
+      template = `<!doctype html><html ⚡ lang="en"><head>
           <script async src="https://cdn.ampproject.org/v0.js"></script>
           <script async custom-template="amp-mustache"
             src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>

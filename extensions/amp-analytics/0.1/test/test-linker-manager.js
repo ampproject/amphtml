@@ -20,15 +20,15 @@ import {
   areFriendlyDomains,
   isWildCardMatch,
 } from '../linker-manager';
-import {Priority} from '../../../../src/service/navigation';
-import {Services} from '../../../../src/services';
+import {Priority} from '#service/navigation';
+import {Services} from '#service';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
 import {installSessionServiceForTesting} from '../session-manager';
 import {installVariableServiceForTesting} from '../variables';
-import {mockWindowInterface} from '../../../../testing/test-helper';
+import {mockWindowInterface} from '#testing/test-helper';
 
 // TODO(ccordry): Refactor all these tests with async/await.
 describes.realWin('Linker Manager', {amp: true}, (env) => {

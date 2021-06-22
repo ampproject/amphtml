@@ -24,9 +24,9 @@ import {
   InfoDialog,
   MOREINFO_VISIBLE_CLASS,
 } from '../amp-story-info-dialog';
-import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/services';
-import {registerServiceBuilder} from '../../../../src/service';
+import {LocalizationService} from '#service/localization';
+import {Services} from '#service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
   let moreInfoLinkUrl;

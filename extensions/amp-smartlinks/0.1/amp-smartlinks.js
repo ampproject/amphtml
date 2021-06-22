@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/core/types/object';
-import {getData} from './../../../src/event-helper';
+import {CommonSignals} from '#core/constants/common-signals';
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
+import {Services} from '#service';
+import {dict} from '#core/types/object';
+import {getData} from '../../../src/event-helper';
 
 import {ENDPOINTS} from './constants';
 import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';

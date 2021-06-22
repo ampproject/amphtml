@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {Wrapper} from '../../../src/preact/component';
+import * as Preact from '#preact';
+import {Wrapper} from '#preact/component';
 import {format, getLocale} from './locales';
-import {getDate} from '../../../src/core/types/date';
-import {toWin} from '../../../src/core/window';
-import {useEffect, useRef, useState} from '../../../src/preact';
-import {useResourcesNotify} from '../../../src/preact/utils';
+import {getDate} from '#core/types/date';
+import {toWin} from '#core/window';
+import {useEffect, useRef, useState} from '#preact';
+import {useResourcesNotify} from '#preact/utils';
 
 /** @const {string} */
 const DEFAULT_LOCALE = 'en_US';

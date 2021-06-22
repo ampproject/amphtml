@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {removeElement} from './dom';
-import {setStyles} from './style';
+import {removeElement} from './core/dom';
+import {setStyles} from './core/dom/style';
 
 /**
  * @param {!Window} win

@@ -17,8 +17,8 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
 import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
-import {forceExperimentBranch} from '../../../src/experiments';
-import {includes} from '../../../src/core/types/string';
+import {forceExperimentBranch} from '#experiments';
+import {includes} from '#core/types/string';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
