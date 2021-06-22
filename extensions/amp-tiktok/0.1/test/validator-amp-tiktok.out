@@ -53,10 +53,10 @@ FAIL
 |          >
 |        </section>
 |      </blockquote>
-|    </amp-tiktok> 
-|    
+|    </amp-tiktok>
+|
 |    <!-- Invalid `amp-tiktok` components -->
-|    <amp-tiktok data-src="6943753342808034566"> 
+|    <amp-tiktok data-src="6943753342808034566">
 >>   ^~~~~~~~~
 amp-tiktok/0.1/test/validator-amp-tiktok.html:58:2 Incomplete layout attributes specified for tag 'amp-tiktok'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-tiktok)
 |    </amp-tiktok>
@@ -89,6 +89,6 @@ amp-tiktok/0.1/test/validator-amp-tiktok.html:58:2 Incomplete layout attributes 
 |          >
 |        </section>
 |      </blockquote>
-|    </amp-tiktok> 
+|    </amp-tiktok>
 |  </body>
 |  </html>

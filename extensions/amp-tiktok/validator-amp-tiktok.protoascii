@@ -65,7 +65,7 @@ tags: {  # <amp-tiktok>
   child_tags: {
     child_tag_name_oneof: "BLOCKQUOTE"
     mandatory_min_num_child_tags: 1
-  } 
+  }
 }
 tags: {
   html_format: AMP
@@ -73,5 +73,5 @@ tags: {
   spec_name: "BLOCKQUOTE with TikTok"
   attrs: { name: "align" }
   attr_lists: "cite-attr"
-  mandatory_ancestor: "AMP-TIKTOK blockquote" 
+  mandatory_ancestor: "AMP-TIKTOK blockquote"
 }
