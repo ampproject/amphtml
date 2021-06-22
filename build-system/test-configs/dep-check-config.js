@@ -84,7 +84,8 @@ exports.rules = [
     mustNotDependOn: 'src/**/*.js',
     allowlist: [
       '3p/**->src/core/constants/amp-events.js',
-      '3p/**->src/core/data-structures/index.js',
+      '3p/**->src/core/data-structures/observable.js',
+      '3p/**->src/core/data-structures/promise.js',
       '3p/**->src/core/error/index.js',
       '3p/**->src/core/types/enum.js',
       '3p/**->src/core/types/function/index.js',
