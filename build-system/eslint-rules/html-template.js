@@ -146,7 +146,7 @@ module.exports = function (context) {
     // Void tags are defined at
     // https://html.spec.whatwg.org/multipage/syntax.html#void-elements
     const invalid =
-      /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|path|source|track|wbr)([a-zA-Z-]+)( [^>]*)?\/>/g;
+      /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)([a-zA-Z-]+)( [^>]*)?\/>/g;
     const matches = [];
 
     let match;
