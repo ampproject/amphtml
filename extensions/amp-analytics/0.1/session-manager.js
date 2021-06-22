@@ -41,19 +41,18 @@ export const SESSION_MAX_AGE_MILLIS = 30 * 60 * 1000;
 export const SESSION_VALUES = {
   SESSION_ID: 'sessionId',
   CREATION_TIMESTAMP: 'creationTimestamp',
-  LAST_ACCESS_TIMESTAMP: 'lastAccessTimestamp',
+  ACCESS_TIMESTAMP: 'accessTimestamp',
   COUNT: 'count',
 };
 
 /**
- * `lastAccessTimestamp` is not stored in localStorage, since
- * that mechanism already handles removing expired sessions.
- * We just keep it so that we don't have to read the value everytime
- * during the same page visit.
+ * Even though our LocalStorage implementation already has a
+ * mechanism that handles removing expired values, we keep it
+ * in memory so that we don't have to read the value everytime.
  * @typedef {{
  *  sessionId: number,
  *  creationTimestamp: number,
- *  lastAccessTimestamp: number,
+ *  accessTimestamp: number,
  *  count: number,
  * }}
  */
@@ -109,7 +108,7 @@ export class SessionManager {
 
   /**
    * Get our session if it exists or creates it. Sets the session
-   * in localStorage to update the last access time.
+   * in localStorage to update the access time.
    * @param {string} type
    * @return {!Promise<SessionInfoDef>}
    */
@@ -122,7 +121,7 @@ export class SessionManager {
       .then((session) => {
         // Either create session or update it
         return !session
-          ? constructSessionInfo(generateSessionId(), Date.now(), 1, Date.now())
+          ? constructSessionInfo()
           : this.updateSession_(constructSessionFromStoredValue(session));
       })
       .then((session) => {
@@ -138,29 +137,25 @@ export class SessionManager {
 
   /**
    * Check if session has expired and reset values (id, count) if so.
-   * Also update `lastAccessTimestamp`.
+   * Also update `accessTimestamp`.
    * @param {!SessionInfoDef} session
    * @return {!SessionInfoDef}
    */
   updateSession_(session) {
+    const currentCount = session[SESSION_VALUES.COUNT];
     if (isSessionExpired(session)) {
-      const newSessionCount =
-        session.count === undefined ? 1 : session.count + 1;
-      session = constructSessionInfo(
-        generateSessionId(),
-        Date.now(),
-        newSessionCount
-      );
-    } else if (session.count === undefined) {
-      session.count = 1;
+      const newSessionCount = currentCount === undefined ? 1 : currentCount + 1;
+      session = constructSessionInfo(newSessionCount);
+    } else if (currentCount === undefined) {
+      session[SESSION_VALUES.COUNT] = 1;
     }
-    session.lastAccessTimestamp = Date.now();
+    session[SESSION_VALUES.ACCESS_TIMESTAMP] = Date.now();
     return session;
   }
 
   /**
    * Set the session in localStorage, updating
-   * its last access time if it did not exist before.
+   * its access time if it did not exist before.
    * @param {string} type
    * @param {SessionInfoDef} session
    * @return {!Promise}
@@ -179,7 +174,8 @@ export class SessionManager {
  * @return {boolean}
  */
 function isSessionExpired(session) {
-  return session.lastAccessTimestamp + SESSION_MAX_AGE_MILLIS < Date.now();
+  const accessTimestamp = session[SESSION_VALUES.ACCESS_TIMESTAMP];
+  return accessTimestamp + SESSION_MAX_AGE_MILLIS < Date.now();
 }
 
 /**
@@ -199,42 +195,36 @@ function getStorageKey(type) {
 }
 
 /**
- * @param {SessionInfoDef|string} storedSession
+ * @param {*} storedSession
  * @return {SessionInfoDef}
  */
 function constructSessionFromStoredValue(storedSession) {
   if (!isObject(storedSession)) {
     dev().error(TAG, 'Invalid stored session value');
-    return constructSessionInfo(generateSessionId(), Date.now(), 1);
+    return constructSessionInfo();
   }
 
-  return constructSessionInfo(
-    storedSession[SESSION_VALUES.SESSION_ID],
-    storedSession[SESSION_VALUES.CREATION_TIMESTAMP],
-    storedSession[SESSION_VALUES.COUNT],
-    storedSession[SESSION_VALUES.LAST_ACCESS_TIMESTAMP]
-  );
+  return {
+    [SESSION_VALUES.SESSION_ID]: storedSession[SESSION_VALUES.SESSION_ID],
+    [SESSION_VALUES.CREATION_TIMESTAMP]:
+      storedSession[SESSION_VALUES.CREATION_TIMESTAMP],
+    [SESSION_VALUES.COUNT]: storedSession[SESSION_VALUES.COUNT],
+    [SESSION_VALUES.ACCESS_TIMESTAMP]:
+      storedSession[SESSION_VALUES.ACCESS_TIMESTAMP],
+  };
 }
 
 /**
- * Construct the session info object from values
- * @param {number} sessionId
- * @param {number} creationTimestamp
- * @param {number} count
- * @param {number|undefined} opt_lastAccessTimestamp
+ * Constructs a new SessionInfoDef object
+ * @param {number=} count
  * @return {!SessionInfoDef}
  */
-function constructSessionInfo(
-  sessionId,
-  creationTimestamp,
-  count,
-  opt_lastAccessTimestamp
-) {
+function constructSessionInfo(count = 1) {
   return {
-    [SESSION_VALUES.SESSION_ID]: sessionId,
-    [SESSION_VALUES.CREATION_TIMESTAMP]: creationTimestamp,
+    [SESSION_VALUES.SESSION_ID]: generateSessionId(),
+    [SESSION_VALUES.CREATION_TIMESTAMP]: Date.now(),
+    [SESSION_VALUES.ACCESS_TIMESTAMP]: Date.now(),
     [SESSION_VALUES.COUNT]: count,
-    [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: opt_lastAccessTimestamp,
   };
 }
 

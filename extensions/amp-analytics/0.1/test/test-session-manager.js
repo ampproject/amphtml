@@ -88,7 +88,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       const session = {
         [SESSION_VALUES.SESSION_ID]: 5000,
         [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
         [SESSION_VALUES.COUNT]: 1,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
@@ -100,7 +100,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       const session2 = {
         [SESSION_VALUES.SESSION_ID]: 6000,
         [SESSION_VALUES.CREATION_TIMESTAMP]: 1555555555556,
-        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: 1555555555556,
+        [SESSION_VALUES.ACCESS_TIMESTAMP]: 1555555555556,
         [SESSION_VALUES.COUNT]: 1,
       };
       expect(await sessionManager.get(vendorType2)).to.deep.equals(session2);
@@ -113,14 +113,14 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       const session = {
         [SESSION_VALUES.SESSION_ID]: 5000,
         [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
         [SESSION_VALUES.COUNT]: 1,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
 
       clock.tick(1);
-      session.lastAccessTimestamp = 1555555555556;
+      session[SESSION_VALUES.ACCESS_TIMESTAMP] = 1555555555556;
       // Get again, extend the session
       storageSetSpy.resetHistory();
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
@@ -138,22 +138,22 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       const session = {
         [SESSION_VALUES.SESSION_ID]: 5000,
         [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
         [SESSION_VALUES.COUNT]: 1,
       };
       await sessionManager.get(vendorType);
 
       clock.tick(1);
-      session.lastAccessTimestamp = 1555555555556;
+      session[SESSION_VALUES.ACCESS_TIMESTAMP] = 1555555555556;
 
       storageSetSpy.resetHistory();
       const storedSession = await sessionManager.get(vendorType);
       expect(storedSession[SESSION_VALUES.CREATION_TIMESTAMP]).to.equal(
-        session.creationTimestamp
+        session[SESSION_VALUES.CREATION_TIMESTAMP]
       );
       expect(
         sessionManager.sessions_[vendorType][SESSION_VALUES.CREATION_TIMESTAMP]
-      ).to.equal(session.creationTimestamp);
+      ).to.equal(session[SESSION_VALUES.CREATION_TIMESTAMP]);
 
       expect(storageSetSpy).to.be.calledOnce;
       expect(storageSetSpy).to.be.calledWith(
@@ -167,7 +167,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       let session = {
         [SESSION_VALUES.SESSION_ID]: 5000,
         [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
         [SESSION_VALUES.COUNT]: 1,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
@@ -182,7 +182,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       session = {
         [SESSION_VALUES.SESSION_ID]: 6000,
         [SESSION_VALUES.CREATION_TIMESTAMP]: 1555557355556,
-        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: 1555557355556,
+        [SESSION_VALUES.ACCESS_TIMESTAMP]: 1555557355556,
         [SESSION_VALUES.COUNT]: 2,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
@@ -217,7 +217,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         ['amp-session:' + vendorType]: {
           [SESSION_VALUES.SESSION_ID]: 5000,
           [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
           [SESSION_VALUES.COUNT]: 1,
         },
       };
@@ -226,7 +226,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       const parsedSession = {
         [SESSION_VALUES.SESSION_ID]: 5000,
         [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: 1555555555556,
+        [SESSION_VALUES.ACCESS_TIMESTAMP]: 1555555555556,
         [SESSION_VALUES.COUNT]: 1,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
@@ -244,7 +244,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         ['amp-session:' + vendorType]: {
           [SESSION_VALUES.SESSION_ID]: 5000,
           [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
           [SESSION_VALUES.COUNT]: 1,
         },
       };
@@ -254,7 +254,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       const parsedSession = {
         [SESSION_VALUES.SESSION_ID]: 7000,
         [SESSION_VALUES.CREATION_TIMESTAMP]: 1555557355556,
-        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: 1555557355556,
+        [SESSION_VALUES.ACCESS_TIMESTAMP]: 1555557355556,
         [SESSION_VALUES.COUNT]: 2,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
@@ -273,7 +273,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         ['amp-session:' + vendorType]: {
           [SESSION_VALUES.SESSION_ID]: 5000,
           [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
         },
       };
 
@@ -281,7 +281,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       const parsedSession = {
         [SESSION_VALUES.SESSION_ID]: 5000,
         [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES.LAST_ACCESS_TIMESTAMP]: defaultTime,
+        [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
         [SESSION_VALUES.COUNT]: 1,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
