@@ -17,15 +17,20 @@ import * as Preact from '#preact';
 import {BaseCarousel} from './../../amp-base-carousel/1.0/component';
 import {Lightbox} from './../../amp-lightbox/1.0/component';
 import {LightboxGalleryContext} from './context';
-import {useCallback, useRef, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {useCallback, useImperativeHandle, useRef, useState} from '#preact';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
 /**
  * @param {!LightboxGalleryDef.Props} props
+ * @param {{current: ?LightboxDef.LightboxApi}} ref
  * @return {PreactDef.Renderable}
  */
-export function LightboxGalleryProvider({children, render}) {
+export function LightboxGalleryProviderWithRef(
+  {children, onAfterClose, onAfterOpen, onBeforeOpen, render},
+  ref
+) {
   const classes = useStyles();
   const lightboxRef = useRef(null);
   const carouselRef = useRef(null);
@@ -57,6 +62,21 @@ export function LightboxGalleryProvider({children, render}) {
     });
   }, []);
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      open: () => {
+        renderElements();
+        setShowControls(true);
+        lightboxRef.current?.open();
+      },
+      close: () => {
+        lightboxRef.current?.close();
+      },
+    }),
+    [renderElements]
+  );
+
   return (
     <>
       <Lightbox
@@ -66,8 +86,9 @@ export function LightboxGalleryProvider({children, render}) {
           [classes.hideControls]: !showControls,
         })}
         closeButtonAs={CloseButtonIcon}
-        onBeforeOpen={() => renderElements()}
-        onAfterOpen={() => setShowControls(true)}
+        onBeforeOpen={onBeforeOpen}
+        onAfterOpen={onAfterOpen}
+        onAfterClose={onAfterClose}
         onClick={() => setShowControls(!showControls)}
         ref={lightboxRef}
       >
@@ -90,6 +111,9 @@ export function LightboxGalleryProvider({children, render}) {
   );
 }
 
+const LightboxGalleryProvider = forwardRef(LightboxGalleryProviderWithRef);
+LightboxGalleryProvider.displayName = 'LightboxGalleryProvider';
+export {LightboxGalleryProvider};
 /**
  * @param {!LightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
