@@ -696,6 +696,22 @@
       ],
     },
     {
+      "url": "examples/visual-tests/amp-story/amp-story-interactive-img-poll.html",
+      "name": "amp-story-interactive-img-poll: basic test",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-interactive-img-quiz.html",
+      "name": "amp-story-interactive-img-quiz: basic test",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+    },
+    {
       "flaky": true, // #34033. See https://percy.io/ampproject/amphtml/builds/10102542/changed/568786603
       "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&url=https://preview.amp.dev/documentation/examples/introduction/stories_in_amp",
       "name": "amp-story-dev-tools: preview tab loading and running",
