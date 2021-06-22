@@ -4,16 +4,9 @@ formats:
   - websites
 teaser:
   text: Embeds a WordPress post.
+experimental: true
+bento: true
 ---
-
-<!--
-  All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
-  and improves SEO.
-  * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
-  * List applicable format(s): websites, ads, stories, email
-  * Do not include markdown formatting in the frontmatter - plain text and punctionation only!
-  * Remove this comment!
--->
 
 <!--
 Copyright 2021 The AMP HTML Authors. All Rights Reserved.
