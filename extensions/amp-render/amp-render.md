@@ -131,7 +131,7 @@ The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supp
 
 ### `template`
 
-References an ID of a defined templating element. 
+References an ID of a defined templating element. This attribute is not necessary if the template is a child of the amp-render component.
 
 ### `credentials`
 
