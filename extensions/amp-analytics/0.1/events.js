@@ -151,6 +151,20 @@ function isAmpStoryTriggerType(triggerType) {
   return triggerType.startsWith('story');
 }
 
+function assertUniqueSelectors(selectors) {
+  if (isArray(selectors)) {
+    const map = {};
+    for (let i = 0; i < selectors.length; i++) {
+      userAssert(
+        !map[selectors[i]],
+        'Cannot have duplicate selectors in selectors list: %s',
+        selectors
+      );
+      map[selectors[i]] = selectors[i];
+    }
+  }
+}
+
 /**
  * @param {string} triggerType
  * @return {boolean}
@@ -1283,13 +1297,20 @@ export class VideoEventTracker extends EventTracker {
       config['selector'] || videoSpec['selector'],
       'Missing required selector on video trigger'
     );
-    const selector = isArray(selectorValue) ? selectorValue : [selectorValue];
+    const selectorArray = isArray(selectorValue)
+      ? selectorValue
+      : [selectorValue];
 
-    this.assertValidSelectors_(selector);
+    //this.assertValidSelectors_(selector);
+    userAssert(
+      selectorArray.length,
+      'Missing required selector on video trigger'
+    );
+    assertUniqueSelectors(selectorArray);
     const selectionMethod = config['selectionMethod'] || null;
     const targetReadyPromises = [];
 
-    selector.forEach((item) => {
+    selectorArray.forEach((item) => {
       targetReadyPromises.push(
         this.root.getElements(context, item, selectionMethod)
       );
@@ -1410,25 +1431,6 @@ export class VideoEventTracker extends EventTracker {
    * Assert that the selectors are all unique and are non-empty
    * @param {!Array<string>|string} selectors
    */
-  assertValidSelectors_(selectors) {
-    if (isArray(selectors)) {
-      if (selectors.length === 0) {
-        userAssert(
-          selectors.length,
-          'Missing required selector on video trigger'
-        );
-      }
-      const map = {};
-      for (let i = 0; i < selectors.length; i++) {
-        userAssert(
-          !map[selectors[i]],
-          'Cannot have duplicate selectors in selectors list: %s',
-          selectors
-        );
-        map[selectors[i]] = selectors[i];
-      }
-    }
-  }
 }
 
 /**
@@ -1547,7 +1549,7 @@ export class VisibilityTracker extends EventTracker {
     // Array selectors do not suppor the special cases: ':host' & ':root'
     const selectionMethod =
       config['selectionMethod'] || visibilitySpec['selectionMethod'];
-    this.assertUniqueSelectors_(selector);
+    assertUniqueSelectors(selector);
     const unlistenPromise = this.root
       .getElements(context.parentElement || context, selector, selectionMethod)
       .then((elements) => {
@@ -1579,19 +1581,6 @@ export class VisibilityTracker extends EventTracker {
    * Assert that the selectors are all unique
    * @param {!Array<string>|string} selectors
    */
-  assertUniqueSelectors_(selectors) {
-    if (isArray(selectors)) {
-      const map = {};
-      for (let i = 0; i < selectors.length; i++) {
-        userAssert(
-          !map[selectors[i]],
-          'Cannot have duplicate selectors in selectors list: %s',
-          selectors
-        );
-        map[selectors[i]] = selectors[i];
-      }
-    }
-  }
 
   /**
    * Returns a Promise indicating that we're ready to report the analytics,
