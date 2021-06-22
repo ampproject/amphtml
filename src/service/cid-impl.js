@@ -31,7 +31,7 @@ import {
   getCryptoRandomBytesArray,
 } from '#core/types/string';
 import {dev, user, userAssert} from '../log';
-import {dict} from '#core/types/object';
+import {dict, parseJson, tryParseJson} from '#core/types/object';
 import {getCookie, setCookie} from '../cookies';
 
 import {
@@ -41,7 +41,6 @@ import {
 import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
 import {isExperimentOn} from '#experiments';
 import {isIframed} from '#core/dom';
-import {parseJson, tryParseJson} from '#core/types/object';
 import {rethrowAsync} from '#core/error';
 import {tryResolve} from '#core/data-structures/promise';
 

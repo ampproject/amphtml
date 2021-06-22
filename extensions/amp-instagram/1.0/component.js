@@ -16,10 +16,9 @@
 
 import * as Preact from '#preact';
 import {IframeEmbed} from '#preact/component/iframe';
-import {dict} from '#core/types/object';
+import {dict, parseJson} from '#core/types/object';
 import {forwardRef} from '#preact/compat';
 import {getData} from '../../../src/event-helper';
-import {parseJson} from '#core/types/object';
 import {useCallback, useState} from '#preact';
 
 const NO_HEIGHT_STYLE = dict();

@@ -24,13 +24,12 @@ import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '#service/extension-script';
 import {cancellation} from '../../../src/error-reporting';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict, map} from '#core/types/object';
+import {dict, map, tryParseJson} from '#core/types/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {realChildElements} from '#core/dom/query';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {tryParseJson} from '#core/types/object';
 import {urls} from '../../../src/config';
 import {utf8Encode} from '#core/types/string';
 

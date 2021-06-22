@@ -27,10 +27,9 @@ import {
   setReportError,
   user,
 } from '../src/log';
-import {dict, hasOwn} from '#core/types/object';
+import {dict, hasOwn, parseJson} from '#core/types/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {loadScript} from './3p';
-import {parseJson} from '#core/types/object';
 
 /**
  * @fileoverview

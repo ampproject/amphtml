@@ -49,7 +49,7 @@ import {
   tryFocus,
 } from '#core/dom';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {deepMerge, dict} from '#core/types/object';
+import {deepMerge, dict, tryParseJson} from '#core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
@@ -71,7 +71,6 @@ import {
 } from '../../../src/utils/xhr-utils';
 import {toWin} from '#core/window';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '#core/types/object';
 
 /** @const {string} */
 const TAG = 'amp-form';

@@ -15,10 +15,9 @@
  */
 
 import {dev} from '../src/log';
-import {dict} from '#core/types/object';
+import {dict, parseJson} from '#core/types/object';
 import {getMode} from '../src/mode';
 import {once} from '#core/types/function';
-import {parseJson} from '#core/types/object';
 import {parseUrlDeprecated} from '../src/url';
 
 /**

@@ -39,7 +39,7 @@ import {cancellation, isCancellation} from '../../../src/error-reporting';
 import {createElementWithAttributes} from '#core/dom';
 import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {dict, parseJson} from '#core/types/object';
 import {duplicateErrorIfNecessary} from '#core/error';
 import {
   getAmpAdRenderOutsideViewport,
@@ -75,7 +75,6 @@ import {
   unobserveWithSharedInOb,
 } from '#core/dom/layout/viewport-observer';
 import {padStart, utf8Decode} from '#core/types/string';
-import {parseJson} from '#core/types/object';
 import {processHead} from './head-validation';
 import {setStyle} from '#core/dom/style';
 import {signingServerURLs} from '#ads/_a4a-config';

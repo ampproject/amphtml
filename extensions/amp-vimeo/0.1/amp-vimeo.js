@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {PauseHelper} from '#core/dom/video';
+import {PauseHelper, isAutoplaySupported} from '#core/dom/video';
 import {Services} from '#service';
 import {
   VIMEO_EVENTS,
@@ -35,7 +35,6 @@ import {
 import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isAutoplaySupported} from '#core/dom/video';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {once} from '#core/types/function';
 import {userAssert} from '../../../src/log';

@@ -49,13 +49,12 @@ import {
   toggleAttribute,
 } from '#core/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '#core/types/object';
+import {dict, map, parseJson} from '#core/types/object';
 import {elementByTag} from '#core/dom/query';
 import {getData, listen} from '../../../src/event-helper';
 import {getExperimentBranch} from '#experiments';
 import {getFrameDoc, localizeCtaText} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {parseJson} from '#core/types/object';
 import {setStyle} from '#core/dom/style';
 
 /** @const {string} */

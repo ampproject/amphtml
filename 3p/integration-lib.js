@@ -15,7 +15,7 @@
  */
 
 import {IntegrationAmpContext} from './ampcontext-integration';
-import {dict} from '#core/types/object';
+import {dict, parseJson} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
 import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
@@ -27,7 +27,6 @@ import {
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
 import {internalRuntimeVersion} from '../src/internal-version';
-import {parseJson} from '#core/types/object';
 import {run, setExperimentToggles} from './3p';
 import {urls} from '../src/config';
 

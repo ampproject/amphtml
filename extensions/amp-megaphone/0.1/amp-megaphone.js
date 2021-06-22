@@ -31,12 +31,11 @@ import {PauseHelper} from '#core/dom/video';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
 import {applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
-import {dict} from '#core/types/object';
+import {dict, tryParseJson} from '#core/types/object';
 import {getData, listen} from '../../../src/event-helper';
 import {isObject} from '#core/types';
 import {removeElement} from '#core/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {tryParseJson} from '#core/types/object';
 import {userAssert} from '../../../src/log';
 
 class AmpMegaphone extends AMP.BaseElement {

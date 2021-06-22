@@ -23,7 +23,7 @@ import {
 } from './transport-serializer';
 import {IframeTransport} from './iframe-transport';
 import {Services} from '#service';
-import {WindowInterface} from '#core/window';
+import {WindowInterface, toWin} from '#core/window';
 import {
   assertHttpsUrl,
   checkCorsUrl,
@@ -38,7 +38,6 @@ import {getTopWindow} from '../../../src/service-helpers';
 
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '#core/dom';
-import {toWin} from '#core/window';
 import {toggle} from '#core/dom/style';
 
 /** @const {string} */

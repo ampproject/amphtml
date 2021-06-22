@@ -25,8 +25,14 @@ import {Signals} from '#core/data-structures/signals';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {debounce} from '#core/types/function';
-import {deepEquals, parseJson} from '#core/types/object';
-import {deepMerge, dict, getValueForExpr, map} from '#core/types/object';
+import {
+  deepEquals,
+  deepMerge,
+  dict,
+  getValueForExpr,
+  map,
+  parseJson,
+} from '#core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {findIndex, isArray, remove, toArray} from '#core/types/array';

@@ -17,9 +17,8 @@
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '#core/data-structures/observable';
 import {Services} from '#service';
-import {deepEquals} from '#core/types/object';
+import {deepEquals, hasOwn} from '#core/types/object';
 import {dev} from '../../../src/log';
-import {hasOwn} from '#core/types/object';
 import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /** @type {string} */

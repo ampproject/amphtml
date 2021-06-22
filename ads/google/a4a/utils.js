@@ -20,7 +20,7 @@ import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {buildUrl} from './shared/url-builder';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {dict, parseJson} from '#core/types/object';
 import {getBinaryType, isExperimentOn, toggleExperiment} from '#experiments';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getMeasuredResources} from '../../../src/ini-load';
@@ -29,7 +29,6 @@ import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {getTimingDataSync} from '#service/variable-source';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {parseJson} from '#core/types/object';
 import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /** @type {string}  */

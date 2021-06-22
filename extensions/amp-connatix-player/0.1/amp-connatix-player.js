@@ -23,7 +23,7 @@ import {PauseHelper} from '#core/dom/video';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {dict} from '#core/types/object';
+import {dict, tryParseJson} from '#core/types/object';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -37,7 +37,6 @@ import {
 } from '#core/dom/layout/size-observer';
 import {removeElement} from '#core/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {tryParseJson} from '#core/types/object';
 import {userAssert} from '../../../src/log';
 
 /**

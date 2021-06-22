@@ -15,9 +15,8 @@
  */
 
 import {dev, devAssert} from './log';
-import {dict} from './core/types/object';
+import {dict, tryParseJson} from './core/types/object';
 import {internalListenImplementation} from './core/dom/event-helper-listen';
-import {tryParseJson} from './core/types/object';
 
 /** @const */
 const AMP_MESSAGE_PREFIX = 'amp-';

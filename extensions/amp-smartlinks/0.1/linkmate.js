@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {deepEquals} from '#core/types/object';
-import {dict} from '#core/types/object';
+import {deepEquals, dict} from '#core/types/object';
 
 import {ENDPOINTS} from './constants';
 import {TwoStepsResponse} from '../../amp-skimlinks/0.1/link-rewriter/two-steps-response';

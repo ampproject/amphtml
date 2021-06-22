@@ -16,7 +16,7 @@
 
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 import {dev, devAssert, user, userAssert} from './log';
-import {dict} from './core/types/object';
+import {dict, tryParseJson} from './core/types/object';
 import {getContextMetadata} from './iframe-attributes';
 import {getMode} from './mode';
 import {
@@ -26,7 +26,6 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn} from './experiments';
 import {setStyle} from './core/dom/style';
-import {tryParseJson} from './core/types/object';
 import {urls} from './config';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */

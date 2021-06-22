@@ -24,11 +24,10 @@ import {
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '#core/types/object';
+import {dict, map, tryParseJson} from '#core/types/object';
 import {getSourceOrigin} from '../../../src/url';
 import {isJsonScriptTag} from '#core/dom';
 import {toggle} from '#core/dom/style';
-import {tryParseJson} from '#core/types/object';
 
 export class AmpState extends AMP.BaseElement {
   /**

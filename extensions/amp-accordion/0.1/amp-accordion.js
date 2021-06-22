@@ -25,7 +25,7 @@ import {clamp} from '#core/math';
 import {closest, realChildElements} from '#core/dom/query';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {dict, parseJson} from '#core/types/object';
 import {dispatchCustomEvent, tryFocus} from '#core/dom';
 import {getStyle, setImportantStyles, setStyles} from '#core/dom/style';
 import {
@@ -33,7 +33,6 @@ import {
   px,
   setStyles as setStylesTransition,
 } from '../../../src/transition';
-import {parseJson} from '#core/types/object';
 import {removeFragment} from '../../../src/url';
 
 const TAG = 'amp-accordion';

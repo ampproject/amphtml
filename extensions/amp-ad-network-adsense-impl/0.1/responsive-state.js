@@ -26,10 +26,9 @@ import {clamp} from '#core/math';
 import {computedStyle, getStyle, setStyle} from '#core/dom/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {hasOwn} from '#core/types/object';
+import {hasOwn, tryParseJson} from '#core/types/object';
 import {randomlySelectUnsetExperiments} from '#experiments';
 import {toWin} from '#core/window';
-import {tryParseJson} from '#core/types/object';
 
 const TAG = 'amp-ad-network-adsense-impl';
 

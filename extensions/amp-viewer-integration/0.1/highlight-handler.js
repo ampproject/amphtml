@@ -15,13 +15,12 @@
  */
 
 import {Services} from '#service';
-import {dict} from '#core/types/object';
+import {dict, parseJson} from '#core/types/object';
 import {findSentences, markTextRangeList} from './findtext';
 import {isExperimentOn} from '#experiments';
 import {listenOnce} from '../../../src/event-helper';
 import {moveLayoutRect} from '#core/dom/layout/rect';
 import {once} from '#core/types/function';
-import {parseJson} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 import {resetStyles, setInitialDisplay, setStyles} from '#core/dom/style';
 import {whenDocumentReady} from '#core/document-ready';

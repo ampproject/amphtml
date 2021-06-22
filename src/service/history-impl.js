@@ -18,13 +18,13 @@ import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {Services} from '#service';
 import {dev, devAssert} from '../log';
 import {dict, map} from '#core/types/object';
+import {getHistoryState} from '#core/window';
 import {getMode} from '../mode';
 import {
   getService,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from '../service-helpers';
-import {getHistoryState} from '#core/window';
 
 /** @private @const {string} */
 const TAG_ = 'History';

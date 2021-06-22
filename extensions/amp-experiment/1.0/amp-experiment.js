@@ -19,14 +19,13 @@ import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
 import {applyExperimentToVariant} from './apply-experiment';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {dict, parseJson} from '#core/types/object';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   installOriginExperimentsForDoc,
   originExperimentsForDoc,
 } from '#service/origin-experiments-impl';
 import {isExperimentOn} from '#experiments';
-import {parseJson} from '#core/types/object';
 
 const TAG = 'amp-experiment';
 

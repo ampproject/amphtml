@@ -83,7 +83,7 @@ import {
 } from '#ads/google/a4a/traffic-experiments';
 import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {createElementWithAttributes, isRTL, removeElement} from '#core/dom';
-import {deepMerge, dict} from '#core/types/object';
+import {deepMerge, dict, tryParseJson} from '#core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
@@ -122,8 +122,6 @@ import {
   metaJsonCreativeGrouper,
 } from '#ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '#core/types/string/url';
-
-import {tryParseJson} from '#core/types/object';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';

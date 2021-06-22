@@ -814,7 +814,8 @@ export class AmpStory extends AMP.BaseElement {
         href = href.slice(0, -1);
       }
       this.win.history.replaceState(
-        (this.win.history && getWindowHistoryState(this.win.history)) || {} /** data */,
+        (this.win.history && getWindowHistoryState(this.win.history)) ||
+          {} /** data */,
         this.win.document.title /** title */,
         href /** URL */
       );

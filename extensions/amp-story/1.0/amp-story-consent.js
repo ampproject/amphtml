@@ -39,11 +39,10 @@ import {
   triggerClickFromLightDom,
 } from './utils';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {dict, parseJson} from '#core/types/object';
 import {isArray} from '#core/types';
 import {isJsonScriptTag} from '#core/dom';
 
-import {parseJson} from '#core/types/object';
 import {renderAsElement} from './simple-template';
 
 /** @const {string} */

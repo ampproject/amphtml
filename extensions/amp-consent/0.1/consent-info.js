@@ -15,9 +15,8 @@
  */
 
 import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
-import {deepEquals} from '#core/types/object';
+import {deepEquals, hasOwn, map} from '#core/types/object';
 import {dev, user} from '../../../src/log';
-import {hasOwn, map} from '#core/types/object';
 import {isEnumValue, isObject} from '#core/types';
 
 const TAG = 'amp-consent';
