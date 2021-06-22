@@ -88,7 +88,7 @@ import {upgradeBackgroundAudio} from './audio';
  * CSS class for an amp-story-page that indicates the entire page is loaded.
  * @const {string}
  */
-export const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
+const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
 
 /**
  * Selectors for media elements.
