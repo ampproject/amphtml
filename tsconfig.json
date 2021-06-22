@@ -22,5 +22,5 @@
       "#third_party/*": ["./third_party/*"]
     }
   },
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules"]
 }
