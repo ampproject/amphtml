@@ -16,7 +16,7 @@
 
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {AnalyticsEvent, AnalyticsEventType, VideoEventTracker} from '../events';
-import {dispatchCustomEvent} from 'src/core/dom/index.js';
+import {dispatchCustomEvent} from 'src/core/dom/index';
 import {macroTask} from '#testing/yield';
 
 describes.realWin(
