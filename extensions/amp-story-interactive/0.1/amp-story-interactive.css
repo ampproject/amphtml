@@ -17,9 +17,6 @@
 /* 1em = 16px for interactive components, unless overriden by font-size */
 .i-amphtml-story-interactive-container {
   font-family: 'Poppins', sans-serif !important;
-}
-
-.i-amphtml-story-interactive-container {
   background: var(--interactive-prompt-background) !important;
   border-radius: 2em !important;
 }
