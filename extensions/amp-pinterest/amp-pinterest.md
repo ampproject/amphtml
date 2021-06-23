@@ -49,7 +49,7 @@ Use the `amp-pinterest` component to display a Save button, Pin widget, or Follo
   width="245"
   height="330"
   data-do="embedPin"
-  data-url="https://www.pinterest.com/pin/99360735500167749/"
+  data-url="https://www.pinterest.com/pin/943504328092563580/"
 >
 </amp-pinterest>
 ```
@@ -160,7 +160,7 @@ Must be set to `embedPin`.
 Must contain the fully-qualified URL of the Pinterest resource to be shown as a widget.
 
 ```html
-data-url="https://www.pinterest.com/pin/99360735500167749/"
+data-url="https://www.pinterest.com/pin/943504328092563580/"
 ```
 
 ##### alt
