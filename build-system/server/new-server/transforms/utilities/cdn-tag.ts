@@ -34,8 +34,8 @@ function isValidScriptExtension(url: URL): boolean {
   return VALID_SCRIPT_EXTENSIONS.includes(extname(url.pathname));
 }
 
-export function isValidOrigin(url: URL,  looseScriptSrcCheck?: boolean): boolean {
-  return looseScriptSrcCheck || url.origin === VALID_CDN_ORIGIN;
+export function isValidOrigin(url: URL,  looseOriginUrlCheck?: boolean): boolean {
+  return looseOriginUrlCheck || url.origin === VALID_CDN_ORIGIN;
 }
 
 export function getCdnUrlAttr(node: posthtml.Node): string | null {
@@ -52,14 +52,14 @@ export function getCdnUrlAttr(node: posthtml.Node): string | null {
  * Determines if a Node is really a ScriptNode.
  * @param node
  */
-export function isValidScript(node: posthtml.Node, looseScriptSrcCheck?: boolean): node is ScriptNode {
+export function isValidScript(node: posthtml.Node, looseOriginUrlCheck?: boolean): node is ScriptNode {
   if (node.tag !== 'script') {
     return false;
   }
 
   const {src = ''} = node.attrs || {};
   const url = tryGetUrl(src);
-  return isValidOrigin(url, looseScriptSrcCheck) && isValidScriptExtension(url);
+  return isValidOrigin(url, looseOriginUrlCheck) && isValidScriptExtension(url);
 }
 
 export function isJsonScript(node: posthtml.Node): boolean {

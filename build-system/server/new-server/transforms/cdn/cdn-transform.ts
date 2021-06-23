@@ -39,7 +39,7 @@ function maybeModifyCdnUrl(node: posthtml.Node, options: OptionSet): posthtml.No
     return node;
   }
   const url = tryGetUrl(node.attrs[attr] || '');
-  if (!isValidOrigin(url, options.looseScriptSrcCheck)) {
+  if (!isValidOrigin(url, options.looseOriginUrlCheck)) {
     return node;
   }
   const {ext} = parse(url.pathname);
