@@ -42,6 +42,8 @@ Some components may additionally [load external resources](./building-a-bento-am
 return <ProxyIframeEmbed frameborder="no" scrolling="no" title="My third party iframe" {...props} />
 ```
 
+One important consideration is that direct iframes, such as those provided by `IframeEmbed` and [`VideoIframe`](./building-a-bento-video-player.md#loading-an-iframe-with-VideoIframe), are not the same as a **proxy iframe**, which provides an additional layer of communication between an iframe and the document. If it is not clear which is the appropriate helper for your component, [your guide](./contributing-code.md#find-a-guide) can help identify the best one to use.
+
 ## Getting Started
 
 Start by generating an extension specifying `--bento` and `--nojss`. We name our extension **`amp-fantastic-embed`**, according to our [guidelines for naming a third-party component](./amp-3p-naming.md).
