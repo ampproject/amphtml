@@ -16,14 +16,22 @@
 
 import {createUseStyles} from 'react-jss';
 
-const DEFAULT_LARGE_DIMENSION = 40;
-const DEFAULT_LARGE_PADDING = 20;
+const TOP_BAR_HEIGHT = 56;
+const DEFAULT_DIMENSION = 24;
+const DEFAULT_PADDING = 16;
+
+const TOP_BAR_HEIGHT_LARGE = 80;
+const DEFAULT_DIMENSION_LARGE = 40;
+const DEFAULT_PADDING_LARGE = 20;
+
+const DEFAULT_GRID_NUM = 4;
+const DEFAULT_GRID_PADDING = 5;
 
 const gallery = {
   position: 'absolute !important',
   left: '0 !important',
   right: '0 !important',
-  top: '0 !important' /* Matches height of top-bar */,
+  top: '0 !important',
   height: '100%',
   width: '100%',
   bottom: '0 !important',
@@ -32,12 +40,12 @@ const gallery = {
 
 const controlsPanel = {
   position: 'absolute !important',
-  height: '56px !important' /* Matches top of gallery */,
+  height: `${TOP_BAR_HEIGHT}px !important`,
   width: '100% !important',
   zIndex: '1',
   background: 'linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0))',
   '@media (min-width:1024px)': {
-    height: '80px !important' /* Matches top of gallery */,
+    height: `${TOP_BAR_HEIGHT_LARGE}px !important`,
   },
 };
 
@@ -55,17 +63,17 @@ const lightbox = {
 const grid = {
   display: 'grid !important',
   justifyContent: 'center !important',
-  gridGap: '5px !important',
+  gridGap: `${DEFAULT_GRID_PADDING}px !important`,
   gridTemplateColumns: 'repeat(3, 1fr)',
   gridAutoRows: 'min-content !important',
-  padding: '0px 5px !important',
-  top: '56px !important',
-  height: 'calc(100% - 56px) !important',
+  padding: `0px ${DEFAULT_GRID_PADDING}px !important`,
+  top: `${TOP_BAR_HEIGHT}px !important`,
+  height: `calc(100% - ${TOP_BAR_HEIGHT}px) !important`,
   width: 'calc(100% - 10px) !important',
   '@media (min-width: 1024px)': {
-    gridTemplateColumns: 'repeat(4, calc(1024px/4 - 5px * 5 / 4))',
-    top: '80px !important' /* Matches height of top-bar */,
-    height: 'calc(100% - 80px) !important',
+    gridTemplateColumns: `repeat(${DEFAULT_GRID_NUM}, calc(1024px/${DEFAULT_GRID_NUM} - ${DEFAULT_GRID_PADDING}px * ${DEFAULT_GRID_PADDING} / ${DEFAULT_GRID_NUM}))`,
+    top: `${TOP_BAR_HEIGHT_LARGE}px !important`,
+    height: `calc(100% - ${TOP_BAR_HEIGHT_LARGE}px) !important`,
   },
 };
 
@@ -95,13 +103,13 @@ const control = {
 };
 
 const topControl = {
-  width: 24,
-  height: 24,
-  padding: 16,
+  width: DEFAULT_DIMENSION,
+  height: DEFAULT_DIMENSION,
+  padding: DEFAULT_PADDING,
   '@media (min-width:1024px)': {
-    width: DEFAULT_LARGE_DIMENSION,
-    height: DEFAULT_LARGE_DIMENSION,
-    padding: DEFAULT_LARGE_PADDING,
+    width: DEFAULT_DIMENSION_LARGE,
+    height: DEFAULT_DIMENSION_LARGE,
+    padding: DEFAULT_PADDING_LARGE,
   },
 };
 
@@ -119,9 +127,9 @@ const arrow = {
   bottom: '0 !important',
   margin: 'auto !important',
   filter: 'drop-shadow(0 0 1px black) !important',
-  width: DEFAULT_LARGE_DIMENSION,
-  height: DEFAULT_LARGE_DIMENSION,
-  padding: DEFAULT_LARGE_PADDING,
+  width: DEFAULT_DIMENSION_LARGE,
+  height: DEFAULT_DIMENSION_LARGE,
+  padding: DEFAULT_PADDING_LARGE,
   '&$nextArrow': {
     right: '0 !important',
     /* Needed for screen reader mode to size correctly. */
