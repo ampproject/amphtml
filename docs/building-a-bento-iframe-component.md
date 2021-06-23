@@ -34,7 +34,7 @@ A number of AMP components use iframes to load external resources while staying 
 return <IframeEmbed frameborder="no" scrolling="no" title="My iframe" {...props} />
 ```
 
-Some components may additionally [load external resources](./building-a-bento-amp-extension#loading-external-resources), such as an SDK, to enable a third party integration. AMP serves this on a different domain for security and performance reasons, and Bento provides `ProxyIframeEmbed` to additionally wrap `IframeEmbed` with an intermediary bootstrapping iframe.
+Some components may additionally [load external resources](./building-a-bento-amp-extension.md#loading-external-resources), such as an SDK, to enable a third party integration. AMP serves this on a different domain for security and performance reasons, and Bento provides `ProxyIframeEmbed` to additionally wrap `IframeEmbed` with an intermediary bootstrapping iframe.
 
 **Preact components** can get this behavior by using an **`ProxyIframeEmbed`** that renders an iframe and propagates props accordingly:
 
@@ -46,7 +46,7 @@ One important consideration is that direct iframes, such as those provided by `I
 
 ## Getting Started
 
-Start by generating an extension specifying `--bento` and `--nojss`. We name our extension **`amp-fantastic-embed`**, according to our [guidelines for naming a third-party component](./amp-3p-naming.md).
+Start by generating an extension specifying `--bento` and `--nojss`. We name our extension **`amp-fantastic-embed`**, according to our [guidelines for naming a third-party component](./spec/amp-3p-naming.md).
 
 ```console
 amp make-extension --bento --nojss --name=amp-fantastic-embed
