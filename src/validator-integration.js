@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getMode, isModeDevelopment} from './mode';
+import {isModeDevelopment} from './mode';
 import {loadPromise} from './event-helper';
 import {parseQueryString} from './core/types/string/url';
 import {urls} from './config';
@@ -45,8 +45,6 @@ export function maybeValidate(win) {
       /* global amp: false */
       amp.validator.validateUrlAndLog(filename, win.document);
     });
-  } else if (getMode().examiner) {
-    loadScript(win.document, `${urls.cdn}/examiner.js`);
   }
 }
 
