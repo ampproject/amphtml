@@ -144,7 +144,7 @@ export class SessionManager {
   updateSession_(session) {
     const currentCount = session[SESSION_VALUES.COUNT];
     if (isSessionExpired(session)) {
-      const newSessionCount = currentCount === undefined ? 1 : currentCount + 1;
+      const newSessionCount = (currentCount ?? 0) + 1;
       session = constructSessionInfo(newSessionCount);
     } else if (currentCount === undefined) {
       session[SESSION_VALUES.COUNT] = 1;
