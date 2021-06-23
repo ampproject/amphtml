@@ -26,9 +26,8 @@ import {OptionSet} from '../utilities/option-set';
 import {parse} from 'path';
 
 function maybeModifyCdnUrl(node: posthtml.Node, options: OptionSet): posthtml.Node {
-  // Make sure that isJsonScript is used before `tryGetUrl`. We bail out
-  // early if the ScriptNode is of type="application/json" since it wouldn't
-  // have any src url to modify.
+  // Make sure to call `isJsonScript` before `tryGetUrl`. We bail out early if
+  // the node is of type="application/json" since it wouldn't have a URL.
   if (isJsonScript(node)) {
     return node;
   }
