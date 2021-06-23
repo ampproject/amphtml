@@ -94,14 +94,9 @@ In most cases you'll only create the required (req'd) files. If your element doe
 
 ## Extend AMP.PreactBaseElement
 
-Most AMP components extend `AMP.BaseElement`. `AMP.BaseElement` provides hookups and callbacks needed to implement and customize behavior. Callback explanations are in the BaseElement Callbacks section of [Building an AMP Extension](https://github.com/ampproject/amphtml/blob/main/docs/building-an-amp-extension.md), and inlined in the [BaseElement](https://github.com/ampproject/amphtml/blob/main/src/base-element.js) class.
+All Preact-based Bento AMP extensions extend `AMP.PreactBaseElement`. Bento AMP extensions differ from classic AMP extensions because they are self-managing and independent, and therefore usable in a wider range of contexts beyond AMP pages, while still being fully integrated with the AMP environment when used in a fully AMP document.
 
 Important: Bento-enabled AMP components built upon a Preact component must also be usable in insolation in React development contexts.
-
-All Preact-based Bento AMP extensions extend `AMP.PreactBaseElement`, which builds upon
-`BaseElement` to extricate the component implementation from the aforementioned
-callbacks. Bento AMP extensions differ from AMP extensions because they are self-managing and independent, and therefore usable in a wider range of contexts beyond AMP pages, while still being fully integrated with the AMP environment
-when used in a fully AMP document.
 
 The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the [AMP/Preact Bridge](#amppreact-bridge) section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the [PreactBaseElement Callbacks](#preactbaseelement-callbacks) section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/main/src/preact/base-element.js) class.
 
