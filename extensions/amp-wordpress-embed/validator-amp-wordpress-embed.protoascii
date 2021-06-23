@@ -26,7 +26,7 @@ tags: {  # amp-wordpress-embed
 }
 tags: {  # <amp-wordpress-embed>
   html_format: AMP
-  tag_name: "WORDPRESS-EMBED"
+  tag_name: "AMP-WORDPRESS-EMBED"
   requires_extension: "amp-wordpress-embed"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-wordpress-embed/"
