@@ -114,7 +114,14 @@ function checkProps(url) {
     displayWarning('data-url is required for <amp-wordpress-embed>');
     return false;
   }
-  return true;
+
+  try {
+    new URL(url);
+    return true;
+  } catch (error) {
+    displayWarning('URL is invalid');
+    return false;
+  }
 }
 
 /**
