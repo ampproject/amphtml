@@ -13,6 +13,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-devAssert(1 + 1);
-devAssert(dev().assert(2 + 2));
 let result = devAssert(foo);
