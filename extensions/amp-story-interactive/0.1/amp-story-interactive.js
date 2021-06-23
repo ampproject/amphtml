@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
- import {AmpStoryInteractiveBinaryPoll} from './amp-story-interactive-binary-poll';
- import {AmpStoryInteractivePoll} from './amp-story-interactive-poll';
- import {AmpStoryInteractiveQuiz} from './amp-story-interactive-quiz';
- import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
- import {AmpStoryInteractiveSlider} from './amp-story-interactive-slider';
- 
- /**
-  * This extension imports the interactive components into amp-story.
-  */
- 
- AMP.extension('amp-story-interactive', '0.1', (AMP) => {
-   AMP.registerElement(
-     'amp-story-interactive-binary-poll',
-     AmpStoryInteractiveBinaryPoll
-   );
-   AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractivePoll);
-   AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
-   AMP.registerElement('amp-story-interactive-slider', AmpStoryInteractiveSlider);
-   AMP.registerElement(
-     'amp-story-interactive-results',
-     AmpStoryInteractiveResults
-   );
- });
+import {AmpStoryInteractiveBinaryPoll} from './amp-story-interactive-binary-poll';
+import {AmpStoryInteractivePoll} from './amp-story-interactive-poll';
+import {AmpStoryInteractiveQuiz} from './amp-story-interactive-quiz';
+import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
+import {AmpStoryInteractiveSlider} from './amp-story-interactive-slider';
+
+/**
+ * This extension imports the interactive components into amp-story.
+ */
+
+AMP.extension('amp-story-interactive', '0.1', (AMP) => {
+  AMP.registerElement(
+    'amp-story-interactive-binary-poll',
+    AmpStoryInteractiveBinaryPoll
+  );
+  AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractivePoll);
+  AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
+  AMP.registerElement('amp-story-interactive-slider', AmpStoryInteractiveSlider);
+  AMP.registerElement(
+    'amp-story-interactive-results',
+    AmpStoryInteractiveResults
+  );
+});
  
