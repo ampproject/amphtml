@@ -54,7 +54,11 @@ struct ParseOptions {
   bool record_node_offsets = false;
   // Records attributes position in the html string.
   bool record_attribute_offsets = false;
+  // Count number of terms in a text node delimited by ascii whitespace and
+  // entity code &nbsp;
+  bool count_num_terms_in_text_node = false;
 
+  // To be used in unit tests only. Callback style parsing is not yet supported.
   OnNodeCallback on_node_callback = nullptr;
 };
 
@@ -356,6 +360,11 @@ class Parser {
   // Records position of elements in html source.
   bool record_node_offsets_ = false;
   bool record_attribute_offsets_ = false;
+  // Counts number of terms delimited by whitespace chars i.e. ascii whitespace,
+  // newline etc.
+  // Entities like &nbsp; and other unicode whitespace chars are not taken into
+  // account.
+  bool count_num_terms_in_text_node_ = false;
 
   // Whether the parser is parsing an HTML fragment.
   // If the fragment is the InnerHTML of a node, set that node in context_node_.
