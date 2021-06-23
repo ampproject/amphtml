@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,10 +47,12 @@ describes.realWin(
 
       myVideo = win.document.createElement('amp-video');
       myVideo.setAttribute('id', 'myVideo');
+      myVideo.setAttribute('data-vars-video-id', 'my-video');
       target.appendChild(myVideo);
 
       myVideo2 = win.document.createElement('amp-video');
       myVideo2.setAttribute('id', 'myVideo-2');
+      myVideo2.setAttribute('data-vars-video-id', 'my-video-2');
       target.appendChild(myVideo2);
     });
 
@@ -149,7 +151,7 @@ describes.realWin(
             tracker.add(analyticsElement, AnalyticsEventType.VIDEO, {
               selector: '',
             });
-          }).to.throw(/Missing required selector/);
+          }).to.throw(/Missing required selector on video trigger/);
 
           expect(() => {
             tracker.add(analyticsElement, AnalyticsEventType.VIDEO, {
@@ -199,7 +201,7 @@ describes.realWin(
 
       it('fires on multiple selectors', async () => {
         const fn1 = env.sandbox.stub();
-        const getElementSpy = env.sandbox.spy(root, 'getElement');
+        const getElementSpy = env.sandbox.spy(root, 'getDataVarsElements_');
 
         tracker.add(
           undefined,
@@ -211,6 +213,7 @@ describes.realWin(
         dispatchCustomEvent(myVideo, 'video-play', data, null);
         dispatchCustomEvent(myVideo2, 'video-play', data2, null);
 
+        await macroTask();
         await macroTask();
         expect(fn1).to.have.callCount(2);
         expect(fn1.firstCall).to.be.calledWith(
@@ -225,7 +228,7 @@ describes.realWin(
 
       it('fires on pause video trigger for multiple selectors', async () => {
         const fn1 = env.sandbox.stub();
-        const getElementSpy = env.sandbox.spy(root, 'getElement');
+        const getElementSpy = env.sandbox.spy(root, 'getDataVarsElements_');
 
         tracker.add(
           undefined,
@@ -241,6 +244,7 @@ describes.realWin(
         dispatchCustomEvent(myVideo2, 'video-pause', data2, null);
 
         await macroTask();
+        await macroTask();
         expect(fn1).to.have.callCount(2);
         expect(fn1.firstCall).to.be.calledWith(
           new AnalyticsEvent(myVideo, 'video-pause', data)
@@ -254,7 +258,7 @@ describes.realWin(
 
       it('fires on video-session trigger for multiple selectors', async () => {
         const fn1 = env.sandbox.stub();
-        const getElementSpy = env.sandbox.spy(root, 'getElement');
+        const getElementSpy = env.sandbox.spy(root, 'getDataVarsElements_');
 
         tracker.add(
           undefined,
@@ -270,6 +274,7 @@ describes.realWin(
         dispatchCustomEvent(myVideo2, 'video-session', data2, null);
 
         await macroTask();
+        await macroTask();
         expect(fn1).to.have.callCount(2);
         expect(fn1.firstCall).to.be.calledWith(
           new AnalyticsEvent(myVideo, 'video-session', data)
@@ -283,7 +288,7 @@ describes.realWin(
 
       it('fires on video-ended trigger for multiple selectors', async () => {
         const fn1 = env.sandbox.stub();
-        const getElementSpy = env.sandbox.spy(root, 'getElement');
+        const getElementSpy = env.sandbox.spy(root, 'getDataVarsElements_');
 
         tracker.add(
           undefined,
@@ -299,6 +304,7 @@ describes.realWin(
         dispatchCustomEvent(myVideo2, 'video-ended', data2, null);
 
         await macroTask();
+        await macroTask();
         expect(fn1).to.have.callCount(2);
         expect(fn1.firstCall).to.be.calledWith(
           new AnalyticsEvent(myVideo, 'video-ended', data)
@@ -312,7 +318,7 @@ describes.realWin(
 
       it('fires on video-percentage-played trigger for multiple selectors', async () => {
         const fn1 = env.sandbox.stub();
-        const getElementSpy = env.sandbox.spy(root, 'getElement');
+        const getElementSpy = env.sandbox.spy(root, 'getDataVarsElements_');
 
         tracker.add(
           undefined,
@@ -341,6 +347,7 @@ describes.realWin(
         );
 
         await macroTask();
+        await macroTask();
         expect(fn1).to.have.callCount(2);
         expect(fn1.firstCall).to.be.calledWith(
           new AnalyticsEvent(
@@ -362,7 +369,7 @@ describes.realWin(
 
       it('fires on video-seconds-played trigger for multiple selectors', async () => {
         const fn1 = env.sandbox.stub();
-        const getElementSpy = env.sandbox.spy(root, 'getElement');
+        const getElementSpy = env.sandbox.spy(root, 'getDataVarsElements_');
 
         tracker.add(
           undefined,
@@ -398,7 +405,7 @@ describes.realWin(
         const fn1 = env.sandbox.stub();
         const fn2 = env.sandbox.stub();
         const fn3 = env.sandbox.stub();
-        const getElementSpy = env.sandbox.spy(root, 'getElement');
+        const getElementSpy = env.sandbox.spy(root, 'getDataVarsElements_');
 
         tracker.add(
           undefined,
@@ -437,6 +444,7 @@ describes.realWin(
         dispatchCustomEvent(myVideo2, 'video-pause', data2, null);
         dispatchCustomEvent(myVideo2, 'video-ended', data2, null);
 
+        await macroTask();
         await macroTask();
         expect(fn1).to.have.callCount(2);
         expect(fn1.firstCall).to.be.calledWith(

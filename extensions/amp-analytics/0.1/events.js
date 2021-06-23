@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,18 +151,16 @@ function isAmpStoryTriggerType(triggerType) {
   return triggerType.startsWith('story');
 }
 
+/**
+ * Assert that the selectors are all unique
+ * @param {!Array<string>|string} selectors
+ */
 function assertUniqueSelectors(selectors) {
-  if (isArray(selectors)) {
-    const map = {};
-    for (let i = 0; i < selectors.length; i++) {
-      userAssert(
-        !map[selectors[i]],
-        'Cannot have duplicate selectors in selectors list: %s',
-        selectors
-      );
-      map[selectors[i]] = selectors[i];
-    }
-  }
+  userAssert(
+    !isArray(selectors) || new Set(selectors).size === selectors.length,
+    'Cannot have duplicate selectors in selectors list: %s',
+    selectors
+  );
 }
 
 /**
@@ -1293,27 +1291,19 @@ export class VideoEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const videoSpec = config['videoSpec'] || {};
-    const selectorValue = userAssert(
+    const selector = userAssert(
       config['selector'] || videoSpec['selector'],
       'Missing required selector on video trigger'
     );
-    const selectorArray = isArray(selectorValue)
-      ? selectorValue
-      : [selectorValue];
 
-    userAssert(
-      selectorArray.length,
-      'Missing required selector on video trigger'
-    );
-    assertUniqueSelectors(selectorArray);
+    userAssert(selector.length, 'Missing required selector on video trigger');
+    assertUniqueSelectors(selector);
     const selectionMethod = config['selectionMethod'] || null;
-    const targetReadyPromises = [];
-
-    selectorArray.forEach((item) => {
-      targetReadyPromises.push(
-        this.root.getElements(context, item, selectionMethod)
-      );
-    });
+    const targetPromises = this.root.getElements(
+      context,
+      selector,
+      selectionMethod
+    );
 
     const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
     const excludeAutoplay = videoSpec['exclude-autoplay'];
@@ -1412,24 +1402,19 @@ export class VideoEventTracker extends EventTracker {
         'No target specified by video session event.'
       );
 
-      Promise.all(targetReadyPromises).then((targetReady) => {
-        targetReady.forEach((target) => {
-          if (!target[0].contains(el)) {
+      targetPromises.then((targets) => {
+        targets.forEach((target) => {
+          if (!target.contains(el)) {
             return;
           }
           const normalizedDetails = removeInternalVars(details);
           listener(
-            new AnalyticsEvent(target[0], normalizedType, normalizedDetails)
+            new AnalyticsEvent(target, normalizedType, normalizedDetails)
           );
         });
       });
     });
   }
-
-  /**
-   * Assert that the selectors are all unique and are non-empty
-   * @param {!Array<string>|string} selectors
-   */
 }
 
 /**
@@ -1575,11 +1560,6 @@ export class VisibilityTracker extends EventTracker {
       });
     };
   }
-
-  /**
-   * Assert that the selectors are all unique
-   * @param {!Array<string>|string} selectors
-   */
 
   /**
    * Returns a Promise indicating that we're ready to report the analytics,
