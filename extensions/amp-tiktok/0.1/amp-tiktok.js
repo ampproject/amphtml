@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-tiktok-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
 import {Services} from '#service';
-import {childElementByTag} from '#core/dom/query';
+import {childElementByAttr, childElementByTag} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {debounce} from '#core/types/function';
 import {getData, listen} from '../../../src/event-helper';
@@ -87,10 +87,10 @@ export class AmpTiktok extends AMP.BaseElement {
   /** @override @nocollapse */
   static createLoaderLogoCallback(element) {
     const html = htmlFor(element);
-    const hasPlaceholder = this.getPlaceholder();
+    const placeholder = childElementByAttr(element, 'placeholder');
     // This component has two different loading icons:
     // in the case where the component has a placeholder we display the white loader for hight contrast.
-    if (hasPlaceholder) {
+    if (placeholder) {
       return {
         color: '#FFFFFF',
         content: html`<svg
