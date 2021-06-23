@@ -21,6 +21,7 @@ describes.endtoend(
     environments: ['email-demo'],
   },
   async (env) => {
+
     it('Should call amp-img layoutCallback', async () => {
       const {controller} = env;
       const imgEl = await controller.findElement('img');
