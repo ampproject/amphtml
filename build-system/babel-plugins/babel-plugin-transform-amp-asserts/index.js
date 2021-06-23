@@ -115,6 +115,15 @@ module.exports = function (babel) {
       CallExpression(path) {
         const callee = path.get('callee');
 
+        if (
+          callee.isIdentifier() &&
+          callee.node.name.startsWith('devAssert') &&
+          path.parentPath.isExpressionStatement()
+        ) {
+          path.parentPath.remove();
+          return;
+        }
+
         if (callee.isIdentifier({name: 'devAssert'})) {
           const args = path.get('arguments');
           // Remove all but the first argument.
