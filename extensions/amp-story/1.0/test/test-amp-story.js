@@ -54,8 +54,8 @@ describes.realWin(
   (env) => {
     let ampdoc;
     let element;
-    const hasSwipeCapability = false;
-    const isEmbedded = false;
+    let hasSwipeCapability = false;
+    let isEmbedded = false;
     let story;
     let replaceStateStub;
     let win;
