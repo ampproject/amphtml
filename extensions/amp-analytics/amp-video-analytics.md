@@ -234,3 +234,22 @@ Video analytics contributes the following variables to [AMP URL Variable Substit
 ### VIDEO_STATE
 
 The `VIDEO_STATE(selector,property)` variable is substituted with the value of the selected video's specified property, as defined under [Common variables](#common-variables) above. The `selector` argument can be any valid CSS selector. The `property` argument can be the name of any of the common video analytics variables.
+
+## Video Trigger Selector Argument
+
+The `selector` argument in the trigger configuration can be assigned with multiple valid CSS selectors in the form of an array or a single id in the form of a string (as can be seen in the examples above).
+
+In the case where a single configuration applies to multiple video elements, instead of creating separate configuration for each, it can be simplified by specifying all the selectors at once.
+
+#### Multiple Selectors Formatting
+In specifying multiple selectors, they can be defined with an array of selectors that are comma separated and individually enclosed in quote marks.
+
+```javascript
+"triggers": {
+  "video-pause": {
+    "on": "video-pause",
+    "request": "event",
+    "selector": ["#Video-1", "#Video-2"]
+  },
+}
+```
