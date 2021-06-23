@@ -15,10 +15,10 @@
  */
 
 import {SESSION_VALUES, sessionServicePromiseForDoc} from './session-manager';
-import {Services} from '../../../src/services';
-import {TickLabel} from '../../../src/core/constants/enums';
-import {asyncStringReplace} from '../../../src/core/types/string';
-import {base64UrlEncodeFromString} from '../../../src/core/types/string/base64';
+import {Services} from '#service';
+import {TickLabel} from '#core/constants/enums';
+import {asyncStringReplace} from '#core/types/string';
+import {base64UrlEncodeFromString} from '#core/types/string/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/core/types/object';
@@ -330,44 +330,18 @@ export class VariableService {
           element,
           userAssert(key, 'CONSENT_METADATA macro must contain a key')
         ),
-      'SESSION_ID': () => {
-        return this.sessionManagerPromise_.then((sessionManager) => {
-          return sessionManager.getSessionValue(
-            type,
-            SESSION_VALUES.SESSION_ID
-          );
-        });
-      },
-      'SESSION_TIMESTAMP': () => {
-        return this.sessionManagerPromise_.then((sessionManager) => {
-          return sessionManager.getSessionValue(type, SESSION_VALUES.TIMESTAMP);
-        });
-      },
-      'SESSION_COUNT': () => {
-        return this.sessionManagerPromise_.then((sessionManager) => {
-          return sessionManager.getSessionValue(type, SESSION_VALUES.COUNT);
-        });
-      },
+      'SESSION_ID': () =>
+        this.getSessionValue_(type, SESSION_VALUES.SESSION_ID),
+      'SESSION_TIMESTAMP': () =>
+        this.getSessionValue_(type, SESSION_VALUES.CREATION_TIMESTAMP),
+      'SESSION_COUNT': () => this.getSessionValue_(type, SESSION_VALUES.COUNT),
       'EVENT_TIMESTAMP': (persist) => {
-        // If persist then store this value in local storage
-        // otherwise don't
-        // If opt_lastTimestamp send the last value stored in LS
-        // Otherwise send the current time
-
-        // Use EVENT_TIMESTAMP(true) to send current timestamp and persist
-        // Use EVENT_TIMESTAMP(false, true) to send last value stored and not persist
-        // Use EVENT_TIMESTAMP(true, true) to send last value stored and persist
-
-        // Parameters are parsed as strings. Default it to true.
         persist = persist === 'false' ? false : true;
-        // Check for stored event, return it, update timestamp w/ this time
-        return this.sessionManagerPromise_.then((sessionManager) => {
-          return sessionManager.getSessionValue(
-            type,
-            SESSION_VALUES.LAST_EVENT_TIMESTAMP,
-            persist
-          );
-        });
+        return this.getSessionValue_(
+          type,
+          SESSION_VALUES.EVENT_TIMESTAMP,
+          persist
+        );
       },
     };
     const perfMacros = isInFie(element)

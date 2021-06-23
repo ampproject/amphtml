@@ -33,7 +33,7 @@ import {
 import {LayoutPriority} from '../../../src/layout';
 import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {SessionManager} from './session-manager';
 import {Transport} from './transport';
 import {dev, devAssert, user} from '../../../src/log';
