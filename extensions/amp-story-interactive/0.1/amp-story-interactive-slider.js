@@ -26,7 +26,7 @@
      * @param {!AmpElement} element
      */
     constructor(element) {
-      super(element, InteractiveType.SLIDER);
+      super(element, InteractiveType.SLIDER, [0, 1]);
     }
   
     /** @override */
@@ -36,8 +36,8 @@
   
     /** @override */
     buildComponent() {
-      console.log("test");
       this.rootEl_ = htmlFor(this.element)`<p>Slider component</p>`;
       return this.rootEl_;
     }
   }
+  
