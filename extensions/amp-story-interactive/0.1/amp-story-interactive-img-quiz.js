@@ -137,6 +137,7 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
       '.i-amphtml-story-interactive-img-option-img'
     );
     imgEl.setAttribute('src', option['image']);
+    imgEl.setAttribute('alt', option['alt']);
 
     if ('correct' in option) {
       convertedOption.setAttribute('correct', 'correct');
