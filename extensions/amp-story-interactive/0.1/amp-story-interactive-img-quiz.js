@@ -21,23 +21,8 @@ import {
 import {CSS} from '../../../build/amp-story-interactive-img-quiz-0.1.css';
 import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
+import {buildImgTemplate} from './utils';
 import {htmlFor} from '#core/dom/static-template';
-
-/**
- * Generates the template for the image quiz.
- *
- * @param {!Element} element
- * @return {!Element}
- */
-const buildQuizTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
-    <div class="i-amphtml-story-interactive-img-container">
-      <div class="i-amphtml-story-interactive-prompt-container"></div>
-      <div class="i-amphtml-story-interactive-img-option-container"></div>
-    </div>
-  `;
-};
 
 /**
  * Generates the template for each option.
@@ -82,7 +67,7 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
 
   /** @override */
   buildComponent() {
-    this.rootEl_ = buildQuizTemplate(this.element);
+    this.rootEl_ = buildImgTemplate(this.element);
     this.attachContent_(this.rootEl_);
     return this.rootEl_;
   }

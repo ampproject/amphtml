@@ -20,23 +20,8 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-img-poll-0.1.css';
 import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
+import {buildImgTemplate} from './utils';
 import {htmlFor} from '#core/dom/static-template';
-
-/**
- * Generates the template for the image poll.
- *
- * @param {!Element} element
- * @return {!Element}
- */
-const buildPollTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
-    <div class="i-amphtml-story-interactive-img-container">
-      <div class="i-amphtml-story-interactive-prompt-container"></div>
-      <div class="i-amphtml-story-interactive-img-option-container"></div>
-    </div>
-  `;
-};
 
 /**
  * Generates the template for each option.
@@ -75,7 +60,7 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
 
   /** @override */
   buildComponent() {
-    this.rootEl_ = buildPollTemplate(this.element);
+    this.rootEl_ = buildImgTemplate(this.element);
     this.attachContent_(this.rootEl_);
     return this.rootEl_;
   }
