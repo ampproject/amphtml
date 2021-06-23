@@ -60,7 +60,7 @@ function getMetaUrl(name) {
  *   geoApi: ?string,
  * }}
  */
-export const urls = {
+export const urls = self.AMP?.config?.urls ?? {
   thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
   thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
   thirdPartyFrameRegex,
