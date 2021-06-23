@@ -48,7 +48,7 @@ function launchEnv(env) {
   const {'storybook_port': port = ENV_PORTS[env]} = argv;
   execScriptAsync(
     [
-      './node_modules/.bin/start-storybook',
+      'npx start-storybook',
       `--config-dir ${envConfigDir(env)}`,
       `--static-dir ${process.cwd()}/`,
       `--port ${port}`,
@@ -83,7 +83,7 @@ function buildEnv(env) {
   log(`Building storybook for the ${cyan(env)} environment...`);
   const result = exec(
     [
-      './node_modules/.bin/build-storybook',
+      'npx build-storybook',
       `--config-dir ${configDir}`,
       `--output-dir ${process.cwd()}/${dir}/${env}`,
       '--quiet',
