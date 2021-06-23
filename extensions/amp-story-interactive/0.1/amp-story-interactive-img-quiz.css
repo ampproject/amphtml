@@ -13,3 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+.i-amphtml-story-interactive-img-quiz-answer-choice-container {
+  position: absolute;
+  height: 19%;
+  width: 19%;
+  bottom: 6%;
+  right: 6%;
+  border: 2px solid var(--i-amphtml-interactive-option-background-color);
+  background-color: var(--interactive-accent-color);
+  color: var(--i-amphtml-interactive-option-background-color);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
