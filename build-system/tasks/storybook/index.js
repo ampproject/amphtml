@@ -32,8 +32,6 @@ const ENV_PORTS = {
   preact: 9002,
 };
 
-const repoDir = path.join(__dirname, '../../..');
-
 /**
  * @param {string} env 'amp' or 'preact'
  * @return {string}
@@ -50,7 +48,7 @@ function launchEnv(env) {
     [
       './node_modules/.bin/start-storybook',
       `--config-dir ${envConfigDir(env)}`,
-      `--static-dir ${repoDir}/`,
+      `--static-dir ${process.cwd()}/`,
       `--port ${port}`,
       '--quiet',
       isCiBuild() ? '--ci' : '',
@@ -63,8 +61,9 @@ function launchEnv(env) {
 
 /**
  * @param {string} env 'amp' or 'preact'
+ * @param {string} dir Relative to cwd.
  */
-function buildEnv(env) {
+function buildEnv(env, dir) {
   const configDir = envConfigDir(env);
 
   if (env === 'amp' && isPullRequestBuild()) {
@@ -85,7 +84,7 @@ function buildEnv(env) {
     [
       './node_modules/.bin/build-storybook',
       `--config-dir ${configDir}`,
-      `--output-dir ${repoDir}/examples/storybook/${env}`,
+      `--output-dir ${process.cwd()}/${dir}/${env}`,
       '--quiet',
       `--loglevel ${isCiBuild() ? 'warn' : 'info'}`,
     ].join(' '),
@@ -108,7 +107,8 @@ async function storybook() {
   if (!build) {
     createCtrlcHandler('storybook');
   }
-  envs.map(build ? buildEnv : launchEnv);
+  const buildDir = build === true ? 'examples/storybook' : build;
+  envs.map(buildDir ? (env) => buildEnv(env, buildDir) : launchEnv);
 }
 
 module.exports = {
@@ -119,7 +119,8 @@ storybook.description =
   'Set up isolated development and testing for AMP components';
 
 storybook.flags = {
-  'build': 'Build a static web application (see https://storybook.js.org/docs)',
+  'build':
+    'Build a static web application (see https://storybook.js.org/docs). This outputs to examples/storybook by default. It can be optionally set to a different directory relative to CWD.',
   'storybook_env':
     "Environment(s) to run Storybook (either 'amp', 'preact' or a list as 'amp,preact')",
   'storybook_port': 'Port from which to run the Storybook dashboard',
