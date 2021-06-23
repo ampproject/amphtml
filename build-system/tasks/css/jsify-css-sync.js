@@ -30,7 +30,7 @@ let syncTransformer;
  */
 function transformCssSync(cssStr, opt_cssnano, opt_filename) {
   if (!syncTransformer) {
-    syncTransformer = require('sync-rpc')(__dirname + '/init-sync.js');
+    syncTransformer = require('sync-rpc')(__dirname + '/init-sync');
   }
   return syncTransformer(cssStr, opt_cssnano, opt_filename);
 }

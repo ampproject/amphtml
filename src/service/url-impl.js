@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LruCache} from '../core/data-structures/lru-cache';
+import {LruCache} from '#core/data-structures/lru-cache';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -26,7 +26,7 @@ import {
   parseUrlWithA,
   resolveRelativeUrl,
 } from '../url';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 import {urls} from '../config';
 
 const SERVICE = 'url';

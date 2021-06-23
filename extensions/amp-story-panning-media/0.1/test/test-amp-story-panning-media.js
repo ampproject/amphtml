@@ -19,8 +19,8 @@ import {
   Action,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {registerServiceBuilder} from '../../../../src/service';
+import {createElementWithAttributes} from '#core/dom';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 /**
  * @return {!Promise<undefined>} A Promise that resolves after the browser has

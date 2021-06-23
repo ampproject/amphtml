@@ -37,12 +37,16 @@ const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'nomodule-build.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   timedExecOrDie('amp dist --fortesting');
   storeNomoduleBuildToWorkspace();
 }
 
 /**
+ * Steps to run during PR builds.
  * @return {Promise<void>}
  */
 async function prBuildWorkflow() {

@@ -38,6 +38,7 @@ const KeyToSeleniumMap = {
   [Key.ArrowLeft]: SeleniumKey.ARROW_LEFT,
   [Key.ArrowRight]: SeleniumKey.ARROW_RIGHT,
   [Key.ArrowUp]: SeleniumKey.ARROW_UP,
+  [Key.Backspace]: SeleniumKey.BACK_SPACE,
   [Key.Enter]: SeleniumKey.ENTER,
   [Key.Escape]: SeleniumKey.ESCAPE,
   [Key.Tab]: SeleniumKey.TAB,
@@ -655,6 +656,9 @@ class SeleniumWebDriverController {
     this.shadowRoot_ = shadowRootBody;
   }
 
+  /**
+   * @return {Promise<void>}
+   */
   async switchToLight() {
     this.shadowRoot_ = null;
   }
@@ -671,6 +675,10 @@ class SeleniumWebDriverController {
     return this.evaluate(() => document.documentElement);
   }
 
+  /**
+   * Shutdown the driver.
+   * @return {void}
+   */
   dispose() {
     return this.driver.quit();
   }

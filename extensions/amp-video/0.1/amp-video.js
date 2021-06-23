@@ -15,40 +15,44 @@
  */
 
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
-import {VisibilityState} from '../../../src/core/constants/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {addParamsToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   childElement,
   childElementByTag,
   childElementsByTag,
-  dispatchCustomEvent,
-  fullscreenEnter,
-  fullscreenExit,
-  insertAfterOrAtStart,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '#core/dom/query';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
+import {
+  dispatchCustomEvent,
+  insertAfterOrAtStart,
+  removeElement,
+} from '#core/dom';
 import {fetchCachedSources} from './video-cache';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
 import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {
   propagateObjectFitStyles,
   setImportantStyles,
   setInitialDisplay,
   setStyles,
-} from '../../../src/style';
-import {toArray} from '../../../src/core/types/array';
+} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 
 const TAG = 'amp-video';
 
@@ -242,7 +246,7 @@ export class AmpVideo extends AMP.BaseElement {
       /* opt_removeMissingAttrs */ true
     );
     this.installEventHandlers_();
-    this.applyFillContent(this.video_, true);
+    applyFillContent(this.video_, true);
     propagateObjectFitStyles(this.element, this.video_);
 
     element.appendChild(this.video_);
@@ -271,7 +275,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     // Fetch and add cached sources URLs if opted-in, and if the sources don't already contained cached URLs from the AMP Cache.
     if (this.element.hasAttribute('cache') && !this.hasAnyCachedSources_()) {
-      return fetchCachedSources(this.element, this.win);
+      return fetchCachedSources(this.element, this.getAmpDoc());
     }
   }
 
@@ -778,7 +782,7 @@ export class AmpVideo extends AMP.BaseElement {
       'background-position': 'center',
     });
     poster.classList.add('i-amphtml-android-poster-bug');
-    this.applyFillContent(poster);
+    applyFillContent(poster);
     element.appendChild(poster);
   }
 

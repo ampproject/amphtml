@@ -15,7 +15,7 @@ FAIL
 |    limitations under the license.
 |  -->
 |  <!DOCTYPE html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |    <!-- prettier-ignore -->
 |    <head>
 |      <meta charset="utf-8">
@@ -73,6 +73,15 @@ FAIL
 |      >
 |      </amp-render>
 |
+|      <!-- Valid: amp-render with binding="never" attribute -->
+|      <amp-render
+|        width="10"
+|        height="10"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|        binding="never"
+|      >
+|      </amp-render>
+|
 |      <!-- Valid: amp-render with binding="always" attribute -->
 |      <amp-render
 |        width="10"
@@ -121,12 +130,12 @@ FAIL
 |      <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
 |      <amp-render width="10" height="10"> </amp-render>
 >>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:121:4 The tag 'amp-render' is missing a mandatory attribute - pick at least one of ['src','[src]','data-amp-bind-src']. (see https://amp.dev/documentation/components/amp-render/)
+amp-render/1.0/test/validator-amp-render.html:130:4 The tag 'amp-render' is missing a mandatory attribute - pick at least one of ['src','[src]','data-amp-bind-src']. (see https://amp.dev/documentation/components/amp-render/)
 |
 |      <!-- Invalid: container layout -->
 |      <amp-render
 >>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:124:4 The specified layout 'CONTAINER' is not supported by tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render/)
+amp-render/1.0/test/validator-amp-render.html:133:4 The specified layout 'CONTAINER' is not supported by tag 'amp-render'. (see https://amp.dev/documentation/components/amp-render/)
 |        layout="container"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
 |      >
@@ -135,7 +144,7 @@ amp-render/1.0/test/validator-amp-render.html:124:4 The specified layout 'CONTAI
 |      <!-- Invalid: invalid binding attribute -->
 |      <amp-render
 >>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:131:4 The attribute 'binding' in tag 'amp-render' is set to the invalid value 'foobar'. (see https://amp.dev/documentation/components/amp-render/)
+amp-render/1.0/test/validator-amp-render.html:140:4 The attribute 'binding' in tag 'amp-render' is set to the invalid value 'foobar'. (see https://amp.dev/documentation/components/amp-render/)
 |        width="10"
 |        height="10"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"

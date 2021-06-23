@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
-import {dict} from '../../../src/core/types/object';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
+import {buildUrl} from '#ads/google/a4a/shared/url-builder';
+import {dict} from '#core/types/object';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}

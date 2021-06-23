@@ -530,37 +530,6 @@ describes.sandboxed('Logging', {}, (env) => {
     });
   });
 
-  describe('assertEnumValue', () => {
-    let log;
-
-    beforeEach(() => {
-      log = new Log(win, RETURNS_FINE);
-    });
-
-    it('should return the enum value', () => {
-      const enum1 = {a: 'value1', b: 'value2'};
-      expect(log.assertEnumValue(enum1, 'value1')).to.equal('value1');
-      expect(log.assertEnumValue(enum1, 'value2')).to.equal('value2');
-    });
-
-    it('should fail with unknown enum value', () => {
-      const enum1 = {a: 'value1', b: 'value2'};
-      expect(() => log.assertEnumValue(enum1, 'value3')).to.throw(
-        'Unknown enum value: "value3"'
-      );
-      expect(() => log.assertEnumValue(enum1, 'value3', 'MyEnum')).to.throw(
-        'Unknown MyEnum value: "value3"'
-      );
-    });
-
-    it('should fail with values of different case', () => {
-      const enum1 = {a: 'value1', b: 'value2'};
-      expect(() => log.assertEnumValue(enum1, 'VALUE1')).to.throw(
-        'Unknown enum value: "VALUE1"'
-      );
-    });
-  });
-
   describe('assertArray', () => {
     let log;
 

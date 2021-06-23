@@ -26,6 +26,9 @@ const {timedExecOrDie} = require('./utils');
 
 const jobName = 'checks.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   timedExecOrDie('amp presubmit');
   timedExecOrDie('amp check-invalid-whitespaces');
@@ -36,7 +39,6 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp check-build-system');
   timedExecOrDie('amp babel-plugin-tests');
   timedExecOrDie('amp caches-json');
-  timedExecOrDie('amp dev-dashboard-tests');
   timedExecOrDie('amp check-exact-versions');
   timedExecOrDie('amp check-renovate-config');
   timedExecOrDie('amp server-tests');
@@ -53,6 +55,7 @@ function pushBuildWorkflow() {
 }
 
 /**
+ * Steps to run during PR builds.
  * @return {Promise<void>}
  */
 async function prBuildWorkflow() {
@@ -99,10 +102,6 @@ async function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.DOCS)) {
     timedExecOrDie('amp check-links --local_changes'); // only for PR builds
     timedExecOrDie('amp markdown-toc');
-  }
-
-  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
-    timedExecOrDie('amp dev-dashboard-tests');
   }
 
   if (buildTargetsInclude(Targets.OWNERS)) {

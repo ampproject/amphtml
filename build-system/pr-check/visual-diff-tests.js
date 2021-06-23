@@ -26,11 +26,17 @@ const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'visual-diff-tests.js';
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
   timedExecOrDie('amp visual-diff --nobuild --main');
 }
 
+/**
+ * Steps to run during PR builds.
+ */
 function prBuildWorkflow() {
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {

@@ -31,6 +31,9 @@ const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'nomodule-tests.js';
 
+/**
+ * Adds a canary or prod config string to all non-esm minified targets.
+ */
 function prependConfig() {
   const targets = MINIFIED_TARGETS.flatMap((target) => [
     `dist/${target}.js`,
@@ -40,6 +43,9 @@ function prependConfig() {
   );
 }
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   prependConfig();
   try {
@@ -56,6 +62,9 @@ function pushBuildWorkflow() {
   }
 }
 
+/**
+ * Steps to run during PR builds.
+ */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     prependConfig();

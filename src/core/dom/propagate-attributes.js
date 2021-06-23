@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {arrayOrSingleItemToArray} from '../types/array';
+import {arrayOrSingleItemToArray} from '#core/types/array';
 
 /**
  * Utility method that propagates attributes from a source element

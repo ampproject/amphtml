@@ -22,20 +22,22 @@ const loadConfig = require('./load-config');
 const rewriteAnalyticsTags = require('./rewrite-analytics-tags');
 const rewriteScriptTags = require('./rewrite-script-tags');
 const runTests = require('./run-tests');
+const {css} = require('../css');
 const {printReport} = require('./print-report');
 
 /**
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function performance() {
-  let resolver;
+  let resolver = (..._) => {}; // eslint-disable-line no-unused-vars
   const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
-  const config = new loadConfig();
+  const config = loadConfig();
   const urls = Object.keys(config.urlToHandlers);
   const urlsAndAdsUrls = urls.concat(config.adsUrls || []);
+  await css();
   await cacheDocuments(urlsAndAdsUrls);
   await compileScripts(urlsAndAdsUrls);
   await copyLocalImages(urlsAndAdsUrls);
@@ -47,16 +49,16 @@ async function performance() {
   return deferred;
 }
 
-performance.description = 'Runs web performance test on current branch';
+performance.description = 'Run web performance tests';
 
 performance.flags = {
   'devtools': 'Run with devtools open',
-  'headless': 'Run chromium headless',
-  'nobuild': 'Does not compile minified runtime before running tests',
+  'headless': 'Run on chromium headless',
+  'nobuild': 'Do not compile minified runtime before running tests',
   'threshold':
-    'Fraction by which metrics are allowed to increase. Number between 0.0 and 1.0',
-  'quiet': 'Does not log progress per page',
-  'url': 'Page to test. Overrides urls set in config.json',
+    'Fraction by which metrics are allowed to increase (number between 0.0 and 1.0)',
+  'quiet': 'Do not log progress per page',
+  'url': 'Page to test (overrides urls set in config.json)',
 };
 
 module.exports = {

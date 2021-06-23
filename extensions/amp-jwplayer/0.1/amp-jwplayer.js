@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {
@@ -27,22 +27,21 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {
-  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '#core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {once} from '../../../src/core/types/function';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {once} from '#core/types/function';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 
 const JWPLAYER_EVENTS = {
   'ready': VideoEvents.LOAD,
@@ -351,7 +350,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     }
     const placeholder = this.win.document.createElement('img');
     propagateAttributes(['aria-label'], this.element, placeholder);
-    this.applyFillContent(placeholder);
+    applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {

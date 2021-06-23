@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AnimationManager,
   AnimationRunner,
   AnimationSequence,
 } from '../animation';
-import {Deferred} from '../../../../src/core/data-structures/promise';
-import {Services} from '../../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
 import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';
-import {htmlFor, htmlRefs} from '../../../../src/static-template';
-import {layoutRectLtwh} from '../../../../src/core/math/layout-rect';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {presets} from '../animation-presets';
-import {scopedQuerySelectorAll} from '../../../../src/dom';
-import {toArray} from '../../../../src/core/types/array';
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {toArray} from '#core/types/array';
 
 const querySelectorAllAnimateIn = (element) =>
   toArray(scopedQuerySelectorAll(element, '[animate-in]'));
@@ -464,7 +464,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       ).to.have.been.calledOnce;
     });
 
-    it('creates internal runners when applying first frame (preset)', async () => {
+    // TODO(wg-stories, #34695): This test is flaky during CI.
+    it.skip('creates internal runners when applying first frame (preset)', async () => {
       const page = html`
         <div>
           <div animate-in="fly-in-left"></div>
@@ -490,7 +491,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       });
     });
 
-    it('creates internal runners when applying first frame (amp-story-animation)', async () => {
+    // TODO(wg-stories, #34695): This test is flaky during CI.
+    it.skip('creates internal runners when applying first frame (amp-story-animation)', async () => {
       const spec1 = {keyframes: [{opacity: 1}]};
       const spec2 = {keyframes: [{transform: 'translate(10px, 10px)'}]};
 

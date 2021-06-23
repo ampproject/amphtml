@@ -92,7 +92,7 @@ async function useRemoteScripts(url) {
 /**
  * Download default extensions that are not explicility stated by script tags in
  * the HTML.
- * @return {Promise}
+ * @return {Promise<string[]>}
  */
 async function downloadDefaultExtensions() {
   return Promise.all(
@@ -108,7 +108,7 @@ async function downloadDefaultExtensions() {
  * Rewrite script tags for each document downloaded from the urls
  *
  * @param {!Array<string>} urls
- * @return {Promise}
+ * @return {Promise<void[]>}
  */
 async function rewriteScriptTags(urls) {
   await downloadDefaultExtensions();

@@ -17,12 +17,12 @@
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {InlineGalleryEvents} from './inline-gallery-events';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/core/types/object';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {matches, scopedQuerySelector} from '../../../src/dom';
-import {propagateAttributes} from '../../../src/core/dom/propagate-attributes';
-import {setStyle} from '../../../src/style';
+import {dict} from '#core/types/object';
+import {htmlFor} from '#core/dom/static-template';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {matches, scopedQuerySelector} from '#core/dom/query';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {setStyle} from '#core/dom/style';
 
 /**
  * Renders a carousel of thumbnails for an inline gallery.
@@ -243,7 +243,9 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
       >
       </amp-base-carousel>
     `;
-    thumbnails.forEach((t) => this.carousel_.appendChild(t));
+    for (const thumbnail of thumbnails) {
+      this.carousel_.appendChild(thumbnail);
+    }
 
     // We create with loop defaulting to false above, and allow it to be
     // overwriten.

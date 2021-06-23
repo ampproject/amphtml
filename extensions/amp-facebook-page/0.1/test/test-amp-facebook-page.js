@@ -15,9 +15,9 @@
  */
 
 import '../amp-facebook-page';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {facebook} from '../../../../3p/facebook';
-import {resetServiceForTesting} from '../../../../src/service';
+import {createElementWithAttributes} from '#core/dom';
+import {facebook} from '#3p/facebook';
+import {resetServiceForTesting} from '../../../../src/service-helpers';
 import {serializeMessage} from '../../../../src/3p-frame-messaging';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 
@@ -97,6 +97,21 @@ describes.realWin(
       expect(iframe.getAttribute('name')).to.contain('"locale":"fr_FR"');
     });
 
+    it('renders with correct embed type', async () => {
+      element = createElementWithAttributes(doc, 'amp-facebook-page', {
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await element.buildInternal();
+      await element.layoutCallback();
+
+      const iframe = element.querySelector('iframe');
+      const context = JSON.parse(iframe.getAttribute('name'));
+      expect(context.attributes.embedAs).to.equal('page');
+    });
+
     it("container's height is changed", async () => {
       const iframeSrc =
         'http://ads.localhost:' +
@@ -116,11 +131,9 @@ describes.realWin(
       await element.layoutCallback();
 
       const impl = await element.getImpl(false);
-      const attemptChangeHeightStub = env.sandbox.stub(
-        impl,
-        'attemptChangeHeight'
-      );
-      attemptChangeHeightStub.returns(Promise.resolve());
+      const attemptChangeHeightStub = env.sandbox
+        .stub(impl, 'attemptChangeHeight')
+        .resolves();
 
       const mockEvent = new CustomEvent('message');
       const sentinel = JSON.parse(
@@ -138,11 +151,9 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-PAGE',
-      };
 
       facebook(win, {
+        embedAs: 'page',
         href,
         width: 100,
         height: 100,
@@ -156,11 +167,9 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-PAGE',
-      };
 
       facebook(win, {
+        embedAs: 'page',
         href,
         locale: 'fr_FR',
         width: 100,
@@ -178,11 +187,9 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-PAGE',
-      };
 
       facebook(win, {
+        embedAs: 'page',
         href,
         tabs: 'messages',
         width: 100,
@@ -198,11 +205,9 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-PAGE',
-      };
 
       facebook(win, {
+        embedAs: 'page',
         href,
         hideCover: true,
         width: 100,
@@ -218,11 +223,9 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-PAGE',
-      };
 
       facebook(win, {
+        embedAs: 'page',
         href,
         hideCta: true,
         width: 100,
@@ -241,15 +244,12 @@ describes.realWin(
         const div = doc.createElement('div');
         div.setAttribute('id', 'c');
         doc.body.appendChild(div);
-        win.context = {
-          tagName: 'AMP-FACEBOOK-PAGE',
-        };
 
         facebook(win, {
+          embedAs: 'page',
           href,
           width: 200,
           height: 200,
-          embedAs: 'page',
         });
         const container = doc.body.getElementsByClassName('fb-page')[0];
         expect(container).not.to.be.undefined;
@@ -263,11 +263,9 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      win.context = {
-        tagName: 'AMP-FACEBOOK-PAGE',
-      };
 
       facebook(win, {
+        embedAs: 'page',
         href,
         width: 100,
         height: 100,
