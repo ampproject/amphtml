@@ -310,11 +310,7 @@ Element styles load with the element script inside an AMP document. You tell AMP
 
 ### Pre-upgrade CSS
 
-Bento components must specify certain layout properties in order to prevent
-[Cumulative Layout Shift (CLS)](https://web.dev/cls) when in use on non-AMP pages.
-The following are a standard set of pre-upgrade styles to be used when no AMP
-runtime or boilerplate--which typically provides this measure of stability for
-the document author--are not in use:
+Bento components must specify certain layout properties in order to prevent [Cumulative Layout Shift (CLS)](https://web.dev/cls) when in use on non-AMP pages. The following are a standard set of pre-upgrade styles to be used when no AMP runtime or boilerplate--which typically provides this measure of stability for the document author--are not in use:
 
 ```css
 /* amp-my-element.css */
