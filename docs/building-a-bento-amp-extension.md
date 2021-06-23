@@ -103,12 +103,12 @@ The configurations which bridge the Preact implementation of the component and i
 ### Element and Component classes
 
 The following shows the overall structure of your element implementation
-file (`extensions/amp-my-element/0.1/amp-my-element.js`). See [Experiments](#experiments) to make sure your component is experimentally gated if necessary.
+file (`extensions/amp-my-element/1.0/amp-my-element.js`). See [Experiments](#experiments) to make sure your component is experimentally gated if necessary.
 
 ```js
 import {func1, func2} from '../../../src/module';
 import {BaseElement} from './base-element'; // Preact base element.
-import {CSS} from '../../../build/amp-my-element-0.1.css';
+import {CSS} from '../../../build/amp-my-element-1.0.css';
 // more ES2015-style import statements.
 
 /** @const */
@@ -138,12 +138,12 @@ class AmpMyElement extends BaseElement {
   }
 }
 
-AMP.extension('amp-my-element', '0.1', (AMP) => {
+AMP.extension('amp-my-element', '1.0', (AMP) => {
   AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 });
 ```
 
-The following shows the corresponding overall structure of your Preact base element implementation file (`extensions/amp-my-element/0.1/base-element.js`).
+The following shows the corresponding overall structure of your Preact base element implementation file (`extensions/amp-my-element/1.0/base-element.js`).
 
 ```js
 import {MyElement} from './component'; // Preact component.
@@ -161,7 +161,7 @@ BaseElement['props'] = {  // Map DOM attributes and children to Preact Component
 };
 ```
 
-The following shows the corresponding overall structure of your Preact functional component implementation file (`extensions/amp-my-element/0.1/component.js`).
+The following shows the corresponding overall structure of your Preact functional component implementation file (`extensions/amp-my-element/1.0/component.js`).
 
 ```js
 import * as Preact from '#preact';
@@ -350,9 +350,9 @@ AMP; all AMP component extensions include the `amp-` prefix.
 One way to specify the appropriate styles is to tell AMP which class to use for this tag name and which CSS to load.
 
 ```javascript
-import {CSS} from '../../../build/amp-my-element-0.1.css';
+import {CSS} from '../../../build/amp-my-element-1.0.css';
 
-AMP.extension('amp-my-element', '0.1', (AMP) => {
+AMP.extension('amp-my-element', '1.0', (AMP) => {
   AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 });
 ```
@@ -515,7 +515,7 @@ const EXPERIMENTS = [
 Then protect your code with a check for the component-specific flag `isExperimentOn(win, 'bento-my-element')`, or the global flag which enables all Bento components `isExperimentOn(win, 'bento')`, and only execute your code when it is on.
 
 ```javascript
-import {CSS} from '../../../build/amp-my-element-0.1.css';
+import {CSS} from '../../../build/amp-my-element-1.0.css';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 
@@ -534,7 +534,7 @@ class AmpMyElement extends AMP.PreactBaseElement {
   }
 }
 
-AMP.extension('amp-my-element', '0.1', AMP => {
+AMP.extension('amp-my-element', '1.0', AMP => {
   AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 });
 ```
@@ -590,7 +590,7 @@ The entry for your component must have `options.wrapper = "bento"`, and may opti
 ```javascript
 exports.extensionBundles = [
 ...
-  {name: 'amp-my-element', version: '1.0', latestVersion: '0.1', options: {npm: true, wrapper: "bento"}},
+  {name: 'amp-my-element', version: '1.0', latestVersion: '1.0', options: {npm: true, wrapper: "bento"}},
 ...
 ];
 ```
@@ -601,7 +601,7 @@ Note, if you are providing a version upgrade (pre-existing 0.1 to Bento 1.0, for
 exports.extensionBundles = [
 ...
   {name: 'amp-my-element', version: '0.1', latestVersion: '0.1', options: {hasCss: true}},
-  {name: 'amp-my-element', version: '1.0', latestVersion: '0.1', options: {npm: true, wrapper: "bento"}},
+  {name: 'amp-my-element', version: '1.0', latestVersion: '1.0', options: {npm: true, wrapper: "bento"}},
 ...
 ];
 ```
@@ -647,7 +647,7 @@ For faster testing during development, consider using --files argument
 to only run your extensions' tests.
 
 ```shell
-$ amp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
+$ amp unit --files=extensions/amp-my-element/1.0/test/test-amp-my-element.js --watch
 ```
 
 Please also reference [Testing in AMP HTML](https://github.com/ampproject/amphtml/blob/main/docs/testing.md) for the full range of testing commands available.
@@ -675,7 +675,7 @@ and existing AMP code for examples of how to add type annotations to
 your code.
 
 The following shows the overall structure of your type definition
-file (extensions/amp-my-element/0.1/my-element.type.js). This will allow support of inline prop destructuring in Preact components.
+file (extensions/amp-my-element/1.0/my-element.type.js). This will allow support of inline prop destructuring in Preact components.
 
 ```javascript
 /** @externs */
