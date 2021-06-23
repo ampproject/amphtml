@@ -133,6 +133,13 @@
     >
     </amp-render>
 
+    <!-- Valid: amp-render with template attribute -->
+    <amp-render width=10 height=10
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      template="found">
+    </amp-render>
+    <template id="found"></template>
+
     <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
     <amp-render width="10" height="10"> </amp-render>
 
@@ -144,5 +151,12 @@
       binding="foobar"
     >
     </amp-render>
+
+    <!-- Invalid: missing template with specified id -->
+    <amp-render width=10 height=10
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      template="missing">
+    </amp-render>
+
   </body>
 </html>

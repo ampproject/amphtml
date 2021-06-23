@@ -134,20 +134,40 @@ FAIL
 |      >
 |      </amp-render>
 |
+|      <!-- Valid: amp-render with template attribute -->
+|      <amp-render width=10 height=10
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|        template="found">
+|      </amp-render>
+|      <template id="found"></template>
+>>     ^~~~~~~~~
+amp-render/1.0/test/validator-amp-render.html:141:4 The mandatory attribute 'type' is missing in tag 'template'. (see https://amp.dev/documentation/components/amp-mustache)
+>>     ^~~~~~~~~
+amp-render/1.0/test/validator-amp-render.html:141:4 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache)
+|
 |      <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
 |      <amp-render width="10" height="10"> </amp-render>
 >>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:137:4 The tag 'amp-render' is missing a mandatory attribute - pick at least one of ['src','[src]','data-amp-bind-src']. (see https://amp.dev/documentation/components/amp-render/)
+amp-render/1.0/test/validator-amp-render.html:144:4 The tag 'amp-render' is missing a mandatory attribute - pick at least one of ['src','[src]','data-amp-bind-src']. (see https://amp.dev/documentation/components/amp-render/)
 |
 |      <!-- Invalid: invalid binding attribute -->
 |      <amp-render
 >>     ^~~~~~~~~
-amp-render/1.0/test/validator-amp-render.html:140:4 The attribute 'binding' in tag 'amp-render' is set to the invalid value 'foobar'. (see https://amp.dev/documentation/components/amp-render/)
+amp-render/1.0/test/validator-amp-render.html:147:4 The attribute 'binding' in tag 'amp-render' is set to the invalid value 'foobar'. (see https://amp.dev/documentation/components/amp-render/)
 |        width="10"
 |        height="10"
 |        src="https://data.com/articles.json?ref=CANONICAL_URL"
 |        binding="foobar"
 |      >
 |      </amp-render>
+|
+|      <!-- Invalid: missing template with specified id -->
+|      <amp-render width=10 height=10
+>>     ^~~~~~~~~
+amp-render/1.0/test/validator-amp-render.html:156:4 Attribute 'template' in tag 'amp-render' contains a value that does not match any other tags on the page. (see https://amp.dev/documentation/components/amp-render/)
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|        template="missing">
+|      </amp-render>
+|
 |    </body>
 |  </html>

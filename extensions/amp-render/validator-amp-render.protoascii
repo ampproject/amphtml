@@ -31,7 +31,7 @@ tags: {  # <amp-render>
   attrs: {
     name: "binding"
     value: "always"
-    value: "never"
+    value: "never" # alternative to "no" introduced in amp-render
     value: "no"
     value: "refresh"
   }
@@ -50,6 +50,10 @@ tags: {  # <amp-render>
       protocol: "https"
     }
     disallowed_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
   }
   attrs: { name: "xssi-prefix" }
   attrs: {
