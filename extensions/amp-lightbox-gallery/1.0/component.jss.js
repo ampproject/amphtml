@@ -24,7 +24,6 @@ const TOP_BAR_HEIGHT_LARGE = 80;
 const DEFAULT_DIMENSION_LARGE = 40;
 const DEFAULT_PADDING_LARGE = 20;
 
-const DEFAULT_GRID_NUM = 4;
 const DEFAULT_GRID_PADDING = 5;
 
 const gallery = {
@@ -71,7 +70,7 @@ const grid = {
   height: `calc(100% - ${TOP_BAR_HEIGHT}px) !important`,
   width: 'calc(100% - 10px) !important',
   '@media (min-width: 1024px)': {
-    gridTemplateColumns: `repeat(${DEFAULT_GRID_NUM}, calc(1024px/${DEFAULT_GRID_NUM} - ${DEFAULT_GRID_PADDING}px * ${DEFAULT_GRID_PADDING} / ${DEFAULT_GRID_NUM}))`,
+    gridTemplateColumns: `repeat(4, calc(1024px/4 - ${DEFAULT_GRID_PADDING}px * 5 / 4))`,
     top: `${TOP_BAR_HEIGHT_LARGE}px !important`,
     height: `calc(100% - ${TOP_BAR_HEIGHT_LARGE}px) !important`,
   },
