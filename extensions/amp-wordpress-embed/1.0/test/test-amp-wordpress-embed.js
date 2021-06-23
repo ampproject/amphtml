@@ -115,9 +115,7 @@ describes.realWin(
       await element.layoutCallback();
 
       expect(consoleOutput.length).to.equal(1);
-      expect(consoleOutput[0]).to.equal(
-        'Please provide a valid url'
-      );
+      expect(consoleOutput[0]).to.equal('Please provide a valid url');
 
       console.warn = originalWarn;
     });

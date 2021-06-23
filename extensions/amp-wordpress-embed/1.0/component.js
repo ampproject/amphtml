@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {IframeEmbed} from '../../../src/preact/component/iframe';
+import * as Preact from '#preact';
+import {IframeEmbed} from '#preact/component/iframe';
 import {addParamToUrl} from '../../../src/url';
-import {dict} from '../../../src/core/types/object';
-import {forwardRef} from '../../../src/preact/compat';
+import {dict} from '#core/types/object';
+import {forwardRef} from '#preact/compat';
 import {getData} from '../../../src/event-helper';
 
-const {useCallback, useState, useMemo} = Preact;
+const {useCallback, useMemo, useState} = Preact;
 
 const NO_HEIGHT_STYLE = dict();
 
