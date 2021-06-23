@@ -31,7 +31,6 @@ describes.realWin(
   (env) => {
     let win;
     let doc;
-    let clock;
     let createElementWithAttributes;
     let clock;
 
