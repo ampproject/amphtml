@@ -79,7 +79,6 @@ const TYPE_CHECK_TARGETS = {
     warningLevel: 'QUIET',
   },
   'src-core': CORE_SRCS_GLOBS,
-  'src-examiner': ['src/examiner/**/*.js'],
   'src-experiments': ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
   'src-inabox': {
     srcGlobs: ['src/inabox/**/*.js'],
