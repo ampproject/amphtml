@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from './index';
+import * as Preact from '#preact';
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
+import {CanPlay, CanRender, LoadingProp} from './contextprops';
 import {Deferred} from '#core/data-structures/promise';
 import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {Loading} from '#core/loading-instructions';
@@ -32,7 +32,7 @@ import {
   setGroupProp,
   setParent,
   subscribe,
-} from '../context';
+} from '#core/context';
 import {
   childElementByAttr,
   childElementByTag,
@@ -49,7 +49,7 @@ import {devAssert} from '#core/assert';
 import {dict, hasOwn, map} from '#core/types/object';
 import {getDate} from '#core/types/date';
 import {getMode} from '../mode';
-import {hydrate, render} from './index';
+import {hydrate, render} from '#preact';
 import {installShadowStyle} from '../shadow-embed';
 import {isElement} from '#core/types';
 import {sequentialIdGenerator} from '#core/math/id-generator';

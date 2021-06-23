@@ -78,7 +78,6 @@ const TYPE_CHECK_TARGETS = {
     srcGlobs: ['src/amp-story-player/**/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-context': ['src/context/**/*.js', ...CORE_SRCS_GLOBS],
   'src-core': CORE_SRCS_GLOBS,
   'src-examiner': ['src/examiner/**/*.js'],
   'src-experiments': ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
@@ -93,7 +92,7 @@ const TYPE_CHECK_TARGETS = {
     ...CORE_SRCS_GLOBS,
   ],
   'src-preact': {
-    srcGlobs: ['src/preact/**/*.js', 'src/context/**/*.js', ...CORE_SRCS_GLOBS],
+    srcGlobs: ['src/preact/**/*.js', ...CORE_SRCS_GLOBS],
     warningLevel: 'QUIET',
   },
   'src-purifier': {

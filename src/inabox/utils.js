@@ -15,7 +15,7 @@
  */
 
 import {Services} from '#service';
-import {createCustomEvent} from '../event-helper.js';
+import {createCustomEvent} from '../event-helper';
 import {whenContentIniLoadMeasure} from '../ini-load';
 
 /**

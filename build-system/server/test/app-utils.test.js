@@ -50,10 +50,18 @@ test('replaceUrls("compiled", ...)', async (t) => {
   t.is(
     replaceUrls(
       mode,
+      '<link rel="stylesheet" href="https://cdn.ampproject.org/v0/amp-whatever-1.0.css" />'
+    ),
+    '<link rel="stylesheet" href="/dist/v0/amp-whatever-1.0.css" />'
+  );
+  t.is(
+    replaceUrls(
+      mode,
       `
         <head>
           <script src="https://cdn.ampproject.org/v0.js"></script>
           <script src="https://cdn.ampproject.org/v0/amp-foo-0.1.js"></script>
+          <link rel="stylesheet" href="https://cdn.ampproject.org/v0/amp-foo-1.0.css" />
         </head>
       `
     ),
@@ -61,6 +69,7 @@ test('replaceUrls("compiled", ...)', async (t) => {
         <head>
           <script src="/dist/v0.js"></script>
           <script src="/dist/v0/amp-foo-0.1.js"></script>
+          <link rel="stylesheet" href="/dist/v0/amp-foo-1.0.css" />
         </head>
       `
   );
@@ -104,10 +113,19 @@ test('replaceUrls("compiled", ..., hostName)', async (t) => {
   t.is(
     replaceUrls(
       mode,
+      '<link rel="stylesheet" href="https://cdn.ampproject.org/v0/amp-whatever-1.0.css" />',
+      hostName
+    ),
+    '<link rel="stylesheet" href="https://foo.bar/dist/v0/amp-whatever-1.0.css" />'
+  );
+  t.is(
+    replaceUrls(
+      mode,
       `
         <head>
           <script src="https://cdn.ampproject.org/v0.js"></script>
           <script src="https://cdn.ampproject.org/v0/amp-foo-0.1.js"></script>
+          <link rel="stylesheet" href="https://cdn.ampproject.org/v0/amp-foo-1.0.css" />
         </head>
       `,
       hostName
@@ -116,6 +134,7 @@ test('replaceUrls("compiled", ..., hostName)', async (t) => {
         <head>
           <script src="https://foo.bar/dist/v0.js"></script>
           <script src="https://foo.bar/dist/v0/amp-foo-0.1.js"></script>
+          <link rel="stylesheet" href="https://foo.bar/dist/v0/amp-foo-1.0.css" />
         </head>
       `
   );
@@ -154,10 +173,18 @@ test('replaceUrls("default", ...)', async (t) => {
   t.is(
     replaceUrls(
       mode,
+      '<link rel="stylesheet" href="https://cdn.ampproject.org/v0/amp-whatever-1.0.css" />'
+    ),
+    '<link rel="stylesheet" href="/dist/v0/amp-whatever-1.0.css" />'
+  );
+  t.is(
+    replaceUrls(
+      mode,
       `
         <head>
           <script src="https://cdn.ampproject.org/v0.js"></script>
           <script src="https://cdn.ampproject.org/v0/amp-foo-0.1.js"></script>
+          <link rel="stylesheet" href="https://cdn.ampproject.org/v0/amp-foo-1.0.css" />
         </head>
       `
     ),
@@ -165,6 +192,7 @@ test('replaceUrls("default", ...)', async (t) => {
         <head>
           <script src="/dist/amp.js"></script>
           <script src="/dist/v0/amp-foo-0.1.max.js"></script>
+          <link rel="stylesheet" href="/dist/v0/amp-foo-1.0.css" />
         </head>
       `
   );
@@ -208,10 +236,19 @@ test('replaceUrls("default", ..., hostName)', async (t) => {
   t.is(
     replaceUrls(
       mode,
+      '<link rel="stylesheet" href="https://cdn.ampproject.org/v0/amp-whatever-1.0.css" />',
+      hostName
+    ),
+    '<link rel="stylesheet" href="https://foo.bar/dist/v0/amp-whatever-1.0.css" />'
+  );
+  t.is(
+    replaceUrls(
+      mode,
       `
         <head>
           <script src="https://cdn.ampproject.org/v0.js"></script>
           <script src="https://cdn.ampproject.org/v0/amp-foo-0.1.js"></script>
+          <link rel="stylesheet" href="https://cdn.ampproject.org/v0/amp-foo-1.0.css" />
         </head>
       `,
       hostName
@@ -220,6 +257,7 @@ test('replaceUrls("default", ..., hostName)', async (t) => {
         <head>
           <script src="https://foo.bar/dist/amp.js"></script>
           <script src="https://foo.bar/dist/v0/amp-foo-0.1.max.js"></script>
+          <link rel="stylesheet" href="https://foo.bar/dist/v0/amp-foo-1.0.css" />
         </head>
       `
   );
@@ -258,10 +296,18 @@ test('replaceUrls(rtv, ...)', async (t) => {
   t.is(
     replaceUrls(
       mode,
+      '<link rel="stylesheet" href="https://cdn.ampproject.org/v0/amp-whatever-1.0.css" />'
+    ),
+    '<link rel="stylesheet" href="https://cdn.ampproject.org/rtv/123456789012345/v0/amp-whatever-1.0.css" />'
+  );
+  t.is(
+    replaceUrls(
+      mode,
       `
         <head>
           <script src="https://cdn.ampproject.org/v0.js"></script>
           <script src="https://cdn.ampproject.org/v0/amp-foo-0.1.js"></script>
+          <link rel="stylesheet" href="https://cdn.ampproject.org/v0/amp-foo-1.0.css" />
         </head>
       `
     ),
@@ -269,6 +315,7 @@ test('replaceUrls(rtv, ...)', async (t) => {
         <head>
           <script src="https://cdn.ampproject.org/rtv/123456789012345/v0.js"></script>
           <script src="https://cdn.ampproject.org/rtv/123456789012345/v0/amp-foo-0.1.js"></script>
+          <link rel="stylesheet" href="https://cdn.ampproject.org/rtv/123456789012345/v0/amp-foo-1.0.css" />
         </head>
       `
   );
