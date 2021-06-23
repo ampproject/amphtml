@@ -32,6 +32,8 @@ const ENV_PORTS = {
   preact: 9002,
 };
 
+const defaultBuildDir = 'examples/storybook';
+
 /**
  * @param {string} env 'amp' or 'preact'
  * @return {string}
@@ -61,11 +63,10 @@ function launchEnv(env) {
 
 /**
  * @param {string} env 'amp' or 'preact'
- * @param {string} dir Relative to cwd.
  */
-function buildEnv(env, dir) {
+function buildEnv(env) {
   const configDir = envConfigDir(env);
-
+  const {'build_dir': dir = defaultBuildDir} = argv;
   if (env === 'amp' && isPullRequestBuild()) {
     // Allows PR deploys to reference built binaries.
     writeFileSync(
@@ -107,8 +108,7 @@ async function storybook() {
   if (!build) {
     createCtrlcHandler('storybook');
   }
-  const buildDir = build === true ? 'examples/storybook' : build;
-  envs.map(buildDir ? (env) => buildEnv(env, buildDir) : launchEnv);
+  envs.map(build ? buildEnv : launchEnv);
 }
 
 module.exports = {
@@ -119,8 +119,8 @@ storybook.description =
   'Set up isolated development and testing for AMP components';
 
 storybook.flags = {
-  'build':
-    'Build a static web application (see https://storybook.js.org/docs). This outputs to examples/storybook by default. It can be optionally set to a different directory relative to CWD.',
+  'build': 'Build a static web application (see https://storybook.js.org/docs)',
+  'build_dir': `Output directory when using --build (defaults to ${defaultBuildDir})`,
   'storybook_env':
     "Environment(s) to run Storybook (either 'amp', 'preact' or a list as 'amp,preact')",
   'storybook_port': 'Port from which to run the Storybook dashboard',
