@@ -15,9 +15,9 @@
  */
 
 import '../amp-soundcloud';
-import {htmlFor} from '../../../../src/core/dom/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {htmlFor} from '#core/dom/static-template';
+import {toggleExperiment} from '#experiments';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-soundcloud-v1.0',

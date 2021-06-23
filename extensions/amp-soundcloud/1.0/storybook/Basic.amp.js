@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {boolean, color, text, withKnobs} from '@storybook/addon-knobs';
 import {rgba2hex} from './converter';
 import {withAmp} from '@ampproject/storybook-addon';
