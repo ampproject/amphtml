@@ -17,13 +17,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const ciReporter = require('./mocha-ci-reporter');
 const config = require('../../test-configs/config');
-const dotsReporter = require('./mocha-dots-reporter');
 const fs = require('fs');
-const glob = require('glob');
 const http = require('http');
-const Mocha = require('mocha');
 const path = require('path');
 const {
   buildRuntime,
@@ -34,16 +30,14 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
+const {createMochaWithFiles} = require('./mocha-utils');
 const {cyan} = require('../../common/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
-const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
+const {validateTestsIfNecessary} = require('./validate-tests');
 const {watch} = require('chokidar');
-
-const SLOW_TEST_THRESHOLD_MS = 2500;
-const TEST_RETRIES = isCiBuild() ? 2 : 0;
 
 const COV_DOWNLOAD_PATH = '/coverage/download';
 const COV_OUTPUT_DIR = './test/coverage-e2e';
@@ -72,46 +66,6 @@ async function setUpTesting_() {
     {quiet: !argv.debug},
     {compiled: argv.compiled}
   );
-}
-
-/**
- * Creates a mocha test instance with configuration determined by CLI args.
- * @return {!Mocha}
- */
-function createMocha_() {
-  let reporter;
-  if (argv.testnames || argv.watch) {
-    reporter = '';
-  } else if (argv.report || isCircleciBuild()) {
-    // TODO(#28387) clean up this typing.
-    reporter = /** @type {*} */ (ciReporter);
-  } else {
-    reporter = dotsReporter;
-  }
-
-  return new Mocha({
-    // e2e tests have a different standard for when a test is too slow,
-    // so we set a non-default threshold.
-    slow: SLOW_TEST_THRESHOLD_MS,
-    reporter,
-    retries: TEST_RETRIES,
-    fullStackTrace: true,
-    reporterOptions: isCiBuild()
-      ? {
-          mochaFile: 'result-reports/e2e.xml',
-        }
-      : null,
-  });
-}
-
-/**
- * Refreshes require cache and adds file to a Mocha instance.
- * @param {!Mocha} mocha Mocha test instance.
- * @param {string} file relative path to test file to add.
- */
-function addMochaFile_(mocha, file) {
-  delete require.cache[path.resolve(file)];
-  mocha.addFile(file);
 }
 
 /**
@@ -162,19 +116,11 @@ async function fetchCoverage_(outDir) {
  * Runs e2e tests on all files under test.
  * @return {!Promise<void>}
  */
-function runTests_() {
-  const mocha = createMocha_();
-  const addFile = addMochaFile_.bind(null, mocha);
+async function runTests_() {
+  const mocha = createMochaWithFiles();
 
-  // specify tests to run
-  if (argv.files || argv.filelist) {
-    getFilesFromArgv().forEach(addFile);
-    getFilesFromFileList().forEach(addFile);
-  } else {
-    config.e2eTestPaths.forEach((path) => {
-      glob.sync(path).forEach(addFile);
-    });
-  }
+  // DO_NOT_SUBMIT remove this.
+  await validateTestsIfNecessary();
 
   // return promise to amp that resolves when there's an error.
   return new Promise((resolve) => {
@@ -185,6 +131,8 @@ function runTests_() {
       }
       await stopServer();
       process.exitCode = failures ? 1 : 0;
+      // DO_NOT_SUBMIT uncomment this.
+      // await validateTestsIfNecessary_();
       resolve();
     });
   });
@@ -203,8 +151,7 @@ async function runWatch_() {
   log('Watching', cyan(filesToWatch), 'for changes...');
   watch(filesToWatch).on('change', (file) => {
     log('Detected a change in', cyan(file));
-    const mocha = createMocha_();
-    addMochaFile_(mocha, file);
+    const mocha = createMochaWithFiles([file]);
     mocha.run();
   });
 
@@ -248,4 +195,5 @@ e2e.flags = {
   'report': 'Write test result report to a local file',
   'coverage': 'Collect coverage data from instrumented code',
   'filelist': 'Run tests specified in this comma-separated list of test files',
+  'validate': 'Validate the runtime and flakiness of newly added/updated tests',
 };
