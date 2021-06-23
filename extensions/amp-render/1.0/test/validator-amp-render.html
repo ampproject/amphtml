@@ -126,15 +126,15 @@
     >
     </amp-render>
 
-    <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
-    <amp-render width="10" height="10"> </amp-render>
-
-    <!-- Invalid: container layout -->
+    <!-- Valid: container layout -->
     <amp-render
       layout="container"
       src="https://data.com/articles.json?ref=CANONICAL_URL"
     >
     </amp-render>
+
+    <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
+    <amp-render width="10" height="10"> </amp-render>
 
     <!-- Invalid: invalid binding attribute -->
     <amp-render
