@@ -213,7 +213,7 @@ export function ssp(global, data) {
             }
 
             // listen to intersections and force element reflow (external DSPs)
-            if (['APPNEXUS', 'PUBMATIC'].includes(ad.dsp)) {
+            if (['APPNEXUS', 'PUBMATIC', 'PUBMATIC2'].includes(ad.dsp)) {
               global.context.observeIntersection(() => {
                 forceElementReflow(parentElement);
               });
