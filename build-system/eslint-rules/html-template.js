@@ -30,10 +30,10 @@ const {
  */
 function create(context) {
   /**
-   * Tags used in <svg> elements can be safely autofixed from an invalid void
-   * tag like <path /> into its full closed form <path></path>.
+   * SVG elements can be safely autofixed from an invalid self-closing tag
+   * like <path /> into its valid closed form <path></path>.
    */
-  const svgAutoFixableVoidTags = new Set([
+  const svgSelfClosing = new Set([
     'circle',
     'ellipse',
     'line',
@@ -187,7 +187,7 @@ function create(context) {
         tag,
         offset: match.index,
         length: fullMatch.length,
-        fixable: svgAutoFixableVoidTags.has(tag),
+        fixable: svgSelfClosing.has(tag),
       });
     }
 
