@@ -22,6 +22,44 @@ import {CSS} from '../../../build/amp-story-interactive-img-poll-0.1.css';
 import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
 
+/**
+ * Generates the template for the image poll.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildPollTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-interactive-img-container">
+      <div class="i-amphtml-story-interactive-prompt-container"></div>
+      <div class="i-amphtml-story-interactive-img-option-container"></div>
+    </div>
+  `;
+};
+
+/**
+ * Generates the template for each option.
+ *
+ * @param {!Element} option
+ * @return {!Element}
+ */
+const buildOptionTemplate = (option) => {
+  const html = htmlFor(option);
+  return html`
+		<div
+      class="i-amphtml-story-interactive-img-poll-option i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
+      aria-live="polite"
+    >
+			<button class="i-amphtml-story-interactive-img-option-button">
+				<img class="i-amphtml-story-interactive-img-option-img" />
+				<div class="i-amphtml-story-interactive-img-option-percentage-fill"></div>
+				<span class="i-amphtml-story-interactive-img-option-percentage-text"></span>
+			</button>
+		</div>
+  `;
+};
+
 export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
   /**
    * @param {!AmpElement} element
@@ -37,7 +75,50 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
 
   /** @override */
   buildComponent() {
-    this.rootEl_ = htmlFor(this.element)`<p>Image poll component</p>`;
+    this.rootEl_ = buildPollTemplate(this.element);
+    this.attachContent_(this.rootEl_);
     return this.rootEl_;
+  }
+
+	/**
+   * Finds the prompt and options content
+   * and adds it to the poll element.
+   *
+   * @private
+   * @param {Element} root
+   */
+	attachContent_(root) {
+    this.attachPrompt_(root);
+
+		const optionContainer = this.rootEl_.querySelector(
+      '.i-amphtml-story-interactive-img-option-container'
+    );
+    this.options_.forEach((option, index) =>
+      optionContainer.appendChild(this.configureOption_(option, index))
+    );
+  }
+
+	/**
+   * Creates an option container with option content,
+   * adds styling and answer choices,
+   * and adds it to the poll element.
+   *
+   * @param {!./amp-story-interactive-abstract.OptionConfigType} option
+   * @param {number} index
+   * @return {!Element}
+   * @private
+   */
+	configureOption_(option, index) {
+    const convertedOption = buildOptionTemplate(this.element);
+    convertedOption.optionIndex_ = option['optionIndex'];
+
+    // Extract and structure the option information
+    const imgEl = convertedOption.querySelector(
+      '.i-amphtml-story-interactive-img-option-img'
+    );
+    imgEl.setAttribute('src', option['image']);
+    imgEl.setAttribute('alt', option['alt']);
+
+    return convertedOption;
   }
 }
