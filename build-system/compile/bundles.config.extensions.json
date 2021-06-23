@@ -877,7 +877,7 @@
     "version": "0.1",
     "latestVersion": "0.1"
   },
-  {
+  { 
     "// 1": "`amp-slides` is deprecated",
     "// 2": "Please use `<amp-carousel type=slides>` instead.",
     "name": "amp-slides",
@@ -1006,7 +1006,8 @@
         "amp-story-interactive-binary-poll",
         "amp-story-interactive-poll",
         "amp-story-interactive-quiz",
-        "amp-story-interactive-results"
+        "amp-story-interactive-results",
+        "amp-story-interactive-slider"
       ]
     }
   },
