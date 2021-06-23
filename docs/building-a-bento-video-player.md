@@ -101,31 +101,6 @@ export class BaseElement extends VideoBaseElement {}
 
 This enables support for AMP actions and analytics, once we map attributes to their prop counterparts in `BaseElement['props']`, and we implement the Preact component.
 
-### Pre-upgrade CSS
-
-Bento components must specify certain layout properties in order to prevent [Cumulative Layout Shift (CLS)](https://web.dev/cls). Video extensions must include the following in the generated **`amp-fantastic-player.css`**:
-
-```css
-/* amp-fantastic-player.css */
-
-/*
- * Pre-upgrade:
- * - display:block element
- * - size-defined element
- */
-amp-fantastic-player {
-  display: block;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Pre-upgrade: size-defining element - hide children. */
-amp-fantastic-player:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
-  display: none;
-  content-visibility: hidden;
-}
-```
-
 ### `props`
 
 [**`props`**](https://github.com/ampproject/amphtml/blob/main/docs/building-a-bento-amp-extension.md#preactbaseelementprops) map the AMP element's attributes to the Preact component props. Take a look at [`VideoBaseElement`](../extensions/amp-video/1.0/base-element.js) for how most video properties are mapped. On your own `base-element.js`, you should specify any of them you support.
