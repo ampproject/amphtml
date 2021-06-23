@@ -2266,8 +2266,6 @@ export class AmpStory extends AMP.BaseElement {
       })
         .then(preloadAllPages)
         .catch();
-
-      // Load page with distance 0 first, and then load the other ones.
     });
   }
 
