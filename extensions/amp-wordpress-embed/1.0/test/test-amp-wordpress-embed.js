@@ -54,7 +54,6 @@ describes.realWin(
         'amp-wordpress-embed',
         {
           'data-url': 'https://wordpress.org/news/2021/06/gutenberg-highlights',
-          'amp': true,
           'height': 200,
           'width': 500,
           'layout': 'responsive',
@@ -75,7 +74,6 @@ describes.realWin(
         'amp-wordpress-embed',
         {
           'data-url': 'https://wordpress.org/news/2021/06/gutenberg-highlights',
-          'amp': true,
           'height': initialHeight,
           'width': 500,
           'layout': 'responsive',
