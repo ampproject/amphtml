@@ -638,6 +638,7 @@ export class PreactBaseElement extends AMP.BaseElement {
           shadowRoot.appendChild(serviceSlot);
           this.getPlaceholder()?.setAttribute('slot', SERVICE_SLOT_NAME);
           this.getFallback()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getOverflowElement()?.setAttribute('slot', SERVICE_SLOT_NAME);
         }
         this.container_ = container;
 
