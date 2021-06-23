@@ -307,6 +307,13 @@ class Strings {
   // Returns 0, if the character at current position is not a whitespace.
   static int IsUtf8WhiteSpaceChar(std::string_view s, std::size_t position = 0);
 
+  // Counts number of words delimited by characters. If no delimiters are
+  // specified defaults to whitspace chars that is ascii space, \n, \r etc.
+  // Note: entity names such as &nbsp;, &amp;, &copy; are not delimiters,
+  // callers must convert these (unescape) to their unicode values.
+  static int CountTerms(std::string_view s,
+                             std::string_view delimiters = kWhitespace);
+
  private:
   // No instance of this class.
   Strings() = default;

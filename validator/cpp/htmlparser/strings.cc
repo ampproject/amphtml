@@ -741,6 +741,20 @@ int Strings::IsUtf8WhiteSpaceChar(std::string_view s, std::size_t position) {
   return 0;
 }
 
+int Strings::CountTerms(std::string_view s, std::string_view delimiters) {
+  if (s.empty() || delimiters.empty()) return 0;
+
+  TrimLeft(&s, delimiters);
+  int count = 0;
+  std::size_t pos = 0;
+  while (pos < s.length()) {
+    count++;
+    pos = s.find_first_of(delimiters, pos);
+    pos = s.find_first_not_of(delimiters, pos);
+  }
+  return count;
+}
+
 namespace {
 
 // Reads an entity like "&lt;" from b[src:] and writes the corresponding "<"
