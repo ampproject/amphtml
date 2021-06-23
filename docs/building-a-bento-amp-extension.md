@@ -575,8 +575,19 @@ You must make changes to [`build-system/compile/bundles.config.extensions.json`]
 ```javascript
 exports.extensionBundles = [
 ...
-  {name: 'amp-kaltura-player', version: '0.1', latestVersion: '0.1'},
-  {name: 'amp-carousel', version: '0.1', latestVersion: '0.1', options: {hasCss: true}},
+  {
+    "name": "amp-carousel",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-kaltura-player",
+    "version": "0.1",
+    "latestVersion": "0.1",
+  },
 ...
 ];
 ```
@@ -586,7 +597,15 @@ The entry for your component must have `options.wrapper = "bento"`, and may opti
 ```javascript
 exports.extensionBundles = [
 ...
-  {name: 'amp-my-element', version: '1.0', latestVersion: '1.0', options: {npm: true, wrapper: "bento"}},
+  {
+    "name": "amp-my-element",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "npm": true,
+      "wrapper": "bento"
+    }
+  },
 ...
 ];
 ```
@@ -596,8 +615,23 @@ Note, if you are providing a version upgrade (pre-existing 0.1 to Bento 1.0, for
 ```javascript
 exports.extensionBundles = [
 ...
-  {name: 'amp-my-element', version: '0.1', latestVersion: '0.1', options: {hasCss: true}},
-  {name: 'amp-my-element', version: '1.0', latestVersion: '1.0', options: {npm: true, wrapper: "bento"}},
+  {
+    "name": "amp-my-element",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-my-element",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true,
+      "wrapper": "bento"
+    }
+  },
 ...
 ];
 ```
