@@ -33,7 +33,7 @@
         <script type="application/json">
           {
               "requests": {
-                  "endpoint": "https://_fake_.com/analytics?session=SESSION_ID&timestamp=SESSION_TIMESTAMP"
+                  "endpoint": "https://_fake_.com/analytics?session=SESSION_ID&timestamp=SESSION_TIMESTAMP&count=SESSION_COUNT"
               },
               "triggers": {
                   "pageview": {
@@ -78,7 +78,7 @@
         <script type="application/json">
           {
               "requests": {
-                  "endpoint": "https://example.com/analytics?session=${sessionId}&timestamp=${sessionTimestamp}"
+                  "endpoint": "https://example.com/analytics?session=${sessionId}&timestamp=${sessionTimestamp}&count=${sessionCount}"
               },
               "triggers": {
                   "pageview": {
