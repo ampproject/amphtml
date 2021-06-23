@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Expander} from '../../../src/service/url-expander/expander';
-import {GlobalVariableSource} from '../../../src/service/url-replacements-impl';
-import {macroTask} from '../../../testing/yield';
+import {Expander} from '#service/url-expander/expander';
+import {GlobalVariableSource} from '#service/url-replacements-impl';
+import {macroTask} from '#testing/yield';
 
 describes.realWin(
   'Expander',

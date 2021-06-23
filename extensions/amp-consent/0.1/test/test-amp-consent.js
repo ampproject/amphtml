@@ -24,19 +24,19 @@ import {
   constructMetadata,
   getConsentStateValue,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '../../../../src/core/constants/consent-state';
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {ConsentStateManager} from '../consent-state-manager';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {dev, user} from '../../../../src/log';
-import {dict} from '../../../../src/core/types/object';
-import {macroTask} from '../../../../testing/yield';
+import {dict} from '#core/types/object';
+import {macroTask} from '#testing/yield';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 import {removeSearch} from '../../../../src/url';
-import {toggleExperiment} from '../../../../src/experiments';
-import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
+import {toggleExperiment} from '#experiments';
+import {xhrServiceForTesting} from '#service/xhr-impl';
 
 describes.realWin(
   'amp-consent',

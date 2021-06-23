@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {closestAncestorElementBySelector} from '../core/dom/query';
+import {Services} from '#service';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dev, user, userAssert} from '../log';
-import {dict} from '../core/types/object';
-import {escapeCssSelectorIdent} from '../core/dom/css-selectors';
+import {dict} from '#core/types/object';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
 import {getMode} from '../mode';
-import {isIframed, openWindowDialog, tryFocus} from '../dom';
+import {isIframed, tryFocus} from '#core/dom';
 import {isLocalhostOrigin} from '../url';
-import {registerServiceBuilderForDoc} from '../service';
-import {toWin} from '../core/window';
-import PriorityQueue from '../core/data-structures/priority-queue';
+import {openWindowDialog} from '../open-window-dialog';
+import {registerServiceBuilderForDoc} from '../service-helpers';
+import {toWin} from '#core/window';
+import PriorityQueue from '#core/data-structures/priority-queue';
 
 const TAG = 'navigation';
 

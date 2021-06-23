@@ -104,7 +104,6 @@ button > svg {
 }
 
 .time {
-  margin-right: 20px;
   text-align: center;
   font-size: 14px;
   text-shadow: 0 0 10px black;
@@ -114,7 +113,12 @@ button > svg {
   height: 30px;
   flex-grow: 1;
   position: relative;
-  margin-right: 20px;
+  margin: 0 20px;
+}
+
+/* Push the next item as if `.progress` was present */
+.progress[hidden] + * {
+  margin-left: auto;
 }
 
 .progress::after {

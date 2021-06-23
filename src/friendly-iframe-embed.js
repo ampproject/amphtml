@@ -17,7 +17,7 @@
 import {CommonSignals} from './core/constants/common-signals';
 import {Deferred} from './core/data-structures/promise';
 import {FIE_EMBED_PROP} from './iframe-helper';
-import {Services} from './services';
+import {Services} from './service';
 import {Signals} from './core/data-structures/signals';
 import {VisibilityState} from './core/constants/visibility-state';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
@@ -26,8 +26,8 @@ import {
   disposeServicesForEmbed,
   getTopWindow,
   setParentWindow,
-} from './service';
-import {escapeHtml} from './dom';
+} from './service-helpers';
+import {escapeHtml} from './core/dom';
 import {getMode} from './mode';
 import {install as installAbortController} from './polyfills/abort-controller';
 import {installAmpdocServicesForEmbed} from './service/core-services';
@@ -39,7 +39,7 @@ import {installForChildWin as installResizeObserver} from './polyfills/resize-ob
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './core/document-ready';
-import {layoutRectLtwh, moveLayoutRect} from './core/math/layout-rect';
+import {layoutRectLtwh, moveLayoutRect} from './core/dom/layout/rect';
 import {loadPromise} from './event-helper';
 import {
   px,
@@ -47,7 +47,7 @@ import {
   setImportantStyles,
   setStyle,
   setStyles,
-} from './style';
+} from './core/dom/style';
 import {rethrowAsync} from './core/error';
 import {toWin} from './core/window';
 import {urls} from './config';

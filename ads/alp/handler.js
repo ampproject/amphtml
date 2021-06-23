@@ -20,11 +20,11 @@ import {
   isProxyOrigin,
   parseUrlDeprecated,
 } from '../../src/url';
-import {closest} from '../../src/core/dom/query';
+import {closest} from '#core/dom/query';
 import {dev} from '../../src/log';
-import {dict} from '../../src/core/types/object';
-import {openWindowDialog} from '../../src/dom';
-import {parseQueryString} from '../../src/core/types/string/url';
+import {dict} from '#core/types/object';
+import {openWindowDialog} from '../../src/open-window-dialog';
+import {parseQueryString} from '#core/types/string/url';
 import {urls} from '../../src/config';
 
 /**

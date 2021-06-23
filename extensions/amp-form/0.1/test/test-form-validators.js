@@ -25,7 +25,7 @@ import {
   getFormValidator,
   setReportValiditySupportedForTesting,
 } from '../form-validators';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {ValidationBubble} from '../validation-bubble';
 
 describes.realWin('form-validators', {amp: true}, (env) => {

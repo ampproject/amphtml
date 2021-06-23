@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact/index';
+import * as Preact from '#preact';
 import {mount} from 'enzyme';
-import {useRenderer} from '../../../../src/preact/component';
+import {useRenderer} from '#preact/component';
 
 describes.sandboxed('useRenderer', {}, (env) => {
   function Component({data, render}) {

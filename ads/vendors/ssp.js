@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
-import {parseJson} from '../../src/core/types/object/json';
-import {setStyle, setStyles} from '../../src/style';
+import {computeInMasterFrame, loadScript, validateData} from '#3p/3p';
+import {parseJson} from '#core/types/object/json';
+import {setStyle, setStyles} from '#core/dom/style';
 
 /*
  * How to develop:

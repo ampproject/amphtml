@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Services} from '../../../src/services';
-import {once} from '../../../src/core/types/function';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Services} from '#service';
+import {once} from '#core/types/function';
 
 import {Tracking} from './tracking';
 
