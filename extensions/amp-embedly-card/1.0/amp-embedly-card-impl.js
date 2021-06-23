@@ -14,31 +14,43 @@
  * limitations under the License.
  */
 
- _;
- import {EmbedlyCard} from './component';
- import {PreactBaseElement} from '#preact/base-element';
- 
- export class BaseElement extends PreactBaseElement {}
- 
- /** @override */
- BaseElement['Component'] = EmbedlyCard;
- 
- /** @override */
- BaseElement['props'] = {
-   'children': {passthrough: true},
-   // 'children': {passthroughNonEmpty: true},
-   // 'children': {selector: '...'},
- };
- 
- /** @override */
- BaseElement['layoutSizeDefined'] = true;
- 
- /** @override */
- BaseElement['usesShadowDom'] = true;
- 
- // DO NOT SUBMIT: If BaseElement['shadowCss']  is set to `null`, remove the
- // following declaration.
- // Otherwise, keep it when defined to an actual value like `COMPONENT_CSS`.
- // Once addressed, remove this set of comments.
- /** @override */
- BaseElement['shadowCss'] = null;
+import {EmbedlyCard} from './component';
+import {PreactBaseElement} from '#preact/base-element';
+
+import {Layout} from '#core/dom/layout';
+import {isExperimentOn} from '#experiments';
+import {userAssert} from '../../../src/log';
+
+/** @const {string} */
+export const TAG = 'amp-embedly-card';
+
+export class BaseElement extends PreactBaseElement {
+  /** @override */
+  isLayoutSupported(layout) {
+    userAssert(
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-embedly-card'),
+      'expected global "bento" or specific "bento-embedly-card" experiment to be enabled'
+    );
+    return layout == Layout.RESPONSIVE;
+  }
+}
+
+/** @override */
+BaseElement['Component'] = EmbedlyCard;
+
+/** @override */
+BaseElement['props'] = {
+  'children': {passthroughNonEmpty: true},
+  'title': {attr: 'title'},
+  'url': {attr: 'data-url'},
+};
+
+/** @override */
+BaseElement['layoutSizeDefined'] = true;
+
+/** @override */
+BaseElement['usesShadowDom'] = true;
+
+/** @override */
+BaseElement['loadable'] = true;
