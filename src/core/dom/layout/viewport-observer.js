@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {devAssert} from './log';
-import {getMode} from './mode';
-import {isIframed} from './core/dom';
-import {toWin} from './core/window';
+import * as mode from '#core/mode';
+import {devAssert} from '#core/assert';
+import {isIframed} from '#core/dom';
+import {toWin} from '#core/window';
 
 /**
  * Returns an IntersectionObserver tracking the Viewport.
@@ -58,7 +58,7 @@ const viewportCallbacks = new WeakMap();
  */
 export function observeWithSharedInOb(element, viewportCallback) {
   // There should never be two unique observers of the same element.
-  if (getMode().localDev) {
+  if (mode.isLocalDev()) {
     devAssert(
       !viewportCallbacks.has(element) ||
         viewportCallbacks.get(element) === viewportCallback
@@ -84,9 +84,7 @@ export function observeWithSharedInOb(element, viewportCallback) {
 export function unobserveWithSharedInOb(element) {
   const win = toWin(element.ownerDocument.defaultView);
   const viewportObserver = viewportObservers.get(win);
-  if (viewportObserver) {
-    viewportObserver.unobserve(element);
-  }
+  viewportObserver?.unobserve(element);
   viewportCallbacks.delete(element);
 }
 
@@ -99,9 +97,6 @@ export function unobserveWithSharedInOb(element) {
 function ioCallback(entries) {
   for (let i = 0; i < entries.length; i++) {
     const {isIntersecting, target} = entries[i];
-    const viewportCallback = viewportCallbacks.get(target);
-    if (viewportCallback) {
-      viewportCallback(isIntersecting);
-    }
+    viewportCallbacks.get(target)?.(isIntersecting);
   }
 }
