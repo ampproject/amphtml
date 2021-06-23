@@ -46,10 +46,6 @@ export class AnimationRunner {
   init() {}
 
   /**
-   */
-  maybeInit() {}
-
-  /**
    * Initializes the players if not already initialized,
    * and starts playing the animations.
    */
