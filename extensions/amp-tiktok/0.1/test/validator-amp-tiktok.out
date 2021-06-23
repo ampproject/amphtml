@@ -46,8 +46,7 @@ amp-tiktok/0.1/test/validator-amp-tiktok.html:38:2 Tag 'amp-tiktok' must have a 
 amp-tiktok/0.1/test/validator-amp-tiktok.html:41:2 Tag 'amp-tiktok' must have a minimum of 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-tiktok)
 |      width="700"
 |      height="800"
-|      data-src="https://www.tiktok.com/@scout2015/video/6943753342808034566"
-|    >
+|      data-src="https://www.tiktok.com/@scout2015/video/6943753342808034566">
 |    </amp-tiktok>
 |    <!-- Valid `amp-tiktok` component: contains width, height and valid blockquote child with placeholder, cite, and data-video-id -->
 |    <amp-tiktok width="500" height="800">
@@ -56,15 +55,13 @@ amp-tiktok/0.1/test/validator-amp-tiktok.html:41:2 Tag 'amp-tiktok' must have a 
 |        class="tiktok-embed"
 |        cite="https://www.tiktok.com/@countingprimes/video/6948210747285441798"
 |        data-video-id="6948210747285441798"
-|        style="max-width: 605px; min-width: 325px"
-|      >
+|        style="max-width: 605px; min-width: 325px">
 |        <section>
 |          <a
 |            target="_blank"
 |            title="@countingprimes"
 |            href="https://www.tiktok.com/@countingprimes"
-|            >@countingprimes</a
-|          >
+|            >@countingprimes</a>
 |          <p>
 |            VIM is great.... right up until you start typing the commands into every
 |            single text editor you see. I’d like to apologize for all my unneeded
@@ -74,8 +71,7 @@ amp-tiktok/0.1/test/validator-amp-tiktok.html:41:2 Tag 'amp-tiktok' must have a 
 |            target="_blank"
 |            title="♬ original sound - countingprimes"
 |            href="https://www.tiktok.com/music/original-sound-6948210588145175302"
-|            >♬ original sound - countingprimes</a
-|          >
+|            >♬ original sound - countingprimes</a>
 |        </section>
 |      </blockquote>
 |    </amp-tiktok>
@@ -83,12 +79,12 @@ amp-tiktok/0.1/test/validator-amp-tiktok.html:41:2 Tag 'amp-tiktok' must have a 
 |    <!-- Invalid `amp-tiktok` component: missing width and height -->
 |    <amp-tiktok data-src="6943753342808034566">
 >>   ^~~~~~~~~
-amp-tiktok/0.1/test/validator-amp-tiktok.html:79:2 Incomplete layout attributes specified for tag 'amp-tiktok'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-tiktok)
+amp-tiktok/0.1/test/validator-amp-tiktok.html:75:2 Incomplete layout attributes specified for tag 'amp-tiktok'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-tiktok)
 |    </amp-tiktok>
 |    <!-- Invalid `amp-tiktok` component: missing data-src -->
 |    <amp-tiktok width="500" height="500">
 >>   ^~~~~~~~~
-amp-tiktok/0.1/test/validator-amp-tiktok.html:82:2 Tag 'amp-tiktok' must have a minimum of 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-tiktok)
+amp-tiktok/0.1/test/validator-amp-tiktok.html:78:2 Tag 'amp-tiktok' must have a minimum of 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-tiktok)
 |    </amp-tiktok>
 |    <!-- Invalid `amp-tiktok` component: blockquote child missing placeholder attr -->
 |    <amp-tiktok width="500" height="800">
@@ -96,15 +92,13 @@ amp-tiktok/0.1/test/validator-amp-tiktok.html:82:2 Tag 'amp-tiktok' must have a 
 |        class="tiktok-embed"
 |        cite="https://www.tiktok.com/@countingprimes/video/6948210747285441798"
 |        data-video-id="6948210747285441798"
-|        style="max-width: 605px; min-width: 325px"
-|      >
+|        style="max-width: 605px; min-width: 325px">
 |        <section>
 |          <a
 |            target="_blank"
 |            title="@countingprimes"
 |            href="https://www.tiktok.com/@countingprimes"
-|            >@countingprimes</a
-|          >
+|            >@countingprimes</a>
 |          <p>
 |            VIM is great.... right up until you start typing the commands into every
 |            single text editor you see. I’d like to apologize for all my unneeded
@@ -114,8 +108,7 @@ amp-tiktok/0.1/test/validator-amp-tiktok.html:82:2 Tag 'amp-tiktok' must have a 
 |            target="_blank"
 |            title="♬ original sound - countingprimes"
 |            href="https://www.tiktok.com/music/original-sound-6948210588145175302"
-|            >♬ original sound - countingprimes</a
-|          >
+|            >♬ original sound - countingprimes</a>
 |        </section>
 |      </blockquote>
 |    </amp-tiktok>
