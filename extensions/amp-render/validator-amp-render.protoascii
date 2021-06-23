@@ -31,7 +31,7 @@ tags: {  # <amp-render>
   attrs: {
     name: "binding"
     value: "always"
-    value: "never" # alternative to "no" introduced in amp-render
+    value: "never" # alternative to "no" introduced in https://github.com/ampproject/amphtml/pull/34643
     value: "no"
     value: "refresh"
   }
