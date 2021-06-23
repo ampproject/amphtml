@@ -40,6 +40,7 @@ export function getA4ARegistry() {
     a4aRegistry = map({
       'adsense': () => true,
       'adzerk': () => true,
+      'dianomi': () => true,
       'doubleclick': () => true,
       'fake': () => true,
       'nws': () => true,
