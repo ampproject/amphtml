@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-/** @externs */
+ import {Layout} from '#core/dom/layout';
+ import {PreactBaseElement} from '#preact/base-element';
+ import {isExperimentOn} from '../../../src/experiments';
+ import {userAssert} from '../../../src/log';
 
-/** @const */
-var EmbedlyCardDef = {};
+/** @const {string} */
+export const TAG = 'amp-embedly-key';
 
-/**
- * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
- * }}
- */
-EmbedlyCardDef.Props;
+export class AmpEmbedlyKey extends PreactBaseElement {
+  /** @override */
+  isLayout(layout) {
+    userAssert(
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-embedly-key'),
+      'expected global "bento" or specific "bento-embedly-key" experiment to be enabled'
+    );
+    return layout === Layout.NODISPLAY;
+  }
+}
