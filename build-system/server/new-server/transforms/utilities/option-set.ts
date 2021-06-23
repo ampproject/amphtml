@@ -24,6 +24,6 @@ export interface OptionSet {
   esm?: boolean;
   port?: number;
   fortesting?: boolean;
-  looseScriptSrcCheck?: boolean;
+  looseOriginUrlCheck?: boolean;
   useMaxNames?: boolean;
 }

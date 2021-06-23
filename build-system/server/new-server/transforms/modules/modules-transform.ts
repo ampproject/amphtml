@@ -15,7 +15,7 @@
  */
 
 import posthtml from 'posthtml';
-import {isJsonScript, isValidScript, toExtension, ScriptNode, tryGetUrl} from '../utilities/script';
+import {isJsonScript, isValidScript, toExtension, ScriptNode, tryGetUrl} from '../utilities/cdn-tag';
 import {OptionSet} from '../utilities/option-set';
 
 /**
@@ -67,7 +67,7 @@ export default function(options: OptionSet = {}): (tree: posthtml.Node) => void 
         return node;
       }
 
-      if (!isValidScript(node, options.looseScriptSrcCheck)) {
+      if (!isValidScript(node, options.looseOriginUrlCheck)) {
         return node;
       }
 
