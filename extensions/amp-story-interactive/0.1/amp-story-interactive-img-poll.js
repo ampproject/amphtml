@@ -108,7 +108,7 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
    * @return {!Element}
    * @private
    */
-	configureOption_(option, index) {
+	configureOption_(option) {
     const convertedOption = buildOptionTemplate(this.element);
     convertedOption.optionIndex_ = option['optionIndex'];
 
