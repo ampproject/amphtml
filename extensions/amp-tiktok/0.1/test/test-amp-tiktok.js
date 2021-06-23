@@ -16,8 +16,8 @@
 
 import '../amp-tiktok';
 import * as dom from '#core/dom';
+import {Services} from '#service';
 import {computedStyle} from '#core/dom/style';
-import {isAmpElement} from '../../../../src/amp-element-helpers';
 
 const VIDEOID = '6948210747285441798';
 
@@ -33,10 +33,12 @@ describes.realWin(
     let doc;
     let clock;
     let createElementWithAttributes;
+    let clock;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      clock = env.sandbox.useFakeTimers();
       createElementWithAttributes = dom.createElementWithAttributes;
       clock = env.sandbox.useFakeTimers();
 
@@ -50,9 +52,17 @@ describes.realWin(
           }
           return createElementWithAttributes(document, tagName, attributes);
         });
+
+      const oEmbedJsonResponse = {
+        'thumbnail_url': '/examples/img/ampicon.png',
+        'title': 'Test TikTok Title',
+      };
+      env.sandbox
+        .stub(Services.xhrFor(win), 'fetchJson')
+        .resolves({json: () => Promise.resolve(oEmbedJsonResponse)});
     });
 
-    async function getTiktok(attrs = {}) {
+    function getTiktokBuildOnly(attrs = {}) {
       const tiktok = dom.createElementWithAttributes(
         win.document,
         'amp-tiktok',
@@ -64,12 +74,13 @@ describes.realWin(
         }
       );
       doc.body.appendChild(tiktok);
-      return tiktok
-        .buildInternal()
-        .then(() => {
-          return tiktok.layoutCallback();
-        })
-        .then(() => tiktok);
+      return tiktok.buildInternal().then(() => tiktok);
+    }
+
+    async function getTiktok(attrs = {}) {
+      const tiktok = await getTiktokBuildOnly(attrs);
+      const impl = await tiktok.getImpl();
+      return impl.layoutCallback().then(() => tiktok);
     }
 
     it('renders with videoId', async () => {
@@ -80,7 +91,7 @@ describes.realWin(
       expect(iframe.getAttribute('src')).to.contain('en-US');
     });
 
-    it('renders with videoId', async () => {
+    it('renders with video src url', async () => {
       const videoSrc =
         'https://www.tiktok.com/@scout2015/video/6948210747285441798';
       const player = await getTiktok({'data-src': videoSrc});
@@ -105,12 +116,49 @@ describes.realWin(
       const player = await getTiktok({'data-src': VIDEOID});
       const playerIframe = player.querySelector('iframe');
       const impl = await player.getImpl(false);
-      env.sandbox.stub(impl, 'handleTiktokMessages_');
 
+      await impl.layoutCallback();
       // Wait 1100ms for resize fallback to be invoked.
       clock.tick(1100);
 
       expect(computedStyle(win, playerIframe).height).to.equal('775.25px');
+    });
+
+    it('renders placeholder', async () => {
+      const videoSrc =
+        'https://www.tiktok.com/@scout2015/video/6948210747285441798';
+      const player = await getTiktok({'data-src': videoSrc});
+      const placeholder = player.querySelector('img');
+      expect(placeholder).to.not.be.null;
+      expect(placeholder.getAttribute('src')).to.equal(
+        '/examples/img/ampicon.png'
+      );
+    });
+
+    it.skip('renders aria title without oEmbed Request', async () => {
+      // TODO(rnthomas) Debug race condition in this test.
+      const player = await getTiktokBuildOnly({'data-src': VIDEOID});
+      const impl = await player.getImpl();
+
+      // Wait 1100ms for resize fallback to be invoked because aria-title is set in that call.
+      clock.tick(1100);
+      await impl.layoutCallback();
+
+      const playerIframe = player.querySelector('iframe');
+      const ariaTitle = playerIframe.getAttribute('aria-title');
+      expect(ariaTitle).to.equal('TikTok');
+    });
+
+    it.skip('renders aria title with oEmbed request', async () => {
+      const videoSrc =
+        'https://www.tiktok.com/@scout2015/video/6948210747285441798';
+      const player = await getTiktok({'data-src': videoSrc});
+
+      // Wait 1100ms for resize fallback to be invoked because aria-title is set in that call.
+      clock.tick(1100);
+      const playerIframe = player.querySelector('iframe');
+      const ariaTitle = playerIframe.getAttribute('aria-title');
+      expect(ariaTitle).to.equal('TikTok: Test TikTok Title');
     });
 
     it('removes iframe after unlayoutCallback', async () => {
