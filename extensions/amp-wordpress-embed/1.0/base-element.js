@@ -24,7 +24,7 @@ BaseElement['Component'] = WordpressEmbed;
 
 /** @override */
 BaseElement['props'] = {
-  url: {attr: 'data-url'},
+  url: {attr: 'data-url', default: ''},
   title: {attr: 'title'},
 };
 

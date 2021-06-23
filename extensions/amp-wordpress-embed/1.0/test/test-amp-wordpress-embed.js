@@ -98,7 +98,7 @@ describes.realWin(
       expect(forceChangeHeightStub).to.be.calledOnce.calledWith(1000);
     });
 
-    it('should show a warning message when data-url is missing', async () => {
+    it('should show a warning message for invalid url', async () => {
       const originalWarn = console.warn;
       const consoleOutput = [];
       const mockedWarn = (output) => consoleOutput.push(output);
@@ -116,7 +116,7 @@ describes.realWin(
 
       expect(consoleOutput.length).to.equal(1);
       expect(consoleOutput[0]).to.equal(
-        'data-url is required for <amp-wordpress-embed>'
+        'Please provide a valid url'
       );
 
       console.warn = originalWarn;

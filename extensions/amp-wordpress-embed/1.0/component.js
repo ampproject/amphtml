@@ -110,16 +110,11 @@ export {WordpressEmbed};
  */
 function checkProps(url) {
   // Perform manual checking as assertion is not available for Bento: Issue #32739
-  if (url === undefined) {
-    displayWarning('data-url is required for <amp-wordpress-embed>');
-    return false;
-  }
-
   try {
     new URL(url);
     return true;
   } catch (error) {
-    displayWarning('URL is invalid');
+    displayWarning('Please provide a valid url');
     return false;
   }
 }
