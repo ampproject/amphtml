@@ -74,6 +74,7 @@ import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {px, toggle} from '#core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';

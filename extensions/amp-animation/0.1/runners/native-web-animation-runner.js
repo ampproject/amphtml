@@ -102,19 +102,14 @@ export class NativeWebAnimationRunner extends AnimationRunner {
   }
 
   /**
-   * Initialize if not initialized already.
-   */
-  maybeInit() {
-    this.players_ || this.init();
-  }
-
-  /**
    * @override
    * Initializes the players if not already initialized,
    * and starts playing the animations.
    */
   start() {
-    this.maybeInit();
+    if (!this.players_) {
+      this.init();
+    }
     this.resume();
   }
 

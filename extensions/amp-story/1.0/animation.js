@@ -37,6 +37,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '#core/types/object';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 import {setStyles} from '#core/dom/style';
 import {timeStrToMillis, unscaledClientRect} from './utils';
@@ -335,7 +336,7 @@ export class AnimationRunner {
       return Promise.resolve();
     }
     this.runnerPromise_.then((runner) => {
-      runner.maybeInit();
+      runner.init();
       runner.finish(/* pauseOnError */ true);
     });
   }
@@ -365,7 +366,6 @@ export class AnimationRunner {
    * @private
    */
   startWhenReady_(runner) {
-    runner.maybeInit();
     runner.start();
   }
 
