@@ -57,7 +57,7 @@ This guide covers how to implement video player components that are internally i
 
 ## Getting Started
 
-Start by generating an extension specifying `--bento` and `--nojss`. We name our extension **`amp-fantastic-player`**, ending with `-player` according to our [guidelines for naming a third-party component](../spec/amp-3p-naming.md).
+Start by generating an extension specifying `--bento` and `--nojss`. We name our extension **`amp-fantastic-player`**, ending with `-player` according to our [guidelines for naming a third-party component](./spec/amp-3p-naming.md).
 
 ```console
 amp make-extension --bento --nojss --name=amp-fantastic-player
@@ -81,8 +81,8 @@ Our `BaseElement` should be a superclass of `VideoBaseElement`. In **`base-eleme
 
 ```diff
   import {MyFantasticPlayer} from './component';
-- import {PreactBaseElement} from '../../../src/preact/base-element';
-+ import {VideoBaseElement} from '../../amp-video/1.0/base-element';
+- import {PreactBaseElement} from '#preact/base-element';
++ import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 - export class BaseElement extends PreactBaseElement {}
 + export class BaseElement extends VideoBaseElement {}
@@ -154,7 +154,7 @@ However, it's more likely that you load a third-party iframe and you communicate
 To enable AMP actions (`my-element.play`) and the Preact component's imperative handle (`myPlayerRef.current.play()`), you'll have to [`forwardRef`](https://reactjs.org/docs/forwarding-refs.html). Rename `FantasticPlayer` to `FantasticPlayerWithRef`, and export a `FantasticPlayer` that forwards a `ref` into the former.
 
 ```diff
-+ import {forwardRef} from '../../../src/preact/compat';
++ import {forwardRef} from '#preact/compat';
 
 - export function FantasticPlayer({...rest}) {
 + function FantasticPlayerWithRef({...rest}, ref) {
@@ -171,7 +171,7 @@ So the outer structure looks like:
 ```js
 // component.js
 // ...
-import {forwardRef} from '../../../src/preact/compat';
+import {forwardRef} from '#preact/compat';
 // ...
 function FantasticPlayerWithRef({...rest}, ref) {
   // ...
@@ -187,7 +187,7 @@ export {FantasticPlayer};
 Your `FantasticPlayer` component should return a `VideoIframe` that's configured to a corresponding `postMessage` API. To start, we update the implementation in **`component.js`**:
 
 ```diff
-- import {ContainWrapper} from '../../../src/preact/component';
+- import {ContainWrapper} from '#preact/component';
 + import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 
   function FantasticPlayerWithRef({...rest}, ref) {
@@ -381,8 +381,8 @@ Your iframe's interface to post messages is likely different, but your component
 Your `FantasticPlayer` component should return a `VideoWrapper` that's configured to a corresponding `postMessage` API. To start, we update the implementation in **`component.js`**.
 
 ```diff
-- import {ContainWrapper} from '../../../src/preact/component';
-+ import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
+- import {ContainWrapper} from '#preact/component';
++ import {VideoWrapper} from '../../amp-video/1.0/component';
 
   function FantasticPlayerWithRef({...rest}, ref) {
 -   ...
@@ -400,7 +400,7 @@ So that our component returns a `<VideoWrapper>`:
 ```js
 // component.js
 // ...
-import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
+import {VideoWrapper} from '../../amp-video/1.0/component';
 
 // ...
 function FantasticPlayerWithRef({...rest}, ref) {
@@ -513,7 +513,7 @@ We set the wrapped method as the `<video>`'s actual event handler:
 +   onCanPlay={onVideoCanPlay}
 ```
 
-You may similarly choose to pass or override properties at the higher level, passed from `FantasticPlayer` into the `VideoWrapper` we instantiate. For a list of these properties [see `video-wrapper.type.js`](../extensions/amp-video/1.0/video-wrapper.type.js)
+You may similarly choose to pass or override properties at the higher level, passed from `FantasticPlayer` into the `VideoWrapper` we instantiate. For a list of these properties [see `amp-video/1.0/component.type.js`](../extensions/amp-video/1.0/component.type.js)
 
 #### Imperative handle
 
