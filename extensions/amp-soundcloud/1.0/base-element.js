@@ -15,7 +15,6 @@
  */
 
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Services} from '../../../src/services';
 import {Soundcloud} from './component';
 
 export class BaseElement extends PreactBaseElement {

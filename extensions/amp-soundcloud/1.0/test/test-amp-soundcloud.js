@@ -36,8 +36,8 @@ describes.realWin(
     // Perform before every testcase
     beforeEach(async () => {
       win = env.win;
-      html = htmlFor(env.win.document);
-      doc = env.win.document;
+      doc = win.document;
+      html = htmlFor(doc);
       toggleExperiment(env.win, 'bento-soundcloud', true, true);
     });
 
@@ -107,7 +107,7 @@ describes.realWin(
       `;
 
       // Add to Document
-      env.win.document.body.appendChild(element);
+      doc.body.appendChild(element);
 
       // Wait till rendering is finished
       await waitForRender();
@@ -138,7 +138,7 @@ describes.realWin(
       `;
 
       // Add to Document
-      env.win.document.body.appendChild(element);
+      doc.body.appendChild(element);
 
       // Wait till rendering is finished
       await waitForRender();
@@ -165,7 +165,7 @@ describes.realWin(
       `;
 
       // Add to Document
-      env.win.document.body.appendChild(element);
+      doc.body.appendChild(element);
 
       // Wait till rendering is finished
       await waitForRender();
@@ -186,7 +186,7 @@ describes.realWin(
       `;
 
       // Add to Document
-      env.win.document.body.appendChild(element);
+      doc.body.appendChild(element);
 
       // Wait till rendering is finished
       await waitForRender();
@@ -212,7 +212,7 @@ describes.realWin(
       `;
 
       // Add to Document
-      env.win.document.body.appendChild(element);
+      doc.body.appendChild(element);
 
       // Wait till rendering is finished
       await waitForRender();
@@ -238,7 +238,7 @@ describes.realWin(
       `;
 
       // Add to Document
-      env.win.document.body.appendChild(element);
+      doc.body.appendChild(element);
 
       // Wait till rendering is finished
       await waitForRender();
@@ -264,7 +264,7 @@ describes.realWin(
       `;
 
       // Add to Document
-      env.win.document.body.appendChild(element);
+      doc.body.appendChild(element);
 
       // Wait till rendering is finished
       await waitForRender();
@@ -286,7 +286,7 @@ describes.realWin(
       `;
 
       // Add to Document
-      env.win.document.body.appendChild(element);
+      doc.body.appendChild(element);
 
       // Wait till rendering is finished
       await waitForRender();

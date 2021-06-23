@@ -34,6 +34,20 @@ export function Soundcloud({
   // Property and Reference Variables
   const iframeRef = useRef(null);
 
+  useEffect(() => {
+    /** Unmount Procedure */
+    return () => {
+      // Pause widget
+      iframeRef.current?.contentWindow?./*OK*/ postMessage(
+        JSON.stringify(dict({'method': 'pause'})),
+        'https://w.soundcloud.com'
+      );
+
+      // Release iframe resources
+      iframeRef.current = null;
+    };
+  }, []);
+
   // Checking for valid props
   if (!checkProps(trackId, playlistId)) {
     return null;
@@ -66,19 +80,6 @@ export function Soundcloud({
     iframeSrc += '&color=' + encodeURIComponent(color);
   }
 
-  useEffect(() => {
-    /** Unmount Procedure */
-    return () => {
-      // Pause widget
-      iframeRef.current?.contentWindow?./*OK*/ postMessage(
-        JSON.stringify(dict({'method': 'pause'})),
-        'https://w.soundcloud.com'
-      );
-
-      // Release iframe resources
-      iframeRef.current = null;
-    };
-  }, []);
   return (
     <IframeEmbed
       allow="autoplay"
