@@ -22,7 +22,7 @@ import {
   AmpStoryDevToolsTabPreview,
   createTabPreviewElement,
 } from './amp-story-dev-tools-tab-preview';
-import {CSS} from '../../../build/amp-story-dev-tools-0.1.css';
+import {CSS} from '#build/amp-story-dev-tools-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
 import {parseQueryString} from '#core/types/string/url';
 import {toggle} from '#core/dom/style';

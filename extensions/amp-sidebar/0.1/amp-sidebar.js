@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {CSS} from '#build/amp-sidebar-0.1.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '#core/constants/key-codes';

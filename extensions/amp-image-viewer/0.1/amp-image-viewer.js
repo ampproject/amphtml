@@ -17,7 +17,7 @@
 import * as st from '#core/dom/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-image-viewer-0.1.css';
+import {CSS} from '#build/amp-image-viewer-0.1.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {
   DoubletapRecognizer,

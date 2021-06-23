@@ -15,7 +15,7 @@
  */
 
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {CSS} from '../../../build/amp-next-page-0.1.css';
+import {CSS} from '#build/amp-next-page-0.1.css';
 import {Layout} from '#core/dom/layout';
 import {NextPageService} from './next-page-service';
 import {Services} from '#service';

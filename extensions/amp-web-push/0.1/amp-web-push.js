@@ -25,7 +25,7 @@
  */
 
 import {CONFIG_TAG, SERVICE_TAG, TAG, WIDGET_TAG} from './vars';
-import {CSS} from '../../../build/amp-web-push-0.1.css';
+import {CSS} from '#build/amp-web-push-0.1.css';
 import {WebPushConfig} from './amp-web-push-config';
 import {WebPushService} from './web-push-service';
 import {WebPushWidget} from './amp-web-push-widget';

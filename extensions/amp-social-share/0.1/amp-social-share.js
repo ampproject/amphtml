@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-social-share-0.1.css';
+import {CSS} from '#build/amp-social-share-0.1.css';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';

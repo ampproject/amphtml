@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-loader-0.1.css';
+import {CSS} from '#build/amp-loader-0.1.css';
 import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';

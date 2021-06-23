@@ -19,7 +19,7 @@ import {
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
 } from './amp-gwd-animation-impl';
-import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
+import {CSS} from '#build/amp-gwd-animation-0.1.css';
 import {Services} from '#service';
 import {getDetail} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';

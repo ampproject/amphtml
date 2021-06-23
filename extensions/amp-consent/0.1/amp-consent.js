@@ -23,7 +23,7 @@ import {
   getConsentStateValue,
   hasStoredValue,
 } from './consent-info';
-import {CSS} from '../../../build/amp-consent-0.1.css';
+import {CSS} from '#build/amp-consent-0.1.css';
 import {
   ConsentConfig,
   expandConsentEndpointUrl,

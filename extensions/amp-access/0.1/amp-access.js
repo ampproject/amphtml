@@ -19,7 +19,7 @@ import {AccessVars} from './access-vars';
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpAccessEvaluator} from './access-expr';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-access-0.1.css';
+import {CSS} from '#build/amp-access-0.1.css';
 import {Observable} from '#core/data-structures/observable';
 import {Services} from '#service';
 import {TickLabel} from '#core/constants/enums';

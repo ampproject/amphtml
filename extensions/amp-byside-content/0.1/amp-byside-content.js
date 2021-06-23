@@ -32,7 +32,7 @@
  * </code>
  */
 
-import {CSS} from '../../../build/amp-byside-content-0.1.css';
+import {CSS} from '#build/amp-byside-content-0.1.css';
 import {Services} from '#service';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';

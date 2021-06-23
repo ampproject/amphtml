@@ -20,7 +20,7 @@ import {FIE_EMBED_PROP} from './iframe-helper';
 import {Services} from './service';
 import {Signals} from './core/data-structures/signals';
 import {VisibilityState} from './core/constants/visibility-state';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {cssText as ampSharedCss} from '#build/ampshared.css';
 import {dev, devAssert, userAssert} from './log';
 import {
   disposeServicesForEmbed,

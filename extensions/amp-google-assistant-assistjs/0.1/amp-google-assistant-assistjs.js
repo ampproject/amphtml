@@ -24,7 +24,7 @@ import {AmpGoogleAssistantVoiceBar} from './amp-google-assistant-voice-bar';
 import {AmpGoogleAssistantVoiceButton} from './amp-google-assistant-voice-button';
 import {AssistjsConfigService} from './assistjs-config-service';
 import {AssistjsFrameService} from './assistjs-frame-service';
-import {CSS} from '../../../build/amp-google-assistant-assistjs-0.1.css';
+import {CSS} from '#build/amp-google-assistant-assistjs-0.1.css';
 import {Services} from '#service';
 
 export class AmpGoogleAssistantAssistjsConfig extends AMP.BaseElement {

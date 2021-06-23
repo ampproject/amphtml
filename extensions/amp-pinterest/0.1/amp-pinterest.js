@@ -34,7 +34,7 @@
  * </code>
  */
 
-import {CSS} from '../../../build/amp-pinterest-0.1.css';
+import {CSS} from '#build/amp-pinterest-0.1.css';
 import {FollowButton} from './follow-button';
 import {PinWidget} from './pin-widget';
 import {SaveButton} from './save-button';

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CSS} from '../../../build/amp-apester-media-0.1.css';
+import {CSS} from '#build/amp-apester-media-0.1.css';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';

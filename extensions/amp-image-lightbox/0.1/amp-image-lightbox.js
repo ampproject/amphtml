@@ -19,7 +19,7 @@ import * as query from '#core/dom/query';
 import * as st from '#core/dom/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
+import {CSS} from '#build/amp-image-lightbox-0.1.css';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,

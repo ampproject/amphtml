@@ -35,7 +35,7 @@ import {dict} from '#core/types/object';
 import {isJsonScriptTag, tryFocus} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
 // Source for this constant is css/amp-story-player-iframe.css
-import {cssText} from '../../build/amp-story-player-iframe.css';
+import {cssText} from '#build/amp-story-player-iframe.css';
 import {devAssertElement} from '#core/assert';
 import {findIndex, toArray} from '#core/types/array';
 import {getMode} from '../mode';

@@ -21,7 +21,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
-import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
+import {CSS} from '#build/amp-story-system-layer-1.0.css';
 import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,

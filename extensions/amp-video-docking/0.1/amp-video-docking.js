@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {ActionTrust} from '#core/constants/action-constants';
-import {CSS} from '../../../build/amp-video-docking-0.1.css';
+import {CSS} from '#build/amp-video-docking-0.1.css';
 import {Controls} from './controls';
 import {DirectionX, DirectionY, FLOAT_TOLERANCE, RectDef} from './def';
 import {HtmlLiteralTagDef} from './html';

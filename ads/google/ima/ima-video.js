@@ -24,7 +24,7 @@ import {loadScript} from '#3p/3p';
 import {throttle} from '#core/types/function';
 import {tryParseJson} from '#core/types/object/json';
 // Source for this constant is css/amp-ima-video-iframe.css
-import {cssText} from '../../../build/amp-ima-video-iframe.css';
+import {cssText} from '#build/amp-ima-video-iframe.css';
 
 /**
  * Possible player states.

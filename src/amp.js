@@ -24,8 +24,8 @@ import './polyfills';
 import {Services} from './service';
 import {TickLabel} from './core/constants/enums';
 import {adoptWithMultidocDeps} from './runtime';
-import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {cssText as ampDocCss} from '#build/ampdoc.css';
+import {cssText as ampSharedCss} from '#build/ampshared.css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {getMode} from './mode';
 import {

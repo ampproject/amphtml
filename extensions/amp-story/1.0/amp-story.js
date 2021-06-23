@@ -54,7 +54,7 @@ import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
-import {CSS} from '../../../build/amp-story-1.0.css';
+import {CSS} from '#build/amp-story-1.0.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';

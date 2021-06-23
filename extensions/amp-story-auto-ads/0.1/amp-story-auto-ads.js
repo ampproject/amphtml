@@ -25,7 +25,7 @@ import {
   STORY_AD_ANALYTICS,
   StoryAdAnalytics,
 } from './story-ad-analytics';
-import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
+import {CSS} from '#build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {EventType, dispatch} from '../../amp-story/1.0/events';
 import {Services} from '#service';
@@ -39,7 +39,7 @@ import {
   StoryAdSegmentExp,
   ViewerSetTimeToBranch,
 } from '#experiments/story-ad-progress-segment';
-import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
+import {CSS as adBadgeCSS} from '#build/amp-story-auto-ads-ad-badge-0.1.css';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
@@ -47,9 +47,9 @@ import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
 import {forceExperimentBranch, getExperimentBranch} from '#experiments';
 import {getPlacementAlgo} from './algorithm-utils';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
+import {CSS as progessBarCSS} from '#build/amp-story-auto-ads-progress-bar-0.1.css';
 import {setStyle} from '#core/dom/style';
-import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
+import {CSS as sharedCSS} from '#build/amp-story-auto-ads-shared-0.1.css';
 import {toggleAttribute} from '#core/dom';
 
 /** @const {string} */

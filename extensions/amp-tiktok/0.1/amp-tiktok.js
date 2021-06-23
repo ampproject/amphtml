@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-tiktok-0.1.css';
+import {CSS} from '#build/amp-tiktok-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
 import {Services} from '#service';
 import {childElementByTag} from '#core/dom/query';

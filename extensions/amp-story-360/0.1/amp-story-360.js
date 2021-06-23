@@ -23,7 +23,7 @@ import {
   Action,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {CSS} from '../../../build/amp-story-360-0.1.css';
+import {CSS} from '#build/amp-story-360-0.1.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '#third_party/zuho/zuho';

@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-base-carousel-1.0.css';
+import {CSS} from '#build/amp-base-carousel-1.0.css';
 import {Services} from '#service';
 import {createCustomEvent} from '../../../src/event-helper';
 import {isExperimentOn} from '#experiments';

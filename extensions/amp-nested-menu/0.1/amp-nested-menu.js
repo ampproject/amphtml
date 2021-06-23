@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-nested-menu-0.1.css';
+import {CSS} from '#build/amp-nested-menu-0.1.css';
 import {Keys} from '#core/constants/key-codes';
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';

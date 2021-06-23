@@ -15,7 +15,7 @@
  */
 
 import {Action, getStoreService} from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
+import {CSS} from '#build/amp-story-unsupported-browser-layer-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '#core/types/object';

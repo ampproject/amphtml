@@ -20,7 +20,7 @@ import {
   SERVICE_ID,
 } from './live-list-manager';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-live-list-0.1.css';
+import {CSS} from '#build/amp-live-list-0.1.css';
 import {Layout} from '#core/dom/layout';
 import {childElementByAttr} from '#core/dom/query';
 import {user, userAssert} from '../../../src/log';

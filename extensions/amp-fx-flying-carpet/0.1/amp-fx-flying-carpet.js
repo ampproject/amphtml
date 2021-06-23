@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
+import {CSS} from '#build/amp-fx-flying-carpet-0.1.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';

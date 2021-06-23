@@ -16,7 +16,7 @@
 
 import {ActionSource} from './action-source';
 import {ActionTrust} from '#core/constants/action-constants';
-import {CSS} from '../../../build/amp-base-carousel-0.1.css';
+import {CSS} from '#build/amp-base-carousel-0.1.css';
 import {Carousel} from './carousel';
 import {CarouselEvents} from './carousel-events';
 import {ChildLayoutManager} from './child-layout-manager';

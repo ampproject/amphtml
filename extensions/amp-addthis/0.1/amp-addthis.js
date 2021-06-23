@@ -45,7 +45,7 @@ import {
   SHARE_EVENT,
 } from './constants';
 import {ActiveToolsMonitor} from './addthis-utils/monitors/active-tools-monitor';
-import {CSS} from '../../../build/amp-addthis-0.1.css';
+import {CSS} from '#build/amp-addthis-0.1.css';
 import {ClickMonitor} from './addthis-utils/monitors/click-monitor';
 import {ConfigManager} from './config-manager';
 import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';

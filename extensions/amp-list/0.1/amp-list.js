@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-list-0.1.css';
+import {CSS} from '#build/amp-list-0.1.css';
 import {
   DIFFABLE_AMP_ELEMENTS,
   DIFF_IGNORE,

@@ -15,7 +15,7 @@
  */
 
 // Source for this constant is css/amp-story-entry-point.css
-import {cssText} from '../../../build/amp-story-entry-point.css';
+import {cssText} from '#build/amp-story-entry-point.css';
 
 /**
  * <amp-story-entry-point> component for embedding stories and launching them in

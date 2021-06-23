@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-selector-0.1.css';
+import {CSS} from '#build/amp-selector-0.1.css';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {areEqualOrdered, toArray} from '#core/types/array';

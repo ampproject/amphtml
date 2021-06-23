@@ -14,7 +14,7 @@
  * the License.
  */
 
-import {CSS} from '../../../build/amp-web-push-0.1.css';
+import {CSS} from '#build/amp-web-push-0.1.css';
 import {IFrameHost} from './iframehost';
 import {
   NotificationPermission,

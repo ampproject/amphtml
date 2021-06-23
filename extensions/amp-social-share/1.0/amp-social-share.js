@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-social-share-1.0.css';
+import {CSS} from '#build/amp-social-share-1.0.css';
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';

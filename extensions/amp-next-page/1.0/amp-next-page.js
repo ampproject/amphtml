@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-next-page-1.0.css';
+import {CSS} from '#build/amp-next-page-1.0.css';
 import {Layout} from '#core/dom/layout';
 import {NextPageService} from './service';
 import {Services} from '#service';

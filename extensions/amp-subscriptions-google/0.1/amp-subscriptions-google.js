@@ -27,7 +27,7 @@ import {
   FilterResult,
   SubscribeResponse as SubscribeResponseInterface,
 } from '#third_party/subscriptions-project/swg';
-import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
+import {CSS} from '#build/amp-subscriptions-google-0.1.css';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
 import {
   Entitlement,

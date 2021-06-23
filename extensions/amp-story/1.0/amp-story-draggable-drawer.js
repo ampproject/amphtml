@@ -20,7 +20,7 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css';
+import {CSS} from '#build/amp-story-draggable-drawer-header-1.0.css';
 import {Layout} from '#core/dom/layout';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '#service';

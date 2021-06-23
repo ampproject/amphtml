@@ -19,7 +19,7 @@ import {
   SubscriptionAnalytics,
   SubscriptionAnalyticsEvents,
 } from './analytics';
-import {CSS} from '../../../build/amp-subscriptions-0.1.css';
+import {CSS} from '#build/amp-subscriptions-0.1.css';
 import {CryptoHandler} from './crypto-handler';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';

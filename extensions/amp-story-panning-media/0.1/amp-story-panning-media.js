@@ -19,7 +19,7 @@ import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
+import {CSS} from '#build/amp-story-panning-media-0.1.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';

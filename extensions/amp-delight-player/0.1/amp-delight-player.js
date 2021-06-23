@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CSS} from '../../../build/amp-delight-player-0.1.css';
+import {CSS} from '#build/amp-delight-player-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';

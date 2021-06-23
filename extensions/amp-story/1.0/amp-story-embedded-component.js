@@ -27,7 +27,7 @@ import {
   StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
-import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
+import {CSS} from '#build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {Keys} from '#core/constants/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';

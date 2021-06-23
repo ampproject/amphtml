@@ -73,7 +73,7 @@ import {isExperimentOn} from '#experiments';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
-import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
+import {CSS as pageAttachmentCSS} from '#build/amp-story-open-page-attachment-0.1.css';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {px, toggle} from '#core/dom/style';

@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-pan-zoom-0.1.css';
+import {CSS} from '#build/amp-pan-zoom-0.1.css';
 import {
   DoubletapRecognizer,
   PinchRecognizer,

@@ -27,7 +27,7 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {CSS} from '../../../build/amp-onetap-google-0.1.css';
+import {CSS} from '#build/amp-onetap-google-0.1.css';
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';

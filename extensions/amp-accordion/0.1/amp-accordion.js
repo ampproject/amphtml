@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-accordion-0.1.css';
+import {CSS} from '#build/amp-accordion-0.1.css';
 import {Keys} from '#core/constants/key-codes';
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';

@@ -22,9 +22,9 @@ import {
   maybeCreateAttribution,
   validateCtaMetadata,
 } from '../../extensions/amp-story-auto-ads/0.1/story-ad-ui';
-import {CSS as inaboxCSS} from '../../build/amp-story-auto-ads-inabox-0.1.css';
+import {CSS as inaboxCSS} from '#build/amp-story-auto-ads-inabox-0.1.css';
 import {installStylesForDoc} from '../style-installer';
-import {CSS as sharedCSS} from '../../build/amp-story-auto-ads-shared-0.1.css';
+import {CSS as sharedCSS} from '#build/amp-story-auto-ads-shared-0.1.css';
 
 /**
  * If story ad metatags exist, render this creative as a story ad.

@@ -19,8 +19,8 @@ import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 import {FakeLocation} from './fake-dom';
 import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {Services} from '#service';
-import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {cssText as ampDocCss} from '#build/ampdoc.css';
+import {cssText as ampSharedCss} from '#build/ampshared.css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
 import {dev} from '../src/log';
 import {

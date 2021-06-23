@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-mathml-0.1.css';
+import {CSS} from '#build/amp-mathml-0.1.css';
 import {Layout, applyFillContent} from '#core/dom/layout';
 import {Services} from '#service';
 import {getIframe} from '../../../src/3p-frame';

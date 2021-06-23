@@ -18,7 +18,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from './autocomplete-binding-single';
-import {CSS} from '../../../build/amp-autocomplete-0.1.css';
+import {CSS} from '#build/amp-autocomplete-0.1.css';
 import {Keys} from '#core/constants/key-codes';
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';

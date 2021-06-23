@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-fit-text-0.1.css';
+import {CSS} from '#build/amp-fit-text-0.1.css';
 import {
   applyFillContent,
   getLengthNumeral,

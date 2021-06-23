@@ -15,7 +15,7 @@
  */
 
 import * as dom from '#core/dom';
-import {CSS} from '../../../build/amp-viz-vega-0.1.css';
+import {CSS} from '#build/amp-viz-vega-0.1.css';
 import {Services} from '#service';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {assertHttpsUrl} from '../../../src/url';

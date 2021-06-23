@@ -19,7 +19,7 @@ import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {CSS} from '../../../build/amp-story-education-0.1.css';
+import {CSS} from '#build/amp-story-education-0.1.css';
 import {Layout} from '#core/dom/layout';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '#service';

@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-lightbox-0.1.css';
+import {CSS} from '#build/amp-lightbox-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '#core/constants/key-codes';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
+import {CSS} from '#build/amp-lightbox-gallery-0.1.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {
   ELIGIBLE_TAP_TAGS,

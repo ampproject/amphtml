@@ -15,7 +15,7 @@
 
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
-import {CSS} from '../../../build/amp-ad-0.1.css';
+import {CSS} from '#build/amp-ad-0.1.css';
 import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {getA4ARegistry} from '#ads/_a4a-config';

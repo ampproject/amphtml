@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-next-page-0.1.css';
+import {CSS} from '#build/amp-next-page-0.1.css';
 import {MultidocManager} from '../../../src/multidoc-manager';
 import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
 import {Services} from '#service';

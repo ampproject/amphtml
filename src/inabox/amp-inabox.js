@@ -24,7 +24,7 @@ import {Services} from '#service';
 import {TickLabel} from '#core/constants/enums';
 import {adopt} from '../runtime';
 import {allowLongTasksInChunking, startupChunk} from '../chunk';
-import {cssText as ampSharedCss} from '../../build/ampshared.css';
+import {cssText as ampSharedCss} from '#build/ampshared.css';
 import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
