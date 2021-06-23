@@ -1289,13 +1289,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * @return {boolean} Whether it has a distance.
-   */
-  hasDistance() {
-    return this.element.hasAttribute('distance');
-  }
-
-  /**
    * @param {number} distance The distance from the current page to the active
    *     page.
    */

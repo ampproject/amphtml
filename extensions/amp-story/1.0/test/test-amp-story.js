@@ -1849,7 +1849,7 @@ describes.realWin(
         env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
       });
 
-      it('should only load the active page with distance=0', async () => {
+      it('should position the active page so it preloads', async () => {
         story.buildCallback();
         await story.layoutCallback();
 
@@ -1857,14 +1857,23 @@ describes.realWin(
         expect(pages[0].getAttribute('distance')).to.be.equal('0');
       });
 
-      it('should load the inactive pages after the active page is loaded with distance=1', async () => {
+      it('should not position the inactive page so it preloads before the active page is loaded', async () => {
         const signals = new Signals();
         pages[0].signals = () => signals;
         story.buildCallback();
         await story.layoutCallback();
 
         // Check page 1 is not loaded.
-        expect(pages[0].hasAttribute('distance')).to.be.true;
+        expect(pages[1].hasAttribute('distance')).to.be.false;
+      });
+
+      it('should position the inactive page so it preloads after the active page is loaded', async () => {
+        const signals = new Signals();
+        pages[0].signals = () => signals;
+        story.buildCallback();
+        await story.layoutCallback();
+
+        // Check page 1 is not loaded.
         expect(pages[1].hasAttribute('distance')).to.be.false;
 
         signals.signal(CommonSignals.LOAD_END);
