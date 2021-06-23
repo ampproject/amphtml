@@ -299,11 +299,11 @@ const maybeMakeProxyUrl = (url, pageEl) => {
   if (!urlService.isProxyOrigin(loc.origin) || urlService.isProxyOrigin(url)) {
     return url;
   }
-  url = urlService.resolveRelativeUrl(
+  const resolvedRelativeUrl = urlService.resolveRelativeUrl(
     url,
     urlService.getSourceOrigin(loc.href)
   );
-  return loc.origin + '/i/s/' + url.replace(/https?:\/\//, '');
+  return loc.origin + '/i/s/' + resolvedRelativeUrl.replace(/https?:\/\//, '');
 };
 
 /**
