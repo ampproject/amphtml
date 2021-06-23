@@ -25,8 +25,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {getMode} from '../../../src/mode';
 import {isArray} from '#core/types';
-import {isExperimentOn} from '#experiments';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {map} from '#core/types/object';
 
 import {provideVisibilityManager} from './visibility-manager';
@@ -343,10 +342,7 @@ export class AnalyticsRoot {
    * @return {!Promise<!Array<!Element>>} Array of elements corresponding to the selector if found.
    */
   getElements(context, selectors, selectionMethod) {
-    if (
-      isExperimentOn(this.ampdoc.win, 'visibility-trigger-improvements') &&
-      isArray(selectors)
-    ) {
+    if (isArray(selectors)) {
       userAssert(
         !selectionMethod,
         'Cannot have selectionMethod %s defined with an array selector.',

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact/index';
-import {CanRender} from '../../../src/context/contextprops';
+import * as Preact from '#preact';
+import {CanRender} from '#preact/contextprops';
 import {PreactBaseElement, whenUpgraded} from '#preact/base-element';
 import {Slot} from '#preact/slot';
 import {forwardRef} from '#preact/compat';
@@ -23,7 +23,7 @@ import {getSchedulerForDoc} from '#service/scheduler';
 import {htmlFor} from '#core/dom/static-template';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {removeElement} from '#core/dom';
-import {subscribe} from '../../../src/context';
+import {subscribe} from '#core/context';
 import {upgradeOrRegisterElement} from '#service/custom-element-registry';
 import {useAmpContext, useLoading} from '#preact/context';
 import {waitFor} from '#testing/test-helper';

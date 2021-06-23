@@ -17,7 +17,10 @@
       "#service/*": ["./src/service/*"],
 
       "#test/*": ["./test/*"],
-      "#testing/*": ["./testing/*"]
+      "#testing/*": ["./testing/*"],
+
+      "#third_party/*": ["./third_party/*"]
     }
-  }
+  },
+  "exclude": ["node_modules"]
 }

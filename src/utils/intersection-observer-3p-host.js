@@ -21,7 +21,7 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
   rectIntersection,
-} from '#core/math/layout-rect';
+} from '#core/dom/layout/rect';
 
 /**
  * The structure that defines the rectangle used in intersection observers.

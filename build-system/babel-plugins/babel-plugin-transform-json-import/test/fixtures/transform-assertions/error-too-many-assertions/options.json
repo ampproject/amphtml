@@ -3,5 +3,5 @@
     "../../../.."
   ],
   "sourceType": "module",
-  "throws": "The only accepted module attribute is `type` (17:57)"
+  "throws": "too many import assertions, we only support `assert { \"type\": \"json\" }`"
 }

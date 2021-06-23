@@ -18,7 +18,7 @@ import '../../../amp-mustache/0.2/amp-mustache';
 import '../amp-date-display';
 import {expect} from 'chai';
 import {user} from '../../../../src/log';
-import {waitFor} from '#testing/test-helper.js';
+import {waitFor} from '#testing/test-helper';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(

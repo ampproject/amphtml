@@ -18,11 +18,7 @@
 const basepathMappings = require('./basepath-mappings');
 const fs = require('fs');
 const path = require('path');
-const {
-  formatBasepath,
-  getListing,
-  isMainPageFromUrl,
-} = require('./util/listing');
+const {formatBasepath, getListing} = require('./util/listing');
 const {getServeMode} = require('../app-utils');
 const {join} = require('path');
 const {renderTemplate} = require('./template');
@@ -51,8 +47,7 @@ async function serveIndex({url}, res, next) {
 
   const renderedHtml = renderTemplate({
     fileSet,
-    selectModePrefix: '/',
-    isMainPage: isMainPageFromUrl(url),
+    htmlEnvelopePrefix: '/',
     basepath: formatBasepath(mappedPath),
     serveMode: getServeMode(),
     css,

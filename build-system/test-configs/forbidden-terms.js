@@ -147,10 +147,12 @@ const forbiddenTermsGlobal = {
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
   '(?:var|let|const) +IS_FORTESTING +=': {
-    message:
-      'IS_FORTESTING local var only allowed in mode.js and ' +
-      'dist.3p/current/integration.js',
-    allowlist: ['src/mode.js'],
+    message: 'IS_FORTESTING local var only allowed in mode.js.',
+    allowlist: ['src/core/mode/for-testing.js'],
+  },
+  '(?:var|let|const) +IS_MINIFIED +=': {
+    message: 'IS_MINIFIED local var only allowed in core/mode/minified.js',
+    allowlist: ['src/core/mode/minified.js'],
   },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
@@ -447,6 +449,7 @@ const forbiddenTermsGlobal = {
       'src/service/index.js',
       'src/service/cid-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
+      'extensions/amp-analytics/0.1/session-manager.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
@@ -633,9 +636,12 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
       'src/config.js',
+      'src/core/window/window.extern.js',
       'src/experiments/index.js',
       'src/experiments/shame.extern.js',
       'src/mode.js',
+      'src/core/mode/test.js',
+      'src/core/mode/local-dev.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'testing/init-tests.js',
       'tools/experiments/experiments.js',
@@ -881,7 +887,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     allowlist: [
-      'build-system/common/update-design-review-issues.js',
+      'build-system/common/update-session-issues/index.js',
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/1.0/component.js',
       'src/core/types/date.js',
@@ -913,6 +919,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/session-manager.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
