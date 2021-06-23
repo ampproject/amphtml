@@ -2240,15 +2240,6 @@ export class AmpStory extends AMP.BaseElement {
 
     const pagesByDistance = this.getPagesByDistance_();
 
-    if (!isExperimentOn(this.win, 'amp-story-load-first-page-only')) {
-      return pagesByDistance.forEach((pageIds, distance) => {
-        pageIds.forEach((pageId) => {
-          const page = this.getPageById(pageId);
-          page.setDistance(distance);
-        });
-      });
-    }
-
     const preloadAllPages = () => {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach((pageId) => {
@@ -2259,25 +2250,24 @@ export class AmpStory extends AMP.BaseElement {
     };
 
     this.mutateElement(() => {
-      if (prioritizeActivePage) {
-        // Load page with distance 0 first, and then load the other ones.
-        return Promise.all(
-          pagesByDistance[0].map((pageId) => {
-            const page = this.getPageById(pageId);
-            page.setDistance(0);
-            return page.signals().whenSignal(CommonSignals.LOAD_END);
-          })
-        ).then(() => {
-          if (
-            pagesByDistance[0].every(
-              (curr) => this.getPageById(curr).getDistance() == 0
-            )
-          ) {
-            preloadAllPages();
-          }
-        });
+      if (
+        !isExperimentOn(this.win, 'amp-story-load-first-page-only') ||
+        !prioritizeActivePage
+      ) {
+        return preloadAllPages();
       }
-      preloadAllPages();
+
+      const activePageId = devAssert(pagesByDistance[0][0]);
+      new Promise((res, rej) => {
+        const page = this.getPageById(activePageId);
+        page.setDistance(0);
+        page.signals().whenSignal(CommonSignals.LOAD_END).then(res);
+        page.signals().whenSignal(EventType.SWITCH_PAGE).then(rej);
+      })
+        .then(() => preloadAllPages())
+        .catch(() => null);
+
+      // Load page with distance 0 first, and then load the other ones.
     });
   }
 
