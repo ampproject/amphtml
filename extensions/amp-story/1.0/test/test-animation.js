@@ -293,7 +293,6 @@ describes.realWin('amp-story animations', {}, (env) => {
         start: env.sandbox.spy(),
         getPlayState: () => WebAnimationPlayState.IDLE,
         onPlayStateChanged: () => {},
-        maybeInit: () => {},
       };
 
       webAnimationBuilder.createRunner = () => webAnimationRunner;
@@ -332,7 +331,6 @@ describes.realWin('amp-story animations', {}, (env) => {
         start: env.sandbox.spy(),
         getPlayState: () => WebAnimationPlayState.IDLE,
         onPlayStateChanged: () => {},
-        maybeInit: () => {},
       };
 
       webAnimationBuilder.createRunner = () => webAnimationRunner;

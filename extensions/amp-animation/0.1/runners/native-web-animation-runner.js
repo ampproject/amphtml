@@ -117,7 +117,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    * @override
    */
   pause() {
-    devAssert(!!this.players_);
+    devAssert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach((player) => {
       if (player.playState == WebAnimationPlayState.RUNNING) {
@@ -130,7 +130,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    * @override
    */
   resume() {
-    devAssert(!!this.players_);
+    devAssert(this.players_);
     const oldRunnerPlayState = this.playState_;
     if (oldRunnerPlayState == WebAnimationPlayState.RUNNING) {
       return;
@@ -158,17 +158,10 @@ export class NativeWebAnimationRunner extends AnimationRunner {
   }
 
   /**
-   * Resume if runner was initialized.
-   */
-  maybeResume() {
-    this.players_ && this.resume();
-  }
-
-  /**
    * @override
    */
   reverse() {
-    devAssert(!!this.players_);
+    devAssert(this.players_);
     // TODO(nainar) there is no reverse call on WorkletAnimation
     this.players_.forEach((player) => {
       player.reverse();
