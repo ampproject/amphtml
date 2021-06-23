@@ -102,7 +102,7 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
       '.i-amphtml-story-interactive-img-option-img'
     );
     imgEl.setAttribute('src', option['image']);
-    imgEl.setAttribute('alt', option['alt']);
+    imgEl.setAttribute('alt', option['image-alt']);
 
     return convertedOption;
   }
