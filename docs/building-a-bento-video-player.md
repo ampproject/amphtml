@@ -57,7 +57,7 @@ This guide covers how to implement video player components that are internally i
 
 ## Getting Started
 
-Start by generating an extension specifying `--bento` and `--nojss`. We name our extension **`amp-fantastic-player`**, ending with `-player` according to our [guidelines for naming a third-party component](../spec/amp-3p-naming.md).
+Start by generating an extension specifying `--bento` and `--nojss`. We name our extension **`amp-fantastic-player`**, ending with `-player` according to our [guidelines for naming a third-party component](./spec/amp-3p-naming.md).
 
 ```console
 amp make-extension --bento --nojss --name=amp-fantastic-player
@@ -382,7 +382,7 @@ Your `FantasticPlayer` component should return a `VideoWrapper` that's configure
 
 ```diff
 - import {ContainWrapper} from '#preact/component';
-+ import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
++ import {VideoWrapper} from '../../amp-video/1.0/component';
 
   function FantasticPlayerWithRef({...rest}, ref) {
 -   ...
@@ -400,7 +400,7 @@ So that our component returns a `<VideoWrapper>`:
 ```js
 // component.js
 // ...
-import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
+import {VideoWrapper} from '../../amp-video/1.0/component';
 
 // ...
 function FantasticPlayerWithRef({...rest}, ref) {
@@ -513,7 +513,7 @@ We set the wrapped method as the `<video>`'s actual event handler:
 +   onCanPlay={onVideoCanPlay}
 ```
 
-You may similarly choose to pass or override properties at the higher level, passed from `FantasticPlayer` into the `VideoWrapper` we instantiate. For a list of these properties [see `video-wrapper.type.js`](../extensions/amp-video/1.0/video-wrapper.type.js)
+You may similarly choose to pass or override properties at the higher level, passed from `FantasticPlayer` into the `VideoWrapper` we instantiate. For a list of these properties [see `amp-video/1.0/component.type.js`](../extensions/amp-video/1.0/component.type.js)
 
 #### Imperative handle
 
