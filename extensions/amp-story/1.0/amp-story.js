@@ -2265,7 +2265,7 @@ export class AmpStory extends AMP.BaseElement {
         page.signals().whenSignal(EventType.SWITCH_PAGE).then(rej);
       })
         .then(preloadAllPages)
-        .catch(() => null);
+        .catch();
 
       // Load page with distance 0 first, and then load the other ones.
     });

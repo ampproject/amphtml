@@ -27,7 +27,6 @@ import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {CommonSignals} from '#core/constants/common-signals';
-import {EventType} from '../events';
 import {Keys} from '#core/constants/key-codes';
 import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
