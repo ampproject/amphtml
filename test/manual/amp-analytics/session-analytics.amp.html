@@ -78,7 +78,8 @@
         <script type="application/json">
           {
               "requests": {
-                  "endpoint": "https://example.com/analytics?session=${sessionId}&timestamp=${sessionTimestamp}&count=${sessionCount}"
+                  "endpoint": "https://example.com/analytics?session=${sessionId}&timestamp=${sessionTimestamp}&count=${sessionCount}&eventTimestamp=${eventTimestamp(false)}",
+                  "click": "https://example.com/click_event?session=${sessionId}"
               },
               "triggers": {
                   "pageview": {
@@ -97,6 +98,14 @@
                     "request": "endpoint",
                     "extraUrlParams": {
                       "timer": true
+                    }
+                  },
+                  "click": {
+                    "on": "click",
+                    "selector": "#test1",
+                    "request": "click",
+                    "extraUrlParams": {
+                      "lastEventTimestamp": "${eventTimestamp}"
                     }
                   }
               },

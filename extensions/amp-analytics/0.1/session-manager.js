@@ -42,6 +42,7 @@ export const SESSION_VALUES = {
   SESSION_ID: 'sessionId',
   CREATION_TIMESTAMP: 'creationTimestamp',
   ACCESS_TIMESTAMP: 'accessTimestamp',
+  EVENT_TIMESTAMP: 'eventTimestamp',
   COUNT: 'count',
 };
 
@@ -53,6 +54,7 @@ export const SESSION_VALUES = {
  *  sessionId: number,
  *  creationTimestamp: number,
  *  accessTimestamp: number,
+ *  eventTimestamp: number,
  *  count: number,
  * }}
  */
@@ -74,12 +76,32 @@ export class SessionManager {
    * Get the value from the session per the vendor.
    * @param {string|undefined} type
    * @param {SESSION_VALUES} value
+   * @param {boolean=} opt_persist
    * @return {!Promise<number|undefined>}
    */
-  getSessionValue(type, value) {
+  getSessionValue(type, value, opt_persist) {
     return this.get(type).then((session) => {
+      if (value === SESSION_VALUES.EVENT_TIMESTAMP) {
+        return this.getSessionEventTimestamp_(type, session, opt_persist);
+      }
       return session?.[value];
     });
+  }
+
+  /**
+   * Get the value from the session per the vendor.
+   * @param {string} type
+   * @param {SessionInfoDef} session
+   * @param {boolean} persist
+   * @return {number|undefined}
+   */
+  getSessionEventTimestamp_(type, session, persist) {
+    const lastTimestamp = session[SESSION_VALUES.EVENT_TIMESTAMP];
+    if (persist) {
+      this.sessions_[type] = this.updateSession_(session, true);
+      this.setSession_(type, session);
+    }
+    return lastTimestamp;
   }
 
   /**
@@ -136,20 +158,25 @@ export class SessionManager {
   }
 
   /**
-   * Check if session has expired and reset values (id, count) if so.
+   * Check if session has expired and reset/update values (id, count) if so.
    * Also update `accessTimestamp`.
    * @param {!SessionInfoDef} session
+   * @param {boolean} updateEvent
    * @return {!SessionInfoDef}
    */
-  updateSession_(session) {
+  updateSession_(session, updateEvent = false) {
     const currentCount = session[SESSION_VALUES.COUNT];
+    const now = Date.now();
     if (isSessionExpired(session)) {
       const newSessionCount = (currentCount ?? 0) + 1;
       session = constructSessionInfo(newSessionCount);
     } else if (currentCount === undefined) {
       session[SESSION_VALUES.COUNT] = 1;
     }
-    session[SESSION_VALUES.ACCESS_TIMESTAMP] = Date.now();
+    session[SESSION_VALUES.ACCESS_TIMESTAMP] = now;
+    if (updateEvent) {
+      session[SESSION_VALUES.EVENT_TIMESTAMP] = now;
+    }
     return session;
   }
 
@@ -211,6 +238,8 @@ function constructSessionFromStoredValue(storedSession) {
     [SESSION_VALUES.COUNT]: storedSession[SESSION_VALUES.COUNT],
     [SESSION_VALUES.ACCESS_TIMESTAMP]:
       storedSession[SESSION_VALUES.ACCESS_TIMESTAMP],
+    [SESSION_VALUES.EVENT_TIMESTAMP]:
+      storedSession[SESSION_VALUES.EVENT_TIMESTAMP],
   };
 }
 
@@ -225,6 +254,7 @@ function constructSessionInfo(count = 1) {
     [SESSION_VALUES.CREATION_TIMESTAMP]: Date.now(),
     [SESSION_VALUES.ACCESS_TIMESTAMP]: Date.now(),
     [SESSION_VALUES.COUNT]: count,
+    [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
   };
 }
 

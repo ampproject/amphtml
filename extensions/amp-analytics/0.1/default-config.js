@@ -50,6 +50,7 @@ const defaultConfig = jsonConfiguration({
     'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
     'experimentBranches': 'EXPERIMENT_BRANCHES',
     'externalReferrer': 'EXTERNAL_REFERRER',
+    'eventTimestamp': 'EVENT_TIMESTAMP',
     'firstContentfulPaint': 'FIRST_CONTENTFUL_PAINT',
     'firstInputDelay': 'FIRST_INPUT_DELAY',
     'firstViewportReady': 'FIRST_VIEWPORT_READY',
