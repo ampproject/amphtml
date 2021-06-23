@@ -20,7 +20,7 @@ import {
   StateProperty,
 } from '../amp-story-store-service';
 import {AmpStoryAccess, Type} from '../amp-story-access';
-import {registerServiceBuilder} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-access', {amp: true}, (env) => {
   let win;

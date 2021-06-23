@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {createIframePromise} from '../../../testing/iframe';
-import {listenParent} from '../../../3p/messaging';
+/* eslint-disable import/no-deprecated */
+
+import {Services} from '#service';
+import {createIframePromise} from '#testing/iframe';
+import {listenParent} from '#3p/messaging';
 import {postMessage} from '../../../src/iframe-helper';
 
 describes.sandboxed('3p messaging', {}, () => {

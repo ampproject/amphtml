@@ -18,7 +18,7 @@ import {
   AdvanceExpToTime,
   StoryAdAutoAdvance,
   divertStoryAdAutoAdvance,
-} from '../../../src/experiments/story-ad-auto-advance';
+} from '#experiments/story-ad-auto-advance';
 import {
   AnalyticsEvents,
   AnalyticsVars,
@@ -26,27 +26,31 @@ import {
   StoryAdAnalytics,
 } from './story-ad-analytics';
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {EventType, dispatch} from '../../amp-story/1.0/events';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {StoryAdConfig} from './story-ad-config';
 import {StoryAdPageManager} from './story-ad-page-manager';
+import {
+  StoryAdSegmentExp,
+  ViewerSetTimeToBranch,
+} from '#experiments/story-ad-progress-segment';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {divertStoryAdPlacements} from '../../../src/experiments/story-ad-placements';
-import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
+import {dict} from '#core/types/object';
+import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
+import {forceExperimentBranch, getExperimentBranch} from '#experiments';
 import {getPlacementAlgo} from './algorithm-utils';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
-import {setStyle} from '../../../src/core/dom/style';
+import {setStyle} from '#core/dom/style';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
-import {toggleAttribute} from '../../../src/core/dom';
+import {toggleAttribute} from '#core/dom';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads';
@@ -60,6 +64,7 @@ const MUSTACHE_TAG = 'amp-mustache';
 /** @enum {string} */
 export const Attributes = {
   AD_SHOWING: 'ad-showing',
+  DESKTOP_ONE_PANEL: 'desktop-one-panel',
   DESKTOP_PANELS: 'desktop-panels',
   DIR: 'dir',
   PAUSED: 'paused',
@@ -311,14 +316,20 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      const {DESKTOP_PANELS} = Attributes;
+      const {DESKTOP_ONE_PANEL, DESKTOP_PANELS} = Attributes;
       this.adBadgeContainer_.removeAttribute(DESKTOP_PANELS);
+      this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
       // TODO(#33969) can no longer be null when launched.
       this.progressBarBackground_?.removeAttribute(DESKTOP_PANELS);
+      this.progressBarBackground_?.removeAttribute(DESKTOP_ONE_PANEL);
 
       if (uiState === UIType.DESKTOP_PANELS) {
         this.adBadgeContainer_.setAttribute(DESKTOP_PANELS, '');
         this.progressBarBackground_?.setAttribute(DESKTOP_PANELS, '');
+      }
+      if (uiState === UIType.DESKTOP_ONE_PANEL) {
+        this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');
+        this.progressBarBackground_?.setAttribute(DESKTOP_ONE_PANEL, '');
       }
     });
   }
@@ -344,23 +355,24 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /**
    * Create progress bar if auto advance exp is on.
+   * TODO(#33969) move to chosen UI and delete the others.
    */
   maybeCreateProgressBar_() {
-    // TODO(ccordry): add viewer enabling of yellow segment.
-    if (isExperimentOn(this.win, 'story-ad-progress-segment')) {
-      // Ad progress bar creation handled in progress-bar.js.
-      return;
-    }
-
     const autoAdvanceExpBranch = getExperimentBranch(
       this.win,
       StoryAdAutoAdvance.ID
     );
-    // TODO(ccordry): move to experiment id when viewer is able to share.
     const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
       'storyNextUp'
     );
-    if (
+    if (storyNextUpParam && ViewerSetTimeToBranch[storyNextUpParam]) {
+      // Actual progress bar creation handled in progress-bar.js.
+      forceExperimentBranch(
+        this.win,
+        StoryAdSegmentExp.ID,
+        ViewerSetTimeToBranch[storyNextUpParam]
+      );
+    } else if (
       autoAdvanceExpBranch &&
       autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
     ) {

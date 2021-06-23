@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 import {FormEvents} from './form-events';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
-import {iterateCursor} from '../../../src/core/dom';
-import {toWin} from '../../../src/core/window';
+import {iterateCursor} from '#core/dom';
+import {toWin} from '#core/window';
 
 /** @const @private {string} */
 const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Observable} from '../../src/core/data-structures/observable';
-import {Services} from '../../src/services';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {Observable} from '#core/data-structures/observable';
+import {Services} from '#service';
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {installViewportServiceForDoc} from '../../src/service/viewport/viewport-impl';
-import {installVsyncService} from '../../src/service/vsync-impl';
-import {markElementScheduledForTesting} from '../../src/service/custom-element-registry';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {installViewerServiceForDoc} from '#service/viewer-impl';
+import {installViewportServiceForDoc} from '#service/viewport/viewport-impl';
+import {installVsyncService} from '#service/vsync-impl';
+import {markElementScheduledForTesting} from '#service/custom-element-registry';
 
 describes.sandboxed('Activity getTotalEngagedTime', {}, (env) => {
   let clock;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {px, resetStyles, setStyles, translate} from '../../src/core/dom/style';
+import {px, resetStyles, setStyles, translate} from '#core/dom/style';
 
 /**
  * Centers a frame with a translate transition.

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import {LogLevel, devAssert} from '../../../src/log';
-import {scopedQuerySelectorAll} from '../../../src/core/dom/query';
-import {tryResolve} from '../../../src/core/data-structures/promise';
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {tryResolve} from '#core/data-structures/promise';
 
 /** @typedef {function(!Element): (boolean|!Promise<boolean>)} */
 let ElementPredicate_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase

@@ -15,13 +15,13 @@
  */
 
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {listen} from '../../../src/event-helper';
-import {removeChildren} from '../../../src/core/dom';
+import {removeChildren} from '#core/dom';
 
 const TAG = 'amp-access-laterpay';
 

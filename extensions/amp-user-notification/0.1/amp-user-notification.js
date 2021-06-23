@@ -15,22 +15,22 @@
  */
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
-import {Deferred} from '../../../src/core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
-} from '../../../src/service/notification-ui-manager';
-import {Services} from '../../../src/services';
+} from '#service/notification-ui-manager';
+import {Services} from '#service';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
-import {rethrowAsync} from '../../../src/core/error';
-import {toggle} from '../../../src/core/dom/style';
+} from '../../../src/service-helpers';
+import {rethrowAsync} from '#core/error';
+import {toggle} from '#core/dom/style';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';

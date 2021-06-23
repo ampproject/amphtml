@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {htmlFor, htmlRefs} from '../../../../src/core/dom/static-template';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 
 describes.sandboxed('DOM - Static Template', {}, () => {
   describe('html', () => {

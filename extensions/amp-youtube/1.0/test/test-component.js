@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {Youtube} from '../component';
-import {createRef} from '../../../../src/preact';
-
-import {dispatchCustomEvent} from '../../../../src/core/dom';
+import {createRef} from '#preact';
+import {dispatchCustomEvent} from '#core/dom';
 import {mount} from 'enzyme';
+import {useStyles} from 'extensions/amp-video/1.0/component.jss';
 
 describes.realWin('YouTube preact component v1.0', {}, (env) => {
   let window, document;
@@ -54,8 +54,10 @@ describes.realWin('YouTube preact component v1.0', {}, (env) => {
     // Style propagated to container, but not iframe.
     expect(wrapper.prop('style').width).to.equal(600);
     expect(wrapper.prop('style').height).to.equal(500);
-    expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
-    expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
+
+    // width/height applied via class
+    const classes = useStyles();
+    expect(wrapper.find('iframe').hasClass(classes.fillStretch)).to.be.true;
   });
 
   it('Pass correct param attributes to the iframe src', () => {
