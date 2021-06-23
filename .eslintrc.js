@@ -232,7 +232,10 @@ module.exports = {
 
     'module-resolver/use-alias': [
       'error',
-      {'alias': getImportResolver().alias},
+      {
+        'alias': getImportResolver().alias,
+        'chainedExtensions': ['.css'],
+      },
     ],
     'no-alert': 2,
     'no-cond-assign': 2,
