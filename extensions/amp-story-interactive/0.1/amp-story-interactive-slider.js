@@ -19,7 +19,7 @@
     InteractiveType,
   } from './amp-story-interactive-abstract';
   import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
-  import {htmlFor} from '../../../src/static-template';
+  import {htmlFor} from '#core/dom/static-template';
   
   export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     /**
