@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
+.i-amphtml-story-interactive-img-container {
+  --i-amphtml-interactive-img-option-width: 42.5% !important;
+  --i-amphtml-interactive-img-option-margin: calc(
+    (100% - (var(--i-amphtml-interactive-img-option-width) * 2)) / 3
+  ) !important;
+}
+
 .i-amphtml-story-interactive-img-option-container {
   background: var(--i-amphtml-interactive-option-background-color) !important;
   display: flex !important;
   justify-content: center !important;
-  /*height: 5.625em !important;*/
-  /*border-radius: 1em !important;*/
-  border-radius: 21.25% !important;
+  border-radius: calc(
+    var(--i-amphtml-interactive-img-option-width) / 2
+  ) !important;
   overflow: hidden !important;
   box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
   /* overflow bug fix for percent bar animation on ios safari  */
@@ -35,12 +42,12 @@
   justify-content: center !important;
   text-align: center !important;
   flex-direction: column !important;
-  width: 42.5% !important;
+  width: var(--i-amphtml-interactive-img-option-width) !important;
   position: relative !important;
   height: 0 !important;
-  margin-bottom: 5% !important;
-  margin-right: 5% !important;
-  padding-top: 42.5% !important;
+  margin-bottom: var(--i-amphtml-interactive-img-option-margin) !important;
+  margin-right: var(--i-amphtml-interactive-img-option-margin) !important;
+  padding-top: var(--i-amphtml-interactive-img-option-width) !important;
   position: relative !important;
 }
 
@@ -56,11 +63,11 @@
 }
 
 .i-amphtml-story-interactive-img-option:nth-child(odd) {
-  margin-left: 5% !important;
+  margin-left: var(--i-amphtml-interactive-img-option-margin) !important;
 }
 
 .i-amphtml-story-interactive-img-option:nth-child(-n + 2) {
-  margin-top: 5% !important;
+  margin-top: var(--i-amphtml-interactive-img-option-margin) !important;
 }
 
 .i-amphtml-story-interactive-img-option-img {
@@ -70,8 +77,4 @@
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
-}
-
-.i-amphtml-story-interactive-img-container {
-  border-radius: 21.25% !important;
 }
