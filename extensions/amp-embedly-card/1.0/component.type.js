@@ -21,7 +21,9 @@ var EmbedlyCardDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   requestResize: (function(number):*|undefined),
+ *   title: (string|undefined),
+ *   url: (string),
  * }}
  */
 EmbedlyCardDef.Props;

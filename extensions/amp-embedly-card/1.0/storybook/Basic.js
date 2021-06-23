@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
- import * as Preact from '#preact';
- import {EmbedlyCard} from '../component';
- import {withKnobs} from '@storybook/addon-knobs';
- 
- export default {
-   title: 'EmbedlyCard',
-   component: EmbedlyCard,
-   decorators: [withKnobs],
- };
- 
- export const _default = () => {
-   // DO NOT SUBMIT: This is example code only.
-   return (
-     <EmbedlyCard
-         bootstrap="http://localhost:8000/dist.3p/current/vendor/embedly.max.js"
-         src="http://ads.localhost:8000/dist.3p/current/frame.max.html"
-         url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
-         title="Embedly Card"
-         style={{width: '400px', height: '400px'}}
-       />
-   );
- };
- 
+import * as Preact from '#preact';
+import {EmbedlyCard} from '../component';
+import {withKnobs} from '@storybook/addon-knobs';
+
+export default {
+  title: 'EmbedlyCard',
+  component: EmbedlyCard,
+  decorators: [withKnobs],
+};
+
+export const _default = () => {
+  return (
+    <EmbedlyCard
+      bootstrap="http://localhost:8000/dist.3p/current/vendor/embedly.max.js"
+      src="http://ads.localhost:8000/dist.3p/current/frame.max.html"
+      url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+      title="Embedly Card"
+      style={{width: '400px', height: '400px'}}
+    />
+  );
+};

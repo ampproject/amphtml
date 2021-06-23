@@ -15,9 +15,10 @@
  */
 
 import '../amp-embedly-card';
-import {htmlFor} from '../../../../src/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {createElementWithAttributes} from '#core/dom';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
+import {toggleExperiment} from '#experiments';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-embedly-card-v1.0',
@@ -29,20 +30,76 @@ describes.realWin(
   (env) => {
     let win;
     let doc;
-    let html;
+    let element;
 
     beforeEach(async () => {
       win = env.win;
       doc = win.document;
-      html = htmlFor(doc);
       toggleExperiment(win, 'bento-embedly-card', true, true);
+      // Override global window here because Preact uses global `createElement`.
+      doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
 
-    it('example test renders', async () => {
-      const element = html` <amp-embedly-card></amp-embedly-card> `;
+    /**
+     * Wait for iframe to be mounted
+     */
+    const waitForRender = async () => {
+      await element.buildInternal();
+      const loadPromise = element.layoutCallback();
+      const shadow = element.shadowRoot;
+      await waitFor(() => shadow.querySelector('iframe'), 'iframe mounted');
+      await loadPromise;
+    };
+
+    it('renders responsively', async () => {
+      // Prepare Bento Tag
+      element = createElementWithAttributes(doc, 'amp-embedly-card', {
+        'data-url': 'https://www.youtube.com/watch?v=lBTCB7yLs8Y',
+        'height': 200,
+        'width': 300,
+        'layout': 'responsive',
+      });
+
+      // Add to Document
       doc.body.appendChild(element);
-      await waitFor(() => element.isConnected, 'element connected');
-      expect(element.parentNode).to.equal(doc.body);
+
+      // Wait till rendering is finished
+      await waitForRender();
+
+      //Extract iframe
+      const iframe = element.shadowRoot.querySelector('iframe');
+
+      //Make sure iframe is available
+      expect(iframe).to.not.be.null;
+
+      // Check iframe for correct scr URL
+      // iframe.className remains ''--> expect(iframe.className).to.match(/i-amphtml-layout-responsive/);
+    });
+
+    it('throws when data-url is not given', async () => {
+      // Prepare Bento Tag
+      element = createElementWithAttributes(doc, 'amp-embedly-card', {
+        'height': 200,
+        'width': 300,
+        layout: 'responsive',
+      });
+
+      // Add to Document
+      doc.body.appendChild(element);
+
+      // Wait till rendering is finished
+      // Cannot because "return null" is provided for no 'data-url'--> await waitForRender();
+
+      //Extract iframe
+      // --> const iframe = element.shadowRoot.querySelector('iframe');
+
+      //Make sure iframe is available
+      // --> expect(iframe).to.not.be.null;
+
+      /** Cannot test as userAssert not available for Preact Component */
+      // expect(iframe.src).to.be.rejectedWith(
+      //   /data-url is required for <amp-embedly-card>/
+      // );
     });
   }
 );

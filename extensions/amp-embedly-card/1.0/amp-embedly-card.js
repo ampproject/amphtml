@@ -14,41 +14,40 @@
  * limitations under the License.
  */
 
- import {BaseElement} from './amp-embedly-card-impl';
- import {dict} from '#core/types/object';
- import {isExperimentOn} from '#experiments';
- import {userAssert} from '../../../src/log';
- import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
- 
- /** @const {string} */
- const TAG = 'amp-embedly-card';
- 
- class AmpEmbedlyCard extends BaseElement {
-   /** @override */
-   init() {
-     // DO NOT SUBMIT: This is example code only.
-     this.registerApiAction('exampleToggle', (api) =>
-       api./*OK*/ exampleToggle()
-     );
- 
-     return dict({
-       // Extra props passed by wrapper AMP component
-       'exampleTagNameProp': this.element.tagName,
-     });
-   }
- 
-   /** @override */
-   isLayoutSupported(layout) {
-     userAssert(
-       isExperimentOn(this.win, 'bento') ||
-         isExperimentOn(this.win, 'bento-embedly-card'),
-       'expected global "bento" or specific "bento-embedly-card" experiment to be enabled'
-     );
-     return super.isLayoutSupported(layout);
-   }
- }
- 
- AMP.extension(TAG, '1.0', (AMP) => {
-   AMP.registerElement(TAG, AmpEmbedlyCard);
-   AMP.registerElement(KEY_TAG, AmpEmbedlyKey);
- });
+import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
+import {BaseElement} from './amp-embedly-card-impl';
+import {dict} from '#core/types/object';
+import {isExperimentOn} from '#experiments';
+import {userAssert} from '../../../src/log';
+
+/** @const {string} */
+const TAG = 'amp-embedly-card';
+
+class AmpEmbedlyCard extends BaseElement {
+  /** @override */
+  init() {
+    return dict({
+      'requestResize': (height) => this.forceChangeHeight(height),
+    });
+  }
+
+  /** @override */
+  static getPreconnects() {
+    return ['https://cdn.embedly.com'];
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    userAssert(
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-embedly-card'),
+      'expected global "bento" or specific "bento-embedly-card" experiment to be enabled'
+    );
+    return super.isLayoutSupported(layout);
+  }
+}
+
+AMP.extension(TAG, '1.0', (AMP) => {
+  AMP.registerElement(TAG, AmpEmbedlyCard);
+  AMP.registerElement(KEY_TAG, AmpEmbedlyKey);
+});

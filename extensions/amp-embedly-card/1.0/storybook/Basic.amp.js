@@ -14,33 +14,32 @@
  * limitations under the License.
  */
 
- import * as Preact from '#preact';
- import {withAmp} from '@ampproject/storybook-addon';
- import {withKnobs} from '@storybook/addon-knobs';
- 
- export default {
-   title: 'amp-embedly-card-1_0',
-   decorators: [withKnobs, withAmp],
- 
-   parameters: {
-     extensions: [{name: 'amp-embedly-card', version: '1.0'}],
-     experiments: ['bento'],
-   },
- };
- 
- // DO NOT SUBMIT: This is example code only.
- export const ExampleUseCase = () => {
-   return (
-     <>
-       <amp-embedly-key layout="nodisplay" value="my-test-key">
-         hello
-       </amp-embedly-key>
-       <amp-embedly-card
-         data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
-         layout="responsive"
-         width="300"
-         height="200"
-       ></amp-embedly-card>
-     </>
-   );
- };
+import * as Preact from '#preact';
+import {withAmp} from '@ampproject/storybook-addon';
+import {withKnobs} from '@storybook/addon-knobs';
+
+export default {
+  title: 'amp-embedly-card-1_0',
+  decorators: [withKnobs, withAmp],
+
+  parameters: {
+    extensions: [{name: 'amp-embedly-card', version: '1.0'}],
+    experiments: ['bento'],
+  },
+};
+
+export const YoutubeEmbed = () => {
+  return (
+    <>
+      <amp-embedly-key layout="nodisplay" value="my-test-key">
+        hello
+      </amp-embedly-key>
+      <amp-embedly-card
+        data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+        layout="responsive"
+        width="300"
+        height="200"
+      ></amp-embedly-card>
+    </>
+  );
+};

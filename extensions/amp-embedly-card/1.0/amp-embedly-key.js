@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
- import {Layout} from '#core/dom/layout';
- import {PreactBaseElement} from '#preact/base-element';
- import {isExperimentOn} from '../../../src/experiments';
- import {userAssert} from '../../../src/log';
+import {Layout} from '#core/dom/layout';
+import {PreactBaseElement} from '#preact/base-element';
+import {isExperimentOn} from '#experiments';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 export const TAG = 'amp-embedly-key';
