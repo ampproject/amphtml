@@ -20,6 +20,7 @@
         {name: 'ampproject/wg-components'},
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-performance'},
+        {name: 'ampproject/wg-stories'},
       ],
     },
     {
