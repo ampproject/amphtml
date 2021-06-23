@@ -194,7 +194,9 @@ function ToggleViewIcon({showCarousel, ...rest}) {
   const classes = useStyles();
   return (
     <svg
-      aria-label={`Switch to ${showCarousel ? 'grid view' : 'carousel view'}`}
+      aria-label={
+        showCarousel ? 'Switch to grid view' : 'Switch to carousel view'
+      }
       className={objstr({
         [classes.control]: true,
         [classes.topControl]: true,
