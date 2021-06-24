@@ -15,19 +15,26 @@
  */
 
 .i-amphtml-story-interactive-img-container {
-  --i-amphtml-interactive-img-option-width: 42.5% !important;
+  --i-amphtml-interactive-img-option-width: 41.9% !important;
   --i-amphtml-interactive-img-option-margin: calc(
     (100% - (var(--i-amphtml-interactive-img-option-width) * 2)) / 3
   ) !important;
+  --i-amphtml-interactive-img-radius: calc(
+    (
+        var(--i-amphtml-interactive-img-option-width) +
+          var(--i-amphtml-interactive-img-option-margin)
+      ) / 2
+  ) !important;
+
+  border-radius: 4em 4em var(--i-amphtml-interactive-img-radius)
+    var(--i-amphtml-interactive-img-radius) !important;
 }
 
 .i-amphtml-story-interactive-img-option-container {
   background: var(--i-amphtml-interactive-option-background-color) !important;
   display: flex !important;
   justify-content: center !important;
-  border-radius: calc(
-    var(--i-amphtml-interactive-img-option-width) / 2
-  ) !important;
+  border-radius: var(--i-amphtml-interactive-img-radius) !important;
   overflow: hidden !important;
   box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
   /* overflow bug fix for percent bar animation on ios safari  */
