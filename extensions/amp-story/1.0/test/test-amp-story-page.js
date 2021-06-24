@@ -452,6 +452,15 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(element.getAttribute('auto-advance-after')).to.be.equal('20000ms');
   });
 
+  it('should not use storyNextUp when in viewer control group', () => {
+    env.sandbox
+      .stub(Services.viewerForDoc(element), 'getParam')
+      .withArgs('storyNextUp')
+      .returns('999999ms');
+    page.buildCallback();
+    expect(element).not.to.have.attribute('auto-advance-after');
+  });
+
   it('should stop the advancement when state becomes not active', async () => {
     page.buildCallback();
     const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
