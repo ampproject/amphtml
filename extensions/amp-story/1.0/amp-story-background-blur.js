@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {setStyles} from '#core/dom/style';
+import {setImportantStyles} from '#core/dom/style';
 
 /** @const {number} */
 const CANVAS_SIZE = 3;
@@ -22,7 +22,7 @@ const CANVAS_SIZE = 3;
 /** @const {number} */
 const DURATION_MS = 200;
 
-export class AmpStoryBackgroundBlur {
+export class backgroundBlur {
   /**
    * @param {!Window} win
    * @param {!Element} element
@@ -42,9 +42,9 @@ export class AmpStoryBackgroundBlur {
    * Setup canvas and attach it to the document.
    */
   attach() {
-    this.canvas_ = document.createElement('canvas');
+    this.canvas_ = this.win_.document.createElement('canvas');
     this.canvas_.width = this.canvas_.height = CANVAS_SIZE;
-    setStyles(this.canvas_, {
+    setImportantStyles(this.canvas_, {
       width: '100%',
       height: '100%',
       position: 'absolute',
@@ -52,6 +52,13 @@ export class AmpStoryBackgroundBlur {
       top: 0,
     });
     this.element_.appendChild(this.canvas_);
+  }
+
+  /**
+   * Remove canvas from the document.
+   */
+  detach() {
+    this.element_.removeChild(this.canvas_);
   }
 
   /**

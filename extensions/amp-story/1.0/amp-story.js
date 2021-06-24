@@ -51,7 +51,7 @@ import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
-import {AmpStoryBackgroundBlur} from './amp-story-background-blur';
+import {backgroundBlur} from './amp-story-background-blur';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
@@ -355,7 +355,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
 
-    /** @private {?AmpStoryBackgroundBlur} */
+    /** @private {?backgroundBlur} */
     this.backgroundBlur_ = null;
   }
 
@@ -1827,6 +1827,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onUIStateUpdate_(uiState) {
+    this.backgroundBlur_?.detach();
+    this.backgroundBlur_ = null;
     switch (uiState) {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
@@ -1848,10 +1850,7 @@ export class AmpStory extends AMP.BaseElement {
       case UIType.DESKTOP_ONE_PANEL:
         this.setDesktopPositionAttributes_(this.activePage_);
         if (!this.backgroundBlur_) {
-          this.backgroundBlur_ = new AmpStoryBackgroundBlur(
-            this.win,
-            this.element
-          );
+          this.backgroundBlur_ = new backgroundBlur(this.win, this.element);
           this.backgroundBlur_.attach();
         }
         this.vsync_.mutate(() => {
