@@ -42,6 +42,7 @@ export const SESSION_VALUES = {
   SESSION_ID: 'sessionId',
   CREATION_TIMESTAMP: 'creationTimestamp',
   ACCESS_TIMESTAMP: 'accessTimestamp',
+  ENGAGED: 'engaged',
   EVENT_TIMESTAMP: 'eventTimestamp',
   COUNT: 'count',
 };
@@ -54,6 +55,7 @@ export const SESSION_VALUES = {
  *  sessionId: number,
  *  creationTimestamp: number,
  *  accessTimestamp: number,
+ *  engaged: boolean,
  *  eventTimestamp: number,
  *  count: number,
  * }}
@@ -83,6 +85,8 @@ export class SessionManager {
     return this.get(type).then((session) => {
       if (value === SESSION_VALUES.EVENT_TIMESTAMP) {
         return this.getSessionEventTimestamp_(type, session, opt_persist);
+      } else if (value === SESSION_VALUES.ENGAGED) {
+        return this.getEngagedValue_(session);
       }
       return session?.[value];
     });
@@ -102,6 +106,19 @@ export class SessionManager {
       this.setSession_(type, session);
     }
     return lastTimestamp;
+  }
+
+  /**
+   * Get the previous engaged value and update the session
+   * to show that user is now engaged.
+   * Currently, we only store this in memory.
+   * @param {SessionInfoDef} session
+   * @return {boolean}
+   */
+  getEngagedValue_(session) {
+    const engaged = session[SESSION_VALUES.ENGAGED];
+    session[SESSION_VALUES.ENGAGED] = true;
+    return engaged == true;
   }
 
   /**
@@ -240,6 +257,7 @@ function constructSessionFromStoredValue(storedSession) {
       storedSession[SESSION_VALUES.ACCESS_TIMESTAMP],
     [SESSION_VALUES.EVENT_TIMESTAMP]:
       storedSession[SESSION_VALUES.EVENT_TIMESTAMP],
+    [SESSION_VALUES.ENGAGED]: undefined,
   };
 }
 
@@ -255,6 +273,7 @@ function constructSessionInfo(count = 1) {
     [SESSION_VALUES.ACCESS_TIMESTAMP]: Date.now(),
     [SESSION_VALUES.COUNT]: count,
     [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
+    [SESSION_VALUES.ENGAGED]: undefined,
   };
 }
 

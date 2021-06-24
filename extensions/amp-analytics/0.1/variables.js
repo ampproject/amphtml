@@ -332,6 +332,7 @@ export class VariableService {
       'SESSION_TIMESTAMP': () =>
         this.getSessionValue_(type, SESSION_VALUES.CREATION_TIMESTAMP),
       'SESSION_COUNT': () => this.getSessionValue_(type, SESSION_VALUES.COUNT),
+      'ENGAGED': () => this.getSessionValue_(type, SESSION_VALUES.ENGAGED),
       'EVENT_TIMESTAMP': (persist) => {
         // Defaults to true
         persist = persist != 'false';
