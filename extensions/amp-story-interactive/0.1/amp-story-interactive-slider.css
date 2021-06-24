@@ -13,3 +13,83 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+html,body{
+  display: grid;
+  height: 100%;
+  text-align: center;
+  place-items: center;
+  background: #651FFE;
+}
+.range{
+  --background: white;
+  height: 60px;
+  width: 380px;
+  background: var(--background);
+  border-radius: 50px;
+  padding: 0 65px 0 45px;
+  box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
+}
+.sliderValue{
+  position: relative;
+  margin: 0 10px;
+}
+.sliderValue span{
+  position: absolute;
+  height: 45px;
+  width: 45px;
+  transform: translate(-50%, 50%) scale(0);
+  font-weight: 500;
+  top: -40px;
+  line-height: 55px;
+  color: #fff;
+  transform-origin: bottom;
+  transition: transform 0.3s ease-in-out;
+}
+.sliderValue span.show{
+  transform: translate(-50%, -10%) scale(1);
+}
+.field{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  position: relative;
+}
+.field .value{
+  position: absolute;
+  font-size: 18px;
+  color: #651FFE;
+  font-weight: 600;
+}
+.field .value.left{
+  left: -22px;
+}
+.field .value.right{
+  right: -43px;
+}
+.range input{
+  -webkit-appearance: none;
+  width: 100%;
+  height: 10px;
+  background: #ddd;
+  border-radius: 5px;
+  outline: none;
+  border: none;
+  z-index: 2222;   
+}
+.range input::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #651FFE;
+  border: 1x solid #651FFE;
+  cursor: pointer;
+}
