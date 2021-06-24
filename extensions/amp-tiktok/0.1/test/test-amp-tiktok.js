@@ -39,6 +39,7 @@ describes.realWin(
       doc = win.document;
       clock = env.sandbox.useFakeTimers();
       createElementWithAttributes = dom.createElementWithAttributes;
+      clock = env.sandbox.useFakeTimers();
 
       env.sandbox
         .stub(dom, 'createElementWithAttributes')
@@ -111,16 +112,13 @@ describes.realWin(
     });
 
     it.skip('resizes using the fallback mechanism when no messages are received', async () => {
-      // TODO(rnthomas) Debug race condition in this test.
-      const player = await getTiktokBuildOnly({'data-src': VIDEOID});
+      const player = await getTiktok({'data-src': VIDEOID});
+      const playerIframe = player.querySelector('iframe');
       const impl = await player.getImpl(false);
 
       await impl.layoutCallback();
       // Wait 1100ms for resize fallback to be invoked.
       clock.tick(1100);
-
-      const playerIframe = player.querySelector('iframe');
-      env.sandbox.stub(impl, 'handleTiktokMessages_');
 
       expect(computedStyle(win, playerIframe).height).to.equal('775.25px');
     });
