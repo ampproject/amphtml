@@ -48,7 +48,6 @@ config.run('amp-fx-collection', {}, function () {
       body: defaultBody,
       css,
       extensions,
-      timeout: 20000,
     },
     (env) => {
       let win;
