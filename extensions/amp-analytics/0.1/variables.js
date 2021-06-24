@@ -333,7 +333,8 @@ export class VariableService {
         this.getSessionValue_(type, SESSION_VALUES.CREATION_TIMESTAMP),
       'SESSION_COUNT': () => this.getSessionValue_(type, SESSION_VALUES.COUNT),
       'EVENT_TIMESTAMP': (persist) => {
-        persist = persist === 'false' ? false : true;
+        // Defaults to true
+        persist = persist != 'false';
         return this.getSessionValue_(
           type,
           SESSION_VALUES.EVENT_TIMESTAMP,
@@ -386,7 +387,7 @@ export class VariableService {
    */
   getSessionValue_(vendorType, key, opt_persist) {
     return this.sessionManagerPromise_.then((sessionManager) => {
-      return sessionManager.getSessionValue(vendorType, key);
+      return sessionManager.getSessionValue(vendorType, key, opt_persist);
     });
   }
 
