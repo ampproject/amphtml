@@ -199,8 +199,7 @@ export class AmpRender extends BaseElement {
    * @private
    */
   undoLayout_(layout) {
-    const layout = parseLayout(layout);
-    const layoutClass = getLayoutClass(devAssert(layout));
+    const layoutClass = getLayoutClass(devAssert(parseLayout(layout)));
     this.element.classList.remove(layoutClass, 'i-amphtml-layout-size-defined');
 
     // TODO(amphtml): Remove [width] and [height] attributes too?

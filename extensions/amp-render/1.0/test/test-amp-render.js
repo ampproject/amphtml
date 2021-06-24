@@ -862,7 +862,14 @@ describes.realWin(
       expect(text).to.equal('Hello Joe 1+1=?');
     });
 
-    it.only('should update on changeToLayoutContainer action', async () => {
+    it('should update to layout=container on changeToLayoutContainer action', async () => {
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) => {
+          Promise.resolve().then(measurer).then(mutator);
+        },
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
+
       env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves({
         'items': [
           {
@@ -916,15 +923,17 @@ describes.realWin(
         </amp-render>
       `;
       doc.body.appendChild(element);
-      const impl = await element.getImpl();
-
-      const mutateStub = env.sandbox.stub(impl, 'mutateElement').resolves({});
 
       await getRenderedData();
       expect(element.getAttribute('layout')).to.equal('fixed');
+      expect(element.getAttribute('i-amphtml-layout')).not.to.equal(
+        'container'
+      );
 
       element.enqueAction(invocation('changeToLayoutContainer'));
-      expect(mutateStub).to.be.called;
+      await getRenderedData();
+      expect(element.getAttribute('layout')).to.equal('container');
+      expect(element.getAttribute('i-amphtml-layout')).to.equal('container');
     });
   }
 );
