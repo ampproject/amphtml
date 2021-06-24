@@ -285,7 +285,7 @@ class LoaderBuilder {
           class="i-amphtml-new-loader-white-on-shim"
           fill="currentColor"
           d="M41,34.5V31c0-0.5-0.4-1-1-1H27c-0.5,0-1,0.5-1,1v10c0,0.6,0.5,1,1,1h13c0.6,0,1-0.4,1-1v-3.5l5,4v-11L41,34.5z"
-        />
+        ></path>
       </svg>
     `;
   }
