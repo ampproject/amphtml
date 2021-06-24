@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {SESSION_VALUES, sessionServicePromiseForDoc} from './session-manager';
 import {Services} from '#service';
 import {TickLabel} from '#core/constants/enums';
 import {asyncStringReplace} from '#core/types/string';
@@ -250,6 +251,9 @@ export class VariableService {
     /** @const @private {!./linker-reader.LinkerReader} */
     this.linkerReader_ = linkerReaderServiceFor(this.ampdoc_.win);
 
+    /** @const @private {!Promise<SessionManager>} */
+    this.sessionManagerPromise_ = sessionServicePromiseForDoc(this.ampdoc_);
+
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
     this.register_('$TRIM', (value) => value.trim());
@@ -312,6 +316,7 @@ export class VariableService {
    * @return {!JsonObject} contains all registered macros
    */
   getMacros(element) {
+    const type = element.getAttribute('type');
     const elementMacros = {
       'COOKIE': (name) =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
@@ -322,6 +327,11 @@ export class VariableService {
           element,
           userAssert(key, 'CONSENT_METADATA macro must contain a key')
         ),
+      'SESSION_ID': () =>
+        this.getSessionValue_(type, SESSION_VALUES.SESSION_ID),
+      'SESSION_TIMESTAMP': () =>
+        this.getSessionValue_(type, SESSION_VALUES.CREATION_TIMESTAMP),
+      'SESSION_COUNT': () => this.getSessionValue_(type, SESSION_VALUES.COUNT),
     };
     const perfMacros = isInFie(element)
       ? {}
@@ -351,8 +361,24 @@ export class VariableService {
               TickLabel.CUMULATIVE_LAYOUT_SHIFT
             ),
         };
-    const merged = {...this.macros_, ...elementMacros, ...perfMacros};
+    const merged = {
+      ...this.macros_,
+      ...elementMacros,
+      ...perfMacros,
+    };
     return /** @type {!JsonObject} */ (merged);
+  }
+
+  /**
+   *
+   * @param {string} vendorType
+   * @param {!SESSION_VALUES} key
+   * @return {!Promise<number>}
+   */
+  getSessionValue_(vendorType, key) {
+    return this.sessionManagerPromise_.then((sessionManager) => {
+      return sessionManager.getSessionValue(vendorType, key);
+    });
   }
 
   /**

@@ -31,7 +31,9 @@ limitations under the License.
 
 ## Usage
 
-The `amp-render` component renders content in a specified template. It can fetch content from a CORS JSON endpoint or inline from `amp-state` or `amp-script`.
+The `amp-render` component fetches JSON data, then renders that data using a template. `amp-render` can use data from a CORS JSON endpoint, from an `amp-state` state variable, or from `amp-script`.
+
+Since `amp-render`'s data can come from `amp-script`, you can use your own JavaScript to filter data, cap its size, create list functionality, and otherwise customize the component's behavior and appearance. If you prefer to use HTML attributes, `amp-list` provides a richer feature set.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
@@ -129,6 +131,10 @@ Your endpoint must implement the requirements specified in the [CORS Requests in
 
 The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supports URL and non-URL expression values.
 
+### `template`
+
+References an ID of a defined templating element. This attribute is not necessary if the template is a child of the `amp-render` element.
+
 ### `credentials`
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
@@ -198,7 +204,9 @@ If we just want to display the German cars from the response, we can use the `ke
 </amp-render>
 ```
 
-Note that they `key` attribute is valid only when `src` is a URL.
+[tip type="important"]
+Note that the `key` attribute is valid only when `src` is a URL. To access a sub-object in data fetched via JavaScript, use your own code to locate that sub-object before passing it to `<amp-render>`.
+[/tip]
 
 ### `binding`
 

@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '#preact';
-import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
+import {CanPlay, CanRender, LoadingProp} from './contextprops';
 import {Loading} from '#core/loading-instructions';
 import {devAssert} from '#core/assert';
 import {isElement} from '#core/types';
@@ -25,7 +25,7 @@ import {
   unmountAll,
 } from '../utils/resource-container-helper';
 import {objectsEqualShallow} from '#core/types/object';
-import {rediscoverChildren, removeProp, setProp} from '../context';
+import {rediscoverChildren, removeProp, setProp} from '#core/context';
 import {useAmpContext} from './context';
 import {useEffect, useLayoutEffect, useRef} from '#preact';
 
