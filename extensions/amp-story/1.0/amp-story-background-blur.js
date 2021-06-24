@@ -93,10 +93,9 @@ export class backgroundBlur {
       if (elapsed < DURATION_MS) {
         const easing = 1 - Math.pow(1 - elapsed / DURATION_MS, 2);
         context.globalAlpha = easing;
+        context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
         if (fillElement) {
           context.drawImage(fillElement, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
-        } else {
-          context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
         }
         this.currentRAF_ = requestAnimationFrame(nextFrame);
       }
