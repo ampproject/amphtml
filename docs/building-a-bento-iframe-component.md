@@ -250,6 +250,17 @@ class AmpFantasticEmbed extends BaseElement {
 }
 ```
 
+For components that request a resize that is denied by the AMP runtime, publishers are recommended to use an `overflow` element to solicit user interaction in order to resize as a layout stability best-practice.
+
+This information can be provided in the component documentation with an exemplary code sample:
+
+```html
+<amp-fantastic-embed layout="fixed" width="400" height="200">
+  <button overflow>Click me to load the full iframed content!</button>
+</amp-fantastic-embed>
+<p>Content below the component.</p>
+```
+
 #### Passing or overriding props
 
 In the previous example, props received from the `ProxyIframeEmbed` are implicitly set through `...rest`. If we set each explicitly, we see the `HTMLIframeElement` attributes handled.
