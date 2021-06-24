@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../../src/amp-events.js';
-import {createFixtureIframe} from '../../../../../testing/iframe.js';
+import {AmpEvents} from '#core/constants/amp-events';
+import {createFixtureIframe} from '#testing/iframe';
 
 function checkElementUpgrade(element) {
   expect(element).to.have.class('i-amphtml-element');
@@ -27,9 +27,9 @@ function checkElementUpgrade(element) {
 }
 
 // NOTE: this only executes on module build tests
-const config = describe.configure().ifModuleBuild();
+const config = describes.sandboxed.configure().ifModuleBuild();
 
-config.run('amp-date-picker', async () => {
+config.run('amp-date-picker', {}, async () => {
   it('initializes the date picker', async () => {
     const testExtension = 'amp-date-picker';
     const fixture = await createFixtureIframe(

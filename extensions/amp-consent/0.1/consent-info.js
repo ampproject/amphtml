@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {CONSENT_STRING_TYPE} from '../../../src/consent-state';
-import {deepEquals} from '../../../src/json';
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+import {deepEquals} from '#core/types/object/json';
 import {dev, user} from '../../../src/log';
-import {hasOwn, map} from '../../../src/utils/object';
-import {isEnumValue, isObject} from '../../../src/types';
+import {hasOwn, map} from '#core/types/object';
+import {isEnumValue, isObject} from '#core/types';
 
 const TAG = 'amp-consent';
 

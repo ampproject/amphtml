@@ -16,7 +16,7 @@
 
 import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
 import {cssText} from '../../../build/amp-story-player.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
 class AmpStoryPlayerWrapper extends AMP.BaseElement {
   /** @override @nocollapse */
@@ -32,12 +32,12 @@ class AmpStoryPlayerWrapper extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.player_.buildCallback();
+    this.player_.buildPlayer();
   }
 
   /** @override */
   layoutCallback() {
-    this.player_.layoutCallback();
+    this.player_.layoutPlayer();
     return Promise.resolve();
   }
 

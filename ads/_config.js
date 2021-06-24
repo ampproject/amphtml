@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonConfiguration} from '../src/json';
+import {jsonConfiguration} from '#core/types/object/json';
 
 /**
  * @typedef {{
@@ -423,6 +423,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'digiteka': {
+    renderStartImplemented: true,
+  },
+
   'directadvert': {
     renderStartImplemented: true,
   },
@@ -534,6 +538,8 @@ const adConfig = jsonConfiguration({
   'fusion': {
     prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
   },
+
+  'gecko': {},
 
   'genieessp': {
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
@@ -700,8 +706,20 @@ const adConfig = jsonConfiguration({
   },
 
   'marfeel': {
-    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
-    preconnect: 'https://live.mrf.io',
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: [
+      'https://live.mrf.io',
+      'https://tpc.googlesyndication.com',
+      'https://fastlane.rubiconproject.com',
+      'https://htlb.casalemedia.com',
+      'https://prg.smartadserver.com',
+      'https://ib.adnxs.com',
+      'https://bidder.criteo.com',
+      'https://marfeel-d.openx.net',
+      'https://ice.360yield.com',
+      'https://mbid.marfeelrev.com',
+      'https://adservice.google.com',
+    ],
     consentHandlingOverride: true,
   },
 
@@ -791,6 +809,7 @@ const adConfig = jsonConfiguration({
       'https://www.myfinance.com',
     ],
     renderStartImplemented: true,
+    clientIdScope: 'AMP_ECID_GOOGLE',
   },
 
   'myoffrz': {
@@ -871,7 +890,9 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'opinary': {},
+  'opinary': {
+    renderStartImplemented: true,
+  },
 
   'outbrain': {
     renderStartImplemented: true,
@@ -966,6 +987,11 @@ const adConfig = jsonConfiguration({
   },
 
   'rbinfox': {
+    renderStartImplemented: true,
+  },
+
+  'rcmwidget': {
+    prefetch: 'https://rcmjs.rambler.ru/static/rcmw/rcmw-amp.js',
     renderStartImplemented: true,
   },
 
@@ -1168,6 +1194,10 @@ const adConfig = jsonConfiguration({
   },
 
   'taboola': {},
+
+  'tail': {
+    renderStartImplemented: true,
+  },
 
   'tcsemotion': {
     prefetch: 'https://ads.tcsemotion.com/www/delivery/amphb.js',

@@ -119,4 +119,4 @@ The AMP provided set of [common attributes](https://amp.dev/documentation/guides
 
 ## Validation
 
-See [amp-timeago rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-timeago/validator-amp-timeago.protoascii) in the AMP validator specification.
+See [amp-timeago rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-timeago/validator-amp-timeago.protoascii) in the AMP validator specification.

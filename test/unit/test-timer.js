@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Timer} from '../../src/service/timer-impl';
+import {Timer} from '#service/timer-impl';
 
 describes.fakeWin('Timer', {}, (env) => {
   let windowMock;

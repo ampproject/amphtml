@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {LruCache} from './utils/lru-cache';
-import {dict, hasOwn} from './utils/object';
-import {endsWith} from './string';
+import {LruCache} from './core/data-structures/lru-cache';
+import {dict, hasOwn} from './core/types/object';
+import {endsWith} from './core/types/string';
 import {getMode} from './mode';
-import {isArray} from './types';
-import {parseQueryString_} from './url-parse-query-string';
-import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
+import {isArray} from './core/types';
+import {parseQueryString} from './core/types/string/url';
 import {urls} from './config';
-import {pureUserAssert as userAssert} from './core/assert';
+import {userAssert} from './log';
 
 /**
  * @type {!JsonObject}
@@ -121,7 +120,7 @@ export function parseUrlDeprecated(url, opt_nocache) {
 export function parseUrlWithA(a, url, opt_cache) {
   if (IS_ESM) {
     a.href = '';
-    return /** @type {!Location} */ (new URL(url, a.href));
+    return /** @type {?} */ (new URL(url, a.href));
   }
 
   if (opt_cache && opt_cache.has(url)) {
@@ -353,20 +352,6 @@ export function assertAbsoluteHttpOrHttpsUrl(urlString) {
 }
 
 /**
- * Parses the query string of an URL. This method returns a simple key/value
- * map. If there are duplicate keys the latest value is returned.
- *
- * This function is implemented in a separate file to avoid a circular
- * dependency.
- *
- * @param {string} queryString
- * @return {!JsonObject}
- */
-export function parseQueryString(queryString) {
-  return parseQueryString_(queryString);
-}
-
-/**
  * Returns the URL without fragment. If URL doesn't contain fragment, the same
  * string is returned.
  * @param {string} url
@@ -404,6 +389,14 @@ export function isProxyOrigin(url) {
     url = parseUrlDeprecated(url);
   }
   return urls.cdnProxyRegex.test(url.origin);
+}
+
+/**
+ * @param {string} uri
+ * @return {boolean}
+ */
+export function isAmpScriptUri(uri) {
+  return uri.startsWith('amp-script:');
 }
 
 /**
@@ -644,18 +637,6 @@ export function checkCorsUrl(url) {
     'Source origin is not allowed in %s',
     url
   );
-}
-
-/**
- * Tries to decode a URI component, falling back to opt_fallback (or an empty
- * string)
- *
- * @param {string} component
- * @param {string=} opt_fallback
- * @return {string}
- */
-export function tryDecodeUriComponent(component, opt_fallback) {
-  return tryDecodeUriComponent_(component, opt_fallback);
 }
 
 /**

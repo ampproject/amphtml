@@ -23,9 +23,10 @@ import {AmpTemplateCreativeDef} from '../../amp-a4a/0.1/amp-ad-type-defs';
 import {dev, devAssert} from '../../../src/log';
 import {getAmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {getMode} from '../../../src/mode';
-import {tryParseJson} from '../../../src/json';
-import {tryResolve} from '../../../src/utils/promise';
-import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
+import {mergeExtensionsMetadata} from '../../amp-a4a/0.1/amp-ad-utils';
+import {tryParseJson} from '#core/types/object/json';
+import {tryResolve} from '#core/data-structures/promise';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-adzerk-impl';
@@ -93,16 +94,19 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
   /** @override */
   maybeValidateAmpCreative(bytes, headers) {
+    // TODO(wg-monetization): this header name has been deprecated elsewhere,
+    // and is never returned by dev server.
     if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
-      return /**@type {!Promise<(ArrayBuffer|null)>}*/ (Promise.resolve(null));
+      return /**@type {!Promise<?ArrayBuffer>}*/ (Promise.resolve(null));
     }
     // Shorthand for: reject promise if current promise chain is out of date.
     const checkStillCurrent = this.verifyStillCurrent();
     return tryResolve(() => utf8Decode(bytes)).then((body) => {
       checkStillCurrent();
-      this.ampCreativeJson_ = /** @type {!../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */ (tryParseJson(
-        body
-      ) || {});
+      this.ampCreativeJson_ =
+        /** @type {!../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+          tryParseJson(body) || {}
+        );
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
       const ampAdTemplateHelper = getAmpAdTemplateHelper(this.element);
       return ampAdTemplateHelper
@@ -163,6 +167,12 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     pushIfNotExist(
       this.creativeMetadata_['customElementExtensions'],
       'amp-mustache'
+    );
+    this.creativeMetadata_['extensions'] =
+      this.creativeMetadata_['extensions'] || [];
+    mergeExtensionsMetadata(
+      this.creativeMetadata_['extensions'],
+      this.creativeMetadata_['customElementExtensions']
     );
     return /**@type {?CreativeMetaDataDef}*/ (this.creativeMetadata_);
   }

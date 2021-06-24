@@ -25,8 +25,8 @@
 
 'use strict';
 
-const log = require('fancy-log');
-const {cyan, yellow} = require('kleur/colors');
+const {cyan, yellow} = require('./build-system/common/colors');
+const {log} = require('./build-system/common/logging');
 
 /**
  * Mapping of each babel transform caller to the name of the function that
@@ -34,11 +34,11 @@ const {cyan, yellow} = require('kleur/colors');
  */
 const babelTransforms = new Map([
   ['babel-jest', 'getEmptyConfig'],
-  ['dep-check', 'getDepCheckConfig'],
   ['post-closure', 'getPostClosureConfig'],
   ['pre-closure', 'getPreClosureConfig'],
   ['test', 'getTestConfig'],
   ['unminified', 'getUnminifiedConfig'],
+  ['minified', 'getMinifiedConfig'],
   ['@babel/eslint-parser', 'getEslintConfig'],
 ]);
 

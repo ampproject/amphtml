@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/action-constants';
-import {AmpDocService} from '../../../../src/service/ampdoc-impl';
-import {AmpEvents} from '../../../../src/amp-events';
+import {ActionService} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpDocService} from '#service/ampdoc-impl';
+import {AmpEvents} from '#core/constants/amp-events';
 import {AmpList} from '../amp-list';
-import {Deferred} from '../../../../src/utils/promise';
-import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
-import {
-  resetExperimentTogglesForTesting,
-  toggleExperiment,
-} from '../../../../src/experiments';
+import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.repeated(
   'amp-list',
@@ -769,7 +765,7 @@ describes.repeated(
             it('should attemptChangeHeight initial content', async () => {
               const initialContent = doc.createElement('div');
               initialContent.setAttribute('role', 'list');
-              initialContent.style.height = '1337px';
+              initialContent.setAttribute('style', 'height: 123px');
 
               // Initial content must be set before buildCallback(), so use
               // a new test AmpList instance.
@@ -784,11 +780,12 @@ describes.repeated(
               // content, once to resize to rendered contents.
               listMock
                 .expects('attemptChangeHeight')
-                .withExactArgs(1337)
+                .withExactArgs(123)
                 .returns(Promise.resolve())
                 .twice();
 
               const itemElement = doc.createElement('div');
+              itemElement.setAttribute('style', 'height: 123px');
               expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
               await list.layoutCallback();
             });
@@ -1013,7 +1010,9 @@ describes.repeated(
             beforeEach(() => {
               resetExperimentTogglesForTesting(win);
 
-              env.sandbox.stub(Services, 'scriptForDocOrNull');
+              env.sandbox
+                .stub(Services, 'scriptForDocOrNull')
+                .returns(Promise.resolve(new AmpScriptService(env.ampdoc)));
               ampScriptEl = document.createElement('amp-script');
               ampScriptEl.setAttribute('id', 'example');
               doc.body.appendChild(ampScriptEl);
@@ -1523,7 +1522,7 @@ describes.repeated(
             });
 
             it('should render a list using async data', async () => {
-              const {resolve, promise} = new Deferred();
+              const {promise, resolve} = new Deferred();
               bind.getStateAsync = () => promise;
 
               const ampStateEl = doc.createElement('amp-state');

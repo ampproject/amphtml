@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   VariableSource,
   getNavigationData,
   getTimingDataAsync,
   getTimingDataSync,
-} from '../../../src/service/variable-source';
+} from '#service/variable-source';
 import {user, userAssert} from '../../../src/log';
 
 const ALLOWLISTED_VARIABLES = [
@@ -198,9 +198,8 @@ export class A4AVariableSource extends VariableSource {
       for (let j = 0; j < attributeNames.length; ++j) {
         const attributeName = attributeNames[j];
         if (elements[i].hasAttribute(attributeName)) {
-          currentResult[attributeName] = elements[i].getAttribute(
-            attributeName
-          );
+          currentResult[attributeName] =
+            elements[i].getAttribute(attributeName);
           foundAtLeastOneAttr = true;
         }
       }

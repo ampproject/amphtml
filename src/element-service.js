@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as dom from './dom';
-import {extensionScriptsInNode} from './service/extension-script';
+import * as dom from './core/dom';
+import {extensionScriptInNode} from './service/extension-script';
 import {
   getAmpdoc,
   getService,
@@ -24,8 +24,8 @@ import {
   getServicePromiseForDoc,
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
-} from './service';
-import {pureUserAssert as userAssert} from './core/assert';
+} from './service-helpers';
+import {userAssert} from './log';
 
 /**
  * Same as getElementService but produces null if the given element is not
@@ -34,29 +34,29 @@ import {pureUserAssert as userAssert} from './core/assert';
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
+ * @param {string} version The extension version.
  * @param {boolean=} opt_element Whether this service is provided by an
  *     element, not the extension.
  * @return {!Promise<?Object>}
  */
-export function getElementServiceIfAvailable(win, id, extension, opt_element) {
+export function getElementServiceIfAvailable(
+  win,
+  id,
+  extension,
+  version,
+  opt_element
+) {
   const s = getServicePromiseOrNull(win, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (s);
   }
-  return getElementServicePromiseOrNull(win, id, extension, opt_element);
-}
-
-/**
- * @param {!Window} win
- * @param {string} elementName Name of an extended custom element.
- * @return {boolean} Whether this element is scheduled to be loaded.
- */
-function isElementScheduled(win, elementName) {
-  // Set in custom-element.js
-  if (!win.__AMP_EXTENDED_ELEMENTS) {
-    return false;
-  }
-  return !!win.__AMP_EXTENDED_ELEMENTS[elementName];
+  return getElementServicePromiseOrNull(
+    win,
+    id,
+    extension,
+    version,
+    opt_element
+  );
 }
 
 /**
@@ -105,19 +105,25 @@ export function getElementServiceIfAvailableForDoc(
   }
   const ampdoc = getAmpdoc(element);
   return ampdoc
-    .waitForBodyOpen()
-    .then(() =>
-      waitForExtensionIfPresent(ampdoc.win, extension, ampdoc.win.document.head)
-    )
+    .whenExtensionsKnown()
     .then(() => {
+      const version = ampdoc.getExtensionVersion(extension);
+      if (!version) {
+        return null;
+      }
+      const extensions = getService(ampdoc.win, 'extensions');
+      return extensions.waitForExtension(extension, version);
+    })
+    .then((ext) => {
+      if (!ext) {
+        return null;
+      }
       // If this service is provided by an element, then we can't depend on
       // the service (they may not use the element).
       if (opt_element) {
         return getServicePromiseOrNullForDoc(element, id);
-      } else if (isElementScheduled(ampdoc.win, extension)) {
-        return getServicePromiseForDoc(element, id);
       }
-      return null;
+      return getServicePromiseForDoc(element, id);
     });
 }
 
@@ -154,73 +160,18 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
  * @closurePrimitive {asserts.matchesReturn}
  */
 function assertService(service, id, extension) {
-  return /** @type {!Object} */ (userAssert(
-    service,
-    'Service %s was requested to be provided through %s, ' +
-      'but %s is not loaded in the current page. To fix this ' +
-      'problem load the JavaScript file for %s in this page.',
-    id,
-    extension,
-    extension,
-    extension
-  ));
-}
-
-/**
- * Waits for body to be present then verifies that an extension script is
- * present in head for installation.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {string} extensionId
- * @return {!Promise<boolean>}
- */
-export function isExtensionScriptInNode(ampdoc, extensionId) {
-  return ampdoc.waitForBodyOpen().then(() => {
-    return extensionScriptInNode(ampdoc.getHeadNode(), extensionId);
-  });
-}
-
-/**
- * Verifies that an extension script is present in head for
- * installation.
- * @param {HTMLHeadElement|Element|ShadowRoot} head
- * @param {string} id
- * @return {boolean}
- * @private
- */
-function extensionScriptInNode(head, id) {
-  return extensionScriptsInNode(head).some(
-    ({extensionId}) => id == extensionId
+  return /** @type {!Object} */ (
+    userAssert(
+      service,
+      'Service %s was requested to be provided through %s, ' +
+        'but %s is not loaded in the current page. To fix this ' +
+        'problem load the JavaScript file for %s in this page.',
+      id,
+      extension,
+      extension,
+      extension
+    )
   );
-}
-
-/**
- * Waits for an extension if its script is present
- * @param {!Window} win
- * @param {string} extension
- * @param {HTMLHeadElement|Element|ShadowRoot} head
- * @return {!Promise}
- * @private
- */
-function waitForExtensionIfPresent(win, extension, head) {
-  /**
-   * If there is an extension script wait for it to load before trying
-   * to get the service. Prevents a race condition when everything but
-   * the extensions is in cache. If there is no script then it's either
-   * not present, or the service was defined by a test. In those cases
-   * we don't wait around for an extension that does not exist.
-   */
-
-  // TODO(jpettitt) investigate registerExtension to short circuit
-  // the dom call in extensionScriptsInNode()
-  if (!extensionScriptInNode(head, extension)) {
-    return Promise.resolve();
-  }
-
-  const extensions = getService(win, 'extensions');
-  return /** @type {!Promise<?Object>} */ (extensions.waitForExtension(
-    win,
-    extension
-  ));
 }
 
 /**
@@ -229,22 +180,44 @@ function waitForExtensionIfPresent(win, extension, head) {
  * @param {!Window} win
  * @param {string} id
  * @param {string} extension
+ * @param {string} version
  * @param {boolean=} opt_element
  * @return {!Promise<Object>}
  * @private
  */
-function getElementServicePromiseOrNull(win, id, extension, opt_element) {
+function getElementServicePromiseOrNull(
+  win,
+  id,
+  extension,
+  version,
+  opt_element
+) {
   return dom
     .waitForBodyOpenPromise(win.document)
-    .then(() => waitForExtensionIfPresent(win, extension, win.document.head))
     .then(() => {
+      // If there is an extension script wait for it to load before trying
+      // to get the service. Prevents a race condition when everything but
+      // the extensions is in cache. If there is no script then it's either
+      // not present, or the service was defined by a test. In those cases
+      // we don't wait around for an extension that does not exist.
+      const extensions = getService(win, 'extensions');
+
+      // TODO(jpettitt) investigate registerExtension to short circuit
+      // the dom call in extensionScriptsInNode()
+      if (!extensionScriptInNode(extensions.win, extension, version)) {
+        return null;
+      }
+      return extensions.waitForExtension(extension, version);
+    })
+    .then((ext) => {
+      if (!ext) {
+        return null;
+      }
       // If this service is provided by an element, then we can't depend on
       // the service (they may not use the element).
       if (opt_element) {
         return getServicePromiseOrNull(win, id);
-      } else if (isElementScheduled(win, extension)) {
-        return getServicePromise(win, id);
       }
-      return null;
+      return getServicePromise(win, id);
     });
 }

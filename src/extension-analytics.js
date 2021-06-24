@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
-import {Services} from './services';
-import {createElementWithAttributes, removeElement} from './dom';
-import {pureDevAssert as devAssert} from './core/assert';
-import {dict} from './utils/object';
-import {isArray, toWin} from './types';
+import {CommonSignals} from './core/constants/common-signals';
+import {Services} from './service';
+import {createElementWithAttributes, removeElement} from './core/dom';
+import {devAssert} from './log';
+import {dict} from './core/types/object';
+import {isArray} from './core/types';
+import {toWin} from './core/window';
 import {triggerAnalyticsEvent} from './analytics';
 
 /**

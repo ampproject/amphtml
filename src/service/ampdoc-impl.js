@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Observable} from '../observable';
-import {Signals} from '../utils/signals';
-import {VisibilityState} from '../visibility-state';
-import {WindowInterface} from '../window-interface';
+import {Deferred} from '#core/data-structures/promise';
+import {Observable} from '#core/data-structures/observable';
+import {Signals} from '#core/data-structures/signals';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {WindowInterface} from '#core/window/interface';
 import {
   addDocumentVisibilityChangeListener,
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
-} from '../utils/document-visibility';
+} from '#core/document-visibility';
 import {dev, devAssert} from '../log';
 import {
   disposeServicesForDoc,
   getParentWindowFrameElement,
   registerServiceBuilder,
-} from '../service';
-import {isDocumentReady, whenDocumentReady} from '../document-ready';
-import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
-import {map} from '../utils/object';
-import {parseQueryString} from '../url';
+} from '../service-helpers';
+import {isDocumentReady, whenDocumentReady} from '#core/document-ready';
+import {isEnumValue} from '#core/types';
+import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '#core/dom';
+import {map} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -268,15 +269,16 @@ export class AmpDoc {
     /** @private @const {!Object<string, string>} */
     this.declaredExtensions_ = {};
 
+    const paramsVisibilityState = this.params_['visibilityState'];
+    devAssert(
+      !paramsVisibilityState ||
+        isEnumValue(VisibilityState, paramsVisibilityState)
+    );
+
     /** @private {?VisibilityState} */
     this.visibilityStateOverride_ =
       (opt_options && opt_options.visibilityState) ||
-      (this.params_['visibilityState'] &&
-        dev().assertEnumValue(
-          VisibilityState,
-          this.params_['visibilityState'],
-          'VisibilityState'
-        )) ||
+      paramsVisibilityState ||
       null;
 
     // Start with `null` to be updated by updateVisibilityState_ in the end
@@ -442,7 +444,6 @@ export class AmpDoc {
    * @restricted
    */
   declareExtension(extensionId, version) {
-    devAssert(version); // QQQ: remove/debugging.
     devAssert(
       !this.declaredExtensions_[extensionId] ||
         this.declaredExtensions_[extensionId] === version,
@@ -450,6 +451,14 @@ export class AmpDoc {
       extensionId
     );
     this.declaredExtensions_[extensionId] = version;
+  }
+
+  /**
+   * @param {string} extensionId
+   * @return {?string}
+   */
+  getExtensionVersion(extensionId) {
+    return this.declaredExtensions_[extensionId] || null;
   }
 
   /**
@@ -668,9 +677,9 @@ export class AmpDoc {
    * @return {?time}
    */
   getFirstVisibleTime() {
-    return /** @type {?number} */ (this.signals_.get(
-      AmpDocSignals.FIRST_VISIBLE
-    ));
+    return /** @type {?number} */ (
+      this.signals_.get(AmpDocSignals.FIRST_VISIBLE)
+    );
   }
 
   /**

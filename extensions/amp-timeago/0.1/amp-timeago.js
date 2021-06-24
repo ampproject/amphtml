@@ -15,12 +15,12 @@
  */
 
 import {format, getLocale} from './locales';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+} from '#core/dom/layout/viewport-observer';
+import {userAssert} from '../../../src/log';
 
 export class AmpTimeAgo extends AMP.BaseElement {
   /** @param {!AmpElement} element */

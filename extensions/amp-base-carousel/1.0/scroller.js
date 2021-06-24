@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {
   Alignment,
   Axis,
@@ -22,11 +22,11 @@ import {
   scrollContainerToElement,
 } from './dimensions';
 import {LightboxGalleryContext} from '../../amp-lightbox-gallery/1.0/context';
-import {debounce} from '../../../src/utils/rate-limit';
-import {forwardRef} from '../../../src/preact/compat';
-import {mod} from '../../../src/utils/math';
-import {setStyle} from '../../../src/style';
-import {toWin} from '../../../src/types';
+import {debounce} from '#core/types/function';
+import {forwardRef} from '#preact/compat';
+import {mod} from '#core/math';
+import {setStyle} from '#core/dom/style';
+import {toWin} from '#core/window';
 import {
   useCallback,
   useContext,
@@ -34,8 +34,8 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
-} from '../../../src/preact';
-import {useStyles} from './base-carousel.jss';
+} from '#preact';
+import {useStyles} from './component.jss';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -49,15 +49,15 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 
 /**
  * @param {!BaseCarouselDef.ScrollerProps} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
 function ScrollerWithRef(
   {
+    _thumbnails,
     advanceCount,
     alignment,
-    autoAdvanceCount,
     axis,
     children,
     lightbox,
@@ -68,7 +68,6 @@ function ScrollerWithRef(
     snap,
     snapBy = 1,
     visibleCount,
-    _thumbnails,
     ...rest
   },
   ref
@@ -268,11 +267,6 @@ function ScrollerWithRef(
     debouncedResetScrollReferencePoint();
   };
 
-  const incrementCount = Math.max(advanceCount, autoAdvanceCount);
-  const needMoreSlidesToScroll =
-    loop &&
-    incrementCount > 1 &&
-    children.length - pivotIndex - visibleCount < incrementCount;
   return (
     <div
       ref={containerRef}
@@ -284,7 +278,6 @@ function ScrollerWithRef(
       {...rest}
     >
       {slides}
-      {needMoreSlidesToScroll && slides}
     </div>
   );
 }
@@ -347,18 +340,18 @@ export {Scroller};
  */
 function renderSlides(
   {
+    _thumbnails,
     alignment,
     children,
     loop,
     mixedLength,
-    restingIndex,
     offsetRef,
     openLightbox,
     pivotIndex,
+    restingIndex,
     snap,
     snapBy,
     visibleCount,
-    _thumbnails,
   },
   classes
 ) {

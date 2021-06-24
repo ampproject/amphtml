@@ -21,12 +21,12 @@ import {
   SanitizerImpl,
   StorageLocation,
 } from '../../amp-script';
-import {FakeWindow} from '../../../../../testing/fake-dom';
-import {Services} from '../../../../../src/services';
+import {FakeWindow} from '#testing/fake-dom';
+import {Services} from '#service';
 import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../../../../../src/service';
+} from '../../../../../src/service-helpers';
 import {user} from '../../../../../src/log';
 
 describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
@@ -144,17 +144,13 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
 
   it('callFunction waits for initialization to complete before returning', async () => {
     element.setAttribute('script', 'local-script');
-    const result = script.callFunction('fetchData');
-    script.workerDom_ = {
-      callFunction(fnIdent) {
-        if (fnIdent === 'fetchData') {
-          return Promise.resolve(42);
-        }
-        return Promise.reject();
-      },
-    };
-    script.initialize_.resolve();
-    expect(await result).to.equal(42);
+    script.workerDom_ = {callFunction: env.sandbox.spy()};
+
+    script.callFunction('fetchData', true);
+    expect(script.workerDom_.callFunction).not.called;
+
+    await script.initialize_.resolve();
+    expect(script.workerDom_.callFunction).calledWithExactly('fetchData', true);
   });
 
   describe('Initialization skipped warning due to zero height/width', () => {
@@ -343,7 +339,7 @@ describes.repeated(
   }
 );
 
-describe('SanitizerImpl', () => {
+describes.sandboxed('SanitizerImpl', {}, (env) => {
   let el;
   let win;
   let s;
@@ -353,7 +349,7 @@ describe('SanitizerImpl', () => {
     win = new FakeWindow();
     el = win.document.createElement('div');
 
-    getSanitizer = ({byUserGesture, byFixedSize}) =>
+    getSanitizer = ({byFixedSize, byUserGesture}) =>
       new SanitizerImpl(
         {
           win,
@@ -547,11 +543,11 @@ describe('SanitizerImpl', () => {
 
     beforeEach(() => {
       bind = {
-        getStateValue: window.sandbox.stub(),
-        setState: window.sandbox.stub(),
-        constrain: window.sandbox.stub(),
+        getStateValue: env.sandbox.stub(),
+        setState: env.sandbox.stub(),
+        constrain: env.sandbox.stub(),
       };
-      window.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
 
     it('AMP.setState(json), without user interaction', async () => {

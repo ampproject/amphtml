@@ -1,4 +1,4 @@
-## Custom transforms for `gulp serve`.
+## Custom transforms for `amp serve`.
 
 **Main directory:** `build-system/server/new-server/transforms/`
 

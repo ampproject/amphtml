@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
+import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {PreactBaseElement} from '#preact/base-element';
 import {CSS as THUMBNAIL_CSS} from './thumbnails.jss';
 import {Thumbnails} from './thumbnails';
-import {isExperimentOn} from '../../../src/experiments';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {isExperimentOn} from '#experiments';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-thumbnails';

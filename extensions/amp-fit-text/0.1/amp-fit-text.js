@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import {BaseElement as BentoFitText} from '../../amp-fit-text/1.0/base-element';
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {isAmphtml} from '../../../src/format';
-import {px, setStyle, setStyles} from '../../../src/style';
-import {throttle} from '../../../src/utils/rate-limit';
+import {
+  applyFillContent,
+  getLengthNumeral,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
+import {px, setStyle, setStyles} from '#core/dom/style';
+import {realChildNodes} from '#core/dom/query';
+import {throttle} from '#core/types/function';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;
@@ -62,18 +65,6 @@ class AmpFitText extends AMP.BaseElement {
   }
 
   /** @override */
-  upgradeCallback() {
-    if (
-      BENTO_AUTO_UPGRADE &&
-      typeof Element.prototype.attachShadow == 'function' &&
-      isAmphtml(this.element.ownerDocument)
-    ) {
-      return new BentoFitText(this.element);
-    }
-    return null;
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
@@ -81,7 +72,7 @@ class AmpFitText extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.content_ = this.element.ownerDocument.createElement('div');
-    this.applyFillContent(this.content_);
+    applyFillContent(this.content_);
     this.content_.classList.add('i-amphtml-fit-text-content');
     setStyles(this.content_, {zIndex: 2});
 
@@ -100,7 +91,7 @@ class AmpFitText extends AMP.BaseElement {
       lineHeight: `${LINE_HEIGHT_EM_}em`,
     });
 
-    this.getRealChildNodes().forEach((node) => {
+    realChildNodes(this.element).forEach((node) => {
       this.contentWrapper_.appendChild(node);
     });
     this.updateMeasurerContent_();

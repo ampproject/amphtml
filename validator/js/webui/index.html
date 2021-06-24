@@ -25,13 +25,13 @@
   <link rel="import" href="@polymer/polymer/polymer.html">
   <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/nmoffdblmcmgeicmolmhobpoocbbmknc">
   <script src="webui.js"></script>
-  <script src="https://cdn.ampproject.org/v0/validator.js"></script>
+  <script src="https://cdn.ampproject.org/v0/validator_wasm.js"></script>
   <style is="custom-style">
     .ampproject-message { background-color: #FFF9C4; }
     html, body {
       height: 100%;
       margin: 0px;
-      padding: 0px 5px !important;
+      padding: 5px !important;
     }
   </style>
   <style scope="iron-icon">
@@ -39,7 +39,7 @@
     .ampproject-error { color: #F44336; }
   </style>
   <meta name="description"
-        content="AMP HTML Project Web Validator. Tests Accelerated Mobile Pages for valid markup.">
+        content="AMP HTML Project Web Validator. Tests AMP Documents for valid markup.">
 </head>
 <body unresolved>
   <webui-mainpage></webui-mainpage>

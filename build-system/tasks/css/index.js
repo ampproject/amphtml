@@ -21,14 +21,12 @@ const path = require('path');
 const {buildExtensions} = require('../extension-helpers');
 const {endBuildStep, watchDebounceDelay} = require('../helpers');
 const {jsifyCssAsync} = require('./jsify-css');
-const {maybeUpdatePackages} = require('../update-packages');
 const {watch} = require('chokidar');
 
 /**
- * Entry point for 'gulp css'
+ * Entry point for 'amp css'
  */
 async function css() {
-  maybeUpdatePackages();
   await compileCss();
 }
 
@@ -74,6 +72,12 @@ const cssEntryPoints = [
     path: 'amp-story-player-iframe.css',
     outJs: 'amp-story-player-iframe.css.js',
     outCss: 'amp-story-player-iframe-v0.css',
+    append: false,
+  },
+  {
+    path: 'amp-ima-video-iframe.css',
+    outJs: 'amp-ima-video-iframe.css.js',
+    outCss: 'amp-ima-video-iframe-v0.css',
     append: false,
   },
 ];
@@ -142,7 +146,7 @@ async function compileCss(options = {}) {
 
   const startTime = Date.now();
   // Must be in order because some iterations write while others append.
-  for (const {path, outJs, outCss, append} of cssEntryPoints) {
+  for (const {append, outCss, outJs, path} of cssEntryPoints) {
     await writeCssEntryPoint(path, outJs, outCss, append);
   }
   await buildExtensions({compileOnlyCss: true});
@@ -156,4 +160,4 @@ module.exports = {
   cssEntryPoints,
 };
 
-css.description = 'Recompile css to build directory';
+css.description = 'Compile all css files to the build directory';

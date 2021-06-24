@@ -1,5 +1,5 @@
 <!doctype html>
-<html ⚡>
+<html ⚡ lang="en">
 <head>
   <meta charset="utf-8">
   <title>Ad examples</title>
@@ -53,6 +53,13 @@
 
     amp-ad[type="adsloom"] {
       width: 100%;
+      max-width: 980px;
+      margin: 18px auto;
+      padding: 0;
+    }
+    amp-ad[type="digiteka"] {
+      width: 300px;
+      height: 250px;
       max-width: 980px;
       margin: 18px auto;
       padding: 0;
@@ -215,6 +222,7 @@
     <option>csa</option>
     <option>custom</option>
     <option>dable</option>
+    <option>digiteka</option>
     <option>directadvert</option>
     <option>distroscale</option>
     <option>dotandads</option>
@@ -317,6 +325,7 @@
     <option>purch</option>
     <option>rakutenunifiedads</option>
     <option>rbinfox</option>
+    <option>rcmwidget</option>
     <option>readmo</option>
     <option>realclick</option>
     <option>recomad</option>
@@ -354,6 +363,7 @@
     <option>svknative</option>
     <option>swoop</option>
     <option>taboola</option>
+    <option>tail</option>
     <option>tcsemotion</option>
     <option>teads</option>
     <option>temedya</option>
@@ -1053,6 +1063,10 @@
   <amp-embed width="336" height="280" type="dable" data-widget-id="G7ZdEWXW" data-item-id="testitem">
   </amp-embed>
 
+  <h2>Digiteka</h2>
+  <amp-ad width="300" height="250" type="digiteka" layout="responsive" data-zone="1" data-mdtk="01540779">
+  </amp-ad>
+
   <h2>Directadvert</h2>
   <amp-ad width="320" height="250" type="directadvert" data-block-id="1953045">
   </amp-ad>
@@ -1191,6 +1205,11 @@
   <h2>FreeWheel</h2>
   <amp-ad width="300" height="150" type="freewheel" layout="responsive" data-zone="2003">
   </amp-ad>
+
+  <h2>Gecko widget</h2>
+  <amp-embed width="200" height="200" type="gecko" layout="responsive" data-widgetIds="96451"
+    data-websiteId="139705" data-publisherId="170734">
+  </amp-embed>
 
   <h2>Geniee SSP</h2>
   <amp-ad width="300" height="250" type="genieessp" data-vid="3" data-zid="1077330">
@@ -1517,7 +1536,7 @@
   </div>
 
   <h2>Opinary</h2>
-  <amp-embed width="500" height="500" type="opinary" layout="intrinsic" data-client="test-success">
+  <amp-embed width="500" height="1" type="opinary" layout="intrinsic" data-client="test-success">
   </amp-embed>
 
   <h2>Outbrain widget</h2>
@@ -1638,6 +1657,14 @@
 
   <h2>RbInfox</h2>
   <amp-embed width="240" height="400" type="rbinfox" src="https://rb.infox.sg/infox/503">
+  </amp-embed>
+
+  <h2>RcmWidget</h2>
+  <amp-embed
+    width="auto"
+    height="500"
+    type="rcmwidget"
+  >
   </amp-embed>
 
   <h2>ReadMo</h2>
@@ -1862,6 +1889,14 @@
     heights="(min-width:1907px) 39%, (min-width:1200px) 46%, (min-width:780px) 64%, (min-width:480px) 98%, (min-width:460px) 167%, 196%"
     data-publisher="amp-demo" data-mode="thumbnails-a" data-placement="Ads Example" data-article="auto">
   </amp-embed>
+
+  <h2>Tail</h2>
+  <div>It is common to see a no-fill ad in this example.</div>
+  <amp-ad width="300" height="250"
+  type="doubleclick"
+  data-slot="/1234567/medium-rectangle"
+  rtc-config="{"vendors": {"tail": {"TAIL_ACCOUNT": "TT-0000-0"}}}">
+  </amp-ad>
 
   <h2>TcsEmotion AMP tag</h2>
   <amp-ad width="100" height="150" type="tcsemotion" data-hb="false" data-zone="1"

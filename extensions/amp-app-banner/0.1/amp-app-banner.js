@@ -15,10 +15,12 @@
  */
 
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
-import {Services} from '../../../src/services';
-import {dev, rethrowAsync, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {openWindowDialog, removeElement} from '../../../src/dom';
+import {Services} from '#service';
+import {dev, user, userAssert} from '../../../src/log';
+import {dict} from '#core/types/object';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {removeElement} from '#core/dom';
+import {rethrowAsync} from '#core/error';
 
 const TAG = 'amp-app-banner';
 const OPEN_LINK_TIMEOUT = 1500;
@@ -384,11 +386,13 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @override */
   buildCallback() {
-    const {win, element} = this;
+    const {element, win} = this;
     const viewer = Services.viewerForDoc(this.getAmpDoc());
-    this.manifestLink_ = /** @type {?HTMLLinkElement} */ (win.document.head.querySelector(
-      'link[rel=manifest],link[rel=origin-manifest]'
-    ));
+    this.manifestLink_ = /** @type {?HTMLLinkElement} */ (
+      win.document.head.querySelector(
+        'link[rel=manifest],link[rel=origin-manifest]'
+      )
+    );
 
     const platform = Services.platformFor(win);
     const url = Services.urlForDoc(element);

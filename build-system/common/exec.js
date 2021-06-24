@@ -21,8 +21,8 @@
 
 const childProcess = require('child_process');
 const {log} = require('./logging');
-const {spawnProcess, getOutput, getStdout, getStderr} = require('./process');
-const {yellow} = require('kleur/colors');
+const {red} = require('./colors');
+const {spawnProcess} = require('./process');
 
 const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
 
@@ -39,14 +39,17 @@ function exec(cmd, options = {'stdio': 'inherit'}) {
 }
 
 /**
- * Executes the provided shell script in an asynchronous process.
+ * Executes the provided shell script in an asynchronous process. Special-cases
+ * the AMP task runner so that it is correctly spawned on all platforms (node
+ * shebangs do not work on Windows).
  *
  * @param {string} script
  * @param {?Object} options
  * @return {!childProcess.ChildProcessWithoutNullStreams}
  */
 function execScriptAsync(script, options) {
-  return childProcess.spawn(script, {shell: shellCmd, ...options});
+  const scriptToSpawn = script.startsWith('amp ') ? `node ${script}` : script;
+  return childProcess.spawn(scriptToSpawn, {shell: shellCmd, ...options});
 }
 
 /**
@@ -87,7 +90,7 @@ function execWithError(cmd) {
 function execOrThrow(cmd, msg) {
   const p = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
   if (p.status && p.status != 0) {
-    log(yellow('ERROR:'), msg);
+    log(red('ERROR:'), msg);
     const error = new Error(p.stderr);
     error.status = p.status;
     throw error;
@@ -101,7 +104,4 @@ module.exports = {
   execScriptAsync,
   execWithError,
   execOrThrow,
-  getOutput,
-  getStderr,
-  getStdout,
 };

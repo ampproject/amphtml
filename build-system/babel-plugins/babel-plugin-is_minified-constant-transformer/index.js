@@ -15,8 +15,8 @@
  */
 
 /**
- * Changes the values of IS_DEV to false and IS_MINIFIED to true.
- * The above said variables are in src/mode.js file.
+ * Changes the value of IS_MINIFIED to true.
+ * The above variable is in src/mode.js and src/core/mode/minified.js.
  * @param {Object} babelTypes
  * @return {!Object}
  */

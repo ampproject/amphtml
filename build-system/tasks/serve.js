@@ -25,26 +25,47 @@ const open = require('open');
 const os = require('os');
 const path = require('path');
 const {
-  buildNewServer,
-  SERVER_TRANSFORM_PATH,
-} = require('../server/typescript-compile');
-const {
+  lazyBuild3pVendor,
   lazyBuildExtensions,
   lazyBuildJs,
-  preBuildRuntimeFiles,
   preBuildExtensions,
+  preBuildRuntimeFiles,
 } = require('../server/lazy-build');
+const {
+  SERVER_TRANSFORM_PATH,
+  buildNewServer,
+} = require('../server/typescript-compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green, red} = require('kleur/colors');
+const {cyan, green, red} = require('../common/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {log} = require('../common/logging');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
 
+/**
+ * @typedef {{
+ *   name: string,
+ *   port: string,
+ *   root: string,
+ *   host: string,
+ *   debug?: boolean,
+ *   silent?: boolean,
+ *   https?: boolean,
+ *   preferHttp1?: boolean,
+ *   liveReload?: boolean,
+ *   middleware?: function[],
+ *   startedcallback?: function,
+ *   serverInit?: function,
+ *   fallback?: string,
+ *   index: boolean | string | string[],
+ * }}
+ */
+let GulpConnectOptionsDef;
+
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
 const HOST = argv.host || '0.0.0.0';
-const PORT = argv.port || 8000;
+const PORT = argv.port || '8000';
 
 // Used for logging.
 let url = null;
@@ -74,6 +95,7 @@ function getMiddleware() {
   if (lazyBuild) {
     middleware.push(lazyBuildExtensions);
     middleware.push(lazyBuildJs);
+    middleware.push(lazyBuild3pVendor);
   }
   return middleware;
 }
@@ -90,7 +112,7 @@ async function startServer(
   serverOptions = {},
   modeOptions = {}
 ) {
-  buildNewServer();
+  await buildNewServer();
   if (serverOptions.lazyBuild) {
     lazyBuild = serverOptions.lazyBuild;
   }
@@ -103,6 +125,8 @@ async function startServer(
     started = resolve;
   });
   setServeMode(modeOptions);
+
+  /** @type {GulpConnectOptionsDef} */
   const options = {
     name: 'AMP Dev Server',
     root: process.cwd(),
@@ -129,7 +153,7 @@ async function startServer(
   log(green('Started'), cyan(options.name), green('at:'));
   log('\t', cyan(url));
   for (const device of Object.entries(os.networkInterfaces())) {
-    for (const detail of device[1]) {
+    for (const detail of device[1] ?? []) {
       if (detail.family === 'IPv4') {
         log('\t', cyan(makeUrl(detail.address)));
       }
@@ -170,7 +194,7 @@ async function stopServer() {
 async function restartServer() {
   stopServer();
   try {
-    buildNewServer();
+    await buildNewServer();
   } catch {
     log(red('ERROR:'), 'Could not rebuild', cyan('AMP Server'));
     return;
@@ -188,7 +212,7 @@ async function performPreBuildSteps() {
 }
 
 /**
- * Entry point of the `gulp serve` task.
+ * Entry point of the `amp serve` task.
  */
 async function serve() {
   await doServe();
@@ -221,19 +245,18 @@ module.exports = {
 
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-serve.description = 'Starts a webserver at the project root directory';
+serve.description = 'Start a webserver at the project root directory';
 serve.flags = {
-  host: '  Hostname or IP address to bind to (default: localhost)',
-  port: '  Specifies alternative port (default: 8000)',
-  https: '  Use HTTPS server',
-  quiet: "  Run in quiet mode and don't log HTTP requests",
-  cache: '  Make local resources cacheable by the browser',
-  no_caching_extensions: '  Disable caching for extensions',
-  compiled: '  Serve minified JS',
-  esm: '  Serve ESM JS (uses the new typescript server transforms)',
-  cdn: '  Serve current prod JS',
-  rtv: '  Serve JS from the RTV provided',
+  host: 'Hostname or IP address to bind to (default: localhost)',
+  port: 'Specify alternative port (default: 8000)',
+  https: 'Use HTTPS server',
+  quiet: "Run in quiet mode and don't log HTTP requests",
+  cache: 'Make local resources cacheable by the browser',
+  no_caching_extensions: 'Disable caching for extensions',
+  compiled: 'Serve minified JS',
+  esm: 'Serve ESM JS (uses the new typescript server transforms)',
+  cdn: 'Serve current prod JS',
+  rtv: 'Serve JS from the RTV provided',
   coverage:
-    '  Serve instrumented code to collect coverage info; use ' +
-    '--coverage=live to auto-report coverage on page unload',
+    'Serve instrumented code to collect coverage info (use --coverage=live to auto-report coverage on page unload)',
 };

@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {Deferred} from '../../../src/utils/promise';
-import {forwardRef} from '../../../src/preact/compat';
+import * as Preact from '#preact';
+import {Deferred} from '#core/data-structures/promise';
+import {VideoWrapper} from './component';
+import {forwardRef} from '#preact/compat';
 import {
   useCallback,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
-} from '../../../src/preact';
+} from '#preact';
 
 const DEFAULT_SANDBOX = [
   'allow-scripts',
@@ -45,28 +46,22 @@ function usePropRef(prop) {
 }
 
 /**
- * Goes inside a VideoWrapper.
- *
- *    import {VideoIframe} from '.../video-iframe';
- *    import {VideoWrapper} from '.../video-wrapper';
- *    render(<VideoWrapper component={VideoIframe} ... />)
- *
- * Usable on the AMP layer through VideoBaseElement.
- *
  * @param {!VideoIframeDef.Props} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
-function VideoIframeWithRef(
+function VideoIframeInternalWithRef(
   {
     loading,
+    unloadOnPause = false,
     sandbox = DEFAULT_SANDBOX,
     muted = false,
     controls = false,
     origin,
     onCanPlay,
     onMessage,
+    playerStateRef,
     makeMethodMessage: makeMethodMessageProp,
     onIframeLoad,
     ...rest
@@ -97,10 +92,25 @@ function VideoIframeWithRef(
   useImperativeHandle(
     ref,
     () => ({
+      get currentTime() {
+        return playerStateRef?.current?.['currentTime'] ?? NaN;
+      },
+      get duration() {
+        return playerStateRef?.current?.['duration'] ?? NaN;
+      },
       play: () => postMethodMessage('play'),
-      pause: () => postMethodMessage('pause'),
+      pause: () => {
+        if (unloadOnPause) {
+          const iframe = iframeRef.current;
+          if (iframe) {
+            iframe.src = iframe.src;
+          }
+        } else {
+          postMethodMessage('pause');
+        }
+      },
     }),
-    [postMethodMessage]
+    [playerStateRef, postMethodMessage, unloadOnPause]
   );
 
   // Keep `onMessage` in a ref to prevent re-listening on every render.
@@ -174,6 +184,29 @@ function VideoIframeWithRef(
   );
 }
 
+/** @visibleForTesting */
+const VideoIframeInternal = forwardRef(VideoIframeInternalWithRef);
+VideoIframeInternal.displayName = 'VideoIframeInternal';
+export {VideoIframeInternal};
+
+/**
+ * VideoWrapper using an <iframe> for implementation.
+ * Usable on the AMP layer through VideoBaseElement.
+ * @param {VideoIframeDef.Props} props
+ * @param {{current: (?T)}} ref
+ * @return {PreactDef.Renderable}
+ * @template T
+ */
+function VideoIframeWithRef(props, ref) {
+  return <VideoWrapper ref={ref} {...props} component={VideoIframeInternal} />;
+}
+
+/**
+ * VideoWrapper using an <iframe> for implementation.
+ * Usable on the AMP layer through VideoBaseElement.
+ * @param {VideoIframeDef.Props} props
+ * @return {PreactDef.Renderable}=
+ */
 const VideoIframe = forwardRef(VideoIframeWithRef);
-VideoIframe.displayName = 'VideoIframe'; // Make findable for tests.
+VideoIframe.displayName = 'VideoIframe';
 export {VideoIframe};

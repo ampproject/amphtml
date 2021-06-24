@@ -15,12 +15,17 @@
  */
 
 import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
-import {getAmpAdMetadata} from './amp-ad-utils';
+import {
+  extensionsHasElement,
+  getAmpAdMetadata,
+  getExtensionsFromMetadata,
+  mergeExtensionsMetadata,
+} from './amp-ad-utils';
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
-import {preloadFriendlyIframeEmbedExtensionIdsDeprecated} from '../../../src/friendly-iframe-embed';
-import {pushIfNotExist} from '../../../src/utils/array';
-import {tryParseJson} from '../../../src/json';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {preloadFriendlyIframeEmbedExtensions} from '../../../src/friendly-iframe-embed';
+import {tryParseJson} from '#core/types/object/json';
+import {urls} from '../../../src/config';
+import {utf8Decode} from '#core/types/string/bytes';
 
 /** @const {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-Ad-Template-Extension';
@@ -34,9 +39,10 @@ export class TemplateValidator extends Validator {
   /** @override */
   validate(context, containerElement, unvalidatedBytes, headers) {
     const body = utf8Decode(/** @type {!ArrayBuffer} */ (unvalidatedBytes));
-    const parsedResponseBody = /** @type {./amp-ad-type-defs.AmpTemplateCreativeDef} */ (tryParseJson(
-      body
-    ));
+    const parsedResponseBody =
+      /** @type {./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+        tryParseJson(body)
+      );
 
     // If we're missing the relevant header, or headers altogether, we cannot
     // proceed. In this case, we return a NON_AMP response, since we cannot
@@ -65,21 +71,30 @@ export class TemplateValidator extends Validator {
       .fetch(parsedResponseBody.templateUrl)
       .then((template) => {
         const creativeMetadata = getAmpAdMetadata(template);
-        const customElementExtensions =
-          creativeMetadata['customElementExtensions'];
-        if (parsedResponseBody.analytics) {
-          pushIfNotExist(customElementExtensions, 'amp-analytics');
-        }
-        pushIfNotExist(customElementExtensions, 'amp-mustache');
-
-        // Load any extensions; do not wait on their promises as this
-        // is just to prefetch.
-        // TODO(#33020): switch to `preloadFriendlyIframeEmbedExtensions` with
-        // the format of `[{extensionId, extensionVersion}]`.
-        preloadFriendlyIframeEmbedExtensionIdsDeprecated(
-          context.win,
-          customElementExtensions
+        creativeMetadata['extensions'] = creativeMetadata['extensions'] || [];
+        const extensions = creativeMetadata['extensions'];
+        mergeExtensionsMetadata(
+          extensions,
+          creativeMetadata['customElementExtensions']
         );
+        if (
+          parsedResponseBody.analytics &&
+          !extensionsHasElement(extensions, 'amp-analytics')
+        ) {
+          extensions.push({
+            'custom-element': 'amp-analytics',
+            src: `${urls.cdn}/v0/amp-analytics-0.1.js`,
+          });
+        }
+        if (!extensionsHasElement(extensions, 'amp-mustache')) {
+          extensions.push({
+            'custom-element': 'amp-mustache',
+            src: `${urls.cdn}/v0/amp-mustache-latest.js`,
+          });
+        }
+
+        const extensionsInfo = getExtensionsFromMetadata(creativeMetadata);
+        preloadFriendlyIframeEmbedExtensions(context.win, extensionsInfo);
 
         // TODO(levitzky) Add preload logic for fonts / images.
         return Promise.resolve(

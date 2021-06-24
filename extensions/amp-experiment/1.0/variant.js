@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
 import {dev, userAssert} from '../../../src/log';
-import {hasOwn} from '../../../src/utils/object';
-import {isArray, isObject} from '../../../src/types';
+import {hasOwn} from '#core/types/object';
+import {isArray, isObject} from '#core/types';
 
 export const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;

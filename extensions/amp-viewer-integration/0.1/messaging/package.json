@@ -12,5 +12,5 @@
     "url": "https://github.com/ampproject/amphtml.git",
     "directory": "extensions/amp-viewer-integration/0.1/messaging"
   },
-  "homepage": "https://github.com/ampproject/amphtml/tree/master/extensions/amp-viewer-integration/0.1/messaging"
+  "homepage": "https://github.com/ampproject/amphtml/tree/main/extensions/amp-viewer-integration/0.1/messaging"
 }

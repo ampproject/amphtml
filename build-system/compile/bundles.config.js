@@ -16,7 +16,7 @@
 'use strict';
 const extensionBundles = require('./bundles.config.extensions.json');
 const wrappers = require('./compile-wrappers');
-const {cyan, red} = require('kleur/colors');
+const {cyan, red} = require('../common/colors');
 const {log} = require('../common/logging');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
@@ -27,7 +27,7 @@ const {VERSION: internalRuntimeVersion} = require('./internal-version');
 exports.jsBundles = {
   'polyfills.js': {
     srcDir: './src/',
-    srcFilename: 'polyfills.js',
+    srcFilename: 'polyfills/index.js',
     destDir: './build/',
     minifiedDestDir: './build/',
   },
@@ -40,17 +40,6 @@ exports.jsBundles = {
       toName: 'alp.max.js',
       includePolyfills: true,
       minifiedName: 'alp.js',
-    },
-  },
-  'examiner.max.js': {
-    srcDir: './src/examiner/',
-    srcFilename: 'examiner.js',
-    destDir: './dist',
-    minifiedDestDir: './dist',
-    options: {
-      toName: 'examiner.max.js',
-      includePolyfills: true,
-      minifiedName: 'examiner.js',
     },
   },
   'ww.max.js': {
@@ -84,6 +73,17 @@ exports.jsBundles = {
     options: {
       minifiedName: 'ampcontext-v0.js',
       externs: ['./ads/ads.extern.js'],
+      include3pDirectories: true,
+      includePolyfills: false,
+    },
+  },
+  'amp-script-proxy-iframe.js': {
+    srcDir: './3p/',
+    srcFilename: 'amp-script-proxy-iframe.js',
+    destDir: './dist.3p/current',
+    minifiedDestDir: './dist.3p/' + internalRuntimeVersion,
+    options: {
+      minifiedName: 'amp-script-proxy-iframe.js',
       include3pDirectories: true,
       includePolyfills: false,
     },

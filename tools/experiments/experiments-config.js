@@ -60,17 +60,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
   },
   {
-    id: 'amp-viz-vega',
-    name: 'AMP Visualization using Vega grammar',
-    spec: 'https://github.com/ampproject/amphtml/issues/3991',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
-  },
-  {
-    id: 'cache-service-worker',
-    name: 'AMP Cache Service Worker',
-    spec: 'https://github.com/ampproject/amphtml/issues/1199',
-  },
-  {
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
@@ -85,10 +74,6 @@ export const EXPERIMENTS = [
     id: 'web-worker',
     name: 'Web worker for background processing',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
-  },
-  {
-    id: 'jank-meter',
-    name: 'Display jank meter',
   },
   {
     id: 'input-debounced',
@@ -162,32 +147,15 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
   },
   {
-    id: 'intersect-resources',
-    name: 'Use IntersectionObserver for resource scheduling.',
-    spec: 'https://github.com/ampproject/amphtml/issues/25428',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26233',
-  },
-  {
     id: 'amp-stream-gallery',
     name: 'Enables component',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
   },
   {
-    id: 'visibility-trigger-improvements',
-    name: 'AMP Analytics Visibility Trigger Improvements',
-    spec: 'https://github.com/ampproject/amphtml/issues/26823',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
-  },
-  {
     id: 'a4a-no-signing',
     name: 'Remove signing requirement for AMPHTML ads',
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
-  },
-  {
-    id: 'expand-json-targeting',
-    name: 'Allow CLIENT_ID in doubleclick json targeting feature',
-    spec: 'https://github.com/ampproject/amphtml/issues/25190',
   },
   {
     id: 'auto-ads-layout-callback',
@@ -221,9 +189,23 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/31607',
   },
   {
+    id: 'amp-story-page-attachment-ui-v2',
+    name: 'New UI for all new page attachments in stories format',
+    spec: 'https://github.com/ampproject/amphtml/projects/123',
+  },
+  {
     id: 'flexible-bitrate',
-    name:
-      'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
+    name: 'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
     spec: 'https://github.com/ampproject/amphtml/projects/111',
+  },
+  {
+    id: 'story-ad-placements',
+    name: 'Optimization of story ad placements',
+    spec: 'https://github.com/ampproject/amphtml/issues/33147',
+  },
+  {
+    id: 'story-ad-auto-advance',
+    name: 'Auto advancing story ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/33969',
   },
 ];

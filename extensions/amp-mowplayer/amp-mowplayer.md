@@ -36,4 +36,4 @@ The Mowplayer media id. This is an alphanumeric sequence that can be found in th
 
 ## Validation
 
-See [amp-mowplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mowplayer/validator-amp-mowplayer.protoascii) in the AMP validator specification.
+See [amp-mowplayer rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-mowplayer/validator-amp-mowplayer.protoascii) in the AMP validator specification.

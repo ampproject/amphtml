@@ -14,94 +14,66 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
-import {dict} from '../../../src/utils/object';
+import * as Preact from '#preact';
+import {IframeEmbed} from '#preact/component/iframe';
+import {dict} from '#core/types/object';
+import {forwardRef} from '#preact/compat';
 import {getData} from '../../../src/event-helper';
-import {parseJson} from '../../../src/json';
-import {useLayoutEffect, useRef, useState} from '../../../src/preact';
-import {useLoad} from '../../../src/preact/context';
+import {parseJson} from '#core/types/object/json';
+import {useCallback, useState} from '#preact';
 
 const NO_HEIGHT_STYLE = dict();
+const MATCHES_MESSAGING_ORIGIN = (origin) =>
+  origin === 'https://www.instagram.com';
 
 /**
- * @param {!InstagramPropsDef} props
+ * @param {!InstagramDef.Props} props
+ * @param {{current: ?InstagramDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-export function Instagram({
-  shortcode,
-  captioned,
-  title,
-  requestResize,
-  loading,
-  onLoad,
-  ...rest
-}) {
-  const load = useLoad(loading, /* unlayoutOnPause */ true);
-
-  const iframeRef = useRef(null);
+function InstagramWithRef(
+  {captioned, requestResize, shortcode, title = 'Instagram', ...rest},
+  ref
+) {
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
   const [opacity, setOpacity] = useState(0);
 
-  useLayoutEffect(() => {
-    if (!iframeRef.current || !load) {
-      return;
-    }
-    const messageHandler = (event) => {
-      if (
-        event.origin != 'https://www.instagram.com' ||
-        event.source != iframeRef.current.contentWindow
-      ) {
-        return;
-      }
-
+  const messageHandler = useCallback(
+    (event) => {
       const data = parseJson(getData(event));
-
       if (data['type'] == 'MEASURE' && data['details']) {
         const height = data['details']['height'];
         if (requestResize) {
           requestResize(height);
-        } else {
-          setHeightStyle(dict({'height': height}));
         }
+        setHeightStyle(dict({'height': height}));
         setOpacity(1);
       }
-    };
-    const {defaultView} = iframeRef.current.ownerDocument;
-
-    defaultView.addEventListener('message', messageHandler);
-
-    return () => {
-      defaultView.removeEventListener('message', messageHandler);
-    };
-  }, [load, requestResize, heightStyle]);
+    },
+    [requestResize]
+  );
 
   return (
-    <ContainWrapper {...rest} wrapperStyle={heightStyle} layout size paint>
-      {load && (
-        <iframe
-          ref={iframeRef}
-          src={
-            'https://www.instagram.com/p/' +
-            encodeURIComponent(shortcode) +
-            '/embed/' +
-            (captioned ? 'captioned/' : '') +
-            '?cr=1&v=12'
-          }
-          loading={loading}
-          onLoad={onLoad}
-          scrolling="no"
-          frameborder="0"
-          allowtransparency
-          title={title}
-          style={{
-            width: '100%',
-            height: '100%',
-            opacity,
-            contentVisibility: 'auto',
-          }}
-        />
-      )}
-    </ContainWrapper>
+    <IframeEmbed
+      allowTransparency
+      iframeStyle={{opacity}}
+      matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
+      messageHandler={messageHandler}
+      ref={ref}
+      src={
+        'https://www.instagram.com/p/' +
+        encodeURIComponent(shortcode) +
+        '/embed/' +
+        (captioned ? 'captioned/' : '') +
+        '?cr=1&v=12'
+      }
+      title={title}
+      wrapperStyle={heightStyle}
+      {...rest}
+    />
   );
 }
+
+const Instagram = forwardRef(InstagramWithRef);
+Instagram.displayName = 'Instagram'; // Make findable for tests.
+export {Instagram};

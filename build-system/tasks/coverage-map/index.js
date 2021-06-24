@@ -16,9 +16,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs').promises;
 const {buildNewServer} = require('../../server/typescript-compile');
-const {cyan} = require('kleur/colors');
+const {cyan} = require('../../common/colors');
 const {dist} = require('../dist');
-const {installPackages} = require('../../common/utils');
 const {log} = require('../../common/logging');
 const {startServer, stopServer} = require('../serve');
 
@@ -67,27 +66,30 @@ async function collectCoverage() {
 
 /**
  * Source: https://github.com/chenxiaochun/blog/issues/38s
- *
- * @param {puppeteer.Page} page
+ * TODO(#28387) change the first parameter to puppeteer.Page once puppeteer is consistently
+ * imported.
+ * @param {*} page
  * @return {Promise<void>}
  */
 async function autoScroll(page) {
   await page.evaluate(async () => {
-    await new Promise((resolve, opt_) => {
-      let totalHeight = 0;
-      const scrollDistance = 100;
-      const distance = scrollDistance;
-      const timer = setInterval(() => {
-        const {scrollHeight} = document.body;
-        window./*OK*/ scrollBy(0, distance);
-        totalHeight += distance;
+    await /** @type {Promise<void>} */ (
+      new Promise((resolve) => {
+        let totalHeight = 0;
+        const scrollDistance = 100;
+        const distance = scrollDistance;
+        const timer = setInterval(() => {
+          const {scrollHeight} = document.body;
+          window./*OK*/ scrollBy(0, distance);
+          totalHeight += distance;
 
-        if (totalHeight >= scrollHeight) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 100);
-    });
+          if (totalHeight >= scrollHeight) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 100);
+      })
+    );
   });
 }
 
@@ -95,9 +97,8 @@ async function autoScroll(page) {
  * @return {Promise<void>}
  */
 async function htmlTransform() {
-  const {
-    transform,
-  } = require('../../server/new-server/transforms/dist/transform');
+  // @ts-ignore
+  const {transform} = require('../../server/new-server/transforms/dist/transform'); // prettier-ignore
   log('Transforming', cyan(`${inputHtml}`) + '...');
   const transformed = await transform(`examples/${inputHtml}`);
   const transformedName = `transformed.${inputHtml}`;
@@ -143,8 +144,7 @@ async function generateMap() {
  * @return {Promise<void>}
  */
 async function coverageMap() {
-  installPackages(__dirname);
-  buildNewServer();
+  await buildNewServer();
 
   if (!argv.nobuild) {
     await dist();
@@ -164,25 +164,20 @@ async function coverageMap() {
   await stopServer();
 }
 
-module.exports = {coverageMap};
+module.exports = {
+  coverageMap,
+};
 
 coverageMap.description =
-  'Generates a code coverage "heat map" HTML visualization on v0.js based on code traversed during puppeteer test via source map explorer';
+  'Generate a code-coverage heat map for v0.js via source map explorer';
 
 coverageMap.flags = {
-  json:
-    '  Customize the name of the JSON output from puppeteer (out.json by default).',
-  inputhtml:
-    '  Set the input HTML for puppeteer testing, by designating the path that leads to the HTML file, starting at "examples/" (everything.amp.html by default).',
-  outputhtml:
-    '  Customize the name of the HTML output from source map explorer (out.html by default).',
-  nobuild: '  Skips dist build.',
-  port:
-    '  Customize the port number of the local AMP server (8000 by default).',
-  file:
-    '  Designate which JS (or MJS) file to view in coverage map, or *.js for all files (v0.js by default). If the JS file is not in the top level dist directory, you need to indicate the path to the JS file relative to dist.',
-  esm:
-    '  Perform coverage test in ESM environment. This will trigger an additional HTML transformation.',
-  sxg:
-    '  Perform coverage test in SxG environment. This will trigger an additional HTML transformation.',
+  json: 'JSON output filename [default: out.json]',
+  inputhtml: 'Input HTML file under "examples/" [default: everything.amp.html]',
+  outputhtml: 'Output HTML file [default: out.html]',
+  nobuild: 'Skip building the runtime',
+  port: 'Port number for AMP server [default: 8000]',
+  file: 'Output file(s) relative to dist/. Accepts .js, .mjs, and wildcards. [default: v0.js]',
+  esm: 'Generate coverage in ESM mode (triggers an extra HTML transformation)',
+  sxg: 'Generate in SxG mode (triggers an extra HTML transformation)',
 };

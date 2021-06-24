@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-import {AmpImg, installImg} from '../../builtins/amp-img';
+import {
+  ATTRIBUTES_TO_PROPAGATE,
+  AmpImg,
+  installImg,
+} from '#builtins/amp-img/amp-img';
 import {BaseElement} from '../../src/base-element';
-import {Layout, LayoutPriority} from '../../src/layout';
-import {Services} from '../../src/services';
+import {Layout, LayoutPriority} from '#core/dom/layout';
+import {Services} from '#service';
 import {createCustomEvent} from '../../src/event-helper';
-import {createIframePromise} from '../../testing/iframe';
+import {createIframePromise} from '#testing/iframe';
 
 describes.sandboxed('amp-img', {}, (env) => {
   let sandbox;
@@ -389,33 +393,9 @@ describes.sandboxed('amp-img', {}, (env) => {
     expect(AmpImg.prerenderAllowed(el)).to.equal(true);
   });
 
-  it('should propogate src as the final attribute when provided a srcset', () => {
-    // Providing src before srcset will cause Safari 14.4 to request two src values for the same `img`.
-    const el = document.createElement('amp-img');
-    el.setAttribute('src', 'test.jpg');
-    el.setAttribute('srcset', SRCSET_STRING);
-    el.setAttribute('width', 300);
-    el.setAttribute('height', 200);
-    el.getResources = () => Services.resourcesForDoc(document);
-    el.getPlaceholder = () => {
-      const img = document.createElement('img');
-      img.src = 'data:image/svg+xml;charset=utf-8,%3Csvg%3E%3C/svg%3E';
-      return img;
-    };
-    el.getLayout = () => 'responsive';
-    el.getLayoutSize = () => ({width: 300, height: 200});
-
-    const impl = new AmpImg(el);
-    const propagateAttributesSpy = sandbox.spy(impl, 'propagateAttributes');
-    impl.buildCallback();
-    impl.layoutCallback();
-
-    expect(propagateAttributesSpy).to.be.calledOnce;
-    const spiedAttributesToPropagate = propagateAttributesSpy.getCall(0)
-      .args[0];
-
+  it('should propogate src as the final attribute', () => {
     expect(
-      spiedAttributesToPropagate[spiedAttributesToPropagate.length - 1]
+      ATTRIBUTES_TO_PROPAGATE[ATTRIBUTES_TO_PROPAGATE.length - 1]
     ).to.equal('src');
   });
 
@@ -510,9 +490,14 @@ describes.sandboxed('amp-img', {}, (env) => {
      *     placeholder attribute.
      * @param {boolean} addBlurClass Whether the child should have the
      *     class that allows it to be a blurred placeholder.
+     * @param {boolean} serverRendered If the image is server rendered.
      * @return {AmpImg} An amp-img object potentially with a blurry placeholder
      */
-    function getImgWithBlur(addPlaceholder, addBlurClass) {
+    function getImgWithBlur(
+      addPlaceholder,
+      addBlurClass,
+      serverRendered = false
+    ) {
       const el = document.createElement('amp-img');
       const img = document.createElement('img');
       el.setAttribute('src', '/examples/img/sample.jpg');
@@ -529,6 +514,12 @@ describes.sandboxed('amp-img', {}, (env) => {
       el.getLayoutSize = () => ({width: 200, height: 100});
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
+      if (serverRendered) {
+        const serverRenderedImg = document.createElement('img');
+        serverRenderedImg.setAttribute('src', '/examples/img/sample.jpg');
+        el.appendChild(serverRenderedImg);
+        el.setAttribute('i-amphtml-ssr', '');
+      }
       const impl = new AmpImg(el);
       impl.togglePlaceholder = sandbox.stub();
       return impl;
@@ -572,9 +563,8 @@ describes.sandboxed('amp-img', {}, (env) => {
     });
 
     it('does not interfere with SSR img creation', () => {
-      const impl = getImgWithBlur(true, true);
+      const impl = getImgWithBlur(true, true, true);
       const ampImg = impl.element;
-      ampImg.setAttribute('i-amphtml-ssr', '');
       impl.buildCallback();
       impl.layoutCallback();
 
@@ -660,13 +650,19 @@ describes.sandboxed('amp-img', {}, (env) => {
     });
 
     it('should not generate sizes for amp-imgs when rendered from the server', async () => {
-      const ampImg = await getImg({
-        src: '/examples/img/sample.jpg',
-        srcset: SRCSET_STRING,
-        width: 300,
-        height: 200,
-        'i-amphtml-ssr': '',
-      });
+      const serverRenderedImg = document.createElement('img');
+      serverRenderedImg.setAttribute('src', '/examples/img/sample.jpg');
+      serverRenderedImg.setAttribute('srcset', SRCSET_STRING);
+      const ampImg = await getImg(
+        {
+          src: '/examples/img/sample.jpg',
+          srcset: SRCSET_STRING,
+          width: 300,
+          height: 200,
+          'i-amphtml-ssr': '',
+        },
+        [serverRenderedImg]
+      );
       const impl = await ampImg.getImpl(false);
       impl.buildCallback();
       await impl.layoutCallback();

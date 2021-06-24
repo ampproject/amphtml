@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
-import {CommonSignals} from '../../../../src/common-signals';
-import {LayoutPriority} from '../../../../src/layout';
-import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
+import {CommonSignals} from '#core/constants/common-signals';
+import {LayoutPriority} from '#core/dom/layout';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {isAdLike} from '../../../../src/iframe-helper';
-import {macroTask} from '../../../../testing/yield';
-import {poll} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
+import {macroTask} from '#testing/yield';
+import {poll} from '#testing/iframe';
+import {toggleExperiment} from '#experiments';
 import {user} from '../../../../src/log';
 
 /** @const {number} */
@@ -51,6 +50,7 @@ describes.realWin(
     let content;
     let win;
     let doc;
+    let resizeObserverStub;
 
     beforeEach(() => {
       iframeSrc =
@@ -79,6 +79,7 @@ describes.realWin(
         }
       });
       setTrackingIframeTimeoutForTesting(20);
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
     function stubUserAsserts() {
@@ -761,7 +762,7 @@ describes.realWin(
     });
 
     it('should listen for embed-ready event', function* () {
-      const activateIframeSpy_ = window.sandbox./*OK*/ spy(
+      const activateIframeSpy_ = env.sandbox./*OK*/ spy(
         AmpIframe.prototype,
         'activateIframe_'
       );
@@ -1063,16 +1064,44 @@ describes.realWin(
       expect(iframe.getAttribute('title')).to.equal(newTitle);
     });
 
-    it('should unlayout on pause', async () => {
-      const ampIframe = createAmpIframe(env, {
-        src: iframeSrc,
-        width: 100,
-        height: 100,
+    describe('pause', () => {
+      it('should have unlayoutOnPause', async () => {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          width: 100,
+          height: 100,
+        });
+        const impl = await ampIframe.getImpl(false);
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        expect(ampIframe.querySelector('iframe')).to.exist;
+        expect(impl.unlayoutOnPause()).to.be.true;
+
+        ampIframe.pause();
+        expect(ampIframe.querySelector('iframe')).to.not.exist;
       });
-      await ampIframe.getImpl(false);
-      await waitForAmpIframeLayoutPromise(doc, ampIframe);
-      expect(ampIframe.querySelector('iframe')).to.exist;
-      expect(ampIframe.unlayoutOnPause()).to.be.true;
+
+      it('should unlayout on pause when loses size', async () => {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          width: 100,
+          height: 100,
+        });
+        await ampIframe.getImpl(false);
+        env.sandbox./*OK*/ stub(ampIframe, 'pause');
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        expect(ampIframe.pause).to.not.be.called;
+
+        // First send "size" event and then "no size".
+        resizeObserverStub.notifySync({
+          target: ampIframe,
+          borderBoxSize: [{inlineSize: 10, blockSize: 100}],
+        });
+        resizeObserverStub.notifySync({
+          target: ampIframe,
+          borderBoxSize: [{inlineSize: 0, blockSize: 0}],
+        });
+        expect(ampIframe.pause).to.be.calledOnce;
+      });
     });
 
     describe('throwIfCannotNavigate()', () => {

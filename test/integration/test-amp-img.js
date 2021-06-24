@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {createCustomEvent} from '../../src/event-helper';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
-} from '../../testing/iframe.js';
+} from '#testing/iframe';
 
-describe
+describes.sandboxed
   .configure()
   .enableIe()
-  .run('Rendering of amp-img', () => {
+  .run('Rendering of amp-img', {}, () => {
     const timeout = window.ampTestRuntimeConfig.mochaTimeout;
 
     let fixture;
@@ -105,10 +105,10 @@ describe
 
 // Move IE tests into its own `describe()`
 // so that we can load a different fixture.
-describe
+describes.sandboxed
   .configure()
   .enableIe()
-  .run('Rendering of amp-img', () => {
+  .run('Rendering of amp-img', {}, () => {
     let fixture;
     beforeEach(async () => {
       fixture = await createFixtureIframe('test/fixtures/images-ie.html', 500);

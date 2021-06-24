@@ -17,13 +17,13 @@ const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
 const path = require('path');
 const {
-  jscodeshift,
   getJscodeshiftReport,
+  jscodeshift,
 } = require('../../test-configs/jscodeshift');
-const {cyan, magenta, yellow} = require('kleur/colors');
+const {cyan, magenta, yellow} = require('../../common/colors');
 const {getOutput} = require('../../common/process');
 const {log} = require('../../common/logging');
-const {readJsonSync, writeFileSync} = require('fs-extra');
+const {readJsonSync, writeJsonSync} = require('fs-extra');
 
 const containRuntimeSource = ['3p', 'ads', 'extensions', 'src', 'test'];
 const containExampleHtml = ['examples', 'test'];
@@ -51,10 +51,10 @@ const isSpecialCannotBeRemoved = (id) =>
 
 /**
  * @param {string} cmd
- * @return {?string}
+ * @return {string}
  */
 function getStdoutThrowOnError(cmd) {
-  const {stdout, stderr} = getOutput(cmd);
+  const {stderr, stdout} = getOutput(cmd);
   if (!stdout && stderr) {
     throw new Error(`${cmd}\n\n${stderr}`);
   }
@@ -141,7 +141,7 @@ function removeFromJsonConfig(config, path, id) {
     }
   }
 
-  writeFileSync(path, JSON.stringify(config, null, 2) + '\n');
+  writeJsonSync(path, config, {spaces: 2});
   return [path];
 }
 
@@ -180,7 +180,7 @@ function gitCommitSingleExperiment(id, workItem, modified) {
       `Previous history on ${prodConfigPath.split('/').pop()}:`,
       workItem.previousHistory
         .map(
-          ({hash, authorDate, subject}) =>
+          ({authorDate, hash, subject}) =>
             `- ${hash} - ${authorDate} - ${subject}`
         )
         .join('\n')
@@ -259,8 +259,8 @@ const findConfigBitCommits = (
       tokens.pop();
     }
     return {
-      hash: tokens.shift(),
-      authorDate: tokens.shift(),
+      hash: /** @type {string} */ (tokens.shift()),
+      authorDate: /** @type {string} */ (tokens.shift()),
       subject: tokens.join(' '),
     };
   });
@@ -286,7 +286,7 @@ function issueUrlToNumberOrUrl(url) {
 }
 
 /**
- * @param {string} list
+ * @param {string[]} list
  * @return {string}
  */
 const checklistMarkdown = (list) =>
@@ -296,14 +296,14 @@ const checklistMarkdown = (list) =>
  * @return {string}
  */
 const readmeMdGithubLink = () =>
-  `https://github.com/ampproject/amphtml/blob/master/${path.relative(
+  `https://github.com/ampproject/amphtml/blob/main/${path.relative(
     process.cwd(),
     __dirname
   )}/README.md`;
 
 /**
  * @param {{
- *   removed: string,
+ *   removed: string[],
  *   cleanupIssues: Array<Object>,
  *   cutoffDateFormatted: string,
  *   modifiedSourceFiles: Array<string>,
@@ -312,11 +312,11 @@ const readmeMdGithubLink = () =>
  * @return {string}
  */
 function summaryCommitMessage({
-  removed,
   cleanupIssues,
   cutoffDateFormatted,
-  modifiedSourceFiles,
   htmlFilesWithReferences,
+  modifiedSourceFiles,
+  removed,
 }) {
   const paragraphs = [
     `🚮 Sweep experiments older than ${cutoffDateFormatted}`,
@@ -331,7 +331,7 @@ function summaryCommitMessage({
       "Close these once they've been addressed and this PR has been merged:",
       checklistMarkdown(
         cleanupIssues.map(
-          ({id, cleanupIssue}) =>
+          ({cleanupIssue, id}) =>
             `\`${id}\`: ${issueUrlToNumberOrUrl(cleanupIssue)}`
         )
       )
@@ -366,9 +366,9 @@ function summaryCommitMessage({
  * @param {!Object<string, *>} canaryConfig
  * @param {string} cutoffDateFormatted
  * @param {string=} removeExperiment
- * @return {!{
- *   include: Object<string, {percentage: number, previousHistory: Array}>,
- *   exclude: Object<string, {percentage: number, previousHistory: Array}>
+ * @return {{
+ *   include?: Object<string, {percentage: number, previousHistory: Array}>,
+ *   exclude?: Object<string, {percentage: number, previousHistory: Array}>
  * }}
  */
 function collectWork(
@@ -388,13 +388,16 @@ function collectWork(
       removeExperiment,
       percentage
     );
+    /** @type {Object<string, {percentage: number, previousHistory: Array}>} */
     const entries = {[removeExperiment]: {percentage, previousHistory}};
     return isSpecialCannotBeRemoved(removeExperiment)
       ? {exclude: entries}
       : {include: entries};
   }
 
+  /** @type {Object<string, {percentage: number, previousHistory: Array}>} */
   const include = {};
+  /** @type {Object<string, {percentage: number, previousHistory: Array}>} */
   const exclude = {};
   for (const [experiment, percentage] of Object.entries(prodConfig)) {
     if (
@@ -421,7 +424,7 @@ function collectWork(
 }
 
 /**
- * Entry point to gulp sweep-experiments.
+ * Entry point to amp sweep-experiments.
  * See README.md for usage.
  */
 async function sweepExperiments() {
@@ -431,10 +434,10 @@ async function sweepExperiments() {
   const canaryConfig = readJsonSync(canaryConfigPath);
 
   const cutoffDateFormatted = dateDaysAgo(
-    argv.experiment ? 0 : argv.days_ago || 365
+    argv.experiment ? 0 : argv.days_ago || 180
   ).toISOString();
 
-  const {exclude, include} = collectWork(
+  const {exclude, include = {}} = collectWork(
     prodConfig,
     canaryConfig,
     cutoffDateFormatted,
@@ -479,8 +482,15 @@ async function sweepExperiments() {
       ...removeFromRuntimeSource(id, workItem.percentage),
     ];
 
+    const formattable = modified.filter(
+      (filename) =>
+        // We don't need to format JSON files since they were written with
+        // {spaces: 2}, and matches prettier's `json-stringify` parser
+        !filename.endsWith('.json')
+    );
+
     getStdoutThrowOnError(
-      `./node_modules/prettier/bin-prettier.js --write ${modified.join(' ')}`
+      `./node_modules/prettier/bin-prettier.js --write ${formattable.join(' ')}`
     );
 
     for (const line of gitCommitSingleExperiment(id, workItem, modified)) {
@@ -532,12 +542,12 @@ module.exports = {
 };
 
 sweepExperiments.description =
-  'Sweep experiments whose configuration is too old, or specified with --experiment.';
+  'Remove outdated experiments from the AMP config';
 
 sweepExperiments.flags = {
   'days_ago':
-    '  How old experiment configuration flips must be for an experiment to be removed. Default is 365 days. This is ignored when using --experiment.',
+    'Age at which experiments are removed (default: 365 days, unless using --experiment)',
   'dry_run':
-    "  Don't write, but only list the experiments that would be removed by this command.",
-  'experiment': '  Remove a specific experiment id.',
+    'List experiments that will be removed without actually removing them',
+  'experiment': 'Remove a specific experiment id, no matter what its age is',
 };

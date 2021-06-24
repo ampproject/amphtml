@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from '../../../src/utils/promise';
-import {InaboxResources} from '../../../src/inabox/inabox-resources';
-import {ResourceState} from '../../../src/service/resource';
-import {macroTask} from '../../../testing/yield';
-import {toggleExperiment} from '../../../src/experiments';
+import {Deferred} from '#core/data-structures/promise';
+import {InaboxResources} from '#inabox/inabox-resources';
+import {ResourceState} from '#service/resource';
+import {macroTask} from '#testing/yield';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin('inabox-resources', {amp: true}, (env) => {
   let win;
@@ -119,18 +119,18 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     resources.add(element1);
     resources.add(element2);
 
-    env.sandbox.stub(element1, 'pauseCallback');
-    env.sandbox.stub(element1, 'resumeCallback');
-    env.sandbox.stub(element2, 'pauseCallback');
-    env.sandbox.stub(element2, 'resumeCallback');
+    env.sandbox.stub(element1, 'pause');
+    env.sandbox.stub(element1, 'resume');
+    env.sandbox.stub(element2, 'pause');
+    env.sandbox.stub(element2, 'resume');
 
     env.ampdoc.overrideVisibilityState('paused');
-    expect(element1.pauseCallback).to.be.calledOnce;
-    expect(element2.pauseCallback).to.be.calledOnce;
+    expect(element1.pause).to.be.calledOnce;
+    expect(element2.pause).to.be.calledOnce;
 
     env.ampdoc.overrideVisibilityState('visible');
-    expect(element1.resumeCallback).to.be.calledOnce;
-    expect(element2.resumeCallback).to.be.calledOnce;
+    expect(element1.resume).to.be.calledOnce;
+    expect(element2.resume).to.be.calledOnce;
   });
 
   it('should unload all resources on dispose', async () => {
@@ -149,10 +149,10 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     expect(resource2.unload).to.be.calledOnce;
   });
 
-  it('should ignore V1 resources for layout pass', async () => {
+  it('should ignore R1 resources for layout pass', async () => {
     const element1 = env.createAmpElement('amp-foo');
     const element2 = env.createAmpElement('amp-bar');
-    env.sandbox.stub(element2, 'V1').returns(true);
+    env.sandbox.stub(element2, 'R1').returns(true);
 
     win.document.body.appendChild(element1);
     win.document.body.appendChild(element2);

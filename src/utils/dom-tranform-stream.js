@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-import {Deferred} from './promise';
-import {dev, devAssert} from '../log';
+import {Deferred} from '#core/data-structures/promise';
+import {devAssert, devAssertElement} from '#core/assert';
 import {removeNoScriptElements} from './dom-writer';
+
+/**
+ * @param {!Function} cb
+ * @return {!Promise}
+ */
+const DEFAULT_TRANSFER_THROTTLE_FUNC = (cb) => Promise.resolve(cb());
 
 export class DomTransformStream {
   /**
    * @param {!Window} win
-   * @param {function=} opt_transferThrottleFunc
+   * @param {(function(!Function):!Promise)=} opt_transferThrottleFunc
    */
   constructor(win, opt_transferThrottleFunc) {
     const headDefer = new Deferred();
@@ -64,13 +70,9 @@ export class DomTransformStream {
     /** @private {boolean} */
     this.shouldTransfer_ = false;
 
-    /**
-     * @param {!function} cb
-     * @const @private {!function}
-     * @return {!Promise}
-     */
+    /** @private @const */
     this.transferThrottle_ =
-      opt_transferThrottleFunc || ((cb) => Promise.resolve(cb()));
+      opt_transferThrottleFunc || DEFAULT_TRANSFER_THROTTLE_FUNC;
   }
 
   /**
@@ -84,7 +86,7 @@ export class DomTransformStream {
     // <body> is newly formed.
     if (!this.detachedBody_ && detachedDoc.body) {
       this.detachedBody_ = detachedDoc.body;
-      this.headResolver_(dev().assertElement(detachedDoc.head));
+      this.headResolver_(devAssertElement(detachedDoc.head));
     }
 
     // If bodyTransfer has already been called, keep transferring on new chunks.
@@ -117,7 +119,7 @@ export class DomTransformStream {
    * @return {!Promise} resolves when doc has been fully transferred.
    */
   transferBody(targetBody) {
-    dev().assertElement(
+    devAssertElement(
       targetBody,
       'No target body given to DomTransformStream.transferBody'
     );
@@ -129,6 +131,14 @@ export class DomTransformStream {
 
     this.shouldTransfer_ = true;
     this.targetBodyResolver_(targetBody);
+
+    this.headPromise_.then(() => {
+      const attrs = this.detachedBody_.attributes;
+      for (let i = 0; i < attrs.length; i++) {
+        const {name, value} = attrs[i];
+        targetBody.setAttribute(name, value);
+      }
+    });
 
     this.transferBodyChunk_();
 
@@ -148,11 +158,11 @@ export class DomTransformStream {
       this.targetBodyPromise_,
       this.headPromise_,
     ]).then((resolvedElements) => {
-      const tranferThrottle = this.transferThrottle_;
-      return tranferThrottle(() => {
+      const transferThrottle = this.transferThrottle_;
+      return transferThrottle(() => {
         this.currentChunkTransferPromise_ = null;
         const targetBody = resolvedElements[0];
-        removeNoScriptElements(dev().assertElement(this.detachedBody_));
+        removeNoScriptElements(devAssertElement(this.detachedBody_));
         while (this.detachedBody_.firstChild) {
           targetBody.appendChild(this.detachedBody_.firstChild);
         }

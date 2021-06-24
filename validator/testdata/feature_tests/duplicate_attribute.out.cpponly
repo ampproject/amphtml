@@ -35,7 +35,7 @@ feature_tests/duplicate_attribute.html:30:2 The tag 'script' contains the attrib
 >>   ^~~~~~~~~
 feature_tests/duplicate_attribute.html:31:2 The tag 'script' contains the attribute 'custom-element' repeated multiple times.
 >>   ^~~~~~~~~
-feature_tests/duplicate_attribute.html:31:2 The attribute 'custom-element' may not appear in tag 'amp-youtube extension script'. (see https://amp.dev/documentation/components/amp-youtube)
+feature_tests/duplicate_attribute.html:31:2 The attribute 'custom-element' may not appear in tag 'amp-youtube v0.1 extension script'. (see https://amp.dev/documentation/components/amp-youtube)
 |
 |  </head>
 |  <body>

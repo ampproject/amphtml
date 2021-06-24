@@ -19,33 +19,34 @@
  * @fileoverview Script that builds the nomodule AMP runtime during CI.
  */
 
+const atob = require('atob');
 const {
   abortTimedJob,
-  printSkipMessage,
-  processAndUploadNomoduleOutput,
+  processAndStoreBuildToArtifacts,
+  skipDependentJobs,
   startTimer,
-  timedExecWithError,
+  storeNomoduleBuildToWorkspace,
   timedExecOrDie,
-  uploadNomoduleOutput,
+  timedExecWithError,
 } = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
-const {red, yellow} = require('kleur/colors');
+const {red, yellow} = require('../common/colors');
 const {runCiJob} = require('./ci-job');
 const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'nomodule-build.js';
 
 /**
- * @return {void}
+ * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp dist --fortesting');
-  uploadNomoduleOutput();
+  timedExecOrDie('amp dist --fortesting');
+  storeNomoduleBuildToWorkspace();
 }
 
 /**
+ * Steps to run during PR builds.
  * @return {Promise<void>}
  */
 async function prBuildWorkflow() {
@@ -58,8 +59,7 @@ async function prBuildWorkflow() {
       Targets.VISUAL_DIFF
     )
   ) {
-    timedExecOrDie('gulp update-packages');
-    const process = timedExecWithError('gulp dist --fortesting');
+    const process = timedExecWithError('amp dist --fortesting');
     if (process.status !== 0) {
       const message = process?.error
         ? process.error.message
@@ -68,12 +68,20 @@ async function prBuildWorkflow() {
       await signalPrDeployUpload('errored');
       return abortTimedJob(jobName, startTime);
     }
-    timedExecOrDie('gulp storybook --build');
-    await processAndUploadNomoduleOutput();
+    timedExecOrDie('amp storybook --build');
+    await processAndStoreBuildToArtifacts();
     await signalPrDeployUpload('success');
+    storeNomoduleBuildToWorkspace();
   } else {
     await signalPrDeployUpload('skipped');
-    printSkipMessage(
+
+    // Special case for visual diffs - Percy is a required check and must pass,
+    // but we just called `skipDependentJobs` so the Visual Diffs job will not
+    // run. Instead, we create an empty, passing check on Percy here.
+    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+    timedExecOrDie('amp visual-diff --empty');
+
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime, integration tests, end-to-end tests, or visual diff tests'
     );

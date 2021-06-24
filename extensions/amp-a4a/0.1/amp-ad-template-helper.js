@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {LruCache} from '../../../src/utils/lru-cache';
-import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
-import {dict} from '../../../src/utils/object';
+import {LruCache} from '#core/data-structures/lru-cache';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {devAssert} from '../../../src/log';
+import {dict} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
-import {isArray} from '../../../src/types';
+} from '../../../src/service-helpers';
+import {isArray} from '#core/types';
 import {parseUrlDeprecated} from '../../../src/url';
 import {urls} from '../../../src/config';
 
@@ -46,7 +46,7 @@ export class AmpAdTemplateHelper {
    */
   constructor(ampdoc) {
     /** @private @const */
-    this.ampdoc_ = ampdoc;
+    this.parentAmpdoc_ = ampdoc;
 
     /** @private {LruCache} */
     this.cache_ = new LruCache(5);
@@ -59,7 +59,7 @@ export class AmpAdTemplateHelper {
    * @return {!Promise<string>}
    */
   fetch(templateUrl) {
-    const {win} = this.ampdoc_;
+    const {win} = this.parentAmpdoc_;
     const proxyUrl =
       getMode(win).localDev && !isNaN(templateUrl)
         ? `http://ads.localhost:${win.location.port}` +
@@ -82,7 +82,7 @@ export class AmpAdTemplateHelper {
    * @return {!Promise<!Element>} Promise which resolves after rendering completes.
    */
   render(templateValues, element) {
-    return Services.templatesForDoc(this.ampdoc_).findAndRenderTemplate(
+    return Services.templatesForDoc(element).findAndRenderTemplate(
       element,
       templateValues
     );
@@ -93,9 +93,9 @@ export class AmpAdTemplateHelper {
    * @param {!Array|!JsonObject} analyticsValue
    */
   insertAnalytics(element, analyticsValue) {
-    analyticsValue = /**@type {!Array}*/ (isArray(analyticsValue)
-      ? analyticsValue
-      : [analyticsValue]);
+    analyticsValue = /**@type {!Array}*/ (
+      isArray(analyticsValue) ? analyticsValue : [analyticsValue]
+    );
     for (let i = 0; i < analyticsValue.length; i++) {
       const config = analyticsValue[i];
       const analyticsEle = element.ownerDocument.createElement('amp-analytics');
@@ -146,8 +146,7 @@ export class AmpAdTemplateHelper {
  */
 export function getAmpAdTemplateHelper(target) {
   registerServiceBuilderForDoc(target, SERVICE_ID, AmpAdTemplateHelper);
-  return /** @type {!AmpAdTemplateHelper} */ (getServiceForDoc(
-    target,
-    SERVICE_ID
-  ));
+  return /** @type {!AmpAdTemplateHelper} */ (
+    getServiceForDoc(target, SERVICE_ID)
+  );
 }

@@ -92,4 +92,4 @@ extended to AMP components.
 
 ## Validation
 
-See [amp-byside-content rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-byside-content/validator-amp-byside-content.protoascii) in the AMP validator specification.
+See [amp-byside-content rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-byside-content/validator-amp-byside-content.protoascii) in the AMP validator specification.

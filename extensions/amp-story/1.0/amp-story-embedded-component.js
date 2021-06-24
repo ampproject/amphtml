@@ -29,27 +29,24 @@ import {
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
-import {Keys} from '../../../src/utils/key-codes';
+import {Keys} from '#core/constants/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
-import {
-  addAttributesToElement,
-  closest,
-  matches,
-  tryFocus,
-} from '../../../src/dom';
+import {Services} from '#service';
+import {addAttributesToElement, tryFocus} from '#core/dom';
+import {closest, matches} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getSourceOriginForElement,
   triggerClickFromLightDom,
 } from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
+import {dict} from '#core/types/object';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
-import {px, resetStyles, setImportantStyles, toggle} from '../../../src/style';
+
+import {px, resetStyles, setImportantStyles, toggle} from '#core/dom/style';
 
 /**
  * Action icons to be placed in tooltip.
@@ -902,11 +899,13 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   updateTooltipEl_(component) {
-    const embedConfig = /** @type {!Object} */ (userAssert(
-      this.getEmbedConfigFor_(component.element),
-      'Invalid embed config for target',
-      component.element
-    ));
+    const embedConfig = /** @type {!Object} */ (
+      userAssert(
+        this.getEmbedConfigFor_(component.element),
+        'Invalid embed config for target',
+        component.element
+      )
+    );
 
     const theme = this.triggeringTarget_.getAttribute('theme');
     if (theme && TooltipTheme.DARK === theme.toLowerCase()) {
@@ -1419,12 +1418,8 @@ export class AmpStoryEmbeddedComponent {
       </section>
     `;
     const overlayEls = htmlRefs(tooltipOverlay);
-    const {
-      tooltip,
-      buttonLeft,
-      buttonRight,
-      arrow,
-    } = /** @type {!tooltipElementsDef} */ (overlayEls);
+    const {arrow, buttonLeft, buttonRight, tooltip} =
+      /** @type {!tooltipElementsDef} */ (overlayEls);
 
     this.tooltip_ = tooltip;
     this.tooltipArrow_ = arrow;

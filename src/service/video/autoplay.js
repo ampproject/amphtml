@@ -15,8 +15,8 @@
  */
 
 import {dev} from '../../log';
-import {htmlFor} from '../../static-template';
-import {removeElement} from '../../dom';
+import {htmlFor} from '#core/dom/static-template';
+import {removeElement} from '#core/dom';
 
 /**
  * @param {!Element} node
@@ -28,7 +28,7 @@ function cloneDeep(node) {
 
 /**
  * @param {!Element|!Document} elOrDoc
- * @param {?{title: string|undefined}=} metadata
+ * @param {?{title: (string|undefined)}=} metadata
  * @return {!Element}
  */
 export function renderInteractionOverlay(elOrDoc, metadata) {

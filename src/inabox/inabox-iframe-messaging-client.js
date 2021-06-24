@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
+import {IframeMessagingClient} from '#3p/iframe-messaging-client';
 import {canInspectWindow} from '../iframe-helper';
-import {getExistingServiceOrNull, registerServiceBuilder} from '../service';
-import {tryParseJson} from '../json';
+import {
+  getExistingServiceOrNull,
+  registerServiceBuilder,
+} from '../service-helpers';
+import {tryParseJson} from '#core/types/object/json';
 
 /**
  * @param {!Window} win
  * @return {?../../3p/iframe-messaging-client.IframeMessagingClient}
  */
 export function iframeMessagingClientFor(win) {
-  return /** @type {?../../3p/iframe-messaging-client.IframeMessagingClient} */ (getExistingServiceOrNull(
-    win,
-    'iframeMessagingClient'
-  ));
+  return /** @type {?../../3p/iframe-messaging-client.IframeMessagingClient} */ (
+    getExistingServiceOrNull(win, 'iframeMessagingClient')
+  );
 }
 
 /**

@@ -30,19 +30,17 @@ export class AmpStoryComponentManager {
   }
 
   /**
-   * Calls layoutCallback on the element when it is close to the viewport.
-   * @param {!AmpStoryPlayer|!AmpStoryEntryPoint} elImpl
+   * Calls layoutPlayer on the element when it is close to the viewport.
+   * @param {!Element} element
    * @private
    */
-  layoutEl_(elImpl) {
-    new AmpStoryPlayerViewportObserver(
-      this.win_,
-      elImpl.getElement(),
-      elImpl.layoutCallback.bind(elImpl)
+  layoutEl_(element) {
+    new AmpStoryPlayerViewportObserver(this.win_, element, () =>
+      element.layoutPlayer()
     );
 
     const scrollHandler = () => {
-      elImpl.layoutCallback();
+      element.layoutPlayer();
       this.win_.removeEventListener('scroll', scrollHandler);
     };
 
@@ -60,7 +58,7 @@ export class AmpStoryComponentManager {
     for (let i = 0; i < players.length; i++) {
       const playerEl = players[i];
       const player = new AmpStoryPlayer(this.win_, playerEl);
-      player.buildCallback();
+      player.buildPlayer();
       this.layoutEl_(player);
     }
   }

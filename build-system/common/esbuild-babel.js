@@ -15,31 +15,23 @@
  */
 
 const babel = require('@babel/core');
-const crypto = require('crypto');
-const fs = require('fs');
 const path = require('path');
+const {debug} = require('../compile/debug-compilation-lifecycle');
+const {TransformCache, batchedRead, md5} = require('./transform-cache');
 
 /**
  * Used to cache babel transforms done by esbuild.
- * @private @const {!Map<string, {hash: string, promise: Promise<{contents: string}>}>}
+ * @const {TransformCache}
  */
-const transformCache = new Map();
-
-/**
- * Used to cache file reads done by esbuild, since it can issue multiple
- * "loads" per file. This batches consecutive reads into a single, and then
- * clears its cache item for the next load.
- * @private @const {!Map<string, Promise<{hash: string, contents: string}>>}
- */
-const readCache = new Map();
+let transformCache;
 
 /**
  * Creates a babel plugin for esbuild for the given caller. Optionally enables
  * caching to speed up transforms.
  * @param {string} callerName
  * @param {boolean} enableCache
- * @param {function()} preSetup
- * @param {function()} postLoad
+ * @param {function(): void} preSetup
+ * @param {function(): void} postLoad
  * @return {!Object}
  */
 function getEsbuildBabelPlugin(
@@ -48,57 +40,36 @@ function getEsbuildBabelPlugin(
   preSetup = () => {},
   postLoad = () => {}
 ) {
-  function sha256(contents) {
-    if (!enableCache) {
-      return '';
-    }
-    const hash = crypto.createHash('sha256');
-    hash.update(callerName);
-    hash.update(contents);
-    return hash.digest('hex');
+  if (!transformCache) {
+    transformCache = new TransformCache('.babel-cache', '.js');
   }
 
-  function batchedRead(path) {
-    let read = readCache.get(path);
-    if (!read) {
-      read = fs.promises
-        .readFile(path)
-        .then((contents) => {
-          return {
-            contents,
-            hash: sha256(contents),
-          };
-        })
-        .finally(() => {
-          readCache.delete(path);
-        });
-      readCache.set(path, read);
-    }
-    return read;
-  }
-
-  function transformContents(filepath, contents, hash) {
+  /**
+   * @param {string} filename
+   * @param {string} contents
+   * @param {string} hash
+   * @param {Object} babelOptions
+   * @return {Promise}
+   */
+  async function transformContents(filename, contents, hash, babelOptions) {
     if (enableCache) {
-      const cached = transformCache.get(filepath);
-      if (cached && cached.hash === hash) {
-        return cached.promise;
+      const cached = transformCache.get(hash);
+      if (cached) {
+        return cached;
       }
     }
 
-    const babelOptions =
-      babel.loadOptions({
-        caller: {name: callerName},
-        filename: filepath,
-        sourceFileName: path.basename(filepath),
-      }) || undefined;
+    debug('pre-babel', filename, contents);
     const promise = babel
       .transformAsync(contents, babelOptions)
       .then((result) => {
-        return {contents: result.code};
+        const {code, map} = result || {};
+        debug('post-babel', filename, code, map);
+        return code + `\n// ${filename}`;
       });
 
     if (enableCache) {
-      transformCache.set(filepath, {hash, promise});
+      transformCache.set(hash, promise);
     }
 
     return promise.finally(postLoad);
@@ -106,15 +77,61 @@ function getEsbuildBabelPlugin(
 
   return {
     name: 'babel',
+
     async setup(build) {
       preSetup();
 
+      const babelOptions =
+        babel.loadOptions({caller: {name: callerName}}) || {};
+      const optionsHash = md5(
+        JSON.stringify({babelOptions, argv: process.argv.slice(2)})
+      );
+
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
-        const {path} = file;
-        const {contents, hash} = await batchedRead(path);
-        return transformContents(path, contents, hash);
+        const filename = file.path;
+        const {contents, hash} = await batchedRead(filename, optionsHash);
+
+        const transformed = await transformContents(
+          filename,
+          contents,
+          hash,
+          getFileBabelOptions(babelOptions, filename)
+        );
+        return {contents: transformed};
       });
     },
+  };
+}
+
+const CJS_TRANSFORMS = new Set([
+  'transform-modules-commonjs',
+  'proposal-dynamic-import',
+  'syntax-dynamic-import',
+  'proposal-export-namespace-from',
+  'syntax-export-namespace-from',
+]);
+
+/**
+ * @param {!Object} babelOptions
+ * @param {string} filename
+ * @return {!Object}
+ */
+function getFileBabelOptions(babelOptions, filename) {
+  // Patch for leaving files within node_modules as esm, since esbuild will break when trying
+  // to process a module file that contains CJS exports. This function is called after
+  // babel.loadOptions, therefore all of the plugins from preset-env have already been applied.
+  // and must be disabled individually.
+  if (filename.includes('node_modules')) {
+    const plugins = babelOptions.plugins.filter(
+      ({key}) => !CJS_TRANSFORMS.has(key)
+    );
+    babelOptions = {...babelOptions, plugins};
+  }
+
+  return {
+    ...babelOptions,
+    filename,
+    filenameRelative: path.basename(filename),
   };
 }
 

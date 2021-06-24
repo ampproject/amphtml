@@ -15,7 +15,7 @@
  */
 
 import {loadPromise} from '../../../src/event-helper';
-import {toggle} from '../../../src/style';
+import {toggle} from '#core/dom/style';
 
 /** @fileoverview
  * Wraps the creation of an invisible sandboxed IFrame. Exposes a load() method
@@ -41,7 +41,7 @@ export class IFrameHost {
     this.url_ = url;
 
     /**
-     * @type {Element|null}
+     * @type {?Element}
      * @private
      */
     this.domElement_ = null;

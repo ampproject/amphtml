@@ -17,9 +17,9 @@
 import {ChunkPriority, chunk} from '../../../../src/chunk';
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
-import {Observable} from '../../../../src/observable';
+import {Observable} from '#core/data-structures/observable';
 import {TwoStepsResponse} from './two-steps-response';
-import {pureUserAssert as userAssert} from '../../../../src/core/assert';
+import {userAssert} from '../../../../src/log';
 
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
 export let AnchorReplacementList;
@@ -155,10 +155,11 @@ export class LinkRewriter {
           resolve();
         });
       };
-      const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (this
-        .rootNode_.nodeType == Node.DOCUMENT_NODE
-        ? this.rootNode_.documentElement
-        : this.rootNode_);
+      const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (
+        this.rootNode_.nodeType == Node.DOCUMENT_NODE
+          ? this.rootNode_.documentElement
+          : this.rootNode_
+      );
       chunk(elementOrShadowRoot, task, ChunkPriority.LOW);
     });
   }

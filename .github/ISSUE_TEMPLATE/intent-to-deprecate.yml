@@ -1,0 +1,57 @@
+---
+name: Intent-to-Deprecate (I2D)
+description: Propose that an existing AMP feature be deprecated.
+labels: INTENT TO DEPRECATE
+body:
+  - type: markdown
+    id: header
+    attributes:
+      value: |
+        Thanks for creating this Intent-to-Deprecate (I2D) issue.
+        - See AMP's [versioning and deprecations policy](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-versioning-policy.md) for instructions on how to fill out this I2D template and how to get help.
+        - If the feature can be removed immediately after deprecation, add the "INTENT TO REMOVE" label to this issue.
+        - Otherwise, file a separate Intent-to-Remove (I2R) when the feature is ready for removal.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A brief description of the feature to be deprecated.
+      placeholder: Provide the detailed removal plan if the feature is ready for immediate removal after deprecation. Otherwise provide an initial plan for removing the deprecated feature and file a separate Intent-to-Remove (I2R) issue after this issue is approved.
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: The rationale behind this deprecation.
+      placeholder: Explain why this feature needs to be deprecated and eventually removed.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact on Existing Users
+      description: How this will affect existing users.
+      placeholder: Explain how the removal of this feature will affect sites that currently use AMP. If available, provide the estimated usage of this feature.
+    validations:
+      required: true
+  - type: textarea
+    id: alternative_implementation
+    attributes:
+      label: Alternative Implementation
+      description: Alternative implementation suggestions for developers using AMP.
+      placeholder: Explain how developers using AMP can achieve similar functionality after the feature you are deprecating is removed.
+    validations:
+      required: true
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Any other relevant context.
+      placeholder: Add any other context that may help people understand your I2D. E.g. paste a screenshot, or provide a link.
+  - type: textarea
+    id: notifications
+    attributes:
+      label: Notifications
+      description: Add working groups or individuals you want to notify about this I2D.
+      value: /cc @ampproject/wg-approvers

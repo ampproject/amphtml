@@ -18,8 +18,8 @@ import {getMode} from '../mode';
 import {
   registerServiceBuilder,
   registerServiceBuilderInEmbedWin,
-} from '../service';
-import {reportError} from '../error';
+} from '../service-helpers';
+import {reportError} from '../error-reporting';
 import {user} from '../log';
 
 const TAG = 'timer';

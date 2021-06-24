@@ -17,8 +17,8 @@
 
 const {
   staticTemplateFactories,
-  staticTemplateTags,
   staticTemplateFactoryFns,
+  staticTemplateTags,
 } = require('../babel-plugins/static-template-metadata');
 
 /**
@@ -28,10 +28,25 @@ const {
  *   TaggedTemplateExpression: {Function(node: CompilerNode): void}
  * }}
  */
-module.exports = function (context) {
+function create(context) {
+  /**
+   * SVG elements can be safely autofixed from an invalid self-closing tag
+   * like <path /> into its valid closed form <path></path>.
+   */
+  const svgSelfClosing = new Set([
+    'circle',
+    'ellipse',
+    'line',
+    'path',
+    'polygon',
+    'polyline',
+    'rect',
+    'stop',
+    'use',
+  ]);
+
   /**
    * @param {CompilerNode} node
-   * @return {void}
    */
   function tagCannotBeCalled(node) {
     const {name} = node.callee;
@@ -47,7 +62,6 @@ module.exports = function (context) {
 
   /**
    * @param {CompilerNode} node
-   * @return {void}
    */
   function factoryUsage(node) {
     const {parent} = node;
@@ -56,7 +70,8 @@ module.exports = function (context) {
     const expectedTagName = staticTemplateFactories[name];
 
     if (parent.type === 'TaggedTemplateExpression' && parent.tag === node) {
-      return tagUsage(parent, `${name}()`);
+      tagUsage(parent, `${name}()`);
+      return;
     }
 
     if (
@@ -89,7 +104,6 @@ module.exports = function (context) {
   /**
    * @param {CompilerNode} node
    * @param {string} opt_name
-   * @return {void}
    */
   function tagUsage(node, opt_name) {
     const {quasi, tag} = node;
@@ -126,12 +140,25 @@ module.exports = function (context) {
       const sourceCode = context.getSourceCode();
       const {start} = template;
 
-      for (let i = 0; i < invalids.length; i++) {
-        const {tag, offset} = invalids[i];
+      for (const {fixable, length, offset, tag} of invalids) {
+        const itemStart = start + offset;
+        let fix;
+        if (fixable) {
+          fix = (fixer) =>
+            fixer.replaceTextRange(
+              [itemStart + length - 2, itemStart + length - 1],
+              `></${tag}`
+            );
+        }
+        const loc = {
+          start: sourceCode.getLocFromIndex(itemStart),
+          end: sourceCode.getLocFromIndex(itemStart + tag.length + 1),
+        };
         context.report({
           node: template,
-          loc: sourceCode.getLocFromIndex(start + offset),
+          loc,
           message: `Invalid void tag "${tag}"`,
+          fix,
         });
       }
     }
@@ -142,19 +169,25 @@ module.exports = function (context) {
    * @return {{
    *   tag: string,
    *   offset: number,
+   *   length: number,
+   *   fixable: boolean,
    * }[]}
    */
   function invalidVoidTag(string) {
     // Void tags are defined at
     // https://html.spec.whatwg.org/multipage/syntax.html#void-elements
-    const invalid = /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)([a-zA-Z-]+)( [^>]*)?\/>/g;
+    const invalid =
+      /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)([a-zA-Z-]+)([\s\n][^>]*)?\/>/gm;
     const matches = [];
 
     let match;
     while ((match = invalid.exec(string))) {
+      const [fullMatch, tag] = match;
       matches.push({
-        tag: match[1],
+        tag,
         offset: match.index,
+        length: fullMatch.length,
+        fixable: svgSelfClosing.has(tag),
       });
     }
 
@@ -189,4 +222,11 @@ module.exports = function (context) {
       tagUsage(node);
     },
   };
+}
+
+module.exports = {
+  meta: {
+    fixable: 'code',
+  },
+  create,
 };

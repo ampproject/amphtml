@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
+import * as Preact from '#preact';
 import {CSS as COMPONENT_CSS} from './component.jss';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {PreactBaseElement} from '#preact/base-element';
 import {Sidebar} from './component';
-import {dict} from '../../../src/utils/object';
-import {toggle} from '../../../src/style';
-import {toggleAttribute} from '../../../src/dom';
+import {dict} from '#core/types/object';
+import {pauseAll} from '../../../src/utils/resource-container-helper';
+import {realChildNodes} from '#core/dom/query';
+import {toggle} from '#core/dom/style';
+import {toggleAttribute} from '#core/dom';
+import {useToolbarHook} from './sidebar-toolbar-hook';
+import {useValueRef} from '#preact/component';
 
 export class BaseElement extends PreactBaseElement {
+  /** @override */
+  static deferredMount(unusedElement) {
+    return false;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -33,18 +43,57 @@ export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
     return dict({
-      'onBeforeOpen': this.toggle_.bind(this, true),
-      'onAfterClose': this.toggle_.bind(this, false),
+      'onBeforeOpen': () => this.beforeOpen_(),
+      'onAfterOpen': () => this.afterOpen_(),
+      'onAfterClose': () => this.afterClose_(),
     });
   }
 
-  /**
-   * Toggle open/closed attributes.
-   * @param {boolean} opt_state
-   */
-  toggle_(opt_state) {
-    this.open_ = toggleAttribute(this.element, 'open', opt_state);
-    toggle(this.element, this.open_);
+  /** @override */
+  updatePropsForRendering(props) {
+    realChildNodes(this.element).map((child) => {
+      if (
+        child.nodeName === 'NAV' &&
+        child.hasAttribute('toolbar') &&
+        child.hasAttribute('toolbar-target')
+      ) {
+        props['children'].push(
+          <ToolbarShim
+            toolbar={child.getAttribute('toolbar')}
+            toolbarTarget={child.getAttribute('toolbar-target')}
+            domElement={child}
+          ></ToolbarShim>
+        );
+      }
+    });
+  }
+
+  /** @override */
+  unmountCallback() {
+    this.removeAsContainer();
+  }
+
+  /** @private */
+  beforeOpen_() {
+    this.open_ = true;
+    toggleAttribute(this.element, 'open', true);
+    toggle(this.element, true);
+  }
+
+  /** @private */
+  afterOpen_() {
+    const sidebar = this.element.shadowRoot.querySelector('[part=sidebar]');
+    this.setAsContainer(sidebar);
+  }
+
+  /** @private */
+  afterClose_() {
+    this.open_ = false;
+    toggleAttribute(this.element, 'open', false);
+    toggle(this.element, false);
+
+    this.removeAsContainer();
+    pauseAll(this.element, /* includeSelf */ false);
   }
 
   /** @override */
@@ -72,3 +121,15 @@ BaseElement['props'] = {
   'children': {passthrough: true},
   'side': {attr: 'side', type: 'string'},
 };
+
+/**
+ * @param {!SidebarDef.ToolbarShimProps} props
+ */
+function ToolbarShim({
+  domElement,
+  toolbar: mediaQueryProp,
+  toolbarTarget: toolbarTargetProp,
+}) {
+  const ref = useValueRef(domElement);
+  useToolbarHook(ref, mediaQueryProp, toolbarTargetProp);
+}

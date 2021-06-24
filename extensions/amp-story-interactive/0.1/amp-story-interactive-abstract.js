@@ -24,25 +24,25 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 import {CSS} from '../../../build/amp-story-interactive-0.1.css';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   addParamsToUrl,
   appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
-import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {base64UrlEncodeFromString} from '#core/types/string/base64';
 import {
   buildInteractiveDisclaimer,
   tryCloseDisclaimer,
 } from './interactive-disclaimer';
-import {closest} from '../../../src/dom';
+import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
-import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/types';
+import {isExperimentOn} from '#experiments';
+import {toArray} from '#core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
@@ -97,14 +97,12 @@ const fontsToLoad = [
   {
     family: 'Poppins',
     weight: '400',
-    src:
-      "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
+    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
   },
   {
     family: 'Poppins',
     weight: '700',
-    src:
-      "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
+    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
 
@@ -765,13 +763,13 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       '.i-amphtml-story-interactive-option'
     );
 
-    this.optionsData_ = data;
-    data.forEach((response, index) => {
+    this.optionsData_ = this.orderData_(data);
+    this.optionsData_.forEach((response) => {
       if (response.selected) {
         this.hasUserSelection_ = true;
-        this.updateStoryStoreState_(index);
+        this.updateStoryStoreState_(response.index);
         this.mutateElement(() => {
-          this.updateToPostSelectionState_(options[index]);
+          this.updateToPostSelectionState_(options[response.index]);
         });
       }
     });
@@ -828,5 +826,35 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         el.setAttribute('tabindex', toggle ? 0 : -1);
       }
     });
+  }
+
+  /**
+   * Reorders options data to account for scrambled or incomplete data.
+   *
+   * @private
+   * @param {!Array<!InteractiveOptionType>} optionsData
+   * @return {!Array<!InteractiveOptionType>}
+   */
+  orderData_(optionsData) {
+    const numOptionElements = this.getOptionElements().length;
+    const orderedData = new Array(numOptionElements);
+    optionsData.forEach((option) => {
+      const {index} = option;
+      if (index >= 0 && index < numOptionElements) {
+        orderedData[index] = option;
+      }
+    });
+
+    for (let i = 0; i < orderedData.length; i++) {
+      if (!orderedData[i]) {
+        orderedData[i] = {
+          count: 0,
+          index: i,
+          selected: false,
+        };
+      }
+    }
+
+    return orderedData;
   }
 }

@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
-import {Services} from './services';
-import {VisibilityState} from './visibility-state';
-import {childElementsByTag, isConnectedNode} from './dom';
+import {CommonSignals} from './core/constants/common-signals';
+import {Services} from './service';
+import {VisibilityState} from './core/constants/visibility-state';
+import {childElementsByTag} from './core/dom/query';
 import {
   createShadowDomWriter,
   createShadowRoot,
   importShadowBody,
 } from './shadow-embed';
 import {dev, user} from './log';
-import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
+import {
+  disposeServicesForDoc,
+  getServicePromiseOrNullForDoc,
+} from './service-helpers';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
-import {isArray, isObject} from './types';
+import {isArray, isObject} from './core/types';
+import {isConnectedNode} from './core/dom';
+
 import {parseExtensionUrl} from './service/extension-script';
 import {parseUrlDeprecated} from './url';
-import {setStyle} from './style';
+import {setStyle} from './core/dom/style';
 
 /** @const @private {string} */
 const TAG = 'multidoc-manager';

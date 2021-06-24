@@ -15,7 +15,7 @@
  */
 
 import {loadScript} from './3p';
-import {setStyles} from '../src/style';
+import {setStyles} from '#core/dom/style';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -107,7 +107,7 @@ function getBeOpinionAsyncInit(global, accountId) {
           });
       },
     });
-    global.BeOpinionSDK['watch'](); // global.BeOpinionSDK.watch() fails 'gulp check-types' validation
+    global.BeOpinionSDK['watch'](); // global.BeOpinionSDK.watch() fails 'amp check-types' validation
   };
 }
 

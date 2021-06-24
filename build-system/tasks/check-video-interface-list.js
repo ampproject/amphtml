@@ -19,7 +19,7 @@ const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../common/diff');
 
 /** Checks or updates 3rd party video player list on this Markdown file. */
-const filepath = 'spec/amp-video-interface.md';
+const filepath = 'docs/spec/amp-video-interface.md';
 
 /** Excludes these extensions since they're on a separate list. */
 const excludeGeneric = ['amp-video', 'amp-video-iframe'];
@@ -33,7 +33,7 @@ const grepJsFiles = 'extensions/**/*.js';
 /**
  * Returns a formatted list entry.
  * @param {string} name
- * @return {name}
+ * @return {string}
  */
 const entry = (name) =>
   `-   [${name}](https://amp.dev/documentation/components/${name}.md)\n`;
@@ -49,7 +49,7 @@ const generateList = () =>
     .trim()
     .split('\n')
     .reduce((list, path) => {
-      const name = path.substr('extensions/'.length).split('/').shift();
+      const name = path.substr('extensions/'.length).split('/').shift() ?? '';
       return list + (excludeGeneric.includes(name) ? '' : entry(name));
     }, '');
 
@@ -80,8 +80,9 @@ module.exports = {
   checkVideoInterfaceList,
 };
 
-checkVideoInterfaceList.description = `Checks or updates 3rd party video player list on ${filepath}`;
+checkVideoInterfaceList.description =
+  'Check 3rd party video player list in amp-video-interface.md';
 
 checkVideoInterfaceList.flags = {
-  'fix': '  Write to file',
+  'fix': 'Update the list and write results to file',
 };

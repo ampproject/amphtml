@@ -16,8 +16,9 @@
 
 import {ConsentPolicyManager} from './consent-policy-manager'; // eslint-disable-line no-unused-vars
 import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
-import {hasOwn, map} from '../../../src/utils/object';
-import {isEnumValue, isObject} from '../../../src/types';
+import {hasOwn, map} from '#core/types/object';
+import {isEnumValue, isObject} from '#core/types';
+
 import {user} from '../../../src/log';
 
 /**
@@ -179,15 +180,12 @@ export class TcfApiCommandManager {
    * @return {!Promise<Array>}
    */
   getTcDataPromises_() {
-    const consentStringInfoPromise = this.policyManager_.getConsentStringInfo(
-      'default'
-    );
-    const metadataPromise = this.policyManager_.getConsentMetadataInfo(
-      'default'
-    );
-    const sharedDataPromise = this.policyManager_.getMergedSharedData(
-      'default'
-    );
+    const consentStringInfoPromise =
+      this.policyManager_.getConsentStringInfo('default');
+    const metadataPromise =
+      this.policyManager_.getConsentMetadataInfo('default');
+    const sharedDataPromise =
+      this.policyManager_.getMergedSharedData('default');
 
     return Promise.all([
       metadataPromise,

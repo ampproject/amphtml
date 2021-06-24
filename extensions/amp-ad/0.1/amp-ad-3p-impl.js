@@ -17,24 +17,24 @@
 import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
-} from '../../../ads/google/utils';
-import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
+} from '#ads/google/utils';
+import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
+} from '#core/constants/consent-state';
 import {
   Layout, // eslint-disable-line no-unused-vars
   LayoutPriority,
   isLayoutSizeDefined,
-} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {adConfig} from '../../../ads/_config';
-import {clamp} from '../../../src/utils/math';
-import {computedStyle, setStyle} from '../../../src/style';
+} from '#core/dom/layout';
+import {Services} from '#service';
+import {adConfig} from '#ads/_config';
+import {clamp} from '#core/math';
+import {computedStyle, setStyle} from '#core/dom/style';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
 import {
@@ -48,18 +48,18 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getExperimentBranch} from '../../../src/experiments';
+import {getExperimentBranch} from '#experiments';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {
   intersectionEntryToJson,
   measureIntersection,
-} from '../../../src/utils/intersection';
-import {moveLayoutRect} from '../../../src/layout-rect';
+} from '#core/dom/layout/intersection';
+import {moveLayoutRect} from '#core/dom/layout/rect';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
-import {toWin} from '../../../src/types';
+} from '#core/dom/layout/viewport-observer';
+import {toWin} from '#core/window';
 
 /** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -150,6 +150,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isFullWidthRequested_ = false;
+
+    /** @private {Promise<!IntersectionObserverEntry>} */
+    this.initialIntersectionPromise_ = null;
   }
 
   /** @override */
@@ -215,6 +218,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.isFullWidthRequested_) {
       return this.attemptFullWidthSizeChange_();
     }
+
+    const asyncIntersection =
+      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+      ADS_INITIAL_INTERSECTION_EXP.experiment;
+    this.initialIntersectionPromise_ = asyncIntersection
+      ? measureIntersection(this.element)
+      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /**
@@ -249,7 +259,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
     // We always need the bootstrap.
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, this.type_, this.getAmpDoc(), preconnect);
     if (typeof this.config.prefetch == 'string') {
       preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
@@ -343,9 +353,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.measureIframeLayoutBox_();
     }
 
-    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (devAssert(
-      this.iframeLayoutBox_
-    ));
+    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
+      devAssert(this.iframeLayoutBox_)
+    );
     return moveLayoutRect(iframe, box.left, box.top);
   }
 
@@ -409,13 +419,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // here, though, allows us to measure the impact of ad throttling via
         // incrementLoadingAds().
 
-        const asyncIntersection =
-          getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-          ADS_INITIAL_INTERSECTION_EXP.experiment;
-        const intersectionPromise = asyncIntersection
-          ? measureIntersection(this.element)
-          : Promise.resolve(this.element.getIntersectionChangeEntry());
-        return intersectionPromise.then((intersection) => {
+        return this.initialIntersectionPromise_.then((intersection) => {
           const iframe = getIframe(
             toWin(this.element.ownerDocument.defaultView),
             this.element,

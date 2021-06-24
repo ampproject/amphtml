@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Deferred} from '#core/data-structures/promise';
+import {Observable} from '#core/data-structures/observable';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
-import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
+import {deepMerge, dict, hasOwn} from '#core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
-import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
+import {getDataParamsFromAttributes} from '#core/dom';
+import {isAmpElement} from '../../../src/amp-element-helpers';
+import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -581,7 +582,7 @@ export class ScrollEventTracker extends EventTracker {
     /** @private {!./analytics-root.AnalyticsRoot} root */
     this.root_ = root;
 
-    /** @private {function(!Object)|null} */
+    /** @private {?function(!Object)} */
     this.boundScrollHandler_ = null;
   }
 
@@ -646,7 +647,7 @@ export class ScrollEventTracker extends EventTracker {
   scrollHandler_(boundsH, boundsV, useInitialPageSize, listener, e) {
     // Calculates percentage scrolled by adding screen height/width to
     // top/left and dividing by the total scroll height/width.
-    const {scrollWidth, scrollHeight} = useInitialPageSize ? e.initialSize : e;
+    const {scrollHeight, scrollWidth} = useInitialPageSize ? e.initialSize : e;
 
     this.triggerScrollEvents_(
       boundsV,
@@ -1473,13 +1474,11 @@ export class VisibilityTracker extends EventTracker {
     const visibilityManager = this.root.getVisibilityManager();
 
     if (reportWhenSpec == 'documentHidden') {
-      createReportReadyPromiseFunc = this.createReportReadyPromiseForDocumentHidden_.bind(
-        this
-      );
+      createReportReadyPromiseFunc =
+        this.createReportReadyPromiseForDocumentHidden_.bind(this);
     } else if (reportWhenSpec == 'documentExit') {
-      createReportReadyPromiseFunc = this.createReportReadyPromiseForDocumentExit_.bind(
-        this
-      );
+      createReportReadyPromiseFunc =
+        this.createReportReadyPromiseForDocumentExit_.bind(this);
     } else {
       userAssert(
         !reportWhenSpec,

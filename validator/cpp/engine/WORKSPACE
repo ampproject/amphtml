@@ -10,17 +10,17 @@ http_archive(
 
 http_archive(
     name = "com_google_googletest",
-    sha256 = "72ccb29062790ffab9ad89524b9846958afd6ed96c0151d30f373e94f518245a",
-    strip_prefix = "googletest-e8512bc38c4c0060858c3306b0660a3f126aee30",
-    urls = ["https://github.com/google/googletest/archive/e8512bc38c4c0060858c3306b0660a3f126aee30.zip"],  # 2019-01-07
+    sha256 = "05e811175ab0652a4791f2db0fe4496a0dfccbc1cbc9222bc1de995680852aa4",
+    strip_prefix = "googletest-7153098229e88295f9655ff1d3b0e2fa9eada5f8",
+    urls = ["https://github.com/google/googletest/archive/7153098229e88295f9655ff1d3b0e2fa9eada5f8.zip"],  # 2019-01-07
 )
 
 http_archive(
     name = "com_googlesource_code_re2",
-    sha256 = "2c3f1f2e495afd5bf1f2877efe0ba4674c43d8fb667fc3c73ea13a9347928c2d",
-    strip_prefix = "re2-f8e389f3acdc2517562924239e2a188037393683",
+    sha256 = "8c3d0c90c7cebe7260dc8753d30743bcc51fc52ecec414728ac8afc258bb2300",
+    strip_prefix = "re2-4244cd1cb492fa1d10986ec67f862964c073f844",
     urls = [
-        "https://github.com/google/re2/archive/f8e389f3acdc2517562924239e2a188037393683.tar.gz",
+        "https://github.com/google/re2/archive/4244cd1cb492fa1d10986ec67f862964c073f844.tar.gz",
     ],
 )
 
@@ -50,6 +50,11 @@ http_archive(
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
+
+local_repository(
+    name = "amphtml-extensions",
+    path = "../../../extensions/",
+)
 
 local_repository(
     name = "validator",

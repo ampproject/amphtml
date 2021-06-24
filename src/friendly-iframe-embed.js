@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
-import {Deferred} from './utils/promise';
+import {CommonSignals} from './core/constants/common-signals';
+import {Deferred} from './core/data-structures/promise';
 import {FIE_EMBED_PROP} from './iframe-helper';
-import {Services} from './services';
-import {Signals} from './utils/signals';
-import {VisibilityState} from './visibility-state';
+import {Services} from './service';
+import {Signals} from './core/data-structures/signals';
+import {VisibilityState} from './core/constants/visibility-state';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {dev, devAssert, rethrowAsync, userAssert} from './log';
+import {dev, devAssert, userAssert} from './log';
 import {
   disposeServicesForEmbed,
   getTopWindow,
   setParentWindow,
-} from './service';
-import {escapeHtml} from './dom';
+} from './service-helpers';
+import {escapeHtml} from './core/dom';
 import {getMode} from './mode';
 import {install as installAbortController} from './polyfills/abort-controller';
 import {installAmpdocServicesForEmbed} from './service/core-services';
@@ -38,8 +38,8 @@ import {installForChildWin as installIntersectionObserver} from './polyfills/int
 import {installForChildWin as installResizeObserver} from './polyfills/resize-observer';
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
-import {isDocumentReady} from './document-ready';
-import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
+import {isDocumentReady} from './core/document-ready';
+import {layoutRectLtwh, moveLayoutRect} from './core/dom/layout/rect';
 import {loadPromise} from './event-helper';
 import {
   px,
@@ -47,8 +47,9 @@ import {
   setImportantStyles,
   setStyle,
   setStyles,
-} from './style';
-import {toWin} from './types';
+} from './core/dom/style';
+import {rethrowAsync} from './core/error';
+import {toWin} from './core/window';
 import {urls} from './config';
 import {whenContentIniLoad} from './ini-load';
 
@@ -62,14 +63,12 @@ import {whenContentIniLoad} from './ini-load';
  *   this embed.
  * - fonts: An optional array of fonts used in this embed.
  *
- * TODO(#33020): remove extensionIds once extensions is used everywhere.
  *
  * @typedef {{
  *   host: (?AmpElement|undefined),
  *   url: string,
  *   html: ?string,
  *   extensions: (?Array<{extensionId: string, extensionVersion: string}>|undefined),
- *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
  *   skipHtmlMerge: (boolean|undefined),
  * }}
@@ -125,29 +124,12 @@ export function getFieSafeScriptSrcs() {
  * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
  */
 export function preloadFriendlyIframeEmbedExtensions(win, extensions) {
-  // TODO(#33020): Use the format directly and preload with the specified
-  // version.
-  preloadFriendlyIframeEmbedExtensionIdsDeprecated(
-    win,
-    extensions.map(({extensionId}) => extensionId)
-  );
-}
-
-/**
- * @param {!Window} win
- * @param {!Array<string>} extensionIds
- * TODO(#33020): remove this method in favor `preloadFriendlyIframeEmbedExtensions`.
- */
-export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
-  win,
-  extensionIds
-) {
   const extensionsService = Services.extensionsFor(win);
 
   // Load any extensions; do not wait on their promises as this
   // is just to prefetch.
-  extensionIds.forEach((extensionId) =>
-    extensionsService.preloadExtension(extensionId)
+  extensions.forEach(({extensionId, extensionVersion}) =>
+    extensionsService.preloadExtension(extensionId, extensionVersion)
   );
 }
 
@@ -180,17 +162,10 @@ export function installFriendlyIframeEmbed(
   iframe.setAttribute('marginheight', '0');
   iframe.setAttribute('marginwidth', '0');
 
-  // Compute extensions.
-  const extensionIds =
-    // TODO(#33020): Remove extensionIds format once it's supported everywhere.
-    spec.extensionIds
-      ? spec.extensionIds
-      : spec.extensions
-      ? spec.extensions.map(({extensionId}) => extensionId)
-      : [];
+  const extensions = spec.extensions || [];
 
   // Pre-load extensions.
-  preloadFriendlyIframeEmbedExtensionIdsDeprecated(win, extensionIds);
+  preloadFriendlyIframeEmbedExtensions(win, extensions);
 
   const html = spec.skipHtmlMerge ? spec.html : mergeHtml(spec);
   // Receive the signal when iframe is ready: it's document is formed.
@@ -274,7 +249,7 @@ export function installFriendlyIframeEmbed(
       embed,
       extensionsService,
       ampdoc,
-      extensionIds,
+      extensions,
       opt_preinstallCallback
     ).then(() => {
       if (!childWin.frameElement) {
@@ -582,9 +557,9 @@ export class FriendlyIframeEmbed {
    * @visibleForTesting
    */
   getBodyElement() {
-    return /** @type {!HTMLBodyElement} */ ((
-      this.iframe.contentDocument || this.iframe.contentWindow.document
-    ).body);
+    return /** @type {!HTMLBodyElement} */ (
+      (this.iframe.contentDocument || this.iframe.contentWindow.document).body
+    );
   }
 
   /**
@@ -643,7 +618,7 @@ export class FriendlyIframeEmbed {
 
         // Offset by scroll top as iframe will be position: fixed.
         const dy = -Services.viewportForDoc(this.iframe).getScrollTop();
-        const {top, left, width, height} = moveLayoutRect(rect, /* dx */ 0, dy);
+        const {height, left, top, width} = moveLayoutRect(rect, /* dx */ 0, dy);
 
         // Offset body by header height to prevent visual jump.
         bodyStyle = {
@@ -746,7 +721,7 @@ export class Installers {
    * @param {!FriendlyIframeEmbed} embed
    * @param {!./service/extensions-impl.Extensions} extensionsService
    * @param {!./service/ampdoc-impl.AmpDocFie} ampdoc
-   * @param {!Array<string>} extensionIds
+   * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
    * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)|undefined} preinstallCallback
    * @param {function(!Promise)=} opt_installComplete
    * @return {!Promise}
@@ -755,7 +730,7 @@ export class Installers {
     embed,
     extensionsService,
     ampdoc,
-    extensionIds,
+    extensions,
     preinstallCallback,
     opt_installComplete
   ) {
@@ -816,7 +791,7 @@ export class Installers {
         if (!childWin.frameElement) {
           return;
         }
-        extensionsService.preinstallEmbed(ampdoc, extensionIds);
+        extensionsService.preinstallEmbed(ampdoc, extensions);
       })
       .then(getDelayPromise)
       .then(() => {
@@ -835,7 +810,7 @@ export class Installers {
         // It's enough of initialization done to return the embed.
         const promise = extensionsService.installExtensionsInDoc(
           ampdoc,
-          extensionIds
+          extensions
         );
         ampdoc.setExtensionsKnown();
         if (opt_installComplete) {

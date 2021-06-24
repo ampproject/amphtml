@@ -15,7 +15,7 @@
  */
 
 import {Instagram} from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {PreactBaseElement} from '#preact/base-element';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -24,6 +24,9 @@ BaseElement['Component'] = Instagram;
 
 /** @override */
 BaseElement['loadable'] = true;
+
+/** @override */
+BaseElement['unloadOnPause'] = true;
 
 /** @override */
 BaseElement['props'] = {

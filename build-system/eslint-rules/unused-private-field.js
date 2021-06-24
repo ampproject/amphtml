@@ -76,7 +76,6 @@ module.exports = {
      * @param {CompilerNode} node
      * @param {string} name
      * @param {boolean} used
-     * @return {void}
      */
     function restrictedUse(node, name, used) {
       if (used) {
@@ -135,7 +134,6 @@ module.exports = {
      * @param {CompilerNode} node
      * @param {string} name
      * @param {boolean} used
-     * @return {void}
      */
     function visibleForTestingUse(node, name, used) {
       if (!used) {
@@ -163,7 +161,6 @@ module.exports = {
      * @param {CompilerNode} node
      * @param {string} name
      * @param {boolean} used
-     * @return {void}
      */
     function unannotatedUse(node, name, used) {
       if (used) {
@@ -233,7 +230,7 @@ module.exports = {
           return;
         }
 
-        const {used, declared} = stack.pop();
+        const {declared, used} = stack.pop();
 
         declared.forEach((node, name) => {
           const checker = checkerForAnnotation(node);

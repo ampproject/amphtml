@@ -14,34 +14,32 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '#core/constants/action-constants';
+import {AmpEvents} from '#core/constants/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
 import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
 import {DatesList} from './dates-list';
-import {Deferred} from '../../../src/utils/promise';
-import {FiniteStateMachine} from '../../../src/finite-state-machine';
-import {Keys} from '../../../src/utils/key-codes';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
+import {Keys} from '#core/constants/key-codes';
+import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Services} from '#service';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {
   closestAncestorElementBySelector,
-  isRTL,
-  iterateCursor,
   scopedQuerySelector,
-  tryFocus,
-} from '../../../src/dom';
-import {computedStyle} from '../../../src/style';
+} from '#core/dom/query';
+import {computedStyle} from '#core/dom/style';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
-import {dashToCamelCase} from '../../../src/string';
+import {dashToCamelCase} from '#core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {once} from '../../../src/utils/function';
+import {dict, map} from '#core/types/object';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {isRTL, iterateCursor, tryFocus} from '#core/dom';
+import {once} from '#core/types/function';
 import {requireExternal} from '../../../src/module';
 
 /**
@@ -216,18 +214,18 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.reactRender_ = requireExternal('react-dom').render;
 
     /** @private @const */
-    this.ReactDates_ = /** @type {!JsonObject} */ (requireExternal(
-      'react-dates'
-    ));
+    this.ReactDates_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates')
+    );
 
     /**
      * @private
      * @const
      * @dict
      */
-    this.ReactDatesConstants_ = /** @type {!JsonObject} */ (requireExternal(
-      'react-dates/constants'
-    ));
+    this.ReactDatesConstants_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates/constants')
+    );
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -595,12 +593,8 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setupStateMachine_(initialState) {
     const sm = new FiniteStateMachine(initialState);
-    const {
-      OVERLAY_OPEN_INPUT,
-      OVERLAY_CLOSED,
-      OVERLAY_OPEN_PICKER,
-      STATIC,
-    } = DatePickerState;
+    const {OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, STATIC} =
+      DatePickerState;
     const noop = () => {};
     sm.addTransition(STATIC, STATIC, noop);
 
@@ -879,10 +873,9 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setState_(newState) {
     return this.render(
-      /** @type {!JsonObject} */ (Object.assign(
-        /** @type {!Object} */ (this.state_),
-        newState
-      ))
+      /** @type {!JsonObject} */ (
+        Object.assign(/** @type {!Object} */ (this.state_), newState)
+      )
     );
   }
 
@@ -1226,7 +1219,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       .then((json) => this.parseSrcTemplates_(json))
       .then((parsedTemplates) => {
         if (parsedTemplates) {
-          const {srcTemplates, srcDefaultTemplate} = parsedTemplates;
+          const {srcDefaultTemplate, srcTemplates} = parsedTemplates;
           this.srcTemplates_ = srcTemplates;
           this.srcDefaultTemplate_ = srcDefaultTemplate;
         }

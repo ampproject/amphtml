@@ -25,15 +25,14 @@ const COMMON_CHROME_FLAGS = [
   '--disable-extensions',
   // Allows simulating user actions (e.g unmute) which otherwise will be denied.
   '--autoplay-policy=no-user-gesture-required',
-  // Makes debugging easy by auto-opening devtools.
-  argv.debug ? '--auto-open-devtools-for-tabs' : null,
-].filter(Boolean);
+];
+// Makes debugging easy by auto-opening devtools.
+if (argv.debug) {
+  COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
+}
 
-/**
- * @param {!Object} config
- */
 module.exports = {
-  frameworks: ['fixture', 'mocha', 'sinon-chai', 'chai', 'source-map-support'],
+  frameworks: ['fixture', 'mocha', 'source-map-support'],
 
   preprocessors: {}, // Dynamically populated based on tests being run.
 
@@ -152,7 +151,6 @@ module.exports = {
 
   plugins: [
     '@chiragrupani/karma-chromium-edge-launcher',
-    'karma-chai',
     'karma-chrome-launcher',
     'karma-esbuild',
     'karma-firefox-launcher',
@@ -160,10 +158,10 @@ module.exports = {
     'karma-html2js-preprocessor',
     'karma-ie-launcher',
     'karma-structured-json-reporter',
+    'karma-junit-reporter',
     'karma-mocha',
     'karma-mocha-reporter',
     'karma-safarinative-launcher',
-    'karma-sinon-chai',
     'karma-source-map-support',
     'karma-spec-reporter',
     'karma-super-dots-reporter',

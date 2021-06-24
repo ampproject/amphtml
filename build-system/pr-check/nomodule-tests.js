@@ -21,39 +21,36 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  downloadNomoduleOutput,
-  printSkipMessage,
+  skipDependentJobs,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {MINIFIED_TARGETS} = require('../tasks/helpers');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'nomodule-tests.js';
 
 /**
- * @return {void}
+ * Adds a canary or prod config string to all non-esm minified targets.
  */
 function prependConfig() {
   const targets = MINIFIED_TARGETS.flatMap((target) => [
     `dist/${target}.js`,
   ]).join(',');
   timedExecOrDie(
-    `gulp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
+    `amp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
   );
 }
 
 /**
- * @return {void}
+ * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
-  timedExecOrDie('gulp update-packages');
   prependConfig();
   try {
     timedExecOrThrow(
-      `gulp integration --nobuild --headless --compiled --report --config=${argv.config}`,
+      `amp integration --nobuild --headless --compiled --report --config=${argv.config}`,
       'Integration tests failed!'
     );
   } catch (e) {
@@ -61,23 +58,21 @@ function pushBuildWorkflow() {
       process.exitCode = e.status;
     }
   } finally {
-    timedExecOrDie('gulp test-report-upload');
+    timedExecOrDie('amp test-report-upload');
   }
 }
 
 /**
- * @return {void}
+ * Steps to run during PR builds.
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
-    downloadNomoduleOutput();
-    timedExecOrDie('gulp update-packages');
     prependConfig();
     timedExecOrDie(
-      `gulp integration --nobuild --compiled --headless --config=${argv.config}`
+      `amp integration --nobuild --compiled --headless --config=${argv.config}`
     );
   } else {
-    printSkipMessage(
+    skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or integration tests'
     );

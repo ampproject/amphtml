@@ -15,11 +15,14 @@
  */
 
 import {ElementStub} from '../element-stub';
-import {Services} from '../services';
+import {Services} from '#service';
 import {createCustomElementClass, stubbedElements} from '../custom-element';
 import {extensionScriptsInNode} from './extension-script';
-import {reportError} from '../error';
-import {pureUserAssert as userAssert} from '../core/assert';
+import {reportError} from '../error-reporting';
+import {userAssert} from '../log';
+
+/** @type {!WeakMap<!./service/ampdoc-impl.AmpDoc, boolean>} */
+const docInitializedMap = new WeakMap();
 
 /**
  * @param {!Window} win
@@ -174,8 +177,33 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
 export function registerElement(win, name, implementationClass) {
   const knownElements = getExtendedElements(win);
   knownElements[name] = implementationClass;
-  const klass = createCustomElementClass(win);
+  const klass = createCustomElementClass(win, elementConnectedCallback);
   win['customElements'].define(name, klass);
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!AmpElement} element
+ * @param {?(typeof BaseElement)} implementationClass
+ * @visibleForTesting
+ */
+export function elementConnectedCallback(ampdoc, element, implementationClass) {
+  // Make sure that the ampdoc has already been stubbed.
+  if (!docInitializedMap.has(ampdoc)) {
+    docInitializedMap.set(ampdoc, true);
+    stubElementsForDoc(ampdoc);
+  }
+
+  // Load the pre-stubbed legacy extension if needed.
+  const extensionId = element.localName;
+  if (!implementationClass && !ampdoc.declaresExtension(extensionId)) {
+    Services.extensionsFor(ampdoc.win).installExtensionForDoc(
+      ampdoc,
+      extensionId,
+      // The legacy auto-extensions are always 0.1.
+      '0.1'
+    );
+  }
 }
 
 /**

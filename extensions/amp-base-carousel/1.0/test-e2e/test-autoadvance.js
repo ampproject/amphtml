@@ -15,7 +15,7 @@
  */
 
 import {getCarousel, getSlides, sleep} from './helpers';
-import {useStyles} from '../base-carousel.jss';
+import {useStyles} from '../component.jss';
 
 const pageWidth = 800;
 const pageHeight = 600;
@@ -43,7 +43,8 @@ describes.endtoend(
       await controller.switchToShadowRoot(carousel);
     });
 
-    it('should move forwards', async () => {
+    // TODO(wg-bento, #24195): getSlides does not always find elements in time.
+    it.skip('should move forwards', async () => {
       const slides = await getSlides(styles, controller);
 
       await expect(rect(slides[1])).to.include({x: 0});
@@ -51,7 +52,8 @@ describes.endtoend(
       await expect(rect(slides[0])).to.include({x: 0});
     });
 
-    it('should go to start and complete two full iterations only', async () => {
+    // TODO(wg-bento, #24195): getSlides does not always find elements in time.
+    it.skip('should go to start and complete two full iterations only', async () => {
       const slides = await getSlides(styles, controller);
 
       // first iteration

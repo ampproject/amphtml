@@ -99,6 +99,11 @@ std::unique_ptr<Document> ParseFragmentWithOptions(std::string_view html,
   }
 
   auto doc = parser->Parse();
+
+  // doc could be nullptr when, for example, the stack depth >
+  // htmlparser_max_nodes_depth_count).
+  if (doc == nullptr) return nullptr;
+
   Node* parent = fragment_parent ? root : doc->root_node_;
   for (Node* c = parent->FirstChild(); c;) {
     Node* next = c->NextSibling();

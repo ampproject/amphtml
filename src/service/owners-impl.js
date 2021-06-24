@@ -16,19 +16,19 @@
 
 import {OwnersInterface} from './owners-interface';
 import {Resource} from './resource';
-import {Services} from '../services';
-import {pureDevAssert as devAssert} from '../core/assert';
-import {isArray} from '../types';
-import {registerServiceBuilderForDoc} from '../service';
+import {Services} from '#service';
+import {devAssert} from '../log';
+import {isArray} from '#core/types';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * @param {!Element|!Array<!Element>} elements
  * @return {!Array<!Element>}
  */
 function elements(elements) {
-  return /** @type {!Array<!Element>} */ (isArray(elements)
-    ? elements
-    : [elements]);
+  return /** @type {!Array<!Element>} */ (
+    isArray(elements) ? elements : [elements]
+  );
 }
 
 /**
@@ -114,10 +114,10 @@ export class OwnersImpl {
    * @private
    */
   findResourcesInElements_(parentResource, elements, callback) {
-    elements.forEach((element) => {
+    for (const element of elements) {
       devAssert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
-    });
+    }
   }
 
   /**

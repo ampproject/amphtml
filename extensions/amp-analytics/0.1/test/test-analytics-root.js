@@ -15,7 +15,7 @@
  */
 
 import * as IniLoad from '../../../../src/ini-load';
-import {AmpDocShadow} from '../../../../src/service/ampdoc-impl';
+import {AmpDocShadow} from '#service/ampdoc-impl';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
 import {AnalyticsEventType, CustomEventTracker} from '../events';
 import {ScrollManager} from '../scroll-manager';
@@ -23,7 +23,6 @@ import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
 } from '../visibility-manager';
-import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
@@ -339,11 +338,6 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         child.setAttribute('data-vars-id', 'child1');
         child2.setAttribute('data-vars-id', 'child2');
         child3.setAttribute('data-vars-id', 'child3');
-        toggleExperiment(win, 'visibility-trigger-improvements', true);
-      });
-
-      afterEach(() => {
-        toggleExperiment(win, 'visibility-trigger-improvements', false);
       });
 
       it('should find element and elements by selector', async () => {
@@ -354,11 +348,10 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
           child,
           child2,
         ]);
-        // Check that non-experiment works
-        toggleExperiment(win, 'visibility-trigger-improvements', false);
-        expect(
-          await root.getElements(body, '.notMyClass', null)
-        ).to.deep.equal([child3]);
+        // Check that non-array selector works
+        expect(await root.getElements(body, '.notMyClass', null)).to.deep.equal(
+          [child3]
+        );
       });
 
       it('should only find elements with data-vars-*', async () => {
@@ -421,7 +414,6 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
       });
 
       it('should find non AMP element with single selector', async () => {
-        toggleExperiment(win, 'visibility-trigger-improvements', false);
         child.classList.remove('i-amphtml-element');
         child.removeAttribute('data-vars-id');
         child.classList.add('myClass');
@@ -753,21 +745,17 @@ describes.realWin(
         child.setAttribute('data-vars-id', '123');
         child2.setAttribute('data-vars-id', '456');
         child3.setAttribute('data-vars-id', '789');
-
-        toggleExperiment(win, 'visibility-trigger-improvements', true);
       });
 
       afterEach(() => {
         child.classList.add('i-amphtml-element');
-        toggleExperiment(win, 'visibility-trigger-improvements', false);
       });
 
       it('should find all elements by selector', async () => {
         const elements = await root.getElements(body, ['.myClass'], null);
 
         expect(elements).to.deep.equals([child, child2]);
-        // Check that non-experiment version works
-        toggleExperiment(win, 'visibility-trigger-improvements', false);
+        // Check that non-selector version works
         expect(
           await root.getElements(body, '.notMyClass', null)
         ).to.deep.equals([child3]);
@@ -829,7 +817,6 @@ describes.realWin(
       });
 
       it('should find non AMP element with single selector', async () => {
-        toggleExperiment(win, 'visibility-trigger-improvements', false);
         child.classList.remove('i-amphtml-element');
         expect(await root.getElements(body, '.myClass', null)).to.deep.equal([
           child,

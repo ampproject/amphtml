@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpReachPlayer extends AMP.BaseElement {
@@ -25,6 +26,9 @@ class AmpReachPlayer extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
   }
 
   /**
@@ -60,10 +64,24 @@ class AmpReachPlayer extends AMP.BaseElement {
     iframe.src =
       'https://player-cdn.beachfrontmedia.com/playerapi/v1/frame/player/?embed_id=' +
       encodeURIComponent(embedId);
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
+
+    this.pauseHelper_.updatePlaying(true);
+
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const iframe = this.iframe_;
+    if (iframe) {
+      this.element.removeChild(iframe);
+      this.iframe_ = null;
+    }
+    this.pauseHelper_.updatePlaying(false);
+    return true;
   }
 
   /** @override */

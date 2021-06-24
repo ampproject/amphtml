@@ -16,10 +16,10 @@
 
 import {Util} from './util';
 import {assertHttpsUrl} from '../../../src/url';
-import {openWindowDialog} from '../../../src/dom';
-import {tryResolve} from '../../../src/utils/promise';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {tryResolve} from '#core/data-structures/promise';
 
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {userAssert} from '../../../src/log';
 
 // Popup options
 const POP_FOLLOW = `status=no,resizable=yes,scrollbars=yes,
@@ -94,7 +94,7 @@ export class FollowButton {
   /**
    * Determine the height of the contents to allow resizing after first layout.
    *
-   * @return {!Promise<number|null>}
+   * @return {!Promise<?number>}
    */
   height() {
     return Promise.resolve(null);

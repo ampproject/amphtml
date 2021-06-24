@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {hasOwn, ownProperty} from '../../../src/utils/object';
-import {parseSrcset} from '../../../src/srcset';
+import {hasOwn, ownProperty} from '#core/types/object';
+import {parseSrcset} from '#core/dom/srcset';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-bind';
@@ -310,6 +310,13 @@ function createElementRules_() {
       },
       'state': null,
       'is-layout-container': null,
+    },
+    'AMP-RENDER': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
     },
     'AMP-SELECTOR': {
       'disabled': null,

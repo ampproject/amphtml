@@ -14,32 +14,33 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/curve';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
+import {bezierCurve} from '#core/data-structures/curve';
 import {
   closestAncestorElementBySelector,
-  dispatchCustomEvent,
-} from '../../../src/dom';
+  realChildElements,
+} from '#core/dom/query';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getStyle, setStyle} from '../../../src/style';
-import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber} from '../../../src/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent} from '#core/dom';
+import {getStyle, setStyle} from '#core/dom/style';
+import {isExperimentOn} from '#experiments';
+import {isFiniteNumber} from '#core/types';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {numeric} from '../../../src/transition';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
+} from '#core/dom/layout/size-observer';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -128,6 +129,9 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
 
+    /** @private @const {boolean} */
+    this.isSafari_ = platform.isSafari();
+
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
@@ -173,7 +177,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.element.classList.add('i-amphtml-slidescroll');
 
-    this.slides_ = this.getRealChildren();
+    this.slides_ = realChildElements(this.element);
 
     this.noOfSlides_ = this.slides_.length;
 
@@ -297,23 +301,23 @@ export class AmpSlideScroll extends BaseSlides {
       Services.timerFor(this.win).cancel(this.scrollTimeout_);
     }
 
-    this.scrollTimeout_ = /** @type {number} */ (Services.timerFor(
-      this.win
-    ).delay(() => {
-      this.scrollTimeout_ = null;
+    this.scrollTimeout_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(() => {
+        this.scrollTimeout_ = null;
 
-      if (this.snappingInProgress_ || this.isTouching_) {
-        return;
-      }
+        if (this.snappingInProgress_ || this.isTouching_) {
+          return;
+        }
 
-      const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
+        const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
 
-      if (this.hasNativeSnapPoints_) {
-        this.updateOnScroll_(currentScrollLeft, ActionTrust.LOW);
-      } else {
-        this.customSnap_(currentScrollLeft, undefined, ActionTrust.LOW);
-      }
-    }, timeout));
+        if (this.hasNativeSnapPoints_) {
+          this.updateOnScroll_(currentScrollLeft, ActionTrust.LOW);
+        } else {
+          this.customSnap_(currentScrollLeft, undefined, ActionTrust.LOW);
+        }
+      }, timeout)
+    );
   }
 
   /**
@@ -430,7 +434,7 @@ export class AmpSlideScroll extends BaseSlides {
   scrollHandler_(unusedEvent) {
     const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
 
-    if (!this.isIos_) {
+    if (!this.isIos_ && !this.isSafari_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
 
@@ -746,9 +750,8 @@ export class AmpSlideScroll extends BaseSlides {
         this.slides_[showIndex].setAttribute('aria-hidden', 'true');
       }
     });
-    this.slidesContainer_./*OK*/ scrollLeft = this.getScrollLeftForIndex_(
-      newIndex
-    );
+    this.slidesContainer_./*OK*/ scrollLeft =
+      this.getScrollLeftForIndex_(newIndex);
     this.triggerAnalyticsEvent_(newIndex);
     this.slideIndex_ = newIndex;
     // If we have a specified number of autoplay loops and

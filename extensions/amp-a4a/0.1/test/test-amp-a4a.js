@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
@@ -37,31 +37,31 @@ import {
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
-import {AmpAdXOriginIframeHandler} from '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {AmpDoc, installDocService} from '../../../../src/service/ampdoc-impl';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {Extensions} from '../../../../src/service/extensions-impl';
+import {AmpAdXOriginIframeHandler} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {AmpDoc, installDocService} from '#service/ampdoc-impl';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Extensions} from '#service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {LayoutPriority} from '../../../../src/layout';
+import {LayoutPriority} from '#core/dom/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
-import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
-import {cancellation} from '../../../../src/error';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {createIframePromise} from '../../../../testing/iframe';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
+import {cancellation} from '../../../../src/error-reporting';
+import {createElementWithAttributes} from '#core/dom';
+import {createIframePromise} from '#testing/iframe';
 import {dev, user} from '../../../../src/log';
 import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
-import {installRealTimeConfigServiceForDoc} from '../../../../src/service/real-time-config/real-time-config-impl';
-import {layoutRectLtwh, layoutSizeFromRect} from '../../../../src/layout-rect';
-import {macroTask} from '../../../../testing/yield';
-import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
+import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
+import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
+import {macroTask} from '#testing/yield';
+import {resetScheduledElementForTesting} from '#service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 
 describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
@@ -310,9 +310,6 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
   let getResourceStub;
 
   beforeEach(() => {
-    // TODO(ccordry): remove with no-signing launch or similar.
-    env.sandbox.stub(AmpA4A.prototype, 'isInNoSigningExp').returns(false);
-
     fetchMock = null;
     getSigningServiceNamesMock = env.sandbox.stub(
       AmpA4A.prototype,
@@ -1530,6 +1527,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: null,
             consentString: null,
             gdprApplies: null,
+            consentStringType: null,
             additionalConsent: null,
           },
           rtcResponse
@@ -1710,6 +1708,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         isStickyAd: () => false,
         maybeInitStickyAd: () => {},
       };
+      await a4a.buildCallback();
       await a4a.layoutCallback();
       expect(
         renderNonAmpCreativeSpy.calledOnce,
@@ -2355,6 +2354,28 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       expect(actual).to.deep.equal(expected);
     });
 
+    it('should copy over any extensions detail', () => {
+      metaData.extensions = [
+        {
+          'custom-element': 'amp-analytics',
+          'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+        },
+        {
+          'custom-element': 'amp-mustache',
+          'src': 'https://cdn.ampproject.org/v0/amp-mustache-1.0.js',
+        },
+      ];
+      const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
+      expect(actual.extensions).to.deep.include({
+        'custom-element': 'amp-analytics',
+        'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+      });
+      expect(actual.extensions).to.deep.include({
+        'custom-element': 'amp-mustache',
+        'src': 'https://cdn.ampproject.org/v0/amp-mustache-1.0.js',
+      });
+    });
+
     // TODO(levitzky) remove the following two tests after metadata bug is
     // fixed.
     it('should parse metadata with wrong opening tag', () => {
@@ -2759,6 +2780,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
             gdprApplies,
+            consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
           })
         ).calledOnce;
@@ -2812,6 +2834,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
             gdprApplies,
+            consentStringType: consentMetadata['consentStringType'],
             additionalConsent: consentMetadata['additionalConsent'],
           })
         ).calledOnce;
@@ -2856,6 +2879,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           getAdUrlSpy.withArgs({
             consentState: CONSENT_POLICY_STATE.UNKNOWN,
             consentString: null,
+            consentStringType: null,
             gdprApplies: null,
             additionalConsent: null,
           })
@@ -3447,7 +3471,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
       {type: 'otherNetwork', prefVal: true},
     ].forEach((test) =>
       it(JSON.stringify(test), () => {
-        const {type, prefVal, expected} = test;
+        const {expected, prefVal, type} = test;
         if (type) {
           a4a.element.setAttribute('type', type);
         }

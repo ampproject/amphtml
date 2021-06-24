@@ -37,7 +37,7 @@ tags: {  # <amp-brid-player>
   }
   attrs: {
     name: "data-outstream"
-    mandatory_oneof: "['data-outstream', 'data-playlist', 'data-video']"
+    mandatory_oneof: "['data-carousel', 'data-outstream', 'data-playlist', 'data-video']"
     value_regex: "[0-9]+"
   }
   attrs: {
@@ -52,12 +52,17 @@ tags: {  # <amp-brid-player>
   }
   attrs: {
     name: "data-playlist"
-    mandatory_oneof: "['data-outstream', 'data-playlist', 'data-video']"
+    mandatory_oneof: "['data-carousel', 'data-outstream', 'data-playlist', 'data-video']"
     value_regex: ".+"
   }
   attrs: {
     name: "data-video"
-    mandatory_oneof: "['data-outstream', 'data-playlist', 'data-video']"
+    mandatory_oneof: "['data-carousel', 'data-outstream', 'data-playlist', 'data-video']"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "data-carousel"
+    mandatory_oneof: "['data-carousel', 'data-outstream', 'data-playlist', 'data-video']"
     value_regex: "[0-9]+"
   }
   attrs: {

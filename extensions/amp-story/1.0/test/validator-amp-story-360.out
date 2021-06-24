@@ -19,7 +19,7 @@ PASS
 |    Tests the validation rules of the amp-story-360 tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <title>amp-story</title>
@@ -31,7 +31,7 @@ PASS
 |    <script async custom-element="amp-story-360" src="https://cdn.ampproject.org/v0/amp-story-360-0.1.js"></script>
 |  </head>
 |  <body>
-|    <amp-story        
+|    <amp-story
 |          standalone
 |          title="Demo Story"
 |          publisher="AMP Story"

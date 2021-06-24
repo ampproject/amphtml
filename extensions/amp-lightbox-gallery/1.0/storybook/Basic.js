@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
+import * as Preact from '#preact';
+import {BaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {LightboxGalleryProvider, WithLightbox} from '../component';
-import {withA11y} from '@storybook/addon-a11y';
 import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'LightboxGallery',
   component: LightboxGalleryProvider,
-  decorators: [withKnobs, withA11y],
+  decorators: [withKnobs],
 };
 
 export const _default = () => {

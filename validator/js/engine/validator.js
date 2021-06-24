@@ -3852,6 +3852,13 @@ function getLayoutSizeDefinedClass() {
 }
 
 /**
+ * @return {string}
+ */
+function getLayoutAwaitingSizeClass() {
+  return "i-amphtml-layout-awaiting-size";
+}
+
+/**
  * @param {!generated.AmpLayout.Layout} layout
  * @return {boolean}
  */
@@ -3864,6 +3871,14 @@ function isLayoutSizeDefined(layout) {
       layout === generated.AmpLayout.Layout.FLUID ||
       layout === generated.AmpLayout.Layout.INTRINSIC ||
       layout === generated.AmpLayout.Layout.RESPONSIVE);
+}
+
+/**
+ * @param {!generated.AmpLayout.Layout} layout
+ * @return {boolean}
+ */
+function isLayoutAwaitingSize(layout) {
+  return layout === generated.AmpLayout.Layout.FLUID;
 }
 
 /**
@@ -4438,6 +4453,10 @@ function validateSsrLayout(
     if (isLayoutSizeDefined(layout)) {
       // i-amphtml-layout-size-defined
       validInternalClasses[getLayoutSizeDefinedClass()] = 0;
+    }
+    if (isLayoutAwaitingSize(layout)) {
+      // i-amphtml-layout-awaiting-size
+      validInternalClasses[getLayoutAwaitingSizeClass()] = 0;
     }
     const classes = classAttr.split(/[\s+]/);
     for (const classToken of classes) {
@@ -5985,8 +6004,12 @@ class ParsedValidatorRules {
       for (let tagSpecId = 0; tagSpecId < numTags; ++tagSpecId) {
         let tagSpec = this.rules_.tags[tagSpecId];
         if (tagSpec.extensionSpec == null) continue;
+        let baseSpecName = tagSpec.extensionSpec.name;
+        if (tagSpec.extensionSpec.versionName !== null)
+          baseSpecName = tagSpec.extensionSpec.name + ' ' +
+              tagSpec.extensionSpec.versionName;
         if (tagSpec.specName === null)
-          tagSpec.specName = tagSpec.extensionSpec.name + ' extension script';
+          tagSpec.specName = baseSpecName + ' extension script';
         if (tagSpec.descriptiveName === null)
           tagSpec.descriptiveName = tagSpec.specName;
         tagSpec.mandatoryParent = 'HEAD';
@@ -7322,7 +7345,7 @@ function errorLine(filenameOrUrl, error) {
 /**
  * Renders the validation results into an array of human readable strings.
  * Careful when modifying this - it's called from
- * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js.
+ * https://github.com/ampproject/amphtml/blob/main/test/integration/test-example-validation.js.
  *
  * WARNING: This is exported; htmlparser changes may break downstream users
  * like https://www.npmjs.com/package/amphtml-validator and

@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from './services';
+import {Services} from './service';
 import {devAssert, userAssert} from './log';
-import {isArray, isObject} from './types';
-import {tryParseJson} from './json';
+import {isArray, isObject} from './core/types';
+import {tryParseJson} from './core/types/object/json';
 
 /**
  * @typedef {{

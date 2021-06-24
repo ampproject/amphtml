@@ -1,7 +1,10 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "outDir": "dist",
     "sourceMap": true,
     "moduleResolution": "node",
@@ -16,26 +19,24 @@
     "strictNullChecks": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
-    "incremental": true,
+    "incremental": false,
     "esModuleInterop": true,
     "declaration": true
   },
+  "files": [
+    "./global.d.ts"
+  ],
   "include": [
-    "./*.js",
-    "./*.ts",
-    "./common/**/*.js",
-    "./common/**/*.ts",
-    "./server/**/*.js",
-    "./server/**/*.ts",
-    "./tasks/**/*.js",
-    "./tasks/**/*.ts"
+    "./**/*.js"
   ],
   "exclude": [
-    "**/node_modules",
-    "common/check-package-manager.js",
-    "server/app-index/test/test-html.js",
-    "server/app-index/test/test-amphtml-helpers.js",
-    "server/new-server/transforms/dist",
-    "server/typescript-compile.js"
+    "./**/node_modules/**",
+    "./**/test/**/*.js",
+    "./**/*test*.js",
+    "./babel-plugins/**/*.js",
+    "./eslint-rules/**/*.js",
+    "./externs/**/*.js",
+    "./tasks/make-extension/template/**/*.js",
+    "./tasks/performance/cache/**/*.js"
   ]
 }

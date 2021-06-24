@@ -16,10 +16,11 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {getImportResolverPlugin} = require('./import-resolver');
 const {getReplacePlugin} = require('./helpers');
 
 /**
- * Gets the config for pre-closure babel transforms run during `gulp dist`.
+ * Gets the config for pre-closure babel transforms run during `amp dist`.
  *
  * @return {!Object}
  */
@@ -40,7 +41,10 @@ function getPreClosureConfig() {
   const replacePlugin = getReplacePlugin();
   const preClosurePlugins = [
     'optimize-objstr',
+    getImportResolverPlugin(),
     argv.coverage ? 'babel-plugin-istanbul' : null,
+    './build-system/babel-plugins/babel-plugin-imported-helpers',
+    './build-system/babel-plugins/babel-plugin-transform-inline-isenumvalue',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
@@ -81,7 +85,7 @@ function getPreClosureConfig() {
         ]
       : null,
     !(isFortesting || isCheckTypes)
-      ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
+      ? './build-system/babel-plugins/babel-plugin-is_fortesting-constant-transformer'
       : null,
   ].filter(Boolean);
   const presetEnv = [
@@ -98,6 +102,7 @@ function getPreClosureConfig() {
     plugins: preClosurePlugins,
     presets: preClosurePresets,
     retainLines: true,
+    sourceMaps: true,
   };
   return preClosureConfig;
 }

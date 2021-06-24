@@ -14,29 +14,30 @@
  * limitations under the License.
  */
 
+import * as MediaQueryProps from '#core/dom/media-query-props';
+import * as VideoUtils from '#core/dom/video';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
-import {Deferred} from '../../../../src/utils/promise';
-import {LocalizationService} from '../../../../src/service/localization';
+import {Deferred} from '#core/data-structures/promise';
+import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
-import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
-import {VideoUtils} from '../../../../src/utils/video';
-import {
-  addAttributesToElement,
-  createElementWithAttributes,
-  scopedQuerySelectorAll,
-} from '../../../../src/dom';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
+import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {registerServiceBuilder} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {toggleExperiment} from '#experiments';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 
 describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   let win;
   let element;
+  let html;
   let gridLayerEl;
   let page;
   let storeService;
@@ -47,6 +48,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   beforeEach(() => {
     win = env.win;
     isPerformanceTrackingOn = false;
+
+    html = htmlFor(win.document);
 
     const mediaPoolRoot = {
       getElement: () => win.document.createElement('div'),
@@ -106,14 +109,25 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should build the animation manager if an element is animated', async () => {
-    // Adding an element that has to be animated.
-    const animatedEl = win.document.createElement('div');
-    animatedEl.setAttribute('animate-in', 'fade-in');
+    const animatedEl = html`<div animate-in="fade-in"></div>`;
+
     element.appendChild(animatedEl);
     element.getAmpDoc = () => new AmpDocSingle(win);
 
     page.buildCallback();
     expect(page.animationManager_).to.exist;
+  });
+
+  it('should not build the animation manager if `prefers-reduced-motion` is on', async () => {
+    env.sandbox.stub(MediaQueryProps, 'prefersReducedMotion').returns(true);
+
+    const animatedEl = html`<div animate-in="fade-in"></div>`;
+
+    element.appendChild(animatedEl);
+    element.getAmpDoc = () => new AmpDocSingle(win);
+
+    page.buildCallback();
+    expect(page.animationManager_).to.be.null;
   });
 
   it('should set an active attribute when state becomes active', async () => {
@@ -164,9 +178,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should start the animations if needed when state becomes active', async () => {
-    // Adding an element that has to be animated.
-    const animatedEl = win.document.createElement('div');
-    animatedEl.setAttribute('animate-in', 'fade-in');
+    const animatedEl = html`<div animate-in="fade-in"></div>`;
     element.appendChild(animatedEl);
 
     page.buildCallback();
@@ -250,6 +262,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const fiePromise = installFriendlyIframeEmbed(iframe, gridLayerEl, {
       url: 'https://amp.dev',
       html: '<video src="https://example.com/video.mp3"></video>',
+      extensions: [],
     });
     env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
@@ -417,6 +430,37 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(mediaPoolRegister).to.not.have.been.called;
   });
 
+  it('should use storyNextUp value as default for auto-advance-after', async () => {
+    env.sandbox
+      .stub(Services.viewerForDoc(element), 'getParam')
+      .withArgs('storyNextUp')
+      .returns('5s');
+    expect(element.getAttribute('auto-advance-after')).to.be.equal(null);
+    page.buildCallback();
+
+    expect(element.getAttribute('auto-advance-after')).to.be.equal('5s');
+  });
+
+  it('should not use storyNextUp to override auto-advance-after value', async () => {
+    env.sandbox
+      .stub(Services.viewerForDoc(element), 'getParam')
+      .withArgs('storyNextUp')
+      .returns('5s');
+    element.setAttribute('auto-advance-after', '20000ms');
+    page.buildCallback();
+
+    expect(element.getAttribute('auto-advance-after')).to.be.equal('20000ms');
+  });
+
+  it('should not use storyNextUp when in viewer control group', () => {
+    env.sandbox
+      .stub(Services.viewerForDoc(element), 'getParam')
+      .withArgs('storyNextUp')
+      .returns('999999ms');
+    page.buildCallback();
+    expect(element).not.to.have.attribute('auto-advance-after');
+  });
+
   it('should stop the advancement when state becomes not active', async () => {
     page.buildCallback();
     const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
@@ -427,9 +471,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should stop the animations when state becomes not active', async () => {
-    // Adding an element that has to be animated.
-    const animatedEl = win.document.createElement('div');
-    animatedEl.setAttribute('animate-in', 'fade-in');
+    const animatedEl = html`<div animate-in="fade-in"></div>`;
     element.appendChild(animatedEl);
 
     page.buildCallback();
@@ -591,9 +633,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
   it('play message should have role="button" to prevent story page navigation', async () => {
     env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
-    env.sandbox
-      .stub(VideoUtils, 'isAutoplaySupported')
-      .returns(Promise.resolve(false));
+    env.sandbox.stub(VideoUtils, 'isAutoplaySupported').resolves(false);
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp4');
     gridLayerEl.appendChild(videoEl);
@@ -643,12 +683,201 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl).to.exist;
   });
 
+  it('should build the open attachment UI with target="_top" to navigate in top window. For viewers, this ensures the link will open in the parent window.', async () => {
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
+  });
+
+  it('should build the new outlink page attachment UI with target="_top" to navigate in top level browsing context. For viewers, this ensures the link will open in the parent window.', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('href', 'google.com');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
+  });
+
+  it('should build the open outlink UI with same codepath as page attachment', async () => {
+    const outlinkEl = win.document.createElement('amp-story-page-outlink');
+    outlinkEl.setAttribute('layout', 'nodisplay');
+    element.appendChild(outlinkEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openoutlinkEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+    expect(openoutlinkEl).to.exist;
+  });
+
+  it('should build the inline page attachment UI with one image', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('cta-image', 'nodisplay');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-inline-page-attachment-img'
+      )
+    ).to.exist;
+  });
+
+  it('should build the inline page attachment UI with two images', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('cta-image', 'nodisplay');
+    attachmentEl.setAttribute('cta-image-2', 'nodisplay');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelectorAll(
+        '.i-amphtml-story-inline-page-attachment-img'
+      ).length
+    ).to.equal(2);
+  });
+
+  it('should NOT rewrite the attachment UI images to a proxy URL', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+
+    const src = 'https://examples.com/foo.bar.png';
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('cta-image', src);
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    const imgEl = openAttachmentEl.querySelector(
+      '.i-amphtml-story-inline-page-attachment-img'
+    );
+    expect(imgEl.getAttribute('style')).to.contain(src);
+  });
+
+  it('should build the new default outlink page attachment UI', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = createElementWithAttributes(
+      win.document,
+      'amp-story-page-attachment',
+      {'layout': 'nodisplay', 'href': 'www.google.com'}
+    );
+    element.appendChild(attachmentEl);
+
+    await page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-outlink-page-attachment-outlink-chip'
+      )
+    ).to.exist;
+  });
+
+  it('should build the new outlink page attachment UI with icon', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = createElementWithAttributes(
+      win.document,
+      'amp-story-page-attachment',
+      {
+        'layout': 'nodisplay',
+        'href': 'www.google.com',
+        'theme': 'custom',
+        'cta-accent-color': 'pink',
+        'cta-accent-element': 'text',
+      }
+    );
+    element.appendChild(attachmentEl);
+
+    await page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(
+      openAttachmentEl.querySelector(
+        '.i-amphtml-story-page-open-attachment-link-icon'
+      )
+    ).to.exist;
+  });
+
   it('should build the open attachment UI with custom CTA label', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
     attachmentEl.setAttribute('layout', 'nodisplay');
-    attachmentEl.setAttribute('data-cta-text', 'Custom label');
+    attachmentEl.setAttribute('cta-text', 'Custom label');
     element.appendChild(attachmentEl);
 
     page.buildCallback();
@@ -659,6 +888,67 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       '.i-amphtml-story-page-open-attachment-label'
     );
     expect(openAttachmentLabelEl.textContent).to.equal('Custom label');
+  });
+
+  it('should use cta-text attribute when data-cta-text also exist', async () => {
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('cta-text', 'CTA text');
+    attachmentEl.setAttribute('data-cta-text', 'data CTA text');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentLabelEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment-label'
+    );
+
+    expect(openAttachmentLabelEl.textContent).to.equal('CTA text');
+  });
+
+  it('should propogate the amp-story-page-attachment title attribute to the cta button', async () => {
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('title', 'cta title');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(openAttachmentEl.getAttribute('title')).to.equal('cta title');
+  });
+
+  it('should propogate the amp-story-page-outlink title attribute to the cta button', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+    const attachmentEl = win.document.createElement('amp-story-page-outlink');
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    element.appendChild(attachmentEl);
+
+    const anchorChild = win.document.createElement('a');
+    anchorChild.setAttribute('href', 'google.com');
+    anchorChild.setAttribute('title', 'cta title');
+    attachmentEl.appendChild(anchorChild);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    expect(openAttachmentEl.getAttribute('title')).to.equal('cta title');
   });
 
   it('should start tracking media performance when entering the page', async () => {

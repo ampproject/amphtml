@@ -63,7 +63,9 @@ CssLength::CssLength()
       is_fluid(false),
       numeral(std::numeric_limits<double>::quiet_NaN()),
       unit(kUnitPx) {}
-CssLength::CssLength(string_view input, bool allow_auto, bool allow_fluid)
+CssLength::CssLength(
+    re2::StringPiece input,
+    bool allow_auto, bool allow_fluid)
     : is_valid(false),
       is_set(false),
       is_auto(false),
@@ -160,7 +162,7 @@ CssLength CalculateWidth(AmpLayout::Layout input_layout,
        input_layout == AmpLayout::FIXED) &&
       !input_width.is_set) {
     // These values come from AMP's external runtime and can be found in
-    // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
+    // https://github.com/ampproject/amphtml/blob/main/src/core/dom/layout/index.js#L70
     // Note that amp-audio is absent due to it not having explicit dimensions
     // (the dimensions are determined at runtime and are specific to the
     // particular device/browser/etc).
@@ -188,7 +190,7 @@ CssLength CalculateHeight(AmpLayout::Layout input_layout,
        input_layout == AmpLayout::FIXED_HEIGHT) &&
       !input_height.is_set) {
     // These values come from AMP's external runtime and can be found in
-    // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
+    // https://github.com/ampproject/amphtml/blob/main/src/core/dom/layout/index.js#L70
     // Note that amp-audio is absent due to it not having explicit dimensions
     // (the dimensions are determined at runtime and are specific to the
     // particular device/browser/etc).
@@ -202,12 +204,10 @@ CssLength CalculateHeight(AmpLayout::Layout input_layout,
 
 CssLength CalculateHeight(const AmpLayout& spec, AmpLayout::Layout input_layout,
                           const CssLength& input_height) {
-  static const auto kOne =
-      new CssLength("1", /*allow_auto=*/false, /*allow_fluid=*/false);
   if ((input_layout == AmpLayout::UNKNOWN || input_layout == AmpLayout::FIXED ||
        input_layout == AmpLayout::FIXED_HEIGHT) &&
       !input_height.is_set && spec.defines_default_height())
-    return *kOne;
+    return *kOnePx;
   return input_height;
 }
 
@@ -288,6 +288,8 @@ std::string GetLayoutStyle(AmpLayout::Layout layout, const CssLength& width,
                     GetCssLengthStyle(height, "height"));
     case AmpLayout::FIXED_HEIGHT:
       return GetCssLengthStyle(height, "height");
+    case AmpLayout::FLUID:
+      return "width:100%;height:0;";
     case AmpLayout::NODISPLAY:
     case AmpLayout::RESPONSIVE:
     case AmpLayout::FILL:
@@ -314,8 +316,16 @@ bool IsLayoutSizeDefined(AmpLayout::Layout layout) {
           layout == AmpLayout::INTRINSIC);
 }
 
+bool IsLayoutAwaitingSize(AmpLayout::Layout layout) {
+  return layout == AmpLayout::FLUID;
+}
+
 std::string GetLayoutSizeDefinedClass() {
   return "i-amphtml-layout-size-defined";
+}
+
+std::string GetLayoutAwaitingSizeClass() {
+  return "i-amphtml-layout-awaiting-size";
 }
 
 }  // namespace amp::validator::parse_layout

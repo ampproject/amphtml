@@ -15,7 +15,7 @@
  */
 
 import {getCarousel, getScrollingElement, getSlide} from './helpers';
-import {useStyles} from '../base-carousel.jss';
+import {useStyles} from '../component.jss';
 
 const pageWidth = 600;
 const pageHeight = 600;
@@ -46,7 +46,8 @@ describes.endtoend(
       await controller.switchToShadowRoot(carousel);
     });
 
-    it('should render correctly', async () => {
+    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
+    it.skip('should render correctly', async () => {
       const el = await getScrollingElement(styles, controller);
       const firstSlide = await getSlide(styles, controller, 0);
 
@@ -57,7 +58,8 @@ describes.endtoend(
       );
     });
 
-    it('should snap when scrolling', async () => {
+    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
+    it.skip('should snap when scrolling', async () => {
       const el = await getScrollingElement(styles, controller);
       const firstSlide = await getSlide(styles, controller, 0);
 
@@ -72,7 +74,8 @@ describes.endtoend(
       await expect(prop(el, 'scrollTop')).to.equal(snappedScrollTop);
     });
 
-    it('should reset the window after scroll', async function () {
+    // TODO(wg-bento, #24195): getScrollingElement does not always find element in time.
+    it.skip('should reset the window after scroll', async function () {
       const el = await getScrollingElement(styles, controller);
       const firstSlide = await getSlide(styles, controller, 0);
 

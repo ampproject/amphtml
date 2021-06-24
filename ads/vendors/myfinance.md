@@ -28,7 +28,7 @@ Serves ads from [MyFinance](https://www.myfinance.com/).
 <amp-ad
   type="myfinance"
   data-selector="myfi-content-end"
-  data-type="widget"
+  data-ad-type="widget"
 >
 </amp-ad>
 ```
@@ -39,7 +39,7 @@ Serves ads from [MyFinance](https://www.myfinance.com/).
 <amp-ad
   type="myfinance"
   data-creative-set="27cdb25b-5df4-4aca-8ef2-f63fd874e1f1"
-  data-type="widget"
+  data-ad-type="widget"
 >
 </amp-ad>
 ```
@@ -50,7 +50,7 @@ Serves ads from [MyFinance](https://www.myfinance.com/).
 <amp-ad
   type="myfinance"
   data-widget="0aec0151-4fa2-47cc-abfc-13d4f9861b7a"
-  data-type="widget"
+  data-ad-type="widget"
 >
 </amp-ad>
 ```
@@ -61,7 +61,7 @@ Serves ads from [MyFinance](https://www.myfinance.com/).
 <amp-ad
   type="myfinance"
   data-campaign="test-campaign"
-  data-type="cru"
+  data-ad-type="cru"
 >
 </amp-ad>
 ```
@@ -72,7 +72,7 @@ Serves ads from [MyFinance](https://www.myfinance.com/).
 
 #### Required parameters
 
--   `data-type` - set to `widget`
+-   `data-ad-type` - set to `widget`
 
 #### Widgets require one of the following parameters to be set
 
@@ -88,7 +88,7 @@ Serves ads from [MyFinance](https://www.myfinance.com/).
 
 #### Required parameters
 
--   `data-type` - set to `cru`
+-   `data-ad-type` - set to `cru`
 -   `data-campaign` - set to a valid campaign
 
 #### Optional parameters

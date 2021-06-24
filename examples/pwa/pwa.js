@@ -129,8 +129,6 @@ class Shell {
     }
   }
 
-  /**
-   */
   handlePopState_() {
     const newPage = this.win.location.pathname;
     log('Pop state: ', newPage, this.currentPage_);
@@ -254,8 +252,6 @@ class AmpViewer {
     this.installScript_('/dist/shadow-v0.js', '/dist/amp-shadow.js');
   }
 
-  /**
-   */
   clear() {
     if (this.amp_) {
       this.amp_.close();
@@ -375,8 +371,6 @@ class AmpViewer {
     return new URL(relativeUrlString, this.baseUrl_).origin;
   }
 
-  /**
-   */
   onMessage_(type, data, rsvp) {}
 }
 
@@ -436,7 +430,8 @@ function streamDocument(url, writer) {
     return fetch(url).then((response) => {
       // This should be a lot simpler with transforming streams and pipes,
       // but, TMK, these are not supported anywhere yet.
-      const /** !ReadableStreamDefaultReader */ reader = response.body.getReader();
+      const /** !ReadableStreamDefaultReader */ reader =
+          response.body.getReader();
       const decoder = new TextDecoder();
       function readChunk(chunk) {
         const text = decoder.decode(chunk.value || new Uint8Array(), {

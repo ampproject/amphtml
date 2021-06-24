@@ -15,10 +15,10 @@
  */
 
 import {dev} from '../src/log';
-import {dict} from '../src/utils/object.js';
+import {dict} from '#core/types/object';
 import {getMode} from '../src/mode';
-import {once} from '../src/utils/function.js';
-import {parseJson} from '../src/json';
+import {once} from '#core/types/function';
+import {parseJson} from '#core/types/object/json';
 import {parseUrlDeprecated} from '../src/url';
 
 /**

@@ -27,15 +27,15 @@ import {
   AmpStoryVariableService,
   AnalyticsVariable,
 } from '../../../amp-story/1.0/variable-service';
-import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/services';
+import {LocalizationService} from '#service/localization';
+import {Services} from '#service';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
-import {dict} from '../../../../src/utils/object';
+import {dict} from '#core/types/object';
 import {getBackendSpecs} from '../interactive-disclaimer';
-import {htmlFor} from '../../../../src/static-template';
-import {measureMutateElementStub} from '../../../../testing/test-helper';
-import {registerServiceBuilder} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+import {htmlFor} from '#core/dom/static-template';
+import {measureMutateElementStub} from '#testing/test-helper';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {toggleExperiment} from '#experiments';
 
 /**
  * Returns mock interactive data.
@@ -63,6 +63,94 @@ export const getMockInteractiveData = () => {
       {
         index: 3,
         count: 1,
+        selected: false,
+      },
+    ],
+  };
+};
+
+/**
+ * Returns mock interactive data with index key values that don't match the
+ * index within the options array.
+ *
+ * @return {Object}
+ */
+export const getMockScrambledData = () => {
+  return {
+    options: [
+      {
+        index: 3,
+        count: 4,
+        selected: false,
+      },
+      {
+        index: 0,
+        count: 1,
+        selected: false,
+      },
+      {
+        index: 1,
+        count: 2,
+        selected: false,
+      },
+      {
+        index: 2,
+        count: 3,
+        selected: true,
+      },
+    ],
+  };
+};
+
+/**
+ * Returns mock interactive data that doesn't account for all options.
+ *
+ * @return {Object}
+ */
+export const getMockIncompleteData = () => {
+  return {
+    options: [
+      {
+        index: 1,
+        count: 5,
+        selected: false,
+      },
+      {
+        index: 2,
+        count: 5,
+        selected: true,
+      },
+    ],
+  };
+};
+
+/**
+ * Returns mock interactive data with index key values that don't correspond
+ * to any of the option elements.
+ *
+ * @return {Object}
+ */
+export const getMockOutOfBoundsData = () => {
+  return {
+    options: [
+      {
+        index: 3,
+        count: 4,
+        selected: false,
+      },
+      {
+        index: 0,
+        count: 1,
+        selected: true,
+      },
+      {
+        index: -1,
+        count: 2,
+        selected: false,
+      },
+      {
+        index: 4,
+        count: 3,
         selected: false,
       },
     ],
@@ -279,6 +367,106 @@ describes.realWin(
       );
     });
 
+    it('should select the correct option if the backend responds with scrambled data', async () => {
+      const NUM_OPTIONS = 4;
+      const scrambledData = getMockScrambledData();
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(scrambledData);
+      addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
+      ampStoryInteractive.element.setAttribute(
+        'endpoint',
+        'http://localhost:8000'
+      );
+      await ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+
+      expect(ampStoryInteractive.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
+      );
+      const selectedIndex = scrambledData.options.filter(
+        (option) => option.selected
+      )[0].index;
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        if (i === selectedIndex) {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        } else {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.not.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        }
+      }
+    });
+
+    it('should select the correct option if the backend responds with incomplete data', async () => {
+      const NUM_OPTIONS = 4;
+      const incompleteData = getMockIncompleteData();
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(incompleteData);
+      addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
+      ampStoryInteractive.element.setAttribute(
+        'endpoint',
+        'http://localhost:8000'
+      );
+      await ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+
+      expect(ampStoryInteractive.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
+      );
+      const selectedIndex = incompleteData.options.filter(
+        (option) => option.selected
+      )[0].index;
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        if (i === selectedIndex) {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        } else {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.not.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        }
+      }
+    });
+
+    it('should select the correct option if the backend responds with out of bounds data', async () => {
+      const NUM_OPTIONS = 4;
+      const outOfBoundsData = getMockOutOfBoundsData();
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(outOfBoundsData);
+      addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
+      ampStoryInteractive.element.setAttribute(
+        'endpoint',
+        'http://localhost:8000'
+      );
+      await ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+
+      expect(ampStoryInteractive.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
+      );
+      expect(ampStoryInteractive.optionsData_.length).to.equal(NUM_OPTIONS);
+      const selectedIndex = outOfBoundsData.options.filter(
+        (option) => option.selected
+      )[0].index;
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        if (i === selectedIndex) {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        } else {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.not.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        }
+      }
+    });
+
     it('should throw error if percentages are not correctly passed', () => {
       addConfigToInteractive(ampStoryInteractive);
       const responseData = dict({'wrongKey': []});
@@ -292,36 +480,32 @@ describes.realWin(
     it('should preprocess percentages properly', () => {
       const responseData1 = getMockInteractiveData()['options'];
 
-      const percentages1 = ampStoryInteractive.preprocessPercentages_(
-        responseData1
-      );
+      const percentages1 =
+        ampStoryInteractive.preprocessPercentages_(responseData1);
 
       expect(percentages1).to.deep.equal([30, 30, 30, 10]);
     });
 
     it('should preprocess percentages preserving ties', () => {
       const responseData2 = generateResponseDataFor([3, 3, 3]);
-      const percentages2 = ampStoryInteractive.preprocessPercentages_(
-        responseData2
-      );
+      const percentages2 =
+        ampStoryInteractive.preprocessPercentages_(responseData2);
 
       expect(percentages2).to.deep.equal([33, 33, 33]);
     });
 
     it('should preprocess percentages preserving order', () => {
       const responseData3 = generateResponseDataFor([255, 255, 245, 245]);
-      const percentages3 = ampStoryInteractive.preprocessPercentages_(
-        responseData3
-      );
+      const percentages3 =
+        ampStoryInteractive.preprocessPercentages_(responseData3);
 
       expect(percentages3).to.deep.equal([26, 26, 24, 24]);
     });
 
     it('should preprocess percentages handling rounding edge cases', () => {
       const responseData4 = generateResponseDataFor([335, 335, 330]);
-      const percentages4 = ampStoryInteractive.preprocessPercentages_(
-        responseData4
-      );
+      const percentages4 =
+        ampStoryInteractive.preprocessPercentages_(responseData4);
 
       expect(percentages4).to.deep.equal([33, 33, 33]);
     });

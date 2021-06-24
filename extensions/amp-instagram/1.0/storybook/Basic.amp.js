@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-instagram-1_0',
-  decorators: [withA11y, withKnobs, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [
@@ -51,7 +50,7 @@ export const _default = () => {
 };
 
 export const InsideAccordion = () => {
-  const shortcode = text('shortcode', 'B8QaZW4AQY_');
+  const shortcode = text('shortcode', 'Bp4I3hRhd_v');
   const width = number('width', 300);
   const height = number('height', 200);
   return (
@@ -67,5 +66,21 @@ export const InsideAccordion = () => {
         </div>
       </section>
     </amp-accordion>
+  );
+};
+
+export const InsideDetails = () => {
+  const shortcode = text('shortcode', 'Bp4I3hRhd_v');
+  const width = number('width', 300);
+  const height = number('height', 200);
+  return (
+    <details open>
+      <summary>Post</summary>
+      <amp-instagram
+        data-shortcode={shortcode}
+        width={width}
+        height={height}
+      ></amp-instagram>
+    </details>
   );
 };

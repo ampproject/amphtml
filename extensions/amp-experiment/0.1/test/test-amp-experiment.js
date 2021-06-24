@@ -16,8 +16,8 @@
 
 import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
-import {Services} from '../../../../src/services';
-import {hasOwn} from '../../../../src/utils/object';
+import {Services} from '#service';
+import {hasOwn} from '#core/types/object';
 
 describes.realWin(
   'amp-experiment',

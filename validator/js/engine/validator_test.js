@@ -289,7 +289,7 @@ ValidatorTestCase.prototype.run = function() {
   message += 'expected:\n' + this.expectedOutput + '\nsaw:\n' + observed;
   if (this.expectedOutputFile !== null) {
     message += '\n\nIf validator/' + absolutePathFor(this.expectedOutputFile) +
-        ' is incorrect, please run `gulp validator --update_tests` to ' +
+        ' is incorrect, please run `amp validator --update_tests` to ' +
         'regenerate it based on its corresponding .html file.';
   }
   asserts.fail(message);
@@ -1522,7 +1522,8 @@ describe('ValidatorRulesMakeSense', () => {
         expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
         specNameIsUnique[tagSpec.specName] = 0;
       } else if (tagSpec.extensionSpec !== null) {
-        const specName = tagSpec.extensionSpec.name + ' extension script';
+        const specName = tagSpec.extensionSpec.name + ' ' +
+            tagSpec.extensionSpec.versionName + ' extension script';
 
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
         specNameIsUnique[specName] = 0;
@@ -1552,7 +1553,7 @@ describe('ValidatorRulesMakeSense', () => {
         (tagSpec.htmlFormat.indexOf(generated.HtmlFormat.Code.AMP4ADS) !==
          -1)) {
       // AMP4ADS format lists approved extensions.
-      // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
+      // https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       // Changes to the following map must be approved by the Ads Working
       // Group, @wg-monetization.
       const approvedAmp4AdsExtensions = {
@@ -1887,8 +1888,8 @@ describe('ValidatorRulesMakeSense', () => {
            () => {
              expect(
                  hasSrc || hasJson || hasTextPlain ||
-                 (hasOctetStream && hasCiphertext) ||
-                 hasAmpOnerror).toBe(true);
+                 (hasOctetStream && hasCiphertext) || hasAmpOnerror)
+                 .toBe(true);
            });
       }
       // cdata_regex and mandatory_cdata

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
+import {Services} from './service';
 import {getFormAsObject, getSubmitButtonUsed} from './form';
-import {iterateCursor} from './dom';
-import {map} from './utils/object';
+import {iterateCursor} from './core/dom';
+import {map} from './core/types/object';
 
 /**
  * Create a form data wrapper. The wrapper is necessary to provide a common

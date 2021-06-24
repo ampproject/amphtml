@@ -15,7 +15,7 @@
  */
 
 import {Renderer} from './amp-ad-type-defs';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {devAssert} from '../../../src/log';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
 
 /**
@@ -41,7 +41,7 @@ export class FriendlyFrameRenderer extends Renderer {
   render(context, element, creativeData) {
     creativeData = /** @type {CreativeData} */ (creativeData);
 
-    const {size, adUrl} = context;
+    const {adUrl, size} = context;
     const {creativeMetadata} = creativeData;
 
     devAssert(size, 'missing creative size');

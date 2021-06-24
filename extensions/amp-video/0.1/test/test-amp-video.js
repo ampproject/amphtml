@@ -15,13 +15,14 @@
  */
 
 import {AmpVideo, isCachedByCdn} from '../amp-video';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {VideoEvents} from '../../../../src/video-interface';
-import {VisibilityState} from '../../../../src/visibility-state';
-import {dispatchCustomEvent} from '../../../../src/dom';
-import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {dispatchCustomEvent} from '#core/dom';
+import {installPerformanceService} from '#service/performance-impl';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin(
   'amp-video',
@@ -40,6 +41,7 @@ describes.realWin(
       doc = win.document;
       timer = Services.timerFor(win);
 
+      installPerformanceService(win);
       resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
@@ -126,13 +128,13 @@ describes.realWin(
       const sources = video.querySelectorAll('source');
       expect(sources.length).to.equal(4);
       expect(sources[0].getAttribute('src')).to.equal(
-        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_quality=high'
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=high'
       );
       expect(sources[1].getAttribute('src')).to.equal(
-        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_quality=medium'
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=medium'
       );
       expect(sources[2].getAttribute('src')).to.equal(
-        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_quality=low'
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_video_quality=low'
       );
       expect(sources[3].getAttribute('src')).to.equal(
         'https://example.com/video.mp4'
@@ -465,9 +467,14 @@ describes.realWin(
       env.sandbox.spy(video, 'pause');
       // The auto-pause only happens on when the video is actually playing.
       dispatchCustomEvent(video, 'play');
+      // First send "size" event and then "no size".
       resizeObserverStub.notifySync({
         target: v,
-        contentRect: {width: 0, height: 0},
+        borderBoxSize: [{inlineSize: 10, blockSize: 10}],
+      });
+      resizeObserverStub.notifySync({
+        target: v,
+        borderBoxSize: [{inlineSize: 0, blockSize: 0}],
       });
       expect(video.pause.called).to.be.true;
     });

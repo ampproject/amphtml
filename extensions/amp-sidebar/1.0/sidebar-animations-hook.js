@@ -15,9 +15,10 @@
  */
 
 import {Side} from './sidebar-config';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {useLayoutEffect, useRef} from '../../../src/preact';
-import {useValueRef} from '../../../src/preact/component';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
+import {setStyles} from '#core/dom/style';
+import {useLayoutEffect, useRef} from '#preact';
+import {useValueRef} from '#preact/component';
 
 const ANIMATION_DURATION = 350;
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
@@ -47,21 +48,26 @@ function safelySetStyles(element, styles) {
 }
 
 /**
+ * @param {boolean} mounted
  * @param {boolean} opened
- * @param {{current: function|undefined}} onAfterClose
+ * @param {{current: function():void} | {current: void}} onAfterOpen
+ * @param {{current: function():void} | {current: void}} onAfterClose
  * @param {string} side
- * @param {{current: Element|null}} sidebarRef
- * @param {{current: Element|null}} backdropRef
- * @param {function} setMounted
+ * @param {{current: (Element|null)}} sidebarRef
+ * @param {{current: (Element|null)}} backdropRef
+ * @param {function():undefined} setMounted
  */
 export function useSidebarAnimation(
+  mounted,
   opened,
+  onAfterOpen,
   onAfterClose,
   side,
   sidebarRef,
   backdropRef,
   setMounted
 ) {
+  const onAfterOpenRef = useValueRef(onAfterOpen);
   const onAfterCloseRef = useValueRef(onAfterClose);
   const sidebarAnimationRef = useRef(null);
   const backdropAnimationRef = useRef(null);
@@ -71,7 +77,10 @@ export function useSidebarAnimation(
     const backdropElement = backdropRef.current;
     // The component might start in a state where `side` is not known
     // This effect must be restarted when the `side` becomes known
-    if (!sidebarElement || !backdropElement || !side) {
+    // Must also check mounted as of #33244.  This is because previously
+    // sidebarElement and backdropElement would not be rendered when
+    // mounted is false.  This is no longer the case.
+    if (!mounted || !sidebarElement || !backdropElement || !side) {
       return;
     }
 
@@ -81,11 +90,10 @@ export function useSidebarAnimation(
       sidebarAnimationRef.current = null;
       backdropAnimationRef.current = null;
       currentlyAnimatingRef.current = false;
+      onAfterOpenRef.current?.();
     };
     const postInvisibleAnim = () => {
-      if (onAfterCloseRef.current) {
-        onAfterCloseRef.current();
-      }
+      onAfterCloseRef.current?.();
       sidebarAnimationRef.current = null;
       backdropAnimationRef.current = null;
       currentlyAnimatingRef.current = false;
@@ -175,5 +183,14 @@ export function useSidebarAnimation(
       backdropAnimationRef.current = backdropAnimation;
       currentlyAnimatingRef.current = true;
     }
-  }, [opened, onAfterCloseRef, side, sidebarRef, backdropRef, setMounted]);
+  }, [
+    mounted,
+    opened,
+    onAfterOpenRef,
+    onAfterCloseRef,
+    side,
+    sidebarRef,
+    backdropRef,
+    setMounted,
+  ]);
 }

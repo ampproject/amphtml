@@ -15,7 +15,7 @@
  */
 
 import {dev} from './log';
-import {whenUpgradedToCustomElement} from './dom';
+import {whenUpgradedToCustomElement} from './amp-element-helpers';
 
 export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
 
@@ -34,6 +34,19 @@ export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
  * @interface
  */
 export class VideoInterface {
+  /**
+   * See `BaseElement`.
+   * @return {!./utils/signals.Signals}
+   */
+  signals() {}
+
+  /**
+   * See `BaseElement`.
+   * @param {function()} unusedMutator
+   * @return {!Promise}
+   */
+  mutateElementSkipRemeasure(unusedMutator) {}
+
   /**
    * Whether the component supports video playback in the current platform.
    * If false, component will be not treated as a video component.
@@ -163,7 +176,7 @@ export class VideoInterface {
    * implementation of fullscreen (flash for example) then check
    * if Services.platformFor(this.win).isSafari is true and use the internal
    * implementation instead. If not, it is recommended to take the iframe
-   * to fullscreen using fullscreenEnter from dom.js
+   * to fullscreen using fullscreenEnter from src/core/dom/fullscreen.js
    */
   fullscreenEnter() {}
 
@@ -185,13 +198,19 @@ export class VideoInterface {
   seekTo(unusedTimeSeconds) {}
 }
 
+/** @type {!AmpElement} */
+VideoInterface.prototype.element;
+
+/** @type {!Window} */
+VideoInterface.prototype.win;
+
 /**
  * Attributes
  *
  * Components implementing the VideoInterface are expected to support
  * the following attributes.
  *
- * @const {!Object<string, string>}
+ * @enum {string}
  */
 export const VideoAttributes = {
   /**
@@ -249,7 +268,7 @@ export const VideoAttributes = {
  * Components implementing the VideoInterface are expected to dispatch
  * the following DOM events.
  *
- * @const {!Object<string, string>}
+ * @enum {string}
  */
 export const VideoEvents = {
   /**
@@ -411,7 +430,7 @@ export let PlayingStateDef;
  * Internal playing states used to distinguish between video playing on user's
  * command and videos playing automatically
  *
- * @const {!Object<string, PlayingStateDef>}
+ * @enum {string}
  */
 export const PlayingStates = {
   /**

@@ -15,7 +15,7 @@
  */
 
 import '../amp-yotpo';
-import {yotpo} from '../../../../3p/yotpo';
+import {yotpo} from '#3p/yotpo';
 
 describes.realWin(
   'amp-yotpo',
@@ -32,6 +32,7 @@ describes.realWin(
       {name: 'BottomLine', selector: '.yotpo.bottomLine'},
       {name: 'PicturesGallery', selector: '.yotpo.yotpo-pictures-gallery'},
       {name: 'ReviewsCarousel', selector: '.yotpo.yotpo-reviews-carousel'},
+      {name: 'ReviewsTab', selector: '.yotpo.yotpo-modal'},
       {name: 'badge', selector: '.yotpo.badge,.yotpo.yotpo-badge'},
       {name: 'questions-bottomline', selector: '.yotpo.QABottomLine'},
       {name: 'slider', selector: '.yotpo.yotpo-slider'},
