@@ -2262,7 +2262,7 @@ export class AmpStory extends AMP.BaseElement {
         const page = this.getPageById(activePageId);
         page.setDistance(0);
         page.signals().whenSignal(CommonSignals.LOAD_END).then(res);
-        page.signals().whenSignal(EventType.SWITCH_PAGE).then(rej);
+        this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, rej);
       })
         .then(() => preloadAllPages())
         .catch();
