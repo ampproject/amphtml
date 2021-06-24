@@ -875,12 +875,10 @@ describes.realWin(
           {
             'name': 'Apple',
             'price': '1.99',
-            'stars': '&#9733;&#9733;&#9733;&#9733;&#9733;',
           },
           {
             'name': 'Orange',
             'price': '0.99',
-            'stars': '&#9733;&#9733;&#9733;&#9733;&#9734;',
           },
           {
             'name': 'Pear',
@@ -889,7 +887,6 @@ describes.realWin(
           {
             'name': 'Banana',
             'price': '1.50',
-            'stars': '&#9733;&#9733;&#9733;&#9733;&#9733;',
           },
           {
             'name': 'Watermelon',
@@ -898,7 +895,6 @@ describes.realWin(
           {
             'name': 'Melon',
             'price': '3.50',
-            'stars': '&#9733;&#9733;&#9733;&#9733;&#9733;',
           },
         ],
       });
@@ -915,7 +911,6 @@ describes.realWin(
             {{#items}}
             <div>
               <div>{{name}}</div>
-              <div>{{{stars}}}</div>
               <div>{{price}}</div>
             </div>
             {{/items}}
