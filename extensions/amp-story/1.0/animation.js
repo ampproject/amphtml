@@ -298,6 +298,7 @@ export class AnimationRunner {
    * @return {!Promise<void>}
    */
   applyFirstFrame() {
+    // return Promise.resolve();
     if (this.hasStarted()) {
       return Promise.resolve();
     }
@@ -351,6 +352,7 @@ export class AnimationRunner {
    * @private
    */
   startWhenReady_(runner) {
+    this.presetTarget_.style['opacity'];
     runner.start();
   }
 
@@ -637,6 +639,7 @@ export class AnimationManager {
             if (!preset) {
               return null;
             }
+            preset.delay = 0;
             return this.createRunner_({
               preset,
               source: el,
