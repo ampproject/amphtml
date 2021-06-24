@@ -58,7 +58,9 @@ export const deduplicateInteractiveIds = (doc) => {
 export const buildImgTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-story-interactive-img-container">
+    <div
+      class="i-amphtml-story-interactive-img-container i-amphtml-story-interactive-container"
+    >
       <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-img-option-container"></div>
     </div>
