@@ -66,9 +66,7 @@ tags: {  # <amp-ad>
   attrs: { name: "type" mandatory: true }
   attrs: {
     name: "sticky"
-    value: ""
-    value: "top"
-    value: "bottom"
+    value_regex: "(|top|bottom)"
   }
   attrs: { name: "always-serve-npa" }
   attrs: { name: "block-rtc" }
