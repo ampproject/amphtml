@@ -50,10 +50,8 @@ const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
 
 /**
  * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
- *
  * TODO: this is similar to the implementation in amp-list. Move it
  * to a common file and import it.
- *
  * @param {!AmpElement} element
  * @param {string} src
  * @return {Promise<!JsonObject>}
@@ -193,6 +191,23 @@ export class AmpRender extends BaseElement {
     return super.isLayoutSupported(layout);
   }
 
+  /** @private */
+  handleResizeToContentsAction_() {
+    let currentHeight, targetHeight;
+    this.measureMutateElement(
+      () => {
+        currentHeight = this.element./*OK*/ offsetHeight;
+        targetHeight = this.element./*OK*/ scrollHeight;
+      },
+      () => {
+        if (targetHeight <= currentHeight) {
+          return;
+        }
+        this.forceChangeHeight(targetHeight);
+      }
+    );
+  }
+
   /** @override */
   init() {
     this.initialSrc_ = this.element.getAttribute('src');
@@ -213,6 +228,10 @@ export class AmpRender extends BaseElement {
         return;
       }
       api.refresh();
+    });
+
+    this.registerAction('resizeToContents', () => {
+      this.handleResizeToContentsAction_();
     });
 
     return dict({
@@ -353,7 +372,6 @@ export class AmpRender extends BaseElement {
   /**
    * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
-   *
    * @override
    */
   isReady(props) {
