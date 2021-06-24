@@ -28,6 +28,11 @@
   border-bottom: 1px solid var(--i-amphtml-interactive-option-background-color);
 }
 
+.i-amphtml-story-interactive-prompt-container {
+  padding-left: 2.5em !important;
+  padding-right: 2.5em !important;
+}
+
 .i-amphtml-story-interactive-img-option-container {
   background: var(--i-amphtml-interactive-option-background-color) !important;
   display: flex !important;
