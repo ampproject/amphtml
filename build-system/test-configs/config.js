@@ -285,8 +285,6 @@ const htmlFixtureGlobs = [
   '!examples/amp-story/grid-layer-presets.html',
   '!examples/amp-story/grid-layer-templates.html',
   '!examples/amp-story/helloworld.html',
-  '!examples/amp-story/interactive_img_polls.html',
-  '!examples/amp-story/interactive_img_quizzes.html',
   '!examples/amp-story/interactive_polls.html',
   '!examples/amp-story/interactive_quizzes.html',
   '!examples/amp-story/interactive_results.html',
