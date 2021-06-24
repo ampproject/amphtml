@@ -352,7 +352,6 @@ export class AnimationRunner {
    * @private
    */
   startWhenReady_(runner) {
-    this.presetTarget_.style['opacity'];
     runner.start();
   }
 
