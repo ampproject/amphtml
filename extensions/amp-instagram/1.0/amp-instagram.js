@@ -37,9 +37,10 @@ class AmpInstagram extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'requestResize': (height) => {
-        this.forceChangeHeight(height);
-      },
+      'requestResize': (height) =>
+        this.attemptChangeHeight(height).catch(() => {
+          /* ignore failures */
+        }),
     });
   }
 }
