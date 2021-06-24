@@ -179,7 +179,7 @@ export const presets = {
     easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes: [
       {
-        opacity: 0,
+        opacity: 0.01,
       },
       {
         opacity: 1,
@@ -191,7 +191,7 @@ export const presets = {
     easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes: [
       {
-        opacity: 0,
+        opacity: 0.01,
         transform: 'scale(0.8)',
       },
       {
@@ -205,7 +205,7 @@ export const presets = {
     easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes: [
       {
-        opacity: 0,
+        opacity: 0.01,
         transform: 'scale(1.4)',
       },
       {
@@ -282,7 +282,7 @@ export const presets = {
     keyframes: [
       {
         transform: 'rotate(-540deg) scale(0.1)',
-        opacity: 0,
+        opacity: 0.01,
       },
       {
         transform: 'none',
