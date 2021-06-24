@@ -93,13 +93,31 @@ Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-an
 The `<amp-render>` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes.
 
 ```html
-<button on="tap:myComponent.refresh">Refresh</button>
-<amp-render id="myComponent" src="https://example.com/data.json">
+<button on="tap:my-component.refresh">Refresh</button>
+<amp-render id="my-component" src="https://example.com/data.json">
   <template type="amp-mustache">
     <div>{{title}}</div>
   </template>
 </amp-render>
 ```
+
+### Dynamic resizing
+In some cases, we may need the `<amp-render>` component to resize on user interaction. For example, when the content does not fit within specified height specified with `layout="fixed-height"`. The `resizeToContents` action handles this by increasing the height to fit the content. If the content already fits in the specified height, height remains unchanged. See the following example:
+
+```html
+<button on="tap:my-component.resizeToContents()">Expand</button>
+<amp-render id="my-component" src="https://example.com/data.json">
+  <template type="amp-mustache">
+    {{#cars}}
+      <p>{{make}} {{model}}</p>
+    {{/cars}}
+  </template>
+</amp-render>
+```
+
+[tip type="important"]
+For `<amp-render>` instances with `layout="responsive"`, `resizeToContents` action may break the aspect ratio since the height might change but width remains fixed.
+[/tip]
 
 ### Substitutions
 
