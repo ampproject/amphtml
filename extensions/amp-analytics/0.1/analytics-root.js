@@ -229,7 +229,6 @@ export class AnalyticsRoot {
           found = closestAncestorElementBySelector(context, selector);
         } else {
           found = this.getRoot().querySelector(selector);
-          console.log(found)
         }
       } catch (e) {
         userAssert(false, `Invalid query selector ${selector}`);
@@ -266,7 +265,9 @@ export class AnalyticsRoot {
             elementArray.push(nodeList[j]);
           }
         }
-        elementArray = useDataVars ? this.getDataVarsElements_(elementArray, selector) : elementArray;
+        elementArray = useDataVars
+          ? this.getDataVarsElements_(elementArray, selector)
+          : elementArray;
         userAssert(elementArray.length, `Element "${selector}" not found`);
         elements = elements.concat(elementArray);
       }

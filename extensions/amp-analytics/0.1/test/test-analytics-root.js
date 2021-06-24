@@ -344,14 +344,13 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         child.classList.add('myClass');
         child2.classList.add('myClass');
         child3.classList.add('notMyClass');
-        expect(await root.getElements(body, ['.myClass'], null, false)).to.deep.equal([
-          child,
-          child2,
-        ]);
+        expect(
+          await root.getElements(body, ['.myClass'], null, false)
+        ).to.deep.equal([child, child2]);
         // Check that non-array selector works
-        expect(await root.getElements(body, '.notMyClass', null, false)).to.deep.equal(
-          [child3]
-        );
+        expect(
+          await root.getElements(body, '.notMyClass', null, false)
+        ).to.deep.equal([child3]);
       });
 
       it('should only find elements with data-vars-*', async () => {
@@ -401,31 +400,30 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
 
       it('should handle invalid selector', async () => {
         expectAsyncConsoleError(/Invalid query selector 12345/, 1);
-        await expect(root.getElements(body, [12345], null, false)).to.be.rejectedWith(
-          /Invalid query selector 12345​​​/
-        );
-        await expect(root.getElements(body, [12345], null, true)).to.be.rejectedWith(
-          /Invalid query selector 12345​​​/
-        );
+        await expect(
+          root.getElements(body, [12345], null, false)
+        ).to.be.rejectedWith(/Invalid query selector 12345​​​/);
+        await expect(
+          root.getElements(body, [12345], null, true)
+        ).to.be.rejectedWith(/Invalid query selector 12345​​​/);
       });
 
       it('should find both AMP and non AMP elements within array selector', async () => {
         child.classList.remove('i-amphtml-element');
         child.classList.add('myClass');
         child2.classList.add('myClass');
-        expect(await root.getElements(body, ['.myClass'], null, false)).to.deep.equal([
-          child,
-          child2,
-        ]);
+        expect(
+          await root.getElements(body, ['.myClass'], null, false)
+        ).to.deep.equal([child, child2]);
       });
 
       it('should find non AMP element with single selector', async () => {
         child.classList.remove('i-amphtml-element');
         child.removeAttribute('data-vars-id');
         child.classList.add('myClass');
-        expect(await root.getElements(body, '.myClass', null, true)).to.deep.equal([
-          child,
-        ]);
+        expect(
+          await root.getElements(body, '.myClass', null, true)
+        ).to.deep.equal([child]);
       });
 
       it('should fail if selection method is found', async () => {
@@ -816,17 +814,16 @@ describes.realWin(
       it('should find both AMP and non AMP elements', async () => {
         child.classList.remove('i-amphtml-element');
         child.setAttribute('data-vars-id', '123');
-        expect(await root.getElements(body, ['.myClass'], null, false)).to.deep.equal([
-          child,
-          child2,
-        ]);
+        expect(
+          await root.getElements(body, ['.myClass'], null, false)
+        ).to.deep.equal([child, child2]);
       });
 
       it('should find non AMP element with single selector', async () => {
         child.classList.remove('i-amphtml-element');
-        expect(await root.getElements(body, '.myClass', null, false)).to.deep.equal([
-          child,
-        ]);
+        expect(
+          await root.getElements(body, '.myClass', null, false)
+        ).to.deep.equal([child]);
       });
     });
 
