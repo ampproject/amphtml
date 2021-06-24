@@ -343,7 +343,7 @@ class AmpCarousel extends AMP.BaseElement {
             stroke-width="2px"
             stroke-linejoin="round"
             stroke-linecap="round"
-          />
+          ></path>
         </svg>
       </button>
     `;
@@ -370,7 +370,7 @@ class AmpCarousel extends AMP.BaseElement {
             stroke-width="2px"
             stroke-linejoin="round"
             stroke-linecap="round"
-          />
+          ></path>
         </svg>
       </button>
     `;
