@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-amp-viz-vega canvas {
-  display: block;
-}
+/** @externs */
+
+/** @const */
+var SoundcloudDef = {};
+
+/**
+ * @typedef {{
+ *   color: string,
+ *   playlistId: (string|undefined),
+ *   secretToken: (string|undefined),
+ *   trackId: (string|undefined),
+ *   visual: boolean,
+ * }}
+ */
+SoundcloudDef.Props;
