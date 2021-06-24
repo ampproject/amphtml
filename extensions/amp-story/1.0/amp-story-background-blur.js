@@ -29,14 +29,17 @@ export class backgroundBlur {
    * @param {!Element} element
    */
   constructor(win, element) {
-    /** @private @const {!Element} */
-    this.element_ = element;
-
     /** @private @const {!Window} */
     this.win_ = win;
 
     /** @private @const {!Element} */
+    this.element_ = element;
+
+    /** @private @const {!Element} */
     this.canvas_ = null;
+
+    /**  @private {!number} */
+    this.currentRAF_ = null;
   }
 
   /**
@@ -95,10 +98,12 @@ export class backgroundBlur {
         } else {
           context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
         }
-        requestAnimationFrame(nextFrame);
+        this.currentRAF_ = requestAnimationFrame(nextFrame);
       }
     };
-    requestAnimationFrame(nextFrame);
+    // Cancels the previous animation loop before starting a new one.
+    cancelAnimationFrame(this.currentRAF_);
+    this.currentRAF_ = requestAnimationFrame(nextFrame);
   }
 
   /**
