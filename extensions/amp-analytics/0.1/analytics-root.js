@@ -229,6 +229,7 @@ export class AnalyticsRoot {
           found = closestAncestorElementBySelector(context, selector);
         } else {
           found = this.getRoot().querySelector(selector);
+          console.log(found)
         }
       } catch (e) {
         userAssert(false, `Invalid query selector ${selector}`);
@@ -247,7 +248,7 @@ export class AnalyticsRoot {
    * @param {!Array<string>} selectors Array of DOM query selectors.
    * @return {!Promise<!Array<!Element>>} Element corresponding to the selector.
    */
-  getElementsByQuerySelectorAll_(selectors) {
+  getElementsByQuerySelectorAll_(selectors, useDataVars) {
     // Wait for document-ready to avoid false missed searches
     return this.ampdoc.whenReady().then(() => {
       let elements = [];
@@ -265,7 +266,7 @@ export class AnalyticsRoot {
             elementArray.push(nodeList[j]);
           }
         }
-        elementArray = this.getDataVarsElements_(elementArray, selector);
+        elementArray = useDataVars ? this.getDataVarsElements_(elementArray, selector) : elementArray;
         userAssert(elementArray.length, `Element "${selector}" not found`);
         elements = elements.concat(elementArray);
       }
@@ -341,7 +342,7 @@ export class AnalyticsRoot {
    *   `'closest'` and `'scope'`.
    * @return {!Promise<!Array<!Element>>} Array of elements corresponding to the selector if found.
    */
-  getElements(context, selectors, selectionMethod) {
+  getElements(context, selectors, selectionMethod, useDataVars) {
     if (isArray(selectors)) {
       userAssert(
         !selectionMethod,
@@ -349,7 +350,8 @@ export class AnalyticsRoot {
         selectionMethod
       );
       return this.getElementsByQuerySelectorAll_(
-        /** @type {!Array<string>} */ (selectors)
+        /** @type {!Array<string>} */ (selectors),
+        useDataVars
       );
     }
     return this.getElement(
