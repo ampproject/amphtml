@@ -1221,6 +1221,7 @@
     "version": "1.0",
     "latestVersion": "1.0",
     "options": {
+      "npm": true,
       "wrappers": "bento"
     }
   },
