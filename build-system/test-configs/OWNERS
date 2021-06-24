@@ -13,9 +13,5 @@
       pattern: 'dep-check-config.js',
       owners: [{name: '*'}],
     },
-    {
-      pattern: 'config.js',
-      owners: [{name: '*'}],
-    },
   ],
 }
