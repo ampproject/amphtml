@@ -59,9 +59,7 @@ function WordpressEmbedWithRef(
       switch (data.message) {
         case 'height':
           if (typeof data.value === 'number') {
-            // Make sure the new height is between 200px and 1000px.
-            // This replicates a constraint in WordPress's wp.receiveEmbedMessage() function.
-            const height = Math.min(Math.max(data.value, 200), 1000);
+            const height = data.value;
             if (requestResize) {
               requestResize(height);
             }
