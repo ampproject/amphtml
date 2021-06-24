@@ -21,7 +21,7 @@ import {toArray} from '#core/types/array';
  */
 export function install(win) {
   const {Set: SetConstructor} = win;
-  const s = new Set([1]);
+  const s = new SetConstructor([1]);
   // Add suppport for `new Set(iterable)`. IE11 lacks it.
   if (s.size < 1) {
     win.Set = /** @type {typeof Set} */ (
