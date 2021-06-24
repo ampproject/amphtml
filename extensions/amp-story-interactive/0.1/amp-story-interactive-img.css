@@ -37,7 +37,7 @@
   background: var(--i-amphtml-interactive-option-background-color) !important;
   display: flex !important;
   justify-content: center !important;
-  border-radius: 4.5em !important;
+  border-radius: 5em !important;
   overflow: hidden !important;
   box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
   /* overflow bug fix for percent bar animation on ios safari  */
