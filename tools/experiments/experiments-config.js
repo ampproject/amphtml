@@ -60,12 +60,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
   },
   {
-    id: 'amp-viz-vega',
-    name: 'AMP Visualization using Vega grammar',
-    spec: 'https://github.com/ampproject/amphtml/issues/3991',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
-  },
-  {
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
