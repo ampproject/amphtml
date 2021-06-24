@@ -38,12 +38,17 @@ export const BasicEmbedExample = () => {
   const layout = text('layout', 'fixed');
 
   return (
-    <amp-wordpress-embed
-      data-url={url}
-      width={width}
-      height={height}
-      layout={layout}
-    ></amp-wordpress-embed>
+    <>
+      <amp-wordpress-embed
+        data-url={url}
+        width={width}
+        height={height}
+        layout={layout}
+      >
+        <button overflow>load more</button>
+      </amp-wordpress-embed>
+      <p>text below</p>
+    </>
   );
 };
 
