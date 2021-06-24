@@ -34,10 +34,10 @@ class AmpLightboxGallery extends BaseElement {
   init() {
     this.registerApiAction(
       DEFAULT_ACTION,
-      (api) => api./*OK*/ open(),
-      ActionTrust.LOW
+      (api) => api.open(),
+      ActionTrust.HIGH
     );
-    this.registerApiAction('open', (api) => api./*OK*/ open(), ActionTrust.LOW);
+    this.registerApiAction('open', (api) => api.open(), ActionTrust.HIGH);
     return super.init();
   }
 
