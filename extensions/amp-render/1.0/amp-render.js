@@ -195,6 +195,8 @@ export class AmpRender extends BaseElement {
 
   /**
    * Undoes previous size-defined layout, must be called in mutation context.
+   * TODO: this is similar to the implementation in amp-list. Move it
+   * to a common file and import it.
    * @param {string} layout
    * @private
    */
@@ -204,12 +206,9 @@ export class AmpRender extends BaseElement {
 
     // TODO(amphtml): Remove [width] and [height] attributes too?
     if (
-      [
-        Layout.FILL,
-        Layout.FIXED,
-        Layout.FLEX_ITEM,
-        Layout.RESPONSIVE,
-      ].includes(layout)
+      [Layout.FILL, Layout.FIXED, Layout.FLEX_ITEM, Layout.RESPONSIVE].includes(
+        layout
+      )
     ) {
       setStyles(this.element, {width: '', height: ''});
     } else if (layout == Layout.FIXED_HEIGHT) {
@@ -223,6 +222,8 @@ export class AmpRender extends BaseElement {
 
   /**
    * Handles the `changeToLayoutContainer` action.
+   * TODO: this is similar to the implementation in amp-list. Move it
+   * to a common file and import it.
    * @return {!Promise}
    * @private
    */
