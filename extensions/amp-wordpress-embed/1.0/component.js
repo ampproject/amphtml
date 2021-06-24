@@ -21,7 +21,7 @@ import {dict} from '#core/types/object';
 import {forwardRef} from '#preact/compat';
 import {getData} from '../../../src/event-helper';
 
-const {useCallback, useLayoutEffect, useMemo, useRef, useState} = Preact;
+const {useCallback, useEffect, useMemo, useRef, useState} = Preact;
 
 const NO_HEIGHT_STYLE = dict();
 
@@ -79,7 +79,7 @@ function WordpressEmbedWithRef(
     [requestResize, matchesMessagingOrigin, win]
   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     setWin(contentRef.current?.ownerDocument?.defaultView);
   }, []);
 
