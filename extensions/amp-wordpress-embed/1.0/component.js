@@ -21,7 +21,7 @@ import {dict} from '#core/types/object';
 import {forwardRef} from '#preact/compat';
 import {getData} from '../../../src/event-helper';
 
-const {useCallback, useMemo, useState} = Preact;
+const {useCallback, useLayoutEffect, useMemo, useRef, useState} = Preact;
 
 const NO_HEIGHT_STYLE = dict();
 
@@ -36,6 +36,8 @@ function WordpressEmbedWithRef(
 ) {
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
   const [opacity, setOpacity] = useState(0);
+  const contentRef = useRef(null);
+  const [win, setWin] = useState(null);
 
   const iframeURL = useMemo(() => {
     return addParamToUrl(url, 'embed', 'true');
@@ -70,14 +72,18 @@ function WordpressEmbedWithRef(
         case 'link':
           // Only follow a link message for the currently-active iframe if the link is for the same origin.
           // This replicates a constraint in WordPress's wp.receiveEmbedMessage() function.
-          if (matchesMessagingOrigin(data.value)) {
-            window.top.location.href = data.value;
+          if (matchesMessagingOrigin(data.value) && win) {
+            win.top.location.href = data.value;
           }
           break;
       }
     },
-    [requestResize, matchesMessagingOrigin]
+    [requestResize, matchesMessagingOrigin, win]
   );
+
+  useLayoutEffect(() => {
+    setWin(contentRef.current?.ownerDocument?.defaultView);
+  }, []);
 
   // Checking for valid props
   if (!checkProps(url)) {
@@ -92,6 +98,7 @@ function WordpressEmbedWithRef(
         matchesMessagingOrigin={matchesMessagingOrigin}
         messageHandler={messageHandler}
         ref={ref}
+        contentRef={contentRef}
         src={iframeURL}
         wrapperStyle={heightStyle}
         title={title}
