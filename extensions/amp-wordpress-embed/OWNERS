@@ -6,7 +6,7 @@
     {
       owners: [
         {name: 'ampproject/wg-bento'},
-        {name: 'westonruter', notify: true}
+        {name: 'westonruter', notify: true},
       ],
     },
   ],
