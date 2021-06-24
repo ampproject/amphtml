@@ -108,8 +108,9 @@ export class backgroundBlur {
    * @return {?Element} An img element with template=fill or null.
    */
   getBackgroundElement_(pageElement) {
-    return pageElement.querySelector(
-      '[template="fill"]:not(.i-amphtml-hidden-by-media-query) img'
-    );
+    const getSize = (el) => el && el.offsetWidth * el.offsetHeight;
+    return Array.from(
+      pageElement.querySelectorAll('amp-story-grid-layer img')
+    ).sort((firstEl, secondEl) => getSize(secondEl) - getSize(firstEl))[0];
   }
 }
