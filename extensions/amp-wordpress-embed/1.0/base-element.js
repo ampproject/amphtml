@@ -24,6 +24,7 @@ BaseElement['Component'] = WordpressEmbed;
 
 /** @override */
 BaseElement['props'] = {
+  children: {passthrough: true},
   url: {attr: 'data-url', default: ''},
   title: {attr: 'title'},
 };

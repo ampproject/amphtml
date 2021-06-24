@@ -45,7 +45,7 @@ export const BasicEmbedExample = () => {
         height={height}
         layout={layout}
       >
-        <button overflow>load more</button>
+        <button overflow>Load more</button>
       </amp-wordpress-embed>
       <p>text below</p>
     </>
