@@ -36,7 +36,7 @@ export class IframeMessagingClient {
     /** @private {!Window} */
     this.win_ = win;
     /** @private {?string} */
-    this.rtvVersion_ = getMode().rtvVersion || null;
+    this.rtvVersion_ = getMode(win).rtvVersion || null;
     /** @private {?Window} */
     this.hostWindow_ = hostWindow || null;
     /** @private {?string} */
