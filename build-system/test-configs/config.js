@@ -206,6 +206,7 @@ const htmlFixtureGlobs = [
   '!examples/viewer-iframe-poll.html',
   '!examples/viewer-webview.html',
   '!examples/viewer.html',
+  '!examples/amp-story/**/*.html',
 
   // TODO(#25149): Fix these invalid files and remove them from this list.
   '!examples/accordion.amp.html',
@@ -263,7 +264,6 @@ const htmlFixtureGlobs = [
   '!examples/amp-script/vue-todomvc.amp.html',
   '!examples/amp-skimlinks.html',
   '!examples/amp-smartlinks.html',
-  '!examples/{,visual-tests/}amp-story/**/*.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-iframe.provider.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-metering-laa.amp.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-metering-registration-widget.html',
