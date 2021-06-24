@@ -26,9 +26,12 @@ export function install(win) {
   if (s.size < 1) {
     win.Set = function (iterable) {
       const set = new Set();
-      const withLength = iterable.length != null ? iterable : toArray(iterable);
-      for (let i = 0; i < withLength.length; i++) {
-        set.add(withLength[i]);
+      if (iterable) {
+        const withLength =
+          iterable.length != null ? iterable : toArray(iterable);
+        for (let i = 0; i < withLength.length; i++) {
+          set.add(withLength[i]);
+        }
       }
       return set;
     };
