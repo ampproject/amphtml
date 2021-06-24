@@ -55,7 +55,7 @@
   margin-left: var(--i-amphtml-interactive-img-option-margin) !important;
 }
 
-.i-amphtml-story-interactive-img-option:nth-child(n + 3) {
+.i-amphtml-story-interactive-img-option:last-child {
   margin-bottom: var(--i-amphtml-interactive-img-option-margin) !important;
 }
 
