@@ -238,7 +238,6 @@ const htmlFixtureGlobs = [
   '!examples/amp-consent/diy-3p-iframe-tcf-postmessage.html',
   '!examples/amp-consent/diy-consent.html',
   '!examples/amp-form.ssr.html',
-  '!examples/amp-google-assistant-assistjs.amp.html',
   '!examples/amp-layout-intrinsic.amp.html',
   '!examples/amp-lightbox.amp.html',
   '!examples/amp-list-layout-container.amp.html',
