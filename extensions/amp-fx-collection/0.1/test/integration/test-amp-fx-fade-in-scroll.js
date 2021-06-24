@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * This is a somewhat arbitrary time just intended to allow the browser to
+ * render a new frame. A more robust approach would be to refactor the test
+ * to use window.requestAnimationFrame rather than timeouts.
+ */
 const ANIMATION_TIME = 50;
 const config = describes.sandboxed.configure().ifChrome();
 config.run('amp-fx-collection', {}, function () {
