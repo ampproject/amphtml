@@ -39,6 +39,9 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
       // makes nextTick behavior synchronous for test assertions.
       setTimeout: (cb) => cb(),
 
+      // location is needed for getMode(win)
+      location: {},
+
       // we don't care about window events for these tests since that behavior
       // is deprecated.
       document: {
