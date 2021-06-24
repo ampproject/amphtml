@@ -67,7 +67,7 @@ export class backgroundBlur {
    * @param {!Element} pageElement
    */
   update(pageElement) {
-    const fillElement = this.getBackgroundElement_(pageElement);
+    const fillElement = this.getBiggestImage_(pageElement);
     if (!fillElement) {
       user().info('No image found for background blur.');
     }
@@ -102,12 +102,12 @@ export class backgroundBlur {
   }
 
   /**
-   * Get active page's background element.
+   * Get active page's largest image element.
    * @private
    * @param {!Element} pageElement
-   * @return {?Element} An img element with template=fill or null.
+   * @return {?Element} An img element or null.
    */
-  getBackgroundElement_(pageElement) {
+  getBiggestImage_(pageElement) {
     const getSize = (el) => el && el.offsetWidth * el.offsetHeight;
     return Array.from(
       pageElement.querySelectorAll('amp-story-grid-layer img')
