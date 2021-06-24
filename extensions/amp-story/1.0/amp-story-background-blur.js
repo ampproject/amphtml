@@ -15,6 +15,7 @@
  */
 
 import {setImportantStyles} from '#core/dom/style';
+import {user} from '../../../src/log';
 
 /** @const {number} */
 const CANVAS_SIZE = 3;
@@ -67,6 +68,9 @@ export class backgroundBlur {
    */
   update(pageElement) {
     const fillElement = this.getBackgroundElement_(pageElement);
+    if (!fillElement) {
+      user().info('No image found for background blur.');
+    }
     this.animate_(fillElement);
   }
 
