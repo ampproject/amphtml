@@ -24,7 +24,6 @@ import {parseQueryString} from './core/types/string/url';
  *   development: boolean,
  *   minified: boolean,
  *   test: boolean,
- *   examiner: boolean,
  *   log: (string|undefined),
  *   version: string,
  *   rtvVersion: string,
@@ -74,7 +73,6 @@ function getMode_(win) {
   return {
     localDev: coreMode.isLocalDev(win),
     development: isModeDevelopment(win),
-    examiner: hashQuery['development'] == '2',
     esm: IS_ESM,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
