@@ -33,19 +33,25 @@ import {htmlFor} from '#core/dom/static-template';
 const buildOptionTemplate = (option) => {
   const html = htmlFor(option);
   return html`
-		<div
+    <div
       class="i-amphtml-story-interactive-img-quiz-option i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
-			<button class="i-amphtml-story-interactive-img-option-button">
-				<img class="i-amphtml-story-interactive-img-option-img" />
-				<div class="i-amphtml-story-interactive-img-option-percentage-fill"></div>
-				<span class="i-amphtml-story-interactive-img-option-percentage-text"></span>
-			</button>
+      <button class="i-amphtml-story-interactive-img-option-button">
+        <img class="i-amphtml-story-interactive-img-option-img" />
+        <div
+          class="i-amphtml-story-interactive-img-option-percentage-fill"
+        ></div>
+        <span
+          class="i-amphtml-story-interactive-img-option-percentage-text"
+        ></span>
+      </button>
       <div class="i-amphtml-story-interactive-img-quiz-answer-choice-container">
-        <span class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"></span>
+        <span
+          class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"
+        ></span>
       </div>
-		</div>
+    </div>
   `;
 };
 

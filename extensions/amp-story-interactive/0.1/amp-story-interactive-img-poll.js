@@ -32,16 +32,20 @@ import {htmlFor} from '#core/dom/static-template';
 const buildOptionTemplate = (option) => {
   const html = htmlFor(option);
   return html`
-		<div
+    <div
       class="i-amphtml-story-interactive-img-poll-option i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
-			<button class="i-amphtml-story-interactive-img-option-button">
-				<img class="i-amphtml-story-interactive-img-option-img" />
-				<div class="i-amphtml-story-interactive-img-option-percentage-fill"></div>
-				<span class="i-amphtml-story-interactive-img-option-percentage-text"></span>
-			</button>
-		</div>
+      <button class="i-amphtml-story-interactive-img-option-button">
+        <img class="i-amphtml-story-interactive-img-option-img" />
+        <div
+          class="i-amphtml-story-interactive-img-option-percentage-fill"
+        ></div>
+        <span
+          class="i-amphtml-story-interactive-img-option-percentage-text"
+        ></span>
+      </button>
+    </div>
   `;
 };
 
@@ -65,17 +69,17 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
     return this.rootEl_;
   }
 
-	/**
+  /**
    * Finds the prompt and options content
    * and adds it to the poll element.
    *
    * @private
    * @param {Element} root
    */
-	attachContent_(root) {
+  attachContent_(root) {
     this.attachPrompt_(root);
 
-		const optionContainer = this.rootEl_.querySelector(
+    const optionContainer = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-img-option-container'
     );
     this.options_.forEach((option, index) =>
@@ -83,17 +87,16 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
     );
   }
 
-	/**
+  /**
    * Creates an option container with option content,
    * adds styling and answer choices,
    * and adds it to the poll element.
    *
    * @param {!./amp-story-interactive-abstract.OptionConfigType} option
-   * @param {number} index
    * @return {!Element}
    * @private
    */
-	configureOption_(option) {
+  configureOption_(option) {
     const convertedOption = buildOptionTemplate(this.element);
     convertedOption.optionIndex_ = option['optionIndex'];
 
