@@ -2256,6 +2256,9 @@ export class AmpStory extends AMP.BaseElement {
       ) {
         return preloadAllPages();
       }
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'amp-story-load-first-page-only'
+      );
 
       const activePageId = devAssert(pagesByDistance[0][0]);
       new Promise((res, rej) => {

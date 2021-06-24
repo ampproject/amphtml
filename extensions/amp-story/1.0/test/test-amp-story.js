@@ -31,6 +31,7 @@ import {Keys} from '#core/constants/key-codes';
 import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
+import {Performance} from '#service/performance-impl';
 import {Services} from '#service';
 import {Signals} from '#core/data-structures/signals';
 import {VisibilityState} from '#core/constants/visibility-state';
@@ -1843,10 +1844,13 @@ describes.realWin(
 
     describe('experiment for amp-story-load-first-page-only', () => {
       let pages;
+      let performanceImpl;
       beforeEach(async () => {
         toggleExperiment(win, 'amp-story-load-first-page-only', true);
         pages = await createStoryWithPages(2, ['page-1', 'page-2'], false);
+        performanceImpl = new Performance(env.win);
         env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
+        env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
       });
 
       it('should position the active page so it preloads', async () => {
@@ -1881,6 +1885,17 @@ describes.realWin(
 
         // Check page 1 is loaded with distance 1.
         expect(pages[1].getAttribute('distance')).to.be.equal('1');
+      });
+
+      it('should enable the CSI experiment', async () => {
+        const enableSpy = env.sandbox.spy(
+          performanceImpl,
+          'addEnabledExperiment'
+        );
+        story.buildCallback();
+        await story.layoutCallback();
+
+        expect(enableSpy).to.be.calledWith('amp-story-load-first-page-only');
       });
     });
   }
