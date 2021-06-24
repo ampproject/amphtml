@@ -51,17 +51,6 @@
   position: relative !important;
 }
 
-.i-amphtml-story-interactive-img-option-button {
-  border: none !important;
-  border-radius: 50% !important;
-  overflow: hidden !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-}
-
 .i-amphtml-story-interactive-img-option:nth-child(odd) {
   margin-left: var(--i-amphtml-interactive-img-option-margin) !important;
 }
@@ -72,6 +61,17 @@
 
 .i-amphtml-story-interactive-img-option:nth-child(3):last-child {
   margin-top: 0 !important;
+}
+
+.i-amphtml-story-interactive-img-option-button {
+  border: none !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .i-amphtml-story-interactive-img-option-img {
