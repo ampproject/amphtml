@@ -59,10 +59,11 @@ export class backgroundBlur {
   }
 
   /**
-   * Remove canvas from the document.
+   * Remove canvas from the document and cancel the RAF.
    */
   detach() {
     this.element_.removeChild(this.canvas_);
+    cancelAnimationFrame(this.currentRAF_);
   }
 
   /**
@@ -106,15 +107,24 @@ export class backgroundBlur {
   }
 
   /**
-   * Get active page's largest image element.
+   * Get active page's largest amp-img element.
    * @private
    * @param {!Element} pageElement
    * @return {?Element} An img element or null.
    */
   getBiggestImage_(pageElement) {
-    const getSize = (el) => el && el.offsetWidth * el.offsetHeight;
+    const getSize = (el) => {
+      if (el) {
+        const layoutBox = el.getLayoutBox();
+        return layoutBox.width * layoutBox.height;
+      } else {
+        return false;
+      }
+    };
     return Array.from(
-      pageElement.querySelectorAll('amp-story-grid-layer img')
-    ).sort((firstEl, secondEl) => getSize(secondEl) - getSize(firstEl))[0];
+      pageElement.querySelectorAll('amp-story-grid-layer amp-img')
+    )
+      .sort((firstEl, secondEl) => getSize(secondEl) - getSize(firstEl))[0]
+      ?.querySelector('img');
   }
 }
