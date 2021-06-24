@@ -87,14 +87,8 @@ class Node {
   Atom DataAtom() const { return atom_; }
   std::string_view NameSpace() const { return name_space_; }
   // Returns nullopt if ParseOptions.store_node_offsets is not set.
-  std::optional<LineCol> LineColInHtmlSrc() const {
-    return line_col_in_html_src_;
-  }
-  std::optional<Offsets> OffsetsInHtmlSrc() const {
-    return offsets_in_html_src_;
-  }
-  int NumTerms() const {
-    return num_terms_;
+  std::optional<LineCol> PositionInHtmlSrc() const {
+    return position_in_html_src_;
   }
 
   const std::vector<Attribute>& Attributes() const { return attributes_; }
@@ -159,12 +153,7 @@ class Node {
   std::string data_;
   std::string name_space_;
   // Position at which this node appears in HTML source.
-  std::optional<LineCol> line_col_in_html_src_;
-  // Start/End offsets in original html src.
-  std::optional<LineCol> offsets_in_html_src_;
-  // Records the number of terms for text contents.
-  // Populated and meaningful only if node is of type TEXT_NODE.
-  int num_terms_ = -1;
+  std::optional<LineCol> position_in_html_src_;
   std::vector<Attribute> attributes_{};
   Node* first_child_ = nullptr;
   Node* next_sibling_ = nullptr;
