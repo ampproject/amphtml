@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,44 +14,16 @@
  * limitations under the License.
  */
 
-import {AmpStoryInteractiveQuiz} from '../amp-story-interactive-quiz';
+import {AmpStoryInteractiveImgQuiz} from '../amp-story-interactive-img-quiz';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
-import {
-  addConfigToInteractive,
-  getMockIncompleteData,
-  getMockInteractiveData,
-  getMockOutOfBoundsData,
-  getMockScrambledData,
-} from './test-amp-story-interactive';
+import {populateQuiz} from './test-amp-story-interactive-quiz';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
-/**
- * Populates the quiz with some number of prompts and some number of options.
- *
- * @param {Window} win
- * @param {AmpStoryInteractive} quiz
- * @param {=number} numOptions
- * @param {?string} prompt
- * @param {=number} correctOption
- */
-export const populateQuiz = (
-  quiz,
-  numOptions = 4,
-  prompt = undefined,
-  correctOption = 1
-) => {
-  if (prompt) {
-    quiz.element.setAttribute('prompt-text', prompt);
-  }
-  addConfigToInteractive(quiz, numOptions, correctOption);
-  quiz.element.setAttribute('id', 'TEST_quizId');
-};
-
 describes.realWin(
-  'amp-story-interactive-quiz',
+  'amp-story-interactive-img-quiz',
   {
     amp: true,
   },
@@ -69,7 +41,7 @@ describes.realWin(
         .resolves({get: () => Promise.resolve('cid')});
 
       const ampStoryQuizEl = win.document.createElement(
-        'amp-story-interactive-quiz'
+        'amp-story-interactive-img-quiz'
       );
       ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       requestService = new AmpStoryRequestService(win);
@@ -95,7 +67,7 @@ describes.realWin(
       storyEl.appendChild(storyPage);
 
       win.document.body.appendChild(storyEl);
-      ampStoryQuiz = new AmpStoryInteractiveQuiz(ampStoryQuizEl);
+      ampStoryQuiz = new AmpStoryInteractiveImgQuiz(ampStoryQuizEl);
 
       env.sandbox.stub(ampStoryQuiz, 'mutateElement').callsFake((fn) => fn());
     });
@@ -124,7 +96,7 @@ describes.realWin(
         'i-amphtml-story-interactive-prompt-container'
       );
       expect(quizContent[1]).to.have.class(
-        'i-amphtml-story-interactive-quiz-option-container'
+        'i-amphtml-story-interactive-img-option-container'
       );
 
       // Check prompt container structure.
@@ -137,7 +109,7 @@ describes.realWin(
       expect(quizContent[1].childNodes.length).to.equal(4);
       expect(
         quizContent[1].querySelectorAll(
-          '.i-amphtml-story-interactive-quiz-option'
+          '.i-amphtml-story-interactive-img-quiz-option'
         )
       ).to.have.length(4);
     });
@@ -163,84 +135,6 @@ describes.realWin(
           ampStoryQuiz.buildCallback();
         }).to.throw(/Improper number of options/);
       });
-    });
-
-    it('should handle the percentage pipeline', async () => {
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockInteractiveData());
-
-      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
-
-      populateQuiz(ampStoryQuiz);
-      await ampStoryQuiz.buildCallback();
-      await ampStoryQuiz.layoutCallback();
-
-      expect(ampStoryQuiz.getOptionElements()[0].innerText).to.contain('30%');
-      expect(ampStoryQuiz.getOptionElements()[3].innerText).to.contain('10%');
-    });
-
-    it('should handle the percentage pipeline with scrambled data', async () => {
-      const NUM_OPTIONS = 4;
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockScrambledData());
-
-      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
-
-      populateQuiz(ampStoryQuiz, NUM_OPTIONS);
-      await ampStoryQuiz.buildCallback();
-      await ampStoryQuiz.layoutCallback();
-
-      const expectedPercentages = [10, 20, 30, 40];
-      for (let i = 0; i < NUM_OPTIONS; i++) {
-        const expectedText = `${expectedPercentages[i]}%`;
-        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
-          expectedText
-        );
-      }
-    });
-
-    it('should handle the percentage pipeline with incomplete data', async () => {
-      const NUM_OPTIONS = 4;
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockIncompleteData());
-
-      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
-
-      populateQuiz(ampStoryQuiz, NUM_OPTIONS);
-      await ampStoryQuiz.buildCallback();
-      await ampStoryQuiz.layoutCallback();
-
-      const expectedPercentages = [0, 50, 50, 0];
-      for (let i = 0; i < NUM_OPTIONS; i++) {
-        const expectedText = `${expectedPercentages[i]}%`;
-        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
-          expectedText
-        );
-      }
-    });
-
-    it('should handle the percentage pipeline with out of bounds data', async () => {
-      const NUM_OPTIONS = 4;
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockOutOfBoundsData());
-
-      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
-
-      populateQuiz(ampStoryQuiz, NUM_OPTIONS);
-      await ampStoryQuiz.buildCallback();
-      await ampStoryQuiz.layoutCallback();
-
-      const expectedPercentages = [20, 0, 0, 80];
-      for (let i = 0; i < NUM_OPTIONS; i++) {
-        const expectedText = `${expectedPercentages[i]}%`;
-        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
-          expectedText
-        );
-      }
     });
   }
 );
