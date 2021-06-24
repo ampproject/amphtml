@@ -8,16 +8,41 @@
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <style amp-custom>
       body {
-        font-family: 'Rubik', sans-serif;
+        font-family: 'Poppins', sans-serif;
       }
+
       amp-story-interactive-img-poll {
         justify-self: center;
+      }
+
+      h1 {
+        color: #005af0;
+        font-size: 40px;
+        margin-bottom: 40px;
+        text-align: center;
+      }
+
+      .container {
+        background-color: white;
+        border-radius: 60px;
+        padding: 40px;
+      }
+
+      .label {
+        background-color: white;
+        border-radius: 10px;
+        margin-left: 10%;
+        opacity: 0.8;
+        padding: 10px;
+        position: relative;
+        text-align: center;
+        top: 80%;
+        width: 80%;
       }
     </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
   </head>
   <body>
     <amp-story
@@ -27,6 +52,41 @@
 			publisher-logo-src="example.com/logo.png"
 			poster-portrait-src="example.com/poster.jpg">
 			<amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <div class="container">
+            <h1>Image Polls</h1>
+            <p>This story contains pages of image polls with varying configurations</p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="info">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <div class="container">
+            <p>Most polls have the default configurations with 1 of 2 changes</p>
+            <br />
+            <p>The exception to this is that all of the polls unless otherwise noted have prompt-size="large" and --interactive-prompt-alignment: center;</p>
+            <br />
+            <p>These are not the default typography options, but I set them this way to match the Figma designs</p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+			<amp-story-page id="4-options">
         <amp-story-grid-layer template="fill">
           <amp-img
             src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
@@ -56,6 +116,13 @@
 						option-4-confetti="🏞️">
 					</amp-story-interactive-img-poll>
 				</amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>4 options</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
 			</amp-story-page>
 			<amp-story-page id="3-options">
         <amp-story-grid-layer template="fill">
@@ -84,6 +151,13 @@
 						option-3-confetti="🏝️">
 					</amp-story-interactive-img-poll>
 				</amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>3 options</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
 			</amp-story-page>
 			<amp-story-page id="2-options">
         <amp-story-grid-layer template="fill">
@@ -109,6 +183,13 @@
 						option-2-confetti="🏙️">
 					</amp-story-interactive-img-poll>
 				</amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>2 options</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
 			</amp-story-page>
 			<amp-story-page id="default-prompt">
         <amp-story-grid-layer template="fill">
@@ -138,6 +219,13 @@
 						option-4-confetti="🏞️">
 					</amp-story-interactive-img-poll>
 				</amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Default prompt size and alignment</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
 			</amp-story-page>
 			<amp-story-page id="dark-theme">
         <amp-story-grid-layer template="fill">
@@ -170,6 +258,13 @@
 						option-4-confetti="🏞️">
 					</amp-story-interactive-img-poll>
 				</amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Dark theme</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
 			</amp-story-page>
 			<amp-story-page id="shadow-chip-style">
         <amp-story-grid-layer template="fill">
@@ -202,6 +297,13 @@
 						option-4-confetti="🏞️">
 					</amp-story-interactive-img-poll>
 				</amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Chip style = shadow</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
 			</amp-story-page>
 			<amp-story-page id="transparent-chip-style">
         <amp-story-grid-layer template="fill">
@@ -234,6 +336,13 @@
 						option-4-confetti="🏞️">
 					</amp-story-interactive-img-poll>
 				</amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Chip style = transparent</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
 			</amp-story-page>
 			<amp-story-page id="custom-css-vars">
         <amp-story-grid-layer template="fill">
