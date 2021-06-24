@@ -1196,14 +1196,6 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-viz-vega",
-    "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
     "name": "amp-vk",
     "version": "0.1",
     "latestVersion": "0.1"
