@@ -93,6 +93,11 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-ad-network-dianomi-impl",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-ad-network-doubleclick-impl",
     "version": "0.1",
     "latestVersion": "0.1"
@@ -1192,14 +1197,6 @@
     "name": "amp-viqeo-player",
     "version": "0.1",
     "latestVersion": "0.1"
-  },
-  {
-    "name": "amp-viz-vega",
-    "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
   },
   {
     "name": "amp-vk",
