@@ -861,5 +861,70 @@ describes.realWin(
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe 1+1=?');
     });
+
+    it.only('should update on changeToLayoutContainer action', async () => {
+      env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves({
+        'items': [
+          {
+            'name': 'Apple',
+            'price': '1.99',
+            'stars': '&#9733;&#9733;&#9733;&#9733;&#9733;',
+          },
+          {
+            'name': 'Orange',
+            'price': '0.99',
+            'stars': '&#9733;&#9733;&#9733;&#9733;&#9734;',
+          },
+          {
+            'name': 'Pear',
+            'price': '1.50',
+          },
+          {
+            'name': 'Banana',
+            'price': '1.50',
+            'stars': '&#9733;&#9733;&#9733;&#9733;&#9733;',
+          },
+          {
+            'name': 'Watermelon',
+            'price': '4.50',
+          },
+          {
+            'name': 'Melon',
+            'price': '3.50',
+            'stars': '&#9733;&#9733;&#9733;&#9733;&#9733;',
+          },
+        ],
+      });
+
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          width="200"
+          height="100"
+          layout="fixed"
+        >
+          <template type="amp-mustache">
+            {{#items}}
+            <div>
+              <div>{{name}}</div>
+              <div>{{{stars}}}</div>
+              <div>{{price}}</div>
+            </div>
+            {{/items}}
+          </template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+      const impl = await element.getImpl();
+
+      const mutateStub = env.sandbox.stub(impl, 'mutateElement').resolves({});
+
+      await getRenderedData();
+      expect(element.getAttribute('layout')).to.equal('fixed');
+
+      element.enqueAction(invocation('changeToLayoutContainer'));
+      expect(mutateStub).to.be.called;
+    });
   }
 );
