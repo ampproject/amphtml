@@ -101,31 +101,6 @@ export class BaseElement extends VideoBaseElement {}
 
 This enables support for AMP actions and analytics, once we map attributes to their prop counterparts in `BaseElement['props']`, and we implement the Preact component.
 
-### Pre-upgrade CSS
-
-Bento components must specify certain layout properties in order to prevent [Cumulative Layout Shift (CLS)](https://web.dev/cls). Video extensions must include the following in the generated **`amp-fantastic-player.css`**:
-
-```css
-/* amp-fantastic-player.css */
-
-/*
- * Pre-upgrade:
- * - display:block element
- * - size-defined element
- */
-amp-fantastic-player {
-  display: block;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Pre-upgrade: size-defining element - hide children. */
-amp-fantastic-player:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
-  display: none;
-  content-visibility: hidden;
-}
-```
-
 ### `props`
 
 [**`props`**](https://github.com/ampproject/amphtml/blob/main/docs/building-a-bento-amp-extension.md#preactbaseelementprops) map the AMP element's attributes to the Preact component props. Take a look at [`VideoBaseElement`](../extensions/amp-video/1.0/base-element.js) for how most video properties are mapped. On your own `base-element.js`, you should specify any of them you support.
@@ -145,7 +120,7 @@ If you need to directly insert nodes to the document, like a `<video>` element, 
 
 However, it's more likely that you load a third-party iframe and you communicate with the host via `postMessage`. In this case you should use a `<VideoIframe>` as opposed to a `<VideoWrapper>`.
 
-> ⚠️ Components may **not** embed scripts from a third-party location into host documents. If a third-party script is absolutely required, like on `<amp-ima-video>`, it must be inserted in an intermediate iframe, which we call a **proxy frame**.
+> ⚠️ Components may **not** embed scripts from a third-party location into host documents. If a third-party script is absolutely required, like on `<amp-ima-video>`, it must be inserted in an intermediate iframe, which we call a [**proxy frame**](./building-a-bento-iframe-component.md).
 >
 > Proxy frames on Bento have not yet been tested as video player components, so they're not covered in this guide. If you wish to use one, please get in touch with `@alanorozco` via a Github issue or on on [Slack](https://bit.ly/amp-slack-signup) in the [`#contributing` channel](https://amphtml.slack.com/messages/C9HRJ1GPN/).
 
