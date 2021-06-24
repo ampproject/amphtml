@@ -60,11 +60,6 @@ const MODULE_SEPARATOR = ';';
  * Used during minification to concatenate extension bundles
  */
 const EXTENSION_BUNDLE_MAP = {
-  'amp-viz-vega.js': [
-    'third_party/d3/d3.js',
-    'third_party/d3-geo-projection/d3-geo-projection.js',
-    'third_party/vega/vega.js',
-  ],
   'amp-inputmask.js': ['third_party/inputmask/bundle.js'],
   'amp-date-picker.js': ['third_party/react-dates/bundle.js'],
   'amp-shadow-dom-polyfill.js': [

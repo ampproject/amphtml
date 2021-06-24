@@ -450,7 +450,6 @@ const htmlFixtureGlobs = [
   '!examples/visual-tests/blank-page/blank.html',
   '!examples/visual-tests/css.amp/css.amp.html',
   '!examples/visual-tests/iframe-wrapper.html',
-  '!examples/viz-vega.amp.html',
   '!examples/wistiaplayer.amp.html',
   '!examples/xhr-intercept.html',
   '!test/fixtures/e2e/amp-accordion/amp-accordion.html',

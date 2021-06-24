@@ -35,7 +35,6 @@ const COMMON_GLOBS = [
   'third_party/set-dom/set-dom.js',
   'third_party/subscriptions-project/*.js',
   'third_party/timeagojs/**/*.js',
-  'third_party/vega/**/*.js',
   'third_party/webcomponentsjs/ShadowCSS.js',
   'third_party/zuho/**/*.js',
   'node_modules/dompurify/package.json',

@@ -370,21 +370,6 @@ function IframeTransportContext() {}
 IframeTransportContext.onAnalyticsEvent;
 IframeTransportContext.sendResponseToCreative;
 
-/** @typedef {function(!JsonObject)} */
-let VegaChartFactory;
-
-// amp-viz-vega related externs.
-/**
- * @typedef {{spec: function(!JsonObject, function(?Error, !VegaChartFactory))}}
- */
-let VegaParser;
-/**
- * @typedef {{parse: VegaParser}}
- */
-let VegaObject;
-/** @type {!VegaObject} */
-window.vg;
-
 // amp-date-picker externs
 /**
  * @type {function(*)}
