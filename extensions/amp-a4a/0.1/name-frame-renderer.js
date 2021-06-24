@@ -24,7 +24,7 @@ import {getExperimentBranch} from '#experiments';
 import {
   intersectionEntryToJson,
   measureIntersection,
-} from '../../../src/utils/intersection';
+} from '#core/dom/layout/intersection';
 import {utf8Decode} from '#core/types/string/bytes';
 
 /**

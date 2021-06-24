@@ -15,7 +15,7 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpScriptService} from '../../../../extensions/amp-script/0.1/amp-script';
+import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
 import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
 import {Services} from '#service';
 import {Transport} from '../transport';

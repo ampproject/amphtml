@@ -228,7 +228,6 @@ function generateCompilerOptions(outputFilename, options) {
     'third_party/resize-observer-polyfill/',
     'third_party/set-dom/',
     'third_party/subscriptions-project/',
-    'third_party/vega/',
     'third_party/webcomponentsjs/',
     'node_modules/',
     'build/patched-module/',

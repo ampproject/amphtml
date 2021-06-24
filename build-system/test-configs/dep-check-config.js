@@ -145,7 +145,7 @@ exports.rules = [
       'ads/google/a4a/**->src/service/index.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
-      'ads/google/a4a/utils.js->src/core/dom/page-layout-box.js',
+      'ads/google/a4a/utils.js->src/core/dom/layout/page-layout-box.js',
       // Some ads need to depend on json.js
       'ads/**->src/core/types/object/json.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
@@ -188,6 +188,7 @@ exports.rules = [
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-oblivki-impl/0.1/amp-ad-network-oblivki-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-dianomi-impl/0.1/amp-ad-network-dianomi-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
 
       // A4A impls importing amp fast fetch header name
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',

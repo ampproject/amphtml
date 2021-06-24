@@ -15,7 +15,7 @@
  */
 
 import {registerServiceBuilder} from '../../../src/service-helpers';
-import {sha384} from '../../../third_party/closure-library/sha384-generated';
+import {sha384} from '#third_party/closure-library/sha384-generated';
 
 /**
  * Registers crypto polyfill.

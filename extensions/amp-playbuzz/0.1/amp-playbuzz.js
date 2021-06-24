@@ -39,7 +39,7 @@
 
 import * as events from '../../../src/event-helper';
 import * as utils from './utils';
-import {CSS} from '#build/amp-playbuzz-0.1.css.js';
+import {CSS} from '#build/amp-playbuzz-0.1.css';
 import {Layout, applyFillContent} from '#core/dom/layout';
 import {Services} from '#service';
 import {
@@ -53,7 +53,7 @@ import {logo, showMoreArrow} from './images';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {removeElement} from '#core/dom';
 
 class AmpPlaybuzz extends AMP.BaseElement {
