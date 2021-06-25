@@ -73,7 +73,8 @@ describes.realWin(
       expect(iframe).to.not.be.null;
 
       // Check iframe for correct scr URL
-      // iframe.className remains ''--> expect(iframe.className).to.match(/i-amphtml-layout-responsive/);
+      // <-- iframe.className remains '' -->
+      expect(iframe.className).to.match(/i-amphtml-layout-responsive/);
     });
 
     it('throws when data-url is not given', async () => {
@@ -88,13 +89,14 @@ describes.realWin(
       doc.body.appendChild(element);
 
       // Wait till rendering is finished
-      // Cannot because "return null" is provided for no 'data-url'--> await waitForRender();
+      // <-- Cannot because "return null" is provided for no 'data-url' -->
+      await waitForRender();
 
       //Extract iframe
-      // --> const iframe = element.shadowRoot.querySelector('iframe');
+      const iframe = element.shadowRoot.querySelector('iframe');
 
       //Make sure iframe is available
-      // --> expect(iframe).to.not.be.null;
+      expect(iframe).to.not.be.null;
 
       /** Cannot test as userAssert not available for Preact Component */
       // expect(iframe.src).to.be.rejectedWith(

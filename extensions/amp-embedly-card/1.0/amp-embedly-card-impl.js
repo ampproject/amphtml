@@ -51,6 +51,3 @@ BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
-
-/** @override */
-BaseElement['loadable'] = true;
