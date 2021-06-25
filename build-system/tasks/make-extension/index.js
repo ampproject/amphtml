@@ -84,6 +84,7 @@ const replace = (inputText, replacements) =>
 /**
  * Generate a sequence of all files in a directory recursively.
  * @param {string} dir
+ * @return {Promise<void>}
  * @yields {string}
  */
 async function* walkDir(dir) {
@@ -163,6 +164,7 @@ async function writeFromTemplateDir(
  *
  * @param {BundleDef} bundle
  * @param {string=} destination
+ * @return {Promise<void>}
  */
 async function insertExtensionBundlesConfig(
   bundle,
