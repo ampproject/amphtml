@@ -384,13 +384,6 @@ const ParsedHtmlTag = class {
   }
 
   /**
-   * @return {boolean}
-   */
-  isEmpty() {
-    return this.tagName_.length === 0;
-  }
-
-  /**
    * Tests if this is an extension script tag.
    * @return {boolean}
    */
