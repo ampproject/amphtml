@@ -17,7 +17,7 @@
 /** @externs */
 
 /** @const */
-var WordpressEmbedDef = {};
+var WordPressEmbedDef = {};
 
 /**
  * @typedef {{
@@ -28,10 +28,10 @@ var WordpressEmbedDef = {};
  *   onReadyState: (function(string, *=)|undefined),
  * }}
  */
-WordpressEmbedDef.Props;
+WordPressEmbedDef.Props;
 
 /** @constructor */
-WordpressEmbedDef.Api = function () {};
+WordPressEmbedDef.Api = function () {};
 
 /** @type {string} */
-WordpressEmbedDef.Api.prototype.readyState;
+WordPressEmbedDef.Api.prototype.readyState;

@@ -22,7 +22,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-wordpress-embed';
 
-class AmpWordpressEmbed extends BaseElement {
+class AmpWordPressEmbed extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -45,5 +45,5 @@ class AmpWordpressEmbed extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpWordpressEmbed);
+  AMP.registerElement(TAG, AmpWordPressEmbed);
 });

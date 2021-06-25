@@ -26,12 +26,12 @@ const {useCallback, useEffect, useMemo, useRef, useState} = Preact;
 const NO_HEIGHT_STYLE = dict();
 
 /**
- * @param {!WordpressEmbedDef.Props} props
- * @param {{current: ?WordpressEmbedDef.Api}} ref
+ * @param {!WordPressEmbedDef.Props} props
+ * @param {{current: ?WordPressEmbedDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-function WordpressEmbedWithRef(
-  {children, requestResize, title = 'WordpressEmbed', url, ...rest},
+function WordPressEmbedWithRef(
+  {children, requestResize, title = 'WordPressEmbed', url, ...rest},
   ref
 ) {
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
@@ -107,9 +107,9 @@ function WordpressEmbedWithRef(
   );
 }
 
-const WordpressEmbed = forwardRef(WordpressEmbedWithRef);
-WordpressEmbed.displayName = 'WordpressEmbed'; // Make findable for tests.
-export {WordpressEmbed};
+const WordPressEmbed = forwardRef(WordPressEmbedWithRef);
+WordPressEmbed.displayName = 'WordPressEmbed'; // Make findable for tests.
+export {WordPressEmbed};
 
 /**
  * Verify required props and throw error if necessary.

@@ -20,7 +20,7 @@ import {WordPressEmbed} from './component';
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = WordpressEmbed;
+BaseElement['Component'] = WordPressEmbed;
 
 /** @override */
 BaseElement['props'] = {

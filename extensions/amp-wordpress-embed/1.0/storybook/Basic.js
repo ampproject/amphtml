@@ -15,12 +15,12 @@
  */
 
 import * as Preact from '#preact';
-import {WordpressEmbed} from '../component';
+import {WordPressEmbed} from '../component';
 import {number, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
-  title: 'WordpressEmbed',
-  component: WordpressEmbed,
+  title: 'WordPressEmbed',
+  component: WordPressEmbed,
   decorators: [withKnobs],
 };
 
@@ -32,5 +32,5 @@ export const _default = () => {
   const width = number('width', 500);
   const height = number('height', 200);
 
-  return <WordpressEmbed url={url} style={{width, height}} />;
+  return <WordPressEmbed url={url} style={{width, height}} />;
 };
