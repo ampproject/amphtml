@@ -27,7 +27,7 @@ html,body{
   place-items: center;
   background: #651FFE;
 }
-.range{
+.i-amphtml-story-interactive-slider-range{
   --background: white;
   height: 60px;
   width: 380px;
@@ -36,11 +36,11 @@ html,body{
   padding: 0 65px 0 45px;
   box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
 }
-.sliderValue{
+.i-amphtml-story-interactive-slider-sliderValue{
   position: relative;
   margin: 0 10px;
 }
-.sliderValue span{
+.i-amphtml-story-interactive-slider-sliderValue span{
   position: absolute;
   height: 45px;
   width: 45px;
@@ -52,29 +52,29 @@ html,body{
   transform-origin: bottom;
   transition: transform 0.3s ease-in-out;
 }
-.sliderValue span.show{
+.i-amphtml-story-interactive-slider-sliderValue span.show{
   transform: translate(-50%, -10%) scale(1);
 }
-.field{
+.i-amphtml-story-interactive-slider-field{
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
   position: relative;
 }
-.field .value{
+.i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-slider-value{
   position: absolute;
   font-size: 18px;
   color: #651FFE;
   font-weight: 600;
 }
-.field .value.left{
+.i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-slider-value.i-amphtml-story-interactive-slider-left{
   left: -22px;
 }
-.field .value.right{
+.i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-slider-value.right{
   right: -43px;
 }
-.range input{
+.i-amphtml-story-interactive-slider-range-input{
   -webkit-appearance: none;
   width: 100%;
   height: 10px;
@@ -84,7 +84,7 @@ html,body{
   border: none;
   z-index: 2222;   
 }
-.range input::-webkit-slider-thumb{
+.i-amphtml-story-interactive-slider-range-input::-webkit-slider-thumb{
   -webkit-appearance: none;
   width: 20px;
   height: 20px;

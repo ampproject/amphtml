@@ -40,5 +40,5 @@
       return this.rootEl_;
     }
   }
-const slideValue = document.querySelector("span");
-const inputSlider = document.querySelector("input");
+const slideValue = document.querySelector("i-amphtml-story-interactive-slider-span");
+const inputSlider = document.querySelector("i-amphtml-story-interactive-slider-input");
