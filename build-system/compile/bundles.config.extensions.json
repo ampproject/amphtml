@@ -340,7 +340,7 @@
     "options": {
       "npm": true,
       "wrappers": "bento"
-    } 
+    }
   },
   {
     "name": "amp-experiment",

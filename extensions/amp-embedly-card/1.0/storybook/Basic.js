@@ -27,8 +27,8 @@ export default {
 export const _default = () => {
   return (
     <EmbedlyCard
-      bootstrap="http://localhost:8000/dist.3p/current/vendor/embedly.max.js"
-      src="http://ads.localhost:8000/dist.3p/current/frame.max.html"
+      bootstrap="http://localhost:9001/dist.3p/current/vendor/embedly.max.js"
+      src="http://ads.localhost:9001/dist.3p/current/frame.max.html"
       url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
       title="Embedly Card"
       style={{width: '400px', height: '400px'}}
