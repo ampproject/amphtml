@@ -457,14 +457,6 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-google-assistant-assistjs",
-    "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
     "name": "amp-google-document-embed",
     "version": "0.1",
     "latestVersion": "0.1"
