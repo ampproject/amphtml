@@ -196,6 +196,7 @@ function setupDefaultHandlers(handlersList, version) {
  * @param {!puppeteer.Page} page
  * @param {!function} resolve
  * @param {string} version
+ * @return {Promise<void>}
  */
 async function setupAdditionalHandlers(
   handlersList,

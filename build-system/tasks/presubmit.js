@@ -107,6 +107,7 @@ function isMissingTerms(srcFile) {
 
 /**
  * Entry point for amp presubmit.
+ * @return {Promise<void>}
  */
 async function presubmit() {
   let forbiddenFound = false;

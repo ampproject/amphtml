@@ -92,6 +92,7 @@ function addJobAndBuildInfo(testType, reportJson) {
 /**
  * Sends a single report to the API endpoint for storage.
  * @param {('unit' | 'integration' | 'e2e')} testType The type of the tests whose result we want to report.
+ * @return {Promise<void>}
  */
 async function sendCiKarmaReport(testType) {
   const body = await getReport(testType);
@@ -127,6 +128,7 @@ async function sendCiKarmaReport(testType) {
 
 /**
  * Uploads every report to the API endpoint for storage.
+ * @return {Promise<void>}
  */
 async function testReportUpload() {
   const filenames = await fs.readdir('result-reports/');

@@ -60,6 +60,7 @@ async function maybeMergeAndRemoveVendorConfig(tag, script) {
  * @param {string} url
  * @param {string} version
  * @param {?object} extraUrlParams
+ * @return {Promise<void>}
  */
 async function alterAnalyticsTags(url, version, extraUrlParams) {
   const cachePath = urlToCachePath(url, version);

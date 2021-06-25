@@ -44,6 +44,7 @@ const blockRegExp = (name) =>
 
 /**
  * Checks or updates analytics vendors list.
+ * @return {Promise<void>}
  */
 async function checkAnalyticsVendorsList() {
   const vendors = globby

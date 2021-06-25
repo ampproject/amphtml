@@ -152,6 +152,7 @@ function maybePrintArgvMessages() {
 
 /**
  * @param {Object} browser
+ * @return {Promise<void>}
  * @private
  */
 async function karmaBrowserComplete_(browser) {

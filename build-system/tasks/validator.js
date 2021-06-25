@@ -25,6 +25,7 @@ if (argv.update_tests) {
 
 /**
  * Simple wrapper around the python based validator tests.
+ * @return {Promise<void>}
  */
 async function validator() {
   execOrDie('python3 build.py' + validatorArgs, {
@@ -35,6 +36,7 @@ async function validator() {
 
 /**
  * Simple wrapper around the bazel based C++ validator tests.
+ * @return {Promise<void>}
  */
 async function validatorCpp() {
   const bazelCmd = [
@@ -57,6 +59,7 @@ async function validatorCpp() {
 
 /**
  * Simple wrapper around the python based validator webui tests.
+ * @return {Promise<void>}
  */
 async function validatorWebui() {
   execOrDie('python3 build.py' + validatorArgs, {

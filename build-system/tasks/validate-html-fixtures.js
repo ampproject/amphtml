@@ -133,6 +133,7 @@ async function runCheck(filesToCheck) {
 
 /**
  * Makes sure that HTML fixtures used during tests contain valid AMPHTML.
+ * @return {Promise<void>}
  */
 async function validateHtmlFixtures() {
   const globs = argv.include_skipped

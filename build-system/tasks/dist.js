@@ -98,6 +98,7 @@ function printDistHelp(options) {
  * Used by `amp` and `amp dist`.
  *
  * @param {!Object} options
+ * @return {Promise<void>}
  */
 async function runPreDistSteps(options) {
   cleanupBuildDir();
@@ -112,6 +113,7 @@ async function runPreDistSteps(options) {
 
 /**
  * Minified build. Entry point for `amp dist`.
+ * @return {Promise<void>}
  */
 async function dist() {
   await doDist();
@@ -121,6 +123,7 @@ async function dist() {
  * Performs a minified build with the given extra args.
  *
  * @param {Object=} extraArgs
+ * @return {Promise<void>}
  */
 async function doDist(extraArgs = {}) {
   const handlerProcess = createCtrlcHandler('dist');
@@ -168,6 +171,7 @@ async function doDist(extraArgs = {}) {
 
 /**
  * Build AMP experiments.js.
+ * @return {Promise<void>}
  */
 async function buildExperiments() {
   await compileJs(
@@ -209,6 +213,7 @@ function buildLoginDone(version) {
 
 /**
  * Build amp-web-push publisher files HTML page.
+ * @return {Promise<void>}
  */
 async function buildWebPushPublisherFiles() {
   const distDir = 'dist/v0';
@@ -240,6 +245,7 @@ async function prebuild() {
 
 /**
  * Copies parsers from the build folder to the dist folder
+ * @return {Promise<void>}
  */
 async function copyParsers() {
   const startTime = Date.now();
@@ -249,6 +255,7 @@ async function copyParsers() {
 
 /**
  * Build amp-web-push publisher files HTML page.
+ * @return {Promise<void>}
  */
 async function preBuildWebPushPublisherFiles() {
   for (const version of WEB_PUSH_PUBLISHER_VERSIONS) {
@@ -272,6 +279,7 @@ async function preBuildWebPushPublisherFiles() {
 
 /**
  * post Build amp-web-push publisher files HTML page.
+ * @return {Promise<void>}
  */
 async function postBuildWebPushPublisherFilesVersion() {
   const distDir = 'dist/v0';
@@ -298,6 +306,7 @@ async function postBuildWebPushPublisherFilesVersion() {
 
 /**
  * Precompilation steps required to build experiment js binaries.
+ * @return {Promise<void>}
  */
 async function preBuildExperiments() {
   const expDir = 'tools/experiments';
@@ -331,6 +340,7 @@ async function preBuildExperiments() {
 
 /**
  * Build "Login Done" page.
+ * @return {Promise<void>}
  */
 async function preBuildLoginDone() {
   await preBuildLoginDoneVersion('0.1');
@@ -339,6 +349,7 @@ async function preBuildLoginDone() {
 /**
  * Build "Login Done" page for the specified version.
  * @param {string} version
+ * @return {Promise<void>}
  */
 async function preBuildLoginDoneVersion(version) {
   const srcDir = `extensions/amp-access/${version}`;

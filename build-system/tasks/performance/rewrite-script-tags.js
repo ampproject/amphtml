@@ -33,6 +33,7 @@ const {
  * Lookup URL from cache and rewrite URLs to build from working branch
  *
  * @param {string} url
+ * @return {Promise<void>}
  */
 async function useLocalScripts(url) {
   const cachePath = urlToCachePath(url, EXPERIMENT);
@@ -64,6 +65,7 @@ async function useLocalScripts(url) {
  * copy
  *
  * @param {string} url
+ * @return {Promise<void>}
  */
 async function useRemoteScripts(url) {
   const cachePath = urlToCachePath(url, CONTROL);

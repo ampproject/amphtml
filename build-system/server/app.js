@@ -522,6 +522,7 @@ app.use('/form/verify-search-json/post', (req, res) => {
  * @param {express.Request} req
  * @param {express.Response} res
  * @param {string} mode
+ * @return {Promise<void>}
  */
 async function proxyToAmpProxy(req, res, mode) {
   const url =

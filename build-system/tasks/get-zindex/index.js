@@ -196,6 +196,7 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
 /**
  * Entry point for amp get-zindex
+ * @return {Promise<void>}
  */
 async function getZindex() {
   logLocalDev('...');

@@ -21,6 +21,7 @@ const {isCiBuild} = require('../common/ci');
 /**
  * Entry point for `amp babel-plugin-tests`. Runs the jest-based tests for
  * AMP's custom babel plugins.
+ * @return {Promise<void>}
  */
 async function babelPluginTests() {
   const projects = ['./build-system/babel-plugins'];

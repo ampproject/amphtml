@@ -36,6 +36,7 @@ const OWNERS_SYNTAX_CHECK_URI =
  * Checks OWNERS files for correctness using the owners bot API.
  * The cumulative result is returned to the `amp` process via process.exitCode
  * so that all OWNERS files can be checked / fixed.
+ * @return {Promise<void>}
  */
 async function checkOwners() {
   if (!usesFilesOrLocalChanges('check-owners')) {
@@ -50,6 +51,7 @@ async function checkOwners() {
 /**
  * Checks a single OWNERS file using the owners bot API.
  * @param {string} file
+ * @return {Promise<void>}
  */
 async function checkFile(file) {
   if (!file.endsWith('OWNERS')) {
