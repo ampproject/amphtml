@@ -128,6 +128,15 @@ describes.realWin(
       const srAboveAd = queryAmpAdBladeSelector(doc);
       expect(srAboveAd).to.not.exist;
     });
+    it('Should not show bottom ad if there no bottomAdOptions', async () => {
+      const media = createCampaignData({
+        bottomAd: true,
+      });
+      delete media.campaignData.bottomAdOptions;
+      await handleCompanionAds(media, baseElement);
+      const bottomAd = queryAmpAdDisplaySelector(doc);
+      expect(bottomAd).to.not.exist;
+    });
   }
 );
 
