@@ -24,6 +24,9 @@ import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-facebook';
+const COMMENTS_TAG = 'amp-facebook-comments';
+const LIKE_TAG = 'amp-facebook-like';
+const PAGE_TAG = 'amp-facebook-page';
 const TYPE = 'facebook';
 
 class AmpFacebook extends BaseElement {
@@ -97,6 +100,24 @@ AmpFacebook['props'] = {
   },
 };
 
+class AmpFacebookComments extends AmpFacebook {}
+
+/** @override */
+AmpFacebookComments['staticProps'] = {'embedAs': 'comments'};
+
+class AmpFacebookLike extends AmpFacebook {}
+
+/** @override */
+AmpFacebookLike['staticProps'] = {'embedAs': 'like'};
+
+class AmpFacebookPage extends AmpFacebook {}
+
+/** @override */
+AmpFacebookPage['staticProps'] = {'embedAs': 'page'};
+
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpFacebook);
+  AMP.registerElement(COMMENTS_TAG, AmpFacebookComments);
+  AMP.registerElement(LIKE_TAG, AmpFacebookLike);
+  AMP.registerElement(PAGE_TAG, AmpFacebookPage);
 });

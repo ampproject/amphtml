@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-import {FacebookBaseElement} from './facebook-base-element';
+import {Facebook} from './component';
+import {PreactBaseElement} from '#preact/base-element';
+import {dashToUnderline} from '#core/types/string';
 
-export class BaseElement extends FacebookBaseElement {}
+export class BaseElement extends PreactBaseElement {}
+
+/** @override */
+BaseElement['Component'] = Facebook;
 
 /** @override */
 BaseElement['props'] = {
-  ...FacebookBaseElement['props'],
+  // common attributes
+  'title': {attr: 'title'}, // Needed for Preact component
+  'href': {attr: 'data-href'},
+  'locale': {
+    attr: 'data-locale',
+    default: dashToUnderline(window.navigator.language),
+  },
+  // amp-facebook
   'allowFullScreen': {attr: 'data-allowfullscreen'},
   'embedAs': {attr: 'data-embed-as'},
   'includeCommentParent': {
@@ -48,3 +60,9 @@ BaseElement['props'] = {
   'smallHeader': {attr: 'data-small-header'},
   'tabs': {attr: 'data-tabs'},
 };
+
+/** @override */
+BaseElement['layoutSizeDefined'] = true;
+
+/** @override */
+BaseElement['usesShadowDom'] = true;

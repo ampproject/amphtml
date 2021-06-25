@@ -29,12 +29,7 @@ export default {
   decorators: [withKnobs, withAmp],
 
   parameters: {
-    extensions: [
-      {name: 'amp-facebook', version: '1.0'},
-      {name: 'amp-facebook-comments', version: '1.0'},
-      {name: 'amp-facebook-like', version: '1.0'},
-      {name: 'amp-facebook-page', version: '1.0'},
-    ],
+    extensions: [{name: 'amp-facebook', version: '1.0'}],
     experiments: ['bento'],
   },
 };
@@ -82,7 +77,7 @@ export const FacebookComments = () => {
       'amp-facebook data-embed-as="comments':
         'amp-facebook data-embed-as="comments',
     },
-    undefined,
+    'amp-facebook-comments',
     {display: 'radio'}
   );
   const href = text(
@@ -131,7 +126,7 @@ export const FacebookLike = () => {
       'amp-facebook-like': 'amp-facebook-like',
       'amp-facebook data-embed-as="like': 'amp-facebook data-embed-as="like',
     },
-    undefined,
+    'amp-facebook-like',
     {display: 'radio'}
   );
   const href = text('href', 'https://www.facebook.com/nasa/');
@@ -191,7 +186,7 @@ export const FacebookPage = () => {
       'amp-facebook-page': 'amp-facebook-page',
       'amp-facebook data-embed-as="page"': 'amp-facebook data-embed-as="page"',
     },
-    undefined,
+    'amp-facebook-page',
     {display: 'radio'}
   );
   const href = text('href', 'https://www.facebook.com/nasa/');
