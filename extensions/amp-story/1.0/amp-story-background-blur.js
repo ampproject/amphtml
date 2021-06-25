@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {scopedQuerySelectorAll} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
 import {user} from '../../../src/log';
 
@@ -38,7 +39,7 @@ export class backgroundBlur {
     /** @private @const {!Element} */
     this.canvas_ = null;
 
-    /**  @private {!number} */
+    /**  @private {?number} */
     this.currentRAF_ = null;
   }
 
@@ -121,7 +122,7 @@ export class backgroundBlur {
       return layoutBox.width * layoutBox.height;
     };
     return Array.from(
-      pageElement.querySelectorAll('amp-story-grid-layer amp-img')
+      scopedQuerySelectorAll(pageElement, 'amp-story-grid-layer amp-img')
     )
       .sort((firstEl, secondEl) => getSize(secondEl) - getSize(firstEl))[0]
       ?.querySelector('img');
