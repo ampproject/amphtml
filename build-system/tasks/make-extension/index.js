@@ -84,7 +84,7 @@ const replace = (inputText, replacements) =>
 /**
  * Generate a sequence of all files in a directory recursively.
  * @param {string} dir
- * @return {Promise<void>}
+ * @return {AsyncIterable<string>}
  * @yields {string}
  */
 async function* walkDir(dir) {
