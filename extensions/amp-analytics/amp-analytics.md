@@ -536,7 +536,7 @@ requests based on random input or at 1% based on client id.
 
 ###### Element selector <a name="element-selector"></a>
 
-Some triggers such as `click` and `visible` allow specifying a single element or
+Some triggers such as `click`, `video`, and `visible` allow specifying a single element or
 a collection of elements using the selector properties. Different triggers can
 apply different limitations and interpretations on selected elements, such as
 whether a selector applies to all matched elements or the first one, or which
@@ -546,7 +546,9 @@ each relevant trigger for more details.
 The selector properties are:
 
 -   `selector` This property is used to find an element or a collection of
-    elements using CSS/DOM query. The semantics of how the element is matched
+    elements using CSS/DOM query.
+
+- The semantics of how the element is matched
     can be changed using `selectionMethod`. The value of this property can be
     one of:
 
@@ -558,6 +560,24 @@ The selector properties are:
     element of `amp-analytics` tag. `closest` searches for the closest ancestor
     of the `amp-analytics` tag that satisfies the given selector. The default
     value is `scope`.
+
+##### Selector Arguments <a name="available-triggers"></a>
+As mentioned above, for `click`, `video`, and `visible` triggers it is possible to specify a single CSS selector or a collection of CSS selectors for the selector argument.
+
+If a single string CSS selector is specified, an element that maps to that selector will be extracted - even if the CSS selector maps to more than one element.
+
+In the case where a single configuration applies to multiple elements, instead of creating separate configuration for each, it can be simplified by specifying all the selectors at once.
+To do so, specify an array of selectors that are comma separated and individually enclosed in quote marks.
+
+```javascript
+"triggers": {
+  "video-pause": {
+    "on": "video-pause",
+    "request": "event",
+    "selector": ["#Video-1", "#Video-2"]
+  },
+}
+```
 
 ##### Available triggers <a name="available-triggers"></a>
 
