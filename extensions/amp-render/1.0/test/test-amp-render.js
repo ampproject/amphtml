@@ -891,7 +891,7 @@ describes.realWin(
       ],
     };
 
-    it.only('should grow on resizeToContents action when height is insufficient', async () => {
+    it('should grow on resizeToContents action when height is insufficient', async () => {
       const fakeMutator = {
         measureMutateElement: (unusedElement, measurer, mutator) =>
           Promise.resolve().then(measurer).then(mutator),
@@ -928,7 +928,7 @@ describes.realWin(
       expect(fakeMutator.forceChangeSize).to.be.calledOnce;
     });
 
-    it.only('should shrink on resizeToContents action when there is exta whitespace', async () => {
+    it('should shrink on resizeToContents action when there is exta whitespace', async () => {
       const fakeMutator = {
         measureMutateElement: (unusedElement, measurer, mutator) =>
           Promise.resolve().then(measurer).then(mutator),
