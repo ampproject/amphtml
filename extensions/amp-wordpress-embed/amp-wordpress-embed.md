@@ -28,7 +28,7 @@ limitations under the License.
 
 ## Behavior
 
-This extension creates an iframe and displays the [excerpt](https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/) of a WordPress post.
+This extension creates an iframe and displays the [excerpt](https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/) of a WordPress post or page.
 
 #### Example: Embedding a WordPress post
 
