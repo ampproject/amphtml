@@ -25,7 +25,7 @@ describes.sandboxed('__component_name_pascalcase__ preact component v1.0', {}, (
       <__component_name_pascalcase__ testProp={true}/>
     );
 
-    const component = wrapper.find('__component_name_pascalcase__');
+    const component = wrapper.find(__component_name_pascalcase__.name);
     expect(component).to.have.lengthOf(1);
     expect(component.prop('testProp')).to.be.true;
   });
