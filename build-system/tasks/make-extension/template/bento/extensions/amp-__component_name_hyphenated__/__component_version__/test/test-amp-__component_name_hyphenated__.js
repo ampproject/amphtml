@@ -38,6 +38,7 @@ describes.realWin(
       toggleExperiment(win, 'bento-__component_name_hyphenated__', true, true);
     });
 
+    // __do_not_submit__: This is example code only.
     it('example test renders', async () => {
       const element = html`
         <amp-__component_name_hyphenated__></amp-__component_name_hyphenated__>
