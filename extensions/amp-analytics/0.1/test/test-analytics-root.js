@@ -799,7 +799,7 @@ describes.realWin(
         expect(children).to.deep.equal([child, child2]);
       });
 
-      it.only('should not find elements with data-vars-* if useDataVars is false', async () => {
+      it('should not find elements with data-vars-* if useDataVars is false', async () => {
         const getElementSpy = env.sandbox.spy(root, 'getDataVarsElements_');
         child.classList.add('myClass');
         child2.classList.add('myClass');
