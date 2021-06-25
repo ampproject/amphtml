@@ -100,43 +100,52 @@ TEST(ParserTest, LineColTest) {
   std::string html = R"HTML(<html>
   <head></head>
   <body>
-    <div>Hello</div>
+    <div>Hello world     how are             you</div>
 
-    <img>
+    <img id="logo">
 
     <a></a>)HTML";
   htmlparser::Parser parser(
       html,
       {.scripting = true,
        .frameset_ok = true,
-       .record_node_offsets = false,
-       .record_attribute_offsets = false,
+       .record_node_offsets = true,
+       .record_attribute_offsets = true,
        .on_node_callback = [&](htmlparser::Node* n,
                                htmlparser::Token t) {
          switch (t.atom) {
            case htmlparser::Atom::HTML: {
-             EXPECT_EQ(1, t.position_in_html_src.first);
+             EXPECT_EQ(1, t.line_col_in_html_src.first);
+             EXPECT_EQ(0, t.offsets_in_html_src.first);
+             EXPECT_EQ(6, t.offsets_in_html_src.second);
              break;
            }
            case htmlparser::Atom::HEAD: {
-             EXPECT_EQ(2, t.position_in_html_src.first);
+             EXPECT_EQ(2, t.line_col_in_html_src.first);
+             // line break and two whitespaces at the beginning of the line.
+             EXPECT_EQ(9, t.offsets_in_html_src.first);
+             EXPECT_EQ(15, t.offsets_in_html_src.second);
              break;
            }
            case htmlparser::Atom::BODY: {
-             EXPECT_EQ(3, t.position_in_html_src.first);
+             EXPECT_EQ(3, t.line_col_in_html_src.first);
+             EXPECT_EQ(25, t.offsets_in_html_src.first);
+             EXPECT_EQ(31, t.offsets_in_html_src.second);
              break;
            }
            case htmlparser::Atom::DIV: {
-             EXPECT_EQ(4, t.position_in_html_src.first);
-             EXPECT_EQ(5, t.position_in_html_src.second);
+             EXPECT_EQ(4, t.line_col_in_html_src.first);
+             EXPECT_EQ(5, t.line_col_in_html_src.second);
              break;
            }
            case htmlparser::Atom::IMG: {
-             EXPECT_EQ(6, t.position_in_html_src.first);
+             EXPECT_EQ(6, t.line_col_in_html_src.first);
+             EXPECT_EQ(92, t.offsets_in_html_src.first);
+             EXPECT_EQ(107, t.offsets_in_html_src.second);
              break;
            }
            case htmlparser::Atom::A: {
-             EXPECT_EQ(8, t.position_in_html_src.first);
+             EXPECT_EQ(8, t.line_col_in_html_src.first);
              break;
            }
            default:
@@ -175,25 +184,25 @@ TEST(ParserTest, LineColTest) {
                                 htmlparser::Token t) {
           switch (t.atom) {
             case htmlparser::Atom::HTML: {
-              EXPECT_EQ(1, t.position_in_html_src.first);
-              EXPECT_EQ(1, t.position_in_html_src.second);
+              EXPECT_EQ(1, t.line_col_in_html_src.first);
+              EXPECT_EQ(1, t.line_col_in_html_src.second);
               break;
             }
             case htmlparser::Atom::HEAD: {
               // Since this is manufactured, its implied
               // location in html source is same as body.
-              EXPECT_EQ(2, t.position_in_html_src.first);
-              EXPECT_EQ(1, t.position_in_html_src.second);
+              EXPECT_EQ(2, t.line_col_in_html_src.first);
+              EXPECT_EQ(1, t.line_col_in_html_src.second);
               break;
             }
             case htmlparser::Atom::BODY: {
-              EXPECT_EQ(2, t.position_in_html_src.first);
-              EXPECT_EQ(1, t.position_in_html_src.second);
+              EXPECT_EQ(2, t.line_col_in_html_src.first);
+              EXPECT_EQ(1, t.line_col_in_html_src.second);
               break;
             }
             case htmlparser::Atom::DIV: {
-              EXPECT_EQ(3, t.position_in_html_src.first);
-              EXPECT_EQ(3, t.position_in_html_src.second);
+              EXPECT_EQ(3, t.line_col_in_html_src.first);
+              EXPECT_EQ(3, t.line_col_in_html_src.second);
 
               // Attributes.
               EXPECT_EQ(2, t.attributes.size());
@@ -205,24 +214,24 @@ TEST(ParserTest, LineColTest) {
 
               EXPECT_TRUE(
                   t.attributes[0]
-                  .position_in_html_src.has_value());
+                  .line_col_in_html_src.has_value());
               htmlparser::LineCol pos = t.attributes[0]
-                  .position_in_html_src.value();
+                  .line_col_in_html_src.value();
               // Both attributes are in same line.
               EXPECT_EQ(3, pos.first);
               EXPECT_EQ(8, pos.second);
               EXPECT_TRUE(
                   t.attributes[1]
-                  .position_in_html_src.has_value());
+                  .line_col_in_html_src.has_value());
               htmlparser::LineCol pos2 = t.attributes[1]
-                  .position_in_html_src.value();
+                  .line_col_in_html_src.value();
               EXPECT_EQ(3, pos2.first);
               EXPECT_EQ(17, pos2.second);
               break;
             }
             case htmlparser::Atom::IMG: {
-              EXPECT_EQ(4, t.position_in_html_src.first);
-              EXPECT_EQ(3, t.position_in_html_src.second);
+              EXPECT_EQ(4, t.line_col_in_html_src.first);
+              EXPECT_EQ(3, t.line_col_in_html_src.second);
 
               // Attributes
               EXPECT_EQ(1, t.attributes.size());
@@ -231,27 +240,27 @@ TEST(ParserTest, LineColTest) {
                         t.attributes[0].value);
               // Attribute is in next line.
               EXPECT_EQ(5, t.attributes[0]
-                        .position_in_html_src.value()
+                        .line_col_in_html_src.value()
                         .first);
               EXPECT_EQ(5, t.attributes[0]
-                        .position_in_html_src.value()
+                        .line_col_in_html_src.value()
                         .second);
               break;
             }
             case htmlparser::Atom::SPAN: {
-              EXPECT_EQ(10, t.position_in_html_src.first);
+              EXPECT_EQ(10, t.line_col_in_html_src.first);
               EXPECT_EQ(10,
-                        t.position_in_html_src.second);
+                        t.line_col_in_html_src.second);
               // Attributes.
               EXPECT_EQ(2, t.attributes.size());
               EXPECT_EQ("id", t.attributes[0].key);
               EXPECT_EQ("myspan", t.attributes[0].value);
               htmlparser::LineCol pos = t.attributes[0]
-                  .position_in_html_src.value();
+                  .line_col_in_html_src.value();
               EXPECT_EQ(12, pos.first);
               EXPECT_EQ(12, pos.second);
               htmlparser::LineCol pos2 = t.attributes[1]
-                  .position_in_html_src.value();
+                  .line_col_in_html_src.value();
               EXPECT_EQ("class", t.attributes[1].key);
               EXPECT_EQ("s", t.attributes[1].value);
               EXPECT_EQ(13, pos2.first);
@@ -286,7 +295,7 @@ TEST(ParserTest, LineBreakAtPeekableCharacter) {
         .on_node_callback = [&](htmlparser::Node* n,
                                 htmlparser::Token t) {
           num_callbacks++;
-          auto pos = t.position_in_html_src;
+          auto pos = t.line_col_in_html_src;
           switch (t.atom) {
             case htmlparser::Atom::HTML: {
               EXPECT_EQ(1, pos.first);
@@ -308,7 +317,7 @@ TEST(ParserTest, LineBreakAtPeekableCharacter) {
               EXPECT_EQ(3, pos.second);
               EXPECT_EQ(1, t.attributes.size());
               auto attrpos = t.attributes[0]
-                  .position_in_html_src.value();
+                  .line_col_in_html_src.value();
               EXPECT_EQ(6, attrpos.first);
               EXPECT_EQ(5, attrpos.second);
               break;

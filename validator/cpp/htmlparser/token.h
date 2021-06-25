@@ -30,6 +30,7 @@ namespace htmlparser {
 // columns used in the parser are 1 index based. That is first character being
 // tokenized starts as first line and first column.
 using LineCol = std::pair<int, int>;
+using Offsets = LineCol;
 
 enum class TokenType {
   // ErrorToken means that an error occurred during tokenization.
@@ -57,7 +58,7 @@ struct Attribute {
   std::string key;
   std::string value;
   // Position of the attribute in html source.
-  std::optional<LineCol> position_in_html_src;
+  std::optional<LineCol> line_col_in_html_src;
 
   bool operator==(const Attribute& other) const;
   bool operator!=(const Attribute& other) const;
@@ -81,7 +82,13 @@ struct Token {
   std::string data;
   // Position of this token in html source.
   // Tokenizer increments it to 1 upon parsing the first character.
-  LineCol position_in_html_src{0, 0};
+  LineCol line_col_in_html_src{0, 0};
+  // Start/End offset in original html src.
+  Offsets offsets_in_html_src{0, 0};
+  // For text node, number of words in the node. Only considers ascii
+  // whitespace.
+  int num_terms;
+
   // List of attributes (unsorted in the same order as they appear in html
   // source, with duplicates).
   std::vector<Attribute> attributes;
