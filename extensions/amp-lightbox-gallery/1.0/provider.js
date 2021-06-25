@@ -49,6 +49,27 @@ export function LightboxGalleryProviderWithRef(
   const count = useRef(0);
   const carouselElements = useRef([]);
   const gridElements = useRef([]);
+
+  const [showCarousel, setShowCarousel] = useState(true);
+  const [showControls, setShowControls] = useState(true);
+  const renderElements = useCallback(() => {
+    renderers.current.forEach((render, index) => {
+      if (!carouselElements.current[index]) {
+        carouselElements.current[index] = render();
+        gridElements.current[index] = (
+          <Thumbnail
+            onClick={() => {
+              setShowCarousel(true);
+              setIndex(index);
+            }}
+            render={render}
+          />
+        );
+        count.current += 1;
+      }
+    });
+  }, []);
+
   const register = (key, render) => {
     // Given key is 1-indexed.
     renderers.current[key - 1] = render;
@@ -79,26 +100,6 @@ export function LightboxGalleryProviderWithRef(
   useLayoutEffect(() => {
     carouselRef.current?.goToSlide(mod(index, count.current));
   }, [index]);
-
-  const [showCarousel, setShowCarousel] = useState(true);
-  const [showControls, setShowControls] = useState(true);
-  const renderElements = useCallback(() => {
-    renderers.current.forEach((render, index) => {
-      if (!carouselElements.current[index]) {
-        carouselElements.current[index] = render();
-        gridElements.current[index] = (
-          <Thumbnail
-            onClick={() => {
-              setShowCarousel(true);
-              setIndex(index);
-            }}
-            render={render}
-          />
-        );
-        count.current += 1;
-      }
-    });
-  }, []);
 
   useImperativeHandle(
     ref,
