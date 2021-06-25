@@ -17,7 +17,7 @@
 import '../amp-__component_name_hyphenated__';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-__component_name_hyphenated__-v__component_version__',
@@ -38,6 +38,7 @@ describes.realWin(
       toggleExperiment(win, 'bento-__component_name_hyphenated__', true, true);
     });
 
+    // __do_not_submit__: This is example code only.
     it('example test renders', async () => {
       const element = html`
         <amp-__component_name_hyphenated__></amp-__component_name_hyphenated__>

@@ -36,6 +36,7 @@ describes.realWin(
       html = htmlFor(doc);
     });
     
+    // __do_not_submit__: This is example code only.
     it('should contain "hello world" when built', async () => {
       const element = html`
         <amp-__component_name_hyphenated__
