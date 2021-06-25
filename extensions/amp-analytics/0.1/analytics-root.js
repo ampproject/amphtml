@@ -356,7 +356,7 @@ export class AnalyticsRoot {
       );
       return this.getElementsByQuerySelectorAll_(
         /** @type {!Array<string>} */ (selectors),
-        /** @type {boolean} */ useDataVars
+        useDataVars
       );
     }
     return this.getElement(
