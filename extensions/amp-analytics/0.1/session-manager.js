@@ -99,7 +99,7 @@ export class SessionManager {
    * Get the session for the vendor, checking if it exists or
    * creating it if necessary.
    * @param {string|undefined} type
-   * @param {?Function} opt_processing
+   * @param {function=} opt_processing
    * @return {!Promise<?SessionInfoDef>}
    */
   get(type, opt_processing) {
@@ -113,9 +113,7 @@ export class SessionManager {
       !isSessionExpired(this.sessions_[type])
     ) {
       this.sessions_[type] = this.updateSession_(this.sessions_[type]);
-      if (opt_processing) {
-        opt_processing(this.sessions_[type]);
-      }
+      opt_processing?.apply(this.sessions_[type]);
       this.setSession_(type, this.sessions_[type]);
       return Promise.resolve(this.sessions_[type]);
     }
@@ -127,7 +125,7 @@ export class SessionManager {
    * Get our session if it exists or creates it. Sets the session
    * in localStorage to update the access time.
    * @param {string} type
-   * @param {!Function} opt_processing
+   * @param {function=} opt_processing
    * @return {!Promise<SessionInfoDef>}
    */
   getOrCreateSession_(type, opt_processing) {
@@ -147,9 +145,7 @@ export class SessionManager {
         if (type in this.sessions_ && !isSessionExpired(this.sessions_[type])) {
           return this.sessions_[type];
         }
-        if (opt_processing) {
-          opt_processing(session);
-        }
+        opt_processing?.apply(session);
         this.setSession_(type, session);
         this.sessions_[type] = session;
         return this.sessions_[type];

@@ -261,14 +261,9 @@ export class AnalyticsConfig {
     if (!this.config_['triggers']) {
       return;
     }
-    const keys = Object.keys(this.config_['triggers']);
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      if (this.config_['triggers']?.[key]?.['session']?.['persistEvent']) {
-        this.config_[PERSIST_EVENT_TIMESTAMP] = true;
-        break;
-      }
-    }
+    this.config_[PERSIST_EVENT_TIMESTAMP] = Object.values(
+      this.config_['triggers']
+    ).some((trigger) => trigger?.['session']?.['persistentEvent']);
   }
 
   /**
