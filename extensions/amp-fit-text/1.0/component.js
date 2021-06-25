@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
+import * as Preact from '#preact';
+import {ContainWrapper} from '#preact/component';
 import {LINE_HEIGHT_EM_, useStyles} from './component.jss';
-import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
-import {toWin} from '../../../src/core/window';
-import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
+import {px, resetStyles, setStyle, setStyles} from '#core/dom/style';
+import {toWin} from '#core/window';
+import {useCallback, useLayoutEffect, useRef} from '#preact';
 
 /**
  * @param {!FitTextProps} props

@@ -22,8 +22,8 @@ import {
   defaultSerializer,
 } from './transport-serializer';
 import {IframeTransport} from './iframe-transport';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/core/window/interface';
+import {Services} from '#service';
+import {WindowInterface} from '#core/window/interface';
 import {
   assertHttpsUrl,
   checkCorsUrl,
@@ -34,12 +34,12 @@ import {createPixel} from '../../../src/pixel';
 import {dev, user, userAssert} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service';
+import {getTopWindow} from '../../../src/service-helpers';
 
 import {loadPromise} from '../../../src/event-helper';
-import {removeElement} from '../../../src/dom';
-import {toWin} from '../../../src/core/window';
-import {toggle} from '../../../src/style';
+import {removeElement} from '#core/dom';
+import {toWin} from '#core/window';
+import {toggle} from '#core/dom/style';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics/transport';

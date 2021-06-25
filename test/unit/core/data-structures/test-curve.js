@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Curves,
-  bezierCurve,
-  getCurve,
-} from '../../../../src/core/data-structures/curve';
+import {Curves, bezierCurve, getCurve} from '#core/data-structures/curve';
 
 describes.sandboxed('data structures - Curve', {}, () => {
   it('bezierCurve', () => {

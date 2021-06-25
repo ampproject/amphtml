@@ -93,6 +93,7 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   extraGlobs?: Array<string>,
  *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
+ *   wrapper?: string,
  * }}
  */
 const ExtensionOptionDef = {};
@@ -624,7 +625,6 @@ function buildBinaries(extDir, binaries, options) {
         minifiedName: maybeToNpmEsmName(`${name}.js`),
         latestName: '',
         outputFormat: esm ? 'esm' : 'cjs',
-        wrapper: '',
         externalDependencies: external,
         remapDependencies: remap,
       })
@@ -648,6 +648,20 @@ function buildBinaries(extDir, binaries, options) {
 async function buildExtensionJs(extDir, name, version, latestVersion, options) {
   const filename = options.filename || name + '.js';
   const latest = version === latestVersion;
+
+  const wrapperName = options.wrapper || 'extension';
+  const wrapperOrFn = wrappers[wrapperName];
+  if (!wrapperOrFn) {
+    throw new Error(
+      `Unknown options.wrapper "${wrapperName}" (${name}:${version})\n` +
+        `Expected one of: ${Object.keys(wrappers).join(', ')}`
+    );
+  }
+  const wrapper =
+    typeof wrapperOrFn === 'function'
+      ? wrapperOrFn(name, version, latest, argv.esm, options.loadPriority)
+      : wrapperOrFn;
+
   await compileJs(
     extDir + '/',
     filename,
@@ -656,20 +670,7 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
       toName: `${name}-${version}.max.js`,
       minifiedName: `${name}-${version}.js`,
       latestName: latest ? `${name}-latest.js` : '',
-      // Wrapper that either registers the extension or schedules it for
-      // execution after the main binary comes back.
-      // The `function` is wrapped in `()` to avoid lazy parsing it,
-      // since it will be immediately executed anyway.
-      // See https://github.com/ampproject/amphtml/issues/3977
-      wrapper: options.noWrapper
-        ? ''
-        : wrappers.extension(
-            name,
-            version,
-            latest,
-            argv.esm,
-            options.loadPriority
-          ),
+      wrapper,
     })
   );
 

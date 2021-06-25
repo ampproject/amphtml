@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {poll} from '../../testing/iframe';
+import {poll} from '#testing/iframe';
 
 //TODO(aghassemi,#10878): Run in all platforms.
 //TODO(aghasemi, #10877): in-a-box, FIE integration tests.

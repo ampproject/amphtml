@@ -120,10 +120,7 @@ function checkLinksInFile(file) {
       // codepen returns a 503 for these link checks
       {pattern: /https:\/\/codepen.*/},
       // GitHub PRs and Issues can be assumed to exist
-      {
-        pattern:
-          /https:\/\/github.com\/ampproject\/amphtml\/(pull|issue)\/d+.*/,
-      },
+      {pattern: /https:\/\/github.com\/ampproject\/amphtml\/(pull|issue)\/.*/},
       // Templated links are merely used to generate other markdown files.
       {pattern: /\$\{[a-z]*\}/},
       {pattern: /https:.*?__component_name\w*__/},
@@ -177,8 +174,8 @@ module.exports = {
   checkLinks,
 };
 
-checkLinks.description = 'Detects dead links in markdown files';
+checkLinks.description = 'Check markdown files for dead links';
 checkLinks.flags = {
-  'files': 'Checks only the specified files',
-  'local_changes': 'Checks just the files changed in the local branch',
+  'files': 'Check only the specified files',
+  'local_changes': 'Check just the files changed in the local branch',
 };

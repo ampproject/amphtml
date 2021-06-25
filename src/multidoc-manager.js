@@ -15,7 +15,7 @@
  */
 
 import {CommonSignals} from './core/constants/common-signals';
-import {Services} from './services';
+import {Services} from './service';
 import {VisibilityState} from './core/constants/visibility-state';
 import {childElementsByTag} from './core/dom/query';
 import {
@@ -24,15 +24,18 @@ import {
   importShadowBody,
 } from './shadow-embed';
 import {dev, user} from './log';
-import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
+import {
+  disposeServicesForDoc,
+  getServicePromiseOrNullForDoc,
+} from './service-helpers';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
 import {isArray, isObject} from './core/types';
-import {isConnectedNode} from './dom';
+import {isConnectedNode} from './core/dom';
 
 import {parseExtensionUrl} from './service/extension-script';
 import {parseUrlDeprecated} from './url';
-import {setStyle} from './style';
+import {setStyle} from './core/dom/style';
 
 /** @const @private {string} */
 const TAG = 'multidoc-manager';

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as dom from '../../src/dom';
-import * as ext from '../../src/service/extensions-impl';
+import * as dom from '#core/dom';
+import * as ext from '#service/extensions-impl';
 import * as styles from '../../src/style-installer';
-import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {AmpDocShadow, AmpDocSingle} from '#service/ampdoc-impl';
 import {ElementStub} from '../../src/element-stub';
-import {Services} from '../../src/services';
+import {Services} from '#service';
 import {adopt, adoptShadowMode} from '../../src/runtime';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {deactivateChunking, runChunksForTesting} from '../../src/chunk';
@@ -27,14 +27,14 @@ import {
   getServiceForDoc,
   getServicePromise,
   getServicePromiseOrNullForDoc,
-} from '../../src/service';
-import {installAmpdocServices} from '../../src/service/core-services';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTemplatesServiceForDoc} from '../../src/service/template-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {setShadowDomSupportedVersionForTesting} from '../../src/core/dom/web-components';
-import {toArray} from '../../src/core/types/array';
-import {vsyncForTesting} from '../../src/service/vsync-impl';
+} from '../../src/service-helpers';
+import {installAmpdocServices} from '#service/core-services';
+import {installPlatformService} from '#service/platform-impl';
+import {installTemplatesServiceForDoc} from '#service/template-impl';
+import {installTimerService} from '#service/timer-impl';
+import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
+import {toArray} from '#core/types/array';
+import {vsyncForTesting} from '#service/vsync-impl';
 
 describes.fakeWin(
   'runtime',

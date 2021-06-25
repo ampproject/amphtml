@@ -19,7 +19,7 @@ FAIL
 |    Tests for the amp-iframely tag. See the inline comments.
 |  -->
 |  <!DOCTYPE html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8" />
 |    <title>Amp Iframely Demo</title>

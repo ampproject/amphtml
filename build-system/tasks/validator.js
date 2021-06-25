@@ -71,15 +71,15 @@ module.exports = {
   validatorWebui,
 };
 
-validator.description = 'Builds and tests the AMP validator.';
+validator.description = 'Build and tests the AMP validator';
 validator.flags = {
-  'update_tests': 'Updates validation test output files',
+  'update_tests': 'Update validation test output files',
 };
 
-validatorCpp.description = 'Builds and tests the AMP C++ validator.';
+validatorCpp.description = 'Build and tests the AMP C++ validator';
 // TODO(antiphoton): Add the ability to update validation test output files.
 
-validatorWebui.description = 'Builds and tests the AMP validator web UI.';
+validatorWebui.description = 'Build and test the AMP validator web UI';
 validatorWebui.flags = {
-  'update_tests': 'Updates validation test output files',
+  'update_tests': 'Update validator web UI test output files',
 };
