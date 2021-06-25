@@ -37,9 +37,9 @@
 }
 
 .i-amphtml-story-interactive-img-quiz-answer-choice {
-  position: absolute;
-  left: 0;
-  right: 0;
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
   color: var(--interactive-prompt-text-color) !important;
   font-weight: bold !important;
 }
