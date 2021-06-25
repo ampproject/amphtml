@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-facebook-like';
+import '../amp-facebook';
 import {createElementWithAttributes} from '#core/dom';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {resetServiceForTesting} from '../../../../src/service-helpers';
@@ -24,10 +24,10 @@ import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
-  'amp-facebook-like',
+  'amp-facebook-comments',
   {
     amp: {
-      extensions: ['amp-facebook-like:1.0'],
+      extensions: ['amp-facebook:1.0'],
     },
   },
   (env) => {
@@ -41,16 +41,19 @@ describes.realWin(
       await loadPromise;
     };
 
+    const href = 'https://cdn.ampproject.org/';
+
     beforeEach(async function () {
       win = env.win;
       doc = win.document;
-      toggleExperiment(win, 'bento-facebook-like', true, true);
+      toggleExperiment(win, 'bento-facebook', true, true);
       // Override global window here because Preact uses global `createElement`.
       doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
 
     it('renders', async () => {
-      element = createElementWithAttributes(doc, 'amp-facebook-like', {
+      element = createElementWithAttributes(doc, 'amp-facebook-comments', {
+        'data-href': href,
         'height': 500,
         'width': 500,
         'layout': 'responsive',
@@ -64,22 +67,9 @@ describes.realWin(
       );
     });
 
-    it('propagates title to iframe', async () => {
-      element = createElementWithAttributes(doc, 'amp-facebook-like', {
-        'height': 500,
-        'width': 500,
-        'layout': 'responsive',
-        'title': 'my custom facebook like element',
-      });
-      doc.body.appendChild(element);
-      await waitForRender();
-
-      const iframe = element.shadowRoot.querySelector('iframe');
-      expect(iframe.title).to.equal('my custom facebook like element');
-    });
-
-    it('ensures iframe is not sandboxed in amp-facebook-like', async () => {
-      element = createElementWithAttributes(doc, 'amp-facebook-like', {
+    it('ensures iframe is not sandboxed in amp-facebook-comments', async () => {
+      element = createElementWithAttributes(doc, 'amp-facebook-comments', {
+        'data-href': href,
         'height': 500,
         'width': 500,
         'layout': 'responsive',
@@ -91,8 +81,23 @@ describes.realWin(
       expect(iframe.hasAttribute('sandbox')).to.be.false;
     });
 
-    it('renders amp-facebook-like with specified locale', async () => {
-      element = createElementWithAttributes(doc, 'amp-facebook-like', {
+    it('renders amp-facebook-comments with detected locale', async () => {
+      element = createElementWithAttributes(doc, 'amp-facebook-comments', {
+        'data-href': href,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('name')).to.contain('"locale":"en_US"');
+    });
+
+    it('renders amp-facebook-comments with specified locale', async () => {
+      element = createElementWithAttributes(doc, 'amp-facebook-comments', {
+        'data-href': href,
         'data-locale': 'fr_FR',
         'height': 500,
         'width': 500,
@@ -106,7 +111,8 @@ describes.realWin(
     });
 
     it('renders with correct embed type', async () => {
-      element = createElementWithAttributes(doc, 'amp-facebook-like', {
+      element = createElementWithAttributes(doc, 'amp-facebook-comments', {
+        'data-href': href,
         'height': 500,
         'width': 500,
         'layout': 'responsive',
@@ -116,7 +122,7 @@ describes.realWin(
 
       const iframe = element.shadowRoot.querySelector('iframe');
       const context = JSON.parse(iframe.getAttribute('name'));
-      expect(context.attributes.embedAs).to.equal('like');
+      expect(context.attributes.embedAs).to.equal('comments');
     });
 
     it("container's height is changed", async () => {
@@ -128,31 +134,29 @@ describes.realWin(
       setDefaultBootstrapBaseUrlForTesting(iframeSrc);
 
       const initialHeight = 300;
-      element = createElementWithAttributes(doc, 'amp-facebook-like', {
+      element = createElementWithAttributes(doc, 'amp-facebook-comments', {
+        'data-href': '585110598171631616',
         'height': initialHeight,
         'width': 500,
         'layout': 'responsive',
       });
       doc.body.appendChild(element);
-      await element.buildInternal();
-      await element.layoutCallback();
+      await waitForRender();
 
       const impl = await element.getImpl(false);
-      const attemptChangeHeightStub = env.sandbox
-        .stub(impl, 'attemptChangeHeight')
-        .resolves();
+      const forceChangeHeightStub = env.sandbox.stub(impl, 'forceChangeHeight');
 
-      const iframe = element.shadowRoot.querySelector('iframe');
       const mockEvent = new CustomEvent('message');
-      const sentinel = JSON.parse(iframe.getAttribute('name'))['attributes'][
-        '_context'
-      ]['sentinel'];
+      const sentinel = JSON.parse(
+        element.shadowRoot.querySelector('iframe').getAttribute('name')
+      )['attributes']['_context']['sentinel'];
       mockEvent.data = serializeMessage('embed-size', sentinel, {
         'height': 1000,
       });
-      mockEvent.source = iframe.contentWindow;
+      mockEvent.source =
+        element.shadowRoot.querySelector('iframe').contentWindow;
       win.dispatchEvent(mockEvent);
-      expect(attemptChangeHeightStub).to.be.calledOnce.calledWith(1000);
+      expect(forceChangeHeightStub).to.be.calledOnce.calledWith(1000);
     });
   }
 );
