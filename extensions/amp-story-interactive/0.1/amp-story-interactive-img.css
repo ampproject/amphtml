@@ -20,12 +20,7 @@
     (100% - (var(--i-amphtml-interactive-img-option-width) * 2)) / 3
   ) !important;
 
-  border-radius: 4em 4em 4.5em 4.5em !important;
-  /**
-	 * Fixes rendering issue sometimes on desktop where accent color shows below
-	 * option container.
-	 */
-  border-bottom: 1px solid var(--i-amphtml-interactive-option-background-color);
+  border-radius: 4em 4em 5em 5em !important;
 }
 
 .i-amphtml-story-interactive-prompt-container {
@@ -40,15 +35,7 @@
   border-radius: 5em !important;
   overflow: hidden !important;
   box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
-  /* overflow bug fix for percent bar animation on ios safari  */
-  transform: translateZ(0) !important;
-  --post-select-scale: 0.5 !important;
   flex-wrap: wrap !important;
-  /**
-	 * Fixes rendering issue sometimes on desktop where accent color shows below
-	 * option container.
-	 */
-  margin-bottom: -5px;
 }
 
 .i-amphtml-story-interactive-img-option {
