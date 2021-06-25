@@ -15,6 +15,8 @@
  */
 
 import {AmpStoryInteractiveBinaryPoll} from './amp-story-interactive-binary-poll';
+import {AmpStoryInteractiveImgPoll} from './amp-story-interactive-img-poll';
+import {AmpStoryInteractiveImgQuiz} from './amp-story-interactive-img-quiz';
 import {AmpStoryInteractivePoll} from './amp-story-interactive-poll';
 import {AmpStoryInteractiveQuiz} from './amp-story-interactive-quiz';
 import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
@@ -28,6 +30,14 @@ AMP.extension('amp-story-interactive', '0.1', (AMP) => {
   AMP.registerElement(
     'amp-story-interactive-binary-poll',
     AmpStoryInteractiveBinaryPoll
+  );
+  AMP.registerElement(
+    'amp-story-interactive-img-poll',
+    AmpStoryInteractiveImgPoll
+  );
+  AMP.registerElement(
+    'amp-story-interactive-img-quiz',
+    AmpStoryInteractiveImgQuiz
   );
   AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractivePoll);
   AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
