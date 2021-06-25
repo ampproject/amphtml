@@ -77,9 +77,12 @@ class AmpFacebook extends BaseElement {
 function parseEmbed(element) {
   const embedAs = element.getAttribute('data-embed-as');
   userAssert(
-    !embedAs || ['post', 'video', 'comment'].indexOf(embedAs) !== -1,
+    !embedAs ||
+      ['post', 'video', 'comment', 'comments', 'like', 'page'].indexOf(
+        embedAs
+      ) !== -1,
     'Attribute data-embed-as for <amp-facebook> value is wrong, should be' +
-      ' "post", "video" or "comment" but was: %s',
+      ' "post", "video", "comment", "comments", "like", or "page", but was: %s',
     embedAs
   );
   return embedAs;

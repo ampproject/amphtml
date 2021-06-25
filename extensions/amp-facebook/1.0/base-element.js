@@ -22,10 +22,29 @@ export class BaseElement extends FacebookBaseElement {}
 BaseElement['props'] = {
   ...FacebookBaseElement['props'],
   'allowFullScreen': {attr: 'data-allowfullscreen'},
+  'embedAs': {attr: 'data-embed-as'},
   'includeCommentParent': {
     attr: 'data-include-comment-parent',
     type: 'boolean',
     default: false,
   },
   'showText': {attr: 'data-show-text'},
+  // -comments
+  'numPosts': {attr: 'data-numposts'},
+  'orderBy': {attr: 'data-order-by'},
+  // -comments & -like
+  'colorscheme': {attr: 'data-colorscheme'},
+  // -like
+  'action': {attr: 'data-action'},
+  'kdSite': {attr: 'data-kd_site'},
+  'layout': {attr: 'data-layout'},
+  'refLabel': {attr: 'data-ref'},
+  'share': {attr: 'data-share'},
+  'size': {attr: 'data-size'},
+  // -page
+  'hideCover': {attr: 'data-hide-cover'},
+  'hideCta': {attr: 'data-hide-cta'},
+  'showFacepile': {attr: 'data-show-facepile'},
+  'smallHeader': {attr: 'data-small-header'},
+  'tabs': {attr: 'data-tabs'},
 };
