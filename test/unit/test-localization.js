@@ -16,10 +16,12 @@
 
 import {
   LocalizationService,
-  LocalizedStringId,
-  createPseudoLocale,
   getLanguageCodesFromString,
 } from '#service/localization';
+import {
+  LocalizedStringId,
+  createPseudoLocale,
+} from '#service/localization/strings';
 
 import {Services} from '#service';
 
