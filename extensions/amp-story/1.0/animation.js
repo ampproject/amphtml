@@ -637,7 +637,6 @@ export class AnimationManager {
             if (!preset) {
               return null;
             }
-            preset.delay = 0;
             return this.createRunner_({
               preset,
               source: el,
