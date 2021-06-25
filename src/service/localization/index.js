@@ -21,8 +21,6 @@ import {LocalizedStringBundleDef, LocalizedStringId} from './strings';
 import {Services} from '#service';
 import {closest} from '#core/dom/query';
 
-export * from './strings';
-
 /**
  * Language code used if there is no language code specified by the document.
  * @const {string}
