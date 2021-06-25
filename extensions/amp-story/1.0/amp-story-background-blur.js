@@ -74,7 +74,7 @@ export class backgroundBlur {
   update(pageElement) {
     const fillElement = this.getBiggestImage_(pageElement);
     if (!fillElement) {
-      user().info('No image found for background blur.');
+      user().info('BACKGROUND-BLUR', 'No image found for background blur.');
     }
     this.animate_(fillElement);
   }
