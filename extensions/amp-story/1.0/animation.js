@@ -298,7 +298,6 @@ export class AnimationRunner {
    * @return {!Promise<void>}
    */
   applyFirstFrame() {
-    // return Promise.resolve();
     if (this.hasStarted()) {
       return Promise.resolve();
     }
