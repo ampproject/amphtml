@@ -2,6 +2,8 @@
   "compilerOptions": {
     "allowJs": true,
     "baseUrl": ".",
+    "outDir": "dist",
+    "noEmit": true,
     "paths": {
       "#3p/*": ["./3p/*"],
       "#ads/*": ["./ads/*"],
@@ -22,5 +24,5 @@
       "#third_party/*": ["./third_party/*"]
     }
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"]
 }
