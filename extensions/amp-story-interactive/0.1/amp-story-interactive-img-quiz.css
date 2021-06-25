@@ -21,11 +21,25 @@
   bottom: 3.5% !important;
   right: 3.5% !important;
   border: 2px solid var(--i-amphtml-interactive-option-background-color) !important;
-  background-color: var(--interactive-accent-color) !important;
-  color: white !important;
+  background-color: var(--interactive-prompt-background) !important;
   border-radius: 50% !important;
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  font-weight: bold;
+}
+
+.i-amphtml-story-interactive-img-quiz-answer-choice-overlay {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  opacity: 0.1 !important;
+  background-color: var(--interactive-accent-color) !important;
+}
+
+.i-amphtml-story-interactive-img-quiz-answer-choice {
+  position: absolute;
+  left: 0;
+  right: 0;
+  color: var(--interactive-prompt-text-color) !important;
+  font-weight: bold !important;
 }
