@@ -1,0 +1,12 @@
+{
+  "countries": [
+    {"Name": "Sudan", "continent": "Africa"},
+    {"Name": "India", "continent": "Asia"},
+    {"Name": "Mexico", "continent": "North America"},
+    {"Name": "Brazil", "continent": "South America"},
+    {"Name": "Costa Rica", "continent": "North America"},
+    {"Name": "Thailand", "continent": "Asia"},
+    {"Name": "Vietnam", "continent": "Asia"},
+    {"Name": "Italy", "continent": "Europe"}
+  ]
+}
