@@ -1,9 +1,6 @@
-# Flags
+# {canary,prod}-config.json
 
-Please be aware that canary-config.json is actually 1% of production (which is
-99%). There are some instances where you might not want this and you should
-instead configure the prod-config.json file with a correct frequency value
-besides 1 or 0.
+These config files are used to bootstrap experiment values into the runtime and are merged directly into the `AMP_CONFIG` field during the build. `prod-config.json` is used in all [release channels](../../docs/release-schedule.md#release-channels) except Experimental, which uses `canary-config.json`.
 
 # experiments-config.json
 
