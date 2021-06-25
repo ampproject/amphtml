@@ -369,6 +369,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
           StateProperty.CURRENT_PAGE_ID
         ),
       };
+
+      this.toggleBackgroundOverlay_(true);
       this.historyService_.push(() => this.closeInternal_(), historyState);
     }
 
@@ -496,6 +498,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       });
     }
 
+    this.toggleBackgroundOverlay_(false);
+
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
 
     this.analyticsService_.triggerEvent(
@@ -505,5 +509,22 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.PAGE_ATTACHMENT_EXIT
     );
+  }
+
+  /**
+   * @param {boolean} isActive
+   * @private
+   */
+  toggleBackgroundOverlay_(isActive) {
+    const activePageEl = closest(
+      this.element,
+      (el) => el.tagName === 'AMP-STORY-PAGE'
+    );
+    this.mutateElement(() => {
+      activePageEl.classList.toggle(
+        'i-amphtml-story-page-attachment-active',
+        isActive
+      );
+    });
   }
 }

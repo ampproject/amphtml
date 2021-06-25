@@ -751,15 +751,6 @@ export class AmpStory extends AMP.BaseElement {
       this.onAdStateUpdate_(isAd);
     });
 
-    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      this.storeService_.subscribe(
-        StateProperty.PAGE_ATTACHMENT_STATE,
-        (isActive) => {
-          this.onAttachmentStateUpdate_(isActive);
-        }
-      );
-    }
-
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
       this.onPausedStateUpdate_(isPaused);
     });
@@ -2121,17 +2112,6 @@ export class AmpStory extends AMP.BaseElement {
         });
       }
     }
-  }
-
-  /**
-   * @param {boolean} isActive
-   * @private
-   */
-  onAttachmentStateUpdate_(isActive) {
-    this.element.classList.toggle(
-      'i-amphtml-story-attachment-active',
-      isActive
-    );
   }
 
   /**
