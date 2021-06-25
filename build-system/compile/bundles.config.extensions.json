@@ -93,6 +93,11 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-ad-network-dianomi-impl",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-ad-network-doubleclick-impl",
     "version": "0.1",
     "latestVersion": "0.1"
@@ -913,6 +918,15 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-soundcloud",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true,
+      "wrappers": "bento"
+    }
+  },
+  {
     "name": "amp-springboard-player",
     "version": "0.1",
     "latestVersion": "0.1"
@@ -1004,9 +1018,13 @@
       "hasCss": true,
       "cssBinaries": [
         "amp-story-interactive-binary-poll",
+        "amp-story-interactive-img",
+        "amp-story-interactive-img-poll",
+        "amp-story-interactive-img-quiz",
         "amp-story-interactive-poll",
         "amp-story-interactive-quiz",
-        "amp-story-interactive-results"
+        "amp-story-interactive-results",
+        "amp-story-interactive-slider"
       ]
     }
   },
@@ -1189,14 +1207,6 @@
     "name": "amp-viqeo-player",
     "version": "0.1",
     "latestVersion": "0.1"
-  },
-  {
-    "name": "amp-viz-vega",
-    "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
   },
   {
     "name": "amp-vk",
