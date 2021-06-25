@@ -188,7 +188,7 @@ export class AmpRender extends BaseElement {
         'placeholder required with layout="container"'
       );
     }
-    return super.isLayoutSupported(layout);
+    return true;
   }
 
   /** @private */
@@ -198,11 +198,32 @@ export class AmpRender extends BaseElement {
       () => {
         currentHeight = this.element./*OK*/ offsetHeight;
         targetHeight = this.element./*OK*/ scrollHeight;
+        // currentHeight (offsetHeight) includes border while targetHeight (scrollHeight) does not
+        if (targetHeight < currentHeight) {
+          // Since targetHeight is smaller than currentHeight, we need to shrink the component.
+          const container = this.element.querySelector(
+            'div[i-amphtml-rendered]'
+          );
+          targetHeight = container./*OK*/ scrollHeight;
+          // check if the first child has any margin-top and add that to the target height
+          if (container.firstElementChild) {
+            const marginTop = computedStyle(
+              this.getAmpDoc().win,
+              container.firstElementChild
+            ).getPropertyValue('margin-top');
+            targetHeight += parseInt(marginTop, 10);
+          }
+          // check if the last child has any margin-bottom and add that to the target height
+          if (container.lastElementChild) {
+            const marginBottom = computedStyle(
+              this.getAmpDoc().win,
+              container.lastElementChild
+            ).getPropertyValue('margin-bottom');
+            targetHeight += parseInt(marginBottom, 10);
+          }
+        }
       },
       () => {
-        if (targetHeight <= currentHeight) {
-          return;
-        }
         this.forceChangeHeight(targetHeight);
       }
     );
@@ -379,6 +400,12 @@ export class AmpRender extends BaseElement {
     return !this.template_ || 'render' in props;
   }
 }
+
+/**
+ * This is disabled to remove the fill content style in the AMP layer.
+ * @override
+ */
+AmpRender['layoutSizeDefined'] = false;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);
