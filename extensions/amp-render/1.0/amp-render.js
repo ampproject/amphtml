@@ -199,12 +199,12 @@ export class AmpRender extends BaseElement {
         currentHeight = this.element./*OK*/ offsetHeight;
         targetHeight = this.element./*OK*/ scrollHeight;
         if (targetHeight < currentHeight) {
-          // Since targetHeight is smaller than currentHeight, we need to shrink the component.
+          // targetHeight is smaller than currentHeight, we need to shrink the height.
           const container = this.element.querySelector(
             'div[i-amphtml-rendered]'
           );
           targetHeight = container./*OK*/ scrollHeight;
-          // check if the first child has any margin-top and add that to the target height
+          // Check if the first child has any margin-top and add it to the target height
           if (container.firstElementChild) {
             const marginTop = computedStyle(
               this.getAmpDoc().win,
@@ -212,7 +212,7 @@ export class AmpRender extends BaseElement {
             ).getPropertyValue('margin-top');
             targetHeight += parseInt(marginTop, 10);
           }
-          // check if the last child has any margin-bottom and add that to the target height
+          // Check if the last child has any margin-bottom and add it to the target height
           if (container.lastElementChild) {
             const marginBottom = computedStyle(
               this.getAmpDoc().win,

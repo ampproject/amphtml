@@ -891,7 +891,7 @@ describes.realWin(
       ],
     };
 
-    it('should resize on resizeToContents action', async () => {
+    it.only('should grow on resizeToContents action when height is insufficient', async () => {
       const fakeMutator = {
         measureMutateElement: (unusedElement, measurer, mutator) =>
           Promise.resolve().then(measurer).then(mutator),
@@ -928,7 +928,7 @@ describes.realWin(
       expect(fakeMutator.forceChangeSize).to.be.calledOnce;
     });
 
-    it('should not resize on resizeToContents action when current height is sufficient', async () => {
+    it.only('should shrink on resizeToContents action when there is exta whitespace', async () => {
       const fakeMutator = {
         measureMutateElement: (unusedElement, measurer, mutator) =>
           Promise.resolve().then(measurer).then(mutator),
@@ -938,12 +938,12 @@ describes.realWin(
 
       env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves(items);
 
-      // set the height large enough so component does not resize
+      // set the height large enough so component shrinks
       element = html`
         <amp-render
           binding="never"
           src="https://example.com/data.json"
-          height="1000"
+          height="5000"
           layout="fixed-height"
         >
           <template type="amp-mustache">
@@ -962,7 +962,7 @@ describes.realWin(
 
       element.enqueAction(invocation('resizeToContents'));
       await getRenderedData();
-      expect(fakeMutator.forceChangeSize).not.to.be.called;
+      expect(fakeMutator.forceChangeSize).to.be.calledOnce;
     });
   }
 );
