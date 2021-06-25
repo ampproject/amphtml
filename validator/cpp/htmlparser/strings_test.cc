@@ -671,3 +671,16 @@ TEST(StringsTest, DecodePercentEncodedURLTest) {
       "example-%80.com").has_value());
 }
 
+TEST(StringsTest, CountTermsTest) {
+  EXPECT_EQ(2, htmlparser::Strings::CountTerms("hello world"));
+  EXPECT_EQ(2, htmlparser::Strings::CountTerms("hello world\n"));
+  EXPECT_EQ(2, htmlparser::Strings::CountTerms("   hello world\n"));
+  EXPECT_EQ(2, htmlparser::Strings::CountTerms("\r\nhello world\n"));
+  EXPECT_EQ(0, htmlparser::Strings::CountTerms("        \n         "));
+  EXPECT_EQ(4, htmlparser::Strings::CountTerms(
+      "  hello world \nbye\r\n bye"));
+  EXPECT_EQ(0, htmlparser::Strings::CountTerms("hello world", ""));
+  EXPECT_EQ(0, htmlparser::Strings::CountTerms("", " \n"));
+  EXPECT_EQ(0, htmlparser::Strings::CountTerms("", ""));
+}
+
