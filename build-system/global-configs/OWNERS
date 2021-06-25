@@ -12,7 +12,7 @@
       ],
     },
     {
-      pattern: "client-side-experiments-config.json",
+      pattern: 'client-side-experiments-config.json',
       owners: [{name: 'danielrozenberg'}, {name: 'jridgewell'}],
     },
   ],
