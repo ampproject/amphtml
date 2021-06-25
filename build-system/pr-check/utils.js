@@ -283,6 +283,7 @@ function storeExperimentBuildToWorkspace(exp) {
 
 /**
  * Replaces URLS in HTML files, compresses and stores nomodule build in CI artifacts.
+ * @return {Promise<void>}
  */
 async function processAndStoreBuildToArtifacts() {
   if (!isCircleciBuild()) {

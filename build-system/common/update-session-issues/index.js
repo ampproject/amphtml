@@ -482,6 +482,7 @@ async function closeStaleIssues(
  * @param {string} repo
  * @param {number} sessionDurationHours
  * @param {Array<IssueWithSessionDateDef>} existing
+ * @return {Promise<void>}
  */
 async function closeStalePinUpcoming(
   token,
@@ -523,6 +524,7 @@ async function closeStalePinUpcoming(
  * @param {string} repo
  * @param {TemplateDef} template
  * @param {Array<IssueWithSessionDateDef>} existing
+ * @return {Promise<void>}
  */
 async function createScheduledIssue(token, repo, template, existing) {
   const issueData = getNextIssueData(template);
@@ -564,6 +566,7 @@ const header = (line, underline = /* em-dash */ '\u2014') =>
 /**
  * @param {string} token
  * @param {string} repo
+ * @return {Promise<void>}
  */
 async function updateDesignReviewIssues(token, repo) {
   const templates = await getTemplates();

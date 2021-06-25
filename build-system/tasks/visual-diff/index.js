@@ -215,6 +215,7 @@ async function launchPercyAgent(browserFetcher) {
 
 /**
  * Launches an AMP webserver for minified js.
+ * @return {Promise<void>}
  */
 async function launchWebServer() {
   await startServer(
@@ -308,6 +309,7 @@ async function newPage(browser, viewport = null) {
  * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
  * @param {?{height: number, width: number}} viewport optional viewport size
  *     object with numeric fields `width` and `height`.
+ * @return {Promise<void>}
  */
 async function resetPage(page, viewport = null) {
   const width = viewport ? viewport.width : VIEWPORT_WIDTH;
@@ -376,6 +378,7 @@ function logTestError(testError) {
  *
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {!Array<WebpageDef>} webpages details about the pages to snapshot.
+ * @return {Promise<void>}
  */
 async function runVisualTests(browser, webpages) {
   const numUnfilteredPages = webpages.length;
@@ -722,6 +725,7 @@ function setDebuggingLevel() {
  * build for every PR.
  *
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
+ * @return {Promise<void>}
  */
 async function createEmptyBuild(browser) {
   log('info', 'Skipping visual diff tests and generating a blank Percy build');
@@ -775,6 +779,7 @@ async function visualDiff() {
  *
  * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
  *     manager.
+ * @return {Promise<void>}
  */
 async function performVisualTests(browserFetcher) {
   setDebuggingLevel();

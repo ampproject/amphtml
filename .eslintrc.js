@@ -172,7 +172,7 @@ module.exports = {
     'jsdoc/require-param': 2,
     'jsdoc/require-param-name': 2,
     'jsdoc/require-param-type': 2,
-    'jsdoc/require-returns': 2,
+    'jsdoc/require-returns': [2, {forceReturnsWithAsync: true}],
     'jsdoc/require-returns-type': 2,
 
     // Custom repo rules defined in build-system/eslint-rules

@@ -33,6 +33,7 @@ const {log, logLocalDev} = require('./logging');
  * @param {boolean} opt_compiled pass true to build the compiled runtime
  *   (`amp dist` instead of `amp build`). Otherwise uses the value of
  *   --compiled to determine which build to generate.
+ * @return {Promise<void>}
  */
 async function buildRuntime(opt_compiled = false) {
   await clean();

@@ -89,6 +89,7 @@ function log(mode, ...messages) {
  * @param {string} testName the full name of the test.
  * @param {!Array<string>} selectors Array of CSS selector that must eventually
  *     be removed from the page.
+ * @return {Promise<void>}
  * @throws {Error} an encountered error.
  */
 async function verifySelectorsInvisible(page, testName, selectors) {
@@ -119,6 +120,7 @@ async function verifySelectorsInvisible(page, testName, selectors) {
  * @param {string} testName the full name of the test.
  * @param {!Array<string>} selectors Array of CSS selectors that must
  *     eventually appear on the page.
+ * @return {Promise<void>}
  * @throws {Error} an encountered error.
  */
 async function verifySelectorsVisible(page, testName, selectors) {
@@ -155,6 +157,7 @@ async function verifySelectorsVisible(page, testName, selectors) {
  *
  * @param {!puppeteer.Page} page page to wait on.
  * @param {string} testName the full name of the test.
+ * @return {Promise<void>}
  * @throws {Error} an encountered error.
  */
 async function waitForPageLoad(page, testName) {

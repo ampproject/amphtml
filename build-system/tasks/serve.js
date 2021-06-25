@@ -106,6 +106,7 @@ function getMiddleware() {
  * @param {?Object} connectOptions
  * @param {?Object} serverOptions
  * @param {?Object} modeOptions
+ * @return {Promise<void>}
  */
 async function startServer(
   connectOptions = {},
@@ -179,6 +180,7 @@ function resetServerFiles() {
 
 /**
  * Stops the currently running server
+ * @return {Promise<void>}
  */
 async function stopServer() {
   if (url) {
@@ -190,6 +192,7 @@ async function stopServer() {
 
 /**
  * Closes the existing server and restarts it
+ * @return {Promise<void>}
  */
 async function restartServer() {
   stopServer();
@@ -205,6 +208,7 @@ async function restartServer() {
 
 /**
  * Performs pre-build steps requested via command line args.
+ * @return {Promise<void>}
  */
 async function performPreBuildSteps() {
   await preBuildRuntimeFiles();
@@ -213,6 +217,7 @@ async function performPreBuildSteps() {
 
 /**
  * Entry point of the `amp serve` task.
+ * @return {Promise<void>}
  */
 async function serve() {
   await doServe();
@@ -221,6 +226,7 @@ async function serve() {
 /**
  * Starts a webserver at the repository root to serve built files.
  * @param {boolean=} lazyBuild
+ * @return {Promise<void>}
  */
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');

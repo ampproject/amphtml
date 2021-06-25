@@ -173,6 +173,7 @@ function checkSourceMap(map) {
 /**
  * Checks sourcemaps generated during minified compilation for correctness.
  * Entry point for `amp check-sourcemaps`.
+ * @return {Promise<void>}
  */
 async function checkSourcemaps() {
   maybeBuild();

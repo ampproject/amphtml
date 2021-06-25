@@ -67,6 +67,7 @@ const getListRegExp = () =>
 
 /**
  * Checks or updates 3rd party video player list.
+ * @return {Promise<void>}
  */
 async function checkVideoInterfaceList() {
   const current = await readFile(filepath, 'utf-8');

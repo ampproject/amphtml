@@ -216,6 +216,7 @@ async function reportAllExpectedTests() {
  *   failed: string|number,
  *   success: string|number,
  * }} results
+ * @return {Promise<void>}
  */
 async function reportTestRunComplete(results) {
   if (!results || results.error) {

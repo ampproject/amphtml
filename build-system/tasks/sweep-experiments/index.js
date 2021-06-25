@@ -426,6 +426,7 @@ function collectWork(
 /**
  * Entry point to amp sweep-experiments.
  * See README.md for usage.
+ * @return {Promise<void>}
  */
 async function sweepExperiments() {
   const headHash = getStdoutThrowOnError('git log -1 --format=%h');

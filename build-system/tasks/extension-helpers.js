@@ -380,7 +380,7 @@ async function buildExtensions(options) {
  * @param {!Object} extensions
  * @param {string} extension
  * @param {!Object} options
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function doBuildExtension(extensions, extension, options) {
   const e = extensions[extension];
@@ -406,6 +406,7 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {string} latestVersion
  * @param {boolean} hasCss
  * @param {?Object} options
+ * @return {Promise<void>}
  */
 async function watchExtension(
   extDir,
@@ -453,7 +454,7 @@ async function watchExtension(
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
  * @param {!Array=} extraGlobs
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function buildExtension(
   name,
@@ -701,6 +702,7 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
 /**
  * Builds and writes the HTML file used for <amp-script> sandboxed mode.
  * @param {boolean} minify
+ * @return {Promise<void>}
  */
 async function buildSandboxedProxyIframe(minify) {
   await doBuildJs(jsBundles, 'amp-script-proxy-iframe.js', {minify});
@@ -724,6 +726,7 @@ async function buildSandboxedProxyIframe(minify) {
  * them accordingly.
  *
  * @param {string} version
+ * @return {Promise<void>}
  */
 async function copyWorkerDomResources(version) {
   const startTime = Date.now();
