@@ -74,7 +74,7 @@ describes.realWin(
 
       // Check iframe for correct scr URL
       // <-- iframe.className remains '' -->
-      expect(iframe.className).to.match(/i-amphtml-layout-responsive/);
+      expect(element.className).to.match(/i-amphtml-layout-responsive/);
     });
 
     it('throws when data-url is not given', async () => {
