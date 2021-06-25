@@ -76,4 +76,4 @@ Example:
 }
 ```
 
-Once merged onto the `main` branch, this file is automatically picked up by the AMP CDN (usually within 1-2 hours from PR merge) and its content is injected into `v0.\[m\]js`. AMP caches can also inject the contents of this file verbatim into pages inside a `<script language=text/json id=__AMP_EXP>{...}</script>` element.
+Once merged onto the `main` branch, this file is automatically picked up by the AMP CDN (usually within 1-2 hours from PR merge) and its content is injected into `v0.[m]js`. AMP caches can also inject the contents of this file verbatim into pages inside a `<script language=text/json id=__AMP_EXP>{...}</script>` element.
