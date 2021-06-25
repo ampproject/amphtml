@@ -49,10 +49,12 @@ describes.realWin(
 
       myVideo = win.document.createElement('amp-video');
       myVideo.setAttribute('id', 'myVideo');
+      myVideo.setAttribute('class', 'video-class');
       target.appendChild(myVideo);
 
       myVideo2 = win.document.createElement('amp-video');
       myVideo2.setAttribute('id', 'myVideo-2');
+      myVideo2.setAttribute('class', 'video-class');
       target.appendChild(myVideo2);
 
       target2 = win.document.createElement('div');
@@ -61,6 +63,7 @@ describes.realWin(
 
       myVideo3 = win.document.createElement('amp-video');
       myVideo3.setAttribute('id', 'myVideo-3');
+      myVideo3.setAttribute('class', 'video3-class');
       target2.appendChild(myVideo3);
     });
 
@@ -98,20 +101,19 @@ describes.realWin(
               'state': 'paused',
               'width': 700,
             };
-          } else {
-            return {
-              'autoplay': false,
-              'currentTime': 0.0045,
-              'duration': 15,
-              'height': 399,
-              'id': id,
-              'muted': false,
-              'playedTotal': 0.0045,
-              'playedRangesJson': '[[0,0.0045]]',
-              'state': 'playing_manual',
-              'width': 700,
-            };
           }
+          return {
+            'autoplay': false,
+            'currentTime': 0.0045,
+            'duration': 15,
+            'height': 399,
+            'id': id,
+            'muted': false,
+            'playedTotal': 0.0045,
+            'playedRangesJson': '[[0,0.0045]]',
+            'state': 'playing_manual',
+            'width': 700,
+          };
         }
 
         data = makeData('myVideo', false, null);
@@ -194,7 +196,7 @@ describes.realWin(
         expect(tracker.sessionObservable_.handlers_.length).to.equal(1);
       });
 
-      it('fires on class selectors', async () => {
+      it('Listener called once with shared class selector', async () => {
         const fn1 = env.sandbox.stub();
         const getElementSpy = env.sandbox.spy(root, 'getElement');
 
@@ -203,7 +205,7 @@ describes.realWin(
           AnalyticsEventType.VIDEO,
           {
             'on': 'video-play',
-            'selector': '.target',
+            'selector': '.video-class',
           },
           fn1
         );
@@ -213,13 +215,11 @@ describes.realWin(
 
         await macroTask();
         await macroTask();
-        expect(fn1).to.have.callCount(2);
+        expect(fn1).to.have.callCount(1);
         expect(fn1.firstCall).to.be.calledWith(
-          new AnalyticsEvent(target, 'video-play', data)
+          new AnalyticsEvent(myVideo, 'video-play', data)
         );
-        expect(fn1.secondCall).to.be.calledWith(
-          new AnalyticsEvent(target, 'video-play', data2)
-        );
+        expect(fn1.secondCall).to.equal(null);
         expect(getElementSpy).to.be.callCount(1);
         expect(tracker.sessionObservable_.handlers_.length).to.equal(1);
       });
@@ -236,7 +236,7 @@ describes.realWin(
           AnalyticsEventType.VIDEO,
           {
             'on': 'video-play',
-            'selector': ['.target', '.target2'],
+            'selector': ['.video-class', '.video3-class'],
           },
           fn1
         );
@@ -249,13 +249,13 @@ describes.realWin(
         await macroTask();
         expect(fn1).to.have.callCount(3);
         expect(fn1.firstCall).to.be.calledWith(
-          new AnalyticsEvent(target, 'video-play', data)
+          new AnalyticsEvent(myVideo, 'video-play', data)
         );
         expect(fn1.secondCall).to.be.calledWith(
-          new AnalyticsEvent(target, 'video-play', data2)
+          new AnalyticsEvent(myVideo2, 'video-play', data2)
         );
         expect(fn1.thirdCall).to.be.calledWith(
-          new AnalyticsEvent(target2, 'video-play', data3)
+          new AnalyticsEvent(myVideo3, 'video-play', data3)
         );
         expect(getElementSpy).to.be.callCount(1);
         expect(tracker.sessionObservable_.handlers_.length).to.equal(1);

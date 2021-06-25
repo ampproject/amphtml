@@ -1543,12 +1543,7 @@ export class VisibilityTracker extends EventTracker {
       config['selectionMethod'] || visibilitySpec['selectionMethod'];
     assertUniqueSelectors(selector);
     const unlistenPromise = this.root
-      .getElements(
-        context.parentElement || context,
-        selector,
-        selectionMethod,
-        false
-      )
+      .getElements(context.parentElement || context, selector, selectionMethod)
       .then((elements) => {
         const unlistenCallbacks = [];
         for (let i = 0; i < elements.length; i++) {
