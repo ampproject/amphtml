@@ -44,7 +44,7 @@ export function __component_name_pascalcase__({exampleTagNameProp, ...rest}) {
 
   return (
     <ContainWrapper layout size paint {...rest} >
-      {{exampleTagNameProp}}
+      {exampleTagNameProp}
       <div className={__jss_styles_example_or_placeholder__}>
         This is hidden
       </div>
