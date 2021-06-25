@@ -115,31 +115,45 @@ ABSL_FLAG(bool, allow_module_nomodule, true,
 
 namespace amp::validator {
 
-// Examples (note these are the same as kNomoduleLtsScriptPathRe):
-// /lts/v0.js
-// /lts/v0/amp-ad-0.1.js
+// LTS JavaScript (note these are the same as kNomoduleLtsScriptPathRe):
+// lts/v0.js
+// lts/v0/amp-ad-0.1.js
 static const LazyRE2 kLtsScriptPathRe = {
-    R"re(/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
-// Examples:
-// /v0.mjs
-// /v0/amp-ad-0.1.mjs
+    R"re(lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
+
+// Module JavaScript:
+// v0.mjs
+// v0/amp-ad-0.1.mjs
 static const LazyRE2 kModuleScriptPathRe = {
-    R"re(/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
-// Examples:
-// /v0.js
-// /v0/amp-ad-0.1.js
+    R"re((v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
+
+// Nomodule JavaScript:
+// v0.js
+// v0/amp-ad-0.1.js
 static const LazyRE2 kNomoduleScriptPathRe = {
-    R"re(/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
-// Examples:
-// /lts/v0.mjs
-// /lts/v0/amp-ad-0.1.mjs
+    R"re((v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
+
+// Module LTS JavaScript:
+// lts/v0.mjs
+// lts/v0/amp-ad-0.1.mjs
 static const LazyRE2 kModuleLtsScriptPathRe = {
-    R"re(/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
-// Examples (note these are the same as kLtsScriptPathRe):
-// /lts/v0.js
-// /lts/v0/amp-ad-0.1.js
+    R"re(lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
+
+// Nomodule LTS JavaScript (note these are the same as kLtsScriptPathRe):
+// lts/v0.js
+// lts/v0/amp-ad-0.1.js
 static const LazyRE2 kNomoduleLtsScriptPathRe = {
-    R"re(/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
+    R"re(lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
+
+// Runtime JavaScript:
+// v0.js
+// v0.mjs
+// v0.mjs?f=sxg
+// lts/v0.js
+// lts/v0.js?f=sxg
+// lts/v0.mjs
+static const LazyRE2 kRuntimeScriptPathRe = {
+    R"re((lts/)?v0\.m?js(\?f=sxg)?)re"};
 
 namespace {
 
@@ -271,6 +285,71 @@ std::string ScriptReleaseVersionToString(ScriptReleaseVersion version) {
   return "";
 }
 
+inline constexpr string_view kAmpProjectDomain = "https://cdn.ampproject.org/";
+
+struct ScriptTag {
+  bool is_amp_domain = false;
+  bool is_extension = false;
+  bool is_runtime = false;
+  ScriptReleaseVersion release_version = ScriptReleaseVersion::UNKNOWN;
+};
+
+ScriptTag ParseScriptTag(htmlparser::Node* node) {
+  ScriptTag script_tag;
+  bool has_async_attr = false;
+  bool has_module_attr = false;
+  bool has_nomodule_attr = false;
+  string_view src;
+
+  for (const auto& attr : node->Attributes()) {
+    std::string attr_name = attr.KeyPart();
+    if (attr_name == "async") {
+      has_async_attr = true;
+    } else if ((attr_name == "custom-element") ||
+               (attr_name == "custom-template") ||
+               (attr_name == "host-service")) {
+      script_tag.is_extension = true;
+    } else if (attr_name == "nomodule") {
+      has_nomodule_attr = true;
+    } else if (attr_name == "src") {
+      src = attr.value;
+    } else if ((attr_name == "type") && (attr.value == "module")) {
+      has_module_attr = true;
+    }
+  }
+
+  // Determine if this has a valid AMP domain and separate the path from the
+  // attribute 'src'. Consumes the domain making src just the path.
+  if (absl::ConsumePrefix(&src, kAmpProjectDomain)) {
+    script_tag.is_amp_domain = true;
+
+    // Only look at script tags that have attribute 'async'.
+    if (has_async_attr) {
+      // Determine if this is the AMP Runtime.
+      if (!script_tag.is_extension &&
+          RE2::FullMatch(src, *kRuntimeScriptPathRe))
+        script_tag.is_runtime = true;
+
+      // Determine the release version (LTS, module, standard, etc).
+      if ((has_module_attr && RE2::FullMatch(src, *kModuleLtsScriptPathRe)) ||
+          (has_nomodule_attr &&
+           RE2::FullMatch(src, *kNomoduleLtsScriptPathRe))) {
+        script_tag.release_version = ScriptReleaseVersion::MODULE_NOMODULE_LTS;
+      } else if ((has_module_attr &&
+                  RE2::FullMatch(src, *kModuleScriptPathRe)) ||
+                 (has_nomodule_attr &&
+                  RE2::FullMatch(src, *kNomoduleScriptPathRe))) {
+        script_tag.release_version = ScriptReleaseVersion::MODULE_NOMODULE;
+      } else if (RE2::FullMatch(src, *kLtsScriptPathRe)) {
+        script_tag.release_version = ScriptReleaseVersion::LTS;
+      } else {
+        script_tag.release_version = ScriptReleaseVersion::STANDARD;
+      }
+    }
+  }
+  return script_tag;
+}
+
 class ParsedHtmlTag {
  public:
   explicit ParsedHtmlTag(htmlparser::Node* node) : node_(node) {
@@ -292,6 +371,8 @@ class ParsedHtmlTag {
     for (const auto& attr : node_->Attributes()) {
       attributes_.push_back(ParsedHtmlTagAttr{attr.KeyPart(), attr.value});
     }
+    if (node_->DataAtom() == htmlparser::Atom::SCRIPT)
+      script_tag_ = ParseScriptTag(node);
   }
 
   // New Methods
@@ -326,93 +407,14 @@ class ParsedHtmlTag {
 
   bool IsEmpty() const { return node_->Data().empty(); }
 
-  std::string ExtensionScriptNameAttribute() const {
-    if (UpperName() == "SCRIPT") {
-      for (const std::string& attribute :
-           {"custom-element", "custom-template", "host-service"}) {
-        if (GetAttr(attribute).has_value()) {
-          return attribute;
-        }
-      }
-    }
-    return "";
-  }
+  bool IsExtensionScript() const { return script_tag_.is_extension; }
 
-  bool IsExtensionScript() const {
-    return !ExtensionScriptNameAttribute().empty();
-  }
+  bool IsAmpDomain() const { return script_tag_.is_amp_domain; }
 
-  bool IsAmpCacheDomain(string_view src) const {
-    return StartsWith(src, "https://cdn.ampproject.org/");
-  }
+  bool IsAmpRuntimeScript() const { return script_tag_.is_runtime; }
 
-  bool IsAsyncScriptTag(string_view src) const {
-    return UpperName() == "SCRIPT" && GetAttr("async").has_value() &&
-           !src.empty();
-  }
-
-  bool IsAmpRuntimeScript() const {
-    const string_view src = GetAttr("src").value_or("");
-    return IsAsyncScriptTag(src) && !IsExtensionScript() &&
-           IsAmpCacheDomain(src) &&
-           (EndsWith(src, "/v0.js") || EndsWith(src, "/v0.mjs") ||
-            EndsWith(src, "/v0.mjs?f=sxg"));
-  }
-
-  // This does not validate the script src, that is handled in the tagspec.
-  // This is checking if the script src is an LTS script.
-  bool IsLtsScriptTag(string_view src) const {
-    return IsAsyncScriptTag(src) && IsAmpCacheDomain(src) &&
-           RE2::PartialMatch(GetAttr("src").value_or(""), *kLtsScriptPathRe);
-  }
-
-  // This does not validate the script src, that is handled in the tagspec.
-  // This is checking if the script src is a module script.
-  bool IsModuleScriptTag(string_view src) const {
-    return IsAsyncScriptTag(src) &&
-           (GetAttr("type").value_or("") == "module") &&
-           IsAmpCacheDomain(src) &&
-           RE2::PartialMatch(GetAttr("src").value_or(""), *kModuleScriptPathRe);
-  }
-
-  // This does not validate the script src, that is handled in the tagspec.
-  // This is checking if the script src is a nomodule script.
-  bool IsNomoduleScriptTag(string_view src) const {
-    return IsAsyncScriptTag(src) && GetAttr("nomodule").has_value() &&
-           IsAmpCacheDomain(src) &&
-           RE2::PartialMatch(GetAttr("src").value_or(""),
-                             *kNomoduleScriptPathRe);
-  }
-
-  // This does not validate the script src, that is handled in the tagspec.
-  // This is checking if the script src is a module LTS script.
-  bool IsModuleLtsScriptTag(string_view src) const {
-    return IsAsyncScriptTag(src) &&
-           (GetAttr("type").value_or("") == "module") &&
-           IsAmpCacheDomain(src) &&
-           RE2::PartialMatch(GetAttr("src").value_or(""),
-                             *kModuleLtsScriptPathRe);
-  }
-
-  // This does not validate the script src, that is handled in the tagspec.
-  // This is checking if the script src is a nomodule LTS script.
-  bool IsNomoduleLtsScriptTag(string_view src) const {
-    return IsAsyncScriptTag(src) && GetAttr("nomodule").has_value() &&
-           IsAmpCacheDomain(src) &&
-           RE2::PartialMatch(GetAttr("src").value_or(""),
-                             *kNomoduleLtsScriptPathRe);
-  }
-
-  // Inspects the separately validated src attribute to select its script
-  // release version: module/nomodule LTS, module/nomodule, LTS or standard.
   ScriptReleaseVersion GetScriptReleaseVersion() const {
-    const string_view src = GetAttr("src").value_or("");
-    if (IsModuleLtsScriptTag(src) || IsNomoduleLtsScriptTag(src))
-      return ScriptReleaseVersion::MODULE_NOMODULE_LTS;
-    if (IsModuleScriptTag(src) || IsNomoduleScriptTag(src))
-      return ScriptReleaseVersion::MODULE_NOMODULE;
-    if (IsLtsScriptTag(src)) return ScriptReleaseVersion::LTS;
-    return ScriptReleaseVersion::STANDARD;
+    return script_tag_.release_version;
   }
 
   const vector<ParsedHtmlTagAttr>& Attributes() const { return attributes_; }
@@ -441,6 +443,7 @@ class ParsedHtmlTag {
   htmlparser::Node* node_;
   std::string lower_tag_name_;
   std::string upper_tag_name_;
+  ScriptTag script_tag_;
   vector<ParsedHtmlTagAttr> attributes_;
   ParsedHtmlTag(const ParsedHtmlTag&) = delete;
   ParsedHtmlTag operator=(const ParsedHtmlTag&) = delete;
@@ -3997,10 +4000,20 @@ void ValidateClassAttr(const ParsedHtmlTagAttr& class_attr,
   }
 }
 
-// Validates the same script release version is used for all script sources.
+// Validates the script is using an AMP domain and that the same script release
+// version is used for all script sources.
 void ValidateScriptSrcAttr(const ParsedHtmlTag& tag, const TagSpec& tag_spec,
                            const Context& context, ValidationResult* result) {
   if (context.script_release_version() == ScriptReleaseVersion::UNKNOWN) return;
+
+  if (!tag.IsAmpDomain()) {
+    context.AddError(ValidationError::DISALLOWED_AMP_DOMAIN, context.line_col(),
+                     /*params=*/{},
+                     "https://amp.dev/documentation/guides-and-tutorials/learn/"
+                     "spec/amphtml#required-markup",
+                     result);
+    return;
+  }
 
   const ScriptReleaseVersion script_release_version =
       tag.GetScriptReleaseVersion();

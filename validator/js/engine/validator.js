@@ -2804,19 +2804,6 @@ class ExtensionsContext {
   }
 }
 
-// If any script in the page uses a specific release version, then all scripts
-// must use that specific release version. This is used to record the first
-// seen script tag and ensure all following script tags follow the convention
-// set by it.
-/** @enum {string} */
-const ScriptReleaseVersion = {
-  UNKNOWN: 'unknown',
-  STANDARD: 'standard',
-  LTS: 'LTS',
-  MODULE_NOMODULE: 'module/nomodule',
-  MODULE_NOMODULE_LTS: 'module/nomodule LTS',
-};
-
 /**
  * The Context keeps track of the line / column that the validator is
  * in, as well as the mandatory tag specs that have already been validated.
@@ -2929,11 +2916,11 @@ class Context {
     this.extensions_ = new ExtensionsContext();
 
     /**
-     * Flag for if the LTS runtime engine is present.
-     * @type {!ScriptReleaseVersion}
+     * Which script release version is present first in the document.
+     * @type {!parserInterface.ScriptReleaseVersion}
      * @private
      */
-    this.scriptReleaseVersion_ = ScriptReleaseVersion.UNKNOWN;
+    this.scriptReleaseVersion_ = parserInterface.ScriptReleaseVersion.UNKNOWN;
   }
 
   /** @return {!ParsedValidatorRules} */
@@ -3061,14 +3048,15 @@ class Context {
   }
 
   /**
-   * Record if this document contains a tag requesting the LTS runtime engine.
+   * Record the first script release version in the document.
    * @param {!parserInterface.ParsedHtmlTag} parsedTag
    * @private
    */
   recordScriptReleaseVersionFromTagResult_(parsedTag) {
-    if (this.getScriptReleaseVersion() === ScriptReleaseVersion.UNKNOWN &&
+    if (this.getScriptReleaseVersion() ===
+            parserInterface.ScriptReleaseVersion.UNKNOWN &&
         (parsedTag.isExtensionScript() || parsedTag.isAmpRuntimeScript())) {
-      this.scriptReleaseVersion_ = getScriptReleaseVersion(parsedTag);
+      this.scriptReleaseVersion_ = parsedTag.getScriptReleaseVersion();
     }
   }
 
@@ -3403,7 +3391,7 @@ class Context {
     return /** @type {!LineCol} */ (this.encounteredBodyLineCol_);
   }
 
-  /** @return {!ScriptReleaseVersion} */
+  /** @return {!parserInterface.ScriptReleaseVersion} */
   getScriptReleaseVersion() {
     return this.scriptReleaseVersion_;
   }
@@ -4841,30 +4829,30 @@ function validateClassAttr(attr, tagSpec, context, result) {
 }
 
 /**
- * @param {!parserInterface.ParsedHtmlTag} tag
- * @return {!ScriptReleaseVersion}
- */
-function getScriptReleaseVersion(tag) {
-  if (tag.isModuleLtsScriptTag() || tag.isNomoduleLtsScriptTag())
-    return ScriptReleaseVersion.MODULE_NOMODULE_LTS;
-  if (tag.isModuleScriptTag() || tag.isNomoduleScriptTag())
-    return ScriptReleaseVersion.MODULE_NOMODULE;
-  if (tag.isLtsScriptTag()) return ScriptReleaseVersion.LTS;
-  return ScriptReleaseVersion.STANDARD;
-}
-
-/**
- * Validates that LTS is used for either all script sources or none.
+ * Validates the script is using an AMP domain and that the same script release
+ * version is used for all script sources.
  * @param {!parserInterface.ParsedHtmlTag} tag
  * @param {!generated.TagSpec} tagSpec
  * @param {!Context} context
  * @param {!generated.ValidationResult} result
  */
 function validateScriptSrcAttr(tag, tagSpec, context, result) {
-  if (context.getScriptReleaseVersion() === ScriptReleaseVersion.UNKNOWN)
+  if (context.getScriptReleaseVersion() ===
+      parserInterface.ScriptReleaseVersion.UNKNOWN)
     return;
 
-  const scriptReleaseVersion = getScriptReleaseVersion(tag);
+  if (!tag.isAmpDomain()) {
+    context.addError(
+        generated.ValidationError.Code.DISALLOWED_AMP_DOMAIN,
+        context.getLineCol(),
+        /*params=*/[],
+        'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
+            'amphtml#required-markup',
+        result);
+    return;
+  }
+
+  const scriptReleaseVersion = tag.getScriptReleaseVersion();
 
   if (context.getScriptReleaseVersion() != scriptReleaseVersion) {
     const specName = tagSpec.extensionSpec !== null ?
@@ -4872,7 +4860,7 @@ function validateScriptSrcAttr(tag, tagSpec, context, result) {
         tagSpec.specName;
 
     switch (context.getScriptReleaseVersion()) {
-      case ScriptReleaseVersion.LTS:
+      case parserInterface.ScriptReleaseVersion.LTS:
         context.addError(
             generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
             context.getLineCol(),
@@ -4882,7 +4870,7 @@ function validateScriptSrcAttr(tag, tagSpec, context, result) {
                 'amphtml#required-markup',
             result);
         break;
-      case ScriptReleaseVersion.MODULE_NOMODULE:
+      case parserInterface.ScriptReleaseVersion.MODULE_NOMODULE:
         context.addError(
             generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
             context.getLineCol(),
@@ -4892,7 +4880,7 @@ function validateScriptSrcAttr(tag, tagSpec, context, result) {
                 'amphtml#required-markup',
             result);
         break;
-      case ScriptReleaseVersion.MODULE_NOMODULE_LTS:
+      case parserInterface.ScriptReleaseVersion.MODULE_NOMODULE_LTS:
         context.addError(
             generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
             context.getLineCol(),
@@ -4902,7 +4890,7 @@ function validateScriptSrcAttr(tag, tagSpec, context, result) {
                 'amphtml#required-markup',
             result);
         break;
-      case ScriptReleaseVersion.STANDARD:
+      case parserInterface.ScriptReleaseVersion.STANDARD:
         context.addError(
             generated.ValidationError.Code.INCORRECT_SCRIPT_RELEASE_VERSION,
             context.getLineCol(),
