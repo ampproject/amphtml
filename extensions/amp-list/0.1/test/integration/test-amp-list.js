@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BrowserController} from '../../../../../testing/test-helper';
+import {BrowserController} from '#testing/test-helper';
 
 const TIMEOUT = 15000;
 

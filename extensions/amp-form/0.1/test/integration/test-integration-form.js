@@ -20,7 +20,7 @@ import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
 import {Services} from '#service';
 import {installGlobalSubmitListenerForDoc} from '../../../../../src/document-submit';
 import {listenOncePromise} from '../../../../../src/event-helper';
-import {poll} from '../../../../../testing/iframe';
+import {poll} from '#testing/iframe';
 import {registerExtendedTemplateForDoc} from '#service/template-impl';
 import {stubElementsForDoc} from '#service/custom-element-registry';
 

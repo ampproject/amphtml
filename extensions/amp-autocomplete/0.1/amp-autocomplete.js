@@ -53,7 +53,7 @@ import {
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 import {toggle} from '#core/dom/style';
-import fuzzysearch from '../../../third_party/fuzzysearch/index';
+import fuzzysearch from '#third_party/fuzzysearch';
 
 /**
  * @typedef {{

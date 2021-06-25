@@ -26,8 +26,9 @@ import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
+import {installSessionServiceForTesting} from '../session-manager';
 import {installVariableServiceForTesting} from '../variables';
-import {mockWindowInterface} from '../../../../testing/test-helper';
+import {mockWindowInterface} from '#testing/test-helper';
 
 // TODO(ccordry): Refactor all these tests with async/await.
 describes.realWin('Linker Manager', {amp: true}, (env) => {
@@ -78,6 +79,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
     });
     windowInterface.getHostname.returns('amp-source-com.cdn.ampproject.org');
     installVariableServiceForTesting(env.ampdoc);
+    installSessionServiceForTesting(env.ampdoc);
     installLinkerReaderService(win);
   });
 

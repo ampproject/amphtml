@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
@@ -37,7 +37,7 @@ import {
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
-import {AmpAdXOriginIframeHandler} from '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {AmpAdXOriginIframeHandler} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {AmpDoc, installDocService} from '#service/ampdoc-impl';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Extensions} from '#service/extensions-impl';
@@ -50,15 +50,15 @@ import {Services} from '#service';
 import {Signals} from '#core/data-structures/signals';
 import {cancellation} from '../../../../src/error-reporting';
 import {createElementWithAttributes} from '#core/dom';
-import {createIframePromise} from '../../../../testing/iframe';
+import {createIframePromise} from '#testing/iframe';
 import {dev, user} from '../../../../src/log';
 import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
-import {layoutRectLtwh, layoutSizeFromRect} from '#core/math/layout-rect';
-import {macroTask} from '../../../../testing/yield';
+import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
+import {macroTask} from '#testing/yield';
 import {resetScheduledElementForTesting} from '#service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
 import {toggleExperiment} from '#experiments';

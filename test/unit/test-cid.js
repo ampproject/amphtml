@@ -33,13 +33,13 @@ import {installExtensionsService} from '#service/extensions-impl';
 import {installPlatformService} from '#service/platform-impl';
 import {installTimerService} from '#service/timer-impl';
 import {installViewerServiceForDoc} from '#service/viewer-impl';
-import {macroTask} from '../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {parseUrlDeprecated} from '../../src/url';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../src/service-helpers';
-import {stubServiceForDoc} from '../../testing/test-helper';
+import {stubServiceForDoc} from '#testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;
 

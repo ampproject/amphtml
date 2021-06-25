@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable import/no-deprecated */
+
 import {dict} from '#core/types/object';
 import {listenParent, nonSensitiveDataPostMessage} from '#3p/messaging';
 import {loadScript} from '#3p/3p';

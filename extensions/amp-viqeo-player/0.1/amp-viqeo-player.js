@@ -16,7 +16,7 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {Services} from '#service';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {dev, userAssert} from '../../../src/log';
@@ -28,6 +28,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {redispatch} from '../../../src/iframe-video';
 import {removeElement} from '#core/dom';
 
@@ -152,7 +153,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     return this.mutateElement(() => {
       this.element.appendChild(iframe);
       this.iframe_ = iframe;
-      this.applyFillContent(iframe);
+      applyFillContent(iframe);
     }).then(() => {
       return this.playerReadyPromise_;
     });
@@ -204,8 +205,8 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.element.ownerDocument.createElement('img');
-    this.propagateAttributes(['aria-label'], placeholder);
-    this.applyFillContent(placeholder);
+    propagateAttributes(['aria-label'], this.element, placeholder);
+    applyFillContent(placeholder);
     placeholder.setAttribute('loading', 'lazy');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');

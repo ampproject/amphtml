@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants.js';
+import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants';
 import {Deferred} from '#core/data-structures/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '#core/data-structures/observable';

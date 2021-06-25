@@ -19,7 +19,7 @@ import {HighlightHandler, getHighlightParam} from '../highlight-handler';
 import {Messaging, WindowPortEmulator} from '../messaging/messaging';
 import {Services} from '#service';
 import {VisibilityState} from '#core/constants/visibility-state';
-import {layoutRectLtwh} from '#core/math/layout-rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {toggleExperiment} from '#experiments';
 
 describes.fakeWin(

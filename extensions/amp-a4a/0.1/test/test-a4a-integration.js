@@ -23,7 +23,7 @@ import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {MockA4AImpl, TEST_URL} from './utils';
-import {createIframePromise} from '../../../../testing/iframe';
+import {createIframePromise} from '#testing/iframe';
 import {getA4ARegistry, signingServerURLs} from '#ads/_a4a-config';
 import {installCryptoService} from '#service/crypto-impl';
 import {installDocService} from '#service/ampdoc-impl';

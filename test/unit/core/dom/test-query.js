@@ -15,6 +15,7 @@
  */
 
 import * as query from '#core/dom/query';
+import {createElementWithAttributes} from '#core/dom';
 import {isElement} from '#core/types';
 import {loadPromise} from '../../../../src/event-helper';
 import {setScopeSelectorSupportedForTesting} from '#core/dom/css-selectors';
@@ -68,6 +69,39 @@ describes.sandboxed('DOM - query helpers', {}, (env) => {
     expect(
       toArray(query.scopedQuerySelectorAll(grandparent, 'div div'))
     ).to.deep.equal([element1, element2]);
+  });
+
+  describe('realChildElements and realChildNodes', () => {
+    let element;
+    beforeEach(() => {
+      element = document.createElement('div');
+    });
+
+    it('realChildElements should return nothing', () => {
+      expect(query.realChildNodes(element).length).to.equal(0);
+      expect(query.realChildElements(element).length).to.equal(0);
+    });
+
+    it('realChildElements should return content-only nodes', () => {
+      const createWithAttr = (attr) =>
+        createElementWithAttributes(document, 'div', {[attr]: ''});
+
+      element.appendChild(document.createElement('i-amp-service'));
+      element.appendChild(createWithAttr('placeholder'));
+      element.appendChild(createWithAttr('fallback'));
+      element.appendChild(createWithAttr('overflow'));
+      element.appendChild(document.createTextNode('abc'));
+      element.appendChild(document.createElement('content'));
+
+      const nodes = query.realChildNodes(element);
+      expect(nodes.length).to.equal(2);
+      expect(nodes[0].textContent).to.equal('abc');
+      expect(nodes[1].tagName.toLowerCase()).to.equal('content');
+
+      const elements = query.realChildElements(element);
+      expect(elements.length).to.equal(1);
+      expect(elements[0].tagName.toLowerCase()).to.equal('content');
+    });
   });
 
   describe('matches', () => {

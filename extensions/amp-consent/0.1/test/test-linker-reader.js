@@ -15,7 +15,7 @@
  */
 
 import {ConsentLinkerReader} from '../linker-reader';
-import {mockWindowInterface} from '../../../../testing/test-helper';
+import {mockWindowInterface} from '#testing/test-helper';
 
 describes.realWin('LinkerReader', {amp: true}, (env) => {
   let linkerReader;

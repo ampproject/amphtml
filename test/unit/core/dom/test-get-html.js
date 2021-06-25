@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {getHtml} from '#core/dom/get-html';
+
 const template = `<div id="wrapper">
   <div test="test" class="tmp">Lorem ipsum</div>
   dolor sit amet
@@ -25,8 +27,6 @@ const template = `<div id="wrapper">
   </amp-analytics>
 </div>
 `;
-
-import {getHtml} from '#core/dom/get-html';
 
 describes.sandboxed('DOM - getHtml', {}, () => {
   let element;

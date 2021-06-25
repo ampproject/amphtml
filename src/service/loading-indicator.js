@@ -15,7 +15,7 @@
  */
 
 import {createLoaderElement} from './loader-element';
-import {createViewportObserver} from '../viewport-observer';
+import {createViewportObserver} from '#core/dom/layout/viewport-observer';
 import {htmlFor} from '#core/dom/static-template';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {removeElement} from '#core/dom';

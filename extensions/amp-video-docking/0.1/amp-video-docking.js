@@ -29,6 +29,7 @@ import {
 import {Services} from '#service';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
+import {applyFillContent} from '#core/dom/layout';
 import {
   calculateLeftJustifiedX,
   calculateRightJustifiedX,
@@ -47,7 +48,7 @@ import {getInternalVideoElementFor} from '#core/dom/video';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isRTL, removeElement} from '#core/dom';
-import {layoutRectEquals, rectIntersection} from '#core/math/layout-rect';
+import {layoutRectEquals, rectIntersection} from '#core/dom/layout/rect';
 import {once} from '#core/types/function';
 import {
   px,
@@ -1009,8 +1010,8 @@ export class VideoDocking {
       toggle(shadowLayer, true);
       toggle(overlay, true);
 
-      video.applyFillContent(this.getPlaceholderRefs_()['poster']);
-      video.applyFillContent(placeholderBackground);
+      applyFillContent(this.getPlaceholderRefs_()['poster']);
+      applyFillContent(placeholderBackground);
       this.setPosterImage_(video);
 
       element.appendChild(placeholderBackground);

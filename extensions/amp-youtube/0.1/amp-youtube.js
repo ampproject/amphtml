@@ -28,6 +28,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {
@@ -43,7 +44,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '#core/dom/static-template';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setStyles} from '#core/dom/style';
 
 const TAG = 'amp-youtube';
@@ -499,7 +500,7 @@ class AmpYoutube extends AMP.BaseElement {
       // the object-fit: cover.
       'visibility': 'hidden',
     });
-    this.propagateAttributes(['aria-label'], imgPlaceholder);
+    propagateAttributes(['aria-label'], this.element, imgPlaceholder);
     // TODO(mkhatib): Maybe add srcset to allow the browser to
     // load the needed size or even better match YTPlayer logic for loading
     // player thumbnails for different screen sizes for a cache win!
@@ -515,7 +516,7 @@ class AmpYoutube extends AMP.BaseElement {
     } else {
       imgPlaceholder.setAttribute('alt', 'Loading video');
     }
-    this.applyFillContent(imgPlaceholder);
+    applyFillContent(imgPlaceholder);
 
     // Because sddefault.jpg isn't available for all videos, we try to load
     // it and fallback to hqdefault.jpg.

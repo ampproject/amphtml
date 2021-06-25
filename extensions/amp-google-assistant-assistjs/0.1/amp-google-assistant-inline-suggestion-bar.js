@@ -21,7 +21,7 @@
 
 import {Services} from '#service';
 import {addAttributesToElement} from '#core/dom';
-import {isLayoutSizeDefined} from '#core/dom/layout';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 
 export class AmpGoogleAssistantInlineSuggestionBar extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -59,7 +59,7 @@ export class AmpGoogleAssistantInlineSuggestionBar extends AMP.BaseElement {
         });
 
         // applyFillContent so that frame covers the entire component.
-        this.applyFillContent(iframe, /* replacedContent */ true);
+        applyFillContent(iframe, /* replacedContent */ true);
 
         this.element.appendChild(iframe);
       });
