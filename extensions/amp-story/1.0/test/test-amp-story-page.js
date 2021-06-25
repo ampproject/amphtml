@@ -790,6 +790,32 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     ).to.equal(2);
   });
 
+  it('should NOT rewrite the attachment UI images to a proxy URL', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+
+    const src = 'https://examples.com/foo.bar.png';
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('cta-image', src);
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    const imgEl = openAttachmentEl.querySelector(
+      '.i-amphtml-story-inline-page-attachment-img'
+    );
+    expect(imgEl.getAttribute('style')).to.contain(src);
+  });
+
   it('should build the new default outlink page attachment UI', async () => {
     toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
 
