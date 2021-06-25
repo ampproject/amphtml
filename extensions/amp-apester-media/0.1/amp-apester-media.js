@@ -41,6 +41,8 @@ import {removeElement} from '#core/dom';
 
 /** @const */
 const TAG = 'amp-apester-media';
+const BOTTOM_AD_HEIGHT = 50;
+const HAS_BOTTOM_AD_EVENT = 'has_bottom_ad';
 /**
  * @enum {string}
  */
@@ -85,6 +87,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.height_ = null;
     /** @private {boolean}  */
     this.random_ = false;
+    /** @private {boolean}  */
+    this.hasBottomAd_ = false;
     /**
      * @private {?string}
      */
@@ -320,11 +324,23 @@ class AmpApesterMedia extends AMP.BaseElement {
               return vsync.mutatePromise(() => {
                 if (this.iframe_) {
                   this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
-                  if (media['campaignData']) {
+                  const campaignData = media['campaignData'];
+                  if (campaignData) {
+                    const bottomAdOptions = campaignData['bottomAdOptions'];
+                    if (bottomAdOptions && bottomAdOptions.enabled) {
+                      this.hasBottomAd_ = true;
+                      this.iframe_.contentWindow./*OK*/ postMessage(
+                        /** @type {JsonObject} */ ({
+                          type: HAS_BOTTOM_AD_EVENT,
+                          adHeight: BOTTOM_AD_HEIGHT,
+                        }),
+                        '*'
+                      );
+                    }
                     this.iframe_.contentWindow./*OK*/ postMessage(
                       /** @type {JsonObject} */ ({
                         type: 'campaigns',
-                        data: media['campaignData'],
+                        data: campaignData,
                       }),
                       '*'
                     );
@@ -442,6 +458,15 @@ class AmpApesterMedia extends AMP.BaseElement {
       (data) => {
         if (this.mediaId_ === data.id && data.height) {
           this.attemptChangeHeight(data.height);
+          if (this.hasBottomAd_) {
+            this.iframe_.contentWindow./*OK*/ postMessage(
+              /** @type {JsonObject} */ ({
+                type: HAS_BOTTOM_AD_EVENT,
+                adHeight: BOTTOM_AD_HEIGHT,
+              }),
+              '*'
+            );
+          }
         }
       },
       this.win,

@@ -16,6 +16,7 @@
 import {getConsentData} from './consent-util';
 import {handleCompanionDisplay} from './companion/display';
 import {handleCompanionVideo} from './companion/video';
+import {handleCompanionBottomAd} from './companion/bottomAd';
 
 /**
  * @param {!JsonObject} media
@@ -28,6 +29,7 @@ export function handleCompanionAds(media, apesterElement) {
     return getConsentData(apesterElement).then((consentData) => {
       handleCompanionDisplay(media, apesterElement);
       handleCompanionVideo(media, apesterElement, consentData);
+      handleCompanionBottomAd(media, apesterElement);
     });
   }
   return Promise.resolve();
