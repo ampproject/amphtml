@@ -31,7 +31,10 @@ AMP.extension('amp-story-interactive', '0.1', (AMP) => {
   );
   AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractivePoll);
   AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
-  AMP.registerElement('amp-story-interactive-slider', AmpStoryInteractiveSlider);
+  AMP.registerElement(
+    'amp-story-interactive-slider',
+    AmpStoryInteractiveSlider
+  );
   AMP.registerElement(
     'amp-story-interactive-results',
     AmpStoryInteractiveResults
