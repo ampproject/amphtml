@@ -115,7 +115,13 @@ ABSL_FLAG(bool, allow_module_nomodule, true,
 
 namespace amp::validator {
 
-// LTS JavaScript (note these are the same as kNomoduleLtsScriptPathRe):
+// Standard and Nomodule JavaScript:
+// v0.js
+// v0/amp-ad-0.1.js
+static const LazyRE2 kStandardScriptPathRe = {
+    R"re((v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
+
+// LTS and Nomodule LTS JavaScript:
 // lts/v0.js
 // lts/v0/amp-ad-0.1.js
 static const LazyRE2 kLtsScriptPathRe = {
@@ -127,23 +133,11 @@ static const LazyRE2 kLtsScriptPathRe = {
 static const LazyRE2 kModuleScriptPathRe = {
     R"re((v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
 
-// Nomodule JavaScript:
-// v0.js
-// v0/amp-ad-0.1.js
-static const LazyRE2 kNomoduleScriptPathRe = {
-    R"re((v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
-
 // Module LTS JavaScript:
 // lts/v0.mjs
 // lts/v0/amp-ad-0.1.mjs
 static const LazyRE2 kModuleLtsScriptPathRe = {
     R"re(lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
-
-// Nomodule LTS JavaScript (note these are the same as kLtsScriptPathRe):
-// lts/v0.js
-// lts/v0/amp-ad-0.1.js
-static const LazyRE2 kNomoduleLtsScriptPathRe = {
-    R"re(lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
 
 // Runtime JavaScript:
 // v0.js
@@ -332,17 +326,16 @@ ScriptTag ParseScriptTag(htmlparser::Node* node) {
 
       // Determine the release version (LTS, module, standard, etc).
       if ((has_module_attr && RE2::FullMatch(src, *kModuleLtsScriptPathRe)) ||
-          (has_nomodule_attr &&
-           RE2::FullMatch(src, *kNomoduleLtsScriptPathRe))) {
+          (has_nomodule_attr && RE2::FullMatch(src, *kLtsScriptPathRe))) {
         script_tag.release_version = ScriptReleaseVersion::MODULE_NOMODULE_LTS;
       } else if ((has_module_attr &&
                   RE2::FullMatch(src, *kModuleScriptPathRe)) ||
                  (has_nomodule_attr &&
-                  RE2::FullMatch(src, *kNomoduleScriptPathRe))) {
+                  RE2::FullMatch(src, *kStandardScriptPathRe))) {
         script_tag.release_version = ScriptReleaseVersion::MODULE_NOMODULE;
       } else if (RE2::FullMatch(src, *kLtsScriptPathRe)) {
         script_tag.release_version = ScriptReleaseVersion::LTS;
-      } else {
+      } else if (RE2::FullMatch(src, *kStandardScriptPathRe)) {
         script_tag.release_version = ScriptReleaseVersion::STANDARD;
       }
     }

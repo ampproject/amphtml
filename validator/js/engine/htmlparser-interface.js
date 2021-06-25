@@ -89,7 +89,13 @@ exports.ScriptReleaseVersion = ScriptReleaseVersion;
 // AMP domain
 const /** string */ ampProjectDomain = 'https://cdn.ampproject.org/';
 
-// LTS JavaScript:
+// Standard and Nomodule JavaScript:
+// v0.js
+// v0/amp-ad-0.1.js
+const /** !RegExp */ standardScriptPathRegex =
+    new RegExp('(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
+
+// LTS and Nomodule LTS JavaScript:
 // lts/v0.js
 // lts/v0/amp-ad-0.1.js
 const /** !RegExp */ ltsScriptPathRegex =
@@ -101,23 +107,11 @@ const /** !RegExp */ ltsScriptPathRegex =
 const /** !RegExp */ moduleScriptPathRegex =
     new RegExp('(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
 
-// Nomodule JavaScript:
-// v0.js
-// v0/amp-ad-0.1.js
-const /** !RegExp */ nomoduleScriptPathRegex =
-    new RegExp('(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
-
 // Module LTS JavaScript:
 // lts/v0.mjs
 // lts/v0/amp-ad-0.1.mjs
 const /** !RegExp */ moduleLtsScriptPathRegex =
     new RegExp('lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
-
-// Nomodule LTS JavaScript:
-// lts/v0.js
-// lts/v0/amp-ad-0.1.js
-const /** !RegExp */ nomoduleLtsScriptPathRegex =
-    new RegExp('lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
 
 // Runtime JavaScript:
 // v0.js
@@ -193,15 +187,15 @@ const ScriptTag = class {
 
         // Determine the release version (LTS, module, standard, etc).
         if ((is_module && moduleLtsScriptPathRegex.test(path)) ||
-            (is_nomodule && nomoduleLtsScriptPathRegex.test(path))) {
+            (is_nomodule && ltsScriptPathRegex.test(path))) {
           this.release_version = ScriptReleaseVersion.MODULE_NOMODULE_LTS;
         } else if (
             (is_module && moduleScriptPathRegex.test(path)) ||
-            (is_nomodule && nomoduleScriptPathRegex.test(path))) {
+            (is_nomodule && standardScriptPathRegex.test(path))) {
           this.release_version = ScriptReleaseVersion.MODULE_NOMODULE;
         } else if (ltsScriptPathRegex.test(path)) {
           this.release_version = ScriptReleaseVersion.LTS;
-        } else {
+        } else if (standardScriptPathRegex.test(path)) {
           this.release_version = ScriptReleaseVersion.STANDARD;
         }
       }
