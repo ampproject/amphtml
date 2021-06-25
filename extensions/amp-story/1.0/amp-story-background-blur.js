@@ -114,12 +114,11 @@ export class backgroundBlur {
    */
   getBiggestImage_(pageElement) {
     const getSize = (el) => {
-      if (el) {
-        const layoutBox = el.getLayoutBox();
-        return layoutBox.width * layoutBox.height;
-      } else {
+      if (!el) {
         return false;
       }
+      const layoutBox = el.getLayoutBox();
+      return layoutBox.width * layoutBox.height;
     };
     return Array.from(
       pageElement.querySelectorAll('amp-story-grid-layer amp-img')
