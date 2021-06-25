@@ -848,7 +848,6 @@ TokenType Tokenizer::Next(bool template_mode) {
   raw_.start = raw_.end;
   data_.start = raw_.end;
   data_.end = raw_.end;
-  num_terms_ = 0;
   is_token_manufactured_ = false;
 
   if (eof_) {

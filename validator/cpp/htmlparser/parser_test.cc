@@ -754,6 +754,36 @@ TEST(ParserTest, VoidElementsParsedCorrectly) {
   <img src="foo.png"></body></html>)HTML");
 }
 
+TEST(ParserTest, NumTermsInTextNodeCountEnabled) {
+  htmlparser::Parser p(
+      "hello world         \t    bye    \n   \n bye  \r   ",
+      {.scripting = true,
+       .frameset_ok = true,
+       .record_node_offsets = true,
+       .record_attribute_offsets = true,
+       .count_num_terms_in_text_node = true});
+  auto doc = p.Parse();
+  EXPECT_NOT_NULL(doc);
+  auto body = doc->RootNode()->FirstChild()->FirstChild()->NextSibling();
+  EXPECT_NOT_NULL(body);
+  EXPECT_EQ(body->DataAtom(), htmlparser::Atom::BODY);
+  EXPECT_EQ(body->FirstChild()->Type(), htmlparser::NodeType::TEXT_NODE);
+  EXPECT_EQ(body->FirstChild()->NumTerms(), 4);
+}
+
+TEST(ParserTest, NumTermsInTextNodeCountDisabled) {
+  htmlparser::Parser p(
+      "hello world         \t    bye    \n   \n bye  \r   ",
+      {.scripting = true,
+       .frameset_ok = true,
+       .record_node_offsets = true,
+       .record_attribute_offsets = true,
+       .count_num_terms_in_text_node = false});
+  auto doc = p.Parse();
+  auto body = doc->RootNode()->FirstChild()->FirstChild()->NextSibling();
+  EXPECT_EQ(body->FirstChild()->NumTerms(), -1);
+}
+
 TEST(ParserTest, DocumentComplexityTest) {
   ::absl::SetFlag(&FLAGS_htmlparser_max_nodes_depth_count, 4);
 
@@ -774,3 +804,4 @@ TEST(ParserTest, DocumentComplexityTest) {
                         "</a></body></html>");
   EXPECT_NOT_NULL(p3.Parse());
 }
+
