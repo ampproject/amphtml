@@ -198,7 +198,6 @@ export class AmpRender extends BaseElement {
       () => {
         currentHeight = this.element./*OK*/ offsetHeight;
         targetHeight = this.element./*OK*/ scrollHeight;
-        // currentHeight (offsetHeight) includes border while targetHeight (scrollHeight) does not
         if (targetHeight < currentHeight) {
           // Since targetHeight is smaller than currentHeight, we need to shrink the component.
           const container = this.element.querySelector(
