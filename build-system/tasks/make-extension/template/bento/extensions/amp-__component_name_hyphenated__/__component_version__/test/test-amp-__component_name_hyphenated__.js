@@ -17,7 +17,7 @@
 import '../amp-__component_name_hyphenated__';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-__component_name_hyphenated__-v__component_version__',
