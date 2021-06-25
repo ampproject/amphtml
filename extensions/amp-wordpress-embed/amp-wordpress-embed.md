@@ -46,7 +46,7 @@ This extension creates an iframe and displays the [excerpt](https://make.wordpre
 
 The URL of the post to embed.
 
-##### height (optional)
+##### height
 
 The initial height of the WordPress post embed in pixels.
 
