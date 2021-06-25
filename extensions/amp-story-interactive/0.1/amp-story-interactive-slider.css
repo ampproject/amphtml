@@ -34,7 +34,7 @@ html,body{
   position: relative;
   margin: 0 10px;
 }
-.i-amphtml-story-interactive-slider-sliderValue span{
+.i-amphtml-story-interactive-slider-sliderValue-span{
   position: absolute;
   height: 45px;
   width: 45px;
@@ -46,7 +46,7 @@ html,body{
   transform-origin: bottom;
   transition: transform 0.3s ease-in-out;
 }
-.i-amphtml-story-interactive-slider-sliderValue span.show{
+.i-amphtml-story-interactive-slider-sliderValue-span.show{
   transform: translate(-50%, -10%) scale(1);
 }
 .i-amphtml-story-interactive-slider-field{
@@ -65,7 +65,7 @@ html,body{
 .i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-slider-value.i-amphtml-story-interactive-slider-left{
   left: -22px;
 }
-.i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-slider-value.right{
+.i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-slider-value.i-amphtml-story-interactive-slider-right{
   right: -43px;
 }
 .i-amphtml-story-interactive-slider-range-input{
