@@ -917,7 +917,7 @@ tags: {  # <amp-story-page-attachment> with no href
     value: "light"
   }
   attrs: {
-    name: "cta-drawer-theme"
+    name: "drawer-theme"
     value: "dark"
     value: "light"
   }

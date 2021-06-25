@@ -115,12 +115,12 @@
   --i-amphtml-draggable-drawer-text-color: #fff !important;
 }
 
-[cta-drawer-theme="light"].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
+[drawer-theme="light"].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
   --i-amphtml-draggable-drawer-background-color: #fff !important;
   --i-amphtml-draggable-drawer-text-color: #202125 !important;
 }
 
-[cta-drawer-theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
+[drawer-theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
   --i-amphtml-draggable-drawer-background-color: #202125 !important;
   --i-amphtml-draggable-drawer-text-color: #fff !important;
 }
