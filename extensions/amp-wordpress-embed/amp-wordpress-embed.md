@@ -49,9 +49,9 @@ This extension creates an iframe and displays the [excerpt](https://make.wordpre
 
 The URL of the post to embed.
 
-##### height
+##### common attributes
 
-The initial height of the WordPress post embed in pixels.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Validation
 
