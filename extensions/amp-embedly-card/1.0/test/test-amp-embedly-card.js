@@ -31,6 +31,8 @@ describes.realWin(
     let win;
     let doc;
     let element;
+    let consoleWarnSpy;
+    let consoleWarn;
 
     beforeEach(async () => {
       win = env.win;
@@ -38,6 +40,15 @@ describes.realWin(
       toggleExperiment(win, 'bento-embedly-card', true, true);
       // Override global window here because Preact uses global `createElement`.
       doNotLoadExternalResourcesInTest(window, env.sandbox);
+
+      // Disable warnings and check against spy when needed
+      consoleWarn = console.warn;
+      console.warn = () => true;
+      consoleWarnSpy = env.sandbox.spy(console, 'warn');
+    });
+
+    afterEach(() => {
+      console.warn = consoleWarn;
     });
 
     /**
@@ -73,7 +84,6 @@ describes.realWin(
       expect(iframe).to.not.be.null;
 
       // Check iframe for correct scr URL
-      // <-- iframe.className remains '' -->
       expect(element.className).to.match(/i-amphtml-layout-responsive/);
     });
 
@@ -89,19 +99,10 @@ describes.realWin(
       doc.body.appendChild(element);
 
       // Wait till rendering is finished
-      // <-- Cannot because "return null" is provided for no 'data-url' -->
       await waitForRender();
 
-      //Extract iframe
-      const iframe = element.shadowRoot.querySelector('iframe');
-
-      //Make sure iframe is available
-      expect(iframe).to.not.be.null;
-
-      /** Cannot test as userAssert not available for Preact Component */
-      // expect(iframe.src).to.be.rejectedWith(
-      //   /data-url is required for <amp-embedly-card>/
-      // );
+      // Check for console.warning
+      expect(consoleWarnSpy).to.be.calledOnce;
     });
   }
 );
