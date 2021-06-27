@@ -57,7 +57,7 @@ export function EmbedlyCardWithRef(
 
   // Check for valid props
   if (!checkProps(url)) {
-    return null;
+    displayWarning('data-url is required for <amp-embedly-card>');
   }
 
   // Prepare options for ProxyIframeEmbed
@@ -96,7 +96,6 @@ export function EmbedlyCardWithRef(
 function checkProps(url) {
   // Perform manual checking as assertion is not available for Bento: Issue #32739
   if (url === undefined) {
-    displayWarning('data-url is required for <amp-embedly-card>');
     return false;
   }
   return true;
