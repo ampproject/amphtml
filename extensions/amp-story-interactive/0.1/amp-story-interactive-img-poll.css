@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-interactive-img-option-percentage-fill {
+.i-amphtml-story-interactive-img-option-img::before {
   background-color: var(--interactive-accent-color) !important;
 }
 
