@@ -15,7 +15,8 @@
  */
 
 import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
-import {BaseElement} from './amp-embedly-card-impl';
+import {BaseElement} from './base-element';
+import {Layout} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
@@ -43,7 +44,7 @@ class AmpEmbedlyCard extends BaseElement {
         isExperimentOn(this.win, 'bento-embedly-card'),
       'expected global "bento" or specific "bento-embedly-card" experiment to be enabled'
     );
-    return super.isLayoutSupported(layout);
+    return layout == Layout.RESPONSIVE;
   }
 }
 

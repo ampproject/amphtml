@@ -17,24 +17,7 @@
 import {EmbedlyCard} from './component';
 import {PreactBaseElement} from '#preact/base-element';
 
-import {Layout} from '#core/dom/layout';
-import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
-
-/** @const {string} */
-export const TAG = 'amp-embedly-card';
-
-export class BaseElement extends PreactBaseElement {
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-embedly-card'),
-      'expected global "bento" or specific "bento-embedly-card" experiment to be enabled'
-    );
-    return layout == Layout.RESPONSIVE;
-  }
-}
+export class BaseElement extends PreactBaseElement {}
 
 /** @override */
 BaseElement['Component'] = EmbedlyCard;
