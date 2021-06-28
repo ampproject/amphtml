@@ -68,8 +68,8 @@
 
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
   .i-amphtml-story-interactive-img-quiz-option[correct='correct']
-  .i-amphtml-story-interactive-img-option-circle {
-  border: 4px solid var(--correct-color) !important;
+  .i-amphtml-story-interactive-img-option-border {
+  border-color: var(--correct-color) !important;
 }
 
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
