@@ -106,12 +106,16 @@ In some cases, we may need the `<amp-render>` element to resize on user interact
 
 ```html
 <button on="tap:my-component.resizeToContents()">Expand</button>
-<amp-render id="my-component" src="https://example.com/data.json">
-  <template type="amp-mustache">
-    {{#cars}}
-      <p>{{make}} {{model}}</p>
-    {{/cars}}
-  </template>
+<amp-render
+  id="my-component"
+  src="https://example.com/data.json"
+  layout="fixed-height"
+  height="30">
+    <template type="amp-mustache">
+      {{#cars}}
+        <p>{{make}} {{model}}</p>
+      {{/cars}}
+    </template>
 </amp-render>
 ```
 
