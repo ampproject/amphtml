@@ -39,20 +39,12 @@ const buildOptionTemplate = (option) => {
       class="i-amphtml-story-interactive-img-quiz-option i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
-      <div class="i-amphtml-story-interactive-img-option-circle">
-        <img class="i-amphtml-story-interactive-img-option-img" />
-        <div
-          class="i-amphtml-story-interactive-img-option-percentage-fill"
-        ></div>
+      <div class="i-amphtml-story-interactive-img-option-img">
         <span
           class="i-amphtml-story-interactive-img-option-percentage-text"
         ></span>
-        <div class="i-amphtml-story-interactive-img-option-border"></div>
       </div>
       <div class="i-amphtml-story-interactive-img-quiz-answer-choice-container">
-        <div
-          class="i-amphtml-story-interactive-img-quiz-answer-choice-overlay"
-        ></div>
         <span
           class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"
         ></span>
@@ -130,11 +122,15 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
     convertedOption.optionIndex_ = option['optionIndex'];
 
     // Extract and structure the option information
-    const imgEl = convertedOption.querySelector(
-      '.i-amphtml-story-interactive-img-option-img'
+    setStyle(
+      convertedOption.querySelector(
+        '.i-amphtml-story-interactive-img-option-img'
+      ),
+      'background-image',
+      'url(' + option['image'] + ')'
     );
-    imgEl.setAttribute('src', option['image']);
-    imgEl.setAttribute('alt', option['imagealt']);
+
+    convertedOption.setAttribute('aria-label', option['imagealt']);
 
     if ('correct' in option) {
       convertedOption.setAttribute('correct', 'correct');

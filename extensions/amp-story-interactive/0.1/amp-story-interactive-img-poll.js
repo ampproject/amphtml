@@ -37,15 +37,10 @@ const buildOptionTemplate = (option) => {
       class="i-amphtml-story-interactive-img-poll-option i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
-      <div class="i-amphtml-story-interactive-img-option-circle">
-        <img class="i-amphtml-story-interactive-img-option-img" />
-        <div
-          class="i-amphtml-story-interactive-img-option-percentage-fill"
-        ></div>
+      <div class="i-amphtml-story-interactive-img-option-img">
         <span
           class="i-amphtml-story-interactive-img-option-percentage-text"
         ></span>
-        <div class="i-amphtml-story-interactive-img-option-border"></div>
       </div>
     </button>
   `;
@@ -103,11 +98,15 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
     convertedOption.optionIndex_ = option['optionIndex'];
 
     // Extract and structure the option information
-    const imgEl = convertedOption.querySelector(
-      '.i-amphtml-story-interactive-img-option-img'
+    setStyle(
+      convertedOption.querySelector(
+        '.i-amphtml-story-interactive-img-option-img'
+      ),
+      'background-image',
+      'url(' + option['image'] + ')'
     );
-    imgEl.setAttribute('src', option['image']);
-    imgEl.setAttribute('alt', option['imagealt']);
+
+    convertedOption.setAttribute('aria-label', option['imagealt']);
 
     return convertedOption;
   }

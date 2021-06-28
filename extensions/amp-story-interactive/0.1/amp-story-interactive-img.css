@@ -39,11 +39,6 @@
 }
 
 .i-amphtml-story-interactive-img-option {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  flex-direction: column !important;
   width: var(--i-amphtml-interactive-img-option-width) !important;
   position: relative !important;
   height: 0 !important;
@@ -51,7 +46,6 @@
   margin-right: var(--i-amphtml-interactive-img-option-margin) !important;
   padding: 0 !important;
   padding-top: var(--i-amphtml-interactive-img-option-width) !important;
-  position: relative !important;
   background: none !important;
   border: none !important;
 }
@@ -68,8 +62,7 @@
   margin-top: 0 !important;
 }
 
-.i-amphtml-story-interactive-img-option-circle {
-  border: none !important;
+.i-amphtml-story-interactive-img-option-img {
   border-radius: 50% !important;
   overflow: hidden !important;
   position: absolute !important;
@@ -77,20 +70,8 @@
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  /**
-	 * Necessary for rendering issues with circular images that are noticeable
-	 * when theme="dark"
-	 */
-  background: var(--i-amphtml-interactive-option-background-color) !important;
-}
-
-.i-amphtml-story-interactive-img-option-img {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
+  background-position: center !important;
+  background-size: cover !important;
 }
 
 .i-amphtml-story-interactive-img-option-border {

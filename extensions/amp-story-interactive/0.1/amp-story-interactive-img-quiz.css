@@ -36,12 +36,15 @@
   text-align: center !important;
 }
 
-.i-amphtml-story-interactive-img-quiz-answer-choice-overlay {
+.i-amphtml-story-interactive-img-quiz-answer-choice-container::before {
+  content: '' !important;
+  display: block !important;
   width: 100% !important;
   height: 100% !important;
-  border-radius: 50% !important;
   opacity: 0.1 !important;
   background-color: var(--interactive-accent-color) !important;
+  border: none !important;
+  border-radius: 50% !important;
 }
 
 .i-amphtml-story-interactive-img-quiz-answer-choice {
