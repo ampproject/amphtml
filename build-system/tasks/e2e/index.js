@@ -209,6 +209,7 @@ async function runWatch_() {
 
 /**
  * Entry-point to run e2e tests.
+ * @return {Promise<void>}
  */
 async function e2e() {
   const handlerProcess = createCtrlcHandler('e2e');
