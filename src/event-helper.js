@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {internalListenImplementation} from './event-helper-listen';
-import {lastChildElement} from './dom';
+import {internalListenImplementation} from './core/dom/event-helper-listen';
+import {lastChildElement} from './core/dom/query';
 import {user} from './log';
 
 /** @const {string}  */

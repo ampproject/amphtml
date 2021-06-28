@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from './core/constants/amp-events';
-import {Services} from './services';
+import {Services} from './service';
 import {
   USER_ERROR_SENTINEL,
   dev,

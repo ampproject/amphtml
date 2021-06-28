@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {
   Accordion,
   AccordionContent,
@@ -23,7 +23,7 @@ import {
 import {VideoIframe} from '../video-iframe';
 import {boolean, text, withKnobs} from '@storybook/addon-knobs';
 import {createCustomEvent} from '../../../../src/event-helper';
-import {useCallback} from '../../../../src/preact';
+import {useCallback} from '#preact';
 
 export default {
   title: 'VideoIframe',

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {
@@ -28,16 +28,15 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {
-  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '#core/dom/fullscreen';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 /** @const */
 const TAG = 'amp-minute-media-player';
@@ -425,7 +424,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    * implementation of fullscreen (flash for example) then check
    * if Services.platformFor(this.win).isSafari is true and use the internal
    * implementation instead. If not, it is recommended to take the iframe
-   * to fullscreen using fullscreenEnter from dom.js
+   * to fullscreen using fullscreenEnter from src/core/dom/fullscreen.js
    */
   /** @override */
   fullscreenEnter() {

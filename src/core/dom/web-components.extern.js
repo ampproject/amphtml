@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Externs for values expected to be on elements when Shadow DOM
- * is supported
+ * is supported.
  * @externs
  */
 

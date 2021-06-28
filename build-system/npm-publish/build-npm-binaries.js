@@ -25,4 +25,6 @@ const {updatePackages} = require('../common/update-packages');
 
 updatePackages();
 timedExecOrDie(`amp build --extensions=${extension} --core_runtime_only`);
+timedExecOrDie(`amp build --extensions=${extension} --core_runtime_only --esm`);
 timedExecOrDie(`amp dist --extensions=${extension} --core_runtime_only`);
+timedExecOrDie(`amp dist --extensions=${extension} --core_runtime_only --esm`);
