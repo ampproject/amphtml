@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringId} from '../../../src/localized-strings'; // eslint-disable-line no-unused-vars
+import {LocalizedStringId} from '#service/localization/strings'; // eslint-disable-line no-unused-vars
 import {createElementWithAttributes} from '#core/dom';
 import {devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';

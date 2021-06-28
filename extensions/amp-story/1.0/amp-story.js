@@ -83,7 +83,7 @@ import {
   scopedQuerySelectorAll,
 } from '#core/dom/query';
 import {computedStyle, setImportantStyles, toggle} from '#core/dom/style';
-import {createPseudoLocale} from '../../../src/localized-strings';
+import {createPseudoLocale} from '#service/localization/strings';
 import {debounce} from '#core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '#core/types/object';

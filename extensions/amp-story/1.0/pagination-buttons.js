@@ -21,7 +21,7 @@ import {
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {dev, devAssert} from '../../../src/log';
 

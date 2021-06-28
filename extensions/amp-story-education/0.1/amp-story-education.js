@@ -21,7 +21,7 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-education-0.1.css';
 import {Layout} from '#core/dom/layout';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev} from '../../../src/log';
