@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-story-viewport-warning-layer-1.0.css';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {
   StateProperty,

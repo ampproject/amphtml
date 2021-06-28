@@ -22,7 +22,7 @@ import {
 import {ActionTrust} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '#core/dom/layout';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {

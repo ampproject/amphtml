@@ -18,7 +18,7 @@ import {LocalizationService} from '#service/localization';
 import {
   LocalizedStringId,
   createPseudoLocale,
-} from '../../../src/localized-strings';
+} from '#service/localization/strings';
 import {Services} from '#service';
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -102,7 +102,7 @@ export class StoryAdLocalization {
   }
 
   /**
-   * @param {!../../../src/localized-strings.LocalizedStringId} id
+   * @param {!../../../src/service/localization/strings.LocalizedStringId} id
    * @return {?string}
    */
   getLocalizedString(id) {

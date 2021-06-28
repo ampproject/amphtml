@@ -25,7 +25,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest, matches} from '#core/dom/query';
