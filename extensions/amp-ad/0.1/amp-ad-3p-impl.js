@@ -382,8 +382,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
-    const pageViewId64Promise = Services.documentInfoForDoc(this.element)
-      .pageViewId64;
+    const pageViewId64Promise = Services.documentInfoForDoc(
+      this.element
+    ).pageViewId64;
 
     // For sticky ad only: must wait for scrolling event before loading the ad
     const scrollPromise = this.uiHandler.getScrollPromiseForStickyAd();
