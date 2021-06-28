@@ -861,5 +861,108 @@ describes.realWin(
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe 1+1=?');
     });
+
+    const items = {
+      'items': [
+        {
+          'name': 'Apple',
+          'price': '1.99',
+        },
+        {
+          'name': 'Orange',
+          'price': '0.99',
+        },
+        {
+          'name': 'Pear',
+          'price': '1.50',
+        },
+        {
+          'name': 'Banana',
+          'price': '1.50',
+        },
+        {
+          'name': 'Watermelon',
+          'price': '4.50',
+        },
+        {
+          'name': 'Melon',
+          'price': '3.50',
+        },
+      ],
+    };
+
+    it('should grow on resizeToContents action when height is insufficient', async () => {
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) =>
+          Promise.resolve().then(measurer).then(mutator),
+        forceChangeSize: env.sandbox.spy(),
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
+
+      env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves(items);
+
+      // set the height small enough so component resizes
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          height="100"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">
+            {{#items}}
+            <div>
+              <div>{{name}}</div>
+              <div>{{price}}</div>
+            </div>
+            {{/items}}
+          </template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await getRenderedData();
+
+      element.enqueAction(invocation('resizeToContents'));
+      await getRenderedData();
+      expect(fakeMutator.forceChangeSize).to.be.calledOnce;
+    });
+
+    it('should shrink on resizeToContents action when there is exta whitespace', async () => {
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) =>
+          Promise.resolve().then(measurer).then(mutator),
+        forceChangeSize: env.sandbox.spy(),
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
+
+      env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves(items);
+
+      // set the height large enough so component shrinks
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          height="5000"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">
+            {{#items}}
+            <div>
+              <div>{{name}}</div>
+              <div>{{price}}</div>
+            </div>
+            {{/items}}
+          </template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await getRenderedData();
+
+      element.enqueAction(invocation('resizeToContents'));
+      await getRenderedData();
+      expect(fakeMutator.forceChangeSize).to.be.calledOnce;
+    });
   }
 );
