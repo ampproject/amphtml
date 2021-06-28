@@ -13,24 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {createContext} from '#preact';
 
-/** @externs */
-
-/** @const */
-var EmbedlyCardDef = {};
-
-/**
- * @typedef {{
- *   requestResize: (function(number):*|undefined),
- *   title: (string|undefined),
- *   url: (string),
- * }}
- */
-EmbedlyCardDef.Props;
-
-/**
- * @typedef {{
- *   apiKey: (string|undefined),
- * }}
- */
-EmbedlyCardDef.EmbedlyContext;
+const EmbedlyContext = createContext(
+  /** @type {EmbedlyCardDef.EmbedlyContext} */ ({apiKey: ''})
+);
+export {EmbedlyContext};

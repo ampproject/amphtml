@@ -14,13 +14,31 @@
  * limitations under the License.
  */
 
+import * as Preact from '#preact';
 import {EmbedlyCard} from './component';
+import {EmbedlyContext} from './embedly-context';
 import {PreactBaseElement} from '#preact/base-element';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = EmbedlyCard;
+BaseElement['Component'] = EmbedlyCardWithContext;
+
+/**
+ * @param {!EmbedlyCardDef.Props} props
+ * @return {PreactDef.Renderable}
+ */
+function EmbedlyCardWithContext(props) {
+  // Extract Embedly Key
+  const ampEmbedlyKeyElement = document.querySelector('amp-embedly-key');
+  const apiKey = ampEmbedlyKeyElement?.getAttribute('value') || '';
+
+  return (
+    <EmbedlyContext.Provider value={apiKey}>
+      <EmbedlyCard {...props}></EmbedlyCard>
+    </EmbedlyContext.Provider>
+  );
+}
 
 /** @override */
 BaseElement['props'] = {

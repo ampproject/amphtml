@@ -15,10 +15,11 @@
  */
 
 import * as Preact from '#preact';
+import {EmbedlyContext} from './embedly-context';
 import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
-import {useCallback, useState} from '#preact';
+import {useCallback, useContext, useState} from '#preact';
 
 /**
  * Attribute name used to set api key with name
@@ -55,6 +56,8 @@ export function EmbedlyCardWithRef(
     [requestResize]
   );
 
+  const {apiKey} = useContext(EmbedlyContext);
+
   // Check for valid props
   if (!checkProps(url)) {
     displayWarning('url prop is required for EmbedlyCard');
@@ -64,10 +67,6 @@ export function EmbedlyCardWithRef(
   const iframeOptions = {
     url,
   };
-
-  // Extract Embedly Key
-  const ampEmbedlyKeyElement = document.querySelector('amp-embedly-key');
-  const apiKey = ampEmbedlyKeyElement?.getAttribute('value');
 
   // Add embedly key
   if (apiKey) {
