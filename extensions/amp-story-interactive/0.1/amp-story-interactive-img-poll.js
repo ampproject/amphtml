@@ -22,6 +22,7 @@ import {CSS} from '../../../build/amp-story-interactive-img-poll-0.1.css';
 import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {buildImgTemplate} from './utils';
 import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
 
 /**
  * Generates the template for each option.
@@ -32,13 +33,11 @@ import {htmlFor} from '#core/dom/static-template';
 const buildOptionTemplate = (option) => {
   const html = htmlFor(option);
   return html`
-    <div
-      class="i-amphtml-story-interactive-img-poll-option i-amphtml-story-interactive-img-option"
+    <button
+      class="i-amphtml-story-interactive-img-poll-option i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
-      <button
-        class="i-amphtml-story-interactive-img-option-button i-amphtml-story-interactive-option"
-      >
+      <div class="i-amphtml-story-interactive-img-option-circle">
         <img class="i-amphtml-story-interactive-img-option-img" />
         <div
           class="i-amphtml-story-interactive-img-option-percentage-fill"
@@ -46,8 +45,9 @@ const buildOptionTemplate = (option) => {
         <span
           class="i-amphtml-story-interactive-img-option-percentage-text"
         ></span>
-      </button>
-    </div>
+        <div class="i-amphtml-story-interactive-img-option-border"></div>
+      </div>
+    </button>
   `;
 };
 
@@ -110,5 +110,29 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
     imgEl.setAttribute('alt', option['imagealt']);
 
     return convertedOption;
+  }
+
+  /**
+   * @override
+   */
+  displayOptionsData(optionsData) {
+    if (!optionsData) {
+      return;
+    }
+
+    const percentages = this.preprocessPercentages_(optionsData);
+
+    this.getOptionElements().forEach((el, index) => {
+      /*if (optionsData[index].selected) {
+        const textEl = el.querySelector(
+          '.i-amphtml-story-interactive-option-text'
+        );
+        textEl.setAttribute('aria-label', 'selected ' + textEl.textContent);
+      }*/
+      el.querySelector(
+        '.i-amphtml-story-interactive-img-option-percentage-text'
+      ).textContent = `${percentages[index]}%`;
+      setStyle(el, '--option-percentage', `${percentages[index]}%`);
+    });
   }
 }

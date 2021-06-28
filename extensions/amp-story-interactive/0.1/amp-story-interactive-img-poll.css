@@ -15,6 +15,10 @@
  */
 
 .i-amphtml-story-interactive-img-option-percentage-fill {
-  background-color: var(--interactive-accent-color);
-  border-color: var(--interactive-accent-color);
+  background-color: var(--interactive-accent-color) !important;
+}
+
+.i-amphtml-story-interactive-option-selected
+  .i-amphtml-story-interactive-img-option-border {
+  border-color: var(--interactive-accent-color) !important;
 }
