@@ -90,7 +90,7 @@ describes.realWin(
 
         await whenCalled(element.setAsContainerInternal);
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
-        expect(scroller).to.exist;
+        expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
         expect(element.removeAsContainerInternal).to.not.be.called;
       });
@@ -115,7 +115,7 @@ describes.realWin(
 
         await whenCalled(element.setAsContainerInternal);
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
-        expect(scroller).to.exist;
+        expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledOnce;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
         expect(element.removeAsContainerInternal).to.not.be.called;
@@ -180,7 +180,7 @@ describes.realWin(
 
         await whenCalled(element.setAsContainerInternal);
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
-        expect(scroller).to.exist;
+        expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
         expect(element.removeAsContainerInternal).to.not.be.called;
       });
@@ -203,7 +203,7 @@ describes.realWin(
 
         await whenCalled(element.setAsContainerInternal);
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
-        expect(scroller).to.exist;
+        expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
         expect(element.removeAsContainerInternal).to.not.be.called;
       });
