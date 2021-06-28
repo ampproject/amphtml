@@ -15,8 +15,8 @@
  */
 
 import * as Preact from '#preact';
+import {text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'amp-embedly-card-1_0',
@@ -28,11 +28,26 @@ export default {
   },
 };
 
-export const YoutubeEmbed = () => {
+export const _default = () => {
+  const apiKey = text('Embedly API Key', 'valid-api-key');
   return (
     <>
-      <amp-embedly-key layout="nodisplay" value="my-test-key">
-      </amp-embedly-key>
+      <amp-embedly-key layout="nodisplay" value={apiKey}></amp-embedly-key>
+      <amp-embedly-card
+        data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+        layout="responsive"
+        width="300"
+        height="200"
+      ></amp-embedly-card>
+    </>
+  );
+};
+
+export const WithAPIKey = () => {
+  const apiKey = text('Embedly API Key', 'valid-api-key');
+  return (
+    <>
+      <amp-embedly-key layout="nodisplay" value={apiKey}></amp-embedly-key>
       <amp-embedly-card
         data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
         layout="responsive"
