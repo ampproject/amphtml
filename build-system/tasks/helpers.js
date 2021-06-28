@@ -119,6 +119,7 @@ function doBuildJs(jsBundles, name, extraOptions) {
  * Generates frames.html
  *
  * @param {!Object} options
+ * @return {Promise<void>}
  */
 async function bootstrapThirdPartyFrames(options) {
   const startTime = Date.now();
@@ -368,6 +369,7 @@ function handleBundleError(err, continueOnError, destFilename) {
  * @param {string} destFilename
  * @param {?Object} options
  * @param {number} startTime
+ * @return {Promise<void>}
  */
 async function finishBundle(
   srcFilename,
@@ -527,6 +529,7 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
 
   /**
    * @param {number} time
+   * @return {Promise<void>}
    */
   async function build(time) {
     if (!result) {

@@ -31,6 +31,7 @@ const ampCliRunner = 'build-system/task-runner/amp-cli-runner.js';
 /**
  * Installs the `amp` task runner to the npm bin directory if it hasn't already
  * been installed. Ensures that the binary exists and is a node runner script.
+ * @return {Promise<void>}
  */
 async function installAmpTaskRunner() {
   const npmBinDir = getStdout('npm bin --global').trim();
