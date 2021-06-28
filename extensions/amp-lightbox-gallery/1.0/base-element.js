@@ -98,7 +98,7 @@ export class BaseElement extends PreactBaseElement {
 
 /**
  * @param {!Document} document
- * @param {function} open
+ * @param {function(number)} open
  * @return {!Array<PreactDef.Renderable>}
  */
 function getLightboxElements(document, open) {
