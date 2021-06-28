@@ -74,10 +74,7 @@ class AmpTwitter extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'requestResize': (height) =>
-        this.attemptChangeHeight(height).catch(() => {
-          /* ignore failures */
-        }),
+      'requestResize': (height) => this.forceChangeHeight(height),
     });
   }
 
