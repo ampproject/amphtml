@@ -28,15 +28,14 @@
     constructor(element) {
       super(element, InteractiveType.SLIDER, [0, 1]);
     }
-  
     /** @override */
     buildCallback() {
       return super.buildCallback(CSS);
     }
-  
+
     /** @override */
     buildComponent() {
-      this.rootEl_ = htmlFor(this.element)`<p>Slider component</p>`;
+      this.rootEl_ = htmlFor(this.element)`<input type= "range">`;
       return this.rootEl_;
     }
   }
