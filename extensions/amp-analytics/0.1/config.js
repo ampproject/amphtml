@@ -253,8 +253,8 @@ export class AnalyticsConfig {
 
   /**
    * Checks if config has opted into persisting any
-   * EventTimestamps the session. Sets the PERSIST_EVENT_TIMESTAMP
-   * flag in the config if so.
+   * EventTimestamps for the session. Sets the PERSIST_EVENT_TIMESTAMP
+   * flag in the config, if so.
    * @private
    */
   checkPersistEvents_() {
@@ -263,7 +263,7 @@ export class AnalyticsConfig {
     }
     this.config_[PERSIST_EVENT_TIMESTAMP] = Object.values(
       this.config_['triggers']
-    ).some((trigger) => trigger?.['session']?.['persistentEvent']);
+    ).some((trigger) => trigger?.['session']?.['persistEvent']);
   }
 
   /**

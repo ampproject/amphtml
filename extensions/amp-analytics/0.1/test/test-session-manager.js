@@ -495,7 +495,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         );
       });
 
-      it.only('should return persisted eventTimestamp from storage', async () => {
+      it('should return persisted eventTimestamp from storage', async () => {
         storageValue = {
           ['amp-session:' + vendorType]: {
             [SESSION_VALUES.SESSION_ID]: 5000,
@@ -513,7 +513,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         expect(eventTimestamp).to.equal(defaultTime);
       });
 
-      it.only('should reset eventTimestamp from expired session in storage', async () => {
+      it('should reset eventTimestamp from expired session in storage', async () => {
         storageValue = {
           ['amp-session:' + vendorType]: {
             [SESSION_VALUES.SESSION_ID]: 5000,
