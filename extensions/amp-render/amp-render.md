@@ -102,7 +102,7 @@ The `<amp-render>` element exposes a `refresh` action that other elements can re
 ```
 
 ### Dynamic resizing
-In some cases, we may need the `<amp-render>` component to resize on user interaction. For example, when the content does not fit within specified height specified with `layout="fixed-height"`. The `resizeToContents` action handles this by increasing the height to fit the content. If the content already fits in the specified height, height remains unchanged. See the following example:
+In some cases, we may need the `<amp-render>` element to resize on user interaction. For example, when the content does not fit within specified `height` attribute with `layout="fixed-height"` or the specified `height` is too large creating empty whitespace. The `<amp-render` element exposes a `resizeToContents` action that adjusts the height to fit the content. See the following example:
 
 ```html
 <button on="tap:my-component.resizeToContents()">Expand</button>
@@ -116,7 +116,7 @@ In some cases, we may need the `<amp-render>` component to resize on user intera
 ```
 
 [tip type="important"]
-For `<amp-render>` instances with `layout="responsive"`, `resizeToContents` action may break the aspect ratio since the height might change but width remains fixed.
+For `<amp-render>` instances with `layout="responsive"`, `resizeToContents` action may break the aspect ratio since the height will change but width may remain fixed.
 [/tip]
 
 ### Substitutions
