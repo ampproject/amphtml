@@ -49,6 +49,7 @@ const diffTentative = (filepath, content, gitDiffFlags = ['-U1']) =>
  * @param {string} filepath
  * @param {string} tentative
  * @param {Array<string>=} opt_gitDiffFlags
+ * @return {Promise<void>}
  */
 async function writeDiffOrFail(
   callerTask,
