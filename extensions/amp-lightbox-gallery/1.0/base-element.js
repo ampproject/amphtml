@@ -26,8 +26,15 @@ import {toArray} from '#core/types/array';
 import {toggle} from '#core/dom/style';
 import {toggleAttribute} from '#core/dom';
 
-/** @const {!Set<string>} */
-const LIGHTBOX_ELIGIBLE_TAGS = new Set(['AMP-IMG', 'IMG']);
+/** @const {!Array<string>} */
+const LIGHTBOX_ELIGIBLE_SELECTORS = [
+  'amp-img[lightbox]',
+  'img[lightbox]',
+  'amp-base-carousel[lightbox] > amp-img',
+  'amp-base-carousel[lightbox] > img',
+  'amp-stream-gallery[lightbox] > amp-img',
+  'amp-stream-gallery[lightbox] > img',
+];
 
 export class BaseElement extends PreactBaseElement {
   /** @param {!AmpElement} element */
@@ -45,8 +52,8 @@ export class BaseElement extends PreactBaseElement {
       'onAfterOpen': () => this.afterOpen_(),
       'onAfterClose': () => this.afterClose_(),
       'render': () =>
-        getLightboxElements(this.element.ownerDocument, () =>
-          this.api().open()
+        getLightboxElements(this.element.ownerDocument, (opt_index) =>
+          this.api().open(opt_index)
         ),
     });
   }
@@ -95,17 +102,16 @@ export class BaseElement extends PreactBaseElement {
  * @return {!Array<PreactDef.Renderable>}
  */
 function getLightboxElements(document, open) {
-  return toArray(document.querySelectorAll('[lightbox]')).map((element) => {
-    if (!LIGHTBOX_ELIGIBLE_TAGS.has(element.tagName)) {
-      return;
+  return toArray(document.querySelectorAll(LIGHTBOX_ELIGIBLE_SELECTORS)).map(
+    (element, index) => {
+      element.addEventListener('click', () => open(index));
+      return (
+        <WithLightbox
+          render={() => <img srcset={srcsetFromElement(element).stringify()} />}
+        />
+      );
     }
-    element.addEventListener('click', open);
-    return (
-      <WithLightbox
-        render={() => <img srcset={srcsetFromElement(element).stringify()} />}
-      />
-    );
-  });
+  );
 }
 
 /** @override */
