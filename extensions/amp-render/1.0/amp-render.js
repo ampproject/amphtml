@@ -50,10 +50,8 @@ const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
 
 /**
  * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
- *
  * TODO: this is similar to the implementation in amp-list. Move it
  * to a common file and import it.
- *
  * @param {!AmpElement} element
  * @param {string} src
  * @return {Promise<!JsonObject>}
@@ -190,7 +188,44 @@ export class AmpRender extends BaseElement {
         'placeholder required with layout="container"'
       );
     }
-    return super.isLayoutSupported(layout);
+    return true;
+  }
+
+  /** @private */
+  handleResizeToContentsAction_() {
+    let currentHeight, targetHeight;
+    this.measureMutateElement(
+      () => {
+        currentHeight = this.element./*OK*/ offsetHeight;
+        targetHeight = this.element./*OK*/ scrollHeight;
+        if (targetHeight < currentHeight) {
+          // targetHeight is smaller than currentHeight, we need to shrink the height.
+          const container = this.element.querySelector(
+            'div[i-amphtml-rendered]'
+          );
+          targetHeight = container./*OK*/ scrollHeight;
+          // Check if the first child has any margin-top and add it to the target height
+          if (container.firstElementChild) {
+            const marginTop = computedStyle(
+              this.getAmpDoc().win,
+              container.firstElementChild
+            ).getPropertyValue('margin-top');
+            targetHeight += parseInt(marginTop, 10);
+          }
+          // Check if the last child has any margin-bottom and add it to the target height
+          if (container.lastElementChild) {
+            const marginBottom = computedStyle(
+              this.getAmpDoc().win,
+              container.lastElementChild
+            ).getPropertyValue('margin-bottom');
+            targetHeight += parseInt(marginBottom, 10);
+          }
+        }
+      },
+      () => {
+        this.forceChangeHeight(targetHeight);
+      }
+    );
   }
 
   /** @override */
@@ -213,6 +248,10 @@ export class AmpRender extends BaseElement {
         return;
       }
       api.refresh();
+    });
+
+    this.registerAction('resizeToContents', () => {
+      this.handleResizeToContentsAction_();
     });
 
     return dict({
@@ -353,7 +392,6 @@ export class AmpRender extends BaseElement {
   /**
    * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
-   *
    * @override
    */
   isReady(props) {
@@ -361,6 +399,12 @@ export class AmpRender extends BaseElement {
     return !this.template_ || 'render' in props;
   }
 }
+
+/**
+ * This is disabled to remove the fill content style in the AMP layer.
+ * @override
+ */
+AmpRender['layoutSizeDefined'] = false;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);
