@@ -23,6 +23,8 @@ import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {buildImgTemplate} from './utils';
 import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
+import objstr from 'obj-str';
 
 /**
  * Generates the template for each option.
@@ -33,13 +35,11 @@ import {htmlFor} from '#core/dom/static-template';
 const buildOptionTemplate = (option) => {
   const html = htmlFor(option);
   return html`
-    <div
-      class="i-amphtml-story-interactive-img-quiz-option i-amphtml-story-interactive-img-option"
+    <button
+      class="i-amphtml-story-interactive-img-quiz-option i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
-      <button
-        class="i-amphtml-story-interactive-img-option-button i-amphtml-story-interactive-option"
-      >
+      <div class="i-amphtml-story-interactive-img-option-circle">
         <img class="i-amphtml-story-interactive-img-option-img" />
         <div
           class="i-amphtml-story-interactive-img-option-percentage-fill"
@@ -47,7 +47,7 @@ const buildOptionTemplate = (option) => {
         <span
           class="i-amphtml-story-interactive-img-option-percentage-text"
         ></span>
-      </button>
+      </div>
       <div class="i-amphtml-story-interactive-img-quiz-answer-choice-container">
         <div
           class="i-amphtml-story-interactive-img-quiz-answer-choice-overlay"
@@ -56,7 +56,7 @@ const buildOptionTemplate = (option) => {
           class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"
         ></span>
       </div>
-    </div>
+    </button>
   `;
 };
 
@@ -140,5 +140,40 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
     }
 
     return convertedOption;
+  }
+
+  /**
+   * @override
+   */
+  displayOptionsData(optionsData) {
+    if (!optionsData) {
+      return;
+    }
+
+    const percentages = this.preprocessPercentages_(optionsData);
+
+    this.getOptionElements().forEach((el, index) => {
+      // Update the aria-label so they read "selected" and "correct" or "incorrect"
+      /*const ariaDescription = objstr({
+        selected: optionsData[index].selected,
+        correct: el.hasAttribute('correct'),
+        incorrect: !el.hasAttribute('correct'),
+      });
+      el.querySelector(
+        '.i-amphtml-story-interactive-quiz-answer-choice'
+      ).setAttribute('aria-hidden', true);
+      const optionText = el.querySelector(
+        '.i-amphtml-story-interactive-quiz-option-text'
+      );
+      optionText.setAttribute(
+        'aria-label',
+        ariaDescription + ' ' + optionText.textContent
+      );*/
+      // Update percentage text
+      el.querySelector(
+        '.i-amphtml-story-interactive-img-option-percentage-text'
+      ).textContent = `${percentages[index]}%`;
+      setStyle(el, '--option-percentage', `${percentages[index]}%`);
+    });
   }
 }
