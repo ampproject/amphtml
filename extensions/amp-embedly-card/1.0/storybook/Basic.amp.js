@@ -32,7 +32,6 @@ export const YoutubeEmbed = () => {
   return (
     <>
       <amp-embedly-key layout="nodisplay" value="my-test-key">
-        hello
       </amp-embedly-key>
       <amp-embedly-card
         data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
