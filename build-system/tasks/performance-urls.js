@@ -25,6 +25,7 @@ const LOCAL_HOST_URL = 'http://localhost:8000/';
 /**
  * Entry point for 'amp performance-urls'
  * Check if all localhost urls in performance/config.json exist
+ * @return {Promise<void>}
  */
 async function performanceUrls() {
   let jsonContent;
