@@ -18,9 +18,9 @@ import {
   AnalyticsPercentageTracker,
   PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS,
   PERCENTAGE_INTERVAL,
-} from '../../src/service/video-manager-impl';
+} from '#service/video-manager-impl';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
-import {Services} from '../../src/services';
+import {Services} from '#service';
 import {createCustomEvent} from '../../src/event-helper';
 
 describes.fakeWin(
@@ -77,7 +77,7 @@ describes.fakeWin(
     }
 
     beforeEach(() => {
-      const {win, sandbox} = env;
+      const {sandbox, win} = env;
 
       mockTimer = {
         delay: sandbox.stub().callsFake((fn) => {

@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {
-  MessageType,
-  ProxyIframeEmbed,
-} from '../../../src/preact/component/3p-frame';
+import * as Preact from '#preact';
+import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
-import {forwardRef} from '../../../src/preact/compat';
-import {useCallback, useState} from '../../../src/preact';
+import {forwardRef} from '#preact/compat';
+import {useCallback, useState} from '#preact';
 
 /** @const {string} */
 const TYPE = 'twitter';
@@ -33,8 +30,11 @@ const MATCHES_MESSAGING_ORIGIN = () => true;
  * @param {{current: (!TwitterDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function TwitterWithRef({requestResize, title, ...rest}, ref) {
-  const [height, setHeight] = useState(FULL_HEIGHT);
+function TwitterWithRef(
+  {momentid, options, requestResize, style, title, tweetid, ...rest},
+  ref
+) {
+  const [height, setHeight] = useState(null);
   const messageHandler = useCallback(
     (event) => {
       const data = deserializeMessage(event.data);
@@ -60,8 +60,9 @@ function TwitterWithRef({requestResize, title, ...rest}, ref) {
       // non-overridable props
       matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       messageHandler={messageHandler}
+      options={{tweetid, momentid, ...options}}
       type={TYPE}
-      wrapperStyle={{height}}
+      style={height ? {...style, height} : style}
     />
   );
 }

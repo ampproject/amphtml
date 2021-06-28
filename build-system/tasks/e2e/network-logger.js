@@ -37,7 +37,7 @@ export class NetworkLogger {
 
   /**
    * @param {PerformanceMethods} networkMethod
-   * @return {Promise<logging.Entry[]>}
+   * @return {Promise<*>}
    */
   async getEntries_(networkMethod) {
     const entries = await this.driver_
@@ -55,7 +55,7 @@ export class NetworkLogger {
   /**
    * Gets sent requests with an optional url to filter by.
    * @param {string=} url
-   * @return {Promise<Array<logging.Entry>>}
+   * @return {Promise<Array<*>>}
    */
   async getSentRequests(url) {
     const entries = await this.getEntries_(

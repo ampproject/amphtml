@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {boolean, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
@@ -51,7 +51,11 @@ export const _default = () => {
       data-locale={locale}
       data-numposts={numPosts}
       data-order-by={orderBy}
-    ></amp-facebook-comments>
+    >
+      <div placeholder>
+        <h1>Placeholder</h1>
+      </div>
+    </amp-facebook-comments>
   );
 };
 

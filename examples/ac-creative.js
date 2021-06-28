@@ -31,8 +31,8 @@ function intersectionCallback(changes) {
 
   var {
     // Amp-ad width and height.
-    width: w,
     height: h,
+    width: w,
 
     // Position in the viewport.
     x: vx,
@@ -41,8 +41,8 @@ function intersectionCallback(changes) {
 
   var {
     // Visible width and height.
-    width: vw,
     height: vh,
+    width: vw,
   } = latestChange.intersectionRect;
 
   // Viewable percentage.

@@ -22,7 +22,7 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const {cyan, green, yellow} = require('kleur/colors');
+const {cyan, green, yellow} = require('../common/colors');
 const {getStdout} = require('../common/process');
 const {logWithoutTimestamp: log} = require('../common/logging');
 
@@ -31,6 +31,7 @@ const ampCliRunner = 'build-system/task-runner/amp-cli-runner.js';
 /**
  * Installs the `amp` task runner to the npm bin directory if it hasn't already
  * been installed. Ensures that the binary exists and is a node runner script.
+ * @return {Promise<void>}
  */
 async function installAmpTaskRunner() {
   const npmBinDir = getStdout('npm bin --global').trim();

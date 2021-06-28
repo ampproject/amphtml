@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 import {
@@ -27,23 +27,25 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  removeElement,
+} from '#core/dom';
+import {
   fullscreenEnter,
   fullscreenExit,
-  getDataParamsFromAttributes,
   isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+} from '#core/dom/fullscreen';
 import {
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
 /** @private @const {string} */
 const TAG = 'amp-brightcove';
@@ -128,21 +130,20 @@ class AmpBrightcove extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     // Warn if the player does not have video interface support
-    this.readyTimeout_ = /** @type {number} */ (Services.timerFor(window).delay(
-      () => {
+    this.readyTimeout_ = /** @type {number} */ (
+      Services.timerFor(window).delay(() => {
         user().warn(
           TAG,
           'Did not receive ready callback from player %s.' +
             ' Ensure it has the videojs-amp-support plugin.',
           this.playerId_
         );
-      },
-      3000
-    ));
+      }, 3000)
+    );
   }
 
   /**
-   * @return {Promise[]}
+   * @return {Promise}
    */
   getConsents_() {
     const consentPolicy = super.getConsentPolicy();
@@ -332,7 +333,7 @@ class AmpBrightcove extends AMP.BaseElement {
       `https://players.brightcove.net/${encodeURIComponent(account)}` +
       `/${encodeURIComponent(this.playerId_)}` +
       `_${encodeURIComponent(embed)}/index.html` +
-      '?amp=1&autoplay=false' +
+      '?amp=1' +
       // These are encodeURIComponent'd in encodeId_().
       (el.getAttribute('data-playlist-id')
         ? '&playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id'))
@@ -366,6 +367,9 @@ class AmpBrightcove extends AMP.BaseElement {
 
     el.setAttribute('data-param-playsinline', 'true');
 
+    if (el.hasAttribute('data-param-autoplay')) {
+      el.removeAttribute('data-param-autoplay');
+    }
     // Pass through data-param-* attributes as params for plugin use
     return addParamsToUrl(src, getDataParamsFromAttributes(el));
   }
@@ -456,8 +460,8 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /** @override */
-  play(unusedIsAutoplay) {
-    this.sendCommand_('play');
+  play(isAutoplay) {
+    this.sendCommand_('play', isAutoplay);
   }
 
   /** @override */

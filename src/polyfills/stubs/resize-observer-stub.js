@@ -23,7 +23,8 @@
  * amp-resize-observer-polyfill extension.
  */
 
-import {Services} from '../../services';
+/** @typedef {function(!typeof ResizeObserver)} */
+let ResObsUpgraderDef;
 
 const UPGRADERS = '_upgraders';
 const STUB = '_stub';
@@ -53,42 +54,28 @@ export function installStub(win) {
 
 /**
  * @param {!Window} win
- */
-export function scheduleUpgradeIfNeeded(win) {
-  if (shouldLoadPolyfill(win)) {
-    Services.extensionsFor(win).preloadExtension(
-      'amp-resize-observer-polyfill'
-    );
-  }
-}
-
-/**
- * @param {!Window} win
  * @param {function()} installer
  */
 export function upgradePolyfill(win, installer) {
   // Can't use the ResizeObserverStub here directly since it's a separate
   // instance deployed in v0.js vs the polyfill extension.
-  const Stub = /** @type {typeof ResizeObserverStub} */ (win.ResizeObserver[
-    STUB
-  ]);
+  const Stub = win.ResizeObserver[STUB];
   if (Stub) {
     delete win.ResizeObserver;
     delete win.ResizeObserverEntry;
     installer();
 
     const Polyfill = win.ResizeObserver;
+    /** @type {!Array<ResObsUpgraderDef>} */
     const upgraders = Stub[UPGRADERS].slice(0);
     const microtask = Promise.resolve();
     const upgrade = (upgrader) => {
       microtask.then(() => upgrader(Polyfill));
     };
-    if (upgraders.length > 0) {
-      /** @type {!Array} */ (upgraders).forEach(upgrade);
+    for (const upgrader of upgraders) {
+      upgrade(upgrader);
     }
-    Stub[UPGRADERS] = /** @type {!Array<function(typeof ResizeObserver)>} */ ({
-      'push': upgrade,
-    });
+    Stub[UPGRADERS] = {'push': upgrade};
   } else {
     // Even if this is not the stub, we still may need to install the polyfill.
     // See `shouldLoadPolyfill` for more info.
@@ -100,16 +87,17 @@ export function upgradePolyfill(win, installer) {
  * The stub for `ResizeObserver`. Implements the same interface, but
  * keeps the tracked elements in memory until the actual polyfill arives.
  * This stub is necessary because the polyfill itself is significantly bigger.
+ * It doesn't technically extend ResizeObserver, but this allows the stub
+ * to be seen as equivalent when typechecking calls expecting a ResizeObserver.
+ * @extends ResizeObserver
  */
 export class ResizeObserverStub {
-  /**
-   * @param {!ResizeObserverCallback} callback
-   */
+  /** @param {!ResizeObserverCallback} callback */
   constructor(callback) {
-    /** @private @const */
+    /** @private @const {!ResizeObserverCallback} */
     this.callback_ = callback;
 
-    /** @private {?Array<!Element>} */
+    /** @private {!Array<!Element>} */
     this.elements_ = [];
 
     /** @private {?ResizeObserver} */
@@ -119,9 +107,7 @@ export class ResizeObserverStub {
     ResizeObserverStub[UPGRADERS].push(this.upgrade_.bind(this));
   }
 
-  /**
-   * @return {*}
-   */
+  /** @return {undefined} */
   disconnect() {
     if (this.inst_) {
       this.inst_.disconnect();
@@ -130,9 +116,7 @@ export class ResizeObserverStub {
     }
   }
 
-  /**
-   * @param {!Element} target
-   */
+  /** @param {!Element} target */
   observe(target) {
     if (this.inst_) {
       this.inst_.observe(target);
@@ -143,9 +127,7 @@ export class ResizeObserverStub {
     }
   }
 
-  /**
-   * @param {!Element} target
-   */
+  /** @param {!Element} target */
   unobserve(target) {
     if (this.inst_) {
       this.inst_.unobserve(target);
@@ -158,20 +140,20 @@ export class ResizeObserverStub {
   }
 
   /**
-   * @param {typeof ResizeObserver} constr
+   * @param {!typeof ResizeObserver} Ctor
    * @private
    */
-  upgrade_(constr) {
-    const inst = new constr(this.callback_, this.options_);
+  upgrade_(Ctor) {
+    const inst = new Ctor(this.callback_);
     this.inst_ = inst;
-    this.elements_.forEach((e) => inst.observe(e));
-    this.elements_ = null;
+    for (const e of this.elements_) {
+      inst.observe(e);
+    }
+    this.elements_.length = 0;
   }
 }
 
-/**
- * @type {!Array<function(typeof ResizeObserver)>}
- */
+/** @type {!Array<!ResObsUpgraderDef>} */
 ResizeObserverStub[UPGRADERS] = [];
 
 /** @visibleForTesting */

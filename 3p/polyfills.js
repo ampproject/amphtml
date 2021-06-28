@@ -19,11 +19,11 @@
  */
 
 // This list should not get longer without a very good reason.
-import {install as installMathSign} from '../src/polyfills/math-sign';
-import {install as installObjectAssign} from '../src/polyfills/object-assign';
-import {install as installObjectValues} from '../src/polyfills/object-values';
-import {install as installPromise} from '../src/polyfills/promise';
-import {install as installStringStartsWith} from '../src/polyfills/string-starts-with';
+import {install as installMathSign} from '#polyfills/math-sign';
+import {install as installObjectAssign} from '#polyfills/object-assign';
+import {install as installObjectValues} from '#polyfills/object-values';
+import {install as installPromise} from '#polyfills/promise';
+import {install as installStringStartsWith} from '#polyfills/string-starts-with';
 
 if (!IS_ESM) {
   installMathSign(self);

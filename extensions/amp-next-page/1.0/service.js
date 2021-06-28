@@ -17,35 +17,38 @@
 import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {VisibilityState} from '../../../src/core/constants/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {
   childElementByAttr,
   childElementsByTag,
+  scopedQuerySelector,
+} from '#core/dom/query';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {findIndex, toArray} from '#core/types/array';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {
   insertAtStart,
   isJsonScriptTag,
   removeChildren,
   removeElement,
-  scopedQuerySelector,
-} from '../../../src/dom';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {findIndex, toArray} from '../../../src/core/types/array';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+} from '#core/dom';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
-import {setStyles, toggle} from '../../../src/style';
+
+import {setStyles, toggle} from '#core/dom/style';
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '#core/types/object/json';
 import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
@@ -495,7 +498,7 @@ export class NextPageService {
    * @return {!HostPage}
    */
   createHostPage() {
-    const {title, location} = this.doc_;
+    const {location, title} = this.doc_;
     const {href: url} = location;
     const image =
       parseSchemaImage(this.doc_) ||
@@ -503,17 +506,19 @@ export class NextPageService {
       parseFavicon(this.doc_) ||
       '';
 
-    return /** @type {!HostPage} */ (new HostPage(
-      this,
-      {
-        url,
-        title: title || '',
-        image,
-      },
-      PageState.INSERTED /** initState */,
-      VisibilityState.VISIBLE /** initVisibility */,
-      this.doc_
-    ));
+    return /** @type {!HostPage} */ (
+      new HostPage(
+        this,
+        {
+          url,
+          title: title || '',
+          image,
+        },
+        PageState.INSERTED /** initState */,
+        VisibilityState.VISIBLE /** initVisibility */,
+        this.doc_
+      )
+    );
   }
 
   /**
@@ -882,10 +887,12 @@ export class NextPageService {
       user().error(TAG, 'failed to parse inline page list', error);
     });
 
-    const pages = /** @type {!Array<!./page.PageMeta>} */ (user().assertArray(
-      parsed,
-      `${TAG} Page list expected an array, found: ${typeof parsed}`
-    ));
+    const pages = /** @type {!Array<!./page.PageMeta>} */ (
+      user().assertArray(
+        parsed,
+        `${TAG} Page list expected an array, found: ${typeof parsed}`
+      )
+    );
 
     removeElement(scriptElement);
     return pages;
@@ -903,8 +910,9 @@ export class NextPageService {
     }
 
     if (this.remoteFetchingPromise_) {
-      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
-        .remoteFetchingPromise_);
+      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (
+        this.remoteFetchingPromise_
+      );
     }
 
     this.remoteFetchingPromise_ = batchFetchJsonFor(
@@ -928,8 +936,9 @@ export class NextPageService {
         return [];
       });
 
-    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
-      .remoteFetchingPromise_);
+    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (
+      this.remoteFetchingPromise_
+    );
   }
 
   /**

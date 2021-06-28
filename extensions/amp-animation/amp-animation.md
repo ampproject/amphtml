@@ -235,6 +235,38 @@ with the following nuances:
 -   CSS extensions such as `width()`, `height()`, `x()`, `y()`, `num()`,
     `rand()`, `index()`, and `length()` are not available to `@keyframes`.
 
+##### On `prefers-reduced-motion`
+
+Oftentimes, a running animation will finalize by putting an element in a visible state, and initial CSS will hide the element to depend on the animation finalizing later.
+
+Users may configure their devices to [use reduced animation](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion). With this option, animations will not run at all. In this case, you need to disable CSS properties that depend on an animation runnning later.
+
+You can use a media query for this purpose. In the following example, an `<amp-animation>` would later animate the element into visibility by setting `opacity: 1`. When animations are disabled, the element is always visible:
+
+```html
+<style amp-custom>
+  .my-hidden-element {
+    opacity: 1;
+  }
+  @media not (prefers-reduced-motion) {
+    .my-hidden-element {
+      opacity: 0;
+    }
+  }
+</style>
+<amp-animation layout="nodisplay">
+  <script type="application/json">
+    [
+      {
+        "selector": ".my-hidden-element",
+        "duration": "1s",
+        "keyframes": {"opacity": 1}
+      }
+    ]
+  </script>
+</amp-animation>
+```
+
 ##### Allowed properties for keyframes
 
 The amp-animation component restricts CSS allowable properties to optimize

@@ -260,7 +260,7 @@ You can override this behavior with a `"transport"` object on the config, such a
 
 Variable substitution applies to navigation URLs and click-tracking URLs. URL
 variable substitution works like standard
-[AMP variable substitution](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md)
+[AMP variable substitution](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md)
 with custom variables and a limited set of platform variables.
 
 #### Platform variables
@@ -272,7 +272,7 @@ with custom variables and a limited set of platform variables.
   </tr>
   <tr>
     <td><code>RANDOM</code></td>
-    <td>A <a href="https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md#random">random</a> float.</td>
+    <td>A <a href="https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md#random">random</a> float.</td>
   </tr>
   <tr>
     <td><code>CLICK_X</code></td>

@@ -96,8 +96,13 @@ const forbiddenTermsGlobal = {
       'css/ampshared.css',
     ],
   },
-  'describe\\.only': '',
-  'describes.*\\.only': '',
+  'describe\\.only': {
+    message: 'Please remove all instances of describe.only',
+    allowlist: ['testing/describes.js'],
+  },
+  'describes.*\\.only': {
+    message: 'Please remove all instances of describes.only',
+  },
   'dev\\(\\)\\.assert\\(': 'Use the devAssert function instead.',
   '[^.]user\\(\\)\\.assert\\(': 'Use the userAssert function instead.',
   'it\\.only': '',
@@ -116,6 +121,10 @@ const forbiddenTermsGlobal = {
       'Do NOT stub on a cross domain iframe! #5359\n' +
       '  If this is same domain, mark /*OK*/.\n' +
       '  If this is cross domain, overwrite the method directly.',
+  },
+  'window\\.sandbox': {
+    message: 'Usage of window.sandbox is forbidden. Use env.sandbox instead.',
+    checkInTestFolder: true,
   },
   'console\\.\\w+\\(': {
     message: String(
@@ -138,10 +147,12 @@ const forbiddenTermsGlobal = {
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
   '(?:var|let|const) +IS_FORTESTING +=': {
-    message:
-      'IS_FORTESTING local var only allowed in mode.js and ' +
-      'dist.3p/current/integration.js',
-    allowlist: ['src/mode.js'],
+    message: 'IS_FORTESTING local var only allowed in mode.js.',
+    allowlist: ['src/core/mode/for-testing.js'],
+  },
+  '(?:var|let|const) +IS_MINIFIED +=': {
+    message: 'IS_MINIFIED local var only allowed in core/mode/minified.js',
+    allowlist: ['src/core/mode/minified.js'],
   },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
@@ -211,6 +222,7 @@ const forbiddenTermsGlobal = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
+      'testing/init-tests.js',
       'testing/describes.js',
       'testing/iframe.js',
     ],
@@ -298,12 +310,12 @@ const forbiddenTermsGlobal = {
       'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',
       'src/element-service.js',
-      'src/service.js',
+      'src/service-helpers.js',
+      'src/service/index.js',
       'src/service/scheduler.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
       'src/service/template-impl.js',
-      'src/services.js',
       'src/utils/display-observer.js',
       'testing/test-helper.js',
     ],
@@ -318,10 +330,12 @@ const forbiddenTermsGlobal = {
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'extensions/amp-access/0.1/amp-login-done.js',
+      'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'src/amp-story-player/amp-story-component-manager.js',
       'src/runtime.js',
       'src/log.js',
       'src/web-worker/web-worker.js',
+      'testing/async-errors.js',
       'tools/experiments/experiments.js',
     ],
   },
@@ -378,7 +392,7 @@ const forbiddenTermsGlobal = {
       // in extensions listed in the amp4ads spec:
       // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/ad-cid.js',
-      'src/services.js',
+      'src/service/index.js',
       'src/service/standard-actions-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
@@ -432,9 +446,10 @@ const forbiddenTermsGlobal = {
       // Storage service is not allowed in amp4ads. No usage should there be
       // in extensions listed in the amp4ads spec:
       // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
-      'src/services.js',
+      'src/service/index.js',
       'src/service/cid-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
+      'extensions/amp-analytics/0.1/session-manager.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
@@ -448,9 +463,10 @@ const forbiddenTermsGlobal = {
       'extensions/amp-story/1.0/history.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
-      'src/experiments.js',
+      'src/experiments/index.js',
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
+      'testing/init-tests.js',
       'testing/fake-dom.js',
     ],
   },
@@ -499,7 +515,7 @@ const forbiddenTermsGlobal = {
       'src/inabox/inabox-viewer.js',
       'src/service/viewer-impl.js',
       'src/error-reporting.js',
-      'src/window-interface.js',
+      'src/core/window/interface.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -519,20 +535,21 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
-      'src/event-helper-listen.js',
+      'src/core/dom/event-helper-listen.js',
     ],
   },
   'setTimeout.*throw': {
     message: 'Use dev.error or user.error instead.',
   },
-  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {
-    message:
-      'Logging message require explicitly `TAG`, or an all uppercase' +
-      ' string as the first parameter',
-    allowlist: [
-      'build-system/babel-plugins/babel-plugin-transform-dev-methods/index.js',
-    ],
-  },
+  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*':
+    {
+      message:
+        'Logging message require explicitly `TAG`, or an all uppercase' +
+        ' string as the first parameter',
+      allowlist: [
+        'build-system/babel-plugins/babel-plugin-transform-dev-methods/index.js',
+      ],
+    },
   '\\.schedulePass\\(': {
     message: 'schedulePass is heavy, think twice before using it',
     allowlist: ['src/service/mutator-impl.js', 'src/service/resources-impl.js'],
@@ -564,8 +581,8 @@ const forbiddenTermsGlobal = {
     allowlist: ['src/custom-element.js', 'src/service/resources-impl.js'],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
-    message: 'Use dom.openWindowDialog',
-    allowlist: ['src/dom.js'],
+    message: 'Use src/open-window-dialog',
+    allowlist: ['src/open-window-dialog.js'],
   },
   '\\.getWin\\(': {
     message: backwardCompat,
@@ -573,9 +590,10 @@ const forbiddenTermsGlobal = {
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     allowlist: [
-      'src/log.js', // Has actual implementation of assertElement.
+      'src/core/assert/base.js', // Has actual implementation of assertElement.
+      'src/core/assert/dev.js', // Has actual implementation of assertElement.
       'src/polyfills/custom-elements.js',
-      'ads/google/imaVideo.js', // Required until #22277 is fixed.
+      'ads/google/ima/ima-video.js', // Required until #22277 is fixed.
       '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
     ],
   },
@@ -590,12 +608,21 @@ const forbiddenTermsGlobal = {
       'src/service/resources-impl.js',
     ],
   },
+  '\\b(__)?AMP_EXP\\b': {
+    message:
+      'Do not access AMP_EXP directly. Use isExperimentOn() to access config',
+    allowlist: [
+      'src/experiments/index.js',
+      'src/experiments/experiments.extern.js',
+    ],
+  },
   'AMP_CONFIG': {
     message:
       'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
       'and getMode() to access config',
     allowlist: [
       'build-system/externs/amp.extern.js',
+      'build-system/server/amp4test.js',
       'build-system/server/app.js',
       'build-system/tasks/e2e/index.js',
       'build-system/tasks/firebase.js',
@@ -609,11 +636,15 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
       'src/config.js',
-      'src/experiments.js',
+      'src/core/window/window.extern.js',
+      'src/experiments/index.js',
+      'src/experiments/shame.extern.js',
       'src/mode.js',
+      'src/core/mode/test.js',
+      'src/core/mode/local-dev.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
+      'testing/init-tests.js',
       'tools/experiments/experiments.js',
-      'build-system/server/amp4test.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -634,9 +665,11 @@ const forbiddenTermsGlobal = {
   '\\.defer\\(\\)': {
     message: 'Promise.defer() is deprecated and should not be used.',
   },
-  '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': {
-    message: 'TAG is not an argument to assert(). Will cause false positives.',
-  },
+  '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)':
+    {
+      message:
+        'TAG is not an argument to assert(). Will cause false positives.',
+    },
   'eslint no-unused-vars': {
     message: 'Use a line-level "no-unused-vars" rule instead.',
     allowlist: ['extensions/amp-access/0.1/iframe-api/access-controller.js'],
@@ -646,7 +679,7 @@ const forbiddenTermsGlobal = {
       'Use of `this.skip()` is forbidden in test files. Use ' +
       '`this.skipTest()` from within a `before()` block instead. See #17245.',
     checkInTestFolder: true,
-    allowlist: ['test/_init_tests.js'],
+    allowlist: ['testing/init-tests.js'],
   },
   '[^\\.]makeBodyVisible\\(': {
     message:
@@ -678,13 +711,6 @@ const forbiddenTermsGlobal = {
       'Use "describes.{realWin|sandboxed|fakeWin|integration}".',
     allowlist: [
       // Non test files. These can remain.
-      'build-system/server/app-index/test/test-amphtml-helpers.js',
-      'build-system/server/app-index/test/test-file-list.js',
-      'build-system/server/app-index/test/test-html.js',
-      'build-system/server/app-index/test/test-self.js',
-      'build-system/server/app-index/test/test-template.js',
-      'build-system/server/app-index/test/test.js',
-      'test/_init_tests.js',
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
       'validator/js/engine/amp4ads-parse-css_test.js',
@@ -695,135 +721,6 @@ const forbiddenTermsGlobal = {
       'validator/js/engine/parse-url_test.js',
       'validator/js/engine/validator_test.js',
       'validator/js/gulpjs/test/validate.js',
-      // Test files. TODO(#24144): Fix these and remove from the allowlist.
-      'ads/google/a4a/shared/test/test-content-recommendation.js',
-      'ads/google/a4a/shared/test/test-url-builder.js',
-      'ads/google/a4a/test/test-line-delimited-response-handler.js',
-      'ads/google/a4a/test/test-traffic-experiments.js',
-      'ads/google/a4a/test/test-utils.js',
-      'ads/google/test/test-utils.js',
-      'extensions/amp-a4a/0.1/test/test-a4a-integration.js',
-      'extensions/amp-a4a/0.1/test/test-a4a-var-source.js',
-      'extensions/amp-a4a/0.1/test/test-amp-ad-utils.js',
-      'extensions/amp-a4a/0.1/test/test-refresh.js',
-      'extensions/amp-access/0.1/test/test-access-expr.js',
-      'extensions/amp-access/0.1/test/test-amp-login-done-dialog.js',
-      'extensions/amp-access/0.1/test/test-jwt.js',
-      'extensions/amp-accordion/0.1/test/integration/test-amp-accordion.js',
-      'extensions/amp-ad-exit/0.1/test/filters/test-click-delay.js',
-      'extensions/amp-ad/0.1/test/test-amp-ad-3p-impl.js',
-      'extensions/amp-ad/0.1/test/test-amp-ad-custom.js',
-      'extensions/amp-ad/0.1/test/test-amp-ad-xorigin-iframe-handler.js',
-      'extensions/amp-addthis/0.1/test/addthis-utils/test-fragment.js',
-      'extensions/amp-addthis/0.1/test/addthis-utils/test-rot13.js',
-      'extensions/amp-analytics/0.1/test/test-iframe-transport-client.js',
-      'extensions/amp-analytics/0.1/test/test-linker-manager.js',
-      'extensions/amp-analytics/0.1/test/test-linker-reader.js',
-      'extensions/amp-analytics/0.1/test/test-linker.js',
-      'extensions/amp-analytics/0.1/test/test-transport-serializers.js',
-      'extensions/amp-auto-ads/0.1/test/test-attributes.js',
-      'extensions/amp-bind/0.1/test/test-bind-evaluator.js',
-      'extensions/amp-bind/0.1/test/test-bind-expression.js',
-      'extensions/amp-bind/0.1/test/test-bind-validator.js',
-      'extensions/amp-bodymovin-animation/0.1/test/integration/test-amp-bodymovin-animation.js',
-      'extensions/amp-dynamic-css-classes/0.1/test/test-dynamic-classes.js',
-      'extensions/amp-fx-collection/0.1/test/integration/test-amp-fx-fly-in.js',
-      'extensions/amp-image-lightbox/0.1/test/integration/test-amp-image-lightbox.js',
-      'extensions/amp-lightbox-gallery/0.1/test/integration/test-amp-lightbox-gallery.js',
-      'extensions/amp-list/0.1/test/integration/test-amp-list.js',
-      'extensions/amp-live-list/0.1/test/test-poller.js',
-      'extensions/amp-pan-zoom/0.1/test/integration/test-amp-pan-zoom.js',
-      'extensions/amp-script/0.1/test/integration/test-amp-script.js',
-      'extensions/amp-script/0.1/test/unit/test-amp-script.js',
-      'extensions/amp-sidebar/0.1/test/integration/test-amp-sidebar.js',
-      'extensions/amp-sidebar/0.1/test/test-toolbar.js',
-      'extensions/amp-sidebar/0.2/test/integration/test-amp-sidebar.js',
-      'extensions/amp-truncate-text/0.1/test/test-binary-search.js',
-      'extensions/amp-viewer-integration/0.1/test/integration/test-amp-viewer-integration.js',
-      'extensions/amp-viewer-integration/0.1/test/test-findtext.js',
-      'test/integration/test-3p-nameframe.js',
-      'test/integration/test-amp-ad-3p.js',
-      'test/integration/test-amp-ad-doubleclick.js',
-      'test/integration/test-amp-analytics.js',
-      'test/integration/test-amp-bind.js',
-      'test/integration/test-amp-img.js',
-      'test/integration/test-amp-pixel.js',
-      'test/integration/test-amp-recaptcha-input.js',
-      'test/integration/test-amp-skimlinks.js',
-      'test/integration/test-boilerplates.js',
-      'test/integration/test-configuration.js',
-      'test/integration/test-css.js',
-      'test/integration/test-double-loading.js',
-      'test/integration/test-extensions-loading.js',
-      'test/integration/test-released.js',
-      'test/integration/test-shadow-dom-element.js',
-      'test/integration/test-video-manager.js',
-      'test/integration/test-video-players.js',
-      'test/unit/3p/test-3p-messaging.js',
-      'test/unit/3p/test-recaptcha.js',
-      'test/unit/ads/test-unruly.js',
-      'test/unit/test-3p-environment.js',
-      'test/unit/test-3p.js',
-      'test/unit/test-action.js',
-      'test/unit/test-activity.js',
-      'test/unit/test-ad-helper.js',
-      'test/unit/test-ads-config.js',
-      'test/unit/test-alp-handler.js',
-      'test/unit/test-amp-context.js',
-      'test/unit/test-amp-inabox.js',
-      'test/unit/test-animation.js',
-      'test/unit/test-batched-json.js',
-      'test/unit/test-callout-vendors.js',
-      'test/unit/test-chunk.js',
-      'test/unit/test-cid.js',
-      'test/unit/test-curve.js',
-      'test/unit/test-describes.js',
-      'test/unit/test-document-info.js',
-      'test/unit/test-document-ready.js',
-      'test/unit/test-event-helper.js',
-      'test/unit/test-experiments.js',
-      'test/unit/test-exponential-backoff.js',
-      'test/unit/test-finite-state-machine.js',
-      'test/unit/test-focus-history.js',
-      'test/unit/test-gesture-recognizers.js',
-      'test/unit/test-gesture.js',
-      'test/unit/test-get-html.js',
-      'test/unit/test-ie-media-bug.js',
-      'test/unit/test-iframe-helper.js',
-      'test/unit/test-iframe-stub.js',
-      'test/unit/test-input.js',
-      'test/unit/test-integration.js',
-      'test/unit/test-intersection-observer-polyfill.js',
-      'test/unit/test-json.js',
-      'test/unit/test-layout-rect.js',
-      'test/unit/test-layout.js',
-      'test/unit/test-log.js',
-      'test/unit/test-mode.js',
-      'test/unit/test-motion.js',
-      'test/unit/test-mustache.js',
-      'test/unit/test-pass.js',
-      'test/unit/test-platform.js',
-      'test/unit/test-pull-to-refresh.js',
-      'test/unit/test-purifier.js',
-      'test/unit/test-render-delaying-services.js',
-      'test/unit/test-resource.js',
-      'test/unit/test-sanitizer.js',
-      'test/unit/test-service.js',
-      'test/unit/test-srcset.js',
-      'test/unit/test-static-template.js',
-      'test/unit/test-style-installer.js',
-      'test/unit/test-style.js',
-      'test/unit/test-task-queue.js',
-      'test/unit/test-transition.js',
-      'test/unit/test-types.js',
-      'test/unit/test-url-rewrite.js',
-      'test/unit/test-url.js',
-      'test/unit/test-viewport.js',
-      'test/unit/test-web-components.js',
-      'test/unit/test-xhr.js',
-      'test/unit/utils/test-base64.js',
-      'test/unit/utils/test-bytes.js',
-      'test/unit/web-worker/test-amp-worker.js',
     ],
     checkInTestFolder: true,
   },
@@ -905,7 +802,10 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Due to various bugs in Firefox, you must use the computedStyle ' +
       'helper in style.js.',
-    allowlist: ['src/style.js', 'build-system/tasks/coverage-map/index.js'],
+    allowlist: [
+      'src/core/dom/style.js',
+      'build-system/tasks/coverage-map/index.js',
+    ],
   },
   'decodeURIComponent\\(': {
     message:
@@ -918,8 +818,8 @@ const forbiddenTermsSrcInclusive = {
       'validator/js/engine/validator.js',
       'validator/js/webui/webui.js',
       'src/url.js',
-      'src/url-try-decode-uri-component.js',
-      'src/utils/bytes.js',
+      'src/core/types/string/url.js',
+      'src/core/types/string/bytes.js',
     ],
   },
   'Text(Encoder|Decoder)\\(': {
@@ -929,8 +829,8 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
-      'src/utils/bytes.js',
-      'src/utils/stream-response.js',
+      'src/core/dom/stream/response.js',
+      'src/core/types/string/bytes.js',
     ],
   },
   'contentHeightChanged': {
@@ -949,8 +849,7 @@ const forbiddenTermsSrcInclusive = {
     message: bannedTermsHelpString,
     allowlist: [
       'src/friendly-iframe-embed.js',
-      'src/polyfills/stubs/intersection-observer-stub.js',
-      'src/polyfills/stubs/resize-observer-stub.js',
+      'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/crypto-impl.js',
     ],
@@ -976,16 +875,19 @@ const forbiddenTermsSrcInclusive = {
       'src/service/resources-impl.js',
       'src/service/variable-source.js',
       'src/validator-integration.js',
-      'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
-      'extensions/amp-web-push/0.1/iframehost.js',
+      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
+      'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
+      'extensions/amp-image-slider/0.1/amp-image-slider.js',
+      'extensions/amp-image-viewer/0.1/amp-image-viewer.js',
       'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
+      'extensions/amp-web-push/0.1/iframehost.js',
     ],
   },
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     allowlist: [
-      '.github/workflows/create-design-review-issue.js',
+      'build-system/common/update-session-issues/index.js',
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/1.0/component.js',
       'src/core/types/date.js',
@@ -1017,6 +919,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/session-manager.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
@@ -1028,7 +931,6 @@ const forbiddenTermsSrcInclusive = {
       'ads/_a4a-config.js',
       'build-system/server/amp4test.js',
       'build-system/server/app-index/amphtml-helpers.js',
-      'build-system/server/app-utils.js',
       'build-system/server/app-video-testbench.js',
       'build-system/server/app.js',
       'build-system/server/shadow-viewer.js',
@@ -1055,18 +957,11 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unresolved merge conflict.',
   },
   '\\.indexOf\\([\'"][^)]+\\)\\s*===?\\s*0\\b': {
-    message: 'use startsWith helper in src/string.js',
+    message: 'use startsWith helper in src/core/types/string',
     allowlist: ['build-system/server/app.js'],
   },
-  '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
-  '/url-parse-query-string': {
-    message: 'Import parseQueryString from `src/url.js`',
-    allowlist: [
-      'build-system/tasks/check-types.js',
-      'src/mode.js',
-      'src/url.js',
-    ],
-  },
+  '\\.indexOf\\(.*===?.*\\.length':
+    'use endsWith helper in src/core/types/string',
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
@@ -1076,7 +971,7 @@ const forbiddenTermsSrcInclusive = {
       'Do not directly use CI-specific environment vars. Instead, add a ' +
       'function to build-system/common/ci.js',
   },
-  '\\.matches\\(': 'Please use matches() helper in src/dom.js',
+  '\\.matches\\(': 'Please use matches() helper in src/core/dom/query.js',
   '\\.getLayoutBox': {
     message: measurementApiDeprecated,
     allowlist: [
@@ -1099,7 +994,7 @@ const forbiddenTermsSrcInclusive = {
     message: measurementApiDeprecated,
     allowlist: [
       'build-system/externs/amp.extern.js',
-      'builtins/amp-img.js',
+      'builtins/amp-img/amp-img.js',
       'src/base-element.js',
       'src/custom-element.js',
       'src/iframe-helper.js',
@@ -1144,6 +1039,14 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
   },
+  "require\\('kleur\\/colors'\\)": {
+    message:
+      'Instead of kleur/colors, use the log-coloring functions in build-system/common/colors.js',
+    allowlist: [
+      'build-system/common/colors.js',
+      'third_party/react-dates/scope-require.js',
+    ],
+  },
   'withA11y':
     'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
   'detectIsAutoplaySupported': {
@@ -1151,7 +1054,7 @@ const forbiddenTermsSrcInclusive = {
       'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',
     allowlist: [
       // The function itself is defined here.
-      'src/utils/video.js',
+      'src/core/dom/video/index.js',
     ],
   },
 };
@@ -1212,14 +1115,13 @@ function matchForbiddenTerms(srcFile, contents, terms) {
   return Object.entries(terms)
     .map(([term, messageOrDef]) => {
       const {
-        message,
         allowlist = null,
         checkInTestFolder = false,
         checkProse = false,
-      } =
-        typeof messageOrDef === 'string'
-          ? {message: messageOrDef}
-          : messageOrDef;
+        message,
+      } = typeof messageOrDef === 'string'
+        ? {message: messageOrDef}
+        : messageOrDef;
       // NOTE: we could do a glob test instead of exact check in the future
       // if needed but that might be too permissive.
       if (

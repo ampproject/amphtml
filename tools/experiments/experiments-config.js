@@ -60,12 +60,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
   },
   {
-    id: 'amp-viz-vega',
-    name: 'AMP Visualization using Vega grammar',
-    spec: 'https://github.com/ampproject/amphtml/issues/3991',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
-  },
-  {
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
@@ -159,20 +153,9 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
   },
   {
-    id: 'visibility-trigger-improvements',
-    name: 'AMP Analytics Visibility Trigger Improvements',
-    spec: 'https://github.com/ampproject/amphtml/issues/26823',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
-  },
-  {
     id: 'a4a-no-signing',
     name: 'Remove signing requirement for AMPHTML ads',
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
-  },
-  {
-    id: 'expand-json-targeting',
-    name: 'Allow CLIENT_ID in doubleclick json targeting feature',
-    spec: 'https://github.com/ampproject/amphtml/issues/25190',
   },
   {
     id: 'auto-ads-layout-callback',
@@ -212,8 +195,7 @@ export const EXPERIMENTS = [
   },
   {
     id: 'flexible-bitrate',
-    name:
-      'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
+    name: 'Adaptive bitrate algorithm for videos on documents from the AMPProject CDN',
     spec: 'https://github.com/ampproject/amphtml/projects/111',
   },
   {

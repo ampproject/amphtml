@@ -16,10 +16,10 @@
 import '../amp-next-page';
 import {HostPage, PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
-import {Services} from '../../../../src/services';
-import {VisibilityState} from '../../../../src/core/constants/visibility-state';
-import {htmlFor} from '../../../../src/static-template';
-import {setStyle} from '../../../../src/style';
+import {Services} from '#service';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
 
 const MOCK_NEXT_PAGE = `<header>Header</header>
     <div style="height:1000px"></div>
@@ -751,12 +751,10 @@ describes.realWin(
           }
         );
 
-        const template1 = service.pages_[1].container.querySelector(
-          '[separator]'
-        );
-        const template2 = service.pages_[2].container.querySelector(
-          '[separator]'
-        );
+        const template1 =
+          service.pages_[1].container.querySelector('[separator]');
+        const template2 =
+          service.pages_[2].container.querySelector('[separator]');
 
         expect(template1.innerText).to.equal('Rendered 1');
         expect(template2.innerText).to.equal('Rendered 2');

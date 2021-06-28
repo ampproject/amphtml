@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
-const {green, yellow, cyan, red} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('../../common/colors');
 const {isCiBuild} = require('../../common/ci');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
@@ -142,6 +142,7 @@ function maybePrintArgvMessages() {
     log(green('Running tests against unminified code.'));
   }
   Object.keys(argv).forEach((arg) => {
+    /** @type {string} */
     const message = argvMessages[arg];
     if (message) {
       log(yellow(`--${arg}:`), green(message));
@@ -151,6 +152,7 @@ function maybePrintArgvMessages() {
 
 /**
  * @param {Object} browser
+ * @return {Promise<void>}
  * @private
  */
 async function karmaBrowserComplete_(browser) {

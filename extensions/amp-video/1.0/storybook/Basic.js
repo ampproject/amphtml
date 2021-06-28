@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {
   Accordion,
   AccordionContent,
   AccordionHeader,
   AccordionSection,
 } from '../../../amp-accordion/1.0/component';
-import {VideoWrapper} from '../video-wrapper';
+import {VideoWrapper} from '../component';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
@@ -57,8 +57,7 @@ const VideoTagPlayer = ({i}) => {
     'sources',
     [
       {
-        src:
-          'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
+        src: 'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
         type: 'video/webm',
       },
       {

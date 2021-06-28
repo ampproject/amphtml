@@ -16,23 +16,8 @@
 
 module.exports = [
   {
-    'name': 'Developing',
-    'href':
-      'https://' +
-      'github.com/ampproject/amphtml/blob/main/contributing/DEVELOPING.md',
-  },
-  {
-    'divider': true,
-    'name': 'Contributing',
-    'href': 'https://github.com/ampproject/amphtml/blob/main/CONTRIBUTING.md',
-  },
-  {
     'name': 'Github',
     'href': 'https://github.com/ampproject/amphtml/',
-  },
-  {
-    'name': 'Find File',
-    'href': 'https://github.com/ampproject/amphtml/find/main',
   },
   {
     'name': 'CircleCI',

@@ -16,7 +16,7 @@
 
 import {AmpAccessEvaluator} from '../access-expr';
 
-describe('evaluate', () => {
+describes.sandboxed('evaluate', {}, () => {
   let evaluator;
   beforeEach(() => {
     evaluator = new AmpAccessEvaluator();

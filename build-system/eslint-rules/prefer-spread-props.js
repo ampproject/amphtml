@@ -40,38 +40,37 @@ module.exports = {
     const sourceCode = context.getSourceCode();
 
     return {
-      'CallExpression[callee.object.name="Object"][callee.property.name="assign"]': function (
-        node
-      ) {
-        const args = node.arguments;
-        if (args.length <= 1) {
-          return;
-        }
-
-        const first = args[0];
-        if (first.type !== 'ObjectExpression') {
-          return;
-        }
-        for (const arg of args) {
-          if (arg.type === 'SpreadElement') {
+      'CallExpression[callee.object.name="Object"][callee.property.name="assign"]':
+        function (node) {
+          const args = node.arguments;
+          if (args.length <= 1) {
             return;
           }
-        }
 
-        context.report({
-          node,
-          message: 'Prefer using object literals with spread property syntax',
-
-          fix(fixer) {
-            const texts = args.map((arg) => `...${sourceCode.getText(arg)}`);
-            if (first.properties.length === 0) {
-              texts.shift();
+          const first = args[0];
+          if (first.type !== 'ObjectExpression') {
+            return;
+          }
+          for (const arg of args) {
+            if (arg.type === 'SpreadElement') {
+              return;
             }
+          }
 
-            return fixer.replaceText(node, `({${texts.join(',')}})`);
-          },
-        });
-      },
+          context.report({
+            node,
+            message: 'Prefer using object literals with spread property syntax',
+
+            fix(fixer) {
+              const texts = args.map((arg) => `...${sourceCode.getText(arg)}`);
+              if (first.properties.length === 0) {
+                texts.shift();
+              }
+
+              return fixer.replaceText(node, `({${texts.join(',')}})`);
+            },
+          });
+        },
     };
   },
 };

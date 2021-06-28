@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import * as Preact from './index';
-import {CanPlay, CanRender, LoadingProp} from '../context/contextprops';
-import {Loading} from '../core/loading-instructions';
-import {pureDevAssert as devAssert} from '../core/assert';
-import {isElement} from '../core/types';
+import * as Preact from '#preact';
+import {CanPlay, CanRender, LoadingProp} from './contextprops';
+import {Loading} from '#core/loading-instructions';
+import {devAssert} from '#core/assert';
+import {isElement} from '#core/types';
 import {
   loadAll,
   pauseAll,
   unmountAll,
 } from '../utils/resource-container-helper';
-import {objectsEqualShallow} from '../core/types/object';
-import {rediscoverChildren, removeProp, setProp} from '../context';
+import {objectsEqualShallow} from '#core/types/object';
+import {rediscoverChildren, removeProp, setProp} from '#core/context';
 import {useAmpContext} from './context';
-import {useEffect, useLayoutEffect, useRef} from './index';
+import {useEffect, useLayoutEffect, useRef} from '#preact';
 
 const EMPTY = {};
 
@@ -142,7 +142,7 @@ export function useSlotContext(ref, opt_props) {
 
 /**
  * @param {!Element} slot
- * @param {function(!AmpElement|!Array<!AmpElement>)} action
+ * @param {function(!AmpElement):void|function(!Array<!AmpElement>):void} action
  */
 function execute(slot, action) {
   const assignedElements = slot.assignedElements

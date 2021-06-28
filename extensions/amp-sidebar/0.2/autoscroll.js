@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {computedStyle} from '../../../src/style';
-import {scopedQuerySelector} from '../../../src/dom';
+import {Services} from '#service';
+import {computedStyle} from '#core/dom/style';
+import {scopedQuerySelector} from '#core/dom/query';
 import {user} from '../../../src/log';
 
 /**

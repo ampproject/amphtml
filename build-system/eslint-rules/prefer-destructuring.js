@@ -45,7 +45,7 @@ module.exports = {
       }
 
       const {name} = id;
-      const {object, property, computed} = init;
+      const {computed, object, property} = init;
       if (
         computed ||
         object.type === 'Super' ||
@@ -112,7 +112,7 @@ module.exports = {
      * @param {*} base
      */
     function processVariables(struct, base) {
-      const {names, nodes, declarations, node} = struct;
+      const {declarations, names, node, nodes} = struct;
 
       if (nodes.size === 0) {
         return;

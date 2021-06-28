@@ -1,4 +1,4 @@
-import {Observable} from '../../../../src/core/data-structures/observable';
+import {Observable} from '#core/data-structures/observable';
 import {ViewerTracker} from '../viewer-tracker';
 
 /**

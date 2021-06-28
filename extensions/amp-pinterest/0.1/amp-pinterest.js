@@ -38,9 +38,9 @@ import {CSS} from '../../../build/amp-pinterest-0.1.css';
 import {FollowButton} from './follow-button';
 import {PinWidget} from './pin-widget';
 import {SaveButton} from './save-button';
-import {Services} from '../../../src/services';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '#service';
+import {htmlFor} from '#core/dom/static-template';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 import {user, userAssert} from '../../../src/log';
 
 /**
@@ -71,7 +71,7 @@ class AmpPinterest extends AMP.BaseElement {
             c-0.04,0.18-0.15,0.22-0.34,0.13c-1.25-0.58-2.03-2.4-2.03-3.87c0-3.15,2.29-6.04,6.6-6.04c3.46,0,6.16,2.47,6.16,5.77
             c0,3.45-2.17,6.22-5.18,6.22c-1.01,0-1.97-0.53-2.29-1.15c0,0-0.5,1.91-0.62,2.38c-0.22,0.87-0.83,1.96-1.24,2.62
             c0.94,0.29,1.92,0.44,2.96,0.44c5.52,0,9.99-4.47,9.99-9.99C45.99,30.47,41.52,26,36,26z"
-          />
+          ></path>
         </svg>
       `,
     };

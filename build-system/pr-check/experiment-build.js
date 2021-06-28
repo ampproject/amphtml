@@ -21,16 +21,19 @@
 
 const {
   skipDependentJobs: skipDependentJobs,
-  timedExecOrDie,
   storeExperimentBuildToWorkspace,
+  timedExecOrDie,
 } = require('./utils');
-const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
 const {getExperimentConfig} = require('../common/utils');
 const {runCiJob} = require('./ci-job');
+const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = `${experiment}-build.js`;
 
+/**
+ * Steps to run during push builds.
+ */
 function pushBuildWorkflow() {
   // Note that if config is invalid, this build would have been skipped by CircleCI.
   const config = getExperimentConfig(experiment);
@@ -39,6 +42,9 @@ function pushBuildWorkflow() {
   storeExperimentBuildToWorkspace(experiment);
 }
 
+/**
+ * Steps to run during PR builds.
+ */
 function prBuildWorkflow() {
   if (
     buildTargetsInclude(

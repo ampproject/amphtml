@@ -15,9 +15,9 @@
  */
 
 import * as events from '../../../src/event-helper';
-import {isJsonLdScriptTag} from '../../../src/dom';
-import {toArray} from '../../../src/core/types/array';
-import {tryParseJson} from '../../../src/json';
+import {isJsonLdScriptTag} from '#core/dom';
+import {toArray} from '#core/types/array';
+import {tryParseJson} from '#core/types/object/json';
 
 const rules = [
   // if it says it's a webview, let's go with that

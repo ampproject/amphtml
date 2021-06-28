@@ -16,15 +16,12 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
-import {
-  createElementWithAttributes,
-  iterateCursor,
-  openWindowDialog,
-} from '../../../src/dom';
+import {createElementWithAttributes, iterateCursor} from '#core/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
 import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/core/types/object';
+import {dict, map} from '#core/types/object';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 
 /**
  * @typedef {{
@@ -82,7 +79,7 @@ export function getStoryAdMetadataFromDoc(doc) {
   const storyMetaTags = getStoryAdMetaTags(doc);
   const vars = map();
   iterateCursor(storyMetaTags, (tag) => {
-    const {name, content} = tag;
+    const {content, name} = tag;
     if (name.startsWith(CTA_META_PREFIX)) {
       const key = name.split('amp-')[1];
       vars[key] = content;
@@ -111,7 +108,7 @@ export function getStoryAdMetadataFromElement(adElement) {
 /**
  * Returns a boolean indicating if there is sufficent metadata to render CTA.
  * @param {!StoryAdUIMetadata} metadata
- * @param {=boolean} opt_inabox
+ * @param {boolean=} opt_inabox
  * @return {boolean}
  */
 export function validateCtaMetadata(metadata, opt_inabox) {

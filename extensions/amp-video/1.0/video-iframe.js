@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {VideoWrapper} from './video-wrapper';
-import {forwardRef} from '../../../src/preact/compat';
+import * as Preact from '#preact';
+import {Deferred} from '#core/data-structures/promise';
+import {VideoWrapper} from './component';
+import {forwardRef} from '#preact/compat';
 import {
   useCallback,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
-} from '../../../src/preact';
+} from '#preact';
 
 const DEFAULT_SANDBOX = [
   'allow-scripts',
@@ -47,7 +47,7 @@ function usePropRef(prop) {
 
 /**
  * @param {!VideoIframeDef.Props} props
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */
@@ -193,7 +193,7 @@ export {VideoIframeInternal};
  * VideoWrapper using an <iframe> for implementation.
  * Usable on the AMP layer through VideoBaseElement.
  * @param {VideoIframeDef.Props} props
- * @param {{current: T|null}} ref
+ * @param {{current: (?T)}} ref
  * @return {PreactDef.Renderable}
  * @template T
  */

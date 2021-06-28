@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {parseJson} from './json';
+import {parseJson} from './core/types/object/json';
 
 /**
  * A unique identifier for each localized string.  Localized string IDs should:
@@ -36,10 +36,6 @@ export const LocalizedStringId = {
   AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL: '67',
   AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT: '33',
   AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT: '32',
-  AMP_STORY_BOOKEND_MORE_TO_READ_LABEL: '30',
-  AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE: '29',
-  AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL: '28',
-  AMP_STORY_CLOSE_BOOKEND: '94',
   AMP_STORY_CLOSE_BUTTON_LABEL: '87',
   AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL: '22',
   AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL: '23',
@@ -85,7 +81,6 @@ export const LocalizedStringId = {
   AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR: '14',
   AMP_STORY_SHARING_PROVIDER_NAME_TWITTER: '15',
   AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP: '16',
-  AMP_STORY_SHOW_BOOKEND: '95',
   AMP_STORY_SIDEBAR_BUTTON_LABEL: '70',
   AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL: '88',
   AMP_STORY_TOOLTIP_EXPAND_TWEET: '36',
@@ -154,9 +149,11 @@ export let LocalizedStringBundleDef;
  * @return {!LocalizedStringBundleDef}
  */
 function cloneLocalizedStringBundle(localizedStringBundle) {
-  return /** @type {!LocalizedStringBundleDef} */ (parseJson(
-    JSON.stringify(/** @type {!JsonObject} */ (localizedStringBundle))
-  ));
+  return /** @type {!LocalizedStringBundleDef} */ (
+    parseJson(
+      JSON.stringify(/** @type {!JsonObject} */ (localizedStringBundle))
+    )
+  );
 }
 
 /**
@@ -175,7 +172,9 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
   );
 
   Object.keys(pseudoLocaleStringBundle).forEach((localizedStringIdAsStr) => {
-    const localizedStringId = /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
+    const localizedStringId = /** @type {!LocalizedStringId} */ (
+      localizedStringIdAsStr
+    );
     pseudoLocaleStringBundle[localizedStringId].string = localizationFn(
       localizedStringBundle[localizedStringId].string
     );

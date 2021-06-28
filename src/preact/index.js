@@ -68,7 +68,7 @@ export function Fragment(props) {
 }
 
 /**
- * @return {{current: (T|null)}}
+ * @return {{current: ?T}}
  * @template T
  */
 export function createRef() {
@@ -81,7 +81,8 @@ export function createRef() {
  * @template T
  */
 export function createContext(value) {
-  return preact.createContext(value);
+  // TODO(preactjs/preact#2736): Remove once Preact's API is fixed.
+  return preact.createContext(value, undefined);
 }
 
 // Defines the type interfaces for the approved Preact Hooks APIs.
@@ -97,8 +98,8 @@ export function useState(initial) {
 }
 
 /**
- * @param {T|null} initial
- * @return {{current: (T|null)}}
+ * @param {?T} initial
+ * @return {{current: ?T}}
  * @template T
  */
 export function useRef(initial) {
@@ -151,7 +152,7 @@ export function useCallback(cb, opt_deps) {
 }
 
 /**
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @param {function():T} create
  * @param {!Array<*>=} opt_deps
  * @return {undefined}

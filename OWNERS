@@ -2,7 +2,7 @@
 // https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
 
 {
-  reviewerTeam: 'ampproject/reviewers-amphtml',
+  reviewerPool: ['ampproject/reviewers-amphtml', 'renovate-approve[bot]'],
   rules: [
     {
       owners: [
@@ -40,11 +40,16 @@
     },
     {
       pattern: '**/package{,-lock}.json',
-      owners: [{name: 'renovate-bot'}],
+      owners: [{name: 'renovate[bot]'}],
     },
     {
       pattern: '**/OWNERS',
       owners: [{name: 'mrjoro', requestReviews: false}],
+    },
+    {
+      // Locked down to minimize new import aliases being added
+      pattern: 'tsconfig.json',
+      owners: [{name: 'ampproject/wg-performance', required: true}],
     },
   ],
 }

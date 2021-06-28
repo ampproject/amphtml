@@ -320,6 +320,8 @@ AmpConfigType.prototype.betaErrorReportingUrl;
 AmpConfigType.prototype.localDev;
 /* @public {string} */
 AmpConfigType.prototype.v;
+/* @public {string} */
+AmpConfigType.prototype.type;
 /* @public {boolean} */
 AmpConfigType.prototype.canary;
 /* @public {string} */
@@ -335,7 +337,7 @@ AmpConfigType.prototype.geoApi;
 /* @public {string} */
 AmpConfigType.prototype.geoApiUrl;
 
-/** @type {!AmpConfigType}  */
+/** @type {!AmpConfigType} */
 window.AMP_CONFIG;
 
 window.AMP_CONTEXT_DATA;
@@ -367,21 +369,6 @@ let IframeTransportEvent;
 function IframeTransportContext() {}
 IframeTransportContext.onAnalyticsEvent;
 IframeTransportContext.sendResponseToCreative;
-
-/** @typedef {function(!JsonObject)} */
-let VegaChartFactory;
-
-// amp-viz-vega related externs.
-/**
- * @typedef {{spec: function(!JsonObject, function(?Error, !VegaChartFactory))}}
- */
-let VegaParser;
-/**
- * @typedef {{parse: VegaParser}}
- */
-let VegaObject;
-/** @type {!VegaObject} */
-window.vg;
 
 // amp-date-picker externs
 /**
@@ -483,7 +470,7 @@ let time;
 let AmpElement = function () {};
 
 /** @return {boolean} */
-AmpElement.prototype.V1 = function () {};
+AmpElement.prototype.R1 = function () {};
 
 /** @return {boolean} */
 AmpElement.prototype.deferredMount = function () {};
@@ -624,7 +611,7 @@ AmpElement.prototype.collapse = function () {};
 let Signals = class {};
 /**
  * @param {string} unusedName
- * @return {number|!Error|null}
+ * @return {?number|?Error}
  */
 Signals.prototype.get = function (unusedName) {};
 
@@ -1089,9 +1076,6 @@ class FeaturePolicy {
   getAllowlistForFeature(feature) {}
 }
 
-/** @type {boolean} */
-HTMLVideoElement.prototype.playsInline;
-
 /**
  * Going through the standardization process now.
  *
@@ -1100,23 +1084,6 @@ HTMLVideoElement.prototype.playsInline;
  * @param {string} cssText
  */
 CSSStyleSheet.prototype.replaceSync = function (cssText) {};
-
-/**
- * @constructor @struct
- */
-function ResizeObserverSize() {}
-
-/** @type {number} */
-ResizeObserverSize.prototype.inlineSize;
-
-/** @type {number} */
-ResizeObserverSize.prototype.blockSize;
-
-/** @type {!Array<!ResizeObserverSize>|undefined} */
-ResizeObserverEntry.prototype.borderBoxSize;
-
-/** @type {?function(!MediaQueryListEvent)} */
-MediaQueryList.prototype.onchange;
 
 /** @type {!Array<!CSSStyleSheet>|undefined} */
 ShadowRoot.prototype.adoptedStyleSheets;

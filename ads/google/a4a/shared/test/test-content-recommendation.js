@@ -18,9 +18,9 @@ import {
   LayoutType,
   getAutoConfig,
   getPubControlConfig,
-} from '../content-recommendation.js';
+} from '#ads/google/a4a/shared/content-recommendation';
 
-describe('getAutoConfig', function () {
+describes.sandboxed('getAutoConfig', {}, function () {
   it('should use image_stacked on wide slots', function () {
     const runTest = (availableWidth, expectedWidth, expectedHeight) => {
       expect(
@@ -164,7 +164,7 @@ describe('getAutoConfig', function () {
   });
 });
 
-describe('getPubControlConfig', function () {
+describes.sandboxed('getPubControlConfig', {}, function () {
   it('should use setting when only one provided', function () {
     const rawPubControlParams = {
       numberOfColumns: '4',

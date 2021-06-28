@@ -35,12 +35,10 @@ describes.realWin(
 
     function setDefaultConfigParams_() {
       webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.PERMISSION_DIALOG_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_URL
-      ] = FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
     }
 
     /**
@@ -59,12 +57,11 @@ describes.realWin(
         iframeWindow = helperIframe.contentWindow;
         iframeWindow.WindowMessenger = WindowMessenger;
         iframeWindow.AmpWebPushPermissionDialog = AmpWebPushPermissionDialog;
-        iframeWindow._ampWebPushPermissionDialog = new iframeWindow.AmpWebPushPermissionDialog(
-          {
+        iframeWindow._ampWebPushPermissionDialog =
+          new iframeWindow.AmpWebPushPermissionDialog({
             debug: true,
             windowContext: iframeWindow,
-          }
-        );
+          });
       });
     }
 
@@ -77,7 +74,8 @@ describes.realWin(
     it.skip('should detect opened as popup', () => {
       return setupPermissionDialogFrame().then(() => {
         env.sandbox./*OK*/ stub(iframeWindow, 'opener').callsFake(true);
-        const isCurrentDialogPopup = iframeWindow._ampWebPushPermissionDialog.isCurrentDialogPopup();
+        const isCurrentDialogPopup =
+          iframeWindow._ampWebPushPermissionDialog.isCurrentDialogPopup();
         expect(isCurrentDialogPopup).to.eq(true);
       });
     });

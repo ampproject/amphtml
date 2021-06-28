@@ -18,7 +18,7 @@
 const fs = require('fs-extra');
 const globby = require('globby');
 const semver = require('semver');
-const {cyan, green, red} = require('kleur/colors');
+const {cyan, green, red} = require('../common/colors');
 const {gitDiffFileMain} = require('../common/git');
 const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
 
@@ -77,4 +77,4 @@ module.exports = {
 };
 
 checkExactVersions.description =
-  'Checks that all package.json files in the repo use exact versions.';
+  'Check all package.json files in the repo to make sure they use exact versions';

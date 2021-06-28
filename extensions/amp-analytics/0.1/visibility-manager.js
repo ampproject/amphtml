@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/core/types/object';
+import {dict, map} from '#core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {isArray} from '../../../src/core/types';
-import {isFiniteNumber} from '../../../src/types';
+import {getParentWindowFrameElement} from '../../../src/service-helpers';
+import {isArray, isFiniteNumber} from '#core/types';
+
 import {
   layoutPositionRelativeToScrolledViewport,
   layoutRectLtwh,
-} from '../../../src/layout-rect';
-import {rootNodeFor} from '../../../src/dom';
+} from '#core/dom/layout/rect';
+import {rootNodeFor} from '#core/dom';
 
 const TAG = 'amp-analytics/visibility-manager';
 
@@ -36,27 +36,8 @@ const PROP = '__AMP_VIS';
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 
 export const DEFAULT_THRESHOLD = [
-  0,
-  0.05,
-  0.1,
-  0.15,
-  0.2,
-  0.25,
-  0.3,
-  0.35,
-  0.4,
-  0.45,
-  0.5,
-  0.55,
-  0.6,
-  0.65,
-  0.7,
-  0.75,
-  0.8,
-  0.85,
-  0.9,
-  0.95,
-  1,
+  0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65,
+  0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1,
 ];
 
 /** @type {number} */

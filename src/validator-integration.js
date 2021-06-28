@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
+import {isModeDevelopment} from './mode';
 import {loadPromise} from './event-helper';
-import {parseQueryString} from './url';
+import {parseQueryString} from './core/types/string/url';
 import {urls} from './config';
 
 /**
@@ -33,7 +33,7 @@ export function maybeValidate(win) {
     return;
   }
   let validator = false;
-  if (getMode().development) {
+  if (isModeDevelopment(win)) {
     const hash = parseQueryString(
       win.location['originalHash'] || win.location.hash
     );
@@ -45,8 +45,6 @@ export function maybeValidate(win) {
       /* global amp: false */
       amp.validator.validateUrlAndLog(filename, win.document);
     });
-  } else if (getMode().examiner) {
-    loadScript(win.document, `${urls.cdn}/examiner.js`);
   }
 }
 
@@ -58,9 +56,9 @@ export function maybeValidate(win) {
  * @return {!Promise}
  */
 export function loadScript(doc, url) {
-  const script = /** @type {!HTMLScriptElement} */ (doc.createElement(
-    'script'
-  ));
+  const script = /** @type {!HTMLScriptElement} */ (
+    doc.createElement('script')
+  );
   script.src = url;
 
   // Propagate nonce to all generated script tags.
