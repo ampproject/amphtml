@@ -39,9 +39,6 @@ const buildOptionTemplate = (option) => {
       aria-live="polite"
     >
       <div class="i-amphtml-story-interactive-img-option-img">
-        <div
-          class="i-amphtml-story-interactive-img-option-percentage-fill"
-        ></div>
         <span
           class="i-amphtml-story-interactive-img-option-percentage-text"
         ></span>
