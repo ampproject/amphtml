@@ -44,9 +44,6 @@ const buildOptionTemplate = (option) => {
         ></span>
       </div>
       <div class="i-amphtml-story-interactive-img-quiz-answer-choice-container">
-        <div
-          class="i-amphtml-story-interactive-img-quiz-answer-choice-overlay"
-        ></div>
         <span
           class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"
         ></span>
