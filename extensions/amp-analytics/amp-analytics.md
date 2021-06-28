@@ -561,8 +561,8 @@ The selector properties are:
     of the `amp-analytics` tag that satisfies the given selector. The default
     value is `scope`.
 
-##### Selector Arguments <a name="available-triggers"></a>
-As mentioned above, for `click`, `video`, and `visible` triggers it is possible to specify a single CSS selector or a collection of CSS selectors for the selector argument.
+##### Selector Values <a name="selector-values"></a>
+As mentioned above, for `click`, `video`, and `visible` triggers it is possible to specify a single CSS selector or a collection of CSS selectors for the selector value.
 
 If a single string CSS selector is specified, an element that maps to that selector will be extracted - even if the CSS selector maps to more than one element.
 
