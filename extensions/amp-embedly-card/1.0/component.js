@@ -94,7 +94,7 @@ export function EmbedlyCardWithRef(
  */
 function checkProps(url) {
   // Perform manual checking as assertion is not available for Bento: Issue #32739
-  return !!url
+  return !!url;
 }
 
 /**
