@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
+import * as Preact from '#preact';
+import {ContainWrapper} from '#preact/component';
 import {
   useCallback,
   useEffect,
@@ -23,7 +23,7 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
 __jss_import_use_styles__;
 
 /**
@@ -44,7 +44,7 @@ export function __component_name_pascalcase__({exampleTagNameProp, ...rest}) {
 
   return (
     <ContainWrapper layout size paint {...rest} >
-      {{exampleTagNameProp}}
+      {exampleTagNameProp}
       <div className={__jss_styles_example_or_placeholder__}>
         This is hidden
       </div>

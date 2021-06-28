@@ -16,6 +16,7 @@
 
 @import './amp-story-access.css';
 @import './amp-story-affiliate-link.css';
+@import './amp-story-desktop-one-panel.css';
 @import './amp-story-desktop-panels.css';
 @import './amp-story-draggable-drawer.css';
 @import './amp-story-page-attachment.css';
@@ -271,7 +272,7 @@ amp-story-page[distance="1"] {
 }
 
 amp-story-page[distance="2"] {
-  transform: translateY(100%) !important;
+  transform: translateY(100vh) !important;
 }
 
 amp-story-page [data-text-background-color] {

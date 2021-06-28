@@ -55,7 +55,7 @@ let ArgsDef;
  *   name: string,
  *   version: string,
  *   latestVersion?: (string|undefined)
- *   options?: ({hasCss: boolean}|undefined)
+ *   options?: ({hasCss?: boolean, wrapper?: string}|undefined)
  * }}
  */
 let BundleDef;
@@ -84,6 +84,7 @@ const replace = (inputText, replacements) =>
 /**
  * Generate a sequence of all files in a directory recursively.
  * @param {string} dir
+ * @return {AsyncIterable<string>}
  * @yields {string}
  */
 async function* walkDir(dir) {
@@ -163,6 +164,7 @@ async function writeFromTemplateDir(
  *
  * @param {BundleDef} bundle
  * @param {string=} destination
+ * @return {Promise<void>}
  */
 async function insertExtensionBundlesConfig(
   bundle,
@@ -177,12 +179,15 @@ async function insertExtensionBundlesConfig(
     ({name}) => name === bundle.name
   );
 
+  const {latestVersion, name, version, ...rest} = bundle;
   extensionBundles.push({
-    ...bundle,
+    name,
+    version,
     latestVersion:
       (existingOrNull && existingOrNull.latestVersion) ||
-      bundle.latestVersion ||
-      bundle.version,
+      latestVersion ||
+      version,
+    ...rest,
   });
 
   await fs.mkdirp(path.dirname(destination));
@@ -197,10 +202,13 @@ async function insertExtensionBundlesConfig(
         return -1;
       }
       return a.name.localeCompare(b.name);
-    })
+    }),
+    {
+      // Written file is parsed by prettier as `json-stringify`, which means
+      // that default formatting by `spaces` is fine.
+      spaces: 2,
+    }
   );
-
-  format([destination]);
 
   logLocalDev(green('SUCCESS:'), 'Wrote', cyan(path.basename(destination)));
 }
@@ -299,7 +307,10 @@ async function makeExtensionFromTemplates(
   };
 
   if (!options.nocss) {
-    bundleConfig.options = {hasCss: true};
+    bundleConfig.options = {...bundleConfig.options, hasCss: true};
+  }
+  if (options.bento) {
+    bundleConfig.options = {...bundleConfig.options, wrapper: 'bento'};
   }
 
   await insertExtensionBundlesConfig(
@@ -444,16 +455,16 @@ module.exports = {
   writeFromTemplateDir,
 };
 
-makeExtension.description = 'Create an extension skeleton';
+makeExtension.description = 'Create the skeleton for a new extension';
 makeExtension.flags = {
-  name: 'The name of the extension. The prefix `amp-*` is added if necessary',
-  cleanup: 'Undo file changes before exiting. This is useful alongside --test',
+  name: 'Name of the extension (the amp-* prefix is added if necessary)',
+  cleanup: 'Undo file changes before exiting (useful with --test)',
   bento: 'Generate a Bento component',
   nocss:
-    'Exclude extension-specific CSS. (If specifying --bento, JSS is still generated unless combined with --nojss)',
-  nojss: 'Exclude extension-specific JSS when specifying --bento.',
+    'Exclude extension-specific CSS (JSS is generated for --bento unless combined with --nojss)',
+  nojss: 'Exclude extension-specific JSS (used with --bento)',
   test: 'Build and test the generated extension',
-  version: 'Sets the version number (default: 0.1; or 1.0 with --bento)',
+  version: 'Set the version number (default: 0.1; or 1.0 with --bento)',
   overwrite:
-    'Overwrites existing files at the destination, if present. Otherwise skips them',
+    'Overwrite existing files at the destination if present, otherwise skip',
 };

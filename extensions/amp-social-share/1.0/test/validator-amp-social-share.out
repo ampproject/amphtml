@@ -19,7 +19,7 @@ FAIL
 |    Tests for the amp-social-share tag. See the inline comments.
 |  -->
 |  <!DOCTYPE html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |    <!-- prettier-ignore -->
 |    <head>
 |      <meta charset="utf-8" />

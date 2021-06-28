@@ -1,7 +1,10 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "outDir": "dist",
     "sourceMap": true,
     "moduleResolution": "node",
@@ -20,21 +23,20 @@
     "esModuleInterop": true,
     "declaration": true
   },
-  "files": ["./global.d.ts"],
-  "include": ["./**/*.js"],
+  "files": [
+    "./global.d.ts"
+  ],
+  "include": [
+    "./**/*.js"
+  ],
   "exclude": [
-    // Directories that do not need type-checking.
     "./**/node_modules/**",
     "./**/test/**/*.js",
-    "./**/*.test.js",
+    "./**/*test*.js",
     "./babel-plugins/**/*.js",
     "./eslint-rules/**/*.js",
     "./externs/**/*.js",
     "./tasks/make-extension/template/**/*.js",
-
-    // Directories that need code fixes before type-checking can be enabled.
-    "./tasks/get-zindex/**/*.js",
-    "./tasks/performance/**/*.js",
-    "./tasks/visual-diff/**/*.js"
+    "./tasks/performance/cache/**/*.js"
   ]
 }

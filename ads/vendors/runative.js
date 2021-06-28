@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../../3p/3p';
-import {parseJson} from '../../src/core/types/object/json';
+import {loadScript, validateData} from '#3p/3p';
+import {parseJson} from '#core/types/object/json';
 
 const requiredParams = ['spot'];
 const optionsParams = [

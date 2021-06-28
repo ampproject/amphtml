@@ -219,14 +219,15 @@ test('insertExtensionBundlesConfig inserts new entry', (t) =>
 
       await insertExtensionBundlesConfig(
         {
-          name: 'a',
           version: 'x',
+          name: 'a',
           options: {hasCss: true},
         },
         destination
       );
 
-      t.deepEqual(await readJson(destination), [
+      const items = await readJson(destination);
+      t.deepEqual(items, [
         // inserted in lexicographical order by name:
         {
           name: '_',
@@ -240,6 +241,14 @@ test('insertExtensionBundlesConfig inserts new entry', (t) =>
         {
           name: 'z',
         },
+      ]);
+
+      // expected order of keys
+      t.deepEqual(Object.keys(items[1]), [
+        'name',
+        'version',
+        'latestVersion',
+        'options',
       ]);
     },
     {extension: 'json'}

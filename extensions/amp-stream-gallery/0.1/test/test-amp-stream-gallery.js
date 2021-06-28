@@ -17,9 +17,9 @@
 import '../amp-stream-gallery';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
-import {setStyle, setStyles} from '../../../../src/style';
-import {toArray} from '../../../../src/core/types/array';
-import {toggleExperiment} from '../../../../src/experiments';
+import {setStyle, setStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+import {toggleExperiment} from '#experiments';
 
 /**
  * @fileoverview Some simple tests for amp-stream-gallery. Most of the

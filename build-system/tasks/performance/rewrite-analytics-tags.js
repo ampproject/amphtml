@@ -60,6 +60,7 @@ async function maybeMergeAndRemoveVendorConfig(tag, script) {
  * @param {string} url
  * @param {string} version
  * @param {?object} extraUrlParams
+ * @return {Promise<void>}
  */
 async function alterAnalyticsTags(url, version, extraUrlParams) {
   const cachePath = urlToCachePath(url, version);
@@ -93,7 +94,7 @@ async function alterAnalyticsTags(url, version, extraUrlParams) {
  * Rewrite analytics configs for each document
  * downloaded from the analytics or ads handler urls
  * @param {?Object} handlers
- * @return {Promise}
+ * @return {Promise<void[]>}
  */
 async function rewriteAnalyticsConfig(handlers) {
   const handlerPromises = [];

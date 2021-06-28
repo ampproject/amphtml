@@ -21,12 +21,21 @@ declare global {
       install: Function;
     };
     AMP: Function[];
-    viewer?: {
+    viewer: {
       receivedMessages?: number;
     };
     __coverage__: any;
+    longTasks: PerformanceEntry[];
+    cumulativeLayoutShift: number;
+    largestContentfulPaint: number;
+    measureStarted: number;
   }
 
+  interface PerformanceEntry {
+    loadTime: number;
+    renderTime: number;
+    value: number;
+  }
   interface Error {
     status?: string;
   }

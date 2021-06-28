@@ -24,6 +24,7 @@ const cachesJsonPath = '../global-configs/caches.json';
 
 /**
  * Entry point for amp caches-jason.
+ * @return {Promise<void>}
  */
 async function cachesJson() {
   const filename = path.basename(cachesJsonPath);
@@ -53,4 +54,4 @@ module.exports = {
   cachesJson,
 };
 
-cachesJson.description = 'Check that caches.json contains all expected caches.';
+cachesJson.description = 'Check that caches.json contains all expected caches';

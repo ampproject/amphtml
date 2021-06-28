@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.167 */
+/** Version: 0.1.22.171 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -189,6 +189,8 @@ const AnalyticsEvent = {
   ACTION_SWG_SUBSCRIPTION_MINI_PROMPT_CLOSE: 1032,
   ACTION_SWG_CONTRIBUTION_MINI_PROMPT_CLOSE: 1033,
   ACTION_CONTRIBUTION_OFFER_SELECTED: 1034,
+  ACTION_SHOWCASE_REGWALL_GSI_CLICK: 1035,
+  ACTION_SHOWCASE_REGWALL_EXISTING_ACCOUNT_CLICK: 1036,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -246,6 +248,30 @@ function map(initial) {
     Object.assign(obj, initial);
   }
   return obj;
+}
+
+/**
+ * Implements `Array.find()` method that's not yet available in all browsers.
+ *
+ * @param {?Array<T>} array
+ * @param {function(T, number, !Array<T>):boolean} predicate
+ * @return {?T}
+ * @template T
+ */
+function findInArray(array, predicate) {
+  if (!array) {
+    return null;
+  }
+  const len = array.length || 0;
+  if (len > 0) {
+    for (let i = 0; i < len; i++) {
+      const other = array[i];
+      if (predicate(other, i, array)) {
+        return other;
+      }
+    }
+  }
+  return null;
 }
 
 /**
@@ -848,6 +874,7 @@ const REGWALL_HTML = `
   }
 
   .gaa-metering-regwall--dialog-spacer {
+    background: linear-gradient(0, #808080, transparent);
     bottom: 0;
     display: block;
     position: fixed;
@@ -1050,9 +1077,13 @@ let GoogleUserDef;
 /**
  * Returns true if the query string contains fresh Google Article Access (GAA) params.
  * @param {string} queryString
+ * @param {boolean} allowAllAccessTypes
  * @return {boolean}
  */
-function queryStringHasFreshGaaParams(queryString) {
+function queryStringHasFreshGaaParams(
+  queryString,
+  allowAllAccessTypes = false
+) {
   const params = parseQueryString(queryString);
 
   // Verify GAA params exist.
@@ -1065,10 +1096,12 @@ function queryStringHasFreshGaaParams(queryString) {
     return false;
   }
 
-  // Verify access type.
-  const noAccess = params['gaa_at'] === 'na';
-  if (noAccess) {
-    return false;
+  if (!allowAllAccessTypes) {
+    // Verify access type.
+    const noAccess = params['gaa_at'] === 'na';
+    if (noAccess) {
+      return false;
+    }
   }
 
   // Verify timestamp isn't stale.
@@ -1215,10 +1248,17 @@ class GaaMeteringRegwall {
 
     for (let i = 0; i < ldJsonElements.length; i++) {
       const ldJsonElement = ldJsonElements[i];
-      const ldJson = /** @type {?{ publisher: ?{ name: string } }} */ (
-        parseJson(ldJsonElement.textContent)
-      );
-      const publisherName = ldJson?.publisher?.name;
+      let ldJson = /** @type {*} */ (parseJson(ldJsonElement.textContent));
+
+      if (!Array.isArray(ldJson)) {
+        ldJson = [ldJson];
+      }
+
+      const publisherName = findInArray(
+        ldJson,
+        (entry) => entry?.publisher?.name
+      )?.publisher.name;
+
       if (publisherName) {
         return publisherName;
       }

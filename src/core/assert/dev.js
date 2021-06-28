@@ -15,7 +15,7 @@
  */
 
 import * as assertions from './base';
-import {isMinifiedMode} from '../minified-mode';
+import * as mode from '#core/mode';
 
 /**
  * @fileoverview This file provides the entrypoint for dev assertions. It's
@@ -67,7 +67,7 @@ export function devAssert(
   opt_8,
   opt_9
 ) {
-  if (isMinifiedMode()) {
+  if (mode.isMinified()) {
     return shouldBeTruthy;
   }
   devAssertDceCheck();
@@ -100,7 +100,7 @@ export function devAssert(
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function devAssertElement(shouldBeElement, opt_message) {
-  if (isMinifiedMode()) {
+  if (mode.isMinified()) {
     return /** @type {!Element} */ (shouldBeElement);
   }
   devAssertDceCheck();
@@ -125,7 +125,7 @@ export function devAssertElement(shouldBeElement, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function devAssertString(shouldBeString, opt_message) {
-  if (isMinifiedMode()) {
+  if (mode.isMinified()) {
     return /** @type {string} */ (shouldBeString);
   }
   devAssertDceCheck();
@@ -151,7 +151,7 @@ export function devAssertString(shouldBeString, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function devAssertNumber(shouldBeNumber, opt_message) {
-  if (isMinifiedMode()) {
+  if (mode.isMinified()) {
     return /** @type {number} */ (shouldBeNumber);
   }
   devAssertDceCheck();
@@ -176,7 +176,7 @@ export function devAssertNumber(shouldBeNumber, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function devAssertArray(shouldBeArray, opt_message) {
-  if (isMinifiedMode()) {
+  if (mode.isMinified()) {
     return /** @type {!Array} */ (shouldBeArray);
   }
   devAssertDceCheck();
@@ -200,7 +200,7 @@ export function devAssertArray(shouldBeArray, opt_message) {
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function devAssertBoolean(shouldBeBoolean, opt_message) {
-  if (isMinifiedMode()) {
+  if (mode.isMinified()) {
     return /** @type {boolean} */ (shouldBeBoolean);
   }
   devAssertDceCheck();
@@ -209,30 +209,5 @@ export function devAssertBoolean(shouldBeBoolean, opt_message) {
     /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
     shouldBeBoolean,
     opt_message
-  );
-}
-
-/**
- * Asserts and returns the enum value. If the enum doesn't contain such a
- * value, the error is thrown.
- *
- * @param {!Object<T>} enumObj
- * @param {*} shouldBeEnum
- * @param {string=} opt_enumName
- * @return {T}
- * @template T
- * @closurePrimitive {asserts.matchesReturn}
- */
-export function devAssertEnumValue(enumObj, shouldBeEnum, opt_enumName) {
-  if (isMinifiedMode()) {
-    return shouldBeEnum;
-  }
-  devAssertDceCheck();
-
-  return assertions.assertEnumValue(
-    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
-    enumObj,
-    shouldBeEnum,
-    opt_enumName
   );
 }

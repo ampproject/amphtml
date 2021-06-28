@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../../src/core/types/object';
-import {loadScript, validateData, writeScript} from '../../3p/3p';
-import {parseJson} from '../../src/core/types/object/json';
+import {hasOwn} from '#core/types/object';
+import {loadScript, validateData, writeScript} from '#3p/3p';
+import {parseJson} from '#core/types/object/json';
 
 const mandatoryParams = [],
   optionalParams = [

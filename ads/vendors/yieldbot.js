@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {getMultiSizeDimensions} from '../../ads/google/utils';
-import {loadScript, validateData} from '../../3p/3p';
-import {rethrowAsync} from '../../src/core/error';
+import {getMultiSizeDimensions} from '#ads/google/utils';
+import {loadScript, validateData} from '#3p/3p';
+import {rethrowAsync} from '#core/error';
 import {user} from '../../src/log';
 
 /**

@@ -18,9 +18,9 @@ import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-video-iframe-1.0.css';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/core/types/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {measureIntersection} from '../../../src/utils/intersection';
+import {dict} from '#core/types/object';
+import {isExperimentOn} from '#experiments';
+import {measureIntersection} from '#core/dom/layout/intersection';
 import {postMessageWhenAvailable} from '../../../src/iframe-video';
 import {userAssert} from '../../../src/log';
 

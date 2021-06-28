@@ -15,15 +15,13 @@
  */
 
 import '../amp-carousel';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
-import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
+import {ActionService} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {user} from '../../../../src/log';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(
   'SlideScroll',

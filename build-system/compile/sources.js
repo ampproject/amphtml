@@ -35,7 +35,6 @@ const COMMON_GLOBS = [
   'third_party/set-dom/set-dom.js',
   'third_party/subscriptions-project/*.js',
   'third_party/timeagojs/**/*.js',
-  'third_party/vega/**/*.js',
   'third_party/webcomponentsjs/ShadowCSS.js',
   'third_party/zuho/**/*.js',
   'node_modules/dompurify/package.json',
@@ -70,6 +69,7 @@ const COMMON_GLOBS = [
   'node_modules/preact/hooks/dist/*.js',
   'node_modules/preact/compat/package.json',
   'node_modules/preact/compat/dist/*.js',
+  'node_modules/@babel/runtime/helpers/*.js',
 ];
 
 /**
@@ -124,8 +124,10 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-experiment/**/*.js',
   // Needed to access form impl from other extensions
   'extensions/amp-form/**/*.js',
-  // Needed by amp-facebook-* for the loader logo
+  // Needed by amp-facebook-* for the loader logo and base implementations
   'extensions/amp-facebook/0.1/facebook-loader.js',
+  'extensions/amp-facebook/1.0/facebook-base-element.js',
+  'extensions/amp-facebook/1.0/component.js',
   // Needed to access inputmask impl from other extensions
   'extensions/amp-inputmask/**/*.js',
   // Needed for AccessService

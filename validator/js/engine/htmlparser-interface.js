@@ -16,7 +16,6 @@
  */
 
 goog.module('amp.htmlparser.interface');
-const googArray = goog.require('goog.array');
 
 /**
  * @param {string} str The string to lower case.
@@ -73,6 +72,139 @@ const ParsedAttr = class {
 };
 exports.ParsedAttr = ParsedAttr;
 
+// If any script in the page uses a specific release version, then all scripts
+// must use that specific release version. This is used to record the first
+// seen script tag and ensure all following script tags follow the convention
+// set by it.
+/** @enum {string} */
+const ScriptReleaseVersion = {
+  UNKNOWN: 'unknown',
+  STANDARD: 'standard',
+  LTS: 'LTS',
+  MODULE_NOMODULE: 'module/nomodule',
+  MODULE_NOMODULE_LTS: 'module/nomodule LTS',
+};
+exports.ScriptReleaseVersion = ScriptReleaseVersion;
+
+// AMP domain
+const /** string */ ampProjectDomain = 'https://cdn.ampproject.org/';
+
+// Standard and Nomodule JavaScript:
+// v0.js
+// v0/amp-ad-0.1.js
+const /** !RegExp */ standardScriptPathRegex =
+    new RegExp('(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
+
+// LTS and Nomodule LTS JavaScript:
+// lts/v0.js
+// lts/v0/amp-ad-0.1.js
+const /** !RegExp */ ltsScriptPathRegex =
+    new RegExp('lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
+
+// Module JavaScript:
+// v0.mjs
+// amp-ad-0.1.mjs
+const /** !RegExp */ moduleScriptPathRegex =
+    new RegExp('(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
+
+// Module LTS JavaScript:
+// lts/v0.mjs
+// lts/v0/amp-ad-0.1.mjs
+const /** !RegExp */ moduleLtsScriptPathRegex =
+    new RegExp('lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
+
+// Runtime JavaScript:
+// v0.js
+// v0.mjs
+// v0.mjs?f=sxg
+// lts/v0.js
+// lts/v0.js?f=sxg
+// lts/v0.mjs
+const /** !RegExp */ runtimeScriptPathRegex =
+    new RegExp('(lts/)?v0\\.m?js(\\?f=sxg)?', 'i');
+
+/**
+ * Represents the state of a script tag.
+ */
+const ScriptTag = class {
+  /**
+   * @param {string} tagName
+   * @param {!Array<!ParsedAttr>} attrs Array of attributes.
+   */
+  constructor(tagName, attrs) {
+    /** @type {boolean} */
+    this.is_amp_domain = false;
+    /** @type {boolean} */
+    this.is_extension = false;
+    /** @type {boolean} */
+    this.is_runtime = false;
+    /** @type {!ScriptReleaseVersion} */
+    this.release_version = ScriptReleaseVersion.UNKNOWN;
+
+    /** @type {boolean} */
+    let is_async = false;
+    /** @type {boolean} */
+    let is_module = false;
+    /** @type {boolean} */
+    let is_nomodule = false;
+    /** @type {string} */
+    let path = '';
+    /** @type {string} */
+    let src = '';
+
+    if (tagName !== 'SCRIPT') {
+      return;
+    }
+
+    for (const attr of attrs) {
+      if (attr.name === 'async') {
+        is_async = true;
+      } else if (
+          (attr.name === 'custom-element') ||
+          (attr.name === 'custom-template') || (attr.name === 'host-service')) {
+        this.is_extension = true;
+      } else if (attr.name === 'nomodule') {
+        is_nomodule = true;
+      } else if (attr.name === 'src') {
+        src = attr.value;
+      } else if ((attr.name === 'type') && (attr.value === 'module')) {
+        is_module = true;
+      }
+    }
+
+    // Determine if this has a valid AMP domain and separate the path from the
+    // attribute 'src'.
+    if (src.startsWith(ampProjectDomain)) {
+      this.is_amp_domain = true;
+      path = src.substr(ampProjectDomain.length);
+
+      // Only look at script tags that have attribute 'async'.
+      if (is_async) {
+        // Determine if this is the AMP Runtime.
+        if (!this.is_extension && runtimeScriptPathRegex.test(path)) {
+          this.is_runtime = true;
+        }
+
+        // Determine the release version (LTS, module, standard, etc).
+        if ((is_module && moduleLtsScriptPathRegex.test(path)) ||
+            (is_nomodule && ltsScriptPathRegex.test(path))) {
+          this.release_version = ScriptReleaseVersion.MODULE_NOMODULE_LTS;
+        } else if (
+            (is_module && moduleScriptPathRegex.test(path)) ||
+            (is_nomodule && standardScriptPathRegex.test(path))) {
+          this.release_version = ScriptReleaseVersion.MODULE_NOMODULE;
+        } else if (ltsScriptPathRegex.test(path)) {
+          this.release_version = ScriptReleaseVersion.LTS;
+        } else if (standardScriptPathRegex.test(path)) {
+          this.release_version = ScriptReleaseVersion.STANDARD;
+        }
+      }
+    }
+  }
+};
+exports.ScriptTag = ScriptTag;
+
+
 /**
  * An Html parser makes method calls with ParsedHtmlTags as arguments.
  */
@@ -110,7 +242,7 @@ const ParsedHtmlTag = class {
       this.attrs_.push(attr);
     }
     // Sort the attribute array by (lower case) name.
-    googArray.sort(this.attrs_, function(a, b) {
+    this.attrs_.sort(function(a, b) {
       if (a.name > b.name) {
         return 1;
       }
@@ -124,6 +256,9 @@ const ParsedHtmlTag = class {
     // Lazily allocated map from attribute name to value.
     /** @private @type {?Object<string, string>} */
     this.attrsByKey_ = null;
+
+    /** @private @type {?ScriptTag} */
+    this.scriptTag_ = new ScriptTag(this.tagName_, this.attrs_);
   }
 
   /**
@@ -219,55 +354,19 @@ const ParsedHtmlTag = class {
   }
 
   /**
-   * @return {boolean}
+   * Returns the script release version, otherwise ScriptReleaseVersion.UNKNOWN.
+   * @return {!ScriptReleaseVersion}
    */
-  isEmpty() {
-    return this.tagName_.length === 0;
+  getScriptReleaseVersion() {
+    return this.scriptTag_.release_version;
   }
 
   /**
-   * Gets the name attribute for an extension script tag.
-   * @return {string}
-   * @private
-   */
-  extensionScriptNameAttribute_() {
-    if (this.upperName() == 'SCRIPT') {
-      for (const attribute
-               of ['custom-element', 'custom-template', 'host-service']) {
-        if (attribute in this.attrsByKey()) {
-          return attribute;
-        }
-      }
-    }
-    return '';
-  }
-
-  /**
-   * Tests if this is an extension script tag.
+   * Tests if this tag is a script with a src of an AMP domain.
    * @return {boolean}
    */
-  isExtensionScript() {
-    return !!this.extensionScriptNameAttribute_();
-  }
-
-  /**
-   * Tests if this is an AMP Cache domain.
-   * @param {string} src
-   * @return {boolean}
-   */
-  isAmpCacheDomain_(src) {
-    return src.startsWith('https://cdn.ampproject.org/');
-  }
-
-  /**
-   * Tests if this is an async script tag.
-   * @param {string} src
-   * @return {boolean}
-   * @private
-   */
-  isAsyncScriptTag_(src) {
-    return this.upperName() == 'SCRIPT' && 'async' in this.attrsByKey() &&
-        src !== null;
+  isAmpDomain() {
+    return this.scriptTag_.is_amp_domain;
   }
 
   /**
@@ -275,96 +374,15 @@ const ParsedHtmlTag = class {
    * @return {boolean}
    */
   isAmpRuntimeScript() {
-    const src = this.getAttrValueOrNull_('src');
-    if (src === null) return false;
-    return this.isAsyncScriptTag_(src) && !this.isExtensionScript() &&
-        this.isAmpCacheDomain_(src) &&
-        (src.endsWith('/v0.js') || src.endsWith('/v0.mjs') ||
-         src.endsWith('/v0.mjs?f=sxg'));
+    return this.scriptTag_.is_runtime;
   }
 
   /**
-   * Tests if this is the LTS version script tag.
+   * Tests if this is an extension script tag.
    * @return {boolean}
    */
-  isLtsScriptTag() {
-    // Examples:
-    // https://cdn.ampproject.org/lts/v0.js
-    // https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
-    const src = this.getAttrValueOrNull_('src');
-    if (src === null) return false;
-    const ltsScriptPathRegex =
-        new RegExp('/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
-    return this.isAsyncScriptTag_(src) && this.isAmpCacheDomain_(src) &&
-        ltsScriptPathRegex.test(src);
-  }
-
-  /**
-   * Tests if this is the module version script tag.
-   * @return {boolean}
-   */
-  isModuleScriptTag() {
-    // Examples:
-    // https://cdn.ampproject.org/v0.mjs
-    // https://cdn.ampproject.org/v0/amp-ad-0.1.mjs
-    const type = this.getAttrValueOrNull_('type');
-    if (type === null) return false;
-    const src = this.getAttrValueOrNull_('src');
-    if (src === null) return false;
-    const moduleScriptPathRegex =
-        new RegExp('/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
-    return this.isAsyncScriptTag_(src) && (type == 'module') &&
-        this.isAmpCacheDomain_(src) && moduleScriptPathRegex.test(src);
-  }
-
-  /**
-   * Tests if this is the nomodule version script tag.
-   * @return {boolean}
-   */
-  isNomoduleScriptTag() {
-    // Examples:
-    // https://cdn.ampproject.org/v0.js
-    // https://cdn.ampproject.org/v0/amp-ad-0.1.js
-    const src = this.getAttrValueOrNull_('src');
-    if (src === null) return false;
-    const nomoduleScriptPathRegex =
-        new RegExp('/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
-    return this.isAsyncScriptTag_(src) && 'nomodule' in this.attrsByKey() &&
-        this.isAmpCacheDomain_(src) && nomoduleScriptPathRegex.test(src);
-  }
-
-  /**
-   * Tests if this is the module LTS version script tag.
-   * @return {boolean}
-   */
-  isModuleLtsScriptTag() {
-    // Examples:
-    // https://cdn.ampproject.org/lts/v0.mjs
-    // https://cdn.ampproject.org/lts/v0/amp-ad-0.1.mjs
-    const type = this.getAttrValueOrNull_('type');
-    if (type === null) return false;
-    const src = this.getAttrValueOrNull_('src');
-    if (src === null) return false;
-    const moduleLtsScriptPathRegex =
-        new RegExp('lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$', 'i');
-    return this.isAsyncScriptTag_(src) && (type == 'module') &&
-        this.isAmpCacheDomain_(src) && moduleLtsScriptPathRegex.test(src);
-  }
-
-  /**
-   * Tests if this is the nomodule LTS version script tag.
-   * @return {boolean}
-   */
-  isNomoduleLtsScriptTag() {
-    // Examples:
-    // https://cdn.ampproject.org/lts/v0.js
-    // https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
-    const src = this.getAttrValueOrNull_('src');
-    if (src === null) return false;
-    const nomoduleLtsScriptPathRegex =
-        new RegExp('/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$', 'i');
-    return this.isAsyncScriptTag_(src) && 'nomodule' in this.attrsByKey() &&
-        this.isAmpCacheDomain_(src) && nomoduleLtsScriptPathRegex.test(src);
+  isExtensionScript() {
+    return this.scriptTag_.is_extension;
   }
 };
 exports.ParsedHtmlTag = ParsedHtmlTag;
