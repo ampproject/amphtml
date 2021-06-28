@@ -102,6 +102,7 @@ The `<amp-render>` element exposes a `refresh` action that other elements can re
 ```
 
 ### Dynamic resizing
+
 In some cases, we may need the `<amp-render>` element to resize on user interaction. For example, when the content does not fit within specified `height` attribute with `layout="fixed-height"` or the specified `height` is too large creating empty whitespace. The `<amp-render` element exposes a `resizeToContents` action that adjusts the height to fit the content. See the following example:
 
 ```html
