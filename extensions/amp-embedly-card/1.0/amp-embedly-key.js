@@ -24,7 +24,7 @@ export const TAG = 'amp-embedly-key';
 
 export class AmpEmbedlyKey extends PreactBaseElement {
   /** @override */
-  isLayout(layout) {
+  isLayoutSupported(layout) {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-embedly-key'),
