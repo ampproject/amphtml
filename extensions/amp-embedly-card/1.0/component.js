@@ -57,7 +57,7 @@ export function EmbedlyCardWithRef(
 
   // Check for valid props
   if (!checkProps(url)) {
-    displayWarning('data-url is required for <amp-embedly-card>');
+    displayWarning('url prop is required for EmbedlyCard');
   }
 
   // Prepare options for ProxyIframeEmbed
