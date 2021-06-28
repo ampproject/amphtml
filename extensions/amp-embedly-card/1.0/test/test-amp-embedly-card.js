@@ -15,6 +15,7 @@
  */
 
 import '../amp-embedly-card';
+import {computedStyle} from '#core/dom/style';
 import {createElementWithAttributes} from '#core/dom';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
@@ -87,8 +88,12 @@ describes.realWin(
       expect(element.className).to.match(/i-amphtml-layout-responsive/);
 
       // Check that the iframe is styled with width: 100%; height: 100%
-      expect(iframe.style.width).to.equal('100%');
-      expect(iframe.style.height).to.equal('100%');
+      expect(computedStyle(win, iframe).width).to.equal(
+        computedStyle(win, element).width
+      );
+      expect(computedStyle(win, iframe).height).to.equal(
+        computedStyle(win, element).height
+      );
     });
 
     it('throws when data-url is not given', async () => {
