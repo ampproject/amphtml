@@ -42,7 +42,6 @@ function EmbedlyCardWithContext(props) {
 
 /** @override */
 BaseElement['props'] = {
-  'children': {passthroughNonEmpty: true},
   'title': {attr: 'title'},
   'url': {attr: 'data-url'},
 };
