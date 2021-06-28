@@ -37,6 +37,7 @@ const options = {
 /**
  * Runs the linter on the given set of files.
  * @param {Array<string>} filesToLint
+ * @return {Promise<void>}
  */
 async function runLinter(filesToLint) {
   logLocalDev(green('Starting linter...'));
@@ -134,6 +135,7 @@ function summarizeResults(results, fixedFiles) {
  * Explicitly makes sure the API doesn't check files in `.eslintignore`.
  * When local changes are linted (e.g. during CI), we also check if the list of
  * forbidden terms needs to be updated.
+ * @return {Promise<void>}
  */
 async function lint() {
   const filesToCheck = getFilesToCheck(
