@@ -245,9 +245,11 @@ export class AnalyticsRoot {
 
   /**
    * @param {!Array<string>} selectors Array of DOM query selectors.
+   * @param {boolean} useDataVars Indicator if DataVars restristiction should be applied.
+   * Default set to true.
    * @return {!Promise<!Array<!Element>>} Element corresponding to the selector.
    */
-  getElementsByQuerySelectorAll_(selectors) {
+  getElementsByQuerySelectorAll_(selectors, useDataVars = true) {
     // Wait for document-ready to avoid false missed searches
     return this.ampdoc.whenReady().then(() => {
       let elements = [];
@@ -265,7 +267,9 @@ export class AnalyticsRoot {
             elementArray.push(nodeList[j]);
           }
         }
-        elementArray = this.getDataVarsElements_(elementArray, selector);
+        elementArray = useDataVars
+          ? this.getDataVarsElements_(elementArray, selector)
+          : elementArray;
         userAssert(elementArray.length, `Element "${selector}" not found`);
         elements = elements.concat(elementArray);
       }
@@ -339,9 +343,11 @@ export class AnalyticsRoot {
    * @param {!Array<string>|string} selectors DOM query selector(s).
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
+   * @param {boolean} useDataVars Indicator if DataVars restristiction should be applied.
+   * Default set to true.
    * @return {!Promise<!Array<!Element>>} Array of elements corresponding to the selector if found.
    */
-  getElements(context, selectors, selectionMethod) {
+  getElements(context, selectors, selectionMethod, useDataVars = true) {
     if (isArray(selectors)) {
       userAssert(
         !selectionMethod,
@@ -349,7 +355,8 @@ export class AnalyticsRoot {
         selectionMethod
       );
       return this.getElementsByQuerySelectorAll_(
-        /** @type {!Array<string>} */ (selectors)
+        /** @type {!Array<string>} */ (selectors),
+        useDataVars
       );
     }
     return this.getElement(

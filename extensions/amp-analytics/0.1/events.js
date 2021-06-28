@@ -152,6 +152,25 @@ function isAmpStoryTriggerType(triggerType) {
 }
 
 /**
+ * Assert that the selectors are all unique
+ * @param {!Array<string>|string} selectors
+ */
+function assertUniqueSelectors(selectors) {
+  const unique = isArray(selectors) ? new Set(selectors) : null;
+  userAssert(
+    unique === null ||
+      unique.size === selectors.length ||
+      // TODO(https://go.amp.dev/issue/34453): Internet Explorer does not
+      // support the constructor `new Set(iterable)`, so it would be empty.
+      // We assume it's ok to continue in this case.
+      // We should remove the following clause once we drop IE support.
+      (!IS_ESM && unique.size === 0),
+    'Cannot have duplicate selectors in selectors list: %s',
+    selectors
+  );
+}
+
+/**
  * @param {string} triggerType
  * @return {boolean}
  */
@@ -213,7 +232,8 @@ export function getTrackerTypesForParentType(parentType) {
 function mergeDataVars(target, eventVars) {
   const vars = getDataParamsFromAttributes(
     target,
-    /* computeParamNameFunc */ undefined,
+    /* computeParamNameFunc */
+    undefined,
     VARIABLE_DATA_ATTRIBUTE_KEY
   );
   // Merge eventVars into vars, depth=0 because
@@ -467,7 +487,6 @@ export class AmpStoryEventTracker extends CustomEventTracker {
    * @param {!AnalyticsEvent} event
    * @param {!Element} rootTarget
    * @param {!JsonObject} config
-
    * @param {function(!AnalyticsEvent)} listener
    */
   fireListener_(event, rootTarget, config, listener) {
@@ -1279,19 +1298,25 @@ export class VideoEventTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const videoSpec = config['videoSpec'] || {};
-    const selector = config['selector'] || videoSpec['selector'];
+    const selector = userAssert(
+      config['selector'] || videoSpec['selector'],
+      'Missing required selector on video trigger'
+    );
+
+    userAssert(selector.length, 'Missing required selector on video trigger');
+    assertUniqueSelectors(selector);
     const selectionMethod = config['selectionMethod'] || null;
-    const targetReady = this.root.getElement(
+    const targetPromises = this.root.getElements(
       context,
       selector,
-      selectionMethod
+      selectionMethod,
+      false
     );
 
     const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
     const excludeAutoplay = videoSpec['exclude-autoplay'];
     const interval = videoSpec['interval'];
     const percentages = videoSpec['percentages'];
-
     const on = config['on'];
 
     const percentageInterval = 5;
@@ -1384,12 +1409,17 @@ export class VideoEventTracker extends EventTracker {
         event.target,
         'No target specified by video session event.'
       );
-      targetReady.then((target) => {
-        if (!target.contains(el)) {
-          return;
-        }
-        const normalizedDetails = removeInternalVars(details);
-        listener(new AnalyticsEvent(target, normalizedType, normalizedDetails));
+
+      targetPromises.then((targets) => {
+        targets.forEach((target) => {
+          if (!target.contains(el)) {
+            return;
+          }
+          const normalizedDetails = removeInternalVars(details);
+          listener(
+            new AnalyticsEvent(target, normalizedType, normalizedDetails)
+          );
+        });
       });
     });
   }
@@ -1511,7 +1541,7 @@ export class VisibilityTracker extends EventTracker {
     // Array selectors do not suppor the special cases: ':host' & ':root'
     const selectionMethod =
       config['selectionMethod'] || visibilitySpec['selectionMethod'];
-    this.assertUniqueSelectors_(selector);
+    assertUniqueSelectors(selector);
     const unlistenPromise = this.root
       .getElements(context.parentElement || context, selector, selectionMethod)
       .then((elements) => {
@@ -1537,24 +1567,6 @@ export class VisibilityTracker extends EventTracker {
         }
       });
     };
-  }
-
-  /**
-   * Assert that the selectors are all unique
-   * @param {!Array<string>|string} selectors
-   */
-  assertUniqueSelectors_(selectors) {
-    if (isArray(selectors)) {
-      const map = {};
-      for (let i = 0; i < selectors.length; i++) {
-        userAssert(
-          !map[selectors[i]],
-          'Cannot have duplicate selectors in selectors list: %s',
-          selectors
-        );
-        map[selectors[i]] = selectors[i];
-      }
-    }
   }
 
   /**

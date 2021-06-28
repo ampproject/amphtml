@@ -354,7 +354,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         );
       });
 
-      it('should only find elements with data-vars-*', async () => {
+      it('should on default only find elements with data-vars-*', async () => {
         const spy = env.sandbox.spy(user(), 'warn');
 
         child.classList.add('myClass');
@@ -371,6 +371,16 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
           '.myClass'
         );
         expect(children).to.deep.equal([child, child2]);
+      });
+
+      it('should not find elements with data-vars-* if useDataVars is false', async () => {
+        const getElementSpy = env.sandbox.spy(root, 'getDataVarsElements_');
+        child.classList.add('myClass');
+        child2.classList.add('myClass');
+        expect(
+          await root.getElements(body, ['.myClass'], null, false)
+        ).to.deep.equal([child, child2]);
+        expect(getElementSpy).to.be.callCount(0);
       });
 
       it('should remove duplicate elements found', async () => {
@@ -787,6 +797,16 @@ describes.realWin(
           '.myClass'
         );
         expect(children).to.deep.equal([child, child2]);
+      });
+
+      it('should not find elements with data-vars-* if useDataVars is false', async () => {
+        const getElementSpy = env.sandbox.spy(root, 'getDataVarsElements_');
+        child.classList.add('myClass');
+        child2.classList.add('myClass');
+        expect(
+          await root.getElements(body, ['.myClass'], null, false)
+        ).to.deep.equal([child, child2]);
+        expect(getElementSpy).to.be.callCount(0);
       });
 
       it('should remove duplicate elements found', async () => {
