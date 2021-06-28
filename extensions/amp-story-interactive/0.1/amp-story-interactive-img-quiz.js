@@ -23,6 +23,7 @@ import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {buildImgTemplate} from './utils';
 import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
 
 /**
  * Generates the template for each option.
@@ -37,7 +38,7 @@ const buildOptionTemplate = (option) => {
       class="i-amphtml-story-interactive-img-quiz-option i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
-      <div class="i-amphtml-story-interactive-img-option-circle">
+      <div class="i-amphtml-story-interactive-img-option-img">
         <div
           class="i-amphtml-story-interactive-img-option-percentage-fill"
         ></div>
@@ -126,11 +127,15 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
     convertedOption.optionIndex_ = option['optionIndex'];
 
     // Extract and structure the option information
-    const imgEl = convertedOption.querySelector(
-      '.i-amphtml-story-interactive-img-option-img'
+    setStyle(
+      convertedOption.querySelector(
+        '.i-amphtml-story-interactive-img-option-img'
+      ),
+      'background-image',
+      'url(' + option['image'] + ')'
     );
-    imgEl.setAttribute('src', option['image']);
-    imgEl.setAttribute('alt', option['imagealt']);
+
+    convertedOption.setAttribute('aria-label', option['imagealt']);
 
     if ('correct' in option) {
       convertedOption.setAttribute('correct', 'correct');
