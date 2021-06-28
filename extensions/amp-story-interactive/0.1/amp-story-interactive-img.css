@@ -15,17 +15,10 @@
  */
 
 .i-amphtml-story-interactive-img-container {
-  --i-amphtml-interactive-img-option-width: 41.9% !important;
-  --i-amphtml-interactive-img-option-margin: calc(
-    (100% - (var(--i-amphtml-interactive-img-option-width) * 2)) / 3
-  ) !important;
+  --i-amphtml-interactive-img-option-dim: 7.5em;
+  --i-amphtml-interactive-img-option-margin: 1em;
 
   border-radius: 4em 4em 5em 5em !important;
-}
-
-.i-amphtml-story-interactive-prompt-container {
-  padding-left: 2.5em !important;
-  padding-right: 2.5em !important;
 }
 
 .i-amphtml-story-interactive-img-option-container {
@@ -39,15 +32,15 @@
 }
 
 .i-amphtml-story-interactive-img-option {
-  width: var(--i-amphtml-interactive-img-option-width) !important;
+  width: var(--i-amphtml-interactive-img-option-dim) !important;
+  height: var(--i-amphtml-interactive-img-option-dim) !important;
   position: relative !important;
-  height: 0 !important;
   margin-top: var(--i-amphtml-interactive-img-option-margin) !important;
   margin-right: var(--i-amphtml-interactive-img-option-margin) !important;
   padding: 0 !important;
-  padding-top: var(--i-amphtml-interactive-img-option-width) !important;
   background: none !important;
   border: none !important;
+  font-size: inherit !important;
 }
 
 .i-amphtml-story-interactive-img-option:nth-child(odd) {

@@ -16,11 +16,11 @@
 
 .i-amphtml-story-interactive-img-quiz-answer-choice-container {
   position: absolute !important;
-  height: 19.4% !important;
-  width: 19.4% !important;
-  bottom: 3.5% !important;
-  right: 3.5% !important;
-  border: 2px solid var(--i-amphtml-interactive-option-background-color) !important;
+  height: 1.5em !important;
+  width: 1.5em !important;
+  bottom: 0.5em !important;
+  right: 0.5em !important;
+  border: 0.125em solid var(--i-amphtml-interactive-option-background-color) !important;
   background-color: var(--interactive-prompt-background) !important;
   border-radius: 50% !important;
   display: flex !important;
