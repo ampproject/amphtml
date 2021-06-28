@@ -113,3 +113,14 @@
   height: var(--option-percentage) !important;
   opacity: 0.5 !important;
 }
+
+.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
+  .i-amphtml-story-interactive-img-option-percentage-text {
+  position: absolute;
+  bottom: 7.2%;
+  text-align: center;
+  right: 0;
+  left: 0;
+  color: white !important;
+  font-weight: bold !important;
+}
