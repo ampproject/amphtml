@@ -85,6 +85,10 @@ describes.realWin(
 
       // Check iframe for correct scr URL
       expect(element.className).to.match(/i-amphtml-layout-responsive/);
+
+      // Check that the iframe is styled with width: 100%; height: 100%
+      expect(iframe.style.width).to.equal('100%');
+      expect(iframe.style.height).to.equal('100%');
     });
 
     it('throws when data-url is not given', async () => {
