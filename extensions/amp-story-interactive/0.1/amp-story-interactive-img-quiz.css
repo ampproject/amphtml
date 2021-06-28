@@ -81,7 +81,7 @@
 }
 
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
-  .i-amphtml-story-interactive-img-quiz-answer-choice-overlay {
+  .i-amphtml-story-interactive-img-quiz-answer-choice-container::before {
   background-color: transparent !important;
   background-image: var(--i-amphtml-interactive-option-post-marker) !important;
   background-position: center !important;
