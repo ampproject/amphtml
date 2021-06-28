@@ -49,6 +49,7 @@
   height: 0 !important;
   margin-top: var(--i-amphtml-interactive-img-option-margin) !important;
   margin-right: var(--i-amphtml-interactive-img-option-margin) !important;
+  padding: 0 !important;
   padding-top: var(--i-amphtml-interactive-img-option-width) !important;
   position: relative !important;
   background: none !important;
