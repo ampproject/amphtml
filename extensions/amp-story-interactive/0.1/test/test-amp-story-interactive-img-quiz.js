@@ -102,7 +102,7 @@ describes.realWin(
       expect(quizContent[1].childNodes.length).to.equal(4);
       expect(
         quizContent[1].querySelectorAll(
-          '.i-amphtml-story-interactive-img-quiz-option'
+          '.i-amphtml-story-interactive-img-option'
         )
       ).to.have.length(4);
     });
