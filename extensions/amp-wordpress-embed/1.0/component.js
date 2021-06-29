@@ -31,7 +31,7 @@ const NO_HEIGHT_STYLE = dict();
  * @return {PreactDef.Renderable}
  */
 function WordPressEmbedWithRef(
-  {children, requestResize, title = 'WordPressEmbed', url, ...rest},
+  {requestResize, title = 'WordPressEmbed', url, ...rest},
   ref
 ) {
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
@@ -89,21 +89,18 @@ function WordPressEmbedWithRef(
   }
 
   return (
-    <>
-      <IframeEmbed
-        allowTransparency
-        iframeStyle={{opacity}}
-        matchesMessagingOrigin={matchesMessagingOrigin}
-        messageHandler={messageHandler}
-        ref={ref}
-        contentRef={contentRef}
-        src={iframeURL}
-        wrapperStyle={heightStyle}
-        title={title}
-        {...rest}
-      />
-      {children}
-    </>
+    <IframeEmbed
+      allowTransparency
+      iframeStyle={{opacity}}
+      matchesMessagingOrigin={matchesMessagingOrigin}
+      messageHandler={messageHandler}
+      ref={ref}
+      contentRef={contentRef}
+      src={iframeURL}
+      wrapperStyle={heightStyle}
+      title={title}
+      {...rest}
+    />
   );
 }
 
