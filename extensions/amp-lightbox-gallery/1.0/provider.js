@@ -17,16 +17,27 @@ import * as Preact from '#preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {Lightbox} from '../../amp-lightbox/1.0/component';
 import {LightboxGalleryContext} from './context';
+import {forwardRef} from '#preact/compat';
 import {mod} from '#core/math';
-import {useCallback, useLayoutEffect, useRef, useState} from '#preact';
+import {
+  useCallback,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from '#preact';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
 /**
  * @param {!LightboxGalleryDef.Props} props
+ * @param {{current: ?LightboxDef.LightboxApi}} ref
  * @return {PreactDef.Renderable}
  */
-export function LightboxGalleryProvider({children, render}) {
+export function LightboxGalleryProviderWithRef(
+  {children, onAfterClose, onAfterOpen, onBeforeOpen, render},
+  ref
+) {
   const classes = useStyles();
   const lightboxRef = useRef(null);
   const carouselRef = useRef(null);
@@ -38,27 +49,6 @@ export function LightboxGalleryProvider({children, render}) {
   const count = useRef(0);
   const carouselElements = useRef([]);
   const gridElements = useRef([]);
-  const register = (key, render) => {
-    // Given key is 1-indexed.
-    renderers.current[key - 1] = render;
-  };
-  const deregister = (key) => {
-    // Given key is 1-indexed.
-    delete renderers.current[key - 1];
-  };
-  const context = {
-    deregister,
-    register,
-    open: (index) => {
-      setShowCarousel(true);
-      setIndex(index);
-      lightboxRef.current.open();
-    },
-  };
-
-  useLayoutEffect(() => {
-    carouselRef.current?.goToSlide(mod(index, count.current));
-  }, [index]);
 
   const [showCarousel, setShowCarousel] = useState(true);
   const [showControls, setShowControls] = useState(true);
@@ -80,6 +70,48 @@ export function LightboxGalleryProvider({children, render}) {
     });
   }, []);
 
+  const register = (key, render) => {
+    // Given key is 1-indexed.
+    renderers.current[key - 1] = render;
+  };
+  const deregister = (key) => {
+    // Given key is 1-indexed.
+    delete renderers.current[key - 1];
+  };
+  const open = useCallback(
+    (opt_index) => {
+      renderElements();
+      setShowControls(true);
+      setShowCarousel(true);
+      if (opt_index != null) {
+        setIndex(opt_index);
+      }
+      lightboxRef.current?.open();
+    },
+    [renderElements]
+  );
+
+  const context = {
+    deregister,
+    register,
+    open,
+  };
+
+  useLayoutEffect(() => {
+    carouselRef.current?.goToSlide(mod(index, count.current));
+  }, [index]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      open,
+      close: () => {
+        lightboxRef.current?.close();
+      },
+    }),
+    [open]
+  );
+
   return (
     <>
       <Lightbox
@@ -89,8 +121,9 @@ export function LightboxGalleryProvider({children, render}) {
           [classes.hideControls]: !showControls,
         })}
         closeButtonAs={CloseButtonIcon}
-        onBeforeOpen={() => renderElements()}
-        onAfterOpen={() => setShowControls(true)}
+        onBeforeOpen={onBeforeOpen}
+        onAfterOpen={onAfterOpen}
+        onAfterClose={onAfterClose}
         ref={lightboxRef}
       >
         <div className={classes.controlsPanel}>
@@ -126,6 +159,9 @@ export function LightboxGalleryProvider({children, render}) {
   );
 }
 
+const LightboxGalleryProvider = forwardRef(LightboxGalleryProviderWithRef);
+LightboxGalleryProvider.displayName = 'LightboxGalleryProvider';
+export {LightboxGalleryProvider};
 /**
  * @param {!LightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
