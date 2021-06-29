@@ -28,7 +28,7 @@ export class AmpEmbedlyKey extends PreactBaseElement {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-embedly-card'),
-      'expected global "bento" or specific "bento-embedly-key" experiment to be enabled'
+      'expected global "bento" or specific "bento-embedly-card" experiment to be enabled'
     );
     return layout === Layout.NODISPLAY;
   }
