@@ -20,15 +20,15 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpEvents} from '../../../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';
-import {Deferred} from '../../../../../src/core/data-structures/promise';
-import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/core/constants/action-constants';
-import {Services} from '../../../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
+import {Services} from '#service';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
 import {dev, user} from '../../../../../src/log';
-import {toArray} from '../../../../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 /**
  * @param {!Object} env

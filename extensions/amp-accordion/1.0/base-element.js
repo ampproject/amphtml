@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '#preact';
 import {
   Accordion,
   AccordionContent,
   AccordionHeader,
   AccordionSection,
 } from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {childElementsByTag} from '../../../src/core/dom/query';
+import {PreactBaseElement} from '#preact/base-element';
+import {childElementsByTag} from '#core/dom/query';
 import {devAssert} from '../../../src/log';
-import {dict, memo} from '../../../src/core/types/object';
-import {forwardRef} from '../../../src/preact/compat';
-import {toArray} from '../../../src/core/types/array';
-import {toggleAttribute} from '../../../src/core/dom';
-import {useDOMHandle} from '../../../src/preact/component';
-import {useLayoutEffect, useRef} from '../../../src/preact';
-import {useSlotContext} from '../../../src/preact/slot';
+import {dict, memo} from '#core/types/object';
+import {forwardRef} from '#preact/compat';
+import {toArray} from '#core/types/array';
+import {toggleAttribute} from '#core/dom';
+import {useDOMHandle} from '#preact/component';
+import {useLayoutEffect, useRef} from '#preact';
+import {useSlotContext} from '#preact/slot';
 
 const SECTION_SHIM_PROP = '__AMP_S_SHIM';
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';

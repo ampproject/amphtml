@@ -20,9 +20,11 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {Services} from '../../../src/services';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
+import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 
 /** @const {string} */
@@ -48,10 +50,8 @@ const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
 
 /**
  * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
- *
  * TODO: this is similar to the implementation in amp-list. Move it
  * to a common file and import it.
- *
  * @param {!AmpElement} element
  * @param {string} src
  * @return {Promise<!JsonObject>}
@@ -181,6 +181,54 @@ export class AmpRender extends BaseElement {
   }
 
   /** @override */
+  isLayoutSupported(layout) {
+    if (layout === Layout.CONTAINER) {
+      userAssert(
+        this.getPlaceholder(),
+        'placeholder required with layout="container"'
+      );
+    }
+    return true;
+  }
+
+  /** @private */
+  handleResizeToContentsAction_() {
+    let currentHeight, targetHeight;
+    this.measureMutateElement(
+      () => {
+        currentHeight = this.element./*OK*/ offsetHeight;
+        targetHeight = this.element./*OK*/ scrollHeight;
+        if (targetHeight < currentHeight) {
+          // targetHeight is smaller than currentHeight, we need to shrink the height.
+          const container = this.element.querySelector(
+            'div[i-amphtml-rendered]'
+          );
+          targetHeight = container./*OK*/ scrollHeight;
+          // Check if the first child has any margin-top and add it to the target height
+          if (container.firstElementChild) {
+            const marginTop = computedStyle(
+              this.getAmpDoc().win,
+              container.firstElementChild
+            ).getPropertyValue('margin-top');
+            targetHeight += parseInt(marginTop, 10);
+          }
+          // Check if the last child has any margin-bottom and add it to the target height
+          if (container.lastElementChild) {
+            const marginBottom = computedStyle(
+              this.getAmpDoc().win,
+              container.lastElementChild
+            ).getPropertyValue('margin-bottom');
+            targetHeight += parseInt(marginBottom, 10);
+          }
+        }
+      },
+      () => {
+        this.forceChangeHeight(targetHeight);
+      }
+    );
+  }
+
+  /** @override */
   init() {
     this.initialSrc_ = this.element.getAttribute('src');
     this.src_ = this.initialSrc_;
@@ -202,6 +250,10 @@ export class AmpRender extends BaseElement {
       api.refresh();
     });
 
+    this.registerAction('resizeToContents', () => {
+      this.handleResizeToContentsAction_();
+    });
+
     return dict({
       'ariaLiveValue': hasAriaLive
         ? this.element.getAttribute('aria-live')
@@ -212,7 +264,41 @@ export class AmpRender extends BaseElement {
       },
       'onReady': () => {
         this.toggleLoading(false);
-        this.togglePlaceholder(false);
+        if (this.element.getAttribute('layout') !== Layout.CONTAINER) {
+          this.togglePlaceholder(false);
+          return;
+        }
+
+        let componentHeight, contentHeight;
+        // TODO(dmanek): Look into using measureIntersection instead
+        this.measureMutateElement(
+          () => {
+            componentHeight = computedStyle(
+              this.getAmpDoc().win,
+              this.element
+            ).getPropertyValue('height');
+            contentHeight = this.element.querySelector(
+              '[i-amphtml-rendered]'
+            )./*OK*/ scrollHeight;
+          },
+          () => {
+            setStyles(this.element, {
+              'overflow': 'hidden',
+              'height': componentHeight,
+            });
+          }
+        ).then(() => {
+          return this.attemptChangeHeight(contentHeight)
+            .then(() => {
+              this.togglePlaceholder(false);
+              setStyles(this.element, {
+                'overflow': '',
+              });
+            })
+            .catch(() => {
+              this.togglePlaceholder(false);
+            });
+        });
       },
       'onError': () => {
         this.toggleLoading(false);
@@ -306,7 +392,6 @@ export class AmpRender extends BaseElement {
   /**
    * TODO: this implementation is identical to one in amp-date-display &
    * amp-date-countdown. Move it to a common file and import it.
-   *
    * @override
    */
   isReady(props) {
@@ -314,6 +399,12 @@ export class AmpRender extends BaseElement {
     return !this.template_ || 'render' in props;
   }
 }
+
+/**
+ * This is disabled to remove the fill content style in the AMP layer.
+ * @override
+ */
+AmpRender['layoutSizeDefined'] = false;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpRender);

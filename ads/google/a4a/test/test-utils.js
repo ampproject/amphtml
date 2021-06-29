@@ -37,18 +37,18 @@ import {
   groupAmpAdsByType,
   maybeAppendErrorParameter,
   mergeExperimentIds,
-} from '../utils';
-import {CONSENT_POLICY_STATE} from '../../../../src/core/constants/consent-state';
+} from '#ads/google/a4a/utils';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {GEO_IN_GROUP} from '../../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
-import {Services} from '../../../../src/services';
-import {buildUrl} from '../shared/url-builder';
-import {createElementWithAttributes} from '../../../../src/core/dom';
-import {createIframePromise} from '../../../../testing/iframe';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {installExtensionsService} from '../../../../src/service/extensions-impl';
-import {installXhrService} from '../../../../src/service/xhr-impl';
-import {toggleExperiment} from '../../../../src/experiments';
+import {Services} from '#service';
+import {buildUrl} from '#ads/google/a4a/shared/url-builder';
+import {createElementWithAttributes} from '#core/dom';
+import {createIframePromise} from '#testing/iframe';
+import {installDocService} from '#service/ampdoc-impl';
+import {installExtensionsService} from '#service/extensions-impl';
+import {installXhrService} from '#service/xhr-impl';
+import {toggleExperiment} from '#experiments';
 import {user} from '../../../../src/log';
 
 function setupForAdTesting(fixture) {

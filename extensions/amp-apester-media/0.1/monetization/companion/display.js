@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../../src/services';
-import {createElementWithAttributes} from '../../../../../src/core/dom';
-import {dict, getValueForExpr} from '../../../../../src/core/types/object';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {dict, getValueForExpr} from '#core/types/object';
 const ALLOWED_AD_PROVIDER = 'gdt';
 
 /**
@@ -82,7 +82,7 @@ function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
       'data-multi-size': multiSizeData,
     })
   );
-  ampAd.classList.add('amp-apester-companion');
+  ampAd.classList.add('i-amphtml-amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
   Services.mutatorForDoc(apesterElement).requestChangeSize(
     ampAd,

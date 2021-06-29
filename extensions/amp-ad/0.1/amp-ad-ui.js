@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {ancestorElementsByTag} from '../../../src/core/dom/query';
-import {
-  createElementWithAttributes,
-  removeElement,
-} from '../../../src/core/dom';
-import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {Services} from '#service';
+import {ancestorElementsByTag} from '#core/dom/query';
+import {createElementWithAttributes, removeElement} from '#core/dom';
+import {devAssert, userAssert} from '../../../src/log';
+import {dict} from '#core/types/object';
 
 import {getAdContainer} from '../../../src/ad-helper';
 import {listen} from '../../../src/event-helper';
-import {setStyle, setStyles} from '../../../src/core/dom/style';
+import {setStyle, setStyles} from '#core/dom/style';
 
 const STICKY_AD_MAX_SIZE_LIMIT = 0.2;
 const STICKY_AD_MAX_HEIGHT_LIMIT = 0.5;
@@ -69,6 +66,11 @@ export class AmpAdUIHandler {
     if (this.element_.hasAttribute(STICKY_AD_PROP)) {
       // TODO(powerivq@) Kargo is currently running an experiment using empty sticky attribute, so
       // we default the position to bottom right. Remove this default afterwards.
+      userAssert(
+        this.element_.getAttribute(STICKY_AD_PROP),
+        'amp-ad sticky is deprecating empty attribute value, please use <amp-ad sticky="bottom" instead'
+      );
+
       this.stickyAdPosition_ =
         this.element_.getAttribute(STICKY_AD_PROP) ||
         StickyAdPositions.BOTTOM_RIGHT;

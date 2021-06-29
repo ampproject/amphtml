@@ -14,7 +14,6 @@ requirement: {
   error_message: 'Use getStyle, setStyle, or setStyles in src/core/dom/style.js'
   value: 'Element.prototype.style'
   allowlist: 'src/core/dom/style.js'
-  allowlist: 'src/layout.js'
 }
 
 requirement: {
@@ -261,12 +260,6 @@ requirement: {
 }
 
 # Set
-
-requirement: {
-  type: BANNED_CODE_PATTERN
-  error_message: 'Cannot construct Set with Iterable'
-  value: '/** @param {Array|Object} a */function template(a) {new Set(a)}'
-}
 
 requirement: {
   type: BANNED_PROPERTY_CALL

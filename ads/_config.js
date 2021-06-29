@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonConfiguration} from '../src/core/types/object/json';
+import {jsonConfiguration} from '#core/types/object/json';
 
 /**
  * @typedef {{
@@ -1194,6 +1194,10 @@ const adConfig = jsonConfiguration({
   },
 
   'taboola': {},
+
+  'tagon': {
+    prefetch: 'https://js.tagon.co/tagon-amp.min.js',
+  },
 
   'tail': {
     renderStartImplemented: true,

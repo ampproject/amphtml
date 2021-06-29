@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/core/constants/action-constants';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {LayoutPriority} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Deferred} from '#core/data-structures/promise';
+import {LayoutPriority} from '#core/dom/layout';
+import {Services} from '#service';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/core/types/object';
+import {dict, map} from '#core/types/object';
 import {getSourceOrigin} from '../../../src/url';
-import {isJsonScriptTag} from '../../../src/core/dom';
-import {toggle} from '../../../src/core/dom/style';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {isJsonScriptTag} from '#core/dom';
+import {toggle} from '#core/dom/style';
+import {tryParseJson} from '#core/types/object/json';
 
 export class AmpState extends AMP.BaseElement {
   /**

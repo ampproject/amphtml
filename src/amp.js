@@ -21,7 +21,7 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {Services} from './services';
+import {Services} from './service';
 import {TickLabel} from './core/constants/enums';
 import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';

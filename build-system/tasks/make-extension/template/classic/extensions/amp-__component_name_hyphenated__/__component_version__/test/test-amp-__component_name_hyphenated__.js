@@ -15,7 +15,7 @@
  */
 
 import '../amp-__component_name_hyphenated__';
-import {htmlFor} from '../../../../src/core/dom/static-template';
+import {htmlFor} from '#core/dom/static-template';
 
 describes.realWin(
   'amp-__component_name_hyphenated__-v__component_version__',
@@ -36,6 +36,7 @@ describes.realWin(
       html = htmlFor(doc);
     });
     
+    // __do_not_submit__: This is example code only.
     it('should contain "hello world" when built', async () => {
       const element = html`
         <amp-__component_name_hyphenated__

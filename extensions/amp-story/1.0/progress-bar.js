@@ -13,21 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  BranchToTimeValues,
+  StoryAdSegmentExp,
+} from '#experiments/story-ad-progress-segment';
 import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {debounce} from '../../../src/core/types/function';
+import {debounce} from '#core/types/function';
 import {dev, devAssert} from '../../../src/log';
-import {escapeCssSelectorNth} from '../../../src/core/dom/css-selectors';
-import {hasOwn, map} from '../../../src/core/types/object';
-import {removeChildren} from '../../../src/core/dom';
-import {scale, setImportantStyles} from '../../../src/core/dom/style';
-import {scopedQuerySelector} from '../../../src/core/dom/query';
+import {escapeCssSelectorNth} from '#core/dom/css-selectors';
+import {getExperimentBranch} from 'src/experiments';
+import {hasOwn, map} from '#core/types/object';
+import {removeChildren} from '#core/dom';
+import {scale, setImportantStyles, setStyle} from '#core/dom/style';
+import {scopedQuerySelector} from '#core/dom/query';
 
 /**
  * Transition used to show the progress of a media. Has to be linear so the
@@ -125,6 +130,9 @@ export class ProgressBar {
 
     /** @private {!Element} */
     this.storyEl_ = storyEl;
+
+    /** @private {?Element} */
+    this.currentAdSegment_ = null;
   }
 
   /**
@@ -197,6 +205,10 @@ export class ProgressBar {
       },
       true /** callToInitialize */
     );
+
+    this.storeService_.subscribe(StateProperty.AD_STATE, (adState) => {
+      this.onAdStateUpdate_(adState);
+    });
 
     Services.viewportForDoc(this.ampdoc_).onResize(
       debounce(this.win_, () => this.onResize_(), 300)
@@ -421,6 +433,58 @@ export class ProgressBar {
       default:
         MAX_SEGMENTS = 20;
     }
+  }
+
+  /**
+   * Show/hide ad progress bar treatment based on ad visibility.
+   * @param {boolean} adState
+   * TODO(#33969) clean up experiment is launched.
+   */
+  onAdStateUpdate_(adState) {
+    const segmentExpBranch = getExperimentBranch(
+      this.win_,
+      StoryAdSegmentExp.ID
+    );
+    if (!segmentExpBranch || segmentExpBranch === StoryAdSegmentExp.CONTROL) {
+      return;
+    }
+    // Set CSS signal that we are in the experiment.
+    if (!this.root_.hasAttribute('i-amphtml-ad-progress-exp')) {
+      this.root_.setAttribute('i-amphtml-ad-progress-exp', '');
+    }
+    adState
+      ? this.createAdSegment_(BranchToTimeValues[segmentExpBranch])
+      : this.removeAdSegment_();
+  }
+
+  /**
+   * Create ad progress segment that will be shown when ad is visible.
+   * TODO(#33969) remove variable animation duration when best value is chosen.
+   * @param {string} animationDuration
+   */
+  createAdSegment_(animationDuration) {
+    const index = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
+    // Fill in segment before ad segment.
+    this.updateProgressByIndex_(index, 1, false);
+    const progressEl = this.getRoot()?.querySelector(
+      `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
+        // +2 because of zero-index and we want the chip after the ad.
+        index + 2
+      )})`
+    );
+    const adSegment = this.win_.document.createElement('div');
+    adSegment.className = 'i-amphtml-story-ad-progress-value';
+    setStyle(adSegment, 'animationDuration', animationDuration);
+    this.currentAdSegment_ = adSegment;
+    progressEl.appendChild(adSegment);
+  }
+
+  /**
+   * Remove active ad progress segment when ad is navigated away from
+   */
+  removeAdSegment_() {
+    this.currentAdSegment_?.parentNode.removeChild(this.currentAdSegment_);
+    this.currentAdSegment_ = null;
   }
 
   /**
