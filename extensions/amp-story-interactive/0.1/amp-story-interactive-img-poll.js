@@ -34,7 +34,7 @@ const buildOptionTemplate = (option) => {
   const html = htmlFor(option);
   return html`
     <button
-      class="i-amphtml-story-interactive-img-poll-option i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
+      class="i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
       <div class="i-amphtml-story-interactive-img-option-img">

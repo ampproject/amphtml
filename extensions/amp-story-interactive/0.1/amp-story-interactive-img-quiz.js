@@ -36,7 +36,7 @@ const buildOptionTemplate = (option) => {
   const html = htmlFor(option);
   return html`
     <button
-      class="i-amphtml-story-interactive-img-quiz-option i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
+      class="i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
       <div class="i-amphtml-story-interactive-img-option-img">
@@ -44,11 +44,9 @@ const buildOptionTemplate = (option) => {
           class="i-amphtml-story-interactive-img-option-percentage-text"
         ></span>
       </div>
-      <div class="i-amphtml-story-interactive-img-quiz-answer-choice-container">
-        <span
-          class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"
-        ></span>
-      </div>
+      <div
+        class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"
+      ></div>
     </button>
   `;
 };

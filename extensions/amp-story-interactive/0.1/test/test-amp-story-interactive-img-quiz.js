@@ -15,7 +15,6 @@
  */
 
 import {AmpStoryInteractiveImgQuiz} from '../amp-story-interactive-img-quiz';
-import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
@@ -31,7 +30,6 @@ describes.realWin(
     let win;
     let ampStoryQuiz;
     let storyEl;
-    let requestService;
 
     beforeEach(() => {
       win = env.win;
@@ -43,11 +41,6 @@ describes.realWin(
       const ampStoryQuizEl = win.document.createElement(
         'amp-story-interactive-img-quiz'
       );
-      ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
-      requestService = new AmpStoryRequestService(win);
-      registerServiceBuilder(win, 'story-request', function () {
-        return requestService;
-      });
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
@@ -109,7 +102,7 @@ describes.realWin(
       expect(quizContent[1].childNodes.length).to.equal(4);
       expect(
         quizContent[1].querySelectorAll(
-          '.i-amphtml-story-interactive-img-quiz-option'
+          '.i-amphtml-story-interactive-img-option'
         )
       ).to.have.length(4);
     });
