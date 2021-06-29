@@ -15,8 +15,8 @@
  */
 
 .i-amphtml-story-interactive-img-container {
-  --i-amphtml-interactive-img-option-dim: 7.5em;
-  --i-amphtml-interactive-img-option-margin: 1em;
+  --i-amphtml-interactive-img-option-size: 7.5em !important;
+  --i-amphtml-interactive-img-option-margin: 1em !important;
 
   border-radius: 4em 4em 5em 5em !important;
 }
@@ -32,8 +32,8 @@
 }
 
 .i-amphtml-story-interactive-img-option {
-  width: var(--i-amphtml-interactive-img-option-dim) !important;
-  height: var(--i-amphtml-interactive-img-option-dim) !important;
+  width: var(--i-amphtml-interactive-img-option-size) !important;
+  height: var(--i-amphtml-interactive-img-option-size) !important;
   position: relative !important;
   margin-top: var(--i-amphtml-interactive-img-option-margin) !important;
   margin-right: var(--i-amphtml-interactive-img-option-margin) !important;
