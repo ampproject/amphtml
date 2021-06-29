@@ -284,7 +284,7 @@ export function addMissingParamsToUrl(url, params) {
 export function serializeQueryString(params) {
   const s = [];
   for (const k in params) {
-    const v = params[k];
+    let v = params[k];
     if (v == null) {
       continue;
     }
@@ -329,7 +329,7 @@ export function assertHttpsUrl(
   sourceName = 'source'
 ) {
   userAssert(
-    urlString != null && urlString != undefined,
+    urlString != null,
     '%s %s must be available',
     elementContext,
     sourceName
