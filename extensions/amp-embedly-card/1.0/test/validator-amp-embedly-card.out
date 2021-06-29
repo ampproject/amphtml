@@ -19,40 +19,48 @@ FAIL
 |    <!-- Valid: amp-embedly-key value and layout -->
 |    <amp-embedly-key value="1d5c48f7edc34c54bdae4c37b681ea2b" layout="nodisplay"></amp-embedly-key>
 |
+|    <!-- Valid: amp-embedly-card correct attributes -->
+|    <amp-embedly-card
+|            data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+|            layout="responsive"
+|            width="100"
+|            height="50"
+|    ></amp-embedly-card>
+|
 |    <!-- Invalid: amp-embedly-key missing value -->
 |    <amp-embedly-key layout="nodisplay"></amp-embedly-key>
 >>   ^~~~~~~~~
-amp-embedly-card/1.0/test/validator-amp-embedly-card.html:22:2 The mandatory attribute 'value' is missing in tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
+amp-embedly-card/1.0/test/validator-amp-embedly-card.html:30:2 The mandatory attribute 'value' is missing in tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
 |
 |    <!-- Invalid: amp-embedly-key invalid layout - responsive -->
 |    <amp-embedly-key layout="responsive"></amp-embedly-key>
 >>   ^~~~~~~~~
-amp-embedly-card/1.0/test/validator-amp-embedly-card.html:25:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
+amp-embedly-card/1.0/test/validator-amp-embedly-card.html:33:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
 |
 |    <!-- Invalid: amp-embedly-key invalid layout - fill -->
 |    <amp-embedly-key layout="fill"></amp-embedly-key>
 >>   ^~~~~~~~~
-amp-embedly-card/1.0/test/validator-amp-embedly-card.html:28:2 The specified layout 'FILL' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
+amp-embedly-card/1.0/test/validator-amp-embedly-card.html:36:2 The specified layout 'FILL' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
 |
 |    <!-- Invalid: amp-embedly-key invalid layout - fixed -->
 |    <amp-embedly-key layout="fixed"></amp-embedly-key>
 >>   ^~~~~~~~~
-amp-embedly-card/1.0/test/validator-amp-embedly-card.html:31:2 The specified layout 'FIXED' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
+amp-embedly-card/1.0/test/validator-amp-embedly-card.html:39:2 The specified layout 'FIXED' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
 |
 |    <!-- Invalid: amp-embedly-key invalid layout - fixed-height -->
 |    <amp-embedly-key layout="fixed-height"></amp-embedly-key>
 >>   ^~~~~~~~~
-amp-embedly-card/1.0/test/validator-amp-embedly-card.html:34:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
+amp-embedly-card/1.0/test/validator-amp-embedly-card.html:42:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
 |
 |    <!-- Invalid: amp-embedly-key invalid layout - flex-item -->
 |    <amp-embedly-key layout="flex-item"></amp-embedly-key>
 >>   ^~~~~~~~~
-amp-embedly-card/1.0/test/validator-amp-embedly-card.html:37:2 The specified layout 'FLEX_ITEM' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
+amp-embedly-card/1.0/test/validator-amp-embedly-card.html:45:2 The specified layout 'FLEX_ITEM' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card)
 |
 |    <!-- Invalid: amp-embedly-card missing width -->
 |    <amp-embedly-card
 >>   ^~~~~~~~~
-amp-embedly-card/1.0/test/validator-amp-embedly-card.html:40:2 The mandatory attribute 'width' is missing in tag 'amp-embedly-card'. (see https://amp.dev/documentation/components/amp-embedly-card/)
+amp-embedly-card/1.0/test/validator-amp-embedly-card.html:48:2 The mandatory attribute 'width' is missing in tag 'amp-embedly-card'. (see https://amp.dev/documentation/components/amp-embedly-card/)
 |            data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
 |            layout="responsive"
 |            height="80"
@@ -61,7 +69,7 @@ amp-embedly-card/1.0/test/validator-amp-embedly-card.html:40:2 The mandatory att
 |    <!-- Invalid: amp-embedly-card missing height -->
 |    <amp-embedly-card
 >>   ^~~~~~~~~
-amp-embedly-card/1.0/test/validator-amp-embedly-card.html:47:2 The mandatory attribute 'height' is missing in tag 'amp-embedly-card'. (see https://amp.dev/documentation/components/amp-embedly-card/)
+amp-embedly-card/1.0/test/validator-amp-embedly-card.html:55:2 The mandatory attribute 'height' is missing in tag 'amp-embedly-card'. (see https://amp.dev/documentation/components/amp-embedly-card/)
 |            data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
 |            layout="responsive"
 |            width="150"
@@ -70,7 +78,7 @@ amp-embedly-card/1.0/test/validator-amp-embedly-card.html:47:2 The mandatory att
 |    <!-- Invalid: amp-embedly-card forbidden protocol http -->
 |    <amp-embedly-card
 >>   ^~~~~~~~~
-amp-embedly-card/1.0/test/validator-amp-embedly-card.html:54:2 Invalid URL protocol 'http:' for attribute 'data-url' in tag 'amp-embedly-card'. (see https://amp.dev/documentation/components/amp-embedly-card/)
+amp-embedly-card/1.0/test/validator-amp-embedly-card.html:62:2 Invalid URL protocol 'http:' for attribute 'data-url' in tag 'amp-embedly-card'. (see https://amp.dev/documentation/components/amp-embedly-card/)
 |            data-url="http://www.youtube.com/watch?v=lBTCB7yLs8Y"
 |            layout="responsive"
 |            width="150"
@@ -80,19 +88,11 @@ amp-embedly-card/1.0/test/validator-amp-embedly-card.html:54:2 Invalid URL proto
 |    <!-- Invalid: amp-embedly-card relative url -->
 |    <amp-embedly-card
 >>   ^~~~~~~~~
-amp-embedly-card/1.0/test/validator-amp-embedly-card.html:62:2 The relative URL '/watch?v=lBTCB7yLs8Y' for attribute 'data-url' in tag 'amp-embedly-card' is disallowed. (see https://amp.dev/documentation/components/amp-embedly-card/)
+amp-embedly-card/1.0/test/validator-amp-embedly-card.html:70:2 The relative URL '/watch?v=lBTCB7yLs8Y' for attribute 'data-url' in tag 'amp-embedly-card' is disallowed. (see https://amp.dev/documentation/components/amp-embedly-card/)
 |            data-url="/watch?v=lBTCB7yLs8Y"
 |            layout="responsive"
 |            width="150"
 |            height="80"
-|    ></amp-embedly-card>
-|
-|    <!-- Valid: amp-embedly-card correct attributes -->
-|    <amp-embedly-card
-|            data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
-|            layout="responsive"
-|            width="100"
-|            height="50"
 |    ></amp-embedly-card>
 |
 |    <!-- Invalid: amp-embedly-card invalid layout -->
