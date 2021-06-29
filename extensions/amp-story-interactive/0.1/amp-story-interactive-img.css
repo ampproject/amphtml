@@ -22,7 +22,9 @@
 }
 
 .i-amphtml-story-interactive-img-option-container {
-  background: var(--i-amphtml-interactive-option-background-color) !important;
+  background: var(
+    --i-amphtml-interactive-options-chip-background-color
+  ) !important;
   display: flex !important;
   justify-content: center !important;
   border-radius: 5em !important;

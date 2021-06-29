@@ -20,7 +20,8 @@
   width: 1.5em !important;
   bottom: 0.5em !important;
   right: 0.5em !important;
-  border: 0.125em solid var(--i-amphtml-interactive-option-background-color) !important;
+  border: 0.125em solid
+    var(--i-amphtml-interactive-options-chip-background-color) !important;
   background-color: var(--interactive-prompt-background) !important;
   border-radius: 50% !important;
   display: flex !important;
