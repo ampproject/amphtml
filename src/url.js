@@ -330,23 +330,21 @@ export function assertHttpsUrl(
   sourceName = 'source'
 ) {
   userAssert(
-    urlString != null,
+    urlString != null && urlString != undefined,
     '%s %s must be available',
     elementContext,
     sourceName
   );
-  // (erwinm, #4560): type cast necessary until #4560 is fixed.
-  const theUrlString = /** @type {string} */ (urlString);
   userAssert(
-    isSecureUrlDeprecated(theUrlString) || /^(\/\/)/.test(theUrlString),
+    isSecureUrlDeprecated(urlString) || /^\/\//.test(urlString),
     '%s %s must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',
     elementContext,
     sourceName,
-    theUrlString
+    urlString
   );
-  return theUrlString;
+  return urlString;
 }
 
 /**
@@ -397,8 +395,16 @@ export function getFragment(url) {
  * @return {boolean}
  */
 export function isProxyOrigin(url) {
-  url = urlAsLocation(url);
-  return urls.cdnProxyRegex.test(url.origin);
+  return urls.cdnProxyRegex.test(urlAsLocation(url).origin);
+}
+
+/**
+ * Returns whether the URL origin is localhost.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {boolean}
+ */
+export function isLocalhostOrigin(url) {
+  return urls.localhostRegex.test(urlAsLocation(url).origin);
 }
 
 /**
@@ -426,27 +432,13 @@ export function getProxyServingType(url) {
 }
 
 /**
- * Returns whether the URL origin is localhost.
- * @param {string|!Location} url URL of an AMP document.
- * @return {boolean}
- */
-export function isLocalhostOrigin(url) {
-  url = urlAsLocation(url);
-  return urls.localhostRegex.test(url.origin);
-}
-
-/**
  * Returns whether the URL has valid protocol.
  * Deep link protocol is valid, but not javascript etc.
  * @param {string|!Location} url
  * @return {boolean}
  */
 export function isProtocolValid(url) {
-  if (!url) {
-    return true;
-  }
-  url = urlAsLocation(url);
-  return !INVALID_PROTOCOLS.includes(url.protocol);
+  return !url || !INVALID_PROTOCOLS.includes(urlAsLocation(url).protocol);
 }
 
 /**
@@ -455,9 +447,9 @@ export function isProtocolValid(url) {
  * @return {string}
  */
 export function removeAmpJsParamsFromUrl(url) {
-  const parsed = parseUrlDeprecated(url);
-  const search = removeAmpJsParamsFromSearch(parsed.search);
-  return parsed.origin + parsed.pathname + search + parsed.hash;
+  const {hash, origin, pathname, search} = parseUrlDeprecated(url);
+  const searchRemoved = removeAmpJsParamsFromSearch(search);
+  return origin + pathname + searchRemoved + hash;
 }
 
 /**
