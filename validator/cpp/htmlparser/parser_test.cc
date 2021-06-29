@@ -118,6 +118,8 @@ TEST(ParserTest, LineColTest) {
              EXPECT_EQ(1, t.line_col_in_html_src.first);
              EXPECT_EQ(0, t.offsets_in_html_src.first);
              EXPECT_EQ(6, t.offsets_in_html_src.second);
+             EXPECT_EQ(0, n->OffsetsInHtmlSrc()->first);
+             EXPECT_EQ(6, n->OffsetsInHtmlSrc()->second);
              break;
            }
            case htmlparser::Atom::HEAD: {
@@ -125,23 +127,31 @@ TEST(ParserTest, LineColTest) {
              // line break and two whitespaces at the beginning of the line.
              EXPECT_EQ(9, t.offsets_in_html_src.first);
              EXPECT_EQ(15, t.offsets_in_html_src.second);
+             EXPECT_EQ(9, n->OffsetsInHtmlSrc()->first);
+             EXPECT_EQ(15, n->OffsetsInHtmlSrc()->second);
              break;
            }
            case htmlparser::Atom::BODY: {
              EXPECT_EQ(3, t.line_col_in_html_src.first);
              EXPECT_EQ(25, t.offsets_in_html_src.first);
              EXPECT_EQ(31, t.offsets_in_html_src.second);
+             EXPECT_EQ(25, n->OffsetsInHtmlSrc()->first);
+             EXPECT_EQ(31, n->OffsetsInHtmlSrc()->second);
              break;
            }
            case htmlparser::Atom::DIV: {
              EXPECT_EQ(4, t.line_col_in_html_src.first);
              EXPECT_EQ(5, t.line_col_in_html_src.second);
+             EXPECT_EQ(36, n->OffsetsInHtmlSrc()->first);
+             EXPECT_EQ(41, n->OffsetsInHtmlSrc()->second);
              break;
            }
            case htmlparser::Atom::IMG: {
              EXPECT_EQ(6, t.line_col_in_html_src.first);
              EXPECT_EQ(92, t.offsets_in_html_src.first);
              EXPECT_EQ(107, t.offsets_in_html_src.second);
+             EXPECT_EQ(92, n->OffsetsInHtmlSrc()->first);
+             EXPECT_EQ(107, n->OffsetsInHtmlSrc()->second);
              break;
            }
            case htmlparser::Atom::A: {

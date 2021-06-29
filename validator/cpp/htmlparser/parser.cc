@@ -405,13 +405,13 @@ void Parser::AddText(const std::string& text) {
   if (text.empty()) return;
 
   auto text_node = document_->NewNode(NodeType::TEXT_NODE);
+  if (record_node_offsets_) {
+    text_node->line_col_in_html_src_ = token_.line_col_in_html_src;
+    text_node->offsets_in_html_src_ = token_.offsets_in_html_src;
+  }
 
   if (ShouldFosterParent()) {
     text_node->data_.assign(text, 0, text.size());
-    if (record_node_offsets_) {
-      text_node->line_col_in_html_src_ = token_.line_col_in_html_src;
-      text_node->offsets_in_html_src_ = token_.offsets_in_html_src;
-    }
     FosterParent(text_node);
     return;
   }
@@ -424,10 +424,6 @@ void Parser::AddText(const std::string& text) {
   }
 
   text_node->data_.assign(text, 0, text.size());
-  if (record_node_offsets_) {
-    text_node->line_col_in_html_src_ = token_.line_col_in_html_src;
-    text_node->offsets_in_html_src_ = token_.offsets_in_html_src;
-  }
   if (count_num_terms_in_text_node_) {
     text_node->num_terms_ = Strings::CountTerms(text);
   }
@@ -438,6 +434,11 @@ void Parser::AddElement() {
   Node* element_node = document_->NewNode(NodeType::ELEMENT_NODE, token_.atom);
   if (token_.atom == Atom::UNKNOWN) {
     element_node->data_ = token_.data;
+  }
+
+  if (record_node_offsets_) {
+    element_node->line_col_in_html_src_ = token_.line_col_in_html_src;
+    element_node->offsets_in_html_src_ = token_.offsets_in_html_src;
   }
 
   switch (token_.atom) {
@@ -455,11 +456,6 @@ void Parser::AddElement() {
     }
     default:
       break;
-  }
-
-  if (record_node_offsets_) {
-    element_node->line_col_in_html_src_ = token_.line_col_in_html_src;
-    element_node->offsets_in_html_src_ = token_.offsets_in_html_src;
   }
 
   std::copy(token_.attributes.begin(), token_.attributes.end(),
@@ -3113,6 +3109,10 @@ bool Parser::ParseForeignContent() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -3261,6 +3261,7 @@ void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
             // For reporting purposes implied tokens are assumed to be parsed at
             // the current tag location.
             .line_col_in_html_src = token_.line_col_in_html_src,
+            .offsets_in_html_src = token_.offsets_in_html_src,
             .attributes = {}};
   has_self_closing_token_ = false;
 
@@ -3287,6 +3288,7 @@ void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
             .atom = real_token.atom,
             .data = real_token.data,
             .line_col_in_html_src = token_.line_col_in_html_src,
+            .offsets_in_html_src = token_.offsets_in_html_src,
             .attributes = real_token.attributes};
   has_self_closing_token_ = self_closing;
 }  // Parser::ParseImpliedToken.
