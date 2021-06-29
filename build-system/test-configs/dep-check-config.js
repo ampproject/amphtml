@@ -471,7 +471,7 @@ exports.rules = [
       'src/polyfills/index.js->src/polyfills/intersection-observer.js',
       'src/polyfills/index.js->src/polyfills/resize-observer.js',
       'src/polyfills/index.js->src/polyfills/map-set.js',
-      'src/polyfills/index.js->src/polyfills/set-add.js',
+      'src/polyfills/index.js->src/polyfills/set.js',
       'src/polyfills/index.js->src/polyfills/weakmap-set.js',
       'src/friendly-iframe-embed.js->src/polyfills/abort-controller.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
