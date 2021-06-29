@@ -51,7 +51,7 @@ export function fetchCachedSources(videoEl, ampdoc) {
   return getCacheUrlService(videoEl, ampdoc)
     .then((service) => service.createCacheUrl(videoUrl))
     .then((cacheUrl) => {
-      const requestUrl = addParamsToUrl(cacheUrl.replace('/c/', '/mbv/'), {
+      const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
         'amp_video_host_url':
           /* document url that contains the video */ canonicalUrl,
       });

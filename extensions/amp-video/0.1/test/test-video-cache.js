@@ -119,6 +119,17 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
         'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com'
       );
     });
+
+    it('should send the request to the correct address if the video has a .gif extension', async () => {
+      const videoEl = createVideo([{'src': 'https://website.com/video.gif'}]);
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.gif?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+      );
+    });
   });
 
   describe('add sources', () => {
