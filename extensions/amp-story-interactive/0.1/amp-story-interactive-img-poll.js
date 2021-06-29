@@ -122,12 +122,12 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
     const percentages = this.preprocessPercentages_(optionsData);
 
     this.getOptionElements().forEach((el, index) => {
-      /*if (optionsData[index].selected) {
-        const textEl = el.querySelector(
-          '.i-amphtml-story-interactive-option-text'
+      if (optionsData[index].selected) {
+        el.setAttribute(
+          'aria-label',
+          'selected ' + this.options_[index]['imagealt']
         );
-        textEl.setAttribute('aria-label', 'selected ' + textEl.textContent);
-      }*/
+      }
       el.querySelector(
         '.i-amphtml-story-interactive-img-option-percentage-text'
       ).textContent = `${percentages[index]}%`;
