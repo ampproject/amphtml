@@ -188,6 +188,7 @@ exports.rules = [
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-oblivki-impl/0.1/amp-ad-network-oblivki-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-dianomi-impl/0.1/amp-ad-network-dianomi-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
 
       // A4A impls importing amp fast fetch header name
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
@@ -424,8 +425,10 @@ exports.rules = [
       'extensions/amp-link-rewriter/0.1/amp-link-rewriter.js->' +
         'src/service/navigation.js',
       // For localization.
-      'extensions/amp-story/1.0/amp-story-localization-service.js->src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->src/service/localization.js',
+      'extensions/amp-story/1.0/amp-story-localization-service.js->src/service/localization/index.js',
+      'extensions/amp-story*/**/*.js->src/service/localization/strings.js',
+      'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->src/service/localization/index.js',
+
       // Accessing calculateScriptBaseUrl() for vendor config URLs
       'extensions/amp-analytics/0.1/config.js->' +
         'src/service/extension-script.js',
@@ -468,7 +471,7 @@ exports.rules = [
       'src/polyfills/index.js->src/polyfills/intersection-observer.js',
       'src/polyfills/index.js->src/polyfills/resize-observer.js',
       'src/polyfills/index.js->src/polyfills/map-set.js',
-      'src/polyfills/index.js->src/polyfills/set-add.js',
+      'src/polyfills/index.js->src/polyfills/set.js',
       'src/polyfills/index.js->src/polyfills/weakmap-set.js',
       'src/friendly-iframe-embed.js->src/polyfills/abort-controller.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',

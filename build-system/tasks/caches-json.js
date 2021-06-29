@@ -24,6 +24,7 @@ const cachesJsonPath = '../global-configs/caches.json';
 
 /**
  * Entry point for amp caches-jason.
+ * @return {Promise<void>}
  */
 async function cachesJson() {
   const filename = path.basename(cachesJsonPath);

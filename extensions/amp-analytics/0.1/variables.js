@@ -327,14 +327,11 @@ export class VariableService {
           element,
           userAssert(key, 'CONSENT_METADATA macro must contain a key')
         ),
-      'SESSION_ID': () => {
-        return this.sessionManagerPromise_.then((sessionManager) => {
-          return sessionManager.getSessionValue(
-            type,
-            SESSION_VALUES.SESSION_ID
-          );
-        });
-      },
+      'SESSION_ID': () =>
+        this.getSessionValue_(type, SESSION_VALUES.SESSION_ID),
+      'SESSION_TIMESTAMP': () =>
+        this.getSessionValue_(type, SESSION_VALUES.CREATION_TIMESTAMP),
+      'SESSION_COUNT': () => this.getSessionValue_(type, SESSION_VALUES.COUNT),
     };
     const perfMacros = isInFie(element)
       ? {}
@@ -370,6 +367,18 @@ export class VariableService {
       ...perfMacros,
     };
     return /** @type {!JsonObject} */ (merged);
+  }
+
+  /**
+   *
+   * @param {string} vendorType
+   * @param {!SESSION_VALUES} key
+   * @return {!Promise<number>}
+   */
+  getSessionValue_(vendorType, key) {
+    return this.sessionManagerPromise_.then((sessionManager) => {
+      return sessionManager.getSessionValue(vendorType, key);
+    });
   }
 
   /**
