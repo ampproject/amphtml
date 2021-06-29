@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {PriorityQueue} from './core/data-structures/priority-queue';
 import {Services} from './service';
 import {dev} from './log';
 import {getData} from './event-helper';
@@ -22,7 +23,6 @@ import {
   registerServiceBuilderForDoc,
 } from './service-helpers';
 import {makeBodyVisibleRecovery} from './style-installer';
-import PriorityQueue from './core/data-structures/priority-queue';
 
 /**
  * @const {string}

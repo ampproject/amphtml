@@ -24,7 +24,7 @@ import {
   useMemo,
   useState,
 } from '#preact';
-import {sequentialIdGenerator} from '#core/math/id-generator';
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {toChildArray} from '#preact/compat';
 
 const generateLightboxItemKey = sequentialIdGenerator();

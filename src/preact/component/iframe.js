@@ -16,7 +16,7 @@
 
 import * as Preact from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
-import {Loading} from '#core/loading-instructions';
+import {Loading} from '#core/constants/loading-instructions';
 import {ReadyState} from '#core/constants/ready-state';
 import {forwardRef} from '#preact/compat';
 import {useAmpContext, useLoading} from '#preact/context';

@@ -15,7 +15,6 @@
  */
 
 import {elementStringOrPassThru} from '#core/error/message-helpers';
-import {includes} from '#core/types/string';
 import {isArray, isElement, isString} from '#core/types';
 import {remove} from '#core/types/array';
 
@@ -59,7 +58,7 @@ export function assert(
   }
 
   // Include the sentinel string if provided and not already present
-  if (sentinel && !includes(opt_message, sentinel)) {
+  if (sentinel && opt_message.indexOf(sentinel) == -1) {
     opt_message += sentinel;
   }
 
