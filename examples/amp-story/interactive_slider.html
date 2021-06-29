@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content="This is the AMP Boilerplate." />
     <link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js" />
-    <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins"
+      rel="stylesheet"
+    />
     <link
       rel="preload"
       as="script"
@@ -25,26 +28,26 @@
     <!-- Import other AMP Extensions here -->
     <style amp-custom>
       /* Add your styles here */
-      .title{
+      .title {
         background-color: white;
         border-radius: 60px;
         padding: 40px;
       }
       h1 {
-        color:black;
+        color: black;
         font-size: 30px;
         margin-bottom: 10px;
         text-align: center;
-        font-family: "Poppins";
+        font-family: 'Poppins';
       }
-      p{
-        font-family: "Poppins";
+      p {
+        font-family: 'Poppins';
         font-size: 15px;
       }
       .bottom {
         position: absolute;
         top: 80%;
-        left: 58%;
+        left: 50%;
         transform: translate(-50%, -50%);
         width: 22em;
       }
@@ -131,14 +134,15 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <div class="title">
-          <h1>Slider Component</h1>
-          <p> This is the most basic form of slider in the light theme</p>
-        </div>
-          <div class="bottom">
-          <amp-story-interactive-slider style="--interactive-accent-color: #651ffe"
+            <h1>Slider Component</h1>
+            <p>This is the most basic form of slider in the light theme</p>
+          </div>
+
+          <amp-story-interactive-slider
+            style="--interactive-accent-color: #651ffe"
+            class="bottom"
             prompt-text="How much do you like this product?"
           >
-        </div>
           </amp-story-interactive-slider>
         </amp-story-grid-layer>
       </amp-story-page>
@@ -154,14 +158,14 @@
         <amp-story-grid-layer template="vertical">
           <div class="title">
             <h1>Slider Component</h1>
-            <p> This is the most basic form of slider in the dark theme</p>
+            <p>This is the most basic form of slider in the dark theme</p>
           </div>
-          <div class="bottom">
-          <amp-story-interactive-slider 
+
+          <amp-story-interactive-slider
+            class="bottom"
             prompt-text="How much do you like this product?"
             theme="dark"
           >
-        </div>
           </amp-story-interactive-slider>
         </amp-story-grid-layer>
       </amp-story-page>
@@ -177,17 +181,20 @@
         <amp-story-grid-layer template="vertical">
           <div class="title">
             <h1>Slider Component</h1>
-            <p> This is the most basic form of slider in the chip-style transparent theme</p>
+            <p>
+              This is the most basic form of slider in the chip-style
+              transparent theme
+            </p>
           </div>
-          <div class="bottom">
-          <amp-story-interactive-slider chip-style="transparent" 
+
+          <amp-story-interactive-slider
+            chip-style="transparent"
+            class="bottom"
             prompt-text="How much do you like this product?"
           >
-        </div>
           </amp-story-interactive-slider>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
-    
   </body>
 </html>

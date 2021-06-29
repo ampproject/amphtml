@@ -28,6 +28,8 @@
   margin: 1em;
   background: transparent;
   position: relative;
+  pointer-events: all;
+  cursor: pointer;
 }
 .i-amphtml-story-interactive-slider-range-input::before {
   background: var(--interactive-accent-color);
