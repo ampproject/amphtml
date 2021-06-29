@@ -17,7 +17,7 @@
 import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {buildOpenAttachmentElementLinkIcon} from './amp-story-open-page-attachment';
@@ -125,12 +125,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.buildInline_();
     }
 
-    if (this.type_ === AttachmentType.OUTLINK) {
-      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-        this.buildRemoteV2_();
-      } else {
-        this.buildRemote_();
-      }
+    if (
+      this.type_ === AttachmentType.OUTLINK &&
+      !isPageAttachmentUiV2ExperimentOn(this.win)
+    ) {
+      this.buildRemote_();
     }
 
     this.win.addEventListener('pageshow', (event) => {
@@ -144,6 +143,20 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     toggle(this.element, true);
     this.element.setAttribute('aria-live', 'assertive');
+  }
+
+  /**
+   * @override
+   */
+  layoutCallback() {
+    super.layoutCallback();
+    // Outlink attachment v2 renders an image and must be built in layoutCallback.
+    if (
+      this.type_ === AttachmentType.OUTLINK &&
+      isPageAttachmentUiV2ExperimentOn(this.win)
+    ) {
+      this.buildRemoteV2_();
+    }
   }
 
   /**

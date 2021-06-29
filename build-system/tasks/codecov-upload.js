@@ -53,6 +53,7 @@ function uploadReport(file, flags) {
 
 /**
  * Uploads code coverage reports for unit / integration tests during CI builds.
+ * @return {Promise<void>}
  */
 async function codecovUpload() {
   if (!isCiBuild()) {

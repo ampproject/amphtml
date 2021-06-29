@@ -64,7 +64,12 @@ tags: {  # <amp-ad>
   }
   attrs: { name: "template" }
   attrs: { name: "type" mandatory: true }
-  attrs: { name: "sticky" value: "" }
+  attrs: {
+    name: "sticky"
+    value: ""
+    value: "top"
+    value: "bottom"
+  }
   attrs: { name: "always-serve-npa" }
   attrs: { name: "block-rtc" }
   attr_lists: "extended-amp-global"

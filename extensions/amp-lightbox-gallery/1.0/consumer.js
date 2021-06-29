@@ -16,8 +16,16 @@
 
 import * as Preact from '#preact';
 import {LightboxGalleryContext} from './context';
+import {
+  cloneElement,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from '#preact';
 import {sequentialIdGenerator} from '#core/math/id-generator';
-import {useContext, useLayoutEffect, useMemo, useState} from '#preact';
+import {toChildArray} from '#preact/compat';
 
 const generateLightboxItemKey = sequentialIdGenerator();
 
@@ -36,12 +44,19 @@ export function WithLightbox({
   as: Comp = 'div',
   children,
   enableActivation = true,
-  onClick: customOnClick,
-  render = () => children,
+  render: renderProp,
   ...rest
 }) {
   const [genKey] = useState(generateLightboxItemKey);
   const {deregister, open, register} = useContext(LightboxGalleryContext);
+  const render = useCallback(
+    () =>
+      renderProp
+        ? renderProp()
+        : toChildArray(children).map((child) => cloneElement(child)),
+    [children, renderProp]
+  );
+
   useLayoutEffect(() => {
     register(genKey, render);
     return () => deregister(genKey);
@@ -51,14 +66,10 @@ export function WithLightbox({
     () =>
       enableActivation && {
         ...DEFAULT_ACTIVATION_PROPS,
-        onClick: () => {
-          if (customOnClick) {
-            customOnClick();
-          }
-          open();
-        },
+        /* genKey is 1-indexed, gallery is 0-indexed */
+        onClick: () => open(Number(genKey) - 1),
       },
-    [customOnClick, enableActivation, open]
+    [enableActivation, genKey, open]
   );
   return (
     <Comp {...activationProps} {...rest}>

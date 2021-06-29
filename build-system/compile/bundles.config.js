@@ -53,17 +53,6 @@ exports.jsBundles = {
       minifiedName: 'alp.js',
     },
   },
-  'examiner.max.js': {
-    srcDir: './src/examiner/',
-    srcFilename: 'examiner.js',
-    destDir: './dist',
-    minifiedDestDir: './dist',
-    options: {
-      toName: 'examiner.max.js',
-      includePolyfills: true,
-      minifiedName: 'examiner.js',
-    },
-  },
   'ww.max.js': {
     srcDir: './src/web-worker/',
     srcFilename: 'web-worker.js',
