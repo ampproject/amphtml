@@ -33,12 +33,12 @@ import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {CookieWriter} from './cookie-writer';
-import {Deferred} from '../../../src/core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
-} from '../../../src/service/notification-ui-manager';
-import {Services} from '../../../src/services';
+} from '#service/notification-ui-manager';
+import {Services} from '#service';
 import {TcfApiCommandManager} from './tcf-api-command-manager';
 import {
   assertHttpsUrl,
@@ -46,14 +46,15 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/core/types/object';
+import {dict, hasOwn} from '#core/types/object';
 import {getData} from '../../../src/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {isArray, isEnumValue, isObject} from '../../../src/core/types';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {isArray, isEnumValue, isObject} from '#core/types';
+import {realChildElements} from '#core/dom/query';
 
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
 
-import {toggle} from '../../../src/style';
+import {toggle} from '#core/dom/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
@@ -223,7 +224,7 @@ export class AmpConsent extends AMP.BaseElement {
       /** @type {string} */ (this.consentId_)
     );
 
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       toggle(child, false);
@@ -235,7 +236,9 @@ export class AmpConsent extends AMP.BaseElement {
       this.getAmpDoc(),
       CONSENT_POLICY_MANAGER
     ).then((manager) => {
-      this.consentPolicyManager_ = /** @type {!ConsentPolicyManager} */ (manager);
+      this.consentPolicyManager_ = /** @type {!ConsentPolicyManager} */ (
+        manager
+      );
       this.consentPolicyManager_.setLegacyConsentInstanceId(
         /** @type {string} */ (this.consentId_)
       );
@@ -262,7 +265,9 @@ export class AmpConsent extends AMP.BaseElement {
       this.getAmpDoc(),
       NOTIFICATION_UI_MANAGER
     ).then((manager) => {
-      this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (manager);
+      this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (
+        manager
+      );
     });
 
     const cookieWriterPromise = this.consentConfig_['cookies']
@@ -732,7 +737,8 @@ export class AmpConsent extends AMP.BaseElement {
     if (!this.consentConfig_['checkConsentHref']) {
       this.remoteConfigPromise_ = Promise.resolve(null);
     } else {
-      const storeConsentPromise = this.consentStateManager_.getLastConsentInstanceInfo();
+      const storeConsentPromise =
+        this.consentStateManager_.getLastConsentInstanceInfo();
       this.remoteConfigPromise_ = storeConsentPromise.then((storedInfo) => {
         // Note: Expect the request to look different in following versions.
         const request = /** @type {!JsonObject} */ ({
@@ -866,10 +872,9 @@ export class AmpConsent extends AMP.BaseElement {
   initPromptUI_(isConsentRequired) {
     this.consentUI_ = new ConsentUI(
       this,
-      /** @type {!JsonObject} */ (devAssert(
-        this.consentConfig_,
-        'consent config not found'
-      ))
+      /** @type {!JsonObject} */ (
+        devAssert(this.consentConfig_, 'consent config not found')
+      )
     );
 
     // Get current consent state

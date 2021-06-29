@@ -17,7 +17,7 @@
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from './core/constants/consent-state';
-import {Services} from './services';
+import {Services} from './service';
 import {dict} from './core/types/object';
 
 /**
@@ -118,13 +118,15 @@ export function getConsentDataToForward(element, opt_policyId) {
     if (!policy) {
       return gettersOrNull;
     }
-    return /** @type {!JsonObject} */ (Promise.all(
-      Object.keys(gettersOrNull).map((key) =>
-        gettersOrNull[key]
-          .call(policy, opt_policyId || 'default')
-          .then((value) => ({[key]: value}))
-      )
-    ).then((objs) => Object.assign.apply({}, objs)));
+    return /** @type {!JsonObject} */ (
+      Promise.all(
+        Object.keys(gettersOrNull).map((key) =>
+          gettersOrNull[key]
+            .call(policy, opt_policyId || 'default')
+            .then((value) => ({[key]: value}))
+        )
+      ).then((objs) => Object.assign.apply({}, objs))
+    );
   });
 }
 

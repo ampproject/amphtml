@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
-import {parseJson} from '../../src/json';
-import {setStyle, setStyles} from '../../src/style';
+import {computeInMasterFrame, loadScript, validateData} from '#3p/3p';
+import {parseJson} from '#core/types/object/json';
+import {setStyle, setStyles} from '#core/dom/style';
 
 /*
  * How to develop:
- * https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md
+ * https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md
  */
 
 /**
@@ -213,7 +213,7 @@ export function ssp(global, data) {
             }
 
             // listen to intersections and force element reflow (external DSPs)
-            if (['APPNEXUS', 'PUBMATIC'].includes(ad.dsp)) {
+            if (['APPNEXUS', 'PUBMATIC', 'PUBMATIC2'].includes(ad.dsp)) {
               global.context.observeIntersection(() => {
                 forceElementReflow(parentElement);
               });

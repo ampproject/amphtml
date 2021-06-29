@@ -15,8 +15,8 @@
  */
 
 import {DateDisplay} from './component';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
+import {PreactBaseElement} from '#preact/base-element';
+import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attributes';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -31,6 +31,7 @@ BaseElement['props'] = {
   },
   'displayIn': {attr: 'display-in'},
   'locale': {attr: 'locale'},
+  'localeOptions': {attrPrefix: 'data-options-'},
 };
 
 /** @override */

@@ -143,7 +143,7 @@ const SCRIPT = `
 };
 `;
 
-const renderShadowViewer = ({src, baseHref}) =>
+const renderShadowViewer = ({baseHref, src}) =>
   html`
     <!DOCTYPE html>
     <html>

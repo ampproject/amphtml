@@ -16,17 +16,18 @@
 'use strict';
 
 const fs = require('fs-extra');
-const {
-  EVENT_TEST_PASS,
-  EVENT_TEST_FAIL,
-  EVENT_RUN_END,
-  EVENT_TEST_PENDING,
-  EVENT_SUITE_BEGIN,
-  EVENT_SUITE_END,
-} = require('mocha').Runner.constants;
+const mocha = require('mocha');
 const {Base} = require('mocha').reporters;
 const {inherits} = require('mocha').utils;
 
+const {
+  EVENT_RUN_END,
+  EVENT_SUITE_BEGIN,
+  EVENT_SUITE_END,
+  EVENT_TEST_FAIL,
+  EVENT_TEST_PASS,
+  EVENT_TEST_PENDING,
+} = mocha.Runner.constants;
 /**
  * @param {Object} output
  * @param {string} filename
@@ -51,6 +52,7 @@ async function writeOutput(output, filename) {
  * @param {*} runner
  */
 function JsonReporter(runner) {
+  // @ts-ignore
   Base.call(this, runner);
   const testEvents = [];
   let suiteList = [];
@@ -73,7 +75,7 @@ function JsonReporter(runner) {
   });
 
   runner.on(EVENT_RUN_END, async function () {
-    const results = testEvents.map(({test, suiteList, event}) => ({
+    const results = testEvents.map(({event, suiteList, test}) => ({
       description: test.title,
       suite: suiteList,
       success: event === EVENT_TEST_PASS,

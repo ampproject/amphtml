@@ -22,13 +22,13 @@ const {
   stopTimer,
 } = require('./utils');
 const {
+  getLoggingPrefix,
   logWithoutTimestamp,
   setLoggingPrefix,
-  getLoggingPrefix,
 } = require('../common/logging');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
-const {red} = require('kleur/colors');
+const {red} = require('../common/colors');
 const {updatePackages} = require('../common/update-packages');
 
 /**
@@ -36,6 +36,7 @@ const {updatePackages} = require('../common/update-packages');
  * @param {string} jobName
  * @param {function} pushBuildWorkflow
  * @param {function} prBuildWorkflow
+ * @return {Promise<void>}
  */
 async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
   setLoggingPrefix(jobName);

@@ -63,7 +63,7 @@ var IframeEmbedDef = {};
  *   allowFullScreen: (boolean|undefined),
  *   allowTransparency: (boolean|undefined),
  *   loading: (string),
- *   manageMessageHandler: (function({current: HTMLIFrameElement}, function):function|undefined),
+ *   manageMessageHandler: (function({current: HTMLIFrameElement}, function():void):function():void|undefined),
  *   name: (string|undefined),
  *   onReadyState: (function(string)|undefined),
  *   ready: (boolean|undefined),

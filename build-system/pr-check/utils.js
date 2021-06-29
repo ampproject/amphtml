@@ -21,19 +21,18 @@ const {
   circleciBuildNumber,
   isCiBuild,
   isCircleciBuild,
-  ciBuildSha,
 } = require('../common/ci');
 const {
   gitBranchCreationPoint,
   gitBranchName,
+  gitCiMainBaseline,
   gitCommitHash,
   gitDiffCommitLog,
   gitDiffStatMain,
-  gitCiMainBaseline,
   shortSha,
 } = require('../common/git');
-const {cyan, green, yellow} = require('kleur/colors');
-const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
+const {cyan, green, yellow} = require('../common/colors');
+const {exec, execOrDie, execOrThrow, execWithError} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
@@ -42,10 +41,6 @@ const NOMODULE_CONTAINER_DIRECTORY = 'nomodule';
 const MODULE_CONTAINER_DIRECTORY = 'module';
 
 const ARTIFACT_FILE_NAME = '/tmp/artifacts/amp_nomodule_build.tar.gz';
-
-// TODO(danielrozenberg): remove when Cloud Storage -> CircleCI Artifacts migration is complete.
-const NOMODULE_GCLOUD_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
-const GCLOUD_STORAGE_BUCKET = 'gs://amp-travis-builds';
 
 const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p'];
 const APP_SERVING_DIRS = [
@@ -57,7 +52,7 @@ const APP_SERVING_DIRS = [
 ];
 
 const GIT_BRANCH_URL =
-  'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md#create-a-git-branch';
+  'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md#create-a-git-branch';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -286,45 +281,13 @@ function storeExperimentBuildToWorkspace(exp) {
   storeBuildToWorkspace_(exp);
 }
 
-// TODO(danielrozenberg): remove when Cloud Storage -> CircleCI Artifacts migration is complete.
-function legacyProcessAndStoreBuildToArtifacts_() {
-  const loggingPrefix = getLoggingPrefix();
-
-  logWithoutTimestamp(
-    `\n${loggingPrefix} Compressing ` +
-      cyan(APP_SERVING_DIRS.join(', ')) +
-      ' into ' +
-      cyan(NOMODULE_GCLOUD_OUTPUT_FILE) +
-      '...'
-  );
-  execOrDie(
-    `zip -r -q ${NOMODULE_GCLOUD_OUTPUT_FILE} ${APP_SERVING_DIRS.join('/ ')}/`
-  );
-  execOrDie(`du -sh ${NOMODULE_GCLOUD_OUTPUT_FILE}`);
-
-  logWithoutTimestamp(
-    `${loggingPrefix} Uploading ` +
-      cyan(NOMODULE_GCLOUD_OUTPUT_FILE) +
-      ' to ' +
-      cyan(GCLOUD_STORAGE_BUCKET) +
-      '...'
-  );
-  execOrDie(
-    `gsutil -q -m cp -r ${NOMODULE_GCLOUD_OUTPUT_FILE} ${GCLOUD_STORAGE_BUCKET}`
-  );
-}
-
 /**
  * Replaces URLS in HTML files, compresses and stores nomodule build in CI artifacts.
+ * @return {Promise<void>}
  */
 async function processAndStoreBuildToArtifacts() {
   if (!isCircleciBuild()) {
     return;
-  }
-
-  // TODO(danielrozenberg): remove when Cloud Storage -> CircleCI Artifacts migration is complete.
-  if (process.env.USE_LEGACY_GCLOUD_STORAGE) {
-    legacyProcessAndStoreBuildToArtifacts_();
   }
 
   await replaceUrls('test/manual');

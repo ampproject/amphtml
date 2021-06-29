@@ -16,8 +16,8 @@
 'use strict';
 
 const {
-  verifySelectorsVisible,
   verifySelectorsInvisible,
+  verifySelectorsVisible,
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
@@ -82,21 +82,21 @@ module.exports = {
       'amp-story-page.i-amphtml-expanded-mode',
     ]);
   },
-  'tapping on non-interactive embed should not show tooltip or block navigation': async (
-    page,
-    name
-  ) => {
-    await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#page-2[active]');
-    await page.waitForTimeout(300); // For animations to finish.
-    await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitForSelector('amp-story-page#page-3[active]');
-    await page.waitForTimeout(300); // For animations to finish.
-    await page.tap('amp-twitter.non-interactive-embed');
-    await page.waitForTimeout(800); // For animations to finish.
-    await verifySelectorsInvisible(page, name, ['a.i-amphtml-story-tooltip']);
-    await verifySelectorsVisible(page, name, ['amp-story-page#page-4[active]']);
-  },
+  'tapping on non-interactive embed should not show tooltip or block navigation':
+    async (page, name) => {
+      await page.tap('.next-container > button.i-amphtml-story-button-move');
+      await page.waitForSelector('amp-story-page#page-2[active]');
+      await page.waitForTimeout(300); // For animations to finish.
+      await page.tap('.next-container > button.i-amphtml-story-button-move');
+      await page.waitForSelector('amp-story-page#page-3[active]');
+      await page.waitForTimeout(300); // For animations to finish.
+      await page.tap('amp-twitter.non-interactive-embed');
+      await page.waitForTimeout(800); // For animations to finish.
+      await verifySelectorsInvisible(page, name, ['a.i-amphtml-story-tooltip']);
+      await verifySelectorsVisible(page, name, [
+        'amp-story-page#page-4[active]',
+      ]);
+    },
   'tapping on closing button should exit expanded view': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitForSelector('amp-story-page#page-2[active]');

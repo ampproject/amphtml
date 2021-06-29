@@ -19,7 +19,7 @@ const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const path = require('path');
 const {ciBuildSha, circleciBuildNumber} = require('../common/ci');
-const {cyan} = require('kleur/colors');
+const {cyan} = require('../common/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
 
@@ -60,8 +60,7 @@ function getBaseUrl() {
 async function replace(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
   const hostName = getBaseUrl();
-  const inabox = false;
-  const result = replaceUrlsAppUtil('compiled', data, hostName, inabox);
+  const result = replaceUrlsAppUtil('compiled', data, hostName);
 
   await fs.writeFile(filePath, result, 'utf8');
 }

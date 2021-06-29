@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as dom from './dom';
+import * as dom from './core/dom';
 import {extensionScriptInNode} from './service/extension-script';
 import {
   getAmpdoc,
@@ -24,7 +24,7 @@ import {
   getServicePromiseForDoc,
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
-} from './service';
+} from './service-helpers';
 import {userAssert} from './log';
 
 /**
@@ -160,16 +160,18 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
  * @closurePrimitive {asserts.matchesReturn}
  */
 function assertService(service, id, extension) {
-  return /** @type {!Object} */ (userAssert(
-    service,
-    'Service %s was requested to be provided through %s, ' +
-      'but %s is not loaded in the current page. To fix this ' +
-      'problem load the JavaScript file for %s in this page.',
-    id,
-    extension,
-    extension,
-    extension
-  ));
+  return /** @type {!Object} */ (
+    userAssert(
+      service,
+      'Service %s was requested to be provided through %s, ' +
+        'but %s is not loaded in the current page. To fix this ' +
+        'problem load the JavaScript file for %s in this page.',
+      id,
+      extension,
+      extension,
+      extension
+    )
+  );
 }
 
 /**

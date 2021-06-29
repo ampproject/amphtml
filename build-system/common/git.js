@@ -20,10 +20,10 @@
  */
 
 const {
-  isCiBuild,
-  isPullRequestBuild,
   ciPullRequestBranch,
   ciPullRequestSha,
+  isCiBuild,
+  isPullRequestBuild,
 } = require('./ci');
 const {getStdout} = require('./process');
 

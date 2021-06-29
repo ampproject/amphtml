@@ -17,16 +17,16 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  buildTargetsInclude,
-  determineBuildTargets,
-  Targets,
-} = require('../pr-check/build-targets');
-const {
   printChangeSummary,
   startTimer,
   stopTimer,
   timedExec,
 } = require('../pr-check/utils');
+const {
+  Targets,
+  buildTargetsInclude,
+  determineBuildTargets,
+} = require('../pr-check/build-targets');
 const {runNpmChecks} = require('../common/npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
 
@@ -35,6 +35,7 @@ const jobName = 'pr-check.js';
 /**
  * This file runs tests against the local workspace to mimic the CI build as
  * closely as possible.
+ * @return {Promise<void>}
  */
 async function prCheck() {
   const runCheck = (cmd) => {
@@ -59,7 +60,13 @@ async function prCheck() {
     runCheck('amp check-invalid-whitespaces --local_changes');
   }
 
-  if (buildTargetsInclude(Targets.LINT)) {
+  if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
+    runCheck('amp validate-html-fixtures --local_changes');
+  }
+
+  if (buildTargetsInclude(Targets.LINT_RULES)) {
+    runCheck('amp lint');
+  } else if (buildTargetsInclude(Targets.LINT)) {
     runCheck('amp lint --local_changes');
   }
 
@@ -69,6 +76,10 @@ async function prCheck() {
 
   if (buildTargetsInclude(Targets.AVA)) {
     runCheck('amp ava');
+  }
+
+  if (buildTargetsInclude(Targets.BUILD_SYSTEM)) {
+    runCheck('amp check-build-system');
   }
 
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
@@ -81,10 +92,6 @@ async function prCheck() {
 
   if (buildTargetsInclude(Targets.DOCS)) {
     runCheck('amp check-links --local_changes');
-  }
-
-  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
-    runCheck('amp dev-dashboard-tests');
   }
 
   if (buildTargetsInclude(Targets.OWNERS)) {
@@ -136,7 +143,7 @@ module.exports = {
   prCheck,
 };
 
-prCheck.description = 'Runs a subset of the CI checks against local changes.';
+prCheck.description = 'Run almost all CI checks against the local branch';
 prCheck.flags = {
-  'nobuild': 'Skips building the runtime via `amp dist`.',
+  'nobuild': 'Skip building the runtime',
 };

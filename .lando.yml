@@ -1,6 +1,6 @@
 # This is a configuration file for a Lando-based local dev environment for amphtml.
 # It is an alternative to the existing local development environment to what is described in the Getting Started
-# End-to-end guide <https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-e2e.md>.
+# End-to-end guide <https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md>.
 #
 # This environment allows you to encapsulate the amphtml development environment inside of a Docker container.
 # Instead of accessing <http://localhost:8000>, this environment can be accessed via <https://amphtml.lando.site>.

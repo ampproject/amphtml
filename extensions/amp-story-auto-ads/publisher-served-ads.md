@@ -89,7 +89,7 @@ A server endpoint needs to provide ad responses in the following JSON format:
 #### Response headers
 
 The ad request is an AMP CORS request, hence a couple of custom response headers are needed.
-See [AMP CORS spec](../../spec/amp-cors-requests.md) for details.
+See [AMP CORS spec](../../docs/spec/amp-cors-requests.md) for details.
 
 ### Tagging
 

@@ -19,7 +19,7 @@ const checkDependencies = require('check-dependencies');
 const del = require('del');
 const fs = require('fs-extra');
 const path = require('path');
-const {cyan, red} = require('kleur/colors');
+const {cyan, red} = require('./colors');
 const {execOrDie} = require('./exec');
 const {getOutput} = require('./process');
 const {isCiBuild} = require('./ci');
@@ -201,7 +201,9 @@ function patchShadowDom() {
 
   writeIfUpdated(patchedName, file);
 }
-
+/**
+ * Adds a missing export statement to the preact module.
+ */
 function patchPreact() {
   fs.ensureDirSync('node_modules/preact/dom');
   const file = `export { render, hydrate } from 'preact';`;
@@ -267,14 +269,13 @@ function updatePackages() {
  *
  * 1. During CI, do a clean install.
  * 2. During local development, do an incremental install if necessary.
- * 3. Since install scripts can be async, `await` the process object.
- * 4. Since script output is noisy, capture and print the stderr if needed.
- * 5. During CI, make sure that the package files were correctly updated.
+ * 3. Since script output is noisy, capture and print the stderr if needed.
+ * 4. During CI, if not skipped, ensure package files were correctly updated.
  *
  * @param {string} dir
- * @return {Promise<void>}
+ * @param {boolean=} skipNpmChecks
  */
-async function updateSubpackages(dir) {
+function updateSubpackages(dir, skipNpmChecks = false) {
   const results = checkDependencies.sync({packageDir: dir});
   const relativeDir = path.relative(process.cwd(), dir);
   if (results.depsWereOk) {
@@ -283,13 +284,13 @@ async function updateSubpackages(dir) {
   } else {
     const installCmd = isCiBuild() ? 'npm ci' : 'npm install';
     log('Running', cyan(installCmd), 'in', cyan(relativeDir) + '...');
-    const output = await getOutput(`${installCmd} --prefix ${dir}`);
+    const output = getOutput(`${installCmd} --prefix ${dir}`);
     if (output.status !== 0) {
       log(red('ERROR:'), output.stderr);
       throw new Error('Installation failed');
     }
   }
-  if (isCiBuild()) {
+  if (isCiBuild() && !skipNpmChecks) {
     runNpmChecks(dir);
   }
 }

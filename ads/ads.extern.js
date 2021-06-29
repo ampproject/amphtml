@@ -317,7 +317,9 @@ window.adpushup.initAmp = function (
   height,
   siteid,
   slotpath,
-  totalampslots
+  totalampslots,
+  jsontargeting,
+  extras
 ) {};
 
 // adreactor.js

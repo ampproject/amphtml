@@ -15,9 +15,10 @@
  */
 
 import {Side} from './sidebar-config';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {useLayoutEffect, useRef} from '../../../src/preact';
-import {useValueRef} from '../../../src/preact/component';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
+import {setStyles} from '#core/dom/style';
+import {useLayoutEffect, useRef} from '#preact';
+import {useValueRef} from '#preact/component';
 
 const ANIMATION_DURATION = 350;
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
@@ -49,12 +50,12 @@ function safelySetStyles(element, styles) {
 /**
  * @param {boolean} mounted
  * @param {boolean} opened
- * @param {{current: function|undefined}} onAfterOpen
- * @param {{current: function|undefined}} onAfterClose
+ * @param {{current: function():void} | {current: void}} onAfterOpen
+ * @param {{current: function():void} | {current: void}} onAfterClose
  * @param {string} side
- * @param {{current: Element|null}} sidebarRef
- * @param {{current: Element|null}} backdropRef
- * @param {function} setMounted
+ * @param {{current: (Element|null)}} sidebarRef
+ * @param {{current: (Element|null)}} backdropRef
+ * @param {function():undefined} setMounted
  */
 export function useSidebarAnimation(
   mounted,

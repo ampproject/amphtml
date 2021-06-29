@@ -153,24 +153,24 @@ Story page attachments allow the same HTML elements as AMP Story along with addi
 
 ## Attributes
 
-### `data-cta-text`
+### `cta-text`
 
 Customizes the call to action text displayed on the UI prompt to open the attachment.
 Default: "Swipe up"
 
 ```html
-<amp-story-page-attachment layout="nodisplay" data-cta-text="Read more"
+<amp-story-page-attachment layout="nodisplay" cta-text="Read more"
   >...</amp-story-page-attachment
 >
 ```
 
-### `data-title`
+### `title`
 
 Displays the provided title in the page attachment header.
 Default: `null`
 
 ```html
-<amp-story-page-attachment layout="nodisplay" data-title="My title"
+<amp-story-page-attachment layout="nodisplay" title="My title"
   >...</amp-story-page-attachment
 >
 ```

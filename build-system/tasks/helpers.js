@@ -29,10 +29,10 @@ const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-const {applyConfig, removeConfig} = require('./prepend-global/index.js');
+const {applyConfig, removeConfig} = require('./prepend-global');
 const {closureCompile} = require('../compile/compile');
+const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
-const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
@@ -60,11 +60,6 @@ const MODULE_SEPARATOR = ';';
  * Used during minification to concatenate extension bundles
  */
 const EXTENSION_BUNDLE_MAP = {
-  'amp-viz-vega.js': [
-    'third_party/d3/d3.js',
-    'third_party/d3-geo-projection/d3-geo-projection.js',
-    'third_party/vega/vega.js',
-  ],
   'amp-inputmask.js': ['third_party/inputmask/bundle.js'],
   'amp-date-picker.js': ['third_party/react-dates/bundle.js'],
   'amp-shadow-dom-polyfill.js': [
@@ -124,6 +119,7 @@ function doBuildJs(jsBundles, name, extraOptions) {
  * Generates frames.html
  *
  * @param {!Object} options
+ * @return {Promise<void>}
  */
 async function bootstrapThirdPartyFrames(options) {
   const startTime = Date.now();
@@ -178,7 +174,6 @@ async function compileAllJs(options) {
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
     doBuildJs(jsBundles, 'alp.max.js', options),
-    doBuildJs(jsBundles, 'examiner.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
     doBuildJs(jsBundles, 'iframe-transport-client-lib.js', options),
@@ -292,6 +287,14 @@ function maybeToEsmName(name) {
 }
 
 /**
+ * @param {string} name
+ * @return {string}
+ */
+function maybeToNpmEsmName(name) {
+  return argv.esm ? name.replace(/\.js$/, '.module.js') : name;
+}
+
+/**
  * Minifies a given JavaScript file entry point.
  * @param {string} srcDir
  * @param {string} srcFilename
@@ -344,8 +347,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
  * @param {string} destFilename
  */
 function handleBundleError(err, continueOnError, destFilename) {
-  /** @type {Error|string} */
-  let message = err;
+  let message = err.toString();
   if (err.stack) {
     // Drop the node_modules call stack, which begins with '    at'.
     message = err.stack.replace(/    at[^]*/, '').trim();
@@ -367,6 +369,7 @@ function handleBundleError(err, continueOnError, destFilename) {
  * @param {string} destFilename
  * @param {?Object} options
  * @param {number} startTime
+ * @return {Promise<void>}
  */
 async function finishBundle(
   srcFilename,
@@ -393,7 +396,11 @@ async function finishBundle(
     );
     endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
   } else {
-    endBuildStep(logPrefix, destFilename, startTime);
+    const loggingName =
+      options.npm && !destFilename.startsWith('amp-')
+        ? `${options.name} → ${destFilename}`
+        : destFilename;
+    endBuildStep(logPrefix, loggingName, startTime);
   }
 
   const targets = options.minify ? MINIFIED_TARGETS : UNMINIFIED_TARGETS;
@@ -469,8 +476,11 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     watchedTargets.set(entryPoint, {
       rebuild: async () => {
         const time = Date.now();
-        const buildPromise = buildResult
-          .rebuild()
+        const {rebuild} = /** @type {Required<esbuild.BuildResult>} */ (
+          buildResult
+        );
+
+        const buildPromise = rebuild()
           .then(() =>
             finishBundle(srcFilename, destDir, destFilename, options, time)
           )
@@ -497,9 +507,8 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
 async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
-  const destFilename = maybeToEsmName(
-    options.minify ? options.minifiedName : options.toName
-  );
+  const fileName = options.minify ? options.minifiedName : options.toName;
+  const destFilename = options.npm ? fileName : maybeToEsmName(fileName);
   const destFile = path.join(destDir, destFilename);
 
   if (watchedTargets.has(entryPoint)) {
@@ -520,6 +529,7 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
 
   /**
    * @param {number} time
+   * @return {Promise<void>}
    */
   async function build(time) {
     if (!result) {
@@ -543,6 +553,10 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
     await finishBundle(srcFilename, destDir, destFilename, options, time);
   }
 
+  /**
+   * Generates a plugin to remap the dependencies of a JS bundle.
+   * @return {Object}
+   */
   function remapDependenciesPlugin() {
     const remapDependencies = {__proto__: null, ...options.remapDependencies};
     const external = options.externalDependencies;
@@ -653,6 +667,11 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     watch(deps).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
+  /**
+   * Actually performs the steps to compile the entry point.
+   * @param {Object} options
+   * @return {Promise<void>}
+   */
   async function doCompileJs(options) {
     const buildResult = options.minify
       ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
@@ -782,7 +801,7 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
  * @return {!Promise}
  */
 async function thirdPartyBootstrap(input, outputName, options) {
-  const {minify, fortesting} = options;
+  const {fortesting, minify} = options;
   const destDir = `dist.3p/${minify ? internalRuntimeVersion : 'current'}`;
   await fs.ensureDir(destDir);
 
@@ -844,7 +863,7 @@ async function getDependencies(entryPoint, options) {
     metafile: true,
     plugins: [babelPlugin],
   });
-  return Object.keys(result.metafile?.inputs);
+  return Object.keys(result.metafile?.inputs ?? {});
 }
 
 module.exports = {
@@ -860,6 +879,7 @@ module.exports = {
   compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
+  maybeToNpmEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
