@@ -14,30 +14,50 @@
  * limitations under the License.
  */
 
- import {
-    AmpStoryInteractive,
-    InteractiveType,
-  } from './amp-story-interactive-abstract';
-  import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
-  import {htmlFor} from '#core/dom/static-template';
-  
-  export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
-    /**
-     * @param {!AmpElement} element
-     */
-    constructor(element) {
-      super(element, InteractiveType.SLIDER, [0, 1]);
-    }
-    /** @override */
-    buildCallback() {
-      return super.buildCallback(CSS);
-    }
+import {
+  AmpStoryInteractive,
+  InteractiveType,
+} from './amp-story-interactive-abstract';
+import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
+import {htmlFor} from '#core/dom/static-template';
 
-    /** @override */
-    buildComponent() {
-      this.rootEl_ = htmlFor(this.element)`<input type= "range">`;
-      return this.rootEl_;
-    }
+/**
+ * Generates the template for the slider.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildSliderTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-interactive-slider-container">
+      <div class="i-amphtml-story-interactive-prompt-container"></div>
+      <div class="i-amphtml-story-interactive-slider-range-container">
+      <div class="i-amphtml-story-interactive-slider-field">
+        <input class="i-amphtml-story-interactive-slider-range-input" type="range" min="0" max="100" value="25" steps="10">
+      </div>
+      </div>
+    </div>
+  `;
+};
+export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
+  /**
+   * @param {!AmpElement} element
+   */
+  constructor(element) {
+    super(element, InteractiveType.SLIDER, [0, 1]);
   }
-const slideValue = document.querySelector("i-amphtml-story-interactive-slider-span");
-const inputSlider = document.querySelector("i-amphtml-story-interactive-slider-input");
+  /** @override */
+  buildCallback() {
+    return super.buildCallback(CSS);
+  }
+
+  /** @override */
+  buildComponent() {
+    this.rootEl_ = buildSliderTemplate(this.element);
+    this.attachPrompt_(this.rootEl_);
+    return this.rootEl_;
+  }
+}
+
+
