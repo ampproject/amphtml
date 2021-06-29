@@ -1014,7 +1014,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       setupFakesForVisibilityStateManipulation();
     });
 
-    it.only('after performance service registered', async () => {
+    it('after performance service registered', async () => {
       // Fake the Performance API.
       env.win.PerformanceObserver.supportedEntryTypes = [
         'largest-contentful-paint',
