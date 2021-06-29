@@ -18,7 +18,7 @@
  * A priority queue backed with sorted array.
  * @template T
  */
-export default class PriorityQueue {
+export class PriorityQueue {
   /**
    * Creates an instance of PriorityQueue.
    */

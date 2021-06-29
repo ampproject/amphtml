@@ -16,7 +16,7 @@
 
 import * as Preact from '#preact';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
-import {Loading} from '#core/loading-instructions';
+import {Loading} from '#core/constants/loading-instructions';
 import {devAssert} from '#core/assert';
 import {isElement} from '#core/types';
 import {
@@ -104,7 +104,9 @@ export function useSlotContext(ref, opt_props) {
       slot,
       LoadingProp,
       Slot,
-      /** @type {!./core/loading-instructions.Loading} */ (context.loading)
+      /** @type {!./core/constants/loading-instructions.Loading} */ (
+        context.loading
+      )
     );
 
     if (!context.playable) {

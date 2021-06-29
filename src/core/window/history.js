@@ -21,7 +21,7 @@
  * @param {!History} history
  * @return {*}
  */
-export function getState(history) {
+export function getHistoryState(history) {
   try {
     return history.state;
   } catch (e) {

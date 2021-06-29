@@ -21,7 +21,7 @@ import {AmpEvents} from '#core/constants/amp-events';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
 import {Deferred} from '#core/data-structures/promise';
 import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {Loading} from '#core/loading-instructions';
+import {Loading} from '#core/constants/loading-instructions';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {ReadyState} from '#core/constants/ready-state';

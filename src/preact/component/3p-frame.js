@@ -26,7 +26,7 @@ import {
 import {getOptionalSandboxFlags, getRequiredSandboxFlags} from '#core/3p-frame';
 import {includes} from '#core/types/string';
 import {parseUrlDeprecated} from '../../url';
-import {sequentialIdGenerator} from '#core/math/id-generator';
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {
   useEffect,
   useImperativeHandle,
