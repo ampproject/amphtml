@@ -50,8 +50,6 @@ const JWPLAYER_EVENTS = {
   'visible': VideoEvents.VISIBILITY,
   'adImpression': VideoEvents.AD_START,
   'adComplete': VideoEvents.AD_END,
-  'adPlay': VideoEvents.PLAYING,
-  'adPause': VideoEvents.PAUSE,
 };
 
 /**
