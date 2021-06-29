@@ -19,7 +19,6 @@ import {tryCallback} from '#core/error';
 import {remove} from '#core/types/array';
 import {toWin} from '#core/window';
 
-// typedef imports
 import {LayoutSizeDef} from './rect';
 
 /** @typedef {!LayoutSizeDef|!ResizeObserverSize} TargetSize */
