@@ -80,31 +80,39 @@ describes.realWin(
     });
 
     it('should structure the content in the quiz element', async () => {
-      populateQuiz(ampStoryQuiz, 4, 'Has prompt!?');
+      ampStoryQuiz.element.setAttribute('option-1-image', 'Fizz');
+      ampStoryQuiz.element.setAttribute('option-1-image-alt', 'Fizz');
+      ampStoryQuiz.element.setAttribute('option-2-image', 'Buzz');
+      ampStoryQuiz.element.setAttribute('option-2-image-alt', 'Buzz');
       await ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
 
-      const quizContent = ampStoryQuiz.getRootElement().children;
-      expect(quizContent[0]).to.have.class(
-        'i-amphtml-story-interactive-prompt-container'
-      );
-      expect(quizContent[1]).to.have.class(
+      const quizContent = ampStoryQuiz.getRootElement().children[0];
+      expect(quizContent).to.have.class(
         'i-amphtml-story-interactive-img-option-container'
       );
 
-      // Check prompt container structure.
-      expect(quizContent[0].children.length).to.equal(1);
-      expect(
-        quizContent[0].querySelectorAll('.i-amphtml-story-interactive-prompt')
-      ).to.have.length(1);
-
       // Check option container structure.
-      expect(quizContent[1].childNodes.length).to.equal(4);
+      expect(quizContent.childNodes.length).to.equal(2);
       expect(
-        quizContent[1].querySelectorAll(
-          '.i-amphtml-story-interactive-img-option'
-        )
-      ).to.have.length(4);
+        quizContent.querySelectorAll('.i-amphtml-story-interactive-img-option')
+      ).to.have.length(2);
+
+      //Check option content
+      expect(
+        quizContent
+          .querySelector('.i-amphtml-story-interactive-img-option')
+          .getAttribute('aria-label')
+      ).to.contain('Fizz');
+      expect(
+        win
+          .getComputedStyle(
+            quizContent.querySelector(
+              '.i-amphtml-story-interactive-img-option-img'
+            )
+          )
+          .getPropertyValue('background-image')
+      ).to.contain('Fizz');
     });
 
     it('should throw an error with fewer than two options', () => {

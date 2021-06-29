@@ -15,9 +15,12 @@
  */
 
 import {AmpStoryInteractiveImgPoll} from '../amp-story-interactive-img-poll';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
+import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {addConfigToInteractive} from './test-amp-story-interactive';
 import {measureMutateElementStub} from '#testing/test-helper';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-story-interactive-img-poll',
@@ -40,6 +43,16 @@ describes.realWin(
         'amp-story-interactive-img-poll'
       );
 
+      const storeService = new AmpStoryStoreService(win);
+      registerServiceBuilder(win, 'story-store', function () {
+        return storeService;
+      });
+
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationServiceForOrNull')
+        .returns(Promise.resolve(localizationService));
+
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
       const gridLayer = win.document.createElement('amp-story-grid-layer');
@@ -53,6 +66,28 @@ describes.realWin(
         .stub(ampStoryPoll, 'measureMutateElement')
         .callsFake(measureMutateElementStub);
       env.sandbox.stub(ampStoryPoll, 'mutateElement').callsFake((fn) => fn());
+    });
+
+    it('should fill the content of the options', async () => {
+      ampStoryPoll.element.setAttribute('option-1-image', 'Fizz');
+      ampStoryPoll.element.setAttribute('option-1-image-alt', 'Fizz');
+      ampStoryPoll.element.setAttribute('option-2-image', 'Buzz');
+      ampStoryPoll.element.setAttribute('option-2-image-alt', 'Buzz');
+      await ampStoryPoll.buildCallback();
+      await ampStoryPoll.layoutCallback();
+
+      expect(
+        ampStoryPoll.getOptionElements()[0].getAttribute('aria-label')
+      ).to.equal('Fizz');
+      expect(
+        win
+          .getComputedStyle(
+            ampStoryPoll
+              .getOptionElements()[1]
+              .querySelector('.i-amphtml-story-interactive-img-option-img')
+          )
+          .getPropertyValue('background-image')
+      ).to.contain('Buzz');
     });
 
     it('should throw an error with fewer than two options', () => {
