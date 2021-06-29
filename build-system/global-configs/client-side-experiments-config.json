@@ -1,3 +1,11 @@
 {
-  "experiments": []
+  "experiments": [
+    {
+      "name": "test-amp-exp",
+      "percentage": 0.5,
+      "rtvPrefix": [
+        "05"
+      ]
+    }
+  ]
 }
