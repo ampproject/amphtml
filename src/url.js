@@ -16,6 +16,7 @@
 
 import * as mode from './core/mode';
 import {LruCache} from './core/data-structures/lru-cache';
+import {arrayOrSingleItemToArray} from './core/types/array';
 import {dict, hasOwn} from './core/types/object';
 import {endsWith} from './core/types/string';
 import {isArray} from './core/types';
@@ -217,6 +218,16 @@ export function appendEncodedParamStringToUrl(
   newUrl += mainAndFragment[1] ? `#${mainAndFragment[1]}` : '';
   return newUrl;
 }
+
+/**
+ * @param {string} key
+ * @param {string} value
+ * @return {string}
+ */
+function urlEncodeKeyValue(key, value) {
+  return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+}
+
 /**
  * Appends a query string field and value to a url. `key` and `value`
  * will be ran through `encodeURIComponent` before appending.
@@ -227,8 +238,11 @@ export function appendEncodedParamStringToUrl(
  * @return {string}
  */
 export function addParamToUrl(url, key, value, opt_addToFront) {
-  const field = `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-  return appendEncodedParamStringToUrl(url, field, opt_addToFront);
+  return appendEncodedParamStringToUrl(
+    url,
+    urlEncodeKeyValue(key, value),
+    opt_addToFront
+  );
 }
 
 /**
@@ -274,14 +288,11 @@ export function serializeQueryString(params) {
     const v = params[k];
     if (v == null) {
       continue;
-    } else if (isArray(v)) {
-      for (let i = 0; i < v.length; i++) {
-        const sv = /** @type {string} */ (v[i]);
-        s.push(`${encodeURIComponent(k)}=${encodeURIComponent(sv)}`);
-      }
-    } else {
-      const sv = /** @type {string} */ (v);
-      s.push(`${encodeURIComponent(k)}=${encodeURIComponent(sv)}`);
+    }
+
+    v = arrayOrSingleItemToArray(v);
+    for (let i = 0; i < v.length; i++) {
+      s.push(urlEncodeKeyValue(k, v[i]));
     }
   }
   return s.join('&');
