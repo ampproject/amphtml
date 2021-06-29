@@ -14,11 +14,29 @@
  * limitations under the License.
  */
 
-describes.endtoend('Bento', {fixture: 'bento/minimal.html'}, async (env) => {
-  it('applies static layout without v0.js', async () => {
-    const layoutSizedDefined = await env.controller.findElement(
-      '.i-amphtml-layout-size-defined'
-    );
-    await expect(layoutSizedDefined).ok;
-  });
-});
+describes.endtoend(
+  'Bento',
+  {
+    environments: ['single'],
+    fixture: 'bento/minimal.html',
+  },
+  async (env) => {
+    it('attaches shadow root without v0.js', async () => {
+      const shadowRoot = await env.controller.evaluate(
+        () =>
+          new Promise((resolve) => {
+            function getShadowRoot() {
+              const {shadowRoot} = document.body.firstElementChild;
+              if (shadowRoot) {
+                resolve(shadowRoot);
+              } else {
+                setTimeout(getShadowRoot, 25);
+              }
+            }
+            getShadowRoot();
+          })
+      );
+      await expect(shadowRoot).ok;
+    });
+  }
+);

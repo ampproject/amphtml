@@ -18,7 +18,6 @@
 /* eslint-disable import/no-restricted-paths */
 /* eslint-disable local/no-forbidden-terms */
 
-import {applyStaticLayout} from 'src/static-layout';
 import {initLogConstructor} from '../log';
 import {toWin} from '#core/window';
 
@@ -57,7 +56,6 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
 
         /** */
         connectedCallback() {
-          applyStaticLayout(this);
           this.implementation.buildCallback();
           this.implementation.layoutCallback();
         }
