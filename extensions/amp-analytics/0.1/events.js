@@ -156,15 +156,8 @@ function isAmpStoryTriggerType(triggerType) {
  * @param {!Array<string>|string} selectors
  */
 function assertUniqueSelectors(selectors) {
-  const unique = isArray(selectors) ? new Set(selectors) : null;
   userAssert(
-    unique === null ||
-      unique.size === selectors.length ||
-      // TODO(https://go.amp.dev/issue/34453): Internet Explorer does not
-      // support the constructor `new Set(iterable)`, so it would be empty.
-      // We assume it's ok to continue in this case.
-      // We should remove the following clause once we drop IE support.
-      (!IS_ESM && unique.size === 0),
+    !isArray(selectors) || new Set(selectors).size === selectors.length,
     'Cannot have duplicate selectors in selectors list: %s',
     selectors
   );
