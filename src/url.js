@@ -19,7 +19,6 @@ import {LruCache} from './core/data-structures/lru-cache';
 import {arrayOrSingleItemToArray} from './core/types/array';
 import {dict, hasOwn} from './core/types/object';
 import {endsWith} from './core/types/string';
-import {isArray} from './core/types';
 import {parseQueryString} from './core/types/string/url';
 import {urls} from './config';
 import {userAssert} from './log';
