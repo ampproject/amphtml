@@ -15,14 +15,14 @@
  */
 
 import * as Preact from '#preact';
-import {Loading} from '#core/loading-instructions';
+import {Loading} from '#core/constants/loading-instructions';
 import {Slot, createSlot} from './slot';
 import {dashToCamelCase} from '#core/types/string';
 import {devAssert} from '#core/assert';
 import {getDate} from '#core/types/date';
 import {matches, realChildNodes} from '#core/dom/query';
 import {parseBooleanAttribute} from '#core/dom';
-import {sequentialIdGenerator} from '#core/math/id-generator';
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 
 /**
  * The following combinations are allowed.
