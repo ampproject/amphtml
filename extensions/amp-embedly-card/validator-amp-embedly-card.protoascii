@@ -20,11 +20,11 @@ tags: {  # embedly-card
   extension_spec: {
     name: "amp-embedly-card"
     version: "0.1"
+    version: "1.0"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
-
 tags: {  # <amp-embedly-card>
   html_format: AMP
   tag_name: "AMP-EMBEDLY-CARD"
