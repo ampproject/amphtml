@@ -129,6 +129,7 @@ amp-viewer-assistance
 amp-vimeo
 amp-vine
 amp-viqeo-player
+amp-viz-vega
 amp-vk
 amp-web-push
 amp-wistia-player
