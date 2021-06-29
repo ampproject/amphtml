@@ -27,14 +27,19 @@ import {toggle} from '#core/dom/style';
 import {toggleAttribute} from '#core/dom';
 
 /** @const {!Array<string>} */
-const LIGHTBOX_ELIGIBLE_SELECTORS = [
-  'amp-img[lightbox]',
-  'img[lightbox]',
-  'amp-base-carousel[lightbox] > amp-img',
-  'amp-base-carousel[lightbox] > img',
-  'amp-stream-gallery[lightbox] > amp-img',
-  'amp-stream-gallery[lightbox] > img',
+const LIGHTBOX_ELIGIBLE_SELECTORS = ['amp-img[lightbox]', 'img[lightbox]'];
+
+/** @const {!Array<string>} */
+const LIGHTBOX_ELIGIBLE_GROUP_SELECTORS = [
+  'amp-base-carousel[lightbox]',
+  'amp-stream-gallery[lightbox]',
 ];
+
+/** @const {string} */
+const DEFAULT_GROUP = 'default';
+
+/** @const {string} */
+const DEFAULT_CAROUSEL_PREFIX = 'carousel';
 
 export class BaseElement extends PreactBaseElement {
   /** @param {!AmpElement} element */
@@ -52,8 +57,9 @@ export class BaseElement extends PreactBaseElement {
       'onAfterOpen': () => this.afterOpen_(),
       'onAfterClose': () => this.afterClose_(),
       'render': () =>
-        getLightboxElements(this.element.ownerDocument, (opt_index) =>
-          this.api().open(opt_index)
+        getLightboxElements(
+          this.element.ownerDocument,
+          (opt_index, opt_group) => this.api().open(opt_index, opt_group)
         ),
     });
   }
@@ -102,16 +108,42 @@ export class BaseElement extends PreactBaseElement {
  * @return {!Array<PreactDef.Renderable>}
  */
 function getLightboxElements(document, open) {
-  return toArray(document.querySelectorAll(LIGHTBOX_ELIGIBLE_SELECTORS)).map(
-    (element, index) => {
-      element.addEventListener('click', () => open(index));
-      return (
-        <WithLightbox
-          render={() => <img srcset={srcsetFromElement(element).stringify()} />}
-        />
+  const lightboxElements = [];
+
+  /**
+   * @param {string} defaultGroup
+   * @param {Element} element
+   * @param {number} index
+   */
+  function processLightboxElement(defaultGroup, element, index) {
+    const group = element.getAttribute('lightbox') || defaultGroup;
+    element.addEventListener('click', () => open(index, group));
+    lightboxElements.push(
+      <WithLightbox
+        group={group}
+        as="img"
+        srcset={srcsetFromElement(element).stringify()}
+      />
+    );
+  }
+
+  // Process all standalone elements into a lightbox.
+  toArray(document.querySelectorAll(LIGHTBOX_ELIGIBLE_SELECTORS)).forEach(
+    (element, index) => processLightboxElement(DEFAULT_GROUP, element, index)
+  );
+
+  // Process all lightboxed carousel elements into separate lightbox groups.
+  toArray(document.querySelectorAll(LIGHTBOX_ELIGIBLE_GROUP_SELECTORS)).forEach(
+    (carousel, index) => {
+      const group =
+        carousel.getAttribute('lightbox') || DEFAULT_CAROUSEL_PREFIX + index;
+      toArray(carousel.children).forEach((element, index) =>
+        processLightboxElement(group, element, index)
       );
     }
   );
+
+  return lightboxElements;
 }
 
 /** @override */
