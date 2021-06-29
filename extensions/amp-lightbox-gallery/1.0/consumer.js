@@ -44,35 +44,42 @@ export function WithLightbox({
   as: Comp = 'div',
   children,
   enableActivation = true,
+  group,
   render: renderProp,
+  srcset,
   ...rest
 }) {
   const [genKey] = useState(generateLightboxItemKey);
   const {deregister, open, register} = useContext(LightboxGalleryContext);
   const render = useCallback(
     () =>
-      renderProp
-        ? renderProp()
-        : toChildArray(children).map((child) => cloneElement(child)),
-    [children, renderProp]
+      renderProp ? (
+        renderProp()
+      ) : children ? (
+        toChildArray(children).map((child) => cloneElement(child))
+      ) : (
+        <Comp srcset={srcset} />
+      ),
+    [children, renderProp, srcset]
   );
 
   useLayoutEffect(() => {
-    register(genKey, render);
-    return () => deregister(genKey);
-  }, [genKey, deregister, register, render]);
+    register(genKey, group, render);
+    return () => deregister(genKey, group);
+  }, [genKey, group, deregister, register, render]);
 
   const activationProps = useMemo(
     () =>
       enableActivation && {
         ...DEFAULT_ACTIVATION_PROPS,
         /* genKey is 1-indexed, gallery is 0-indexed */
-        onClick: () => open(Number(genKey) - 1),
+        onClick: () => open(Number(genKey) - 1, group),
       },
-    [enableActivation, genKey, open]
+    [enableActivation, genKey, group, open]
   );
+
   return (
-    <Comp {...activationProps} {...rest}>
+    <Comp {...activationProps} srcset={srcset} {...rest}>
       {children}
     </Comp>
   );
