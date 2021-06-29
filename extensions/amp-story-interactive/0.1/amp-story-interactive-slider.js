@@ -33,9 +33,14 @@ const buildSliderTemplate = (element) => {
     <div class="i-amphtml-story-interactive-slider-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-slider-range-container">
-      <div class="i-amphtml-story-interactive-slider-field">
-        <input class="i-amphtml-story-interactive-slider-range-input" type="range" min="0" max="100" value="25" steps="10">
-      </div>
+        <input
+          class="i-amphtml-story-interactive-slider-range-input"
+          type="range"
+          min="0"
+          max="100"
+          value="25"
+          steps="10"
+        />
       </div>
     </div>
   `;
@@ -59,5 +64,3 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     return this.rootEl_;
   }
 }
-
-

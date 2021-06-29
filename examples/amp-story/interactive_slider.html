@@ -43,8 +43,9 @@
       }
       .bottom {
         position: absolute;
-        bottom: 5em;
-        padding-left: 4em;
+        top: 80%;
+        left: 58%;
+        transform: translate(-50%, -50%);
         width: 22em;
       }
     </style>
@@ -134,7 +135,7 @@
           <p> This is the most basic form of slider in the light theme</p>
         </div>
           <div class="bottom">
-          <amp-story-interactive-slider
+          <amp-story-interactive-slider style="--interactive-accent-color: #651ffe"
             prompt-text="How much do you like this product?"
           >
         </div>
@@ -156,7 +157,7 @@
             <p> This is the most basic form of slider in the dark theme</p>
           </div>
           <div class="bottom">
-          <amp-story-interactive-slider
+          <amp-story-interactive-slider 
             prompt-text="How much do you like this product?"
             theme="dark"
           >
@@ -164,6 +165,29 @@
           </amp-story-interactive-slider>
         </amp-story-grid-layer>
       </amp-story-page>
+      <amp-story-page id="cover-transparent">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            layout="fixed"
+            width="1600"
+            height="1600"
+            src="https://images.unsplash.com/photo-1587270613304-4cc9ef012b92?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTl8fHN1cGVyaGVybyUyMGNvbWljJTIwYm9va3xlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=60"
+          />
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <div class="title">
+            <h1>Slider Component</h1>
+            <p> This is the most basic form of slider in the chip-style transparent theme</p>
+          </div>
+          <div class="bottom">
+          <amp-story-interactive-slider chip-style="transparent" 
+            prompt-text="How much do you like this product?"
+          >
+        </div>
+          </amp-story-interactive-slider>
+        </amp-story-grid-layer>
+      </amp-story-page>
     </amp-story>
+    
   </body>
 </html>
