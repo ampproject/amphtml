@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import * as mode from './core/mode';
 import {LruCache} from './core/data-structures/lru-cache';
 import {dict, hasOwn} from './core/types/object';
 import {endsWith} from './core/types/string';
-import {getMode} from './mode';
 import {isArray} from './core/types';
 import {parseQueryString} from './core/types/string/url';
 import {urls} from './config';
@@ -65,6 +65,7 @@ const urlAsLocation = (url) =>
 
 /**
  * Returns the correct origin for a given window.
+ * TODO(rcebulko): This really belongs under #core/window somewhere, not in url
  * @param {!Window} win
  * @return {string} origin
  */
@@ -77,6 +78,12 @@ export function getWinOrigin(win) {
  * the URL gets resolved.
  * Consider the returned object immutable. This is enforced during
  * testing by freezing the object.
+ * TODO(#34453): The URL constructor isn't supported in IE11, but is supported
+ * everywhere else. There's a lot of code paths (and all uses of the LruCache)
+ * that are built around this polyfill. Once we can drop IE11 support and just
+ * use the URL constructor, we can clear out all of parseWithA, all the URL
+ * cache logic (incl. additional caches in other call-sites). Most is guarded by
+ * IS_ESM and is only included in nomodule builds, but still.
  * @param {string} url
  * @param {boolean=} opt_nocache
  *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
@@ -113,6 +120,8 @@ export function parseUrlDeprecated(url, opt_nocache) {
  */
 export function parseUrlWithA(anchorEl, url, opt_cache) {
   if (IS_ESM) {
+    // Doing this causes the <a> to auto-set its own href to the resolved path,
+    // which would be the baseUrl for the URL constructor.
     anchorEl.href = '';
     return /** @type {?} */ (new URL(url, anchorEl.href));
   }
@@ -170,7 +179,7 @@ export function parseUrlWithA(anchorEl, url, opt_cache) {
   info.origin = origin;
 
   // Freeze during testing to avoid accidental mutation.
-  const frozen = getMode().test && Object.freeze ? Object.freeze(info) : info;
+  const frozen = mode.isTest() && Object.freeze ? Object.freeze(info) : info;
 
   if (opt_cache) {
     opt_cache.put(url, frozen);
