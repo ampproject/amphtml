@@ -151,21 +151,18 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
 
     this.getOptionElements().forEach((el, index) => {
       // Update the aria-label so they read "selected" and "correct" or "incorrect"
-      /*const ariaDescription = objstr({
+      const ariaDescription = objstr({
         selected: optionsData[index].selected,
         correct: el.hasAttribute('correct'),
         incorrect: !el.hasAttribute('correct'),
       });
-      el.querySelector(
-        '.i-amphtml-story-interactive-quiz-answer-choice'
-      ).setAttribute('aria-hidden', true);
-      const optionText = el.querySelector(
-        '.i-amphtml-story-interactive-quiz-option-text'
-      );
-      optionText.setAttribute(
+      el.setAttribute(
         'aria-label',
-        ariaDescription + ' ' + optionText.textContent
-      );*/
+        ariaDescription + ' ' + this.options_[index]['imagealt']
+      );
+      el.querySelector(
+        '.i-amphtml-story-interactive-img-quiz-answer-choice'
+      ).setAttribute('aria-hidden', true);
       // Update percentage text
       el.querySelector(
         '.i-amphtml-story-interactive-img-option-percentage-text'
