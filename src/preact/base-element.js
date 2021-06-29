@@ -135,20 +135,20 @@ export class PreactBaseElement extends BaseElement {
   /** @override @nocollapse */
   static requiresShadowDom() {
     // eslint-disable-next-line local/no-static-this
-    return this['usesShadowDom'];
+    return this['usesShadowDom']; // eslint-disable-line local/restrict-this-access
   }
 
   /** @override @nocollapse */
   static usesLoading() {
     // eslint-disable-next-line local/no-static-this
-    const Ctor = this;
+    const Ctor = this; // eslint-disable-line local/restrict-this-access
     return Ctor['loadable'];
   }
 
   /** @override @nocollapse */
   static prerenderAllowed() {
     // eslint-disable-next-line local/no-static-this
-    const Ctor = this;
+    const Ctor = this; // eslint-disable-line local/restrict-this-access
     return !Ctor.usesLoading();
   }
 
@@ -563,9 +563,9 @@ export class PreactBaseElement extends BaseElement {
             SERVICE_SLOT_ATTRS
           );
           shadowRoot.appendChild(serviceSlot);
-          this.getPlaceholder()?.setAttribute('slot', SERVICE_SLOT_NAME);
-          this.getFallback()?.setAttribute('slot', SERVICE_SLOT_NAME);
-          this.getOverflowElement()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getPlaceholder?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getFallback?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getOverflowElement?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
         }
         this.container_ = container;
 
