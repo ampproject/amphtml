@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-interactive-slider-range-container {
+.i-amphtml-story-interactive-slider-input-container {
   background: var(--i-amphtml-interactive-option-background-color) !important;
-  border-radius: 1.5em !important;
+  border-radius: 2em !important;
   box-shadow: 0.125em 0.25em 0.5em rgba(0, 0, 0, 0.1) !important;
 }
-.i-amphtml-story-interactive-slider-range-input {
+.i-amphtml-story-interactive-slider-input {
   -webkit-appearance: none !important;
   width: calc(100% - 2em) !important;
   height: 1em !important;
@@ -29,24 +29,23 @@
   pointer-events: all !important;
   cursor: pointer !important;
 }
-.i-amphtml-story-interactive-slider-range-input::before {
+.i-amphtml-story-interactive-slider-input::before {
   background: var(--interactive-accent-color) !important;
   content: '' !important;
   opacity: 0.3 !important;
   width: 100% !important;
   height: 100% !important;
-  border-radius: 0.625em !important;
-  outline: none !important;
-  border: none !important;
+  border-radius: 0.5em !important;
+  outline: 1 !important;
+  border: 1 !important;
   position: absolute !important;
   z-index: 2222 !important;
 }
-.i-amphtml-story-interactive-slider-range-input::-webkit-slider-thumb {
+.i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
   -webkit-appearance: none !important;
-  width: 1.25em !important;
-  height: 1.25em !important;
-  border-radius: 50% !important;
+  width: 1.5em !important;
+  height: 1.5em !important;
   background: var(--interactive-accent-color) !important;
-  border: 1x solid var(--interactive-accent-color) !important;
+  border-radius: 50%;
   cursor: pointer !important;
 }

@@ -32,14 +32,13 @@ const buildSliderTemplate = (element) => {
   return html`
     <div class="i-amphtml-story-interactive-slider-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
-      <div class="i-amphtml-story-interactive-slider-range-container">
+      <div class="i-amphtml-story-interactive-slider-input-container">
         <input
-          class="i-amphtml-story-interactive-slider-range-input"
+          class="i-amphtml-story-interactive-slider-input"
           type="range"
           min="0"
           max="100"
           value="25"
-          steps="10"
         />
       </div>
     </div>
