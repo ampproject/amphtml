@@ -43,11 +43,9 @@ const buildOptionTemplate = (option) => {
           class="i-amphtml-story-interactive-img-option-percentage-text"
         ></span>
       </div>
-      <div class="i-amphtml-story-interactive-img-quiz-answer-choice-container">
-        <span
-          class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"
-        ></span>
-      </div>
+      <div
+        class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"
+      ></div>
     </button>
   `;
 };
