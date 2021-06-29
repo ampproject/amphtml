@@ -23,19 +23,16 @@ import {parseQueryString} from './core/types/string/url';
 import {urls} from './config';
 import {userAssert} from './log';
 
-/**
- * @type {!JsonObject}
- */
-const SERVING_TYPE_PREFIX = dict({
+const SERVING_TYPE_PREFIX = new Set([
   // No viewer
-  'c': true,
+  'c',
   // In viewer
-  'v': true,
+  'v',
   // Ad landing page
-  'a': true,
+  'a',
   // Ad
-  'ad': true,
-});
+  'ad',
+]);
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
@@ -530,7 +527,7 @@ export function getSourceUrl(url) {
   const path = url.pathname.split('/');
   const prefix = path[1];
   userAssert(
-    SERVING_TYPE_PREFIX[prefix],
+    SERVING_TYPE_PREFIX.has(prefix),
     'Unknown path prefix in url %s',
     url.href
   );
