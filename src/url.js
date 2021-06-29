@@ -38,7 +38,7 @@ const SERVING_TYPE_PREFIX = new Set([
  * Cached a-tag to avoid memory allocation during URL parsing.
  * @type {HTMLAnchorElement}
  */
-let a;
+let cachedAnchorEl;
 
 /**
  * We cached all parsed URLs. As of now there are no use cases
@@ -46,22 +46,7 @@ let a;
  * but we often parse the same one over and over again.
  * @type {LruCache}
  */
-let cache;
-
-/** @private @const Matches amp_js_* parameters in query string. */
-const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
-
-/** @private @const Matches amp_gsa parameters in query string. */
-const AMP_GSA_PARAMS_REGEX = /[?&]amp_gsa[^&]*/;
-
-/** @private @const Matches amp_r parameters in query string. */
-const AMP_R_PARAMS_REGEX = /[?&]amp_r[^&]*/;
-
-/** @private @const Matches amp_kit parameters in query string. */
-const AMP_KIT_PARAMS_REGEX = /[?&]amp_kit[^&]*/;
-
-/** @private @const Matches usqp parameters from goog experiment in query string. */
-const GOOGLE_EXPERIMENT_PARAMS_REGEX = /[?&]usqp[^&]*/;
+let urlCache;
 
 const INVALID_PROTOCOLS = [
   /*eslint no-script-url: 0*/ 'javascript:',
@@ -92,14 +77,20 @@ export function getWinOrigin(win) {
  * @return {!Location}
  */
 export function parseUrlDeprecated(url, opt_nocache) {
-  if (!a) {
-    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = IS_ESM
+  if (!cachedAnchorEl) {
+    cachedAnchorEl = /** @type {!HTMLAnchorElement} */ (
+      self.document.createElement('a')
+    );
+    urlCache = IS_ESM
       ? null
       : self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
-  return parseUrlWithA(a, url, IS_ESM || opt_nocache ? null : cache);
+  return parseUrlWithA(
+    cachedAnchorEl,
+    url,
+    IS_ESM || opt_nocache ? null : urlCache
+  );
 }
 
 /**
@@ -107,40 +98,40 @@ export function parseUrlDeprecated(url, opt_nocache) {
  * the URL gets resolved.
  * Consider the returned object immutable. This is enforced during
  * testing by freezing the object.
- * @param {!HTMLAnchorElement} a
+ * @param {!HTMLAnchorElement} anchorEl
  * @param {string} url
  * @param {LruCache=} opt_cache
  *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  * @restricted
  */
-export function parseUrlWithA(a, url, opt_cache) {
+export function parseUrlWithA(anchorEl, url, opt_cache) {
   if (IS_ESM) {
-    a.href = '';
-    return /** @type {?} */ (new URL(url, a.href));
+    anchorEl.href = '';
+    return /** @type {?} */ (new URL(url, anchorEl.href));
   }
 
   if (opt_cache && opt_cache.has(url)) {
     return opt_cache.get(url);
   }
 
-  a.href = url;
+  anchorEl.href = url;
 
   // IE11 doesn't provide full URL components when parsing relative URLs.
   // Assigning to itself again does the trick #3449.
-  if (!a.protocol) {
-    a.href = a.href;
+  if (!anchorEl.protocol) {
+    anchorEl.href = anchorEl.href;
   }
 
   const info = /** @type {!Location} */ ({
-    href: a.href,
-    protocol: a.protocol,
-    host: a.host,
-    hostname: a.hostname,
-    port: a.port == '0' ? '' : a.port,
-    pathname: a.pathname,
-    search: a.search,
-    hash: a.hash,
+    href: anchorEl.href,
+    protocol: anchorEl.protocol,
+    host: anchorEl.host,
+    hostname: anchorEl.hostname,
+    port: anchorEl.port == '0' ? '' : anchorEl.port,
+    pathname: anchorEl.pathname,
+    search: anchorEl.search,
+    hash: anchorEl.hash,
     origin: null, // Set below.
   });
 
@@ -160,11 +151,11 @@ export function parseUrlWithA(a, url, opt_cache) {
     info.host = info.hostname;
   }
 
-  // For data URI a.origin is equal to the string 'null' which is not useful.
+  // For data URI anchorEl.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
   let origin;
-  if (a.origin && a.origin != 'null') {
-    origin = a.origin;
+  if (anchorEl.origin && anchorEl.origin != 'null') {
+    origin = anchorEl.origin;
   } else if (info.protocol == 'data:' || !info.host) {
     origin = info.href;
   } else {
@@ -478,11 +469,15 @@ function removeAmpJsParamsFromSearch(urlSearch) {
     return '';
   }
   const search = urlSearch
-    .replace(AMP_JS_PARAMS_REGEX, '')
-    .replace(AMP_GSA_PARAMS_REGEX, '')
-    .replace(AMP_R_PARAMS_REGEX, '')
-    .replace(AMP_KIT_PARAMS_REGEX, '')
-    .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
+    // The below regex is a combo of these original patterns. Combining these
+    // and the corresponding `.replace` calls saves ~120B. Matches params in
+    // query string:
+    // - /[?&]amp_js[^&]*/   amp_js_*
+    // - /[?&]amp_gsa[^&]*/  amp_gsa
+    // - /[?&]amp_r[^&]*/    amp_r
+    // - /[?&]amp_kit[^&]*/  amp_kit
+    // - /[?&]usqp[^&]*/     usqp (from goog experiment)
+    .replace(/[?&](amp_(js|gsa|r|kit)|usqp)[^&]*/g, '')
     .replace(/^[?&]/, ''); // Removes first ? or &.
   return search ? '?' + search : '';
 }
