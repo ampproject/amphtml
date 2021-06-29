@@ -1,0 +1,85 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>amp-embedly-card example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    amp-embedly-card {
+      color: red;
+    }
+  </style>
+  <script async custom-element="amp-embedly-card" src="https://cdn.ampproject.org/v0/amp-embedly-card-1.0.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <!-- Valid: amp-embedly-key value and layout -->
+  <amp-embedly-key value="1d5c48f7edc34c54bdae4c37b681ea2b" layout="nodisplay"></amp-embedly-key>
+
+  <!-- Valid: amp-embedly-card correct attributes -->
+  <amp-embedly-card
+          data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+          layout="responsive"
+          width="100"
+          height="50"
+  ></amp-embedly-card>
+
+  <!-- Invalid: amp-embedly-key missing value -->
+  <amp-embedly-key layout="nodisplay"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-key invalid layout - responsive -->
+  <amp-embedly-key layout="responsive"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-key invalid layout - fill -->
+  <amp-embedly-key layout="fill"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-key invalid layout - fixed -->
+  <amp-embedly-key layout="fixed"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-key invalid layout - fixed-height -->
+  <amp-embedly-key layout="fixed-height"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-key invalid layout - flex-item -->
+  <amp-embedly-key layout="flex-item"></amp-embedly-key>
+
+  <!-- Invalid: amp-embedly-card missing width -->
+  <amp-embedly-card
+          data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+          layout="responsive"
+          height="80"
+  ></amp-embedly-card>
+
+  <!-- Invalid: amp-embedly-card missing height -->
+  <amp-embedly-card
+          data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+          layout="responsive"
+          width="150"
+  ></amp-embedly-card>
+
+  <!-- Invalid: amp-embedly-card forbidden protocol http -->
+  <amp-embedly-card
+          data-url="http://www.youtube.com/watch?v=lBTCB7yLs8Y"
+          layout="responsive"
+          width="150"
+          height="80"
+  ></amp-embedly-card>
+
+  <!-- Invalid: amp-embedly-card relative url -->
+  <amp-embedly-card
+          data-url="/watch?v=lBTCB7yLs8Y"
+          layout="responsive"
+          width="150"
+          height="80"
+  ></amp-embedly-card>
+
+  <!-- Invalid: amp-embedly-card invalid layout -->
+  <amp-embedly-card
+          data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+          layout="nodisplay"
+          width="100"
+          height="50"
+  ></amp-embedly-card>
+</body>
+</html>
