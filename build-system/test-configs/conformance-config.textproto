@@ -262,12 +262,6 @@ requirement: {
 # Set
 
 requirement: {
-  type: BANNED_CODE_PATTERN
-  error_message: 'Cannot construct Set with Iterable'
-  value: '/** @param {Array|Object} a */function template(a) {new Set(a)}'
-}
-
-requirement: {
   type: BANNED_PROPERTY_CALL
   error_message: 'Set.prototype.keys is not allowed'
   value: 'Set.prototype.keys'

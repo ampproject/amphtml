@@ -30,7 +30,7 @@ import {install as installObjectAssign} from './object-assign';
 import {install as installObjectValues} from './object-values';
 import {install as installPromise} from './promise';
 import {install as installResizeObserver} from './resize-observer';
-import {install as installSetAdd} from './set-add';
+import {install as installSet} from './set';
 import {install as installStringStartsWith} from './string-starts-with';
 import {install as installWeakMapSet} from './weakmap-set';
 
@@ -43,7 +43,7 @@ if (!IS_ESM) {
   installArrayIncludes(self);
   installMapSet(self);
   installWeakMapSet(self);
-  installSetAdd(self);
+  installSet(self);
   installStringStartsWith(self);
 }
 
