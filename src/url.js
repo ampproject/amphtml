@@ -48,14 +48,20 @@ let cachedAnchorEl;
  */
 let urlCache;
 
-const INVALID_PROTOCOLS = [
-  /*eslint no-script-url: 0*/ 'javascript:',
-  /*eslint no-script-url: 0*/ 'data:',
-  /*eslint no-script-url: 0*/ 'vbscript:',
-];
+// eslint-disable-next-line no-script-url
+const INVALID_PROTOCOLS = ['javascript:', 'data:', 'vbscript:'];
 
 /** @const {string} */
 export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
+
+/**
+ * Coerces a url into a location;
+ * @function
+ * @param {string|!Location} url
+ * @return {!Location}
+ */
+const urlAsLocation = (url) =>
+  typeof url == 'string' ? parseUrlDeprecated(url) : url;
 
 /**
  * Returns the correct origin for a given window.
@@ -278,9 +284,7 @@ export function serializeQueryString(params) {
  * @return {boolean}
  */
 export function isSecureUrlDeprecated(url) {
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
+  url = urlAsLocation(url);
   return (
     url.protocol == 'https:' ||
     url.hostname == 'localhost' ||
@@ -373,9 +377,7 @@ export function getFragment(url) {
  * @return {boolean}
  */
 export function isProxyOrigin(url) {
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
+  url = urlAsLocation(url);
   return urls.cdnProxyRegex.test(url.origin);
 }
 
@@ -395,9 +397,7 @@ export function isAmpScriptUri(uri) {
  * @return {?string}
  */
 export function getProxyServingType(url) {
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
+  url = urlAsLocation(url);
   if (!isProxyOrigin(url)) {
     return null;
   }
@@ -411,9 +411,7 @@ export function getProxyServingType(url) {
  * @return {boolean}
  */
 export function isLocalhostOrigin(url) {
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
+  url = urlAsLocation(url);
   return urls.localhostRegex.test(url.origin);
 }
 
@@ -427,9 +425,7 @@ export function isProtocolValid(url) {
   if (!url) {
     return true;
   }
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
+  url = urlAsLocation(url);
   return !INVALID_PROTOCOLS.includes(url.protocol);
 }
 
@@ -499,9 +495,7 @@ export function removeParamsFromSearch(urlSearch, paramName) {
  * @return {string}
  */
 export function getSourceUrl(url) {
-  if (typeof url == 'string') {
-    url = parseUrlDeprecated(url);
-  }
+  url = urlAsLocation(url);
 
   // Not a proxy URL - return the URL itself.
   if (!isProxyOrigin(url)) {
@@ -552,9 +546,7 @@ export function getSourceOrigin(url) {
  * @return {string}
  */
 export function resolveRelativeUrl(relativeUrlString, baseUrl) {
-  if (typeof baseUrl == 'string') {
-    baseUrl = parseUrlDeprecated(baseUrl);
-  }
+  baseUrl = urlAsLocation(baseUrl);
   if (IS_ESM || typeof URL == 'function') {
     return new URL(relativeUrlString, baseUrl.href).toString();
   }
@@ -569,9 +561,7 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
  * @private @visibleForTesting
  */
 export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
-  if (typeof baseUrl == 'string') {
-    baseUrl = parseUrlDeprecated(baseUrl);
-  }
+  baseUrl = urlAsLocation(baseUrl);
   relativeUrlString = relativeUrlString.replace(/\\/g, '/');
   const relativeUrl = parseUrlDeprecated(relativeUrlString);
 
