@@ -20,15 +20,16 @@
   width: 1.5em !important;
   bottom: 0.5em !important;
   right: 0.5em !important;
-  border: 0.125em solid
-    var(--i-amphtml-interactive-options-chip-background-color) !important;
-  background-color: var(--interactive-prompt-background) !important;
+  border: 0.125em solid var(--i-amphtml-interactive-option-background-color) !important;
+  background-color: var(
+    --i-amphtml-interactive-option-background-color
+  ) !important;
   border-radius: 50% !important;
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
   text-align: center !important;
-  color: var(--interactive-prompt-text-color) !important;
+  color: var(--interactive-accent-color) !important;
   font-weight: bold !important;
   line-height: 1.5em !important;
 }
