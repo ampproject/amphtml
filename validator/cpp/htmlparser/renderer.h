@@ -58,6 +58,14 @@ enum class RenderError {
 
 class Renderer {
  public:
+  // This renderer though fully functional, is primarily used to render webkit
+  // test cases. This Render uses recursion which may not be very efficient for
+  // production rendering. Some things you may need to consider:
+  // A) Increase the stack size.
+  // B) Control document complexity by --htmlparser_max_nodes_depth_count flag.
+  // C) Write your own renderer.
+  //
+  // TODO(amaltas): Replace recursion with iteration based dom tree traversal.
   static RenderError Render(Node* node, std::stringbuf* output_buffer);
 };
 
