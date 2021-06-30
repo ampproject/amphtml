@@ -333,7 +333,7 @@ export class PreactBaseElement extends BaseElement {
     this.scheduleRender_();
 
     if (Ctor['loadable']) {
-      this.setReadyState(ReadyState.LOADING);
+      this.setReadyState?.(ReadyState.LOADING);
     }
     this.maybeUpdateReadyState_();
 

@@ -70,7 +70,7 @@ export class BaseElement extends PreactBaseElement {
 
   /** @override */
   unmountCallback() {
-    this.removeAsContainer();
+    this.removeAsContainer?.();
   }
 
   /** @private */
@@ -83,7 +83,7 @@ export class BaseElement extends PreactBaseElement {
   /** @private */
   afterOpen_() {
     const sidebar = this.element.shadowRoot.querySelector('[part=sidebar]');
-    this.setAsContainer(sidebar);
+    this.setAsContainer?.(sidebar);
   }
 
   /** @private */
@@ -92,7 +92,7 @@ export class BaseElement extends PreactBaseElement {
     toggleAttribute(this.element, 'open', false);
     toggle(this.element, false);
 
-    this.removeAsContainer();
+    this.removeAsContainer?.();
     pauseAll(this.element, /* includeSelf */ false);
   }
 

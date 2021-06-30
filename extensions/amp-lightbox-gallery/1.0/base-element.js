@@ -60,7 +60,7 @@ export class BaseElement extends PreactBaseElement {
 
   /** @override */
   unmountCallback() {
-    this.removeAsContainer();
+    this.removeAsContainer?.();
   }
 
   /** @private */
@@ -73,7 +73,7 @@ export class BaseElement extends PreactBaseElement {
   /** @private */
   afterOpen_() {
     const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
-    this.setAsContainer(scroller);
+    this.setAsContainer?.(scroller);
   }
 
   /** @private */
@@ -82,7 +82,7 @@ export class BaseElement extends PreactBaseElement {
     toggleAttribute(this.element, 'open', false);
     toggle(this.element, false);
 
-    this.removeAsContainer();
+    this.removeAsContainer?.();
   }
 
   /** @override */

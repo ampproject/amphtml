@@ -230,13 +230,14 @@ module.exports = {
       {
         className: 'PreactBaseElement',
         allowed: [
+          'api',
           'element',
           'getProp',
           'loadable',
           'mutateElement',
           'mutateProps',
           'registerApiAction',
-          'setReadyState',
+          'triggerEvent',
           'usesLoading',
           'usesShadowDom',
           'win',
