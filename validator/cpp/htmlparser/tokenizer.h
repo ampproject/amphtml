@@ -273,10 +273,6 @@ class Tokenizer {
 
   // Current token's line col record. One line can have several tokens.
   LineCol token_line_col_;
-
-  // The start/end index of the current token in HTML.
-  int position_;
-  int position_end_;
 };
 
 }  // namespace htmlparser
