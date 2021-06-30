@@ -65,7 +65,8 @@ std::unique_ptr<Document> Parse(std::string_view html) {
       ParseOptions{.scripting = true,
                    .frameset_ok = true,
                    .record_node_offsets = true,
-                   .record_attribute_offsets = true});
+                   .record_attribute_offsets = true,
+                   .count_num_terms_in_text_node = true});
   return parser->Parse();
 }
 
@@ -122,7 +123,8 @@ std::unique_ptr<Document> ParseFragment(std::string_view html,
   ParseOptions options = {.scripting = true,
                           .frameset_ok = true,
                           .record_node_offsets = true,
-                          .record_attribute_offsets = true};
+                          .record_attribute_offsets = true,
+                          .count_num_terms_in_text_node = true};
   return ParseFragmentWithOptions(html, options, fragment_parent);
 }
 
@@ -138,6 +140,7 @@ Parser::Parser(std::string_view html, const ParseOptions& options,
       frameset_ok_(options.frameset_ok),
       record_node_offsets_(options.record_node_offsets),
       record_attribute_offsets_(options.record_attribute_offsets),
+      count_num_terms_in_text_node_(options.count_num_terms_in_text_node),
       fragment_(fragment_parent != nullptr),
       context_node_(fragment_parent) {
   insertion_mode_ = std::bind(&Parser::InitialIM, this);
@@ -391,7 +394,7 @@ void Parser::FosterParent(Node* node) {
 
   if (prev && prev->node_type_ == NodeType::TEXT_NODE &&
       node->node_type_ == NodeType::TEXT_NODE) {
-    prev->data_ += node->data_;
+    prev->data_.append(node->data_);
     return;
   }
 
@@ -402,10 +405,13 @@ void Parser::AddText(const std::string& text) {
   if (text.empty()) return;
 
   auto text_node = document_->NewNode(NodeType::TEXT_NODE);
+  if (record_node_offsets_) {
+    text_node->line_col_in_html_src_ = token_.line_col_in_html_src;
+    text_node->offsets_in_html_src_ = token_.offsets_in_html_src;
+  }
 
   if (ShouldFosterParent()) {
     text_node->data_.assign(text, 0, text.size());
-    text_node->position_in_html_src_ = token_.position_in_html_src;
     FosterParent(text_node);
     return;
   }
@@ -418,7 +424,9 @@ void Parser::AddText(const std::string& text) {
   }
 
   text_node->data_.assign(text, 0, text.size());
-  text_node->position_in_html_src_ = token_.position_in_html_src;
+  if (count_num_terms_in_text_node_) {
+    text_node->num_terms_ = Strings::CountTerms(text);
+  }
   AddChild(text_node);
 }  // Parser::AddText.
 
@@ -426,6 +434,11 @@ void Parser::AddElement() {
   Node* element_node = document_->NewNode(NodeType::ELEMENT_NODE, token_.atom);
   if (token_.atom == Atom::UNKNOWN) {
     element_node->data_ = token_.data;
+  }
+
+  if (record_node_offsets_) {
+    element_node->line_col_in_html_src_ = token_.line_col_in_html_src;
+    element_node->offsets_in_html_src_ = token_.offsets_in_html_src;
   }
 
   switch (token_.atom) {
@@ -445,10 +458,6 @@ void Parser::AddElement() {
       break;
   }
 
-  if (record_node_offsets_) {
-    element_node->position_in_html_src_ = token_.position_in_html_src;
-  }
-
   std::copy(token_.attributes.begin(), token_.attributes.end(),
             std::back_inserter(element_node->attributes_));
   AddChild(element_node);
@@ -457,7 +466,7 @@ void Parser::AddElement() {
     std::transform(
         element_node->attributes_.begin(), element_node->attributes_.end(),
         element_node->attributes_.begin(), [](Attribute attr) -> Attribute {
-          attr.position_in_html_src = std::nullopt;
+          attr.line_col_in_html_src = std::nullopt;
           return attr;
         });
   }
@@ -662,7 +671,8 @@ bool Parser::InitialIM() {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->data_ = std::move(token_.data);
       if (record_node_offsets_) {
-        node->position_in_html_src_ = token_.position_in_html_src;
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
       }
       node->SetManufactured(token_.is_manufactured);
       document_->root_node_->AppendChild(node);
@@ -672,7 +682,8 @@ bool Parser::InitialIM() {
       auto doctype_node = document_->NewNode(NodeType::DOCTYPE_NODE);
       bool quirks_mode = ParseDoctype(token_.data, doctype_node);
       if (record_node_offsets_) {
-        doctype_node->position_in_html_src_ = token_.position_in_html_src;
+        doctype_node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        doctype_node->offsets_in_html_src_ = token_.offsets_in_html_src;
       }
       document_->root_node_->AppendChild(doctype_node);
       accounting_.quirks_mode = quirks_mode;
@@ -735,7 +746,10 @@ bool Parser::BeforeHTMLIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = std::move(token_.data);
       document_->root_node_->AppendChild(node);
       return true;
@@ -792,7 +806,10 @@ bool Parser::BeforeHeadIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
@@ -924,7 +941,10 @@ bool Parser::InHeadIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
@@ -1088,7 +1108,10 @@ bool Parser::AfterHeadIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
@@ -1155,7 +1178,7 @@ bool Parser::InBodyIM() {
           if (!accounting_.has_manufactured_html || num_html_tags_ > 1) {
             accounting_.duplicate_html_elements = true;
             accounting_.duplicate_html_element_location =
-                token_.position_in_html_src;
+                token_.line_col_in_html_src;
           }
           break;
         }
@@ -1185,7 +1208,7 @@ bool Parser::InBodyIM() {
               if (!accounting_.has_manufactured_body || num_body_tags_ > 1) {
                 accounting_.duplicate_body_elements = true;
                 accounting_.duplicate_body_element_location =
-                    token_.position_in_html_src;
+                    token_.line_col_in_html_src;
               }
             }
           }
@@ -1692,7 +1715,10 @@ bool Parser::InBodyIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2117,7 +2143,10 @@ bool Parser::InTableIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -2231,7 +2260,10 @@ bool Parser::InColumnGroupIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -2368,7 +2400,10 @@ bool Parser::InTableBodyIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -2659,7 +2694,10 @@ bool Parser::InSelectIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2849,7 +2887,10 @@ bool Parser::AfterBodyIM() {
                "after-body insertion mode";
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = token_.data;
       open_elements_stack_.at(0)->AppendChild(node);
       return true;
@@ -2868,7 +2909,10 @@ bool Parser::InFramesetIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2924,7 +2968,10 @@ bool Parser::AfterFramesetIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2981,7 +3028,10 @@ bool Parser::AfterAfterBodyIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = token_.data;
       document_->root_node_->AppendChild(node);
       return true;
@@ -3002,7 +3052,10 @@ bool Parser::AfterAfterFramesetIM() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
-      node->position_in_html_src_ = token_.position_in_html_src;
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = token_.data;
       document_->root_node_->AppendChild(node);
       break;
@@ -3056,6 +3109,10 @@ bool Parser::ParseForeignContent() {
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
+      if (record_node_offsets_) {
+        node->line_col_in_html_src_ = token_.line_col_in_html_src;
+        node->offsets_in_html_src_ = token_.offsets_in_html_src;
+      }
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -3194,7 +3251,7 @@ void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
   Token real_token = {.token_type = token_.token_type,
                       .atom = token_.atom,
                       .data = token_.data,
-                      .position_in_html_src = token_.position_in_html_src,
+                      .line_col_in_html_src = token_.line_col_in_html_src,
                       .attributes = token_.attributes};
   bool self_closing = has_self_closing_token_;
   // Create implied tokens.
@@ -3203,7 +3260,8 @@ void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
             .data = data,
             // For reporting purposes implied tokens are assumed to be parsed at
             // the current tag location.
-            .position_in_html_src = token_.position_in_html_src,
+            .line_col_in_html_src = token_.line_col_in_html_src,
+            .offsets_in_html_src = token_.offsets_in_html_src,
             .attributes = {}};
   has_self_closing_token_ = false;
 
@@ -3229,7 +3287,8 @@ void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
   token_ = {.token_type = real_token.token_type,
             .atom = real_token.atom,
             .data = real_token.data,
-            .position_in_html_src = token_.position_in_html_src,
+            .line_col_in_html_src = token_.line_col_in_html_src,
+            .offsets_in_html_src = token_.offsets_in_html_src,
             .attributes = real_token.attributes};
   has_self_closing_token_ = self_closing;
 }  // Parser::ParseImpliedToken.

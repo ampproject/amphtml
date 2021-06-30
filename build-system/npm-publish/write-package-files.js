@@ -40,6 +40,7 @@ async function shouldSkip() {
 
 /**
  * Write package.json
+ * @return {Promise<void>}
  */
 async function writePackageJson() {
   const extensionVersionArr = extensionVersion.split('.', 2);
@@ -116,6 +117,7 @@ async function writePackageJson() {
 
 /**
  * Write react.js
+ * @return {Promise<void>}
  */
 async function writeReactJs() {
   const content = "module.exports = require('./dist/component-react');";
@@ -134,6 +136,7 @@ async function writeReactJs() {
 
 /**
  * Main
+ * @return {Promise<void>}
  */
 async function main() {
   if (await shouldSkip()) {

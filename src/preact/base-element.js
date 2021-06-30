@@ -21,7 +21,7 @@ import {AmpEvents} from '#core/constants/amp-events';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
 import {Deferred} from '#core/data-structures/promise';
 import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {Loading} from '#core/loading-instructions';
+import {Loading} from '#core/constants/loading-instructions';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {ReadyState} from '#core/constants/ready-state';
@@ -560,6 +560,7 @@ export class PreactBaseElement extends AMP.BaseElement {
           shadowRoot.appendChild(serviceSlot);
           this.getPlaceholder()?.setAttribute('slot', SERVICE_SLOT_NAME);
           this.getFallback()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getOverflowElement()?.setAttribute('slot', SERVICE_SLOT_NAME);
         }
         this.container_ = container;
 

@@ -60,11 +60,6 @@ const MODULE_SEPARATOR = ';';
  * Used during minification to concatenate extension bundles
  */
 const EXTENSION_BUNDLE_MAP = {
-  'amp-viz-vega.js': [
-    'third_party/d3/d3.js',
-    'third_party/d3-geo-projection/d3-geo-projection.js',
-    'third_party/vega/vega.js',
-  ],
   'amp-inputmask.js': ['third_party/inputmask/bundle.js'],
   'amp-date-picker.js': ['third_party/react-dates/bundle.js'],
   'amp-shadow-dom-polyfill.js': [
@@ -124,6 +119,7 @@ function doBuildJs(jsBundles, name, extraOptions) {
  * Generates frames.html
  *
  * @param {!Object} options
+ * @return {Promise<void>}
  */
 async function bootstrapThirdPartyFrames(options) {
   const startTime = Date.now();
@@ -373,6 +369,7 @@ function handleBundleError(err, continueOnError, destFilename) {
  * @param {string} destFilename
  * @param {?Object} options
  * @param {number} startTime
+ * @return {Promise<void>}
  */
 async function finishBundle(
   srcFilename,
@@ -532,6 +529,7 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
 
   /**
    * @param {number} time
+   * @return {Promise<void>}
    */
   async function build(time) {
     if (!result) {
