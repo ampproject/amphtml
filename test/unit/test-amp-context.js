@@ -27,7 +27,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
 
   beforeEach(() => {
     windowPostMessageSpy = env.sandbox.spy();
-    // Stub RTV version.
+    // Manually set RTV value used in these tests.
     getMode().rtvVersion = '0123456789';
     win = {
       addEventListener: (eventType, handlerFn) => {
