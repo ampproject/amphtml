@@ -90,9 +90,6 @@ class Node {
   std::optional<LineCol> LineColInHtmlSrc() const {
     return line_col_in_html_src_;
   }
-  std::optional<Offsets> OffsetsInHtmlSrc() const {
-    return offsets_in_html_src_;
-  }
   int NumTerms() const {
     return num_terms_;
   }
@@ -160,8 +157,6 @@ class Node {
   std::string name_space_;
   // Position at which this node appears in HTML source.
   std::optional<LineCol> line_col_in_html_src_;
-  // Start/End offsets in original html src.
-  std::optional<LineCol> offsets_in_html_src_;
   // Records the number of terms for text contents.
   // Populated and meaningful only if node is of type TEXT_NODE.
   int num_terms_ = -1;
