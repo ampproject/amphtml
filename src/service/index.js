@@ -812,26 +812,6 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService}
-   */
-  static assistjsFrameServiceForDoc(elementOrAmpDoc) {
-    return /** @type {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService} */ (
-      getServiceForDoc(elementOrAmpDoc, 'assistjs-frame-service')
-    );
-  }
-
-  /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService}
-   */
-  static assistjsConfigServiceForDoc(elementOrAmpDoc) {
-    return /** @type {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService} */ (
-      getServiceForDoc(elementOrAmpDoc, 'assistjs-config-service')
-    );
-  }
-
-  /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<../amp-cache-url/amp-cache-url.AmpCacheUrlService>}
    */
   static cacheUrlServicePromiseForDoc(elementOrAmpDoc) {
