@@ -748,7 +748,7 @@ TEST(ParserTest, VoidElementsParsedCorrectly) {
 
 TEST(ParserTest, NumTermsInTextNodeCountEnabled) {
   htmlparser::Parser p(
-      "hello world         \t    bye    \n   \n bye  \r   ",
+      "<script>var c = 0</script>hello world    \t    bye    \n   \nbye  \r   ",
       {.scripting = true,
        .frameset_ok = true,
        .record_node_offsets = true,
@@ -761,6 +761,13 @@ TEST(ParserTest, NumTermsInTextNodeCountEnabled) {
   EXPECT_EQ(body->DataAtom(), htmlparser::Atom::BODY);
   EXPECT_EQ(body->FirstChild()->Type(), htmlparser::NodeType::TEXT_NODE);
   EXPECT_EQ(body->FirstChild()->NumTerms(), 4);
+
+  auto head = doc->RootNode()->FirstChild()->FirstChild();
+  EXPECT_NOT_NULL(head);
+  EXPECT_EQ(head->FirstChild()->DataAtom(), htmlparser::Atom::SCRIPT);
+  EXPECT_EQ(head->FirstChild()->FirstChild()->Type(),
+            htmlparser::NodeType::TEXT_NODE);
+  EXPECT_EQ(head->FirstChild()->FirstChild()->NumTerms(), -1);
 }
 
 TEST(ParserTest, NumTermsInTextNodeCountDisabled) {

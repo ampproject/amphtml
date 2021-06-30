@@ -423,10 +423,15 @@ void Parser::AddText(const std::string& text) {
   }
 
   text_node->data_.assign(text, 0, text.size());
-  if (count_num_terms_in_text_node_) {
+  AddChild(text_node);
+  // Count number of terms in ths text node, except if this is <script>,
+  // <textarea> or a comment node.
+  if (count_num_terms_in_text_node_ && text_node->Parent() &&
+      text_node->Parent()->DataAtom() != Atom::SCRIPT &&
+      text_node->Parent()->Type() != NodeType::COMMENT_NODE &&
+      text_node->Parent()->DataAtom() != Atom::TEXTAREA) {
     text_node->num_terms_ = Strings::CountTerms(text);
   }
-  AddChild(text_node);
 }  // Parser::AddText.
 
 void Parser::AddElement() {
