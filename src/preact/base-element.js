@@ -135,21 +135,19 @@ export class PreactBaseElement extends BaseElement {
   /** @override @nocollapse */
   static requiresShadowDom() {
     // eslint-disable-next-line local/no-static-this
-    return this['usesShadowDom']; // eslint-disable-line local/restrict-this-access
+    return this['usesShadowDom'];
   }
 
   /** @override @nocollapse */
   static usesLoading() {
     // eslint-disable-next-line local/no-static-this
-    const Ctor = this; // eslint-disable-line local/restrict-this-access
-    return Ctor['loadable'];
+    return this['loadable'];
   }
 
   /** @override @nocollapse */
   static prerenderAllowed() {
     // eslint-disable-next-line local/no-static-this
-    const Ctor = this; // eslint-disable-line local/restrict-this-access
-    return !Ctor.usesLoading();
+    return !this.usesLoading();
   }
 
   /** @param {!Element} element */

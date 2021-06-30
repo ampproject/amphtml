@@ -99,29 +99,32 @@ module.exports = function (context) {
     [memberSelector](node) {
       seen.add(node.object);
 
-      const {property} = node;
-      if (property.type !== 'Identifier') {
+      const {parent, property} = node;
+
+      // Optional users are ok
+      if (parent.optional) {
+        return;
+      }
+
+      const name =
+        property.type === 'Identifier'
+          ? property.name
+          : property.type === 'Literal'
+          ? property.value
+          : null;
+
+      if (!name) {
         context.report({
           node: property,
           message: 'unknown property type',
         });
-        return;
       }
 
-      // Optional users are ok
-      if (node.parent.optional) {
-        return;
-      }
-
-      const {name} = property;
       if (allowed.includes(name)) {
         return;
       }
 
-      if (
-        node.parent.type === 'AssignmentExpression' &&
-        node.parent.left === node
-      ) {
+      if (parent.type === 'AssignmentExpression' && parent.left === node) {
         used.set(name, new NoPushArray());
         return;
       }
