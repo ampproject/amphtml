@@ -17,7 +17,7 @@
 .i-amphtml-story-interactive-slider-input-container {
   background: var(--i-amphtml-interactive-option-background-color) !important;
   border-radius: 2em !important;
-  box-shadow: 0.125em 0.25em 0.5em rgba(0, 0, 0, 0.1) !important;
+  box-shadow:var(--i-amphtml-interactive-component-shadow) !important;
 }
 .i-amphtml-story-interactive-slider-input {
   -webkit-appearance: none !important;
@@ -36,10 +36,8 @@
   width: 100% !important;
   height: 100% !important;
   border-radius: 0.5em !important;
-  outline: 1 !important;
-  border: 1 !important;
   position: absolute !important;
-  z-index: 2222 !important;
+  z-index: 1 !important;
 }
 .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
   -webkit-appearance: none !important;
