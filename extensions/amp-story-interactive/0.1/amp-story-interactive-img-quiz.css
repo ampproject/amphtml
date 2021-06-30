@@ -82,7 +82,7 @@
   .i-amphtml-story-interactive-img-quiz-answer-choice::before {
   background-color: transparent !important;
   background-image: var(--i-amphtml-interactive-option-post-marker) !important;
-  background-position: center !important;
+  background-position: 0.375em !important;
   background-repeat: no-repeat !important;
   background-size: 0.75em !important;
   filter: var(--i-amphtml-story-interactive-img-quiz-answer-filter) !important;
