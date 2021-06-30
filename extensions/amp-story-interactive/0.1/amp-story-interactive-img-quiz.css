@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-interactive-img-option {
-  --correct-color: #5bba74 !important;
-  --correct-color-shaded: #00600f !important;
-  --incorrect-color: #f34e4e !important;
-  --incorrect-color-shaded: #b71c1c !important;
-}
-
 .i-amphtml-story-interactive-img-quiz-answer-choice {
   position: absolute !important;
   height: 1.5em !important;
