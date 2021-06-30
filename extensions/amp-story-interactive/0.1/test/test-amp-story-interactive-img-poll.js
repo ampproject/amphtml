@@ -126,21 +126,6 @@ describes.realWin(
       });
     });
 
-    /*it('should fill the content of the options', async () => {
-      ampStoryPoll.element.setAttribute('option-1-image', 'src1');
-      ampStoryPoll.element.setAttribute('option-1-image-alt', 'alt1');
-      ampStoryPoll.element.setAttribute('option-2-image', 'src2');
-      ampStoryPoll.element.setAttribute('option-2-image-alt', 'alt2');
-      await ampStoryPoll.buildCallback();
-      await ampStoryPoll.layoutCallback();
-      expect(
-        ampStoryPoll.getOptionElements()[0].getAttribute('aria-label')
-      ).to.contain('Fizz');
-      expect(ampStoryPoll.getOptionElements()[1].textContent).to.contain(
-        'Buzz'
-      );
-    });*/
-
     it('should handle the percentage pipeline', async () => {
       env.sandbox
         .stub(requestService, 'executeRequest')
