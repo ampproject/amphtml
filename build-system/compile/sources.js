@@ -24,7 +24,6 @@ const COMMON_GLOBS = [
   'third_party/amp-toolbox-cache-url/**/*.js',
   'third_party/caja/html-sanitizer.js',
   'third_party/closure-library/sha384-generated.js',
-  'third_party/closure-responding-channel/closure-bundle.js',
   'third_party/css-escape/css-escape.js',
   'third_party/d3/**/*.js',
   'third_party/fuzzysearch/index.js',
