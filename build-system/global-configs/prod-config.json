@@ -9,7 +9,7 @@
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "flexAdSlots": 0.05,
-  "flexible-bitrate": 0.5,
+  "flexible-bitrate": 0.1,
   "ios-fixed-no-transfer": 0,
   "layout-aspect-ratio-css": 0,
   "disable-a4a-non-sd": 1,
