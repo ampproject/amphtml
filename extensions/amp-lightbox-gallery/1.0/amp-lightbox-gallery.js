@@ -50,8 +50,7 @@ class AmpLightboxGallery extends BaseElement {
    * @param {*} invocation
    */
   openAction(api, invocation) {
-    const args = invocation.args || {};
-    const id = args['id'];
+    const id = invocation?.args?.['id'];
     if (id) {
       this.getAmpDoc().getElementById(id)?.click();
     } else {
