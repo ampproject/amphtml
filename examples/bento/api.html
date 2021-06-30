@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Bento component method API</title>
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
+    <script
+      async
+      custom-element="amp-video"
+      src="https://cdn.ampproject.org/v0/amp-video-1.0.js"
+    ></script>
+  </head>
+  <body>
+    <amp-video
+      style="display: block; position: relative; width: 160px; height: 90px"
+      src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4"
+    >
+    </amp-video>
+
+    <button data-method="play" disabled>Play</button>
+    <button data-method="pause" disabled>Pause</button>
+
+    <script>
+      (async function () {
+        const element = document.body.firstElementChild;
+        const tagName = element.tagName.toLowerCase();
+
+        await window.customElements.whenDefined(tagName);
+
+        const api = await element.getApi();
+
+        function onButtonClick(e) {
+          // We follow the `data-method` attribute in this example.
+          // Otherwise, this would be a direct call to e.g. api.play();
+          const method = e.target.dataset.method;
+          api[method]();
+        }
+
+        const buttons = Array.from(
+          document.querySelectorAll('button[data-method]')
+        );
+        buttons.forEach((button) => {
+          button.removeAttribute('disabled');
+          button.addEventListener('click', onButtonClick);
+        });
+      })();
+    </script>
+  </body>
+</html>
