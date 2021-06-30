@@ -334,6 +334,15 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-embedly-card",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true,
+      "wrappers": "bento"
+    }
+  },
+  {
     "name": "amp-experiment",
     "version": [
       "0.1",
@@ -626,6 +635,16 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-lightbox-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "wrapper": "bento"
     }
   },
   {

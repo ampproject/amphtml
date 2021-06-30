@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,15 @@
  * limitations under the License.
  */
 
-/**
- * Forces the return value from Set.prototype.add to always be the set
- * instance. IE11 returns undefined.
- *
- * @param {!Window} win
- */
-export function install(win) {
-  const {Set} = win;
-  const s = new Set();
-  if (s.add(0) !== s) {
-    const {add} = s;
+// src/polyfills.js must be the first import.
+import '#3p/polyfills';
 
-    win.Object.defineProperty(Set.prototype, 'add', {
-      enumerable: false,
-      configurable: true,
-      writable: true,
-      value: function () {
-        add.apply(this, arguments);
-        return this;
-      },
-    });
-  }
-}
+import {draw3p, init} from '#3p/integration-lib';
+import {register} from '#3p/3p';
+
+import {tagon} from '#ads/vendors/tagon';
+
+init(window);
+register('tagon', tagon);
+
+window.draw3p = draw3p;
