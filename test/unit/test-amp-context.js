@@ -16,6 +16,7 @@
 import {AmpContext} from '#3p/ampcontext';
 import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
 import {Platform} from '#service/platform-impl';
+import {getMode} from 'src/mode';
 
 const NOOP = () => {};
 
@@ -26,6 +27,8 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
 
   beforeEach(() => {
     windowPostMessageSpy = env.sandbox.spy();
+    // Stub RTV version.
+    getMode().rtvVersion = '0123456789';
     win = {
       addEventListener: (eventType, handlerFn) => {
         expect(eventType).to.equal('message');
@@ -69,7 +72,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
         'user-error-in-iframe',
         '1-291921',
         {'message': 'test'},
-        '01$internalRuntimeVersion$'
+        '0123456789'
       )
     );
   });
@@ -177,8 +180,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // observer
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
-      'amp-01$internalRuntimeVersion$' +
-        '{"type":"send-intersections","sentinel":"1-291921"}',
+      'amp-0123456789{"type":"send-intersections","sentinel":"1-291921"}',
       '*'
     );
 
@@ -218,8 +220,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // observer
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
-      'amp-01$internalRuntimeVersion$' +
-        '{"type":"send-embed-state","sentinel":"1-291921"}',
+      'amp-0123456789{"type":"send-embed-state","sentinel":"1-291921"}',
       '*'
     );
 
@@ -331,7 +332,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // window.context should have sent postMessage requesting resize
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
-      'amp-01$internalRuntimeVersion$' +
+      'amp-0123456789' +
         '{"id":0,"width":100,"height":200,"type":"embed-size","sentinel":"1-291921"}',
       '*'
     );
@@ -377,7 +378,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
 
     // window.context should have sent resize request postMessage
     expect(windowPostMessageSpy).to.be.calledWith(
-      'amp-01$internalRuntimeVersion$' +
+      'amp-0123456789' +
         '{"id":0,"width":100,"height":200,"type":"embed-size","sentinel":"1-291921"}',
       '*'
     );
