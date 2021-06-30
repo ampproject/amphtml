@@ -42,6 +42,7 @@
   padding: 0 !important;
   background: none !important;
   border: none !important;
+  font-family: inherit !important;
   font-size: inherit !important;
 }
 
