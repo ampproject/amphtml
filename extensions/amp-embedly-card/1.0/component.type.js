@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
+/** @externs */
+
+/** @const */
+var EmbedlyCardDef = {};
+
 /**
- * Gets state from History.
- * But IE11 throws if there is no state.
- *
- * @param {!History} history
- * @return {*}
+ * @typedef {{
+ *   requestResize: (function(number):*|undefined),
+ *   title: (string|undefined),
+ *   url: (string),
+ * }}
  */
-export function getHistoryState(history) {
-  try {
-    return history.state;
-  } catch (e) {
-    return null;
-  }
-}
+EmbedlyCardDef.Props;
+
+/**
+ * @typedef {{
+ *   apiKey: (string|undefined),
+ * }}
+ */
+EmbedlyCardDef.EmbedlyContext;
