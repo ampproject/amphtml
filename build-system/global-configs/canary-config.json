@@ -13,6 +13,7 @@
   "ios-fixed-no-transfer": 1,
   "ads-initialIntersection": 1,
   "amp-cid-backup": 1,
+  "flexible-bitrate": 0.1,
   "layout-aspect-ratio-css": 1,
   "tcf-post-message-proxy-api": 1,
   "amp-consent-granular-consent": 1,
