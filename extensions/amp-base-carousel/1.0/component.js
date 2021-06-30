@@ -354,8 +354,8 @@ function BaseCarouselWithRef(
         {childrenArray.map((child, index) => (
           <WithAmpContext
             key={index}
-            renderable={index == currentSlide}
-            playable={index == currentSlide}
+            renderable={index === currentSlide}
+            playable={index === currentSlide}
           >
             {child}
           </WithAmpContext>
