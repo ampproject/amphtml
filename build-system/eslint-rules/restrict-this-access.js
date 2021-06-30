@@ -15,6 +15,9 @@
  */
 'use strict';
 
+// Restricts use of `this` to a subset of properties when an instance is a
+// of a specific class type, or a subclass of it.
+// See `className` of instances and `allowed` properties in plugin's config.
 module.exports = function (context) {
   const {options = []} = context;
   const [firstOptions = {}] = options;
