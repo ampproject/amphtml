@@ -487,7 +487,7 @@ export class PreactBaseElement extends BaseElement {
    * @private
    */
   onReadyState_(state, opt_failure) {
-    this.setReadyState(state, opt_failure);
+    this.setReadyState?.(state, opt_failure);
 
     const Ctor = this.constructor;
     if (Ctor['unloadOnPause']) {
