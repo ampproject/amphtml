@@ -29,12 +29,22 @@ import {toChildArray} from '#preact/compat';
 
 const generateLightboxItemKey = sequentialIdGenerator();
 
+/** @const {string} */
 const DEFAULT_ARIA_LABEL = 'Open content in a lightbox view.';
+
+/** @const {!Object<string, *>} */
 const DEFAULT_ACTIVATION_PROPS = {
   'aria-label': DEFAULT_ARIA_LABEL,
   role: 'button',
-  tabIndex: '0',
+  tabIndex: 0,
 };
+
+/**
+ *
+ * @param {!PreactDef.Renderable} child
+ * @return {!PreactDef.Renderable}
+ */
+const CLONE_CHILD = (child) => cloneElement(child);
 
 /**
  * @param {!LightboxGalleryDef.WithLightboxProps} props
@@ -51,17 +61,15 @@ export function WithLightbox({
 }) {
   const [genKey] = useState(generateLightboxItemKey);
   const {deregister, open, register} = useContext(LightboxGalleryContext);
-  const render = useCallback(
-    () =>
-      renderProp ? (
-        renderProp()
-      ) : children ? (
-        toChildArray(children).map((child) => cloneElement(child))
-      ) : (
-        <Comp srcset={srcset} />
-      ),
-    [children, renderProp, srcset]
-  );
+  const render = useCallback(() => {
+    if (renderProp) {
+      return renderProp();
+    }
+    if (children) {
+      return toChildArray(children).map(CLONE_CHILD);
+    }
+    return <Comp srcset={srcset} />;
+  }, [children, renderProp, srcset]);
 
   useLayoutEffect(() => {
     register(genKey, group, render);
