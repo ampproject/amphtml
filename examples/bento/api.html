@@ -26,25 +26,23 @@
 
     <script>
       (async function () {
+        // Wait for our element to be defined, then we can get its API.
         const element = document.body.firstElementChild;
         const tagName = element.tagName.toLowerCase();
 
         await window.customElements.whenDefined(tagName);
 
-        const api = await element.getApi();
-
         // We follow the `data-method` attribute in this example, but that's not
         // necessary. Otherwise, we would call a method like api.play() directly.
-
-        function onButtonClick(e) {
-          const method = e.target.dataset.method;
-          api[method]();
+        function onDataMethodButtonClick({target}) {
+          const api = await element.getApi();
+          api[target.dataset.method]()
         }
 
         const buttons = document.querySelectorAll('button[data-method]');
         for (const button of buttons) {
           button.removeAttribute('disabled');
-          button.addEventListener('click', onButtonClick);
+          button.addEventListener('click', onDataMethodButtonClick);
         }
       })();
     </script>
