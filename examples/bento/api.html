@@ -33,20 +33,19 @@
 
         const api = await element.getApi();
 
+        // We follow the `data-method` attribute in this example, but that's not
+        // necessary. Otherwise, we would call a method like api.play() directly.
+
         function onButtonClick(e) {
-          // We follow the `data-method` attribute in this example.
-          // Otherwise, this would be a direct call to e.g. api.play();
           const method = e.target.dataset.method;
           api[method]();
         }
 
-        const buttons = Array.from(
-          document.querySelectorAll('button[data-method]')
-        );
-        buttons.forEach((button) => {
+        const buttons = document.querySelectorAll('button[data-method]');
+        for (const button of buttons) {
           button.removeAttribute('disabled');
           button.addEventListener('click', onButtonClick);
-        });
+        }
       })();
     </script>
   </body>
