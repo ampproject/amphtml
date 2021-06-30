@@ -2,14 +2,7 @@
   "experiments": [
     {
       "name": "flexible-bitrate",
-      "percentage": 0.1,
-    },
-    {
-      "name": "test-amp-exp",
-      "percentage": 0.5,
-      "rtvPrefix": [
-        "05"
-      ]
+      "percentage": 0.1
     }
   ]
 }
