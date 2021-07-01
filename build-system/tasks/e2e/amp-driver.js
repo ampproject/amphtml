@@ -192,6 +192,7 @@ class AmpDriver {
    * given environment.
    * @param {!AmpdocEnvironment} environment
    * @param {string} url
+   * @return {Promise<void>}
    */
   async navigateToEnvironment(environment, url) {
     const ampEnv = EnvironmentBehaviorMap[environment];

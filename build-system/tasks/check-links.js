@@ -31,6 +31,7 @@ let filesIntroducedByPr;
 
 /**
  * Checks for dead links in .md files passed in via --files or --local_changes.
+ * @return {Promise<void>}
  */
 async function checkLinks() {
   if (!usesFilesOrLocalChanges('check-links')) {
@@ -120,10 +121,7 @@ function checkLinksInFile(file) {
       // codepen returns a 503 for these link checks
       {pattern: /https:\/\/codepen.*/},
       // GitHub PRs and Issues can be assumed to exist
-      {
-        pattern:
-          /https:\/\/github.com\/ampproject\/amphtml\/(pull|issue)\/d+.*/,
-      },
+      {pattern: /https:\/\/github.com\/ampproject\/amphtml\/(pull|issue)\/.*/},
       // Templated links are merely used to generate other markdown files.
       {pattern: /\$\{[a-z]*\}/},
       {pattern: /https:.*?__component_name\w*__/},
