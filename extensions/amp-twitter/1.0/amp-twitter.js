@@ -19,6 +19,7 @@ import {dict} from '#core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
+import {user} from 'src/log';
 import {userAssert} from '#core/assert';
 
 /** @const {string} */
@@ -74,7 +75,15 @@ class AmpTwitter extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'requestResize': (height) => this.forceChangeHeight(height),
+      'requestResize': (height) =>
+        this.attemptChangeHeight(height).catch(() => {
+          if (!this.getOverflowElement()) {
+            user().warn(
+              TAG,
+              '[overflow] element not found. Provide one to enable resizing to full contents.'
+            );
+          }
+        }),
     });
   }
 

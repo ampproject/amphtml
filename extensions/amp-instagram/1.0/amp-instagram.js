@@ -18,7 +18,7 @@ import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-instagram-1.0.css';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-instagram';
@@ -39,7 +39,12 @@ class AmpInstagram extends BaseElement {
     return dict({
       'requestResize': (height) =>
         this.attemptChangeHeight(height).catch(() => {
-          /* ignore failures */
+          if (!this.getOverflowElement()) {
+            user().warn(
+              TAG,
+              '[overflow] element not found. Provide one to enable resizing to full contents.'
+            );
+          }
         }),
     });
   }

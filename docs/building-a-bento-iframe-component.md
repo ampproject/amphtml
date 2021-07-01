@@ -243,7 +243,11 @@ class AmpFantasticEmbed extends BaseElement {
   init() {
     return dict({
       'requestResize': (height) => {
-        this.attemptChangeHeight(height);
+        this.attemptChangeHeight(height).catch(() => {
+          if (!this.getOverflowElement()) {
+            user().warn(TAG, '[overflow] element not found. Provide one to enable resizing to full contents.')
+          }
+        });
       },
     });
   }
