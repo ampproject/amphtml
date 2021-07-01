@@ -143,6 +143,7 @@ Parser::Parser(std::string_view html, const ParseOptions& options,
       count_num_terms_in_text_node_(options.count_num_terms_in_text_node),
       fragment_(fragment_parent != nullptr),
       context_node_(fragment_parent) {
+  document_->stats_.html_src_bytes = html.size();
   insertion_mode_ = std::bind(&Parser::InitialIM, this);
 }
 
@@ -179,6 +180,7 @@ std::unique_ptr<Document> Parser::Parse() {
   DumpDocument(document_.get());
 #endif
 
+  document_->stats_.document_end_location = tokenizer_->CurrentPosition();
   return std::move(document_);
 }  // End Parser::Parse.
 
@@ -446,15 +448,15 @@ void Parser::AddElement() {
 
   switch (token_.atom) {
     case Atom::HTML: {
-      element_node->SetManufactured(accounting_.has_manufactured_html);
+      element_node->SetManufactured(document_->stats_.has_manufactured_html);
       break;
     }
     case Atom::HEAD: {
-      element_node->SetManufactured(accounting_.has_manufactured_head);
+      element_node->SetManufactured(document_->stats_.has_manufactured_head);
       break;
     }
     case Atom::BODY: {
-      element_node->SetManufactured(accounting_.has_manufactured_body);
+      element_node->SetManufactured(document_->stats_.has_manufactured_body);
       break;
     }
     default:
@@ -687,7 +689,7 @@ bool Parser::InitialIM() {
         doctype_node->line_col_in_html_src_ = token_.line_col_in_html_src;
       }
       document_->root_node_->AppendChild(doctype_node);
-      accounting_.quirks_mode = quirks_mode;
+      document_->stats_.quirks_mode = quirks_mode;
       insertion_mode_ = std::bind(&Parser::BeforeHTMLIM, this);
 
       if (on_node_callback_) {
@@ -700,7 +702,7 @@ bool Parser::InitialIM() {
       break;
   }
 
-  accounting_.quirks_mode = true;
+  document_->stats_.quirks_mode = true;
   insertion_mode_ = std::bind(&Parser::BeforeHTMLIM, this);
   return false;
 }  // Parser::InitialIM.
@@ -1172,9 +1174,9 @@ bool Parser::InBodyIM() {
             return true;
           }
           CopyAttributes(open_elements_stack_.at(0), token_);
-          if (!accounting_.has_manufactured_html || num_html_tags_ > 1) {
-            accounting_.duplicate_html_elements = true;
-            accounting_.duplicate_html_element_location =
+          if (!document_->stats_.has_manufactured_html || num_html_tags_ > 1) {
+            document_->stats_.duplicate_html_elements = true;
+            document_->stats_.duplicate_html_element_location =
                 token_.line_col_in_html_src;
           }
           break;
@@ -1202,9 +1204,10 @@ bool Parser::InBodyIM() {
                 body->atom_ == Atom::BODY) {
               frameset_ok_ = false;
               CopyAttributes(body, token_);
-              if (!accounting_.has_manufactured_body || num_body_tags_ > 1) {
-                accounting_.duplicate_body_elements = true;
-                accounting_.duplicate_body_element_location =
+              if (!document_->stats_.has_manufactured_body ||
+                  num_body_tags_ > 1) {
+                document_->stats_.duplicate_body_elements = true;
+                document_->stats_.duplicate_body_element_location =
                     token_.line_col_in_html_src;
               }
             }
@@ -1411,7 +1414,7 @@ bool Parser::InBodyIM() {
           break;
         }
         case Atom::TABLE: {
-          if (!accounting_.quirks_mode) {
+          if (!document_->stats_.quirks_mode) {
             PopUntil(Scope::ButtonScope, Atom::P);
           }
           AddElement();
@@ -3254,13 +3257,13 @@ void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
   if (token_type == TokenType::START_TAG_TOKEN) {
     switch (atom) {
       case Atom::HTML:
-        accounting_.has_manufactured_html = true;
+        document_->stats_.has_manufactured_html = true;
         break;
       case Atom::HEAD:
-        accounting_.has_manufactured_head = true;
+        document_->stats_.has_manufactured_head = true;
         break;
       case Atom::BODY:
-        accounting_.has_manufactured_body = true;
+        document_->stats_.has_manufactured_body = true;
         break;
       default:
         break;
