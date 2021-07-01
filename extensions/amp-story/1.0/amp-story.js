@@ -459,6 +459,11 @@ export class AmpStory extends AMP.BaseElement {
         );
       });
     }
+    if (isExperimentOn(this.win, 'amp-story-load-first-page-only')) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'amp-story-load-first-page-only'
+      );
+    }
 
     if (this.maybeLoadStoryDevTools_()) {
       return;
@@ -2256,15 +2261,13 @@ export class AmpStory extends AMP.BaseElement {
       ) {
         return preloadAllPages();
       }
-      Services.performanceFor(this.win).addEnabledExperiment(
-        'amp-story-load-first-page-only'
-      );
 
       const activePageId = devAssert(pagesByDistance[0][0]);
       new Promise((res, rej) => {
         const page = this.getPageById(activePageId);
         page.setDistance(0);
         page.signals().whenSignal(CommonSignals.LOAD_END).then(res);
+        // Don't call preload if user navigates before page loads, since the navigation will call preload properly.
         this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, rej);
       })
         .then(() => preloadAllPages())
