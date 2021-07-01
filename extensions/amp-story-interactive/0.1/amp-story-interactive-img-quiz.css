@@ -25,9 +25,6 @@
     --i-amphtml-interactive-option-background-color
   ) !important;
   border-radius: 50% !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
   text-align: center !important;
   color: var(--interactive-accent-color) !important;
   font-weight: bold !important;
