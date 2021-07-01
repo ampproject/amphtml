@@ -15,9 +15,9 @@
  */
 
 import '../amp-audio';
-import {htmlFor} from '../../../../src/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
+import {htmlFor} from '#core/dom/static-template';
+import {toggleExperiment} from '#experiments';
+import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-audio-v1.0',
@@ -38,6 +38,7 @@ describes.realWin(
       toggleExperiment(win, 'bento-audio', true, true);
     });
 
+    // DO NOT SUBMIT: This is example code only.
     it('example test renders', async () => {
       const element = html` <amp-audio></amp-audio> `;
       doc.body.appendChild(element);

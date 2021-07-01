@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
+import * as Preact from '#preact';
+import {ContainWrapper} from '#preact/component';
 import {listen} from '../../../src/event-helper';
-import {
-  setMediaSession,
-  validateMediaMetadata,
-} from '../../../src/mediasession-helper';
+import {setMediaSession} from '../../../src/mediasession-helper';
 
 const {useCallback, useEffect, useMemo, useRef} = Preact;
 
@@ -39,6 +36,7 @@ export function Audio({
   preload,
   src,
   title,
+  validateMediaMetadata,
   ...rest
 }) {
   const containerRef = useRef();
@@ -49,6 +47,7 @@ export function Audio({
       audioPlaying()
     );
 
+    // Execute at unlayout
     return () => {
       unlistenPlaying();
     };
@@ -75,9 +74,12 @@ export function Audio({
       audioRef.current.pause();
     };
 
-    validateMediaMetadata(element, metaData);
+    if (validateMediaMetadata) {
+      validateMediaMetadata(element, metaData);
+    }
+
     setMediaSession(win, metaData, playHandler, pauseHandler);
-  }, [metaData]);
+  }, [metaData, validateMediaMetadata]);
 
   return (
     <ContainWrapper ref={containerRef} layout size paint {...rest}>

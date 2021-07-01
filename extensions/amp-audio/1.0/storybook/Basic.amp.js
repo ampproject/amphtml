@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
 
@@ -37,8 +37,9 @@ export const ExampleUseCase = () => {
       title="Snow Fight"
       album="Jan Morgenstern"
       artist="Sintel"
-      height="50"
+      height="75"
       width="auto"
+      layout="fixed-height"
       controls
     >
       <div fallback>Your browser doesn’t support HTML5 audio</div>

@@ -15,10 +15,11 @@
  */
 
 import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-audio-1.0.css';
-import {dict} from '../../../src/core/types/object';
-import {isExperimentOn} from '../../../src/experiments';
+import {Layout} from '#core/dom/layout';
+import {dict} from '#core/types/object';
+import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
+import {validateMediaMetadata} from '../../../src/mediasession-helper';
 
 /** @const {string} */
 const TAG = 'amp-audio';
@@ -26,14 +27,10 @@ const TAG = 'amp-audio';
 class AmpAudio extends BaseElement {
   /** @override */
   init() {
-    // DO NOT SUBMIT: This is example code only.
-    this.registerApiAction('exampleToggle', (api) =>
-      api./*OK*/ exampleToggle()
-    );
-
     return dict({
-      // Extra props passed by wrapper AMP component
-      'exampleTagNameProp': this.element.tagName,
+      'validateMediaMetadata': (element, metaData) => {
+        validateMediaMetadata(element, metaData);
+      },
     });
   }
 
@@ -44,10 +41,11 @@ class AmpAudio extends BaseElement {
         isExperimentOn(this.win, 'bento-audio'),
       'expected global "bento" or specific "bento-audio" experiment to be enabled'
     );
-    return super.isLayoutSupported(layout);
+    //return super.isLayoutSupported(layout);
+    return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
   }
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpAudio, CSS);
+  AMP.registerElement(TAG, AmpAudio);
 });

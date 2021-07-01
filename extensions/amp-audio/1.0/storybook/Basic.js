@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {Audio} from '../component';
 import {withKnobs} from '@storybook/addon-knobs';
 
@@ -29,7 +29,14 @@ export const _default = () => {
   return (
     <Audio
       style={{width: 300, height: 200}}
-      example-property="example string property value"
+      src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+      artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
+      title="Snow Fight"
+      album="Jan Morgenstern"
+      artist="Sintel"
+      height="50"
+      width="auto"
+      controls
     >
       This text is inside.
     </Audio>

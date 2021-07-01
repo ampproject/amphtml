@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import {createUseStyles} from 'react-jss';
+import * as Preact from '#preact';
+import {Audio} from '../component';
+import {mount} from 'enzyme';
+import {waitFor} from '#testing/test-helper';
 
-// DO NOT SUBMIT: Example class used for styling
-const exampleContentHidden = {
-  // display: 'none',
-};
+describes.sandboxed('Audio preact component v1.0', {}, (env) => {
+  // DO NOT SUBMIT: This is example code only.
+  it('should render', () => {
+    const wrapper = mount(<Audio testProp={true} />);
 
-const JSS = {
-  exampleContentHidden,
-};
-
-// useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
-// eslint-disable-next-line local/no-export-side-effect
-export const useStyles = createUseStyles(JSS);
+    const component = wrapper.find(Audio.name);
+    expect(component).to.have.lengthOf(1);
+    expect(component.prop('testProp')).to.be.true;
+  });
+});

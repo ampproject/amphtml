@@ -167,6 +167,14 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-audio",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "wrapper": "bento"
+    }
+  },
+  {
     "name": "amp-auto-ads",
     "version": "0.1",
     "latestVersion": "0.1"

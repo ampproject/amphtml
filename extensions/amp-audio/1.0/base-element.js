@@ -15,9 +15,8 @@
  */
 
 import {Audio} from './component';
-import {CSS as COMPONENT_CSS} from './component.jss';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {PreactBaseElement} from '#preact/base-element';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -26,7 +25,7 @@ BaseElement['Component'] = Audio;
 
 /** @override */
 BaseElement['props'] = {
-  'children': {passthrough: true},
+  'children': {passthroughNonEmpty: true},
   album: {attr: 'album', type: 'string', default: EMPTY_METADATA.album},
   artist: {attr: 'artist', type: 'string', default: EMPTY_METADATA.artist},
   artwork: {attr: 'artwork', type: 'string', default: EMPTY_METADATA.artwork},
@@ -44,10 +43,3 @@ BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
-
-// DO NOT SUBMIT: If BaseElement['shadowCss']  is set to `null`, remove the
-// following declaration.
-// Otherwise, keep it when defined to an actual value like `COMPONENT_CSS`.
-// Once addressed, remove this set of comments.
-/** @override */
-BaseElement['shadowCss'] = COMPONENT_CSS;
