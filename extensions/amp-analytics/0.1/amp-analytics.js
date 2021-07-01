@@ -58,7 +58,7 @@ const ALLOWLIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.RENDER_START,
 ];
 
-export const PERSIST_EVENT_TIMESTAMP = 'persistSessionEvent';
+export const PERSIST_SESSION_VALUE = 'persistSessionValue';
 export class AmpAnalytics extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -289,7 +289,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!Promise}
    */
   maybeInitializeSessionManager_() {
-    if (this.config_[PERSIST_EVENT_TIMESTAMP] && this.type_) {
+    if (this.config_[PERSIST_SESSION_VALUE] && this.type_) {
       const ampdoc = this.getAmpDoc();
       return sessionServicePromiseForDoc(ampdoc).then((manager) => {
         this.sessionManager_ = manager;

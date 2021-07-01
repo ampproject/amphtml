@@ -15,7 +15,7 @@
  */
 
 import {AnalyticsConfig, expandConfigRequest, mergeObjects} from '../config';
-import {PERSIST_EVENT_TIMESTAMP} from '../amp-analytics';
+import {PERSIST_SESSION_VALUE} from '../amp-analytics';
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {map} from '#core/types/object';
@@ -983,12 +983,12 @@ describes.realWin(
       });
     });
 
-    describe('event persists', () => {
+    describe('persist session values', () => {
       beforeEach(() => {
         fakeVendorJson = undefined;
       });
 
-      it('should add flag for when opted in', async () => {
+      it('should add flag for when `persistEvent` opted in', async () => {
         fakeVendorJson = {
           'requests': {'foo': '//vendor'},
           'triggers': [
@@ -1004,20 +1004,29 @@ describes.realWin(
           {'type': vendorName, 'id': 'analyticsId'}
         );
         const config = await new AnalyticsConfig(element).loadConfig();
-        expect(config[PERSIST_EVENT_TIMESTAMP]).to.be.true;
+        expect(config[PERSIST_SESSION_VALUE]).to.be.true;
       });
 
-      it('should handle multiple opt ins', async () => {
+      it('should add flag for when `persistEngaged` opted in', async () => {
         fakeVendorJson = {
           'requests': {'foo': '//vendor'},
           'triggers': [
             {
               'on': 'visible',
               'request': 'foo',
-              'session': {'persistEvent': true},
+              'session': {'persistEngaged': true},
             },
           ],
         };
+        const element = getAnalyticsTag(
+          {},
+          {'type': vendorName, 'id': 'analyticsId'}
+        );
+        const config = await new AnalyticsConfig(element).loadConfig();
+        expect(config[PERSIST_SESSION_VALUE]).to.be.true;
+      });
+
+      it('should handle multiple opt ins', async () => {
         const element = getAnalyticsTag(
           {
             'requests': {'foo': '//inlined'},
@@ -1031,14 +1040,14 @@ describes.realWin(
                 'on': 'click',
                 'request': 'foo',
                 'selector': '.className1',
-                'session': {'persistEvent': true},
+                'session': {'persistEngaged': true},
               },
             ],
           },
           {'type': vendorName, 'id': 'analyticsId'}
         );
         const config = await new AnalyticsConfig(element).loadConfig();
-        expect(config[PERSIST_EVENT_TIMESTAMP]).to.be.true;
+        expect(config[PERSIST_SESSION_VALUE]).to.be.true;
       });
 
       it('should handle no triggers', async () => {
@@ -1049,7 +1058,7 @@ describes.realWin(
           {'type': vendorName, 'id': 'analyticsId'}
         );
         const config = await new AnalyticsConfig(element).loadConfig();
-        expect(config[PERSIST_EVENT_TIMESTAMP]).to.be.undefined;
+        expect(config[PERSIST_SESSION_VALUE]).to.be.undefined;
       });
     });
 

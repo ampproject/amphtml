@@ -1764,39 +1764,74 @@ describes.realWin(
         });
       });
 
-      describe('trigger event', () => {
+      describe('trigger event with persist session value', () => {
         let vendorType;
 
         beforeEach(() => {
           vendorType = 'testVendor';
         });
 
-        it('should update manager when event it triggered', async () => {
-          const analytics = getAnalyticsTag(
-            {
-              'requests': {'foo': 'https://example.test/bar'},
-              'triggers': {
-                'pageview': {
-                  'on': 'visible',
-                  'request': 'foo',
-                  'session': {'persistEvent': true},
+        it(
+          'should update session manager for eventTimestamp' +
+            'when event is triggered',
+          async () => {
+            const analytics = getAnalyticsTag(
+              {
+                'requests': {'foo': 'https://example.test/bar'},
+                'triggers': {
+                  'pageview': {
+                    'on': 'visible',
+                    'request': 'foo',
+                    'session': {'persistEvent': true},
+                  },
                 },
               },
-            },
-            {
-              'type': vendorType,
-            }
-          );
+              {
+                'type': vendorType,
+              }
+            );
 
-          const sessionSpy = env.sandbox.spy(
-            SessionManager.prototype,
-            'updateEventTimestamp'
-          );
+            const sessionSpy = env.sandbox.spy(
+              SessionManager.prototype,
+              'updateEvent'
+            );
 
-          await waitForSendRequest(analytics);
-          expect(sessionSpy).to.be.calledOnce;
-          expect(sessionSpy).to.be.calledWith(vendorType);
-        });
+            await waitForSendRequest(analytics);
+            expect(sessionSpy).to.be.calledOnce;
+            expect(sessionSpy).to.be.calledWith(vendorType, true, false);
+          }
+        );
+
+        it(
+          'should update session manager for engaged' +
+            'when event is triggered',
+          async () => {
+            const analytics = getAnalyticsTag(
+              {
+                'requests': {'foo': 'https://example.test/bar'},
+                'triggers': {
+                  'pageview': {
+                    'on': 'visible',
+                    'request': 'foo',
+                    'session': {'persistEngaged': true},
+                  },
+                },
+              },
+              {
+                'type': vendorType,
+              }
+            );
+
+            const sessionSpy = env.sandbox.spy(
+              SessionManager.prototype,
+              'updateEvent'
+            );
+
+            await waitForSendRequest(analytics);
+            expect(sessionSpy).to.be.calledOnce;
+            expect(sessionSpy).to.be.calledWith(vendorType, false, true);
+          }
+        );
 
         it('should update manager for multiple events', async () => {
           const analytics = getAnalyticsTag(
@@ -1811,7 +1846,7 @@ describes.realWin(
                 'pageview2': {
                   'on': 'visible',
                   'request': 'foo',
-                  'session': {'persistEvent': true},
+                  'session': {'persistEvent': true, 'persistEngaged': true},
                 },
               },
             },
@@ -1822,49 +1857,31 @@ describes.realWin(
 
           const sessionSpy = env.sandbox.spy(
             SessionManager.prototype,
-            'updateEventTimestamp'
+            'updateEvent'
           );
 
           await macroTask();
           await waitForSendRequest(analytics);
           expect(sessionSpy).to.be.calledTwice;
-          expect(sessionSpy.firstCall).to.be.calledWith(vendorType);
-          expect(sessionSpy.secondCall).to.be.calledWith(vendorType);
-        });
-
-        it('should not update manager without `persistEvent`', async () => {
-          const analytics = getAnalyticsTag(
-            {
-              'requests': {'foo': 'https://example.test/bar'},
-              'triggers': {
-                'pageview': {
-                  'on': 'visible',
-                  'request': 'foo',
-                },
-              },
-            },
-            {
-              'type': vendorType,
-            }
+          expect(sessionSpy.firstCall).to.be.calledWith(
+            vendorType,
+            true,
+            false
           );
-
-          const sessionSpy = env.sandbox.spy(
-            SessionManager.prototype,
-            'updateEventTimestamp'
+          expect(sessionSpy.secondCall).to.be.calledWith(
+            vendorType,
+            true,
+            true
           );
-
-          await waitForSendRequest(analytics);
-          expect(sessionSpy).to.not.be.called;
         });
 
         it(
-          'should not update manager with `persistEvent`' +
-            ' at top level config',
+          'should not update manager without' +
+            '`persistEvent` or `persistEngaged`',
           async () => {
             const analytics = getAnalyticsTag(
               {
                 'requests': {'foo': 'https://example.test/bar'},
-                'session': {'persistEvent': true},
                 'triggers': {
                   'pageview': {
                     'on': 'visible',
@@ -1879,13 +1896,39 @@ describes.realWin(
 
             const sessionSpy = env.sandbox.spy(
               SessionManager.prototype,
-              'updateEventTimestamp'
+              'updateEvent'
             );
 
             await waitForSendRequest(analytics);
             expect(sessionSpy).to.not.be.called;
           }
         );
+
+        it('should not update manager with opt in at top level config', async () => {
+          const analytics = getAnalyticsTag(
+            {
+              'requests': {'foo': 'https://example.test/bar'},
+              'session': {'persistEvent': true},
+              'triggers': {
+                'pageview': {
+                  'on': 'visible',
+                  'request': 'foo',
+                },
+              },
+            },
+            {
+              'type': vendorType,
+            }
+          );
+
+          const sessionSpy = env.sandbox.spy(
+            SessionManager.prototype,
+            'updateEvent'
+          );
+
+          await waitForSendRequest(analytics);
+          expect(sessionSpy).to.not.be.called;
+        });
       });
     });
 
