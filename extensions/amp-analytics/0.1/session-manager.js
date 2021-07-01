@@ -86,7 +86,7 @@ export class SessionManager {
 
   /**
    * Updates EventTimestamp and/or Engaged for this session,
-   * asynchronously as a callback to avoid duplicate writing.
+   * asynchronously as a callback to avoid duplicate writing,
    * when the session is retrieved or created.
    * @param {string} type
    * @param {boolean} persistEvent
