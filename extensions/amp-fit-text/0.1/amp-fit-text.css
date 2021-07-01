@@ -26,6 +26,7 @@
 
 .i-amphtml-fit-text-content {
   z-index: 2;
+  visibility: hidden; /* overriden to visible in layoutCallback */
 }
 
 .i-amphtml-fit-text-content-wrapper {
