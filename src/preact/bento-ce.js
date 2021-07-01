@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// TODO(alanorozco)
+// TODO(alanorozco): These lint exceptions are required by initLogConstructor.
 /* eslint-disable import/no-restricted-paths */
 /* eslint-disable local/no-forbidden-terms */
 
