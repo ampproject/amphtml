@@ -19,6 +19,7 @@
   border-radius: 2em !important;
   box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
 }
+
 .i-amphtml-story-interactive-slider-input {
   -webkit-appearance: none !important;
   width: calc(100% - 2em) !important;
@@ -29,6 +30,7 @@
   pointer-events: all !important;
   cursor: pointer !important;
 }
+
 .i-amphtml-story-interactive-slider-input::before {
   background: var(--interactive-accent-color) !important;
   content: '' !important;
@@ -37,8 +39,8 @@
   height: 100% !important;
   border-radius: 0.5em !important;
   position: absolute !important;
-  z-index: 1 !important;
 }
+
 .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
   -webkit-appearance: none !important;
   width: 1.5em !important;

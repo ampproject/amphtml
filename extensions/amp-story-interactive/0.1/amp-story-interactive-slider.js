@@ -44,6 +44,7 @@ const buildSliderTemplate = (element) => {
     </div>
   `;
 };
+
 export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   /**
    * @param {!AmpElement} element
@@ -51,6 +52,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   constructor(element) {
     super(element, InteractiveType.SLIDER, [0, 1]);
   }
+
   /** @override */
   buildCallback() {
     return super.buildCallback(CSS);
