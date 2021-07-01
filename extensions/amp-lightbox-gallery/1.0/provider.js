@@ -29,6 +29,9 @@ import {
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
+/** @const {string} */
+const DEFAULT_GROUP = 'default';
+
 /**
  * @param {!LightboxGalleryDef.Props} props
  * @param {{current: ?LightboxDef.LightboxApi}} ref
@@ -42,21 +45,31 @@ export function LightboxGalleryProviderWithRef(
   const lightboxRef = useRef(null);
   const carouselRef = useRef(null);
   const [index, setIndex] = useState(0);
-  const renderers = useRef([]);
+  const renderers = useRef({});
 
-  // Prefer counting elements over retrieving array length because
+  // Prefer counting elements over retrieving array lengths because
   // array can contain empty values that have been deregistered.
-  const count = useRef(0);
-  const carouselElements = useRef([]);
-  const gridElements = useRef([]);
+  const count = useRef({});
+  const carouselElements = useRef({});
+  const gridElements = useRef({});
 
   const [showCarousel, setShowCarousel] = useState(true);
   const [showControls, setShowControls] = useState(true);
-  const renderElements = useCallback(() => {
-    renderers.current.forEach((render, index) => {
-      if (!carouselElements.current[index]) {
-        carouselElements.current[index] = render();
-        gridElements.current[index] = (
+  const [group, setGroup] = useState(null);
+  const renderElements = useCallback((opt_group) => {
+    const group = opt_group ?? Object.keys(renderers.current)[0];
+    if (!group) {
+      return;
+    }
+    if (!carouselElements.current[group]) {
+      carouselElements.current[group] = [];
+      gridElements.current[group] = [];
+      count.current[group] = 0;
+    }
+    renderers.current[group].forEach((render, index) => {
+      if (!carouselElements.current[group][index]) {
+        carouselElements.current[group][index] = render();
+        gridElements.current[group][index] = (
           <Thumbnail
             onClick={() => {
               setShowCarousel(true);
@@ -65,22 +78,28 @@ export function LightboxGalleryProviderWithRef(
             render={render}
           />
         );
-        count.current += 1;
+        count.current[group] += 1;
       }
     });
+    setGroup(group);
   }, []);
 
-  const register = (key, render) => {
+  const register = useCallback((key, group = DEFAULT_GROUP, render) => {
     // Given key is 1-indexed.
-    renderers.current[key - 1] = render;
-  };
-  const deregister = (key) => {
+    if (!renderers.current[group]) {
+      renderers.current[group] = [];
+    }
+    renderers.current[group][key - 1] = render;
+  }, []);
+
+  const deregister = useCallback((key, group = DEFAULT_GROUP) => {
     // Given key is 1-indexed.
-    delete renderers.current[key - 1];
-  };
+    delete renderers.current[group][key - 1];
+  }, []);
+
   const open = useCallback(
-    (opt_index) => {
-      renderElements();
+    (opt_index, opt_group) => {
+      renderElements(opt_group);
       setShowControls(true);
       setShowCarousel(true);
       if (opt_index != null) {
@@ -98,8 +117,8 @@ export function LightboxGalleryProviderWithRef(
   };
 
   useLayoutEffect(() => {
-    carouselRef.current?.goToSlide(mod(index, count.current));
-  }, [index]);
+    carouselRef.current?.goToSlide(mod(index, count.current[group]));
+  }, [group, index]);
 
   useImperativeHandle(
     ref,
@@ -142,13 +161,13 @@ export function LightboxGalleryProviderWithRef(
           onClick={() => setShowControls(!showControls)}
           ref={carouselRef}
         >
-          {carouselElements.current}
+          {carouselElements.current[group]}
         </BaseCarousel>
         {!showCarousel && (
           <div
             className={objstr({[classes.gallery]: true, [classes.grid]: true})}
           >
-            {gridElements.current}
+            {gridElements.current[group]}
           </div>
         )}
       </Lightbox>
