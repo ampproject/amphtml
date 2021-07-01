@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {createContext} from '#preact';
 
- .amp-google-assistant-assistjs {
-  /* Placeholder for an empty CSS ruleset*/
-   display: block;
- }
+const EmbedlyContext = createContext(
+  /** @type {EmbedlyCardDef.EmbedlyContext} */ ({apiKey: ''})
+);
+export {EmbedlyContext};
