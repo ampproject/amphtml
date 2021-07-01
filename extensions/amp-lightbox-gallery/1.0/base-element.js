@@ -41,13 +41,31 @@ const DEFAULT_GROUP = 'default';
 /** @const {string} */
 const DEFAULT_CAROUSEL_PREFIX = 'carousel';
 
+/** @const {number} */
+let count = 0;
+
 export class BaseElement extends PreactBaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
+    /** @private {!Element} */
+    this.element_ = element;
+
     /** @private {boolean} */
     this.open_ = false;
+  }
+
+  /** @override */
+  mountCallback() {
+    // There should only be one instance of `amp-lightbox-gallery` in a document.
+    if (count++) {
+      console /*OK */
+        .warn(
+          `<amp-lightbox-gallery> already exists in the document. Removing additional instance: ${this.element_}`
+        );
+      this.element_.parentNode?.removeChild(this.element_);
+    }
   }
 
   /** @override */
@@ -66,6 +84,7 @@ export class BaseElement extends PreactBaseElement {
 
   /** @override */
   unmountCallback() {
+    count--;
     this.removeAsContainer();
   }
 
