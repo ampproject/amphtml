@@ -86,8 +86,7 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
 
   /**
    * Creates an option container with option content,
-   * adds styling and answer choices,
-   * and adds it to the poll element.
+   * adds styling and answer choices.
    *
    * @param {!./amp-story-interactive-abstract.OptionConfigType} option
    * @return {!Element}
