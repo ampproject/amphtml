@@ -33,6 +33,7 @@ const {log, logLocalDev} = require('./logging');
  * @param {boolean} opt_compiled pass true to build the compiled runtime
  *   (`amp dist` instead of `amp build`). Otherwise uses the value of
  *   --compiled to determine which build to generate.
+ * @return {Promise<void>}
  */
 async function buildRuntime(opt_compiled = false) {
   await clean();
@@ -124,8 +125,6 @@ function getFilesFromArgv() {
  * Gets a list of files to be checked based on command line args and the given
  * file matching globs. Used by tasks like prettify, lint, check-links, etc.
  * Optionally takes in options for globbing and a file containing ignore rules.
- * When local changes are linted (e.g. during CI), we also check if the list of
- * forbidden terms needs to be updated.
  *
  * @param {!Array<string>} globs
  * @param {Object=} options
@@ -146,10 +145,6 @@ function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
     if (filesChanged.length == 0) {
       log(green('INFO: ') + 'No files to check in this PR');
       return [];
-    }
-    const forbiddenTerms = 'build-system/test-configs/forbidden-terms.js';
-    if (!filesChanged.includes(forbiddenTerms)) {
-      filesChanged.push(forbiddenTerms);
     }
     return logFiles(filesChanged);
   }

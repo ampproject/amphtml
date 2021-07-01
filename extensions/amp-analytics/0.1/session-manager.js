@@ -40,28 +40,22 @@ export const SESSION_MAX_AGE_MILLIS = 30 * 60 * 1000;
  */
 export const SESSION_VALUES = {
   SESSION_ID: 'sessionId',
-  TIMESTAMP: 'creationTimestamp',
-};
-
-/**
- * Key values for retriving/storing session values
- * @enum {string}
- */
-const SESSION_STORAGE_KEYS = {
-  SESSION_ID: 'sessionId',
   CREATION_TIMESTAMP: 'creationTimestamp',
-  LAST_ACCESS_TIMESTAMP: 'lastAccessTimestamp',
+  ACCESS_TIMESTAMP: 'accessTimestamp',
+  EVENT_TIMESTAMP: 'eventTimestamp',
+  COUNT: 'count',
 };
 
 /**
- * `lastAccessTimestamp` is not stored in localStorage, since
- * that mechanism already handles removing expired sessions.
- * We just keep it so that we don't have to read the value everytime
- * during the same page visit.
+ * Even though our LocalStorage implementation already has a
+ * mechanism that handles removing expired values, we keep it
+ * in memory so that we don't have to read the value everytime.
  * @typedef {{
  *  sessionId: number,
  *  creationTimestamp: number,
- *  lastAccessTimestamp: number,
+ *  accessTimestamp: number,
+ *  eventTimestamp: number,
+ *  count: number,
  * }}
  */
 export let SessionInfoDef;
@@ -85,8 +79,19 @@ export class SessionManager {
    * @return {!Promise<number|undefined>}
    */
   getSessionValue(type, value) {
-    return this.get(type).then((session) => {
-      return session?.[value];
+    return this.get(type).then((session) => session?.[value]);
+  }
+
+  /**
+   * Update EventTimestamp for this session async.
+   * Passes in a callback to set the EventTimestamp,
+   * to be used when the session it retrieved or created.
+   * @param {string} type
+   * @return {!Promise}
+   */
+  updateEventTimestamp(type) {
+    return this.get(type, (session) => {
+      session[SESSION_VALUES.EVENT_TIMESTAMP] = Date.now();
     });
   }
 
@@ -94,9 +99,10 @@ export class SessionManager {
    * Get the session for the vendor, checking if it exists or
    * creating it if necessary.
    * @param {string|undefined} type
+   * @param {Function=} opt_processing
    * @return {!Promise<?SessionInfoDef>}
    */
-  get(type) {
+  get(type, opt_processing) {
     if (!type) {
       user().error(TAG, 'Sessions can only be accessed with a vendor type.');
       return Promise.resolve(null);
@@ -106,48 +112,68 @@ export class SessionManager {
       hasOwn(this.sessions_, type) &&
       !isSessionExpired(this.sessions_[type])
     ) {
+      this.sessions_[type] = this.updateSession_(this.sessions_[type]);
+      opt_processing?.(this.sessions_[type]);
       this.setSession_(type, this.sessions_[type]);
-      this.sessions_[type].lastAccessTimestamp = Date.now();
       return Promise.resolve(this.sessions_[type]);
     }
 
-    return this.getSessionFromStorage_(type);
+    return this.getOrCreateSession_(type, opt_processing);
   }
 
   /**
    * Get our session if it exists or creates it. Sets the session
-   * in localStorage to update the last access time.
+   * in localStorage to update the access time.
    * @param {string} type
+   * @param {Function=} opt_processing
    * @return {!Promise<SessionInfoDef>}
    */
-  getSessionFromStorage_(type) {
+  getOrCreateSession_(type, opt_processing) {
     return this.storagePromise_
       .then((storage) => {
         const storageKey = getStorageKey(type);
-        // Gets the session if it has not expired
-        return storage.get(storageKey, SESSION_MAX_AGE_MILLIS);
+        return storage.get(storageKey);
       })
       .then((session) => {
-        // If no valid session in storage, create a new one
+        // Either create session or update it
         return !session
-          ? constructSessionInfo(generateSessionId(), Date.now())
-          : constructSessionFromStoredValue(session);
+          ? constructSessionInfo()
+          : this.updateSession_(constructSessionFromStoredValue(session));
       })
       .then((session) => {
         // Avoid multiple session creation race
         if (type in this.sessions_ && !isSessionExpired(this.sessions_[type])) {
           return this.sessions_[type];
         }
+        opt_processing?.(session);
         this.setSession_(type, session);
-        session.lastAccessTimestamp = Date.now();
         this.sessions_[type] = session;
         return this.sessions_[type];
       });
   }
 
   /**
+   * Check if session has expired and reset/update values (id, count) if so.
+   * Also update `accessTimestamp`.
+   * @param {!SessionInfoDef} session
+   * @return {!SessionInfoDef}
+   */
+  updateSession_(session) {
+    const currentCount = session[SESSION_VALUES.COUNT];
+    const now = Date.now();
+    if (isSessionExpired(session)) {
+      const newSessionCount = (currentCount ?? 0) + 1;
+      session = constructSessionInfo(newSessionCount);
+    } else if (currentCount === undefined) {
+      session[SESSION_VALUES.COUNT] = 1;
+    }
+    session[SESSION_VALUES.ACCESS_TIMESTAMP] = now;
+    return session;
+  }
+
+  /**
    * Set the session in localStorage, updating
-   * its last access time if it did not exist before.
+   * its access time if it did not exist before.
    * @param {string} type
    * @param {SessionInfoDef} session
    * @return {!Promise}
@@ -166,7 +192,8 @@ export class SessionManager {
  * @return {boolean}
  */
 function isSessionExpired(session) {
-  return session.lastAccessTimestamp + SESSION_MAX_AGE_MILLIS < Date.now();
+  const accessTimestamp = session[SESSION_VALUES.ACCESS_TIMESTAMP];
+  return accessTimestamp + SESSION_MAX_AGE_MILLIS < Date.now();
 }
 
 /**
@@ -186,38 +213,39 @@ function getStorageKey(type) {
 }
 
 /**
- * @param {SessionInfoDef|string} storedSession
- * @return {SessionInfoDef|undefined}
+ * @param {*} storedSession
+ * @return {SessionInfoDef}
  */
 function constructSessionFromStoredValue(storedSession) {
   if (!isObject(storedSession)) {
     dev().error(TAG, 'Invalid stored session value');
-    return;
+    return constructSessionInfo();
   }
 
-  return constructSessionInfo(
-    storedSession[SESSION_STORAGE_KEYS.SESSION_ID],
-    storedSession[SESSION_STORAGE_KEYS.CREATION_TIMESTAMP],
-    Date.now()
-  );
+  return {
+    [SESSION_VALUES.SESSION_ID]: storedSession[SESSION_VALUES.SESSION_ID],
+    [SESSION_VALUES.CREATION_TIMESTAMP]:
+      storedSession[SESSION_VALUES.CREATION_TIMESTAMP],
+    [SESSION_VALUES.COUNT]: storedSession[SESSION_VALUES.COUNT],
+    [SESSION_VALUES.ACCESS_TIMESTAMP]:
+      storedSession[SESSION_VALUES.ACCESS_TIMESTAMP],
+    [SESSION_VALUES.EVENT_TIMESTAMP]:
+      storedSession[SESSION_VALUES.EVENT_TIMESTAMP],
+  };
 }
 
 /**
- * Construct the session info object from values
- * @param {number} sessionId
- * @param {number} creationTimestamp
- * @param {number} lastAccessTimestamp
+ * Constructs a new SessionInfoDef object
+ * @param {number=} count
  * @return {!SessionInfoDef}
  */
-function constructSessionInfo(
-  sessionId,
-  creationTimestamp,
-  lastAccessTimestamp
-) {
+function constructSessionInfo(count = 1) {
   return {
-    [SESSION_STORAGE_KEYS.SESSION_ID]: sessionId,
-    [SESSION_STORAGE_KEYS.CREATION_TIMESTAMP]: creationTimestamp,
-    [SESSION_STORAGE_KEYS.LAST_ACCESS_TIMESTAMP]: lastAccessTimestamp,
+    [SESSION_VALUES.SESSION_ID]: generateSessionId(),
+    [SESSION_VALUES.CREATION_TIMESTAMP]: Date.now(),
+    [SESSION_VALUES.ACCESS_TIMESTAMP]: Date.now(),
+    [SESSION_VALUES.COUNT]: count,
+    [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
   };
 }
 

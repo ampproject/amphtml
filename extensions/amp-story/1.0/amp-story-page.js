@@ -48,9 +48,10 @@ import {Deferred} from '#core/data-structures/promise';
 import {EventType, dispatch} from './events';
 import {Layout} from '#core/dom/layout';
 import {LoadingSpinner} from './loading-spinner';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {MediaPool} from './media-pool';
 import {Services} from '#service';
+import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {addAttributesToElement, iterateCursor} from '#core/dom';
 import {
@@ -391,7 +392,12 @@ export class AmpStoryPage extends AMP.BaseElement {
     const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
       'storyNextUp'
     );
-    if (autoAdvanceAttr !== null || storyNextUpParam === null) {
+    if (
+      autoAdvanceAttr !== null ||
+      storyNextUpParam === null ||
+      // This is a special value that indicates we are in the viewer indicated control group.
+      storyNextUpParam === StoryAdSegmentTimes.SENTINEL
+    ) {
       return;
     }
     addAttributesToElement(

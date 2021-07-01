@@ -77,6 +77,8 @@ const defaultConfig = jsonConfiguration({
     'scrollTop': 'SCROLL_TOP',
     'scrollWidth': 'SCROLL_WIDTH',
     'sessionId': 'SESSION_ID',
+    'sessionCount': 'SESSION_COUNT',
+    'sessionEventTimestamp': 'SESSION_EVENT_TIMESTAMP',
     'sessionTimestamp': 'SESSION_TIMESTAMP',
     'serverResponseTime': 'SERVER_RESPONSE_TIME',
     'sourceHost': 'SOURCE_HOST',

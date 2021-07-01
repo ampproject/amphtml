@@ -74,7 +74,7 @@ class AmpFitText extends AMP.BaseElement {
     this.content_ = this.element.ownerDocument.createElement('div');
     applyFillContent(this.content_);
     this.content_.classList.add('i-amphtml-fit-text-content');
-    setStyles(this.content_, {zIndex: 2});
+    setStyles(this.content_, {zIndex: 2, visibility: 'hidden'});
 
     this.contentWrapper_ = this.element.ownerDocument.createElement('div');
     setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
@@ -149,6 +149,7 @@ class AmpFitText extends AMP.BaseElement {
     }
     return this.mutateElement(() => {
       this.updateFontSize_();
+      setStyles(this.content_, {visibility: 'visible'});
     });
   }
 
