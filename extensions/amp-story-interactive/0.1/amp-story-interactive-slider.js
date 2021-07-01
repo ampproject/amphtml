@@ -49,7 +49,7 @@ const buildSliderTemplate = (element) => {
             type="range"
             min="0"
             max="100"
-            value="25"
+            value="0"
           />
           <div class="i-amphtml-story-interactive-slider-sliderValue span">
           <span>50</span>
@@ -63,6 +63,7 @@ const buildSliderTemplate = (element) => {
     </div>
   `;
 };
+
 export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   /**
    * @param {!AmpElement} element
