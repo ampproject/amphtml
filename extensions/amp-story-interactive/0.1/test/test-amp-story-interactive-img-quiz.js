@@ -79,7 +79,7 @@ describes.realWin(
       expect(ampStoryQuiz.getRootElement().children.length).to.equal(1);
     });
 
-    it('should structure the content in the quiz element', async () => {
+    it('should structure the content in the quiz element with images', async () => {
       ampStoryQuiz.element.setAttribute('option-1-image', 'Fizz');
       ampStoryQuiz.element.setAttribute('option-1-image-alt', 'Fizz');
       ampStoryQuiz.element.setAttribute('option-2-image', 'Buzz');
@@ -100,11 +100,6 @@ describes.realWin(
 
       //Check option content
       expect(
-        quizContent
-          .querySelector('.i-amphtml-story-interactive-img-option')
-          .getAttribute('aria-label')
-      ).to.contain('Fizz');
-      expect(
         win
           .getComputedStyle(
             quizContent.querySelector(
@@ -113,6 +108,38 @@ describes.realWin(
           )
           .getPropertyValue('background-image')
       ).to.contain('Fizz');
+      expect(
+        win
+          .getComputedStyle(
+            quizContent.querySelectorAll(
+              '.i-amphtml-story-interactive-img-option-img'
+            )[1]
+          )
+          .getPropertyValue('background-image')
+      ).to.contain('Buzz');
+    });
+
+    it('should set the aria-label for each option', async () => {
+      ampStoryQuiz.element.setAttribute('option-1-image', 'Fizz');
+      ampStoryQuiz.element.setAttribute('option-1-image-alt', 'Fizz');
+      ampStoryQuiz.element.setAttribute('option-2-image', 'Buzz');
+      ampStoryQuiz.element.setAttribute('option-2-image-alt', 'Buzz');
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const quizContent = ampStoryQuiz.getRootElement().children[0];
+
+      //Check option content
+      expect(
+        quizContent
+          .querySelector('.i-amphtml-story-interactive-img-option')
+          .getAttribute('aria-label')
+      ).to.contain('Fizz');
+      expect(
+        quizContent
+          .querySelectorAll('.i-amphtml-story-interactive-img-option')[1]
+          .getAttribute('aria-label')
+      ).to.contain('Buzz');
     });
 
     it('should throw an error with fewer than two options', () => {
