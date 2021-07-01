@@ -29,7 +29,7 @@ import {Scroller} from './scroller';
 import {WithAmpContext} from '#preact/context';
 import {forwardRef, toChildArray} from '#preact/compat';
 import {isRTL} from '#core/dom';
-import {sequentialIdGenerator} from '#core/math/id-generator';
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {toWin} from '#core/window';
 import {
   useCallback,
@@ -354,8 +354,8 @@ function BaseCarouselWithRef(
         {childrenArray.map((child, index) => (
           <WithAmpContext
             key={index}
-            renderable={index === currentSlide}
-            playable={index === currentSlide}
+            renderable={index == currentSlide}
+            playable={index == currentSlide}
           >
             {child}
           </WithAmpContext>
