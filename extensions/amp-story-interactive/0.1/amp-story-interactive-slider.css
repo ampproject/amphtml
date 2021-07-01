@@ -17,14 +17,79 @@
 .i-amphtml-story-interactive-slider-input-container {
   background: var(--i-amphtml-interactive-option-background-color) !important;
   border-radius: 2em !important;
-  box-shadow:var(--i-amphtml-interactive-component-shadow) !important;
+  box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
 }
+.i-amphtml-story-interactive-slider-sliderValue {
+  position: relative;
+  margin: 0 0.625px;
+}
+.i-amphtml-story-interactive-slider-sliderValue span {
+  position: absolute;
+  height: 2.8em;
+  width: 2.8em;
+  transform: translate(-50%, 50%) scale(0);
+  font-weight: 500;
+  top: -2.5em;
+  line-height: 3.4em;
+  color: #fff;
+  transform-origin: bottom;
+  transition: transform 0.3s ease-in-out;
+}
+.i-amphtml-story-interactive-slider-sliderValue span.show {
+  transform: translate(-50%, -10%) scale(1);
+}
+.i-amphtml-story-interactive-slider-sliderValue span::after {
+  position: absolute;
+  content: '';
+  height: 2.8em;
+  width: 2.8em;
+  background: #651ffe;
+  z-index: -1;
+  left: 50%;
+  top: 0.2em;
+  transform: translateX(-50%) rotate(45deg);
+  border-bottom-left-radius: 50%;
+  box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25);
+  border-top-left-radius: 50%;
+  border-top-right-radius: 50%;
+}
+
+.i-amphtml-story-interactive-slider-field {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  position: relative;
+}
+.i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-slidervalue{
+  position: absolute;
+  font-size: 18px;
+  color: #651FFE;
+  font-weight: 600;
+}
+.i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-slidervalue.left{
+  left: -22px;
+}
+.i-amphtml-story-interactive-slide-rfield .i-amphtml-story-interactive-slidervalue.right{
+  right: -43px;
+}
+
 .i-amphtml-story-interactive-slider-input {
   -webkit-appearance: none !important;
-  width: calc(100% - 2em) !important;
+  width: calc(80% - 2em) !important;
   height: 1em !important;
-  margin: 1em !important;
+  margin-bottom: 1em !important;
+  margin-top: 1em !important;
+  margin-left: 0.5em !important;
+  margin-right: 0.5em !important;
   background: transparent !important;
+  /*--percentage: 0%;
+  background: linear-gradient(
+    90deg,
+    #B28FFF 0%,
+    #783BFE var(--percentage),
+    #D8C7FF var(--percentage)
+  );*/
   position: relative !important;
   pointer-events: all !important;
   cursor: pointer !important;

@@ -20,6 +20,7 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 
 /**
  * Generates the template for the slider.
@@ -27,19 +28,35 @@ import {htmlFor} from '#core/dom/static-template';
  * @param {!Element} element
  * @return {!Element}
  */
+/**
+ * Handles a tap event on the quiz element.
+ * @param {Event}
+ * @protected
+ */
 const buildSliderTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-interactive-slider-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-slider-input-container">
-        <input
-          class="i-amphtml-story-interactive-slider-input"
-          type="range"
-          min="0"
-          max="100"
-          value="25"
-        />
+        <div class="i-amphtml-story-interactive-slider-sliderValue span">
+          <span>50</span>
+        </div>
+        <div class="i-amphtml-story-interactive-slider-field">
+          <div class="i-amphtml-story-interactive-slider-field i-amphtml-story-interactive-slidervalue.left">
+            0
+          </div>
+          <input
+            class="i-amphtml-story-interactive-slider-input"
+            type="range"
+            min="0"
+            max="100"
+            value="25"
+          />
+          <div class="i-amphtml-story-interactive-slider-field i-amphtml-story-interactive-slidervalue.right">
+            100
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -60,6 +77,16 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   buildComponent() {
     this.rootEl_ = buildSliderTemplate(this.element);
     this.attachPrompt_(this.rootEl_);
+    const sliderValue = scopedQuerySelector(this.rootEl_, 'span');
+    const inputSlider = scopedQuerySelector(this.rootEl_, 'input');
+    this.rootEl_.addEventListener('input', () => {
+      console.log('running');
+      let value = inputSlider.value;
+      sliderValue.textContent = value;
+      console.log(sliderValue);
+      sliderValue.style.left = value + '%';
+      sliderValue.classList.add('show');
+    });
     return this.rootEl_;
   }
 }
