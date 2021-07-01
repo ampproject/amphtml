@@ -17,7 +17,7 @@
 .i-amphtml-story-interactive-slider-input-container {
   background: var(--i-amphtml-interactive-option-background-color) !important;
   border-radius: 2em !important;
-  box-shadow:var(--i-amphtml-interactive-component-shadow) !important;
+  box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
 }
 .i-amphtml-story-interactive-slider-input {
   -webkit-appearance: none !important;
