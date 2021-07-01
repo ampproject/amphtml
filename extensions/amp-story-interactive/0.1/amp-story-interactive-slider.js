@@ -39,13 +39,11 @@ const buildSliderTemplate = (element) => {
     <div class="i-amphtml-story-interactive-slider-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-slider-input-container">
-        <div class="i-amphtml-story-interactive-slider-sliderValue span">
-          <span>50</span>
-        </div>
         <div class="i-amphtml-story-interactive-slider-field">
-          <div class="i-amphtml-story-interactive-slider-field i-amphtml-story-interactive-slidervalue.left">
+          <div class="i-amphtml-story-interactive-slidervalue">
             0
           </div>
+        <div class="i-amphtml-story-interactive-slider-input-size">
           <input
             class="i-amphtml-story-interactive-slider-input"
             type="range"
@@ -53,7 +51,11 @@ const buildSliderTemplate = (element) => {
             max="100"
             value="25"
           />
-          <div class="i-amphtml-story-interactive-slider-field i-amphtml-story-interactive-slidervalue.right">
+          <div class="i-amphtml-story-interactive-slider-sliderValue span">
+          <span>50</span>
+        </div>
+          </div>
+          <div class="i-amphtml-story-interactive-slidervalue">
             100
           </div>
         </div>
@@ -79,6 +81,8 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.attachPrompt_(this.rootEl_);
     const sliderValue = scopedQuerySelector(this.rootEl_, 'span');
     const inputSlider = scopedQuerySelector(this.rootEl_, 'input');
+    const Slider = scopedQuerySelector(this.rootEl_, 'input');
+
     this.rootEl_.addEventListener('input', () => {
       console.log('running');
       let value = inputSlider.value;
@@ -86,6 +90,13 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
       console.log(sliderValue);
       sliderValue.style.left = value + '%';
       sliderValue.classList.add('show');
+      
+    });
+    function updateSlider(val) {
+        Slider.style.setProperty("--percentage", val + "%");
+    }
+    Slider.addEventListener("input", () => {
+        updateSlider(Slider.value);
     });
     return this.rootEl_;
   }
