@@ -100,29 +100,6 @@ describes.realWin(
 
       //Check option content
       expect(
-        quizContent
-          .querySelector('.i-amphtml-story-interactive-img-option')
-          .getAttribute('aria-label')
-      ).to.contain('Fizz');
-      expect(
-        quizContent
-          .querySelectorAll('.i-amphtml-story-interactive-img-option')[1]
-          .getAttribute('aria-label')
-      ).to.contain('Buzz');
-    });
-
-    it('should set the aria-label for each option', async () => {
-      ampStoryQuiz.element.setAttribute('option-1-image', 'Fizz');
-      ampStoryQuiz.element.setAttribute('option-1-image-alt', 'Fizz');
-      ampStoryQuiz.element.setAttribute('option-2-image', 'Buzz');
-      ampStoryQuiz.element.setAttribute('option-2-image-alt', 'Buzz');
-      await ampStoryQuiz.buildCallback();
-      await ampStoryQuiz.layoutCallback();
-
-      const quizContent = ampStoryQuiz.getRootElement().children[0];
-
-      //Check option content
-      expect(
         win
           .getComputedStyle(
             quizContent.querySelector(
@@ -139,6 +116,29 @@ describes.realWin(
             )[1]
           )
           .getPropertyValue('background-image')
+      ).to.contain('Buzz');
+    });
+
+    it('should set the aria-label for each option', async () => {
+      ampStoryQuiz.element.setAttribute('option-1-image', 'Fizz');
+      ampStoryQuiz.element.setAttribute('option-1-image-alt', 'Fizz');
+      ampStoryQuiz.element.setAttribute('option-2-image', 'Buzz');
+      ampStoryQuiz.element.setAttribute('option-2-image-alt', 'Buzz');
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const quizContent = ampStoryQuiz.getRootElement().children[0];
+
+      //Check option content
+      expect(
+        quizContent
+          .querySelector('.i-amphtml-story-interactive-img-option')
+          .getAttribute('aria-label')
+      ).to.contain('Fizz');
+      expect(
+        quizContent
+          .querySelectorAll('.i-amphtml-story-interactive-img-option')[1]
+          .getAttribute('aria-label')
       ).to.contain('Buzz');
     });
 
