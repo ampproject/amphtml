@@ -5677,22 +5677,6 @@ class Validator {
     }
 
     parse_accounting_ = parser->Accounting();
-    if (GetFlag(FLAGS_duplicate_html_body_elements_is_error) &&
-        parse_accounting_.duplicate_body_elements &&
-        parse_accounting_.duplicate_body_element_location.has_value()) {
-      auto [line, col] =
-          parse_accounting_.duplicate_body_element_location.value();
-      context_.AddError(ValidationError::DUPLICATE_UNIQUE_TAG,
-                        LineCol(line, col), {"BODY"}, "", &result_);
-    }
-    if (GetFlag(FLAGS_duplicate_html_body_elements_is_error) &&
-        parse_accounting_.duplicate_html_elements &&
-        parse_accounting_.duplicate_html_element_location.has_value()) {
-      auto [line, col] =
-          parse_accounting_.duplicate_html_element_location.value();
-      context_.AddError(ValidationError::DUPLICATE_UNIQUE_TAG,
-                        LineCol(line, col), {"HTML"}, "", &result_);
-    }
     UpdateLineColumnIndex(doc->RootNode());
     ValidateNode(doc->RootNode());
     auto [current_line_no, current_col_no] = parser->CurrentTokenizerPosition();
