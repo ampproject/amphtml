@@ -21,7 +21,7 @@ import {
   getPercentageOffsetFromAlignment,
   scrollContainerToElement,
 } from './dimensions';
-import {LightboxGalleryContext} from '../../amp-lightbox-gallery/1.0/context';
+import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
 import {debounce} from '#core/types/function';
 import {forwardRef} from '#preact/compat';
 import {mod} from '#core/math';
@@ -29,7 +29,6 @@ import {setStyle} from '#core/dom/style';
 import {toWin} from '#core/window';
 import {
   useCallback,
-  useContext,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -60,7 +59,7 @@ function ScrollerWithRef(
     alignment,
     axis,
     children,
-    lightbox,
+    lightboxGroup,
     loop,
     mixedLength,
     restingIndex,
@@ -138,7 +137,6 @@ function ScrollerWithRef(
    */
   const scrollOffset = useRef(0);
 
-  const {open: openLightbox} = useContext(LightboxGalleryContext);
   const slides = renderSlides(
     {
       alignment,
@@ -146,7 +144,7 @@ function ScrollerWithRef(
       loop,
       mixedLength,
       offsetRef,
-      openLightbox: lightbox && openLightbox,
+      lightboxGroup,
       pivotIndex,
       restingIndex,
       snap,
@@ -343,10 +341,10 @@ function renderSlides(
     _thumbnails,
     alignment,
     children,
+    lightboxGroup,
     loop,
     mixedLength,
     offsetRef,
-    openLightbox,
     pivotIndex,
     restingIndex,
     snap,
@@ -356,15 +354,11 @@ function renderSlides(
   classes
 ) {
   const {length} = children;
-  const lightboxProps = openLightbox && {
-    role: 'button',
-    tabindex: '0',
-    onClick: () => openLightbox(),
-  };
+  const Comp = lightboxGroup ? WithLightbox : 'div';
   const slides = children.map((child, index) => {
     const key = `slide-${child.key || index}`;
     return (
-      <div
+      <Comp
         key={key}
         data-slide={index}
         class={`${classes.slideSizing} ${classes.slideElement} ${
@@ -376,14 +370,14 @@ function renderSlides(
             ? classes.centerAlign
             : classes.startAlign
         } ${_thumbnails ? classes.thumbnails : ''} `}
+        group={lightboxGroup}
         part="slide"
         style={{
           flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`,
         }}
-        {...lightboxProps}
       >
         {child}
-      </div>
+      </Comp>
     );
   });
 
