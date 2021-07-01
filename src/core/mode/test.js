@@ -27,5 +27,5 @@ export function isTest(opt_win) {
     return false;
   }
   const win = opt_win || self;
-  return !!(self.AMP_CONFIG?.test || win.__AMP_TEST || win['__karma__']);
+  return !!(win.AMP_CONFIG?.test || win.__AMP_TEST || win['__karma__']);
 }

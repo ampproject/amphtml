@@ -68,6 +68,7 @@ describes.sandboxed('getRtvVersion', {}, () => {
     const win = {
       AMP_CONFIG: {
         v: '12345',
+        test: true,
       },
       location: parseUrlDeprecated('https://acme.org/doc1'),
     };
