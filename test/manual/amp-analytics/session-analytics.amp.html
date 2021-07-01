@@ -33,28 +33,34 @@
         <script type="application/json">
           {
               "requests": {
-                  "endpoint": "https://_fake_.com/analytics?session=SESSION_ID&timestamp=SESSION_TIMESTAMP&count=SESSION_COUNT"
+                  "endpoint": "https://_fake_.com/analytics?"
               },
               "triggers": {
                   "pageview": {
                       "on": "visible",
-                      "request": "endpoint"
+                      "request": "endpoint",
+                      "extraUrlParams": {
+                        "ssid": "SESSION_ID",
+                        "ct": "SESSION_TIMESTAMP",
+                        "c": "SESSION_COUNT",
+                        "et": "SESSION_EVENT_TIMESTAMP"
+                      }
                   },
                   "session": {
                     "on": "timer",
                     "timerSpec": {
                         "interval": 10
                     },
-                    "enabled": true,
+                    "enabled": false,
                     "request": "endpoint"
                   },
-                  "session2": {
-                    "on": "timer",
-                    "timerSpec": {
-                        "interval": 15
-                    },
-                    "enabled": true,
-                    "request": "endpoint"
+                  "click": {
+                    "on": "click",
+                    "selector": "#test1",
+                    "request": "endpoint",
+                    "session": {
+                      "persistEvent": true
+                    }
                   }
               },
               "transport": {
