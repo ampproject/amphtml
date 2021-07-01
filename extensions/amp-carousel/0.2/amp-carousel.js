@@ -686,6 +686,85 @@ class AmpCarousel extends AMP.BaseElement {
   }
 }
 
+/**
+ *
+ * @param {!Document} doc
+ * @param {!Element} element
+ */
+export function buildDom(doc, element) {
+  const win = doc.defaultView;
+  const slides = realChildElements(element);
+
+  element.appendChild(this.renderContainerDom_()); // todo
+  this.scrollContainer_ = element.querySelector('.i-amphtml-carousel-scroll');
+  this.prevButton_ = this.element.querySelector('.amp-carousel-button-prev');
+  this.nextButton_ = this.element.querySelector('.amp-carousel-button-next');
+
+  this.carousel_ = new Carousel({
+    win,
+    element,
+    scrollContainer: dev().assertElement(this.scrollContainer_),
+    initialIndex: Number(this.element.getAttribute('slide') || '0'),
+    runMutate: (cb) => this.mutateElement(cb),
+  });
+  this.configureCarousel_(slides);
+
+  // Setup actions and listeners
+  this.setupActions_();
+  this.element.addEventListener(CarouselEvents.INDEX_CHANGE, (event) => {
+    this.onIndexChanged_(event);
+  });
+  this.element.addEventListener(CarouselEvents.SCROLL_START, () => {
+    this.onScrollStarted_();
+  });
+  this.element.addEventListener(CarouselEvents.SCROLL_POSITION_CHANGED, () => {
+    this.onScrollPositionChanged_();
+  });
+  this.prevButton_.addEventListener('click', () => this.interactionPrev());
+  this.nextButton_.addEventListener('click', () => this.interactionNext());
+  this.handlePropagationInViewer_();
+
+  const owners = Services.ownersForDoc(element);
+  this.childLayoutManager_ = new ChildLayoutManager({
+    ampElement: this,
+    intersectionElement: dev().assertElement(this.scrollContainer_),
+    // For iOS, we queue changes until scrolling stops, which we detect
+    // ~200ms after it actually stops. Load items earlier so they have time
+    // to load.
+    nearbyMarginInPercent: this.isIos_ ? 200 : 100,
+    viewportIntersectionCallback: (child, isIntersecting) => {
+      if (isIntersecting) {
+        owners.scheduleResume(this.element, child);
+      } else {
+        owners.schedulePause(this.element, child);
+      }
+    },
+  });
+  // For iOS, we cannot trigger layout during scrolling or the UI will
+  // flicker, so tell the layout to simply queue the changes, which we
+  // flush after scrolling stops.
+  this.childLayoutManager_.setQueueChanges(this.isIos_);
+
+  this.childLayoutManager_.updateChildren(this.slides_);
+  this.carousel_.updateSlides(this.slides_);
+  // Need to wait for slides to exist first.
+  this.carousel_.goToSlide(Number(this.element.getAttribute('slide') || '0'));
+  // Signal for runtime to check children for layout.
+
+  if (this.element.hasAttribute('controls')) {
+    this.showControls_ = true;
+  } else {
+    Services.inputFor(this.win).onMouseDetected((mouseDetected) => {
+      if (mouseDetected) {
+        this.showControls_ = true;
+        this.updateUi_();
+      }
+    }, true);
+  }
+
+  return this.mutateElement(() => {});
+}
+
 AMP.extension('amp-carousel', '0.2', (AMP) => {
   AMP.registerElement('amp-carousel', AmpCarousel, CSS);
 });
