@@ -332,16 +332,10 @@ export class VariableService {
       'SESSION_TIMESTAMP': () =>
         this.getSessionValue_(type, SESSION_VALUES.CREATION_TIMESTAMP),
       'SESSION_COUNT': () => this.getSessionValue_(type, SESSION_VALUES.COUNT),
-      'ENGAGED': () => this.getSessionValue_(type, SESSION_VALUES.ENGAGED),
-      'EVENT_TIMESTAMP': (persist) => {
-        // Defaults to true
-        persist = persist != 'false';
-        return this.getSessionValue_(
-          type,
-          SESSION_VALUES.EVENT_TIMESTAMP,
-          persist
-        );
-      },
+      'SESSION_EVENT_TIMESTAMP': () =>
+        this.getSessionValue_(type, SESSION_VALUES.EVENT_TIMESTAMP),
+      'SESSION_ENGAGED': () =>
+        this.getSessionValue_(type, SESSION_VALUES.ENGAGED),
     };
     const perfMacros = isInFie(element)
       ? {}
@@ -383,12 +377,11 @@ export class VariableService {
    *
    * @param {string} vendorType
    * @param {!SESSION_VALUES} key
-   * @param {boolean=} opt_persist
    * @return {!Promise<number>}
    */
-  getSessionValue_(vendorType, key, opt_persist) {
+  getSessionValue_(vendorType, key) {
     return this.sessionManagerPromise_.then((sessionManager) => {
-      return sessionManager.getSessionValue(vendorType, key, opt_persist);
+      return sessionManager.getSessionValue(vendorType, key);
     });
   }
 

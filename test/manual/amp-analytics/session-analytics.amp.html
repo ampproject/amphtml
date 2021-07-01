@@ -38,10 +38,7 @@
               "triggers": {
                   "pageview": {
                       "on": "visible",
-                      "request": "endpoint",
-                      "extraUrlParams": {
-                          "pageview": 1
-                      }
+                      "request": "endpoint"
                   },
                   "session": {
                     "on": "timer",
@@ -49,10 +46,7 @@
                         "interval": 10
                     },
                     "enabled": true,
-                    "request": "endpoint",
-                    "extraUrlParams": {
-                      "timer": true
-                    }
+                    "request": "endpoint"
                   },
                   "session2": {
                     "on": "timer",
@@ -60,10 +54,7 @@
                         "interval": 15
                     },
                     "enabled": true,
-                    "request": "endpoint",
-                    "extraUrlParams": {
-                      "timer2": true
-                    }
+                    "request": "endpoint"
                   }
               },
               "transport": {
@@ -78,17 +69,13 @@
         <script type="application/json">
           {
               "requests": {
-                  "endpoint": "https://example.com/analytics?session=${sessionId}&timestamp=${sessionTimestamp}&count=${sessionCount}&eventTimestamp=${eventTimestamp(false)}",
+                  "endpoint": "https://example.com/analytics?session=${sessionId}&timestamp=${sessionTimestamp}&count=${sessionCount}&eventTimestamp=${sessionEventTimestamp}&engaged=${sessionEngaged}",
                   "click": "https://example.com/click_event?session=${sessionId}"
               },
               "triggers": {
                   "pageview": {
                       "on": "visible",
-                      "request": "endpoint",
-                      "extraUrlParams": {
-                        "engaged": "${engaged}",
-                          "pageview": 1
-                      }
+                      "request": "endpoint"
                   },
                   "session": {
                     "on": "timer",
@@ -105,9 +92,12 @@
                     "on": "click",
                     "selector": "#test1",
                     "request": "click",
+                    "session": {
+                      "persistEvent": true
+                    },
                     "extraUrlParams": {
-                      "engaged": "ENGAGED"
-                      "lastEventTimestamp": "${eventTimestamp}"
+                      "lastEventTimestamp": "SESSION_EVENT_TIMESTAMP",
+                      "engaged": "SESSION_ENGAGED"
                     }
                   }
               },

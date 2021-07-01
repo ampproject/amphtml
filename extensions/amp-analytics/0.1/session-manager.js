@@ -78,56 +78,40 @@ export class SessionManager {
    * Get the value from the session per the vendor.
    * @param {string|undefined} type
    * @param {SESSION_VALUES} value
-   * @param {boolean=} opt_persist
    * @return {!Promise<number|undefined>}
    */
-  getSessionValue(type, value, opt_persist) {
-    return this.get(type).then((session) => {
-      if (value === SESSION_VALUES.EVENT_TIMESTAMP) {
-        return this.getSessionEventTimestamp_(type, session, opt_persist);
-      } else if (value === SESSION_VALUES.ENGAGED) {
-        return this.getEngagedValue_(session);
-      }
-      return session?.[value];
-    });
+  getSessionValue(type, value) {
+    return this.get(type).then((session) => session?.[value]);
   }
 
   /**
-   * Get the value from the session per the vendor.
+   * Updates EventTimestamp and/or Engaged for this session,
+   * asynchronously as a callback to avoid duplicate writing.
+   * when the session is retrieved or created.
    * @param {string} type
-   * @param {SessionInfoDef} session
-   * @param {boolean} persist
-   * @return {number|undefined}
+   * @param {boolean} persistEvent
+   * @param {boolean} persistEngaged
+   * @return {!Promise}
    */
-  getSessionEventTimestamp_(type, session, persist) {
-    const lastTimestamp = session[SESSION_VALUES.EVENT_TIMESTAMP];
-    if (persist) {
-      this.sessions_[type] = this.updateSession_(session, true);
-      this.setSession_(type, session);
-    }
-    return lastTimestamp;
-  }
-
-  /**
-   * Get the previous engaged value and update the session
-   * to show that user is now engaged.
-   * Currently, we only store this in memory.
-   * @param {SessionInfoDef} session
-   * @return {boolean}
-   */
-  getEngagedValue_(session) {
-    const engaged = session[SESSION_VALUES.ENGAGED];
-    session[SESSION_VALUES.ENGAGED] = true;
-    return engaged == true;
+  updateEvent(type, persistEvent, persistEngaged) {
+    return this.get(type, (session) => {
+      if (persistEvent) {
+        session[SESSION_VALUES.EVENT_TIMESTAMP] = Date.now();
+      }
+      if (persistEngaged) {
+        session[SESSION_VALUES.ENGAGED] = true;
+      }
+    });
   }
 
   /**
    * Get the session for the vendor, checking if it exists or
    * creating it if necessary.
    * @param {string|undefined} type
+   * @param {Function=} opt_processing
    * @return {!Promise<?SessionInfoDef>}
    */
-  get(type) {
+  get(type, opt_processing) {
     if (!type) {
       user().error(TAG, 'Sessions can only be accessed with a vendor type.');
       return Promise.resolve(null);
@@ -138,20 +122,22 @@ export class SessionManager {
       !isSessionExpired(this.sessions_[type])
     ) {
       this.sessions_[type] = this.updateSession_(this.sessions_[type]);
+      opt_processing?.(this.sessions_[type]);
       this.setSession_(type, this.sessions_[type]);
       return Promise.resolve(this.sessions_[type]);
     }
 
-    return this.getOrCreateSession_(type);
+    return this.getOrCreateSession_(type, opt_processing);
   }
 
   /**
    * Get our session if it exists or creates it. Sets the session
    * in localStorage to update the access time.
    * @param {string} type
+   * @param {Function=} opt_processing
    * @return {!Promise<SessionInfoDef>}
    */
-  getOrCreateSession_(type) {
+  getOrCreateSession_(type, opt_processing) {
     return this.storagePromise_
       .then((storage) => {
         const storageKey = getStorageKey(type);
@@ -168,6 +154,7 @@ export class SessionManager {
         if (type in this.sessions_ && !isSessionExpired(this.sessions_[type])) {
           return this.sessions_[type];
         }
+        opt_processing?.(session);
         this.setSession_(type, session);
         this.sessions_[type] = session;
         return this.sessions_[type];
@@ -178,10 +165,9 @@ export class SessionManager {
    * Check if session has expired and reset/update values (id, count) if so.
    * Also update `accessTimestamp`.
    * @param {!SessionInfoDef} session
-   * @param {boolean} updateEvent
    * @return {!SessionInfoDef}
    */
-  updateSession_(session, updateEvent = false) {
+  updateSession_(session) {
     const currentCount = session[SESSION_VALUES.COUNT];
     const now = Date.now();
     if (isSessionExpired(session)) {
@@ -191,9 +177,6 @@ export class SessionManager {
       session[SESSION_VALUES.COUNT] = 1;
     }
     session[SESSION_VALUES.ACCESS_TIMESTAMP] = now;
-    if (updateEvent) {
-      session[SESSION_VALUES.EVENT_TIMESTAMP] = now;
-    }
     return session;
   }
 
@@ -257,7 +240,7 @@ function constructSessionFromStoredValue(storedSession) {
       storedSession[SESSION_VALUES.ACCESS_TIMESTAMP],
     [SESSION_VALUES.EVENT_TIMESTAMP]:
       storedSession[SESSION_VALUES.EVENT_TIMESTAMP],
-    [SESSION_VALUES.ENGAGED]: undefined,
+    [SESSION_VALUES.ENGAGED]: storedSession[SESSION_VALUES.ENGAGED] ?? false,
   };
 }
 
@@ -273,7 +256,7 @@ function constructSessionInfo(count = 1) {
     [SESSION_VALUES.ACCESS_TIMESTAMP]: Date.now(),
     [SESSION_VALUES.COUNT]: count,
     [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-    [SESSION_VALUES.ENGAGED]: undefined,
+    [SESSION_VALUES.ENGAGED]: false,
   };
 }
 
