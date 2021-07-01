@@ -45,7 +45,10 @@
   font-size: inherit !important;
 }
 
-.i-amphtml-story-interactive-img-option:nth-child(odd) {
+.i-amphtml-story-interactive-img-container:not([dir='rtl'])
+  .i-amphtml-story-interactive-img-option:nth-child(odd),
+.i-amphtml-story-interactive-img-container[dir='rtl']
+  .i-amphtml-story-interactive-img-option:nth-child(even) {
   margin-left: var(--i-amphtml-interactive-img-option-margin) !important;
 }
 
