@@ -58,7 +58,6 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
         connectedCallback() {
           this.implementation.mountCallback();
           this.implementation.buildCallback();
-          this.implementation.layoutCallback();
         }
 
         /** */
@@ -93,9 +92,6 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
 
     /** */
     buildCallback() {}
-
-    /** */
-    layoutCallback() {}
   }
 
   BaseElement = /** @type {typeof AMP.BaseElement} */ (CeBaseElement);
