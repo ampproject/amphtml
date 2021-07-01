@@ -289,7 +289,15 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!Promise}
    */
   maybeInitializeSessionManager_() {
-    if (this.config_[PERSIST_SESSION_VALUE] && this.type_) {
+    if (!this.config_['triggers']) {
+      return Promise.resolve();
+    }
+    const shouldInitialize = Object.values(this.config_['triggers']).some(
+      (trigger) =>
+        trigger?.['session']?.['persistEvent'] ||
+        trigger?.['session']?.['persistEngaged']
+    );
+    if (shouldInitialize && this.type_) {
       const ampdoc = this.getAmpDoc();
       return sessionServicePromiseForDoc(ampdoc).then((manager) => {
         this.sessionManager_ = manager;
@@ -625,13 +633,11 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleEvent_(trigger, event) {
-    const persistEvent = trigger?.session?.['persistEvent'] === true;
-    const persistEngaged = trigger?.session?.['persistEngaged'] === true;
-    if (this.sessionManager_ && (persistEvent || persistEngaged)) {
-      this.sessionManager_.updateEvent(
+    if (this.sessionManager_) {
+      this.sessionManager_?.updateEvent(
         this.type_,
-        persistEvent,
-        persistEngaged
+        !!trigger.session?.['persistEvent'],
+        !!trigger.session?.['persistEngaged']
       );
     }
     const requests = isArray(trigger['request'])

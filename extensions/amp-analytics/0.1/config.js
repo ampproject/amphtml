@@ -15,7 +15,6 @@
  */
 
 import {DEFAULT_CONFIG} from './default-config';
-import {PERSIST_SESSION_VALUE} from './amp-analytics';
 import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';
 import {calculateScriptBaseUrl} from '#service/extension-script';
@@ -77,7 +76,6 @@ export class AnalyticsConfig {
 
     return Promise.all([this.fetchRemoteConfig_(), this.fetchVendorConfig_()])
       .then(this.processConfigs_.bind(this))
-      .then(this.checkPersistEvents_.bind(this))
       .then(this.checkWarningMessage_.bind(this))
       .then(() => this.config_);
   }
@@ -249,25 +247,6 @@ export class AnalyticsConfig {
           )
       );
     });
-  }
-
-  /**
-   * Checks if config has opted into persisting any
-   * EventTimestamps for the session. Sets the PERSIST_EVENT_TIMESTAMP
-   * flag in the config, if so.
-   * @private
-   */
-  checkPersistEvents_() {
-    if (!this.config_['triggers']) {
-      return;
-    }
-    this.config_[PERSIST_SESSION_VALUE] = Object.values(
-      this.config_['triggers']
-    ).some(
-      (trigger) =>
-        trigger?.['session']?.['persistEvent'] ||
-        trigger?.['session']?.['persistEngaged']
-    );
   }
 
   /**

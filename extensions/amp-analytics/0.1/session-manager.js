@@ -91,9 +91,12 @@ export class SessionManager {
    * @param {string} type
    * @param {boolean} persistEvent
    * @param {boolean} persistEngaged
-   * @return {!Promise}
+   * @return {?Promise}
    */
   updateEvent(type, persistEvent, persistEngaged) {
+    if (!persistEvent && !persistEngaged) {
+      return;
+    }
     return this.get(type, (session) => {
       if (persistEvent) {
         session[SESSION_VALUES.EVENT_TIMESTAMP] = Date.now();

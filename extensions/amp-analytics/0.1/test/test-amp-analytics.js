@@ -1771,10 +1771,8 @@ describes.realWin(
           vendorType = 'testVendor';
         });
 
-        it(
-          'should update session manager for eventTimestamp' +
-            'when event is triggered',
-          async () => {
+        describe('initialize session manager', () => {
+          it('should add flag for when `persistEvent` opted in', async () => {
             const analytics = getAnalyticsTag(
               {
                 'requests': {'foo': 'https://example.test/bar'},
@@ -1791,21 +1789,11 @@ describes.realWin(
               }
             );
 
-            const sessionSpy = env.sandbox.spy(
-              SessionManager.prototype,
-              'updateEvent'
-            );
-
             await waitForSendRequest(analytics);
-            expect(sessionSpy).to.be.calledOnce;
-            expect(sessionSpy).to.be.calledWith(vendorType, true, false);
-          }
-        );
+            expect(analytics.sessionManager_).to.not.be.null;
+          });
 
-        it(
-          'should update session manager for engaged' +
-            'when event is triggered',
-          async () => {
+          it('should add flag for when `persistEngaged` opted in', async () => {
             const analytics = getAnalyticsTag(
               {
                 'requests': {'foo': 'https://example.test/bar'},
@@ -1821,17 +1809,103 @@ describes.realWin(
                 'type': vendorType,
               }
             );
-
-            const sessionSpy = env.sandbox.spy(
-              SessionManager.prototype,
-              'updateEvent'
-            );
-
             await waitForSendRequest(analytics);
-            expect(sessionSpy).to.be.calledOnce;
-            expect(sessionSpy).to.be.calledWith(vendorType, false, true);
-          }
-        );
+            expect(analytics.sessionManager_).to.not.be.null;
+          });
+
+          it('should handle multiple opt ins', async () => {
+            const analytics = getAnalyticsTag(
+              {
+                'requests': {'foo': 'https://example.test/bar'},
+                'triggers': {
+                  'pageview1': {
+                    'on': 'visible',
+                    'request': 'foo',
+                    'session': {'persistEvent': true},
+                  },
+                  'pageview2': {
+                    'on': 'click',
+                    'request': 'foo',
+                    'selector': '.className1',
+                    'session': {'persistEngaged': true},
+                  },
+                },
+              },
+              {
+                'type': vendorType,
+              }
+            );
+            await waitForSendRequest(analytics);
+            expect(analytics.sessionManager_).to.not.be.null;
+          });
+
+          it('should handle no triggers', async () => {
+            const analytics = getAnalyticsTag(
+              {
+                'requests': {'foo': 'https://example.test/bar'},
+              },
+              {
+                'type': vendorType,
+              }
+            );
+            await waitForNoSendRequest(analytics);
+            expect(analytics.sessionManager_).to.be.null;
+          });
+        });
+
+        it('should update session manager for eventTimestamp when event is triggered', async () => {
+          const analytics = getAnalyticsTag(
+            {
+              'requests': {'foo': 'https://example.test/bar'},
+              'triggers': {
+                'pageview': {
+                  'on': 'visible',
+                  'request': 'foo',
+                  'session': {'persistEvent': true},
+                },
+              },
+            },
+            {
+              'type': vendorType,
+            }
+          );
+
+          const sessionSpy = env.sandbox.spy(
+            SessionManager.prototype,
+            'updateEvent'
+          );
+
+          await waitForSendRequest(analytics);
+          expect(sessionSpy).to.be.calledOnce;
+          expect(sessionSpy).to.be.calledWith(vendorType, true, false);
+        });
+
+        it('should update session manager for engaged when event is triggered', async () => {
+          const analytics = getAnalyticsTag(
+            {
+              'requests': {'foo': 'https://example.test/bar'},
+              'triggers': {
+                'pageview': {
+                  'on': 'visible',
+                  'request': 'foo',
+                  'session': {'persistEngaged': true},
+                },
+              },
+            },
+            {
+              'type': vendorType,
+            }
+          );
+
+          const sessionSpy = env.sandbox.spy(
+            SessionManager.prototype,
+            'updateEvent'
+          );
+
+          await waitForSendRequest(analytics);
+          expect(sessionSpy).to.be.calledOnce;
+          expect(sessionSpy).to.be.calledWith(vendorType, false, true);
+        });
 
         it('should update manager for multiple events', async () => {
           const analytics = getAnalyticsTag(
@@ -1860,7 +1934,6 @@ describes.realWin(
             'updateEvent'
           );
 
-          await macroTask();
           await waitForSendRequest(analytics);
           expect(sessionSpy).to.be.calledTwice;
           expect(sessionSpy.firstCall).to.be.calledWith(
