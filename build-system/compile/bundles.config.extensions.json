@@ -489,6 +489,14 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-iframe",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "wrapper": "bento"
+    }
+  },
+  {
     "name": "amp-iframely",
     "version": "0.1",
     "latestVersion": "0.1"
