@@ -56,8 +56,14 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
 
         /** */
         connectedCallback() {
+          this.implementation.mountCallback();
           this.implementation.buildCallback();
           this.implementation.layoutCallback();
+        }
+
+        /** */
+        disconnectedCallback() {
+          this.implementation.unmountCallback();
         }
 
         /** @return {Promise<*>} */
@@ -80,16 +86,16 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
     }
 
     /** */
+    mountCallback() {}
+
+    /** */
+    unmountCallback() {}
+
+    /** */
     buildCallback() {}
 
     /** */
     layoutCallback() {}
-
-    /** */
-    // unlayoutCallback() {}
-
-    /** */
-    // mutatedAttributesCallback() {}
   }
 
   BaseElement = /** @type {typeof AMP.BaseElement} */ (CeBaseElement);
