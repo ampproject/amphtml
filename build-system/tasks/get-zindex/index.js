@@ -207,6 +207,7 @@ async function getZindex() {
       getZindexSelectors('{css,src,extensions}/**/*.css'),
       getZindexChainsInJs([
         '{3p,src,extensions}/**/*.js',
+        '!**/dist/**/*.js',
         '!extensions/**/test/**/*.js',
         '!extensions/**/storybook/**/*.js',
       ]),
