@@ -52,14 +52,14 @@ class AmpLightboxGallery extends BaseElement {
   }
 
   /** @override */
-  afterOpen_() {
+  afterOpen() {
     const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
     this.setAsContainer?.(scroller);
   }
 
   /** @override */
-  afterClose_() {
-    super.afterClose_();
+  afterClose() {
+    super.afterClose();
     this.removeAsContainer?.();
   }
 

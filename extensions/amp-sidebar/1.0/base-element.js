@@ -43,9 +43,9 @@ export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
     return dict({
-      'onBeforeOpen': () => this.beforeOpen_(),
-      'onAfterOpen': () => this.afterOpen_(),
-      'onAfterClose': () => this.afterClose_(),
+      'onBeforeOpen': () => this.beforeOpen(),
+      'onAfterOpen': () => this.afterOpen(),
+      'onAfterClose': () => this.afterClose(),
     });
   }
 
@@ -68,15 +68,18 @@ export class BaseElement extends PreactBaseElement {
     });
   }
 
-  /** @private */
-  beforeOpen_() {
+  /** @protected */
+  beforeOpen() {
     this.open_ = true;
     toggleAttribute(this.element, 'open', true);
     toggle(this.element, true);
   }
 
-  /** @private */
-  afterClose_() {
+  /** @protected */
+  afterOpen() {}
+
+  /** @protected */
+  afterClose() {
     this.open_ = false;
     toggleAttribute(this.element, 'open', false);
     toggle(this.element, false);
