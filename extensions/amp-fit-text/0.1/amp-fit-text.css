@@ -17,17 +17,37 @@
 .i-amphtml-fit-text-content,
 .i-amphtml-fit-text-content.i-amphtml-fill-content {
   display: block;
-  /* @alternative */ display: flex;
+  /* @alternative */
+  display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
   justify-content: center;
+}
+
+.i-amphtml-fit-text-content {
+  z-index: 2;
+}
+
+.i-amphtml-fit-text-content-wrapper {
+  line-height: 1.15em;
 }
 
 /* We have to use the old-style flex box with line clamping. It will only
    work in WebKit, but unfortunately there's no alternative. */
 .i-amphtml-fit-text-content-overflown {
   display: block;
-  /* @alternative */ display: -webkit-box;
+  /* @alternative */
+  display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Note that "measurer" cannot be styled with "bottom:0". */
+.i-amphtml-fit-text-measurer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  visibility: hidden;
+  line-height: 1.15em;
 }

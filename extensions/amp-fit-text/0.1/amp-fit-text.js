@@ -20,13 +20,17 @@ import {
   getLengthNumeral,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {px, setStyle, setStyles} from '#core/dom/style';
-import {realChildNodes} from '#core/dom/query';
+import {realChildNodes, scopedQuerySelector} from '#core/dom/query';
 import {throttle} from '#core/types/function';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;
 const RESIZE_THROTTLE_MS = 100;
+const MEASURER_CLASS = 'i-amphtml-fit-text-measurer';
+const CONTENT_CLASS = 'i-amphtml-fit-text-content';
+const CONTENT_WRAPPER_CLASS = 'i-amphtml-fit-text-content-wrapper';
 
 class AmpFitText extends AMP.BaseElement {
   /** @override @nocollapse */
@@ -71,38 +75,17 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.content_ = this.element.ownerDocument.createElement('div');
-    applyFillContent(this.content_);
-    this.content_.classList.add('i-amphtml-fit-text-content');
-    setStyles(this.content_, {zIndex: 2, visibility: 'hidden'});
-
-    this.contentWrapper_ = this.element.ownerDocument.createElement('div');
-    setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
-    this.content_.appendChild(this.contentWrapper_);
-
-    this.measurer_ = this.element.ownerDocument.createElement('div');
-    // Note that "measurer" cannot be styled with "bottom:0".
-    setStyles(this.measurer_, {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      zIndex: 1,
-      visibility: 'hidden',
-      lineHeight: `${LINE_HEIGHT_EM_}em`,
-    });
-
-    realChildNodes(this.element).forEach((node) => {
-      this.contentWrapper_.appendChild(node);
-    });
-    this.updateMeasurerContent_();
-    this.element.appendChild(this.content_);
-    this.element.appendChild(this.measurer_);
+    const {element} = this;
+    buildDom(element.ownerDocument, element);
+    this.content_ = getDescendentByClass(element, CONTENT_CLASS);
+    this.contentWrapper_ = getDescendentByClass(element, CONTENT_WRAPPER_CLASS);
+    this.measurer_ = getDescendentByClass(element, MEASURER_CLASS);
 
     this.minFontSize_ =
-      getLengthNumeral(this.element.getAttribute('min-font-size')) || 6;
+      getLengthNumeral(element.getAttribute('min-font-size')) || 6;
 
     this.maxFontSize_ =
-      getLengthNumeral(this.element.getAttribute('max-font-size')) || 72;
+      getLengthNumeral(element.getAttribute('max-font-size')) || 72;
 
     // Make it so that updates to the textContent of the amp-fit-text element
     // actually update the text of the content element.
@@ -165,7 +148,7 @@ class AmpFitText extends AMP.BaseElement {
    * Copies text from the displayed content to the measurer element.
    */
   updateMeasurerContent_() {
-    this.measurer_./*OK*/ innerHTML = this.contentWrapper_./*OK*/ innerHTML;
+    copyInnerHtml(this.contentWrapper_, this.measurer_);
   }
 
   /** @private */
@@ -234,6 +217,47 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
     lineClamp: overflown ? numberOfLines : '',
     maxHeight: overflown ? px(lineHeight * numberOfLines) : '',
   });
+}
+
+/**
+ *
+ * @param {!Document} document
+ * @param {!Element} element
+ */
+export function buildDom(document, element) {
+  const content = document.createElement('div');
+  applyFillContent(content);
+  content.classList.add(CONTENT_CLASS);
+
+  const contentWrapper = document.createElement('div');
+  contentWrapper.classList.add(CONTENT_WRAPPER_CLASS);
+  content.appendChild(contentWrapper);
+
+  const measurer = document.createElement('div');
+  measurer.classList.add(MEASURER_CLASS);
+
+  realChildNodes(element).forEach((node) => contentWrapper.appendChild(node));
+  copyInnerHtml(contentWrapper, measurer);
+  element.appendChild(content);
+  element.appendChild(measurer);
+}
+
+/**
+ * @param {!Element} element
+ * @param {string} className
+ * @return {Element}
+ */
+function getDescendentByClass(element, className) {
+  return scopedQuerySelector(element, ` .${escapeCssSelectorIdent(className)}`);
+}
+
+/**
+ * Copies the inner html from src element to destination element
+ * @param {!Element} src
+ * @param {!Element} dst
+ */
+function copyInnerHtml(src, dst) {
+  dst./*OK*/ innerHTML = src./*OK*/ innerHTML;
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
