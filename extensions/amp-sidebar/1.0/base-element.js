@@ -68,11 +68,6 @@ export class BaseElement extends PreactBaseElement {
     });
   }
 
-  /** @override */
-  unmountCallback() {
-    this.removeAsContainer();
-  }
-
   /** @private */
   beforeOpen_() {
     this.open_ = true;
@@ -81,18 +76,11 @@ export class BaseElement extends PreactBaseElement {
   }
 
   /** @private */
-  afterOpen_() {
-    const sidebar = this.element.shadowRoot.querySelector('[part=sidebar]');
-    this.setAsContainer(sidebar);
-  }
-
-  /** @private */
   afterClose_() {
     this.open_ = false;
     toggleAttribute(this.element, 'open', false);
     toggle(this.element, false);
 
-    this.removeAsContainer();
     pauseAll(this.element, /* includeSelf */ false);
   }
 

@@ -67,6 +67,23 @@ class AmpLightbox extends BaseElement {
     );
     return super.isLayoutSupported(layout);
   }
+
+  /** @override */
+  afterOpen_() {
+    const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
+    this.setAsContainer(scroller);
+  }
+
+  /** @override */
+  afterClose_() {
+    super.afterClose_();
+    this.removeAsContainer();
+  }
+
+  /** @override */
+  unmountCallback() {
+    this.removeAsContainer();
+  }
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {

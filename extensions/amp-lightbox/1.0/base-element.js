@@ -40,11 +40,6 @@ export class BaseElement extends PreactBaseElement {
     });
   }
 
-  /** @override */
-  unmountCallback() {
-    this.removeAsContainer();
-  }
-
   /** @private */
   beforeOpen_() {
     this.open_ = true;
@@ -54,19 +49,11 @@ export class BaseElement extends PreactBaseElement {
   }
 
   /** @private */
-  afterOpen_() {
-    const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
-    this.setAsContainer(scroller);
-  }
-
-  /** @private */
   afterClose_() {
     this.open_ = false;
     toggleAttribute(this.element, 'open', false);
     toggle(this.element, false);
     this.triggerEvent(this.element, 'close');
-
-    this.removeAsContainer();
 
     // Unmount all children when the lightbox is closed. They will automatically
     // remount when the lightbox is opened again.
