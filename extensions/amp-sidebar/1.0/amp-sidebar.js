@@ -60,18 +60,18 @@ class AmpSidebar extends BaseElement {
   /** @override */
   afterOpen_() {
     const sidebar = this.element.shadowRoot.querySelector('[part=sidebar]');
-    this.setAsContainer(sidebar);
+    this.setAsContainer?.(sidebar);
   }
 
   /** @override */
   afterClose_() {
     super.afterClose_();
-    this.removeAsContainer();
+    this.removeAsContainer?.();
   }
 
   /** @override */
   unmountCallback() {
-    this.removeAsContainer();
+    this.removeAsContainer?.();
   }
 }
 

@@ -71,18 +71,18 @@ class AmpLightbox extends BaseElement {
   /** @override */
   afterOpen_() {
     const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
-    this.setAsContainer(scroller);
+    this.setAsContainer?.(scroller);
   }
 
   /** @override */
   afterClose_() {
     super.afterClose_();
-    this.removeAsContainer();
+    this.removeAsContainer?.();
   }
 
   /** @override */
   unmountCallback() {
-    this.removeAsContainer();
+    this.removeAsContainer?.();
   }
 }
 
