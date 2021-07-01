@@ -42,6 +42,7 @@ export const SESSION_VALUES = {
   SESSION_ID: 'sessionId',
   CREATION_TIMESTAMP: 'creationTimestamp',
   ACCESS_TIMESTAMP: 'accessTimestamp',
+  EVENT_TIMESTAMP: 'eventTimestamp',
   COUNT: 'count',
 };
 
@@ -53,6 +54,7 @@ export const SESSION_VALUES = {
  *  sessionId: number,
  *  creationTimestamp: number,
  *  accessTimestamp: number,
+ *  eventTimestamp: number,
  *  count: number,
  * }}
  */
@@ -77,8 +79,19 @@ export class SessionManager {
    * @return {!Promise<number|undefined>}
    */
   getSessionValue(type, value) {
-    return this.get(type).then((session) => {
-      return session?.[value];
+    return this.get(type).then((session) => session?.[value]);
+  }
+
+  /**
+   * Update EventTimestamp for this session async.
+   * Passes in a callback to set the EventTimestamp,
+   * to be used when the session it retrieved or created.
+   * @param {string} type
+   * @return {!Promise}
+   */
+  updateEventTimestamp(type) {
+    return this.get(type, (session) => {
+      session[SESSION_VALUES.EVENT_TIMESTAMP] = Date.now();
     });
   }
 
@@ -86,9 +99,10 @@ export class SessionManager {
    * Get the session for the vendor, checking if it exists or
    * creating it if necessary.
    * @param {string|undefined} type
+   * @param {Function=} opt_processing
    * @return {!Promise<?SessionInfoDef>}
    */
-  get(type) {
+  get(type, opt_processing) {
     if (!type) {
       user().error(TAG, 'Sessions can only be accessed with a vendor type.');
       return Promise.resolve(null);
@@ -99,20 +113,22 @@ export class SessionManager {
       !isSessionExpired(this.sessions_[type])
     ) {
       this.sessions_[type] = this.updateSession_(this.sessions_[type]);
+      opt_processing?.(this.sessions_[type]);
       this.setSession_(type, this.sessions_[type]);
       return Promise.resolve(this.sessions_[type]);
     }
 
-    return this.getOrCreateSession_(type);
+    return this.getOrCreateSession_(type, opt_processing);
   }
 
   /**
    * Get our session if it exists or creates it. Sets the session
    * in localStorage to update the access time.
    * @param {string} type
+   * @param {Function=} opt_processing
    * @return {!Promise<SessionInfoDef>}
    */
-  getOrCreateSession_(type) {
+  getOrCreateSession_(type, opt_processing) {
     return this.storagePromise_
       .then((storage) => {
         const storageKey = getStorageKey(type);
@@ -129,6 +145,7 @@ export class SessionManager {
         if (type in this.sessions_ && !isSessionExpired(this.sessions_[type])) {
           return this.sessions_[type];
         }
+        opt_processing?.(session);
         this.setSession_(type, session);
         this.sessions_[type] = session;
         return this.sessions_[type];
@@ -136,20 +153,21 @@ export class SessionManager {
   }
 
   /**
-   * Check if session has expired and reset values (id, count) if so.
+   * Check if session has expired and reset/update values (id, count) if so.
    * Also update `accessTimestamp`.
    * @param {!SessionInfoDef} session
    * @return {!SessionInfoDef}
    */
   updateSession_(session) {
     const currentCount = session[SESSION_VALUES.COUNT];
+    const now = Date.now();
     if (isSessionExpired(session)) {
       const newSessionCount = (currentCount ?? 0) + 1;
       session = constructSessionInfo(newSessionCount);
     } else if (currentCount === undefined) {
       session[SESSION_VALUES.COUNT] = 1;
     }
-    session[SESSION_VALUES.ACCESS_TIMESTAMP] = Date.now();
+    session[SESSION_VALUES.ACCESS_TIMESTAMP] = now;
     return session;
   }
 
@@ -211,6 +229,8 @@ function constructSessionFromStoredValue(storedSession) {
     [SESSION_VALUES.COUNT]: storedSession[SESSION_VALUES.COUNT],
     [SESSION_VALUES.ACCESS_TIMESTAMP]:
       storedSession[SESSION_VALUES.ACCESS_TIMESTAMP],
+    [SESSION_VALUES.EVENT_TIMESTAMP]:
+      storedSession[SESSION_VALUES.EVENT_TIMESTAMP],
   };
 }
 
@@ -225,6 +245,7 @@ function constructSessionInfo(count = 1) {
     [SESSION_VALUES.CREATION_TIMESTAMP]: Date.now(),
     [SESSION_VALUES.ACCESS_TIMESTAMP]: Date.now(),
     [SESSION_VALUES.COUNT]: count,
+    [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
   };
 }
 
