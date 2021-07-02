@@ -1,14 +1,18 @@
-<!-- Use #load=all to disable the experiment, and #compressed=true to test with smaller images. -->
+<!-- Use #load=first to enable the experiment. -->
 <!doctype html>
 <html ⚡ lang="en">
 <head>
   <meta charset="utf-8">
-  <link rel="canonical" href="lcp.html">
+  <link rel="canonical" href="lcp-compressed.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <title>LCP test</title>
 
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
 
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style amp-custom>
@@ -16,9 +20,13 @@
       box-sizing: border-box;
     }
     amp-story-page {
-      font-family: 'Helvetica Neue', sans-serif;
+      font-family: 'Source Sans Pro', sans-serif;
       color: white;
       background: black;
+    }
+    code {
+      font-family: 'Source Code Pro', monospace;
+      background: #fff2;
     }
     amp-story p {
       line-height: 1.5;
@@ -35,12 +43,19 @@
     .byline {
       letter-spacing: 1.28px;
     }
-    img {
-      bottom: 35% !important;
+    amp-img {
+      margin: 1em;
+      margin-bottom: 5em;
     }
   </style>
 </head>
   <body>
+    <script>
+      const loadFirst = location.hash.includes('load=first');
+      (self.AMP = self.AMP || []).push(function(AMP) {
+        AMP.toggleExperiment('amp-story-load-first-page-only', loadFirst);
+      });
+    </script>
     <amp-story standalone id="cats"
         title="LCP test" publisher="The AMP team"
         publisher-logo-src="./img/amplogo.png"
@@ -52,14 +67,13 @@
             id="img1"
             width="400"
             height="750"
-            src="https://images.unsplash.com/photo-1515705576963-95cad62945b6?w=1750&q=100&fm=webp"
+            src="https://images.unsplash.com/photo-1515705576963-95cad62945b6?w=1750&q=30&fm=webp"
             layout="fill">
           </amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical" class="bottom">
-          <p class="bold">LCP for images</p>
-          <p class="byline">load=first</p>
-          <p class="byline">compressed=true</p>
+          <p class="bold">LCP for images (compressed)</p>
+          <p class="byline">Add <code>#load=first</code> to activate experiment</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
@@ -69,7 +83,7 @@
             id="img2"
             width="400"
             height="750"
-            src="https://images.unsplash.com/photo-1502318217862-aa4e294ba657?w=1080&q=100&fm=webp"
+            src="https://images.unsplash.com/photo-1502318217862-aa4e294ba657?w=1080&q=30&fm=webp"
             layout="fill">
           </amp-img>
         </amp-story-grid-layer>
@@ -81,27 +95,11 @@
             id="img3"
             width="400"
             height="750"
-            src="https://images.unsplash.com/photo-1513809491260-0e192158ae44?w=1080&q=100&fm=webp"
+            src="https://images.unsplash.com/photo-1513809491260-0e192158ae44?w=1080&q=30&fm=webp"
             layout="fill">
           </amp-img>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
-    <script>
-      const loadAll = location.hash.includes('load=all');
-      (self.AMP = self.AMP || []).push(function(AMP) {
-        AMP.toggleExperiment('amp-story-load-first-page-only', !loadAll);
-      });
-      const bylines = document.querySelectorAll('.byline');
-      if (loadAll) {
-        bylines[0].textContent = 'load=all';
-      }
-      const compress = location.hash.includes('compressed=true');
-      const quality = compress ? 30 : 100;
-      document.querySelectorAll('amp-img').forEach((img) => {
-        img.setAttribute('src', img.getAttribute('src').replace('100', quality));
-      })
-      bylines[1].textContent = 'compressed=' + compress;
-    </script>
   </body>
 </html>
