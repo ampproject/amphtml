@@ -72,7 +72,7 @@ import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
 import {VisibilityState} from '#core/constants/visibility-state';
-import {backgroundBlur} from './amp-story-background-blur';
+import {BackgroundBlur} from './background-blur';
 import {
   childElement,
   childElementByTag,
@@ -353,7 +353,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
 
-    /** @private {?backgroundBlur} */
+    /** @private {?BackgroundBlur} */
     this.backgroundBlur_ = null;
   }
 
@@ -1849,7 +1849,7 @@ export class AmpStory extends AMP.BaseElement {
       case UIType.DESKTOP_ONE_PANEL:
         this.setDesktopPositionAttributes_(this.activePage_);
         if (!this.backgroundBlur_) {
-          this.backgroundBlur_ = new backgroundBlur(this.win, this.element);
+          this.backgroundBlur_ = new BackgroundBlur(this.win, this.element);
           this.backgroundBlur_.attach();
         }
         this.vsync_.mutate(() => {

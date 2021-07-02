@@ -24,7 +24,7 @@ const CANVAS_SIZE = 3;
 /** @const {number} */
 const DURATION_MS = 200;
 
-export class backgroundBlur {
+export class BackgroundBlur {
   /**
    * @param {!Window} win
    * @param {!Element} element
@@ -108,7 +108,7 @@ export class backgroundBlur {
   }
 
   /**
-   * Get active page's largest amp-img element.
+   * Get active page's biggest amp-img element.
    * @private
    * @param {!Element} pageElement
    * @return {?Element} An img element or null.
