@@ -81,7 +81,35 @@ describes.realWin(
       env.sandbox.stub(ampStoryPoll, 'mutateElement').callsFake((fn) => fn());
     });
 
-    it('should fill the content of the options', async () => {
+    it('should fill the content of the options with images', async () => {
+      ampStoryPoll.element.setAttribute('option-1-image', 'Fizz');
+      ampStoryPoll.element.setAttribute('option-1-image-alt', 'Fizz');
+      ampStoryPoll.element.setAttribute('option-2-image', 'Buzz');
+      ampStoryPoll.element.setAttribute('option-2-image-alt', 'Buzz');
+      await ampStoryPoll.buildCallback();
+      await ampStoryPoll.layoutCallback();
+
+      expect(
+        win
+          .getComputedStyle(
+            ampStoryPoll
+              .getOptionElements()[0]
+              .querySelector('.i-amphtml-story-interactive-img-option-img')
+          )
+          .getPropertyValue('background-image')
+      ).to.contain('Fizz');
+      expect(
+        win
+          .getComputedStyle(
+            ampStoryPoll
+              .getOptionElements()[1]
+              .querySelector('.i-amphtml-story-interactive-img-option-img')
+          )
+          .getPropertyValue('background-image')
+      ).to.contain('Buzz');
+    });
+
+    it('should set the aria-label of the options', async () => {
       ampStoryPoll.element.setAttribute('option-1-image', 'Fizz');
       ampStoryPoll.element.setAttribute('option-1-image-alt', 'Fizz');
       ampStoryPoll.element.setAttribute('option-2-image', 'Buzz');
@@ -93,14 +121,8 @@ describes.realWin(
         ampStoryPoll.getOptionElements()[0].getAttribute('aria-label')
       ).to.equal('Fizz');
       expect(
-        win
-          .getComputedStyle(
-            ampStoryPoll
-              .getOptionElements()[1]
-              .querySelector('.i-amphtml-story-interactive-img-option-img')
-          )
-          .getPropertyValue('background-image')
-      ).to.contain('Buzz');
+        ampStoryPoll.getOptionElements()[1].getAttribute('aria-label')
+      ).to.equal('Buzz');
     });
 
     it('should throw an error with fewer than two options', () => {

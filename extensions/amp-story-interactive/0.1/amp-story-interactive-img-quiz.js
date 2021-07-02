@@ -100,9 +100,8 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
   }
 
   /**
-   * Creates an option container with option content,
-   * adds styling and answer choices,
-   * and adds it to the quiz element.
+   * Creates and returns an option container with option content,
+   * adds styling and answer choices.
    *
    * @param {!./amp-story-interactive-abstract.OptionConfigType} option
    * @param {number} index
