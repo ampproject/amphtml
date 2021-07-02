@@ -32,12 +32,12 @@ import {registerServiceBuilder} from '../../../../src/service-helpers';
  * Populates the quiz with some number of prompts and some number of options.
  *
  * @param {Window} win
- * @param {AmpStoryInteractiveQuiz} quiz
+ * @param {AmpStoryInteractive} quiz
  * @param {=number} numOptions
  * @param {?string} prompt
  * @param {=number} correctOption
  */
-const populateQuiz = (
+export const populateQuiz = (
   quiz,
   numOptions = 4,
   prompt = undefined,
