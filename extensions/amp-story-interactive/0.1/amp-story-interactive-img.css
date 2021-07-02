@@ -28,8 +28,6 @@
   display: flex !important;
   justify-content: center !important;
   border-radius: 4.375em !important;
-  overflow: hidden !important;
-  box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
   flex-wrap: wrap !important;
 }
 

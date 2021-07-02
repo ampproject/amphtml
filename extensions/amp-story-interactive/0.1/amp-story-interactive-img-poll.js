@@ -22,7 +22,7 @@ import {CSS} from '../../../build/amp-story-interactive-img-poll-0.1.css';
 import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {buildImgTemplate} from './utils';
 import {htmlFor} from '#core/dom/static-template';
-import {setStyle} from '#core/dom/style';
+import {setImportantStyles} from '#core/dom/style';
 
 /**
  * Generates the template for each option.
@@ -37,11 +37,7 @@ const buildOptionTemplate = (option) => {
       class="i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
-      <div class="i-amphtml-story-interactive-img-option-img">
-        <span
-          class="i-amphtml-story-interactive-img-option-percentage-text"
-        ></span>
-      </div>
+      <div class="i-amphtml-story-interactive-img-option-img"></div>
     </button>
   `;
 };
@@ -98,12 +94,11 @@ export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {
 
     // Extract and structure the option information
     // TODO: Rewrite image URL (https://github.com/ampproject/amphtml/pull/35043#discussion_r660874389)
-    setStyle(
+    setImportantStyles(
       convertedOption.querySelector(
         '.i-amphtml-story-interactive-img-option-img'
       ),
-      'background-image',
-      'url(' + option['image'] + ')'
+      {'background-image': 'url(' + option['image'] + ')'}
     );
 
     convertedOption.setAttribute('aria-label', option['imagealt']);
