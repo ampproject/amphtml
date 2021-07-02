@@ -1728,6 +1728,7 @@ describes.realWin(
           await analytics.layoutCallback();
           expect(analytics.sessionManager_).to.not.be.null;
         });
+
         it('should not initialize without flag', async () => {
           const analytics = getAnalyticsTag(
             {
@@ -1747,6 +1748,7 @@ describes.realWin(
           await analytics.layoutCallback();
           expect(analytics.sessionManager_).to.be.null;
         });
+
         it('should not initialize manager without type', async () => {
           const analytics = getAnalyticsTag({
             'requests': {'foo': 'https://example.test/bar'},
@@ -1793,26 +1795,6 @@ describes.realWin(
             expect(analytics.sessionManager_).to.not.be.null;
           });
 
-          it('should add flag for when `persistEngaged` opted in', async () => {
-            const analytics = getAnalyticsTag(
-              {
-                'requests': {'foo': 'https://example.test/bar'},
-                'triggers': {
-                  'pageview': {
-                    'on': 'visible',
-                    'request': 'foo',
-                    'session': {'persistEngaged': true},
-                  },
-                },
-              },
-              {
-                'type': vendorType,
-              }
-            );
-            await waitForSendRequest(analytics);
-            expect(analytics.sessionManager_).to.not.be.null;
-          });
-
           it('should handle multiple opt ins', async () => {
             const analytics = getAnalyticsTag(
               {
@@ -1827,7 +1809,7 @@ describes.realWin(
                     'on': 'click',
                     'request': 'foo',
                     'selector': '.className1',
-                    'session': {'persistEngaged': true},
+                    'session': {'persistEvent': true},
                   },
                 },
               },
@@ -1877,34 +1859,7 @@ describes.realWin(
 
           await waitForSendRequest(analytics);
           expect(sessionSpy).to.be.calledOnce;
-          expect(sessionSpy).to.be.calledWith(vendorType, true, false);
-        });
-
-        it('should update session manager for engaged when event is triggered', async () => {
-          const analytics = getAnalyticsTag(
-            {
-              'requests': {'foo': 'https://example.test/bar'},
-              'triggers': {
-                'pageview': {
-                  'on': 'visible',
-                  'request': 'foo',
-                  'session': {'persistEngaged': true},
-                },
-              },
-            },
-            {
-              'type': vendorType,
-            }
-          );
-
-          const sessionSpy = env.sandbox.spy(
-            SessionManager.prototype,
-            'updateEvent'
-          );
-
-          await waitForSendRequest(analytics);
-          expect(sessionSpy).to.be.calledOnce;
-          expect(sessionSpy).to.be.calledWith(vendorType, false, true);
+          expect(sessionSpy).to.be.calledWith(vendorType);
         });
 
         it('should update manager for multiple events', async () => {
@@ -1920,7 +1875,7 @@ describes.realWin(
                 'pageview2': {
                   'on': 'visible',
                   'request': 'foo',
-                  'session': {'persistEvent': true, 'persistEngaged': true},
+                  'session': {'persistEvent': true},
                 },
               },
             },
@@ -1936,46 +1891,34 @@ describes.realWin(
 
           await waitForSendRequest(analytics);
           expect(sessionSpy).to.be.calledTwice;
-          expect(sessionSpy.firstCall).to.be.calledWith(
-            vendorType,
-            true,
-            false
-          );
-          expect(sessionSpy.secondCall).to.be.calledWith(
-            vendorType,
-            true,
-            true
-          );
+          expect(sessionSpy.firstCall).to.be.calledWith(vendorType);
+          expect(sessionSpy.secondCall).to.be.calledWith(vendorType);
         });
 
-        it(
-          'should not update manager without' +
-            '`persistEvent` or `persistEngaged`',
-          async () => {
-            const analytics = getAnalyticsTag(
-              {
-                'requests': {'foo': 'https://example.test/bar'},
-                'triggers': {
-                  'pageview': {
-                    'on': 'visible',
-                    'request': 'foo',
-                  },
+        it('should not update manager without `persistEvent`', async () => {
+          const analytics = getAnalyticsTag(
+            {
+              'requests': {'foo': 'https://example.test/bar'},
+              'triggers': {
+                'pageview': {
+                  'on': 'visible',
+                  'request': 'foo',
                 },
               },
-              {
-                'type': vendorType,
-              }
-            );
+            },
+            {
+              'type': vendorType,
+            }
+          );
 
-            const sessionSpy = env.sandbox.spy(
-              SessionManager.prototype,
-              'updateEvent'
-            );
+          const sessionSpy = env.sandbox.spy(
+            SessionManager.prototype,
+            'updateEvent'
+          );
 
-            await waitForSendRequest(analytics);
-            expect(sessionSpy).to.not.be.called;
-          }
-        );
+          await waitForSendRequest(analytics);
+          expect(sessionSpy).to.not.be.called;
+        });
 
         it('should not update manager with opt in at top level config', async () => {
           const analytics = getAnalyticsTag(

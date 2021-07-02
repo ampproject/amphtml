@@ -21,6 +21,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
 import {hasOwn, map} from '#core/types/object';
+import {isDocumentHidden} from '#core/document-visibility';
 import {isObject} from '#core/types';
 import {listen} from 'src/event-helper';
 
@@ -104,31 +105,23 @@ export class SessionManager {
    */
   init_() {
     this.setInitialEngagedSignals_();
-    this.unlisten_(
+    this.unlisteners_.push(
       listen(this.win_, 'focus', () => {
         this.isFocused_ = true;
         this.updateEngagedForSessions_();
-      })
-    );
-    this.unlisten_(
+      }),
       listen(this.win_, 'blur', () => {
         this.isFocused_ = false;
         this.updateEngagedForSessions_();
-      })
-    );
-    this.unlisten_(
+      }),
       listen(this.win_, 'pageshow', () => {
         this.isOpen_ = true;
         this.updateEngagedForSessions_();
-      })
-    );
-    this.unlisten_(
+      }),
       listen(this.win_, 'pagehide', () => {
         this.isOpen_ = false;
         this.updateEngagedForSessions_();
-      })
-    );
-    this.unlisten_(
+      }),
       this.ampdoc_.onVisibilityChanged(() => {
         this.isVisible_ = this.ampdoc_.isVisible();
         this.updateEngagedForSessions_();
@@ -136,17 +129,10 @@ export class SessionManager {
     );
   }
 
-  /**
-   * @param {!UnlistenDef} handler
-   */
-  unlisten_(handler) {
-    this.unlisteners_.push(handler);
-  }
-
   /** Sets the initial states of the engaged signals used for all sessions. */
   setInitialEngagedSignals_() {
     this.isFocused_ = this.win_.document.hasFocus();
-    this.isVisible_ = !this.win_.document.hidden;
+    this.isVisible_ = !isDocumentHidden(this.win_.document);
   }
 
   /** Sets the engaged session value for all sessions and persists. */
@@ -160,10 +146,10 @@ export class SessionManager {
 
   /** @override */
   dispose() {
-    this.unlisten_.forEach((unlisten) => {
+    this.unlisteners_.forEach((unlisten) => {
       unlisten();
     });
-    this.unlisten_.length = 0;
+    this.unlisteners_.length = 0;
   }
 
   /**
@@ -249,6 +235,8 @@ export class SessionManager {
   /**
    * Check if session has expired and reset/update values (id, count) if so.
    * Also update `accessTimestamp`.
+   * Sets the initial engaged singals if this session is a continuation and
+   * was not debounced.
    * @param {!SessionInfoDef} session
    * @param {boolean=} opt_usePersistedEngaged
    * @return {!SessionInfoDef}
@@ -263,9 +251,15 @@ export class SessionManager {
       const previouslyEngaged =
         opt_usePersistedEngaged && session[SESSION_VALUES.ENGAGED];
       // Use the persisted engaged value if it was `true`,
-      // to signal that this was not a debounced session
+      // to signal that this was not a debounced session.
       session[SESSION_VALUES.ENGAGED] =
         previouslyEngaged || this.getEngagedValue_();
+      // Set the initial engaged signals to true (since it's not debounced)
+      if (previouslyEngaged) {
+        this.isFocused_ = true;
+        this.isOpen_ = true;
+        this.isVisible_ = true;
+      }
     }
     session[SESSION_VALUES.ACCESS_TIMESTAMP] = now;
     return session;
@@ -336,7 +330,7 @@ function constructSessionFromStoredValue(storedSession) {
       storedSession[SESSION_VALUES.ACCESS_TIMESTAMP],
     [SESSION_VALUES.EVENT_TIMESTAMP]:
       storedSession[SESSION_VALUES.EVENT_TIMESTAMP],
-    [SESSION_VALUES.ENGAGED]: storedSession[SESSION_VALUES.ENGAGED] ?? false,
+    [SESSION_VALUES.ENGAGED]: storedSession[SESSION_VALUES.ENGAGED] ?? true,
   };
 }
 

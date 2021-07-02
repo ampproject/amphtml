@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import * as Listen from '../../../../src/event-helper';
 import {
   SESSION_MAX_AGE_MILLIS,
   SESSION_VALUES,
   SessionManager,
   installSessionServiceForTesting,
 } from '../session-manager';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {expect} from 'chai';
 import {installVariableServiceForTesting} from '../variables';
 import {
@@ -49,6 +51,9 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
     defaultTime = 1555555555555;
     clock = env.sandbox.useFakeTimers(defaultTime);
     vendorType = 'myVendorType';
+    env.sandbox.defineProperty(win.document, 'hasFocus', {
+      value: () => true,
+    });
 
     resetServiceForTesting(win, 'storage');
     registerServiceBuilder(win, 'storage', function () {
@@ -92,7 +97,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
         [SESSION_VALUES.COUNT]: 1,
         [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES.ENGAGED]: false,
+        [SESSION_VALUES.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -106,7 +111,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         [SESSION_VALUES.ACCESS_TIMESTAMP]: 1555555555556,
         [SESSION_VALUES.COUNT]: 1,
         [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES.ENGAGED]: false,
+        [SESSION_VALUES.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType2)).to.deep.equals(session2);
       expect(sessionManager.sessions_[vendorType2]).to.deep.equals(session2);
@@ -120,7 +125,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
         [SESSION_VALUES.COUNT]: 1,
         [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES.ENGAGED]: false,
+        [SESSION_VALUES.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -146,7 +151,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
         [SESSION_VALUES.COUNT]: 1,
         [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES.ENGAGED]: false,
+        [SESSION_VALUES.ENGAGED]: true,
       };
       await sessionManager.get(vendorType);
 
@@ -176,7 +181,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
         [SESSION_VALUES.COUNT]: 1,
         [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES.ENGAGED]: false,
+        [SESSION_VALUES.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -193,7 +198,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         [SESSION_VALUES.ACCESS_TIMESTAMP]: 1555557355556,
         [SESSION_VALUES.COUNT]: 2,
         [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES.ENGAGED]: false,
+        [SESSION_VALUES.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -237,7 +242,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         [SESSION_VALUES.ACCESS_TIMESTAMP]: 1555555555556,
         [SESSION_VALUES.COUNT]: 1,
         [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES.ENGAGED]: false,
+        [SESSION_VALUES.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
         parsedSession
@@ -266,7 +271,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         [SESSION_VALUES.ACCESS_TIMESTAMP]: 1555557355556,
         [SESSION_VALUES.COUNT]: 2,
         [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES.ENGAGED]: false,
+        [SESSION_VALUES.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
         parsedSession
@@ -276,36 +281,9 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       );
       expect(Object.keys(sessionManager.sessions_).length).to.equal(1);
     });
-
-    // Not expected to be called (i.e for testing)
-    it('should set count for a session without a count', async () => {
-      storageValue = {
-        ['amp-session:' + vendorType]: {
-          [SESSION_VALUES.SESSION_ID]: 5000,
-          [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
-        },
-      };
-
-      randomVal = 0.7;
-      const parsedSession = {
-        [SESSION_VALUES.SESSION_ID]: 5000,
-        [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES.COUNT]: 1,
-        [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES.ENGAGED]: false,
-      };
-      expect(await sessionManager.get(vendorType)).to.deep.equals(
-        parsedSession
-      );
-      expect(sessionManager.sessions_[vendorType]).to.deep.equals(
-        parsedSession
-      );
-    });
   });
 
-  describe('eventTimestamp and engaged', () => {
+  describe('eventTimestamp', () => {
     let vendorType, session;
 
     beforeEach(() => {
@@ -324,7 +302,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         };
 
         expect(Object.keys(sessionManager.sessions_).length).to.equal(0);
-        await sessionManager.updateEvent(vendorType, true, true);
+        await sessionManager.updateEvent(vendorType);
 
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith(
@@ -344,13 +322,13 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
           [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime + 1,
           [SESSION_VALUES.COUNT]: 1,
           [SESSION_VALUES.EVENT_TIMESTAMP]: defaultTime + 1,
-          [SESSION_VALUES.ENGAGED]: false,
+          [SESSION_VALUES.ENGAGED]: true,
         };
 
-        await sessionManager.updateEvent(vendorType, true, false);
+        await sessionManager.updateEvent(vendorType);
         clock.tick(1);
         storageSetSpy.resetHistory();
-        await sessionManager.updateEvent(vendorType, true, false);
+        await sessionManager.updateEvent(vendorType);
 
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith(
@@ -361,9 +339,8 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
         expect(await sessionManager.get(vendorType)).to.deep.equals(session);
 
-        session[SESSION_VALUES.ENGAGED] = true;
         storageSetSpy.resetHistory();
-        await sessionManager.updateEvent(vendorType, false, true);
+        await sessionManager.updateEvent(vendorType);
 
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith(
@@ -383,7 +360,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
             [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
             [SESSION_VALUES.COUNT]: 1,
             [SESSION_VALUES.EVENT_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES.ENGAGED]: false,
+            [SESSION_VALUES.ENGAGED]: true,
           },
         };
 
@@ -396,7 +373,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
           [SESSION_VALUES.EVENT_TIMESTAMP]: defaultTime + 1,
           [SESSION_VALUES.ENGAGED]: true,
         };
-        await sessionManager.updateEvent(vendorType, true, true);
+        await sessionManager.updateEvent(vendorType);
 
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith(
@@ -416,7 +393,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
             [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
             [SESSION_VALUES.COUNT]: 1,
             [SESSION_VALUES.EVENT_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES.ENGAGED]: false,
+            [SESSION_VALUES.ENGAGED]: true,
           },
         };
 
@@ -432,7 +409,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
           [SESSION_VALUES.EVENT_TIMESTAMP]: pastExpiration,
           [SESSION_VALUES.ENGAGED]: true,
         };
-        await sessionManager.updateEvent(vendorType, true, true);
+        await sessionManager.updateEvent(vendorType);
 
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith(
@@ -444,81 +421,218 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       });
     });
+  });
 
-    describe('retrieving last EventTimestamp', () => {
-      it('should return no eventTimestamp without persisted event', async () => {
-        const eventTimestamp = await sessionManager.getSessionValue(
-          vendorType,
-          SESSION_VALUES.EVENT_TIMESTAMP
-        );
-        expect(eventTimestamp).to.be.undefined;
+  describe('engaged', () => {
+    let vendorType, session;
+
+    beforeEach(() => {
+      vendorType = 'myVendorType';
+    });
+
+    describe('engaged signal listeners', () => {
+      it('should set initial values and listeners', () => {
+        expect(sessionManager.isVisible_).to.be.true;
+        expect(sessionManager.isFocused_).to.be.true;
+        expect(sessionManager.isOpen_).to.be.true;
+
+        expect(sessionManager.unlisteners_.length).to.equal(5);
       });
 
-      it('should return no eventTimestamp when session has expired', async () => {
-        // Returned undefined, stores eventTimestamp in LocalStorage
-        await sessionManager.updateEvent(vendorType, true);
+      it('should dispose correctly', () => {
+        const unlistenSpy = env.sandbox.spy();
+        env.sandbox.stub(Listen, 'listen').returns(unlistenSpy);
+        env.sandbox
+          .stub(env.ampdoc, 'onVisibilityChanged')
+          .returns(unlistenSpy);
+        sessionManager = new SessionManager(env.ampdoc);
+        sessionManager.dispose();
 
-        // Go past expiration
-        clock.tick(SESSION_MAX_AGE_MILLIS + 1);
-        randomVal = 0.6;
+        expect(sessionManager.unlisteners_.length).to.equal(0);
+        expect(unlistenSpy.callCount).to.equal(5);
+      });
 
-        storageSetSpy.resetHistory();
-        expect(
-          await sessionManager.getSessionValue(
-            vendorType,
-            SESSION_VALUES.EVENT_TIMESTAMP
-          )
-        ).to.be.undefined;
+      it('should change engaged singals with listeners', async () => {
+        const updateEngagedSpy = env.sandbox.spy(
+          sessionManager,
+          'updateEngagedForSessions_'
+        );
+        win.dispatchEvent(new Event('blur'));
+        expect(sessionManager.isFocused_).to.be.false;
+        win.dispatchEvent(new Event('focus'));
+        expect(sessionManager.isFocused_).to.be.true;
+        win.dispatchEvent(new Event('pagehide'));
+        expect(sessionManager.isOpen_).to.be.false;
+        win.dispatchEvent(new Event('pageshow'));
+        expect(sessionManager.isOpen_).to.be.true;
 
-        let pastExpiration = 1555557355556;
+        env.sandbox.defineProperty(win.document, 'hidden', {
+          value: true,
+        });
+        env.ampdoc.overrideVisibilityState(VisibilityState.HIDDEN);
+        expect(sessionManager.isVisible_).to.be.false;
+        env.sandbox.defineProperty(win.document, 'hidden', {
+          value: false,
+        });
+        env.ampdoc.overrideVisibilityState(VisibilityState.VISIBLE);
+        expect(sessionManager.isVisible_).to.be.true;
+
+        expect(updateEngagedSpy.callCount).to.equal(6);
+      });
+
+      it('should calculate engaged correctly', () => {
+        sessionManager.isVisible_ = true;
+        sessionManager.isOpen_ = true;
+        sessionManager.isFocused_ = true;
+
+        expect(sessionManager.getEngagedValue_()).to.be.true;
+
+        sessionManager.isVisible_ = false;
+        expect(sessionManager.getEngagedValue_()).to.be.false;
+
+        sessionManager.isVisible_ = true;
+        sessionManager.isOpen_ = false;
+        expect(sessionManager.getEngagedValue_()).to.be.false;
+
+        sessionManager.isOpen_ = true;
+        sessionManager.isFocused_ = false;
+        expect(sessionManager.getEngagedValue_()).to.be.false;
+      });
+
+      it('should update sessions when all engaged signal changes', async () => {
+        await sessionManager.get(vendorType);
         session = {
-          [SESSION_VALUES.SESSION_ID]: 6000,
-          [SESSION_VALUES.CREATION_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.ACCESS_TIMESTAMP]: pastExpiration,
+          [SESSION_VALUES.SESSION_ID]: 5000,
+          [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.COUNT]: 1,
+          [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
+          [SESSION_VALUES.ENGAGED]: true,
+        };
+
+        expect(storageSetSpy).to.be.calledOnce;
+        expect(storageSetSpy).to.be.calledWith(
+          'amp-session:' + vendorType,
+          session
+        );
+
+        win.dispatchEvent(new Event('blur'));
+        session[SESSION_VALUES.ENGAGED] = false;
+
+        expect(storageSetSpy).to.be.calledOnce;
+        expect(storageSetSpy).to.be.calledWith(
+          'amp-session:' + vendorType,
+          session
+        );
+
+        win.dispatchEvent(new Event('focus'));
+        session[SESSION_VALUES.ENGAGED] = true;
+
+        expect(storageSetSpy).to.be.calledOnce;
+        expect(storageSetSpy).to.be.calledWith(
+          'amp-session:' + vendorType,
+          session
+        );
+
+        win.dispatchEvent(new Event('pagehide'));
+        session[SESSION_VALUES.ENGAGED] = false;
+
+        expect(storageSetSpy).to.be.calledOnce;
+        expect(storageSetSpy).to.be.calledWith(
+          'amp-session:' + vendorType,
+          session
+        );
+
+        win.dispatchEvent(new Event('pageshow'));
+        session[SESSION_VALUES.ENGAGED] = true;
+
+        expect(storageSetSpy).to.be.calledOnce;
+        expect(storageSetSpy).to.be.calledWith(
+          'amp-session:' + vendorType,
+          session
+        );
+        env.sandbox.defineProperty(win.document, 'hidden', {
+          value: true,
+        });
+        env.ampdoc.overrideVisibilityState(VisibilityState.HIDDEN);
+        session[SESSION_VALUES.ENGAGED] = false;
+
+        expect(storageSetSpy).to.be.calledOnce;
+        expect(storageSetSpy).to.be.calledWith(
+          'amp-session:' + vendorType,
+          session
+        );
+
+        env.sandbox.defineProperty(win.document, 'hidden', {
+          value: false,
+        });
+        env.ampdoc.overrideVisibilityState(VisibilityState.VISIBLE);
+        session[SESSION_VALUES.ENGAGED] = true;
+
+        expect(storageSetSpy).to.be.calledOnce;
+        expect(storageSetSpy).to.be.calledWith(
+          'amp-session:' + vendorType,
+          session
+        );
+      });
+
+      it('should update all sessions in memory', async () => {
+        const vendorType2 = vendorType + '2';
+        await sessionManager.get(vendorType);
+        await sessionManager.get(vendorType2);
+
+        session = {
+          [SESSION_VALUES.SESSION_ID]: 5000,
+          [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.COUNT]: 1,
+          [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
+          [SESSION_VALUES.ENGAGED]: false,
+        };
+        expect(storageSetSpy.callCount).to.equal(2);
+        win.dispatchEvent(new Event('blur'));
+        expect(sessionManager.sessions_[vendorType]).to.deep.equal(session);
+        expect(sessionManager.sessions_[vendorType2]).to.deep.equal(session);
+      });
+
+      it('use persisted engaged value', async () => {
+        session = {
+          [SESSION_VALUES.SESSION_ID]: 5000,
+          [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.COUNT]: 1,
+          [SESSION_VALUES.EVENT_TIMESTAMP]: defaultTime,
+          [SESSION_VALUES.ENGAGED]: true,
+        };
+        storageValue = {
+          ['amp-session:' + vendorType]: session,
+        };
+
+        env.sandbox.defineProperty(win.document, 'hidden', {
+          value: true,
+        });
+        env.ampdoc.overrideVisibilityState(VisibilityState.HIDDEN);
+        expect(sessionManager.isVisible_).to.be.false;
+
+        // Uses the `true` engaged value
+        const persistedSession = await sessionManager.get(vendorType);
+        expect(persistedSession).to.deep.equal(session);
+        expect(sessionManager.sessions_[vendorType]).to.deep.equal(session);
+      });
+
+      it('use resets engaged value to current engaged value', async () => {
+        // New session
+        session = {
+          [SESSION_VALUES.SESSION_ID]: 5000,
+          [SESSION_VALUES.CREATION_TIMESTAMP]:
+            defaultTime + SESSION_MAX_AGE_MILLIS + 1,
+          [SESSION_VALUES.ACCESS_TIMESTAMP]:
+            defaultTime + SESSION_MAX_AGE_MILLIS + 1,
           [SESSION_VALUES.COUNT]: 2,
           [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
           [SESSION_VALUES.ENGAGED]: false,
         };
-        expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
-
-        expect(storageSetSpy).to.be.calledOnce;
-        expect(storageSetSpy).to.be.calledWith(
-          'amp-session:' + vendorType,
-          session
-        );
-
-        // Go past expiration
-        clock.tick(SESSION_MAX_AGE_MILLIS + 1);
-        randomVal = 0.7;
-        pastExpiration = 1555559155557;
-
-        await sessionManager.updateEvent(vendorType, true);
-        storageSetSpy.resetHistory();
-        expect(
-          await sessionManager.getSessionValue(
-            vendorType,
-            SESSION_VALUES.EVENT_TIMESTAMP
-          )
-        ).to.equal(1555559155557);
-
-        session = {
-          [SESSION_VALUES.SESSION_ID]: 7000,
-          [SESSION_VALUES.CREATION_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.ACCESS_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.COUNT]: 3,
-          [SESSION_VALUES.EVENT_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.ENGAGED]: false,
-        };
-        expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
-
-        expect(storageSetSpy).to.be.calledOnce;
-        expect(storageSetSpy).to.be.calledWith(
-          'amp-session:' + vendorType,
-          session
-        );
-      });
-
-      it('should return persisted eventTimestamp from storage', async () => {
+        // Old session
         storageValue = {
           ['amp-session:' + vendorType]: {
             [SESSION_VALUES.SESSION_ID]: 5000,
@@ -526,152 +640,33 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
             [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
             [SESSION_VALUES.COUNT]: 1,
             [SESSION_VALUES.EVENT_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES.ENGAGED]: false,
+            [SESSION_VALUES.ENGAGED]: true,
           },
         };
 
-        const eventTimestamp = await sessionManager.getSessionValue(
-          vendorType,
-          SESSION_VALUES.EVENT_TIMESTAMP
-        );
-        expect(eventTimestamp).to.equal(defaultTime);
-      });
-
-      it('should reset eventTimestamp from expired session in storage', async () => {
-        storageValue = {
-          ['amp-session:' + vendorType]: {
-            [SESSION_VALUES.SESSION_ID]: 5000,
-            [SESSION_VALUES.CREATION_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES.COUNT]: 1,
-            [SESSION_VALUES.EVENT_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES.ENGAGED]: false,
-          },
-        };
-
-        let pastExpiration = 1555557355556;
         clock.tick(SESSION_MAX_AGE_MILLIS + 1);
-        randomVal = 0.6;
+        env.sandbox.defineProperty(win.document, 'hidden', {
+          value: true,
+        });
+        env.ampdoc.overrideVisibilityState(VisibilityState.HIDDEN);
+        expect(sessionManager.isVisible_).to.be.false;
 
-        session = {
-          [SESSION_VALUES.SESSION_ID]: 6000,
-          [SESSION_VALUES.CREATION_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.ACCESS_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.COUNT]: 2,
-          [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-          [SESSION_VALUES.ENGAGED]: false,
-        };
-
-        const eventTimestamp = await sessionManager.getSessionValue(
-          vendorType,
-          SESSION_VALUES.EVENT_TIMESTAMP
-        );
-        expect(eventTimestamp).to.equal(undefined);
-
-        expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
-        expect(storageSetSpy).to.be.calledOnce;
-        expect(storageSetSpy).to.be.calledWith(
-          'amp-session:' + vendorType,
-          session
-        );
-
-        randomVal = 0.7;
-        pastExpiration = 1555559155557;
-        clock.tick(SESSION_MAX_AGE_MILLIS + 1);
-        storageSetSpy.resetHistory();
-
-        session = {
-          [SESSION_VALUES.SESSION_ID]: 7000,
-          [SESSION_VALUES.CREATION_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.ACCESS_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.COUNT]: 3,
-          [SESSION_VALUES.EVENT_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.ENGAGED]: false,
-        };
-
-        await sessionManager.updateEvent(vendorType, true);
-        expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
-        expect(storageSetSpy).to.be.calledOnce;
-        expect(storageSetSpy).to.be.calledWith(
-          'amp-session:' + vendorType,
-          session
-        );
+        const persistedSession = await sessionManager.get(vendorType);
+        expect(persistedSession).to.deep.equal(session);
+        expect(sessionManager.sessions_[vendorType]).to.deep.equal(session);
       });
     });
 
-    describe('retrieving Engaged', () => {
-      it('should return false for engaged', async () => {
+    describe('retrieving and persisting engaged', () => {
+      it('should return current engaged value', async () => {
         const engaged = await sessionManager.getSessionValue(
           vendorType,
           SESSION_VALUES.ENGAGED
         );
-        expect(engaged).to.be.false;
+        expect(engaged).to.be.true;
       });
 
-      it('should return false engaged when session has expired', async () => {
-        await sessionManager.updateEvent(vendorType, false, true);
-
-        // Go past expiration
-        clock.tick(SESSION_MAX_AGE_MILLIS + 1);
-        randomVal = 0.6;
-
-        storageSetSpy.resetHistory();
-        expect(
-          await sessionManager.getSessionValue(
-            vendorType,
-            SESSION_VALUES.ENGAGED
-          )
-        ).to.be.false;
-
-        let pastExpiration = 1555557355556;
-        session = {
-          [SESSION_VALUES.SESSION_ID]: 6000,
-          [SESSION_VALUES.CREATION_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.ACCESS_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.COUNT]: 2,
-          [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-          [SESSION_VALUES.ENGAGED]: false,
-        };
-        expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
-
-        expect(storageSetSpy).to.be.calledOnce;
-        expect(storageSetSpy).to.be.calledWith(
-          'amp-session:' + vendorType,
-          session
-        );
-
-        // Go past expiration
-        clock.tick(SESSION_MAX_AGE_MILLIS + 1);
-        randomVal = 0.7;
-        pastExpiration = 1555559155557;
-
-        await sessionManager.updateEvent(vendorType, true, true);
-        storageSetSpy.resetHistory();
-        expect(
-          await sessionManager.getSessionValue(
-            vendorType,
-            SESSION_VALUES.ENGAGED
-          )
-        ).to.be.true;
-
-        session = {
-          [SESSION_VALUES.SESSION_ID]: 7000,
-          [SESSION_VALUES.CREATION_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.ACCESS_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.COUNT]: 3,
-          [SESSION_VALUES.EVENT_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.ENGAGED]: true,
-        };
-        expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
-
-        expect(storageSetSpy).to.be.calledOnce;
-        expect(storageSetSpy).to.be.calledWith(
-          'amp-session:' + vendorType,
-          session
-        );
-      });
-
-      it('should return persisted engaged from storage', async () => {
+      it('should return persisted engaged from storage if true', async () => {
         storageValue = {
           ['amp-session:' + vendorType]: {
             [SESSION_VALUES.SESSION_ID]: 5000,
@@ -683,14 +678,21 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
           },
         };
 
+        // Set the document to hidden so that our current engaged is false.
+        env.sandbox.defineProperty(win.document, 'hidden', {
+          value: true,
+        });
+        env.ampdoc.overrideVisibilityState(VisibilityState.HIDDEN);
+
         const engaged = await sessionManager.getSessionValue(
           vendorType,
           SESSION_VALUES.ENGAGED
         );
+        // Engaged is true b/c it's the persisted value
         expect(engaged).to.be.true;
       });
 
-      it('should reset eventTimestamp from expired session in storage', async () => {
+      it('should not use persisted engaged from storage if false', async () => {
         storageValue = {
           ['amp-session:' + vendorType]: {
             [SESSION_VALUES.SESSION_ID]: 5000,
@@ -698,50 +700,16 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
             [SESSION_VALUES.ACCESS_TIMESTAMP]: defaultTime,
             [SESSION_VALUES.COUNT]: 1,
             [SESSION_VALUES.EVENT_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES.ENGAGED]: true,
+            [SESSION_VALUES.ENGAGED]: false,
           },
-        };
-
-        const pastExpiration = 1555557355556;
-        clock.tick(SESSION_MAX_AGE_MILLIS + 1);
-        randomVal = 0.6;
-
-        session = {
-          [SESSION_VALUES.SESSION_ID]: 6000,
-          [SESSION_VALUES.CREATION_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.ACCESS_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES.COUNT]: 2,
-          [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
-          [SESSION_VALUES.ENGAGED]: false,
         };
 
         const engaged = await sessionManager.getSessionValue(
           vendorType,
           SESSION_VALUES.ENGAGED
         );
-        expect(engaged).to.be.false;
-
-        expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
-        expect(storageSetSpy).to.be.calledOnce;
-        expect(storageSetSpy).to.be.calledWith(
-          'amp-session:' + vendorType,
-          session
-        );
-      });
-
-      it('should be engaged for same session with window closed/reopened', async () => {
-        await sessionManager.updateEvent(vendorType, true, true);
-
-        // Simulate closing window
-        const sessionManager2 = new SessionManager(env.ampdoc);
-
-        const engaged = await sessionManager2.getSessionValue(
-          vendorType,
-          SESSION_VALUES.ENGAGED
-        );
+        // Engaged is true current document state is engaged
         expect(engaged).to.be.true;
-        expect(sessionManager2.sessions_[vendorType][SESSION_VALUES.ENGAGED]).to
-          .be.true;
       });
     });
   });
