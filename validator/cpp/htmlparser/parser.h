@@ -274,6 +274,13 @@ class Parser {
   // Copies attributes of the token's attributes to the node.
   void CopyAttributes(Node* node, Token token) const;
 
+  // Record <base> tag's base url and target attributes as document's
+  // metadata.
+  void RecordBaseURLMetadata(Node* base_node);
+
+  // Record link rel=canonical url as document's metadata.
+  void RecordLinkRelCanonical(Node* link_node);
+
   // Provides the tokens for the parser.
   std::unique_ptr<Tokenizer> tokenizer_;
 
