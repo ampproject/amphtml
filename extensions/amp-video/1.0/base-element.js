@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CSS} from './autoplay.jss';
+import {CSS} from './component.jss';
+import {CSS as CSS_AUTOPLAY} from './autoplay.jss';
 import {PreactBaseElement} from '#preact/base-element';
 import {VideoWrapper} from './component';
 
@@ -73,7 +74,7 @@ BaseElement['props'] = {
 };
 
 /** @override */
-BaseElement['shadowCss'] = CSS;
+BaseElement['shadowCss'] = CSS + CSS_AUTOPLAY;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
