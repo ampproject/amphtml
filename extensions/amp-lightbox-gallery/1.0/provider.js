@@ -17,6 +17,7 @@ import * as Preact from '#preact';
 import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {Lightbox} from '../../amp-lightbox/1.0/component';
 import {LightboxGalleryContext} from './context';
+import {PADDING_ALLOWANCE, useStyles} from './component.jss';
 import {forwardRef} from '#preact/compat';
 import {mod} from '#core/math';
 import {
@@ -26,11 +27,26 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
 /** @const {string} */
 const DEFAULT_GROUP = 'default';
+
+/** @const {string} */
+const EXPOSED_CAPTION_CLASS = 'amp-lightbox-gallery-caption';
+
+/** @enum {string}  */
+const CaptionState = {
+  AUTO: 'auto',
+  CLIP: 'clip',
+  EXPAND: 'expanded',
+};
+
+/** @const {!JsonObject<string, string>} */
+const CAPTION_PROPS = {
+  'aria-label': 'Toggle caption expanded state.',
+  'role': 'button',
+};
 
 /**
  * @param {!LightboxGalleryDef.Props} props
@@ -46,6 +62,7 @@ export function LightboxGalleryProviderWithRef(
   const carouselRef = useRef(null);
   const [index, setIndex] = useState(0);
   const renderers = useRef({});
+  const captions = useRef({});
 
   // Prefer counting elements over retrieving array lengths because
   // array can contain empty values that have been deregistered.
@@ -68,12 +85,13 @@ export function LightboxGalleryProviderWithRef(
     }
     renderers.current[group].forEach((render, index) => {
       if (!carouselElements.current[group][index]) {
+        const absoluteIndex = count.current[group];
         carouselElements.current[group][index] = render();
         gridElements.current[group][index] = (
           <Thumbnail
             onClick={() => {
               setShowCarousel(true);
-              setIndex(index);
+              setIndex(absoluteIndex);
             }}
             render={render}
           />
@@ -84,17 +102,25 @@ export function LightboxGalleryProviderWithRef(
     setGroup(group);
   }, []);
 
-  const register = useCallback((key, group = DEFAULT_GROUP, render) => {
-    // Given key is 1-indexed.
-    if (!renderers.current[group]) {
-      renderers.current[group] = [];
-    }
-    renderers.current[group][key - 1] = render;
-  }, []);
+  const register = useCallback(
+    (key, group = DEFAULT_GROUP, render, caption) => {
+      // Given key is 1-indexed.
+      if (!renderers.current[group]) {
+        renderers.current[group] = [];
+        captions.current[group] = [];
+      }
+      renderers.current[group][key - 1] = render;
+      captions.current[group][key - 1] = caption;
+    },
+    []
+  );
 
   const deregister = useCallback((key, group = DEFAULT_GROUP) => {
     // Given key is 1-indexed.
     delete renderers.current[group][key - 1];
+    delete captions.current[group][key - 1];
+    delete carouselElements.current[group][key - 1];
+    count.current[group]--;
   }, []);
 
   const open = useCallback(
@@ -116,9 +142,34 @@ export function LightboxGalleryProviderWithRef(
     open,
   };
 
+  const captionRef = useRef(undefined);
+  const [caption, setCaption] = useState(null);
+  const [captionState, setCaptionState] = useState(CaptionState.AUTO);
   useLayoutEffect(() => {
-    carouselRef.current?.goToSlide(mod(index, count.current[group]));
+    carouselRef.current?.goToSlide(index);
+    if (group) {
+      // This is the index to target accounting for existing empty
+      // entries in our render sets. Prefer to account for empty
+      // entries over filtering them out to respect the index the nodes
+      // were originally registered with by the user.
+      const inflatedIndex =
+        // Registered element entries, including empty.
+        renderers.current[group].length -
+        // Registered element entries rendered.
+        count.current[group] +
+        // Normalized carousel index.
+        mod(index, count.current[group]);
+      setCaption(captions.current[group][inflatedIndex]);
+      setCaptionState(CaptionState.AUTO);
+    }
   }, [group, index]);
+
+  useLayoutEffect(() => {
+    const {offsetHeight, scrollHeight} = captionRef.current ?? {};
+    if (scrollHeight > offsetHeight + PADDING_ALLOWANCE) {
+      setCaptionState(CaptionState.CLIP);
+    }
+  }, [caption]);
 
   useImperativeHandle(
     ref,
@@ -155,14 +206,39 @@ export function LightboxGalleryProviderWithRef(
           arrowPrevAs={NavButtonIcon}
           arrowNextAs={NavButtonIcon}
           className={classes.gallery}
-          defaultSlide={index}
+          defaultSlide={mod(index, count.current[group]) || 0}
           hidden={!showCarousel}
           loop
           onClick={() => setShowControls(!showControls)}
+          onSlideChange={(i) => setIndex(i)}
           ref={carouselRef}
         >
           {carouselElements.current[group]}
         </BaseCarousel>
+        <div
+          hidden={!showCarousel}
+          className={objstr({
+            [classes.caption]: true,
+            [classes.control]: true,
+            [classes[captionState]]: true,
+            [EXPOSED_CAPTION_CLASS]: true,
+          })}
+          ref={captionRef}
+          {...(captionState === CaptionState.AUTO
+            ? null
+            : {
+                onClick: () => {
+                  if (captionState === CaptionState.CLIP) {
+                    setCaptionState(CaptionState.EXPAND);
+                  } else {
+                    setCaptionState(CaptionState.CLIP);
+                  }
+                },
+                ...CAPTION_PROPS,
+              })}
+        >
+          <div className={classes.captionText}>{caption}</div>
+        </div>
         {!showCarousel && (
           <div
             className={objstr({[classes.gallery]: true, [classes.grid]: true})}

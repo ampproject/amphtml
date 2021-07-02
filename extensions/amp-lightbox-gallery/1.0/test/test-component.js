@@ -890,4 +890,142 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
       expect(carousel.find('img')).to.have.lengthOf(3);
     });
   });
+
+  describe('Captions', () => {
+    it('should render with captions from caption, alt, and aria-label props', () => {
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <WithLightbox caption="First img">
+            <img />
+          </WithLightbox>
+          <WithLightbox as="img" alt="Second img" />
+          <WithLightbox
+            as="section"
+            aria-label="Third and fourth img group"
+            render={() => <img />}
+          >
+            <img />
+            <img />
+          </WithLightbox>
+        </LightboxGalleryProvider>
+      );
+
+      // Open lightbox
+      wrapper.find('div').first().simulate('click');
+      wrapper.update();
+
+      // Render provided children in the "default" (non-carousel) group
+      const lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(1);
+
+      // Rendered elements
+      expect(lightbox.find('img')).to.have.lengthOf(3);
+      const caption = wrapper.find(`.amp-lightbox-gallery-caption`);
+      expect(caption).to.have.lengthOf(1);
+      expect(caption.text()).to.equal('First img');
+    });
+
+    it('should prefer caption to alt and aria-label props', () => {
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <WithLightbox caption="First img" alt="ignored" aria-label="ignored">
+            <img />
+          </WithLightbox>
+        </LightboxGalleryProvider>
+      );
+
+      // Open lightbox
+      wrapper.find('div').first().simulate('click');
+      wrapper.update();
+
+      // Render provided children in the "default" (non-carousel) group
+      const lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(1);
+
+      // Rendered elements
+      expect(lightbox.find('img')).to.have.lengthOf(1);
+      const caption = wrapper.find(`.amp-lightbox-gallery-caption`);
+      expect(caption).to.have.lengthOf(1);
+      expect(caption.text()).to.equal('First img');
+    });
+
+    it('should prefer alt to aria-label prop', () => {
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <WithLightbox alt="First img" aria-label="ignored">
+            <img />
+          </WithLightbox>
+        </LightboxGalleryProvider>
+      );
+
+      // Open lightbox
+      wrapper.find('div').first().simulate('click');
+      wrapper.update();
+
+      // Render provided children in the "default" (non-carousel) group
+      const lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(1);
+
+      // Rendered elements
+      expect(lightbox.find('img')).to.have.lengthOf(1);
+      const caption = wrapper.find(`.amp-lightbox-gallery-caption`);
+      expect(caption).to.have.lengthOf(1);
+      expect(caption.text()).to.equal('First img');
+    });
+
+    it('should take alt prop from carousel direct children', () => {
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <BaseCarousel lightbox>
+            <img alt="First img" />
+          </BaseCarousel>
+        </LightboxGalleryProvider>
+      );
+
+      // Open lightbox
+      wrapper.find('div[part="slide"]').first().simulate('click');
+      wrapper.update();
+
+      // Render provided children in the "default" (non-carousel) group
+      const lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(1);
+
+      // Rendered elements
+      expect(lightbox.find('img')).to.have.lengthOf(1);
+      const caption = wrapper.find(`.amp-lightbox-gallery-caption`);
+      expect(caption).to.have.lengthOf(1);
+      expect(caption.text()).to.equal('First img');
+    });
+
+    it('should take aria-label prop from carousel direct children', () => {
+      const wrapper = mount(
+        <LightboxGalleryProvider>
+          <BaseCarousel lightbox>
+            <div role="img" aria-label="First img">
+              <img />
+            </div>
+          </BaseCarousel>
+        </LightboxGalleryProvider>
+      );
+
+      // Open lightbox
+      wrapper.find('div[part="slide"]').first().simulate('click');
+      wrapper.update();
+
+      // Render provided children in the "default" (non-carousel) group
+      const lightbox = wrapper.find('Lightbox');
+      expect(lightbox).to.have.lengthOf(1);
+      expect(lightbox.children()).to.have.lengthOf(1);
+
+      // Rendered elements
+      expect(lightbox.find('img')).to.have.lengthOf(1);
+      const caption = wrapper.find(`.amp-lightbox-gallery-caption`);
+      expect(caption).to.have.lengthOf(1);
+      expect(caption.text()).to.equal('First img');
+    });
+  });
 });
