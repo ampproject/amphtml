@@ -19,11 +19,12 @@ import '../../../amp-mustache/0.2/amp-mustache';
 import '../../../amp-script/0.1/amp-script';
 import '../amp-render';
 import * as BatchedJsonModule from '../../../../src/batched-json';
+import * as Style from '#core/dom/style';
+import * as log from '../../../../src/log';
 import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
 import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';
-import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
 import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
@@ -83,7 +84,6 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       html = htmlFor(doc);
-      toggleExperiment(win, 'amp-render', true, true);
     });
 
     it('renders from amp-state', async () => {
@@ -119,12 +119,9 @@ describes.realWin(
     });
 
     it('renders json from src', async () => {
-      const fetchStub = env.sandbox.stub(
-        BatchedJsonModule,
-        'batchFetchJsonFor'
-      );
-
-      fetchStub.resolves({name: 'Joe'});
+      const fetchStub = env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
 
       element = html`
         <amp-render
@@ -142,6 +139,102 @@ describes.realWin(
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe');
       expect(fetchStub).to.have.been.calledOnce;
+    });
+
+    it('should render with layout=container', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      const setStylesStub = env.sandbox.spy(Style, 'setStyles');
+
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) =>
+          Promise.resolve().then(measurer).then(mutator),
+        requestChangeSize: () => {
+          return Promise.resolve();
+        },
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          layout="container"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+          <div placeholder>Placeholder text</div>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      // We do this twice to flush out vsync
+      // TODO(dmanek): investigate if this can be done with one call
+      await getRenderedData();
+      await getRenderedData();
+
+      expect(setStylesStub).to.be.calledTwice;
+    });
+
+    it('layout=container does not resize', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      const setStylesStub = env.sandbox.stub(Style, 'setStyles');
+
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) =>
+          Promise.resolve().then(measurer).then(mutator),
+        requestChangeSize: () => Promise.reject(),
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          layout="container"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+          <div placeholder>Placeholder text</div>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      // We do this twice to flush out vsync
+      // TODO(dmanek): investigate if this can be done with one call
+      await getRenderedData();
+      await getRenderedData();
+
+      expect(setStylesStub).to.be.calledOnce;
+    });
+
+    it('should error when layout=container is used without placeholder', async () => {
+      const errorSpy = env.sandbox.stub(log, 'userAssert');
+
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          layout="container"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await getRenderedData();
+      // TODO: Called once again in template-impl.js. Investigate the error "Type must be specified: %s".
+      expect(errorSpy).to.be.calledTwice;
+      expect(errorSpy.getCall(0).args[1]).to.match(
+        /placeholder required with layout="container"/
+      );
     });
 
     it('renders from amp-script', async () => {
@@ -767,6 +860,109 @@ describes.realWin(
 
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe 1+1=?');
+    });
+
+    const items = {
+      'items': [
+        {
+          'name': 'Apple',
+          'price': '1.99',
+        },
+        {
+          'name': 'Orange',
+          'price': '0.99',
+        },
+        {
+          'name': 'Pear',
+          'price': '1.50',
+        },
+        {
+          'name': 'Banana',
+          'price': '1.50',
+        },
+        {
+          'name': 'Watermelon',
+          'price': '4.50',
+        },
+        {
+          'name': 'Melon',
+          'price': '3.50',
+        },
+      ],
+    };
+
+    it('should grow on resizeToContents action when height is insufficient', async () => {
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) =>
+          Promise.resolve().then(measurer).then(mutator),
+        forceChangeSize: env.sandbox.spy(),
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
+
+      env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves(items);
+
+      // set the height small enough so component resizes
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          height="100"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">
+            {{#items}}
+            <div>
+              <div>{{name}}</div>
+              <div>{{price}}</div>
+            </div>
+            {{/items}}
+          </template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await getRenderedData();
+
+      element.enqueAction(invocation('resizeToContents'));
+      await getRenderedData();
+      expect(fakeMutator.forceChangeSize).to.be.calledOnce;
+    });
+
+    it('should shrink on resizeToContents action when there is exta whitespace', async () => {
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) =>
+          Promise.resolve().then(measurer).then(mutator),
+        forceChangeSize: env.sandbox.spy(),
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
+
+      env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves(items);
+
+      // set the height large enough so component shrinks
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          height="5000"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">
+            {{#items}}
+            <div>
+              <div>{{name}}</div>
+              <div>{{price}}</div>
+            </div>
+            {{/items}}
+          </template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await getRenderedData();
+
+      element.enqueAction(invocation('resizeToContents'));
+      await getRenderedData();
+      expect(fakeMutator.forceChangeSize).to.be.calledOnce;
     });
   }
 );

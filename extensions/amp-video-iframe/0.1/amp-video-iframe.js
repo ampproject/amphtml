@@ -45,7 +45,7 @@ import {getConsentDataToForward} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isFullscreenElement} from '#core/dom/fullscreen';
-import {measureIntersection} from '../../../src/utils/intersection';
+import {measureIntersection} from '#core/dom/layout/intersection';
 import {once} from '#core/types/function';
 
 /** @private @const */

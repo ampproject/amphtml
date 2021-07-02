@@ -35,12 +35,15 @@ import {handleCompanionAds} from './monetization';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
+} from '#core/dom/layout/viewport-observer';
 import {px, setStyles} from '#core/dom/style';
 import {removeElement} from '#core/dom';
 
 /** @const */
 const TAG = 'amp-apester-media';
+const AD_TAG = 'amp-ad';
+/** @const {!JsonObject} */
+const BOTTOM_AD_MESSAGE = dict({'type': 'has_bottom_ad', 'adHeight': 50});
 /**
  * @enum {string}
  */
@@ -85,6 +88,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.height_ = null;
     /** @private {boolean}  */
     this.random_ = false;
+    /** @private {boolean}  */
+    this.hasBottomAd_ = false;
     /**
      * @private {?string}
      */
@@ -320,11 +325,24 @@ class AmpApesterMedia extends AMP.BaseElement {
               return vsync.mutatePromise(() => {
                 if (this.iframe_) {
                   this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
-                  if (media['campaignData']) {
+                  const campaignData = media['campaignData'];
+                  if (campaignData) {
+                    const bottomAdOptions = campaignData['bottomAdOptions'];
+                    if (bottomAdOptions && bottomAdOptions.enabled) {
+                      this.hasBottomAd_ = true;
+                      const ampdoc = this.getAmpDoc();
+                      Services.extensionsFor(
+                        this.win
+                      )./*OK*/ installExtensionForDoc(ampdoc, AD_TAG);
+                      this.iframe_.contentWindow./*OK*/ postMessage(
+                        BOTTOM_AD_MESSAGE,
+                        '*'
+                      );
+                    }
                     this.iframe_.contentWindow./*OK*/ postMessage(
                       /** @type {JsonObject} */ ({
                         type: 'campaigns',
-                        data: media['campaignData'],
+                        data: campaignData,
                       }),
                       '*'
                     );
@@ -442,6 +460,12 @@ class AmpApesterMedia extends AMP.BaseElement {
       (data) => {
         if (this.mediaId_ === data.id && data.height) {
           this.attemptChangeHeight(data.height);
+          if (this.hasBottomAd_) {
+            this.iframe_.contentWindow./*OK*/ postMessage(
+              BOTTOM_AD_MESSAGE,
+              '*'
+            );
+          }
         }
       },
       this.win,

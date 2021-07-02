@@ -20,7 +20,7 @@ import {
   RelativePositions,
   layoutRectLtwh,
   layoutRectsRelativePos,
-} from '#core/math/layout-rect';
+} from '#core/dom/layout/rect';
 import {Services} from '#service';
 import {
   assertLength,
