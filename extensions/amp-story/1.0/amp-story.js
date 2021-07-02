@@ -98,7 +98,6 @@ import {getMode, isModeDevelopment} from '../../../src/mode';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isDesktopOnePanelExperimentOn} from './amp-story-desktop-one-panel';
 import {isExperimentOn} from '#experiments';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {isRTL} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
 import {
