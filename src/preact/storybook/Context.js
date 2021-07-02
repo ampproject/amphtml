@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {boolean, select, withKnobs} from '@storybook/addon-knobs';
+
 import * as Preact from '#preact';
 import {WithAmpContext, useAmpContext, useLoading} from '#preact/context';
-import {boolean, select, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: '0/Context',

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {boolean, object, text, withKnobs} from '@storybook/addon-knobs';
+
 import * as Preact from '#preact';
 import {ContainWrapper, Wrapper} from '#preact/component';
-import {boolean, object, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: '0/Wrappers',

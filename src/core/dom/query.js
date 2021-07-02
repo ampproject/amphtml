@@ -15,6 +15,7 @@
  */
 
 import {devAssert, devAssertElement} from '#core/assert';
+
 import {isScopeSelectorSupported, prependSelectorsWith} from './css-selectors';
 
 /** @fileoverview Helper functions for DOM queries. */

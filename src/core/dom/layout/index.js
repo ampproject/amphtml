@@ -19,8 +19,8 @@
  * details.
  */
 
-import {isFiniteNumber} from '#core/types';
 import {userAssert} from '#core/assert';
+import {isFiniteNumber} from '#core/types';
 
 /**
  * @enum {string}

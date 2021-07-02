@@ -17,5 +17,6 @@
 module.exports = {
   'rules': {
     'local/no-style-display': 0,
+    'import/order': 0,
   },
 };

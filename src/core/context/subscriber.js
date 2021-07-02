@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import {ContextNode} from './node';
-import {arrayOrSingleItemToArray} from '#core/types/array';
-import {throttleTail} from './scheduler';
 import {tryCallback} from '#core/error';
+import {arrayOrSingleItemToArray} from '#core/types/array';
 
-// typedef imports
+import {ContextNode} from './node';
 import {ContextPropDef} from './prop.type';
+import {throttleTail} from './scheduler';
 
 const EMPTY_ARRAY = [];
 const EMPTY_FUNC = () => {};

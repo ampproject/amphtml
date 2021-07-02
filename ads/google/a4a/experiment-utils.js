@@ -20,7 +20,6 @@ import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '#experiments';
-// Typedef imports
 import {ExperimentInfoDef} from '#experiments/experiments.type';
 
 /**
