@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {ContainWrapper, useValueRef} from '#preact/component';
 import {Loading} from '#core/constants/loading-instructions';
 import {ReadyState} from '#core/constants/ready-state';
-import {forwardRef} from '#preact/compat';
-import {useAmpContext, useLoading} from '#preact/context';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useEffect,
@@ -27,6 +25,9 @@ import {
   useLayoutEffect,
   useRef,
 } from '#preact';
+import {forwardRef} from '#preact/compat';
+import {ContainWrapper, useValueRef} from '#preact/component';
+import {useAmpContext, useLoading} from '#preact/context';
 
 const DEFAULT_MATCHES_MESSAGING_ORIGIN = () => false;
 const ABOUT_BLANK = 'about:blank';

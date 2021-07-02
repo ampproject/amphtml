@@ -29,7 +29,6 @@ import {isArray} from '#core/types';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
 
-// typedef imports
 import {ExperimentInfoDef} from './experiments.type';
 
 /** @const {string} */

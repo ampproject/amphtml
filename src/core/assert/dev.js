@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import * as assertions from './base';
 import * as mode from '#core/mode';
+
+import * as assertions from './base';
 
 /**
  * @fileoverview This file provides the entrypoint for dev assertions. It's

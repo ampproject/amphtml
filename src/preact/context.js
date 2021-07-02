@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
 import {
   Loading,
   reducer as loadingReducer,
 } from '#core/constants/loading-instructions';
+
+import * as Preact from '#preact';
 import {createContext, useContext, useMemo} from '#preact';
 
 /** @type {PreactDef.Context} */

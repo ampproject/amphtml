@@ -15,7 +15,6 @@
  */
 
 import {ContextNode} from './node';
-// typedef imports
 import {ContextPropDef} from './prop.type';
 
 export {contextProp} from './prop';

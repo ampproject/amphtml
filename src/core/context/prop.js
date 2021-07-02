@@ -16,7 +16,6 @@
 
 import {devAssert} from '#core/assert';
 
-// typedef imports
 import {ContextPropDef} from './prop.type';
 
 const EMPTY_DEPS = [];
