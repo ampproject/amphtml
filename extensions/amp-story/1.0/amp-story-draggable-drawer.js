@@ -226,7 +226,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
       // For displaying sticky header on mobile.
       new this.win.IntersectionObserver((e) => {
-        this.headerEl_.classList.toggle(
+        this.headerEl_?.classList.toggle(
           'i-amphtml-story-draggable-drawer-header-stuck',
           !e[0].isIntersecting
         );
@@ -261,7 +261,7 @@ export class DraggableDrawer extends AMP.BaseElement {
       ? this.startListeningForTouchEvents_()
       : this.stopListeningForTouchEvents_();
 
-    this.headerEl_.toggleAttribute('desktop', !isMobile);
+    this.headerEl_?.toggleAttribute('desktop', !isMobile);
   }
 
   /**
