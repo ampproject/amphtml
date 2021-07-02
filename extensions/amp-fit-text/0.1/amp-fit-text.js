@@ -21,7 +21,7 @@ import {
   isLayoutSizeDefined,
 } from '#core/dom/layout';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {px, setStyle, setStyles} from '#core/dom/style';
+import {px, setStyle, setStyles, setImportantStyles} from '#core/dom/style';
 import {realChildNodes, scopedQuerySelector} from '#core/dom/query';
 import {throttle} from '#core/types/function';
 
@@ -77,6 +77,7 @@ class AmpFitText extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
     buildDom(element.ownerDocument, element);
+
     this.content_ = getDescendentByClass(element, CONTENT_CLASS);
     this.contentWrapper_ = getDescendentByClass(element, CONTENT_WRAPPER_CLASS);
     this.measurer_ = getDescendentByClass(element, MEASURER_CLASS);
@@ -132,7 +133,7 @@ class AmpFitText extends AMP.BaseElement {
     }
     return this.mutateElement(() => {
       this.updateFontSize_();
-      setStyles(this.content_, {visibility: 'visible'});
+      setImportantStyles(this.content_, {visibility: 'visible'});
     });
   }
 
@@ -248,7 +249,7 @@ export function buildDom(document, element) {
  * @return {Element}
  */
 function getDescendentByClass(element, className) {
-  return scopedQuerySelector(element, ` .${escapeCssSelectorIdent(className)}`);
+  return element.querySelector(`.${escapeCssSelectorIdent(className)}`);
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
