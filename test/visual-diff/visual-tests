@@ -685,7 +685,7 @@
       "viewport": {"width": 360, "height": 4500},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-      ],
+      ]
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html",
