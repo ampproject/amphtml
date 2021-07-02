@@ -23,7 +23,7 @@
 
 .i-amphtml-story-interactive-slider-sliderValue {
   position: relative;
-  margin: 0 1.18em;
+  margin: 0 1.6em;
 }
 
 .i-amphtml-story-interactive-slider-sliderValue span {
@@ -76,7 +76,7 @@
 .i-amphtml-story-interactive-slider-input {
   -webkit-appearance: none !important;
   height: 1em !important;
-  width: 95%;
+  width: 94%;
   margin-bottom: 1em !important;
   margin-top: 1em !important;
   margin-left: 0.5em !important;
