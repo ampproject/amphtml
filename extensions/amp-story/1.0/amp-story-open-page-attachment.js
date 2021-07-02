@@ -18,7 +18,7 @@
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
 import {AttachmentTheme} from './amp-story-page-attachment';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {getLocalizationService} from './amp-story-localization-service';

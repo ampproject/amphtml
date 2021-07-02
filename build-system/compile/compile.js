@@ -220,7 +220,6 @@ function generateCompilerOptions(outputFilename, options) {
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
-    'third_party/closure-responding-channel',
     'third_party/d3/',
     'third_party/inputmask/',
     'third_party/mustache/',
