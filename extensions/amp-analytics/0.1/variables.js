@@ -332,6 +332,8 @@ export class VariableService {
       'SESSION_TIMESTAMP': () =>
         this.getSessionValue_(type, SESSION_VALUES.CREATION_TIMESTAMP),
       'SESSION_COUNT': () => this.getSessionValue_(type, SESSION_VALUES.COUNT),
+      'SESSION_EVENT_TIMESTAMP': () =>
+        this.getSessionValue_(type, SESSION_VALUES.EVENT_TIMESTAMP),
     };
     const perfMacros = isInFie(element)
       ? {}
