@@ -31,10 +31,11 @@ import {
 } from './story-mock';
 import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
 import {Services} from '#service';
+import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 import {StoryAdPage} from '../story-ad-page';
+import {forceExperimentBranch, toggleExperiment} from '#experiments';
 import {macroTask} from '#testing/yield';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {toggleExperiment} from '#experiments';
 
 const NOOP = () => {};
 
@@ -287,7 +288,11 @@ describes.realWin(
     describe('system layer', () => {
       beforeEach(async () => {
         // TODO(#33969) remove when launched.
-        toggleExperiment(win, 'story-ad-auto-advance', true);
+        forceExperimentBranch(
+          win,
+          'story-ad-auto-advance',
+          StoryAdAutoAdvance.EIGHT_SECONDS
+        );
         // Force sync mutateElement.
         env.sandbox.stub(autoAds, 'mutateElement').callsArg(0);
         addStoryAutoAdsConfig(adElement);
