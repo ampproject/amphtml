@@ -54,6 +54,7 @@ import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
+import {BackgroundBlur} from './background-blur';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {EventType, dispatch} from './events';
@@ -72,7 +73,6 @@ import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
 import {VisibilityState} from '#core/constants/visibility-state';
-import {BackgroundBlur} from './background-blur';
 import {
   childElement,
   childElementByTag,
