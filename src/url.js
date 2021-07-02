@@ -437,7 +437,7 @@ export function getProxyServingType(url) {
  * @return {boolean}
  */
 export function isProtocolValid(url) {
-  return !url || !INVALID_PROTOCOLS.includes(urlAsLocation(url).protocol);
+  return !(url && INVALID_PROTOCOLS.includes(urlAsLocation(url).protocol));
 }
 
 /**
@@ -480,7 +480,7 @@ function removeAmpJsParamsFromSearch(urlSearch) {
   // - /[?&]amp_r[^&]*/    amp_r
   // - /[?&]amp_kit[^&]*/  amp_kit
   // - /[?&]usqp[^&]*/     usqp (from goog experiment)
-  return removeParamsFromSearch(urlSearch, '(amp_(js[^=]*|gsa|r|kit)|usqp)');
+  return removeParamsFromSearch(urlSearch, '(amp_(js[^&=]*|gsa|r|kit)|usqp)');
 }
 
 /**
