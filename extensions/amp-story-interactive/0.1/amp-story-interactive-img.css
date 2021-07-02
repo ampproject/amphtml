@@ -1,0 +1,68 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.i-amphtml-story-interactive-img-container {
+  --i-amphtml-interactive-img-option-size: 7.5em !important;
+  --i-amphtml-interactive-img-option-margin: 1em !important;
+
+  border-radius: 3.75em 3.75em 4.375em 4.375em !important;
+}
+
+.i-amphtml-story-interactive-img-option-container {
+  background: var(
+    --i-amphtml-interactive-options-chip-background-color
+  ) !important;
+  display: flex !important;
+  justify-content: center !important;
+  border-radius: 4.375em !important;
+  flex-wrap: wrap !important;
+}
+
+.i-amphtml-story-interactive-img-option {
+  width: var(--i-amphtml-interactive-img-option-size) !important;
+  height: var(--i-amphtml-interactive-img-option-size) !important;
+  position: relative !important;
+  margin-top: var(--i-amphtml-interactive-img-option-margin) !important;
+  margin-right: var(--i-amphtml-interactive-img-option-margin) !important;
+  padding: 0 !important;
+  background: none !important;
+  border: none !important;
+  font-size: inherit !important;
+}
+
+.i-amphtml-story-interactive-img-option:nth-child(odd) {
+  margin-left: var(--i-amphtml-interactive-img-option-margin) !important;
+}
+
+.i-amphtml-story-interactive-img-option:last-child {
+  margin-bottom: var(--i-amphtml-interactive-img-option-margin) !important;
+}
+
+.i-amphtml-story-interactive-img-option:nth-child(3):last-child {
+  margin-top: 0 !important;
+}
+
+.i-amphtml-story-interactive-img-option-img {
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-position: center !important;
+  background-size: cover !important;
+}

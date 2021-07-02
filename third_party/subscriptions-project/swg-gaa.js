@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.171 */
+/** Version: 0.1.22.172 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -895,6 +895,7 @@ const REGWALL_HTML = `
     margin: 0 auto;
     max-width: 100%;
     padding: 24px 20px;
+    pointer-events: auto;
     width: 410px;
   }
 
@@ -1190,6 +1191,7 @@ class GaaMeteringRegwall {
       'height': '100%',
       'left': '0',
       'opacity': '0',
+      'pointer-events': 'none',
       'position': 'fixed',
       'right': '0',
       'transition': 'opacity 0.5s',
