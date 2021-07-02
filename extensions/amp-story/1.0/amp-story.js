@@ -2268,9 +2268,10 @@ export class AmpStory extends AMP.BaseElement {
         page.signals().whenSignal(CommonSignals.LOAD_END).then(res);
         // Don't call preload if user navigates before page loads, since the navigation will call preload properly.
         this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, rej);
-      })
-        .then(() => preloadAllPages())
-        .catch();
+      }).then(
+        () => preloadAllPages(),
+        () => {}
+      );
     });
   }
 
