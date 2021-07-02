@@ -5649,16 +5649,16 @@ class Validator {
         context_(rules_, max_errors_) {}
 
   ValidationResult Validate(const htmlparser::Document& doc) {
-    parse_accounting_ = doc.Stats();
+    doc_metadata_ = doc.Metadata();
     UpdateLineColumnIndex(doc.RootNode());
     // The validation check for document size can't be done here since
     // the Type Identifiers on the html tag have not been parsed yet and
     // we wouldn't know which rule to apply. It's set to the context
     // so that when those things are known it can be checked.
-    context_.SetDocByteSize(parse_accounting_.html_src_bytes);
+    context_.SetDocByteSize(doc_metadata_.html_src_bytes);
     ValidateNode(doc.RootNode());
     auto [current_line_no, current_col_no] =
-        parse_accounting_.document_end_location;
+        doc_metadata_.document_end_location;
     context_.SetLineCol(current_line_no, current_col_no > 0 ? current_col_no - 1
                                                             : current_col_no);
     EndDocument();
@@ -5733,7 +5733,7 @@ class Validator {
         }
         return true;
       case htmlparser::NodeType::DOCTYPE_NODE:
-        if (parse_accounting_.quirks_mode) {
+        if (doc_metadata_.quirks_mode) {
           LineCol linecol(1, 0);
           auto lc = node->LineColInHtmlSrc();
           if (lc.has_value()) {
@@ -5975,7 +5975,7 @@ class Validator {
   const ParsedValidatorRules* rules_;
   int max_errors_ = -1;
   Context context_;
-  htmlparser::ParseAccounting parse_accounting_;
+  htmlparser::DocumentMetadata doc_metadata_;
   ValidationResult result_;
   Validator(const Validator&) = delete;
   Validator& operator=(const Validator&) = delete;
