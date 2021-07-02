@@ -53,9 +53,9 @@ export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
     return dict({
-      'onBeforeOpen': () => this.beforeOpen_(),
-      'onAfterOpen': () => this.afterOpen_(),
-      'onAfterClose': () => this.afterClose_(),
+      'onBeforeOpen': () => this.beforeOpen(),
+      'onAfterOpen': () => this.afterOpen(),
+      'onAfterClose': () => this.afterClose(),
       'render': () =>
         getLightboxElements(
           this.element.ownerDocument,
@@ -64,31 +64,21 @@ export class BaseElement extends PreactBaseElement {
     });
   }
 
-  /** @override */
-  unmountCallback() {
-    this.removeAsContainer();
-  }
-
-  /** @private */
-  beforeOpen_() {
+  /** @protected */
+  beforeOpen() {
     this.open_ = true;
     toggleAttribute(this.element, 'open', true);
     toggle(this.element, true);
   }
 
-  /** @private */
-  afterOpen_() {
-    const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
-    this.setAsContainer(scroller);
-  }
+  /** @protected */
+  afterOpen() {}
 
-  /** @private */
-  afterClose_() {
+  /** @protected */
+  afterClose() {
     this.open_ = false;
     toggleAttribute(this.element, 'open', false);
     toggle(this.element, false);
-
-    this.removeAsContainer();
   }
 
   /** @override */
