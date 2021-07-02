@@ -57,8 +57,6 @@ const ALLOWLIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.INI_LOAD,
   AnalyticsEventType.RENDER_START,
 ];
-
-export const PERSIST_SESSION_VALUE = 'persistSessionValue';
 export class AmpAnalytics extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -293,9 +291,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve();
     }
     const shouldInitialize = Object.values(this.config_['triggers']).some(
-      (trigger) =>
-        trigger?.['session']?.['persistEvent'] ||
-        trigger?.['session']?.['persistEngaged']
+      (trigger) => trigger?.['session']?.['persistEvent']
     );
     if (shouldInitialize && this.type_) {
       const ampdoc = this.getAmpDoc();
@@ -633,12 +629,9 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleEvent_(trigger, event) {
-    if (this.sessionManager_) {
-      this.sessionManager_?.updateEvent(
-        this.type_,
-        !!trigger.session?.['persistEvent'],
-        !!trigger.session?.['persistEngaged']
-      );
+    const persistEvent = !!trigger.session?.['persistEvent'];
+    if (persistEvent) {
+      this.sessionManager_?.updateEvent(this.type_);
     }
     const requests = isArray(trigger['request'])
       ? trigger['request']
