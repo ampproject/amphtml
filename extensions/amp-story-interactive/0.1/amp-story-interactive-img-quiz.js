@@ -38,11 +38,7 @@ const buildOptionTemplate = (option) => {
       class="i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
-      <div class="i-amphtml-story-interactive-img-option-img">
-        <span
-          class="i-amphtml-story-interactive-img-option-percentage-text"
-        ></span>
-      </div>
+      <div class="i-amphtml-story-interactive-img-option-img"></div>
       <div
         class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"
       ></div>
