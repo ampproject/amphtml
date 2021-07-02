@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import * as mode from '#core/mode';
-import {Values} from './values';
 import {devAssert, devAssertElement} from '#core/assert';
+import * as mode from '#core/mode';
 import {pushIfNotExist, removeItem} from '#core/types/array';
-import {throttleTail} from './scheduler';
 
 import {ContextPropDef} from './prop.type';
+import {throttleTail} from './scheduler';
+import {Values} from './values';
 
 // Properties set on the DOM nodes to track the context state.
 const NODE_PROP = '__AMP_NODE';

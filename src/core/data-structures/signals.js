@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Deferred} from './promise';
+import {TimestampDef} from '#core/types/date';
 import {map} from '#core/types/object';
 
-import {TimestampDef} from '#core/types/date';
+import {Deferred} from './promise';
 
 /**
  * This object tracts signals and allows blocking until a signal has been

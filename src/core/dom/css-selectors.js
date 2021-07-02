@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {cssEscape} from '#third_party/css-escape/css-escape';
 import {devAssert} from '#core/assert';
+
+import {cssEscape} from '#third_party/css-escape/css-escape';
 
 /**
  * @type {boolean|undefined}

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {deepScan, findParent} from './scan';
 import {devAssert} from '#core/assert';
-import {pushIfNotExist, removeItem} from '#core/types/array';
 import {rethrowAsync} from '#core/error';
-import {throttleTail} from './scheduler';
+import {pushIfNotExist, removeItem} from '#core/types/array';
 
 import {ContextPropDef} from './prop.type';
+import {deepScan, findParent} from './scan';
+import {throttleTail} from './scheduler';
 
 const EMPTY_ARRAY = [];
 const EMPTY_FUNC = () => {};
