@@ -46,6 +46,10 @@ AMP.extension('amp-story-interactive', '0.1', (AMP) => {
     AmpStoryInteractiveSlider
   );
   AMP.registerElement(
+    'amp-story-interactive-slider',
+    AmpStoryInteractiveSlider
+  );
+  AMP.registerElement(
     'amp-story-interactive-results',
     AmpStoryInteractiveResults
   );

@@ -13,3 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+.i-amphtml-story-interactive-slider-input-container {
+  background: var(--i-amphtml-interactive-option-background-color) !important;
+  border-radius: 2em !important;
+  box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
+}
+
+.i-amphtml-story-interactive-slider-input {
+  -webkit-appearance: none !important;
+  width: calc(100% - 2em) !important;
+  height: 1em !important;
+  margin: 1em !important;
+  background: transparent !important;
+  position: relative !important;
+  pointer-events: all !important;
+  cursor: pointer !important;
+}
+
+.i-amphtml-story-interactive-slider-input::before {
+  background: var(--interactive-accent-color) !important;
+  content: '' !important;
+  opacity: 0.3 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0.5em !important;
+  position: absolute !important;
+}
+
+.i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  width: 1.5em !important;
+  height: 1.5em !important;
+  background: var(--interactive-accent-color) !important;
+  border-radius: 50%;
+  cursor: pointer !important;
+}

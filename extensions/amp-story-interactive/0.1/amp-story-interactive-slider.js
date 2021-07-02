@@ -21,6 +21,30 @@ import {
 import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
 
+/**
+ * Generates the template for the slider.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildSliderTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amphtml-story-interactive-slider-container">
+      <div class="i-amphtml-story-interactive-prompt-container"></div>
+      <div class="i-amphtml-story-interactive-slider-input-container">
+        <input
+          class="i-amphtml-story-interactive-slider-input"
+          type="range"
+          min="0"
+          max="100"
+          value="25"
+        />
+      </div>
+    </div>
+  `;
+};
+
 export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   /**
    * @param {!AmpElement} element
@@ -36,7 +60,8 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
 
   /** @override */
   buildComponent() {
-    this.rootEl_ = htmlFor(this.element)`<p>Slider component</p>`;
+    this.rootEl_ = buildSliderTemplate(this.element);
+    this.attachPrompt_(this.rootEl_);
     return this.rootEl_;
   }
 }
