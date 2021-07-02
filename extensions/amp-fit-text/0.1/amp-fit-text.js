@@ -20,9 +20,8 @@ import {
   getLengthNumeral,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {px, setStyle, setStyles, setImportantStyles} from '#core/dom/style';
-import {realChildNodes, scopedQuerySelector} from '#core/dom/query';
+import {px, setImportantStyles, setStyle, setStyles} from '#core/dom/style';
+import {realChildNodes} from '#core/dom/query';
 import {throttle} from '#core/types/function';
 
 const TAG = 'amp-fit-text';
@@ -76,11 +75,14 @@ class AmpFitText extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const {element} = this;
-    buildDom(element.ownerDocument, element);
 
-    this.content_ = getDescendentByClass(element, CONTENT_CLASS);
-    this.contentWrapper_ = getDescendentByClass(element, CONTENT_WRAPPER_CLASS);
-    this.measurer_ = getDescendentByClass(element, MEASURER_CLASS);
+    const {content, contentWrapper, measurer} = buildDom(
+      element.ownerDocument,
+      element
+    );
+    this.content_ = content;
+    this.contentWrapper_ = contentWrapper;
+    this.measurer_ = measurer;
 
     this.minFontSize_ =
       getLengthNumeral(element.getAttribute('min-font-size')) || 6;
@@ -224,6 +226,7 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
  *
  * @param {!Document} document
  * @param {!Element} element
+ * @return {{content: !Element, contentWrapper: !Element, measurer: !Element}}
  */
 export function buildDom(document, element) {
   const content = document.createElement('div');
@@ -241,15 +244,8 @@ export function buildDom(document, element) {
   measurer./*OK*/ innerHTML = contentWrapper./*OK*/ innerHTML;
   element.appendChild(content);
   element.appendChild(measurer);
-}
 
-/**
- * @param {!Element} element
- * @param {string} className
- * @return {Element}
- */
-function getDescendentByClass(element, className) {
-  return element.querySelector(`.${escapeCssSelectorIdent(className)}`);
+  return {content, contentWrapper, measurer};
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
