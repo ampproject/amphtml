@@ -26,7 +26,7 @@ import {realChildNodes, scopedQuerySelector} from '#core/dom/query';
 import {throttle} from '#core/types/function';
 
 const TAG = 'amp-fit-text';
-const LINE_HEIGHT_EM_ = 1.15;
+const LINE_HEIGHT_EM_ = 1.15; // WARNING: when updating this ensure you also update the css values for line-height.
 const RESIZE_THROTTLE_MS = 100;
 const MEASURER_CLASS = 'i-amphtml-fit-text-measurer';
 const CONTENT_CLASS = 'i-amphtml-fit-text-content';
@@ -148,7 +148,7 @@ class AmpFitText extends AMP.BaseElement {
    * Copies text from the displayed content to the measurer element.
    */
   updateMeasurerContent_() {
-    copyInnerHtml(this.contentWrapper_, this.measurer_);
+    this.measurer_./*OK*/ innerHTML = this.contentWrapper_./*OK*/ innerHTML;
   }
 
   /** @private */
@@ -237,7 +237,7 @@ export function buildDom(document, element) {
   measurer.classList.add(MEASURER_CLASS);
 
   realChildNodes(element).forEach((node) => contentWrapper.appendChild(node));
-  copyInnerHtml(contentWrapper, measurer);
+  measurer./*OK*/ innerHTML = contentWrapper./*OK*/ innerHTML;
   element.appendChild(content);
   element.appendChild(measurer);
 }
@@ -249,15 +249,6 @@ export function buildDom(document, element) {
  */
 function getDescendentByClass(element, className) {
   return scopedQuerySelector(element, ` .${escapeCssSelectorIdent(className)}`);
-}
-
-/**
- * Copies the inner html from src element to destination element
- * @param {!Element} src
- * @param {!Element} dst
- */
-function copyInnerHtml(src, dst) {
-  dst./*OK*/ innerHTML = src./*OK*/ innerHTML;
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
