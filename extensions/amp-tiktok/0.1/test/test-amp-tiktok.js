@@ -18,6 +18,7 @@ import '../amp-tiktok';
 import * as dom from '#core/dom';
 import {Services} from '#service';
 import {computedStyle} from '#core/dom/style';
+import {expect} from 'chai';
 
 const VIDEOID = '6948210747285441798';
 
@@ -32,14 +33,11 @@ describes.realWin(
     let win;
     let doc;
     let createElementWithAttributes;
-    let clock;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      clock = env.sandbox.useFakeTimers();
       createElementWithAttributes = dom.createElementWithAttributes;
-      clock = env.sandbox.useFakeTimers();
 
       env.sandbox
         .stub(dom, 'createElementWithAttributes')
@@ -111,15 +109,12 @@ describes.realWin(
       expect(iframe.getAttribute('src')).to.contain('fr-FR');
     });
 
-    it.skip('resizes using the fallback mechanism when no messages are received', async () => {
+    it('resizes using the fallback mechanism when no messages are received', async () => {
+      // Stub timeoutPromise to skip 1000ms wait before catch statement executes.
+      env.sandbox.stub(Services.timerFor(win), 'timeoutPromise').rejects();
       const player = await getTiktok({'data-src': VIDEOID});
+
       const playerIframe = player.querySelector('iframe');
-      const impl = await player.getImpl(false);
-
-      await impl.layoutCallback();
-      // Wait 1100ms for resize fallback to be invoked.
-      clock.tick(1100);
-
       expect(computedStyle(win, playerIframe).height).to.equal('775.25px');
     });
 
@@ -134,30 +129,25 @@ describes.realWin(
       );
     });
 
-    it.skip('renders aria title without oEmbed Request', async () => {
-      // TODO(rnthomas) Debug race condition in this test.
-      const player = await getTiktokBuildOnly({'data-src': VIDEOID});
-      const impl = await player.getImpl();
-
-      // Wait 1100ms for resize fallback to be invoked because aria-title is set in that call.
-      clock.tick(1100);
-      await impl.layoutCallback();
+    it('renders aria title without oEmbed Request', async () => {
+      // Stub timeoutPromise to skip 1000ms wait before catch statement executes.
+      env.sandbox.stub(Services.timerFor(win), 'timeoutPromise').rejects();
+      const player = await getTiktok({'data-src': VIDEOID});
 
       const playerIframe = player.querySelector('iframe');
-      const ariaTitle = playerIframe.getAttribute('aria-title');
-      expect(ariaTitle).to.equal('TikTok');
+      expect(playerIframe.title).to.equal('TikTok');
     });
 
-    it.skip('renders aria title with oEmbed request', async () => {
+    it('renders aria title with oEmbed request', async () => {
       const videoSrc =
         'https://www.tiktok.com/@scout2015/video/6948210747285441798';
       const player = await getTiktok({'data-src': videoSrc});
+      const impl = await player.getImpl();
+      // Replace debounced function with function which is called directly to avoid 1000ms wait.
+      impl.resizeOuterDebounced_ = impl.resizeOuter_;
 
-      // Wait 1100ms for resize fallback to be invoked because aria-title is set in that call.
-      clock.tick(1100);
       const playerIframe = player.querySelector('iframe');
-      const ariaTitle = playerIframe.getAttribute('aria-title');
-      expect(ariaTitle).to.equal('TikTok: Test TikTok Title');
+      expect(playerIframe.title).to.equal('TikTok: Test TikTok Title');
     });
 
     it('removes iframe after unlayoutCallback', async () => {
