@@ -20,7 +20,7 @@ import {PreactBaseElement} from '#preact/base-element';
 import {dict} from '#core/types/object';
 import {toggle} from '#core/dom/style';
 import {toggleAttribute} from '#core/dom';
-import {unmountAll} from '../../../src/utils/resource-container-helper';
+import {unmountAll} from '#core/dom/resource-container-helper';
 
 export class BaseElement extends PreactBaseElement {
   /** @param {!AmpElement} element */
