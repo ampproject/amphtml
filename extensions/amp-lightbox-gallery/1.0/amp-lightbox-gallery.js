@@ -67,6 +67,23 @@ class AmpLightboxGallery extends BaseElement {
     );
     return super.isLayoutSupported(layout);
   }
+
+  /** @override */
+  afterOpen() {
+    const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
+    this.setAsContainer?.(scroller);
+  }
+
+  /** @override */
+  afterClose() {
+    super.afterClose();
+    this.removeAsContainer?.();
+  }
+
+  /** @override */
+  unmountCallback() {
+    this.removeAsContainer?.();
+  }
 }
 
 /**
