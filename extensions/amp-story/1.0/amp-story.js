@@ -35,14 +35,14 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '../../../src/core/constants/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
@@ -54,60 +54,61 @@ import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
+import {BackgroundBlur} from './background-blur';
 import {CSS} from '../../../build/amp-story-1.0.css';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
 import {InfoDialog} from './amp-story-info-dialog';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {Layout} from '../../../src/layout';
+import {Keys} from '#core/constants/key-codes';
+import {Layout} from '#core/dom/layout';
 import {LiveStoryManager} from './live-story-manager';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {ShareMenu} from './amp-story-share-menu';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
-import {VisibilityState} from '../../../src/core/constants/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {
   childElement,
   childElementByTag,
   childElements,
   childNodes,
   closest,
-  isRTL,
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
-import {computedStyle, setImportantStyles, toggle} from '../../../src/style';
-import {createPseudoLocale} from '../../../src/localized-strings';
-import {debounce} from '../../../src/core/types/function';
+} from '#core/dom/query';
+import {computedStyle, setImportantStyles, toggle} from '#core/dom/style';
+import {createPseudoLocale} from '#service/localization/strings';
+import {debounce} from '#core/types/function';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, map} from '../../../src/core/types/object';
-import {endsWith} from '../../../src/core/types/string';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {findIndex, lastItem, toArray} from '../../../src/core/types/array';
+import {dict, map} from '#core/types/object';
+import {endsWith} from '#core/types/string';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {findIndex, lastItem, toArray} from '#core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
-import {getState} from '../../../src/history';
-import {isExperimentOn} from '../../../src/experiments';
+import {getHistoryState as getWindowHistoryState} from '#core/window/history';
+import {isDesktopOnePanelExperimentOn} from './amp-story-desktop-one-panel';
+import {isExperimentOn} from '#experiments';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
-import {parseQueryString} from '../../../src/core/types/string/url';
+import {isRTL} from '#core/dom';
+import {parseQueryString} from '#core/types/string/url';
 import {
   removeAttributeInMutate,
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
 } from './utils';
-
 import {upgradeBackgroundAudio} from './audio';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDefault from './_locales/default.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -136,6 +137,9 @@ const DESKTOP_WIDTH_THRESHOLD = 1024;
 
 /** @private @const {number} */
 const DESKTOP_HEIGHT_THRESHOLD = 550;
+
+/** @private @const {string} */
+const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '3 / 4';
 
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
@@ -285,6 +289,11 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     /** @private @const */
+    this.desktopOnePanelMedia_ = this.win.matchMedia(
+      `(min-aspect-ratio: ${DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD})`
+    );
+
+    /** @private @const */
     this.canRotateToDesktopMedia_ = this.win.matchMedia(
       `(min-width: ${DESKTOP_HEIGHT_THRESHOLD}px) and ` +
         `(min-height: ${DESKTOP_WIDTH_THRESHOLD}px)`
@@ -343,6 +352,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
+
+    /** @private {?BackgroundBlur} */
+    this.backgroundBlur_ = null;
   }
 
   /** @override */
@@ -804,7 +816,8 @@ export class AmpStory extends AMP.BaseElement {
         href = href.slice(0, -1);
       }
       this.win.history.replaceState(
-        (this.win.history && getState(this.win.history)) || {} /** data */,
+        (this.win.history && getWindowHistoryState(this.win.history)) ||
+          {} /** data */,
         this.win.document.title /** title */,
         href /** URL */
       );
@@ -1437,6 +1450,8 @@ export class AmpStory extends AMP.BaseElement {
       this.updateNavigationPath_(targetPageId, direction);
     }
 
+    this.backgroundBlur_?.update(targetPage.element);
+
     // Each step will run in a requestAnimationFrame, and wait for the next
     // frame before executing the following step.
     const steps = [
@@ -1755,6 +1770,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   maybeTriggerViewportWarning_(isLandscape) {
+    if (isDesktopOnePanelExperimentOn(this.win)) {
+      return;
+    }
     if (
       isLandscape ===
       this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE)
@@ -1808,12 +1826,15 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onUIStateUpdate_(uiState) {
+    this.backgroundBlur_?.detach();
+    this.backgroundBlur_ = null;
     switch (uiState) {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
         });
         break;
       case UIType.DESKTOP_PANELS:
@@ -1822,6 +1843,20 @@ export class AmpStory extends AMP.BaseElement {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
+        });
+        break;
+      case UIType.DESKTOP_ONE_PANEL:
+        this.setDesktopPositionAttributes_(this.activePage_);
+        if (!this.backgroundBlur_) {
+          this.backgroundBlur_ = new BackgroundBlur(this.win, this.element);
+          this.backgroundBlur_.attach();
+        }
+        this.vsync_.mutate(() => {
+          this.element.removeAttribute('desktop');
+          this.element.classList.add('i-amphtml-story-desktop-one-panel');
+          this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-panels');
         });
         break;
       case UIType.DESKTOP_FULLBLEED:
@@ -1829,6 +1864,7 @@ export class AmpStory extends AMP.BaseElement {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
         });
         break;
       // Because of the DOM mutations, switching from this mode to another is
@@ -1889,6 +1925,9 @@ export class AmpStory extends AMP.BaseElement {
       return UIType.DESKTOP_FULLBLEED;
     }
 
+    if (isDesktopOnePanelExperimentOn(this.win)) {
+      return UIType.DESKTOP_ONE_PANEL;
+    }
     // Three panels desktop UI (default).
     return UIType.DESKTOP_PANELS;
   }
@@ -1898,6 +1937,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isDesktop_() {
+    if (isDesktopOnePanelExperimentOn(this.win)) {
+      return this.desktopOnePanelMedia_.matches && !this.platform_.isBot();
+    }
     return this.desktopMedia_.matches && !this.platform_.isBot();
   }
 

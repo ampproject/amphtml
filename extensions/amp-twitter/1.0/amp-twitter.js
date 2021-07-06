@@ -15,11 +15,11 @@
  */
 
 import {BaseElement} from './base-element';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/core/assert';
+import {htmlFor} from '#core/dom/static-template';
+import {isExperimentOn} from '#experiments';
+import {userAssert} from '#core/assert';
 
 /** @const {string} */
 const TAG = 'amp-twitter';
@@ -46,7 +46,7 @@ class AmpTwitter extends BaseElement {
       c0,1.42,0.72,2.68,1.83,3.42c-0.67-0.02-1.31-0.21-1.86-0.51c0,0.02,0,0.03,0,0.05c0,1.99,1.41,3.65,3.29,4.02
       c-0.34,0.09-0.71,0.14-1.08,0.14c-0.26,0-0.52-0.03-0.77-0.07c0.52,1.63,2.04,2.82,3.83,2.85c-1.4,1.1-3.17,1.76-5.1,1.76
       c-0.33,0-0.66-0.02-0.98-0.06C27.82,43.45,29.97,44.13,32.29,44.13"
-          />
+          ></path>
         </svg>
       `,
     };

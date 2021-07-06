@@ -19,12 +19,12 @@ import {
   Action,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {LocalizationService} from '../../../../src/service/localization';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {LocalizationService} from '#service/localization';
+import {createElementWithAttributes} from '#core/dom';
 import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
-} from '../../../../src/service';
+} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-story-360',

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 import {
   createElementWithAttributes,
   iterateCursor,
-  matches,
   removeElement,
-} from '../../../src/dom';
-import {toArray} from '../../../src/core/types/array';
+} from '#core/dom';
+import {matches} from '#core/dom/query';
+import {toArray} from '#core/types/array';
 import {user} from '../../../src/log';
 
 /**
@@ -51,7 +51,7 @@ export function fetchCachedSources(videoEl, ampdoc) {
   return getCacheUrlService(videoEl, ampdoc)
     .then((service) => service.createCacheUrl(videoUrl))
     .then((cacheUrl) => {
-      const requestUrl = addParamsToUrl(cacheUrl.replace('/c/', '/mbv/'), {
+      const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
         'amp_video_host_url':
           /* document url that contains the video */ canonicalUrl,
       });

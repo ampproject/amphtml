@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  doesOriginDomainMatchIframeSrc,
-  initRecaptcha,
-} from '../../../3p/recaptcha';
+import {doesOriginDomainMatchIframeSrc, initRecaptcha} from '#3p/recaptcha';
 import {parseUrlDeprecated} from '../../../src/url';
 import {urls} from '../../../src/config';
 

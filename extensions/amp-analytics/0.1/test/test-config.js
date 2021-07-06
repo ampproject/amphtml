@@ -15,10 +15,11 @@
  */
 
 import {AnalyticsConfig, expandConfigRequest, mergeObjects} from '../config';
-import {Services} from '../../../../src/services';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {map} from '../../../../src/core/types/object';
-import {stubService} from '../../../../testing/test-helper';
+import {PERSIST_EVENT_TIMESTAMP} from '../amp-analytics';
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
+import {map} from '#core/types/object';
+import {stubService} from '#testing/test-helper';
 import {user} from '../../../../src/log';
 
 describes.realWin(
@@ -979,6 +980,76 @@ describes.realWin(
           );
           expect(config['warningMessage']).to.be.undefined;
         });
+      });
+    });
+
+    describe('event persists', () => {
+      beforeEach(() => {
+        fakeVendorJson = undefined;
+      });
+
+      it('should add flag for when opted in', async () => {
+        fakeVendorJson = {
+          'requests': {'foo': '//vendor'},
+          'triggers': [
+            {
+              'on': 'visible',
+              'request': 'foo',
+              'session': {'persistEvent': true},
+            },
+          ],
+        };
+        const element = getAnalyticsTag(
+          {},
+          {'type': vendorName, 'id': 'analyticsId'}
+        );
+        const config = await new AnalyticsConfig(element).loadConfig();
+        expect(config[PERSIST_EVENT_TIMESTAMP]).to.be.true;
+      });
+
+      it('should handle multiple opt ins', async () => {
+        fakeVendorJson = {
+          'requests': {'foo': '//vendor'},
+          'triggers': [
+            {
+              'on': 'visible',
+              'request': 'foo',
+              'session': {'persistEvent': true},
+            },
+          ],
+        };
+        const element = getAnalyticsTag(
+          {
+            'requests': {'foo': '//inlined'},
+            'triggers': [
+              {
+                'on': 'visible',
+                'request': 'foo',
+                'session': {'persistEvent': true},
+              },
+              {
+                'on': 'click',
+                'request': 'foo',
+                'selector': '.className1',
+                'session': {'persistEvent': true},
+              },
+            ],
+          },
+          {'type': vendorName, 'id': 'analyticsId'}
+        );
+        const config = await new AnalyticsConfig(element).loadConfig();
+        expect(config[PERSIST_EVENT_TIMESTAMP]).to.be.true;
+      });
+
+      it('should handle no triggers', async () => {
+        const element = getAnalyticsTag(
+          {
+            'requests': {'foo': '//inlined'},
+          },
+          {'type': vendorName, 'id': 'analyticsId'}
+        );
+        const config = await new AnalyticsConfig(element).loadConfig();
+        expect(config[PERSIST_EVENT_TIMESTAMP]).to.be.undefined;
       });
     });
 

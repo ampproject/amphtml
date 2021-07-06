@@ -21,8 +21,8 @@
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {SafeframeHostApi, removeSafeframeListener} from '../safeframe-host';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {utf8Encode} from '../../../../src/core/types/string/bytes';
+import {createElementWithAttributes} from '#core/dom';
+import {utf8Encode} from '#core/types/string/bytes';
 
 /**
  * We're allowing external resources because otherwise using realWin causes

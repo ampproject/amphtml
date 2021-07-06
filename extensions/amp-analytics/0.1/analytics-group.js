@@ -15,11 +15,11 @@
  */
 
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/core/data-structures/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {dev, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
-import {toWin} from '../../../src/types';
+import {toWin} from '#core/window';
 
 /**
  * @const {number}

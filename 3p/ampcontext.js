@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpEvents} from '../src/core/constants/amp-events';
-import {Deferred} from '../src/core/data-structures/promise';
+import {AmpEvents} from '#core/constants/amp-events';
+import {Deferred} from '#core/data-structures/promise';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {dev, devAssert} from '../src/log';
-import {dict, map} from '../src/core/types/object';
-import {isObject} from '../src/core/types';
+import {dict, map} from '#core/types/object';
+import {isObject} from '#core/types';
 import {parseUrlDeprecated} from '../src/url';
-import {tryParseJson} from '../src/core/types/object/json';
+import {tryParseJson} from '#core/types/object/json';
 
 export class AbstractAmpContext {
   /**
@@ -95,6 +95,9 @@ export class AbstractAmpContext {
 
     /** @type {?string} */
     this.pageViewId = null;
+
+    /** @type {?string} */
+    this.pageViewId64 = null;
 
     /** @type {?string} */
     this.referrer = null;
@@ -364,6 +367,7 @@ export class AbstractAmpContext {
     this.location = parseUrlDeprecated(context.location.href);
     this.mode = context.mode;
     this.pageViewId = context.pageViewId;
+    this.pageViewId64 = context.pageViewId64;
     this.referrer = context.referrer;
     this.sentinel = context.sentinel;
     this.sourceUrl = context.sourceUrl;

@@ -18,7 +18,7 @@ PASS
 |    Test Description: Basic test for amp-bind.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <title>amp-bind: Basic</title>

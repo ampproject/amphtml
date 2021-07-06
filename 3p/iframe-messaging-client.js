@@ -19,9 +19,9 @@ import {
   listen,
   serializeMessage,
 } from '../src/3p-frame-messaging';
-import {Observable} from '../src/core/data-structures/observable';
+import {Observable} from '#core/data-structures/observable';
 import {dev} from '../src/log';
-import {dict, map} from '../src/core/types/object';
+import {dict, map} from '#core/types/object';
 import {getData} from '../src/event-helper';
 import {getMode} from '../src/mode';
 

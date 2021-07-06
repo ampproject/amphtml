@@ -21,7 +21,7 @@ const path = require('path');
 const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const {CompilationLifecycles, debug} = require('./debug-compilation-lifecycle');
-const {jsBundles} = require('./bundles.config.js');
+const {jsBundles} = require('./bundles.config');
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
@@ -73,12 +73,12 @@ async function terserMinify(code, filename) {
 
 /**
  * Apply Babel Transforms on output from Closure Compuler, then cleanup added
- * space with Terser. Used only in esm mode.
+ * space with Terser.
  * @param {string} file
  * @return {Promise<void>}
  */
 async function postClosureBabel(file) {
-  if ((!argv.esm && !argv.sxg) || path.extname(file) === '.map') {
+  if (path.extname(file) === '.map') {
     debug(CompilationLifecycles['complete'], file);
     return;
   }

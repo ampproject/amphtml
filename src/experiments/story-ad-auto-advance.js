@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {randomlySelectUnsetExperiments} from '../experiments';
+import {randomlySelectUnsetExperiments} from '#experiments';
 
-// typedef imports
 import {ExperimentInfoDef} from './experiments.type';
 
 /** @const {!Object<string, string>} */

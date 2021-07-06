@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
+import {Services} from './service';
 import {dev} from './log';
 import {isElement} from './core/types';
 

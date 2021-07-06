@@ -67,6 +67,7 @@ const getListRegExp = () =>
 
 /**
  * Checks or updates 3rd party video player list.
+ * @return {Promise<void>}
  */
 async function checkVideoInterfaceList() {
   const current = await readFile(filepath, 'utf-8');
@@ -80,8 +81,9 @@ module.exports = {
   checkVideoInterfaceList,
 };
 
-checkVideoInterfaceList.description = `Checks or updates 3rd party video player list on ${filepath}`;
+checkVideoInterfaceList.description =
+  'Check 3rd party video player list in amp-video-interface.md';
 
 checkVideoInterfaceList.flags = {
-  'fix': 'Write to file',
+  'fix': 'Update the list and write results to file',
 };

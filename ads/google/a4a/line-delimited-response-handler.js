@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {tryParseJson} from '#core/types/object/json';
 
 /**
  * Handles an XHR response by calling lineCallback for each line delineation.
