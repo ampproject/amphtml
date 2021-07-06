@@ -35,6 +35,7 @@ const jobName = 'pr-check.js';
 /**
  * This file runs tests against the local workspace to mimic the CI build as
  * closely as possible.
+ * @return {Promise<void>}
  */
 async function prCheck() {
   const runCheck = (cmd) => {
@@ -93,10 +94,6 @@ async function prCheck() {
     runCheck('amp check-links --local_changes');
   }
 
-  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
-    runCheck('amp dev-dashboard-tests');
-  }
-
   if (buildTargetsInclude(Targets.OWNERS)) {
     runCheck('amp check-owners');
   }
@@ -146,7 +143,7 @@ module.exports = {
   prCheck,
 };
 
-prCheck.description = 'Runs a subset of the CI checks against local changes.';
+prCheck.description = 'Run almost all CI checks against the local branch';
 prCheck.flags = {
-  'nobuild': 'Skips building the runtime via `amp dist`.',
+  'nobuild': 'Skip building the runtime',
 };

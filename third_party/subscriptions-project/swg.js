@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.167 */
+/** Version: 0.1.22.172 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -93,6 +93,8 @@ const AnalyticsEvent = {
   ACTION_SWG_SUBSCRIPTION_MINI_PROMPT_CLOSE: 1032,
   ACTION_SWG_CONTRIBUTION_MINI_PROMPT_CLOSE: 1033,
   ACTION_CONTRIBUTION_OFFER_SELECTED: 1034,
+  ACTION_SHOWCASE_REGWALL_GSI_CLICK: 1035,
+  ACTION_SHOWCASE_REGWALL_EXISTING_ACCOUNT_CLICK: 1036,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -1352,6 +1354,12 @@ class SkuSelectedResponse {
 
     /** @private {?string} */
     this.oldPlayOffer_ = data[4 + base] == null ? null : data[4 + base];
+
+    /** @private {?string} */
+    this.customMessage_ = data[5 + base] == null ? null : data[5 + base];
+
+    /** @private {?boolean} */
+    this.anonymous_ = data[6 + base] == null ? null : data[6 + base];
   }
 
   /**
@@ -1425,6 +1433,34 @@ class SkuSelectedResponse {
   }
 
   /**
+   * @return {?string}
+   */
+  getCustomMessage() {
+    return this.customMessage_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setCustomMessage(value) {
+    this.customMessage_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getAnonymous() {
+    return this.anonymous_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setAnonymous(value) {
+    this.anonymous_ = value;
+  }
+
+  /**
    * @param {boolean} includeLabel
    * @return {!Array<?>}
    * @override
@@ -1436,6 +1472,8 @@ class SkuSelectedResponse {
         this.oneTime_, // field 3 - one_time
         this.playOffer_, // field 4 - play_offer
         this.oldPlayOffer_, // field 5 - old_play_offer
+        this.customMessage_, // field 6 - custom_message
+        this.anonymous_, // field 7 - anonymous
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2386,7 +2424,14 @@ function toHex(buffer) {
  */
 function hash(stringToHash) {
   const crypto = self.crypto || self.msCrypto;
-  const subtle = crypto.subtle;
+  const subtle = crypto?.subtle;
+
+  if (!subtle) {
+    const message = 'Swgjs only works on secure (HTTPS or localhost) pages.';
+    warn(message);
+    return Promise.reject(message);
+  }
+
   return subtle
     .digest('SHA-512', utf8EncodeSync(stringToHash))
     .then((digest) => toHex(digest));
@@ -4511,7 +4556,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.167',
+    '_client': 'SwG 0.1.22.172',
   });
 }
 
@@ -4668,6 +4713,11 @@ class PayStartFlow {
     // Assign one-time recurrence enum if applicable
     if (this.subscriptionRequest_['oneTime']) {
       swgPaymentRequest['paymentRecurrence'] = RecurrenceMapping['ONE_TIME'];
+    }
+
+    // Assign additional metadata if available.
+    if (this.subscriptionRequest_['metadata']) {
+      swgPaymentRequest['metadata'] = this.subscriptionRequest_['metadata'];
     }
 
     // Start/cancel events.
@@ -5140,10 +5190,8 @@ class OffersFlow {
 
     this.activityIframeView_ = null;
 
-    let isClosable = options && options.isClosable;
-    if (isClosable == undefined) {
-      isClosable = false; // Default is to hide Close button.
-    }
+    // Default to hiding close button.
+    const isClosable = options?.isClosable ?? false;
 
     const feArgsObj = deps.activities().addDefaultArguments({
       'showNative': deps.callbacks().hasSubscribeRequestCallback(),
@@ -5188,18 +5236,20 @@ class OffersFlow {
     /** @private  @const {!Array<!string>} */
     this.skus_ = feArgsObj['skus'] || [ALL_SKUS];
 
-    /** @private @const {!Promise<!ActivityIframeView>} */
-    this.activityIframeViewPromise_ = this.getUrl_(
-      this.clientConfigManager_.getClientConfig()
-    ).then((url) => {
-      return new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl(url),
-        feArgsObj,
-        /* shouldFadeBody */ true
-      );
-    });
+    /** @private @const {!Promise<?ActivityIframeView>} */
+    this.activityIframeViewPromise_ = this.clientConfigManager_
+      .getClientConfig()
+      .then((clientConfig) => {
+        return this.shouldShow_(clientConfig)
+          ? new ActivityIframeView(
+              this.win_,
+              this.activityPorts_,
+              feUrl(this.getUrl_(clientConfig)),
+              feArgsObj,
+              /* shouldFadeBody */ true
+            )
+          : null;
+      });
   }
 
   /**
@@ -5260,6 +5310,10 @@ class OffersFlow {
   start() {
     if (this.activityIframeViewPromise_) {
       return this.activityIframeViewPromise_.then((activityIframeView) => {
+        if (!activityIframeView) {
+          return Promise.resolve();
+        }
+
         // So no error if skipped to payment screen.
         // Start/cancel events.
         // The second parameter is required by Propensity in AMP.
@@ -5294,18 +5348,25 @@ class OffersFlow {
   }
 
   /**
-   * Gets the URL that should be used for the activity iFrame view.
-   * @param {!Promise<../model/client-config.ClientConfig>} clientConfigPromise
-   * @return {!Promise<string>}
+   * Returns whether this flow is configured as enabled, not showing
+   * even on explicit start when flag is configured false.
+   *
+   * @param {!../model/client-config.ClientConfig} clientConfig
+   * @return {boolean}
    */
-  getUrl_(clientConfigPromise) {
-    return clientConfigPromise.then((clientConfig) => {
-      if (clientConfig.useUpdatedOfferFlows) {
-        return '/subscriptionoffersiframe';
-      } else {
-        return '/offersiframe';
-      }
-    });
+  shouldShow_(clientConfig) {
+    return clientConfig.uiPredicates?.canDisplayAutoPrompt !== false;
+  }
+
+  /**
+   * Gets the URL that should be used for the activity iFrame view.
+   * @param {!../model/client-config.ClientConfig} clientConfig
+   * @return {string}
+   */
+  getUrl_(clientConfig) {
+    return clientConfig.useUpdatedOfferFlows
+      ? '/subscriptionoffersiframe'
+      : '/offersiframe';
   }
 
   /**
@@ -5725,7 +5786,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.167',
+        '_client': 'SwG 0.1.22.172',
         'supportsEventManager': true,
       },
       args || {}
@@ -6571,7 +6632,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.167');
+    context.setClientVersion('SwG 0.1.22.172');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -8076,7 +8137,8 @@ class ContributionsFlow {
 
     this.activityIframeView_ = null;
 
-    const isClosable = (options && options.isClosable) || true;
+    // Default to showing close button.
+    const isClosable = options?.isClosable ?? true;
 
     /** @private @const {!Promise<!ActivityIframeView>} */
     this.activityIframeViewPromise_ = this.getUrl_(
@@ -8353,7 +8415,7 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:35px!important;width:560px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(#324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:35px!important;width:560px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -8532,6 +8594,7 @@ class Graypane$1 {
     setImportantStyles$1(this.fadeBackground_, {
       'z-index': zIndex,
       'display': 'none',
+      'pointer-events': 'none',
       'position': 'fixed',
       'top': 0,
       'right': 0,
@@ -10174,9 +10237,13 @@ function analyticsEventToGoogleAnalyticsEvent(event, subscriptionFlow) {
 /**
  * Returns true if the query string contains fresh Google Article Access (GAA) params.
  * @param {string} queryString
+ * @param {boolean} allowAllAccessTypes
  * @return {boolean}
  */
-function queryStringHasFreshGaaParams(queryString) {
+function queryStringHasFreshGaaParams(
+  queryString,
+  allowAllAccessTypes = false
+) {
   const params = parseQueryString(queryString);
 
   // Verify GAA params exist.
@@ -10189,10 +10256,12 @@ function queryStringHasFreshGaaParams(queryString) {
     return false;
   }
 
-  // Verify access type.
-  const noAccess = params['gaa_at'] === 'na';
-  if (noAccess) {
-    return false;
+  if (!allowAllAccessTypes) {
+    // Verify access type.
+    const noAccess = params['gaa_at'] === 'na';
+    if (noAccess) {
+      return false;
+    }
   }
 
   // Verify timestamp isn't stale.
@@ -10305,6 +10374,12 @@ class EntitlementsManager {
 
     /** @private @const {!../api/subscriptions.Config} */
     this.config_ = deps.config();
+
+    /**
+     * Tests can use this promise to wait for POST requests to finish.
+     * @visibleForTesting
+     */
+    this.entitlementsPostPromise = null;
 
     this.deps_
       .eventManager()
@@ -10436,7 +10511,13 @@ class EntitlementsManager {
   possiblyPingbackOnClientEvent_(event) {
     // Verify GAA params are present, otherwise bail since the pingback
     // shouldn't happen on non-metering requests.
-    if (!queryStringHasFreshGaaParams(this.win_.location.search)) {
+    // We don't validate access type since we want to pingback on all access types.
+    if (
+      !queryStringHasFreshGaaParams(
+        this.win_.location.search,
+        /*allowAllAccessTypes=*/ true
+      )
+    ) {
       return;
     }
 
@@ -10500,11 +10581,34 @@ class EntitlementsManager {
       '/publication/' +
       encodeURIComponent(this.publicationId_) +
       '/entitlements';
-    if (this.encodedParams_) {
-      url = addQueryParam(url, 'encodedParams', this.encodedParams_);
-    }
+    url = addDevModeParamsToUrl(this.win_.location, url);
 
-    this.fetcher_.sendPost(serviceUrl(url), message);
+    // Promise that sets this.encodedParams_ when it resolves.
+    const encodedParamsPromise = this.encodedParams_
+      ? Promise.resolve()
+      : hash(getCanonicalUrl(this.deps_.doc())).then((hashedCanonicalUrl) => {
+          /** @type {!GetEntitlementsParamsInternalDef} */
+          const encodableParams = {
+            metering: {
+              resource: {
+                hashedCanonicalUrl,
+              },
+            },
+          };
+          this.encodedParams_ = base64UrlEncodeFromBytes(
+            utf8EncodeSync(JSON.stringify(encodableParams))
+          );
+        });
+
+    this.entitlementsPostPromise = encodedParamsPromise.then(() => {
+      url = addQueryParam(
+        url,
+        'encodedParams',
+        /** @type {!string} */ (this.encodedParams_)
+      );
+
+      return this.fetcher_.sendPost(serviceUrl(url), message);
+    });
   }
 
   /**
@@ -10864,6 +10968,8 @@ class EntitlementsManager {
         const hashedCanonicalUrl = values[0];
         const swgUserToken = values[1];
 
+        url = addDevModeParamsToUrl(this.win_.location, url);
+
         // Add encryption param.
         if (params?.encryption) {
           url = addQueryParam(
@@ -10893,10 +10999,12 @@ class EntitlementsManager {
                 resource: {
                   hashedCanonicalUrl,
                 },
+                // Publisher provided state.
                 state: {
                   id: meteringStateId,
                   attributes: [],
                 },
+                token: this.getGaaToken_(),
               },
             };
 
@@ -10966,6 +11074,22 @@ class EntitlementsManager {
         return this.parseEntitlements(json);
       });
   }
+}
+
+/**
+ * Parses entitlement dev mode params from the given hash fragment and adds it
+ * to the given URL.
+ * @param {!Location} location
+ * @param {string} url
+ * @return {string}
+ */
+function addDevModeParamsToUrl(location, url) {
+  const hashParams = parseQueryString(location.hash);
+  const devModeScenario = hashParams['swg.deventitlement'];
+  if (devModeScenario === undefined) {
+    return url;
+  }
+  return addQueryParam(url, 'devEnt', devModeScenario);
 }
 
 /**

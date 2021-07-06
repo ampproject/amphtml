@@ -19,13 +19,14 @@ import '../../../amp-mustache/0.2/amp-mustache';
 import '../../../amp-script/0.1/amp-script';
 import '../amp-render';
 import * as BatchedJsonModule from '../../../../src/batched-json';
-import {ActionInvocation} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {Services} from '../../../../src/services';
-import {htmlFor} from '../../../../src/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
-import {whenUpgradedToCustomElement} from '../../../../src/dom';
+import * as Style from '#core/dom/style';
+import * as log from '../../../../src/log';
+import {ActionInvocation} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Services} from '#service';
+import {htmlFor} from '#core/dom/static-template';
+import {waitFor} from '#testing/test-helper';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 
 describes.realWin(
   'amp-render-v1.0',
@@ -83,7 +84,6 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       html = htmlFor(doc);
-      toggleExperiment(win, 'amp-render', true, true);
     });
 
     it('renders from amp-state', async () => {
@@ -100,6 +100,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -118,15 +119,13 @@ describes.realWin(
     });
 
     it('renders json from src', async () => {
-      const fetchStub = env.sandbox.stub(
-        BatchedJsonModule,
-        'batchFetchJsonFor'
-      );
-
-      fetchStub.resolves({name: 'Joe'});
+      const fetchStub = env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
 
       element = html`
         <amp-render
+          binding="no"
           src="https://example.com/data.json"
           width="auto"
           height="140"
@@ -140,6 +139,102 @@ describes.realWin(
       const text = await getRenderedData();
       expect(text).to.equal('Hello Joe');
       expect(fetchStub).to.have.been.calledOnce;
+    });
+
+    it('should render with layout=container', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      const setStylesStub = env.sandbox.spy(Style, 'setStyles');
+
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) =>
+          Promise.resolve().then(measurer).then(mutator),
+        requestChangeSize: () => {
+          return Promise.resolve();
+        },
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          layout="container"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+          <div placeholder>Placeholder text</div>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      // We do this twice to flush out vsync
+      // TODO(dmanek): investigate if this can be done with one call
+      await getRenderedData();
+      await getRenderedData();
+
+      expect(setStylesStub).to.be.calledTwice;
+    });
+
+    it('layout=container does not resize', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      const setStylesStub = env.sandbox.stub(Style, 'setStyles');
+
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) =>
+          Promise.resolve().then(measurer).then(mutator),
+        requestChangeSize: () => Promise.reject(),
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          layout="container"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+          <div placeholder>Placeholder text</div>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      // We do this twice to flush out vsync
+      // TODO(dmanek): investigate if this can be done with one call
+      await getRenderedData();
+      await getRenderedData();
+
+      expect(setStylesStub).to.be.calledOnce;
+    });
+
+    it('should error when layout=container is used without placeholder', async () => {
+      const errorSpy = env.sandbox.stub(log, 'userAssert');
+
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          layout="container"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await getRenderedData();
+      // TODO: Called once again in template-impl.js. Investigate the error "Type must be specified: %s".
+      expect(errorSpy).to.be.calledTwice;
+      expect(errorSpy.getCall(0).args[1]).to.match(
+        /placeholder required with layout="container"/
+      );
     });
 
     it('renders from amp-script', async () => {
@@ -158,6 +253,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-script:dataFunctions.getRemoteData"
           width="auto"
           height="200"
@@ -182,7 +278,12 @@ describes.realWin(
 
     it('fails gracefully when src is omitted', async () => {
       element = html`
-        <amp-render width="auto" height="140" layout="fixed-height">
+        <amp-render
+          width="auto"
+          height="140"
+          layout="fixed-height"
+          binding="no"
+        >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
         </amp-render>
       `;
@@ -201,6 +302,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           id="my-amp-render"
           src="https://example.com/data.json"
           width="auto"
@@ -252,6 +354,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -293,6 +396,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-script:dataFunctions.getRemoteData"
           width="auto"
           height="200"
@@ -344,6 +448,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           xssi-prefix=")]}"
           key="fullName"
           src="https://example.com/data.json"
@@ -387,6 +492,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           xssi-prefix=")]}"
           key="fullName"
           src="https://example.com/data.json?RANDOM"
@@ -431,6 +537,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:president"
           [src]="srcUrl"
           width="auto"
@@ -469,6 +576,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -500,6 +608,7 @@ describes.realWin(
 
       element = html`
         <amp-render
+          binding="no"
           src="amp-state:theFood"
           width="auto"
           height="140"
@@ -530,6 +639,7 @@ describes.realWin(
           width="auto"
           height="140"
           layout="fixed-height"
+          binding="no"
         >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
           <p placeholder>Loading data</p>
@@ -564,6 +674,7 @@ describes.realWin(
           width="auto"
           height="140"
           layout="fixed-height"
+          binding="no"
         >
           <template type="amp-mustache"><p>Hello {{name}}</p></template>
           <p placeholder>Loading data</p>
@@ -584,6 +695,274 @@ describes.realWin(
       const fallback = element.querySelector(`[fallback]`);
 
       expect(fallback.textContent).to.equal('Failed');
+    });
+
+    it('should work with binding="always"', async () => {
+      const rescanStub = env.sandbox.stub();
+      rescanStub.resolves({});
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanStub,
+        signals: () => {
+          return {
+            get: () => null,
+          };
+        },
+      });
+
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="always"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+
+      expect(rescanStub).to.be.calledOnce;
+      const {fast, update} = rescanStub.getCall(0).args[2];
+      expect(fast).to.be.true;
+      expect(update).to.be.true;
+    });
+
+    it('should work with binding="refresh"', async () => {
+      const rescanStub = env.sandbox.stub();
+      rescanStub.resolves({});
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanStub,
+        signals: () => {
+          return {
+            get: () => 123,
+          };
+        },
+      });
+
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchStub.resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="refresh"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+
+      expect(rescanStub).to.be.calledOnce;
+      const {fast, update} = rescanStub.getCall(0).args[2];
+      expect(fast).to.be.true;
+      expect(update).to.be.true;
+    });
+
+    it('should default to binding="refresh" when nothing is specified', async () => {
+      const rescanStub = env.sandbox.stub();
+      rescanStub.resolves({});
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+        rescan: rescanStub,
+        signals: () => {
+          return {
+            get: () => null,
+          };
+        },
+      });
+
+      const fetchStub = env.sandbox.stub(
+        BatchedJsonModule,
+        'batchFetchJsonFor'
+      );
+      fetchStub.resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"><p>Hello {{name}}</p></template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await whenUpgradedToCustomElement(element);
+      await element.buildInternal();
+
+      expect(rescanStub).to.be.calledOnce;
+      const {fast, update} = rescanStub.getCall(0).args[2];
+      expect(fast).to.be.true;
+      expect(update).to.be.false;
+    });
+
+    it('should not perform any updates when binding="no"', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="no"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"
+            >Hello {{name}} 1+1=<span [text]="1+1">?</span></template
+          >
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Hello Joe 1+1=?');
+    });
+
+    it('should not perform any updates when binding="never"', async () => {
+      env.sandbox
+        .stub(BatchedJsonModule, 'batchFetchJsonFor')
+        .resolves({name: 'Joe'});
+
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          width="auto"
+          height="140"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache"
+            >Hello {{name}} 1+1=<span [text]="1+1">?</span></template
+          >
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      const text = await getRenderedData();
+      expect(text).to.equal('Hello Joe 1+1=?');
+    });
+
+    const items = {
+      'items': [
+        {
+          'name': 'Apple',
+          'price': '1.99',
+        },
+        {
+          'name': 'Orange',
+          'price': '0.99',
+        },
+        {
+          'name': 'Pear',
+          'price': '1.50',
+        },
+        {
+          'name': 'Banana',
+          'price': '1.50',
+        },
+        {
+          'name': 'Watermelon',
+          'price': '4.50',
+        },
+        {
+          'name': 'Melon',
+          'price': '3.50',
+        },
+      ],
+    };
+
+    it('should grow on resizeToContents action when height is insufficient', async () => {
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) =>
+          Promise.resolve().then(measurer).then(mutator),
+        forceChangeSize: env.sandbox.spy(),
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
+
+      env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves(items);
+
+      // set the height small enough so component resizes
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          height="100"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">
+            {{#items}}
+            <div>
+              <div>{{name}}</div>
+              <div>{{price}}</div>
+            </div>
+            {{/items}}
+          </template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await getRenderedData();
+
+      element.enqueAction(invocation('resizeToContents'));
+      await getRenderedData();
+      expect(fakeMutator.forceChangeSize).to.be.calledOnce;
+    });
+
+    it('should shrink on resizeToContents action when there is exta whitespace', async () => {
+      const fakeMutator = {
+        measureMutateElement: (unusedElement, measurer, mutator) =>
+          Promise.resolve().then(measurer).then(mutator),
+        forceChangeSize: env.sandbox.spy(),
+      };
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
+
+      env.sandbox.stub(BatchedJsonModule, 'batchFetchJsonFor').resolves(items);
+
+      // set the height large enough so component shrinks
+      element = html`
+        <amp-render
+          binding="never"
+          src="https://example.com/data.json"
+          height="5000"
+          layout="fixed-height"
+        >
+          <template type="amp-mustache">
+            {{#items}}
+            <div>
+              <div>{{name}}</div>
+              <div>{{price}}</div>
+            </div>
+            {{/items}}
+          </template>
+        </amp-render>
+      `;
+      doc.body.appendChild(element);
+
+      await getRenderedData();
+
+      element.enqueAction(invocation('resizeToContents'));
+      await getRenderedData();
+      expect(fakeMutator.forceChangeSize).to.be.calledOnce;
     });
   }
 );

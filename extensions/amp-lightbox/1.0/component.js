@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Keys} from '../../../src/core/constants/key-codes';
-import {forwardRef} from '../../../src/preact/compat';
-import {setStyle} from '../../../src/style';
-import {tryFocus} from '../../../src/dom';
-import {
-  useImperativeHandle,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from '../../../src/preact';
+import * as Preact from '#preact';
+import {ContainWrapper, useValueRef} from '#preact/component';
+import {Keys} from '#core/constants/key-codes';
+import {forwardRef} from '#preact/compat';
+import {setStyle} from '#core/dom/style';
+import {tryFocus} from '#core/dom';
+import {useImperativeHandle, useLayoutEffect, useRef, useState} from '#preact';
 import {useStyles} from './component.jss';
 
 const ANIMATION_DURATION = 200;

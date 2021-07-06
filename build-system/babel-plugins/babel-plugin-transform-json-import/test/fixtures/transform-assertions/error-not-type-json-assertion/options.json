@@ -1,5 +1,7 @@
 {
-  "plugins": ["../../../.."],
+  "plugins": [
+    "../../../.."
+  ],
   "sourceType": "module",
   "throws": "unknown type assertion, we only support `assert { \"type\": \"json\" }`"
 }

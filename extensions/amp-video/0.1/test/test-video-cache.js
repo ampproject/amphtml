@@ -15,10 +15,10 @@
  */
 
 import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
 import {fetchCachedSources} from '../video-cache';
-import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
+import {xhrServiceForTesting} from '#service/xhr-impl';
 
 describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
   let cacheUrlService;
@@ -117,6 +117,17 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
       expect(xhrSpy).to.have.been.calledWith(
         'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+      );
+    });
+
+    it('should send the request to the correct address if the video has a .gif extension', async () => {
+      const videoEl = createVideo([{'src': 'https://website.com/video.gif'}]);
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.gif?amp_video_host_url=https%3A%2F%2Fcanonical.com'
       );
     });
   });

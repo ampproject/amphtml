@@ -91,6 +91,7 @@ function createTable(filesData) {
     const entry = Array.isArray(filesData[filename])
       ? filesData[filename]
       : Object.entries(filesData[filename]).sort(sortedByEntryKey);
+    // @ts-ignore
     for (const [context, zIndex] of entry) {
       rows.push([`\`${context}\``, zIndex, `[${filename}](/${filename})`]);
     }
@@ -195,6 +196,7 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
 /**
  * Entry point for amp get-zindex
+ * @return {Promise<void>}
  */
 async function getZindex() {
   logLocalDev('...');
@@ -205,6 +207,7 @@ async function getZindex() {
       getZindexSelectors('{css,src,extensions}/**/*.css'),
       getZindexChainsInJs([
         '{3p,src,extensions}/**/*.js',
+        '!**/dist/**/*.js',
         '!extensions/**/test/**/*.js',
         '!extensions/**/storybook/**/*.js',
       ]),
@@ -254,8 +257,8 @@ module.exports = {
 };
 
 getZindex.description =
-  'Runs through all css files of project to gather z-index values';
+  'Run through all css files in the repo to gather z-index values';
 
 getZindex.flags = {
-  'fix': 'Write to file',
+  'fix': 'Write the results to file',
 };

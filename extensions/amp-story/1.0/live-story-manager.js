@@ -15,10 +15,11 @@
  */
 
 import {Action, getStoreService} from './amp-story-store-service';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
-import {Services} from '../../../src/services';
-import {createElementWithAttributes, lastChildElement} from '../../../src/dom';
-import {dict} from '../../../src/core/types/object';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {dict} from '#core/types/object';
+import {lastChildElement} from '#core/dom/query';
 import {userAssert} from '../../../src/log';
 
 /**

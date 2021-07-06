@@ -21,8 +21,8 @@
 
 const childProcess = require('child_process');
 const {log} = require('./logging');
+const {red} = require('./colors');
 const {spawnProcess} = require('./process');
-const {yellow} = require('./colors');
 
 const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
 
@@ -90,7 +90,7 @@ function execWithError(cmd) {
 function execOrThrow(cmd, msg) {
   const p = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
   if (p.status && p.status != 0) {
-    log(yellow('ERROR:'), msg);
+    log(red('ERROR:'), msg);
     const error = new Error(p.stderr);
     error.status = p.status;
     throw error;

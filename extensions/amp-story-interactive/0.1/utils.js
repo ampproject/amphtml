@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {map} from '../../../src/core/types/object';
+import {htmlFor} from '#core/dom/static-template';
+import {map} from '#core/types/object';
 import {user} from '../../../src/log';
 
 /** @private Whether ids are deduplicated or not */
@@ -46,4 +47,22 @@ export const deduplicateInteractiveIds = (doc) => {
       interactiveEls[i].id = newId;
     }
   }
+};
+
+/**
+ * Generates the template for the image quizzes and polls.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+export const buildImgTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div
+      class="i-amphtml-story-interactive-img-container i-amphtml-story-interactive-container"
+    >
+      <div class="i-amphtml-story-interactive-prompt-container"></div>
+      <div class="i-amphtml-story-interactive-img-option-container"></div>
+    </div>
+  `;
 };

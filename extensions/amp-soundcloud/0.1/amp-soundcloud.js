@@ -27,10 +27,10 @@
  * </amp-soundcloud>
  */
 
-import {PauseHelper} from '../../../src/utils/pause-helper';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/core/types/object';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {dict} from '#core/types/object';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
@@ -107,7 +107,7 @@ class AmpSoundcloud extends AMP.BaseElement {
 
     iframe.src = src;
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     iframe.height = height;
     this.element.appendChild(iframe);
 

@@ -39,7 +39,7 @@ In the following example, the component creates a **`customEventReporter`** obje
 ```js
   buildCallback() {
     const builder = new customEventReporterBuilder(this.element);
-    builder.track('layout', 'example.come/layout');
+    builder.track('layout', 'example.come/core/dom/layout');
     builder.track('id', ['example.com/${id}', 'example2.com/${id}']);
     this.reporter_ = builder.build();
   }

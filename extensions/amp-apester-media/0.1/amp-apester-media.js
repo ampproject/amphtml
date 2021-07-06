@@ -15,10 +15,15 @@
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
+import {
+  applyFillContent,
+  getLengthNumeral,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {
   extractTags,
   getPlatform,
@@ -26,17 +31,19 @@ import {
   setFullscreenOff,
   setFullscreenOn,
 } from './utils';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {handleCompanionAds} from './monetization';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
-import {px, setStyles} from '../../../src/style';
-import {removeElement} from '../../../src/dom';
+} from '#core/dom/layout/viewport-observer';
+import {px, setStyles} from '#core/dom/style';
+import {removeElement} from '#core/dom';
 
 /** @const */
 const TAG = 'amp-apester-media';
+const AD_TAG = 'amp-ad';
+/** @const {!JsonObject} */
+const BOTTOM_AD_MESSAGE = dict({'type': 'has_bottom_ad', 'adHeight': 50});
 /**
  * @enum {string}
  */
@@ -81,6 +88,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.height_ = null;
     /** @private {boolean}  */
     this.random_ = false;
+    /** @private {boolean}  */
+    this.hasBottomAd_ = false;
     /**
      * @private {?string}
      */
@@ -245,7 +254,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     iframe.height = this.height_;
     iframe.width = this.width_;
     iframe.classList.add('amp-apester-iframe');
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     return iframe;
   }
 
@@ -316,11 +325,24 @@ class AmpApesterMedia extends AMP.BaseElement {
               return vsync.mutatePromise(() => {
                 if (this.iframe_) {
                   this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
-                  if (media['campaignData']) {
+                  const campaignData = media['campaignData'];
+                  if (campaignData) {
+                    const bottomAdOptions = campaignData['bottomAdOptions'];
+                    if (bottomAdOptions && bottomAdOptions.enabled) {
+                      this.hasBottomAd_ = true;
+                      const ampdoc = this.getAmpDoc();
+                      Services.extensionsFor(
+                        this.win
+                      )./*OK*/ installExtensionForDoc(ampdoc, AD_TAG);
+                      this.iframe_.contentWindow./*OK*/ postMessage(
+                        BOTTOM_AD_MESSAGE,
+                        '*'
+                      );
+                    }
                     this.iframe_.contentWindow./*OK*/ postMessage(
                       /** @type {JsonObject} */ ({
                         type: 'campaigns',
-                        data: media['campaignData'],
+                        data: campaignData,
                       }),
                       '*'
                     );
@@ -438,6 +460,12 @@ class AmpApesterMedia extends AMP.BaseElement {
       (data) => {
         if (this.mediaId_ === data.id && data.height) {
           this.attemptChangeHeight(data.height);
+          if (this.hasBottomAd_) {
+            this.iframe_.contentWindow./*OK*/ postMessage(
+              BOTTOM_AD_MESSAGE,
+              '*'
+            );
+          }
         }
       },
       this.win,

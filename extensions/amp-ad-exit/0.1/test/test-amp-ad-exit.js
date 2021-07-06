@@ -17,10 +17,10 @@
 import {AmpAdExit} from '../amp-ad-exit';
 import {FilterType} from '../filters/filter';
 import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {installTimerService} from '../../../../src/service/timer-impl';
-import {setParentWindow} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {setParentWindow} from '../../../../src/service-helpers';
+import {toggleExperiment} from '#experiments';
 
 const TEST_3P_VENDOR = '3p-vendor';
 
@@ -359,6 +359,42 @@ describes.realWin(
       expect(open).to.have.been.calledWith(
         EXIT_CONFIG.targets.clickTargetTest.finalUrl,
         '_top'
+      );
+    });
+
+    it('should enable attribution tracking when given `browserAdConversion`', async () => {
+      env.sandbox
+        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
+        .returns(true);
+      const openStub = env.sandbox.stub(win, 'open').returns(win);
+      const config = {
+        targets: {
+          landingPage: {
+            finalUrl: 'https://example.com',
+            behaviors: {
+              browserAdConversion: {
+                attributiondestination: 'https://example.com',
+                attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
+                attributionreportto: 'https://google.com',
+              },
+            },
+          },
+        },
+      };
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'landingPage'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(openStub).calledWithExactly(
+        'https://example.com',
+        '_blank',
+        'noopener,attributiondestination=https://example.com,attributionsourceeventid=EFnZ8GunL1xrwNTIHbXrvQ==,attributionreportto=https://google.com'
       );
     });
 

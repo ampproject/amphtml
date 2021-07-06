@@ -199,8 +199,8 @@ module.exports = {
 };
 
 markdownToc.description =
-  'Finds Markdown files that contain table of contents and updates them.';
+  'Update all markdown files that contain a table of contents';
 
 markdownToc.flags = {
-  'fix': 'Write to file',
+  'fix': 'Update the list and write results to file',
 };

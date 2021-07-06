@@ -14,7 +14,7 @@
   limitations under the license.
 -->
 <!DOCTYPE html>
-<html ⚡>
+<html ⚡ lang="en">
   <!-- prettier-ignore -->
   <head>
     <meta charset="utf-8">
@@ -27,8 +27,9 @@
         color: red;
       }
     </style>
-    <script async custom-element="amp-render" src="https://cdn.ampproject.org/v0/amp-render-1.0.js"></script>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-render" src="https://cdn.ampproject.org/v0/amp-render-1.0.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
   </head>
   <body>
     <!-- Valid: amp-render with only src attribute -->
@@ -69,6 +70,15 @@
       height="10"
       src="https://data.com/articles.json?ref=CANONICAL_URL"
       binding="no"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with binding="never" attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      binding="never"
     >
     </amp-render>
 
@@ -117,15 +127,15 @@
     >
     </amp-render>
 
-    <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
-    <amp-render width="10" height="10"> </amp-render>
-
-    <!-- Invalid: container layout -->
+    <!-- Valid: container layout -->
     <amp-render
       layout="container"
       src="https://data.com/articles.json?ref=CANONICAL_URL"
     >
     </amp-render>
+
+    <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
+    <amp-render width="10" height="10"> </amp-render>
 
     <!-- Invalid: invalid binding attribute -->
     <amp-render
@@ -135,5 +145,19 @@
       binding="foobar"
     >
     </amp-render>
+
+    <!-- Valid: amp-render with template attribute -->
+    <amp-render width=10 height=10
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      template="found">
+    </amp-render>
+    <template id="found" type="amp-mustache"></template>
+
+    <!-- Invalid: missing template with specified id -->
+    <amp-render width=10 height=10
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      template="missing">
+    </amp-render>
+
   </body>
 </html>

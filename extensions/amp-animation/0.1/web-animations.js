@@ -38,19 +38,20 @@ import {
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
-import {dashToCamelCase} from '../../../src/core/types/string';
+} from '#core/dom/query';
+import {computedStyle, getVendorJsPropertyName} from '#core/dom/style';
+import {dashToCamelCase} from '#core/types/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
-import {isArray, toArray} from '../../../src/core/types/array';
-import {isExperimentOn} from '../../../src/experiments';
+import {isArray, toArray} from '#core/types/array';
+import {isEnumValue, isObject} from '#core/types';
+import {isExperimentOn} from '#experiments';
 import {isInFie} from '../../../src/iframe-helper';
-import {isObject} from '../../../src/core/types';
-import {layoutRectLtwh} from '../../../src/core/math/layout-rect';
-import {map} from '../../../src/core/types/object';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {map} from '#core/types/object';
+
 import {parseCss} from './parsers/css-expr';
 
 /** @const {string} */
@@ -792,16 +793,17 @@ export class MeasureScanner extends Scanner {
       '"iterationStart" is invalid: %s',
       newTiming.iterationStart
     );
-    user().assertEnumValue(
-      WebAnimationTimingDirection,
-      /** @type {string} */ (direction),
-      'direction'
+
+    userAssert(
+      isEnumValue(WebAnimationTimingDirection, direction),
+      `Unknown direction: ${direction}`
     );
-    user().assertEnumValue(
-      WebAnimationTimingFill,
-      /** @type {string} */ (fill),
-      'fill'
+
+    userAssert(
+      isEnumValue(WebAnimationTimingFill, fill),
+      `Unknown fill: ${fill}`
     );
+
     return {
       duration,
       delay,

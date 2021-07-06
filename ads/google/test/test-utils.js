@@ -17,11 +17,11 @@
 import {
   ExternalCorePubVars,
   LayoutType,
-} from '../a4a/shared/content-recommendation';
+} from '#ads/google/a4a/shared/content-recommendation';
 import {
   getMatchedContentResponsiveHeightAndUpdatePubParams,
   getMultiSizeDimensions,
-} from '../utils';
+} from '#ads/google/utils';
 
 describes.sandboxed('#getMultiSizeDimensions', {}, () => {
   const multiSizes = [
