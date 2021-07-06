@@ -54,6 +54,7 @@ import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
+import {BackgroundBlur} from './background-blur';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '#core/constants/common-signals';
 import {EventType, dispatch} from './events';
@@ -350,6 +351,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
+
+    /** @private {?BackgroundBlur} */
+    this.backgroundBlur_ = null;
   }
 
   /** @override */
@@ -1436,6 +1440,8 @@ export class AmpStory extends AMP.BaseElement {
       this.updateNavigationPath_(targetPageId, direction);
     }
 
+    this.backgroundBlur_?.update(targetPage.element);
+
     // Each step will run in a requestAnimationFrame, and wait for the next
     // frame before executing the following step.
     const steps = [
@@ -1810,6 +1816,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onUIStateUpdate_(uiState) {
+    this.backgroundBlur_?.detach();
+    this.backgroundBlur_ = null;
     switch (uiState) {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
@@ -1830,6 +1838,10 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP_ONE_PANEL:
         this.setDesktopPositionAttributes_(this.activePage_);
+        if (!this.backgroundBlur_) {
+          this.backgroundBlur_ = new BackgroundBlur(this.win, this.element);
+          this.backgroundBlur_.attach();
+        }
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
           this.element.classList.add('i-amphtml-story-desktop-one-panel');
