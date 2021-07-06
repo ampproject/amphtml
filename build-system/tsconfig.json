@@ -37,6 +37,7 @@
     "./eslint-rules/**/*.js",
     "./externs/**/*.js",
     "./tasks/make-extension/template/**/*.js",
-    "./tasks/performance/cache/**/*.js"
+    "./tasks/performance/cache/**/*.js",
+    "./server/new-server/transforms/dist/**/*.js"
   ]
 }
