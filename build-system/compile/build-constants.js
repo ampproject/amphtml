@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 const argv = require('minimist')(process.argv.slice(2));
-const {VERSION: internalRuntimeVersion} = require('./internal-version');
+const {VERSION} = require('./internal-version');
 
-const isCheckTypes = argv._.includes('check-types');
-const version =
-  process.env.JEST_WORKER_ID !== undefined
-    ? 'transform-version-call'
-    : internalRuntimeVersion;
+const testTasks = ['e2e', 'integration', 'visual-diff', 'unit', 'check-types'];
+const isTestTask = testTasks.some((task) => argv._.includes(task));
+const isForTesting = argv.fortesting || isTestTask;
+const isMinified = !!(argv._.includes('dist') || argv.compiled);
 
 /**
  * Build time constants. Used by babel but hopefully one day directly by the bundlers..
- * TODO: move to bundlers once https://github.com/google/closure-compiler/issues/1601 is resolved.
+ *
+ * TODO: move constant replacement to bundlers once either https://github.com/google/closure-compiler/issues/1601
+ *       is resolved, or we switch to using a different bundler.
  *
  * @type {Object<string, boolean|string>}
  */
 const BUILD_CONSTANTS = {
-  IS_FORTESTING: !!(argv.fortesting || isCheckTypes),
-  IS_MINIFIED: !!argv.compiled,
-  VERSION: version,
-  '$internalRuntimeVersion$': internalRuntimeVersion,
+  IS_FORTESTING: isForTesting,
+  IS_MINIFIED: isMinified,
+  INTERNAL_RUNTIME_VERSION: isTestTask ? '$internalRuntimeVersion$' : VERSION,
 
   // We build on the idea that SxG is an upgrade to the ESM build.
   // Therefore, all conditions set by ESM will also hold for SxG.
