@@ -642,7 +642,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'jixie': {},
+  'jixie': { 
+    prefetch: ['https://scripts.jixie.io/jxamp.min.js'],
+    renderStartImplemented: true
+  },
 
   'kixer': {
     prefetch: 'https://cdn.kixer.com/ad/load.js',
