@@ -92,7 +92,7 @@ Example:
       <li><code>data-player-param-token="abc"</code> becomes <code>&token=abc</code></li>
       <li><code>data-player-param-custom-data="key:value;key2:value2"</code> becomes <code>&customData=key%3Avalue%3Bkey2%3Avalue2</code></li>
     </ul>
-    An alternative to using a <code>data-player-querystring</code>.
+    An alternative to using <code>data-player-querystring</code>.
     </td>
   </tr>
   <tr>
@@ -149,7 +149,7 @@ Example:
   </tr>
   <tr>
     <td  width="40%"><strong>data-block-on-consent</strong></td>
-    <td><strong>Requires <code>amp-consent</code> extension.</strong> If this attribute is present, playing loading will be delayed until the consent state is resolved. The consent data will then be passed to the player's iframe as query parameters for use with advertising implementations.
+    <td><strong>Requires <code>amp-consent</code> extension.</strong> If this attribute is present, player loading will be delayed until the consent state is resolved. The consent data will then be passed to the player's iframe as query parameters for use with advertising implementations.
     <br />
     For more details, see <a  href="https://amp.dev/documentation/components/amp-consent/">amp-consent</a> documentation.</td>
   </tr>
