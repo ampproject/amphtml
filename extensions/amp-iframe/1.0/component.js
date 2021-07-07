@@ -15,14 +15,6 @@
  */
 
 import * as Preact from '#preact';
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '#preact';
 
 /**
  * @param {!IframeDef.Props} props
@@ -47,7 +39,6 @@ export function Iframe({
       allowpaymentrequest={allowPaymentRequest}
       allowtransparency={allowTransparency}
       referrerpolicy={referrerPolicy}
-      sandbox={sandbox}
       {...rest}
     ></iframe>
   );

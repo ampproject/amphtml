@@ -39,14 +39,14 @@ describes.realWin(
       toggleExperiment(win, 'bento-iframe', true, true);
     });
 
-    it('renders', async () => {
+    it('should render', async () => {
       const element = html`
-        <amp-iframe src="https://www.google.com"></amp-iframe>
+        <amp-iframe src="https://www.wikipedia.org"></amp-iframe>
       `;
       doc.body.appendChild(element);
       await waitFor(() => element.isConnected, 'element connected');
       expect(element.parentNode).to.equal(doc.body);
-      expect(element.getAttribute('src')).to.equal('https://www.google.com');
+      expect(element.getAttribute('src')).to.equal('https://www.wikipedia.org');
     });
   }
 );

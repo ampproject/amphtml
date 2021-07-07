@@ -25,13 +25,11 @@ export default {
 };
 
 export const _default = () => {
-  // DO NOT SUBMIT: This is example code only.
   return (
     <Iframe
-      style={{width: 300, height: 200}}
-      example-property="example string property value"
-    >
-      This text is inside.
-    </Iframe>
+      style={{width: 800, height: 600}}
+      src="https://www.wikipedia.org/"
+      title="Wikipedia"
+    ></Iframe>
   );
 };

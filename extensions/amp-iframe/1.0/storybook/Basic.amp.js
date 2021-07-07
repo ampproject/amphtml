@@ -28,19 +28,16 @@ export default {
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
 export const ExampleUseCase = () => {
   return (
     <amp-iframe
-      width="300"
-      height="200"
-      example-property="example string property value"
-    >
-      This text is inside.
-    </amp-iframe>
+      width="800"
+      height="600"
+      src="https://www.wikipedia.org/"
+    ></amp-iframe>
   );
 };
 
 ExampleUseCase.story = {
-  name: 'Example use case story',
+  name: 'amp-iframe with src attribute',
 };

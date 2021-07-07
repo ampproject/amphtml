@@ -27,8 +27,10 @@ BaseElement['props'] = {
   'src': {attr: 'src'},
   'srcdoc': {attr: 'srcdoc'},
   'sandbox': {attr: 'sandbox'},
-  // 'children': {passthroughNonEmpty: true},
-  // 'children': {selector: '...'},
+  'allowFullScreen': {attr: 'allowfullscreen'},
+  'allowPaymentRequest': {attr: 'allowpaymentrequest'},
+  'allowTransparency': {attr: 'allowtransparency'},
+  'referrerPolicy': {attr: 'referrerpolicy'},
 };
 
 /** @override */
