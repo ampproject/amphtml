@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-interactive-img-option-img::before {
-  background-color: var(--interactive-accent-color) !important;
-}
-
-.i-amphtml-story-interactive-option-selected
-  .i-amphtml-story-interactive-img-option-img {
-  box-shadow: inset 0 0 0 0.25em var(--interactive-accent-color) !important;
+.i-amphtml-story-interactive-img-option {
+  --i-amphtml-interactive-option-post-color: var(
+    --interactive-accent-color
+  ) !important;
 }
