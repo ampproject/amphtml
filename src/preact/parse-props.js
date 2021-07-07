@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {Loading} from '#core/constants/loading-instructions';
-import {Slot, createSlot} from './slot';
-import {dashToCamelCase} from '#core/types/string';
 import {devAssert} from '#core/assert';
-import {getDate} from '#core/types/date';
-import {matches, realChildNodes} from '#core/dom/query';
-import {parseBooleanAttribute} from '#core/dom';
+import {Loading} from '#core/constants/loading-instructions';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
+import {parseBooleanAttribute} from '#core/dom';
+import {matches, realChildNodes} from '#core/dom/query';
+import {getDate} from '#core/types/date';
+import {dashToCamelCase} from '#core/types/string';
+
+import * as Preact from '#preact';
+
+import {Slot, createSlot} from './slot';
 
 /**
  * The following combinations are allowed.
