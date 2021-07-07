@@ -40,7 +40,7 @@ class PausableInterface {
  */
 let AmpElement = function () {};
 
-/** @type {function():void}  */
+/** @type {function(number=):!Promise}  */
 AmpElement.prototype.ensureLoaded;
 /** @type {function():Promise} */
 AmpElement.prototype.unmount;
