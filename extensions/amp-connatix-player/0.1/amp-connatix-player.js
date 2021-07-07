@@ -83,7 +83,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.mediaId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'https://cdm.connatix.com';
+    this.iframeDomain_ = null;
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -254,7 +254,12 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // Media id is optional
     this.mediaId_ = element.getAttribute('data-media-id') || '';
-
+    const elementsPlayer = element.getAttribute('data-elements-player') || false;
+    if (elementsPlayer) {
+      this.iframeDomain_ = 'https://cdm.connatix.com';
+    } else {
+      this.iframeDomain_ = 'https://cdm.elements.video';
+    }
     // will be used by sendCommand in order to send only after the player is rendered
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -296,6 +301,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // append child iframe for element
     element.appendChild(iframe);
+    // pixel tracker after frame appended
+    (new Image()).src = 'https://capi.connatix.com/tr/si?token=' + this.playerId_;
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     // bind to player events (playerRendered after we can send commands to player and other)
