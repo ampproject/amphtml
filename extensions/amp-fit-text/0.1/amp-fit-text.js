@@ -20,16 +20,13 @@ import {
   getLengthNumeral,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {px, setImportantStyles, setStyle, setStyles} from '#core/dom/style';
+import {px, setStyle, setStyles} from '#core/dom/style';
 import {realChildNodes} from '#core/dom/query';
 import {throttle} from '#core/types/function';
 
 const TAG = 'amp-fit-text';
-const LINE_HEIGHT_EM_ = 1.15; // WARNING: when updating this ensure you also update the css values for line-height.
+const LINE_HEIGHT_EM_ = 1.15;
 const RESIZE_THROTTLE_MS = 100;
-const MEASURER_CLASS = 'i-amphtml-fit-text-measurer';
-const CONTENT_CLASS = 'i-amphtml-fit-text-content';
-const CONTENT_WRAPPER_CLASS = 'i-amphtml-fit-text-content-wrapper';
 
 class AmpFitText extends AMP.BaseElement {
   /** @override @nocollapse */
@@ -74,21 +71,38 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const {element} = this;
+    this.content_ = this.element.ownerDocument.createElement('div');
+    applyFillContent(this.content_);
+    this.content_.classList.add('i-amphtml-fit-text-content');
+    setStyles(this.content_, {zIndex: 2, visibility: 'hidden'});
 
-    const {content, contentWrapper, measurer} = buildDom(
-      element.ownerDocument,
-      element
-    );
-    this.content_ = content;
-    this.contentWrapper_ = contentWrapper;
-    this.measurer_ = measurer;
+    this.contentWrapper_ = this.element.ownerDocument.createElement('div');
+    setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
+    this.content_.appendChild(this.contentWrapper_);
+
+    this.measurer_ = this.element.ownerDocument.createElement('div');
+    // Note that "measurer" cannot be styled with "bottom:0".
+    setStyles(this.measurer_, {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      zIndex: 1,
+      visibility: 'hidden',
+      lineHeight: `${LINE_HEIGHT_EM_}em`,
+    });
+
+    realChildNodes(this.element).forEach((node) => {
+      this.contentWrapper_.appendChild(node);
+    });
+    this.updateMeasurerContent_();
+    this.element.appendChild(this.content_);
+    this.element.appendChild(this.measurer_);
 
     this.minFontSize_ =
-      getLengthNumeral(element.getAttribute('min-font-size')) || 6;
+      getLengthNumeral(this.element.getAttribute('min-font-size')) || 6;
 
     this.maxFontSize_ =
-      getLengthNumeral(element.getAttribute('max-font-size')) || 72;
+      getLengthNumeral(this.element.getAttribute('max-font-size')) || 72;
 
     // Make it so that updates to the textContent of the amp-fit-text element
     // actually update the text of the content element.
@@ -135,7 +149,7 @@ class AmpFitText extends AMP.BaseElement {
     }
     return this.mutateElement(() => {
       this.updateFontSize_();
-      setImportantStyles(this.content_, {visibility: 'visible'});
+      setStyles(this.content_, {visibility: 'visible'});
     });
   }
 
@@ -220,32 +234,6 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
     lineClamp: overflown ? numberOfLines : '',
     maxHeight: overflown ? px(lineHeight * numberOfLines) : '',
   });
-}
-
-/**
- *
- * @param {!Document} document
- * @param {!Element} element
- * @return {{content: !Element, contentWrapper: !Element, measurer: !Element}}
- */
-export function buildDom(document, element) {
-  const content = document.createElement('div');
-  applyFillContent(content);
-  content.classList.add(CONTENT_CLASS);
-
-  const contentWrapper = document.createElement('div');
-  contentWrapper.classList.add(CONTENT_WRAPPER_CLASS);
-  content.appendChild(contentWrapper);
-
-  const measurer = document.createElement('div');
-  measurer.classList.add(MEASURER_CLASS);
-
-  realChildNodes(element).forEach((node) => contentWrapper.appendChild(node));
-  measurer./*OK*/ innerHTML = contentWrapper./*OK*/ innerHTML;
-  element.appendChild(content);
-  element.appendChild(measurer);
-
-  return {content, contentWrapper, measurer};
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
