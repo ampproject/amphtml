@@ -37,7 +37,7 @@ class AmpLayout extends BaseElement {
 
   /** @override */
   buildCallback() {
-    buildDOM(this.win.document, this.element);
+    buildDom(this.win.document, this.element);
   }
 }
 
@@ -46,7 +46,7 @@ class AmpLayout extends BaseElement {
  * @param {!Document} document
  * @param {!Element} element
  */
-export function buildDOM(document, element) {
+export function buildDom(document, element) {
   const layout = parseLayout(element.getAttribute('layout'));
   if (layout == Layout.CONTAINER) {
     return;
