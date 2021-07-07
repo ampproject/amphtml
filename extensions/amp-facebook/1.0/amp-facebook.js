@@ -54,15 +54,7 @@ class AmpFacebook extends BaseElement {
   init() {
     return dict({
       'onReady': () => this.togglePlaceholder(false),
-      'requestResize': (height) =>
-        this.attemptChangeHeight(height).catch(() => {
-          if (!this.getOverflowElement()) {
-            user().warn(
-              TAG,
-              '[overflow] element not found. Provide one to enable resizing to full contents.'
-            );
-          }
-        }),
+      'requestResize': (height) => this.attemptChangeHeight(height),
     });
   }
 

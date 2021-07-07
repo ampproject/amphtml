@@ -37,15 +37,7 @@ class AmpInstagram extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'requestResize': (height) =>
-        this.attemptChangeHeight(height).catch(() => {
-          if (!this.getOverflowElement()) {
-            user().warn(
-              TAG,
-              '[overflow] element not found. Provide one to enable resizing to full contents.'
-            );
-          }
-        }),
+      'requestResize': (height) => this.attemptChangeHeight(height),
     });
   }
 }

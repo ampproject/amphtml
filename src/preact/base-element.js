@@ -35,7 +35,7 @@ import {
 } from '#core/context';
 import {childElementByAttr, childElementByTag} from '#core/dom/query';
 import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
-import {devAssert} from '#core/assert';
+import {devAssert, user} from '#core/assert';
 import {dict, hasOwn, map} from '#core/types/object';
 import {getMode} from '../mode';
 import {hydrate, render} from '#preact';
@@ -377,6 +377,19 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (this.container_) {
       this.scheduleRender_();
     }
+  }
+
+  /** @override */
+  attemptChangeHeight(newHeight) {
+    super.attemptChangeHeight(newHeight).catch(() => {
+      if (!this.getOverflowElement()) {
+        const TAG = this.element.tagName;
+        user().warn(
+          TAG,
+          '[overflow] element not found. Provide one to enable resizing to full contents.'
+        );
+      }
+  });
   }
 
   /**
