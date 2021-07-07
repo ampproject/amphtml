@@ -19,7 +19,6 @@ import {dict} from '#core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
-import {user} from 'src/log';
 import {userAssert} from '#core/assert';
 
 /** @const {string} */

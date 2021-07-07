@@ -35,12 +35,13 @@ import {
 } from '#core/context';
 import {childElementByAttr, childElementByTag} from '#core/dom/query';
 import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
-import {devAssert, user} from '#core/assert';
+import {devAssert} from '#core/assert';
 import {dict, hasOwn, map} from '#core/types/object';
 import {getMode} from '../mode';
 import {hydrate, render} from '#preact';
 import {installShadowStyle} from '../shadow-embed';
 import {isElement} from '#core/types';
+import {user} from 'src/log';
 
 /** @const {!MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
@@ -389,7 +390,7 @@ export class PreactBaseElement extends AMP.BaseElement {
           '[overflow] element not found. Provide one to enable resizing to full contents.'
         );
       }
-  });
+    });
   }
 
   /**

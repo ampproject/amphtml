@@ -20,7 +20,7 @@ import {dashToUnderline} from '#core/types/string';
 import {dict} from '#core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {isExperimentOn} from '#experiments';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-facebook';
