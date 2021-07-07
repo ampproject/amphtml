@@ -355,7 +355,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
         expect(localDomainUrl).to.not.contain('testLinker2=');
       });
     });
-    
+
     it('should only allow same domain matching when opt in', async () => {
       const config = {
         linkers: {
