@@ -987,6 +987,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'extensions/amp-next-page/1.0/visibility-observer.js',
       'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
+      'extensions/amp-story/1.0/background-blur.js',
       'extensions/amp-story/1.0/page-advancement.js',
     ],
   },
