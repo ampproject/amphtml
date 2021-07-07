@@ -18,27 +18,27 @@ import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
-import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {addParamsToUrl} from '../../../src/url';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {dict} from '#core/types/object';
+import { Deferred } from '#core/data-structures/promise';
+import { PauseHelper } from '#core/dom/video/pause-helper';
+import { Services } from '#service';
+import { addParamsToUrl } from '../../../src/url';
+import { applyFillContent, isLayoutSizeDefined } from '#core/dom/layout';
+import { dict } from '#core/types/object';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData} from '../../../src/event-helper';
+import { getData } from '../../../src/event-helper';
 import {
   observeContentSize,
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
-import {removeElement} from '#core/dom';
-import {setIsMediaComponent} from '../../../src/video-interface';
-import {tryParseJson} from '#core/types/object/json';
-import {userAssert} from '../../../src/log';
+import { removeElement } from '#core/dom';
+import { setIsMediaComponent } from '../../../src/video-interface';
+import { tryParseJson } from '#core/types/object/json';
+import { userAssert } from '../../../src/log';
 
 /**
  * @param {!Array<T>} promises
@@ -55,14 +55,14 @@ export function allSettled(promises) {
    * @return {{status: string, value: *}}
    */
   function onFulfilled(value) {
-    return {status: 'fulfilled', value};
+    return { status: 'fulfilled', value };
   }
   /**
    * @param {*} reason
    * @return {{status: string, reason: *}}
    */
   function onRejected(reason) {
-    return {status: 'rejected', reason};
+    return { status: 'rejected', reason };
   }
   return Promise.all(
     promises.map((promise) => {
@@ -84,6 +84,9 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     /** @private {string} */
     this.iframeDomain_ = null;
+
+    /** @private {string} */
+    this.trackerDomain_ = null;
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -241,7 +244,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const {element} = this;
+    const { element } = this;
 
     setIsMediaComponent(element);
 
@@ -257,8 +260,10 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     const elementsPlayer = element.getAttribute('data-elements-player') || false;
     if (elementsPlayer) {
       this.iframeDomain_ = 'https://cdm.connatix.com';
+      this.trackerDomain_ = 'https://capi.connatix.com';
     } else {
       this.iframeDomain_ = 'https://cdm.elements.video';
+      this.trackerDomain_ = 'https://capi.elements.video';
     }
     // will be used by sendCommand in order to send only after the player is rendered
     const deferred = new Deferred();
@@ -281,7 +286,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const {element} = this;
+    const { element } = this;
     // Url Params for iframe source
     const urlParams = dict({
       'playerId': this.playerId_ || undefined,
@@ -302,7 +307,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     // append child iframe for element
     element.appendChild(iframe);
     // pixel tracker after frame appended
-    (new Image()).src = 'https://capi.connatix.com/tr/si?token=' + this.playerId_;
+    (new Image()).src = this.trackerDomain_ + '/tr/si?token=' + this.playerId_;
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     // bind to player events (playerRendered after we can send commands to player and other)
@@ -325,11 +330,11 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
    * @param {!../layout-rect.LayoutSizeDef} size
    * @private
    */
-  onResized_({height, width}) {
+  onResized_({ height, width }) {
     if (!this.iframe_) {
       return;
     }
-    this.sendCommand_('ampResize', {'width': width, 'height': height});
+    this.sendCommand_('ampResize', { 'width': width, 'height': height });
   }
 
   /** @override */
