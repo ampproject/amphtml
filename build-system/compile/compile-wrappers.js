@@ -120,28 +120,6 @@ function (payload) {
       });
 }
 `);
-// const bentoLoaderFn = removeWhitespace(`
-// function (p) {
-//   if (self.AMP) {
-//     self.AMP.push(p);
-//   } else {
-//     if (document.head.querySelector('script[src$="v0.js"],script[src$="v0.mjs"]')) {
-//       self.AMP = [p];
-//     } else {
-//       p.f({
-//         registerElement: function (n, b, s) {
-//           if (s)
-//             document.head.appendChild(
-//               document.createElement("style")
-//             ).textContent = s;
-//           customElements.define(n, b.CustomElement(b));
-//         },
-//       });
-
-//     }
-//   }
-// }
-// `);
 
 /**
  * Wraps to load an extension's payload (p) as a Bento component.
