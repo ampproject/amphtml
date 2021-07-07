@@ -24,10 +24,10 @@ var IframeDef = {};
  *   allowFullScreen: (boolean),
  *   allowPaymentRequest: (boolean),
  *   allowTransparency: (boolean),
- *   referrerPolicy: (!string),
- *   sandbox: (!string),
+ *   referrerPolicy: (string),
+ *   sandbox: (string),
  *   src: (!string),
- *   srcdoc: (!string),
+ *   srcdoc: (string),
  * }}
  */
 IframeDef.Props;

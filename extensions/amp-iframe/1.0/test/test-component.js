@@ -17,15 +17,30 @@
 import * as Preact from '#preact';
 import {Iframe} from '../component';
 import {mount} from 'enzyme';
-import {waitFor} from '#testing/test-helper';
 
-describes.sandboxed('Iframe preact component v1.0', {}, (env) => {
-  // DO NOT SUBMIT: This is example code only.
+describes.sandboxed('Iframe preact component v1.0', {}, () => {
   it('should render', () => {
-    const wrapper = mount(<Iframe testProp={true} />);
+    const wrapper = mount(<Iframe src={'https://www.google.com'} />);
 
     const component = wrapper.find(Iframe.name);
     expect(component).to.have.lengthOf(1);
-    expect(component.prop('testProp')).to.be.true;
+    expect(component.prop('src')).to.equal('https://www.google.com');
+  });
+
+  it('should set truthy props and strip falsy props', () => {
+    const wrapper = mount(
+      <Iframe
+        src={'https://www.google.com'}
+        allowFullScreen={true}
+        allowPaymentRequest={false}
+      />
+    );
+
+    const component = wrapper.find(Iframe.name);
+    expect(component).to.have.lengthOf(1);
+    expect(component.prop('src')).to.equal('https://www.google.com');
+    expect(component.prop('allowFullScreen')).to.be.true;
+    // falsy values are stripped by Preact
+    expect(component.prop('allowpaymentrequest')).to.be.undefined;
   });
 });

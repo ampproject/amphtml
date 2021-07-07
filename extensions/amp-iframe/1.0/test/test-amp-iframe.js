@@ -15,6 +15,7 @@
  */
 
 import '../amp-iframe';
+import {expect} from 'chai';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
@@ -38,12 +39,14 @@ describes.realWin(
       toggleExperiment(win, 'bento-iframe', true, true);
     });
 
-    // DO NOT SUBMIT: This is example code only.
-    it('example test renders', async () => {
-      const element = html` <amp-iframe></amp-iframe> `;
+    it('renders', async () => {
+      const element = html`
+        <amp-iframe src="https://www.google.com"></amp-iframe>
+      `;
       doc.body.appendChild(element);
       await waitFor(() => element.isConnected, 'element connected');
       expect(element.parentNode).to.equal(doc.body);
+      expect(element.getAttribute('src')).to.equal('https://www.google.com');
     });
   }
 );
