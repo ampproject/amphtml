@@ -395,6 +395,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     placeholder.setAttribute('placeholder', '');
     placeholder.className = 'amp-apester-loader';
     setStyles(image, {
+      position: 'relative',
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)',
