@@ -61,7 +61,7 @@ function constructCompanionBottomAd(slot, bannerSizes, apesterElement) {
       'height': `${height}`,
       'type': 'doubleclick',
       'style':
-        'position: absolute; bottom: 0;left: 50%;margin-left: -150px;margin-bottom: 0;',
+        'position: absolute !important; bottom: 0;left: 50%;margin-left: -150px;margin-bottom: 0;',
       'layout': 'fixed',
       'data-slot': `${slot}`,
       'data-multi-size-validation': 'false',
