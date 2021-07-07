@@ -15,9 +15,10 @@
  */
 
 import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 import {toWin} from '#core/window';
 
-import {matches} from './query';
+import {childElementsByTag, matches} from './query';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -536,4 +537,28 @@ export function dispatchCustomEvent(node, name, opt_data, opt_options) {
  */
 export function containsNotSelf(parent, child) {
   return child !== parent && parent.contains(child);
+}
+
+/**
+ * Helper method to get the json config from an element <script> tag
+ * @param {!Element} element
+ * @return {?JsonObject}
+ * @throws {!Error} If element does not have exactly one <script> child
+ * with type="application/json", or if the <script> contents are not valid JSON.
+ */
+export function getChildJsonConfig(element) {
+  const scripts = childElementsByTag(element, 'script');
+  const n = scripts.length;
+  if (n !== 1) {
+    throw new Error(`Found ${scripts.length} <script> children. Expected 1.`);
+  }
+  const script = scripts[0];
+  if (!isJsonScriptTag(script)) {
+    throw new Error('<script> child must have type="application/json"');
+  }
+  try {
+    return parseJson(script.textContent);
+  } catch (unusedError) {
+    throw new Error('Failed to parse <script> contents. Is it valid JSON?');
+  }
 }
