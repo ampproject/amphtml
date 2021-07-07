@@ -55,6 +55,19 @@ body:
         - LTS
     validations:
       required: true
+  - type: dropdown
+    id: formats
+    attributes:
+      label: Formats
+      description: The formats that this bug affects. See https://amp.dev/documentation/components/ for reference.
+      multiple: true
+      options:
+        - Websites
+        - Stories
+        - Ads
+        - Emails
+    validations:
+      required: true
   - type: textarea
     id: justification
     attributes:
@@ -110,22 +123,6 @@ body:
         - How do we detect them sooner and mitigate their impact?
         - How could we make the investigation of these issues easier?
         If details are as yet unknown, put down "TODO" in this section and remember to fill it in later.
-  - type: textarea
-    id: cherry_pick_progress
-    attributes:
-      label: Cherry-Pick Progress
-      description: Progress details for this cherry-pick.
-      value: |
-        <!-- Leave this section as it is for now. -->
-
-        To be updated by @ampproject/release-on-duty as each stage is completed.
-        - [x] Cherry-pick request created
-        - [ ] Cherry-pick request approved
-        - [ ] New version released to Beta / Experimental channels
-        - [ ] New version released to Stable channel
-        - [ ] New version released to LTS channel
-        - [ ] Release tracker updated
-        - [ ] Cherry-pick completed
   - type: textarea
     id: notifications
     attributes:
