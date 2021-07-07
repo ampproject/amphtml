@@ -143,6 +143,7 @@ Parser::Parser(std::string_view html, const ParseOptions& options,
       count_num_terms_in_text_node_(options.count_num_terms_in_text_node),
       fragment_(fragment_parent != nullptr),
       context_node_(fragment_parent) {
+  document_->metadata_.html_src_bytes = html.size();
   insertion_mode_ = std::bind(&Parser::InitialIM, this);
 }
 
@@ -179,6 +180,7 @@ std::unique_ptr<Document> Parser::Parse() {
   DumpDocument(document_.get());
 #endif
 
+  document_->metadata_.document_end_location = tokenizer_->CurrentPosition();
   return std::move(document_);
 }  // End Parser::Parse.
 
@@ -423,10 +425,15 @@ void Parser::AddText(const std::string& text) {
   }
 
   text_node->data_.assign(text, 0, text.size());
-  if (count_num_terms_in_text_node_) {
+  AddChild(text_node);
+  // Count number of terms in ths text node, except if this is <script>,
+  // <textarea> or a comment node.
+  if (count_num_terms_in_text_node_ && text_node->Parent() &&
+      text_node->Parent()->DataAtom() != Atom::SCRIPT &&
+      text_node->Parent()->Type() != NodeType::COMMENT_NODE &&
+      text_node->Parent()->DataAtom() != Atom::TEXTAREA) {
     text_node->num_terms_ = Strings::CountTerms(text);
   }
-  AddChild(text_node);
 }  // Parser::AddText.
 
 void Parser::AddElement() {
@@ -441,15 +448,15 @@ void Parser::AddElement() {
 
   switch (token_.atom) {
     case Atom::HTML: {
-      element_node->SetManufactured(accounting_.has_manufactured_html);
+      element_node->SetManufactured(document_->metadata_.has_manufactured_html);
       break;
     }
     case Atom::HEAD: {
-      element_node->SetManufactured(accounting_.has_manufactured_head);
+      element_node->SetManufactured(document_->metadata_.has_manufactured_head);
       break;
     }
     case Atom::BODY: {
-      element_node->SetManufactured(accounting_.has_manufactured_body);
+      element_node->SetManufactured(document_->metadata_.has_manufactured_body);
       break;
     }
     default:
@@ -682,7 +689,7 @@ bool Parser::InitialIM() {
         doctype_node->line_col_in_html_src_ = token_.line_col_in_html_src;
       }
       document_->root_node_->AppendChild(doctype_node);
-      accounting_.quirks_mode = quirks_mode;
+      document_->metadata_.quirks_mode = quirks_mode;
       insertion_mode_ = std::bind(&Parser::BeforeHTMLIM, this);
 
       if (on_node_callback_) {
@@ -695,7 +702,7 @@ bool Parser::InitialIM() {
       break;
   }
 
-  accounting_.quirks_mode = true;
+  document_->metadata_.quirks_mode = true;
   insertion_mode_ = std::bind(&Parser::BeforeHTMLIM, this);
   return false;
 }  // Parser::InitialIM.
@@ -850,6 +857,15 @@ bool Parser::InHeadIM() {
           AddElement();
           open_elements_stack_.Pop();
           AcknowledgeSelfClosingTag();
+          if (!top() || !top()->LastChild()) return true;
+          // Record some extra document url related info.
+          if (token_.atom == Atom::BASE) {
+            auto base_node = top()->LastChild();
+            RecordBaseURLMetadata(base_node);
+          } else if (token_.atom == Atom::LINK) {
+            auto link_node = top()->LastChild();
+            RecordLinkRelCanonical(link_node);
+          }
           return true;
         }
         case Atom::NOSCRIPT: {
@@ -1167,9 +1183,10 @@ bool Parser::InBodyIM() {
             return true;
           }
           CopyAttributes(open_elements_stack_.at(0), token_);
-          if (!accounting_.has_manufactured_html || num_html_tags_ > 1) {
-            accounting_.duplicate_html_elements = true;
-            accounting_.duplicate_html_element_location =
+          if (!document_->metadata_.has_manufactured_html ||
+              num_html_tags_ > 1) {
+            document_->metadata_.duplicate_html_elements = true;
+            document_->metadata_.duplicate_html_element_location =
                 token_.line_col_in_html_src;
           }
           break;
@@ -1197,9 +1214,10 @@ bool Parser::InBodyIM() {
                 body->atom_ == Atom::BODY) {
               frameset_ok_ = false;
               CopyAttributes(body, token_);
-              if (!accounting_.has_manufactured_body || num_body_tags_ > 1) {
-                accounting_.duplicate_body_elements = true;
-                accounting_.duplicate_body_element_location =
+              if (!document_->metadata_.has_manufactured_body ||
+                  num_body_tags_ > 1) {
+                document_->metadata_.duplicate_body_elements = true;
+                document_->metadata_.duplicate_body_element_location =
                     token_.line_col_in_html_src;
               }
             }
@@ -1406,7 +1424,7 @@ bool Parser::InBodyIM() {
           break;
         }
         case Atom::TABLE: {
-          if (!accounting_.quirks_mode) {
+          if (!document_->metadata_.quirks_mode) {
             PopUntil(Scope::ButtonScope, Atom::P);
           }
           AddElement();
@@ -3249,13 +3267,13 @@ void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
   if (token_type == TokenType::START_TAG_TOKEN) {
     switch (atom) {
       case Atom::HTML:
-        accounting_.has_manufactured_html = true;
+        document_->metadata_.has_manufactured_html = true;
         break;
       case Atom::HEAD:
-        accounting_.has_manufactured_head = true;
+        document_->metadata_.has_manufactured_head = true;
         break;
       case Atom::BODY:
-        accounting_.has_manufactured_body = true;
+        document_->metadata_.has_manufactured_body = true;
         break;
       default:
         break;
@@ -3307,6 +3325,38 @@ void Parser::CopyAttributes(Node* node, Token token) const {
     }
   }
 }  // Parser::CopyAttributes.
+
+void Parser::RecordBaseURLMetadata(Node* base_node) {
+  if (base_node->Type() != NodeType::ELEMENT_NODE ||
+      base_node->DataAtom() != Atom::BASE) return;
+
+  for (auto& attr : base_node->Attributes()) {
+    if (Strings::EqualFold(attr.key, "href")) {
+      document_->metadata_.base_url.first = attr.value;
+    } else if (Strings::EqualFold(attr.key, "target")) {
+      document_->metadata_.base_url.second = attr.value;
+    }
+  }
+}
+
+void Parser::RecordLinkRelCanonical(Node* link_node) {
+  if (link_node->Type() != NodeType::ELEMENT_NODE ||
+      link_node->DataAtom() != Atom::LINK) return;
+
+  bool canonical;
+  std::string canonical_url;
+  for (auto& attr : link_node->Attributes()) {
+    if (Strings::EqualFold(attr.key, "rel") &&
+        Strings::EqualFold(attr.value, "canonical")) {
+      canonical = true;
+    } else if (Strings::EqualFold(attr.key, "href")) {
+      canonical_url = attr.value;
+    }
+  }
+  if (canonical && !canonical_url.empty()) {
+    document_->metadata_.canonical_url = canonical_url;
+  }
+}
 
 namespace {
 // Returns only whitespace characters in s.

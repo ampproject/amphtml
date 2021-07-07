@@ -38,9 +38,14 @@
 #ifndef AMPVALIDATOR__VALIDATOR_H_
 #define AMPVALIDATOR__VALIDATOR_H_
 
+#include "document.h"
 #include "validator.pb.h"
 
 namespace amp::validator {
+
+ValidationResult Validate(const htmlparser::Document& document,
+                          HtmlFormat_Code html_format = HtmlFormat::AMP,
+                          int max_errors = -1);
 
 ValidationResult Validate(std::string_view html,
                           HtmlFormat_Code html_format = HtmlFormat::AMP,
