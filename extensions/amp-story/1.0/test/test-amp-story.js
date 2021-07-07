@@ -1847,10 +1847,10 @@ describes.realWin(
       let performanceImpl;
       beforeEach(async () => {
         toggleExperiment(win, 'amp-story-load-first-page-only', true);
-        pages = await createStoryWithPages(2, ['page-1', 'page-2'], false);
         performanceImpl = new Performance(env.win);
-        env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
         env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
+        pages = await createStoryWithPages(2, ['page-1', 'page-2'], false);
+        env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
       });
 
       it('should position the active page so it preloads', async () => {
