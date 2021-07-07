@@ -157,9 +157,6 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
         'aria-label',
         ariaDescription + ' ' + this.options_[index]['imagealt']
       );
-      el.querySelector(
-        '.i-amphtml-story-interactive-img-quiz-answer-choice'
-      ).setAttribute('aria-hidden', true);
       // Update percentage text
       el.querySelector(
         '.i-amphtml-story-interactive-img-option-percentage-text'
