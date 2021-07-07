@@ -19,10 +19,12 @@
  * Sync status.amp.dev with cherry-pick progress
  */
 
-const [number, body, before, after] = process.argv.slice(2);
 const fetch = require('node-fetch');
 const {getChannels, getFormats, steps} = require('./common');
 const {log} = require('../common/logging');
+
+const [number, body, before, after] = process.argv.slice(2);
+
 const apiUrl = `https://api.statuspage.io/v1/pages/${process.env.STATUS_PAGE_ID}`;
 const headers = {
   'Content-Type': 'application/json',
@@ -140,9 +142,10 @@ async function syncIncident() {
   // get step that was checked off
   let checked = -1;
   for (const step of [3, 2, 1, 0]) {
-    const indexBefore = before.indexOf(steps[step].text) - 3;
-    const indexAfter = after.indexOf(steps[step].text) - 3;
-    if (before[indexBefore] !== 'x' && after[indexAfter] === 'x') {
+    const regex = new RegExp(
+      `[x] ${steps[step].text}`.replace(/[.*()[\]\\]/g, '\\$&')
+    );
+    if (regex.test(after) && !regex.test(before)) {
       checked = step;
       break;
     }

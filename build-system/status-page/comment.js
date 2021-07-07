@@ -20,9 +20,10 @@
  */
 
 const fetch = require('node-fetch');
-const [number, body, user] = process.argv.slice(2);
 const {getChannels, steps} = require('./common');
 const {log} = require('../common/logging');
+
+const [number, body, user] = process.argv.slice(2);
 
 const commentTemplate = (channels) => `
   #### 🌸 Cherry-Pick Progress 🌸 
@@ -39,7 +40,7 @@ const commentTemplate = (channels) => `
 
 /**
  * Add progress comment for Stable and LTS cherry-picks
- * @return {Promise<object>}
+ * @return {Promise<Object>}
  */
 async function addComment() {
   const channels = getChannels(body);
