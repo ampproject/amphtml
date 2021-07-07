@@ -25,7 +25,9 @@ export function copyTextToClipboard(win, text) {
   let copySuccessful = false;
   const doc = win.document;
 
-  const textarea = doc.createElement('textarea');
+  const textarea =
+    /** @type {!HTMLTextAreaElement} */
+    (doc.createElement('textarea'));
 
   setStyles(textarea, {
     'position': 'fixed',
