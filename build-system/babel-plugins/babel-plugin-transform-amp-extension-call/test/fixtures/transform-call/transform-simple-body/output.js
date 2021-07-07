@@ -15,4 +15,3 @@
  */
 AMP.registerTemplate(TAG, AmpMustache);
 AMP.registerElement('amp-gist', AmpGist);
-AMP.registerBentoElement('amp-foo', AmpFoo, class {});

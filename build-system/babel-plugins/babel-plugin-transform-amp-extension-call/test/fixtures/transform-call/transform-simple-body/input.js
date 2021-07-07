@@ -21,7 +21,3 @@ AMP.extension('amp-mustache', '0.2', function (AMP) {
 AMP.extension('amp-gist', '0.1', (AMP) => {
   AMP.registerElement('amp-gist', AmpGist);
 });
-
-AMP.extension('amp-foo', '0.1', (AMP) =>
-  AMP.registerBentoElement('amp-foo', AmpFoo, class {})
-);
