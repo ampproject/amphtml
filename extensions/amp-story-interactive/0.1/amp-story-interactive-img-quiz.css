@@ -56,19 +56,19 @@
   background-color: var(--i-amphtml-interactive-option-post-color) !important;
 }
 
-.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
+.i-amphtml-story-interactive-post-selection
   .i-amphtml-story-interactive-img-quiz-option[correct='correct']
   .i-amphtml-story-interactive-img-option-img {
   box-shadow: inset 0 0 0 0.25em var(--correct-color) !important;
 }
 
-.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
+.i-amphtml-story-interactive-post-selection
   .i-amphtml-story-interactive-img-quiz-answer-choice {
   background-color: var(--i-amphtml-interactive-option-post-color) !important;
   color: transparent !important;
 }
 
-.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
+.i-amphtml-story-interactive-post-selection
   .i-amphtml-story-interactive-img-quiz-answer-choice::before {
   background-color: transparent !important;
   background-image: var(--i-amphtml-interactive-option-post-marker) !important;
