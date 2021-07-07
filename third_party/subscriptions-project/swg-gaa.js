@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.170 */
+/** Version: 0.1.22.172 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -248,6 +248,30 @@ function map(initial) {
     Object.assign(obj, initial);
   }
   return obj;
+}
+
+/**
+ * Implements `Array.find()` method that's not yet available in all browsers.
+ *
+ * @param {?Array<T>} array
+ * @param {function(T, number, !Array<T>):boolean} predicate
+ * @return {?T}
+ * @template T
+ */
+function findInArray(array, predicate) {
+  if (!array) {
+    return null;
+  }
+  const len = array.length || 0;
+  if (len > 0) {
+    for (let i = 0; i < len; i++) {
+      const other = array[i];
+      if (predicate(other, i, array)) {
+        return other;
+      }
+    }
+  }
+  return null;
 }
 
 /**
@@ -850,6 +874,7 @@ const REGWALL_HTML = `
   }
 
   .gaa-metering-regwall--dialog-spacer {
+    background: linear-gradient(0, #808080, transparent);
     bottom: 0;
     display: block;
     position: fixed;
@@ -870,6 +895,7 @@ const REGWALL_HTML = `
     margin: 0 auto;
     max-width: 100%;
     padding: 24px 20px;
+    pointer-events: auto;
     width: 410px;
   }
 
@@ -1165,6 +1191,7 @@ class GaaMeteringRegwall {
       'height': '100%',
       'left': '0',
       'opacity': '0',
+      'pointer-events': 'none',
       'position': 'fixed',
       'right': '0',
       'transition': 'opacity 0.5s',
@@ -1223,10 +1250,17 @@ class GaaMeteringRegwall {
 
     for (let i = 0; i < ldJsonElements.length; i++) {
       const ldJsonElement = ldJsonElements[i];
-      const ldJson = /** @type {?{ publisher: ?{ name: string } }} */ (
-        parseJson(ldJsonElement.textContent)
-      );
-      const publisherName = ldJson?.publisher?.name;
+      let ldJson = /** @type {*} */ (parseJson(ldJsonElement.textContent));
+
+      if (!Array.isArray(ldJson)) {
+        ldJson = [ldJson];
+      }
+
+      const publisherName = findInArray(
+        ldJson,
+        (entry) => entry?.publisher?.name
+      )?.publisher.name;
+
       if (publisherName) {
         return publisherName;
       }
