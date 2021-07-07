@@ -1058,10 +1058,7 @@ message ValidationResult {
   }
   optional Status status = 2;
   repeated ValidationError errors = 1;
-  // The following field is deprecated and can return any value. Do not depend
-  // on this.
-  optional int32 validator_revision = 3 [default = -1];
-  optional int32 spec_file_revision = 4 [default = -1];
+
   // If the AMP document is a transformed AMP document, then this is the
   // version of the transformers that were used to transform it. If the document
   // is not transformed, then the transformer_version's value will be 0.
@@ -1082,4 +1079,7 @@ message ValidationResult {
   // If the TagSpec is selected, these will be added to the final set of
   // requirements.
   repeated ValueSetRequirement value_set_requirements = 8;
+
+  // Deprecated fields, do not resuse.
+  reserved 3, 4;
 }
