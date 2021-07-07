@@ -82,6 +82,7 @@ class AmpLightboxGallery extends BaseElement {
 
   /** @override */
   unmountCallback() {
+    super.unmountCallback();
     this.removeAsContainer?.();
   }
 }

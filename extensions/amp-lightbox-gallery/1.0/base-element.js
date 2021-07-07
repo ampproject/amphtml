@@ -85,7 +85,6 @@ export class BaseElement extends PreactBaseElement {
   /** @override */
   unmountCallback() {
     count--;
-    this.removeAsContainer();
   }
 
   /** @protected */
