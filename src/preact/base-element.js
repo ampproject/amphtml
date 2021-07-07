@@ -35,8 +35,8 @@ import {PauseHelper} from '#core/dom/video/pause-helper';
 import {isElement} from '#core/types';
 import {dict, hasOwn, map} from '#core/types/object';
 
-import {hydrate, render} from '#preact';
 import * as Preact from '#preact';
+import {hydrate, render} from '#preact';
 import {BaseElement} from '#preact/bento-ce';
 
 import {WithAmpContext} from './context';
