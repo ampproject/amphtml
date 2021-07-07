@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from './base-element';
-import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 
