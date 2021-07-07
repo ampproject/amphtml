@@ -548,17 +548,19 @@ export function containsNotSelf(parent, child) {
  */
 export function getChildJsonConfig(element) {
   const scripts = childElementsByTag(element, 'script');
-  const n = scripts.length;
-  if (n !== 1) {
-    throw new Error(`Found ${scripts.length} <script> children. Expected 1.`);
+  const {length} = scripts;
+  if (length !== 1) {
+    throw new Error(`Found ${length} <script> children. Expected 1.`);
   }
+
   const script = scripts[0];
   if (!isJsonScriptTag(script)) {
     throw new Error('<script> child must have type="application/json"');
   }
+
   try {
     return parseJson(script.textContent);
-  } catch (unusedError) {
+  } catch {
     throw new Error('Failed to parse <script> contents. Is it valid JSON?');
   }
 }
