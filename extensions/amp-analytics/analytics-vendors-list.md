@@ -77,6 +77,12 @@ Adds support for Alexa Certified Site Metrics. The `atrk_acct` and `domain` vari
 
 Type attribute value: `amplitude`
 
+### AppsFlyer
+
+Type attribute value: `appsflyer`
+
+Adds support for AppsFlyer. More details for adding AppsFlyer support can be found at [appsflyer.com](https://support.appsflyer.com/hc/en-us/articles/360002274017-People-Based-Attribution-PBA-getting-started)
+
 ### AT Internet
 
 Type attribute value: `atinternet`
