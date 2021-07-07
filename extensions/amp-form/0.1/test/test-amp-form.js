@@ -28,7 +28,7 @@ import {AmpSelector} from '../../../amp-selector/0.1/amp-selector';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
-} from '../../../../src/async-input';
+} from '#core/constants/async-input';
 import {DIRTINESS_INDICATOR_CLASS} from '../form-dirtiness';
 import {Services} from '#service';
 import {cidServiceForDocForTesting} from '#service/cid-impl';
