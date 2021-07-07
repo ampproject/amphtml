@@ -19,7 +19,7 @@ import {Toast} from './toast';
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
-} from '../../../src/clipboard';
+} from '#core/window/clipboard';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '#core/types/object';
 import {getLocalizationService} from './amp-story-localization-service';
