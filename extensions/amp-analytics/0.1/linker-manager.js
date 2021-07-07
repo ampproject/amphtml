@@ -309,8 +309,7 @@ export class LinkerManager {
     // fragments.
     const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
     const sameDomain = config['sameDomainEnabled'];
-    const sameDomainEnabled = sameDomain && sameDomain == true;
-    if (!sameDomainEnabled && winHostname === hostname) {
+    if (!Boolean(sameDomain) && winHostname === hostname) {
       return false;
     }
 
