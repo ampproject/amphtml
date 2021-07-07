@@ -39,3 +39,11 @@ class PausableInterface {
  * @implements {PausableInterface}
  */
 let AmpElement = function () {};
+
+/** @type {function():void}  */
+AmpElement.prototype.ensureLoaded;
+/** @type {function():Promise} */
+AmpElement.prototype.unmount;
+
+/** @type {function():?Element} */
+AmpElement.prototype.getPlaceholder;
