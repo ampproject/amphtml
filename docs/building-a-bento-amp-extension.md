@@ -399,7 +399,7 @@ The following shows the corresponding overall structure of your Preact base elem
 
 ```js
 import {MyElement} from './component'; // Preact component.
-import {PreactBaseElement} from '#preact/base-element'; // Preact component.
+import {PreactBaseElement} from '#preact/base-element'; // Custom element bridge to Preact.
 
 export class BaseElement extends PreactBaseElement {}
 
