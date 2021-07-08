@@ -15,7 +15,7 @@
  */
 
 import {AmpImg} from '#builtins/amp-img/amp-img';
-import {BaseElement} from '../../src/base-element';
+import {BaseElement} from '../../../src/base-element';
 import {Layout, LayoutPriority} from '#core/dom/layout';
 import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
 import {testElementR1} from '#testing/element-v1';
