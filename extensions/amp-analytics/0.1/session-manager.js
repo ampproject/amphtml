@@ -21,7 +21,9 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
 import {hasOwn, map} from '#core/types/object';
+import {isDocumentHidden} from '#core/document-visibility';
 import {isObject} from '#core/types';
+import {listen} from 'src/event-helper';
 
 /** @const {string} */
 const TAG = 'amp-analytics/session-manager';
@@ -42,6 +44,7 @@ export const SESSION_VALUES = {
   SESSION_ID: 'sessionId',
   CREATION_TIMESTAMP: 'creationTimestamp',
   ACCESS_TIMESTAMP: 'accessTimestamp',
+  ENGAGED: 'engaged',
   EVENT_TIMESTAMP: 'eventTimestamp',
   COUNT: 'count',
 };
@@ -54,12 +57,16 @@ export const SESSION_VALUES = {
  *  sessionId: number,
  *  creationTimestamp: number,
  *  accessTimestamp: number,
+ *  engaged: boolean,
  *  eventTimestamp: number,
  *  count: number,
  * }}
  */
 export let SessionInfoDef;
 
+/**
+ * @implements {../../../src/service.Disposable}
+ */
 export class SessionManager {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -70,6 +77,79 @@ export class SessionManager {
 
     /** @private {!Object<string, ?SessionInfoDef>} */
     this.sessions_ = map();
+
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @private {!Window} */
+    this.win_ = ampdoc.win;
+
+    /** @private {!Array<!UnlistenDef>} */
+    this.unlisteners_ = [];
+
+    /** @private {?boolean} */
+    this.isFocused_ = null;
+
+    /** @private {?boolean} */
+    this.isVisible_ = null;
+
+    /** @private {boolean} */
+    this.isOpen_ = true;
+
+    this.init_();
+  }
+
+  /**
+   * Install event listeners for engaged singals.
+   * `amp-analytics` waits for ampdoc to be visible first.
+   */
+  init_() {
+    this.setInitialEngagedSignals_();
+    this.unlisteners_.push(
+      listen(this.win_, 'focus', () => {
+        this.isFocused_ = true;
+        this.updateEngagedForSessions_();
+      }),
+      listen(this.win_, 'blur', () => {
+        this.isFocused_ = false;
+        this.updateEngagedForSessions_();
+      }),
+      listen(this.win_, 'pageshow', () => {
+        this.isOpen_ = true;
+        this.updateEngagedForSessions_();
+      }),
+      listen(this.win_, 'pagehide', () => {
+        this.isOpen_ = false;
+        this.updateEngagedForSessions_();
+      }),
+      this.ampdoc_.onVisibilityChanged(() => {
+        this.isVisible_ = this.ampdoc_.isVisible();
+        this.updateEngagedForSessions_();
+      })
+    );
+  }
+
+  /** Sets the initial states of the engaged signals used for all sessions. */
+  setInitialEngagedSignals_() {
+    this.isFocused_ = this.win_.document.hasFocus();
+    this.isVisible_ = !isDocumentHidden(this.win_.document);
+  }
+
+  /** Sets the engaged session value for all sessions and persists. */
+  updateEngagedForSessions_() {
+    Object.keys(this.sessions_).forEach((key) => {
+      const session = this.sessions_[key];
+      session[SESSION_VALUES.ENGAGED] = this.getEngagedValue_();
+      this.setSession_(key, session);
+    });
+  }
+
+  /** @override */
+  dispose() {
+    this.unlisteners_.forEach((unlisten) => {
+      unlisten();
+    });
+    this.unlisteners_.length = 0;
   }
 
   /**
@@ -83,13 +163,13 @@ export class SessionManager {
   }
 
   /**
-   * Update EventTimestamp for this session async.
-   * Passes in a callback to set the EventTimestamp,
-   * to be used when the session it retrieved or created.
+   * Updates EventTimestamp for this session,
+   * asynchronously as a callback to avoid duplicate writing,
+   * when the session is retrieved or created.
    * @param {string} type
    * @return {!Promise}
    */
-  updateEventTimestamp(type) {
+  updateEvent(type) {
     return this.get(type, (session) => {
       session[SESSION_VALUES.EVENT_TIMESTAMP] = Date.now();
     });
@@ -137,8 +217,8 @@ export class SessionManager {
       .then((session) => {
         // Either create session or update it
         return !session
-          ? constructSessionInfo()
-          : this.updateSession_(constructSessionFromStoredValue(session));
+          ? constructSessionInfo(this.getEngagedValue_())
+          : this.updateSession_(constructSessionFromStoredValue(session), true);
       })
       .then((session) => {
         // Avoid multiple session creation race
@@ -155,20 +235,39 @@ export class SessionManager {
   /**
    * Check if session has expired and reset/update values (id, count) if so.
    * Also update `accessTimestamp`.
+   * Sets the initial engaged singals if this session is a continuation and
+   * was not debounced.
    * @param {!SessionInfoDef} session
+   * @param {boolean=} opt_usePersistedEngaged
    * @return {!SessionInfoDef}
    */
-  updateSession_(session) {
+  updateSession_(session, opt_usePersistedEngaged) {
     const currentCount = session[SESSION_VALUES.COUNT];
     const now = Date.now();
     if (isSessionExpired(session)) {
       const newSessionCount = (currentCount ?? 0) + 1;
-      session = constructSessionInfo(newSessionCount);
-    } else if (currentCount === undefined) {
-      session[SESSION_VALUES.COUNT] = 1;
+      session = constructSessionInfo(this.getEngagedValue_(), newSessionCount);
+    } else {
+      const previouslyEngaged =
+        opt_usePersistedEngaged && session[SESSION_VALUES.ENGAGED];
+      // Use the persisted engaged value if it was `true`,
+      // to signal that this was not a debounced session.
+      session[SESSION_VALUES.ENGAGED] =
+        previouslyEngaged || this.getEngagedValue_();
+      // Set the initial engaged signals to true (since it's not debounced)
+      if (previouslyEngaged) {
+        this.isFocused_ = true;
+        this.isOpen_ = true;
+        this.isVisible_ = true;
+      }
     }
     session[SESSION_VALUES.ACCESS_TIMESTAMP] = now;
     return session;
+  }
+
+  /** Gets the most recent engaged value */
+  getEngagedValue_() {
+    return this.isOpen_ && this.isVisible_ && this.isFocused_;
   }
 
   /**
@@ -231,21 +330,24 @@ function constructSessionFromStoredValue(storedSession) {
       storedSession[SESSION_VALUES.ACCESS_TIMESTAMP],
     [SESSION_VALUES.EVENT_TIMESTAMP]:
       storedSession[SESSION_VALUES.EVENT_TIMESTAMP],
+    [SESSION_VALUES.ENGAGED]: storedSession[SESSION_VALUES.ENGAGED] ?? true,
   };
 }
 
 /**
  * Constructs a new SessionInfoDef object
+ * @param {boolean} engaged
  * @param {number=} count
  * @return {!SessionInfoDef}
  */
-function constructSessionInfo(count = 1) {
+function constructSessionInfo(engaged, count = 1) {
   return {
     [SESSION_VALUES.SESSION_ID]: generateSessionId(),
     [SESSION_VALUES.CREATION_TIMESTAMP]: Date.now(),
     [SESSION_VALUES.ACCESS_TIMESTAMP]: Date.now(),
     [SESSION_VALUES.COUNT]: count,
     [SESSION_VALUES.EVENT_TIMESTAMP]: undefined,
+    [SESSION_VALUES.ENGAGED]: engaged,
   };
 }
 
