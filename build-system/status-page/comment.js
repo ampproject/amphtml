@@ -40,7 +40,7 @@ const commentTemplate = (channels) => `
 
 /**
  * Add progress comment for Stable and LTS cherry-picks
- * @return {Promise<Object>}
+ * @return {Promise<void>}
  */
 async function addComment() {
   const channels = getChannels(body);
@@ -61,7 +61,6 @@ async function addComment() {
 
   const response = await fetch(apiUrl, options);
   log(await response.json());
-  return;
 }
 
 addComment();

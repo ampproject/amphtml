@@ -130,7 +130,7 @@ async function updateIncident(formats, status) {
 
 /**
  * Syncs incident with cherry-pick progress
- * @return {Promise<any>}
+ * @return {Promise<void>}
  */
 async function syncIncident() {
   const formats = getFormats(body);
@@ -167,7 +167,6 @@ async function syncIncident() {
 
   const response = await updateIncident(formats, steps[checked].status);
   log(response);
-  return;
 }
 
 syncIncident();
