@@ -384,7 +384,7 @@ export class PreactBaseElement extends AMP.BaseElement {
 
   /** @override */
   attemptChangeHeight(newHeight) {
-    super.attemptChangeHeight(newHeight).catch(() => {
+    return super.attemptChangeHeight(newHeight).catch(() => {
       if (this.getOverflowElement && !this.getOverflowElement()) {
         console./* OK */ warn(
           '[overflow] element not found. Provide one to enable resizing to full contents.',
