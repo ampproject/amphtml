@@ -42,7 +42,6 @@ import {WithAmpContext} from './context';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
 import {AmpElementPropDef, collectProps} from './parse-props';
 
-import {user} from '../log';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 
@@ -386,11 +385,10 @@ export class PreactBaseElement extends AMP.BaseElement {
   /** @override */
   attemptChangeHeight(newHeight) {
     super.attemptChangeHeight(newHeight).catch(() => {
-      if (!this.getOverflowElement()) {
-        const TAG = this.element.tagName;
-        user().warn(
-          TAG,
-          '[overflow] element not found. Provide one to enable resizing to full contents.'
+      if (this.getOverflowElement && !this.getOverflowElement()) {
+        console./* OK */ warn(
+          '[overflow] element not found. Provide one to enable resizing to full contents.',
+          this.element
         );
       }
     });
