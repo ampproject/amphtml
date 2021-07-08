@@ -147,14 +147,14 @@ const forbiddenTermsGlobal = {
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
   'IS_FORTESTING': {
-    message: 'IS_FORTESTING local var only allowed in core/mode/for-testing.js',
+    message: 'IS_FORTESTING only allowed in core/mode/for-testing.js',
     allowlist: [
       'src/core/mode/for-testing.js',
       'build-system/compile/build-constants.js',
     ],
   },
   'IS_MINIFIED': {
-    message: 'IS_MINIFIED local var only allowed in core/mode/minified.js',
+    message: 'IS_MINIFIED only allowed in core/mode/minified.js',
     allowlist: [
       'src/core/mode/minified.js',
       'build-system/compile/build-constants.js',
@@ -162,7 +162,7 @@ const forbiddenTermsGlobal = {
   },
   'INTERNAL_RUNTIME_VERSION': {
     message:
-      'INTERNAL_RUNTIME_VERSION local var only allowed in src/internal-version.js',
+      'INTERNAL_RUNTIME_VERSION only allowed in src/internal-version.js',
     allowlist: [
       'src/internal-version.js',
       'build-system/compile/build-constants.js',
