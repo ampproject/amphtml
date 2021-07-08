@@ -98,7 +98,7 @@ In most cases you'll only create the required (req'd) files. If your element doe
 AMP runtime is currently in v0 major version. Extensions versions are
 maintained separately. If your changes to your non-experimental
 extension makes breaking changes that are not backward compatible you
-should version your extension. This would usually be by creating a 0.2
+should release a new version of your extension. This would usually be by creating a [0.2 or 1.0](./spec/amp-versioning-policy.md#amp-extensions)
 directory next to your 0.1.
 
 When version 0.2 is under development, make sure that `latestVersion` is
