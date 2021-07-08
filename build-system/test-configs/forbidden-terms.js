@@ -146,11 +146,27 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  '(?:var|let|const) +IS_FORTESTING +=': {
-    message: 'IS_FORTESTING local var only allowed in mode.js.',
+  'IS_FORTESTING': {
+    message: 'IS_FORTESTING local var only allowed in core/mode/for-testing.js',
+    allowlist: [
+      'src/core/mode/for-testing.js',
+      'build-system/compile/build-constants.js',
+    ],
   },
-  '(?:var|let|const) +IS_MINIFIED +=': {
+  'IS_MINIFIED': {
     message: 'IS_MINIFIED local var only allowed in core/mode/minified.js',
+    allowlist: [
+      'src/core/mode/minified.js',
+      'build-system/compile/build-constants.js',
+    ],
+  },
+  'INTERNAL_RUNTIME_VERSION': {
+    message:
+      'INTERNAL_RUNTIME_VERSION local var only allowed in src/internal-version.js',
+    allowlist: [
+      'src/internal-version.js',
+      'build-system/compile/build-constants.js',
+    ],
   },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',

@@ -74,6 +74,7 @@ module.exports = {
     'IS_SXG': 'readonly',
     'IS_MINIFIED': 'readonly',
     'IS_FORTESTING': 'readonly',
+    'INTERNAL_RUNTIME_VERSION': 'readonly',
     'AMP': 'readonly',
     'context': 'readonly',
     'global': 'readonly',

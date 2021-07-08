@@ -24,5 +24,5 @@
  * @return {string}
  */
 export function internalRuntimeVersion() {
-  return INTERNAL_RUNTIME_VERSION; // eslint-disable-line no-undef
+  return INTERNAL_RUNTIME_VERSION;
 }
