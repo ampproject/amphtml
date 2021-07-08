@@ -66,6 +66,9 @@ module.exports = function ({types: t}) {
           if (shouldResolveDevelopmentMode && property.name === 'development') {
             path.replaceWith(t.booleanLiteral(false));
           }
+          if (property.name === 'minified') {
+            path.replaceWith(t.booleanLiteral(true));
+          }
         }
       },
     },
