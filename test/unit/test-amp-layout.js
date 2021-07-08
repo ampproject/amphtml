@@ -34,7 +34,7 @@ describes.realWin('amp-layout', {amp: true}, (env) => {
     return ampLayout;
   }
 
-  it('should reparent all children under a container for when not layout=container', async () => {
+  it('should reparent all children under a container for when layout!=container', async () => {
     const children = '<span>hello</span><span>world</span>';
     const ampLayout = await getAmpLayout(
       {layout: Layout.FIXED, height: 100, width: 100},
