@@ -32,7 +32,7 @@ const isMinified = !!(argv._.includes('dist') || argv.compiled);
 const BUILD_CONSTANTS = {
   IS_FORTESTING: isForTesting,
   IS_MINIFIED: isMinified,
-  INTERNAL_RUNTIME_VERSION: isTestTask ? '$internalRuntimeVersion$' : VERSION,
+  INTERNAL_RUNTIME_VERSION: VERSION,
 
   // We build on the idea that SxG is an upgrade to the ESM build.
   // Therefore, all conditions set by ESM will also hold for SxG.
