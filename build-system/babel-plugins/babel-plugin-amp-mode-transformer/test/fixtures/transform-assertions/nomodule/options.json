@@ -1,0 +1,11 @@
+{
+  "plugins": [
+    [
+      "../../../..",
+      {
+        "isEsmBuild": false
+      }
+    ]
+  ],
+  "sourceType": "module"
+}
