@@ -15,14 +15,10 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {
-  Layout,
-  applyFillContent,
-  isLayoutSizeDefined,
-  parseLayout,
-} from '#core/dom/layout';
+import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {realChildNodes} from '#core/dom/query';
 import {registerElement} from '#service/custom-element-registry';
+import {getEffectiveLayout} from 'src/static-layout';
 
 class AmpLayout extends BaseElement {
   /** @override @nocollapse */
@@ -47,7 +43,7 @@ class AmpLayout extends BaseElement {
  * @param {!Element} element
  */
 export function buildDom(document, element) {
-  const layout = parseLayout(element.getAttribute('layout'));
+  const {layout} = getEffectiveLayout(element);
   if (layout == Layout.CONTAINER) {
     return;
   }
