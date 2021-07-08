@@ -49,9 +49,6 @@ export class BaseElement extends PreactBaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!Element} */
-    this.element_ = element;
-
     /** @private {boolean} */
     this.open_ = false;
   }
@@ -62,9 +59,9 @@ export class BaseElement extends PreactBaseElement {
     if (count++) {
       console /*OK */
         .warn(
-          `<amp-lightbox-gallery> already exists in the document. Removing additional instance: ${this.element_}`
+          `<amp-lightbox-gallery> already exists in the document. Removing additional instance: ${this.element}`
         );
-      this.element_.parentNode?.removeChild(this.element_);
+      this.element.parentNode?.removeChild(this.element);
     }
   }
 
