@@ -28,7 +28,7 @@ Read this document to learn how to create a new Bento AMP component.
     -   [Element styling](#element-styling)
     -   [Layouts supported in your element](#layouts-supported-in-your-element)
     -   [Register element with AMP](#register-element-with-amp)
--   [Test, Validate and Experiment](#test-validate-and-experiment)
+-   [Validation, Testing and Experiment](#validation-testing-and-experiment)
     -   [Allowing proper validation](#allowing-proper-validation)
     -   [Performance considerations](#performance-considerations)
     -   [Unit tests](#unit-tests)
@@ -545,7 +545,7 @@ import {CSS} from './my-element.jss';
 AmpMyElement['shadowCss'] = CSS;
 ```
 
-## Test, Validate and Experiment
+## Validation, Testing and Experiment
 
 ### Allowing proper validation
 
