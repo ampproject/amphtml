@@ -14,80 +14,98 @@
  * limitations under the License.
  */
 
+.i-amphtml-story-interactive-slider-container {
+  --percentage: 0%;
+}
+
 .i-amphtml-story-interactive-slider-input-container {
-  display: flex;
+  display: flex !important;
   background: var(--i-amphtml-interactive-option-background-color) !important;
   border-radius: 2em !important;
   box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
 }
 
 .i-amphtml-story-interactive-slider-sliderValue {
-  position: relative;
-  margin: 0 1.5em;
+  position: relative !important;
+  margin: 0 1.5em !important;
+  z-index: 2 !important;
 }
 
 .i-amphtml-story-interactive-slider-sliderValue span {
-  position: absolute;
-  transform: translate(-50%, 50%) scale(0);
-  font-weight: 500;
-  top: -6em;
-  line-height: 3.4em;
-  color: #fff;
-  transform-origin: bottom;
-  transition: transform 0.3s ease-in-out;
+  position: absolute !important;
+  left: var(--percentage) !important;
+  transform: translate(-50%, 50%) scale(0) !important;
+  font-weight: 500 !important;
+  top: -6em !important;
+  line-height: 3.4em !important;
+  color: #fff !important;
+  transform-origin: bottom !important;
+  transition: transform 0.3s ease-in-out !important;
 }
 
 .i-amphtml-story-interactive-slider-sliderValue span.show {
-  transform: translate(-50%, -10%) scale(1);
+  transform: translate(-50%, -10%) scale(1) !important;
 }
 
 .i-amphtml-story-interactive-slider-sliderValue span::after {
-  position: absolute;
-  content: '';
-  height: 2.8em;
-  width: 2.8em;
-  background: var(--interactive-accent-color);
-  z-index: -1;
-  left: 50%;
-  top: 0.2em;
-  transform: translateX(-50%) rotate(45deg);
-  border-bottom-left-radius: 50%;
-  box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25);
-  border-top-left-radius: 50%;
-  border-top-right-radius: 50%;
+  position: absolute !important;
+  content: '' !important;
+  height: 2.8em !important;
+  width: 2.8em !important;
+  background: var(--interactive-accent-color) !important;
+  z-index: -1 !important;
+  left: 50% !important;
+  top: 0.1em !important;
+  transform: translateX(-50%) rotate(45deg) !important;
+  border-bottom-left-radius: 50% !important;
+  box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25) !important;
+  border-top-left-radius: 50% !important;
+  border-top-right-radius: 50% !important;
+}
+
+.i-amphtml-story-interactive-slider-sliderValue span.answered{
+  cursor: initial !important;
+  font-weight: 700 !important;
+  transform: translate(-50%, 60%) scale(.8) !important;
+}
+
+.i-amphtml-story-interactive-slider-sliderValue span.answered::after {
+  
+  cursor: initial !important;
+  border: 0.125em solid #fff !important;
+  border-bottom-right-radius: 50% !important;
 }
 
 .i-amphtml-story-interactive-slider-field {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
-  margin: 0em 1em;
-  position: relative;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  width: 100% !important;
+  margin: 0em 1em !important;
+  position: relative !important;
 }
 
 .i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-slidervalue{
-  font-size: 18px;
-  color: var(--interactive-accent-color);
-  font-weight: 600;
+  font-size: 1.125em !important;
+  color: var(--interactive-accent-color) !important;
+  font-weight: 600 !important;
 }
 
 .i-amphtml-story-interactive-slider-input {
   -webkit-appearance: none !important;
   height: 1em !important;
-  width: 94%;
+  width: 94% !important;
   margin-bottom: 1em !important;
   margin-top: 1em !important;
   margin-left: 0.5em !important;
   margin-right: 0.5em !important;
-  --percentage: 0%;
   background: linear-gradient(
     90deg,
     #B28FFF 0%,
     #783BFE var(--percentage),
     #D8C7FF var(--percentage)
-  );
+  ) !important;
   border-radius: 0.5em !important;
   position: relative !important;
   pointer-events: all !important;
@@ -114,6 +132,10 @@
   width: 1.5em !important;
   height: 1.5em !important;
   background: var(--interactive-accent-color) !important;
-  border-radius: 50%;
-  cursor: pointer !important;
+  border-radius: 50% !important;
+ 
+}
+
+.i-amphtml-story-interactive-slider-input[disabled]{
+  cursor: initial !important;
 }
