@@ -559,7 +559,7 @@ In simple terms:
 
 1. Modify the spec in the `.protoascii` file, using satisfies and excludes to differentiate restrictiveness between `0.1` and `1.0` versions
 2. Copy the existing `validator-amp-my-element.html` and `validator-amp-my-element.out` files from the `0.1/test` directory to the `1.0/test` directory
-3. Manually updating the script imported from the copied files to `1.0`
+3. Manually update the script imported from the copied test files to `1.0`
 
 In some cases, the validator rules for a `0.1` counterpart may allow for less strict usage of the component, such as with `requires_usage: EXEMPTED` or `deprecated_allow_duplicates: true`. The `1.0` version should reintroduce these restrictions by differentiating the versions via `satisfies` and `excludes`. [The validation PR for `amp-social-share`](https://github.com/ampproject/amphtml/pull/33478) serves as a useful reference and example for how to execute this change.
 
