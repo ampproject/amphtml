@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from '#core/constants/amp-events';
-import {createCustomEvent} from '../../src/event-helper';
+import {createCustomEvent} from '../../../src/event-helper';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
