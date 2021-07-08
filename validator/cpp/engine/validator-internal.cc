@@ -104,10 +104,6 @@ ABSL_FLAG(int, max_node_recursion_depth, 200,
           "Maximum recursion depth of nodes, if stack of nodes grow beyond this"
           "validator will stop parsing with FAIL result");
 
-ABSL_FLAG(bool, duplicate_html_body_elements_is_error, false,
-          "If true, duplicate <html>,<body> elements is considered error for "
-          "validation purposes. (Default is to allow, leaving it to HTML5 "
-          "user-agent to treat them as per the spec).");
 ABSL_FLAG(bool, allow_module_nomodule, true,
           "If true, then script versions for module and nomdule are allowed "
           "in AMP documents. This gating should be temporary and removed "
@@ -5652,6 +5648,23 @@ class Validator {
         max_errors_(max_errors),
         context_(rules_, max_errors_) {}
 
+  ValidationResult Validate(const htmlparser::Document& doc) {
+    doc_metadata_ = doc.Metadata();
+    UpdateLineColumnIndex(doc.RootNode());
+    // The validation check for document size can't be done here since
+    // the Type Identifiers on the html tag have not been parsed yet and
+    // we wouldn't know which rule to apply. It's set to the context
+    // so that when those things are known it can be checked.
+    context_.SetDocByteSize(doc_metadata_.html_src_bytes);
+    ValidateNode(doc.RootNode());
+    auto [current_line_no, current_col_no] =
+        doc_metadata_.document_end_location;
+    context_.SetLineCol(current_line_no, current_col_no > 0 ? current_col_no - 1
+                                                            : current_col_no);
+    EndDocument();
+    return result_;
+  }
+
   ValidationResult Validate(std::string_view html) {
     Clear();
     htmlparser::ParseOptions options{
@@ -5660,11 +5673,6 @@ class Validator {
         .record_node_offsets = true,
         .record_attribute_offsets = true,
     };
-    // The validation check for document size can't be done here since
-    // the Type Identifiers on the html tag have not been parsed yet and
-    // we wouldn't know which rule to apply. It's set to the context
-    // so that when those things are known it can be checked.
-    context_.SetDocByteSize(html.length());
     auto parser = std::make_unique<htmlparser::Parser>(html, options);
     auto doc = parser->Parse();
     // Currently parser returns nullptr only if document is too complex.
@@ -5676,30 +5684,7 @@ class Validator {
       return result_;
     }
 
-    parse_accounting_ = parser->Accounting();
-    if (GetFlag(FLAGS_duplicate_html_body_elements_is_error) &&
-        parse_accounting_.duplicate_body_elements &&
-        parse_accounting_.duplicate_body_element_location.has_value()) {
-      auto [line, col] =
-          parse_accounting_.duplicate_body_element_location.value();
-      context_.AddError(ValidationError::DUPLICATE_UNIQUE_TAG,
-                        LineCol(line, col), {"BODY"}, "", &result_);
-    }
-    if (GetFlag(FLAGS_duplicate_html_body_elements_is_error) &&
-        parse_accounting_.duplicate_html_elements &&
-        parse_accounting_.duplicate_html_element_location.has_value()) {
-      auto [line, col] =
-          parse_accounting_.duplicate_html_element_location.value();
-      context_.AddError(ValidationError::DUPLICATE_UNIQUE_TAG,
-                        LineCol(line, col), {"HTML"}, "", &result_);
-    }
-    UpdateLineColumnIndex(doc->RootNode());
-    ValidateNode(doc->RootNode());
-    auto [current_line_no, current_col_no] = parser->CurrentTokenizerPosition();
-    context_.SetLineCol(current_line_no, current_col_no > 0 ? current_col_no - 1
-                                                            : current_col_no);
-    EndDocument();
-    return result_;
+    return Validate(*doc);
   }
 
   // Updates context's line column index using the current node's position.
@@ -5748,7 +5733,7 @@ class Validator {
         }
         return true;
       case htmlparser::NodeType::DOCTYPE_NODE:
-        if (parse_accounting_.quirks_mode) {
+        if (doc_metadata_.quirks_mode) {
           LineCol linecol(1, 0);
           auto lc = node->LineColInHtmlSrc();
           if (lc.has_value()) {
@@ -5990,7 +5975,7 @@ class Validator {
   const ParsedValidatorRules* rules_;
   int max_errors_ = -1;
   Context context_;
-  htmlparser::ParseAccounting parse_accounting_;
+  htmlparser::DocumentMetadata doc_metadata_;
   ValidationResult result_;
   Validator(const Validator&) = delete;
   Validator& operator=(const Validator&) = delete;
@@ -6003,6 +5988,13 @@ ValidationResult Validate(std::string_view html, HtmlFormat_Code html_format,
   Validator validator(ParsedValidatorRulesProvider::Get(html_format),
                       max_errors);
   return validator.Validate(html);
+}
+
+ValidationResult Validate(const htmlparser::Document& doc,
+                          HtmlFormat_Code html_format, int max_errors) {
+  Validator validator(ParsedValidatorRulesProvider::Get(html_format),
+                      max_errors);
+  return validator.Validate(doc);
 }
 
 }  // namespace amp::validator

@@ -75,7 +75,6 @@ import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
-import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {px, toggle} from '#core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
@@ -316,9 +315,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   maybeCreateAnimationManager_() {
     if (this.animationManager_) {
-      return;
-    }
-    if (prefersReducedMotion(this.win)) {
       return;
     }
     if (!hasAnimations(this.element)) {
@@ -725,7 +721,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   beforeVisible() {
-    return this.maybeApplyFirstAnimationFrame();
+    return this.maybeApplyFirstAnimationFrameOrFinish();
   }
 
   /**
@@ -1260,7 +1256,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   maybeStartAnimations_() {
-    this.animationManager_?.animateIn();
+    if (!this.animationManager_) {
+      return;
+    }
+    this.animationManager_.animateIn();
   }
 
   /**
@@ -1274,17 +1273,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
     this.signals()
       .whenSignal(CommonSignals.LOAD_END)
-      .then(() => this.maybeApplyFirstAnimationFrame())
-      .then(() => {
-        this.animationManager_.finishAll();
-      });
+      .then(() => this.animationManager_.applyLastFrame());
   }
 
   /**
    * @return {!Promise}
    */
-  maybeApplyFirstAnimationFrame() {
-    return Promise.resolve(this.animationManager_?.applyFirstFrame());
+  maybeApplyFirstAnimationFrameOrFinish() {
+    return Promise.resolve(this.animationManager_?.applyFirstFrameOrFinish());
   }
 
   /**
