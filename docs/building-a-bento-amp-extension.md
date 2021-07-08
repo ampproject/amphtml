@@ -563,7 +563,7 @@ In simple terms:
 
 In some cases, the validator rules for a `0.1` counterpart may allow for less strict usage of the component, such as with `requires_usage: EXEMPTED` or `deprecated_allow_duplicates: true`. The `1.0` version should reintroduce these restrictions by differentiating the versions via `satisfies` and `excludes`. [The validation PR for `amp-social-share`](https://github.com/ampproject/amphtml/pull/33478) serves as a useful reference and example for how to execute this change.
 
-For example, Bento `amp-soundcloud` .protoascii should be like:
+For example, changes to the Bento `amp-soundcloud` .protoascii should look as follows:
 
 ```protoascii
 tags: {  # amp-soundcloud 1.0
