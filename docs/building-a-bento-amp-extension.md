@@ -557,7 +557,7 @@ When converting an existing component to Bento with a version bump, it suffices 
 
 In simple terms:
 
-1. Modifying the spec in the `.protoascii` file, using satisfies and excludes to differentiate restrictiveness between `0.1` and `1.0` versions
+1. Modify the spec in the `.protoascii` file, using satisfies and excludes to differentiate restrictiveness between `0.1` and `1.0` versions
 2. Copying the existing `validator-amp-my-element.html` and `validator-amp-my-element.out` files from the `0.1/test` directory to the `1.0/test` directory
 3. Manually updating the script imported from the copied files to `1.0`
 
