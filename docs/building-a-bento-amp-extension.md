@@ -549,7 +549,7 @@ AmpMyElement['shadowCss'] = CSS;
 
 ### Allowing proper validation
 
-One of AMP's features is documentation validation checks to confirm it's valid AMP. When you implement your element, you must update the [AMP Validator](https://github.com/ampproject/amphtml/blob/main/validator/README.md)
+One of AMP's features is static validation on AMP document markup. When you implement your element, you must update the [AMP Validator](https://github.com/ampproject/amphtml/blob/main/validator/README.md)
 to include rules for your element. Otherwise documents using your extended component become invalid. Create your own rules by following the directions at
 [Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/main/docs/component-validator-rules.md).
 
