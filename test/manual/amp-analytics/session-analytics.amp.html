@@ -43,7 +43,8 @@
                         "ssid": "SESSION_ID",
                         "ct": "SESSION_TIMESTAMP",
                         "c": "SESSION_COUNT",
-                        "et": "SESSION_EVENT_TIMESTAMP"
+                        "et": "SESSION_EVENT_TIMESTAMP",
+                        "e": "SESSION_ENGAGED"
                       }
                   },
                   "session": {
@@ -51,7 +52,11 @@
                     "timerSpec": {
                         "interval": 10
                     },
-                    "enabled": false,
+                    "extraUrlParams": {
+                      "lastEventTimestamp": "SESSION_EVENT_TIMESTAMP",
+                      "engaged": "SESSION_ENGAGED"
+                    },
+                    "enabled": true,
                     "request": "endpoint"
                   },
                   "click": {
@@ -75,7 +80,7 @@
         <script type="application/json">
           {
               "requests": {
-                  "endpoint": "https://example.com/analytics?session=${sessionId}&timestamp=${sessionTimestamp}&count=${sessionCount}&eventTimestamp=${sessionEventTimestamp}",
+                  "endpoint": "https://example.com/analytics?session=${sessionId}&timestamp=${sessionTimestamp}&count=${sessionCount}&eventTimestamp=${sessionEventTimestamp}&engaged=${sessionEngaged}",
                   "click": "https://example.com/click_event?session=${sessionId}"
               },
               "triggers": {
@@ -102,7 +107,8 @@
                       "persistEvent": true
                     },
                     "extraUrlParams": {
-                      "lastEventTimestamp": "SESSION_EVENT_TIMESTAMP"
+                      "lastEventTimestamp": "SESSION_EVENT_TIMESTAMP",
+                      "engaged": "SESSION_ENGAGED"
                     }
                   }
               },
