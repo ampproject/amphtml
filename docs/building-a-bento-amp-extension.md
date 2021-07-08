@@ -555,7 +555,45 @@ to include rules for your element. Otherwise documents using your extended compo
 
 When converting an existing component to Bento with a version bump, it suffices to copy existing validator tests if applicable for APIs that stay stable between versions. When copying test files, be sure to change the version of the extension being imported.
 
+In simple terms:
+
+1. Modifying the spec in the `.protoascii` file, using satisfies and excludes to differentiate restrictiveness between `0.1` and `1.0` versions
+2. Copying the existing `validator-amp-my-element.html` and `validator-amp-my-element.out` files from the `0.1/test` directory to the `1.0/test` directory
+3. Manually updating the script imported from the copied files to `1.0`
+
 In some cases, the validator rules for a `0.1` counterpart may allow for less strict usage of the component, such as with `requires_usage: EXEMPTED` or `deprecated_allow_duplicates: true`. The `1.0` version should reintroduce these restrictions by differentiating the versions via `satisfies` and `excludes`. [The validation PR for `amp-social-share`](https://github.com/ampproject/amphtml/pull/33478) serves as a useful reference and example for how to execute this change.
+
+For example, Bento `amp-soundcloud` .protoascii should be like:
+
+```protoascii
+tags: {  # amp-soundcloud 1.0
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies: "amp-soundcloud 1.0"
+  excludes: "amp-soundcloud 0.1"
+  extension_spec: {
+    name: "amp-soundcloud"
+    version_name: "v1.0"
+    version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-soundcloud 0.1 and latest
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies: "amp-soundcloud 0.1"
+  excludes: "amp-soundcloud 1.0"
+  extension_spec: {
+    name: "amp-soundcloud"
+    version_name: "v0.1"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+```
 
 ### Performance considerations
 
@@ -712,6 +750,15 @@ Also consider contributing an example to
 #### Using Storybook
 
 To speed up development and testing of components, we recommend using the Storybook dashboard and develop "stories" (testing scenarios) for components. [Storybook](https://storybook.js.org/) has many features that assist with the isolated development and manual testing of components including easy manual interaction with component parameters, integrated accessibility auditing, and responsiveness testing.
+
+Two storybook enviroments are available in your component directory `amp-my-element/1.0/storybook` :
+
+|            | AMP Storybook             | Preact Storybook      |
+| ---------- | ------------------------- | --------------------- |
+| File       | `\storybook\Basic.amp.js` | `\storybook\Basic.js` |
+| Accessible | `localhost:9001`          | `localhost:9002`      |
+
+To interact with the storybook component, [Knobs](https://github.com/storybookjs/addon-knobs) are available. [Color](https://github.com/storybookjs/addon-knobs#color), [text](https://github.com/storybookjs/addon-knobs#text), [number](https://github.com/storybookjs/addon-knobs#number), [select](https://github.com/storybookjs/addon-knobs#select), [boolean](https://github.com/storybookjs/addon-knobs#boolean) are commonly used knobs.
 
 To run these environments and explore existing components, run:
 
