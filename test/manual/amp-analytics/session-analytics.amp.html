@@ -44,7 +44,7 @@
                         "ct": "SESSION_TIMESTAMP",
                         "c": "SESSION_COUNT",
                         "et": "SESSION_EVENT_TIMESTAMP",
-                        "e": "SESSION_ENEGAGED"
+                        "e": "SESSION_ENGAGED"
                       }
                   },
                   "session": {
@@ -52,7 +52,11 @@
                     "timerSpec": {
                         "interval": 10
                     },
-                    "enabled": false,
+                    "extraUrlParams": {
+                      "lastEventTimestamp": "SESSION_EVENT_TIMESTAMP",
+                      "engaged": "SESSION_ENGAGED"
+                    },
+                    "enabled": true,
                     "request": "endpoint"
                   },
                   "click": {
@@ -60,8 +64,7 @@
                     "selector": "#test1",
                     "request": "endpoint",
                     "session": {
-                      "persistEvent": true,
-                      "engaged": true
+                      "persistEvent": true
                     }
                   }
               },
@@ -101,8 +104,7 @@
                     "selector": "#test1",
                     "request": "click",
                     "session": {
-                      "persistEvent": true,
-                      "engaged": true
+                      "persistEvent": true
                     },
                     "extraUrlParams": {
                       "lastEventTimestamp": "SESSION_EVENT_TIMESTAMP",
