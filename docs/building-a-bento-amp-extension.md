@@ -413,7 +413,7 @@ BaseElement['props'] = {                         // Map DOM attributes and child
 };
 ```
 
-Note: AMP Layout attributes like ‘layout’, ‘height’, ‘heights’, ‘width’, ‘media’, etc are not needed to be mapped as they will be intrinsically passed to the preact component.
+Note: AMP Layout attributes like ‘layout’, ‘height’, ‘heights’, ‘width’, ‘media’, etc are not needed to be mapped as they will be intrinsically passed to the Preact component.
 
 The following shows the corresponding overall structure of your Preact functional component implementation file (`extensions/amp-my-element/1.0/component.js`).
 
