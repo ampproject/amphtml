@@ -95,7 +95,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
     'amp-ad',
     dict({
       'width': size.width,
-      'height': '0',
+      'height': size.height,
       'type': 'blade',
       'layout': 'fixed',
       'data-blade_player_type': 'bladex',
