@@ -179,6 +179,7 @@ module.exports = {
 
     // Custom repo rules defined in build-system/eslint-rules
     'local/await-expect': 2,
+    'local/bento-base-element': 2,
     'local/closure-type-primitives': 2,
     'local/dict-string-keys': 2,
     'local/get-mode-usage': 2,
@@ -227,6 +228,29 @@ module.exports = {
     'local/prefer-unnested-spread-objects': 2,
     'local/private-prop-names': 2,
     'local/query-selector': 2,
+    'local/restrict-this-access': [
+      2,
+      {
+        classNames: [
+          'BentoBaseElement',
+          'PreactBaseElement',
+          'VideoBaseElement',
+        ],
+        allowed: [
+          'api',
+          'element',
+          'getProp',
+          'loadable',
+          'mutateElement',
+          'mutateProps',
+          'registerApiAction',
+          'triggerEvent',
+          'usesLoading',
+          'usesShadowDom',
+          'win',
+        ],
+      },
+    ],
     'local/todo-format': 0,
     'local/unused-private-field': 2,
     'local/vsync': 0,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {createLoaderLogo} from '../0.1/facebook-loader';
 import {dashToUnderline} from '#core/types/string';
 import {dict} from '#core/types/object';
@@ -26,7 +26,7 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-facebook';
 const TYPE = 'facebook';
 
-class AmpFacebook extends BaseElement {
+class AmpFacebook extends BentoBaseElement {
   /** @override @nocollapse */
   static createLoaderLogoCallback(element) {
     return createLoaderLogo(element);

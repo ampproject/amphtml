@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-gallery-1.0.css';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
@@ -29,7 +29,7 @@ const TAG = 'amp-lightbox-gallery';
 /** @const {string} */
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
-class AmpLightboxGallery extends BaseElement {
+class AmpLightboxGallery extends BentoBaseElement {
   /** @override */
   init() {
     this.registerApiAction(

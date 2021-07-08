@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {CSS} from '../../../build/amp-selector-1.0.css';
 import {Services} from '#service';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -27,7 +27,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-selector';
 
-class AmpSelector extends BaseElement {
+class AmpSelector extends BentoBaseElement {
   /** @override */
   init() {
     // Set up API

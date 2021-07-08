@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {CSS} from '../../../build/amp-fit-text-1.0.css';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
@@ -22,7 +22,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-fit-text';
 
-class AmpFitText extends BaseElement {
+class AmpFitText extends BentoBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

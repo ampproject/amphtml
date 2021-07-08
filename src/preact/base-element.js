@@ -143,26 +143,24 @@ export class PreactBaseElement extends AMP.BaseElement {
   /** @override @nocollapse */
   static usesLoading() {
     // eslint-disable-next-line local/no-static-this
-    const Ctor = this;
-    return Ctor['loadable'];
+    return this['loadable'];
   }
 
   /** @override @nocollapse */
   static prerenderAllowed() {
     // eslint-disable-next-line local/no-static-this
-    const Ctor = this;
-    return !Ctor.usesLoading();
+    return !this.usesLoading();
   }
 
-  /** @param {!AmpElement} element */
+  /** @param {!Element} element */
   constructor(element) {
     super(element);
 
     /** @private {!JsonObject} */
     this.defaultProps_ = dict({
       'loading': Loading.AUTO,
-      'onReadyState': this.onReadyState_.bind(this),
-      'onPlayingState': this.updateIsPlaying_.bind(this),
+      'onReadyState': () => this.onReadyState_(),
+      'onPlayingState': () => this.updateIsPlaying_(),
     });
 
     /** @private {!AmpContextDef.ContextType} */
@@ -266,7 +264,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   buildCallback() {
     const Ctor = this.constructor;
 
-    this.observer = new MutationObserver(this.checkMutations_.bind(this));
+    this.observer = new MutationObserver((rs) => this.checkMutations_(rs));
     const props = Ctor['props'];
     const childrenInit = checkPropsFor(props, HAS_SELECTOR)
       ? CHILDREN_MUTATION_INIT
@@ -337,7 +335,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.scheduleRender_();
 
     if (Ctor['loadable']) {
-      this.setReadyState(ReadyState.LOADING);
+      this.setReadyState?.(ReadyState.LOADING);
     }
     this.maybeUpdateReadyState_();
 
@@ -400,13 +398,17 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /**
+   * Register an action for AMP documents to execute an API handler.
+   *
+   * This has no effect on Bento documents, since they lack an Actions system.
+   * Instead, they should use `(await element.getApi()).action()`
    * @param {string} alias
    * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
    * @param {../action-constants.ActionTrust} minTrust
    * @protected
    */
   registerApiAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
-    this.registerAction(
+    this.registerAction?.(
       alias,
       (invocation) => handler(this.api(), invocation),
       minTrust
@@ -487,7 +489,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @private
    */
   onReadyState_(state, opt_failure) {
-    this.setReadyState(state, opt_failure);
+    this.setReadyState?.(state, opt_failure);
 
     const Ctor = this.constructor;
     if (Ctor['unloadOnPause']) {
@@ -561,9 +563,9 @@ export class PreactBaseElement extends AMP.BaseElement {
             SERVICE_SLOT_ATTRS
           );
           shadowRoot.appendChild(serviceSlot);
-          this.getPlaceholder()?.setAttribute('slot', SERVICE_SLOT_NAME);
-          this.getFallback()?.setAttribute('slot', SERVICE_SLOT_NAME);
-          this.getOverflowElement()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getPlaceholder?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getFallback?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
+          this.getOverflowElement?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
         }
         this.container_ = container;
 
@@ -574,6 +576,7 @@ export class PreactBaseElement extends AMP.BaseElement {
         // to create a simple mechanism that would automatically compute
         // `CanRender = false` on undistributed children.
         addGroup(this.element, UNSLOTTED_GROUP, MATCH_ANY, /* weight */ -1);
+        // eslint-disable-next-line local/restrict-this-access
         setGroupProp(this.element, UNSLOTTED_GROUP, CanRender, this, false);
       } else if (lightDomTag) {
         this.container_ = this.element;
@@ -710,6 +713,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     const keys = Object.keys(current);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
+      // eslint-disable-next-line local/restrict-this-access
       wrapRefProperty(this, api, key);
     }
     this.apiWrapper_ = api;

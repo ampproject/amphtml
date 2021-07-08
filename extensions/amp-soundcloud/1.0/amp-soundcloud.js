@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-soundcloud';
 
-class AmpSoundcloud extends BaseElement {
+class AmpSoundcloud extends BentoBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
