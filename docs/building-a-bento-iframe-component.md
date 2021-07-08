@@ -233,7 +233,7 @@ function FantasticEmbedWithRef({...rest}, ref) {
 
 AMP documents additionally guarantee layout stability to the degree that it manages when components may or may not resize on the page. Because of this, the `IframeEmbed` component takes a `requestResize` prop where a different flow of logic may be passed in by the publisher to respond to measure events.
 
-In your AMP element implementation, you will use `requestResize` to pass in the `attemptChangeHeight` method that is extended from the `BaseElement` class:
+In your AMP element implementation, you will use `requestResize` to pass in the `attemptChangeHeight` method that is extended from the `PreactBaseElement` class:
 
 ```javascript
 // amp-fantastic-embed.js
@@ -242,13 +242,7 @@ class AmpFantasticEmbed extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'requestResize': (height) => {
-        this.attemptChangeHeight(height).catch(() => {
-          if (!this.getOverflowElement()) {
-            user().warn(TAG, '[overflow] element not found. Provide one to enable resizing to full contents.')
-          }
-        });
-      },
+      'requestResize': (height) => this.attemptChangeHeight(height),
     });
   }
 }
