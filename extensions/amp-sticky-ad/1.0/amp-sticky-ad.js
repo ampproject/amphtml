@@ -57,6 +57,12 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    userAssert(
+      this.win.document.querySelectorAll(
+        'amp-sticky-ad.i-amphtml-built, amp-ad[sticky].i-amphtml-built'
+      ).length <= 1,
+      'At most one sticky ad can be loaded per page'
+    );
     this.viewport_ = this.getViewport();
     this.element.classList.add('i-amphtml-sticky-ad-layout');
 

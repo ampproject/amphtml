@@ -214,6 +214,18 @@ export class AmpAdUIHandler {
   }
 
   /**
+   * Verify that the limits for sticky ads are not exceeded
+   */
+  validateStickyAd() {
+    userAssert(
+      this.doc_.querySelectorAll(
+        'amp-sticky-ad.i-amphtml-built, amp-ad[sticky].i-amphtml-built'
+      ).length <= 1,
+      'At most one sticky ad can be loaded per page'
+    );
+  }
+
+  /**
    * @return {boolean}
    */
   isStickyAd() {
