@@ -154,7 +154,7 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "0.1",
-    "latestVersion": "0.1",
++   "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }
@@ -162,10 +162,10 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "1.0",
-    "latestVersion": "0.1",
++   "latestVersion": "0.1",
     "options": {
-+     "npm": true,
-+     "wrapper": "bento"
+      "npm": true,
+      "wrapper": "bento"
     }
   },
 ...
