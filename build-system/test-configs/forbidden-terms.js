@@ -148,11 +148,9 @@ const forbiddenTermsGlobal = {
   },
   '(?:var|let|const) +IS_FORTESTING +=': {
     message: 'IS_FORTESTING local var only allowed in mode.js.',
-    allowlist: ['src/core/mode/for-testing.js'],
   },
   '(?:var|let|const) +IS_MINIFIED +=': {
     message: 'IS_MINIFIED local var only allowed in core/mode/minified.js',
-    allowlist: ['src/core/mode/minified.js'],
   },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
