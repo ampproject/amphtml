@@ -533,27 +533,27 @@ In some cases, the validator rules for a `0.1` counterpart may allow for less st
 
 For example, changes to the Bento `amp-soundcloud` .protoascii should look as follows:
 
-```protoascii
-tags: {  # amp-soundcloud 1.0
-  html_format: AMP
-  tag_name: "SCRIPT"
-  satisfies: "amp-soundcloud 1.0"
-  excludes: "amp-soundcloud 0.1"
-  extension_spec: {
-    name: "amp-soundcloud"
-    version_name: "v1.0"
-    version: "1.0"
-  }
-  attr_lists: "common-extension-attrs"
-}
+```diff
++ tags: {  # amp-soundcloud 1.0
++   html_format: AMP
++   tag_name: "SCRIPT"
++   satisfies: "amp-soundcloud 1.0"
++   excludes: "amp-soundcloud 0.1"
++   extension_spec: {
++     name: "amp-soundcloud"
++     version_name: "v1.0"
++     version: "1.0"
++   }
++   attr_lists: "common-extension-attrs"
++ }
 tags: {  # amp-soundcloud 0.1 and latest
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-soundcloud 0.1"
-  excludes: "amp-soundcloud 1.0"
++   satisfies: "amp-soundcloud 0.1"
++   excludes: "amp-soundcloud 1.0"
   extension_spec: {
     name: "amp-soundcloud"
-    version_name: "v0.1"
++     version_name: "v0.1"
     version: "0.1"
     version: "latest"
     requires_usage: EXEMPTED
@@ -747,11 +747,11 @@ experimental: true
 
 For example, Bento `amp-youtube` markdown should have YAML metadata as:
 
-```
+```diff
 ---
 $category@: media
-bento: true
-experimental: true
++ bento: true
++ experimental: true
 formats:
   - websites
 teaser:
