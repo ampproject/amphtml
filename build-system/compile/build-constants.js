@@ -19,7 +19,7 @@ const {VERSION} = require('./internal-version');
 const testTasks = ['e2e', 'integration', 'visual-diff', 'unit', 'check-types'];
 const isTestTask = testTasks.some((task) => argv._.includes(task));
 const isForTesting = argv.fortesting || isTestTask;
-const isMinified = !!(argv._.includes('dist') || argv.compiled);
+const isMinified = argv._.includes('dist') || !!argv.compiled;
 
 /**
  * Build time constants. Used by babel but hopefully one day directly by the bundlers..
