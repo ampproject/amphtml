@@ -212,6 +212,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     userAssert(this.config, `Type "${this.type_}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
+    this.uiHandler.validateStickyAd();
 
     this.isFullWidthRequested_ = this.shouldRequestFullWidth_();
 
