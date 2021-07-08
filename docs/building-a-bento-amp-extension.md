@@ -761,7 +761,7 @@ teaser:
 
 ### Code Ownership
 
-Developers are requested to provide code ownership for newely created components. Please read [Code Ownership and AMP](https://github.com/ampproject/amphtml/blob/main/docs/code-ownership.md) for detailed information. Refer discussion related to code ownersip on PR [#34948-discussion_r656779590](https://github.com/ampproject/amphtml/pull/34948#discussion_r656779590).
+Developers are requested to provide code ownership for newly created components. Please read [Code Ownership and AMP](https://github.com/ampproject/amphtml/blob/main/docs/code-ownership.md) for detailed information. Refer discussion related to code ownership on PR [#34948-discussion_r656779590](https://github.com/ampproject/amphtml/pull/34948#discussion_r656779590).
 
 ## Example PRs
 
