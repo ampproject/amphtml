@@ -95,18 +95,12 @@ In most cases you'll only create the required (req'd) files. If your element doe
 
 ### Versioning
 
-AMP runtime is currently in v0 major version. Extensions versions are
-maintained separately. If your changes to your non-experimental
-extension makes breaking changes that are not backward compatible you
-should release a new version of your extension. This would usually be by creating a [0.2 or 1.0](./spec/amp-versioning-policy.md#amp-extensions)
-directory next to your 0.1.
+AMP runtime is currently in v0 major version. Extensions versions are maintained separately. If your changes to your non-experimental
+extension makes breaking changes that are not backward compatible you should release a new version of your extension. This would usually be by creating a [0.2 or 1.0](./spec/amp-versioning-policy.md#amp-extensions) directory next to your 0.1.
 
-When version 0.2 is under development, make sure that `latestVersion` is
-set to 0.1 for both the 0.1 and 0.2 entries in `extensionBundles`. Once 0.2
-is ready to be released, `latestVersion` can be changed to 0.2.
+When version 0.2 is under development, make sure that `latestVersion` is set to 0.1 for both the 0.1 and 0.2 entries in `extensionBundles`. Once 0.2 is ready to be released, `latestVersion` can be changed to 0.2.
 
-If your extension is still in experiments breaking changes usually are
-fine so you can just update the same version.
+If your extension is still in experiments breaking changes usually are fine so you can just update the same version.
 
 Note that Bento upgrades to existing AMP components should go by one major version, meaning it should create a 1.0 directory next to an existing 0.1 or 0.2.
 
@@ -136,7 +130,7 @@ exports.extensionBundles = [
 
 The entry for your component must have `options.wrapper = "bento"`. It may optionally include `options.npm = true` to publish the Preact component portion on npm automatically, following AMP's [release schedule](./release-schedule.md).
 
-```javascript
+```diff
 exports.extensionBundles = [
 ...
   {
@@ -144,8 +138,8 @@ exports.extensionBundles = [
     "version": "1.0",
     "latestVersion": "1.0",
     "options": {
-      "npm": true,
-      "wrapper": "bento"
++     "npm": true,
++     "wrapper": "bento"
     }
   },
 ...
@@ -154,7 +148,7 @@ exports.extensionBundles = [
 
 Note, if you are providing a version upgrade (pre-existing 0.1 to Bento 1.0, for example), it is important to note that the latest version is the 0.1 until the 1.0 version is no longer experimental and fully launched. The following is an example of two version entries for one component:
 
-```javascript
+```diff
 exports.extensionBundles = [
 ...
   {
@@ -170,8 +164,8 @@ exports.extensionBundles = [
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": true,
-      "wrapper": "bento"
++     "npm": true,
++     "wrapper": "bento"
     }
   },
 ...
@@ -269,16 +263,9 @@ The configurations which bridge the Preact implementation of the component and i
 
 ### Actions and events
 
-AMP provides a framework for [elements to fire their own
-events](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-actions-and-events.md)
-to allow users of that element to listen and react to the events. For
-example, the `amp-base-carousel` extension fires a `slideChange` event.
-This allow publishers to listen to that event and react to it, for example, by updating an `amp-selector` state to match the current slide shown.
+AMP provides a framework for [elements to fire their own events](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-actions-and-events.md) to allow users of that element to listen and react to the events. For example, the `amp-base-carousel` extension fires a `slideChange` event. This allow publishers to listen to that event and react to it, for example, by updating an `amp-selector` state to match the current slide shown.
 
-The other part of the event-system in AMP is actions. When listening to
-an event on an element usually you'd like to trigger an action (possibly
-on other elements). For example, in the example above, the publisher is
-executing the `toggle` action on `amp-selector`.
+The other part of the event-system in AMP is actions. When listening to an event on an element usually you'd like to trigger an action (possibly on other elements). For example, in the example above, the publisher is executing the `toggle` action on `amp-selector`.
 
 The syntax for using this on elements is as follow:
 
@@ -304,8 +291,7 @@ actionServiceForDoc(doc.documentElement).trigger(
 );
 ```
 
-And to expose actions use `registerApiAction` method that your element
-inherits from `PreactBaseElement`. Note, this should correspond directly with the API exposed in the corresponding Preact compnent via [`useImperativeHandle`](https://reactjs.org/docs/hooks-reference.html#useimperativehandle), and the component should be defined using a [`forwardRef`](https://preactjs.com/guide/v10/switching-to-preact/#forwardref) accordingly.
+And to expose actions use `registerApiAction` method that your element inherits from `PreactBaseElement`. Note, this should correspond directly with the API exposed in the corresponding Preact compnent via [`useImperativeHandle`](https://reactjs.org/docs/hooks-reference.html#useimperativehandle), and the component should be defined using a [`forwardRef`](https://preactjs.com/guide/v10/switching-to-preact/#forwardref) accordingly.
 
 ```javascript
 this.registerApiAction('close', (api) => api.close());
@@ -354,8 +340,7 @@ You must document your element's actions and events in its own reference documen
 
 ### Element and Component classes
 
-The following shows the overall structure of your element implementation
-file (`extensions/amp-my-element/1.0/amp-my-element.js`). See [Experiments](#experiments) to make sure your component is experimentally gated if necessary.
+The following shows the overall structure of your element implementation file (`extensions/amp-my-element/1.0/amp-my-element.js`). See [Experiments](#experiments) to make sure your component is experimentally gated if necessary.
 
 ```js
 import {func1, func2} from '../../../src/module';
@@ -436,11 +421,7 @@ export function MyElement({propName1, propName2, ...rest}) {
 
 ### Element styling
 
-You can write a stylesheet to style your element to provide a minimal
-visual appeal. Your element structure should account for whether you
-want users (publishers and developers using your element) to customize
-the default styling you're providing and allow for easy CSS classes
-and/or well-structure DOM elements.
+You can write a stylesheet to style your element to provide a minimal visual appeal. Your element structure should account for whether you want users (publishers and developers using your element) to customize the default styling you're providing and allow for easy CSS classes and/or well-structure DOM elements.
 
 Element styles load with the element script inside an AMP document. You tell AMP which CSS or JSS belongs to this element when [registering the element](#register-element-with-AMP).
 
@@ -476,21 +457,11 @@ amp-my-element:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
 
 ### Layouts supported in your element
 
-AMP defines different layouts that elements can choose whether or not to
-support. Your element needs to announce which layouts it supports through
-overriding the `isLayoutSupported(layout)` callback and returning true
-if the element supports that layout. [Read more about AMP Layout
-System](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md)
-and [Layout
-Types](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md#layout).
+AMP defines different layouts that elements can choose whether or not to support. Your element needs to announce which layouts it supports through overriding the `isLayoutSupported(layout)` callback and returning true if the element supports that layout. [Read more about AMP Layout System](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md) and [Layout Types](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-layout.md#layout).
 
 #### What layout should your element support?
 
-After understanding each layout type, if it makes sense, support all of
-them. Otherwise choose what makes sense to your element. A popular
-support choice is to support size-defined layouts (Fixed, Fixed Height,
-Responsive and Fill) through using the utility `isLayoutSizeDefined`
-in `layout.js`.
+After understanding each layout type, if it makes sense, support all of them. Otherwise choose what makes sense to your element. A popular support choice is to support size-defined layouts (Fixed, Fixed Height, Responsive and Fill) through using the utility `isLayoutSizeDefined` in `layout.js`.
 
 For example, `amp-inline-gallery-thumbnails` only supports fixed-height layout.
 
@@ -523,8 +494,7 @@ AmpBaseCarousel['layoutSizeDefined'] = true;
 
 ### Register element with AMP
 
-Once you have implemented your AMP element, you need to register it with
-AMP; all AMP component extensions include the `amp-` prefix.
+Once you have implemented your AMP element, you need to register it with AMP; all AMP component extensions include the `amp-` prefix.
 
 One way to specify the appropriate styles is to tell AMP which class to use for this tag name and which CSS to load.
 
@@ -549,9 +519,7 @@ AmpMyElement['shadowCss'] = CSS;
 
 ### Allowing proper validation
 
-One of AMP's features is static validation on AMP document markup. When you implement your element, you must update the [AMP Validator](https://github.com/ampproject/amphtml/blob/main/validator/README.md)
-to include rules for your element. Otherwise documents using your extended component become invalid. Create your own rules by following the directions at
-[Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/main/docs/component-validator-rules.md).
+One of AMP's features is static validation on AMP document markup. When you implement your element, you must update the [AMP Validator](https://github.com/ampproject/amphtml/blob/main/validator/README.md) to include rules for your element. Otherwise documents using your extended component become invalid. Create your own rules by following the directions at [Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/main/docs/component-validator-rules.md).
 
 When converting an existing component to Bento with a version bump, it suffices to copy existing validator tests if applicable for APIs that stay stable between versions. When copying test files, be sure to change the version of the extension being imported.
 
@@ -599,27 +567,22 @@ tags: {  # amp-soundcloud 0.1 and latest
 
 #### Loading external resources
 
-You may need to add third party integration for extended components that need to load external resources, such as an SDK. Loading resources is only allowed inside a third party iframe. AMP serves this on a different domain for security and performance reasons. Take a look at adding
-[`amp-facebook`](https://github.com/ampproject/amphtml/pull/1479/)
-extension PR for examples of third party integration, and pair it with the [Bento contribution for `amp-facebook`](https://github.com/ampproject/amphtml/pull/34585/) to see how their impementations may differ.
+You may need to add third party integration for extended components that need to load external resources, such as an SDK. Loading resources is only allowed inside a third party iframe. AMP serves this on a different domain for security and performance reasons. Take a look at adding [`amp-facebook`](https://github.com/ampproject/amphtml/pull/1479/) extension PR for examples of third party integration, and pair it with the [Bento contribution for `amp-facebook`](https://github.com/ampproject/amphtml/pull/34585/) to see how their impementations may differ.
 
-Read about [Inclusion of third party software, embeds and services into
-AMP](https://github.com/ampproject/amphtml/blob/main/3p/README.md).
+Read about [Inclusion of third party software, embeds and services into AMP](https://github.com/ampproject/amphtml/blob/main/3p/README.md).
 
 For contrast, take a look at `amp-instagram` which does NOT require an SDK to embed a post. Instead, it provides an iframe-based embedding that allows `amp-instagram` to use a normal iframe with no third party integrations. `amp-youtube` and others work similarly.
 
 ### Unit tests
 
-Make sure you write good coverage for your code. We require unit tests
-for all checked in code. We use the following frameworks for testing:
+Make sure you write good coverage for your code. We require unit tests for all checked in code. We use the following frameworks for testing:
 
 -   [Mocha](https://mochajs.org/), our test framework
 -   [Karma](https://karma-runner.github.io/), our tests runner
 -   [Sinon](http://sinonjs.org/), spies, stubs and mocks.
 -   [Enzyme](https://enzymejs.github.io/enzyme/), our Preact test utility.
 
-For faster testing during development, consider using --files argument
-to only run your extensions' tests.
+For faster testing during development, consider using --files argument to only run your extensions' tests.
 
 ```shell
 $ amp unit --files=extensions/amp-my-element/1.0/test/test-amp-my-element.js --watch
@@ -629,14 +592,9 @@ Please also reference [Testing in AMP HTML](https://github.com/ampproject/amphtm
 
 ### Type checking
 
-We use Closure Compiler to perform type checking. Please see
-[Annotating JavaScript for the Closure
-Compiler](https://github.com/google/closure-compiler/wiki/Annotating-JavaScript-for-the-Closure-Compiler)
-and existing AMP code for examples of how to add type annotations to
-your code.
+We use Closure Compiler to perform type checking. Please see [Annotating JavaScript for the Closure Compiler](https://github.com/google/closure-compiler/wiki/Annotating-JavaScript-for-the-Closure-Compiler) and existing AMP code for examples of how to add type annotations to your code.
 
-The following shows the overall structure of your type definition
-file (extensions/amp-my-element/1.0/my-element.type.js). This will allow support of inline prop destructuring in Preact components.
+The following shows the overall structure of your type definition file (extensions/amp-my-element/1.0/my-element.type.js). This will allow support of inline prop destructuring in Preact components.
 
 ```javascript
 /** @externs */
@@ -659,15 +617,9 @@ $ amp check-types
 
 ### Experiments
 
-Most newly created elements are initially launched as
-[experiments](https://github.com/ampproject/amphtml/blob/main/tools/experiments/README.md).
-This allows people to experiment with using the new element and provide
-the author(s) with feedback. It also provides the AMP Team with the
-opportunity to monitor for any potential errors. This is especially required if the validator isn't updated with your extended component rules. Without your rules in the validator, documents using the component in production are invalid.
+Most newly created elements are initially launched as [experiments](https://github.com/ampproject/amphtml/blob/main/tools/experiments/README.md). This allows people to experiment with using the new element and provide the author(s) with feedback. It also provides the AMP Team with the opportunity to monitor for any potential errors. This is especially required if the validator isn't updated with your extended component rules. Without your rules in the validator, documents using the component in production are invalid.
 
-Add your extension as an experiment in the
-`amphtml/tools/experiments` file by adding a record for your extension
-in EXPERIMENTS variable.
+Add your extension as an experiment in the `amphtml/tools/experiments` file by adding a record for your extension in EXPERIMENTS variable.
 
 ```javascript
 /** @const {!Array<!ExperimentDef>} */
@@ -714,9 +666,7 @@ AMP.extension('amp-my-element', '1.0', AMP => {
 
 #### Enabling and removing your experiment
 
-Users wanting to experiment with your element can then go to the
-[experiments page](https://cdn.ampproject.org/experiments.html) and
-enable your experiment.
+Users wanting to experiment with your element can then go to the [experiments page](https://cdn.ampproject.org/experiments.html) and enable your experiment.
 
 If you are testing on your localhost, use the command `AMP.toggleExperiment(id, true/false)` to enable the experiment. One option is to use `AMP.toggleExperiment('bento', true)` to enable all Bento components at once.
 
