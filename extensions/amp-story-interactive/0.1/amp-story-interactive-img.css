@@ -93,7 +93,7 @@
   right: 0 !important;
   left: 0 !important;
   color: white !important;
-  font-weight: bold !important;
+  font-weight: 700 !important;
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
