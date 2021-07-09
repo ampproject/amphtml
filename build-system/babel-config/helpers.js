@@ -18,6 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const experimentsConstantBackup = require('../global-configs/experiments-const.json');
+const {BUILD_CONSTANTS} = require('../compile/build-constants');
 
 /**
  * Get experiment constant to define from command line arguments, if any
@@ -46,24 +47,20 @@ function getExperimentConstant() {
 function getReplacePlugin() {
   /**
    * @param {string} identifierName the identifier name to replace
-   * @param {boolean} value the value to replace with
+   * @param {boolean|string} value the value to replace with
    * @return {!Object} replacement options used by minify-replace plugin
    */
   function createReplacement(identifierName, value) {
-    return {
-      identifierName,
-      replacement: {type: 'booleanLiteral', value: !!value},
-    };
+    const replacement =
+      typeof value === 'boolean'
+        ? {type: 'booleanLiteral', value}
+        : {type: 'stringLiteral', value};
+    return {identifierName, replacement};
   }
 
-  // We build on the idea that SxG is an upgrade to the ESM build.
-  // Therefore, all conditions set by ESM will also hold for SxG.
-  // However, we will also need to introduce a separate IS_SxG flag
-  // for conditions only true for SxG.
-  const replacements = [
-    createReplacement('IS_ESM', argv.esm || argv.sxg),
-    createReplacement('IS_SXG', argv.sxg),
-  ];
+  const replacements = Object.entries(BUILD_CONSTANTS).map(([ident, val]) =>
+    createReplacement(ident, val)
+  );
 
   const experimentConstant = getExperimentConstant();
   if (experimentConstant) {

@@ -62,11 +62,9 @@ function getPreClosureConfig() {
       './build-system/babel-plugins/babel-plugin-transform-json-import',
       {freeze: false},
     ],
-    './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
-    './build-system/babel-plugins/babel-plugin-transform-version-call',
     './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     './build-system/babel-plugins/babel-plugin-transform-default-assignment',
     replacePlugin,
@@ -83,9 +81,6 @@ function getPreClosureConfig() {
           './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
           {isEsmBuild: !!argv.esm},
         ]
-      : null,
-    !(isFortesting || isCheckTypes)
-      ? './build-system/babel-plugins/babel-plugin-is_fortesting-constant-transformer'
       : null,
   ].filter(Boolean);
   const presetEnv = [
