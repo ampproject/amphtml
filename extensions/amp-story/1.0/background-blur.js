@@ -24,7 +24,7 @@ import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 const CANVAS_SIZE = 3;
 
 /** @const {number} */
-const DURATION_MS = 200;
+const DURATION_MS = 400;
 
 /** @const {string} */
 const CLASS_NAME = 'BACKGROUND-BLUR';
@@ -43,6 +43,10 @@ export class BackgroundBlur {
 
     /** @private @const {!Element} */
     this.canvas_ = null;
+
+    /** @private @const {Element} */
+    this.offScreenCanvas_ = this.win_.document.createElement('canvas');
+    this.offScreenCanvas_.width = this.offScreenCanvas_.height = CANVAS_SIZE;
 
     /**  @private {?number} */
     this.currentRAF_ = null;
@@ -106,19 +110,10 @@ export class BackgroundBlur {
    * @param {?Element} fillElement
    */
   animate_(fillElement) {
-    const context = this.canvas_.getContext('2d');
-
-    const draw = (easing) => {
-      context.globalAlpha = easing;
-      context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-      if (fillElement) {
-        context.drawImage(fillElement, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
-      }
-    };
-
+    this.drawOffscreenCanvas_(fillElement);
     // Do not animate on first load.
     if (this.firstLoad_) {
-      draw(1 /** easing **/);
+      this.drawCanvas_(1 /** easing **/);
       this.firstLoad_ = false;
       return;
     }
@@ -131,14 +126,43 @@ export class BackgroundBlur {
       }
       const elapsed = currTime - startTime;
       if (elapsed < DURATION_MS) {
-        const easing = 1 - Math.pow(1 - elapsed / DURATION_MS, 2);
-        draw(easing);
+        const easing = elapsed / DURATION_MS;
+        this.drawCanvas_(easing);
         this.currentRAF_ = requestAnimationFrame(nextFrame);
       }
     };
     // Cancels the previous animation loop before starting a new one.
     cancelAnimationFrame(this.currentRAF_);
     this.currentRAF_ = requestAnimationFrame(nextFrame);
+  }
+
+  /**
+   * Draws to the canvas with opacity.
+   * @private
+   * @param {number} alphaPercentage
+   */
+  drawCanvas_(alphaPercentage) {
+    const context = this.canvas_.getContext('2d');
+    context.globalAlpha = alphaPercentage;
+    context.drawImage(this.offScreenCanvas_, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  }
+
+  /**
+   * Composes the image offscreen, then uses it for fading in.
+   * @private
+   * @param {?Element} fillElement
+   */
+  drawOffscreenCanvas_(fillElement) {
+    const context = this.offScreenCanvas_.getContext('2d');
+    // A black background in drawn first in case the image is a transparent PNG.
+    context.fillStyle = 'black';
+    context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    if (fillElement) {
+      context.drawImage(fillElement, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      // For background protection.
+      context.fillStyle = 'rgba(0, 0, 0, .3)';
+      context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    }
   }
 
   /**
