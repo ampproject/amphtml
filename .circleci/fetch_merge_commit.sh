@@ -46,7 +46,7 @@ echo "export CIRCLECI_MERGE_COMMIT=$CIRCLECI_MERGE_COMMIT" >> $BASH_ENV
 
 # Fetch the merge commit. This ensures that all CI stages use the same commit.
 echo $(GREEN "Fetching merge commit $CIRCLECI_MERGE_COMMIT...")
-(set -x && git pull --ff-only origin "$CIRCLECI_MERGE_COMMIT") || err=$?
+(set -x && curl "https://github.com/ampproject/amphtml/archive/refs/heads/${CIRCLECI_MERGE_COMMIT}.zip" | gunzip) || err=$?
 
 # If a clean merge is not possible, do not proceed with the build. GitHub's UI
 # will show an error indicating there was a merge conflict.
