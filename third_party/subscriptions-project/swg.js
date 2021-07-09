@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.172 */
+/** Version: 0.1.22.173 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4556,7 +4556,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.172',
+    '_client': 'SwG 0.1.22.173',
   });
 }
 
@@ -5786,7 +5786,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.172',
+        '_client': 'SwG 0.1.22.173',
         'supportsEventManager': true,
       },
       args || {}
@@ -6632,7 +6632,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.172');
+    context.setClientVersion('SwG 0.1.22.173');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -10864,9 +10864,15 @@ class EntitlementsManager {
       return Promise.resolve();
     }
 
+    const params = new EventParams();
+    params.setIsUserRegistered(true);
     this.deps_
       .eventManager()
-      .logSwgEvent(AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION, false);
+      .logSwgEvent(
+        AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
+        false,
+        params
+      );
     // Check if storage bit is set. It's only set by the `Entitlements.ack` method.
     return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
       const toastWasShown = value === '1';
