@@ -221,7 +221,6 @@ export function LightboxGalleryProviderWithRef(
             [classes.caption]: true,
             [classes.control]: true,
             [classes[captionState]]: true,
-            [EXPOSED_CAPTION_CLASS]: true,
           })}
           ref={captionRef}
           {...(captionState === CaptionState.AUTO
@@ -237,7 +236,15 @@ export function LightboxGalleryProviderWithRef(
                 ...CAPTION_PROPS,
               })}
         >
-          <div className={classes.captionText}>{caption}</div>
+          <div
+            className={objstr({
+              [classes.captionText]: true,
+              [EXPOSED_CAPTION_CLASS]: true,
+            })}
+            part="caption"
+          >
+            {caption}
+          </div>
         </div>
         {!showCarousel && (
           <div

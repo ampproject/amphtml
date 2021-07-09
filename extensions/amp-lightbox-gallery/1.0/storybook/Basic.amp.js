@@ -197,6 +197,7 @@ export const StreamGallery = () => {
 export const Grouping = () => {
   return (
     <>
+      <style>{`::part(caption) { color: red; }`}</style>
       <p>
         Note: The standalone img/amp-img elements are lightboxed in a separate
         lightbox-gallery group than the carousel elements.
@@ -216,7 +217,21 @@ export const Grouping = () => {
           lightbox
           src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
         />
-        <figcaption>Dog wearing yellow shirt.</figcaption>
+        <figcaption>
+          This is the caption for the first image. Lorem Ipsum is simply dummy
+          text of the printing and typesetting industry. Lorem Ipsum has been
+          the industry's standard dummy text ever since the 1500s, when an
+          unknown printer took a galley of type and scrambled it to make a type
+          specimen book. It has survived not only five centuries, but also the
+          leap into electronic typesetting, remaining essentially unchanged. It
+          was popularised in the 1960s with the release of Letraset sheets
+          containing Lorem Ipsum passages, and more recently with desktop
+          publishing software like Aldus PageMaker including versions of Lorem
+          Ipsum. Lorem Ipsum is simply dummy text of the printing and
+          typesetting industry. Lorem Ipsum is simply dummy text of the printing
+          and typesetting industry. Lorem Ipsum is simply dummy text of the
+          printing and typesetting industry.
+        </figcaption>
       </figure>
       <amp-img
         id="my-img"
