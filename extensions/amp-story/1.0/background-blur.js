@@ -123,6 +123,7 @@ export class BackgroundBlur {
       return;
     }
 
+    // Animation loop for fade.
     let startTime;
     const nextFrame = (currTime) => {
       if (!startTime) {
