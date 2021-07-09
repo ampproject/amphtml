@@ -12,20 +12,19 @@ jobs:
     steps:
       - uses: actions/setup-node@v2
         with:
-          node-version: 14.x
-          registry-url: https://registry.npmjs.org
+          node-version: lts/*
       - uses: actions/checkout@v2
       - name: Add progress comment to cherry-pick issue for Stable and LTS
         if: github.event_name == 'issues' && github.event.action == 'opened'
         run: |
-          npm install
+          npm ci
           node ./build-system/status-page/comment.js ${{ github.event.issue.number }} '${{ github.event.issue.body }}' ${{ github.actor }}
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
       - name: Sync status page with cherry-pick progress
         if: github.event_name == 'issue_comment' && github.event.action == 'edited' && contains(github.event.comment.body, '🌸 Cherry-pick Progress 🌸')
         run: |
-          npm install
+          npm ci
           node ./build-system/status-page/incident.js ${{ github.event.issue.number }} '${{ github.event.issue.body }}' '${{ github.event.changes.body.from }}' '${{ github.event.comment.body}}'
         env:
           STATUS_PAGE_ID: ${{ secrets.STATUS_PAGE_ID }}
