@@ -68,7 +68,7 @@ constexpr std::array<char32_t, 32> kReplacementTable{
     // 0x0D->L'\u000D' is a no-op.
 };
 
-// Copied from absl/strings/ascii.cc
+// Copied from https://github.com/abseil/abseil-cpp/blob/master/absl/strings/ascii.cc
 constexpr std::array<unsigned char, 256> kPropertyBits{
     0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,  // 0x00
     0x40, 0x68, 0x48, 0x48, 0x48, 0x48, 0x40, 0x40,
