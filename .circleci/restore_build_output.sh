@@ -24,11 +24,12 @@ YELLOW() { echo -e "\033[0;33m$1\033[0m"; }
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 
 MERGABLE_OUTPUT_DIRS="build dist dist.3p dist.tools"
-
-# TODO(danielrozenberg): remove conditional after #33708 is merged.
-WORKSPACE_DIR=$(if [[ -d /tmp/restored-workspace ]]; then echo "/tmp/restored-workspace"; else echo "/tmp/workspace"; fi)
+WORKSPACE_DIR="/tmp/restored-workspace"
 
 if [[ -d "${WORKSPACE_DIR}/builds" ]]; then
+  echo $(GREEN "Installing rsync...")
+  sudo apt update && sudo apt install rsync
+
   echo $(GREEN "Restoring build output from workspace")
   for CONTAINER_DIR in ${WORKSPACE_DIR}/builds/*; do
     for OUTPUT_DIR in ${MERGABLE_OUTPUT_DIRS}; do

@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.1.3
+  node: circleci/node@4.5.1
 
 push_and_pr_builds: &push_and_pr_builds
   filters:
@@ -19,41 +20,38 @@ push_builds_only: &push_builds_only
 executors:
   amphtml-docker-small-executor:
     docker:
-      - image: cimg/base:2021.05
+      - image: cimg/base:stable
     resource_class: small
   amphtml-medium-executor:
-    machine:
-      image: ubuntu-2004:202010-01
+    docker:
+      - image: cimg/node:lts-browsers
     resource_class: medium
   amphtml-large-executor:
-    machine:
-      image: ubuntu-2004:202010-01
+    docker:
+      - image: cimg/node:lts-browsers
     resource_class: large
   amphtml-xlarge-executor:
-    machine:
-      image: ubuntu-2004:202010-01
+    docker:
+      - image: cimg/node:lts-browsers
+    resource_class: xlarge
+  validator-xlarge-executor:
+    docker:
+      - image: cimg/openjdk:16.0-node
     resource_class: xlarge
 
 commands:
-  restore_workspace:
+  setup_vm:
     steps:
       - attach_workspace:
           at: /tmp
       - run:
           name: 'Rename Restored Workspace'
-          command: |
-            if [[ -d /tmp/workspace ]]; then
-              mv /tmp/workspace /tmp/restored-workspace
-            fi
-  maybe_gracefully_halt:
-    steps:
+          command: mv /tmp/workspace /tmp/restored-workspace
       - run:
           name: 'Maybe Gracefully Halt'
           command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/maybe_gracefully_halt.sh | bash
-  setup_vm:
-    steps:
       - run:
-          name: 'Create Workspace'
+          name: 'Create New Workspace'
           command: mkdir -p /tmp/workspace
       - checkout
       - run:
@@ -65,9 +63,7 @@ commands:
       - run:
           name: 'Configure Hosts'
           command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
-      - run:
-          name: 'Install Dependencies'
-          command: ./.circleci/install_dependencies.sh
+      - node/install-packages
       - run:
           name: 'Restore Build Output'
           command: ./.circleci/restore_build_output.sh
@@ -79,8 +75,12 @@ commands:
             - workspace
   install_chrome:
     steps:
-      - browser-tools/install-chrome:
-          replace-existing: true
+      - browser-tools/install-browser-tools:
+          install-chrome: true
+          install-chromedriver: true
+          install-firefox: false
+          install-geckodriver: false
+          replace-existing-chrome: true
   fail_fast:
     steps:
       - run:
@@ -107,9 +107,8 @@ jobs:
     executor:
       name: amphtml-medium-executor
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
+      - install_chrome
       - run:
           name: 'Checks'
           command: node build-system/pr-check/checks.js
@@ -119,8 +118,6 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Unminified Build'
@@ -131,8 +128,6 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Create Artifacts Directory'
@@ -148,8 +143,6 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Module Build'
@@ -160,8 +153,6 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Bundle Size'
@@ -170,10 +161,8 @@ jobs:
       - teardown_vm
   'Validator Tests':
     executor:
-      name: amphtml-xlarge-executor
+      name: validator-xlarge-executor
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Install Validator Dependencies'
@@ -188,8 +177,6 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -202,8 +189,6 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -216,8 +201,6 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -235,8 +218,6 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -254,8 +235,6 @@ jobs:
         type: enum
         enum: ['prod', 'canary']
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -268,8 +247,6 @@ jobs:
     executor:
       name: amphtml-large-executor
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -282,8 +259,6 @@ jobs:
     executor:
       name: amphtml-xlarge-executor
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
@@ -301,8 +276,6 @@ jobs:
         type: enum
         enum: ['A', 'B', 'C']
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - run:
           name: 'Experiment << parameters.exp >> Build'
@@ -318,8 +291,6 @@ jobs:
         type: enum
         enum: ['A', 'B', 'C']
     steps:
-      - restore_workspace
-      - maybe_gracefully_halt
       - setup_vm
       - install_chrome
       - run:
