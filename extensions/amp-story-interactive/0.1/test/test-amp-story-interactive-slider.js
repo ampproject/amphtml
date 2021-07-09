@@ -78,5 +78,31 @@ describes.realWin(
         ampStorySlider.getRootElement().querySelector('input[type="range"]')
       ).to.not.be.null;
     });
+
+    it('should be disabled after the input event', async () => {
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      const slider = ampStorySlider
+        .getRootElement()
+        .querySelector('input[type="range"]');
+      // simulates a change event, which is when the user releases the slider
+      slider.dispatchEvent(new CustomEvent('change'));
+      expect(slider.hasAttribute('disabled')).to.be.true;
+    });
+
+    it('checks that input is the same as the number displayed in the bubble', async () => {
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      const slider = ampStorySlider
+        .getRootElement()
+        .querySelector('input[type="range"]');
+      const sliderValue = ampStorySlider
+        .getRootElement()
+        .querySelector('.i-amphtml-story-interactive-slider-bubble span');
+      slider.value = 50;
+      // simulates an input event
+      slider.dispatchEvent(new CustomEvent('input'));
+      expect(slider.value).to.be.equal(sliderValue.textContent);
+    });
   }
 );

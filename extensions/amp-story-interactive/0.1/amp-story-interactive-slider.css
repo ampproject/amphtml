@@ -25,13 +25,13 @@
   box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
 }
 
-.i-amphtml-story-interactive-slider-sliderValue {
+.i-amphtml-story-interactive-slider-bubble {
   position: relative !important;
   margin: 0 1.5em !important;
   z-index: 2 !important;
 }
 
-.i-amphtml-story-interactive-slider-sliderValue span {
+.i-amphtml-story-interactive-slider-bubble span {
   position: absolute !important;
   left: var(--percentage) !important;
   transform: translate(-50%, 50%) scale(0) !important;
@@ -43,11 +43,11 @@
   transition: transform 0.3s ease-in-out !important;
 }
 
-.i-amphtml-story-interactive-slider-sliderValue span.show {
+.i-amphtml-story-interactive-slider-bubble span.show {
   transform: translate(-50%, -10%) scale(1) !important;
 }
 
-.i-amphtml-story-interactive-slider-sliderValue span::after {
+.i-amphtml-story-interactive-slider-bubble span::after {
   position: absolute !important;
   content: '' !important;
   height: 2.8em !important;
@@ -63,14 +63,13 @@
   border-top-right-radius: 50% !important;
 }
 
-.i-amphtml-story-interactive-slider-sliderValue span.answered{
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble span{
   cursor: initial !important;
   font-weight: 700 !important;
   transform: translate(-50%, 60%) scale(.8) !important;
 }
 
-.i-amphtml-story-interactive-slider-sliderValue span.answered::after {
-  
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble span::after {
   cursor: initial !important;
   border: 0.125em solid #fff !important;
   border-bottom-right-radius: 50% !important;
@@ -86,7 +85,7 @@
   position: relative !important;
 }
 
-.i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-slidervalue{
+.i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-side-values{
   font-size: 1.125em !important;
   color: var(--interactive-accent-color) !important;
   font-weight: 600 !important;
@@ -133,7 +132,6 @@
   height: 1.5em !important;
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
- 
 }
 
 .i-amphtml-story-interactive-slider-input[disabled]{

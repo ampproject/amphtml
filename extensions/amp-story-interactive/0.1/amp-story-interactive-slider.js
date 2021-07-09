@@ -20,8 +20,8 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
-import { setImportantStyles } from '#core/dom/style';
+//import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
+import {setImportantStyles} from '#core/dom/style';
 
 /**
  * Generates the template for the slider.
@@ -29,11 +29,7 @@ import { setImportantStyles } from '#core/dom/style';
  * @param {!Element} element
  * @return {!Element}
  */
-/**
- * Handles a tap event on the quiz element.
- * @param {Event}
- * @protected
- */
+
 const buildSliderTemplate = (element) => {
   const html = htmlFor(element);
   return html`
@@ -41,7 +37,7 @@ const buildSliderTemplate = (element) => {
       <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-slider-input-container">
         <div class="i-amphtml-story-interactive-slider-field">
-          <div class="i-amphtml-story-interactive-slidervalue">0</div>
+          <div class="i-amphtml-story-interactive-side-values">0</div>
           <div class="i-amphtml-story-interactive-slider-input-size">
             <input
               class="i-amphtml-story-interactive-slider-input"
@@ -50,11 +46,11 @@ const buildSliderTemplate = (element) => {
               max="100"
               value="0"
             />
-            <div class="i-amphtml-story-interactive-slider-sliderValue span">
+            <div class="i-amphtml-story-interactive-slider-bubble span">
               <span>50</span>
             </div>
           </div>
-          <div class="i-amphtml-story-interactive-slidervalue">100</div>
+          <div class="i-amphtml-story-interactive-side-values">100</div>
         </div>
       </div>
     </div>
@@ -67,7 +63,23 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    */
   constructor(element) {
     super(element, InteractiveType.SLIDER, [0, 1]);
+    this.sliderValue = null;
+    this.inputSlider = null;
   }
+
+  /** @override */
+  buildComponent() {
+    this.rootEl_ = buildSliderTemplate(this.element);
+    this.sliderValue = this.rootEl_.querySelector(
+      '.i-amphtml-story-interactive-slider-bubble span'
+    );
+    this.inputSlider = this.rootEl_.querySelector(
+      '.i-amphtml-story-interactive-slider-input'
+    );
+    this.attachPrompt_(this.rootEl_);
+    return this.rootEl_;
+  }
+
   /** @override */
   buildCallback() {
     return super.buildCallback(CSS);
@@ -79,42 +91,34 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   }
 
   /** @override */
-  initializeListeners_(){
-    console.log("running");
+  initializeListeners_() {
     super.initializeListeners_();
-    const sliderValue = scopedQuerySelector(this.rootEl_, 'span');
-    const inputSlider = scopedQuerySelector(this.rootEl_, 'input');
 
-    this.rootEl_.addEventListener('input', () => {
-      let value = inputSlider.value;
-      sliderValue.textContent = value;
-      sliderValue.classList.add('show');
-      sliderValue.classList.remove('answered');
-      this.updateSlider(value);
-
+    this.inputSlider.addEventListener('input', () => {
+      const {value} = this.inputSlider;
+      this.sliderValue.textContent = value;
+      this.sliderValue.classList.add('show');
+      this.onDrag_(value);
     });
-    this.rootEl_.addEventListener('mouseup', () => {
-      inputSlider.setAttribute('disabled', "");
-      sliderValue.classList.remove('show');
-      sliderValue.classList.add('answered');
-    });
-    this.rootEl_.addEventListener('touchend', () => {
-      inputSlider.setAttribute('disabled', "");
-      sliderValue.classList.remove('show');
-      sliderValue.classList.add('answered');
+    this.inputSlider.addEventListener('change', () => {
+      this.postState_();
     });
   }
 
-  updateSlider(val) {
-    console.log(val);
-      setImportantStyles(this.rootEl_, {"--percentage": val + "%"});
+  /**
+   * @private
+   * @param {Element} val
+   */
+  onDrag_(val) {
+    setImportantStyles(this.rootEl_, {'--percentage': val + '%'});
   }
 
-  /** @override */
-  buildComponent() {
-    this.rootEl_ = buildSliderTemplate(this.element);
-    this.attachPrompt_(this.rootEl_);
-    return this.rootEl_;
-  
+  /**
+   * @private
+   */
+  postState_() {
+    this.updateToPostSelectionState_();
+    this.inputSlider.setAttribute('disabled', '');
+    this.sliderValue.classList.remove('show');
   }
 }
