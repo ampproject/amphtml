@@ -24,5 +24,5 @@
  * @return {string}
  */
 export function internalRuntimeVersion() {
-  return '$internalRuntimeVersion$';
+  return INTERNAL_RUNTIME_VERSION;
 }
