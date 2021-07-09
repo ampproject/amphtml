@@ -398,8 +398,7 @@ export class AnimationRunner {
       try {
         this.runner_.pause();
       } catch (e) {
-        // This fails when the story was not initialized and the user pauses.
-        // Eg: visibilityState=prerender and long press before page becomes active.
+        // This fails when the story animations are not initialized and pause is called. Context on #35161.
       }
     }
   }
