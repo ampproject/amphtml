@@ -141,12 +141,12 @@ async function syncIncident() {
 
   // get step that was checked off
   let checked = -1;
-  for (const index of [3, 2, 1, 0]) {
+  for (let i = steps.length - 1; i >= 0; i--) {
     const regex = new RegExp(
-      `[x] <!-- status=${steps[index].status} -->`.replace(/[[\]\\]/g, '\\$&')
+      `[x] <!-- status=${steps[i].status} -->`.replace(/[[\]\\]/g, '\\$&')
     );
     if (regex.test(after) && !regex.test(before)) {
-      checked = index;
+      checked = i;
       break;
     }
   }
