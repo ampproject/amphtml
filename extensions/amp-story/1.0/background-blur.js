@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '#core/constants/common-signals';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
 import {user} from '../../../src/log';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 /** @const {number} */
 const CANVAS_SIZE = 3;
 
 /** @const {number} */
 const DURATION_MS = 200;
+
+/** @const {string} */
+const CLASS_NAME = 'BACKGROUND-BLUR';
 
 export class BackgroundBlur {
   /**
@@ -41,6 +46,9 @@ export class BackgroundBlur {
 
     /**  @private {?number} */
     this.currentRAF_ = null;
+
+    /**  @private {?boolean} */
+    this.firstLoad_ = true;
   }
 
   /**
@@ -72,11 +80,24 @@ export class BackgroundBlur {
    * @param {!Element} pageElement
    */
   update(pageElement) {
-    const fillElement = this.getBiggestImage_(pageElement);
-    if (!fillElement) {
-      user().info('BACKGROUND-BLUR', 'No image found for background blur.');
+    const ampImgEl = this.getBiggestImage_(pageElement);
+    if (!ampImgEl) {
+      user().info(CLASS_NAME, 'No image found for background blur.');
+      this.animate_();
+      return;
     }
-    this.animate_(fillElement);
+
+    // Ensures img element exists and is loaded.
+    whenUpgradedToCustomElement(ampImgEl)
+      .then(() => ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
+      .then(
+        () => {
+          this.animate_(ampImgEl.querySelector('img'));
+        },
+        () => {
+          user().error(CLASS_NAME, 'Failed to load the amp-img.');
+        }
+      );
   }
 
   /**
@@ -86,6 +107,23 @@ export class BackgroundBlur {
    */
   animate_(fillElement) {
     const context = this.canvas_.getContext('2d');
+
+    const draw = (easing) => {
+      context.globalAlpha = easing;
+      context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      if (fillElement) {
+        context.drawImage(fillElement, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      }
+    };
+
+    // Do not animate on first load.
+    if (this.firstLoad_) {
+      draw(1 /** easing **/);
+      this.firstLoad_ = false;
+      return;
+    }
+
+    // Animation loop for fade.
     let startTime;
     const nextFrame = (currTime) => {
       if (!startTime) {
@@ -94,11 +132,7 @@ export class BackgroundBlur {
       const elapsed = currTime - startTime;
       if (elapsed < DURATION_MS) {
         const easing = 1 - Math.pow(1 - elapsed / DURATION_MS, 2);
-        context.globalAlpha = easing;
-        context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-        if (fillElement) {
-          context.drawImage(fillElement, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
-        }
+        draw(easing);
         this.currentRAF_ = requestAnimationFrame(nextFrame);
       }
     };
@@ -111,7 +145,7 @@ export class BackgroundBlur {
    * Get active page's biggest amp-img element.
    * @private
    * @param {!Element} pageElement
-   * @return {?Element} An img element or null.
+   * @return {?Element} An amp-img element or null.
    */
   getBiggestImage_(pageElement) {
     const getSize = (el) => {
@@ -123,8 +157,6 @@ export class BackgroundBlur {
     };
     return Array.from(
       scopedQuerySelectorAll(pageElement, 'amp-story-grid-layer amp-img')
-    )
-      .sort((firstEl, secondEl) => getSize(secondEl) - getSize(firstEl))[0]
-      ?.querySelector('img');
+    ).sort((firstEl, secondEl) => getSize(secondEl) - getSize(firstEl))[0];
   }
 }
