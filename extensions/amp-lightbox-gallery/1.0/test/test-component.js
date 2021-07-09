@@ -202,12 +202,14 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
       expect(carousel.prop('arrowNextAs').name).to.equal('NavButtonIcon');
 
       // Children are given to carousel
-      const imgs = carousel.find('img');
-      expect(imgs).to.have.lengthOf(4);
-      expect(imgs.at(0).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(1).hasClass('rendered-img')).to.be.true;
-      expect(imgs.at(2).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(3).hasClass('rendered-img')).to.be.true;
+      expect(carousel.find('[data-slide=0] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=1] img').hasClass('rendered-img')).to.be
+        .true;
+      expect(carousel.find('[data-slide=2] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=3] img').hasClass('rendered-img')).to.be
+        .true;
     });
 
     it('toggles to grid view', () => {
@@ -266,12 +268,15 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
       const carousel = wrapper.find('BaseCarousel');
       expect(carousel).to.have.lengthOf(1);
       expect(carousel.prop('hidden')).to.be.true;
-      const imgs = carousel.find('img');
-      expect(imgs).to.have.lengthOf(4);
-      expect(imgs.at(0).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(1).hasClass('rendered-img')).to.be.true;
-      expect(imgs.at(2).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(3).hasClass('rendered-img')).to.be.true;
+      // Children are given to carousel
+      expect(carousel.find('[data-slide=0] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=1] img').hasClass('rendered-img')).to.be
+        .true;
+      expect(carousel.find('[data-slide=2] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=3] img').hasClass('rendered-img')).to.be
+        .true;
     });
 
     it('toggles to grid view and back to carousel', () => {
@@ -554,12 +559,14 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
       expect(carousel.prop('arrowNextAs').name).to.equal('NavButtonIcon');
 
       // Children are given to carousel
-      const imgs = carousel.find('img');
-      expect(imgs).to.have.lengthOf(4);
-      expect(imgs.at(0).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(1).hasClass('rendered-img')).to.be.true;
-      expect(imgs.at(2).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(3).hasClass('rendered-img')).to.be.true;
+      expect(carousel.find('[data-slide=0] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=1] img').hasClass('rendered-img')).to.be
+        .true;
+      expect(carousel.find('[data-slide=2] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=3] img').hasClass('rendered-img')).to.be
+        .true;
     });
 
     it('toggles to grid view', () => {
@@ -617,12 +624,14 @@ describes.sandboxed('LightboxGallery preact component', {}, () => {
       const carousel = wrapper.find('BaseCarousel');
       expect(carousel).to.have.lengthOf(1);
       expect(carousel.prop('hidden')).to.be.true;
-      const imgs = carousel.find('img');
-      expect(imgs).to.have.lengthOf(4);
-      expect(imgs.at(0).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(1).hasClass('rendered-img')).to.be.true;
-      expect(imgs.at(2).hasClass('rendered-img')).to.be.false;
-      expect(imgs.at(3).hasClass('rendered-img')).to.be.true;
+      expect(carousel.find('[data-slide=0] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=1] img').hasClass('rendered-img')).to.be
+        .true;
+      expect(carousel.find('[data-slide=2] img').hasClass('rendered-img')).to.be
+        .false;
+      expect(carousel.find('[data-slide=3] img').hasClass('rendered-img')).to.be
+        .true;
     });
 
     it('toggles to grid view and back to carousel', () => {
