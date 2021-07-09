@@ -54,7 +54,7 @@ class AmpFacebook extends BaseElement {
   init() {
     return dict({
       'onReady': () => this.togglePlaceholder(false),
-      'requestResize': (height) => this.forceChangeHeight(height),
+      'requestResize': (height) => this.attemptChangeHeight(height),
     });
   }
 
