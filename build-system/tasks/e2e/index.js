@@ -30,7 +30,7 @@ const {
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
 const {buildRuntime, getFilesFromArgv} = require('../../common/utils');
-const {cyan} = require('../../common/colors');
+const {cyan, green} = require('../../common/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
@@ -86,6 +86,16 @@ function createMocha_() {
     reporter = dotsReporter;
   }
 
+  /** @type {Partial<Mocha.MochaOptions> & Record<string, any>} */
+  const additionOptions = {};
+  if (argv.workers || 2) {
+    additionOptions.jobs = argv.workers || 2;
+    additionOptions.require = ['./build-system/tasks/e2e/worker-helper'];
+    additionOptions.parallel = true;
+  }
+
+  log(green('additional options'), JSON.stringify(additionOptions));
+
   return new Mocha({
     // e2e tests have a different standard for when a test is too slow,
     // so we set a non-default threshold.
@@ -98,6 +108,7 @@ function createMocha_() {
           mochaFile: 'result-reports/e2e.xml',
         }
       : null,
+    ...additionOptions,
   });
 }
 
@@ -242,4 +253,5 @@ e2e.flags = {
   'debug': 'Print debugging information while running tests',
   'report': 'Write test result report to a local file',
   'coverage': 'Collect coverage data from instrumented code',
+  'workers': 'The number of workers to use. Runs synchronously if not defined.',
 };
