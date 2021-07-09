@@ -46,9 +46,7 @@ const buildSliderTemplate = (element) => {
               max="100"
               value="0"
             />
-            <div class="i-amphtml-story-interactive-slider-bubble span">
-              <span>50</span>
-            </div>
+            <div class="i-amphtml-story-interactive-slider-bubble">50</div>
           </div>
           <div class="i-amphtml-story-interactive-side-values">100</div>
         </div>
@@ -63,17 +61,19 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    */
   constructor(element) {
     super(element, InteractiveType.SLIDER, [0, 1]);
-    this.sliderValue = null;
-    this.inputSlider = null;
+    /** @private {?Element} bubble containing the current selection of the user while dragging */
+    this.bubbleEl_ = null;
+    /** @private {?Element} tracks user input */
+    this.inputEl_ = null;
   }
 
   /** @override */
   buildComponent() {
     this.rootEl_ = buildSliderTemplate(this.element);
-    this.sliderValue = this.rootEl_.querySelector(
-      '.i-amphtml-story-interactive-slider-bubble span'
+    this.bubbleEl_ = this.rootEl_.querySelector(
+      '.i-amphtml-story-interactive-slider-bubble'
     );
-    this.inputSlider = this.rootEl_.querySelector(
+    this.inputEl_ = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-slider-input'
     );
     this.attachPrompt_(this.rootEl_);
@@ -94,13 +94,13 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   initializeListeners_() {
     super.initializeListeners_();
 
-    this.inputSlider.addEventListener('input', () => {
-      const {value} = this.inputSlider;
-      this.sliderValue.textContent = value;
-      this.sliderValue.classList.add('show');
+    this.inputEl_.addEventListener('input', () => {
+      const {value} = this.inputEl_;
+      this.bubbleEl_.textContent = value;
+      this.bubbleEl_.classList.add('show');
       this.onDrag_(value);
     });
-    this.inputSlider.addEventListener('change', () => {
+    this.inputEl_.addEventListener('change', () => {
       this.postState_();
     });
   }
@@ -118,7 +118,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    */
   postState_() {
     this.updateToPostSelectionState_();
-    this.inputSlider.setAttribute('disabled', '');
-    this.sliderValue.classList.remove('show');
+    this.inputEl_.setAttribute('disabled', '');
+    this.bubbleEl_.classList.remove('show');
   }
 }

@@ -96,13 +96,14 @@ describes.realWin(
       const slider = ampStorySlider
         .getRootElement()
         .querySelector('input[type="range"]');
-      const sliderValue = ampStorySlider
+      const sliderBubble = ampStorySlider
         .getRootElement()
-        .querySelector('.i-amphtml-story-interactive-slider-bubble span');
-      slider.value = 50;
+        .querySelector('.i-amphtml-story-interactive-slider-bubble');
+      slider.value = 30;
       // simulates an input event
       slider.dispatchEvent(new CustomEvent('input'));
-      expect(slider.value).to.be.equal(sliderValue.textContent);
+      // expect(slider.value).to.be.equal(sliderValue.textContent);
+      expect(sliderBubble.textContent).to.be.equal('30');
     });
   }
 );
