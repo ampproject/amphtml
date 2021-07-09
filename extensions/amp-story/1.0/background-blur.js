@@ -48,7 +48,7 @@ export class BackgroundBlur {
     this.currentRAF_ = null;
 
     /**  @private {?boolean} */
-    this.firstLoad = true;
+    this.firstLoad_ = true;
   }
 
   /**
@@ -117,9 +117,9 @@ export class BackgroundBlur {
     };
 
     // Do not animate on first load.
-    if (this.firstLoad) {
+    if (this.firstLoad_) {
       draw(1);
-      this.firstLoad = false;
+      this.firstLoad_ = false;
       return;
     }
 
