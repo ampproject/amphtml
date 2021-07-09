@@ -15,13 +15,6 @@
  */
 
 /* 1em = 16px for interactive components, unless overriden by font-size */
-.i-amphtml-story-interactive-quiz-container {
-  --correct-color: #5bba74 !important;
-  --correct-color-shaded: #00600f !important;
-  --incorrect-color: #f34e4e !important;
-  --incorrect-color-shaded: #b71c1c !important;
-}
-
 .i-amphtml-story-interactive-quiz-option-container {
   display: flex !important;
   flex-direction: column;
