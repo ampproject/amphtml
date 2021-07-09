@@ -118,7 +118,7 @@ export class BackgroundBlur {
 
     // Do not animate on first load.
     if (this.firstLoad_) {
-      draw(1);
+      draw(1 /** easing **/);
       this.firstLoad_ = false;
       return;
     }
