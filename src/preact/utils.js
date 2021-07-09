@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {useAmpContext} from './context';
 import {useLayoutEffect} from '#preact';
+
+import {useAmpContext} from './context';
 
 /**
  * Notifies Resources (if present) of a rerender in the component.

@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-// Magic constant that is replaced by babel.
-// IS_FORTESTING is only replaced when `amp dist` is called without the
-// --fortesting flag.
-const IS_FORTESTING = true;
-
 /**
- * Returns true whenever closure compiler is used with --fortesting. Calls are
- * DCE'd when compiled.
+ * Returns true whenever --fortesting is used.
+ * This is a magic constant replaced by babel.
+ *
+ * Calls are DCE'd when compiled.
  * @return {boolean}
  */
 export function isFortesting() {

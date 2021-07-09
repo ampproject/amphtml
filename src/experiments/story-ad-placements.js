@@ -16,7 +16,6 @@
 
 import {randomlySelectUnsetExperiments} from '#experiments';
 
-// typedef imports
 import {ExperimentInfoDef} from './experiments.type';
 
 /** @const */

@@ -146,13 +146,15 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  '(?:var|let|const) +IS_FORTESTING +=': {
-    message: 'IS_FORTESTING local var only allowed in mode.js.',
-    allowlist: ['src/core/mode/for-testing.js'],
-  },
-  '(?:var|let|const) +IS_MINIFIED +=': {
-    message: 'IS_MINIFIED local var only allowed in core/mode/minified.js',
-    allowlist: ['src/core/mode/minified.js'],
+  'INTERNAL_RUNTIME_VERSION|IS_(FORTESTING|MINIFIED)': {
+    message:
+      'Do not use build constants directly. Instead, use the helpers in `#core/mode`.',
+    allowlist: [
+      'src/internal-version.js',
+      'src/core/mode/minified.js',
+      'src/core/mode/for-testing.js',
+      'build-system/compile/build-constants.js',
+    ],
   },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
@@ -987,6 +989,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'extensions/amp-next-page/1.0/visibility-observer.js',
       'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
+      'extensions/amp-story/1.0/background-blur.js',
       'extensions/amp-story/1.0/page-advancement.js',
     ],
   },

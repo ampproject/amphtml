@@ -72,7 +72,6 @@ exports.rules = [
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg-gaa.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
-      'extensions/amp-google-assistant-assistjs/**/*.js->third_party/closure-responding-channel/closure-bundle.js',
       'src/core/dom/css-selectors.js->third_party/css-escape/css-escape.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
@@ -241,10 +240,11 @@ exports.rules = [
       'extensions/amp-stream-gallery/1.0/component.js->extensions/amp-base-carousel/1.0/component.js',
 
       // Autolightboxing dependencies
-      'extensions/amp-base-carousel/1.0/component.js->extensions/amp-lightbox-gallery/1.0/component.js',
-      'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/context.js',
+      'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/component.js',
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/component.js',
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-base-carousel/1.0/component.js',
+      'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-lightbox/1.0/component.jss.js',
+      'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
 
       // Facebook components
       'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',
@@ -419,8 +419,10 @@ exports.rules = [
       'extensions/amp-link-rewriter/0.1/amp-link-rewriter.js->' +
         'src/service/navigation.js',
       // For localization.
-      'extensions/amp-story/1.0/amp-story-localization-service.js->src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->src/service/localization.js',
+      'extensions/amp-story/1.0/amp-story-localization-service.js->src/service/localization/index.js',
+      'extensions/amp-story*/**/*.js->src/service/localization/strings.js',
+      'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->src/service/localization/index.js',
+
       // Accessing calculateScriptBaseUrl() for vendor config URLs
       'extensions/amp-analytics/0.1/config.js->' +
         'src/service/extension-script.js',
@@ -463,7 +465,7 @@ exports.rules = [
       'src/polyfills/index.js->src/polyfills/intersection-observer.js',
       'src/polyfills/index.js->src/polyfills/resize-observer.js',
       'src/polyfills/index.js->src/polyfills/map-set.js',
-      'src/polyfills/index.js->src/polyfills/set-add.js',
+      'src/polyfills/index.js->src/polyfills/set.js',
       'src/polyfills/index.js->src/polyfills/weakmap-set.js',
       'src/friendly-iframe-embed.js->src/polyfills/abort-controller.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',

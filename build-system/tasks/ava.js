@@ -20,6 +20,7 @@ const {execOrDie} = require('../common/exec');
 
 /**
  * Runs ava tests.
+ * @return {Promise<void>}
  */
 async function ava() {
   // These need equivalents for CI in build-system/pr-check/build-targets.js

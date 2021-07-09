@@ -95,7 +95,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
     'amp-ad',
     dict({
       'width': size.width,
-      'height': '0',
+      'height': size.height,
       'type': 'blade',
       'layout': 'fixed',
       'data-blade_player_type': 'bladex',
@@ -106,7 +106,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
     })
   );
 
-  ampBladeAd.classList.add('amp-apester-companion');
+  ampBladeAd.classList.add('i-amphtml-amp-apester-companion');
 
   const relativeElement =
     position === 'below' ? apesterElement.nextSibling : apesterElement;
