@@ -65,6 +65,13 @@
   background-size: cover !important;
 }
 
+.i-amphtml-story-interactive-img-option-img::before {
+  content: '' !important;
+  display: none !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .i-amphtml-story-interactive-option-selected
   .i-amphtml-story-interactive-img-option-img {
   box-shadow: inset 0 0 0 0.25em var(--i-amphtml-interactive-option-post-color) !important;
@@ -72,11 +79,8 @@
 
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
   .i-amphtml-story-interactive-img-option-img::before {
-  background-color: var(--i-amphtml-interactive-option-post-color) !important;
-  content: '' !important;
   display: block !important;
-  width: 100% !important;
-  height: 100% !important;
+  background-color: var(--i-amphtml-interactive-option-post-color) !important;
   margin-top: calc(100% - var(--option-percentage)) !important;
   opacity: 0.5 !important;
 }
@@ -99,6 +103,16 @@
   animation-delay: var(
     --i-amphtml-interactive-landing-animation-delay-offset-el1
   ) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-img-option-img::before {
+  display: block !important;
+  background-color: var(--i-amphtml-interactive-theme-shading-flash) !important;
+  opacity: 0 !important;
+  animation: i-amphtml-interactive-animation-landing-animation-flash-background
+    var(--i-amphtml-interactive-animation-time) !important;
+  animation-delay: inherit !important;
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
