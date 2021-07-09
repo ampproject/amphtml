@@ -370,10 +370,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (
-      isExperimentOn(this.win, 'amp-story-interactive-disclaimer') &&
-      this.element.hasAttribute('endpoint')
-    ) {
+    if (this.element.hasAttribute('endpoint')) {
       // Needs to be called after buildCallback to measure properly.
       this.disclaimerEl_ = buildInteractiveDisclaimer(this);
       this.rootEl_.prepend(this.disclaimerEl_);
