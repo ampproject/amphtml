@@ -17,6 +17,7 @@
 import {BaseElement} from './base-element';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
+import {dict} from '#core/types/object';
 
 /** @const {string} */
 const TAG = 'amp-iframe';
@@ -30,6 +31,17 @@ class AmpIframe extends BaseElement {
       'expected global "bento" or specific "bento-iframe" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
+  init() {
+    return dict({
+      'onLoadCallback': () => {
+        if (this.getPlaceholder()) {
+          this.togglePlaceholder(false);
+        }
+      },
+    });
   }
 }
 

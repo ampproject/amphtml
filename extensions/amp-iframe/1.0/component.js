@@ -24,6 +24,7 @@ export function Iframe({
   allowFullScreen,
   allowPaymentRequest,
   allowTransparency,
+  onLoadCallback,
   referrerPolicy,
   sandbox,
   src,
@@ -39,6 +40,7 @@ export function Iframe({
       allowpaymentrequest={allowPaymentRequest}
       allowtransparency={allowTransparency}
       referrerpolicy={referrerPolicy}
+      onload={onLoadCallback}
       {...rest}
     ></iframe>
   );
