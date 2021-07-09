@@ -88,8 +88,8 @@ function createMocha_() {
 
   /** @type {Partial<Mocha.MochaOptions> & Record<string, any>} */
   const additionOptions = {};
-  if (argv.workers || 2) {
-    additionOptions.jobs = argv.workers || 2;
+  if (argv.workers || 4) {
+    additionOptions.jobs = argv.workers || 4;
     additionOptions.require = ['./build-system/tasks/e2e/worker-helper'];
     additionOptions.parallel = true;
   }
