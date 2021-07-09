@@ -82,7 +82,7 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
   /** @override */
   layoutCallback() {
     this.setBubbleColor_(dev().assertElement(this.rootEl_));
-    super.layoutCallback();
+    return super.layoutCallback();
   }
 
   /**
