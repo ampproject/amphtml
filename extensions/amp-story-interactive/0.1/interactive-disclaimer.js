@@ -25,6 +25,8 @@
 import {LocalizedStringId} from '#service/localization/strings';
 import {htmlFor} from '#core/dom/static-template';
 import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
 
 /**
  * Creates a disclaimer icon and dialog.
@@ -111,6 +113,7 @@ export function buildInteractiveDisclaimer(interactive) {
     );
     descriptionEl.id = disclaimerDescriptionId;
     dialogEl.setAttribute('aria-describedby', disclaimerDescriptionId); // For screen readers.
+
     return closeDisclaimer(interactive, disclaimer);
   });
 

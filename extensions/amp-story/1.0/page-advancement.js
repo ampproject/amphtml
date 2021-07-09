@@ -475,6 +475,7 @@ export class ManualAdvancement extends AdvancementConfig {
     closest(
       dev().assertElement(event.target),
       (el) => {
+        console.log(el);
         tagName = el.tagName.toLowerCase();
 
         if (
@@ -488,6 +489,12 @@ export class ManualAdvancement extends AdvancementConfig {
         if (
           tagName.startsWith('amp-story-interactive-') &&
           !this.isInStoryPageSideEdge_(event, this.getStoryPageRect_())
+        ) {
+          shouldHandleEvent = false;
+          return true;
+        }
+        if (
+          el.classList.contains('i-amphtml-story-interactive-disclaimer-alert')
         ) {
           shouldHandleEvent = false;
           return true;
