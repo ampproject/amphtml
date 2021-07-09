@@ -922,6 +922,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-component-shadow: 0px 4px 12px rgba(60, 64, 67, 0.08), 0px 2px 4px rgba(60, 64, 67, 0.12);
   --i-amphtml-interactive-prompt-clamp: 4 !important;
   --i-amphtml-interactive-results-prompt-margin: 20px !important;
+  --i-amphtml-story-interactive-img-quiz-answer-filter: none;
 }
 
 .i-amphtml-story-interactive-component[theme="dark"] {
@@ -932,6 +933,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-theme-shading-base: rgb(60, 61, 63) !important;
   --i-amphtml-interactive-theme-shading-flash: rgba(167, 173, 180, 0.5) !important;
   --i-amphtml-interactive-strong-text-color: white !important;
+  --i-amphtml-story-interactive-img-quiz-answer-filter: invert(100%);
 }
 
 .i-amphtml-story-interactive-component[chip-style="shadow"] {
