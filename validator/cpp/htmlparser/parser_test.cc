@@ -39,43 +39,45 @@ TEST(ParserTest, ParseManufacturedTags) {
   auto doc = parser.Parse();
   EXPECT_NOT_NULL(doc);
   EXPECT_NOT_NULL(doc->RootNode());
-  EXPECT_FALSE(parser.Accounting().has_manufactured_html);
-  EXPECT_TRUE(parser.Accounting().has_manufactured_head);
-  EXPECT_TRUE(parser.Accounting().has_manufactured_body);
+  EXPECT_EQ(29, doc->Metadata().html_src_bytes);
+  EXPECT_FALSE(doc->Metadata().has_manufactured_html);
+  EXPECT_TRUE(doc->Metadata().has_manufactured_head);
+  EXPECT_TRUE(doc->Metadata().has_manufactured_body);
 
   htmlparser::Parser parser2("<html><head></head><div>Hello</div></html>");
   doc = parser2.Parse();
   EXPECT_NOT_NULL(doc);
+  EXPECT_EQ(42, doc->Metadata().html_src_bytes);
   EXPECT_NOT_NULL(doc->RootNode());
-  EXPECT_FALSE(parser2.Accounting().has_manufactured_html);
-  EXPECT_FALSE(parser2.Accounting().has_manufactured_head);
-  EXPECT_TRUE(parser2.Accounting().has_manufactured_body);
+  EXPECT_FALSE(doc->Metadata().has_manufactured_html);
+  EXPECT_FALSE(doc->Metadata().has_manufactured_head);
+  EXPECT_TRUE(doc->Metadata().has_manufactured_body);
 
   htmlparser::Parser parser3("<html><head></head><body><div>Hello</div>"
                              "</body></html>");
   doc = parser3.Parse();
   EXPECT_NOT_NULL(doc);
   EXPECT_NOT_NULL(doc->RootNode());
-  EXPECT_FALSE(parser3.Accounting().has_manufactured_html);
-  EXPECT_FALSE(parser3.Accounting().has_manufactured_head);
-  EXPECT_FALSE(parser3.Accounting().has_manufactured_body);
+  EXPECT_FALSE(doc->Metadata().has_manufactured_html);
+  EXPECT_FALSE(doc->Metadata().has_manufactured_head);
+  EXPECT_FALSE(doc->Metadata().has_manufactured_body);
 
   // Missing end (closing) tags does not amount to manufactured tags.
   htmlparser::Parser parser4("<html><head><body><div>Hello</div>");
   doc = parser4.Parse();
   EXPECT_NOT_NULL(doc);
   EXPECT_NOT_NULL(doc->RootNode());
-  EXPECT_FALSE(parser4.Accounting().has_manufactured_html);
-  EXPECT_FALSE(parser4.Accounting().has_manufactured_head);
-  EXPECT_FALSE(parser4.Accounting().has_manufactured_body);
+  EXPECT_FALSE(doc->Metadata().has_manufactured_html);
+  EXPECT_FALSE(doc->Metadata().has_manufactured_head);
+  EXPECT_FALSE(doc->Metadata().has_manufactured_body);
 
   htmlparser::Parser parser5("hello");
   doc = parser5.Parse();
   EXPECT_NOT_NULL(doc);
   EXPECT_NOT_NULL(doc->RootNode());
-  EXPECT_TRUE(parser5.Accounting().has_manufactured_html);
-  EXPECT_TRUE(parser5.Accounting().has_manufactured_head);
-  EXPECT_TRUE(parser5.Accounting().has_manufactured_body);
+  EXPECT_TRUE(doc->Metadata().has_manufactured_html);
+  EXPECT_TRUE(doc->Metadata().has_manufactured_head);
+  EXPECT_TRUE(doc->Metadata().has_manufactured_body);
   EXPECT_NOT_NULL(doc->RootNode());
   EXPECT_EQ(doc->RootNode()->FirstChild()->DataAtom(),
             htmlparser::Atom::HTML);
@@ -85,9 +87,9 @@ TEST(ParserTest, ParseManufacturedTags) {
   doc = parser6.Parse();
   EXPECT_NOT_NULL(doc);
   EXPECT_NOT_NULL(doc->RootNode());
-  EXPECT_TRUE(parser6.Accounting().has_manufactured_html);
-  EXPECT_TRUE(parser6.Accounting().has_manufactured_head);
-  EXPECT_TRUE(parser6.Accounting().has_manufactured_body);
+  EXPECT_TRUE(doc->Metadata().has_manufactured_html);
+  EXPECT_TRUE(doc->Metadata().has_manufactured_head);
+  EXPECT_TRUE(doc->Metadata().has_manufactured_body);
   EXPECT_NOT_NULL(doc->RootNode());
   EXPECT_EQ(doc->RootNode()->FirstChild()->DataAtom(),
             htmlparser::Atom::HTML);
@@ -415,7 +417,7 @@ TEST(ParserTest, ParserAccounting) {
   htmlparser::Parser p1(all_good);
   auto doc = p1.Parse();
   EXPECT_NOT_NULL(doc->RootNode());
-  htmlparser::ParseAccounting act = p1.Accounting();
+  htmlparser::DocumentMetadata act = doc->Metadata();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
   EXPECT_FALSE(act.has_manufactured_body);
@@ -435,7 +437,7 @@ TEST(ParserTest, ParserAccounting) {
   htmlparser::Parser p2(implied_html);
   doc = p2.Parse();
   EXPECT_NOT_NULL(doc->RootNode());
-  act = p2.Accounting();
+  act = doc->Metadata();
   EXPECT_TRUE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
   EXPECT_FALSE(act.has_manufactured_body);
@@ -455,7 +457,7 @@ TEST(ParserTest, ParserAccounting) {
   htmlparser::Parser p3(implied_body);
   doc = p3.Parse();
   EXPECT_NOT_NULL(doc->RootNode());
-  act = p3.Accounting();
+  act = doc->Metadata();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
   EXPECT_TRUE(act.has_manufactured_body);
@@ -475,7 +477,7 @@ TEST(ParserTest, ParserAccounting) {
   htmlparser::Parser p4(implied_head);
   doc = p4.Parse();
   EXPECT_NOT_NULL(doc->RootNode());
-  act = p4.Accounting();
+  act = doc->Metadata();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_TRUE(act.has_manufactured_head);
   EXPECT_FALSE(act.has_manufactured_body);
@@ -499,7 +501,7 @@ TEST(ParserTest, ParserAccounting) {
   htmlparser::Parser p5(second_html);
   doc = p5.Parse();
   EXPECT_NOT_NULL(doc->RootNode());
-  act = p5.Accounting();
+  act = doc->Metadata();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
   EXPECT_FALSE(act.has_manufactured_body);
@@ -524,7 +526,7 @@ TEST(ParserTest, ParserAccounting) {
   htmlparser::Parser p6(second_body);
   doc = p6.Parse();
   EXPECT_NOT_NULL(doc->RootNode());
-  act = p6.Accounting();
+  act = doc->Metadata();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
   EXPECT_FALSE(act.has_manufactured_body);
@@ -549,7 +551,7 @@ TEST(ParserTest, ParserAccounting) {
   htmlparser::Parser p6a(second_body_implicit);
   doc = p6a.Parse();
   EXPECT_NOT_NULL(doc->RootNode());
-  act = p6a.Accounting();
+  act = doc->Metadata();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
   EXPECT_TRUE(act.has_manufactured_body);
@@ -573,7 +575,7 @@ TEST(ParserTest, ParserAccounting) {
   htmlparser::Parser p6b(second_body_after_manufactured);
   doc = p6b.Parse();
   EXPECT_NOT_NULL(doc->RootNode());
-  act = p6b.Accounting();
+  act = doc->Metadata();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
   EXPECT_TRUE(act.has_manufactured_body);
@@ -597,7 +599,7 @@ TEST(ParserTest, ParserAccounting) {
   htmlparser::Parser p6c(second_body_after_body_close);
   doc = p6c.Parse();
   EXPECT_NOT_NULL(doc->RootNode());
-  act = p6c.Accounting();
+  act = doc->Metadata();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
   EXPECT_TRUE(act.has_manufactured_body);
@@ -748,7 +750,7 @@ TEST(ParserTest, VoidElementsParsedCorrectly) {
 
 TEST(ParserTest, NumTermsInTextNodeCountEnabled) {
   htmlparser::Parser p(
-      "hello world         \t    bye    \n   \n bye  \r   ",
+      "<script>var c = 0</script>hello world    \t    bye    \n   \nbye  \r   ",
       {.scripting = true,
        .frameset_ok = true,
        .record_node_offsets = true,
@@ -761,6 +763,13 @@ TEST(ParserTest, NumTermsInTextNodeCountEnabled) {
   EXPECT_EQ(body->DataAtom(), htmlparser::Atom::BODY);
   EXPECT_EQ(body->FirstChild()->Type(), htmlparser::NodeType::TEXT_NODE);
   EXPECT_EQ(body->FirstChild()->NumTerms(), 4);
+
+  auto head = doc->RootNode()->FirstChild()->FirstChild();
+  EXPECT_NOT_NULL(head);
+  EXPECT_EQ(head->FirstChild()->DataAtom(), htmlparser::Atom::SCRIPT);
+  EXPECT_EQ(head->FirstChild()->FirstChild()->Type(),
+            htmlparser::NodeType::TEXT_NODE);
+  EXPECT_EQ(head->FirstChild()->FirstChild()->NumTerms(), -1);
 }
 
 TEST(ParserTest, NumTermsInTextNodeCountDisabled) {
@@ -797,3 +806,12 @@ TEST(ParserTest, DocumentComplexityTest) {
   EXPECT_NOT_NULL(p3.Parse());
 }
 
+TEST(ParserTest, DocumentMetadataTest) {
+  auto doc = htmlparser::Parse("<html><head><base href=\"www.google.com\""
+                               "target=\"blank\">"
+                               "<link rel=canonical href=\"foo.google.com\">"
+                               "</head><body></body></html>");
+  EXPECT_EQ(doc->Metadata().base_url.first, "www.google.com");
+  EXPECT_EQ(doc->Metadata().base_url.second, "blank");
+  EXPECT_EQ(doc->Metadata().canonical_url, "foo.google.com");
+}
