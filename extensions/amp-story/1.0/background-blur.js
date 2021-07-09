@@ -46,6 +46,9 @@ export class BackgroundBlur {
 
     /**  @private {?number} */
     this.currentRAF_ = null;
+
+    /**  @private {?boolean} */
+    this.firstLoad = true;
   }
 
   /**
@@ -104,6 +107,22 @@ export class BackgroundBlur {
    */
   animate_(fillElement) {
     const context = this.canvas_.getContext('2d');
+
+    const draw = (easing) => {
+      context.globalAlpha = easing;
+      context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      if (fillElement) {
+        context.drawImage(fillElement, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      }
+    };
+
+    // Do not animate on first load.
+    if (this.firstLoad) {
+      draw(1);
+      this.firstLoad = false;
+      return;
+    }
+
     let startTime;
     const nextFrame = (currTime) => {
       if (!startTime) {
@@ -112,11 +131,7 @@ export class BackgroundBlur {
       const elapsed = currTime - startTime;
       if (elapsed < DURATION_MS) {
         const easing = 1 - Math.pow(1 - elapsed / DURATION_MS, 2);
-        context.globalAlpha = easing;
-        context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-        if (fillElement) {
-          context.drawImage(fillElement, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
-        }
+        draw(easing);
         this.currentRAF_ = requestAnimationFrame(nextFrame);
       }
     };
