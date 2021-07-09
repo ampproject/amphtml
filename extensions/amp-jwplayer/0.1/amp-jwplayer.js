@@ -48,10 +48,10 @@ import {
 } from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {once} from '../../../src/core/types/function';
-import {tryParseJson} from '../../../src/core/types/object/json';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {once} from '#core/types/function';
+import {tryParseJson} from '#core/types/object/json';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 
 const JWPLAYER_EVENTS = {
   'ready': VideoEvents.LOAD,
