@@ -19,6 +19,7 @@
  * @fileoverview Script that runs the end-to-end tests during CI.
  */
 
+const os = require('os');
 const {
   skipDependentJobs,
   timedExecOrDie,
@@ -52,7 +53,9 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
-    timedExecOrDie('amp e2e --nobuild --headless --compiled --workers=6');
+    timedExecOrDie(
+      `amp e2e --nobuild --headless --compiled --workers=${os.cpus().length}`
+    );
   } else {
     skipDependentJobs(
       jobName,

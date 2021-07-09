@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 const {describes} = require('./helper');
-const {log} = require('../../common/logging');
 require('@babel/register')({caller: {name: 'test'}});
 
-log('helpers loaded');
+// TODO(rileyajones) find a way to make browsers configurable.
 describes.configure({headless: true, browsers: 'chrome'});
