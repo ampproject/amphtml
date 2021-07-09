@@ -99,7 +99,6 @@ import {getMode, isModeDevelopment} from '../../../src/mode';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isDesktopOnePanelExperimentOn} from './amp-story-desktop-one-panel';
 import {isExperimentOn} from '#experiments';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {isRTL} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
 import {
@@ -752,15 +751,6 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
     });
-
-    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      this.storeService_.subscribe(
-        StateProperty.PAGE_ATTACHMENT_STATE,
-        (isActive) => {
-          this.onAttachmentStateUpdate_(isActive);
-        }
-      );
-    }
 
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
       this.onPausedStateUpdate_(isPaused);
@@ -2132,17 +2122,6 @@ export class AmpStory extends AMP.BaseElement {
         });
       }
     }
-  }
-
-  /**
-   * @param {boolean} isActive
-   * @private
-   */
-  onAttachmentStateUpdate_(isActive) {
-    this.element.classList.toggle(
-      'i-amphtml-story-attachment-active',
-      isActive
-    );
   }
 
   /**
