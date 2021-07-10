@@ -27,6 +27,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
@@ -39,8 +40,8 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isLayoutSizeDefined} from '#core/dom/layout';
 import {once} from '#core/types/function';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 
 const JWPLAYER_EVENTS = {
   'ready': VideoEvents.LOAD,
@@ -348,8 +349,8 @@ class AmpJWPlayer extends AMP.BaseElement {
       return;
     }
     const placeholder = this.win.document.createElement('img');
-    this.propagateAttributes(['aria-label'], placeholder);
-    this.applyFillContent(placeholder);
+    propagateAttributes(['aria-label'], this.element, placeholder);
+    applyFillContent(placeholder);
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {

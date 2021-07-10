@@ -20,6 +20,7 @@ import {PreactBaseElement} from '#preact/base-element';
 import {Sidebar} from './component';
 import {dict} from '#core/types/object';
 import {pauseAll} from '../../../src/utils/resource-container-helper';
+import {realChildNodes} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {toggleAttribute} from '#core/dom';
 import {useToolbarHook} from './sidebar-toolbar-hook';
@@ -42,15 +43,15 @@ export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
     return dict({
-      'onBeforeOpen': () => this.beforeOpen_(),
-      'onAfterOpen': () => this.afterOpen_(),
-      'onAfterClose': () => this.afterClose_(),
+      'onBeforeOpen': () => this.beforeOpen(),
+      'onAfterOpen': () => this.afterOpen(),
+      'onAfterClose': () => this.afterClose(),
     });
   }
 
   /** @override */
   updatePropsForRendering(props) {
-    this.getRealChildNodes().map((child) => {
+    realChildNodes(this.element).map((child) => {
       if (
         child.nodeName === 'NAV' &&
         child.hasAttribute('toolbar') &&
@@ -67,31 +68,22 @@ export class BaseElement extends PreactBaseElement {
     });
   }
 
-  /** @override */
-  unmountCallback() {
-    this.removeAsContainer();
-  }
-
-  /** @private */
-  beforeOpen_() {
+  /** @protected */
+  beforeOpen() {
     this.open_ = true;
     toggleAttribute(this.element, 'open', true);
     toggle(this.element, true);
   }
 
-  /** @private */
-  afterOpen_() {
-    const sidebar = this.element.shadowRoot.querySelector('[part=sidebar]');
-    this.setAsContainer(sidebar);
-  }
+  /** @protected */
+  afterOpen() {}
 
-  /** @private */
-  afterClose_() {
+  /** @protected */
+  afterClose() {
     this.open_ = false;
     toggleAttribute(this.element, 'open', false);
     toggle(this.element, false);
 
-    this.removeAsContainer();
     pauseAll(this.element, /* includeSelf */ false);
   }
 

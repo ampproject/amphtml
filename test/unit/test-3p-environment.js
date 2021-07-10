@@ -16,7 +16,7 @@
 
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {Services} from '#service';
-import {createIframePromise} from '../../testing/iframe';
+import {createIframePromise} from '#testing/iframe';
 import {loadPromise} from '../../src/event-helper';
 import {manageWin, setInViewportForTesting} from '#3p/environment';
 

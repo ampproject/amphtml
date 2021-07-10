@@ -35,6 +35,7 @@ const jobName = 'pr-check.js';
 /**
  * This file runs tests against the local workspace to mimic the CI build as
  * closely as possible.
+ * @return {Promise<void>}
  */
 async function prCheck() {
   const runCheck = (cmd) => {
@@ -91,10 +92,6 @@ async function prCheck() {
 
   if (buildTargetsInclude(Targets.DOCS)) {
     runCheck('amp check-links --local_changes');
-  }
-
-  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
-    runCheck('amp dev-dashboard-tests');
   }
 
   if (buildTargetsInclude(Targets.OWNERS)) {

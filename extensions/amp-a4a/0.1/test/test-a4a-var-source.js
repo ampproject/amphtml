@@ -15,7 +15,7 @@
  */
 
 import {A4AVariableSource} from '../a4a-variable-source';
-import {createIframePromise} from '../../../../testing/iframe';
+import {createIframePromise} from '#testing/iframe';
 import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 
 describes.sandboxed('A4AVariableSource', {}, () => {

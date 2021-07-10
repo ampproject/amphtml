@@ -21,7 +21,7 @@ import {
   SanitizerImpl,
   StorageLocation,
 } from '../../amp-script';
-import {FakeWindow} from '../../../../../testing/fake-dom';
+import {FakeWindow} from '#testing/fake-dom';
 import {Services} from '#service';
 import {
   registerServiceBuilderForDoc,

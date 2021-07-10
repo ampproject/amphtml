@@ -418,17 +418,17 @@ std::string Node::InnerText() const {
 
 void Node::UpdateChildNodesPositions(Node* relative_node) {
   // Cannot proceed if relative node has no positional information.
-  if (!relative_node->PositionInHtmlSrc().has_value()) return;
+  if (!relative_node->LineColInHtmlSrc().has_value()) return;
 
-  auto [r_line, r_col] = relative_node->PositionInHtmlSrc().value();
+  auto [r_line, r_col] = relative_node->LineColInHtmlSrc().value();
 
   // Update the positions of this node.
-  if (position_in_html_src_.has_value()) {
-    auto [line, col] = position_in_html_src_.value();
+  if (line_col_in_html_src_.has_value()) {
+    auto [line, col] = line_col_in_html_src_.value();
     int effective_col = line == 1 ?
         r_col + col + AtomUtil::ToString(
             relative_node->DataAtom()).size() + 1 /* closing > */ : col;
-    position_in_html_src_ = LineCol({line + r_line - 1, effective_col});
+    line_col_in_html_src_ = LineCol({line + r_line - 1, effective_col});
   }
 
   // Update the positions of this node's children.
@@ -454,9 +454,9 @@ std::string Node::DebugString() {
       break;
   }
 
-  if (position_in_html_src_.has_value()) {
-    ost << position_in_html_src_.value().first << ":"
-        << position_in_html_src_.value().second;
+  if (line_col_in_html_src_.has_value()) {
+    ost << line_col_in_html_src_.value().first << ":"
+        << line_col_in_html_src_.value().second;
   }
   ost << "\n";
 

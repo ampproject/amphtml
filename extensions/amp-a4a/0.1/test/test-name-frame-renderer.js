@@ -36,7 +36,6 @@ describes.realWin('NameFrameRenderer', realWinConfig, (env) => {
       size: {width: '320', height: '50'},
       requestUrl: 'http://www.google.com',
       win: env.win,
-      applyFillContent: () => {},
       sentinel: 's-1234',
     };
 

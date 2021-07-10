@@ -24,15 +24,12 @@ import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
 } from '#service/custom-element-registry';
-import {
-  mockWindowInterface,
-  stubServiceForDoc,
-} from '../../testing/test-helper';
+import {mockWindowInterface, stubServiceForDoc} from '#testing/test-helper';
 
 import {Observable} from '#core/data-structures/observable';
 import {Services} from '#service';
 import {cidServiceForDocForTesting} from '#service/cid-impl';
-import {createIframePromise} from '../../testing/iframe';
+import {createIframePromise} from '#testing/iframe';
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {installCryptoService} from '#service/crypto-impl';
 import {installDocService} from '#service/ampdoc-impl';

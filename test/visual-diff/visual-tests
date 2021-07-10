@@ -479,8 +479,32 @@
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-desktop-one-panel.html",
-      "name": "amp-story: desktop one panel",
+      "name": "amp-story: desktop one panel desktop default margin",
       "viewport": {"width": 1440, "height": 900},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-desktop-one-panel.html",
+      "name": "amp-story: desktop one panel desktop panel responsive margin",
+      "viewport": {"width": 1440, "height": 1300},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-desktop-one-panel.html",
+      "name": "amp-story: desktop one panel short screen no margin",
+      "viewport": {"width": 1440, "height": 750},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-desktop-one-panel.html",
+      "name": "amp-story: desktop one panel small square screen",
+      "viewport": {"width": 400, "height": 400},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
       ],
@@ -661,11 +685,27 @@
       "viewport": {"width": 360, "height": 4500},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-      ],
+      ]
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html",
       "name": "amp-story-interactive-quiz: sizing and positioning",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-interactive-img-poll.html",
+      "name": "amp-story-interactive-img-poll: render 4 image options with default customization options in mobile layout",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-interactive-img-quiz.html",
+      "name": "amp-story-interactive-img-quiz: render 4 image options with default customization options in mobile layout",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",

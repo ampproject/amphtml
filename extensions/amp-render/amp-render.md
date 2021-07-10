@@ -31,7 +31,9 @@ limitations under the License.
 
 ## Usage
 
-The `amp-render` component renders content in a specified template. It can fetch content from a CORS JSON endpoint or inline from `amp-state` or `amp-script`.
+The `amp-render` component fetches JSON data, then renders that data using a template. `amp-render` can use data from a CORS JSON endpoint, from an `amp-state` state variable, or from `amp-script`.
+
+Since `amp-render`'s data can come from `amp-script`, you can use your own JavaScript to filter data, cap its size, create list functionality, and otherwise customize the component's behavior and appearance. If you prefer to use HTML attributes, `amp-list` provides a richer feature set.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
@@ -91,13 +93,36 @@ Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-an
 The `<amp-render>` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes.
 
 ```html
-<button on="tap:myComponent.refresh">Refresh</button>
-<amp-render id="myComponent" src="https://example.com/data.json">
+<button on="tap:my-component.refresh">Refresh</button>
+<amp-render id="my-component" src="https://example.com/data.json">
   <template type="amp-mustache">
     <div>{{title}}</div>
   </template>
 </amp-render>
 ```
+
+### Dynamic resizing
+
+In some cases, we may need the `<amp-render>` element to resize on user interaction. For example, when the content does not fit within specified `height` attribute with `layout="fixed-height"` or the specified `height` is too large creating empty whitespace. The `<amp-render` element exposes a `resizeToContents` action that adjusts the height to fit the content. See the following example:
+
+```html
+<button on="tap:my-component.resizeToContents()">Expand</button>
+<amp-render
+  id="my-component"
+  src="https://example.com/data.json"
+  layout="fixed-height"
+  height="30">
+    <template type="amp-mustache">
+      {{#cars}}
+        <p>{{make}} {{model}}</p>
+      {{/cars}}
+    </template>
+</amp-render>
+```
+
+[tip type="important"]
+For `<amp-render>` instances with `layout="responsive"`, `resizeToContents` action may break the aspect ratio since the height will change but width may remain fixed.
+[/tip]
 
 ### Substitutions
 
@@ -128,6 +153,10 @@ Your endpoint must implement the requirements specified in the [CORS Requests in
 [/tip]
 
 The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supports URL and non-URL expression values.
+
+### `template`
+
+References an ID of a defined templating element. This attribute is not necessary if the template is a child of the `amp-render` element.
 
 ### `credentials`
 
@@ -198,7 +227,9 @@ If we just want to display the German cars from the response, we can use the `ke
 </amp-render>
 ```
 
-Note that they `key` attribute is valid only when `src` is a URL.
+[tip type="important"]
+Note that the `key` attribute is valid only when `src` is a URL. To access a sub-object in data fetched via JavaScript, use your own code to locate that sub-object before passing it to `<amp-render>`.
+[/tip]
 
 ### `binding`
 

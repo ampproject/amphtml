@@ -48,9 +48,10 @@ import {Deferred} from '#core/data-structures/promise';
 import {EventType, dispatch} from './events';
 import {Layout} from '#core/dom/layout';
 import {LoadingSpinner} from './loading-spinner';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {MediaPool} from './media-pool';
 import {Services} from '#service';
+import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {addAttributesToElement, iterateCursor} from '#core/dom';
 import {
@@ -74,7 +75,7 @@ import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
-import {prefersReducedMotion} from '#core/dom/media-query-props';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {px, toggle} from '#core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
@@ -316,9 +317,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.animationManager_) {
       return;
     }
-    if (prefersReducedMotion(this.win)) {
-      return;
-    }
     if (!hasAnimations(this.element)) {
       return;
     }
@@ -390,7 +388,12 @@ export class AmpStoryPage extends AMP.BaseElement {
     const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
       'storyNextUp'
     );
-    if (autoAdvanceAttr !== null || storyNextUpParam === null) {
+    if (
+      autoAdvanceAttr !== null ||
+      storyNextUpParam === null ||
+      // This is a special value that indicates we are in the viewer indicated control group.
+      storyNextUpParam === StoryAdSegmentTimes.SENTINEL
+    ) {
       return;
     }
     addAttributesToElement(
@@ -718,7 +721,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   beforeVisible() {
-    return this.maybeApplyFirstAnimationFrame();
+    return this.maybeApplyFirstAnimationFrameOrFinish();
   }
 
   /**
@@ -1253,7 +1256,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   maybeStartAnimations_() {
-    this.animationManager_?.animateIn();
+    if (!this.animationManager_) {
+      return;
+    }
+    this.animationManager_.animateIn();
   }
 
   /**
@@ -1267,17 +1273,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
     this.signals()
       .whenSignal(CommonSignals.LOAD_END)
-      .then(() => this.maybeApplyFirstAnimationFrame())
-      .then(() => {
-        this.animationManager_.finishAll();
-      });
+      .then(() => this.animationManager_.applyLastFrame());
   }
 
   /**
    * @return {!Promise}
    */
-  maybeApplyFirstAnimationFrame() {
-    return Promise.resolve(this.animationManager_?.applyFirstFrame());
+  maybeApplyFirstAnimationFrameOrFinish() {
+    return Promise.resolve(this.animationManager_?.applyFirstFrameOrFinish());
   }
 
   /**
@@ -1910,7 +1913,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         childImgNode &&
           ampImgNode
             .getImpl()
-            .then((ampImg) => ampImg.propagateAttributes('alt', childImgNode));
+            .then((impl) =>
+              propagateAttributes('alt', impl.element, childImgNode)
+            );
       }
     });
   }

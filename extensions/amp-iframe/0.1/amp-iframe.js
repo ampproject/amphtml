@@ -17,11 +17,15 @@
 import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
 import {ActionTrust} from '#core/constants/action-constants';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
-import {LayoutPriority, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  LayoutPriority,
+  applyFillContent,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
-import {base64EncodeFromBytes} from '#core/types/string/base64.js';
+import {base64EncodeFromBytes} from '#core/types/string/base64';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
@@ -34,13 +38,14 @@ import {
 } from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '#experiments';
-import {moveLayoutRect} from '#core/math/layout-rect';
+import {moveLayoutRect} from '#core/dom/layout/rect';
 import {parseJson} from '#core/types/object/json';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {removeElement} from '#core/dom';
 import {removeFragment} from '../../../src/url';
 import {setStyle} from '#core/dom/style';
 import {urls} from '../../../src/config';
-import {utf8Encode} from '#core/types/string/bytes.js';
+import {utf8Encode} from '#core/types/string/bytes';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -407,14 +412,14 @@ export class AmpIframe extends AMP.BaseElement {
 
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
-    this.applyFillContent(iframe);
+    applyFillContent(iframe);
     iframe.name = 'amp_iframe' + count++;
 
     if (this.isClickToPlay_) {
       setStyle(iframe, 'zIndex', -1);
     }
 
-    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, iframe);
+    propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.element, iframe);
 
     // TEMPORARY: disable `allow=autoplay`
     // This is a workaround for M72-M74 user-activation breakage.
@@ -619,7 +624,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
     if (this.iframe_ && mutations['title']) {
       // only propagating title because propagating all causes e2e error:
-      this.propagateAttributes(['title'], this.iframe_);
+      propagateAttributes(['title'], this.element, this.iframe_);
     }
   }
 

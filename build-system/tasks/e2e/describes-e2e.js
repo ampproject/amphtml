@@ -578,6 +578,7 @@ class EndToEndFixture {
    * @param {!Object} env
    * @param {string} browserName
    * @param {number} retries
+   * @return {Promise<void>}
    */
   async setup(env, browserName, retries = 0) {
     const config = getConfig();

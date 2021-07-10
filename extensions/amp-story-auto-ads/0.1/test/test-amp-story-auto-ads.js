@@ -31,10 +31,11 @@ import {
 } from './story-mock';
 import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
 import {Services} from '#service';
+import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 import {StoryAdPage} from '../story-ad-page';
-import {macroTask} from '../../../../testing/yield';
+import {forceExperimentBranch, toggleExperiment} from '#experiments';
+import {macroTask} from '#testing/yield';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {toggleExperiment} from '#experiments';
 
 const NOOP = () => {};
 
@@ -287,7 +288,11 @@ describes.realWin(
     describe('system layer', () => {
       beforeEach(async () => {
         // TODO(#33969) remove when launched.
-        toggleExperiment(win, 'story-ad-auto-advance', true);
+        forceExperimentBranch(
+          win,
+          'story-ad-auto-advance',
+          StoryAdAutoAdvance.EIGHT_SECONDS
+        );
         // Force sync mutateElement.
         env.sandbox.stub(autoAds, 'mutateElement').callsArg(0);
         addStoryAutoAdsConfig(adElement);
@@ -341,6 +346,30 @@ describes.realWin(
         storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
         expect(adBadgeContainer).to.have.attribute(Attributes.DESKTOP_PANELS);
         expect(progressBackground).to.have.attribute(Attributes.DESKTOP_PANELS);
+      });
+
+      it('should propagate the desktop-one-panel attribute to badge & progress bar', () => {
+        toggleExperiment(win, 'amp-story-desktop-one-panel', true);
+
+        const adBadgeContainer = doc.querySelector(
+          '.i-amphtml-ad-overlay-container'
+        );
+        const progressBackground = doc.querySelector(
+          '.i-amphtml-story-ad-progress-background'
+        );
+        expect(adBadgeContainer).not.to.have.attribute(
+          Attributes.DESKTOP_ONE_PANEL
+        );
+        expect(progressBackground).not.to.have.attribute(
+          Attributes.DESKTOP_ONE_PANEL
+        );
+        storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_ONE_PANEL);
+        expect(adBadgeContainer).to.have.attribute(
+          Attributes.DESKTOP_ONE_PANEL
+        );
+        expect(progressBackground).to.have.attribute(
+          Attributes.DESKTOP_ONE_PANEL
+        );
       });
 
       it('should propagate the dir=rtl attribute', () => {

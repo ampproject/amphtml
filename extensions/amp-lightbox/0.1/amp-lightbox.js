@@ -22,6 +22,7 @@ import {Gestures} from '../../../src/gesture';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {applyFillContent} from '#core/dom/layout';
 import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
   computedStyle,
@@ -39,6 +40,7 @@ import {dict, hasOwn} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '#core/dom/static-template';
 import {isInFie} from '../../../src/iframe-helper';
+import {realChildElements} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 import {tryFocus} from '#core/dom';
 import {unmountAll} from '../../../src/utils/resource-container-helper';
@@ -232,11 +234,11 @@ class AmpLightbox extends AMP.BaseElement {
 
     this.isScrollable_ = element.hasAttribute('scrollable');
 
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
 
     this.container_ = element.ownerDocument.createElement('div');
     if (!this.isScrollable_) {
-      this.applyFillContent(this.container_);
+      applyFillContent(this.container_);
     }
     element.appendChild(this.container_);
 

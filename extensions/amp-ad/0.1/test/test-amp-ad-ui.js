@@ -19,7 +19,7 @@ import * as domQuery from '#core/dom/query';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '#core/dom';
-import {macroTask} from '../../../../testing/yield';
+import {macroTask} from '#testing/yield';
 import {setStyles} from '#core/dom/style';
 
 describes.realWin(
@@ -343,6 +343,20 @@ describes.realWin(
         uiHandler.stickyAdPosition_ = 'top';
         uiHandler.onResizeSuccess();
         expect(uiHandler.topStickyAdScrollListener_).to.not.be.undefined;
+      });
+
+      it('should refuse to load the second sticky ads', () => {
+        for (let i = 0; i < 2; i++) {
+          const adElement = env.win.document.createElement('amp-ad');
+          adElement.setAttribute('sticky', 'top');
+          adElement.setAttribute('class', 'i-amphtml-built');
+          env.win.document.body.insertBefore(adElement, null);
+        }
+        allowConsoleError(() => {
+          expect(() => {
+            uiHandler.validateStickyAd();
+          }).to.throw();
+        });
       });
     });
   }

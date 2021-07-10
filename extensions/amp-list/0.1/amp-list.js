@@ -26,6 +26,7 @@ import {
 import {Deferred} from '#core/data-structures/promise';
 import {
   Layout,
+  applyFillContent,
   getLayoutClass,
   isLayoutSizeDefined,
   parseLayout,
@@ -55,7 +56,7 @@ import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '#core/types/array';
 import {isExperimentOn} from '#experiments';
 import {px, setImportantStyles, setStyles, toggle} from '#core/dom/style';
-import {setDOM} from '../../../third_party/set-dom/set-dom';
+import {setDOM} from '#third_party/set-dom/set-dom';
 import {
   setupAMPCors,
   setupInput,
@@ -559,7 +560,7 @@ export class AmpList extends AMP.BaseElement {
     // to take the height of its children instead,
     // whereas fill-content forces height:0
     if (!this.loadMoreEnabled_ && !this.enableManagedResizing_) {
-      this.applyFillContent(container, true);
+      applyFillContent(container, true);
     }
     return container;
   }
@@ -1404,7 +1405,7 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Undoes previous size-defined layout, must be called in mutation context.
    * @param {string} layoutString
-   * @see src/layout.js
+   * @see src/core/dom/layout/index.js
    */
   undoLayout_(layoutString) {
     const layout = parseLayout(layoutString);

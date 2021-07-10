@@ -16,7 +16,7 @@
 
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {htmlFor} from '#core/dom/static-template';
-import {poll} from '../../../../../testing/iframe';
+import {poll} from '#testing/iframe';
 
 const config = describes.sandboxed.configure().ifChrome();
 
