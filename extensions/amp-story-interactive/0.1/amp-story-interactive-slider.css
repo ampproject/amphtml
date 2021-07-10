@@ -52,7 +52,7 @@
 .i-amphtml-story-interactive-slider-bubble::after {
   position: absolute !important;
   content: '' !important;
-  box-sizing: border-box;
+  box-sizing: border-box !important;
   height: 2.8em !important;
   width: 2.8em !important;
   background: var(--interactive-accent-color) !important;
@@ -66,10 +66,10 @@
   border-top-right-radius: 50% !important;
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble{
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
   cursor: initial !important;
   font-weight: 700 !important;
-  transform: translate(-50%, -50%) scale(.8) !important;
+  transform: translate(-50%, -50%) scale(0.8) !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble::after {
@@ -88,7 +88,7 @@
   position: relative !important;
 }
 
-.i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-side-values{
+.i-amphtml-story-interactive-slider-field .i-amphtml-story-interactive-side-values {
   font-size: 1.125em !important;
   color: var(--interactive-accent-color) !important;
   font-weight: 600 !important;
@@ -96,17 +96,15 @@
 
 .i-amphtml-story-interactive-slider-input {
   -webkit-appearance: none !important;
-  font-size: inherit;
+  font-size: inherit !important;
   height: 1em !important;
- 
-  width: calc(100% + 1.5em)!important;
-  margin: 0em -.75em!important;
-  --percentage-corrected: calc(2.5% + .95 * var(--percentage));
-
+  width: calc(100% + 1.5em) !important;
+  margin: 0em -0.75em !important;
+  --percentage-corrected: calc(2.5% + 0.95 * var(--percentage)) !important;
   background: linear-gradient(
     90deg,
-    #B28FFF 0%,
-    #783BFE var(--percentage-corrected),
+    #b28fff 0%,
+    #783bfe var(--percentage-corrected),
     transparent var(--percentage-corrected)
   ) !important;
   border-radius: 0.5em !important;
@@ -116,10 +114,10 @@
 }
 
 .i-amphtml-story-interactive-slider-input-size {
-  position: relative;
+  position: relative !important;
   flex: 1 !important;
-  margin: 1em 1.5em;
-  height: 1em;
+  margin: 1em 1.5em !important;
+  height: 1em !important;
 }
 
 .i-amphtml-story-interactive-slider-input::before {
@@ -141,6 +139,6 @@
   border-radius: 50% !important;
 }
 
-.i-amphtml-story-interactive-slider-input[disabled]{
+.i-amphtml-story-interactive-slider-input[disabled] {
   cursor: initial !important;
 }
