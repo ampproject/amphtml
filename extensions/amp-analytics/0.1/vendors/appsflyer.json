@@ -4,8 +4,8 @@
     "beacon": true
   },
   "requests": {
-    "onelink": "https://wa.onelink.me/amp/v1/onelink?af_id=COOKIE(afUserId)",
-    "event": "https://wa.appsflyer.com/amp/v1/events?site-id=${webAppId}"
+    "onelink": "https://amp.onelink.me/amp/v1/onelink?af_id=COOKIE(afUserId)",
+    "event": "https://amp.appsflyer.com/amp/v1/events?site-id=${webAppId}"
   },
   "triggers": {
     "onelink": {
