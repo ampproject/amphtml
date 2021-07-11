@@ -296,52 +296,6 @@ function maybeToNpmEsmName(name) {
 }
 
 /**
- * Minifies a given JavaScript file entry point.
- * @param {string} srcDir
- * @param {string} srcFilename
- * @param {string} destDir
- * @param {?Object} options
- * @return {!Promise}
- */
-async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
-  const timeInfo = {};
-  const entryPoint = path.join(srcDir, srcFilename);
-  const minifiedName = maybeToEsmName(options.minifiedName);
-
-  options.errored = false;
-  await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
-  // If an incremental watch build fails, simply return.
-  if (options.watch && options.errored) {
-    return;
-  }
-
-  const destPath = path.join(destDir, minifiedName);
-  combineWithCompiledFile(srcFilename, destPath, options);
-  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
-  if (options.latestName) {
-    fs.copySync(
-      destPath,
-      path.join(destDir, maybeToEsmName(options.latestName))
-    );
-  }
-
-  let name = minifiedName;
-  if (options.latestName) {
-    name += ` → ${maybeToEsmName(options.latestName)}`;
-  }
-  endBuildStep('Minified', name, timeInfo.startTime);
-
-  const target = path.basename(minifiedName, path.extname(minifiedName));
-  if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
-    await applyAmpConfig(
-      maybeToEsmName(`${destDir}/${minifiedName}`),
-      /* localDev */ options.fortesting,
-      /* fortesting */ options.fortesting
-    );
-  }
-}
-
-/**
  * Handles a bundling error
  * @param {Error} err
  * @param {boolean} continueOnError
@@ -409,7 +363,7 @@ async function finishBundle(
   if (targets.includes(target)) {
     await applyAmpConfig(
       path.join(destDir, destFilename),
-      /* localDev */ true,
+      /* localDev */ options.fortesting,
       /* fortesting */ options.fortesting
     );
   }
@@ -427,7 +381,9 @@ async function finishBundle(
 async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
-  const destFilename = options.toName || srcFilename;
+  const destFilename = options.minified
+    ? maybeToEsmName(options.minifiedName)
+    : options.toName || srcFilename;
   const destFile = path.join(destDir, destFilename);
 
   if (watchedTargets.has(entryPoint)) {
@@ -450,7 +406,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
 
   const {banner, footer} = splitWrapper();
   const babelPlugin = getEsbuildBabelPlugin(
-    'unminified',
+    options.minify ? 'minified' : 'unminified',
     /* enableCache */ true
   );
 
@@ -467,7 +423,10 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       incremental: !!options.watch,
       logLevel: 'silent',
     })
-    .then((result) => {
+    .then(async (result) => {
+      if (options.minify) {
+        await minifyWithTerser(destDir, destFilename, options);
+      }
       finishBundle(srcFilename, destDir, destFilename, options, startTime);
       return result;
     })
@@ -482,9 +441,12 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         );
 
         const buildPromise = rebuild()
-          .then(() =>
-            finishBundle(srcFilename, destDir, destFilename, options, time)
-          )
+          .then(async () => {
+            if (options.minify) {
+              await minifyWithTerser(destDir, destFilename, options);
+            }
+            finishBundle(srcFilename, destDir, destFilename, options, time);
+          })
           .catch((err) =>
             handleBundleError(err, /* continueOnError */ true, destFilename)
           );
@@ -675,7 +637,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
    */
   async function doCompileJs(options) {
     const buildResult = options.minify
-      ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
+      ? compileUnminifiedJs(srcDir, srcFilename, destDir, options)
       : compileUnminifiedJs(srcDir, srcFilename, destDir, options);
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
