@@ -30,7 +30,6 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global');
-const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {isCiBuild} = require('../common/ci');
@@ -38,6 +37,7 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
+const {yellow} = require('../common/colors');
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
@@ -164,15 +164,13 @@ async function compileCoreRuntime(options) {
  * @return {!Promise}
  */
 async function compileAllJs(options) {
-  const {minify} = options;
-  if (minify) {
-    log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
-  } else {
-    log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
-  }
+  log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
+
   const startTime = Date.now();
   await Promise.all([
-    minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
+    options.minify
+      ? Promise.resolve()
+      : doBuildJs(jsBundles, 'polyfills.js', options),
     doBuildJs(jsBundles, 'alp.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
@@ -189,7 +187,7 @@ async function compileAllJs(options) {
   ]);
   await compileCoreRuntime(options);
   endBuildStep(
-    minify ? 'Minified' : 'Compiled',
+    options.minify ? 'Minified' : 'Compiled',
     'all runtime JS files',
     startTime
   );
@@ -335,18 +333,24 @@ async function finishBundle(
 ) {
   combineWithCompiledFile(
     srcFilename,
-    path.join(destDir, destFilename),
+    path.join(destDir, maybeToEsmName(destFilename)),
     options
   );
 
   const logPrefix = options.minify ? 'Minified' : 'Compiled';
   let {latestName} = options;
   if (latestName) {
+    latestName = maybeToEsmName(latestName);
     if (!options.minify) {
-      latestName = latestName.replace(/\.js$/, '.max.js');
+      // TODO: be smarter about a regex here.
+      if (options.esm) {
+        latestName = latestName.replace(/\.mjs$/, '.max.mjs');
+      } else {
+        latestName = latestName.replace(/\.js$/, '.max.js');
+      }
     }
     fs.copySync(
-      path.join(destDir, options.toName),
+      path.join(destDir, destFilename),
       path.join(destDir, latestName)
     );
     endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
@@ -381,9 +385,9 @@ async function finishBundle(
 async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
-  const destFilename = options.minified
+  const destFilename = options.minify
     ? maybeToEsmName(options.minifiedName)
-    : options.toName || srcFilename;
+    : maybeToEsmName(options.toName || srcFilename);
   const destFile = path.join(destDir, destFilename);
 
   if (watchedTargets.has(entryPoint)) {
@@ -410,6 +414,9 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     /* enableCache */ true
   );
 
+  // TODO: Make this once per dist build, and likely not as part of this flow.
+  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
+
   const buildResult = await esbuild
     .build({
       entryPoints: [entryPoint],
@@ -420,14 +427,30 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       plugins: [babelPlugin],
       banner,
       footer,
+      format: argv.esm ? 'esm' : 'iife',
       incremental: !!options.watch,
       logLevel: 'silent',
+      external: options.externalDependencies,
+      minify: !!options.minify,
     })
     .then(async (result) => {
+      for (const warning of result.warnings) {
+        log(
+          yellow('Warning during compilation:'),
+          `  file: ${warning.location?.file}\n`,
+          `  msg: ${warning.text}\n`
+        );
+      }
       if (options.minify) {
         await minifyWithTerser(destDir, destFilename, options);
       }
-      finishBundle(srcFilename, destDir, destFilename, options, startTime);
+      await finishBundle(
+        srcFilename,
+        destDir,
+        destFilename,
+        options,
+        startTime
+      );
       return result;
     })
     .catch((err) => handleBundleError(err, !!options.watch, destFilename));
@@ -445,7 +468,13 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
             if (options.minify) {
               await minifyWithTerser(destDir, destFilename, options);
             }
-            finishBundle(srcFilename, destDir, destFilename, options, time);
+            await finishBundle(
+              srcFilename,
+              destDir,
+              destFilename,
+              options,
+              time
+            );
           })
           .catch((err) =>
             handleBundleError(err, /* continueOnError */ true, destFilename)
@@ -502,7 +531,6 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
         sourcemap: true,
         outfile: destFile,
         plugins,
-        minify: options.minify,
         format: options.outputFormat || undefined,
         target: argv.esm ? 'es6' : 'es5',
         incremental: !!options.watch,
@@ -576,8 +604,15 @@ async function minifyWithTerser(destDir, destFilename, options) {
 
   const filename = path.join(destDir, destFilename);
   const terserOptions = {
-    mangle: true,
-    compress: true,
+    mangle: {
+      // TODO: test this out when everything else is working.
+      // properties: {
+      //   regex: '_$'
+      // }
+    },
+    compress: {
+      passes: 3,
+    },
     output: {
       beautify: !!argv.pretty_print,
       comments: /\/*/,
@@ -585,6 +620,7 @@ async function minifyWithTerser(destDir, destFilename, options) {
       keep_quoted_props: true,
     },
     sourceMap: true,
+    module: !!argv.esm,
   };
   const minified = await terser.minify(
     fs.readFileSync(filename, 'utf8'),
