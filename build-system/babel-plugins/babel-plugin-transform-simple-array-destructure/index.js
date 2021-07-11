@@ -26,7 +26,11 @@ module.exports = function (babel) {
     name: 'simple-array-destructure',
 
     visitor: {
-      ArrayPattern(path) {
+      ArrayPattern(path, state) {
+        if (state.file.opts.filename.includes('node_modules')) {
+          return;
+        }
+
         const {parentPath} = path;
         if (!parentPath.isVariableDeclarator()) {
           throw path.buildCodeFrameError(

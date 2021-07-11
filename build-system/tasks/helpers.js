@@ -30,7 +30,6 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global');
-const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {isCiBuild} = require('../common/ci');
@@ -102,7 +101,7 @@ const watchedTargets = new Map();
 function doBuildJs(jsBundles, name, extraOptions) {
   const target = jsBundles[name];
   if (target) {
-    return compileJs(
+    return esbuildCompile(
       target.srcDir,
       target.srcFilename,
       extraOptions.minify ? target.minifiedDestDir : target.destDir,
@@ -164,15 +163,13 @@ async function compileCoreRuntime(options) {
  * @return {!Promise}
  */
 async function compileAllJs(options) {
-  const {minify} = options;
-  if (minify) {
-    log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
-  } else {
-    log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
-  }
+  log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
+
   const startTime = Date.now();
   await Promise.all([
-    minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
+    options.minify
+      ? Promise.resolve()
+      : doBuildJs(jsBundles, 'polyfills.js', options),
     doBuildJs(jsBundles, 'alp.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
@@ -189,7 +186,7 @@ async function compileAllJs(options) {
   ]);
   await compileCoreRuntime(options);
   endBuildStep(
-    minify ? 'Minified' : 'Compiled',
+    options.minify ? 'Minified' : 'Compiled',
     'all runtime JS files',
     startTime
   );
@@ -284,6 +281,11 @@ function toEsmName(name) {
  * @return {string}
  */
 function maybeToEsmName(name) {
+  // NPM Binaries don't get the .mjs extension.
+  if (/component-p?react/.test(name)) {
+    return name;
+  }
+
   return argv.esm ? toEsmName(name) : name;
 }
 
@@ -292,53 +294,7 @@ function maybeToEsmName(name) {
  * @return {string}
  */
 function maybeToNpmEsmName(name) {
-  return argv.esm ? name.replace(/\.js$/, '.module.js') : name;
-}
-
-/**
- * Minifies a given JavaScript file entry point.
- * @param {string} srcDir
- * @param {string} srcFilename
- * @param {string} destDir
- * @param {?Object} options
- * @return {!Promise}
- */
-async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
-  const timeInfo = {};
-  const entryPoint = path.join(srcDir, srcFilename);
-  const minifiedName = maybeToEsmName(options.minifiedName);
-
-  options.errored = false;
-  await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
-  // If an incremental watch build fails, simply return.
-  if (options.watch && options.errored) {
-    return;
-  }
-
-  const destPath = path.join(destDir, minifiedName);
-  combineWithCompiledFile(srcFilename, destPath, options);
-  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
-  if (options.latestName) {
-    fs.copySync(
-      destPath,
-      path.join(destDir, maybeToEsmName(options.latestName))
-    );
-  }
-
-  let name = minifiedName;
-  if (options.latestName) {
-    name += ` → ${maybeToEsmName(options.latestName)}`;
-  }
-  endBuildStep('Minified', name, timeInfo.startTime);
-
-  const target = path.basename(minifiedName, path.extname(minifiedName));
-  if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
-    await applyAmpConfig(
-      maybeToEsmName(`${destDir}/${minifiedName}`),
-      /* localDev */ options.fortesting,
-      /* fortesting */ options.fortesting
-    );
-  }
+  return argv.esm ? name.replace(/\.m?js$/, '.module.js') : name;
 }
 
 /**
@@ -381,18 +337,24 @@ async function finishBundle(
 ) {
   combineWithCompiledFile(
     srcFilename,
-    path.join(destDir, destFilename),
+    path.join(destDir, maybeToEsmName(destFilename)),
     options
   );
 
   const logPrefix = options.minify ? 'Minified' : 'Compiled';
   let {latestName} = options;
   if (latestName) {
+    latestName = maybeToEsmName(latestName);
     if (!options.minify) {
-      latestName = latestName.replace(/\.js$/, '.max.js');
+      // TODO: be smarter about a regex here.
+      if (options.esm) {
+        latestName = latestName.replace(/\.mjs$/, '.max.mjs');
+      } else {
+        latestName = latestName.replace(/\.js$/, '.max.js');
+      }
     }
     fs.copySync(
-      path.join(destDir, options.toName),
+      path.join(destDir, destFilename),
       path.join(destDir, latestName)
     );
     endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
@@ -409,7 +371,7 @@ async function finishBundle(
   if (targets.includes(target)) {
     await applyAmpConfig(
       path.join(destDir, destFilename),
-      /* localDev */ true,
+      /* localDev */ options.fortesting,
       /* fortesting */ options.fortesting
     );
   }
@@ -428,10 +390,12 @@ async function finishBundle(
 async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
-  const fileName = options.minify
+  let destFilename = options.minify
     ? options.minifiedName
-    : options.toName ?? srcFilename;
-  const destFilename = options.npm ? fileName : maybeToEsmName(fileName);
+    : options.toName || srcFilename;
+  if (!options.npm) {
+    destFilename = maybeToEsmName(destFilename);
+  }
   const destFile = path.join(destDir, destFilename);
 
   if (watchedTargets.has(entryPoint)) {
@@ -452,7 +416,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     };
   }
   const {banner, footer} = splitWrapper();
-
   const babelPlugin = getEsbuildBabelPlugin(
     options.minify ? 'minified' : 'unminified',
     /* enableCache */ true
@@ -546,7 +509,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         if (options.onWatchBuild) {
           options.onWatchBuild(buildPromise);
         }
-        await buildPromise;
       },
     });
   }
@@ -595,6 +557,7 @@ const watchedEntryPoints = new Set();
 
 /**
  * Bundles (max) or compiles (min) a given JavaScript file entry point.
+ * Handles filewatching, and defers to doCompileJs for actual compilation.
  *
  * @param {string} srcDir Path to the src directory
  * @param {string} srcFilename Name of the JS source file
@@ -613,27 +576,15 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     watchedEntryPoints.add(entryPoint);
     const deps = await getDependencies(entryPoint, options);
     const watchFunc = async () => {
-      await doCompileJs({...options, continueOnError: true});
+      await esbuildCompile(srcDir, srcFilename, destDir, {
+        ...options,
+        continueOnError: true,
+      });
     };
     watch(deps).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
-  /**
-   * Actually performs the steps to compile the entry point.
-   * @param {Object} options
-   * @return {Promise<void>}
-   */
-  async function doCompileJs(options) {
-    const buildResult = options.minify
-      ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
-      : esbuildCompile(srcDir, srcFilename, destDir, options);
-    if (options.onWatchBuild) {
-      options.onWatchBuild(buildResult);
-    }
-    await buildResult;
-  }
-
-  await doCompileJs(options);
+  await esbuildCompile(srcDir, srcFilename, destDir, options);
 }
 
 /**
@@ -822,8 +773,8 @@ module.exports = {
   applyAmpConfig,
   bootstrapThirdPartyFrames,
   compileAllJs,
-  compileCoreRuntime,
   compileJs,
+  compileCoreRuntime,
   esbuildCompile,
   doBuildJs,
   endBuildStep,

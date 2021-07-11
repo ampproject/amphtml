@@ -34,19 +34,21 @@ const isMinified = argv._.includes('dist') || !!argv.compiled;
  * TODO: move constant replacement to bundlers once either https://github.com/google/closure-compiler/issues/1601
  *       is resolved, or we switch to using a different bundler.
  *
- * @type {Object<string, boolean|string>}
+ * @type {Object<string, string>}
  */
 const BUILD_CONSTANTS = {
-  IS_PROD: isProd,
-  IS_MINIFIED: isMinified,
-  INTERNAL_RUNTIME_VERSION: isTestTask ? '$internalRuntimeVersion$' : VERSION,
+  IS_PROD: `${isProd}`,
+  IS_MINIFIED: `${isMinified}`,
+  INTERNAL_RUNTIME_VERSION: isTestTask
+    ? `'${'$internalRuntimeVersion$'}'`
+    : `'${VERSION}'`,
 
   // We build on the idea that SxG is an upgrade to the ESM build.
   // Therefore, all conditions set by ESM will also hold for SxG.
   // However, we will also need to introduce a separate IS_SxG flag
   // for conditions only true for SxG.
-  IS_ESM: !!(argv.esm || argv.sxg),
-  IS_SXG: !!argv.sxg,
+  IS_ESM: `${!!(argv.esm || argv.sxg)}`,
+  IS_SXG: `${!!argv.sxg}`,
 };
 
 module.exports = {BUILD_CONSTANTS};
