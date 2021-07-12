@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '#preact';
-import {number, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
+import {number, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
 
 export default {
   title: '0/amp-layout with aspect ratio CSS',
