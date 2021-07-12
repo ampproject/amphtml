@@ -85,9 +85,6 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.iframeDomain_ = null;
 
-    /** @private {string} */
-    this.trackerDomain_ = null;
-
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
@@ -260,10 +257,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     const elementsPlayer = element.getAttribute('data-elements-player') || false;
     if (elementsPlayer) {
       this.iframeDomain_ = 'https://cdm.elements.video';
-      this.trackerDomain_ = 'https://capi.elements.video';
     } else {
       this.iframeDomain_ = 'https://cdm.connatix.com';
-      this.trackerDomain_ = 'https://capi.connatix.com';
     }
     // will be used by sendCommand in order to send only after the player is rendered
     const deferred = new Deferred();
@@ -306,8 +301,6 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // append child iframe for element
     element.appendChild(iframe);
-    // pixel tracker after frame appended
-    (new Image()).src = this.trackerDomain_ + '/tr/si?token=' + this.playerId_;
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     // bind to player events (playerRendered after we can send commands to player and other)
