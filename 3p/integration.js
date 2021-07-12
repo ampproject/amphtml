@@ -293,7 +293,7 @@ import {whopainfeed} from '#ads/vendors/whopainfeed';
 import {widespace} from '#ads/vendors/widespace';
 import {wisteria} from '#ads/vendors/wisteria';
 import {wpmedia} from '#ads/vendors/wpmedia';
-import {wunderkind} from '#/ads/vendors/wunderkind';
+import {wunderkind} from '#ads/vendors/wunderkind';
 import {xlift} from '#ads/vendors/xlift';
 import {yahoo} from '#ads/vendors/yahoo';
 import {yahoofedads} from '#ads/vendors/yahoofedads';
