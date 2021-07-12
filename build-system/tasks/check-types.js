@@ -102,6 +102,9 @@ const TYPE_CHECK_TARGETS = {
     srcGlobs: ['src/service/**/*.js'],
     warningLevel: 'QUIET',
   },
+  'src-compiler': {
+    srcGlobs: ['src/compiler/**/*.js'],
+  },
   'src-utils': {
     srcGlobs: ['src/utils/**/*.js'],
     warningLevel: 'QUIET',

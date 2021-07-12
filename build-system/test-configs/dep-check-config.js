@@ -39,6 +39,11 @@ exports.rules = [
   },
   {
     filesMatching: '**/*.js',
+    mustNotDependOn: 'src/compiler/**/*.js',
+    allowlist: [],
+  },
+  {
+    filesMatching: '**/*.js',
     mustNotDependOn: 'src/purifier/**/*.js',
     allowlist: [
       // WARNING: Importing purifier.js will also bundle DOMPurify (13KB).
