@@ -23,7 +23,7 @@ import {
 import {px, setImportantStyles, setStyle, setStyles} from '#core/dom/style';
 import {realChildNodes} from '#core/dom/query';
 import {throttle} from '#core/types/function';
-import {removeChildren} from '#core/dom';
+import {copyChildren, removeChildren} from '#core/dom';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15; // WARNING: when updating this ensure you also update the css values for line-height.
@@ -252,19 +252,15 @@ export function buildDom(document, element) {
 /**
  * Make a destination node a clone of the source.
  *
- * @param {!Node} source
- * @param {!Node} dest
+ * @param {!Node} from
+ * @param {!Node} to
  */
-function mirrorNode(source, dest) {
+function mirrorNode(from, to) {
   // First clear out the destination node.
-  removeChildren(dest);
+  removeChildren(to);
 
   // Then copy all the source's child nodes into destination node.
-  const {childNodes} = source;
-  const len = childNodes.length;
-  for (let i = 0; i < len; i++) {
-    dest.appendChild(childNodes[i].cloneNode(true));
-  }
+  copyChildren(from, to);
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
