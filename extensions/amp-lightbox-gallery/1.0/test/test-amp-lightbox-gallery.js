@@ -17,6 +17,7 @@
 import '../amp-lightbox-gallery';
 import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {installLightboxGallery} from '../amp-lightbox-gallery';
 import {poll} from '#testing/iframe';
@@ -36,6 +37,7 @@ describes.realWin(
     let win;
     let doc;
     let html;
+    let element;
 
     async function waitForOpen(el, open) {
       const isOpenOrNot = () => el.hasAttribute('open') === open;
@@ -59,23 +61,78 @@ describes.realWin(
       );
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       win = env.win;
       doc = win.document;
       html = htmlFor(doc);
       toggleExperiment(win, 'bento-lightbox-gallery', true, true);
     });
 
+    afterEach(() => {
+      element?.parentNode?.removeChild(element);
+    });
+
     it('should render', async () => {
       await installLightboxGallery(env.ampdoc);
-      const element = doc.getElementById(TAG);
+      element = doc.getElementById(TAG);
       await element.buildInternal();
       expect(element.hasAttribute('open')).to.be.false;
       expect(element.hasAttribute('hidden')).to.be.true;
     });
 
+    describe('uniqueness', () => {
+      let duplicate;
+
+      afterEach(() => {
+        duplicate?.parentNode?.removeChild(duplicate);
+      });
+
+      it('should remove duplicate element', async () => {
+        await installLightboxGallery(env.ampdoc);
+        element = doc.getElementById(TAG);
+        await element.mountInternal();
+        duplicate = createElementWithAttributes(doc, TAG, {
+          'layout': 'nodisplay',
+        });
+
+        // first attempt is removed
+        doc.body.appendChild(duplicate);
+        expect(duplicate.mountInternal()).to.be.rejectedWith(/CANCELLED/);
+        await waitFor(
+          () => duplicate.parentNode == null,
+          'Waiting for duplicate detached.'
+        );
+        expect(element.parentNode).not.to.be.null;
+
+        // second attempt is removed
+        doc.body.appendChild(duplicate);
+        expect(duplicate.mountInternal()).to.be.rejectedWith(/CANCELLED/);
+        await waitFor(
+          () => duplicate.parentNode == null,
+          'Waiting for duplicate detached.'
+        );
+        expect(element.parentNode).not.to.be.null;
+      });
+
+      it('should allow duplicate if first instance is removed', async () => {
+        await installLightboxGallery(env.ampdoc);
+        element = doc.getElementById(TAG);
+        await element.mountInternal();
+        element.parentNode.removeChild(element);
+
+        duplicate = createElementWithAttributes(doc, TAG, {
+          'layout': 'nodisplay',
+        });
+        doc.body.appendChild(duplicate);
+        await duplicate.mountInternal();
+
+        expect(duplicate.parentNode).not.to.be.null;
+        expect(element.parentNode).to.be.null;
+      });
+    });
+
     describe('mutability', () => {
-      let element, img;
+      let img;
 
       beforeEach(async () => {
         img = html` <img lightbox src="img.jpg" /> `;
@@ -155,7 +212,7 @@ describes.realWin(
     });
 
     describe('imperative api', () => {
-      let element, img;
+      let img;
 
       beforeEach(async () => {
         img = html` <img lightbox src="img.jpg" /> `;
@@ -217,7 +274,7 @@ describes.realWin(
     });
 
     describe('grouping', () => {
-      let element, lightboxElements;
+      let lightboxElements;
 
       beforeEach(async () => {
         lightboxElements = html`<div>

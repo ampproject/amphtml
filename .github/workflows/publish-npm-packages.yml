@@ -26,7 +26,7 @@ jobs:
           echo "::set-output name=extensions::{\"include\":${EXTENSIONS}}"
   publish:
     if: github.repository == 'ampproject/amphtml'
-    environment: NPM_TOKEN #TODO: change environment name in repo settings
+    environment: bento_publishing
     needs: setup
     runs-on: ubuntu-latest
     strategy:
