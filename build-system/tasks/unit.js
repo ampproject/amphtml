@@ -17,6 +17,10 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
+  ParallelTestRunner,
+  canBeRunInParallel,
+} = require('./runtime-test/parallel-test-runner');
+const {
   RuntimeTestConfig,
   RuntimeTestRunner,
 } = require('./runtime-test/runtime-test-base');
@@ -53,7 +57,9 @@ async function unit() {
   }
 
   const config = new RuntimeTestConfig('unit');
-  const runner = new Runner(config);
+  const runner = canBeRunInParallel()
+    ? new ParallelTestRunner(config)
+    : new Runner(config);
 
   await runner.setup();
   await runner.run();
@@ -83,4 +89,6 @@ unit.flags = {
   'testnames': 'List the name of each test being run',
   'verbose': 'Enable logging',
   'watch': 'Watch for changes in files, runs corresponding test(s)',
+  'worker_id':
+    'If defined run the job with the assumption that it is being controlled',
 };

@@ -210,7 +210,9 @@ class RuntimeTestConfig {
     if (isCircleciBuild()) {
       this.reporters.push('junit');
       this.junitReporter = {
-        outputFile: `result-reports/${this.testType}.xml`,
+        outputFile: `result-reports/${this.testType}${
+          argv.worker_id || ''
+        }.xml`,
         useBrowserName: false,
       };
     }
@@ -222,7 +224,9 @@ class RuntimeTestConfig {
     if (argv.report) {
       this.reporters.push('json-result');
       this.jsonResultReporter = {
-        outputFile: `result-reports/${this.testType}.json`,
+        outputFile: `result-reports/${this.testType}${
+          argv.worker_id || ''
+        }.json`,
       };
     }
   }
@@ -385,13 +389,16 @@ class RuntimeTestRunner {
    * @return {Promise<void>}
    */
   async setup() {
-    await this.maybeBuild();
-    await startServer({
-      name: 'AMP Test Server',
-      host: 'localhost',
-      port: this.config.client.testServerPort,
-      middleware: () => [app],
-    });
+    if (!argv.worker_id) {
+      await this.maybeBuild();
+      await startServer({
+        name: 'AMP Test Server',
+        host: 'localhost',
+        port: this.config.client.testServerPort,
+        middleware: () => [app],
+      });
+    }
+
     const handlerProcess = createCtrlcHandler(`amp ${this.config.testType}`);
     this.env = new Map().set('handlerProcess', handlerProcess);
   }
