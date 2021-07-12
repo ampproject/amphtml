@@ -21,6 +21,6 @@
   "3p-vendor-split": 1,
   "story-ad-auto-advance": 1,
   "story-ad-placements": 1,
-  "amp-story-load-first-page-only": 0.1,
+  "story-load-first-page-only": 0.1,
   "amp-story-page-attachment-ui-v2": 1
 }
