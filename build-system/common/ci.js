@@ -15,6 +15,8 @@
  */
 'use strict';
 
+const fs = require('fs');
+
 /**
  * @fileoverview Provides various kinds of CI state.
  *
@@ -200,7 +202,11 @@ function ciJobUrl() {
  * @return {string}
  */
 function circleciPrMergeCommit() {
-  return isCircleci ? env('CIRCLECI_MERGE_COMMIT') : '';
+  return isCircleci
+    ? fs.readFileSync('/tmp/workspace/.CIRCLECI_MERGE_COMMIT', {
+        encoding: 'utf-8',
+      })
+    : '';
 }
 
 /**

@@ -18,10 +18,6 @@ push_builds_only: &push_builds_only
         - /^amp-release-.*$/
 
 executors:
-  amphtml-docker-small-executor:
-    docker:
-      - image: cimg/base:stable
-    resource_class: small
   amphtml-medium-executor:
     docker:
       - image: cimg/node:lts-browsers
@@ -49,21 +45,16 @@ commands:
           command: mv /tmp/workspace /tmp/restored-workspace
       - run:
           name: 'Maybe Gracefully Halt'
-          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/maybe_gracefully_halt.sh | bash
+          command: /tmp/restored-workspace/checkout/.circleci/maybe_gracefully_halt.sh
+      - run:
+          name: 'Restore Checkout'
+          command: shopt -s dotglob && mv /tmp/restored-workspace/checkout/* .
       - run:
           name: 'Create New Workspace'
           command: mkdir -p /tmp/workspace
-      - checkout
-      - run:
-          name: 'Fetch Merge Commit'
-          command: ./.circleci/fetch_merge_commit.sh
-      - run:
-          name: 'Check Config'
-          command: ./.circleci/check_config.sh
       - run:
           name: 'Configure Hosts'
           command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
-      - node/install-packages
       - run:
           name: 'Restore Build Output'
           command: ./.circleci/restore_build_output.sh
@@ -95,13 +86,24 @@ commands:
           path: result-reports
 
 jobs:
-  'Compute Merge Commit':
+  'Initialize Workflow':
     executor:
-      name: amphtml-docker-small-executor
+      name: amphtml-medium-executor
     steps:
       - run:
-          name: 'Compute Merge Commit'
-          command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/compute_merge_commit.sh | bash
+          name: 'Create New Workspace'
+          command: mkdir -p /tmp/workspace/checkout
+      - checkout
+      - run:
+          name: 'Compute and Checkout Merge Commit'
+          command: ./.circleci/compute_merge_commit.sh
+      - run:
+          name: 'Check Config'
+          command: ./.circleci/check_config.sh
+      - node/install-packages
+      - run:
+          name: 'Store Checkout'
+          command: shopt -s dotglob && mv * /tmp/workspace/checkout
       - teardown_vm
   'Checks':
     executor:
@@ -303,32 +305,32 @@ jobs:
 workflows:
   'CircleCI':
     jobs:
-      - 'Compute Merge Commit':
+      - 'Initialize Workflow':
           <<: *push_and_pr_builds
       - 'Checks':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Workflow'
       - 'Unminified Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Workflow'
       - 'Nomodule Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Workflow'
       - 'Module Build':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Workflow'
       - 'Bundle Size':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Workflow'
       - 'Validator Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Workflow'
       - 'Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
@@ -336,7 +338,7 @@ workflows:
       - 'Unit Tests':
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Workflow'
       - 'Unminified Tests':
           <<: *push_and_pr_builds
           requires:
@@ -369,7 +371,7 @@ workflows:
               exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
           requires:
-            - 'Compute Merge Commit'
+            - 'Initialize Workflow'
       - 'Experiment Tests':
           name: 'Experiment << matrix.exp >> Tests'
           matrix:

@@ -33,15 +33,8 @@ if [[ $CIRCLE_JOB == Experiment* ]]; then
   # Extract the experiment name from the job name in `config.yml`.
   EXP=$(echo $CIRCLE_JOB | awk '{print $2}')
 
-  # Extract the commit SHA. For PR jobs, this is written to .CIRCLECI_MERGE_COMMIT.
-  if [[ -f /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT ]]; then
-    COMMIT_SHA="$(cat /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT)"
-  else
-    COMMIT_SHA="${CIRCLE_SHA1}"
-  fi
-
   # Do not proceed if the experiment config is missing a valid name, constant, or date.
-  EXPERIMENT_JSON=$(curl -sS "https://raw.githubusercontent.com/ampproject/amphtml/${COMMIT_SHA}/build-system/global-configs/experiments-config.json" | jq ".experiment${EXP}")
+  EXPERIMENT_JSON=$(cat build-system/global-configs/experiments-config.json | jq ".experiment${EXP}")
   if ! echo "${EXPERIMENT_JSON}" | jq -e '.name,.define_experiment_constant,.expiration_date_utc'; then
     echo $(YELLOW "Experiment ${EXP} is misconfigured, or does not exist.")
     echo $(GREEN "Gracefully halting this job")
