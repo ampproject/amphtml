@@ -81,7 +81,7 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
 
   /** @override */
   layoutCallback() {
-    this.setBubbleColor_(dev().assertElement(this.rootEl_));
+    this.setBubbleTextColor_(dev().assertElement(this.rootEl_));
     return super.layoutCallback();
   }
 
@@ -183,7 +183,7 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
    * @param {!Element} root
    * @private
    */
-  setBubbleColor_(root) {
+  setBubbleTextColor_(root) {
     // Only retrieves first bubble, but styles all bubbles accordingly
     const answerChoiceEl = root.querySelector(
       '.i-amphtml-story-interactive-img-quiz-answer-choice'
