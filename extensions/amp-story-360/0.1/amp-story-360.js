@@ -356,18 +356,6 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     applyFillContent(container, /* replacedContent */ true);
 
-    // Mutation observer for distance attribute
-    const config = {attributes: true, attributeFilter: ['distance']};
-    const callback = (mutationsList) => {
-      this.distance_ = parseInt(
-        mutationsList[0].target.getAttribute('distance'),
-        10
-      );
-      this.restoreOrLoseGlContext_();
-    };
-    const observer = new MutationObserver(callback);
-    this.getPage_() && observer.observe(this.getPage_(), config);
-
     // Initialize all services before proceeding
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
@@ -390,6 +378,13 @@ export class AmpStory360 extends AMP.BaseElement {
           this.onPageNavigation_();
           this.maybeShowDiscoveryAnimation_();
         });
+
+        storeService.subscribe(
+          StateProperty.PAGE_DISTANCE_MAP,
+          (pageDistanceMap) => {
+            this.distance_ = pageDistanceMap[this.getPageId_()];
+          }
+        );
 
         this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
           if (this.isOnActivePage_) {
@@ -517,7 +512,7 @@ export class AmpStory360 extends AMP.BaseElement {
       // Debounce onDeviceOrientation_ to rAF.
       let rafTimeout;
       this.win.addEventListener('deviceorientation', (e) => {
-        if (this.isReady_ && this.distance_ < MIN_WEBGL_DISTANCE) {
+        if (this.isReady_) {
           rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
           rafTimeout = this.win.requestAnimationFrame(() => {
             if (!this.isOnActivePage_) {
