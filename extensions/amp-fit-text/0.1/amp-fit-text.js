@@ -261,7 +261,8 @@ function mirrorNode(source, dest) {
 
   // Then copy all the source's child nodes into destination node.
   const {childNodes} = source;
-  for (let i = 0; i < childNodes.length; i++) {
+  const len = childNodes.length;
+  for (let i = 0; i < len; i++) {
     dest.appendChild(childNodes[i].cloneNode(true));
   }
 }
