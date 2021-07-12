@@ -95,13 +95,10 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     super.initializeListeners_();
 
     this.inputEl_.addEventListener('input', () => {
-      const {value} = this.inputEl_;
-      this.bubbleEl_.textContent = value;
-      this.bubbleEl_.classList.add('show');
-      this.onDrag_(value);
+      this.onDrag_();
     });
     this.inputEl_.addEventListener('change', () => {
-      this.postState_();
+      this.onRelease_();
     });
   }
 
@@ -109,14 +106,17 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    * @private
    * @param {Element} val
    */
-  onDrag_(val) {
-    setImportantStyles(this.rootEl_, {'--percentage': val + '%'});
+  onDrag_() {
+    const {value} = this.inputEl_;
+    this.bubbleEl_.textContent = value;
+    this.bubbleEl_.classList.add('show');
+    setImportantStyles(this.rootEl_, {'--percentage': value + '%'});
   }
 
   /**
    * @private
    */
-  postState_() {
+  onRelease_() {
     this.updateToPostSelectionState_();
     this.inputEl_.setAttribute('disabled', '');
     this.bubbleEl_.classList.remove('show');

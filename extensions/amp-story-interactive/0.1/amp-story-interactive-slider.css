@@ -36,13 +36,8 @@
   line-height: 2.6em;
   z-index: 2 !important;
   font-weight: 500 !important;
-  color: #fff !important;
+  color: white !important;
   transition: transform 0.3s ease-in-out !important;
-}
-
-.i-amphtml-story-interactive-slider-bubble::before {
-  text-align: center;
-  line-height: 2.8em;
 }
 
 .i-amphtml-story-interactive-slider-bubble.show {
@@ -60,14 +55,11 @@
   left: 50% !important;
   top: -0.1em !important;
   transform: translateX(-50%) rotate(45deg) !important;
-  border-bottom-left-radius: 50% !important;
+  border-radius: 50% 50% 0% 50% !important;
   box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25) !important;
-  border-top-left-radius: 50% !important;
-  border-top-right-radius: 50% !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
-  cursor: initial !important;
   font-weight: 700 !important;
   transform: translate(-50%, -50%) scale(0.8) !important;
 }

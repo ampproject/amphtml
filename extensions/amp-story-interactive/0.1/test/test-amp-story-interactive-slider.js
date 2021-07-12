@@ -100,9 +100,8 @@ describes.realWin(
         .getRootElement()
         .querySelector('.i-amphtml-story-interactive-slider-bubble');
       slider.value = 30;
-      // simulates an input event
+      // simulates an input event, which is when the user drags the slider
       slider.dispatchEvent(new CustomEvent('input'));
-      // expect(slider.value).to.be.equal(sliderValue.textContent);
       expect(sliderBubble.textContent).to.be.equal('30');
     });
   }
