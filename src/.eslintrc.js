@@ -87,11 +87,8 @@ module.exports = {
       'rules': {'import/no-nodejs-modules': 0},
     },
     {
-      'files': [
-        'core/**/*.js',
-        'preact/**/*.js',
-      ],
-      'rules': {'import/order': 2}
-    }
+      'files': ['builtins/**/*.js', 'core/**/*.js', 'preact/**/*.js'],
+      'rules': {'import/order': 2},
+    },
   ],
 };

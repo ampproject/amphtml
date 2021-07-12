@@ -395,7 +395,11 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      this.runner_.pause();
+      try {
+        this.runner_.pause();
+      } catch (e) {
+        // This fails when the story animations are not initialized and pause is called. Context on #35161.
+      }
     }
   }
 
