@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../../src/base-element';
-import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {ReadyState} from '#core/constants/ready-state';
-import {Services} from '#service';
-import {dev} from '../../src/log';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
-import {listen} from '../../src/event-helper';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {propagateObjectFitStyles, setImportantStyles} from '#core/dom/style';
-import {registerElement} from '#service/custom-element-registry';
 import {removeElement} from '#core/dom';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
+import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {scopedQuerySelector} from '#core/dom/query';
+import {propagateObjectFitStyles, setImportantStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+import {registerElement} from '#service/custom-element-registry';
+
+import {BaseElement} from '../../base-element';
+import {listen} from '../../event-helper';
+import {dev} from '../../log';
 
 /** @const {string} */
 const TAG = 'amp-img';

@@ -16,7 +16,7 @@
 
 module.exports = {
   stories: [
-    '../../../../builtins/storybook/*.amp.js',
+    '../../../../src/builtins/storybook/*.amp.js',
     '../../../../extensions/**/*.*/storybook/*.amp.js',
   ],
   addons: [
