@@ -104,7 +104,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
 
   /**
    * @private
-   * @param {Element} val
    */
   onDrag_() {
     const {value} = this.inputEl_;
