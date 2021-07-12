@@ -14,8 +14,25 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-interactive-img-option {
-  --i-amphtml-interactive-option-post-color: var(
-    --interactive-accent-color
-  ) !important;
+/**
+ * Returns the HTML for an AMP Document with eligible components server-rendered.
+ *
+ * @param {string} html
+ * @return {string}
+ */
+function compileHtml(html) {
+  return html;
 }
+
+/**
+ * Returns the AST for an AMP Document with eligible components server-rendered.
+ *
+ * @param {*} ast
+ * @return {*}
+ */
+function compileAst(ast) {
+  return ast;
+}
+
+globalThis.compileHtml = compileHtml;
+globalThis.compileAst = compileAst;
