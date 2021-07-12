@@ -23,6 +23,7 @@ import {
 import {px, setImportantStyles, setStyle, setStyles} from '#core/dom/style';
 import {realChildNodes} from '#core/dom/query';
 import {throttle} from '#core/types/function';
+import {removeChildren} from '#core/dom';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15; // WARNING: when updating this ensure you also update the css values for line-height.
@@ -151,7 +152,7 @@ class AmpFitText extends AMP.BaseElement {
    * Copies text from the displayed content to the measurer element.
    */
   updateMeasurerContent_() {
-    this.measurer_./*OK*/ innerHTML = this.contentWrapper_./*OK*/ innerHTML;
+    mirrorNode(this.contentWrapper_, this.measurer_);
   }
 
   /** @private */
@@ -241,11 +242,27 @@ export function buildDom(document, element) {
   measurer.classList.add(MEASURER_CLASS);
 
   realChildNodes(element).forEach((node) => contentWrapper.appendChild(node));
-  measurer./*OK*/ innerHTML = contentWrapper./*OK*/ innerHTML;
+  mirrorNode(contentWrapper, measurer);
   element.appendChild(content);
   element.appendChild(measurer);
 
   return {content, contentWrapper, measurer};
+}
+
+/**
+ * Make a destination node a clone of the source.
+ *
+ * @param {!Node} source
+ * @param {!Node} dest
+ */
+function mirrorNode(source, dest) {
+  // First clear out the destination node.
+  removeChildren(dest);
+
+  const {childNodes} = source;
+  for (let i = 0; i < childNodes.length; i++) {
+    dest.appendChild(childNodes[i].cloneNode(true));
+  }
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
