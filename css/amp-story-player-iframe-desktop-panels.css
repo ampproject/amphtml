@@ -52,6 +52,14 @@
   }
 }
 
+/* Remove panel experience when screen is 3 / 4 ratio.  */
+@media(max-aspect-ratio: 3 / 4) {
+  .story-player-iframe-desktop-panels {
+    --i-amphtml-story-player-desktop-panels-width: 100%;
+    --i-amphtml-story-player-desktop-panels-height: 100%;
+  }
+}
+
 .i-amphtml-story-player-main-container-desktop-panels {
   height: 100% !important;
   overflow: hidden !important;
@@ -61,17 +69,22 @@
   align-items: center !important;
 }
 
-.i-amphtml-story-player-main-container-desktop-panels iframe:nth-of-type(1),
-.i-amphtml-story-player-main-container-desktop-panels .story-player-iframe-desktop-panels[i-amphtml-iframe-position="0"] {
-  transform: translateX(calc(50vw - 50%)) !important;
-}
-
-.i-amphtml-story-player-main-container-desktop-panels iframe:nth-of-type(2),
-.i-amphtml-story-player-main-container-desktop-panels iframe:nth-of-type(3),
-.i-amphtml-story-player-main-container-desktop-panels .story-player-iframe-desktop-panels[i-amphtml-iframe-position="1"] {
-  transform: translateX(calc(50vw + 50%)) scale(.6) !important;
+.i-amphtml-story-player-main-container-desktop-panels .story-player-iframe-desktop-panels[i-amphtml-iframe-position="-2"] {
+  transform: translateX(calc(50vw - 250%)) scale(.6) !important;
 }
 
 .i-amphtml-story-player-main-container-desktop-panels .story-player-iframe-desktop-panels[i-amphtml-iframe-position="-1"] {
   transform: translateX(calc(50vw - 150%)) scale(.6) !important;
+}
+
+.i-amphtml-story-player-main-container-desktop-panels .story-player-iframe-desktop-panels[i-amphtml-iframe-position="0"] {
+  transform: translateX(calc(50vw - 50%)) !important;
+}
+
+.i-amphtml-story-player-main-container-desktop-panels .story-player-iframe-desktop-panels[i-amphtml-iframe-position="1"] {
+  transform: translateX(calc(50vw + 50%)) scale(.6) !important;
+}
+
+.i-amphtml-story-player-main-container-desktop-panels .story-player-iframe-desktop-panels[i-amphtml-iframe-position="2"] {
+  transform: translateX(calc(50vw + 150%)) scale(.6) !important;
 }
