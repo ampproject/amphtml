@@ -276,6 +276,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     link.setAttribute('href', hrefAttr);
     const {openStringEl, urlStringEl} = htmlRefs(link);
 
+    // Navigation is handled programmatically. Disable clicks on the placeholder
+    // anchor to prevent from users triggering double navigations, which has
+    // side effects in native contexts opening webviews/CCTs.
+    link.addEventListener('click', (event) => event.preventDefault());
+
     // Set image.
     const openImgAttr = this.element.getAttribute('cta-image');
     if (openImgAttr && openImgAttr !== 'none') {
