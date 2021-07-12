@@ -45,8 +45,8 @@ export class BackgroundBlur {
     this.canvas_ = null;
 
     /** @private @const {Element} */
-    this.offScreenCanvas_ = this.win_.document.createElement('canvas');
-    this.offScreenCanvas_.width = this.offScreenCanvas_.height = CANVAS_SIZE;
+    this.offscreenCanvas_ = this.win_.document.createElement('canvas');
+    this.offscreenCanvas_.width = this.offscreenCanvas_.height = CANVAS_SIZE;
 
     /**  @private {?number} */
     this.currentRAF_ = null;
@@ -144,7 +144,7 @@ export class BackgroundBlur {
   drawCanvas_(alphaPercentage) {
     const context = this.canvas_.getContext('2d');
     context.globalAlpha = alphaPercentage;
-    context.drawImage(this.offScreenCanvas_, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    context.drawImage(this.offscreenCanvas_, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
   }
 
   /**
@@ -153,7 +153,7 @@ export class BackgroundBlur {
    * @param {?Element} fillElement
    */
   drawOffscreenCanvas_(fillElement) {
-    const context = this.offScreenCanvas_.getContext('2d');
+    const context = this.offscreenCanvas_.getContext('2d');
     // A black background in drawn first in case the image is a transparent PNG.
     context.fillStyle = 'black';
     context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
