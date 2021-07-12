@@ -3,6 +3,10 @@
     {
       "name": "flexible-bitrate",
       "percentage": 0.1
+    },
+    {
+      "name": "amp-story-load-first-page-only",
+      "percentage": 0.1
     }
   ]
 }
