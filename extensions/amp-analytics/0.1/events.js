@@ -45,6 +45,7 @@ const TAG = 'amp-analytics/events';
  */
 export const AnalyticsEventType = {
   CLICK: 'click',
+  BROWSER_EVENT: 'browser-event',
   CUSTOM: 'custom',
   HIDDEN: 'hidden',
   INI_LOAD: 'ini-load',
@@ -55,6 +56,11 @@ export const AnalyticsEventType = {
   VIDEO: 'video',
   VISIBLE: 'visible',
 };
+
+const BrowserEventType = {
+  BLUR: 'blur',
+  CHANGE: 'change'
+}
 
 const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
 
@@ -73,6 +79,14 @@ const TRACKER_TYPE = Object.freeze({
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function (root) {
       return new ClickEventTracker(root);
+    },
+  },
+  [AnalyticsEventType.BROWSER_EVENT]: {
+    name: AnalyticsEventType.BROWSER_EVENT,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    // Escape the temporal dead zone by not referencing a class directly.
+    klass: function (root) {
+      return new CustomBrowserEventTracker(root);
     },
   },
   [AnalyticsEventType.CUSTOM]: {
@@ -175,6 +189,14 @@ function isVideoTriggerType(triggerType) {
  * @param {string} triggerType
  * @return {boolean}
  */
+function isCustomBrowserTriggerType(triggerType) {
+  return Object.values(BrowserEventType).includes(triggerType);
+}
+
+/**
+ * @param {string} triggerType
+ * @return {boolean}
+ */
 function isReservedTriggerType(triggerType) {
   return isEnumValue(AnalyticsEventType, triggerType);
 }
@@ -186,6 +208,9 @@ function isReservedTriggerType(triggerType) {
 export function getTrackerKeyName(eventType) {
   if (isVideoTriggerType(eventType)) {
     return AnalyticsEventType.VIDEO;
+  }
+  if (isCustomBrowserTriggerType(eventType)) {
+    return AnalyticsEventType.BROWSER_EVENT;
   }
   if (isAmpStoryTriggerType(eventType)) {
     return AnalyticsEventType.STORY;
@@ -304,6 +329,46 @@ export class EventTracker {
    * @abstract
    */
   add(unusedContext, unusedEventType, unusedConfig, unusedListener) {}
+}
+
+/**
+ * Tracks custom browser events.
+ */
+export class CustomBrowserEventTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+
+    /** @private {?Observable<!Event>} */
+    this.observables_ = new Observable();
+
+    /** @private {?function(!Event)} */
+    this.boundOnSession_ = this.observables_.fire.bind(
+      this.observables_
+    );
+
+  }
+
+  /** @override */
+  dispose() {
+
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+
+    // get the element
+    // get the event type
+
+    return this.observables_.add((event) => {
+      // add a listener
+    });
+
+
+
+  }
 }
 
 /**
@@ -1270,7 +1335,6 @@ export class VideoEventTracker extends EventTracker {
     this.boundOnSession_ = this.sessionObservable_.fire.bind(
       this.sessionObservable_
     );
-
     Object.keys(VideoAnalyticsEvents).forEach((key) => {
       this.root
         .getRoot()
