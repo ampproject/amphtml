@@ -27,6 +27,10 @@ const TAG = 'amp-audio';
 class AmpAudio extends BaseElement {
   /** @override */
   init() {
+    this.registerApiAction('play', (api) => api./*OK*/ play());
+    this.registerApiAction('pause', (api) => api./*OK*/ pause());
+    this.registerApiAction('isPlaying', (api) => api./*OK*/ isPlaying());
+
     return dict({
       'validateMediaMetadata': (element, metaData) => {
         validateMediaMetadata(element, metaData);
