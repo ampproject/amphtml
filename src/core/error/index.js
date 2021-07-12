@@ -82,10 +82,11 @@ export function rethrowAsync(var_args) {
  * Executes the provided callback in a try/catch and rethrows any errors
  * asynchronously.
  *
- * @param {function(...*):T} callback
- * @param {...*} args
+ * @param {function(S):T} callback
+ * @param {S} args
  * @return {T}
  * @template T
+ * @template S
  */
 export function tryCallback(callback, ...args) {
   try {

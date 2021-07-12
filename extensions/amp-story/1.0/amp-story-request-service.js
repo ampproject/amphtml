@@ -15,7 +15,7 @@
  */
 
 import {Services} from '#service';
-import {getChildJsonConfig} from '../../../src/json';
+import {getChildJsonConfig} from '#core/dom';
 import {isProtocolValid} from '../../../src/url';
 import {once} from '#core/types/function';
 import {registerServiceBuilder} from '../../../src/service-helpers';

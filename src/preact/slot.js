@@ -17,6 +17,11 @@
 import {devAssert} from '#core/assert';
 import {Loading} from '#core/constants/loading-instructions';
 import {rediscoverChildren, removeProp, setProp} from '#core/context';
+import {
+  loadAll,
+  pauseAll,
+  unmountAll,
+} from '#core/dom/resource-container-helper';
 import {isElement} from '#core/types';
 import {objectsEqualShallow} from '#core/types/object';
 
@@ -25,12 +30,6 @@ import {useEffect, useLayoutEffect, useRef} from '#preact';
 
 import {useAmpContext} from './context';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
-
-import {
-  loadAll,
-  pauseAll,
-  unmountAll,
-} from '../utils/resource-container-helper';
 
 const EMPTY = {};
 
