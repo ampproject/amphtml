@@ -119,6 +119,7 @@ function doBuildJs(jsBundles, name, extraOptions) {
  * Generates frames.html
  *
  * @param {!Object} options
+ * @return {Promise<void>}
  */
 async function bootstrapThirdPartyFrames(options) {
   const startTime = Date.now();
@@ -178,6 +179,7 @@ async function compileAllJs(options) {
     doBuildJs(jsBundles, 'iframe-transport-client-lib.js', options),
     doBuildJs(jsBundles, 'recaptcha.js', options),
     doBuildJs(jsBundles, 'amp-viewer-host.max.js', options),
+    doBuildJs(jsBundles, 'compiler.js', options),
     doBuildJs(jsBundles, 'video-iframe-integration.js', options),
     doBuildJs(jsBundles, 'amp-story-entry-point.js', options),
     doBuildJs(jsBundles, 'amp-story-player.js', options),
@@ -368,6 +370,7 @@ function handleBundleError(err, continueOnError, destFilename) {
  * @param {string} destFilename
  * @param {?Object} options
  * @param {number} startTime
+ * @return {Promise<void>}
  */
 async function finishBundle(
   srcFilename,
@@ -527,6 +530,7 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
 
   /**
    * @param {number} time
+   * @return {Promise<void>}
    */
   async function build(time) {
     if (!result) {

@@ -15,6 +15,7 @@
  */
 
 const fs = require('fs');
+
 const {
   forbiddenTermsGlobal,
   forbiddenTermsSrcInclusive,
@@ -22,6 +23,8 @@ const {
 const {
   getImportResolver,
 } = require('./build-system/babel-config/import-resolver');
+
+const importAliases = getImportResolver().alias;
 
 /**
  * Dynamically extracts experiment globals from the config file.
@@ -54,7 +57,6 @@ module.exports = {
     'react',
     'react-hooks',
     'sort-destructure-keys',
-    'sort-imports-es6-autofix',
     'sort-requires',
   ],
   'env': {
@@ -70,6 +72,9 @@ module.exports = {
     ...getExperimentGlobals(),
     'IS_ESM': 'readonly',
     'IS_SXG': 'readonly',
+    'IS_MINIFIED': 'readonly',
+    'IS_FORTESTING': 'readonly',
+    'INTERNAL_RUNTIME_VERSION': 'readonly',
     'AMP': 'readonly',
     'context': 'readonly',
     'global': 'readonly',
@@ -172,7 +177,7 @@ module.exports = {
     'jsdoc/require-param': 2,
     'jsdoc/require-param-name': 2,
     'jsdoc/require-param-type': 2,
-    'jsdoc/require-returns': 2,
+    'jsdoc/require-returns': [2, {forceReturnsWithAsync: true}],
     'jsdoc/require-returns-type': 2,
 
     // Custom repo rules defined in build-system/eslint-rules
@@ -230,10 +235,7 @@ module.exports = {
     'local/vsync': 0,
     'local/window-property-name': 2,
 
-    'module-resolver/use-alias': [
-      'error',
-      {'alias': getImportResolver().alias},
-    ],
+    'module-resolver/use-alias': ['error', {'alias': importAliases}],
     'no-alert': 2,
     'no-cond-assign': 2,
     'no-debugger': 2,
@@ -307,12 +309,47 @@ module.exports = {
       },
     ],
     'sort-destructure-keys/sort-destructure-keys': 2,
-    'sort-imports-es6-autofix/sort-imports-es6': [
+    'import/order': [
+      // Disabled for now, so individual folders can opt-in one PR at a time and
+      // minimize disruption/merge conflicts
+      0,
+      {
+        // Split up imports groups with exactly one newline
+        'newlines-between': 'always',
+        // Sort imports within each group alphabetically, ignoring case
+        'alphabetize': {
+          'order': 'asc',
+          'caseInsensitive': true,
+        },
+
+        'pathGroups': [
+          // Define each import alias (#core, #preact, etc.) as its own group.
+          ...Object.keys(importAliases).map((alias) => ({
+            // Group imports from `#alias/foobar` and `#alias` together.
+            'pattern': `${alias}{,/**}`,
+            'group': 'internal',
+            'position': 'before',
+          })),
+        ],
+        'pathGroupsExcludedImportTypes': Object.keys(importAliases),
+
+        // Order the input groups first as builtins, then #internal, followed by
+        // same-directory and submodule imports, then relative imports that
+        // reach into parent directories.
+        'groups': [
+          // import * as Preact from '#preact/index'
+          ['builtin', 'external'],
+          'internal',
+          ['index', 'sibling'],
+          'parent',
+        ],
+      },
+    ],
+    'sort-imports': [
       2,
       {
-        'ignoreCase': false,
-        'ignoreMemberSort': false,
-        'memberSyntaxSortOrder': ['none', 'all', 'multiple', 'single'],
+        'allowSeparatedGroups': true,
+        'ignoreDeclarationSort': true,
       },
     ],
     'sort-requires/sort-requires': 2,

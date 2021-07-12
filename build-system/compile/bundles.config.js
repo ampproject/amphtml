@@ -112,6 +112,15 @@ exports.jsBundles = {
       includePolyfills: true,
     },
   },
+  'compiler.js': {
+    srcDir: './src/compiler/',
+    srcFilename: 'index.js',
+    destDir: './dist',
+    minifiedDestDir: './dist',
+    options: {
+      minifiedName: 'compiler.js',
+    },
+  },
   'amp-viewer-host.max.js': {
     srcDir: './extensions/amp-viewer-integration/0.1/examples/',
     srcFilename: 'amp-viewer-host.js',
