@@ -148,7 +148,10 @@ export class BackgroundBlur {
   }
 
   /**
-   * Composes the image offscreen, then uses it for fading in.
+   * Composes the image offscreen at 100% opacity, then uses it for fading in.
+   * If these draw calls are done with opacity, a flash would be visible.
+   * This is due to the black fill being a high contrast compared to the image.
+   * The black fill is always needed in case the image is a transparent png.
    * @private
    * @param {?Element} fillElement
    */
