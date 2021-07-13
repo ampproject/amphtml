@@ -130,7 +130,7 @@ async function bootstrapThirdPartyFrames(options) {
       };
       watch(frameObject.max).on(
         'change',
-        debounce(watchFunc, watchDebounceDelay)
+        debounce(watchFunc, watchDebounceDelay, {immediate: true})
       );
     });
   }
@@ -665,7 +665,10 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     const watchFunc = async () => {
       await doCompileJs({...options, continueOnError: true});
     };
-    watch(deps).on('change', debounce(watchFunc, watchDebounceDelay));
+    watch(deps).on(
+      'change',
+      debounce(watchFunc, watchDebounceDelay, {immediate: true})
+    );
   }
 
   /**
