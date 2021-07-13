@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const path = require('path');
-const {getBabelOutputDir} = require('./pre-closure-babel');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 /**
@@ -45,11 +44,8 @@ function getSourceMapBase(options) {
  * @param {Object} sourcemaps
  */
 function updatePaths(sourcemaps) {
-  const babelOutputDir = getBabelOutputDir();
   sourcemaps.sources = sourcemaps.sources.map((source) =>
-    source.startsWith(babelOutputDir)
-      ? path.relative(babelOutputDir, source)
-      : source
+    source.startsWith('../') ? source.slice('../'.length) : source
   );
   if (sourcemaps.file) {
     sourcemaps.file = path.basename(sourcemaps.file);
