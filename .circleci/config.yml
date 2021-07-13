@@ -70,12 +70,9 @@ commands:
             - workspace
   install_chrome:
     steps:
-      - browser-tools/install-browser-tools:
-          install-chrome: true
-          install-chromedriver: true
-          install-firefox: false
-          install-geckodriver: false
-          replace-existing-chrome: true
+      - browser-tools/install-chrome:
+          replace-existing: true
+      - browser-tools/install-chromedriver
   fail_fast:
     steps:
       - run:
