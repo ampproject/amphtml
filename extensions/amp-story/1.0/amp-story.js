@@ -460,9 +460,9 @@ export class AmpStory extends AMP.BaseElement {
         );
       });
     }
-    if (isExperimentOn(this.win, 'amp-story-load-first-page-only')) {
+    if (isExperimentOn(this.win, 'story-load-first-page-only')) {
       Services.performanceFor(this.win).addEnabledExperiment(
-        'amp-story-load-first-page-only'
+        'story-load-first-page-only'
       );
     }
 
@@ -2246,7 +2246,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.mutateElement(() => {
       if (
-        !isExperimentOn(this.win, 'amp-story-load-first-page-only') ||
+        !isExperimentOn(this.win, 'story-load-first-page-only') ||
         !prioritizeActivePage
       ) {
         return preloadAllPages();
