@@ -18,9 +18,9 @@ import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {realChildNodes} from '#core/dom/query';
 
 import {registerElement} from '#service/custom-element-registry';
-import {getEffectiveLayout} from 'src/static-layout';
 
-import {BaseElement} from '../../base-element';
+import {BaseElement} from 'src/base-element';
+import {getEffectiveLayout} from 'src/static-layout';
 
 class AmpLayout extends BaseElement {
   /** @override @nocollapse */
