@@ -428,7 +428,6 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       banner,
       footer,
       // Terser throws when using esm mode, complains about Export not in toplevel.
-      //
       // format: argv.esm ? 'esm' : 'iife',
       incremental: !!options.watch,
       logLevel: 'silent',
@@ -443,9 +442,9 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
           `  msg: ${warning.text}\n`
         );
       }
-      if (options.minify) {
-        await minifyWithTerser(destDir, destFilename, options);
-      }
+      // if (options.minify) {
+      //   await minifyWithTerser(destDir, destFilename, options);
+      // }
       await finishBundle(
         srcFilename,
         destDir,
@@ -680,12 +679,12 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
    * @return {Promise<void>}
    */
   async function doCompileJs(options) {
-    const buildResult = options.minify
-      ? compileUnminifiedJs(srcDir, srcFilename, destDir, options)
-      : compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+    const buildResult = compileUnminifiedJs(srcDir, srcFilename, destDir, options)
+
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
     }
+
     await buildResult;
   }
 
@@ -883,7 +882,6 @@ module.exports = {
   compileJsWithEsbuild,
   doBuildJs,
   endBuildStep,
-  compileUnminifiedJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
   maybeToNpmEsmName,
