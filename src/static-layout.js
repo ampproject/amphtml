@@ -173,7 +173,7 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
   // If the layout was already done by server-side rendering (SSR), then the
   // code below will not run. Any changes below will necessitate a change to SSR
   // and must be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
-  const {height, layout, width} = getEffectiveLayout(element);
+  const {height, layout, width} = getEffectiveLayoutInternal(element);
 
   // Apply UI.
   element.classList.add(getLayoutClass(layout));
@@ -262,20 +262,31 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
 }
 
 /**
+ * Gets the effective layout for an element.
+ *
+ * @param {!Element} element
+ * @return {!Layout}
+ */
+export function getEffectiveLayout(element) {
+  return getEffectiveLayoutInternal(element).layout;
+}
+
+/**
  * @typedef {
  *   {layout: !Layout, height: number, width: number} | {layout: !Layout}
- * } EffectiveLayout
+ * } InternalEffectiveLayout
  */
 
 /**
  * Gets the effective layout for an element.
- * If i-amphtml-layout is available, then directly use that value.
+ *
+ * If class 'i-amphtml-layout' is present, then directly use its value.
  * Else calculate layout based on element attributes and return the width/height.
  *
  * @param {!Element} element
- * @return {EffectiveLayout}
+ * @return {InternalEffectiveLayout}
  */
-export function getEffectiveLayout(element) {
+function getEffectiveLayoutInternal(element) {
   // Return the pre-existing value if layout has already been applied.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
@@ -357,7 +368,6 @@ export function getEffectiveLayout(element) {
     layout = Layout.FIXED;
   }
 
-  // Verify layout attributes
   if (
     layout == Layout.FIXED ||
     layout == Layout.FIXED_HEIGHT ||

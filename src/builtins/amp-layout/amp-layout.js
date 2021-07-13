@@ -45,7 +45,7 @@ class AmpLayout extends BaseElement {
  * @param {!Element} element
  */
 export function buildDom(document, element) {
-  const {layout} = getEffectiveLayout(element);
+  const layout = getEffectiveLayout(element);
   if (layout == Layout.CONTAINER) {
     return;
   }
