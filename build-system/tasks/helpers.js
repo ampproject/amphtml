@@ -383,7 +383,7 @@ async function finishBundle(
  * @param {?Object} options
  * @return {!Promise}
  */
-async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
+async function doCompileJs(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
   const destFilename = options.minify
@@ -583,6 +583,7 @@ const watchedEntryPoints = new Set();
 
 /**
  * Bundles (max) or compiles (min) a given JavaScript file entry point.
+ * Handles filewatching, and defers to doCompileJs for actual compilation.
  *
  * @param {string} srcDir Path to the src directory
  * @param {string} srcFilename Name of the JS source file
@@ -601,7 +602,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     watchedEntryPoints.add(entryPoint);
     const deps = await getDependencies(entryPoint, options);
     const watchFunc = async () => {
-      await compileUnminifiedJs(srcDir, srcFilename, destDir, {
+      await doCompileJs(srcDir, srcFilename, destDir, {
         ...options,
         continueOnError: true,
       });
@@ -609,7 +610,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     watch(deps).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
-  await compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+  await doCompileJs(srcDir, srcFilename, destDir, options);
 }
 
 /**
