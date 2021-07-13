@@ -266,15 +266,19 @@ export class AmpVideo extends AMP.BaseElement {
     // Cached so mediapool operations (eg: swapping sources) don't interfere with this bool.
     this.hasBitrateSources_ =
       !!this.element.querySelector('source[data-bitrate]') ||
-      this.hasAnyCachedSources_() ||
-      this.element.hasAttribute('cache');
+      this.element.hasAttribute('cache') ||
+      this.hasAnyCachedSources_();
 
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
 
-    // Fetch and add cached sources URLs if opted-in, and if the sources don't already contained cached URLs from the AMP Cache.
-    if (this.element.hasAttribute('cache') && !this.hasAnyCachedSources_()) {
+    if (this.element.hasAttribute('cache')) {
+      // If enabled, disables AMP Cache video caching (cdn.ampproject.org),
+      // opted-in through the "amp-orig-src" attribute.
+      this.removeCachedSources_();
+      // Fetch new sources from remote video cache, opted-in through the "cache"
+      // attribute.
       return fetchCachedSources(this.element, this.getAmpDoc());
     }
   }
@@ -483,6 +487,21 @@ export class AmpVideo extends AMP.BaseElement {
   }
 
   /**
+   * Disables AMP Cache video caching (cdn.ampproject.org), opted-in through
+   * amp-orig-src.
+   * @private
+   */
+  removeCachedSources_() {
+    this.getCachedSources_().forEach((cachedSource) => {
+      cachedSource.setAttribute(
+        'src',
+        cachedSource.getAttribute('amp-orig-src')
+      );
+      cachedSource.removeAttribute('amp-orig-src');
+    });
+  }
+
+  /**
    * @private
    * Propagate sources that are cached by the CDN.
    */
@@ -612,18 +631,27 @@ export class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {boolean}
+   * @return {!Array<!Element>}
    */
-  hasAnyCachedSources_() {
+  getCachedSources_() {
     const {element} = this;
     const sources = toArray(childElementsByTag(element, 'source'));
+    const cachedSources = [];
     sources.push(element);
     for (let i = 0; i < sources.length; i++) {
       if (isCachedByCdn(sources[i])) {
-        return true;
+        cachedSources.push(sources[i]);
       }
     }
-    return false;
+    return cachedSources;
+  }
+
+  /**
+   * @private
+   * @return {boolean}
+   */
+  hasAnyCachedSources_() {
+    return !!this.getCachedSources_().length;
   }
 
   /**
