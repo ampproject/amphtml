@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
 import {AmpVideo, isCachedByCdn} from '../amp-video';
 import {Services} from '#service';
 import {VideoEvents} from '../../../../src/video-interface';
@@ -23,6 +24,7 @@ import {installPerformanceService} from '#service/performance-impl';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {toggleExperiment} from '#experiments';
+import {xhrServiceForTesting} from '#service/xhr-impl';
 
 describes.realWin(
   'amp-video',
@@ -693,6 +695,92 @@ describes.realWin(
       const pEnded = listenOncePromise(v, VideoEvents.ENDED);
       const pPause = listenOncePromise(v, VideoEvents.PAUSE);
       return Promise.all([pEnded, pPause]);
+    });
+
+    describe('remote video cache (amp-video[cache=*])', () => {
+      let remoteSources;
+      beforeEach(() => {
+        const cacheUrlService = new AmpCacheUrlService();
+        env.sandbox
+          .stub(Services, 'cacheUrlServicePromiseForDoc')
+          .resolves(cacheUrlService);
+
+        const extensionsService = {
+          installExtensionForDoc: env.sandbox.spy(() => Promise.resolve()),
+        };
+        env.sandbox.stub(Services, 'extensionsFor').returns(extensionsService);
+
+        const xhrService = xhrServiceForTesting(env.win);
+        env.sandbox.stub(Services, 'xhrFor').returns(xhrService);
+        remoteSources = [];
+        env.sandbox.stub(xhrService, 'fetch').resolves({
+          json: () => Promise.resolve({sources: remoteSources}),
+        });
+      });
+
+      it('should play a source fetched from video caching', async () => {
+        remoteSources.push({
+          url: 'https://example.com/cached-video.mp4',
+          type: 'video/mp4',
+        });
+        const v = await getVideo({
+          src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+          type: 'video/mp4',
+          'amp-orig-src': 'https://example.com/video.mp4',
+          cache: 'google',
+          layout: 'responsive',
+          height: '100px',
+          width: '100px',
+        });
+        const sources = v.querySelectorAll('source');
+        expect(sources.length).to.equal(2);
+        expect(v.querySelector('video')).to.not.have.attribute('src');
+        expect(sources[0].getAttribute('src')).to.equal(
+          'https://example.com/cached-video.mp4'
+        );
+        expect(sources[1].getAttribute('src')).to.equal(
+          'https://example.com/video.mp4'
+        );
+      });
+
+      it('should remove AMP Cache video caching on video[src] if remote video caching is provided', async () => {
+        const origSrc = 'https://example.com/video.mp4';
+        const v = await getVideo({
+          src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+          type: 'video/mp4',
+          'amp-orig-src': origSrc,
+          cache: 'google',
+          layout: 'responsive',
+          height: '100px',
+          width: '100px',
+        });
+        const sources = v.querySelectorAll('source');
+        expect(sources.length).to.equal(1);
+        expect(sources[0].getAttribute('src')).to.equal(origSrc);
+      });
+
+      it('should remove AMP Cache video caching on source elements if remote video caching is provided', async () => {
+        const origSrc = 'https://example.com/video.mp4';
+        const cachedSource = doc.createElement('source');
+        cachedSource.setAttribute(
+          'src',
+          'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+        );
+        cachedSource.setAttribute('amp-orig-src', origSrc);
+        const v = await getVideo(
+          {
+            type: 'video/mp4',
+            cache: 'google',
+            layout: 'responsive',
+            height: '100px',
+            width: '100px',
+          },
+          [cachedSource]
+        );
+        const sources = v.querySelectorAll('source');
+        expect(sources.length).to.equal(1);
+        expect(sources[0].getAttribute('src')).to.equal(origSrc);
+      });
     });
 
     describe('blurred image placeholder', () => {
