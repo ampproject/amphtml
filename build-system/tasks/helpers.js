@@ -447,11 +447,6 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
           `  msg: ${warning.text}\n`
         );
       }
-      if (options.minify) {
-        // TODO: uncomment when all the tests are passing, since it more than doubles build times.
-        //   await minifyWithTerser(destDir, destFilename, options);
-        await writeSourcemaps(`${destFile}.map`, options);
-      }
       await finishBundle(
         srcFilename,
         destDir,
@@ -459,6 +454,13 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         options,
         startTime
       );
+
+      if (options.minify) {
+        // TODO: uncomment when all the tests are passing, since it more than doubles build times.
+        await minifyWithTerser(destDir, destFilename, options);
+        await writeSourcemaps(`${destFile}.map`, options);
+      }
+
       return result;
     })
     .catch((err) => handleBundleError(err, !!options.watch, destFilename));
