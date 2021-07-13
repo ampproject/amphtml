@@ -59,8 +59,8 @@ export const AnalyticsEventType = {
 
 const BrowserEventType = {
   BLUR: 'blur',
-  CHANGE: 'change'
-}
+  CHANGE: 'change',
+};
 
 const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
 
@@ -345,10 +345,7 @@ export class CustomBrowserEventTracker extends EventTracker {
     this.observables_ = new Observable();
 
     /** @private {?function(!Event)} */
-    this.boundOnSession_ = this.observables_.fire.bind(
-      this.observables_
-    );
-
+    this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
   }
 
   /** @override */
@@ -359,21 +356,39 @@ export class CustomBrowserEventTracker extends EventTracker {
     });
     this.boundOnSession_ = null;
     this.observables_ = null;
-
   }
 
   /** @override */
   add(context, eventType, config, listener) {
+    const selector = userAssert(
+      config['selector'],
+      'Missing required selector on browser event trigger'
+    );
+    const selectionMethod = config['selectionMethod'] || null;
+    const eventName = config['on'];
 
-    // get the element
-    // get the event type
+    const targetReady = this.root.getElement(
+      context,
+      selector,
+      selectionMethod
+    );
+
+    this.root.getRoot().addEventListener(eventName, this.boundOnSession_, true);
 
     return this.observables_.add((event) => {
-      // add a listener
+      const el = dev().assertElement(
+        event.target,
+        'No target specified by browser event.'
+      );
+      if (!event.type.localeCompare(eventName)) {
+        targetReady.then((target) => {
+          if (!target.contains(el)) {
+            return;
+          }
+          listener(new AnalyticsEvent(target, eventName, event.detail));
+        });
+      }
     });
-
-
-
   }
 }
 
