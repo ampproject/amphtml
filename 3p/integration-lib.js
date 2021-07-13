@@ -43,7 +43,6 @@ const AMP_EMBED_ALLOWED = {
   adstyle: true,
   bringhub: true,
   dable: true,
-  gecko: true,
   engageya: true,
   epeex: true,
   firstimpression: true,
