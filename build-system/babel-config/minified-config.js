@@ -77,12 +77,12 @@ function getMinifiedConfig() {
     !isCheckTypes
       ? null
       : './build-system/babel-plugins/babel-plugin-transform-json-configuration',
-    (isFortesting || isCheckTypes)
-      ?  null
+    isFortesting || isCheckTypes
+      ? null
       : [
           './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
           {isEsmBuild: !!argv.esm},
-        ]
+        ],
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',

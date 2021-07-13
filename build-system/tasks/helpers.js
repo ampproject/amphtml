@@ -37,6 +37,7 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
+const {writeSourcemaps} = require('../compile/helpers');
 const {yellow} = require('../common/colors');
 
 /** @type {Remapping.default} */
@@ -442,9 +443,11 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
           `  msg: ${warning.text}\n`
         );
       }
-      // if (options.minify) {
-      //   await minifyWithTerser(destDir, destFilename, options);
-      // }
+      if (options.minify) {
+        // TODO: uncomment when all the tests are passing, since it more than doubles build times.
+        //   await minifyWithTerser(destDir, destFilename, options);
+        await writeSourcemaps(`${destFile}.map`, options);
+      }
       await finishBundle(
         srcFilename,
         destDir,
@@ -679,7 +682,12 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
    * @return {Promise<void>}
    */
   async function doCompileJs(options) {
-    const buildResult = compileUnminifiedJs(srcDir, srcFilename, destDir, options)
+    const buildResult = compileUnminifiedJs(
+      srcDir,
+      srcFilename,
+      destDir,
+      options
+    );
 
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
