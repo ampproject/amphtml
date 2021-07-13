@@ -59,6 +59,11 @@ jobs:
         run: |
           NPM_PACKAGE=$(jq -r .name ./extensions/${{ matrix.extension }}/${{ matrix.version }}/package.json)
           NPM_VERSION=$(jq -r .version ./extensions/${{ matrix.extension }}/${{ matrix.version }}/package.json)
-          npm dist-tag add ${NPM_PACKAGE}@${NPM_VERSION} latest
+          echo "Processing ${NPM_PACKAGE}@${NPM_VERSION}"
+          if [[ $(npm view ${NPM_PACKAGE}@${NPM_VERSION}) ]]; then
+            npm dist-tag add ${NPM_PACKAGE}@${NPM_VERSION} latest
+          else
+            npm publish ./extensions/${{ matrix.extension }}/${{ matrix.version }} --access public --tag latest
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
