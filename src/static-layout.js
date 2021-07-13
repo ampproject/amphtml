@@ -268,6 +268,12 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
  * @return {!Layout}
  */
 export function getEffectiveLayout(element) {
+  // Return the pre-existing value if layout has already been applied.
+  const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
+  if (completedLayoutAttr) {
+    return parseLayout(completedLayoutAttr);
+  }
+
   return getEffectiveLayoutInternal(element).layout;
 }
 
@@ -287,12 +293,6 @@ export function getEffectiveLayout(element) {
  * @return {InternalEffectiveLayout}
  */
 function getEffectiveLayoutInternal(element) {
-  // Return the pre-existing value if layout has already been applied.
-  const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
-  if (completedLayoutAttr) {
-    return {layout: parseLayout(completedLayoutAttr)};
-  }
-
   // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
   const widthAttr = element.getAttribute('width');
