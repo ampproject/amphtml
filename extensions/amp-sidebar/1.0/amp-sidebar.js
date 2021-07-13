@@ -16,7 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -55,6 +55,24 @@ class AmpSidebar extends BaseElement {
       'expected global "bento" or specific "bento-sidbar" experiment to be enabled'
     );
     return true;
+  }
+
+  /** @override */
+  afterOpen() {
+    super.afterOpen();
+    const sidebar = this.element.shadowRoot.querySelector('[part=sidebar]');
+    this.setAsContainer?.(sidebar);
+  }
+
+  /** @override */
+  afterClose() {
+    super.afterClose();
+    this.removeAsContainer?.();
+  }
+
+  /** @override */
+  unmountCallback() {
+    this.removeAsContainer?.();
   }
 }
 

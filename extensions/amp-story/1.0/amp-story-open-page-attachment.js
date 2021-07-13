@@ -18,13 +18,14 @@
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
 import {AttachmentTheme} from './amp-story-page-attachment';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {computedStyle, setImportantStyles} from '../../../src/style';
+import {LocalizedStringId} from '#service/localization/strings';
+import {Services} from '#service';
+import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
-import {toWin} from '../../../src/types';
+import {toWin} from '#core/window';
 
 /**
  * @enum {string}
@@ -98,12 +99,18 @@ export const buildOpenAttachmentElementLinkIcon = (element) =>
  */
 export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
   if (isPageAttachmentUiV2ExperimentOn(pageEl.getAmpDoc().win)) {
-    if (attachmentEl.getAttribute('href')) {
+    // Outlinks can be an amp-story-page-outlink or the legacy version,
+    // an amp-story-page-attachment with an href.
+    const isOutlink =
+      attachmentEl.tagName === 'AMP-STORY-PAGE-OUTLINK' ||
+      attachmentEl.getAttribute('href');
+    if (isOutlink) {
       return renderOutlinkPageAttachmentUI(pageEl, attachmentEl);
     } else {
       return renderInlinePageAttachmentUi(pageEl, attachmentEl);
     }
   }
+  // This codepath can be removed after amp-story-page-attachment-ui-v2 is launched.
   return renderOldPageAttachmentUI(pageEl, attachmentEl);
 };
 
@@ -135,6 +142,12 @@ const renderOldPageAttachmentUI = (pageEl, attachmentEl) => {
       LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
     );
 
+  // Copy title to the element if it exists.
+  const attachmentTitle = attachmentEl.getAttribute('data-title');
+  if (attachmentTitle) {
+    openAttachmentEl.setAttribute('title', attachmentTitle);
+  }
+
   textEl.textContent = openLabel;
 
   return openAttachmentEl;
@@ -149,10 +162,25 @@ const renderOldPageAttachmentUI = (pageEl, attachmentEl) => {
 const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
 
+  // amp-story-page-outlink requires an anchor element child for SEO and analytics optimisations.
+  // amp-story-page-attachment uses this same codepath and allows an href attribute.
+  // This is hidden with css. Clicks are simulated from it when a remote attachment is clicked.
+  const anchorChild = pageEl
+    .querySelector('amp-story-page-outlink')
+    ?.querySelector('a');
+
   // Copy href to the element so it can be previewed on hover and long press.
-  const attachmentHref = attachmentEl.getAttribute('href');
+  const attachmentHref =
+    anchorChild?.getAttribute('href') || attachmentEl.getAttribute('href');
   if (attachmentHref) {
     openAttachmentEl.setAttribute('href', attachmentHref);
+  }
+
+  // Copy title to the element if it exists.
+  const attachmentTitle =
+    anchorChild?.getAttribute('title') || attachmentEl.getAttribute('title');
+  if (attachmentTitle) {
+    openAttachmentEl.setAttribute('title', attachmentTitle);
   }
 
   // Get elements.
@@ -171,6 +199,7 @@ const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
 
   // Append text & aria-label.
   const openLabelAttr =
+    anchorChild?.textContent ||
     attachmentEl.getAttribute('cta-text') ||
     attachmentEl.getAttribute('data-cta-text');
   const openLabel = openLabelAttr
@@ -245,15 +274,36 @@ const renderInlinePageAttachmentUi = (pageEl, attachmentEl) => {
 
   const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
   if (openImgAttr2) {
-    chipEl.prepend(makeImgElWithBG(openImgAttr2));
+    const src = maybeMakeProxyUrl(openImgAttr2, pageEl);
+    chipEl.prepend(makeImgElWithBG(src));
   }
 
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   if (openImgAttr) {
-    chipEl.prepend(makeImgElWithBG(openImgAttr));
+    const src = maybeMakeProxyUrl(openImgAttr, pageEl);
+    chipEl.prepend(makeImgElWithBG(src));
   }
 
   return openAttachmentEl;
+};
+
+/**
+ * Makes a proxy URL if document is served from a proxy origin. No-op otherwise.
+ * @param {string} url
+ * @param {!Element} pageEl
+ * @return {string}
+ */
+const maybeMakeProxyUrl = (url, pageEl) => {
+  const urlService = Services.urlForDoc(pageEl);
+  const loc = pageEl.getAmpDoc().win.location;
+  if (!urlService.isProxyOrigin(loc.origin) || urlService.isProxyOrigin(url)) {
+    return url;
+  }
+  const resolvedRelativeUrl = urlService.resolveRelativeUrl(
+    url,
+    urlService.getSourceOrigin(loc.href)
+  );
+  return loc.origin + '/i/s/' + resolvedRelativeUrl.replace(/https?:\/\//, '');
 };
 
 /**

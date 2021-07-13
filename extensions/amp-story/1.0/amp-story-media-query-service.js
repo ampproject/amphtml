@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {dev} from '../../../src/log';
-import {registerServiceBuilder} from '../../../src/service';
+import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /**
  * Util function to retrieve the media query service. Ensures we can retrieve

@@ -20,8 +20,8 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkValueimpressionImpl} from '../amp-ad-network-valueimpression-impl';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
 
 /**
  * We're allowing external resources because otherwise using realWin causes

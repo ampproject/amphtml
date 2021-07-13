@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonConfiguration} from '../../../src/core/types/object/json';
+import {jsonConfiguration} from '#core/types/object/json';
 
 // TODO(zhouyx@: Rename file and object name)
 const defaultConfig = jsonConfiguration({
@@ -76,6 +76,11 @@ const defaultConfig = jsonConfiguration({
     'scrollLeft': 'SCROLL_LEFT',
     'scrollTop': 'SCROLL_TOP',
     'scrollWidth': 'SCROLL_WIDTH',
+    'sessionId': 'SESSION_ID',
+    'sessionCount': 'SESSION_COUNT',
+    'sessionEngaged': 'SESSION_ENGAGED',
+    'sessionEventTimestamp': 'SESSION_EVENT_TIMESTAMP',
+    'sessionTimestamp': 'SESSION_TIMESTAMP',
     'serverResponseTime': 'SERVER_RESPONSE_TIME',
     'sourceHost': 'SOURCE_HOST',
     'sourceHostname': 'SOURCE_HOSTNAME',

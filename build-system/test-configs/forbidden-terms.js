@@ -146,11 +146,15 @@ const forbiddenTermsGlobal = {
     message: realiasGetMode,
     allowlist: ['src/mode-object.js', 'src/iframe-attributes.js'],
   },
-  '(?:var|let|const) +IS_FORTESTING +=': {
+  'INTERNAL_RUNTIME_VERSION|IS_(FORTESTING|MINIFIED)': {
     message:
-      'IS_FORTESTING local var only allowed in mode.js and ' +
-      'dist.3p/current/integration.js',
-    allowlist: ['src/mode.js'],
+      'Do not use build constants directly. Instead, use the helpers in `#core/mode`.',
+    allowlist: [
+      'src/internal-version.js',
+      'src/core/mode/minified.js',
+      'src/core/mode/for-testing.js',
+      'build-system/compile/build-constants.js',
+    ],
   },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
@@ -304,18 +308,16 @@ const forbiddenTermsGlobal = {
       'extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
-      'extensions/amp-form/0.1/amp-form.js', // References service defined in amp-form.
-      'extensions/amp-form/0.1/form-dirtiness.js', // References service defined in amp-form.
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',
       'src/element-service.js',
-      'src/service.js',
+      'src/service-helpers.js',
+      'src/service/index.js',
       'src/service/scheduler.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
       'src/service/template-impl.js',
-      'src/services.js',
       'src/utils/display-observer.js',
       'testing/test-helper.js',
     ],
@@ -392,7 +394,7 @@ const forbiddenTermsGlobal = {
       // in extensions listed in the amp4ads spec:
       // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/ad-cid.js',
-      'src/services.js',
+      'src/service/index.js',
       'src/service/standard-actions-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
@@ -446,9 +448,10 @@ const forbiddenTermsGlobal = {
       // Storage service is not allowed in amp4ads. No usage should there be
       // in extensions listed in the amp4ads spec:
       // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
-      'src/services.js',
+      'src/service/index.js',
       'src/service/cid-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
+      'extensions/amp-analytics/0.1/session-manager.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
@@ -514,7 +517,7 @@ const forbiddenTermsGlobal = {
       'src/inabox/inabox-viewer.js',
       'src/service/viewer-impl.js',
       'src/error-reporting.js',
-      'src/window-interface.js',
+      'src/core/window/interface.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -534,7 +537,7 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
-      'src/event-helper-listen.js',
+      'src/core/dom/event-helper-listen.js',
     ],
   },
   'setTimeout.*throw': {
@@ -580,8 +583,8 @@ const forbiddenTermsGlobal = {
     allowlist: ['src/custom-element.js', 'src/service/resources-impl.js'],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
-    message: 'Use dom.openWindowDialog',
-    allowlist: ['src/dom.js'],
+    message: 'Use src/open-window-dialog',
+    allowlist: ['src/open-window-dialog.js'],
   },
   '\\.getWin\\(': {
     message: backwardCompat,
@@ -607,6 +610,14 @@ const forbiddenTermsGlobal = {
       'src/service/resources-impl.js',
     ],
   },
+  '\\b(__)?AMP_EXP\\b': {
+    message:
+      'Do not access AMP_EXP directly. Use isExperimentOn() to access config',
+    allowlist: [
+      'src/experiments/index.js',
+      'src/experiments/experiments.extern.js',
+    ],
+  },
   'AMP_CONFIG': {
     message:
       'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
@@ -627,9 +638,12 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
       'src/config.js',
+      'src/core/window/window.extern.js',
       'src/experiments/index.js',
       'src/experiments/shame.extern.js',
       'src/mode.js',
+      'src/core/mode/test.js',
+      'src/core/mode/local-dev.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'testing/init-tests.js',
       'tools/experiments/experiments.js',
@@ -699,12 +713,6 @@ const forbiddenTermsGlobal = {
       'Use "describes.{realWin|sandboxed|fakeWin|integration}".',
     allowlist: [
       // Non test files. These can remain.
-      'build-system/server/app-index/test/test-amphtml-helpers.js',
-      'build-system/server/app-index/test/test-file-list.js',
-      'build-system/server/app-index/test/test-html.js',
-      'build-system/server/app-index/test/test-self.js',
-      'build-system/server/app-index/test/test-template.js',
-      'build-system/server/app-index/test/test.js',
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
       'validator/js/engine/amp4ads-parse-css_test.js',
@@ -796,7 +804,10 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Due to various bugs in Firefox, you must use the computedStyle ' +
       'helper in style.js.',
-    allowlist: ['src/style.js', 'build-system/tasks/coverage-map/index.js'],
+    allowlist: [
+      'src/core/dom/style.js',
+      'build-system/tasks/coverage-map/index.js',
+    ],
   },
   'decodeURIComponent\\(': {
     message:
@@ -866,16 +877,19 @@ const forbiddenTermsSrcInclusive = {
       'src/service/resources-impl.js',
       'src/service/variable-source.js',
       'src/validator-integration.js',
-      'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
-      'extensions/amp-web-push/0.1/iframehost.js',
+      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
+      'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
+      'extensions/amp-image-slider/0.1/amp-image-slider.js',
+      'extensions/amp-image-viewer/0.1/amp-image-viewer.js',
       'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
+      'extensions/amp-web-push/0.1/iframehost.js',
     ],
   },
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     allowlist: [
-      '.github/workflows/create-design-review-issue.js',
+      'build-system/common/update-session-issues/index.js',
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/1.0/component.js',
       'src/core/types/date.js',
@@ -907,6 +921,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/session-manager.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
@@ -918,7 +933,6 @@ const forbiddenTermsSrcInclusive = {
       'ads/_a4a-config.js',
       'build-system/server/amp4test.js',
       'build-system/server/app-index/amphtml-helpers.js',
-      'build-system/server/app-utils.js',
       'build-system/server/app-video-testbench.js',
       'build-system/server/app.js',
       'build-system/server/shadow-viewer.js',
@@ -959,7 +973,7 @@ const forbiddenTermsSrcInclusive = {
       'Do not directly use CI-specific environment vars. Instead, add a ' +
       'function to build-system/common/ci.js',
   },
-  '\\.matches\\(': 'Please use matches() helper in src/dom.js',
+  '\\.matches\\(': 'Please use matches() helper in src/core/dom/query.js',
   '\\.getLayoutBox': {
     message: measurementApiDeprecated,
     allowlist: [
@@ -975,6 +989,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'extensions/amp-next-page/1.0/visibility-observer.js',
       'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
+      'extensions/amp-story/1.0/background-blur.js',
       'extensions/amp-story/1.0/page-advancement.js',
     ],
   },
@@ -982,7 +997,7 @@ const forbiddenTermsSrcInclusive = {
     message: measurementApiDeprecated,
     allowlist: [
       'build-system/externs/amp.extern.js',
-      'builtins/amp-img/amp-img.js',
+      'src/builtins/amp-img/amp-img.js',
       'src/base-element.js',
       'src/custom-element.js',
       'src/iframe-helper.js',
@@ -1042,7 +1057,7 @@ const forbiddenTermsSrcInclusive = {
       'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',
     allowlist: [
       // The function itself is defined here.
-      'src/utils/video.js',
+      'src/core/dom/video/index.js',
     ],
   },
 };

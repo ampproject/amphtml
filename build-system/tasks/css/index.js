@@ -25,6 +25,7 @@ const {watch} = require('chokidar');
 
 /**
  * Entry point for 'amp css'
+ * @return {Promise<void>}
  */
 async function css() {
   await compileCss();
@@ -84,6 +85,7 @@ const cssEntryPoints = [
 
 /**
  * Copies the css from the build folder to the dist folder
+ * @return {Promise<void>}
  */
 async function copyCss() {
   const startTime = Date.now();
@@ -107,6 +109,7 @@ async function copyCss() {
  * @param {string} jsFilename
  * @param {string} cssFilename
  * @param {boolean} append append CSS to existing file
+ * @return {Promise<void>}
  */
 async function writeCss(css, jsFilename, cssFilename, append) {
   await fs.ensureDir('build/css');
@@ -124,6 +127,7 @@ async function writeCss(css, jsFilename, cssFilename, append) {
  * @param {string} outJs
  * @param {string} outCss
  * @param {boolean} append
+ * @return {Promise<void>}
  */
 async function writeCssEntryPoint(path, outJs, outCss, append) {
   const css = await jsifyCssAsync(`css/${path}`);
@@ -134,7 +138,7 @@ async function writeCssEntryPoint(path, outJs, outCss, append) {
  * Compile all the css and drop in the build folder
  *
  * @param {Object=} options
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function compileCss(options = {}) {
   if (options.watch) {
@@ -160,4 +164,4 @@ module.exports = {
   cssEntryPoints,
 };
 
-css.description = 'Recompile css to build directory';
+css.description = 'Compile all css files to the build directory';

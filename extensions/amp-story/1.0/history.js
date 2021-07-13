@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/core/types/object';
-import {getState} from '../../../src/history';
-import {parseJson} from '../../../src/core/types/object/json';
+import {dict} from '#core/types/object';
+import {getHistoryState as getWindowHistoryState} from '#core/window/history';
+import {parseJson} from '#core/types/object/json';
 
 const EXPIRATION_DURATION_MILLIS = 10 * 60 * 1000; // 10 Minutes
 const CREATION_TIME = 'time';
@@ -41,7 +41,7 @@ export const HistoryState = {
  */
 export function setHistoryState(win, stateName, value) {
   const {history} = win;
-  const state = getState(history) || {};
+  const state = getWindowHistoryState(history) || {};
   const newHistory = {
     ...state,
     [stateName]: value,
@@ -60,7 +60,7 @@ export function setHistoryState(win, stateName, value) {
  */
 export function getHistoryState(win, stateName) {
   const {history} = win;
-  let state = getState(history);
+  let state = getWindowHistoryState(history);
   // We do get an early state but without a navigation path. In that case we
   // prefer localStorage.
   if (!state || !state[stateName]) {

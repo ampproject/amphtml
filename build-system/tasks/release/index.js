@@ -142,6 +142,7 @@ function logSeparator_() {
  *
  * @param {string} outputDir full directory path to emplace artifacts in.
  * @param {string} tempDir full directory path to temporary working directory.
+ * @return {Promise<void>}
  */
 async function prepareEnvironment_(outputDir, tempDir) {
   execOrDie('amp clean');
@@ -202,6 +203,7 @@ function discoverDistFlavors_() {
  * @param {string} flavorType AMP flavor to build.
  * @param {string} command `amp` command to build the flavor.
  * @param {string} tempDir full directory path to temporary working directory.
+ * @return {Promise<void>}
  */
 async function compileDistFlavors_(flavorType, command, tempDir) {
   // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
@@ -259,6 +261,7 @@ async function compileDistFlavors_(flavorType, command, tempDir) {
  *
  * @param {string} flavorType AMP flavor to build.
  * @param {string} tempDir full directory path to temporary working directory.
+ * @return {Promise<void>}
  */
 async function fetchAmpSw_(flavorType, tempDir) {
   const ampSwTempDir = path.join(tempDir, 'ampproject/amp-sw');
@@ -297,6 +300,7 @@ async function fetchAmpSw_(flavorType, tempDir) {
  * @param {!Array<string>} rtvPrefixes list of 2-digit RTV prefixes to generate.
  * @param {string} tempDir full directory path to temporary working directory.
  * @param {string} outputDir full directory path to emplace artifacts in.
+ * @return {Promise<void>}
  */
 async function populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir) {
   const rtvCopyingPromise = async (/** @type {string} */ rtvPrefix) => {
@@ -331,6 +335,7 @@ async function populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir) {
  * Generates a listing of all files in each org-cdn/rtv/ subdirectory.
 
  * @param {string} outputDir full directory path to emplace artifacts in.
+ * @return {Promise<void>}
  */
 async function generateFileListing_(outputDir) {
   await Promise.all(
@@ -364,6 +369,7 @@ async function generateFileListing_(outputDir) {
  * e.g., /amp4ads-v0.js for AMP ads.
  *
  * @param {string} outputDir full directory path to emplace artifacts in.
+ * @return {Promise<void>}
  */
 async function prependConfig_(outputDir) {
   const activeChannels = Object.entries(CHANNEL_CONFIGS).filter(
@@ -424,6 +430,7 @@ async function prependConfig_(outputDir) {
  *
  * @param {string} tempDir full directory path to temporary working directory.
  * @param {string} outputDir full directory path to emplace artifacts in.
+ * @return {Promise<void>}
  */
 async function populateNetWildcard_(tempDir, outputDir) {
   const netWildcardDir = path.join(outputDir, 'net-wildcard', VERSION);
@@ -437,6 +444,7 @@ async function populateNetWildcard_(tempDir, outputDir) {
  * Cleans are deletes the temp directory.
  *
  * @param {string} tempDir full directory path to temporary working directory.
+ * @return {Promise<void>}
  */
 async function cleanup_(tempDir) {
   await fs.rmdir(tempDir, {recursive: true});
@@ -499,13 +507,13 @@ module.exports = {
   release,
 };
 
-release.description = 'Generates a release build';
+release.description = 'Generate a release build';
 release.flags = {
   'output_dir':
     'Directory path to emplace release files (defaults to "./release")',
   'flavor':
-    'Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
+    'Limit this release build to a single flavor (can be used to split the release work across multiple build machines)',
   'esm':
     // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
-    'True to compile with --esm, false to compile without; Do not set to compile both.',
+    'Compile with --esm if true, without --esm if false, and with + without --esm if left unset',
 };

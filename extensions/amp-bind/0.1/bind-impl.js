@@ -14,42 +14,30 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {BindEvents} from './bind-events';
 import {BindValidator} from './bind-validator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {RAW_OBJECT_ARGS_KEY} from '../../../src/core/constants/action-constants';
-import {Services} from '../../../src/services';
-import {Signals} from '../../../src/core/data-structures/signals';
-import {
-  closestAncestorElementBySelector,
-  iterateCursor,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {Deferred} from '#core/data-structures/promise';
+import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
+import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {debounce} from '../../../src/core/types/function';
-import {deepEquals, parseJson} from '../../../src/core/types/object/json';
-import {
-  deepMerge,
-  dict,
-  getValueForExpr,
-  map,
-} from '../../../src/core/types/object';
+import {debounce} from '#core/types/function';
+import {deepEquals, parseJson} from '#core/types/object/json';
+import {deepMerge, dict, getValueForExpr, map} from '#core/types/object';
 import {dev, devAssert, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {
-  findIndex,
-  isArray,
-  remove,
-  toArray,
-} from '../../../src/core/types/array';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {findIndex, isArray, remove, toArray} from '#core/types/array';
 import {getMode} from '../../../src/mode';
+import {iterateCursor} from '#core/dom';
+import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';
 
-import {isFiniteNumber, isObject} from '../../../src/core/types';
+import {isFiniteNumber, isObject} from '#core/types';
 
 import {reportError} from '../../../src/error-reporting';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
@@ -128,7 +116,7 @@ const BIND_ONLY_ATTRIBUTES = map({
  * Elements that opt-out of tree walking in favor of rescan() with {fast: true}.
  * @const {!Array<string>}
  */
-const FAST_RESCAN_TAGS = ['AMP-LIST'];
+const FAST_RESCAN_TAGS = ['AMP-LIST', 'AMP-RENDER'];
 
 /**
  * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from

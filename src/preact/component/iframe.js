@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Loading} from '../../../src/core/loading-instructions';
-import {ReadyState} from '../../../src/core/constants/ready-state';
-import {forwardRef} from '../../../src/preact/compat';
-import {useAmpContext, useLoading} from '../../../src/preact/context';
+import {Loading} from '#core/constants/loading-instructions';
+import {ReadyState} from '#core/constants/ready-state';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
-} from '../../../src/preact';
+} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {ContainWrapper, useValueRef} from '#preact/component';
+import {useAmpContext, useLoading} from '#preact/context';
 
 const DEFAULT_MATCHES_MESSAGING_ORIGIN = () => false;
 const ABOUT_BLANK = 'about:blank';

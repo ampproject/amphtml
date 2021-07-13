@@ -21,7 +21,7 @@ const metaCharset = `<meta charset=utf-8></meta>`;
 const metaViewport = `<meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"></meta>`;
 
 it('generates extensions metadata', () => {
-  const docString = `<html ⚡><head>
+  const docString = `<html ⚡ lang="en"><head>
     <script custom-element="amp-font"
         src="https://cdn.ampproject.org/v0/amp-font-0.1.js"></script>
     <script custom-element="amp-list"

@@ -17,7 +17,7 @@
 import {SwipeDef} from '../../../src/gesture-recognizers';
 import {delayAfterDeferringToEventLoop} from './utils';
 import {dev} from '../../../src/log';
-import {setStyles} from '../../../src/style';
+import {setStyles} from '#core/dom/style';
 
 /**
  * The distance needed to dismiss the swipe element, as fraction of its length.
