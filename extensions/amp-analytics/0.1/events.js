@@ -353,6 +353,12 @@ export class CustomBrowserEventTracker extends EventTracker {
 
   /** @override */
   dispose() {
+    const root = this.root.getRoot();
+    Object.keys(BrowserEventType).forEach((key) => {
+      root.removeEventListener(BrowserEventType[key], this.boundOnSession_);
+    });
+    this.boundOnSession_ = null;
+    this.observables_ = null;
 
   }
 
