@@ -45,7 +45,7 @@ commands:
       - attach_workspace:
           at: /tmp
       - run:
-          name: 'Rename Restored Workspace and Create New Workspace'
+          name: 'Configure Temporary Workspace'
           command: |
             mv /tmp/workspace /tmp/restored-workspace
             mkdir -p /tmp/workspace
@@ -54,7 +54,7 @@ commands:
           command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/maybe_gracefully_halt.sh | bash
       - checkout
       - run:
-          name: 'Fetch Merge Commit, Check Config, Restore Build Output, and Configure Hosts'
+          name: 'Configure Development Environment'
           command: |
             ./.circleci/fetch_merge_commit.sh
             ./.circleci/check_config.sh
