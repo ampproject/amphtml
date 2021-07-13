@@ -29,8 +29,8 @@ limitations under the License.
 
 ### Required parameter
 
-- `data-site-id`
-- `data-campaign-id`
+-   `data-site-id`
+-   `data-campaign-id`
 
 ## Configuration
 
