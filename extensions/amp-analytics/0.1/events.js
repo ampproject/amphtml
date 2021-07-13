@@ -190,7 +190,7 @@ function isVideoTriggerType(triggerType) {
  * @return {boolean}
  */
 function isCustomBrowserTriggerType(triggerType) {
-  return Object.values(BrowserEventType).indexOf(triggerType);
+  return Object.values(BrowserEventType).indexOf(triggerType) > -1;
 }
 
 /**
@@ -389,25 +389,6 @@ export class CustomBrowserEventTracker extends EventTracker {
         });
       }
     });
-
-    // unlisten to listerners
-    const unlistenPromise = this.root
-      .getElements(context.parentElement || context, selector, selectionMethod)
-      .then((elements) => {
-        const unlistenCallbacks = [];
-        for (let i = 0; i < elements.length; i++) {
-          unlistenCallbacks.push(elements[i]);
-        }
-        return unlistenCallbacks;
-      });
-
-    return function () {
-      unlistenPromise.then((unlistenCallbacks) => {
-        for (let i = 0; i < unlistenCallbacks.length; i++) {
-          unlistenCallbacks[i]();
-        }
-      });
-    };
   }
 }
 
