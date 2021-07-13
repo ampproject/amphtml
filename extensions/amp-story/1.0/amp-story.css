@@ -971,6 +971,10 @@ amp-story-interactive-img-poll.i-amphtml-story-interactive-component, amp-story-
   max-width: 18em !important;
 }
 
+amp-story-interactive-img-poll.i-amphtml-story-interactive-component, amp-story-interactive-img-quiz.i-amphtml-story-interactive-component {
+  --interactive-prompt-alignment: center;
+}
+
 amp-story-interactive-binary-poll[theme="dark"], amp-story-interactive-poll[theme="dark"] {
   --i-amphtml-interactive-option-accent-color: white !important;
 }
