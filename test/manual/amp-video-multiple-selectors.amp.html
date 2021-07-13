@@ -182,7 +182,7 @@
       <h1>amp-video: multiple analytics selectors</h1>
       <div class="main">
         <div class="video-container">
-          <amp-video class="vids", data-vars-video-id="my-video" data-substitutable data-removable-attrs="src" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" width="358" height="204" layout="responsive" id="my-video" controls>
+          <amp-video data-vars-video-id="my-video" data-substitutable data-removable-attrs="src" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" width="358" height="204" layout="responsive" id="my-video" controls>
             <div placeholder>
               This is a placeholder
             </div>
@@ -190,7 +190,7 @@
               This is a fallback
             </div>
           </amp-video>
-          <amp-video class="vids", data-vars-video-id="my-video-2" data-substitutable data-removable-attrs="src" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" width="358" height="204" layout="responsive" id="my-video-2" controls>
+          <amp-video data-vars-video-id="my-video-2" data-substitutable data-removable-attrs="src" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" width="358" height="204" layout="responsive" id="my-video-2" controls>
             <div placeholder>
               This is a placeholder
             </div>
@@ -259,7 +259,7 @@
           "myVideoPlay": {
             "on": "video-play",
             "request": "event",
-            "selector": [".vids"],
+            "selector": ["#my-video", "#my-video-2"],
             "vars": {
               "eventType": "video-play"
             },
