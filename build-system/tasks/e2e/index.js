@@ -105,7 +105,9 @@ function createMocha_() {
     fullStackTrace: true,
     reporterOptions: isCiBuild()
       ? {
-          mochaFile: 'result-reports/e2e.xml',
+          mochaFile: 'result-reports/e2e.[hash].xml',
+          testsuitesTitle: true,
+          suiteTitleSeparatedBy: '.',
         }
       : null,
     ...additionOptions,
