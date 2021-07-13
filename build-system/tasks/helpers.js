@@ -414,6 +414,10 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     options.minify ? 'minified' : 'unminified',
     /* enableCache */ true
   );
+  const plugins = [babelPlugin];
+  if (options.remapDependencies) {
+    plugins.unshift(remapDependenciesPlugin(options));
+  }
 
   // TODO: Make this once per dist build, and likely not as part of this flow.
   fs.outputFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
@@ -491,106 +495,30 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
 }
 
 /**
- * Transforms a given JavaScript file entry point with esbuild and babel, and
- * watches it for changes (if required).
- * Used by 3p iframe vendors.
- * @param {string} srcDir
- * @param {string} srcFilename
- * @param {string} destDir
- * @param {?Object} options
- * @return {!Promise}
+ * Generates a plugin to remap the dependencies of a JS bundle.
+ *
+ * @param {Object} options
+ * @return {Object}
  */
-async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
-  const startTime = Date.now();
-  const entryPoint = path.join(srcDir, srcFilename);
-  const fileName = options.minify ? options.minifiedName : options.toName;
-  const destFilename = options.npm ? fileName : maybeToEsmName(fileName);
-  const destFile = path.join(destDir, destFilename);
-
-  if (watchedTargets.has(entryPoint)) {
-    return watchedTargets.get(entryPoint).rebuild();
-  }
-
-  const babelPlugin = getEsbuildBabelPlugin(
-    options.minify ? 'minified' : 'unminified',
-    /* enableCache */ true
-  );
-  const plugins = [babelPlugin];
-
-  if (options.remapDependencies) {
-    plugins.unshift(remapDependenciesPlugin());
-  }
-
-  let result = null;
-
-  /**
-   * @param {number} time
-   * @return {Promise<void>}
-   */
-  async function build(time) {
-    if (!result) {
-      result = await esbuild.build({
-        entryPoints: [entryPoint],
-        bundle: true,
-        sourcemap: true,
-        outfile: destFile,
-        plugins,
-        format: options.outputFormat || undefined,
-        target: argv.esm ? 'es6' : 'es5',
-        incremental: !!options.watch,
-        logLevel: 'silent',
-        external: options.externalDependencies,
-      });
-    } else {
-      result = await result.rebuild();
-    }
-    await minifyWithTerser(destDir, destFilename, options);
-    await finishBundle(srcFilename, destDir, destFilename, options, time);
-  }
-
-  /**
-   * Generates a plugin to remap the dependencies of a JS bundle.
-   * @return {Object}
-   */
-  function remapDependenciesPlugin() {
-    const remapDependencies = {__proto__: null, ...options.remapDependencies};
-    const external = options.externalDependencies;
-    return {
-      name: 'remap-dependencies',
-      setup(build) {
-        build.onResolve({filter: /.*/}, (args) => {
-          const dep = args.path;
-          const remap = remapDependencies[dep];
-          if (remap) {
-            const isExternal = external.includes(remap);
-            return {
-              path: isExternal ? remap : require.resolve(remap),
-              external: isExternal,
-            };
-          }
-        });
-      },
-    };
-  }
-
-  await build(startTime).catch((err) =>
-    handleBundleError(err, !!options.watch, destFilename)
-  );
-
-  if (options.watch) {
-    watchedTargets.set(entryPoint, {
-      rebuild: async () => {
-        const time = Date.now();
-        const buildPromise = build(time).catch((err) =>
-          handleBundleError(err, !!options.watch, destFilename)
-        );
-        if (options.onWatchBuild) {
-          options.onWatchBuild(buildPromise);
+function remapDependenciesPlugin(options) {
+  const remapDependencies = {__proto__: null, ...options.remapDependencies};
+  const external = options.externalDependencies;
+  return {
+    name: 'remap-dependencies',
+    setup(build) {
+      build.onResolve({filter: /.*/}, (args) => {
+        const dep = args.path;
+        const remap = remapDependencies[dep];
+        if (remap) {
+          const isExternal = external.includes(remap);
+          return {
+            path: isExternal ? remap : require.resolve(remap),
+            external: isExternal,
+          };
         }
-        await buildPromise;
-      },
-    });
-  }
+      });
+    },
+  };
 }
 
 /**
@@ -671,32 +599,15 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     watchedEntryPoints.add(entryPoint);
     const deps = await getDependencies(entryPoint, options);
     const watchFunc = async () => {
-      await doCompileJs({...options, continueOnError: true});
+      await compileUnminifiedJs(srcDir, srcFilename, destDir, {
+        ...options,
+        continueOnError: true,
+      });
     };
     watch(deps).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
-  /**
-   * Actually performs the steps to compile the entry point.
-   * @param {Object} options
-   * @return {Promise<void>}
-   */
-  async function doCompileJs(options) {
-    const buildResult = compileUnminifiedJs(
-      srcDir,
-      srcFilename,
-      destDir,
-      options
-    );
-
-    if (options.onWatchBuild) {
-      options.onWatchBuild(buildResult);
-    }
-
-    await buildResult;
-  }
-
-  await doCompileJs(options);
+  await compileUnminifiedJs(srcDir, srcFilename, destDir, options);
 }
 
 /**
@@ -887,7 +798,6 @@ module.exports = {
   compileAllJs,
   compileCoreRuntime,
   compileJs,
-  compileJsWithEsbuild,
   doBuildJs,
   endBuildStep,
   maybePrintCoverageMessage,
