@@ -104,5 +104,21 @@ describes.realWin(
       slider.dispatchEvent(new CustomEvent('input'));
       expect(sliderBubble.textContent).to.be.equal('30');
     });
+
+    it.only('checks that input is the same as the --percentage variable', async () => {
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      const slider = ampStorySlider
+        .getRootElement()
+        .querySelector('input[type="range"]');
+      slider.value = 30;
+      // simulates an input event, which is when the user drags the slider
+      slider.dispatchEvent(new CustomEvent('input'));
+      expect(
+        win
+          .getComputedStyle(ampStorySlider.getRootElement())
+          .getPropertyValue('--percentage')
+      ).to.be.equal('30%');
+    });
   }
 );
