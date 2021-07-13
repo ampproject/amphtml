@@ -262,12 +262,18 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
 }
 
 /**
+ * @typedef {
+ *   {layout: !Layout, height: number, width: number} | {layout: !Layout}
+ * } EffectiveLayout
+ */
+
+/**
  * Gets the effective layout for an element.
  * If i-amphtml-layout is available, then directly use that value.
  * Else calculate layout based on element attributes and return the width/height.
  *
  * @param {!Element} element
- * @return {{layout: !Layout, height: number?, width: number?}}
+ * @return {EffectiveLayout}
  */
 export function getEffectiveLayout(element) {
   // Return the pre-existing value if layout has already been applied.
