@@ -190,7 +190,7 @@ function isVideoTriggerType(triggerType) {
  * @return {boolean}
  */
 function isCustomBrowserTriggerType(triggerType) {
-  return Object.values(BrowserEventType).includes(triggerType);
+  return Object.values(BrowserEventType).indexOf(triggerType);
 }
 
 /**
