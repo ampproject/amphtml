@@ -415,7 +415,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   );
 
   // TODO: Make this once per dist build, and likely not as part of this flow.
-  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
+  fs.outputFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
 
   const buildResult = await esbuild
     .build({
@@ -427,7 +427,9 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       plugins: [babelPlugin],
       banner,
       footer,
-      format: argv.esm ? 'esm' : 'iife',
+      // Terser throws when using esm mode, complains about Export not in toplevel.
+      //
+      // format: argv.esm ? 'esm' : 'iife',
       incremental: !!options.watch,
       logLevel: 'silent',
       external: options.externalDependencies,
@@ -622,15 +624,21 @@ async function minifyWithTerser(destDir, destFilename, options) {
     sourceMap: true,
     module: !!argv.esm,
   };
+
   const minified = await terser.minify(
     fs.readFileSync(filename, 'utf8'),
     terserOptions
   );
-  const remapped = remapping(
-    [minified.map, fs.readFileSync(`${filename}.map`, 'utf8')],
-    () => null,
-    !argv.full_sourcemaps
-  );
+  let remapped = minified.map?.toString() ?? '';
+  try {
+    remapped = remapping(
+      [minified.map, fs.readFileSync(`${filename}.map`, 'utf8')],
+      () => null,
+      !argv.full_sourcemaps
+    );
+  } catch (e) {
+    console.error(`Could not remap: ${destFilename}, error: ${e.toString()}`);
+  }
   fs.writeFileSync(filename, minified.code);
   fs.writeFileSync(`${filename}.map`, remapped.toString());
 }
