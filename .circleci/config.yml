@@ -45,29 +45,23 @@ commands:
       - attach_workspace:
           at: /tmp
       - run:
-          name: 'Rename Restored Workspace'
-          command: mv /tmp/workspace /tmp/restored-workspace
+          name: 'Rename Restored Workspace and Create New Workspace'
+          command: |
+            mv /tmp/workspace /tmp/restored-workspace
+            mkdir -p /tmp/workspace
       - run:
           name: 'Maybe Gracefully Halt'
           command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/maybe_gracefully_halt.sh | bash
-      - run:
-          name: 'Create New Workspace'
-          command: mkdir -p /tmp/workspace
       - checkout
       - run:
-          name: 'Fetch Merge Commit'
-          command: ./.circleci/fetch_merge_commit.sh
-      - run:
-          name: 'Check Config'
-          command: ./.circleci/check_config.sh
-      - run:
-          name: 'Configure Hosts'
-          command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
+          name: 'Fetch Merge Commit, Check Config, Restore Build Output, and Configure Hosts'
+          command: |
+            ./.circleci/fetch_merge_commit.sh
+            ./.circleci/check_config.sh
+            ./.circleci/restore_build_output.sh
+            cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - node/install-packages:
           override-ci-command: npm config set prefix $HOME && npm ci
-      - run:
-          name: 'Restore Build Output'
-          command: ./.circleci/restore_build_output.sh
   teardown_vm:
     steps:
       - persist_to_workspace:
