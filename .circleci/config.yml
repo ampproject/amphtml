@@ -18,7 +18,7 @@ push_builds_only: &push_builds_only
         - /^amp-release-.*$/
 
 executors:
-  amphtml-docker-small-executor:
+  amphtml-small-executor:
     docker:
       - image: cimg/base:stable
     resource_class: small
@@ -90,7 +90,7 @@ commands:
 jobs:
   'Compute Merge Commit':
     executor:
-      name: amphtml-docker-small-executor
+      name: amphtml-small-executor
     steps:
       - run:
           name: 'Compute Merge Commit'
