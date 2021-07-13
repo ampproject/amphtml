@@ -19,8 +19,8 @@ import {realChildNodes} from '#core/dom/query';
 
 import {registerElement} from '#service/custom-element-registry';
 
-import {BaseElement} from 'src/base-element';
-import {getEffectiveLayout} from 'src/static-layout';
+import {BaseElement} from '../../base-element';
+import {getEffectiveLayout} from '../../static-layout';
 
 class AmpLayout extends BaseElement {
   /** @override @nocollapse */
