@@ -995,3 +995,9 @@ amp-story-interactive-results[theme="dark"][chip-style="transparent"] {
 amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
   --i-amphtml-interactive-animation-delay: 350ms !important;
 }
+
+/* For LCP purposes, add a 1px border to fullscreen images when they are not loaded so they can be LCP candidates */
+amp-story-page.i-amphtml-experiment-story-add-lcp-borders-to-imgs amp-img:where([layout="fill"], [layout="responsive"]):not(.i-amphtml-loaded) img {
+  box-sizing: border-box !important;
+  border: 1px solid transparent !important;
+}
