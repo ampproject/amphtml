@@ -188,7 +188,7 @@ const LOG_TYPE = {
  * Flag to show or hide the desktop panels player experiment.
  * @const {boolean}
  */
-const DESKTOP_PANEL_STORY_PLAYER_EXP_ON = false;
+const DESKTOP_PANEL_STORY_PLAYER_EXP_ON = true;
 
 /**
  * NOTE: If udpated here, update in amp-story.js
@@ -728,8 +728,8 @@ export class AmpStoryPlayer {
     new AmpStoryPlayerViewportObserver(this.win_, this.element_, () =>
       this.visibleDeferred_.resolve()
     );
-
     if (DESKTOP_PANEL_STORY_PLAYER_EXP_ON) {
+      this.buildDesktopStoryControlUI_(this.rootEl_);
       new this.win_.ResizeObserver((e) => {
         const {width, height} = e[0].contentRect;
         this.onPlayerResize_(width, height);
@@ -739,6 +739,25 @@ export class AmpStoryPlayer {
     this.render_();
 
     this.element_.isLaidOut_ = true;
+  }
+
+  /**
+   * Builds desktop "previous" and "next" story UI.
+   * @param {!Element} containerToUse
+   * @private
+   */
+  buildDesktopStoryControlUI_(parentEl) {
+    const prevButton = this.doc_.createElement('button');
+    prevButton.classList.add('i-amphtml-story-player-desktop-panel-prev');
+    prevButton.addEventListener('click', () => this.previous_());
+    parentEl.appendChild(prevButton);
+    prevButton.innerText = 'prev';
+
+    const nextButton = this.doc_.createElement('button');
+    nextButton.classList.add('i-amphtml-story-player-desktop-panel-next');
+    nextButton.addEventListener('click', () => this.next_());
+    parentEl.appendChild(nextButton);
+    nextButton.innerText = 'next';
   }
 
   /**
@@ -761,13 +780,13 @@ export class AmpStoryPlayer {
       });
 
       this.rootEl_.classList.toggle(
-        'i-amphtml-story-player-desktop-panel-small',
-        height < 538
+        'i-amphtml-story-player-desktop-panel-medium',
+        height < 756
       );
 
       this.rootEl_.classList.toggle(
-        'i-amphtml-story-player-desktop-panel-medium',
-        height < 756
+        'i-amphtml-story-player-desktop-panel-small',
+        height < 538
       );
     }
   }

@@ -92,69 +92,54 @@
   display: none;
 }
 
-/* For desktop panel player */
-
- /* .i-amphtml-story-player-loaded .story-player-iframe-desktop-panel {
-  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
-} */
-
- .i-amphtml-story-player-desktop-panel.i-amphtml-story-player-main-container {
-  height: 100% !important;
-  overflow: hidden !important;
-  transform-style: preserve-3d !important;
-  background: black !important;
-  display: flex !important;
-  align-items: center !important;
-}
+/* For desktop panel player UI. */
 
 /**
  * NOTE: If you change any variables or media queries change:
  * extensions/amp-story/1.0/amp-story-desktop-one-panel.css
  */
 
-.i-amphtml-story-player-desktop-panel.i-amphtml-story-player-main-container {
+.i-amphtml-story-player-desktop-panel {
   --i-amphtml-story-player-desktop-panel-ratio: 69 / 116;
-  --i-amphtml-story-player-desktop-panel-responsive-margin: max(74px, 8.25vh);
+  --i-amphtml-story-player-desktop-panel-responsive-margin: max(74px, calc(var(--i-amphtml-story-player-height) * .0825));
   /** Calculates panel height by subtracting responsive vertical margin. */
   --i-amphtml-story-player-desktop-panel-height: calc(var(--i-amphtml-story-player-height) - var(--i-amphtml-story-player-desktop-panel-responsive-margin) * 2);
   --i-amphtml-story-player-desktop-panel-width: calc(var(--i-amphtml-story-player-desktop-panel-height) * var(--i-amphtml-story-player-desktop-panel-ratio));
-  --i-amphtml-story-player-desktop-panel-border-radius: 10px;
+  --i-amphtml-story-player-desktop-panel-button-margin: max(10px, calc(50vw - var(--i-amphtml-story-player-desktop-panel-width) / 2));
 }
 
- .i-amphtml-story-player-desktop-panel.i-amphtml-story-player-desktop-panel-medium.i-amphtml-story-player-main-container {
+/* Override if iframe height is less than 756px. */
+ .i-amphtml-story-player-desktop-panel.i-amphtml-story-player-desktop-panel-medium {
     --i-amphtml-story-player-desktop-panel-responsive-margin: 0px;
     --i-amphtml-story-player-desktop-panel-width: calc(var(--i-amphtml-story-player-height) * var(--i-amphtml-story-player-desktop-panel-ratio));
-    --i-amphtml-story-player-desktop-panel-border-radius: 0;
   }
 
- .i-amphtml-story-player-desktop-panel.i-amphtml-story-player-desktop-panel-small.i-amphtml-story-player-main-container  {
+  /* Override if iframe height is less than 538px. */
+ .i-amphtml-story-player-desktop-panel.i-amphtml-story-player-desktop-panel-small  {
     --i-amphtml-story-player-desktop-panel-ratio: 3 / 4;
   }
 
-.i-amphtml-story-player-desktop-panel .story-player-iframe {
-  width: var(--i-amphtml-story-player-desktop-panel-width) !important;
-  height: var(--i-amphtml-story-player-desktop-panel-height) !important;
-  border-radius: var(--i-amphtml-story-player-desktop-panel-border-radius) !important;
-  position: absolute !important;
-  border: none !important;
-}
+  .i-amphtml-story-player-desktop-panel-prev,   
+  .i-amphtml-story-player-desktop-panel-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
 
+  .i-amphtml-story-player-desktop-panel-prev {
+    margin-inline-start: calc(var(--i-amphtml-story-player-desktop-panel-button-margin));
+  }
 
-.i-amphtml-story-player-desktop-panel .story-player-iframe {
-  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
-}
+  .i-amphtml-story-player-desktop-panel-next {
+    right: 0;
+    margin-inline-end: var(--i-amphtml-story-player-desktop-panel-button-margin);
+  }
 
-.i-amphtml-story-player-desktop-panel .story-player-iframe[i-amphtml-iframe-position="-1"] {
-  transform: translateX(calc(50vw - 150%)) scale(.6) !important;
-  opacity: 0 !important;
-}
+  [dir="rtl"].i-amphtml-story-player-desktop-panel-prev {
+    right: 0;
+  }
 
-.i-amphtml-story-player-desktop-panel .story-player-iframe[i-amphtml-iframe-position="0"] {
-  transform: translateX(calc(50vw - 50%)) !important;
-  opacity: 1 !important;
-}
-
-.i-amphtml-story-player-desktop-panel .story-player-iframe[i-amphtml-iframe-position="1"] {
-  transform: translateX(calc(50vw + 50%)) scale(.6) !important;
-  opacity: 0 !important;
-}
+  [dir="rtl"].i-amphtml-story-player-desktop-panel-next {
+    left: 0;
+  }
