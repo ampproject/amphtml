@@ -412,6 +412,9 @@ export class AmpStoryPlayer {
     this.initializeAttribution_();
     this.initializePageScroll_();
     this.initializeCircularWrapping_();
+    if (DESKTOP_PANEL_STORY_PLAYER_EXP_ON) {
+      this.initializeDesktopStoryControlUI_();
+    }
     this.signalReady_();
     this.element_.isBuilt_ = true;
   }
@@ -729,7 +732,6 @@ export class AmpStoryPlayer {
       this.visibleDeferred_.resolve()
     );
     if (DESKTOP_PANEL_STORY_PLAYER_EXP_ON) {
-      this.buildDesktopStoryControlUI_(this.rootEl_);
       new this.win_.ResizeObserver((e) => {
         const {width, height} = e[0].contentRect;
         this.onPlayerResize_(width, height);
@@ -743,21 +745,36 @@ export class AmpStoryPlayer {
 
   /**
    * Builds desktop "previous" and "next" story UI.
-   * @param {!Element} containerToUse
    * @private
    */
-  buildDesktopStoryControlUI_(parentEl) {
+  initializeDesktopStoryControlUI_() {
     const prevButton = this.doc_.createElement('button');
     prevButton.classList.add('i-amphtml-story-player-desktop-panel-prev');
     prevButton.addEventListener('click', () => this.previous_());
     prevButton.setAttribute('aria-label', 'previous story');
-    parentEl.appendChild(prevButton);
+    this.rootEl_.appendChild(prevButton);
 
     const nextButton = this.doc_.createElement('button');
     nextButton.classList.add('i-amphtml-story-player-desktop-panel-next');
     nextButton.addEventListener('click', () => this.next_());
     nextButton.setAttribute('aria-label', 'next story');
-    parentEl.appendChild(nextButton);
+    this.rootEl_.appendChild(nextButton);
+
+    const checkButtonsDisabled = () => {
+      prevButton.toggleAttribute(
+        'disabled',
+        this.isIndexOutofBounds_(this.currentIdx_ - 1) &&
+          !this.isCircularWrappingEnabled_
+      );
+      nextButton.toggleAttribute(
+        'disabled',
+        this.isIndexOutofBounds_(this.currentIdx_ + 1) &&
+          !this.isCircularWrappingEnabled_
+      );
+    };
+
+    this.element_.addEventListener('navigation', () => checkButtonsDisabled());
+    this.element_.addEventListener('ready', () => checkButtonsDisabled());
   }
 
   /**

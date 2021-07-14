@@ -132,6 +132,7 @@
     background-position: center;
     background-repeat: no-repeat;
     cursor: pointer;
+    transition: 150ms opacity;
   }
 
   .i-amphtml-story-player-desktop-panel-prev[disabled],
