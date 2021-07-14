@@ -30,6 +30,7 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global');
+const {BUILD_CONSTANTS} = require('../compile/build-constants');
 const {cyan, green, red} = require('../common/colors');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {isCiBuild} = require('../common/ci');
@@ -291,7 +292,7 @@ function maybeToEsmName(name) {
  * @return {string}
  */
 function maybeToNpmEsmName(name) {
-  return argv.esm ? name.replace(/\.js$/, '.module.js') : name;
+  return argv.esm ? name.replace(/\.m?js$/, '.module.js') : name;
 }
 
 /**
@@ -427,7 +428,7 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
       entryPoints: [entryPoint],
       bundle: true,
       sourcemap: true,
-      define: experimentDefines,
+      define: {...experimentDefines, ...BUILD_CONSTANTS},
       outfile: destFile,
       plugins: [babelPlugin],
       banner,
