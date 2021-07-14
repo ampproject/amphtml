@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.173 */
+/** Version: 0.1.22.174 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1912,6 +1912,75 @@ class ClientEventManagerApi {
  */
 
 /**
+ * @enum {string}
+ */
+const ExperimentFlags = {
+  /**
+   * Enables the feature that allows you to replace one subscription
+   * for another in the subscribe() API.
+   */
+  REPLACE_SUBSCRIPTION: 'replace-subscription',
+
+  /**
+   * Enables the contributions feature.
+   * DEPRECATED. This flag can be removed once not used by anyone.
+   */
+  CONTRIBUTIONS: 'contributions',
+
+  /**
+   * Enables the Propensity feature
+   */
+  PROPENSITY: 'propensity',
+
+  /**
+   * Enables the Smartbox feature.
+   */
+  SMARTBOX: 'smartbox',
+
+  /**
+   * Enables using new Activities APIs
+   */
+  HEJIRA: 'hejira',
+
+  /** Enables logging to both the new SwG Clearcut service and the pre-existing
+   *  Clearcut iframe while we verify the new logging system works.
+   *  Publishers should not activate this experiment.
+   */
+  LOGGING_BEACON: 'logging-beacon',
+
+  /** Enables googleTransactionID change. With the experiment on the ID is
+   *  changed from '<uuid>' to '<uuid>.swg'.
+   */
+  UPDATE_GOOGLE_TRANSACTION_ID: 'update-google-transaction-id',
+
+  /**
+   * Experiment flag for guarding changes to fix PayClient redirect flow.
+   */
+  PAY_CLIENT_REDIRECT: 'pay-client-redirect',
+
+  /**
+   * Enables scrolling within dialogs.
+   */
+  SCROLLING_WITHIN_DIALOGS: 'scrolling-within-dialogs',
+};
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * abstract View Class. Used to render the content within the Dialog. The
  * extended class has actual content.
  * @abstract
@@ -2932,6 +3001,446 @@ class ErrorUtils {
  * limitations under the License.
  */
 
+// NOTE: This regex was copied from SwG's AMP extension. https://github.com/ampproject/amphtml/blob/c23bf281f817a2ee5df73f6fd45e9f4b71bb68b6/extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js#L56
+const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
+
+/**
+ * Cached a-tag to avoid memory allocation during URL parsing.
+ * @type {HTMLAnchorElement}
+ */
+let a;
+
+/**
+ * We cached all parsed URLs. As of now there are no use cases
+ * of AMP docs that would ever parse an actual large number of URLs,
+ * but we often parse the same one over and over again.
+ * @type {Object<string, !LocationDef>}
+ */
+let cache;
+
+/**
+ * Returns a Location-like object for the given URL. If it is relative,
+ * the URL gets resolved.
+ * Consider the returned object immutable. This is enforced during
+ * testing by freezing the object.
+ * @param {string} url
+ * @return {!LocationDef}
+ */
+function parseUrl(url) {
+  if (!a) {
+    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
+    cache = self.UrlCache || (self.UrlCache = Object.create(null));
+  }
+
+  const fromCache = cache[url];
+  if (fromCache) {
+    return fromCache;
+  }
+
+  const info = parseUrlWithA(a, url);
+
+  return (cache[url] = info);
+}
+
+/**
+ * Returns a Location-like object for the given URL. If it is relative,
+ * the URL gets resolved.
+ * @param {!HTMLAnchorElement} a
+ * @param {string} url
+ * @return {!LocationDef}
+ */
+function parseUrlWithA(a, url) {
+  a.href = url;
+
+  // IE11 doesn't provide full URL components when parsing relative URLs.
+  // Assigning to itself again does the trick.
+  if (!a.protocol) {
+    a.href = a.href;
+  }
+
+  /** @type {!LocationDef} */
+  const info = {
+    href: a.href,
+    protocol: a.protocol,
+    host: a.host,
+    hostname: a.hostname,
+    port: a.port == '0' ? '' : a.port,
+    pathname: a.pathname,
+    search: a.search,
+    hash: a.hash,
+    origin: '', // Set below.
+  };
+
+  // Some IE11 specific polyfills.
+  // 1) IE11 strips out the leading '/' in the pathname.
+  if (info.pathname[0] !== '/') {
+    info.pathname = '/' + info.pathname;
+  }
+
+  // 2) For URLs with implicit ports, IE11 parses to default ports while
+  // other browsers leave the port field empty.
+  if (
+    (info.protocol == 'http:' && info.port == 80) ||
+    (info.protocol == 'https:' && info.port == 443)
+  ) {
+    info.port = '';
+    info.host = info.hostname;
+  }
+
+  // For data URI a.origin is equal to the string 'null' which is not useful.
+  // We instead return the actual origin which is the full URL.
+  if (a.origin && a.origin != 'null') {
+    info.origin = a.origin;
+  } else if (info.protocol == 'data:' || !info.host) {
+    info.origin = info.href;
+  } else {
+    info.origin = info.protocol + '//' + info.host;
+  }
+  return info;
+}
+
+/**
+ * Parses and builds Object of URL query string.
+ * @param {string} query The URL query string.
+ * @return {!Object<string, string>}
+ */
+function parseQueryString(query) {
+  if (!query) {
+    return {};
+  }
+  return (/^[?#]/.test(query) ? query.slice(1) : query)
+    .split('&')
+    .reduce((params, param) => {
+      const item = param.split('=');
+      try {
+        const key = decodeURIComponent(item[0] || '');
+        const value = decodeURIComponent(item[1] || '');
+        if (key) {
+          params[key] = value;
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        warn(`SwG could not parse a URL query param: ${item[0]}`);
+      }
+      return params;
+    }, {});
+}
+
+/**
+ * Adds a parameter to a query string.
+ * @param {string} url
+ * @param {string} param
+ * @param {string} value
+ * @return {string}
+ */
+function addQueryParam(url, param, value) {
+  const queryIndex = url.indexOf('?');
+  const fragmentIndex = url.indexOf('#');
+  let fragment = '';
+  if (fragmentIndex != -1) {
+    fragment = url.substring(fragmentIndex);
+    url = url.substring(0, fragmentIndex);
+  }
+  if (queryIndex == -1) {
+    url += '?';
+  } else if (queryIndex < url.length - 1) {
+    url += '&';
+  }
+  url += encodeURIComponent(param) + '=' + encodeURIComponent(value);
+  return url + fragment;
+}
+
+/**
+ * @param {!../proto/api_messages.Message} message
+ * @return {string}
+ */
+function serializeProtoMessageForUrl(message) {
+  return JSON.stringify(message.toArray(false));
+}
+
+/**
+ * @param {!../model/doc.Doc} doc
+ * @return {string}
+ */
+function getCanonicalUrl(doc) {
+  const node = doc.getRootNode().querySelector("link[rel='canonical']");
+  return (node && node.href) || '';
+}
+
+const PARSED_URL = parseUrl(self.window.location.href);
+const PARSED_REFERRER = parseUrl(self.document.referrer);
+
+/**
+ * True for Google domains
+ * @param {LocationDef=} parsedUrl Defaults to the current page's URL
+ * @return {boolean}
+ */
+function isGoogleDomain(parsedUrl) {
+  parsedUrl = parsedUrl || PARSED_URL;
+  return GOOGLE_DOMAIN_RE.test(parsedUrl.hostname);
+}
+
+/**
+ * True for HTTPS URLs
+ * @param {LocationDef=} parsedUrl Defaults to the current page's URL
+ * @return {boolean}
+ */
+function isSecure(parsedUrl) {
+  parsedUrl = parsedUrl || PARSED_URL;
+  return parsedUrl.protocol === 'https' || parsedUrl.protocol === 'https:';
+}
+
+/**
+ * True when the page is rendered within a secure Google application or
+ * was linked to from a secure Google domain.
+ * @param {LocationDef=} parsedReferrer Defaults to the current page's referrer
+ * @return {boolean}
+ */
+function wasReferredByGoogle(parsedReferrer) {
+  parsedReferrer = parsedReferrer || PARSED_REFERRER;
+  return isSecure(parsedReferrer) && isGoogleDomain(parsedReferrer);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview
+ *
+ * Client-side experiments in SwG.
+ *
+ * The experiments can be set in a few different ways:
+ *  1. By gulp build rules using `--experiments=${experimentsString}` argument.
+ *  2. By `#swg.experiments=${experimentsString}` parameter in the URL's
+ *     fragment.
+ *  3. By `swg.configure({experiments: [array]})` call.
+ *
+ * The `${experimentsString}` is defined as following:
+ *  - experimentString = (experimentSpec,)*
+ *  - experimentSpec = experimentId | experimentId '=' num100 ('c')?
+ *
+ * Some examples:
+ *  - `A,B` - defines two experiments "A" and "B" that will be turned on.
+ *  - `A:100,B:100` - the same: "A" and "B" will be turned on.
+ *  - `A:0` - the experiment "A" will be disabled.
+ *  - `A:1` - enable the experiment "A" in 1% of impressions.
+ *  - `A:10c` - enable the experiment "A" in 10% of impressions with 10%
+ *    control. In this case, 20% of the impressions will be split into two
+ *    categories: experiment and control. Notice, a control can be requested
+ *    only for the fraction under 20%.
+ */
+
+/**
+ * @enum {string}
+ */
+const Selection = {
+  EXPERIMENT: 'e',
+  CONTROL: 'c',
+};
+
+/**
+ * A comma-separated set of experiments.
+ * @type {string}
+ */
+let experimentsString = '';
+
+/**
+ * A parsed map of experiments.
+ * @type {?Object<string, boolean>}
+ */
+let experimentMap = null;
+
+/**
+ * Ensures that the experiments have been initialized and returns them.
+ * @param {!Window} win
+ * @return {!Object<string, boolean>}
+ */
+function getExperiments(win) {
+  if (!experimentMap) {
+    experimentMap = {};
+    let combinedExperimentString = experimentsString;
+    try {
+      const query = parseQueryString(win.location.hash);
+      const experimentStringFromHash = query['swg.experiments'];
+      if (experimentStringFromHash) {
+        combinedExperimentString += ',' + experimentStringFromHash;
+      }
+    } catch (e) {
+      // Ignore: experiment parsing cannot block runtime.
+      ErrorUtils.throwAsync(e);
+    }
+
+    // Format:
+    // - experimentString = (experimentSpec,)*
+    combinedExperimentString.split(',').forEach((s) => {
+      s = s.trim();
+      if (!s) {
+        return;
+      }
+      try {
+        parseSetExperiment(win, experimentMap, s);
+      } catch (e) {
+        // Ignore: experiment parsing cannot block runtime.
+        ErrorUtils.throwAsync(e);
+      }
+    });
+  }
+  return experimentMap;
+}
+
+/**
+ * @param {!Window} win
+ * @param {?Object<string, boolean>} experimentMap
+ * @param {string} spec
+ */
+function parseSetExperiment(win, experimentMap, spec) {
+  // Format:
+  // - experimentSpec = experimentId | experimentId '=' num100 ('c')?
+  let experimentId;
+  let fraction;
+  let control = false;
+  const eq = spec.indexOf(':');
+  if (eq == -1) {
+    experimentId = spec;
+    fraction = 100;
+    control = false;
+  } else {
+    experimentId = spec.substring(0, eq).trim();
+    spec = spec.substring(eq + 1);
+    if (spec.substring(spec.length - 1) == Selection.CONTROL) {
+      control = true;
+      spec = spec.substring(0, spec.length - 1);
+    }
+    fraction = parseInt(spec, 10);
+  }
+  if (isNaN(fraction)) {
+    throw new Error('invalid fraction');
+  }
+
+  // Calculate "on"/"off".
+  let on;
+  if (fraction > 99) {
+    // Explicitly "on".
+    on = true;
+  } else if (fraction < 1) {
+    // Explicitly "off".
+    on = false;
+  } else if (win.sessionStorage) {
+    // Fractional and possibly with the control.
+    // Note that:
+    // a. We can't do persistent experiments if storage is not available.
+    // b. We can't run control on more than 20%.
+    control = control && fraction <= 20;
+    try {
+      // Set fraction in the experiment to make it unlaunchable.
+      const storageKey =
+        'subscribe.google.com:e:' +
+        experimentId +
+        ':' +
+        fraction +
+        (control ? 'c' : '');
+      let selection = parseSelection(win.sessionStorage.getItem(storageKey));
+      if (!selection) {
+        // Is experiment/control range?
+        if (win.Math.random() * 100 <= fraction * (control ? 2 : 1)) {
+          const inExperiment = control ? win.Math.random() <= 0.5 : true;
+          selection = inExperiment ? Selection.EXPERIMENT : Selection.CONTROL;
+          win.sessionStorage.setItem(storageKey, selection);
+        }
+      }
+      on = !!selection;
+      if (selection == Selection.CONTROL) {
+        experimentId = 'c-' + experimentId;
+      }
+    } catch (e) {
+      // Ignore: experiment parsing cannot block runtime.
+      on = false;
+      ErrorUtils.throwAsync(e);
+    }
+  } else {
+    on = false;
+  }
+
+  experimentMap[experimentId] = on;
+}
+
+/**
+ * @param {?string} s
+ * @return {?Selection}
+ */
+function parseSelection(s) {
+  // Do a simple if-then to inline the whole Selection enum.
+  return s == Selection.EXPERIMENT
+    ? Selection.EXPERIMENT
+    : s == Selection.CONTROL
+    ? Selection.CONTROL
+    : null;
+}
+
+/**
+ * Whether the specified experiment is on or off.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @return {boolean}
+ */
+function isExperimentOn(win, experimentId) {
+  return getExperiments(win)[experimentId] || false;
+}
+
+/**
+ * Toggles the experiment on or off. Returns the actual value of the experiment
+ * after toggling is done.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @param {boolean} on
+ */
+function setExperiment(win, experimentId, on) {
+  getExperiments(win)[experimentId] = on;
+}
+
+/**
+ * @return {!Array<string>}
+ */
+function getOnExperiments(win) {
+  const experimentMap = getExperiments(win);
+  const experiments = [];
+  for (const experiment in experimentMap) {
+    if (experimentMap[experiment]) {
+      experiments.push(experiment);
+    }
+  }
+  return experiments;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /** @const {!Object<string, string>} */
 const iframeAttributes$2 = {
   'frameborder': '0',
@@ -2965,6 +3474,11 @@ class ActivityIframeView extends View {
 
     /** @private @const {!Document} */
     this.doc_ = this.win_.document;
+
+    // Optionally allow scrolling within dialogs.
+    if (isExperimentOn(this.win_, ExperimentFlags.SCROLLING_WITHIN_DIALOGS)) {
+      delete iframeAttributes$2.scrolling;
+    }
 
     /** @private @const {!HTMLIFrameElement} */
     this.iframe_ = /** @type {!HTMLIFrameElement} */ (
@@ -4266,222 +4780,6 @@ function defaultConfig() {
  * limitations under the License.
  */
 
-// NOTE: This regex was copied from SwG's AMP extension. https://github.com/ampproject/amphtml/blob/c23bf281f817a2ee5df73f6fd45e9f4b71bb68b6/extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js#L56
-const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
-
-/**
- * Cached a-tag to avoid memory allocation during URL parsing.
- * @type {HTMLAnchorElement}
- */
-let a;
-
-/**
- * We cached all parsed URLs. As of now there are no use cases
- * of AMP docs that would ever parse an actual large number of URLs,
- * but we often parse the same one over and over again.
- * @type {Object<string, !LocationDef>}
- */
-let cache;
-
-/**
- * Returns a Location-like object for the given URL. If it is relative,
- * the URL gets resolved.
- * Consider the returned object immutable. This is enforced during
- * testing by freezing the object.
- * @param {string} url
- * @return {!LocationDef}
- */
-function parseUrl(url) {
-  if (!a) {
-    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.UrlCache || (self.UrlCache = Object.create(null));
-  }
-
-  const fromCache = cache[url];
-  if (fromCache) {
-    return fromCache;
-  }
-
-  const info = parseUrlWithA(a, url);
-
-  return (cache[url] = info);
-}
-
-/**
- * Returns a Location-like object for the given URL. If it is relative,
- * the URL gets resolved.
- * @param {!HTMLAnchorElement} a
- * @param {string} url
- * @return {!LocationDef}
- */
-function parseUrlWithA(a, url) {
-  a.href = url;
-
-  // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick.
-  if (!a.protocol) {
-    a.href = a.href;
-  }
-
-  /** @type {!LocationDef} */
-  const info = {
-    href: a.href,
-    protocol: a.protocol,
-    host: a.host,
-    hostname: a.hostname,
-    port: a.port == '0' ? '' : a.port,
-    pathname: a.pathname,
-    search: a.search,
-    hash: a.hash,
-    origin: '', // Set below.
-  };
-
-  // Some IE11 specific polyfills.
-  // 1) IE11 strips out the leading '/' in the pathname.
-  if (info.pathname[0] !== '/') {
-    info.pathname = '/' + info.pathname;
-  }
-
-  // 2) For URLs with implicit ports, IE11 parses to default ports while
-  // other browsers leave the port field empty.
-  if (
-    (info.protocol == 'http:' && info.port == 80) ||
-    (info.protocol == 'https:' && info.port == 443)
-  ) {
-    info.port = '';
-    info.host = info.hostname;
-  }
-
-  // For data URI a.origin is equal to the string 'null' which is not useful.
-  // We instead return the actual origin which is the full URL.
-  if (a.origin && a.origin != 'null') {
-    info.origin = a.origin;
-  } else if (info.protocol == 'data:' || !info.host) {
-    info.origin = info.href;
-  } else {
-    info.origin = info.protocol + '//' + info.host;
-  }
-  return info;
-}
-
-/**
- * Parses and builds Object of URL query string.
- * @param {string} query The URL query string.
- * @return {!Object<string, string>}
- */
-function parseQueryString(query) {
-  if (!query) {
-    return {};
-  }
-  return (/^[?#]/.test(query) ? query.slice(1) : query)
-    .split('&')
-    .reduce((params, param) => {
-      const item = param.split('=');
-      try {
-        const key = decodeURIComponent(item[0] || '');
-        const value = decodeURIComponent(item[1] || '');
-        if (key) {
-          params[key] = value;
-        }
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        warn(`SwG could not parse a URL query param: ${item[0]}`);
-      }
-      return params;
-    }, {});
-}
-
-/**
- * Adds a parameter to a query string.
- * @param {string} url
- * @param {string} param
- * @param {string} value
- * @return {string}
- */
-function addQueryParam(url, param, value) {
-  const queryIndex = url.indexOf('?');
-  const fragmentIndex = url.indexOf('#');
-  let fragment = '';
-  if (fragmentIndex != -1) {
-    fragment = url.substring(fragmentIndex);
-    url = url.substring(0, fragmentIndex);
-  }
-  if (queryIndex == -1) {
-    url += '?';
-  } else if (queryIndex < url.length - 1) {
-    url += '&';
-  }
-  url += encodeURIComponent(param) + '=' + encodeURIComponent(value);
-  return url + fragment;
-}
-
-/**
- * @param {!../proto/api_messages.Message} message
- * @return {string}
- */
-function serializeProtoMessageForUrl(message) {
-  return JSON.stringify(message.toArray(false));
-}
-
-/**
- * @param {!../model/doc.Doc} doc
- * @return {string}
- */
-function getCanonicalUrl(doc) {
-  const node = doc.getRootNode().querySelector("link[rel='canonical']");
-  return (node && node.href) || '';
-}
-
-const PARSED_URL = parseUrl(self.window.location.href);
-const PARSED_REFERRER = parseUrl(self.document.referrer);
-
-/**
- * True for Google domains
- * @param {LocationDef=} parsedUrl Defaults to the current page's URL
- * @return {boolean}
- */
-function isGoogleDomain(parsedUrl) {
-  parsedUrl = parsedUrl || PARSED_URL;
-  return GOOGLE_DOMAIN_RE.test(parsedUrl.hostname);
-}
-
-/**
- * True for HTTPS URLs
- * @param {LocationDef=} parsedUrl Defaults to the current page's URL
- * @return {boolean}
- */
-function isSecure(parsedUrl) {
-  parsedUrl = parsedUrl || PARSED_URL;
-  return parsedUrl.protocol === 'https' || parsedUrl.protocol === 'https:';
-}
-
-/**
- * True when the page is rendered within a secure Google application or
- * was linked to from a secure Google domain.
- * @param {LocationDef=} parsedReferrer Defaults to the current page's referrer
- * @return {boolean}
- */
-function wasReferredByGoogle(parsedReferrer) {
-  parsedReferrer = parsedReferrer || PARSED_REFERRER;
-  return isSecure(parsedReferrer) && isGoogleDomain(parsedReferrer);
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /**
  * Have to put these in the map to avoid compiler optimization. Due to
  * optimization issues, this map only allows property-style keys. E.g. "hr1",
@@ -4556,7 +4854,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.173',
+    '_client': 'SwG 0.1.22.174',
   });
 }
 
@@ -5786,7 +6084,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.173',
+        '_client': 'SwG 0.1.22.174',
         'supportsEventManager': true,
       },
       args || {}
@@ -6146,294 +6444,6 @@ class ClientEventManager {
  * limitations under the License.
  */
 
-/**
- * @enum {string}
- */
-const ExperimentFlags = {
-  /**
-   * Enables the feature that allows you to replace one subscription
-   * for another in the subscribe() API.
-   */
-  REPLACE_SUBSCRIPTION: 'replace-subscription',
-
-  /**
-   * Enables the contributions feature.
-   * DEPRECATED. This flag can be removed once not used by anyone.
-   */
-  CONTRIBUTIONS: 'contributions',
-
-  /**
-   * Enables the Propensity feature
-   */
-  PROPENSITY: 'propensity',
-
-  /**
-   * Enables the Smartbox feature.
-   */
-  SMARTBOX: 'smartbox',
-
-  /**
-   * Enables using new Activities APIs
-   */
-  HEJIRA: 'hejira',
-
-  /** Enables logging to both the new SwG Clearcut service and the pre-existing
-   *  Clearcut iframe while we verify the new logging system works.
-   *  Publishers should not activate this experiment.
-   */
-  LOGGING_BEACON: 'logging-beacon',
-
-  /** Enables googleTransactionID change. With the experiment on the ID is
-   *  changed from '<uuid>' to '<uuid>.swg'.
-   */
-  UPDATE_GOOGLE_TRANSACTION_ID: 'update-google-transaction-id',
-
-  /**
-   * Experiment flag for guarding changes to fix PayClient redirect flow.
-   */
-  PAY_CLIENT_REDIRECT: 'pay-client-redirect',
-};
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @fileoverview
- *
- * Client-side experiments in SwG.
- *
- * The experiments can be set in a few different ways:
- *  1. By gulp build rules using `--experiments=${experimentsString}` argument.
- *  2. By `#swg.experiments=${experimentsString}` parameter in the URL's
- *     fragment.
- *  3. By `swg.configure({experiments: [array]})` call.
- *
- * The `${experimentsString}` is defined as following:
- *  - experimentString = (experimentSpec,)*
- *  - experimentSpec = experimentId | experimentId '=' num100 ('c')?
- *
- * Some examples:
- *  - `A,B` - defines two experiments "A" and "B" that will be turned on.
- *  - `A:100,B:100` - the same: "A" and "B" will be turned on.
- *  - `A:0` - the experiment "A" will be disabled.
- *  - `A:1` - enable the experiment "A" in 1% of impressions.
- *  - `A:10c` - enable the experiment "A" in 10% of impressions with 10%
- *    control. In this case, 20% of the impressions will be split into two
- *    categories: experiment and control. Notice, a control can be requested
- *    only for the fraction under 20%.
- */
-
-/**
- * @enum {string}
- */
-const Selection = {
-  EXPERIMENT: 'e',
-  CONTROL: 'c',
-};
-
-/**
- * A comma-separated set of experiments.
- * @type {string}
- */
-let experimentsString = '';
-
-/**
- * A parsed map of experiments.
- * @type {?Object<string, boolean>}
- */
-let experimentMap = null;
-
-/**
- * Ensures that the experiments have been initialized and returns them.
- * @param {!Window} win
- * @return {!Object<string, boolean>}
- */
-function getExperiments(win) {
-  if (!experimentMap) {
-    experimentMap = {};
-    let combinedExperimentString = experimentsString;
-    try {
-      const query = parseQueryString(win.location.hash);
-      const experimentStringFromHash = query['swg.experiments'];
-      if (experimentStringFromHash) {
-        combinedExperimentString += ',' + experimentStringFromHash;
-      }
-    } catch (e) {
-      // Ignore: experiment parsing cannot block runtime.
-      ErrorUtils.throwAsync(e);
-    }
-
-    // Format:
-    // - experimentString = (experimentSpec,)*
-    combinedExperimentString.split(',').forEach((s) => {
-      s = s.trim();
-      if (!s) {
-        return;
-      }
-      try {
-        parseSetExperiment(win, experimentMap, s);
-      } catch (e) {
-        // Ignore: experiment parsing cannot block runtime.
-        ErrorUtils.throwAsync(e);
-      }
-    });
-  }
-  return experimentMap;
-}
-
-/**
- * @param {!Window} win
- * @param {?Object<string, boolean>} experimentMap
- * @param {string} spec
- */
-function parseSetExperiment(win, experimentMap, spec) {
-  // Format:
-  // - experimentSpec = experimentId | experimentId '=' num100 ('c')?
-  let experimentId;
-  let fraction;
-  let control = false;
-  const eq = spec.indexOf(':');
-  if (eq == -1) {
-    experimentId = spec;
-    fraction = 100;
-    control = false;
-  } else {
-    experimentId = spec.substring(0, eq).trim();
-    spec = spec.substring(eq + 1);
-    if (spec.substring(spec.length - 1) == Selection.CONTROL) {
-      control = true;
-      spec = spec.substring(0, spec.length - 1);
-    }
-    fraction = parseInt(spec, 10);
-  }
-  if (isNaN(fraction)) {
-    throw new Error('invalid fraction');
-  }
-
-  // Calculate "on"/"off".
-  let on;
-  if (fraction > 99) {
-    // Explicitly "on".
-    on = true;
-  } else if (fraction < 1) {
-    // Explicitly "off".
-    on = false;
-  } else if (win.sessionStorage) {
-    // Fractional and possibly with the control.
-    // Note that:
-    // a. We can't do persistent experiments if storage is not available.
-    // b. We can't run control on more than 20%.
-    control = control && fraction <= 20;
-    try {
-      // Set fraction in the experiment to make it unlaunchable.
-      const storageKey =
-        'subscribe.google.com:e:' +
-        experimentId +
-        ':' +
-        fraction +
-        (control ? 'c' : '');
-      let selection = parseSelection(win.sessionStorage.getItem(storageKey));
-      if (!selection) {
-        // Is experiment/control range?
-        if (win.Math.random() * 100 <= fraction * (control ? 2 : 1)) {
-          const inExperiment = control ? win.Math.random() <= 0.5 : true;
-          selection = inExperiment ? Selection.EXPERIMENT : Selection.CONTROL;
-          win.sessionStorage.setItem(storageKey, selection);
-        }
-      }
-      on = !!selection;
-      if (selection == Selection.CONTROL) {
-        experimentId = 'c-' + experimentId;
-      }
-    } catch (e) {
-      // Ignore: experiment parsing cannot block runtime.
-      on = false;
-      ErrorUtils.throwAsync(e);
-    }
-  } else {
-    on = false;
-  }
-
-  experimentMap[experimentId] = on;
-}
-
-/**
- * @param {?string} s
- * @return {?Selection}
- */
-function parseSelection(s) {
-  // Do a simple if-then to inline the whole Selection enum.
-  return s == Selection.EXPERIMENT
-    ? Selection.EXPERIMENT
-    : s == Selection.CONTROL
-    ? Selection.CONTROL
-    : null;
-}
-
-/**
- * Whether the specified experiment is on or off.
- * @param {!Window} win
- * @param {string} experimentId
- * @return {boolean}
- */
-function isExperimentOn(win, experimentId) {
-  return getExperiments(win)[experimentId] || false;
-}
-
-/**
- * Toggles the experiment on or off. Returns the actual value of the experiment
- * after toggling is done.
- * @param {!Window} win
- * @param {string} experimentId
- * @param {boolean} on
- */
-function setExperiment(win, experimentId, on) {
-  getExperiments(win)[experimentId] = on;
-}
-
-/**
- * @return {!Array<string>}
- */
-function getOnExperiments(win) {
-  const experimentMap = getExperiments(win);
-  const experiments = [];
-  for (const experiment in experimentMap) {
-    if (experimentMap[experiment]) {
-      experiments.push(experiment);
-    }
-  }
-  return experiments;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @const {!Object<string, string>} */
 const iframeStyles = {
   opacity: '0',
@@ -6632,7 +6642,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.173');
+    context.setClientVersion('SwG 0.1.22.174');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7170,7 +7180,7 @@ const ButtonAttributeValues = {
   CONTRIBUTION: 'contribution',
 };
 
-const BUTTON_INNER_HTML = `<img class="swg-button-v2-icon-$theme$"></div>$textContent$`;
+const BUTTON_INNER_HTML = `<div class="swg-button-v2-icon-$theme$"></div>$textContent$`;
 
 /**
  * The button stylesheet can be found in the `/assets/swg-button.css`.
@@ -7343,7 +7353,7 @@ class ButtonApi {
     attributeValues.forEach((attributeValue) => {
       const elements = this.doc_
         .getRootNode()
-        .querySelectorAll(`button[${attribute}="${attributeValue}"]`);
+        .querySelectorAll(`[${attribute}="${attributeValue}"]`);
       for (let i = 0; i < elements.length; i++) {
         if (attributeValue === ButtonAttributeValues.SUBSCRIPTION) {
           this.attachSubscribeButton(
@@ -9038,6 +9048,12 @@ class Dialog {
     /** @private {?Promise} */
     this.animating_ = null;
 
+    /**
+     * Helps identify stale animations.
+     * @private {number}
+     */
+    this.animationNumber_ = 0;
+
     /** @private {boolean} */
     this.hidden_ = false;
 
@@ -9270,12 +9286,23 @@ class Dialog {
     }
     const newHeight = this.getMaxAllowedHeight_(height);
 
+    // Uniquely identify this animation.
+    // This lets callbacks abandon stale animations.
+    const animationNumber = ++this.animationNumber_;
+    const isStale = () => {
+      return animationNumber !== this.animationNumber_;
+    };
+
     let animating;
     if (animated) {
       const oldHeight = this.getElement().offsetHeight;
       if (newHeight >= oldHeight) {
         // Expand.
         animating = this.animate_(() => {
+          if (isStale()) {
+            return Promise.resolve();
+          }
+
           setImportantStyles$1(this.getElement(), {
             'height': `${newHeight}px`,
             'transform': `translateY(${newHeight - oldHeight}px)`,
@@ -9292,14 +9319,21 @@ class Dialog {
       } else {
         // Collapse.
         animating = this.animate_(() => {
-          return transition$1(
-            this.getElement(),
-            {
-              'transform': `translateY(${oldHeight - newHeight}px)`,
-            },
-            300,
-            'ease-out'
-          ).then(() => {
+          const transitionPromise = isStale()
+            ? Promise.resolve()
+            : transition$1(
+                this.getElement(),
+                {
+                  'transform': `translateY(${oldHeight - newHeight}px)`,
+                },
+                300,
+                'ease-out'
+              );
+          return transitionPromise.then(() => {
+            if (isStale()) {
+              return;
+            }
+
             setImportantStyles$1(this.getElement(), {
               'height': `${newHeight}px`,
               'transform': 'translateY(0)',
@@ -9314,6 +9348,10 @@ class Dialog {
       animating = Promise.resolve();
     }
     return animating.then(() => {
+      if (isStale()) {
+        return;
+      }
+
       this.updatePaddingToHtml_(height);
       view.resized();
     });
