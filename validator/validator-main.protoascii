@@ -2610,6 +2610,7 @@ attr_lists: {
   }
   attrs: { name: "checked" }
   attrs: { name: "disabled" }
+  attrs: { name: "form" }
   attrs: { name: "height" }
   attrs: {
     disabled_by: "amp4email"

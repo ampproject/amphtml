@@ -18,6 +18,7 @@ import {Services} from '#service';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {formElementsQuerySelectorAll} from './amp-form';
 import {iterateCursor} from '#core/dom';
 import {toWin} from '#core/window';
 
@@ -115,7 +116,7 @@ export class FormValidator {
 
   /** @return {!NodeList} */
   inputs() {
-    return this.form.querySelectorAll('input,select,textarea');
+    return formElementsQuerySelectorAll(this.form, 'input,select,textarea');
   }
 
   /**
