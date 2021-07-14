@@ -16,7 +16,7 @@
 'use strict';
 
 /**
- * @fileoverview Script that runs the experiment A/B/C tests during CI.
+ * @fileoverview Script that runs the experiment A/B/C E2E tests during CI.
  */
 
 const {
@@ -24,13 +24,14 @@ const {
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
+const {e2eTestPaths} = require('../test-configs/config');
 const {experiment} = require('minimist')(process.argv.slice(2));
+const {getCircleCiShardTestFiles, runCiJob} = require('./ci-job');
 const {getExperimentConfig} = require('../common/utils');
 const {isPushBuild} = require('../common/ci');
-const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
-const jobName = `${experiment}-tests.js`;
+const jobName = `${experiment}-e2e-tests.js`;
 
 /**
  * Runs tests for the given configuration and reports results for push builds.
@@ -41,11 +42,9 @@ function runExperimentTests(config) {
     const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
     const experimentFlag = `--experiment ${experiment}`;
     const reportFlag = isPushBuild() ? '--report' : '';
+    const shardTestFiles = getCircleCiShardTestFiles(e2eTestPaths);
     timedExecOrThrow(
-      `amp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag} ${reportFlag}`
-    );
-    timedExecOrThrow(
-      `amp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag} ${reportFlag}`
+      `amp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag} ${reportFlag} --files ${shardTestFiles}`
     );
   } catch (e) {
     if (e.status) {

@@ -178,17 +178,38 @@ jobs:
       - store_test_output
       - fail_fast
       - teardown_vm
-  'Unit Tests':
+  'Local Unit Tests':
     executor:
       name: amphtml-large-executor
+    steps:
+      - unless:
+          condition:
+            matches:
+              pattern: ^pull/\d+$
+              value: << pipeline.git.branch >>
+          steps:
+            - run:
+                name: 'Skip Local Unit Test on Push Builds'
+                command: circleci-agent step halt
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Local Unit Tests'
+          command: node build-system/pr-check/unit-tests-local.js
+      - store_test_output
+      - fail_fast
+      - teardown_vm
+  'All Unit Tests':
+    executor:
+      name: amphtml-large-executor
+    parallelism: 16
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Unit Tests'
+          name: 'All Unit Tests'
           command: node build-system/pr-check/unit-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Unminified Tests':
     executor:
@@ -239,6 +260,7 @@ jobs:
   'End-to-End Tests':
     executor:
       name: amphtml-large-executor
+    parallelism: 16
     steps:
       - setup_vm
       - install_chrome
@@ -246,7 +268,6 @@ jobs:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Performance Tests':
     executor:
@@ -275,7 +296,7 @@ jobs:
           command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
       - fail_fast
       - teardown_vm
-  'Experiment Tests':
+  'Experiment Integration Tests':
     executor:
       name: amphtml-large-executor
     parameters:
@@ -287,8 +308,26 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Experiment << parameters.exp >> Tests'
-          command: node build-system/pr-check/experiment-tests.js --experiment=experiment<< parameters.exp >>
+          name: 'Experiment << parameters.exp >> Integration Tests'
+          command: node build-system/pr-check/experiment-integration-tests.js --experiment=experiment<< parameters.exp >>
+      - store_test_output
+      - fail_fast
+      - teardown_vm
+  'Experiment End-to-End Tests':
+    executor:
+      name: amphtml-large-executor
+    parameters:
+      exp:
+        description: 'Which of the three (A/B/C) experiments to use'
+        type: enum
+        enum: ['A', 'B', 'C']
+    parallelism: 16
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Experiment << parameters.exp >> End-to-End Tests'
+          command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
       - fail_fast
       - teardown_vm
@@ -326,10 +365,15 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
-      - 'Unit Tests':
+      - 'Local Unit Tests':
           <<: *push_and_pr_builds
           requires:
             - 'Compute Merge Commit'
+      - 'All Unit Tests':
+          name: '⛓️ All Unit Tests'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Local Unit Tests'
       - 'Unminified Tests':
           <<: *push_and_pr_builds
           requires:
@@ -352,9 +396,11 @@ workflows:
             - 'Nomodule Build'
             - 'Module Build'
       - 'End-to-End Tests':
+          name: '⛓️ End-to-End Tests'
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
+            - '⛓️ All Unit Tests'
       - 'Experiment Build':
           name: 'Experiment << matrix.exp >> Build'
           matrix:
@@ -363,8 +409,16 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Compute Merge Commit'
-      - 'Experiment Tests':
-          name: 'Experiment << matrix.exp >> Tests'
+      - 'Experiment Integration Tests':
+          name: 'Experiment << matrix.exp >> Integration Tests'
+          matrix:
+            parameters:
+              exp: ['A', 'B', 'C']
+          <<: *push_and_pr_builds
+          requires:
+            - 'Experiment << matrix.exp >> Build'
+      - 'Experiment End-to-End Tests':
+          name: '⛓️ Experiment << matrix.exp >> End-to-End Tests'
           matrix:
             parameters:
               exp: ['A', 'B', 'C']

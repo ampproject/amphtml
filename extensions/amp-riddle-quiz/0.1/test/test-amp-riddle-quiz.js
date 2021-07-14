@@ -37,7 +37,8 @@ describes.realWin(
       win.document.body.appendChild(element);
     });
 
-    it('should have iframe when built', () => {
+    // TODO(#): disabled in #35227
+    it.skip('should have iframe when built', () => {
       element.buildInternal().then(() => {
         const iframe = element.querySelector('iframe');
         expect(iframe).to.not.be.null;

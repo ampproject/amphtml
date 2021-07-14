@@ -133,7 +133,7 @@ class RuntimeTestConfig {
         browsers: ['Firefox_flags'],
         customLaunchers: {
           // eslint-disable-next-line
-        Firefox_flags: {
+          Firefox_flags: {
             base: 'Firefox',
             flags: argv.headless ? ['-headless'] : [],
           },
@@ -174,7 +174,7 @@ class RuntimeTestConfig {
         browsers: ['Chrome_flags'],
         customLaunchers: {
           // eslint-disable-next-line
-        Chrome_flags: {
+          Chrome_flags: {
             base: 'Chrome',
             flags: chromeFlags,
           },
@@ -324,7 +324,8 @@ class RuntimeTestConfig {
     this.singleRun = !argv.watch;
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose;
-    this.client.captureConsole = !!argv.verbose || !!argv.files;
+    this.client.captureConsole =
+      !!argv.verbose || (!isCiBuild() && !!argv.files);
     this.client.amp = {
       useCompiledJs: !!argv.compiled,
       adTypes: getAdTypes(),

@@ -24,8 +24,9 @@ const {
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
-const {runCiJob} = require('./ci-job');
+const {getCircleCiShardTestFiles, runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
+const {unitTestPaths} = require('../test-configs/config');
 
 const jobName = 'unit-tests.js';
 
@@ -34,8 +35,9 @@ const jobName = 'unit-tests.js';
  */
 function pushBuildWorkflow() {
   try {
+    const shardTestFiles = getCircleCiShardTestFiles(unitTestPaths);
     timedExecOrThrow(
-      'amp unit --headless --coverage --report',
+      `amp unit --headless --coverage --report --files ${shardTestFiles}`,
       'Unit tests failed!'
     );
     timedExecOrThrow(
@@ -56,8 +58,8 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
-    timedExecOrDie('amp unit --headless --local_changes');
-    timedExecOrDie('amp unit --headless --coverage');
+    const shardTestFiles = getCircleCiShardTestFiles(unitTestPaths);
+    timedExecOrDie(`amp unit --headless --coverage --files ${shardTestFiles}`);
     timedExecOrDie('amp codecov-upload');
   } else {
     skipDependentJobs(

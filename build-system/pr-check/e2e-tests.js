@@ -24,7 +24,8 @@ const {
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
-const {runCiJob} = require('./ci-job');
+const {e2eTestPaths} = require('../test-configs/config');
+const {getCircleCiShardTestFiles, runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'e2e-tests.js';
@@ -34,8 +35,9 @@ const jobName = 'e2e-tests.js';
  */
 function pushBuildWorkflow() {
   try {
+    const shardTestFiles = getCircleCiShardTestFiles(e2eTestPaths);
     timedExecOrThrow(
-      'amp e2e --nobuild --headless --compiled --report',
+      `amp e2e --nobuild --headless --compiled --report --files ${shardTestFiles}`,
       'End-to-end tests failed!'
     );
   } catch (e) {
@@ -52,7 +54,10 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
-    timedExecOrDie('amp e2e --nobuild --headless --compiled');
+    const shardTestFiles = getCircleCiShardTestFiles(e2eTestPaths);
+    timedExecOrDie(
+      `amp e2e --nobuild --headless --compiled --files ${shardTestFiles}`
+    );
   } else {
     skipDependentJobs(
       jobName,
