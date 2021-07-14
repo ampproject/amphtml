@@ -4,40 +4,37 @@
     "beacon": true
   },
   "requests": {
-    "onelink": "https://amp.onelink.me/amp/v1/onelink?af_id=COOKIE(afUserId)",
-    "event": "https://amp.appsflyer.com/amp/v1/events?site-id=${webAppId}"
+    "onelink": "https://pbastg1.onelink.me/amp/v1/onelink?webAppId=${webAppId}&afWebUserId=${afWebUserId}&amp-afUserId=${amp-afUserId}&amp-afRefUserId=${amp-afRefUserId}",
+    "event": "https://wahandler-amp-ns.msp.appsflyer.com/amp/v1/events?webAppId=${webAppId}&afWebUserId=${afWebUserId}&amp-afUserId=${amp-afUserId}&amp-afRefUserId=${amp-afRefUserId}"
   },
   "triggers": {
     "onelink": {
       "on": "visible",
       "request": "onelink",
       "extraUrlParams": {
-        "amp-afUserId": "CLIENT_ID(amp-afUserId)",
-        "amp-afRefUserId": "COOKIE(amp-afRefUserId)",
-        "afWebUserId": "COOKIE(afUserId)"
+        "data": {
+          "eventType": "LOAD"
+        },
+        "meta": {
+          "referrer": "${documentReferrer}",
+          "timestamp": "${timestamp}",
+          "userAgent": "${userAgent}",
+          "locationHref": "${ampdocUrl}"
+        }
       }
     },
-    "load": {
+    "event": {
       "on": "visible",
       "request": "event",
       "extraUrlParams": {
         "data": {
-          "amp-afUserId": "CLIENT_ID(amp-afUserId)",
-          "amp-afRefUserId": "COOKIE(amp-afRefUserId)",
-          "webAppId": "${webAppId}",
-          "eventType": "LOAD",
-          "afWebUserId": "COOKIE(afUserId)"
+          "eventType": "LOAD"
         },
         "meta": {
-          "userAgent": "${userAgent}",
-          "externalReferrer": "${externalReferrer}",
-          "documentReferrer": "${documentReferrer}",
-          "viewer": "${viewer}",
-          "ampGeo": "${ampGeo}",
-          "pageViewId": "${pageViewId}",
-          "pageViewId64": "${pageViewId64}",
+          "referrer": "${documentReferrer}",
           "timestamp": "${timestamp}",
-          "sourceHost": "${sourceHost}"
+          "userAgent": "${userAgent}",
+          "locationHref": "${ampdocUrl}"
         }
       }
     }
@@ -56,5 +53,10 @@
     "amp-afRefUserId": {
       "value": "LINKER_PARAM(linker, afRefUserId)"
     }
+  },
+  "vars": {
+    "afWebUserId": "COOKIE(afUserId)",
+    "amp-afUserId": "CLIENT_ID(amp-afUserId)",
+    "amp-afRefUserId": "COOKIE(amp-afRefUserId)"
   }
 }

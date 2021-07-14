@@ -81,7 +81,7 @@ Type attribute value: `amplitude`
 
 Type attribute value: `appsflyer`
 
-Adds support for AppsFlyer. More details for adding AppsFlyer support can be found at [appsflyer.com](https://support.appsflyer.com/hc/en-us/articles/360002274017-People-Based-Attribution-PBA-getting-started)
+Adds support for AppsFlyer. More details for adding AppsFlyer support can be found at [appsflyer.com](https://support.appsflyer.com/hc/en-us/articles/360001610038#amp-support)
 
 ### AT Internet
 
