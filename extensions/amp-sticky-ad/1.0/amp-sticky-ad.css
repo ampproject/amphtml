@@ -31,6 +31,14 @@ amp-sticky-ad {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+amp-sticky-ad[sticky='sidebar'] {
+  position: relative !important;
+    left: unset !important;
+    bottom: unset !important;
+    width: unset !important;
+    display: contents !important;
+}
+
 amp-sticky-ad-top-padding {
   display: block;
   width: 100% !important;

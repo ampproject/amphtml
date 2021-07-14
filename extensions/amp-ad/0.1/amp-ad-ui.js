@@ -36,7 +36,10 @@ const TOP_STICKY_AD_TRIGGER_THRESHOLD = 200;
  */
 const StickyAdPositions = {
   TOP: 'top',
+  LEFT: 'left',
+  RIGHT: 'right',
   BOTTOM: 'bottom',
+  SIDEBAR: 'sidebar',
   BOTTOM_RIGHT: 'bottom-right',
 };
 
@@ -247,6 +250,56 @@ export class AmpAdUIHandler {
         setStyle(this.element_, 'top', `${paddingTop}px`);
       }
 
+      // TODO: (@anuragvasanwala) - Implement custom padding/margin for left & right support for respective mode.
+      if (this.stickyAdPosition_ == StickyAdPositions.LEFT) {
+        // // Let the top sticky ad be below the viewer top.
+        // const paddingTop = Services.viewportForDoc(
+        //   this.element_.getAmpDoc()
+        // ).getPaddingTop();
+
+        setStyle(this.element_, 'top', `${100}px`);
+
+        console /*OK*/
+          .warn(
+            'Ad Size: ' +
+              this.element_.getAttribute('width') +
+              ' x ' +
+              this.element_.getAttribute('height')
+          );
+
+        devAssert(
+          this.validSize(
+            this.element_.getAttribute('height'),
+            this.element_.getAttribute('width')
+          ),
+          'amp-ad width is restricted to maximum 300px for style="left"'
+        );
+      }
+
+      if (this.stickyAdPosition_ == StickyAdPositions.RIGHT) {
+        // // Let the top sticky ad be below the viewer top.
+        // const paddingTop = Services.viewportForDoc(
+        //   this.element_.getAmpDoc()
+        // ).getPaddingTop();
+        setStyle(this.element_, 'top', `${100}px`);
+
+        console /*OK*/
+          .warn(
+            'Ad Size: ' +
+              this.element_.getAttribute('width') +
+              ' x ' +
+              this.element_.getAttribute('height')
+          );
+
+        devAssert(
+          this.validSize(
+            this.element_.getAttribute('height'),
+            this.element_.getAttribute('width')
+          ),
+          'amp-ad width is restricted to maximum 300px for style="right"'
+        );
+      }
+
       if (this.stickyAdPosition_ == StickyAdPositions.BOTTOM) {
         const paddingBar = this.doc_.createElement('amp-ad-sticky-padding');
         this.element_.insertBefore(
@@ -258,6 +311,19 @@ export class AmpAdUIHandler {
         );
       }
     }
+  }
+
+  /**
+   * Validates height x weight for vertical ad
+   * @param {number} height
+   * @param {number} width
+   * @return {boolean}
+   */
+  validSize(height, width) {
+    if (width <= 300 && height <= 600) {
+      return true;
+    }
+    return false;
   }
 
   /**
