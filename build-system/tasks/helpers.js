@@ -15,8 +15,8 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const debounce = require('lodash.debounce');
 const esbuild = require('esbuild');
+const {debounce} = require('../common/functions');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
@@ -130,7 +130,7 @@ async function bootstrapThirdPartyFrames(options) {
       };
       watch(frameObject.max).on(
         'change',
-        debounce(watchFunc, watchDebounceDelay, {leading: true, trailing: true})
+        debounce(watchFunc, watchDebounceDelay)
       );
     });
   }
@@ -665,10 +665,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
     const watchFunc = async () => {
       await doCompileJs({...options, continueOnError: true});
     };
-    watch(deps).on(
-      'change',
-      debounce(watchFunc, watchDebounceDelay, {leading: true, trailing: true})
-    );
+    watch(deps).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   /**
