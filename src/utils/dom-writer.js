@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '#service';
-import {childElementsByTag} from '#core/dom/query';
-import {dev} from '../log';
 import {devAssert} from '#core/assert';
 import {iterateCursor, removeElement} from '#core/dom';
+import {childElementsByTag} from '#core/dom/query';
+
+import {Services} from '#service';
+
+import {dev} from '../log';
 
 /**
  * Takes as an input a text stream, parses it and incrementally reconstructs

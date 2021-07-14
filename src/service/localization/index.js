@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// The LocalizedStringId type is imported even though it is not used because the
-// compiler does not output types for enums, but we want to distinguish between
-// LocalizedStringId enum values and any other strings.
-// eslint-disable-next-line no-unused-vars
-import {LocalizedStringBundleDef, LocalizedStringId} from './strings';
-import {Services} from '#service';
 import {closest} from '#core/dom/query';
+
+import {Services} from '#service';
+
+import {
+  LocalizedStringBundleDef,
+  // The LocalizedStringId type is imported even though it is not used because
+  // the compiler does not output types for enums, but we want to distinguish
+  // between LocalizedStringId enum values and any other strings.
+  // eslint-disable-next-line no-unused-vars
+  LocalizedStringId,
+} from './strings';
 
 /**
  * Language code used if there is no language code specified by the document.

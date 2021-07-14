@@ -14,34 +14,38 @@
  * limitations under the License.
  */
 
-import {Animation} from '../../animation';
-import {Observable} from '#core/data-structures/observable';
-import {Services} from '#service';
-import {ViewportBindingDef} from './viewport-binding-def';
-import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
-import {ViewportBindingNatural_} from './viewport-binding-natural';
-import {ViewportInterface} from './viewport-interface';
 import {VisibilityState} from '#core/constants/visibility-state';
-import {clamp} from '#core/math';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {computedStyle, setStyle} from '#core/dom/style';
-import {dev, devAssert} from '../../log';
-import {dict} from '#core/types/object';
-import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
-import {getMode} from '../../mode';
-import {
-  getParentWindowFrameElement,
-  registerServiceBuilderForDoc,
-} from '../../service-helpers';
+import {Observable} from '#core/data-structures/observable';
+import {tryResolve} from '#core/data-structures/promise';
 import {getVerticalScrollbarWidth, isIframed} from '#core/dom';
-import {isExperimentOn} from '#experiments';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
 } from '#core/dom/layout/rect';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {computedStyle, setStyle} from '#core/dom/style';
+import {clamp} from '#core/math';
+import {dict} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {ViewportBindingDef} from './viewport-binding-def';
+import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
+import {ViewportBindingNatural_} from './viewport-binding-natural';
+import {ViewportInterface} from './viewport-interface';
+
+import {Animation} from '../../animation';
+import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
+import {dev, devAssert} from '../../log';
+import {getMode} from '../../mode';
+import {
+  getParentWindowFrameElement,
+  registerServiceBuilderForDoc,
+} from '../../service-helpers';
 import {numeric} from '../../transition';
-import {tryResolve} from '#core/data-structures/promise';
 
 const TAG_ = 'Viewport';
 const SCROLL_POS_TO_BLOCK = {

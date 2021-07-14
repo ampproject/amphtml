@@ -15,17 +15,21 @@
  */
 
 import {Observable} from '#core/data-structures/observable';
+import {whenDocumentReady} from '#core/document-ready';
+import {waitForBodyOpen} from '#core/dom';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {computedStyle, px, setImportantStyles} from '#core/dom/style';
+
+import {isExperimentOn} from '#experiments';
+
 import {Services} from '#service';
+
 import {
   ViewportBindingDef,
   marginBottomOfLastChild,
 } from './viewport-binding-def';
-import {computedStyle, px, setImportantStyles} from '#core/dom/style';
+
 import {dev} from '../../log';
-import {isExperimentOn} from '#experiments';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {waitForBodyOpen} from '#core/dom';
-import {whenDocumentReady} from '#core/document-ready';
 
 const TAG_ = 'Viewport';
 

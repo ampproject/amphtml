@@ -21,36 +21,37 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {Services} from './service';
+import {installAutoLightboxExtension} from './auto-lightbox';
+import {startupChunk} from './chunk';
 import {TickLabel} from './core/constants/enums';
-import {adoptWithMultidocDeps} from './runtime';
-import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {installErrorReporting} from './error-reporting';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {maybeTrackImpression} from './impression';
+import {internalRuntimeVersion} from './internal-version';
 import {getMode} from './mode';
+import {preconnectToOrigin} from './preconnect';
+import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {adoptWithMultidocDeps} from './runtime';
+import {Services} from './service';
+import {installDocService} from './service/ampdoc-impl';
 import {
   installAmpdocServices,
   installBuiltinElements,
   installRuntimeServices,
 } from './service/core-services';
-import {installAutoLightboxExtension} from './auto-lightbox';
-import {installDocService} from './service/ampdoc-impl';
-import {installErrorReporting} from './error-reporting';
+import {stubElementsForDoc} from './service/custom-element-registry';
 import {installPerformanceService} from './service/performance-impl';
 import {installPlatformService} from './service/platform-impl';
-import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installStandaloneExtension} from './standalone';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from './style-installer';
-import {internalRuntimeVersion} from './internal-version';
-import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
-import {preconnectToOrigin} from './preconnect';
-import {startupChunk} from './chunk';
-import {stubElementsForDoc} from './service/custom-element-registry';
+
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 
 /**
  * Execute the bootstrap

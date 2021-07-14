@@ -17,6 +17,7 @@
 import {AmpStoryEntryPoint} from './amp-story-entry-point/amp-story-entry-point-impl';
 import {AmpStoryPlayer} from './amp-story-player-impl';
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
+
 import {initLogConstructor} from '../log';
 
 export class AmpStoryComponentManager {
