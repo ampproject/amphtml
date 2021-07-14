@@ -90,7 +90,7 @@ describes.realWin(
       expect(slider.hasAttribute('disabled')).to.be.true;
     });
 
-    it('checks that input is the same as the number displayed in the bubble', async () => {
+    it('should set the number displayed in the bubble to the same as the input', async () => {
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
       const slider = ampStorySlider
@@ -105,7 +105,7 @@ describes.realWin(
       expect(sliderBubble.textContent).to.be.equal('30');
     });
 
-    it.only('checks that input is the same as the --percentage variable', async () => {
+    it('should display the percentage in the bubble when the user drags the slider', async () => {
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
       const slider = ampStorySlider
@@ -119,6 +119,31 @@ describes.realWin(
           .getComputedStyle(ampStorySlider.getRootElement())
           .getPropertyValue('--percentage')
       ).to.be.equal('30%');
+    });
+
+    it('should show the bubble when the user drags the slider', async () => {
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      const slider = ampStorySlider
+        .getRootElement()
+        .querySelector('input[type="range"]');
+      const sliderBubble = ampStorySlider
+        .getRootElement()
+        .querySelector('.i-amphtml-story-interactive-slider-bubble');
+      // simulates an input event, which is when the user drags the slider
+      slider.dispatchEvent(new CustomEvent('input'));
+      expect(sliderBubble.classList.contains('show')).to.be.true;
+    });
+
+    it.only('should show post-selection state when the user releases the slider', async () => {
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      const slider = ampStorySlider
+        .getRootElement()
+        .querySelector('input[type="range"]');
+      // simulates a change event, which is when the user releases the slider
+      slider.dispatchEvent(new CustomEvent('change'));
+      expect(ampStorySlider.getRootElement().classList.contains('i-amphtml-story-interactive-post-selection')).to.be.true;
     });
   }
 );

@@ -29,27 +29,24 @@ import {setImportantStyles} from '#core/dom/style';
  * @param {!Element} element
  * @return {!Element}
  */
-
 const buildSliderTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-interactive-slider-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-slider-input-container">
-        <div class="i-amphtml-story-interactive-slider-field">
-          <div class="i-amphtml-story-interactive-side-values">0</div>
-          <div class="i-amphtml-story-interactive-slider-input-size">
-            <input
-              class="i-amphtml-story-interactive-slider-input"
-              type="range"
-              min="0"
-              max="100"
-              value="0"
-            />
-            <div class="i-amphtml-story-interactive-slider-bubble">50</div>
-          </div>
-          <div class="i-amphtml-story-interactive-side-values">100</div>
+        <div class="i-amphtml-story-interactive-side-values">0</div>
+        <div class="i-amphtml-story-interactive-slider-input-size">
+          <input
+            class="i-amphtml-story-interactive-slider-input"
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+          />
+          <div class="i-amphtml-story-interactive-slider-bubble">50</div>
         </div>
+        <div class="i-amphtml-story-interactive-side-values">100</div>
       </div>
     </div>
   `;
@@ -83,11 +80,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   /** @override */
   buildCallback() {
     return super.buildCallback(CSS);
-  }
-
-  /** @override */
-  layoutCallback() {
-    this.initializeListeners_();
   }
 
   /** @override */
