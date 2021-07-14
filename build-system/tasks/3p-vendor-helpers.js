@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const debounce = require('debounce');
+const debounce = require('../common/debounce');
 const globby = require('globby');
 const {compileJsWithEsbuild} = require('./helpers');
 const {cyan, red} = require('../common/colors');

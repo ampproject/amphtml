@@ -15,7 +15,7 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const debounce = require('debounce');
+const debounce = require('../common/debounce');
 const esbuild = require('esbuild');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');

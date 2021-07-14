@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const debounce = require('debounce');
+const debounce = require('../../common/debounce');
 const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');
