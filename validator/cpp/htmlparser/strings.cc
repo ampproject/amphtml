@@ -31,7 +31,7 @@ namespace htmlparser {
 // These replacements permit compatibility with old numeric entities that
 // assumed Windows-1252 encoding.
 // https://html.spec.whatwg.org/multipage/syntax.html#consume-a-character-reference
-constexpr std::array<char32_t, 32> replacementTable{
+constexpr std::array<char32_t, 32> kReplacementTable{
     L'\u20AC', // First entry is what 0x80 should be replaced with.
     L'\u0081',
     L'\u201A',
@@ -67,6 +67,27 @@ constexpr std::array<char32_t, 32> replacementTable{
     // 0x00->L'\uFFFD' is handled programmatically.
     // 0x0D->L'\u000D' is a no-op.
 };
+
+// Copied from https://github.com/abseil/abseil-cpp/blob/master/absl/strings/ascii.cc
+constexpr std::array<unsigned char, 256> kPropertyBits{
+    0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,  // 0x00
+    0x40, 0x68, 0x48, 0x48, 0x48, 0x48, 0x40, 0x40,
+    0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,  // 0x10
+    0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
+    0x28, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,  // 0x20
+    0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+    0x84, 0x84, 0x84, 0x84, 0x84, 0x84, 0x84, 0x84,  // 0x30
+    0x84, 0x84, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+    0x10, 0x85, 0x85, 0x85, 0x85, 0x85, 0x85, 0x05,  // 0x40
+    0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05,
+    0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05,  // 0x50
+    0x05, 0x05, 0x05, 0x10, 0x10, 0x10, 0x10, 0x10,
+    0x10, 0x85, 0x85, 0x85, 0x85, 0x85, 0x85, 0x05,  // 0x60
+    0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05,
+    0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05,  // 0x70
+    0x05, 0x05, 0x05, 0x10, 0x10, 0x10, 0x10, 0x40,
+};
+
 
 // Internal functions forward
 // ==========================
@@ -741,18 +762,22 @@ int Strings::IsUtf8WhiteSpaceChar(std::string_view s, std::size_t position) {
   return 0;
 }
 
-int Strings::CountTerms(std::string_view s, std::string_view delimiters) {
-  if (s.empty() || delimiters.empty()) return 0;
-
-  TrimLeft(&s, delimiters);
-  int count = 0;
-  std::size_t pos = 0;
-  while (pos < s.length()) {
-    count++;
-    pos = s.find_first_of(delimiters, pos);
-    pos = s.find_first_not_of(delimiters, pos);
+int Strings::CountTerms(std::string_view s) {
+  bool in_term = false;
+  int num_terms = 0;
+  while (!s.empty()) {
+    unsigned char c = s.front();
+    s.remove_prefix(1);
+    // whitespace and punctuations.
+    if ((kPropertyBits[c] & 0x08) != 0 || (kPropertyBits[c] & 0x10) != 0) {
+      in_term = false;
+    } else if (!in_term) {
+      // First character of a term
+      ++num_terms;
+      in_term = true;
+    }
   }
-  return count;
+  return num_terms;
 }
 
 namespace {
@@ -816,7 +841,7 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
 
     if (0x80 <= x && x <= 0x9F) {
       // Replace characters from Windows-1252 with UTF-8 equivalents.
-      x = replacementTable[x - 0x80];
+      x = kReplacementTable[x - 0x80];
     } else if (x == 0 || (0xD800 <= x && x <= 0xDFFF) || x > 0x10FFFF) {
       // Replace invalid characters with the replacement chracter.
       x = L'\uFFFD';

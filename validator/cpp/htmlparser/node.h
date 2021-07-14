@@ -71,6 +71,7 @@ class Node {
   void AddAttribute(const Attribute& attr);
   // Sorts the attributes of this node.
   void SortAttributes(bool remove_duplicates = false);
+  void DropDuplicateAttributes();
 
   // Updates child nodes line and column numbers relative to the given node.
   // This does not change order or parent/child relationship of this or child
