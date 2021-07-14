@@ -68,3 +68,8 @@
   filter: var(--i-amphtml-story-interactive-img-quiz-answer-filter) !important;
   opacity: 1 !important;
 }
+
+.i-amphtml-story-interactive-option-selected
+  .i-amphtml-story-interactive-img-quiz-answer-choice {
+  animation: answer-choice-bounce forwards 600ms linear !important;
+}

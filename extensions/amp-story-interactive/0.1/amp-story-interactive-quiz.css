@@ -256,39 +256,6 @@
   color: var(--incorrect-color-shaded) !important;
 }
 
-@keyframes answer-choice-bounce {
-  0% {
-    visibility: hidden;
-    border: solid 2px var(--i-amphtml-interactive-answer-choice-background);
-    transform: scale(0);
-    visibility: hidden;
-  }
-  21% {
-    visibility: visible;
-    transform: scale(.01);
-    animation-timing-function: cubic-bezier(.3, .5, .7, 1);
-  }
-  43% {
-    transform: scale(1.203);
-    animation-timing-function: ease-in-out;
-  }
-  62% {
-    transform: scale(0.956);
-  }
-  83% {
-    transform: scale(1.008);
-  }
-  96% {
-    transform: scale(1);
-  }
-  99% {
-    transform: scale(.998);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
 @keyframes option-select-incorrect {
   0% {
     border-color: var(--incorrect-color);
