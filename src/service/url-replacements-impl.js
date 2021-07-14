@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+import {hasOwn} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
+import {WindowInterface} from '#core/window/interface';
+
+import {Services} from '#service';
+
+import {Expander} from './url-expander/expander';
 import {
   AsyncResolverDef,
   ResolverReturnDef,
@@ -23,9 +30,14 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from './variable-source';
-import {Expander} from './url-expander/expander';
-import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
+
+import {getTrackImpressionPromise} from '../impression';
+import {internalRuntimeVersion} from '../internal-version';
+import {dev, devAssert, user, userAssert} from '../log';
+import {
+  installServiceInEmbedDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
 import {
   addMissingParamsToUrl,
   addParamsToUrl,
@@ -35,15 +47,6 @@ import {
   removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
-import {dev, devAssert, user, userAssert} from '../log';
-import {getTrackImpressionPromise} from '../impression';
-import {hasOwn} from '#core/types/object';
-import {
-  installServiceInEmbedDoc,
-  registerServiceBuilderForDoc,
-} from '../service-helpers';
-import {internalRuntimeVersion} from '../internal-version';
-import {parseQueryString} from '#core/types/string/url';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';

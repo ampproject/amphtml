@@ -15,8 +15,8 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {map} from '#core/types/object';
 import {rethrowAsync} from '#core/error';
+import {map} from '#core/types/object';
 
 /**
  * For type anotations where Element is a local variable.

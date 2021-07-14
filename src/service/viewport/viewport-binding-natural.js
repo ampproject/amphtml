@@ -15,14 +15,17 @@
  */
 
 import {Observable} from '#core/data-structures/observable';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {computedStyle, px, setImportantStyles} from '#core/dom/style';
+
 import {Services} from '#service';
+
 import {
   ViewportBindingDef,
   marginBottomOfLastChild,
 } from './viewport-binding-def';
-import {computedStyle, px, setImportantStyles} from '#core/dom/style';
+
 import {dev} from '../../log';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 const TAG_ = 'Viewport';
 

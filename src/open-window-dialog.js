@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev} from './log';
 import {includes} from './core/types/string';
+import {dev} from './log';
 
 /**
  * This method wraps around window's open method. It first tries to execute

@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+import {isArray} from '#core/types';
+
+import {Services} from '#service';
+
 import {OwnersInterface} from './owners-interface';
 import {Resource} from './resource';
-import {Services} from '#service';
+
 import {devAssert} from '../log';
-import {isArray} from '#core/types';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /**

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {cssText} from '../../../build/video-autoplay.css';
 import {installStylesForDoc} from '../../style-installer';
 // Source for this constant is css/video-autoplay.css
-import {cssText} from '../../../build/video-autoplay.css';
 
 /**
  * @param  {!../ampdoc-impl.AmpDoc} ampdoc

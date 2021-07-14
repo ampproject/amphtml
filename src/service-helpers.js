@@ -21,8 +21,8 @@
  */
 
 import {Deferred} from './core/data-structures/promise';
-import {dev, devAssert} from './log';
 import {toWin} from './core/window';
+import {dev, devAssert} from './log';
 
 /**
  * Holds info about a service.

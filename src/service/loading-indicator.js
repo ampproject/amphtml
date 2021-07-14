@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {createLoaderElement} from './loader-element';
+import {removeElement} from '#core/dom';
 import {createViewportObserver} from '#core/dom/layout/viewport-observer';
 import {htmlFor} from '#core/dom/static-template';
+
+import {createLoaderElement} from './loader-element';
+
 import {registerServiceBuilderForDoc} from '../service-helpers';
-import {removeElement} from '#core/dom';
 
 const MIN_SIZE = 20;
 

@@ -15,12 +15,14 @@
  */
 
 import {IframeMessagingClient} from '#3p/iframe-messaging-client';
+
+import {tryParseJson} from '#core/types/object/json';
+
 import {canInspectWindow} from '../iframe-helper';
 import {
   getExistingServiceOrNull,
   registerServiceBuilder,
 } from '../service-helpers';
-import {tryParseJson} from '#core/types/object/json';
 
 /**
  * @param {!Window} win

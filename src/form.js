@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ancestorElementsByTag} from './core/dom/query';
 import {iterateCursor} from './core/dom';
+import {ancestorElementsByTag} from './core/dom/query';
 
 /** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';

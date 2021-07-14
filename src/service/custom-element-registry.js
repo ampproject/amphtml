@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {ElementStub} from '../element-stub';
 import {Services} from '#service';
-import {createCustomElementClass, stubbedElements} from '../custom-element';
+
 import {extensionScriptsInNode} from './extension-script';
+
+import {createCustomElementClass, stubbedElements} from '../custom-element';
+import {ElementStub} from '../element-stub';
 import {reportError} from '../error-reporting';
 import {userAssert} from '../log';
 

@@ -15,6 +15,13 @@
  */
 
 import {
+  devAssert,
+  devAssertNumber,
+  devAssertString,
+  userAssert,
+} from './core/assert';
+import {transparentPng} from './core/dom/img';
+import {
   Layout,
   getLayoutClass,
   getLengthNumeral,
@@ -23,17 +30,10 @@ import {
   parseLayout,
   parseLength,
 } from './core/dom/layout';
-import {
-  devAssert,
-  devAssertNumber,
-  devAssertString,
-  userAssert,
-} from './core/assert';
 import {htmlFor} from './core/dom/static-template';
-import {isExperimentOn} from './experiments';
 import {setStyle, setStyles, toggle} from './core/dom/style';
 import {toWin} from './core/window';
-import {transparentPng} from './core/dom/img';
+import {isExperimentOn} from './experiments';
 
 /**
  * Whether aspect-ratio CSS can be used to implement responsive layouts.

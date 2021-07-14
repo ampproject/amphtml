@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getMode} from '../mode';
 import {urls} from '../config';
+import {getMode} from '../mode';
 
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LATEST_VERSION = 'latest';

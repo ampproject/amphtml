@@ -15,13 +15,14 @@
  */
 /* eslint-disable local/window-property-name */
 
-import {dict} from '#core/types/object';
-import {getData, listen} from './event-helper';
-import {getMode} from './mode';
+import {tryResolve} from '#core/data-structures/promise';
 import {isFiniteNumber} from '#core/types';
 import {once} from '#core/types/function';
+import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
-import {tryResolve} from '#core/data-structures/promise';
+
+import {getData, listen} from './event-helper';
+import {getMode} from './mode';
 
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 
