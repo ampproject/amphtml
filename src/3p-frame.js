@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseUrlDeprecated} from './url';
-import {dev, devAssert, user, userAssert} from './log';
-import {dict} from './core/types/object';
-import {getContextMetadata} from './iframe-attributes';
-import {getMode} from './mode';
+import {urls} from './config';
 import {
   getOptionalSandboxFlags,
   getRequiredSandboxFlags,
 } from './core/3p-frame';
-import {internalRuntimeVersion} from './internal-version';
-import {isExperimentOn} from './experiments';
 import {setStyle} from './core/dom/style';
+import {dict} from './core/types/object';
 import {tryParseJson} from './core/types/object/json';
-import {urls} from './config';
+import {getContextMetadata} from './iframe-attributes';
+import {internalRuntimeVersion} from './internal-version';
+import {dev, devAssert, user, userAssert} from './log';
+import {getMode} from './mode';
+import {assertHttpsUrl, parseUrlDeprecated} from './url';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
@@ -120,7 +119,7 @@ export function getIframe(
   const name = JSON.stringify(
     dict({
       'host': host,
-      'bootstrap': getBootstrapUrl(attributes['type'], parentWindow),
+      'bootstrap': getBootstrapUrl(attributes['type']),
       'type': attributes['type'],
       // https://github.com/ampproject/amphtml/pull/2955
       'count': count[attributes['type']],
@@ -202,22 +201,19 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Get the bootstrap script URL for iframe.
  * @param {string} type
- * @param {!Window} win
  * @return {string}
  */
-export function getBootstrapUrl(type, win) {
+export function getBootstrapUrl(type) {
+  const extension = IS_ESM ? '.mjs' : '.js';
   if (getMode().localDev || getMode().test) {
     const filename = getMode().minified
-      ? `./vendor/${type}.`
-      : `./vendor/${type}.max.`;
-    return IS_ESM ? filename + 'mjs' : filename + 'js';
+      ? `./vendor/${type}`
+      : `./vendor/${type}.max`;
+    return filename + extension;
   }
-  if (isExperimentOn(win, '3p-vendor-split')) {
-    return IS_ESM
-      ? `${urls.thirdParty}/${internalRuntimeVersion()}/vendor/${type}.mjs`
-      : `${urls.thirdParty}/${internalRuntimeVersion()}/vendor/${type}.js`;
-  }
-  return `${urls.thirdParty}/${internalRuntimeVersion()}/f.js`;
+  return `${
+    urls.thirdParty
+  }/${internalRuntimeVersion()}/vendor/${type}${extension}`;
 }
 
 /**
@@ -233,7 +229,7 @@ export function preloadBootstrap(win, type, ampdoc, preconnect) {
 
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  preconnect.preload(ampdoc, getBootstrapUrl(type, win), 'script');
+  preconnect.preload(ampdoc, getBootstrapUrl(type), 'script');
 }
 
 /**

@@ -15,18 +15,20 @@
  */
 
 import {PriorityQueue} from '#core/data-structures/priority-queue';
-import {Services} from '#service';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {dev, user, userAssert} from '../log';
-import {dict} from '#core/types/object';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
-import {getMode} from '../mode';
 import {isIframed, tryFocus} from '#core/dom';
-import {isLocalhostOrigin} from '../url';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {dict} from '#core/types/object';
+import {toWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
+import {dev, user, userAssert} from '../log';
+import {getMode} from '../mode';
 import {openWindowDialog} from '../open-window-dialog';
 import {registerServiceBuilderForDoc} from '../service-helpers';
-import {toWin} from '#core/window';
+import {isLocalhostOrigin} from '../url';
 
 const TAG = 'navigation';
 
