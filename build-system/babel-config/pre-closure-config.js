@@ -15,21 +15,15 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
 const {getImportResolverPlugin} = require('./import-resolver');
 const {getReplacePlugin} = require('./helpers');
 
 /**
- * Gets the config for pre-closure babel transforms run during `amp dist`.
+ * Gets the config for pre-closure babel transforms run during `check-types`
  *
  * @return {!Object}
  */
 function getPreClosureConfig() {
-  const isCheckTypes = argv._.includes('check-types');
-  const testTasks = ['e2e', 'integration', 'visual-diff'];
-  const isTestTask = testTasks.some((task) => argv._.includes(task));
-  const isFortesting = argv.fortesting || isTestTask;
-
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
     {
@@ -40,66 +34,24 @@ function getPreClosureConfig() {
   ];
   const replacePlugin = getReplacePlugin();
   const preClosurePlugins = [
-    'optimize-objstr',
     getImportResolverPlugin(),
-    argv.coverage ? 'babel-plugin-istanbul' : null,
     './build-system/babel-plugins/babel-plugin-imported-helpers',
-    './build-system/babel-plugins/babel-plugin-transform-inline-isenumvalue',
-    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
-    './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
-    '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
-    argv.esm || argv.sxg
-      ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
-      : null,
-    // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
-    [
-      './build-system/babel-plugins/babel-plugin-transform-log-methods',
-      {replaceCallArguments: false},
-    ],
-    './build-system/babel-plugins/babel-plugin-transform-parenthesize-expression',
     [
       './build-system/babel-plugins/babel-plugin-transform-json-import',
       {freeze: false},
     ],
-    './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
-    './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
-    './build-system/babel-plugins/babel-plugin-transform-default-assignment',
     replacePlugin,
-    './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
-    // TODO(erwinm, #28698): fix this in fixit week
-    // argv.esm
-    //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
-    //: null,
-    !isCheckTypes
-      ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
-      : null,
-    !(isFortesting || isCheckTypes)
-      ? [
-          './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
-          {isEsmBuild: !!argv.esm},
-        ]
-      : null,
   ].filter(Boolean);
-  const presetEnv = [
-    '@babel/preset-env',
-    {
-      bugfixes: true,
-      modules: false,
-      targets: {esmodules: true},
-    },
-  ];
-  const preClosurePresets = argv.esm || argv.sxg ? [presetEnv] : [];
-  const preClosureConfig = {
+
+  return {
     compact: false,
     plugins: preClosurePlugins,
-    presets: preClosurePresets,
     retainLines: true,
     sourceMaps: true,
   };
-  return preClosureConfig;
 }
 
 module.exports = {
