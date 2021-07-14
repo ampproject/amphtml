@@ -750,14 +750,14 @@ export class AmpStoryPlayer {
     const prevButton = this.doc_.createElement('button');
     prevButton.classList.add('i-amphtml-story-player-desktop-panel-prev');
     prevButton.addEventListener('click', () => this.previous_());
+    prevButton.setAttribute('aria-label', 'previous story');
     parentEl.appendChild(prevButton);
-    prevButton.innerText = 'prev';
 
     const nextButton = this.doc_.createElement('button');
     nextButton.classList.add('i-amphtml-story-player-desktop-panel-next');
     nextButton.addEventListener('click', () => this.next_());
+    nextButton.setAttribute('aria-label', 'next story');
     parentEl.appendChild(nextButton);
-    nextButton.innerText = 'next';
   }
 
   /**
