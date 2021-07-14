@@ -13,43 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import mustache from '#third_party/mustache/mustache';
+import * as tempura from 'tempura';
 
 describes.sandboxed('Mustache', {}, () => {
-  let savedSanitizer;
+  function render(str, data) {
+    const options = {escape: (value) => value.toUpperCase()};
+    return tempura.compile(str, options)(data);
+  }
 
-  beforeEach(() => {
-    savedSanitizer = mustache.sanitizeUnescaped;
-    mustache.setUnescapedSanitizer(function (value) {
-      return value.toUpperCase();
-    });
-  });
-
-  afterEach(() => {
-    mustache.setUnescapedSanitizer(savedSanitizer);
-  });
-
-  it('should escape html', () => {
-    expect(mustache.render('{{value}}', {value: '<b>abc</b>'})).to.equal(
+  it.only('should escape html', () => {
+    throw new Error(render(`Hello, {{name}}.`, {name: 'jake'}));
+    expect(render('{{value}}', {value: '<b>abc</b>'})).to.equal(
       '&lt;b&gt;abc&lt;&#x2F;b&gt;'
     );
   });
 
   it('should transform unescaped html', () => {
-    expect(mustache.render('{{{value}}}', {value: '<b>abc</b>'})).to.equal(
-      '<B>ABC</B>'
-    );
+    expect(render('{{{value}}}', {value: '<b>abc</b>'})).to.equal('<B>ABC</B>');
   });
 
   it('should only expand own properties', () => {
     const parent = {value: 'bc'};
     const child = Object.create(parent);
     const container = {parent, child};
-    expect(mustache.render('a{{value}}', parent)).to.equal('abc');
-    expect(mustache.render('a{{value}}', child)).to.equal('a');
-    expect(mustache.render('a{{parent.value}}', container)).to.equal('abc');
-    expect(mustache.render('a{{child.value}}', container)).to.equal('a');
+    expect(render('a{{value}}', parent)).to.equal('abc');
+    expect(render('a{{value}}', child)).to.equal('a');
+    expect(render('a{{parent.value}}', container)).to.equal('abc');
+    expect(render('a{{child.value}}', container)).to.equal('a');
   });
 
   it('should NOT allow calls to builtin functions', () => {
@@ -65,16 +55,13 @@ describes.sandboxed('Mustache', {}, () => {
       },
     };
     expect(
-      mustache.render(
-        '{{#t}}{{x.pop}}X{{x.pop}}{{/t}}{{#t}}{{0}}Y{{1}}{{/t}}',
-        obj
-      )
+      render('{{#t}}{{x.pop}}X{{x.pop}}{{/t}}{{#t}}{{0}}Y{{1}}{{/t}}', obj)
     ).to.equal('X0Y1');
   });
 
   it('should NOT allow delimiter substituion', () => {
     expect(
-      mustache.render('{{value}}{{=<% %>=}}<% value %>', {
+      render('{{value}}{{=<% %>=}}<% value %>', {
         value: 'abc',
       })
     ).to.equal('abc<% value %>');

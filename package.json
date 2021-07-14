@@ -33,6 +33,7 @@
     "react-jss": "10.6.0",
     "resize-observer-polyfill": "1.5.1",
     "rrule": "2.6.8",
+    "tempura": "0.1.0",
     "timeago.js": "4.0.2",
     "web-activities": "1.24.0",
     "web-animations-js": "2.3.2"

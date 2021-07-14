@@ -21,9 +21,15 @@ import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {iterateCursor, templateContentClone} from '#core/dom';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {user} from '../../../src/log';
-import mustache from '#third_party/mustache/mustache';
+import * as tempura from 'tempura';
 
 const TAG = 'amp-mustache';
+
+/**
+ * A cache for compiled mustache render functions.
+ * @type {Map<string, function(Object):string}
+ */
+const renderCache = new Map();
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -44,11 +50,6 @@ export class AmpMustache extends BaseTemplate {
     });
     /** @private @const {!Purifier} */
     this.purifier_ = getService(win, 'purifier');
-
-    // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    mustache.setUnescapedSanitizer((value) =>
-      this.purifier_.purifyTagsForTripleMustache(value)
-    );
   }
 
   /** @override */
@@ -59,6 +60,12 @@ export class AmpMustache extends BaseTemplate {
     if (this.viewerCanRenderTemplates()) {
       return;
     }
+
+    // If already compiled this template, return.
+    if (renderCache.has(this.template_)) {
+      return;
+    }
+
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
 
@@ -66,7 +73,11 @@ export class AmpMustache extends BaseTemplate {
     this.template_ = this.initTemplateString_();
 
     try {
-      mustache.parse(this.template_, /* tags */ undefined);
+      // Unescaped templating (triple mustache) has a special, strict sanitizer.
+      const options = {
+        escape: (value) => this.purifier_.purifyTagsForTripleMustache(value),
+      };
+      renderCache.set(this.template_, tempura.compile(this.template_, options));
     } catch (err) {
       user().error(TAG, err.message, this.element);
     }
@@ -141,11 +152,13 @@ export class AmpMustache extends BaseTemplate {
     if (typeof data === 'object') {
       mustacheData = {...data, ...this.nestedTemplates_};
     }
-    const html = mustache.render(
-      this.template_,
-      mustacheData,
-      /* partials */ undefined
-    );
+    if (!renderCache.has(this.template_)) {
+      this.compileCallback();
+    }
+    const render = renderCache.get(this.template_);
+
+    // TODO: is it ok that this doesn't support partials?
+    const html = render(mustacheData);
     return this.purifyAndSetHtml_(html);
   }
 

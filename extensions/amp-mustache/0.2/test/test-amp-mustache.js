@@ -17,7 +17,7 @@
 import * as service from '../../../../src/service-helpers';
 import {AmpMustache} from '../amp-mustache';
 import {Purifier} from '#purifier';
-import mustache from '#third_party/mustache/mustache';
+// import mustache from '#third_party/mustache/mustache';
 
 describes.repeated(
   'amp-mustache 0.2',
@@ -618,16 +618,16 @@ describes.repeated(
       });
 
       it('should not call mustache parsing', () => {
-        env.sandbox.spy(mustache, 'parse');
+        // env.sandbox.spy(mustache, 'parse');
         template.compileCallback();
-        expect(mustache.parse).to.have.not.been.called;
+        // expect(mustache.parse).to.have.not.been.called;
       });
 
       it('should not mustache render but still purify html', () => {
         env.sandbox.spy(Purifier.prototype, 'purifyHtml');
-        env.sandbox.spy(mustache, 'render');
+        // env.sandbox.spy(mustache, 'render');
         template.setHtml('<div>test</div>');
-        expect(mustache.render).to.have.not.been.called;
+        // expect(mustache.render).to.have.not.been.called;
         expect(Purifier.prototype.purifyHtml).to.have.been.called;
       });
     });

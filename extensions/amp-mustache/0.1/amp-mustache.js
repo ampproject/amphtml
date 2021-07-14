@@ -22,9 +22,15 @@ import {
   sanitizeTagsForTripleMustache,
 } from '../../../src/sanitizer';
 import {user} from '../../../src/log';
-import mustache from '#third_party/mustache/mustache';
+import * as tempura from 'tempura';
 
 const TAG = 'amp-mustache';
+
+/**
+ * A cache for compiled mustache render functions.
+ * @type {Map<string, function(Object):string}
+ */
+const renderCache = new Map();
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -39,9 +45,6 @@ export class AmpMustache extends BaseTemplate {
    */
   constructor(element, win) {
     super(element, win);
-
-    // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    mustache.setUnescapedSanitizer(sanitizeTagsForTripleMustache);
 
     user().warn(
       TAG,
@@ -58,13 +61,27 @@ export class AmpMustache extends BaseTemplate {
     if (this.viewerCanRenderTemplates()) {
       return;
     }
+
+    // If already compiled this template, return.
+    if (renderCache.has(this.template_)) {
+      return;
+    }
+
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
 
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
 
-    mustache.parse(this.template_, /* tags */ undefined);
+    try {
+      // Unescaped templating (triple mustache) has a special, strict sanitizer.
+      const options = {
+        escape: (value) => sanitizeTagsForTripleMustache(value),
+      };
+      renderCache.set(this.template_, tempura.compile(this.template_, options));
+    } catch (err) {
+      user().error(TAG, err.message, this.element);
+    }
   }
 
   /**
@@ -138,11 +155,12 @@ export class AmpMustache extends BaseTemplate {
     if (typeof data === 'object') {
       mustacheData = {...data, ...this.nestedTemplates_};
     }
-    return mustache.render(
-      this.template_,
-      mustacheData,
-      /* partials */ undefined
-    );
+
+    if (!renderCache.has(this.template_)) {
+      this.compileCallback();
+    }
+    const render = renderCache.get(this.template_);
+    return render(mustacheData);
   }
 
   /**
