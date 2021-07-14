@@ -18,27 +18,27 @@ import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
-import { Deferred } from '#core/data-structures/promise';
-import { PauseHelper } from '#core/dom/video/pause-helper';
-import { Services } from '#service';
-import { addParamsToUrl } from '../../../src/url';
-import { applyFillContent, isLayoutSizeDefined } from '#core/dom/layout';
-import { dict } from '#core/types/object';
+import {Deferred} from '#core/data-structures/promise';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Services} from '#service';
+import {addParamsToUrl} from '../../../src/url';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {dict} from '#core/types/object';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import { getData } from '../../../src/event-helper';
+import {getData} from '../../../src/event-helper';
 import {
   observeContentSize,
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
-import { removeElement } from '#core/dom';
-import { setIsMediaComponent } from '../../../src/video-interface';
-import { tryParseJson } from '#core/types/object/json';
-import { userAssert } from '../../../src/log';
+import {removeElement} from '#core/dom';
+import {setIsMediaComponent} from '../../../src/video-interface';
+import {tryParseJson} from '#core/types/object/json';
+import {userAssert} from '../../../src/log';
 
 /**
  * @param {!Array<T>} promises
@@ -55,14 +55,14 @@ export function allSettled(promises) {
    * @return {{status: string, value: *}}
    */
   function onFulfilled(value) {
-    return { status: 'fulfilled', value };
+    return {status: 'fulfilled', value};
   }
   /**
    * @param {*} reason
    * @return {{status: string, reason: *}}
    */
   function onRejected(reason) {
-    return { status: 'rejected', reason };
+    return {status: 'rejected', reason};
   }
   return Promise.all(
     promises.map((promise) => {
@@ -241,7 +241,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const { element } = this;
+    const {element} = this;
 
     setIsMediaComponent(element);
 
@@ -281,7 +281,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const { element } = this;
+    const {element} = this;
     // Url Params for iframe source
     const urlParams = dict({
       'playerId': this.playerId_ || undefined,
@@ -323,11 +323,11 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
    * @param {!../layout-rect.LayoutSizeDef} size
    * @private
    */
-  onResized_({ height, width }) {
+  onResized_({height, width}) {
     if (!this.iframe_) {
       return;
     }
-    this.sendCommand_('ampResize', { 'width': width, 'height': height });
+    this.sendCommand_('ampResize', {'width': width, 'height': height});
   }
 
   /** @override */
