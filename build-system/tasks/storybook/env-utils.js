@@ -23,11 +23,13 @@
  * @return {Object}
  */
 function webpackConfigNoChunkTilde(config) {
+  // Change runtime filenames (like runtime~main.*)
   if (config.optimization.runtimeChunk) {
     config.optimization.runtimeChunk = {
       name: ({name}) => `runtime-${name}`,
     };
   }
+  // Change all other chunked filenames (like vendors~main.*)
   if (config.optimization.splitChunks) {
     config.optimization.splitChunks.automaticNameDelimiter = '-';
   }
