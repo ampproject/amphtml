@@ -16,6 +16,7 @@
 const path = require('path');
 const {DefinePlugin} = require('webpack');
 const {getRelativeAliasMap} = require('../../../babel-config/import-resolver');
+const {webpackConfigNoChunkTilde} = require('../env-utils');
 
 const rootDir = path.join(__dirname, '../../../..');
 
@@ -72,5 +73,6 @@ module.exports = ({config}) => {
   // Replaced by minify-replace (babel) in the usual build pipeline
   // build-system/babel-config/helpers.js#getReplacePlugin
   config.plugins.push(new DefinePlugin({IS_ESM: false}));
-  return config;
+
+  return webpackConfigNoChunkTilde(config);
 };
