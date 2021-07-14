@@ -34,7 +34,6 @@ const {log} = require('./build-system/common/logging');
  */
 const babelTransforms = new Map([
   ['babel-jest', 'getEmptyConfig'],
-  ['post-closure', 'getPostClosureConfig'],
   ['pre-closure', 'getPreClosureConfig'],
   ['test', 'getTestConfig'],
   ['unminified', 'getUnminifiedConfig'],
