@@ -30,16 +30,18 @@ const isMinified = argv._.includes('dist') || !!argv.compiled;
  * @type {Object<string, boolean|string>}
  */
 const BUILD_CONSTANTS = {
-  IS_FORTESTING: isForTesting,
-  IS_MINIFIED: isMinified,
-  INTERNAL_RUNTIME_VERSION: isTestTask ? '$internalRuntimeVersion$' : VERSION,
+  IS_FORTESTING: `${isForTesting}`,
+  IS_MINIFIED: `${isMinified}`,
+  INTERNAL_RUNTIME_VERSION: isTestTask
+    ? '$internalRuntimeVersion$'
+    : `'${VERSION}'`,
 
   // We build on the idea that SxG is an upgrade to the ESM build.
   // Therefore, all conditions set by ESM will also hold for SxG.
   // However, we will also need to introduce a separate IS_SxG flag
   // for conditions only true for SxG.
-  IS_ESM: !!(argv.esm || argv.sxg),
-  IS_SXG: !!argv.sxg,
+  IS_ESM: `${!!(argv.esm || argv.sxg)}`,
+  IS_SXG: `${!!argv.sxg}`,
 };
 
 module.exports = {BUILD_CONSTANTS};

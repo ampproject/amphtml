@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const experimentsConstantBackup = require('../global-configs/experiments-const.json');
-const {BUILD_CONSTANTS} = require('../compile/build-constants');
 
 /**
  * Get experiment constant to define from command line arguments, if any
@@ -58,10 +57,7 @@ function getReplacePlugin() {
     return {identifierName, replacement};
   }
 
-  const replacements = Object.entries(BUILD_CONSTANTS).map(([ident, val]) =>
-    createReplacement(ident, val)
-  );
-
+  const replacements = [];
   const experimentConstant = getExperimentConstant();
   if (experimentConstant) {
     replacements.push(createReplacement(experimentConstant, true));
