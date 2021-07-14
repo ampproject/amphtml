@@ -16,7 +16,7 @@
 'use strict';
 
 const connect = require('gulp-connect');
-const debounce = require('debounce');
+const debounce = require('lodash.debounce');
 const globby = require('globby');
 const header = require('connect-header');
 const minimist = require('minimist');

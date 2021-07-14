@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const debounce = require('debounce');
+const debounce = require('lodash.debounce');
 const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');
@@ -144,7 +144,7 @@ async function compileCss(options = {}) {
   if (options.watch) {
     watch('css/**/*.css').on(
       'change',
-      debounce(compileCss, watchDebounceDelay)
+      debounce(compileCss, watchDebounceDelay, {leading: true, trailing: true})
     );
   }
 

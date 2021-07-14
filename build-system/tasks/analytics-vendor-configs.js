@@ -16,7 +16,7 @@
 
 const minimist = require('minimist');
 const argv = minimist(process.argv.slice(2));
-const debounce = require('debounce');
+const debounce = require('lodash.debounce');
 const fs = require('fs-extra');
 const globby = require('globby');
 const jsonminify = require('jsonminify');
