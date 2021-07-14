@@ -19,15 +19,11 @@ const del = require('del');
 const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');
-const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
-const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel} = require('./pre-closure-babel');
 const {runClosure} = require('./closure-compile');
-const {sanitize} = require('./sanitize');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
-const {writeSourcemaps} = require('./helpers');
 
 const queue = [];
 let inProgress = 0;
@@ -435,14 +431,6 @@ async function compile(
   await runClosure(outputFilename, options, flags, transformedSrcFiles);
   if (options.errored && options.continueOnError) {
     return; // Watch build. Bail on compilation errors.
-  }
-  if (!options.typeCheckOnly) {
-    if (!argv.pseudo_names && !options.skipUnknownDepsCheck) {
-      await checkForUnknownDeps(destFile);
-    }
-    await postClosureBabel(destFile);
-    await sanitize(destFile);
-    await writeSourcemaps(sourcemapFile, options);
   }
 }
 
