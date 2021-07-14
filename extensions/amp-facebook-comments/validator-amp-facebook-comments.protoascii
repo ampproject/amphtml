@@ -17,6 +17,8 @@
 tags: {  # amp-facebook-comments
   html_format: AMP
   tag_name: "SCRIPT"
+  satisfies: "amp facebook 0.1"
+  excludes: "amp facebook 1.0"
   extension_spec: {
     name: "amp-facebook-comments"
     version: "0.1"
