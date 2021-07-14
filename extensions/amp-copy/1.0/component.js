@@ -33,8 +33,6 @@ import {useStyles} from './component.jss';
 export function Copy({children, sourceId, text, ...rest}) {
   const [status, setStaus] = useState(null);
   let theme = useMemo(()=>{
-    console.log('theme');
-    console.log(status);
     if(status!=null){
       if(status==true){
         return useStyles().success;  
