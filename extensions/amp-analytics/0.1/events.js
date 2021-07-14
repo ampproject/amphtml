@@ -28,6 +28,7 @@ import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {isAmpElement} from '../../../src/amp-element-helpers';
 import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
+import {throttle} from '#core/types/function';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -373,7 +374,13 @@ export class CustomBrowserEventTracker extends EventTracker {
       selectionMethod
     );
 
-    this.root.getRoot().addEventListener(eventName, this.boundOnSession_, true);
+    throttle(
+      this.root.ampdoc.win,
+      this.root
+        .getRootElement()
+        .addEventListener(eventName, this.boundOnSession_, true),
+      500
+    );
 
     return this.observables_.add((event) => {
       const el = dev().assertElement(
