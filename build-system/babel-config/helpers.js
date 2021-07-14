@@ -18,6 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const experimentsConstantBackup = require('../global-configs/experiments-const.json');
+const {BUILD_CONSTANTS} = require('../compile/build-constants');
 
 /**
  * Get experiment constant to define from command line arguments, if any
@@ -50,6 +51,10 @@ function getReplacePlugin() {
    * @return {!Object} replacement options used by minify-replace plugin
    */
   function createReplacement(identifierName, value) {
+    if (value === 'true' || value === 'false') {
+      value = value === 'true';
+    }
+
     const replacement =
       typeof value === 'boolean'
         ? {type: 'booleanLiteral', value}
@@ -58,6 +63,14 @@ function getReplacePlugin() {
   }
 
   const replacements = [];
+  // The check-types command uses Closure, which doesn't support
+  // build constant replacement. So we do it here in babel.
+  if (argv._.includes('check-types')) {
+    for (const [ident, val] of Object.entries(BUILD_CONSTANTS)) {
+      replacements.push(createReplacement(ident, val));
+    }
+  }
+
   const experimentConstant = getExperimentConstant();
   if (experimentConstant) {
     replacements.push(createReplacement(experimentConstant, true));
