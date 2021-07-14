@@ -18,6 +18,7 @@ import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
 } from '../../amp-story/1.0/story-analytics';
+import {clamp} from '#core/math';
 import {
   Action,
   StateProperty,
@@ -33,7 +34,7 @@ import {
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
 import {
   buildInteractiveDisclaimer,
-  tryCloseDisclaimer,
+  buildInteractiveIcon,
 } from './interactive-disclaimer';
 import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -41,8 +42,8 @@ import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
-import {isExperimentOn} from '#experiments';
 import {toArray} from '#core/types/array';
+import {setImportantStyles} from '#core/dom/style';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
@@ -147,6 +148,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     /** @protected {?Promise<JsonObject>} */
     this.clientIdPromise_ = null;
+
+    /** @private {?Element} */
+    this.disclaimerEl_ = null;
+
+    /** @private {?Element} */
+    this.disclaimerIcon_ = null;
 
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
@@ -372,8 +379,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   layoutCallback() {
     if (this.element.hasAttribute('endpoint')) {
       // Needs to be called after buildCallback to measure properly.
-      this.disclaimerEl_ = buildInteractiveDisclaimer(this);
-      this.rootEl_.prepend(this.disclaimerEl_);
+      this.disclaimerIcon_ = buildInteractiveIcon(this);
+      this.rootEl_.prepend(this.disclaimerIcon_);
     }
     this.initializeListeners_();
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
@@ -462,7 +469,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           );
           this.toggleTabbableElements_(currPageId === this.getPageId_());
         });
-        tryCloseDisclaimer(this, this.disclaimerEl_);
+        this.closeDisclaimer_();
       },
       true /** callToInitialize */
     );
@@ -476,6 +483,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @protected
    */
   handleTap_(e) {
+    if (e.target == this.disclaimerIcon_ && !this.disclaimerEl_) {
+      this.openDisclaimer_();
+      return;
+    }
+
     if (this.hasUserSelection_) {
       return;
     }
@@ -499,7 +511,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           confettiEmoji
         );
       }
-      tryCloseDisclaimer(this, this.disclaimerEl_);
+      this.closeDisclaimer_();
     }
   }
 
@@ -853,5 +865,71 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     }
 
     return orderedData;
+  }
+
+  /**
+   * Opens the disclaimer dialog and positions it according to the page and itself.
+   */
+  openDisclaimer_() {
+    if (this.disclaimerEl_) {
+      return;
+    }
+    // Create disclaimer element.
+    this.disclaimerEl_ = buildInteractiveDisclaimer(this);
+    
+    // Get rects.
+    const interactiveRect = this.element./*OK*/ getBoundingClientRect();
+    const pageRect =
+      this.disclaimerEl_.parentElement./*OK*/ getBoundingClientRect();
+    const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
+
+    // Calculate left, right and bottom.
+    const rightPercentage =
+      1 -
+      (interactiveRect.x + interactiveRect.width - pageRect.x) / pageRect.width;
+    const leftPercentage = (interactiveRect.x - pageRect.x) / pageRect.width;
+    const bottomPercentage =
+      1 - (interactiveRect.y + iconRect.height - pageRect.y) / pageRect.height;
+    const widthPercentage = interactiveRect.width / pageRect.width;
+
+    // Compose styles using direction, and clamp so the element is always inside bounds.
+    const styles = {
+      bottom: clamp(bottomPercentage * 100, 0, 85) + '%',
+      'max-width': Math.min(widthPercentage * 100, 75) + '%',
+      position: 'absolute',
+      'z-index': 3,
+    };
+    if (this.rootEl_.getAttribute('dir') == 'rtl') {
+      styles.left = clamp(leftPercentage * 100, 0, 25) + '%';
+    } else {
+      styles.right = clamp(rightPercentage * 100, 0, 25) + '%';
+    }
+    setImportantStyles(this.disclaimerEl_, {...styles});
+    this.disclaimerIcon_.setAttribute('hide', '');
+
+    // Add click listener.
+    this.disclaimerEl_.addEventListener('click', (e) => {
+      if (
+        e.path[0].classList.contains(
+          'i-amphtml-story-interactive-disclaimer-close'
+        )
+      ) {
+        this.closeDisclaimer_();
+      }
+    });
+  }
+
+  /**
+   * Closes the disclaimer dialog if open.
+   */
+  closeDisclaimer_() {
+    if (!this.disclaimerEl_) {
+      return;
+    }
+    this.disclaimerEl_.remove();
+    this.disclaimerEl_ = null;
+    if (this.disclaimerIcon_) {
+      this.disclaimerIcon_.removeAttribute('hide');
+    }
   }
 }

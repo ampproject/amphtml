@@ -17,7 +17,6 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
-    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
   </head>
   <body>
@@ -55,7 +54,7 @@
           <amp-story-grid-layer template="center">
             <amp-story-interactive-quiz
                 id="international-quiz-dark"
-                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                endpoint="https://webstoriesinteractivity.googleapis.com/v1/interactives"
                 style="--interactive-accent-color: #ffa600;--interactive-prompt-background: linear-gradient(150deg, #da450b, #ffa600)"
                 theme="dark"
                 chip-style="shadow"
@@ -82,7 +81,7 @@
             <amp-story-interactive-quiz
                 id="first-cup-dark"
                 endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-                style="--interactive-accent-color: #20AC5E;"
+                style="--interactive-accent-color: #20AC5E;font-size: calc(var(--story-page-vmin) * 4)"
                 theme="dark"
                 prompt-text="Who won the first soccer world cup?"
                 option-1-text="France"
@@ -163,7 +162,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-quiz
-                id="smallest-mammal-light"
+                id="smallest-mammal-transparent"
                 endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
                 prompt-size="large"
                 chip-style="transparent"
@@ -389,7 +388,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-poll
-              id="poll-4"
+              id="poll-5"
               chip-style="shadow"
               endpoint="http://localhost:3000/interactives"
               style="--interactive-accent-color: #ff6347"
@@ -417,7 +416,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-poll
-              id="poll-4"
+              id="poll-6"
               chip-style="shadow"
               endpoint="http://localhost:3000/interactives"
               style="--interactive-accent-color: #ff6347"
@@ -464,7 +463,7 @@
             amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
-        <amp-story-page id="poll-7">
+        <amp-story-page id="poll-8">
           <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(255, 255, 255), rgb(178, 243, 255))">
             <amp-img
                 src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
@@ -476,7 +475,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-poll
-              id="poll-7"
+              id="poll-8"
               endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
               style="--interactive-accent-color: #ff6347;--interactive-prompt-text-color:black"
               theme="dark"
