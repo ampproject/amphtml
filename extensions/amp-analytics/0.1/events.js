@@ -22,6 +22,7 @@ import {
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
+import {throttle} from '#core/types/function';
 import {deepMerge, dict, hasOwn} from '#core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
@@ -291,6 +292,7 @@ export class AnalyticsEvent {
    * attribute value from target element should be included.
    */
   constructor(target, type, vars = dict(), enableDataVars = true) {
+    console.log(type)
     /** @const */
     this['target'] = target;
     /** @const */
@@ -339,6 +341,7 @@ export class CustomBrowserEventTracker extends EventTracker {
    * @param {!./analytics-root.AnalyticsRoot} root
    */
   constructor(root) {
+    let counter
     super(root);
 
     /** @private {?Observable<!Event>} */
@@ -373,7 +376,8 @@ export class CustomBrowserEventTracker extends EventTracker {
       selectionMethod
     );
 
-    this.root.getRoot().addEventListener(eventName, this.boundOnSession_, true);
+    this.root.getRootElement().addEventListener(eventName,
+      throttle(this.root.getElement(),this.boundOnSession_,500), true);
 
     return this.observables_.add((event) => {
       const el = dev().assertElement(
@@ -385,11 +389,27 @@ export class CustomBrowserEventTracker extends EventTracker {
           if (!target.contains(el)) {
             return;
           }
+          targetReady.then(target => {console.log(target)})
           listener(new AnalyticsEvent(target, eventName, event.detail));
         });
       }
     });
+
   }
+
+throttle_ (callback, limit) {
+    var wait = false;
+    return function () {
+        if (!wait) {
+            callback.apply(this, arguments);
+            wait = true;
+            setTimeout(function () {
+                wait = false;
+            }, limit);
+        }
+    }
+}
+
 }
 
 /**
