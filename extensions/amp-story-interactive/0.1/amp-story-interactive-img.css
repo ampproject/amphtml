@@ -66,8 +66,7 @@
   background-size: cover !important;
 }
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
-  .i-amphtml-story-interactive-img-option:focus {
+.i-amphtml-story-interactive-img-option:focus {
   outline: none !important;
 }
 
