@@ -270,6 +270,16 @@
     }
   },
   {
+    "name": "amp-copy",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "npm": true,
+      "hasCss": true,
+      "wrapper": "bento"
+    }
+  },
+  {
     "name": "amp-crypto-polyfill",
     "version": "0.1",
     "latestVersion": "0.1"
