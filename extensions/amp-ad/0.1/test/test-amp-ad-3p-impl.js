@@ -342,7 +342,7 @@ describes.realWin(
           );
           expect(fetches[1]).to.have.property(
             'href',
-            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js'
+            'https://3p.ampproject.net/$internalRuntimeVersion$/vendor/_ping_.js'
           );
 
           const preconnects = win.document.querySelectorAll(

@@ -419,7 +419,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
 
       it('should prefetch bootstrap frame and JS', () => {
         mockMode({});
-        toggleExperiment(window, '3p-vendor-split', true);
         const ampdoc = Services.ampdoc(window.document);
         preloadBootstrap(window, 'avendor', ampdoc, preconnect);
         // Wait for visible promise.
