@@ -34,10 +34,13 @@ const sourcemapUrlMatcher =
   'https://raw.githubusercontent.com/ampproject/amphtml/\\d{13}/';
 
 // Mapping related constants
-const expectedFirstLineFileJs =
-  'node_modules/@babel/runtime/helpers/esm/classCallCheck.js'; // First file that is compiled into v0.js.
-const expectedFirstLineCodeJs =
-  'function _classCallCheck(instance, Constructor) {'; // First line of code in that file.
+// const expectedFirstLineFileJs =
+//   'node_modules/@babel/runtime/helpers/esm/classCallCheck.js'; // First file that is compiled into v0.js.
+// const expectedFirstLineCodeJs =
+//   'function _classCallCheck(instance, Constructor) {'; // First line of code in that file.
+
+const expectedFirstLineFileJs = 'src/polyfills/abort-controller.js'; // First file that is compiled into v0.mjs.
+const expectedFirstLineCodeJs = 'class AbortController {'; // First line of code in that file.
 
 const expectedFirstLineFileMjs = 'src/polyfills/abort-controller.js'; // First file that is compiled into v0.mjs.
 const expectedFirstLineCodeMjs = 'class AbortController {'; // First line of code in that file.
