@@ -351,7 +351,7 @@ export class CustomBrowserEventTracker extends EventTracker {
 
   /** @override */
   dispose() {
-    const root = this.root.getRoot();
+    const root = this.root.getRootElement();
     Object.keys(BrowserEventType).forEach((key) => {
       root.removeEventListener(BrowserEventType[key], this.boundOnSession_);
     });
@@ -378,7 +378,8 @@ export class CustomBrowserEventTracker extends EventTracker {
       this.root.ampdoc.win,
       this.root
         .getRootElement()
-        .addEventListener(eventName, this.boundOnSession_, true),
+        .addEventListener(
+          eventName, this.boundOnSession_, true),
       500
     );
 
@@ -387,7 +388,7 @@ export class CustomBrowserEventTracker extends EventTracker {
         event.target,
         'No target specified by browser event.'
       );
-      if (!event.type.localeCompare(eventName)) {
+      if (event.type === eventName) {
         targetReady.then((target) => {
           if (!target.contains(el)) {
             return;
