@@ -45,7 +45,7 @@ class AmpFacebookLike extends BaseElement {
       // Base URL for 3p bootstrap iframes
       getBootstrapBaseUrl(win, ampdoc),
       // Script URL for iframe
-      getBootstrapUrl(TYPE, win),
+      getBootstrapUrl(TYPE),
       'https://facebook.com',
       // This domain serves the actual tweets as JSONP.
       'https://connect.facebook.net/' + locale + '/sdk.js',
