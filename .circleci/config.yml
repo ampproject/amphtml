@@ -17,6 +17,12 @@ push_builds_only: &push_builds_only
         - main
         - /^amp-release-.*$/
 
+pr_builds_only: &pr_builds_only
+  filters:
+    branches:
+      only:
+        - /^pull\/\d+$/
+
 executors:
   amphtml-small-executor:
     docker:
@@ -178,9 +184,22 @@ jobs:
       - store_test_output
       - fail_fast
       - teardown_vm
+  'Local Unit Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Local Unit Tests'
+          command: node build-system/pr-check/unit-tests-local.js
+      - store_test_output
+      - fail_fast
+      - teardown_vm
   'Unit Tests':
     executor:
       name: amphtml-large-executor
+    parallelism: 16
     steps:
       - setup_vm
       - install_chrome
@@ -188,7 +207,6 @@ jobs:
           name: 'Unit Tests'
           command: node build-system/pr-check/unit-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Unminified Tests':
     executor:
@@ -239,6 +257,7 @@ jobs:
   'End-to-End Tests':
     executor:
       name: amphtml-large-executor
+    parallelism: 16
     steps:
       - setup_vm
       - install_chrome
@@ -246,7 +265,6 @@ jobs:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
       - store_test_output
-      - fail_fast
       - teardown_vm
   'Performance Tests':
     executor:
@@ -326,6 +344,10 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
+      - 'Local Unit Tests':
+          <<: *pr_builds_only
+          requires:
+            - 'Compute Merge Commit'
       - 'Unit Tests':
           <<: *push_and_pr_builds
           requires:
@@ -355,6 +377,7 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
+            - 'Unit Tests'
       - 'Experiment Build':
           name: 'Experiment << matrix.exp >> Build'
           matrix:
