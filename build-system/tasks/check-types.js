@@ -79,7 +79,6 @@ const TYPE_CHECK_TARGETS = {
     warningLevel: 'QUIET',
   },
   'src-core': CORE_SRCS_GLOBS,
-  'src-examiner': ['src/examiner/**/*.js'],
   'src-experiments': ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
   'src-inabox': {
     srcGlobs: ['src/inabox/**/*.js'],
@@ -102,6 +101,9 @@ const TYPE_CHECK_TARGETS = {
   'src-service': {
     srcGlobs: ['src/service/**/*.js'],
     warningLevel: 'QUIET',
+  },
+  'src-compiler': {
+    srcGlobs: ['src/compiler/**/*.js'],
   },
   'src-utils': {
     srcGlobs: ['src/utils/**/*.js'],

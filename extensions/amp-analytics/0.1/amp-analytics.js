@@ -34,7 +34,7 @@ import {LayoutPriority} from '#core/dom/layout';
 import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
 import {Services} from '#service';
-import {SessionManager} from './session-manager';
+import {SessionManager, sessionServicePromiseForDoc} from './session-manager';
 import {Transport} from './transport';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '#core/types/object';
@@ -57,7 +57,6 @@ const ALLOWLIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.INI_LOAD,
   AnalyticsEventType.RENDER_START,
 ];
-
 export class AmpAnalytics extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -103,11 +102,17 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {./transport.Transport} */
     this.transport_ = null;
 
+    /** @private {string} */
+    this.type_ = this.element.getAttribute('type');
+
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
 
     /** @private {?./linker-manager.LinkerManager} */
     this.linkerManager_ = null;
+
+    /** @private {?./session-manager.SessionManager} */
+    this.sessionManager_ = null;
 
     /** @private {?boolean} */
     this.isInFie_ = null;
@@ -251,6 +256,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           this.config_['transport'] || {}
         );
       })
+      .then(this.maybeInitializeSessionManager_.bind(this))
       .then(this.registerTriggers_.bind(this))
       .then(this.initializeLinker_.bind(this));
     this.iniPromise_.then(() => {
@@ -274,6 +280,26 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.isInFie_ = isInFie(this.element);
     }
     return this.isInFie_;
+  }
+
+  /**
+   * Maybe initializes Session Manager.
+   * @return {!Promise}
+   */
+  maybeInitializeSessionManager_() {
+    if (!this.config_['triggers']) {
+      return Promise.resolve();
+    }
+    const shouldInitialize = Object.values(this.config_['triggers']).some(
+      (trigger) => trigger?.['session']?.['persistEvent']
+    );
+    if (shouldInitialize && this.type_) {
+      const ampdoc = this.getAmpDoc();
+      return sessionServicePromiseForDoc(ampdoc).then((manager) => {
+        this.sessionManager_ = manager;
+      });
+    }
+    return Promise.resolve();
   }
 
   /**
@@ -577,11 +603,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   initializeLinker_() {
-    const type = this.element.getAttribute('type');
     this.linkerManager_ = new LinkerManager(
       this.getAmpDoc(),
       this.config_,
-      type,
+      this.type_,
       this.element
     );
     const linkerTask = () => {
@@ -604,6 +629,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleEvent_(trigger, event) {
+    const persistEvent = !!trigger.session?.['persistEvent'];
+    if (persistEvent) {
+      this.sessionManager_?.updateEvent(this.type_);
+    }
     const requests = isArray(trigger['request'])
       ? trigger['request']
       : [trigger['request']];

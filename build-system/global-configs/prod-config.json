@@ -9,9 +9,8 @@
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "flexAdSlots": 0.05,
-  "flexible-bitrate": 0.5,
+  "flexible-bitrate": 0.1,
   "ios-fixed-no-transfer": 0,
-  "visibility-trigger-improvements": 1,
   "layout-aspect-ratio-css": 0,
   "disable-a4a-non-sd": 1,
   "tcf-post-message-proxy-api": 1,
@@ -19,5 +18,6 @@
   "amp-cid-backup": 1,
   "3p-vendor-split": 1,
   "story-ad-placements": 0.01,
+  "story-load-first-page-only": 0.1,
   "amp-story-page-attachment-ui-v2": 1
 }

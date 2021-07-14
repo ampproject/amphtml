@@ -33,14 +33,18 @@
         <script type="application/json">
           {
               "requests": {
-                  "endpoint": "https://_fake_.com/analytics?session=SESSION_ID&timestamp=SESSION_TIMESTAMP"
+                  "endpoint": "https://_fake_.com/analytics?"
               },
               "triggers": {
                   "pageview": {
                       "on": "visible",
                       "request": "endpoint",
                       "extraUrlParams": {
-                          "pageview": 1
+                        "ssid": "SESSION_ID",
+                        "ct": "SESSION_TIMESTAMP",
+                        "c": "SESSION_COUNT",
+                        "et": "SESSION_EVENT_TIMESTAMP",
+                        "e": "SESSION_ENGAGED"
                       }
                   },
                   "session": {
@@ -48,21 +52,19 @@
                     "timerSpec": {
                         "interval": 10
                     },
-                    "enabled": true,
-                    "request": "endpoint",
                     "extraUrlParams": {
-                      "timer": true
-                    }
-                  },
-                  "session2": {
-                    "on": "timer",
-                    "timerSpec": {
-                        "interval": 15
+                      "lastEventTimestamp": "SESSION_EVENT_TIMESTAMP",
+                      "engaged": "SESSION_ENGAGED"
                     },
                     "enabled": true,
+                    "request": "endpoint"
+                  },
+                  "click": {
+                    "on": "click",
+                    "selector": "#test1",
                     "request": "endpoint",
-                    "extraUrlParams": {
-                      "timer2": true
+                    "session": {
+                      "persistEvent": true
                     }
                   }
               },
@@ -78,15 +80,13 @@
         <script type="application/json">
           {
               "requests": {
-                  "endpoint": "https://example.com/analytics?session=${sessionId}&timestamp=${sessionTimestamp}"
+                  "endpoint": "https://example.com/analytics?session=${sessionId}&timestamp=${sessionTimestamp}&count=${sessionCount}&eventTimestamp=${sessionEventTimestamp}&engaged=${sessionEngaged}",
+                  "click": "https://example.com/click_event?session=${sessionId}"
               },
               "triggers": {
                   "pageview": {
                       "on": "visible",
-                      "request": "endpoint",
-                      "extraUrlParams": {
-                          "pageview": 1
-                      }
+                      "request": "endpoint"
                   },
                   "session": {
                     "on": "timer",
@@ -97,6 +97,18 @@
                     "request": "endpoint",
                     "extraUrlParams": {
                       "timer": true
+                    }
+                  },
+                  "click": {
+                    "on": "click",
+                    "selector": "#test1",
+                    "request": "click",
+                    "session": {
+                      "persistEvent": true
+                    },
+                    "extraUrlParams": {
+                      "lastEventTimestamp": "SESSION_EVENT_TIMESTAMP",
+                      "engaged": "SESSION_ENGAGED"
                     }
                   }
               },
