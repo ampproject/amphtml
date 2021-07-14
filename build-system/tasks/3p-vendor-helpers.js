@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+const debounce = require('../common/debounce');
 const globby = require('globby');
 const {compileJsWithEsbuild} = require('./helpers');
 const {cyan, red} = require('../common/colors');
-const {debounce} = require('../common/functions');
 const {endBuildStep} = require('./helpers');
 const {VERSION} = require('../compile/internal-version');
 const {watchDebounceDelay} = require('./helpers');
@@ -42,10 +42,7 @@ async function buildVendorConfigs(options) {
     const watchFunc = () => {
       buildVendorConfigs(copyOptions);
     };
-    watch(SRCPATH).on(
-      'change',
-      debounce(watchFunc, watchDebounceDelay, {leading: true, trailing: true})
-    );
+    watch(SRCPATH).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   const startTime = Date.now();

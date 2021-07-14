@@ -15,6 +15,7 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
+const debounce = require('../common/debounce');
 const fs = require('fs-extra');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
@@ -40,7 +41,6 @@ const {
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
 const {cyan, green, red} = require('../common/colors');
-const {debounce} = require('../common/functions');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');

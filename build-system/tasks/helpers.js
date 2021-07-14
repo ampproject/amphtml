@@ -15,8 +15,8 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
+const debounce = require('../common/debounce');
 const esbuild = require('esbuild');
-const {debounce} = require('../common/functions');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');

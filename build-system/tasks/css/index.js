@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+const debounce = require('../../common/debounce');
 const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');
 const {buildExtensions} = require('../extension-helpers');
-const {debounce} = require('../../common/functions');
 const {endBuildStep, watchDebounceDelay} = require('../helpers');
 const {jsifyCssAsync} = require('./jsify-css');
 const {watch} = require('chokidar');
@@ -144,7 +144,7 @@ async function compileCss(options = {}) {
   if (options.watch) {
     watch('css/**/*.css').on(
       'change',
-      debounce(compileCss, watchDebounceDelay, {leading: true, trailing: true})
+      debounce(compileCss, watchDebounceDelay)
     );
   }
 
