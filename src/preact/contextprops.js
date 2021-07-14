@@ -19,8 +19,6 @@ import {
   reducer as loadingReducer,
 } from '#core/constants/loading-instructions';
 import {contextProp} from '#core/context/prop';
-
-// typedef imports
 import {ContextPropDef} from '#core/context/prop.type';
 
 /**

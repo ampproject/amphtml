@@ -86,5 +86,9 @@ module.exports = {
       'files': ['**/storybook/*.js', '**/rollup.config.js'],
       'rules': {'import/no-nodejs-modules': 0},
     },
+    {
+      'files': ['builtins/**/*.js', 'core/**/*.js', 'preact/**/*.js'],
+      'rules': {'import/order': 2},
+    },
   ],
 };
