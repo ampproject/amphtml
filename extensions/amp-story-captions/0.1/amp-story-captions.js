@@ -16,9 +16,9 @@
 
 import {CSS} from '../../../build/amp-story-captions-0.1.css';
 import {TrackRenderer} from './track-renderer';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {listen} from '../../../src/event-helper';
-import {toArray} from '../../../src/core/types/array';
+import {toArray} from '#core/types/array';
 
 export class AmpStoryCaptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -42,7 +42,7 @@ export class AmpStoryCaptions extends AMP.BaseElement {
   buildCallback() {
     this.container_ = this.element.ownerDocument.createElement('div');
     this.element.appendChild(this.container_);
-    this.applyFillContent(this.container_, /* replacedContent */ true);
+    applyFillContent(this.container_, /* replacedContent */ true);
   }
 
   /** @override */

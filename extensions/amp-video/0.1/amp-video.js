@@ -20,6 +20,7 @@ import {
   insertAfterOrAtStart,
   removeElement,
 } from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {fetchCachedSources} from './video-cache';
 import {
   fullscreenEnter,
@@ -756,7 +757,9 @@ export class AmpVideo extends AMP.BaseElement {
     if (!captionsId) {
       return;
     }
-    const captionsElement = document.getElementById(captionsId);
+    const captionsElement = this.win.document.querySelector(
+      `amp-story-captions#${escapeCssSelectorIdent(captionsId)}`
+    );
     if (!captionsElement) {
       return;
     }
