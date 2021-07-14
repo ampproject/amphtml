@@ -56,6 +56,9 @@
 
 .i-amphtml-story-interactive-img-option:nth-child(3):last-child {
   margin-top: 0 !important;
+  margin-left: var(
+    --i-amphtml-interactive-img-option-margin
+  ) !important; /* Needed for rtl layout */
 }
 
 .i-amphtml-story-interactive-img-option-img {
