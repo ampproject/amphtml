@@ -230,3 +230,23 @@ TEST(NodeTest, AttributeTest) {
   EXPECT_EQ(div.Attributes()[0].key, "CLASS");
   EXPECT_EQ(div.Attributes()[0].value, "FOO");
 }
+
+TEST(NodeType, DropDuplicateAttributes) {
+  Node div(NodeType::ELEMENT_NODE, Atom::DIV);
+  Attribute attr_a{.name_space = "", .key = "class", .value = "foo"};
+  Attribute attr_b{.name_space = "", .key = "id", .value = "myDiv"};
+  Attribute attr_c{.name_space = "", .key = "class", .value = "bar"};
+  Attribute attr_d{.name_space = "", .key = "class", .value = "baz"};
+
+  div.AddAttribute(attr_a);
+  div.AddAttribute(attr_b);
+  div.AddAttribute(attr_c);
+  div.AddAttribute(attr_d);
+  div.DropDuplicateAttributes();
+  EXPECT_EQ(div.Attributes().size(), 2);
+  EXPECT_EQ(div.Attributes()[0].key, "class");
+  EXPECT_EQ(div.Attributes()[0].value, "foo");
+  EXPECT_EQ(div.Attributes()[1].key, "id");
+  EXPECT_EQ(div.Attributes()[1].value, "myDiv");
+}
+

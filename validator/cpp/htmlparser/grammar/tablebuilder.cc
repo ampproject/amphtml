@@ -16,6 +16,7 @@
 
 #include "grammar/tablebuilder.h"
 
+#include <array>
 #include <filesystem>
 #include <fstream>
 #include <iostream>

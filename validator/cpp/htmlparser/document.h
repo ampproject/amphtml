@@ -92,6 +92,10 @@ class Document {
 
   const DocumentMetadata& Metadata() const { return metadata_; }
 
+  // Creates a new node. The node is owned by Document and is destroyed when
+  // document is destructed.
+  Node* NewNode(NodeType node_type, Atom atom = Atom::UNKNOWN);
+
   // Returns the root node of a DOM tree. Node* owned by document.
   Node* RootNode() const { return root_node_; }
 
@@ -100,10 +104,6 @@ class Document {
   const std::vector<Node*> FragmentNodes() const { return fragment_nodes_; }
 
  private:
-  // Creates a new node. The node is owned by Document and is destroyed when
-  // document is destructed.
-  Node* NewNode(NodeType node_type, Atom atom = Atom::UNKNOWN);
-
   // Returns a new node with the same type, data and attributes.
   // The clone has no parent, no siblings and no children.
   // The node is owned by the document and is destroyed when document is
