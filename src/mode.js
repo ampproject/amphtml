@@ -15,8 +15,8 @@
  */
 
 import * as coreMode from './core/mode';
-import {internalRuntimeVersion} from './internal-version';
 import {parseQueryString} from './core/types/string/url';
+import {internalRuntimeVersion} from './internal-version';
 
 /**
  * @typedef {{
