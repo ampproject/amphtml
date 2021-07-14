@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-export {isFortesting} from './for-testing';
-export {isLocalDev} from './local-dev';
-export {isMinified} from './minified';
-export {isTest} from './test';
-export {isEsm} from './esm';
+/**
+ * Returns true whenever --esm is used.
+ * Calls are DCE'd when compiled.
+ *
+ * @return {boolean}
+ */
+export function isEsm() {
+  return IS_ESM;
+}

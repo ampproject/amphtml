@@ -73,7 +73,7 @@ function getMode_(win) {
   return {
     localDev: coreMode.isLocalDev(win),
     development: isModeDevelopment(win),
-    esm: IS_ESM,
+
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
     minified: coreMode.isMinified(),
