@@ -16,7 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const fs = require('fs-extra');
 const path = require('path');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
@@ -56,18 +55,16 @@ function updatePaths(sourcemaps) {
  * Writes the sourcemap output to disk.
  * @param {string} sourcemapsFile
  * @param {Object} options
- * @return {Promise<void>}
+ * @return {string}
  */
-async function writeSourcemaps(sourcemapsFile, options) {
-  const sourcemaps = await fs.readJson(sourcemapsFile);
+function massageSourcemaps(sourcemapsFile, options) {
+  const sourcemaps = JSON.parse(sourcemapsFile);
   updatePaths(sourcemaps);
   const extra = {
     sourceRoot: getSourceMapBase(options),
     includeContent: !!argv.full_sourcemaps,
   };
-  await fs.writeJSON(sourcemapsFile, {...sourcemaps, ...extra});
+  return JSON.stringify({...sourcemaps, ...extra});
 }
 
-module.exports = {
-  writeSourcemaps,
-};
+module.exports = {massageSourcemaps};

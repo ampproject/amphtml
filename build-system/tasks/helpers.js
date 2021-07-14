@@ -18,6 +18,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
 const esbuild = require('esbuild');
 /** @type {Object} */
+const babel = require('@babel/core');
 const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
 const magicstring = require('magic-string');
@@ -36,9 +37,9 @@ const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
+const {massageSourcemaps} = require('../compile/helpers');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
-const {writeSourcemaps} = require('../compile/helpers');
 const {yellow} = require('../common/colors');
 
 /** @type {Remapping.default} */
@@ -428,7 +429,12 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
       entryPoints: [entryPoint],
       bundle: true,
       sourcemap: true,
-      define: {...experimentDefines, ...BUILD_CONSTANTS},
+      define: {
+        ...Object.fromEntries(
+          Object.entries(experimentDefines).map(([k, v]) => [k, `'${v}'`])
+        ),
+        ...BUILD_CONSTANTS,
+      },
       outfile: destFile,
       plugins: [babelPlugin],
       banner,
@@ -438,7 +444,8 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
       incremental: !!options.watch,
       logLevel: 'silent',
       external: options.externalDependencies,
-      minify: !!options.minify,
+      minify: false,
+      write: false,
     })
     .then(async (result) => {
       for (const warning of result.warnings) {
@@ -448,6 +455,24 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
           `  msg: ${warning.text}\n`
         );
       }
+      let code =
+        result.outputFiles.find((file) => !file.path.endsWith('.map'))?.text ??
+        '';
+      let map =
+        result.outputFiles.find((file) => file.path.endsWith('.map'))?.text ??
+        '';
+
+      if (options.minify) {
+        ({code, map} = await minify(code, map, /* mangleProps */ true));
+        ({code, map} = await transpile(code, map));
+        ({code, map} = await minify(code, map));
+        map = massageSourcemaps(map, options);
+      }
+      await Promise.all([
+        fs.writeFile(destFile, code),
+        fs.writeFile(`${destFile}.map`, map),
+      ]);
+
       await finishBundle(
         srcFilename,
         destDir,
@@ -455,12 +480,6 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
         options,
         startTime
       );
-
-      if (options.minify) {
-        // TODO: uncomment when all the tests are passing, since it more than doubles build times.
-        await minifyWithTerser(destDir, destFilename, options);
-        await writeSourcemaps(`${destFile}.map`, options);
-      }
 
       return result;
     })
@@ -477,7 +496,7 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
         const buildPromise = rebuild()
           .then(async () => {
             if (options.minify) {
-              await minifyWithTerser(destDir, destFilename, options);
+              await minify(destDir, destFilename, options);
             }
             await finishBundle(
               srcFilename,
@@ -525,26 +544,41 @@ function remapDependenciesPlugin(options) {
 }
 
 /**
- * Minify the code with Terser. Only used by the ESBuild.
+ * Use babel to transpile with preset-env
  *
- * @param {string} destDir
- * @param {string} destFilename
- * @param {?Object} options
+ * @param {string} code
+ * @param {string} map
  * @return {!Promise}
  */
-async function minifyWithTerser(destDir, destFilename, options) {
-  if (!options.minify) {
-    return;
-  }
-
-  const filename = path.join(destDir, destFilename);
-  const terserOptions = {
-    mangle: {
-      // TODO: test this out when everything else is working.
-      // properties: {
-      //   regex: '_$'
-      // }
+async function transpile(code, map) {
+  const presetEnv = [
+    '@babel/preset-env',
+    {
+      bugfixes: true,
+      modules: false,
+      targets: argv.esm ? {esmodules: true} : {ie: 11, chrome: 41},
     },
+  ];
+
+  const transformed = await babel.transformAsync(code, {
+    presets: [presetEnv],
+    inputSourceMap: JSON.parse(map),
+  });
+
+  return {code: transformed.code, map: transformed.map};
+}
+
+/**
+ * Minify the code with Terser. Only used by the ESBuild.
+ *
+ * @param {string} code
+ * @param {string} map
+ * @param {boolean=} mangleProps
+ * @return {!Promise<{code: string, map: *, error?: Error}>}
+ */
+async function minify(code, map, mangleProps = false) {
+  const terserOptions = {
+    mangle: {},
     compress: {
       passes: 3,
     },
@@ -557,23 +591,25 @@ async function minifyWithTerser(destDir, destFilename, options) {
     sourceMap: true,
     module: !!argv.esm,
   };
+  // TODO: test this out when everything else is working.
+  if (mangleProps) {
+    terserOptions.mangle = {properties: {regex: '_$'}};
+  }
 
-  const minified = await terser.minify(
-    fs.readFileSync(filename, 'utf8'),
-    terserOptions
-  );
+  const minified = await terser.minify(code, terserOptions);
   let remapped = minified.map?.toString() ?? '';
   try {
     remapped = remapping(
-      [minified.map, fs.readFileSync(`${filename}.map`, 'utf8')],
+      [minified.map, map],
       () => null,
       !argv.full_sourcemaps
     );
   } catch (e) {
-    console.error(`Could not remap: ${destFilename}, error: ${e.toString()}`);
+    return {code: minified.code ?? '', map, error: e};
+    // console.error(`Could not remap: ${destFilename}, error: ${e.toString()}`);
   }
-  fs.writeFileSync(filename, minified.code);
-  fs.writeFileSync(`${filename}.map`, remapped.toString());
+
+  return {code: minified.code ?? '', map: remapped.toString()};
 }
 
 /**

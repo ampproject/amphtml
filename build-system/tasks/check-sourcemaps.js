@@ -137,7 +137,7 @@ function checkSourcemapMappings(sourcemapJson, map) {
   }
 
   // See https://www.npmjs.com/package/sourcemap-codec#usage
-  const firstLineMapping = decode(sourcemapJson.mappings)[0][0];
+  const firstLineMapping = decode(sourcemapJson.mappings)[2][0];
   const [, sourceIndex = 0, sourceCodeLine = 0, sourceCodeColumn] =
     firstLineMapping;
 
