@@ -173,125 +173,7 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
   // If the layout was already done by server-side rendering (SSR), then the
   // code below will not run. Any changes below will necessitate a change to SSR
   // and must be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
-
-  // Parse layout from the element.
-  const layoutAttr = element.getAttribute('layout');
-  const widthAttr = element.getAttribute('width');
-  const heightAttr = element.getAttribute('height');
-  const sizesAttr = element.getAttribute('sizes');
-  const heightsAttr = element.getAttribute('heights');
-
-  // Input layout attributes.
-  const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
-  userAssert(
-    inputLayout !== undefined,
-    'Invalid "layout" value: %s, %s',
-    layoutAttr,
-    element
-  );
-  /** @const {string|null|undefined} */
-  const inputWidth =
-    widthAttr && widthAttr != 'auto' ? parseLength(widthAttr) : widthAttr;
-  userAssert(
-    inputWidth !== undefined,
-    'Invalid "width" value: %s, %s',
-    widthAttr,
-    element
-  );
-  /** @const {string|null|undefined} */
-  const inputHeight =
-    heightAttr && heightAttr != 'fluid' ? parseLength(heightAttr) : heightAttr;
-  userAssert(
-    inputHeight !== undefined,
-    'Invalid "height" value: %s, %s',
-    heightAttr,
-    element
-  );
-
-  // Effective layout attributes. These are effectively constants.
-  let width;
-  let height;
-  let layout;
-
-  // Calculate effective width and height.
-  if (
-    (!inputLayout ||
-      inputLayout == Layout.FIXED ||
-      inputLayout == Layout.FIXED_HEIGHT) &&
-    (!inputWidth || !inputHeight) &&
-    hasNaturalDimensions(element.tagName)
-  ) {
-    // Default width and height: handle elements that do not specify a
-    // width/height and are defined to have natural browser dimensions.
-    const dimensions = getNaturalDimensions(element);
-    width =
-      inputWidth || inputLayout == Layout.FIXED_HEIGHT
-        ? inputWidth
-        : dimensions.width;
-    height = inputHeight || dimensions.height;
-  } else {
-    width = inputWidth;
-    height = inputHeight;
-  }
-
-  // Calculate effective layout.
-  if (inputLayout) {
-    layout = inputLayout;
-  } else if (!width && !height) {
-    layout = Layout.CONTAINER;
-  } else if (height == 'fluid') {
-    layout = Layout.FLUID;
-  } else if (height && (!width || width == 'auto')) {
-    layout = Layout.FIXED_HEIGHT;
-  } else if (height && width && (sizesAttr || heightsAttr)) {
-    layout = Layout.RESPONSIVE;
-  } else {
-    layout = Layout.FIXED;
-  }
-
-  // Verify layout attributes.
-  if (
-    layout == Layout.FIXED ||
-    layout == Layout.FIXED_HEIGHT ||
-    layout == Layout.RESPONSIVE ||
-    layout == Layout.INTRINSIC
-  ) {
-    userAssert(height, 'The "height" attribute is missing: %s', element);
-  }
-  if (layout == Layout.FIXED_HEIGHT) {
-    userAssert(
-      !width || width == 'auto',
-      'The "width" attribute must be missing or "auto": %s',
-      element
-    );
-  }
-  if (
-    layout == Layout.FIXED ||
-    layout == Layout.RESPONSIVE ||
-    layout == Layout.INTRINSIC
-  ) {
-    userAssert(
-      width && width != 'auto',
-      'The "width" attribute must be present and not "auto": %s',
-      element
-    );
-  }
-
-  if (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
-    userAssert(
-      getLengthUnits(width) == getLengthUnits(height),
-      'Length units should be the same for "width" and "height": %s, %s, %s',
-      widthAttr,
-      heightAttr,
-      element
-    );
-  } else {
-    userAssert(
-      heightsAttr === null,
-      '"heights" attribute must be missing: %s',
-      element
-    );
-  }
+  const {height, layout, width} = getEffectiveLayoutInternal(element);
 
   // Apply UI.
   element.classList.add(getLayoutClass(layout));
@@ -377,4 +259,157 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
   // in the future.
   element.setAttribute('i-amphtml-layout', layout);
   return layout;
+}
+
+/**
+ * Gets the effective layout for an element.
+ *
+ * @param {!Element} element
+ * @return {!Layout}
+ */
+export function getEffectiveLayout(element) {
+  // Return the pre-existing value if layout has already been applied.
+  const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
+  if (completedLayoutAttr) {
+    return parseLayout(completedLayoutAttr);
+  }
+
+  return getEffectiveLayoutInternal(element).layout;
+}
+
+/**
+ * @typedef {
+ *   {layout: !Layout, height: number, width: number} | {layout: !Layout}
+ * } InternalEffectiveLayout
+ */
+
+/**
+ * Gets the effective layout for an element.
+ *
+ * If class 'i-amphtml-layout' is present, then directly use its value.
+ * Else calculate layout based on element attributes and return the width/height.
+ *
+ * @param {!Element} element
+ * @return {InternalEffectiveLayout}
+ */
+function getEffectiveLayoutInternal(element) {
+  // Parse layout from the element.
+  const layoutAttr = element.getAttribute('layout');
+  const widthAttr = element.getAttribute('width');
+  const heightAttr = element.getAttribute('height');
+  const sizesAttr = element.getAttribute('sizes');
+  const heightsAttr = element.getAttribute('heights');
+
+  // Input layout attributes.
+  const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
+  userAssert(
+    inputLayout !== undefined,
+    'Invalid "layout" value: %s, %s',
+    layoutAttr,
+    element
+  );
+  /** @const {string|null|undefined} */
+  const inputWidth =
+    widthAttr && widthAttr != 'auto' ? parseLength(widthAttr) : widthAttr;
+  userAssert(
+    inputWidth !== undefined,
+    'Invalid "width" value: %s, %s',
+    widthAttr,
+    element
+  );
+  /** @const {string|null|undefined} */
+  const inputHeight =
+    heightAttr && heightAttr != 'fluid' ? parseLength(heightAttr) : heightAttr;
+  userAssert(
+    inputHeight !== undefined,
+    'Invalid "height" value: %s, %s',
+    heightAttr,
+    element
+  );
+
+  // Effective layout attributes. These are effectively constants.
+  let width;
+  let height;
+  let layout;
+
+  // Calculate effective width and height.
+  if (
+    (!inputLayout ||
+      inputLayout == Layout.FIXED ||
+      inputLayout == Layout.FIXED_HEIGHT) &&
+    (!inputWidth || !inputHeight) &&
+    hasNaturalDimensions(element.tagName)
+  ) {
+    // Default width and height: handle elements that do not specify a
+    // width/height and are defined to have natural browser dimensions.
+    const dimensions = getNaturalDimensions(element);
+    width =
+      inputWidth || inputLayout == Layout.FIXED_HEIGHT
+        ? inputWidth
+        : dimensions.width;
+    height = inputHeight || dimensions.height;
+  } else {
+    width = inputWidth;
+    height = inputHeight;
+  }
+
+  // Calculate effective layout.
+  if (inputLayout) {
+    layout = inputLayout;
+  } else if (!width && !height) {
+    layout = Layout.CONTAINER;
+  } else if (height == 'fluid') {
+    layout = Layout.FLUID;
+  } else if (height && (!width || width == 'auto')) {
+    layout = Layout.FIXED_HEIGHT;
+  } else if (height && width && (sizesAttr || heightsAttr)) {
+    layout = Layout.RESPONSIVE;
+  } else {
+    layout = Layout.FIXED;
+  }
+
+  if (
+    layout == Layout.FIXED ||
+    layout == Layout.FIXED_HEIGHT ||
+    layout == Layout.RESPONSIVE ||
+    layout == Layout.INTRINSIC
+  ) {
+    userAssert(height, 'The "height" attribute is missing: %s', element);
+  }
+  if (layout == Layout.FIXED_HEIGHT) {
+    userAssert(
+      !width || width == 'auto',
+      'The "width" attribute must be missing or "auto": %s',
+      element
+    );
+  }
+  if (
+    layout == Layout.FIXED ||
+    layout == Layout.RESPONSIVE ||
+    layout == Layout.INTRINSIC
+  ) {
+    userAssert(
+      width && width != 'auto',
+      'The "width" attribute must be present and not "auto": %s',
+      element
+    );
+  }
+
+  if (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
+    userAssert(
+      getLengthUnits(width) == getLengthUnits(height),
+      'Length units should be the same for "width" and "height": %s, %s, %s',
+      widthAttr,
+      heightAttr,
+      element
+    );
+  } else {
+    userAssert(
+      heightsAttr === null,
+      '"heights" attribute must be missing: %s',
+      element
+    );
+  }
+
+  return {layout, width, height};
 }
