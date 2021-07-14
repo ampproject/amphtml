@@ -4,8 +4,8 @@
     "beacon": true
   },
   "requests": {
-    "onelink": "https://pbastg1.onelink.me/amp/v1/onelink?webAppId=${webAppId}&afWebUserId=${afWebUserId}&amp-afUserId=${amp-afUserId}&amp-afRefUserId=${amp-afRefUserId}",
-    "event": "https://wahandler-amp-ns.msp.appsflyer.com/amp/v1/events?webAppId=${webAppId}&afWebUserId=${afWebUserId}&amp-afUserId=${amp-afUserId}&amp-afRefUserId=${amp-afRefUserId}"
+    "onelink": "https://amp.onelink.me/amp/v1/onelink?webAppId=${webAppId}&afWebUserId=${afWebUserId}&amp-afUserId=${amp-afUserId}&amp-afRefUserId=${amp-afRefUserId}",
+    "event": "https://amp.appsflyer.com/amp/v1/events?webAppId=${webAppId}&afWebUserId=${afWebUserId}&amp-afUserId=${amp-afUserId}&amp-afRefUserId=${amp-afRefUserId}"
   },
   "triggers": {
     "onelink": {

@@ -26,8 +26,8 @@
     "event": "https://api.amplitude.com/amp/event?api_key=!apiKey&device_id=_client_id(amplitude_amp_id)_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_"
   },
   "appsflyer": {
-    "onelink": "https://amp.onelink.me/amp/v1/onelink?af_id=af_id",
-    "event": "https://amp.appsflyer.com/amp/v1/events?site-id=site_id"
+    "onelink": "https://amp.onelink.me/amp/v1/onelink?webAppId=web-app-id&afWebUserId=af-web-user-id&amp-afUserId=amp-af-user-id&amp-afRefUserId=amp-af-ref-user-id",
+    "event": "https://amp.appsflyer.com/amp/v1/events?webAppId=web-app-id&afWebUserId=af-web-user-id&amp-afUserId=amp-af-user-id&amp-afRefUserId=amp-af-ref-user-id"
   },
   "atinternet": {
     "base": "https://!log.xiti.com/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",

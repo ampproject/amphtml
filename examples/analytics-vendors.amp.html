@@ -289,39 +289,52 @@ For complete documentation and additional examples please see: https://marketing
 <!-- AppsFlyer example -->
 <amp-analytics type="appsflyer" id="appsflyer">
 <script type="application/json">
-    {
-        "vars": {
-            "webAppId": "c1e0b335-5b96-486e-8694-01c165df48d1"
-        },
-        "linkers": {
-            "enabled": true
-        },
-        "triggers": {
-            "purchase": {
-                "on": "click",
-                "request": "event",
-                "selector": "#purchaseButton",
-                "extraUrlParams": {
-                    "eventType": "EVENT",
-                    "eventName": "purchase",
-                    "eventRevenue": "1.99",
-                    "eventRevenueCurrency": "USD",
-                    "eventValue": {
-                        "label": "shoes"
-                    }
-                }
-            },
-            "login": {
-                "on": "click",
-                "request": "event",
-                "selector": "#loginButton",
-                "extraUrlParams": {
-                    "eventType": "IDENTIFY",
-                    "customerUserId": "cuid0"
-                }
-            }
+  {
+    "vars": {
+      "webAppId": "c1e0b335-5b96-486e-8694-01c165df48d1"
+    },
+    "linkers": {
+      "enabled": true
+    },
+    "triggers": {
+      "subscribe": {
+        "on": "click",
+        "request": "event",
+        "selector": "#subscribeBtn",
+        "extraUrlParams": {
+          "data": {
+            "eventType": "EVENT",
+            "eventName": "subscribe_clicked"
+          }
         }
+      },
+      "purchaseSuccess": {
+        "on": "amp-form-submit-success",
+        "request": "event",
+        "selector": "#purchaseForm",
+        "extraUrlParams": {
+          "data": {
+            "eventType": "EVENT",
+            "eventName": "purchase_success",
+            "eventRevenue": "1.99",
+            "eventRevenueCurrency": "ILS",
+            "eventValue": "{'key0': 'value0', 'key1': 1}"
+          }
+        }
+      },
+      "login": {
+        "on": "click",
+        "request": "event",
+        "selector": "#loginSubmitButton",
+        "extraUrlParams": {
+          "data": {
+            "eventType": "IDENTIFY",
+            "customerUserId": "cuid0"
+          }
+        }
+      }
     }
+  }
 </script>
 </amp-analytics>
 <!-- End AppsFlyer example -->
