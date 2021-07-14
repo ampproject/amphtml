@@ -24,18 +24,28 @@ export default {
   decorators: [withKnobs],
 };
 
-export const _default = () => {
+export const CopyInputValue = () => {
   return (
     <>
-    <input type="text" id="source123" value="abcdefgh" />
-    <div id="x12"><p> hello world </p></div>
-    <Copy
-      width="60"
-      height="20"
-      sourceId="x12"
-    >
-      Copy Text
-    </Copy>
+      <input type="text" id="myInputField1" value="Text to copy!" />
+
+      <Copy width="100" height="20" sourceId="myInputField1">
+        Copy Text
+      </Copy>
+    </>
+  );
+};
+
+export const CopyDIVContentText = () => {
+  return (
+    <>
+      <div id="myDiv1">
+        <p> hello world </p>
+      </div>
+
+      <Copy width="100" height="20" sourceId="myDiv1">
+        Copy Text
+      </Copy>
     </>
   );
 };

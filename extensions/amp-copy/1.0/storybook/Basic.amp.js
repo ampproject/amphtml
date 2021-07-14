@@ -28,23 +28,26 @@ export default {
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const ExampleUseCase = () => {
+export const CopyInputValue = () => {
   return (
     <>
-    <input type="text" id="source123" value="abcdefgh" />
-    <div id="x12"><p> hello world </p></div>
-    <amp-copy
-      width="60"
-      height="20"
-      source-id="x12"
-    >
-      Copy Text
-    </amp-copy>
+      <input type="text" id="myInputField1" value="Text to copy!" />
+      <amp-copy width="100" height="20" source-id="myInputField1">
+        Copy Text
+      </amp-copy>
     </>
   );
 };
 
-ExampleUseCase.story = {
-  name: 'Example use case story',
+export const CopyDIVContentText = () => {
+  return (
+    <>
+      <div id="myDiv1">
+        <p> hello world </p>
+      </div>
+      <amp-copy width="100" height="20" source-id="myDiv1">
+        Copy Content
+      </amp-copy>
+    </>
+  );
 };
