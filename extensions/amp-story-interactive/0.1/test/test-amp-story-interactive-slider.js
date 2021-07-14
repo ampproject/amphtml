@@ -143,7 +143,11 @@ describes.realWin(
         .querySelector('input[type="range"]');
       // simulates a change event, which is when the user releases the slider
       slider.dispatchEvent(new CustomEvent('change'));
-      expect(ampStorySlider.getRootElement().classList.contains('i-amphtml-story-interactive-post-selection')).to.be.true;
+      expect(
+        ampStorySlider
+          .getRootElement()
+          .classList.contains('i-amphtml-story-interactive-post-selection')
+      ).to.be.true;
     });
   }
 );

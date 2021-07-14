@@ -118,12 +118,12 @@
   z-index: 1 !important;
 }
 
-.i-amphtml-story-interactive-slider-input::-webkit-slider-thumb{
+.i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
   -webkit-appearance: none !important;
   width: 1.5em !important;
   height: 1.5em !important;
   background: var(--interactive-accent-color) !important;
-  border-radius: 50% !important; 
+  border-radius: 50% !important;
 }
 
 .i-amphtml-story-interactive-slider-input[disabled] {
