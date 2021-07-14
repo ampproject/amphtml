@@ -15,9 +15,9 @@
  */
 
 import {listen} from '../../../src/event-helper';
-import {removeChildren, removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
-import {toArray} from '../../../src/core/types/array';
+import {removeChildren, removeElement} from '#core/dom';
+import {setStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 
 // Class used for sections of text that is in the future (for ASR-style captions).
 const FUTURE_CUE_SECTION_CLASS = 'amp-story-captions-future';
@@ -75,6 +75,8 @@ export class TrackRenderer {
     this.cueChangeUnlistener_();
     this.timeUpdateUnlistener_();
     removeElement(this.element_);
+    this.video_ = null;
+    this.track_ = null;
   }
 
   /**
@@ -127,11 +129,10 @@ export class TrackRenderer {
       toArray(cue.childNodes).forEach((section, j) => {
         // The first section always has implicit timestamp 0, so it's never in the future.
         if (j > 0) {
-          if (this.cueTimestamps_[i][j - 1] > videoTime) {
-            section.classList.add(FUTURE_CUE_SECTION_CLASS);
-          } else {
-            section.classList.remove(FUTURE_CUE_SECTION_CLASS);
-          }
+          section.classList.toggle(
+            FUTURE_CUE_SECTION_CLASS,
+            this.cueTimestamps_[i][j - 1] > videoTime
+          );
         }
       });
     });

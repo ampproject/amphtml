@@ -36,4 +36,7 @@ tags: {  # <amp-story-captions>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
   }
+  child_tags: {
+    mandatory_num_child_tags: 0
+  }
 }
