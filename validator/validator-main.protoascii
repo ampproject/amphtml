@@ -2719,7 +2719,12 @@ tags: {
   html_format: AMP
   tag_name: "INPUT"
   spec_name: "INPUT [type=file]"
-   attrs: {
+  attrs: {
+    disabled_by: "amp4email"
+    name: "capture"
+    value: ""
+  }
+  attrs: {
     disabled_by: "amp4email"
     name: "no-verify"
     value: ""
