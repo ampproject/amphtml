@@ -41,13 +41,20 @@ void Node::SortAttributes(bool remove_duplicates) {
             [](const Attribute& left, const Attribute& right) -> bool {
               return left.KeyPart() < right.KeyPart();
             });
-  if (remove_duplicates) {
-    attributes_.erase(
-        std::unique(attributes_.begin(), attributes_.end(),
-                    [](const Attribute& left, const Attribute& right) -> bool {
-                      return left.KeyPart() == right.KeyPart();
-                    }), attributes_.end());
-  }
+  if (remove_duplicates) DropDuplicateAttributes();
+}
+
+void Node::DropDuplicateAttributes() {
+  auto remove_attributes = [&](auto first, auto last) {
+    for (; first != last; ++first) {
+      last = std::remove_if(std::next(first), last, [first](const auto& attr) {
+        return first->KeyPart() == attr.KeyPart();
+      });
+    }
+    return last;
+  };
+  attributes_.erase(remove_attributes(attributes_.begin(), attributes_.end()),
+                    attributes_.end());
 }
 
 bool Node::IsSpecialElement() const {
