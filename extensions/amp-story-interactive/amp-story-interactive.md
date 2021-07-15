@@ -55,7 +55,7 @@ Does not support pairing with `amp-story-interactive-results`, and can optionall
 ```html
 <amp-story-interactive-binary-poll
   id="pizza-binary-poll"
-  endpoint="https://webstoriesinteractivity.googleapis.com/v1/interactives"
+  endpoint="https://backend.com/v1/interactives"
   prompt-text="Like Pizza?"
   option-1-text="Yes"
   option-1-confetti="🍕"
@@ -77,7 +77,7 @@ Display different categories based on user poll answers by pairing `amp-story-in
 <amp-story-interactive-poll
     id="season-poll"
     theme="dark"
-    endpoint="https://webstoriesinteractivity.googleapis.com/v1/interactives"
+    endpoint="https://backend.com/v1/interactives"
     prompt-text="Pick a season"
     option-1-text="Spring" option-1-confetti="🌼"
     option-2-text="Summer" option-2-confetti="☀️"
@@ -97,7 +97,7 @@ Display different categories based on percentage of correct user answers by pair
 [sourcecode:html]
 <amp-story-interactive-quiz
     id="arts-quiz"
-    endpoint="https://webstoriesinteractivity.googleapis.com/v1/interactives"
+    endpoint="https://backend.com/v1/interactives"
     prompt-text='Who was the artist that created the famous painting "The Last Supper"?'
     option-1-text="Michelangelo"
     option-2-text="Leonardo da Vinci" option-2-correct option-2-confetti="🎨"
@@ -167,15 +167,6 @@ Response: No response necessary
 
 Backends need to be specified on the necessary components (binary-poll, poll, quiz), and can be deployed by publishers, tools or others.
 
-[tip type="read-on"]
-
-Note: Before setting up your own backend consider using one of the freely available options:
-
--   https://webstoriesinteractivity.googleapis.com/v1/interactives (provided by Google, [learn more](https://support.google.com/websearch/answer/9838173))
--   _(please create a PR if you would like to list your generally available backend here)_
-
-[/tip]
-
 ## Attributes
 
 The interactive experience elements from `amp-story-interactive` share an API language for customizing options.
@@ -228,7 +219,7 @@ Example:
 [sourcecode:html]
 <amp-story-interactive-poll
     prompt-text="What's your favorite food"
-    endpoint="https://webstoriesinteractivity.googleapis.com/v1/interactives"
+    endpoint="https://backend.com/v1/interactives"
     option-1-results-category="Bunny" option-1-text="Carrots"
     option-2-results-category="Dog" option-2-text="Bones"
     option-3-results-category="Cat" option-3-text="Fish">

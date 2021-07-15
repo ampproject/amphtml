@@ -36,7 +36,7 @@ import {
   buildInteractiveDisclaimer,
   buildInteractiveIcon,
 } from './interactive-disclaimer';
-import {closest} from '#core/dom/query';
+import {closest, closestAncestorElementBySelector} from '#core/dom/query';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
@@ -273,7 +273,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     ]).then(() => {
       this.rootEl_ = this.buildComponent();
       this.rootEl_.classList.add('i-amphtml-story-interactive-container');
-      if (this.element.hasAttribute('endpoint')) {
+      if (isExperimentOn(this.win, 'amp-story-interactive-disclaimer') && this.element.hasAttribute('endpoint')) {
         this.disclaimerIcon_ = buildInteractiveIcon(this);
         this.rootEl_.prepend(this.disclaimerIcon_);
       }
@@ -874,45 +874,52 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       return;
     }
     this.disclaimerEl_ = buildInteractiveDisclaimer(this);
-    
-    // Get rects and calculate left, right and bottom.
-    const interactiveRect = this.element./*OK*/ getBoundingClientRect();
-    const pageRect =
-      this.disclaimerEl_.parentElement./*OK*/ getBoundingClientRect();
-    const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
-    const rightPercentage =
-      1 -
-      (interactiveRect.x + interactiveRect.width - pageRect.x) / pageRect.width;
-    const leftPercentage = (interactiveRect.x - pageRect.x) / pageRect.width;
-    const bottomPercentage =
-      1 - (interactiveRect.y + iconRect.height - pageRect.y) / pageRect.height;
-    const widthPercentage = interactiveRect.width / pageRect.width;
 
-    // Compose styles, align to left or right of component based on dir.
-    const styles = {
-      bottom: clamp(bottomPercentage * 100, 0, 85) + '%',
-      'max-width': Math.min(widthPercentage * 100, 75) + '%',
-      position: 'absolute',
-      'z-index': 3,
-    };
-    if (this.rootEl_.getAttribute('dir') == 'rtl') {
-      styles.left = clamp(leftPercentage * 100, 0, 25) + '%';
-    } else {
-      styles.right = clamp(rightPercentage * 100, 0, 25) + '%';
-    }
-    setImportantStyles(this.disclaimerEl_, {...styles});
-    this.disclaimerIcon_.setAttribute('hide', '');
+    // Get rects and calculate right and bottom.
+    const pageEl = closestAncestorElementBySelector(
+      this.element,
+      'amp-story-page'
+    );
 
-    // Add click listener through the shadow dom using e.path.
-    this.disclaimerEl_.addEventListener('click', (e) => {
-      if (
-        e.path[0].classList.contains(
-          'i-amphtml-story-interactive-disclaimer-close'
-        )
-      ) {
-        this.closeDisclaimer_();
+    let styles;
+    this.measureMutateElement(
+      () => {
+        const interactiveRect = this.element./*OK*/ getBoundingClientRect();
+        const pageRect = pageEl.parentElement./*OK*/ getBoundingClientRect();
+        const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
+        const rightPercentage =
+          1 -
+          (interactiveRect.x + interactiveRect.width - pageRect.x) /
+            pageRect.width;
+        const bottomPercentage =
+          1 -
+          (interactiveRect.y + iconRect.height - pageRect.y) / pageRect.height;
+        const widthPercentage = interactiveRect.width / pageRect.width;
+
+        styles = {
+          bottom: clamp(bottomPercentage * 100, 0, 85) + '%',
+          right: clamp(rightPercentage * 100, 0, 25) + '%',
+          'max-width': Math.min(widthPercentage * 100, 75) + '%',
+          position: 'absolute',
+          'z-index': 3,
+        };
+      },
+      () => {
+        setImportantStyles(this.disclaimerEl_, {...styles});
+        pageEl.appendChild(this.disclaimerEl_);
+        this.disclaimerIcon_.setAttribute('hide', '');
+        // Add click listener through the shadow dom using e.path.
+        this.disclaimerEl_.addEventListener('click', (e) => {
+          if (
+            e.path[0].classList.contains(
+              'i-amphtml-story-interactive-disclaimer-close'
+            )
+          ) {
+            this.closeDisclaimer_();
+          }
+        });
       }
-    });
+    );
   }
 
   /**
@@ -922,10 +929,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     if (!this.disclaimerEl_) {
       return;
     }
-    this.disclaimerEl_.remove();
-    this.disclaimerEl_ = null;
-    if (this.disclaimerIcon_) {
-      this.disclaimerIcon_.removeAttribute('hide');
-    }
+    this.mutateElement(() => {
+      this.disclaimerEl_.remove();
+      this.disclaimerEl_ = null;
+      if (this.disclaimerIcon_) {
+        this.disclaimerIcon_.removeAttribute('hide');
+      }
+    })
   }
 }
