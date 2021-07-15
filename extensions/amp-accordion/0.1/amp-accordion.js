@@ -331,7 +331,12 @@ class AmpAccordion extends AMP.BaseElement {
     if (this.element.hasAttribute('animate')) {
       if (toExpand) {
         header.setAttribute('aria-expanded', 'true');
-        this.animateExpand_(section, trust);
+        this.animateExpand_(section, trust).then(() => {
+          Services.ownersForDoc(this.element).scheduleLayout(
+            this.element,
+            content
+          );
+        });
         if (this.element.hasAttribute('expand-single-section')) {
           this.sections_.forEach((sectionIter) => {
             if (sectionIter != section) {
@@ -364,6 +369,10 @@ class AmpAccordion extends AMP.BaseElement {
               }
             });
           }
+          Services.ownersForDoc(this.element).scheduleLayout(
+            this.element,
+            content
+          );
         } else {
           this.triggerEvent_('collapse', section, trust);
           section.removeAttribute('expanded');
