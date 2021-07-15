@@ -587,6 +587,15 @@ export class ManualAdvancement extends AdvancementConfig {
       return false;
     }
 
+    // Always handle clicks inside the page attachment.
+    const clickInsideAttachment = this.element_
+      .querySelector('amp-story-page[active]')
+      .querySelector('amp-story-page-attachment')
+      ?.contains(event.target);
+    if (clickInsideAttachment) {
+      return false;
+    }
+
     const sideEdgeWidthFromPercent =
       pageRect.width * (PROTECTED_SCREEN_EDGE_PERCENT / 100);
     const sideEdgeLimit = Math.max(
