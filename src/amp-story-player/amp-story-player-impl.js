@@ -188,6 +188,18 @@ const LOG_TYPE = {
 };
 
 /**
+ * Flag to show or hide the desktop panels player experiment.
+ * @const {boolean}
+ */
+const DESKTOP_PANEL_STORY_PLAYER_EXP_ON = true;
+
+/**
+ * NOTE: If udpated here, update in amp-story.js
+ * @private @const {string}
+ */
+const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = 3 / 4;
+
+/**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
  */
@@ -403,6 +415,9 @@ export class AmpStoryPlayer {
     this.initializeAttribution_();
     this.initializePageScroll_();
     this.initializeCircularWrapping_();
+    if (DESKTOP_PANEL_STORY_PLAYER_EXP_ON) {
+      this.initializeDesktopStoryControlUI_();
+    }
     this.signalReady_();
     this.element_.isBuilt_ = true;
   }
@@ -719,10 +734,81 @@ export class AmpStoryPlayer {
     new AmpStoryPlayerViewportObserver(this.win_, this.element_, () =>
       this.visibleDeferred_.resolve()
     );
+    if (DESKTOP_PANEL_STORY_PLAYER_EXP_ON) {
+      new this.win_.ResizeObserver((e) => {
+        const {width, height} = e[0].contentRect;
+        this.onPlayerResize_(width, height);
+      }).observe(this.element_);
+    }
 
     this.render_();
 
     this.element_.isLaidOut_ = true;
+  }
+
+  /**
+   * Builds desktop "previous" and "next" story UI.
+   * @private
+   */
+  initializeDesktopStoryControlUI_() {
+    const prevButton = this.doc_.createElement('button');
+    prevButton.classList.add('i-amphtml-story-player-desktop-panel-prev');
+    prevButton.addEventListener('click', () => this.previous_());
+    prevButton.setAttribute('aria-label', 'previous story');
+    this.rootEl_.appendChild(prevButton);
+
+    const nextButton = this.doc_.createElement('button');
+    nextButton.classList.add('i-amphtml-story-player-desktop-panel-next');
+    nextButton.addEventListener('click', () => this.next_());
+    nextButton.setAttribute('aria-label', 'next story');
+    this.rootEl_.appendChild(nextButton);
+
+    const checkButtonsDisabled = () => {
+      prevButton.toggleAttribute(
+        'disabled',
+        this.isIndexOutofBounds_(this.currentIdx_ - 1) &&
+          !this.isCircularWrappingEnabled_
+      );
+      nextButton.toggleAttribute(
+        'disabled',
+        this.isIndexOutofBounds_(this.currentIdx_ + 1) &&
+          !this.isCircularWrappingEnabled_
+      );
+    };
+
+    this.element_.addEventListener('navigation', () => checkButtonsDisabled());
+    this.element_.addEventListener('ready', () => checkButtonsDisabled());
+  }
+
+  /**
+   * @param {number} width
+   * @param {number} height
+   * @private
+   */
+  onPlayerResize_(width, height) {
+    const isDesktopOnePanel =
+      width / height > DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD;
+
+    this.rootEl_.classList.toggle(
+      'i-amphtml-story-player-desktop-panel',
+      isDesktopOnePanel
+    );
+
+    if (isDesktopOnePanel) {
+      setStyles(this.rootEl_, {
+        '--i-amphtml-story-player-height': `${height}px`,
+      });
+
+      this.rootEl_.classList.toggle(
+        'i-amphtml-story-player-desktop-panel-medium',
+        height < 756
+      );
+
+      this.rootEl_.classList.toggle(
+        'i-amphtml-story-player-desktop-panel-small',
+        height < 538
+      );
+    }
   }
 
   /**
