@@ -426,7 +426,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // create ad.
       'pwprc': this.element.getAttribute('data-package'),
       'spsa': this.isSinglePageStoryAd
-        ? `${viewportSize.width}x${viewportSize.height}`
+        ? `${this.size_.width}x${this.size_.height}`
         : null,
     };
 
