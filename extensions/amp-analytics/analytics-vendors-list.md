@@ -276,6 +276,10 @@ More details for adding INFOnline anonymous support can be found at [www.infonli
 
 Type attribute value: `iplabel`
 
+Add support for ip-label Ekara Real User Monitoring (https://www.ip-label.com). Requires defining _variable_ `trackerId` with ip-label provided _trackerId_.
+
+Configuration details can be found at ip-label wiki.
+
 ### Keen
 
 Type attribute value: `keen`
