@@ -285,6 +285,11 @@ function toEsmName(name) {
  * @return {string}
  */
 function maybeToEsmName(name) {
+  // NPM Binaries don't get the .mjs extension.
+  if (/component-p?react/.test(name)) {
+    return name;
+  }
+
   return argv.esm ? toEsmName(name) : name;
 }
 
