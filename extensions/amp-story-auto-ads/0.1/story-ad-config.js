@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
 import {isJsonScriptTag} from '#core/dom';
 import {isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
@@ -41,10 +42,13 @@ const AllowedAdTypes = {
 export class StoryAdConfig {
   /**
    * @param {!Element} element amp-story-auto-ads element.
+   * @param {!Window} win Window element
    */
-  constructor(element) {
+  constructor(element, win) {
     /** @private {!Element} amp-story-auto ads element. */
+    /** @private {!Window} Window element. */
     this.element_ = element;
+    this.win_ = win;
   }
 
   /**
@@ -52,15 +56,17 @@ export class StoryAdConfig {
    * @return {!JsonObject}
    */
   getConfig() {
-    const child = this.element_.firstElementChild;
-    userAssert(
-      child && isJsonScriptTag(child),
-      `The ${TAG} should ` +
-        'be inside a <script> tag with type="application/json"'
-    );
+    const configData = this.element_.hasAttribute('src')
+      ? this.getRemoteConfig_()
+      : this.getInlineConfig_(this.element_.firstElementChild);
+    return configData.then((jsonConfig) => this.validateConfig_(jsonConfig));
+  }
 
-    const jsonConfig = parseJson(child.textContent);
-
+  /**
+   * @param {!Element} jsonConfig
+   * @return {!JsonObject}
+   */
+  validateConfig_(jsonConfig) {
     const requiredAttrs = {
       class: 'i-amphtml-story-ad',
       layout: 'fill',
@@ -86,8 +92,41 @@ export class StoryAdConfig {
         delete adAttributes[attr];
       }
     }
+    return /** @type {!JsonObject} */ ({
+      ...adAttributes,
+      ...requiredAttrs,
+    });
+  }
 
-    return /** @type {!JsonObject} */ ({...adAttributes, ...requiredAttrs});
+  /**
+   * @param {!Element} child
+   * @return {!JsonObject}
+   */
+  getInlineConfig_(child) {
+    userAssert(
+      child && isJsonScriptTag(child),
+      `The ${TAG} should ` +
+        'be inside a <script> tag with type="application/json"'
+    );
+    const inlineJSONConfig = parseJson(child.textContent);
+
+    return Promise.resolve(inlineJSONConfig);
+  }
+
+  /**
+   * @return {!JsonObject}
+   */
+  getRemoteConfig_() {
+    return Services.xhrFor(this.win_)
+      .fetchJson(this.element_.getAttribute('src'))
+      .then((response) => response.json())
+      .catch((err) => {
+        user().error(
+          TAG,
+          'Error determining if remote config is valid JSON',
+          err
+        );
+      });
   }
 
   /**

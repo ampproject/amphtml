@@ -216,10 +216,11 @@ describes.realWin(
         new MockStoryImpl(storyElement);
         addStoryAutoAdsConfig(adElement);
         await autoAds.buildCallback();
-        autoAds.layoutCallback();
+        await autoAds.layoutCallback();
       });
 
       it('should create glassPane', () => {
+        // this is failing
         const pane = doc.querySelector('.i-amphtml-glass-pane');
         expect(pane).to.exist;
       });
@@ -500,6 +501,19 @@ describes.realWin(
           env.sandbox.match(payload),
           env.sandbox.match(eventInit)
         );
+      });
+    });
+
+    describe('Test if Handle Config assigns a new conifg and returns a promise', async () => {
+      const handleConfig = await new this.handleConfig_();
+      handleConfig.then((result) => {
+        expect(result).to.eql({
+          'amp-story': '',
+          class: 'i-amphtml-story-ad',
+          'data-slot': '/30497360/a4a/amp_story_dfp_example',
+          layout: 'fill',
+          type: 'doubleclick',
+        });
       });
     });
   }
