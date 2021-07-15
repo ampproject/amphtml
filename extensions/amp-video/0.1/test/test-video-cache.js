@@ -18,6 +18,7 @@ import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {fetchCachedSources} from '../video-cache';
+import {installPerformanceService} from '#service/performance-impl';
 import {xhrServiceForTesting} from '#service/xhr-impl';
 
 describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
@@ -42,6 +43,8 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       sourceUrl: 'https://example.com',
       canonicalUrl: 'https://canonical.com',
     });
+
+    installPerformanceService(env.win);
   });
 
   describe('select sources', () => {
