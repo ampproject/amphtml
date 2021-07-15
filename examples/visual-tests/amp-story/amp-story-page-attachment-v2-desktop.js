@@ -58,7 +58,7 @@ module.exports = {
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
-    await screen.tap(160, 460);
+    await screen.tap(720, 880);
     await page.waitForTimeout(500); // For animations to finish.
   },
 
@@ -76,7 +76,7 @@ module.exports = {
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
-    await screen.tap(160, 460);
+    await screen.tap(720, 880);
     await page.waitForTimeout(500); // For animations to finish.
   },
 
@@ -94,7 +94,7 @@ module.exports = {
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
-    await screen.tap(160, 460);
+    await screen.tap(720, 880);
     await page.waitForTimeout(500); // For animations to finish.
   },
 
@@ -112,7 +112,7 @@ module.exports = {
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-page-open-attachment[active]',
     ]);
-    await screen.tap(160, 460);
+    await screen.tap(720, 880);
     await page.waitForTimeout(500); // For animations to finish.
   },
 

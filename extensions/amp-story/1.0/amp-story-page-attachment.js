@@ -104,14 +104,19 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     super.buildCallback();
 
     const theme = this.element.getAttribute('theme')?.toLowerCase();
-    if (theme && AttachmentTheme.DARK === theme) {
-      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+    const drawerTheme = this.element
+      .getAttribute('drawer-theme')
+      ?.toLowerCase();
+    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
+      if (drawerTheme) {
+        this.headerEl_.setAttribute('theme', drawerTheme);
+      } else if (theme && AttachmentTheme.DARK === theme) {
         this.headerEl_.setAttribute('theme', theme);
         this.element.setAttribute('theme', theme);
-      } else {
-        this.headerEl_.classList.add(DARK_THEME_CLASS);
-        this.element.classList.add(DARK_THEME_CLASS);
       }
+    } else if (theme && AttachmentTheme.DARK === theme) {
+      this.headerEl_.classList.add(DARK_THEME_CLASS);
+      this.element.classList.add(DARK_THEME_CLASS);
     }
 
     // Outlinks can be an amp-story-page-outlink or the legacy version,

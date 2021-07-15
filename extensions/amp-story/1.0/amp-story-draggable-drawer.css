@@ -44,7 +44,7 @@
 
 .i-amphtml-story-draggable-drawer-container {
   height: calc(100% - 40px) !important;
-  background: rgba(255, 255, 255, 1) !important;
+  background: var(--i-amphtml-draggable-drawer-background-color) !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
   transition: background 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
@@ -111,6 +111,16 @@
 }
 
 [theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
+  --i-amphtml-draggable-drawer-background-color: #202125 !important;
+  --i-amphtml-draggable-drawer-text-color: #fff !important;
+}
+
+[drawer-theme="light"].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
+  --i-amphtml-draggable-drawer-background-color: #fff !important;
+  --i-amphtml-draggable-drawer-text-color: #202125 !important;
+}
+
+[drawer-theme="dark"].i-amphtml-amp-story-page-attachment-ui-v2.amp-story-draggable-drawer-root {
   --i-amphtml-draggable-drawer-background-color: #202125 !important;
   --i-amphtml-draggable-drawer-text-color: #fff !important;
 }
