@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {onDocumentReady} from '#core/document-ready';
+// src/polyfills.js must be the first import.
+import '#3p/polyfills';
 
-import {AmpStoryComponentManager} from './amp-story-component-manager';
-import {AmpStoryPlayer} from './amp-story-player-impl';
+import {draw3p, init} from '#3p/integration-lib';
+import {register} from '#3p/3p';
 
-onDocumentReady(self.document, () => {
-  const manager = new AmpStoryComponentManager(self);
-  manager.loadPlayers();
-});
+import {wunderkind} from '#ads/vendors/wunderkind';
 
-globalThis.AmpStoryPlayer = AmpStoryPlayer;
+init(window);
+register('wunderkind', wunderkind);
+
+window.draw3p = draw3p;

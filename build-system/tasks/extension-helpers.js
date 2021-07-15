@@ -15,7 +15,7 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const debounce = require('debounce');
+const debounce = require('../common/debounce');
 const fs = require('fs-extra');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');

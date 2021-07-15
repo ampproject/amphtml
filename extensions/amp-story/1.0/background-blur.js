@@ -24,10 +24,16 @@ import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
 const CANVAS_SIZE = 3;
 
 /** @const {number} */
-const DURATION_MS = 200;
+const DURATION_MS = 400;
 
 /** @const {string} */
 const CLASS_NAME = 'BACKGROUND-BLUR';
+
+/**
+ * readyState for first rendrable frame of video element.
+ * @const {number}
+ */
+const HAVE_CURRENT_DATA = 2;
 
 export class BackgroundBlur {
   /**
@@ -43,6 +49,10 @@ export class BackgroundBlur {
 
     /** @private @const {!Element} */
     this.canvas_ = null;
+
+    /** @private @const {Element} */
+    this.offscreenCanvas_ = this.win_.document.createElement('canvas');
+    this.offscreenCanvas_.width = this.offscreenCanvas_.height = CANVAS_SIZE;
 
     /**  @private {?number} */
     this.currentRAF_ = null;
@@ -80,22 +90,44 @@ export class BackgroundBlur {
    * @param {!Element} pageElement
    */
   update(pageElement) {
-    const ampImgEl = this.getBiggestImage_(pageElement);
-    if (!ampImgEl) {
-      user().info(CLASS_NAME, 'No image found for background blur.');
+    const mediaEl = this.getBiggestMediaEl_(pageElement);
+    if (!mediaEl) {
+      user().info(CLASS_NAME, 'No amp-img or amp-video found.');
       this.animate_();
       return;
     }
 
-    // Ensures img element exists and is loaded.
-    whenUpgradedToCustomElement(ampImgEl)
-      .then(() => ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
+    // Ensure element is loaded before calling animate.
+    whenUpgradedToCustomElement(mediaEl)
+      .then(() => mediaEl.signals().whenSignal(CommonSignals.LOAD_END))
       .then(
         () => {
-          this.animate_(ampImgEl.querySelector('img'));
+          // If image, render it.
+          if (mediaEl.tagName === 'AMP-IMG') {
+            this.animate_(mediaEl.querySelector('img'));
+            return;
+          }
+
+          // If video, render first frame or poster image.
+          const innerVideoEl = mediaEl.querySelector('video');
+          const alreadyHasData = innerVideoEl.readyState >= HAVE_CURRENT_DATA;
+          if (alreadyHasData) {
+            this.animate_(innerVideoEl);
+            return;
+          }
+          // If video doesnt have data, render from the poster image.
+          const posterSrc = mediaEl.getAttribute('poster');
+          if (!posterSrc) {
+            this.animate_();
+            user().info(CLASS_NAME, 'No "poster" attribute on amp-video.');
+            return;
+          }
+          const img = new Image();
+          img.onload = () => this.animate_(img);
+          img.src = posterSrc;
         },
         () => {
-          user().error(CLASS_NAME, 'Failed to load the amp-img.');
+          user().error(CLASS_NAME, 'Failed to load the amp-img or amp-video.');
         }
       );
   }
@@ -106,19 +138,10 @@ export class BackgroundBlur {
    * @param {?Element} fillElement
    */
   animate_(fillElement) {
-    const context = this.canvas_.getContext('2d');
-
-    const draw = (easing) => {
-      context.globalAlpha = easing;
-      context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-      if (fillElement) {
-        context.drawImage(fillElement, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
-      }
-    };
-
+    this.drawOffscreenCanvas_(fillElement);
     // Do not animate on first load.
     if (this.firstLoad_) {
-      draw(1 /** easing **/);
+      this.drawCanvas_(1 /** easing **/);
       this.firstLoad_ = false;
       return;
     }
@@ -131,8 +154,8 @@ export class BackgroundBlur {
       }
       const elapsed = currTime - startTime;
       if (elapsed < DURATION_MS) {
-        const easing = 1 - Math.pow(1 - elapsed / DURATION_MS, 2);
-        draw(easing);
+        const easing = elapsed / DURATION_MS;
+        this.drawCanvas_(easing);
         this.currentRAF_ = requestAnimationFrame(nextFrame);
       }
     };
@@ -142,12 +165,44 @@ export class BackgroundBlur {
   }
 
   /**
-   * Get active page's biggest amp-img element.
+   * Draws to the canvas with opacity.
+   * @private
+   * @param {number} alphaPercentage
+   */
+  drawCanvas_(alphaPercentage) {
+    const context = this.canvas_.getContext('2d');
+    context.globalAlpha = alphaPercentage;
+    context.drawImage(this.offscreenCanvas_, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  }
+
+  /**
+   * Composes the image offscreen at 100% opacity, then uses it for fading in.
+   * If these draw calls are done with opacity, a flash would be visible.
+   * This is due to the black fill being a high contrast compared to the image.
+   * The black fill is always needed in case the image is a transparent png.
+   * @private
+   * @param {?Element} fillElement
+   */
+  drawOffscreenCanvas_(fillElement) {
+    const context = this.offscreenCanvas_.getContext('2d');
+    // A black background in drawn first in case the image is a transparent PNG.
+    context.fillStyle = 'black';
+    context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    if (fillElement) {
+      context.drawImage(fillElement, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      // For background protection.
+      context.fillStyle = 'rgba(0, 0, 0, .3)';
+      context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    }
+  }
+
+  /**
+   * Get active page's biggest amp-img or amp-video element.
    * @private
    * @param {!Element} pageElement
-   * @return {?Element} An amp-img element or null.
+   * @return {?Element} An amp-img, amp-video or null.
    */
-  getBiggestImage_(pageElement) {
+  getBiggestMediaEl_(pageElement) {
     const getSize = (el) => {
       if (!el) {
         return false;
@@ -156,7 +211,10 @@ export class BackgroundBlur {
       return layoutBox.width * layoutBox.height;
     };
     return Array.from(
-      scopedQuerySelectorAll(pageElement, 'amp-story-grid-layer amp-img')
+      scopedQuerySelectorAll(
+        pageElement,
+        'amp-story-grid-layer amp-img, amp-story-grid-layer amp-video'
+      )
     ).sort((firstEl, secondEl) => getSize(secondEl) - getSize(firstEl))[0];
   }
 }

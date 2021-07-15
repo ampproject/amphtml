@@ -20,6 +20,7 @@ import {realChildNodes} from '#core/dom/query';
 import {registerElement} from '#service/custom-element-registry';
 
 import {BaseElement} from '../../base-element';
+import {getEffectiveLayout} from '../../static-layout';
 
 class AmpLayout extends BaseElement {
   /** @override @nocollapse */
@@ -34,16 +35,27 @@ class AmpLayout extends BaseElement {
 
   /** @override */
   buildCallback() {
-    if (this.getLayout() == Layout.CONTAINER) {
-      return;
-    }
-    const container = this.win.document.createElement('div');
-    applyFillContent(container);
-    realChildNodes(this.element).forEach((child) => {
-      container.appendChild(child);
-    });
-    this.element.appendChild(container);
+    buildDom(this.win.document, this.element);
   }
+}
+
+/**
+ *
+ * @param {!Document} document
+ * @param {!Element} element
+ */
+export function buildDom(document, element) {
+  const layout = getEffectiveLayout(element);
+  if (layout == Layout.CONTAINER) {
+    return;
+  }
+
+  const container = document.createElement('div');
+  applyFillContent(container);
+  realChildNodes(element).forEach((child) => {
+    container.appendChild(child);
+  });
+  element.appendChild(container);
 }
 
 /**

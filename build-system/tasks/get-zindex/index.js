@@ -69,7 +69,7 @@ function zIndexCollector(acc, css) {
           .forEach((selector) => {
             // If multiple redeclaration of a selector and z index
             // are done in a single file, this will get overridden.
-            acc[selector] = decl.value;
+            acc[selector.trim()] = decl.value;
           });
       }
     });

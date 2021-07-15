@@ -15,6 +15,7 @@
  */
 
 import {dict, map} from '#core/types/object';
+
 import {isAmp4Email} from '../format';
 import {isUrlAttribute} from '../url-rewrite';
 

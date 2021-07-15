@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
+import {urls} from './config';
 import * as assertions from './core/assert/base';
+import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
 import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
   isUserErrorMessage,
   stripUserError,
 } from './core/error/message-helpers';
-import {createErrorVargs, duplicateErrorIfNecessary} from './core/error';
-import {getMode} from './mode';
-import {internalRuntimeVersion} from './internal-version';
 import {isArray} from './core/types';
 import {once} from './core/types/function';
-import {urls} from './config';
+import {internalRuntimeVersion} from './internal-version';
+import {getMode} from './mode';
 
 const noop = () => {};
 

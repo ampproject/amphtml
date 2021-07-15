@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {onDocumentReady} from '#core/document-ready';
+import {loadScript, validateData} from '#3p/3p';
 
-import {AmpStoryComponentManager} from './amp-story-component-manager';
-import {AmpStoryPlayer} from './amp-story-player-impl';
-
-onDocumentReady(self.document, () => {
-  const manager = new AmpStoryComponentManager(self);
-  manager.loadPlayers();
-});
-
-globalThis.AmpStoryPlayer = AmpStoryPlayer;
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function wunderkind(global, data) {
+  const d = global.document.createElement('div');
+  d.id = '_wknd';
+  global.document.getElementById('c').appendChild(d);
+  validateData(data, ['siteId']);
+  loadScript(global, `https://tag.wknd.ai/${data.siteId}/amp-ad-tag.js`);
+}
