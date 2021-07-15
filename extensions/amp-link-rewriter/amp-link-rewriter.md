@@ -41,7 +41,7 @@ code before the line
 <script
   async
   custom-element="amp-link-rewriter"
-  src="https://cdn.ampproject.org/v0/amp-link-rewriter-0.1.js`"
+  src="https://cdn.ampproject.org/v0/amp-link-rewriter-0.1.js"
 ></script>
 ```
 
