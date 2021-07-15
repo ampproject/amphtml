@@ -28,7 +28,7 @@ import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {isAmpElement} from '../../../src/amp-element-helpers';
 import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
-import {throttle} from '#core/types/function';
+import {debounce} from '#core/types/function';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -365,7 +365,10 @@ export class CustomBrowserEventTracker extends EventTracker {
       config['selector'],
       'Missing required selector on browser event trigger'
     );
-    userAssert(selector.length, 'Missing required selector on browser event trigger');
+    userAssert(
+      selector.length,
+      'Missing required selector on browser event trigger'
+    );
     assertUniqueSelectors(selector);
 
     const selectionMethod = config['selectionMethod'] || null;
@@ -378,7 +381,7 @@ export class CustomBrowserEventTracker extends EventTracker {
       false
     );
 
-    throttle(
+    debounce(
       this.root.ampdoc.win,
       this.root
         .getRootElement()
