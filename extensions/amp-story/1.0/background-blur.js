@@ -92,7 +92,7 @@ export class BackgroundBlur {
   update(pageElement) {
     const mediaEl = this.getBiggestMediaEl_(pageElement);
     if (!mediaEl) {
-      user().info(CLASS_NAME, 'No image or video found for background blur.');
+      user().info(CLASS_NAME, 'No amp-img or amp-video found.');
       this.animate_();
       return;
     }
@@ -102,24 +102,29 @@ export class BackgroundBlur {
       .then(() => mediaEl.signals().whenSignal(CommonSignals.LOAD_END))
       .then(
         () => {
+          // If image, render it.
           if (mediaEl.tagName === 'AMP-IMG') {
-            // If image render right away.
             this.animate_(mediaEl.querySelector('img'));
-          } else {
-            const innerVideoEl = mediaEl.querySelector('video');
-            const alreadyHasData = innerVideoEl.readyState >= HAVE_CURRENT_DATA;
-            if (alreadyHasData) {
-              // If video already has data, render first frame.
-              this.animate_(innerVideoEl);
-            } else {
-              // If video doesnt have data, render from the poster image.
-              const img = new Image();
-              img.src = mediaEl.getAttribute('poster');
-              img.onload = () => {
-                this.animate_(img);
-              };
-            }
+            return;
           }
+
+          // If video, render first frame or poster image.
+          const innerVideoEl = mediaEl.querySelector('video');
+          const alreadyHasData = innerVideoEl.readyState >= HAVE_CURRENT_DATA;
+          if (alreadyHasData) {
+            this.animate_(innerVideoEl);
+            return;
+          }
+          // If video doesnt have data, render from the poster image.
+          const posterSrc = mediaEl.getAttribute('poster');
+          if (!posterSrc) {
+            this.animate_();
+            user().info(CLASS_NAME, 'No "poster" attribute on amp-video.');
+            return;
+          }
+          const img = new Image();
+          img.onload = () => this.animate_(img);
+          img.src = posterSrc;
         },
         () => {
           user().error(CLASS_NAME, 'Failed to load the amp-img or amp-video.');
