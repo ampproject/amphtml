@@ -474,8 +474,8 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
         log(`code\n-------\n${code}\n map:\n------\n${map}`);
       }
       await Promise.all([
-        fs.writeFile(destFile, code),
-        fs.writeFile(`${destFile}.map`, map),
+        fs.outputFile(destFile, code),
+        fs.outputFile(`${destFile}.map`, map),
       ]);
 
       await finishBundle(
