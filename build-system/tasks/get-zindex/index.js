@@ -69,7 +69,7 @@ function zIndexCollector(acc, css) {
           .forEach((selector) => {
             // If multiple redeclaration of a selector and z index
             // are done in a single file, this will get overridden.
-            acc[selector] = decl.value;
+            acc[selector.trim()] = decl.value;
           });
       }
     });
@@ -156,12 +156,13 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
     const result = {};
 
-    const {stderr, stdout} = jscodeshiftAsync([
+    const process = jscodeshiftAsync([
       '--dry',
       '--no-babel',
       `--transform=${__dirname}/jscodeshift/collect-zindex.js`,
       ...filesIncludingString,
     ]);
+    const {stderr, stdout} = process;
 
     stderr.on('data', (data) => {
       throw new Error(data.toString());
@@ -188,7 +189,7 @@ function getZindexChainsInJs(glob, cwd = '.') {
       } catch (_) {}
     });
 
-    stdout.on('close', () => {
+    process.on('close', () => {
       resolve(result);
     });
   });
