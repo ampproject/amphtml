@@ -44,7 +44,10 @@
   font-size: inherit !important;
 }
 
-.i-amphtml-story-interactive-img-option:nth-child(odd) {
+.i-amphtml-story-interactive-img-container:not([dir='rtl'])
+  .i-amphtml-story-interactive-img-option:nth-child(odd),
+.i-amphtml-story-interactive-img-container[dir='rtl']
+  .i-amphtml-story-interactive-img-option:nth-child(even) {
   margin-left: var(--i-amphtml-interactive-img-option-margin) !important;
 }
 
@@ -54,6 +57,9 @@
 
 .i-amphtml-story-interactive-img-option:nth-child(3):last-child {
   margin-top: 0 !important;
+  margin-left: var(
+    --i-amphtml-interactive-img-option-margin
+  ) !important; /* Needed for rtl layout */
 }
 
 .i-amphtml-story-interactive-img-option-img {
