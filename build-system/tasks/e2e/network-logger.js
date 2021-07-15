@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import selenium from 'selenium-webdriver';
+const selenium = require('selenium-webdriver');
 
 const {logging} = selenium;
 
@@ -28,7 +28,7 @@ const PerformanceMethods = {
   'WINDOW_OPEN': 'Network.windowOpen',
 };
 
-export class NetworkLogger {
+class NetworkLogger {
   /** @param {!selenium.WebDriver} driver */
   constructor(driver) {
     /** @type {selenium.WebDriver} */
@@ -67,3 +67,7 @@ export class NetworkLogger {
     return entries;
   }
 }
+
+module.exports = {
+  NetworkLogger,
+};
