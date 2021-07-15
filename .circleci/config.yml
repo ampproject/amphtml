@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.1.3
+  win: circleci/windows@2.4.0
 
 push_and_pr_builds: &push_and_pr_builds
   filters:
@@ -35,6 +36,11 @@ executors:
     resource_class: xlarge
 
 commands:
+  install-edge:
+    steps:
+      - run:
+          name: 'Install Edge'
+          command: choco install microsoft-edge
   restore_workspace:
     steps:
       - attach_workspace:
@@ -50,6 +56,17 @@ commands:
       - run:
           name: 'Maybe Gracefully Halt'
           command: curl -sS https://raw.githubusercontent.com/ampproject/amphtml/main/.circleci/maybe_gracefully_halt.sh | bash
+  setup_windows_vm:
+    steps:
+      - run:
+          name: 'Install Chocolatey'
+          command: Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+      - run:
+          name: 'Install Node'
+          command: (choco install nvm) -and (nvm install 14.17.0) -and (nvm use 14.17.0)
+      - run:
+          name: 'Install Dependencies'
+          command: npm ci
   setup_vm:
     steps:
       - run:
@@ -328,6 +345,21 @@ jobs:
       - store_test_output
       - fail_fast
       - teardown_vm
+  'Edge Tests':
+    executor:
+      name: win/default
+      size: large
+      shell: powershell.exe
+    steps:
+      - checkout
+      - setup_windows_vm
+      - install-edge
+      - run:
+          name: 'Debug Node'
+          command: node --version
+      - run:
+          name: 'Edge Tests'
+          command: node build-system/pr-check/cross-browser-tests.js
 
 workflows:
   'CircleCI':
@@ -407,8 +439,5 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Experiment << matrix.exp >> Build'
-      # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
-      # - 'Performance Tests':
-      #     <<: *push_builds_only
-      #     requires:
-      #       - 'Nomodule Build'
+      - 'Edge Tests':
+          <<: *push_and_pr_builds
