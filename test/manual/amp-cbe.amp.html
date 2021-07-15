@@ -116,7 +116,7 @@
           "genericTrigger-1":{
             "on": "change",
             "request": "event",
-            "selector": "#inputText",
+            "selector": ["#inputText","#numChild"],
             "vars": {
               "eventType": "change"
             },
@@ -124,43 +124,13 @@
                 "eventId": "${id}"
             }
           },
-
           "genericTrigger-2":{
             "on": "blur",
             "request": "event",
-            "selector": "#inputText2",
+            "selector": ["#inputText2", "#numChild2"],
             "vars": {
               "eventType": "blur"
             },
-            "extraUrlParams":{
-                "eventId": "${id}"
-            }
-          },
-
-          "genericTrigger-3":{
-            "on": "change",
-            "request": "event",
-            "selector": "#numChild",
-            "vars": {
-                      "eventCategory": "ui-components",
-                      "eventAction": "change",
-                      "eventLabel": "${numChild}",
-                      "eventType": "change"
-                  },
-            "extraUrlParams":{
-                "eventId": "${id}"
-            }
-          },
-          "genericTrigger-4":{
-            "on": "blur",
-            "request": "event",
-            "selector": "#numChild2",
-            "vars": {
-                      "eventCategory": "ui-components",
-                      "eventAction": "blur",
-                      "eventLabel": "${numChild2}",
-                      "eventType": "blur"
-                  },
             "extraUrlParams":{
                 "eventId": "${id}"
             }

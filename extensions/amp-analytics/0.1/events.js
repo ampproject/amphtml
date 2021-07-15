@@ -351,7 +351,7 @@ export class CustomBrowserEventTracker extends EventTracker {
 
   /** @override */
   dispose() {
-    const root = this.root.getRootElement();
+    const root = this.root.getRoot();
     Object.keys(BrowserEventType).forEach((key) => {
       root.removeEventListener(BrowserEventType[key], this.boundOnSession_);
     });
@@ -365,37 +365,43 @@ export class CustomBrowserEventTracker extends EventTracker {
       config['selector'],
       'Missing required selector on browser event trigger'
     );
+    userAssert(selector.length, 'Missing required selector on browser event trigger');
+    assertUniqueSelectors(selector);
+
     const selectionMethod = config['selectionMethod'] || null;
     const eventName = config['on'];
 
-    const targetReady = this.root.getElement(
+    const targetReady = this.root.getElements(
       context,
       selector,
-      selectionMethod
+      selectionMethod,
+      false
     );
 
     throttle(
       this.root.ampdoc.win,
       this.root
         .getRootElement()
-        .addEventListener(
-          eventName, this.boundOnSession_, true),
+        .addEventListener(eventName, this.boundOnSession_, true),
       500
     );
 
     return this.observables_.add((event) => {
-      const el = dev().assertElement(
-        event.target,
-        'No target specified by browser event.'
-      );
-      if (event.type === eventName) {
-        targetReady.then((target) => {
+      if (event.type !== eventName) {
+        return;
+      }
+      targetReady.then((targets) => {
+        targets.forEach((target) => {
+          const el = dev().assertElement(
+            event.target,
+            'No target specified by browser event.'
+          );
           if (!target.contains(el)) {
             return;
           }
           listener(new AnalyticsEvent(target, eventName, event.detail));
         });
-      }
+      });
     });
   }
 }
