@@ -21,6 +21,11 @@
   border-radius: 5em 5em 5.833em 5.833em !important;
 }
 
+.i-amphtml-story-interactive-img-container
+  .i-amphtml-story-interactive-prompt-container {
+  padding: 1.667em !important;
+}
+
 .i-amphtml-story-interactive-img-option-container {
   background: var(
     --i-amphtml-interactive-options-chip-background-color
