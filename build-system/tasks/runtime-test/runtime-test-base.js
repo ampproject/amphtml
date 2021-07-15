@@ -31,6 +31,7 @@ const {
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
 const {app} = require('../../server/test-server');
+const {BUILD_CONSTANTS} = require('../../compile/build-constants');
 const {createKarmaServer, getAdTypes} = require('./helpers');
 const {cyan, green, red, yellow} = require('../../common/colors');
 const {dotWrappingWidth} = require('../../common/logging');
@@ -311,6 +312,7 @@ class RuntimeTestConfig {
       define: {
         'process.env.NODE_DEBUG': 'false',
         'process.env.NODE_ENV': '"test"',
+        ...BUILD_CONSTANTS,
       },
       plugins: [importPathPlugin, babelPlugin],
       sourcemap: 'inline',

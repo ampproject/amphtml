@@ -51,6 +51,10 @@ function getReplacePlugin() {
    * @return {!Object} replacement options used by minify-replace plugin
    */
   function createReplacement(identifierName, value) {
+    if (value === 'true' || value === 'false') {
+      value = value === 'true';
+    }
+
     const replacement =
       typeof value === 'boolean'
         ? {type: 'booleanLiteral', value}
@@ -58,9 +62,14 @@ function getReplacePlugin() {
     return {identifierName, replacement};
   }
 
-  const replacements = Object.entries(BUILD_CONSTANTS).map(([ident, val]) =>
-    createReplacement(ident, val)
-  );
+  const replacements = [];
+  // The check-types command uses Closure, which doesn't support
+  // build constant replacement. So we do it here in babel.
+  if (argv._.includes('check-types')) {
+    for (const [ident, val] of Object.entries(BUILD_CONSTANTS)) {
+      replacements.push(createReplacement(ident, val));
+    }
+  }
 
   const experimentConstant = getExperimentConstant();
   if (experimentConstant) {

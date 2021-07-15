@@ -68,7 +68,7 @@ elif [[ "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
 fi
 
 # For PR builds, cancel when the first job fails.
-echo $(RED "Canceling PR build because a job failed.")
-curl -X POST \
---header "Content-Type: application/json" \
-"https://circleci.com/api/v2/workflow/${CIRCLE_WORKFLOW_ID}/cancel?circle-token=${CIRCLE_TOKEN}"
+#echo $(RED "Canceling PR build because a job failed.")
+#curl -X POST \
+#--header "Content-Type: application/json" \
+#"https://circleci.com/api/v2/workflow/${CIRCLE_WORKFLOW_ID}/cancel?circle-token=${CIRCLE_TOKEN}"
