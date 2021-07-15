@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.173 */
+/** Version: 0.1.22.174 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -42,6 +42,7 @@ const I18N_STRINGS = {
     'es': 'Disfruta de más artículos con Google',
     'es-ar': 'Disfruta más artículos con Google',
     'fr': 'Plus de contenus avec Google',
+    'fr-ca': 'Aller plus loin avec Google',
     'hi': 'Google की मदद से ज़्यादा मुफ़्त लेख पाएं',
     'it': 'Con Google puoi avere di più',
     'ja': 'Google からのプレゼント',
@@ -63,6 +64,8 @@ const I18N_STRINGS = {
     'es-ar':
       '<strong></strong>Normalmente, es necesario pagar para ver este contenido, pero Google te ofrece acceso gratuito a este y otros artículos si te registras en <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> con tu Cuenta&nbsp;de&nbsp;Google.',
     'fr': '<strong></strong>Ce contenu est généralement payant, mais vous pouvez lire cet article et d\'autres contenus gratuitement grâce à Google en vous inscrivant sur <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> avec votre compte Google.',
+    'fr-ca':
+      '<strong></strong>Ce contenu est généralement payant, mais Google vous offre un accès gratuit à cet article et à d\'autres si vous vous inscrivez à <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> à l\'aide de votre compte Google.',
     'hi': '<strong></strong>इस कॉन्टेंट को पढ़ने के लिए पैसे चुकाने पड़ते हैं, लेकिन आप Google की मदद से इस लेख और अन्य कॉन्टेंट को मुफ़्त में पढ़ सकते हैं. इसके लिए, आपको Google खाते का इस्तेमाल करके, <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> में रजिस्टर करना होगा.',
     'it': '<strong></strong>Generalmente questi contenuti sono a pagamento, ma Google ti offre accesso gratuito a questo articolo e ad altri articoli se ti registri a <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando il tuo Account Google.',
     'ja': '<strong></strong>通常、この記事をお読みいただくにはお支払いが必要ですが、お使いの Google アカウントで <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> に登録すると、この記事を無料でお読みいただけます。',
@@ -85,6 +88,7 @@ const I18N_STRINGS = {
     'es': '¿Ya tienes una cuenta?',
     'es-ar': '¿Ya tienes una cuenta?',
     'fr': 'Vous avez déjà un compte&nbsp;?',
+    'fr-ca': 'Vous avez déjà un compte?',
     'hi': 'क्या आपके पास पहले से कोई प्रकाशक खाता है?',
     'it': 'Hai già un account?',
     'ja': 'すでにアカウントをお持ちですか？',
@@ -105,6 +109,7 @@ const I18N_STRINGS = {
     'es': 'Iniciar sesión con Google',
     'es-ar': 'Acceder con Google',
     'fr': 'Se connecter avec Google',
+    'fr-ca': 'Se connecter avec Google',
     'hi': 'Google से साइन इन करें',
     'it': 'Accedi con Google',
     'ja': 'Google でログイン',
@@ -118,25 +123,27 @@ const I18N_STRINGS = {
     'te': 'Googleతో సైన్ ఇన్ చేయండి',
   },
   'SHOWCASE_REGWALL_CASL': {
-    'bn': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'cs': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'de': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'en': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'es': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'fr': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'hi': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'it': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'ja': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'kn': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'ml': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'mr': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'nl': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'bn': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'cs': 'Prostudujte si <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>podmínky CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> publikace <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
+    'de': '<ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL-Bedingungen<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> von <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> ansehen',
+    'en': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'es': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'fr': 'Consultez les <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Conditions d\'utilisation LCAP (Loi canadienne anti-pourriel)<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> de <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
+    'fr-ca':
+      'Consulter les <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>conditions d\'utilisation relatives à la Loi canadienne antipourriel (LCAP)<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> de la publication <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
+    'hi': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> की <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>सीएएसएल (कैनेडियन एंटी-स्पैम लेजिस्लेशन) से जुड़ी शर्तों<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> के बारे में पढ़ें',
+    'it': 'Rileggi i <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>termini della legge CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> di <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
+    'ja': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> の <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL 規約<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>を見る',
+    'kn': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'ml': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'mr': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'nl': 'Bekijk de <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL-voorwaarden<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> van <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'pt-br':
-      'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+      'Confira os <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>termos da CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> da publicação <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'pt-pt':
-      'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'ta': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'te': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Terms and CASL consent<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+      'Analise os <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>termos da CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> da publicação <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
+    'ta': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> இன் <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL விதிமுறைகளைப்<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> பாருங்கள்',
+    'te': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
   },
 };
 
@@ -1110,6 +1117,14 @@ body {
  *   familyName: string,
  *   imageUrl: string,
  *   email: string,
+ *   authorizationData: {
+ *     access_token: string,
+ *     id_token: string,
+ *     scope: string,
+ *     expires_in: number,
+ *     first_issued_at: number,
+ *     expires_at: number,
+ *   },
  * }} GaaUserDef
  */
 let GaaUserDef;
@@ -1118,7 +1133,14 @@ let GaaUserDef;
  * GoogleUser object that Google Sign-In returns after users sign in.
  * https://developers.google.com/identity/sign-in/web/reference#googleusergetbasicprofile
  * @typedef {{
- *   getAuthResponse: function(): {id_token: string},
+ *   getAuthResponse: function(boolean): {
+ *     access_token: string,
+ *     id_token: string,
+ *     scope: string,
+ *     expires_in: number,
+ *     first_issued_at: number,
+ *     expires_at: number,
+ *   },
  *   getBasicProfile: function(): {
  *     getName: function(): string,
  *     getGivenName: function(): string,
@@ -1525,15 +1547,19 @@ class GaaGoogleSignInButton {
         const basicProfile = /** @type {!GoogleUserDef} */ (
           googleUser
         ).getBasicProfile();
+        // Gather authorization response.
+        const authorizationData = /** @type {!GoogleUserDef} */ (
+          googleUser
+        ).getAuthResponse(true);
         /** @type {!GaaUserDef} */
         const gaaUser = {
-          idToken: /** @type {!GoogleUserDef} */ (googleUser).getAuthResponse()
-            .id_token,
+          idToken: authorizationData.id_token,
           name: basicProfile.getName(),
           givenName: basicProfile.getGivenName(),
           familyName: basicProfile.getFamilyName(),
           imageUrl: basicProfile.getImageUrl(),
           email: basicProfile.getEmail(),
+          authorizationData,
         };
 
         // Send GAA user to parent frame.
