@@ -439,8 +439,6 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
       plugins: [babelPlugin],
       banner,
       footer,
-      // Terser throws when using esm mode, complains about Export not in toplevel.
-      // format: argv.esm ? 'esm' : 'iife',
       incremental: !!options.watch,
       logLevel: 'silent',
       external: options.externalDependencies,
@@ -463,7 +461,7 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
         '';
 
       if (options.minify) {
-        ({code, map} = await minify(code, map, /* mangleProps */ true));
+        // ({code, map} = await minify(code, map, /* mangleProps */ true));
         ({code, map} = await postBuildTranspile(code, map));
         ({code, map} = await minify(code, map));
         map = massageSourcemaps(map, options);
