@@ -42,6 +42,10 @@
   position: absolute !important;
 }
 
+.i-amphtml-story-interactive-img-quiz-answer-choice::first-line {
+  font-size: 1.167em !important;
+}
+
 .i-amphtml-story-interactive-img-option[correct='correct'] {
   --i-amphtml-interactive-option-post-color: var(--correct-color) !important;
   --i-amphtml-interactive-option-post-marker: url("data:image/svg+xml;charset=utf-8,%3csvg width='12' height='10' viewBox='0 0 12 10' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M3.58383 7.49723L1.36237 5.27577C1.11249 5.02588 0.707566 5.02517 0.4568 5.27417C0.204778 5.52442 0.204058 5.93181 0.455194 6.18295L3.58383 9.31159L10.8251 2.0703C11.0748 1.82061 11.0748 1.4158 10.8251 1.16611C10.5755 0.916512 10.1709 0.916416 9.92115 1.1659L3.58383 7.49723Z' fill='white'/%3e%3c/svg%3e") !important;

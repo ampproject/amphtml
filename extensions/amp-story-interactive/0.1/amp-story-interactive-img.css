@@ -97,6 +97,10 @@
   left: 0 !important;
   color: white !important;
   font-weight: 700 !important;
+}
+
+.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
+  .i-amphtml-story-interactive-img-option-percentage-text::first-line {
   font-size: 1.167em !important;
 }
 
