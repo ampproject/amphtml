@@ -15,8 +15,7 @@
  */
 
 .i-amphtml-story-interactive-slider-container {
-  --pct-0-to-1-decimal: 0;
-  --pct-0-to-100-percent: calc(100% * var(--pct-0-to-1-decimal));
+  --percentage: 0%;
 }
 
 .i-amphtml-story-interactive-slider-input-container {
@@ -28,21 +27,18 @@
   justify-content: center !important;
   height: 100% !important;
   width: 100% !important;
-  padding: 1em !important;
+  padding: 0em 1em !important;
   box-sizing: border-box !important;
   position: relative !important;
-  --thumb-size: 1.5em;
-  --thumb-offset: calc((.5 - var(--pct-0-to-1-decimal)) * var(--thumb-size));
 }
 
 .i-amphtml-story-interactive-slider-bubble {
-  --bubble-transform-offset: calc(-50% + var(--thumb-offset));
   position: absolute !important;
-  transform: translate(var(--bubble-transform-offset), -50%) scale(0) !important;
+  transform: translate(-50%, -50%) scale(0) !important;
   width: 2.8em !important;
   height: 2.8em !important;
   top: 50% !important;
-  left: var(--pct-0-to-100-percent) !important;
+  left: var(--percentage) !important;
   text-align: center !important;
   line-height: 2.9em !important;
   z-index: 2 !important;
@@ -51,7 +47,7 @@
 }
 
 .i-amphtml-story-interactive-slider-bubble.show {
-  transform: translate(var(--bubble-transform-offset), -155%) scale(1) !important;
+  transform: translate(-50%, -155%) scale(1) !important;
 }
 
 .i-amphtml-story-interactive-slider-bubble::after {
@@ -70,7 +66,7 @@
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
   font-weight: 700 !important;
-  transform: translate(var(--bubble-transform-offset), -50%) scale(0.8) !important;
+  transform: translate(-50%, -50%) scale(0.8) !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble::after {
@@ -83,25 +79,26 @@
   -webkit-appearance: none !important;
   font-size: inherit !important;
   height: 1em !important;
-  width: 100% !important;
-  --slider-fill-bar-offset: calc(var(--pct-0-to-100-percent) + var(--thumb-offset)) !important;
+  width: calc(100% + 1.5em) !important;
+  margin: 0em -0.75em !important;
+  /* This maps the range and has the gradient follow behind the thumb */
+  --percentage-corrected: calc(2.5% + 0.95 * var(--percentage)) !important;
   background: linear-gradient(
     90deg,
     #b28fff 0%,
-    #783bfe var(--slider-fill-bar-offset),
-    transparent var(--slider-fill-bar-offset)
+    #783bfe var(--percentage-corrected),
+    transparent var(--percentage-corrected)
   ) !important;
   border-radius: 0.5em !important;
   position: absolute !important;
   pointer-events: all !important;
   cursor: pointer !important;
-  /* Removes default input margins. */
-  margin: 0 !important;
 }
 
 .i-amphtml-story-interactive-slider-input-size {
   position: relative !important;
   flex: 1 !important;
+  margin: 1em 0.75em !important;
   height: 1em !important;
 }
 
@@ -118,8 +115,8 @@
 
 .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
   -webkit-appearance: none !important;
-  width: var(--thumb-size) !important;
-  height: var(--thumb-size) !important;
+  width: 1.5em !important;
+  height: 1.5em !important;
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
 }

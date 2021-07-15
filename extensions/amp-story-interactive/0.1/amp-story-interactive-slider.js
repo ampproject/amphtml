@@ -71,6 +71,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.inputEl_ = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-slider-input'
     );
+
     this.attachPrompt_(this.rootEl_);
     return this.rootEl_;
   }
@@ -97,11 +98,9 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    */
   onDrag_() {
     const {value} = this.inputEl_;
-    this.bubbleEl_.textContent = value + '%';
+    this.bubbleEl_.textContent = value + "%";
     this.bubbleEl_.classList.add('show');
-    setImportantStyles(this.rootEl_, {
-      '--pct-0-to-1-decimal': value * 0.01,
-    });
+    setImportantStyles(this.rootEl_, {'--percentage': value + '%'});
   }
 
   /**
