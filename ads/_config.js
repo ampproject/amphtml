@@ -189,6 +189,15 @@ const adConfig = jsonConfiguration({
 
   'adservsolutions': {},
 
+  'adskeeper': {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.adskeeper.com',
+      'https://servicer.adskeeper.com',
+      'https://s-img.adskeeper.com',
+    ],
+  },
+
   'adsloom': {
     clientIdScope: 'AMP_ECID_ADSLOOM',
   },
