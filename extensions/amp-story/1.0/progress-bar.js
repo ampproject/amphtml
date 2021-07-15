@@ -155,7 +155,14 @@ export class ProgressBar {
     }
 
     this.root_ = this.win_.document.createElement('ol');
-    this.root_.setAttribute('aria-hidden', true);
+    this.root_.setAttribute('aria-hidden', false);
+    this.root_.setAttribute('role', 'region');
+    this.root_.setAttribute('aria-live', 'polite');
+    // Set the initial aria-label for the current page number and total pages.
+    this.root_.setAttribute(
+      'aria-label',
+      `page ${StateProperty.CURRENT_PAGE_INDEX} of ${this.segmentCount_}`
+    );
     this.root_.classList.add('i-amphtml-story-progress-bar');
     this.storyEl_.addEventListener(EventType.REPLAY, () => {
       this.replay_();
@@ -396,6 +403,21 @@ export class ProgressBar {
   }
 
   /**
+   * Called from updateProgress method to set the `aria-label` attribute
+   * triggering assistive technology to inform user of the current page.
+   * @param {number} index zero-based index of pages in the story.
+   * @private
+   */
+  setAriaLabelByIndex_(index) {
+    this.mutator_.mutateElement(this.getRoot(), () => {
+      this.getRoot().setAttribute(
+        'aria-label',
+        `page ${index + 1} of ${this.segmentCount_}`
+      );
+    });
+  }
+
+  /**
    * Handles resize events.
    * @private
    */
@@ -497,6 +519,8 @@ export class ProgressBar {
     segmentProgressBar.classList.add('i-amphtml-story-page-progress-bar');
     const segmentProgressValue = this.win_.document.createElement('div');
     segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
+    segmentProgressBar.setAttribute('role', 'group');
+    segmentProgressBar.setAttribute('aria-roledescription', 'page');
     segmentProgressBar.appendChild(segmentProgressValue);
     this.getRoot().appendChild(segmentProgressBar);
     this.segments_.push(segmentProgressBar);
@@ -558,6 +582,12 @@ export class ProgressBar {
       const segmentIndex = this.segmentIdMap_[segmentId];
 
       this.updateProgressByIndex_(segmentIndex, progress);
+
+      // Only update aria-label once on change to the current page.
+      // Otherwise, the method will be called repeatedly for pages where 0 < progress < 1.
+      if (progress === 0 || progress === 1) {
+        this.setAriaLabelByIndex_(segmentIndex);
+      }
 
       // If updating progress for a new segment, update all the other progress
       // bar segments.
