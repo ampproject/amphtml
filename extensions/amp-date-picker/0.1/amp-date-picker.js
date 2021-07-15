@@ -447,8 +447,16 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     this.isRTL_ = isRTL(this.win.document);
 
+    const lightboxContainer = closestAncestorElementBySelector(
+      this.element,
+      'amp-lightbox'
+    );
+
     if (this.type_ === DatePickerType.SINGLE) {
-      this.dateField_ = this.setupDateField_(DateFieldType.DATE);
+      this.dateField_ = this.setupDateField_(
+        DateFieldType.DATE,
+        lightboxContainer
+      );
       if (this.mode_ == DatePickerMode.OVERLAY && this.dateField_ === null) {
         user().error(
           TAG,
@@ -457,8 +465,14 @@ export class AmpDatePicker extends AMP.BaseElement {
         );
       }
     } else if (this.type_ === DatePickerType.RANGE) {
-      this.startDateField_ = this.setupDateField_(DateFieldType.START_DATE);
-      this.endDateField_ = this.setupDateField_(DateFieldType.END_DATE);
+      this.startDateField_ = this.setupDateField_(
+        DateFieldType.START_DATE,
+        lightboxContainer
+      );
+      this.endDateField_ = this.setupDateField_(
+        DateFieldType.END_DATE,
+        lightboxContainer
+      );
 
       if (
         this.mode_ == DatePickerMode.OVERLAY &&
@@ -504,6 +518,8 @@ export class AmpDatePicker extends AMP.BaseElement {
       'endToday',
       this.todayAction_.bind(this, (d) => this.handleSetDates_(null, d))
     );
+
+    this.setupListeners_();
 
     return this.mutateElement(() => {
       // NOTE(cvializ): There is no standard date format for just the first
@@ -551,7 +567,6 @@ export class AmpDatePicker extends AMP.BaseElement {
   layoutCallback() {
     const srcAttributesPromise = this.setupSrcAttributes_();
     this.setupTemplates_();
-    this.setupListeners_();
 
     if (this.element.contains(this.document_.activeElement)) {
       this.maybeTransitionWithFocusChange_(
@@ -882,9 +897,11 @@ export class AmpDatePicker extends AMP.BaseElement {
   /**
    * Get the existing input, or create a hidden input for the date field.
    * @param {!DateFieldType} type The selector for the input field
+   * @param {?Element} lightboxContainer Used to detect whether the field
+   * triggers an overlay or similar. (See isFieldOverlayTrigger_)
    * @return {?Element}
    */
-  setupDateField_(type) {
+  setupDateField_(type, lightboxContainer) {
     const fieldSelector = this.element.getAttribute(`${type}-selector`);
     const existingField = this.getAmpDoc()
       .getRootNode()
@@ -892,7 +909,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     if (existingField) {
       if (
         !this.element.hasAttribute('touch-keyboard-editable') &&
-        this.mode_ == DatePickerMode.OVERLAY &&
+        this.isFieldOverlayTrigger_(existingField, lightboxContainer) &&
         this.input_.isTouchDetected()
       ) {
         setTouchNonValidationReadonly(existingField, true);
@@ -910,6 +927,38 @@ export class AmpDatePicker extends AMP.BaseElement {
     }
 
     return null;
+  }
+
+  /**
+   * Detects whether a field triggers an overlay, or overlay-like datepicker.
+   *
+   * A field triggers the component as "overlay-like" when using a mode
+   * different from [mode=overlay], but behaving similarly.
+   *
+   * For example, [fullscreen] only allows [mode=static], but would be
+   * overlay-like when contained inside a lightbox that's triggered by the
+   * field's tap event, like the example on
+   * https://go.amp.dev/c/amp-date-picker/#fullscreen
+   *
+   * We detect this so we can prevent the virtual keyboard from popping up
+   * when opening the lightbox, since it would visibly cover the field.
+   * @param {!Element} field
+   * @param {?Element} lightboxContainer
+   * @return {boolean}
+   * @private
+   */
+  isFieldOverlayTrigger_(field, lightboxContainer) {
+    if (this.mode_ == DatePickerMode.OVERLAY) {
+      return true;
+    }
+    if (!lightboxContainer) {
+      return false;
+    }
+    return this.action_.hasResolvableActionForTarget(
+      field,
+      'tap',
+      lightboxContainer
+    );
   }
 
   /**
