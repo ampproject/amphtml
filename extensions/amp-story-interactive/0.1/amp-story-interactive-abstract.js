@@ -149,7 +149,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?Promise<JsonObject>} */
     this.clientIdPromise_ = null;
 
-    /** @private {?Element} */
+    /** @private {?Element} the disclaimer dialog if open, null if closed */
     this.disclaimerEl_ = null;
 
     /** @private {?Element} */
@@ -273,6 +273,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     ]).then(() => {
       this.rootEl_ = this.buildComponent();
       this.rootEl_.classList.add('i-amphtml-story-interactive-container');
+      if (this.element.hasAttribute('endpoint')) {
+        this.disclaimerIcon_ = buildInteractiveIcon(this);
+        this.rootEl_.prepend(this.disclaimerIcon_);
+      }
       createShadowRootWithStyle(
         this.element,
         dev().assertElement(this.rootEl_),
@@ -377,11 +381,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.element.hasAttribute('endpoint')) {
-      // Needs to be called after buildCallback to measure properly.
-      this.disclaimerIcon_ = buildInteractiveIcon(this);
-      this.rootEl_.prepend(this.disclaimerIcon_);
-    }
     this.initializeListeners_();
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveInteractiveData_()
