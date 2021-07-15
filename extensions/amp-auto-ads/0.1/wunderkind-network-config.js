@@ -48,7 +48,7 @@ export class WunderkindNetworkConfig {
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
 
-    const websiteID = this.autoAmpAdsElement_.getAttribute('data-website-id');
+    let websiteID = this.autoAmpAdsElement_.getAttribute('data-website-id');
 
     // websiteID should be an integer
     websiteID = websiteID.replace(/[^0-9]/g, '');
