@@ -99,7 +99,9 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     const {value} = this.inputEl_;
     this.bubbleEl_.textContent = value + '%';
     this.bubbleEl_.classList.add('show');
-    setImportantStyles(this.rootEl_, {'--percentage': value + '%'});
+    setImportantStyles(this.rootEl_, {
+      '--pct-0-to-1-decimal': value * 0.01,
+    });
   }
 
   /**
