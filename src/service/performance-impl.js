@@ -52,6 +52,15 @@ const TAG = 'Performance';
 let TickEventDef;
 
 /**
+ * @enum {number}
+ */
+const LCP_ELEMENT_TYPE = {
+  image: 1,
+  video: 2,
+  other: 3,
+};
+
+/**
  * Performance holds the mechanism to call `tick` to stamp out important
  * events in the lifecycle of the AMP runtime. It can hold a small amount
  * of tick events to forward to the external `tick` function when it is set.
@@ -187,6 +196,12 @@ export class Performance {
      * @private {?number}
      */
     this.largestContentfulPaint_ = null;
+
+    /**
+     * Which type of element was chosen as the LCP.
+     * @private {LCP_ELEMENT_TYPE}
+     */
+    this.largestContentfulPaintType_ = null;
 
     this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
@@ -351,6 +366,16 @@ export class Performance {
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
         this.largestContentfulPaint_ = entry.startTime;
+        const {tagName} = entry.element;
+        // TODO: should we also determine which amp-element caused this?
+        // if so, how to handle owners
+        if (tagName === 'IMG') {
+          this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.image;
+        } else if (tagName === 'VIDEO') {
+          this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.video;
+        } else {
+          this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.other;
+        }
       } else if (entry.entryType == 'navigation' && !recordedNavigation) {
         [
           'domComplete',
@@ -555,6 +580,7 @@ export class Performance {
       return;
     }
 
+    // TODO: tick type.
     this.tickDelta(
       TickLabel.LARGEST_CONTENTFUL_PAINT,
       this.largestContentfulPaint_
