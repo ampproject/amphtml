@@ -475,6 +475,8 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
         fs.outputFile(`${destFile}.map`, map),
       ]);
 
+      // TODO: finishBundle breaks sourcemaps
+      // Make it not do that.
       await finishBundle(
         srcFilename,
         destDir,
@@ -583,6 +585,11 @@ function remapDependenciesPlugin(options) {
 // }
 
 /**
+ * Name cache to help terser perform cross-binary property mangling.
+ */
+const nameCache = {};
+
+/**
  * Minify the code with Terser. Only used by the ESBuild.
  *
  * @param {string} code
@@ -597,6 +604,7 @@ async function minify(code, map, manglePrivates = false) {
     mangle: {},
     compress: {
       passes: 3,
+      properties: false, // Preserve property access via bracket notation.
     },
     output: {
       beautify: !!argv.pretty_print,
@@ -605,15 +613,18 @@ async function minify(code, map, manglePrivates = false) {
     },
     sourceMap: {content: map},
     module: !!argv.esm,
+    nameCache,
   };
-
   // TODO: test this out when everything else is working.
   if (manglePrivates) {
-    terserOptions.mangle = {properties: {regex: '_$'}};
+    terserOptions.mangle.properties = {
+      regex: '_$',
+      // eslint-disable-next-line google-camelcase/google-camelcase
+      keep_quoted: true, // Do not mangle properties accessed via bracket notation.
+    };
   }
 
   const minified = await terser.minify(code, terserOptions);
-
   return {code: minified.code ?? '', map: minified.map};
 }
 
