@@ -98,7 +98,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    */
   onDrag_() {
     const {value} = this.inputEl_;
-    this.bubbleEl_.textContent = value + "%";
+    this.bubbleEl_.textContent = value + '%';
     this.bubbleEl_.classList.add('show');
     setImportantStyles(this.rootEl_, {'--percentage': value + '%'});
   }
