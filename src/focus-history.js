@@ -15,9 +15,9 @@
  */
 
 import {Observable} from './core/data-structures/observable';
-import {Services} from './service';
-import {dev} from './log';
 import {isElement} from './core/types';
+import {dev} from './log';
+import {Services} from './service';
 
 /**
  * FocusHistory keeps track of recent focused elements. This history can be

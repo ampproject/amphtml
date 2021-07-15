@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseUrlDeprecated} from './url';
-import {dev, devAssert, user, userAssert} from './log';
-import {dict} from './core/types/object';
-import {getContextMetadata} from './iframe-attributes';
-import {getMode} from './mode';
+import {urls} from './config';
 import {
   getOptionalSandboxFlags,
   getRequiredSandboxFlags,
 } from './core/3p-frame';
-import {internalRuntimeVersion} from './internal-version';
 import {setStyle} from './core/dom/style';
+import {dict} from './core/types/object';
 import {tryParseJson} from './core/types/object/json';
-import {urls} from './config';
+import {getContextMetadata} from './iframe-attributes';
+import {internalRuntimeVersion} from './internal-version';
+import {dev, devAssert, user, userAssert} from './log';
+import {getMode} from './mode';
+import {assertHttpsUrl, parseUrlDeprecated} from './url';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
