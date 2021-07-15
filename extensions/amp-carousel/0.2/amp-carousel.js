@@ -154,6 +154,8 @@ class AmpCarousel extends AMP.BaseElement {
     this.prevButton_ = this.element.querySelector('.amp-carousel-button-prev');
     this.nextButton_ = this.element.querySelector('.amp-carousel-button-next');
 
+    this.applyFillContent(this.scrollContainer_);
+
     this.carousel_ = new Carousel({
       win,
       element,

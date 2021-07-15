@@ -25,10 +25,6 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-scroll {
   white-space: nowrap !important;
 }
 
-amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
-  position: static;
-}
-
 .amp-scrollable-carousel-slide {
   display: inline-block !important;
   /*
