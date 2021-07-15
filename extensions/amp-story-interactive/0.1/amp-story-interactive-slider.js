@@ -35,7 +35,6 @@ const buildSliderTemplate = (element) => {
     <div class="i-amphtml-story-interactive-slider-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-slider-input-container">
-        <div class="i-amphtml-story-interactive-side-values">0</div>
         <div class="i-amphtml-story-interactive-slider-input-size">
           <input
             class="i-amphtml-story-interactive-slider-input"
@@ -46,7 +45,6 @@ const buildSliderTemplate = (element) => {
           />
           <div class="i-amphtml-story-interactive-slider-bubble">50</div>
         </div>
-        <div class="i-amphtml-story-interactive-side-values">100</div>
       </div>
     </div>
   `;
@@ -99,7 +97,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    */
   onDrag_() {
     const {value} = this.inputEl_;
-    this.bubbleEl_.textContent = value;
+    this.bubbleEl_.textContent = value + '%';
     this.bubbleEl_.classList.add('show');
     setImportantStyles(this.rootEl_, {'--percentage': value + '%'});
   }

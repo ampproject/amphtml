@@ -75,12 +75,6 @@
   border-bottom-right-radius: 50% !important;
 }
 
-.i-amphtml-story-interactive-slider-input-container .i-amphtml-story-interactive-side-values {
-  font-size: 1.125em !important;
-  color: var(--interactive-accent-color) !important;
-  font-weight: 600 !important;
-}
-
 .i-amphtml-story-interactive-slider-input {
   -webkit-appearance: none !important;
   font-size: inherit !important;
