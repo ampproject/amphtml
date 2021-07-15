@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {Services} from '#service';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -27,7 +27,7 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-accordion';
 
 /** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
-class AmpAccordion extends BaseElement {
+class AmpAccordion extends BentoBaseElement {
   /** @override */
   init() {
     this.registerApiAction('toggle', (api, invocation) =>

@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {CSS} from '../../../build/amp-base-carousel-1.0.css';
 import {Services} from '#service';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -27,7 +27,7 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-base-carousel';
 
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
-class AmpBaseCarousel extends BaseElement {
+class AmpBaseCarousel extends BentoBaseElement {
   /** @override */
   init() {
     this.registerApiAction('prev', (api) => api.prev(), ActionTrust.LOW);

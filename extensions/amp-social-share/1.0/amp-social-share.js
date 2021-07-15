@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {CSS} from '../../../build/amp-social-share-1.0.css';
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
@@ -128,7 +128,7 @@ const updateTypeConfig = (element, mutations, prevTypeValue) => {
   return typeConfig;
 };
 
-class AmpSocialShare extends BaseElement {
+class AmpSocialShare extends BentoBaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

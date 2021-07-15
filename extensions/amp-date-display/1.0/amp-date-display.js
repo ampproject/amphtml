@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {Services} from '#service';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
@@ -23,7 +23,7 @@ import {isExperimentOn} from '#experiments';
 /** @const {string} */
 const TAG = 'amp-date-display';
 
-class AmpDateDisplay extends BaseElement {
+class AmpDateDisplay extends BentoBaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

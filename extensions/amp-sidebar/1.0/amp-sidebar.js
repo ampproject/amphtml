@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
@@ -22,7 +22,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-sidebar';
 
-class AmpSidebar extends BaseElement {
+class AmpSidebar extends BentoBaseElement {
   /** @override */
   init() {
     this.registerApiAction('toggle', (api) => api./*OK*/ toggle());

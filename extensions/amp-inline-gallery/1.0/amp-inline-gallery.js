@@ -22,7 +22,7 @@ import {
   AmpInlineGalleryThumbnails,
   TAG as THUMBNAILS_TAG,
 } from './amp-inline-gallery-thumbnails';
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {Layout} from '#core/dom/layout';
 import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-pagination-1.0.css';
 import {isExperimentOn} from '#experiments';
@@ -31,7 +31,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-inline-gallery';
 
-class AmpInlineGallery extends BaseElement {
+class AmpInlineGallery extends BentoBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

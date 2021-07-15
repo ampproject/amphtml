@@ -15,10 +15,10 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
-export class VideoBaseElement extends BaseElement {
+export class VideoBaseElement extends BentoBaseElement {
   /** @override */
   init() {
     this.registerApiAction_('play', (api) => api.play());

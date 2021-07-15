@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {
   BatchFetchOptionsDef,
   UrlReplacementPolicy,
@@ -97,7 +97,7 @@ function getUpdateValue(bindingValue, isFirstMutation) {
   return false;
 }
 
-export class AmpRender extends BaseElement {
+export class AmpRender extends BentoBaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

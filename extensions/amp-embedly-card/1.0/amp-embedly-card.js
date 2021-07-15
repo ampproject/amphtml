@@ -15,7 +15,7 @@
  */
 
 import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {Layout} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
@@ -24,7 +24,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-embedly-card';
 
-class AmpEmbedlyCard extends BaseElement {
+class AmpEmbedlyCard extends BentoBaseElement {
   /** @override */
   init() {
     return dict({

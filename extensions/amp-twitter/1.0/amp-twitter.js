@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {dict} from '#core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {htmlFor} from '#core/dom/static-template';
@@ -25,7 +25,7 @@ import {userAssert} from '#core/assert';
 const TAG = 'amp-twitter';
 const TYPE = 'twitter';
 
-class AmpTwitter extends BaseElement {
+class AmpTwitter extends BentoBaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

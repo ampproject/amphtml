@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Services} from '#service';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -27,7 +27,7 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-lightbox';
 
 /** @extends {PreactBaseElement<LightboxDef.Api>} */
-class AmpLightbox extends BaseElement {
+class AmpLightbox extends BentoBaseElement {
   /** @override */
   init() {
     this.registerApiAction(

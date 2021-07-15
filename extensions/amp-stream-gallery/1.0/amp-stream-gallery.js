@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {CSS} from '../../../build/amp-stream-gallery-1.0.css';
 import {Services} from '#service';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -26,7 +26,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-stream-gallery';
 
-class AmpStreamGallery extends BaseElement {
+class AmpStreamGallery extends BentoBaseElement {
   /** @override */
   init() {
     this.registerApiAction('prev', (api) => api.prev(), ActionTrust.LOW);

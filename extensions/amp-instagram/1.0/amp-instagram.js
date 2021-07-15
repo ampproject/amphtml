@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
+import {BaseElement as BentoBaseElement} from './base-element';
 import {CSS} from '../../../build/amp-instagram-1.0.css';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
@@ -23,7 +23,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-instagram';
 
-class AmpInstagram extends BaseElement {
+class AmpInstagram extends BentoBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
