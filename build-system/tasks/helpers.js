@@ -17,8 +17,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
 const esbuild = require('esbuild');
+// const babel = require('@babel/core');
 /** @type {Object} */
-const babel = require('@babel/core');
 const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
 const magicstring = require('magic-string');
@@ -442,7 +442,6 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
       incremental: !!options.watch,
       logLevel: 'silent',
       external: options.externalDependencies,
-      minify: false,
       write: false,
     })
     .then(async (result) => {
@@ -464,9 +463,7 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
       // It goes through the error path here, which is pretty ungraceful.
       try {
         if (options.minify) {
-          ({code, map} = await minify(code, map, /* manglePrivates */ true));
-          ({code, map} = await postBuildTranspile(code, map));
-          ({code, map} = await minify(code, map));
+          ({code, map} = await minify(code, map, true));
           map = massageSourcemaps(map, options);
         }
       } catch (e) {
@@ -548,36 +545,42 @@ function remapDependenciesPlugin(options) {
   };
 }
 
-/**
- * Use babel to transpile with preset-env
- *
- * @param {string} code
- * @param {string} map
- * @return {!Promise}
- */
-async function postBuildTranspile(code, map) {
-  const presetEnv = [
-    '@babel/preset-env',
-    {
-      bugfixes: true,
-      modules: false,
-      targets: argv.esm ? {esmodules: true} : {ie: 11, chrome: 41},
-    },
-  ];
+// /**
+//  * Use babel to transpile with preset-env
+//  *
+//  * @param {string} code
+//  * @param {string} map
+//  * @return {!Promise}
+//  */
+// async function postBuildTranspile(code, map) {
+//   const presetEnv = [
+//     '@babel/preset-env',
+//     {
+//       bugfixes: true,
+//       modules: false,
+//       targets: argv.esm ? {esmodules: true} : {ie: 11, chrome: 41},
+//     },
+//   ];
 
-  const transformed = await babel.transformAsync(code, {
-    compact: false,
-    plugins: [
-      './build-system/babel-plugins/babel-plugin-const-transformer',
-      './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
-      './build-system/babel-plugins/babel-plugin-transform-minified-comments',
-    ],
-    presets: [presetEnv],
-    inputSourceMap: JSON.parse(map),
-  });
+//   const transformed = await babel.transformAsync(code, {
+//     compact: true,
+//     plugins: [
+//       './build-system/babel-plugins/babel-plugin-const-transformer',
+//       './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
+//       './build-system/babel-plugins/babel-plugin-transform-minified-comments',
+//     ],
+//     presets: [presetEnv],
+//     inputSourceMap: JSON.parse(map),
+//     'assumptions': {
+//       'constantSuper': true,
+//       'noClassCalls': true,
+//       'setClassMethods': true,
+//       'superIsCallableConstructor': true,
+//     },
+//   });
 
-  return {code: transformed.code, map: JSON.stringify(transformed.map)};
-}
+//   return {code: transformed.code, map: JSON.stringify(transformed.map)};
+// }
 
 /**
  * Minify the code with Terser. Only used by the ESBuild.
@@ -588,6 +591,8 @@ async function postBuildTranspile(code, map) {
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
 async function minify(code, map, manglePrivates = false) {
+  // TODO: is it ok that I drop comments?
+  // Why was it here in the first place?
   const terserOptions = {
     mangle: {},
     compress: {
@@ -595,26 +600,21 @@ async function minify(code, map, manglePrivates = false) {
     },
     output: {
       beautify: !!argv.pretty_print,
-
-      // TODO: is it ok that I drop comments?
-      // Why was it here in the first place?
-
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
     },
-    sourceMap: true,
+    sourceMap: {content: map},
     module: !!argv.esm,
   };
+
   // TODO: test this out when everything else is working.
   if (manglePrivates) {
     terserOptions.mangle = {properties: {regex: '_$'}};
   }
 
   const minified = await terser.minify(code, terserOptions);
-  let remapped = minified.map?.toString() ?? '';
-  remapped = remapping([minified.map, map], () => null, !argv.full_sourcemaps);
 
-  return {code: minified.code ?? '', map: remapped.toString()};
+  return {code: minified.code ?? '', map: minified.map};
 }
 
 /**
