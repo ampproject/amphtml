@@ -16,6 +16,8 @@
 
 .i-amphtml-story-interactive-slider-container {
   --percentage: 0%;
+  /* This maps the range and has the gradient follow behind the thumb */
+  --percentage-corrected: calc(2.5% + 0.95 * var(--percentage)) !important;
 }
 
 .i-amphtml-story-interactive-slider-input-container {
@@ -46,7 +48,7 @@
   color: white !important;
 }
 
-.i-amphtml-story-interactive-slider-bubble.show {
+.i-amphtml-story-interactive-slider-container.show .i-amphtml-story-interactive-slider-bubble{
   transform: translate(-50%, -155%) scale(1) !important;
 }
 
@@ -81,14 +83,8 @@
   height: 1em !important;
   width: calc(100% + 1.5em) !important;
   margin: 0em -0.75em !important;
-  /* This maps the range and has the gradient follow behind the thumb */
-  --percentage-corrected: calc(2.5% + 0.95 * var(--percentage)) !important;
-  background: linear-gradient(
-    90deg,
-    #b28fff 0%,
-    #783bfe var(--percentage-corrected),
-    transparent var(--percentage-corrected)
-  ) !important;
+
+  background: linear-gradient(90deg,var(--interactive-accent-color) var(--percentage-corrected),transparent var(--percentage-corrected))!important;
   border-radius: 0.5em !important;
   position: absolute !important;
   pointer-events: all !important;
@@ -103,14 +99,13 @@
 }
 
 .i-amphtml-story-interactive-slider-input::before {
-  background: var(--interactive-accent-color) !important;
+  background: linear-gradient(90deg, white, var(--interactive-accent-color) var(--percentage-corrected))!important;
   content: '' !important;
-  opacity: 0.3 !important;
+  opacity: 0.5 !important;
   width: 100% !important;
   height: 100% !important;
   border-radius: 0.5em !important;
   position: absolute !important;
-  z-index: 1 !important;
 }
 
 .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
@@ -119,6 +114,16 @@
   height: 1.5em !important;
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
+  position: relative;
+}
+
+.i-amphtml-story-interactive-slider-container.show .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb{
+  -webkit-appearance: none !important;
+  transform:  rotate(45deg) !important;
+  box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25) !important;
+  z-index: 3 !important; 
+  border-radius: 0% 50% 50% 50% !important;
+  border: 0.125em solid white !important;
 }
 
 .i-amphtml-story-interactive-slider-input[disabled] {
