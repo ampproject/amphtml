@@ -16,7 +16,7 @@
 
 /**
  * Converts an array-like object to an array.
- * @param {?IArrayLike<T>|string} arrayLike
+ * @param {?ArrayLike<T>|string} arrayLike
  * @return {!Array<T>}
  * @template T
  */

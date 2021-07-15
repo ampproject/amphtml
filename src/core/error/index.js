@@ -37,11 +37,11 @@ export function duplicateErrorIfNecessary(error) {
 }
 
 /**
- * @param {...*} var_args
+ * @param {...*} _var_args
  * @return {!Error}
  * @visibleForTesting
  */
-export function createErrorVargs(var_args) {
+export function createErrorVargs(_var_args) {
   let error = null;
   let message = '';
   for (const arg of arguments) {
@@ -66,9 +66,9 @@ export function createErrorVargs(var_args) {
 /**
  * Rethrows the error without terminating the current context. This preserves
  * whether the original error designation is a user error or a dev error.
- * @param {...*} var_args
+ * @param {...*} _var_args
  */
-export function rethrowAsync(var_args) {
+export function rethrowAsync(_var_args) {
   const error = createErrorVargs.apply(null, arguments);
   setTimeout(() => {
     // __AMP_REPORT_ERROR is installed globally per window in the entry point.
@@ -84,7 +84,7 @@ export function rethrowAsync(var_args) {
  *
  * @param {function(...*):T} callback
  * @param {...*} args
- * @return {T}
+ * @return {T|undefined}
  * @template T
  */
 export function tryCallback(callback, ...args) {

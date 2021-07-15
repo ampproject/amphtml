@@ -107,7 +107,7 @@ export function devAssertElement(shouldBeElement, opt_message) {
   devAssertDceCheck();
 
   return assertions.assertElement(
-    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
+    /** @type {!assertions.AssertionFunctionDef<Element>} */ (devAssert),
     shouldBeElement,
     opt_message
   );
@@ -132,7 +132,7 @@ export function devAssertString(shouldBeString, opt_message) {
   devAssertDceCheck();
 
   return assertions.assertString(
-    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
+    /** @type {!assertions.AssertionFunctionDef<string>} */ (devAssert),
     shouldBeString,
     opt_message
   );
@@ -158,7 +158,7 @@ export function devAssertNumber(shouldBeNumber, opt_message) {
   devAssertDceCheck();
 
   return assertions.assertNumber(
-    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
+    /** @type {!assertions.AssertionFunctionDef<number>} */ (devAssert),
     shouldBeNumber,
     opt_message
   );
@@ -183,7 +183,7 @@ export function devAssertArray(shouldBeArray, opt_message) {
   devAssertDceCheck();
 
   return assertions.assertArray(
-    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
+    /** @type {!assertions.AssertionFunctionDef<Array>} */ (devAssert),
     shouldBeArray,
     opt_message
   );
@@ -207,7 +207,7 @@ export function devAssertBoolean(shouldBeBoolean, opt_message) {
   devAssertDceCheck();
 
   return assertions.assertBoolean(
-    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
+    /** @type {!assertions.AssertionFunctionDef<boolean>} */ (devAssert),
     shouldBeBoolean,
     opt_message
   );

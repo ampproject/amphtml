@@ -108,7 +108,7 @@ export function deepMerge(target, source, depth = 10) {
 
   // BFS to ensure objects don't have recursive references at shallower depths.
   while (queue.length > 0) {
-    const {d, s, t} = queue.shift();
+    const {d, s, t} = /** @type {*}*/ (queue.shift());
     if (seen.includes(s)) {
       throw new Error('Source object has a circular reference.');
     }
@@ -180,7 +180,7 @@ export function objectsEqualShallow(o1, o2) {
  * @param {T} obj
  * @param {string} prop
  * @param {function(T, string):R} factory
- * @return {R}
+ * @return {!R}
  * @template T,R
  */
 export function memo(obj, prop, factory) {
@@ -189,7 +189,7 @@ export function memo(obj, prop, factory) {
     result = factory(obj, prop);
     obj[prop] = result;
   }
-  return result;
+  return /** @type {R}*/ (result);
 }
 
 /**
@@ -226,6 +226,8 @@ export function getValueForExpr(obj, expr) {
   }
   // Otherwise, navigate via properties.
   const parts = expr.split('.');
+
+  /** @type {JsonObject|undefined} */
   let value = obj;
   for (const part of parts) {
     if (
@@ -243,3 +245,8 @@ export function getValueForExpr(obj, expr) {
   }
   return value;
 }
+
+/** @type {JsonObject} */
+const a = {'hello': 5};
+
+a.hello;

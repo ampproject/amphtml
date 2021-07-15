@@ -264,7 +264,7 @@ module.exports = {
     'no-unused-vars': [
       2,
       {
-        'argsIgnorePattern': '^(var_args$|opt_|unused)',
+        'argsIgnorePattern': '^(_?var_args$|opt_|unused)',
         'varsIgnorePattern': '(AmpElement|Def|Interface)$',
       },
     ],

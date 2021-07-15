@@ -17,7 +17,7 @@
 /**
  * Checks whether `val` is a valid value of `enumObj`.
  *
- * @param {!Object<T>} enumObj
+ * @param {!Object} enumObj
  * @param {T} val
  * @return {boolean}
  * @template T

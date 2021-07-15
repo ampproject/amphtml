@@ -99,7 +99,7 @@ export function userAssert(
  */
 export function userAssertElement(shouldBeElement, opt_message) {
   return assertions.assertElement(
-    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
+    /** @type {!assertions.AssertionFunctionDef<Element>} */ (userAssert),
     shouldBeElement,
     opt_message
   );
@@ -119,7 +119,7 @@ export function userAssertElement(shouldBeElement, opt_message) {
  */
 export function userAssertString(shouldBeString, opt_message) {
   return assertions.assertString(
-    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
+    /** @type {!assertions.AssertionFunctionDef<string>} */ (userAssert),
     shouldBeString,
     opt_message
   );
@@ -140,7 +140,7 @@ export function userAssertString(shouldBeString, opt_message) {
  */
 export function userAssertNumber(shouldBeNumber, opt_message) {
   return assertions.assertNumber(
-    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
+    /** @type {!assertions.AssertionFunctionDef<number>} */ (userAssert),
     shouldBeNumber,
     opt_message
   );
@@ -160,7 +160,7 @@ export function userAssertNumber(shouldBeNumber, opt_message) {
  */
 export function userAssertArray(shouldBeArray, opt_message) {
   return assertions.assertArray(
-    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
+    /** @type {!assertions.AssertionFunctionDef<Array>} */ (userAssert),
     shouldBeArray,
     opt_message
   );
@@ -179,7 +179,7 @@ export function userAssertArray(shouldBeArray, opt_message) {
  */
 export function userAssertBoolean(shouldBeBoolean, opt_message) {
   return assertions.assertBoolean(
-    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
+    /** @type {!assertions.AssertionFunctionDef<boolean>} */ (userAssert),
     shouldBeBoolean,
     opt_message
   );

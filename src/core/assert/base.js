@@ -26,7 +26,8 @@ import {remove} from '#core/types/array';
 
 /**
  * A base assertion function, provided to various assertion helpers.
- * @typedef {function(?, string=, ...*):?|function(?, !Array<*>)}
+ * @template T
+ * @typedef {(function(T, ...*):T)|function(?, !Array<*>):*}
  */
 export let AssertionFunctionDef;
 
@@ -42,7 +43,7 @@ export let AssertionFunctionDef;
  * @param {?string} sentinel
  * @param {T} shouldBeTruthy
  * @param {string} opt_message
- * @param {...*} var_args Arguments substituted into %s in the message
+ * @param {...*} _var_args Arguments substituted into %s in the message
  * @return {T}
  * @template T
  * @throws {Error} when shouldBeTruthy is not truthy.
@@ -51,7 +52,7 @@ export function assert(
   sentinel,
   shouldBeTruthy,
   opt_message = 'Assertion failed',
-  var_args
+  _var_args
 ) {
   if (shouldBeTruthy) {
     return shouldBeTruthy;
@@ -74,7 +75,7 @@ export function assert(
 
   while (splitMessage.length) {
     const subValue = arguments[i++];
-    const nextConstant = splitMessage.shift();
+    const nextConstant = /** @type {string}*/ (splitMessage.shift());
 
     message += elementStringOrPassThru(subValue) + nextConstant;
     messageArray.push(subValue, nextConstant.trim());
@@ -97,7 +98,7 @@ export function assert(
  * Otherwise creates a sprintf syntax string containing the optional message or the
  * default. The `subject` of the assertion is added at the end.
  *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef<T>} assertFn underlying assertion function to call
  * @param {T} subject
  * @param {*} shouldBeTruthy
  * @param {string} defaultMessage
@@ -130,7 +131,7 @@ function assertType_(
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef<Element>} assertFn underlying assertion function to call
  * @param {*} shouldBeElement
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {!Element} The value of shouldBeTrueish.
@@ -155,7 +156,7 @@ export function assertElement(assertFn, shouldBeElement, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef<string>} assertFn underlying assertion function to call
  * @param {*} shouldBeString
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {string} The string value. Can be an empty string.
@@ -180,7 +181,7 @@ export function assertString(assertFn, shouldBeString, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef<number>} assertFn underlying assertion function to call
  * @param {*} shouldBeNumber
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {number} The number value. The allowed values include `0`
@@ -206,7 +207,7 @@ export function assertNumber(assertFn, shouldBeNumber, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef<Array>} assertFn underlying assertion function to call
  * @param {*} shouldBeArray
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {!Array} The array value
@@ -230,7 +231,7 @@ export function assertArray(assertFn, shouldBeArray, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {!AssertionFunctionDef<boolean>} assertFn underlying assertion function to call
  * @param {*} shouldBeBoolean
  * @param {!Array<*>|string=} opt_message The assertion message
  * @return {boolean} The boolean value.

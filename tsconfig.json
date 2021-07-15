@@ -1,9 +1,24 @@
 {
   "compilerOptions": {
+    "lib": [ 
+      "DOM",
+      "ESNext"
+    ],
+    "downlevelIteration": true,
+    "moduleResolution": "node",
     "allowJs": true,
-    "baseUrl": ".",
-    "outDir": "dist",
+    "checkJs": true,
     "noEmit": true,
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "incremental": false,
+    "esModuleInterop": true,
+    "declaration": true,
+
     "paths": {
       "#3p/*": ["./3p/*"],
       "#ads/*": ["./ads/*"],
@@ -24,5 +39,16 @@
       "#third_party/*": ["./third_party/*"]
     }
   },
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "./src/core/window/**/*.js",
+    "./src/core/error/**/*.js",
+    "./src/core/assert/**/*.js",
+    // "./src/core/types/**/*.js",
+    "./src/core/**/*.d.ts"
+  ],
+  "exclude": [
+    "**/*extern*",
+    "node_modules", 
+    "dist"
+  ]
 }
