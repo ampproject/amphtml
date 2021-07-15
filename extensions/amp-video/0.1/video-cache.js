@@ -45,6 +45,9 @@ export function fetchCachedSources(videoEl, ampdoc) {
     user().error('AMP-VIDEO', 'Video cache not properly configured');
     return Promise.resolve();
   }
+
+  Services.performanceFor(ampdoc.win).addEnabledExperiment('video-cache');
+
   const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
   maybeReplaceSrcWithSourceElement(videoEl, win);
   const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
