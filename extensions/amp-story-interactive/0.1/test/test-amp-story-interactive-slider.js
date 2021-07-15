@@ -102,7 +102,7 @@ describes.realWin(
       slider.value = 30;
       // simulates an input event, which is when the user drags the slider
       slider.dispatchEvent(new CustomEvent('input'));
-      expect(sliderBubble.textContent).to.be.equal('30');
+      expect(sliderBubble.textContent).to.be.equal('30%');
     });
 
     it('should display the percentage in the bubble when the user drags the slider', async () => {
@@ -132,10 +132,10 @@ describes.realWin(
         .querySelector('.i-amphtml-story-interactive-slider-bubble');
       // simulates an input event, which is when the user drags the slider
       slider.dispatchEvent(new CustomEvent('input'));
-      expect(sliderBubble.classList.contains('show')).to.be.true;
+      expect(sliderBubble).to.have.class('show');
     });
 
-    it.only('should show post-selection state when the user releases the slider', async () => {
+    it('should show post-selection state when the user releases the slider', async () => {
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
       const slider = ampStorySlider
@@ -143,11 +143,9 @@ describes.realWin(
         .querySelector('input[type="range"]');
       // simulates a change event, which is when the user releases the slider
       slider.dispatchEvent(new CustomEvent('change'));
-      expect(
-        ampStorySlider
-          .getRootElement()
-          .classList.contains('i-amphtml-story-interactive-post-selection')
-      ).to.be.true;
+      expect(ampStorySlider.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
+      );
     });
   }
 );
