@@ -43,3 +43,7 @@ if [[ -d "${WORKSPACE_DIR}/builds" ]]; then
 else
   echo $(YELLOW "Workspace does not contain any build outputs to restore")
 fi
+
+if [[ -d "${WORKSPACE_DIR}/node_modules" ]]; then
+  mv "${WORKSPACE_DIR}/node_modules" .
+fi

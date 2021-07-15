@@ -62,7 +62,7 @@ commands:
             cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       # TODO(danielrozenberg): consolidate the extra steps.
       - node/install-packages:
-          override-ci-command: npm config set prefix $HOME && npm ci
+          override-ci-command: npm config set prefix $HOME && npm ci && cp -r node_modules /tmp/workspace
   teardown_vm:
     steps:
       - persist_to_workspace:
