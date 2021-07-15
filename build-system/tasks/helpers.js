@@ -464,7 +464,7 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
       // It goes through the error path here, which is pretty ungraceful.
       try {
         if (options.minify) {
-          ({code, map} = await minify(code, map, /* mangleProps */ true));
+          ({code, map} = await minify(code, map, /* manglePrivates */ true));
           ({code, map} = await postBuildTranspile(code, map));
           ({code, map} = await minify(code, map));
           map = massageSourcemaps(map, options);
@@ -584,10 +584,10 @@ async function postBuildTranspile(code, map) {
  *
  * @param {string} code
  * @param {string} map
- * @param {boolean=} mangleProps
+ * @param {boolean=} manglePrivates
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minify(code, map, mangleProps = false) {
+async function minify(code, map, manglePrivates = false) {
   const terserOptions = {
     mangle: {},
     compress: {
@@ -595,7 +595,10 @@ async function minify(code, map, mangleProps = false) {
     },
     output: {
       beautify: !!argv.pretty_print,
-      comments: /\/*/,
+
+      // TODO: is it ok that I drop comments?
+      // Why was it here in the first place?
+
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
     },
@@ -603,22 +606,13 @@ async function minify(code, map, mangleProps = false) {
     module: !!argv.esm,
   };
   // TODO: test this out when everything else is working.
-  if (mangleProps) {
+  if (manglePrivates) {
     terserOptions.mangle = {properties: {regex: '_$'}};
   }
 
   const minified = await terser.minify(code, terserOptions);
   let remapped = minified.map?.toString() ?? '';
-  try {
-    remapped = remapping(
-      [minified.map, map],
-      () => null,
-      !argv.full_sourcemaps
-    );
-  } catch (e) {
-    return {code: minified.code ?? '', map, error: e};
-    // console.error(`Could not remap: ${destFilename}, error: ${e.toString()}`);
-  }
+  remapped = remapping([minified.map, map], () => null, !argv.full_sourcemaps);
 
   return {code: minified.code ?? '', map: remapped.toString()};
 }

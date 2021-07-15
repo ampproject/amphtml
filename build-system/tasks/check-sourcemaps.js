@@ -130,10 +130,7 @@ function checkSourcemapMappings(sourcemapJson, map) {
   }
 
   // See https://www.npmjs.com/package/sourcemap-codec#usage
-  // Zeroth sub-array corresponds to the first line of output.
-  // First line of output is the AMP_CONFIG which has no mappings.
-  // Sourcemaps represents this with a semicolon.
-  const firstLineMapping = decode(sourcemapJson.mappings)[1][0];
+  const firstLineMapping = decode(sourcemapJson.mappings)[0][0];
   const [, sourceIndex = 0, sourceCodeLine = 0, sourceCodeColumn] =
     firstLineMapping;
 
