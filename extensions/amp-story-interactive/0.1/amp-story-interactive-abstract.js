@@ -873,16 +873,13 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     if (this.disclaimerEl_) {
       return;
     }
-    // Create disclaimer element.
     this.disclaimerEl_ = buildInteractiveDisclaimer(this);
     
-    // Get rects.
+    // Get rects and calculate left, right and bottom..
     const interactiveRect = this.element./*OK*/ getBoundingClientRect();
     const pageRect =
       this.disclaimerEl_.parentElement./*OK*/ getBoundingClientRect();
     const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
-
-    // Calculate left, right and bottom.
     const rightPercentage =
       1 -
       (interactiveRect.x + interactiveRect.width - pageRect.x) / pageRect.width;
@@ -891,7 +888,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       1 - (interactiveRect.y + iconRect.height - pageRect.y) / pageRect.height;
     const widthPercentage = interactiveRect.width / pageRect.width;
 
-    // Compose styles using direction, and clamp so the element is always inside bounds.
+    // Compose styles, align to left or right of component based on dir.
     const styles = {
       bottom: clamp(bottomPercentage * 100, 0, 85) + '%',
       'max-width': Math.min(widthPercentage * 100, 75) + '%',
