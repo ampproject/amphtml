@@ -38,6 +38,7 @@ import {
   mutateElementStub,
 } from '#testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {toggleExperiment} from '#experiments/';
 
 /**
  * Returns mock interactive data.
@@ -285,7 +286,10 @@ describes.realWin(
         .callsFake((fn) => fn());
       env.sandbox
         .stub(ampStoryInteractive, 'measureMutateElement')
-        .callsFake((fn1, fn2) => fn1() && fn2());
+        .callsFake((fn1, fn2) => {
+          fn1();
+          fn2();
+        });
     });
 
     it('should parse the attributes properly into an options list', async () => {
@@ -533,6 +537,10 @@ describes.realWin(
     });
 
     describe('disclaimer dialog', () => {
+      beforeEach(() => {
+        toggleExperiment(win, 'amp-story-interactive-disclaimer', true);
+      });
+
       it('should create the dialog when the disclaimer icon is clicked', async () => {
         env.sandbox
           .stub(requestService, 'executeRequest')

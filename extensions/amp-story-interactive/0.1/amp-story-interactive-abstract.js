@@ -44,6 +44,7 @@ import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
 import {toArray} from '#core/types/array';
 import {setImportantStyles} from '#core/dom/style';
+import { isExperimentOn } from '#experiments/';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
