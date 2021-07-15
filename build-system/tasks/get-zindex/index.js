@@ -156,12 +156,13 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
     const result = {};
 
-    const {stderr, stdout} = jscodeshiftAsync([
+    const p = jscodeshiftAsync([
       '--dry',
       '--no-babel',
       `--transform=${__dirname}/jscodeshift/collect-zindex.js`,
       ...filesIncludingString,
     ]);
+    const {stderr, stdout} = p;
 
     stderr.on('data', (data) => {
       throw new Error(data.toString());
@@ -188,7 +189,7 @@ function getZindexChainsInJs(glob, cwd = '.') {
       } catch (_) {}
     });
 
-    stdout.on('close', () => {
+    p.on('close', () => {
       resolve(result);
     });
   });
