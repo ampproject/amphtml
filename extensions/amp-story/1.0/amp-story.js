@@ -92,7 +92,7 @@ import {endsWith} from '#core/types/string';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getDetail} from '../../../src/event-helper';
+import {getDetail, listen, listenOnce} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
@@ -411,11 +411,12 @@ export class AmpStory extends AMP.BaseElement {
     this.mutateElement(() => {});
 
     const pageId = this.getInitialPageId_();
+    let initialPage;
     if (pageId) {
-      const page = this.element.querySelector(
+      initialPage = this.element.querySelector(
         `amp-story-page#${escapeCssSelectorIdent(pageId)}`
       );
-      page.setAttribute('active', '');
+      initialPage.setAttribute('active', '');
     }
 
     this.initializeStyles_();
@@ -464,6 +465,23 @@ export class AmpStory extends AMP.BaseElement {
       Services.performanceFor(this.win).addEnabledExperiment(
         'story-load-first-page-only'
       );
+    }
+    if (isExperimentOn(this.win, 'story-add-lcp-borders-to-imgs')) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-add-lcp-borders-to-imgs'
+      );
+      if (initialPage) {
+        initialPage.classList.add(
+          'i-amphtml-experiment-story-add-lcp-borders-to-imgs'
+        );
+        initialPage.querySelectorAll('amp-img').forEach((el) => {
+          el.signals()
+            .whenSignal(CommonSignals.LOAD_END)
+            .then(() => {
+              el.classList.add('i-amphtml-loaded');
+            });
+        });
+      }
     }
 
     if (this.maybeLoadStoryDevTools_()) {
