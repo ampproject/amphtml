@@ -16,6 +16,7 @@
 
 .i-amphtml-story-interactive-slider-container {
   --percentage: 0%;
+  --thumb-size: 1.5em;
 }
 
 .i-amphtml-story-interactive-slider-input-container {
@@ -25,11 +26,8 @@
   box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
   align-items: center !important;
   justify-content: center !important;
-  height: 100% !important;
-  width: 100% !important;
+  height: 3em !important;
   padding: 0em 1em !important;
-  box-sizing: border-box !important;
-  position: relative !important;
 }
 
 .i-amphtml-story-interactive-slider-bubble {
@@ -41,9 +39,9 @@
   left: var(--percentage) !important;
   text-align: center !important;
   line-height: 2.9em !important;
-  z-index: 2 !important;
   font-weight: 700 !important;
   color: white !important;
+  z-index: 1;
 }
 
 .i-amphtml-story-interactive-slider-bubble.show {
@@ -65,7 +63,6 @@
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
-  font-weight: 700 !important;
   transform: translate(-50%, -50%) scale(0.8) !important;
 }
 
@@ -79,8 +76,8 @@
   -webkit-appearance: none !important;
   font-size: inherit !important;
   height: 1em !important;
-  width: calc(100% + 1.5em) !important;
-  margin: 0em -0.75em !important;
+  width: calc(100% + var(--thumb-size)) !important;
+  margin: 0em calc(var(--thumb-size) * -0.5) !important;
   /* This maps the range and has the gradient follow behind the thumb */
   --percentage-corrected: calc(2.5% + 0.95 * var(--percentage)) !important;
   background: linear-gradient(
@@ -98,7 +95,7 @@
 .i-amphtml-story-interactive-slider-input-size {
   position: relative !important;
   flex: 1 !important;
-  margin: 1em 0.75em !important;
+  margin: 1em calc(var(--thumb-size) * 0.5) !important;
   height: 1em !important;
 }
 
@@ -115,8 +112,8 @@
 
 .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
   -webkit-appearance: none !important;
-  width: 1.5em !important;
-  height: 1.5em !important;
+  width: var(--thumb-size) !important;
+  height: var(--thumb-size) !important;
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
 }
