@@ -16,11 +16,11 @@
 
 .i-amphtml-story-interactive-img-quiz-answer-choice {
   position: absolute !important;
-  height: 1.5em !important;
-  width: 1.5em !important;
-  bottom: 0.5em !important;
-  right: 0.5em !important;
-  border: 0.125em solid var(--i-amphtml-interactive-option-background-color) !important;
+  height: 2em !important;
+  width: 2em !important;
+  bottom: 0.333em !important;
+  right: 0.333em !important;
+  border: 0.167em solid var(--i-amphtml-interactive-option-background-color) !important;
   background-color: var(
     --i-amphtml-interactive-option-background-color
   ) !important;
@@ -28,7 +28,7 @@
   text-align: center !important;
   color: var(--interactive-accent-color) !important;
   font-weight: 700 !important;
-  line-height: 1.5em !important;
+  line-height: 2em !important;
 }
 
 .i-amphtml-story-interactive-img-quiz-answer-choice::before {
@@ -62,9 +62,9 @@
   .i-amphtml-story-interactive-img-quiz-answer-choice::before {
   background-color: transparent !important;
   background-image: var(--i-amphtml-interactive-option-post-marker) !important;
-  background-position: 0.375em !important;
+  background-position: center !important;
   background-repeat: no-repeat !important;
-  background-size: 0.75em !important;
+  background-size: 1em !important;
   filter: var(--i-amphtml-story-interactive-img-quiz-answer-filter) !important;
   opacity: 1 !important;
 }
