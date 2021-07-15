@@ -69,19 +69,6 @@ function buildDisclaimerLayout(element) {
 }
 
 /**
- * Creates a disclaimer icon.
- * @param {!Element} element
- * @return {!Element}
- */
-function buildIconLayout(element) {
-  const html = htmlFor(element);
-  return html`<button
-    class="i-amphtml-story-interactive-disclaimer-icon"
-    aria-label="Open disclaimer"
-  ></button>`;
-}
-
-/**
  * Creates a disclaimer dialog from the interactive element passed in.
  * @param {!AmpStoryInteractive} interactive the interactive element.
  * @param {JsonObject<string, string>=} attrs optional attributes for the disclaimer.
@@ -131,8 +118,11 @@ export function buildInteractiveDisclaimer(interactive, attrs = {}) {
  * @return {!Element} the icon with the dialog that should be added to the shadowRoot.
  */
 export function buildInteractiveIcon(interactive) {
-  const disclaimerIcon = buildIconLayout(interactive.element);
-  return disclaimerIcon;
+  const html = htmlFor(interactive.element);
+  return html`<button
+    class="i-amphtml-story-interactive-disclaimer-icon"
+    aria-label="Open disclaimer"
+  ></button>`;
 }
 
 /**
