@@ -22,6 +22,7 @@ import {
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
+import {throttle} from '#core/types/function';
 import {deepMerge, dict, hasOwn} from '#core/types/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
@@ -45,6 +46,7 @@ const TAG = 'amp-analytics/events';
  */
 export const AnalyticsEventType = {
   CLICK: 'click',
+  BROWSER_EVENT: 'browser-event',
   CUSTOM: 'custom',
   HIDDEN: 'hidden',
   INI_LOAD: 'ini-load',
@@ -54,6 +56,11 @@ export const AnalyticsEventType = {
   TIMER: 'timer',
   VIDEO: 'video',
   VISIBLE: 'visible',
+};
+
+const BrowserEventType = {
+  BLUR: 'blur',
+  CHANGE: 'change',
 };
 
 const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
@@ -73,6 +80,14 @@ const TRACKER_TYPE = Object.freeze({
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function (root) {
       return new ClickEventTracker(root);
+    },
+  },
+  [AnalyticsEventType.BROWSER_EVENT]: {
+    name: AnalyticsEventType.BROWSER_EVENT,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    // Escape the temporal dead zone by not referencing a class directly.
+    klass: function (root) {
+      return new CustomBrowserEventTracker(root);
     },
   },
   [AnalyticsEventType.CUSTOM]: {
@@ -175,6 +190,14 @@ function isVideoTriggerType(triggerType) {
  * @param {string} triggerType
  * @return {boolean}
  */
+function isCustomBrowserTriggerType(triggerType) {
+  return Object.values(BrowserEventType).indexOf(triggerType) > -1;
+}
+
+/**
+ * @param {string} triggerType
+ * @return {boolean}
+ */
 function isReservedTriggerType(triggerType) {
   return isEnumValue(AnalyticsEventType, triggerType);
 }
@@ -186,6 +209,9 @@ function isReservedTriggerType(triggerType) {
 export function getTrackerKeyName(eventType) {
   if (isVideoTriggerType(eventType)) {
     return AnalyticsEventType.VIDEO;
+  }
+  if (isCustomBrowserTriggerType(eventType)) {
+    return AnalyticsEventType.BROWSER_EVENT;
   }
   if (isAmpStoryTriggerType(eventType)) {
     return AnalyticsEventType.STORY;
@@ -266,6 +292,7 @@ export class AnalyticsEvent {
    * attribute value from target element should be included.
    */
   constructor(target, type, vars = dict(), enableDataVars = true) {
+    console.log(type)
     /** @const */
     this['target'] = target;
     /** @const */
@@ -304,6 +331,85 @@ export class EventTracker {
    * @abstract
    */
   add(unusedContext, unusedEventType, unusedConfig, unusedListener) {}
+}
+
+/**
+ * Tracks custom browser events.
+ */
+export class CustomBrowserEventTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    let counter
+    super(root);
+
+    /** @private {?Observable<!Event>} */
+    this.observables_ = new Observable();
+
+    /** @private {?function(!Event)} */
+    this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
+  }
+
+  /** @override */
+  dispose() {
+    const root = this.root.getRoot();
+    Object.keys(BrowserEventType).forEach((key) => {
+      root.removeEventListener(BrowserEventType[key], this.boundOnSession_);
+    });
+    this.boundOnSession_ = null;
+    this.observables_ = null;
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const selector = userAssert(
+      config['selector'],
+      'Missing required selector on browser event trigger'
+    );
+    const selectionMethod = config['selectionMethod'] || null;
+    const eventName = config['on'];
+
+    const targetReady = this.root.getElement(
+      context,
+      selector,
+      selectionMethod
+    );
+
+    this.root.getRootElement().addEventListener(eventName,
+      throttle(this.root.getElement(),this.boundOnSession_,500), true);
+
+    return this.observables_.add((event) => {
+      const el = dev().assertElement(
+        event.target,
+        'No target specified by browser event.'
+      );
+      if (!event.type.localeCompare(eventName)) {
+        targetReady.then((target) => {
+          if (!target.contains(el)) {
+            return;
+          }
+          targetReady.then(target => {console.log(target)})
+          listener(new AnalyticsEvent(target, eventName, event.detail));
+        });
+      }
+    });
+
+  }
+
+throttle_ (callback, limit) {
+    var wait = false;
+    return function () {
+        if (!wait) {
+            callback.apply(this, arguments);
+            wait = true;
+            setTimeout(function () {
+                wait = false;
+            }, limit);
+        }
+    }
+}
+
 }
 
 /**
@@ -1270,7 +1376,6 @@ export class VideoEventTracker extends EventTracker {
     this.boundOnSession_ = this.sessionObservable_.fire.bind(
       this.sessionObservable_
     );
-
     Object.keys(VideoAnalyticsEvents).forEach((key) => {
       this.root
         .getRoot()
