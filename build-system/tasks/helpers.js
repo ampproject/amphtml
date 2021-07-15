@@ -428,10 +428,11 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
   // TODO: Make this once per dist build, and likely not as part of this flow.
   fs.outputFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
 
-  // TODO: use target es5 vs. es6 depending on the build.
   const buildResult = await esbuild
     .build({
       entryPoints: [entryPoint],
+      // For es5 builds, ensure esbuild-injected code is transpiled.
+      target: argv.esm ? 'es6' : 'es5',
       bundle: true,
       sourcemap: true,
       define: {
