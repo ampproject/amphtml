@@ -33,7 +33,7 @@ const BUILD_CONSTANTS = {
   IS_FORTESTING: `${isForTesting}`,
   IS_MINIFIED: `${isMinified}`,
   INTERNAL_RUNTIME_VERSION: isTestTask
-    ? '$internalRuntimeVersion$'
+    ? `'${'$internalRuntimeVersion$'}'`
     : `'${VERSION}'`,
 
   // We build on the idea that SxG is an upgrade to the ESM build.
