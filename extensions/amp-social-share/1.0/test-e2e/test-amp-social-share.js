@@ -32,7 +32,8 @@ describes.endtoend(
     });
 
     describe('rendering', () => {
-      it('renders the default social share button', async () => {
+      // TODO(#35241): flaky test disabled in #35176
+      it.skip('renders the default social share button', async () => {
         const host = await controller.findElement('#one');
 
         await controller.switchToShadowRoot(host);
@@ -57,7 +58,8 @@ describes.endtoend(
         ).to.not.equal(0);
       });
 
-      it('renders the social share button with custom sizing', async () => {
+      // TODO(#35241): flaky test disabled in #35176
+      it.skip('renders the social share button with custom sizing', async () => {
         const host = await controller.findElement('#three');
 
         await controller.switchToShadowRoot(host);
@@ -71,7 +73,8 @@ describes.endtoend(
         ).to.equal(400);
       });
 
-      it('renders the social share button with custom type and endpoint', async () => {
+      // TODO(#35241): flaky test disabled in #35176
+      it.skip('renders the social share button with custom type and endpoint', async () => {
         const host = await controller.findElement('#four');
 
         await controller.switchToShadowRoot(host);

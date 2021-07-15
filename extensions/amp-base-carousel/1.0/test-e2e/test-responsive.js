@@ -44,7 +44,8 @@ describes.endtoend(
       await controller.switchToShadowRoot(carousel);
     });
 
-    it('should layout correctly initially', async () => {
+    // TODO(#35241): flaky test disabled in #35176
+    it.skip('should layout correctly initially', async () => {
       const firstSlide = await getSlide(styles, controller, 0);
 
       // 3 slides width width 1000 = 333 width per slide.
@@ -54,7 +55,8 @@ describes.endtoend(
       });
     });
 
-    it('should layout correctly after resize', async () => {
+    // TODO(#35241): flaky test disabled in #35176
+    it.skip('should layout correctly after resize', async () => {
       const firstSlide = await getSlide(styles, controller, 0);
 
       await controller.setWindowRect({
@@ -68,7 +70,8 @@ describes.endtoend(
       });
     });
 
-    it('should retain position when changing the visible count', async () => {
+    // TODO(#35241): flaky test disabled in #35176
+    it.skip('should retain position when changing the visible count', async () => {
       const el = await getScrollingElement(styles, controller);
       const secondSlide = await getSlide(styles, controller, 1);
 
@@ -85,7 +88,8 @@ describes.endtoend(
       await expect(controller.getElementRect(secondSlide)).to.include({x: 0});
     });
 
-    it('should respond to attribute changes', async () => {
+    // TODO(#35241): flaky test disabled in #35176
+    it.skip('should respond to attribute changes', async () => {
       const firstSlide = await getSlide(styles, controller, 0);
 
       // 3 slides width width 1000 = 333 width per slide.
