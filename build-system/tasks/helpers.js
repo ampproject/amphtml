@@ -17,7 +17,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
 const esbuild = require('esbuild');
-// const babel = require('@babel/core');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
@@ -429,6 +428,7 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
   // TODO: Make this once per dist build, and likely not as part of this flow.
   fs.outputFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
 
+  // TODO: use target es5 vs. es6 depending on the build.
   const buildResult = await esbuild
     .build({
       entryPoints: [entryPoint],
@@ -549,43 +549,6 @@ function remapDependenciesPlugin(options) {
     },
   };
 }
-
-// /**
-//  * Use babel to transpile with preset-env
-//  *
-//  * @param {string} code
-//  * @param {string} map
-//  * @return {!Promise}
-//  */
-// async function postBuildTranspile(code, map) {
-//   const presetEnv = [
-//     '@babel/preset-env',
-//     {
-//       bugfixes: true,
-//       modules: false,
-//       targets: argv.esm ? {esmodules: true} : {ie: 11, chrome: 41},
-//     },
-//   ];
-
-//   const transformed = await babel.transformAsync(code, {
-//     compact: true,
-//     plugins: [
-//       './build-system/babel-plugins/babel-plugin-const-transformer',
-//       './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
-//       './build-system/babel-plugins/babel-plugin-transform-minified-comments',
-//     ],
-//     presets: [presetEnv],
-//     inputSourceMap: JSON.parse(map),
-//     'assumptions': {
-//       'constantSuper': true,
-//       'noClassCalls': true,
-//       'setClassMethods': true,
-//       'superIsCallableConstructor': true,
-//     },
-//   });
-
-//   return {code: transformed.code, map: JSON.stringify(transformed.map)};
-// }
 
 /**
  * Name cache to help terser perform cross-binary property mangling.
