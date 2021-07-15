@@ -72,7 +72,8 @@ describes.endtoend(
       //TODO(sparhami): fails on shadow demo
       it.configure()
         .skipShadowDemo()
-        .run('should snap on the center point', async () => {
+        // TODO(#): disabled in #35176
+        .skip('should snap on the center point', async () => {
           const el = await getScrollingElement(controller);
           const slides = await getSlides(controller);
           const scrollAmount = 1 + slideOneWidth / 2;

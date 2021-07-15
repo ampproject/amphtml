@@ -24,10 +24,25 @@ const {
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
+const {getStdout} = require('../common/process');
 const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
+const {unitTestPaths} = require('../test-configs/config');
 
 const jobName = 'unit-tests.js';
+
+/**
+ *
+ * @return {string}
+ */
+function getShardTestFiles() {
+  const unitTestPathsJoined = `"${unitTestPaths.join('" "')}"`;
+  return getStdout(
+    `circleci tests glob ${unitTestPathsJoined} | circleci tests split --split-by=timings`
+  )
+    .trim()
+    .replace(/\s+/g, ',');
+}
 
 /**
  * Steps to run during push builds.
@@ -35,7 +50,7 @@ const jobName = 'unit-tests.js';
 function pushBuildWorkflow() {
   try {
     timedExecOrThrow(
-      'amp unit --headless --coverage --report',
+      `amp unit --headless --coverage --files ${getShardTestFiles()}`,
       'Unit tests failed!'
     );
     timedExecOrThrow(
@@ -56,8 +71,9 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
-    timedExecOrDie('amp unit --headless --local_changes');
-    timedExecOrDie('amp unit --headless --coverage');
+    timedExecOrDie(
+      `amp unit --headless --coverage --files ${getShardTestFiles()}`
+    );
     timedExecOrDie('amp codecov-upload');
   } else {
     skipDependentJobs(

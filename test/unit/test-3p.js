@@ -291,7 +291,8 @@ describes.sandboxed('3p', {}, (env) => {
       expect(s.src).to.equal(url);
     });
 
-    it('should handle onSuccess callback', (done) => {
+    // TODO(#): disabled in #35227
+    it.skip('should handle onSuccess callback', (done) => {
       loadScript(
         window,
         'http://localhost:9876/test/unit/test-3p.js',
