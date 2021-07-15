@@ -209,6 +209,7 @@ export function loadPromise(eleOrWindow) {
         return reject(new Error('Media has no source.'));
       }
     }
+
     unlistenError = listenOnce(errorTarget, 'error', reject);
   });
 
@@ -223,7 +224,11 @@ export function loadPromise(eleOrWindow) {
       if (unlistenLoad) {
         unlistenLoad();
       }
-      failedToLoad(eleOrWindow);
+      if (isHTMLImageElement(eleOrWindow)) {
+        throw user().createError('Image failed to load', eleOrWindow);
+      } else {
+        failedToLoad(eleOrWindow);
+      }
     }
   );
 }
@@ -258,6 +263,15 @@ function failedToLoad(eleOrWindow) {
  */
 function isHTMLMediaElement(eleOrWindow) {
   return eleOrWindow.tagName === 'AUDIO' || eleOrWindow.tagName === 'VIDEO';
+}
+
+/**
+ * Returns true if the parameter is a HTMLImageElement
+ * @param {!Element|!Window} eleOrWindow
+ * @return {boolean}
+ */
+function isHTMLImageElement(eleOrWindow) {
+  return eleOrWindow.tagName === 'IMG';
 }
 
 /**
