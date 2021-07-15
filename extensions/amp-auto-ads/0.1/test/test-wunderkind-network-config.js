@@ -57,7 +57,7 @@ describes.realWin(
         const adNetwork = getAdNetworkConfig('wunderkind', ampAutoAdsElem);
         const configUrl = adNetwork.getConfigUrl();
         expect(configUrl).to.contain(
-          'https://api.bounceexchange.com/bounce/amp?' + PUBLISHER_ID
+          'https://api.bounceexchange.com/bounce/amp?w_id=' + SITE_ID
         );
       });
 

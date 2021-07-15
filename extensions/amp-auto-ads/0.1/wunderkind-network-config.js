@@ -38,7 +38,7 @@ export class WunderkindNetworkConfig {
   }
 
   /**
-   *
+   * True if responsive is enabled for auto-ads
    */
   isResponsiveEnabled() {
     return true;
@@ -48,12 +48,15 @@ export class WunderkindNetworkConfig {
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
 
-    const websiteId = this.autoAmpAdsElement_.getAttribute('data-website-id');
+    const websiteID = this.autoAmpAdsElement_.getAttribute('data-website-id');
+
+    // websiteID should be an integer
+    websiteID = websiteID.replace(/[^0-9]/sg, '');
 
     return buildUrl(
       'https://api.bounceexchange.com/bounce/amp',
       {
-        'w_id': websiteId,
+        'w_id': websiteID,
         'calling_url': docInfo.sourceUrl,
       },
       4096
