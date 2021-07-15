@@ -72,7 +72,7 @@ The example below contains an `amp-accordion` with three sections. The
 [filter formats="websites, ads"]Include the `disable-session-state` attribute
 to preserve the collapsed/expanded state.[/filter]
 
-[example preview="top-frame" playground="true"]
+[example preview="top-frame" playground="true" imports="amp-accordion:0.1"]
 
 ```html
 <amp-accordion id="my-accordion"{% if not format=='email'%} disable-session-states{% endif %}>
@@ -102,7 +102,7 @@ to preserve the collapsed/expanded state.[/filter]
 Include the `animate` attribute in `<amp-accordion>` to add a "roll down"
 animation when the content is expanded and "roll up" animation when collapsed.
 
-[example preview="top-frame" playground="true"]
+[example preview="top-frame" playground="true" imports="amp-accordion:0.1"]
 
 ```html
 <amp-accordion animate>
@@ -146,7 +146,7 @@ Apply the `expand-single-section` attribute to `amp-accordion` to specify that
 only one `<section>` can expand at a time. If the user clicks or taps on a
 collapsed `<section>`, any currently expanded `<section>` collapses.
 
-[example preview="top-frame" playground="true"]
+[example preview="top-frame" playground="true" imports="amp-accordion:0.1"]
 
 ```html
 <amp-accordion expand-single-section>
@@ -178,7 +178,7 @@ section. An expanded section collapses if the expression evaluates as false. A
 collapsed section expands if the expression evaluates as anything other than
 false.
 
-[example preview="top-frame" playground="true"]
+[example preview="top-frame" playground="true" imports="amp-accordion:0.1"]
 
 ```html
 <amp-accordion>
@@ -215,7 +215,7 @@ The `toggle` action switches the `expanded` and `collapsed` states of
 of the accordion. To specify a specific section, add the `section` argument and
 use its corresponding `id` as the value.
 
-[example preview="top-frame" playground="true"]
+[example preview="top-frame" playground="true" imports="amp-accordion:0.1"]
 
 ```html
 <amp-accordion id="myAccordion">
@@ -280,7 +280,7 @@ The `expand` event triggers the targeted `amp-accordion` section to change from
 the collapsed state to the expanded state. Call `expand` on an already expanded
 section to trigger the `expand` event.
 
-[example preview="top-frame" playground="true"]
+[example preview="top-frame" playground="true" imports="amp-accordion:0.1"]
 
 ```html
 <amp-accordion id="myAccordion">
@@ -303,7 +303,7 @@ The `collapse` event triggers the targeted `amp-accordion` section to change
 from the expanded state to the collapsed state. Call `collapse` on an already
 collapsed section to trigger the event.
 
-[example preview="top-frame" playground="true"]
+[example preview="top-frame" playground="true" imports="amp-accordion:0.1"]
 
 ```html
 <amp-accordion id="myAccordion">
