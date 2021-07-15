@@ -80,12 +80,26 @@ function getMinifiedConfig() {
       {isEsmBuild: !!argv.esm},
     ],
   ].filter(Boolean);
+  const presetEnv = [
+    '@babel/preset-env',
+    {
+      bugfixes: true,
+      modules: false,
+      targets: argv.esm ? {esmodules: true} : {ie: 11, chrome: 41},
+    },
+  ];
+
   return {
     compact: false,
     plugins,
-    presets: [],
+    presets: [presetEnv],
     retainLines: true,
-    sourceMaps: true,
+    'assumptions': {
+      'constantSuper': true,
+      'noClassCalls': true,
+      'setClassMethods': true,
+      'superIsCallableConstructor': true,
+    },
   };
 }
 

@@ -61,10 +61,10 @@ function getEsbuildBabelPlugin(
 
     debug('pre-babel', filename, contents);
     const promise = babel
-      .transformAsync(contents, {...babelOptions, sourceMaps: 'both'})
+      .transformAsync(contents, {...babelOptions, sourceMaps: 'inline'})
       .then((result) => {
-        const {code, map} = result || {};
-        debug('post-babel', filename, code, map);
+        const {code} = result || {};
+        debug('post-babel', filename, code);
         return code;
       });
 
