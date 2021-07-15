@@ -1014,6 +1014,12 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-story-captions",
+    "version": "0.1",
+    "options": {"hasCss": true},
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-story-dev-tools",
     "version": "0.1",
     "latestVersion": "0.1",
