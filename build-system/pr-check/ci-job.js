@@ -27,8 +27,12 @@ const {
   setLoggingPrefix,
 } = require('../common/logging');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
+const {isCircleciBuild, isPullRequestBuild} = require('../common/ci');
 const {red} = require('../common/colors');
+const {
+  startFastFailPollingWorker,
+  stopFastFailWorker,
+} = require('../common/fast-fail-worker');
 const {updatePackages} = require('../common/update-packages');
 
 /**
@@ -39,6 +43,9 @@ const {updatePackages} = require('../common/update-packages');
  * @return {Promise<void>}
  */
 async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
+  if (isCircleciBuild()) {
+    startFastFailPollingWorker();
+  }
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
   try {
@@ -55,6 +62,8 @@ async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
     logWithoutTimestamp(getLoggingPrefix(), red('ERROR:'), err);
     abortTimedJob(jobName, startTime);
   }
+
+  stopFastFailWorker();
 }
 
 module.exports = {
