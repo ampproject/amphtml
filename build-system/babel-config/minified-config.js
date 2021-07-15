@@ -25,7 +25,6 @@ const {getReplacePlugin} = require('./helpers');
  * @return {!Object}
  */
 function getMinifiedConfig() {
-  const isCheckTypes = argv._.includes('check-types');
   const testTasks = ['e2e', 'integration', 'visual-diff'];
   const isTestTask = testTasks.some((task) => argv._.includes(task));
   const isFortesting = argv.fortesting || isTestTask;
@@ -74,28 +73,15 @@ function getMinifiedConfig() {
     // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
     //: null,
-    !isCheckTypes
-      ? null
-      : './build-system/babel-plugins/babel-plugin-transform-json-configuration',
-    isFortesting || isCheckTypes
-      ? null
-      : [
-          './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
-          {isEsmBuild: !!argv.esm},
-        ],
+    !isFortesting && [
+      './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
+      {isEsmBuild: !!argv.esm},
+    ],
   ].filter(Boolean);
-  const presetEnv = [
-    '@babel/preset-env',
-    {
-      bugfixes: true,
-      modules: false,
-      targets: argv.esm ? {esmodules: true} : {ie: 11, chrome: 41},
-    },
-  ];
   return {
     compact: false,
     plugins,
-    presets: [presetEnv],
+    presets: [],
     retainLines: true,
     sourceMaps: true,
   };

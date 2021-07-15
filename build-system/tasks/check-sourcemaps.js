@@ -33,7 +33,7 @@ const v0MjsMap = 'dist/v0.mjs.map';
 const sourcemapUrlMatcher =
   'https://raw.githubusercontent.com/ampproject/amphtml/\\d{13}/';
 
-const expectedFirstLineFile = 'src/polyfills/abort-controller.js'; // First file that is compiled into v0.mjs.
+const expectedFirstLineFile = 'src/polyfills/abort-controller.js'; // First file that is compiled into v0.js.
 const expectedFirstLineCode = 'class AbortController {'; // First line of code in that file.
 /**
  * Build runtime with sourcemaps if needed.
@@ -130,7 +130,10 @@ function checkSourcemapMappings(sourcemapJson, map) {
   }
 
   // See https://www.npmjs.com/package/sourcemap-codec#usage
-  const firstLineMapping = decode(sourcemapJson.mappings)[2][0];
+  // Zeroth sub-array corresponds to the first line of output.
+  // First line of output is the AMP_CONFIG which has no mappings.
+  // Sourcemaps represents this with a semicolon.
+  const firstLineMapping = decode(sourcemapJson.mappings)[1][0];
   const [, sourceIndex = 0, sourceCodeLine = 0, sourceCodeColumn] =
     firstLineMapping;
 
