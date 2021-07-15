@@ -460,11 +460,18 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
         result.outputFiles.find((file) => file.path.endsWith('.map'))?.text ??
         '';
 
-      if (options.minify) {
-        // ({code, map} = await minify(code, map, /* mangleProps */ true));
-        ({code, map} = await postBuildTranspile(code, map));
-        ({code, map} = await minify(code, map));
-        map = massageSourcemaps(map, options);
+      // TODO: figure out what to do about shadow-dom-polyfill.
+      // It goes through the error path here, which is pretty ungraceful.
+      try {
+        if (options.minify) {
+          ({code, map} = await minify(code, map, /* mangleProps */ true));
+          ({code, map} = await postBuildTranspile(code, map));
+          ({code, map} = await minify(code, map));
+          map = massageSourcemaps(map, options);
+        }
+      } catch (e) {
+        log(`Failed to minify: ${destFile}, with error: ${e.message}`);
+        log(`code\n-------\n${code}\n map:\n------\n${map}`);
       }
       await Promise.all([
         fs.writeFile(destFile, code),
@@ -559,6 +566,7 @@ async function postBuildTranspile(code, map) {
   ];
 
   const transformed = await babel.transformAsync(code, {
+    compact: false,
     plugins: [
       './build-system/babel-plugins/babel-plugin-const-transformer',
       './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
@@ -568,7 +576,7 @@ async function postBuildTranspile(code, map) {
     inputSourceMap: JSON.parse(map),
   });
 
-  return {code: transformed.code, map: transformed.map};
+  return {code: transformed.code, map: JSON.stringify(transformed.map)};
 }
 
 /**
