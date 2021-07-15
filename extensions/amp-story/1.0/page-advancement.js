@@ -524,24 +524,7 @@ export class ManualAdvancement extends AdvancementConfig {
     // <span>).
     const target = dev().assertElement(event.target);
 
-    if (
-      this.isInStoryPageSideEdge_(event, pageRect) ||
-      this.isTooLargeOnPage_(event, pageRect)
-    ) {
-      event.preventDefault();
-      return false;
-    }
-
-    if (
-      target.getAttribute('show-tooltip') === 'auto' &&
-      this.isInScreenBottom_(target, pageRect)
-    ) {
-      target.setAttribute('target', '_blank');
-      target.setAttribute('role', 'link');
-      return false;
-    }
-
-    return !!closest(
+    const canShow = !!closest(
       target,
       (el) => {
         tagName = el.tagName.toLowerCase();
@@ -559,6 +542,26 @@ export class ManualAdvancement extends AdvancementConfig {
       },
       /* opt_stopAt */ this.element_
     );
+
+    if (
+      canShow &&
+      (this.isInStoryPageSideEdge_(event, pageRect) ||
+        this.isTooLargeOnPage_(event, pageRect))
+    ) {
+      event.preventDefault();
+      return false;
+    }
+
+    if (
+      target.getAttribute('show-tooltip') === 'auto' &&
+      this.isInScreenBottom_(target, pageRect)
+    ) {
+      target.setAttribute('target', '_blank');
+      target.setAttribute('role', 'link');
+      return false;
+    }
+
+    return canShow;
   }
 
   /**
@@ -584,15 +587,6 @@ export class ManualAdvancement extends AdvancementConfig {
     // Clicks with coordinates (0,0) are assumed to be from keyboard or Talkback.
     // These clicks should never be overriden for navigation.
     if (event.clientX === 0 && event.clientY === 0) {
-      return false;
-    }
-
-    // Always handle clicks inside the page attachment.
-    const clickInsideAttachment = this.element_
-      .querySelector('amp-story-page[active]')
-      .querySelector('amp-story-page-attachment')
-      ?.contains(event.target);
-    if (clickInsideAttachment) {
       return false;
     }
 
