@@ -359,6 +359,7 @@ function renderSlides(
     const key = `slide-${child.key || index}`;
     return (
       <Comp
+        caption={child.props.caption}
         key={key}
         data-slide={index}
         class={`${classes.slideSizing} ${classes.slideElement} ${

@@ -413,5 +413,216 @@ describes.realWin(
         expect(element.removeAsContainerInternal).to.not.be.called;
       });
     });
+
+    describe('captions', () => {
+      it('should render with caption via figure', async () => {
+        const img = html` <figure>
+          <img lightbox src="img.jpg" />
+          <figcaption>figure img</figcaption>
+        </figure>`;
+        doc.body.appendChild(img);
+        await installLightboxGallery(env.ampdoc);
+        element = doc.getElementById(TAG);
+        await element.buildInternal();
+
+        element.enqueAction(invocation(element, DEFAULT_ACTION));
+        await waitForOpen(element, true);
+        expect(element.hasAttribute('hidden')).to.be.false;
+
+        expect(
+          element.shadowRoot.querySelector('.amp-lightbox-gallery-caption')
+            .textContent
+        ).to.equal('figure img');
+      });
+
+      it('should render with caption via aria-describedby', async () => {
+        const img = html` <div>
+          <img lightbox src="img.jpg" aria-describedby="description" />
+          <div id="description">description img</div>
+        </div>`;
+        doc.body.appendChild(img);
+        await installLightboxGallery(env.ampdoc);
+        element = doc.getElementById(TAG);
+        await element.buildInternal();
+
+        element.enqueAction(invocation(element, DEFAULT_ACTION));
+        await waitForOpen(element, true);
+        expect(element.hasAttribute('hidden')).to.be.false;
+
+        expect(
+          element.shadowRoot.querySelector('.amp-lightbox-gallery-caption')
+            .textContent
+        ).to.equal('description img');
+      });
+
+      it('should render with caption via aria-labelledby', async () => {
+        const img = html` <div>
+          <img lightbox src="img.jpg" aria-labelledby="label" />
+          <div id="label">label img</div>
+        </div>`;
+        doc.body.appendChild(img);
+        await installLightboxGallery(env.ampdoc);
+        element = doc.getElementById(TAG);
+        await element.buildInternal();
+
+        element.enqueAction(invocation(element, DEFAULT_ACTION));
+        await waitForOpen(element, true);
+        expect(element.hasAttribute('hidden')).to.be.false;
+
+        expect(
+          element.shadowRoot.querySelector('.amp-lightbox-gallery-caption')
+            .textContent
+        ).to.equal('label img');
+      });
+
+      it('should render with caption via alt', async () => {
+        doc.body.appendChild(
+          html` <img lightbox src="img.jpg" alt="alt img" />`
+        );
+        await installLightboxGallery(env.ampdoc);
+        element = doc.getElementById(TAG);
+        await element.buildInternal();
+
+        element.enqueAction(invocation(element, DEFAULT_ACTION));
+        await waitForOpen(element, true);
+        expect(element.hasAttribute('hidden')).to.be.false;
+
+        expect(
+          element.shadowRoot.querySelector('.amp-lightbox-gallery-caption')
+            .textContent
+        ).to.equal('alt img');
+      });
+
+      it('should render with caption via aria-label', async () => {
+        doc.body.appendChild(
+          html` <img lightbox src="img.jpg" aria-label="aria-label img" />`
+        );
+        await installLightboxGallery(env.ampdoc);
+        element = doc.getElementById(TAG);
+        await element.buildInternal();
+
+        element.enqueAction(invocation(element, DEFAULT_ACTION));
+        await waitForOpen(element, true);
+        expect(element.hasAttribute('hidden')).to.be.false;
+
+        expect(
+          element.shadowRoot.querySelector('.amp-lightbox-gallery-caption')
+            .textContent
+        ).to.equal('aria-label img');
+      });
+
+      it('should prefer figure description to all other labels', async () => {
+        doc.body.appendChild(
+          html` <div>
+            <figure>
+              <img
+                lightbox
+                src="img.jpg"
+                alt="alt img"
+                aria-label="aria-label img"
+                aria-labelledby="label"
+                aria-describedby="description"
+              />
+              <figcaption>figure img</figcaption>
+            </figure>
+            <div id="label">label img</div>
+            <div id="description">description img</div>
+          </div>`
+        );
+        await installLightboxGallery(env.ampdoc);
+        element = doc.getElementById(TAG);
+        await element.buildInternal();
+
+        element.enqueAction(invocation(element, DEFAULT_ACTION));
+        await waitForOpen(element, true);
+        expect(element.hasAttribute('hidden')).to.be.false;
+
+        expect(
+          element.shadowRoot.querySelector('.amp-lightbox-gallery-caption')
+            .textContent
+        ).to.equal('figure img');
+      });
+
+      it('should prefer aria-describedby to aria-labelledby, alt, and aria-label', async () => {
+        doc.body.appendChild(
+          html` <div>
+            <img
+              lightbox
+              src="img.jpg"
+              alt="alt img"
+              aria-label="aria-label img"
+              aria-labelledby="label"
+              aria-describedby="description"
+            />
+            <div id="label">label img</div>
+            <div id="description">description img</div>
+          </div>`
+        );
+        await installLightboxGallery(env.ampdoc);
+        element = doc.getElementById(TAG);
+        await element.buildInternal();
+
+        element.enqueAction(invocation(element, DEFAULT_ACTION));
+        await waitForOpen(element, true);
+        expect(element.hasAttribute('hidden')).to.be.false;
+
+        expect(
+          element.shadowRoot.querySelector('.amp-lightbox-gallery-caption')
+            .textContent
+        ).to.equal('description img');
+      });
+
+      it('should prefer aria-labelledby to alt and aria-label', async () => {
+        doc.body.appendChild(
+          html` <div>
+            <img
+              lightbox
+              src="img.jpg"
+              alt="alt img"
+              aria-label="aria-label img"
+              aria-labelledby="label"
+            />
+            <div id="label">label img</div>
+          </div>`
+        );
+        await installLightboxGallery(env.ampdoc);
+        element = doc.getElementById(TAG);
+        await element.buildInternal();
+
+        element.enqueAction(invocation(element, DEFAULT_ACTION));
+        await waitForOpen(element, true);
+        expect(element.hasAttribute('hidden')).to.be.false;
+
+        expect(
+          element.shadowRoot.querySelector('.amp-lightbox-gallery-caption')
+            .textContent
+        ).to.equal('label img');
+      });
+
+      it('should prefer alt to aria-label', async () => {
+        doc.body.appendChild(
+          html` <div>
+            <img
+              lightbox
+              src="img.jpg"
+              alt="alt img"
+              aria-label="aria-label img"
+            />
+          </div>`
+        );
+        await installLightboxGallery(env.ampdoc);
+        element = doc.getElementById(TAG);
+        await element.buildInternal();
+
+        element.enqueAction(invocation(element, DEFAULT_ACTION));
+        await waitForOpen(element, true);
+        expect(element.hasAttribute('hidden')).to.be.false;
+
+        expect(
+          element.shadowRoot.querySelector('.amp-lightbox-gallery-caption')
+            .textContent
+        ).to.equal('alt img');
+      });
+    });
   }
 );
