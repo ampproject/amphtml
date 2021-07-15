@@ -464,7 +464,7 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
 
       if (options.minify) {
         ({code, map} = await minify(code, map, /* mangleProps */ true));
-        ({code, map} = await transpile(code, map));
+        ({code, map} = await postBuildTranspile(code, map));
         ({code, map} = await minify(code, map));
         map = massageSourcemaps(map, options);
       }
@@ -550,7 +550,7 @@ function remapDependenciesPlugin(options) {
  * @param {string} map
  * @return {!Promise}
  */
-async function transpile(code, map) {
+async function postBuildTranspile(code, map) {
   const presetEnv = [
     '@babel/preset-env',
     {
@@ -561,6 +561,11 @@ async function transpile(code, map) {
   ];
 
   const transformed = await babel.transformAsync(code, {
+    plugins: [
+      './build-system/babel-plugins/babel-plugin-const-transformer',
+      './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
+      './build-system/babel-plugins/babel-plugin-transform-minified-comments',
+    ],
     presets: [presetEnv],
     inputSourceMap: JSON.parse(map),
   });
