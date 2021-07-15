@@ -51,7 +51,7 @@ export class WunderkindNetworkConfig {
     const websiteID = this.autoAmpAdsElement_.getAttribute('data-website-id');
 
     // websiteID should be an integer
-    websiteID = websiteID.replace(/[^0-9]/sg, '');
+    websiteID = websiteID.replace(/[^0-9]/g, '');
 
     return buildUrl(
       'https://api.bounceexchange.com/bounce/amp',
