@@ -17,6 +17,7 @@
 .i-amphtml-story-interactive-img-container {
   --i-amphtml-interactive-img-option-size: 7.5em !important;
   --i-amphtml-interactive-img-option-margin: 1em !important;
+  --i-amphtml-interactive-img-transform: scale(0.95) !important;
 
   border-radius: 3.75em 3.75em 4.375em 4.375em !important;
 }
@@ -63,6 +64,16 @@
   height: 100% !important;
   background-position: center !important;
   background-size: cover !important;
+}
+
+.i-amphtml-story-interactive-img-option:focus {
+  outline: none !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-img-option:focus
+  .i-amphtml-story-interactive-img-option-img {
+  transform: var(--i-amphtml-interactive-img-transform) !important;
 }
 
 .i-amphtml-story-interactive-img-option-img::before {
@@ -134,6 +145,6 @@
 
 @keyframes i-amphtml-story-interactive-img-option-img-landing-animation {
   33% {
-    transform: scale(0.95);
+    transform: var(--i-amphtml-interactive-img-transform);
   }
 }
