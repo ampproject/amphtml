@@ -73,6 +73,8 @@ function getMinifiedConfig() {
     // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
     //: null,
+    !isFortesting &&
+      './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     !isFortesting && [
       './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
       {isEsmBuild: !!argv.esm},
