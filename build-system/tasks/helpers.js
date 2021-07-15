@@ -480,8 +480,6 @@ async function doCompileJs(srcDir, srcFilename, destDir, options) {
         fs.outputFile(`${destFile}.map`, map),
       ]);
 
-      // TODO: finishBundle breaks sourcemaps
-      // Make it not do that.
       await finishBundle(
         srcFilename,
         destDir,
@@ -615,6 +613,7 @@ async function minify(code, map, manglePrivates = false) {
       beautify: !!argv.pretty_print,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
+      preamble: ';',
     },
     sourceMap: {content: map},
     module: !!argv.esm,
