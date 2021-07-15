@@ -430,6 +430,28 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
     });
   });
 
+  it('should write cookie with custom expiration ("Session")', () => {
+    win.location = 'https://www.example.test/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 'Session', // Session Cookie
+          'aCookie': {
+            'value': 'testValue',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=testValue; path=/; domain=example.test; ' +
+          'expires=Session'
+      );
+    });
+  });
+
   it('should write cookie with custom expiration (decimal value)', () => {
     win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(

@@ -84,7 +84,7 @@ function tryGetDocumentCookie_(win) {
  * @param {!Window} win
  * @param {string} name
  * @param {string} value
- * @param {time} expirationTime
+ * @param {time|undefined} expirationTime
  * @param {{
  *   highestAvailableDomain:(boolean|undefined),
  *   domain:(string|undefined),
@@ -183,7 +183,7 @@ export function getHighestAvailableDomain(win) {
  * @param {!Window} win
  * @param {string} name
  * @param {string} value
- * @param {time} expirationTime
+ * @param {time|undefined} expirationTime
  * @param {string|undefined} domain
  * @param {!SameSite=} sameSite
  * @param {boolean|undefined=} secure
@@ -211,8 +211,8 @@ function trySetCookie(
     encodeURIComponent(value) +
     '; path=/' +
     (domain ? '; domain=' + domain : '') +
-    '; expires=' +
-    new Date(expirationTime).toUTCString() +
+    (expirationTime ? '; expires=' +
+      new Date(expirationTime).toUTCString() : "") +
     getSameSiteString(win, sameSite) +
     (secure ? '; Secure' : '');
   try {
