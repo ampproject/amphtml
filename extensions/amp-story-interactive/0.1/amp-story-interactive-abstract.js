@@ -875,7 +875,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     }
     this.disclaimerEl_ = buildInteractiveDisclaimer(this);
     
-    // Get rects and calculate left, right and bottom..
+    // Get rects and calculate left, right and bottom.
     const interactiveRect = this.element./*OK*/ getBoundingClientRect();
     const pageRect =
       this.disclaimerEl_.parentElement./*OK*/ getBoundingClientRect();

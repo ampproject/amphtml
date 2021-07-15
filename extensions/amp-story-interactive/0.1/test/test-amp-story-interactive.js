@@ -554,6 +554,30 @@ describes.realWin(
         ).to.not.be.null;
       });
 
+      it('should destroy the dialog when the close button is clicked', async () => {
+        env.sandbox
+          .stub(requestService, 'executeRequest')
+          .resolves(getMockInteractiveData());
+        addConfigToInteractive(ampStoryInteractive);
+        ampStoryInteractive.element.setAttribute(
+          'endpoint',
+          'https://notabackend.com'
+        );
+        await ampStoryInteractive.buildCallback();
+        await ampStoryInteractive.layoutCallback();
+
+        await ampStoryInteractive
+          .getRootElement()
+          .querySelector('.i-amphtml-story-interactive-disclaimer-icon')
+          .click();
+
+        expect(
+          storyEl.querySelector(
+            '.i-amphtml-story-interactive-disclaimer-dialog'
+          )
+        ).to.not.be.null;
+      });
+
       it('should set the url of the disclaimer to the backend url', async () => {
         env.sandbox
           .stub(requestService, 'executeRequest')
