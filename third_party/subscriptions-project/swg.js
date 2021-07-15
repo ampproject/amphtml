@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.170 */
+/** Version: 0.1.22.173 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4556,7 +4556,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.170',
+    '_client': 'SwG 0.1.22.173',
   });
 }
 
@@ -5236,18 +5236,20 @@ class OffersFlow {
     /** @private  @const {!Array<!string>} */
     this.skus_ = feArgsObj['skus'] || [ALL_SKUS];
 
-    /** @private @const {!Promise<!ActivityIframeView>} */
-    this.activityIframeViewPromise_ = this.getUrl_(
-      this.clientConfigManager_.getClientConfig()
-    ).then((url) => {
-      return new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl(url),
-        feArgsObj,
-        /* shouldFadeBody */ true
-      );
-    });
+    /** @private @const {!Promise<?ActivityIframeView>} */
+    this.activityIframeViewPromise_ = this.clientConfigManager_
+      .getClientConfig()
+      .then((clientConfig) => {
+        return this.shouldShow_(clientConfig)
+          ? new ActivityIframeView(
+              this.win_,
+              this.activityPorts_,
+              feUrl(this.getUrl_(clientConfig)),
+              feArgsObj,
+              /* shouldFadeBody */ true
+            )
+          : null;
+      });
   }
 
   /**
@@ -5308,6 +5310,10 @@ class OffersFlow {
   start() {
     if (this.activityIframeViewPromise_) {
       return this.activityIframeViewPromise_.then((activityIframeView) => {
+        if (!activityIframeView) {
+          return Promise.resolve();
+        }
+
         // So no error if skipped to payment screen.
         // Start/cancel events.
         // The second parameter is required by Propensity in AMP.
@@ -5342,18 +5348,25 @@ class OffersFlow {
   }
 
   /**
-   * Gets the URL that should be used for the activity iFrame view.
-   * @param {!Promise<../model/client-config.ClientConfig>} clientConfigPromise
-   * @return {!Promise<string>}
+   * Returns whether this flow is configured as enabled, not showing
+   * even on explicit start when flag is configured false.
+   *
+   * @param {!../model/client-config.ClientConfig} clientConfig
+   * @return {boolean}
    */
-  getUrl_(clientConfigPromise) {
-    return clientConfigPromise.then((clientConfig) => {
-      if (clientConfig.useUpdatedOfferFlows) {
-        return '/subscriptionoffersiframe';
-      } else {
-        return '/offersiframe';
-      }
-    });
+  shouldShow_(clientConfig) {
+    return clientConfig.uiPredicates?.canDisplayAutoPrompt !== false;
+  }
+
+  /**
+   * Gets the URL that should be used for the activity iFrame view.
+   * @param {!../model/client-config.ClientConfig} clientConfig
+   * @return {string}
+   */
+  getUrl_(clientConfig) {
+    return clientConfig.useUpdatedOfferFlows
+      ? '/subscriptionoffersiframe'
+      : '/offersiframe';
   }
 
   /**
@@ -5773,7 +5786,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.170',
+        '_client': 'SwG 0.1.22.173',
         'supportsEventManager': true,
       },
       args || {}
@@ -6619,7 +6632,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.170');
+    context.setClientVersion('SwG 0.1.22.173');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -8581,6 +8594,7 @@ class Graypane$1 {
     setImportantStyles$1(this.fadeBackground_, {
       'z-index': zIndex,
       'display': 'none',
+      'pointer-events': 'none',
       'position': 'fixed',
       'top': 0,
       'right': 0,
@@ -10361,6 +10375,12 @@ class EntitlementsManager {
     /** @private @const {!../api/subscriptions.Config} */
     this.config_ = deps.config();
 
+    /**
+     * Tests can use this promise to wait for POST requests to finish.
+     * @visibleForTesting
+     */
+    this.entitlementsPostPromise = null;
+
     this.deps_
       .eventManager()
       .registerEventListener(this.possiblyPingbackOnClientEvent_.bind(this));
@@ -10561,11 +10581,34 @@ class EntitlementsManager {
       '/publication/' +
       encodeURIComponent(this.publicationId_) +
       '/entitlements';
-    if (this.encodedParams_) {
-      url = addQueryParam(url, 'encodedParams', this.encodedParams_);
-    }
+    url = addDevModeParamsToUrl(this.win_.location, url);
 
-    this.fetcher_.sendPost(serviceUrl(url), message);
+    // Promise that sets this.encodedParams_ when it resolves.
+    const encodedParamsPromise = this.encodedParams_
+      ? Promise.resolve()
+      : hash(getCanonicalUrl(this.deps_.doc())).then((hashedCanonicalUrl) => {
+          /** @type {!GetEntitlementsParamsInternalDef} */
+          const encodableParams = {
+            metering: {
+              resource: {
+                hashedCanonicalUrl,
+              },
+            },
+          };
+          this.encodedParams_ = base64UrlEncodeFromBytes(
+            utf8EncodeSync(JSON.stringify(encodableParams))
+          );
+        });
+
+    this.entitlementsPostPromise = encodedParamsPromise.then(() => {
+      url = addQueryParam(
+        url,
+        'encodedParams',
+        /** @type {!string} */ (this.encodedParams_)
+      );
+
+      return this.fetcher_.sendPost(serviceUrl(url), message);
+    });
   }
 
   /**
@@ -10821,9 +10864,15 @@ class EntitlementsManager {
       return Promise.resolve();
     }
 
+    const params = new EventParams();
+    params.setIsUserRegistered(true);
     this.deps_
       .eventManager()
-      .logSwgEvent(AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION, false);
+      .logSwgEvent(
+        AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
+        false,
+        params
+      );
     // Check if storage bit is set. It's only set by the `Entitlements.ack` method.
     return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
       const toastWasShown = value === '1';
@@ -10925,6 +10974,8 @@ class EntitlementsManager {
         const hashedCanonicalUrl = values[0];
         const swgUserToken = values[1];
 
+        url = addDevModeParamsToUrl(this.win_.location, url);
+
         // Add encryption param.
         if (params?.encryption) {
           url = addQueryParam(
@@ -10954,6 +11005,7 @@ class EntitlementsManager {
                 resource: {
                   hashedCanonicalUrl,
                 },
+                // Publisher provided state.
                 state: {
                   id: meteringStateId,
                   attributes: [],
@@ -11028,6 +11080,22 @@ class EntitlementsManager {
         return this.parseEntitlements(json);
       });
   }
+}
+
+/**
+ * Parses entitlement dev mode params from the given hash fragment and adds it
+ * to the given URL.
+ * @param {!Location} location
+ * @param {string} url
+ * @return {string}
+ */
+function addDevModeParamsToUrl(location, url) {
+  const hashParams = parseQueryString(location.hash);
+  const devModeScenario = hashParams['swg.deventitlement'];
+  if (devModeScenario === undefined) {
+    return url;
+  }
+  return addQueryParam(url, 'devEnt', devModeScenario);
 }
 
 /**

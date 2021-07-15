@@ -31,7 +31,9 @@ import {Keys} from '#core/constants/key-codes';
 import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
+import {Performance} from '#service/performance-impl';
 import {Services} from '#service';
+import {Signals} from '#core/data-structures/signals';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {createElementWithAttributes} from '#core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -57,6 +59,8 @@ describes.realWin(
     let story;
     let replaceStateStub;
     let win;
+
+    const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
     /**
      * @param {number} count
@@ -1835,6 +1839,63 @@ describes.realWin(
             StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
           )
         ).to.be.false;
+      });
+    });
+
+    describe('experiment for story-load-first-page-only', () => {
+      let pages;
+      let performanceImpl;
+      beforeEach(async () => {
+        toggleExperiment(win, 'story-load-first-page-only', true);
+        performanceImpl = new Performance(env.win);
+        env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
+        pages = await createStoryWithPages(2, ['page-1', 'page-2'], false);
+        env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
+      });
+
+      it('should position the active page so it preloads', async () => {
+        story.buildCallback();
+        await story.layoutCallback();
+
+        // Check page 0 is loaded with distance 0.
+        expect(pages[0].getAttribute('distance')).to.be.equal('0');
+      });
+
+      it('should not position the inactive page so it preloads before the active page is loaded', async () => {
+        const signals = new Signals();
+        pages[0].signals = () => signals;
+        story.buildCallback();
+        await story.layoutCallback();
+
+        // Check page 1 is not loaded.
+        expect(pages[1].hasAttribute('distance')).to.be.false;
+      });
+
+      it('should position the inactive page so it preloads after the active page is loaded', async () => {
+        const signals = new Signals();
+        pages[0].signals = () => signals;
+        story.buildCallback();
+        await story.layoutCallback();
+
+        // Check page 1 is not loaded.
+        expect(pages[1].hasAttribute('distance')).to.be.false;
+
+        signals.signal(CommonSignals.LOAD_END);
+        await nextTick();
+
+        // Check page 1 is loaded with distance 1.
+        expect(pages[1].getAttribute('distance')).to.be.equal('1');
+      });
+
+      it('should enable the CSI experiment', async () => {
+        const enableSpy = env.sandbox.spy(
+          performanceImpl,
+          'addEnabledExperiment'
+        );
+        story.buildCallback();
+        await story.layoutCallback();
+
+        expect(enableSpy).to.be.calledWith('story-load-first-page-only');
       });
     });
   }

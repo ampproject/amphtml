@@ -432,6 +432,7 @@ export class AmpA4A extends AMP.BaseElement {
     );
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
+    this.uiHandler.validateStickyAd();
 
     const verifier = signatureVerifierFor(this.win);
     this.keysetPromise_ = this.getAmpDoc()

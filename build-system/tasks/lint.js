@@ -37,6 +37,7 @@ const options = {
 /**
  * Runs the linter on the given set of files.
  * @param {Array<string>} filesToLint
+ * @return {Promise<void>}
  */
 async function runLinter(filesToLint) {
   logLocalDev(green('Starting linter...'));
@@ -132,6 +133,9 @@ function summarizeResults(results, fixedFiles) {
 /**
  * Checks files for formatting (and optionally fixes them) with Eslint.
  * Explicitly makes sure the API doesn't check files in `.eslintignore`.
+ * When local changes are linted (e.g. during CI), we also check if the list of
+ * forbidden terms needs to be updated.
+ * @return {Promise<void>}
  */
 async function lint() {
   const filesToCheck = getFilesToCheck(
@@ -141,6 +145,10 @@ async function lint() {
   );
   if (filesToCheck.length == 0) {
     return;
+  }
+  const forbiddenTerms = 'build-system/test-configs/forbidden-terms.js';
+  if (argv.local_changes && !filesToCheck.includes(forbiddenTerms)) {
+    filesToCheck.push(forbiddenTerms);
   }
   await runLinter(filesToCheck);
 }

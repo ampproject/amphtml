@@ -56,6 +56,24 @@ class AmpSidebar extends BaseElement {
     );
     return true;
   }
+
+  /** @override */
+  afterOpen() {
+    super.afterOpen();
+    const sidebar = this.element.shadowRoot.querySelector('[part=sidebar]');
+    this.setAsContainer?.(sidebar);
+  }
+
+  /** @override */
+  afterClose() {
+    super.afterClose();
+    this.removeAsContainer?.();
+  }
+
+  /** @override */
+  unmountCallback() {
+    this.removeAsContainer?.();
+  }
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {

@@ -45,6 +45,7 @@ async function runPreBuildSteps(options) {
 
 /**
  * Unminified build. Entry point for `amp build`.
+ * @return {Promise<void>}
  */
 async function build() {
   await doBuild();
@@ -54,6 +55,7 @@ async function build() {
  * Performs an unminified build with the given extra args.
  *
  * @param {Object=} extraArgs
+ * @return {Promise<void>}
  */
 async function doBuild(extraArgs = {}) {
   const handlerProcess = createCtrlcHandler('build');

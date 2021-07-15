@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as MediaQueryProps from '#core/dom/media-query-props';
 import * as VideoUtils from '#core/dom/video';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
@@ -116,18 +115,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     expect(page.animationManager_).to.exist;
-  });
-
-  it('should not build the animation manager if `prefers-reduced-motion` is on', async () => {
-    env.sandbox.stub(MediaQueryProps, 'prefersReducedMotion').returns(true);
-
-    const animatedEl = html`<div animate-in="fade-in"></div>`;
-
-    element.appendChild(animatedEl);
-    element.getAmpDoc = () => new AmpDocSingle(win);
-
-    page.buildCallback();
-    expect(page.animationManager_).to.be.null;
   });
 
   it('should set an active attribute when state becomes active', async () => {
@@ -450,6 +437,15 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
 
     expect(element.getAttribute('auto-advance-after')).to.be.equal('20000ms');
+  });
+
+  it('should not use storyNextUp when in viewer control group', () => {
+    env.sandbox
+      .stub(Services.viewerForDoc(element), 'getParam')
+      .withArgs('storyNextUp')
+      .returns('999999ms');
+    page.buildCallback();
+    expect(element).not.to.have.attribute('auto-advance-after');
   });
 
   it('should stop the advancement when state becomes not active', async () => {
@@ -779,6 +775,32 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         '.i-amphtml-story-inline-page-attachment-img'
       ).length
     ).to.equal(2);
+  });
+
+  it('should NOT rewrite the attachment UI images to a proxy URL', async () => {
+    toggleExperiment(win, 'amp-story-page-attachment-ui-v2', true);
+
+    const attachmentEl = win.document.createElement(
+      'amp-story-page-attachment'
+    );
+
+    const src = 'https://examples.com/foo.bar.png';
+    attachmentEl.setAttribute('layout', 'nodisplay');
+    attachmentEl.setAttribute('cta-image', src);
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+
+    const imgEl = openAttachmentEl.querySelector(
+      '.i-amphtml-story-inline-page-attachment-img'
+    );
+    expect(imgEl.getAttribute('style')).to.contain(src);
   });
 
   it('should build the new default outlink page attachment UI', async () => {

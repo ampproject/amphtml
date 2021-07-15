@@ -15,8 +15,8 @@
  */
 
 import * as coreMode from './core/mode';
-import {internalRuntimeVersion} from './internal-version';
 import {parseQueryString} from './core/types/string/url';
+import {internalRuntimeVersion} from './internal-version';
 
 /**
  * @typedef {{
@@ -24,7 +24,6 @@ import {parseQueryString} from './core/types/string/url';
  *   development: boolean,
  *   minified: boolean,
  *   test: boolean,
- *   examiner: boolean,
  *   log: (string|undefined),
  *   version: string,
  *   rtvVersion: string,
@@ -74,7 +73,6 @@ function getMode_(win) {
   return {
     localDev: coreMode.isLocalDev(win),
     development: isModeDevelopment(win),
-    examiner: hashQuery['development'] == '2',
     esm: IS_ESM,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
@@ -95,7 +93,7 @@ function getMode_(win) {
  */
 function getRtvVersion(win) {
   // Ignore memoized copy during testing to allow override.
-  if (!rtvVersion && !coreMode.isTest(win)) {
+  if (!rtvVersion || coreMode.isTest(win)) {
     // Currently `internalRuntimeVersion` and thus `mode.version` contain only
     // major version. The full version however must also carry the minor version.
     // We will default to production default `01` minor version for now.

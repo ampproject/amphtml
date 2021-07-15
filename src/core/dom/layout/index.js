@@ -19,8 +19,8 @@
  * details.
  */
 
-import {isFiniteNumber} from '#core/types';
 import {userAssert} from '#core/assert';
+import {isFiniteNumber} from '#core/types';
 
 /**
  * @enum {string}
@@ -85,6 +85,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-PINTEREST': true,
   'AMP-PLAYBUZZ': true,
   'AMP-RENDER': true,
+  'AMP-TIKTOK': true,
   'AMP-TWITTER': true,
 };
 /**
