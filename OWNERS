@@ -21,6 +21,10 @@
       owners: [{name: '*'}],
     },
     {
+      pattern: '**/*.extern.js',
+      owners: [{name: 'rcebulko', notify: true}],
+    },
+    {
       pattern: '{.*,amp.js}',
       owners: [{name: 'ampproject/wg-infra'}],
     },
