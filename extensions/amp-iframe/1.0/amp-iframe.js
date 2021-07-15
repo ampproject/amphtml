@@ -18,6 +18,7 @@ import {BaseElement} from './base-element';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
+import {measureIntersection} from '#core/dom/layout/intersection';
 
 /** @const {string} */
 const TAG = 'amp-iframe';
@@ -41,23 +42,22 @@ class AmpIframe extends BaseElement {
         if (placeholder) {
           this.togglePlaceholder(false);
         } else {
-          const pos = this.element./*OK*/ getLayoutBox();
-          const minTop = Math.min(
-            600,
-            this.getViewport().getSize().height * 0.75
-          );
-          userAssert(
-            pos.top >= minTop,
-            '<amp-iframe> elements must be positioned outside the first 75% ' +
-              'of the viewport or 600px from the top (whichever is smaller): %s ' +
-              ' Current position %s. Min: %s' +
-              "Positioning rules don't apply for iframes that use `placeholder`." +
-              'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
-              'amp-iframe/amp-iframe.md#iframe-with-placeholder for details.',
-            this.element,
-            pos.top,
-            minTop
-          );
+          measureIntersection(this.element).then((intersectionEntry) => {
+            const pos = intersectionEntry.boundingClientRect;
+            const minTop = Math.min(600, this.getViewport().getHeight() * 0.75);
+            userAssert(
+              pos.top >= minTop,
+              '<amp-iframe> elements must be positioned outside the first 75% ' +
+                'of the viewport or 600px from the top (whichever is smaller): %s ' +
+                ' Current position %s. Min: %s' +
+                "Positioning rules don't apply for iframes that use `placeholder`." +
+                'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
+                'amp-iframe/amp-iframe.md#iframe-with-placeholder for details.',
+              this.element,
+              pos.top,
+              minTop
+            );
+          });
         }
       },
     });
