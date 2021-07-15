@@ -32,7 +32,7 @@ const ENV_PORTS = {
   preact: 9002,
 };
 
-const repoDir = path.join(__dirname, '../../..');
+const defaultBuildDir = 'examples/storybook';
 
 /**
  * @param {string} env 'amp' or 'preact'
@@ -48,9 +48,9 @@ function launchEnv(env) {
   const {'storybook_port': port = ENV_PORTS[env]} = argv;
   execScriptAsync(
     [
-      './node_modules/.bin/start-storybook',
+      'npx start-storybook',
       `--config-dir ${envConfigDir(env)}`,
-      `--static-dir ${repoDir}/`,
+      `--static-dir ${process.cwd()}/`,
       `--port ${port}`,
       '--quiet',
       isCiBuild() ? '--ci' : '',
@@ -66,7 +66,7 @@ function launchEnv(env) {
  */
 function buildEnv(env) {
   const configDir = envConfigDir(env);
-
+  const {'build_dir': dir = defaultBuildDir} = argv;
   if (env === 'amp' && isPullRequestBuild()) {
     // Allows PR deploys to reference built binaries.
     writeFileSync(
@@ -83,9 +83,9 @@ function buildEnv(env) {
   log(`Building storybook for the ${cyan(env)} environment...`);
   const result = exec(
     [
-      './node_modules/.bin/build-storybook',
+      'npx build-storybook',
       `--config-dir ${configDir}`,
-      `--output-dir ${repoDir}/examples/storybook/${env}`,
+      `--output-dir ${process.cwd()}/${dir}/${env}`,
       '--quiet',
       `--loglevel ${isCiBuild() ? 'warn' : 'info'}`,
     ].join(' '),
@@ -120,6 +120,7 @@ storybook.description =
 
 storybook.flags = {
   'build': 'Build a static web application (see https://storybook.js.org/docs)',
+  'build_dir': `Output directory when using --build (defaults to ${defaultBuildDir})`,
   'storybook_env':
     "Environment(s) to run Storybook (either 'amp', 'preact' or a list as 'amp,preact')",
   'storybook_port': 'Port from which to run the Storybook dashboard',
