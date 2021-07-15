@@ -1,0 +1,65 @@
+<!--
+  Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Bento component method API</title>
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
+    <script
+      async
+      custom-element="amp-video"
+      src="https://cdn.ampproject.org/v0/amp-video-1.0.js"
+    ></script>
+  </head>
+  <body>
+    <amp-video
+      style="display: block; width: 160px; height: 90px"
+      src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4"
+    >
+    </amp-video>
+
+    <button data-method="play" disabled>Play</button>
+    <button data-method="pause" disabled>Pause</button>
+
+    <script>
+      (async () => {
+        // Wait for our element to be defined, then we can get its API.
+        const element = document.body.firstElementChild;
+        const tagName = element.tagName.toLowerCase();
+
+        await window.customElements.whenDefined(tagName);
+
+        // We follow the `data-method` attribute in this example, but that's not
+        // necessary. Otherwise, we would call a method like api.play() directly.
+        function onDataMethodButtonClick({target}) {
+          const api = await element.getApi();
+          api[target.dataset.method]()
+        }
+
+        const buttons = document.querySelectorAll('button[data-method]');
+        for (const button of buttons) {
+          button.removeAttribute('disabled');
+          button.addEventListener('click', onDataMethodButtonClick);
+        }
+      })();
+    </script>
+  </body>
+</html>
