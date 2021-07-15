@@ -466,7 +466,7 @@ export class ManualAdvancement extends AdvancementConfig {
    * follow its capture phase.
    * @param {!Event} event
    * @return {boolean}
-   * @private`
+   * @private
    */
   shouldHandleEvent_(event) {
     let shouldHandleEvent = false;

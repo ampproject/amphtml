@@ -907,7 +907,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     setImportantStyles(this.disclaimerEl_, {...styles});
     this.disclaimerIcon_.setAttribute('hide', '');
 
-    // Add click listener.
+    // Add click listener through the shadow dom using e.path.
     this.disclaimerEl_.addEventListener('click', (e) => {
       if (
         e.path[0].classList.contains(
