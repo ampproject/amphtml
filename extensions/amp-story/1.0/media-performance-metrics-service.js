@@ -21,10 +21,9 @@ import {
 import {Services} from '#service';
 import {TickLabel} from '#core/constants/enums';
 import {dev} from '../../../src/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {lastChildElement, matches} from '#core/dom/query';
 import {registerServiceBuilder} from '../../../src/service-helpers';
-import {urls} from '../../../src/config';
+import {toArray} from '#core/types/array';
 
 /**
  * Media status.
@@ -130,9 +129,6 @@ export class MediaPerformanceMetricsService {
 
     /** @private @const {!../../../src/service/performance-impl.Performance} */
     this.performanceService_ = Services.performanceFor(win);
-
-    /** @private @const {!../../../src/service/url-impl.Url} */
-    this.urlService_ = Services.urlForDoc(win.document.body);
   }
 
   /**
@@ -211,21 +207,9 @@ export class MediaPerformanceMetricsService {
   sendMetrics_(mediaEntry) {
     const {media, metrics} = mediaEntry;
 
-    let videoCacheState;
-    if (this.urlService_.isProxyOrigin(media.currentSrc)) {
-      videoCacheState = CacheState.CACHE;
-    } else {
-      // Media is served from origin. Checks if there was a cached source.
-      const {hostname} = this.urlService_.parse(urls.cdn);
-      videoCacheState = media.querySelector(
-        `[src*="${escapeCssSelectorIdent(hostname)}"]`
-      )
-        ? CacheState.ORIGIN_CACHE_MISS
-        : CacheState.ORIGIN;
-    }
     this.performanceService_.tickDelta(
       TickLabel.VIDEO_CACHE_STATE,
-      videoCacheState
+      this.getVideoCacheState_(media)
     );
     this.performanceService_.tickDelta(
       TickLabel.VIDEO_ON_FIRST_PAGE,
@@ -433,5 +417,28 @@ export class MediaPerformanceMetricsService {
 
     timeStamps.waiting = Date.now();
     mediaEntry.status = Status.WAITING;
+  }
+
+  /**
+   * @param {!HTMLMediaElement} media
+   * @return {!CacheState}
+   * @private
+   */
+  getVideoCacheState_(media) {
+    let hasCachedSource = false;
+    const isCachedSource = (source) =>
+      source.hasAttribute('i-amphtml-video-cached-source');
+    // All video caching mechanisms rely on HTMLSourceElements and never a src
+    // on the HTMLMediaElement as it does not allow for fallback sources.
+    const sources = toArray(media.querySelectorAll('source'));
+    for (const source of sources) {
+      if (media.currentSrc === source.src && isCachedSource(source)) {
+        return CacheState.CACHE;
+      }
+      if (isCachedSource(source)) {
+        hasCachedSource = true;
+      }
+    }
+    return hasCachedSource ? CacheState.ORIGIN_CACHE_MISS : CacheState.ORIGIN;
   }
 }
