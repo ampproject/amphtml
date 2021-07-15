@@ -97,7 +97,7 @@ export class AmpAdXOriginIframeHandler {
     devAssert(!this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
-    if (!this.uiHandler_.isStickyAd()) {
+    if (!this.uiHandler_.isStickyAd() && !this.uiHandler_.isInterstitialAd()) {
       applyFillContent(this.iframe);
     }
     const timer = Services.timerFor(this.baseInstance_.win);
@@ -161,7 +161,7 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(
       listenFor(
         this.iframe,
-        'embed-size',
+        MessageType.EMBED_SIZE,
         (data, source, origin, event) => {
           if (!!data['hasOverflow']) {
             this.element_.warnOnMissingOverflow = false;
@@ -235,8 +235,9 @@ export class AmpAdXOriginIframeHandler {
       new Deferred();
 
     if (
-      this.baseInstance_.config &&
-      this.baseInstance_.config.renderStartImplemented
+      this.uiHandler_.isInterstitialAd() ||
+      (this.baseInstance_.config &&
+        this.baseInstance_.config.renderStartImplemented)
     ) {
       // When `render-start` is supported, these signals are mutually
       // exclusive. Whichever arrives first wins.
@@ -375,6 +376,9 @@ export class AmpAdXOriginIframeHandler {
       info['origin'],
       info['event']
     );
+    if (this.uiHandler_.isInterstitialAd()) {
+      this.uiHandler_.onWebInterstitialRenderStart(info);
+    }
   }
 
   /**

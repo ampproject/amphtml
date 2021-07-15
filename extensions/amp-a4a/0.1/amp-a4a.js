@@ -49,6 +49,7 @@ import {
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {ChunkPriority, chunk} from '../../../src/chunk';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -434,6 +435,18 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
+
+    if (this.uiHandler.isInterstitialAd()) {
+      chunk(
+        this.element,
+        () => {
+          this.initiateAdRequest();
+          this.layoutCallback();
+          this.uiHandler.maybeInitInterstitialAd();
+        },
+        ChunkPriority.HIGH
+      );
+    }
   }
 
   /** @override */
@@ -611,6 +624,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     if (
       !this.uiHandler.isStickyAd() &&
+      !this.uiHandler.isInterstitialAd() &&
       !isAdPositionAllowed(this.element, this.win)
     ) {
       user().warn(
@@ -1800,7 +1814,7 @@ export class AmpA4A extends AMP.BaseElement {
       height,
       width
     );
-    if (!this.uiHandler.isStickyAd()) {
+    if (!this.uiHandler.isStickyAd() && !this.uiHandler.isInterstitialAd()) {
       applyFillContent(this.iframe);
     }
 
@@ -1894,7 +1908,7 @@ export class AmpA4A extends AMP.BaseElement {
         })
       )
     );
-    if (!this.uiHandler.isStickyAd()) {
+    if (!this.uiHandler.isStickyAd() && !this.uiHandler.isInterstitialAd()) {
       applyFillContent(this.iframe);
     }
     const fontsArray = [];

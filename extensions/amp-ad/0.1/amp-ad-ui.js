@@ -1,5 +1,8 @@
 import {Services} from '#service';
-import {ancestorElementsByTag} from '#core/dom/query';
+import {
+  ancestorElementsByTag,
+  closestAncestorElementBySelector,
+} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {dict} from '#core/types/object';
 import {user, userAssert} from '#utils/log';
@@ -71,6 +74,16 @@ export class AmpAdUIHandler {
         this.stickyAdPosition_ = null;
       }
     }
+
+    /**
+     * Whether the web interstitial ads has been rendered.
+     */
+    this.webInterstitialRendered_ = false;
+
+    /**
+     * Web interstitial next URL.
+     */
+    this.webInterstitialNextUrl_ = undefined;
 
     /**
      * Whether the close button has been rendered for a sticky ad unit.
@@ -290,6 +303,129 @@ export class AmpAdUIHandler {
 
   /**
    * Adjust the padding-bottom when resized to prevent overlaying on top of content
+   * @return {boolean}
+   */
+  isInterstitialAd() {
+    return this.element_.hasAttribute('interstitial');
+  }
+
+  /**
+   * maybeInitInterstitialAd
+   */
+  maybeInitInterstitialAd() {
+    if (this.isInterstitialAd()) {
+      closestAncestorElementBySelector(this.element_, 'BODY')
+        .querySelectorAll('a:not([amp-interstitial-opt-out])')
+        .forEach((a) =>
+          a.addEventListener(
+            'click',
+            this.interstitialLinkClickCallback_.bind(this)
+          )
+        );
+    }
+  }
+
+  /**
+   * Signal that the web interstitial ad is eligible to be rendered.
+   * Insert the interstitial UI elements.
+   * @param {{data: !JsonObject}} info
+   */
+  onWebInterstitialRenderStart(info) {
+    this.webInterstitialRendered_ = true;
+
+    if (!info['interstitial-with-close-button']) {
+    }
+  }
+
+  /**
+   * Callback for link clicked
+   * @param {*} e
+   */
+  interstitialLinkClickCallback_(e) {
+    if (!this.webInterstitialRendered_) {
+      return;
+    }
+
+    this.webInterstitialNextUrl_ = e.target.href;
+    setStyle(this.element_, 'visibility', 'visible');
+    e.preventDefault();
+  }
+
+  /**
+   * The function that add a close button to the web interstitial ad
+   * @param {*} target
+   */
+  addForwardButton_(target) {
+    const header = createElementWithAttributes(
+      /** @type {!Document} */ (this.element_.ownerDocument),
+      'div'
+    );
+    setStyle(header, 'width', '340px');
+    header.classList.add('amp-ad-interstitial-wrapper');
+
+    listen(header, 'click', (e) => e.stopPropagation());
+
+    const title = createElementWithAttributes(
+      /** @type {!Document} */ (this.element_.ownerDocument),
+      'div',
+      dict()
+    );
+    title.classList.add('interstitial-title');
+
+    const closeBtn = createElementWithAttributes(
+      /** @type {!Document} */ (this.element_.ownerDocument),
+      'div',
+      dict({'aria-label': 'Close ad'})
+    );
+    closeBtn.classList.add('close');
+    closeBtn.classList.add('btn');
+
+    const closeBtnSpan = createElementWithAttributes(
+      /** @type {!Document} */ (this.element_.ownerDocument),
+      'span',
+      dict()
+    );
+
+    listen(closeBtn, 'click', () => {
+      window.location.href = target.href;
+    });
+
+    closeBtn.appendChild(closeBtnSpan);
+
+    const openBtn = createElementWithAttributes(
+      /** @type {!Document} */ (this.element_.ownerDocument),
+      'div',
+      dict({'aria-label': 'Open ad'})
+    );
+    openBtn.classList.add('open');
+    openBtn.classList.add('btn');
+
+    const openBtnSpan = createElementWithAttributes(
+      /** @type {!Document} */ (this.element_.ownerDocument),
+      'span',
+      dict()
+    );
+
+    listen(openBtn, 'click', () => {
+      window.location.href =
+        'https://www.googleadservices.com/pagead/aclk?sa=L&ai=CUw0AKCa1W-yME9SUpgOY8qhwhPWs6VG_9eT3swiBuLGbzAgQASCc9MAtYMn2-IaAgKAZiAEBoAHL4uKEA8gBBuACAKgDAcgDCqoEhgJP0OHwOs-pZUTpUv7xVVS5jfprFiowesg50-Sy3NZO0n7-4RtT68Xp1hAno5-nssTlbQ-LYcPYA1BDDHRM928ig_unrTa_S3IweztuH4PClGB3hGik4vzrfHEGQ8i7g1m-0kx6dEnFlhcq8ICaB8V3et1IdWru66QxcvmftaawPE8Vh2PtwzNPkqxAIrHNDsL-mJPVoeFrqKzVeyCI-YmQfxoQku8EBN4pAjbLygfhskcwvPTxlCdse7lB_uhqMmcrxAukYeKYzDAqlLivkBuNLq-c-g3AG5K1HC2F87AFgX2mIn8L6TksOnK6G45Ok122YY04u9XPuYT6C7-LWsrJrlKT7vs84AQBkAYBoAY3gAednZ17iAcBkAcCqAeOzhuoB9XJG6gHugaoB9nLG6gHz8wbqAemvhvYBwHSCAYIABACGAGxCVoZJTDTxjKLgAoD2BMC&num=1&cid=CAMSeQClSFh3fjxWIixa9MkpWwHy-PKoXt7C5IoKfHkZjCffkfO7UTqaTqPn_9MxZ_vu3hU82Z8-cdsQ6XLJDv-V_8fRF3hs7aYgIX1KYr9OKo4Zjtfzu2GBslxbVKMZ3H6Vdj5gSsbtUxBwC__repXOJ6k6LMOmT6xnoRs&sig=AOD64_0qNiLnSl3w5y9ewNd2TPGu2Ihapw&client=ca-pub-2640472772368642&nx=CLICK_X&ny=CLICK_Y&nb=9&adurl=https://cleanmymac.macpaw.com/27%3Fcampaign%3Ddisplay_cmmx_brand_responsads_asgood_inmarket_us%26ci%3D1071931606%26adgroupid%3D53050287032%26adpos%3Dnone%26ck%3D%26targetid%3D%26match%3D%26gnetwork%3Dd%26creative%3D293998038630%26placement%3Dnative-ads-preview.weebly.com%26placecat%3D%26accname%3Dcmm';
+    });
+
+    openBtn.appendChild(openBtnSpan);
+
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+    header.appendChild(openBtn);
+    this.element_.appendChild(header);
+
+    listen(this.element_, 'click', (e) => {
+      window.location.href = target.href;
+      e.preventDefault();
+    });
+  }
+
+  /**
+   * When a sticky ad is shown, the close button should be rendered at the same time.
    */
   adjustPadding() {
     if (
