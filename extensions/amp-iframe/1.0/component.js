@@ -16,6 +16,8 @@
 
 import * as Preact from '#preact';
 
+const NOOP = () => {};
+
 /**
  * @param {!IframeDef.Props} props
  * @return {PreactDef.Renderable}
@@ -24,6 +26,7 @@ export function Iframe({
   allowFullScreen,
   allowPaymentRequest,
   allowTransparency,
+  onLoadCallback = NOOP,
   referrerPolicy,
   sandbox,
   src,
@@ -39,6 +42,7 @@ export function Iframe({
       allowpaymentrequest={allowPaymentRequest}
       allowtransparency={allowTransparency}
       referrerpolicy={referrerPolicy}
+      onload={onLoadCallback}
       {...rest}
     ></iframe>
   );
