@@ -98,7 +98,7 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
  * @param {!Object<string, *>} styles
  */
 export function setImportantStyles(element, styles) {
-  const {style} = element;
+  const style = element.style;
   for (const k in styles) {
     style.setProperty(
       getVendorJsPropertyName(style, k),

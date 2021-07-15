@@ -51,7 +51,7 @@ let JSONValueDef;
 /**
  * @typedef {{
  *   YOU_MUST_USE: string,
- *   jsonLiteral: function(),
+ *   jsonLiteral: function,
  *   TO_MAKE_THIS_TYPE: string,
  * }}
  */

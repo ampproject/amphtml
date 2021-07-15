@@ -24,18 +24,17 @@
  * so it will return the same cached value even when the arguments are
  * different.
  *
- * @param {function(...):T} fn
- * @return {function(...):T}
+ * @param {function(...*):T} fn
+ * @return {function(...*):T}
  * @template T
  */
 export function once(fn) {
-  let evaluated = false;
   let retValue = null;
+  /** @type {null | function(...*):T} */
   let callback = fn;
   return (...args) => {
-    if (!evaluated) {
+    if (callback) {
       retValue = callback.apply(self, args);
-      evaluated = true;
       callback = null; // GC
     }
     return retValue;

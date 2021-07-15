@@ -29,8 +29,7 @@
  * accessed using bracket notation.
  */
 interface JsonObject {
-    [key: string]: any
+  [key: string]: any;
 }
-
 
 // TODO: is there any way to force this to only be used via bracket notation in TS?

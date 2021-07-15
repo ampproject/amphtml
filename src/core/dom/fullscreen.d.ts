@@ -15,9 +15,26 @@
  */
 
 /**
- * @fileoverview Externs for extra properties expected on errors.
- * @externs
+ * @fileoverview Externs for possible fullscreen properties browsers may attach
+ * to Elements.
  */
 
-/** @type {undefined|Array<*>} */
-Error.prototype.messageArray;
+declare interface Element {
+  requestFullScreen: any;
+  exitFullscreen;
+  cancelFullScreen: any;
+  webkitExitFullscreen: any;
+  webkitEnterFullscreen: any;
+  webkitCancelFullScreen: any;
+  webkitDisplayingFullscreen: any;
+  mozCancelFullScreen: any;
+  msExitFullscreen: any;
+  style: any;
+}
+
+declare interface Document {
+  cancelFullScreen: any;
+  webkitExitFullscreen: any;
+}
+
+// TODO: all of these may be unecessary if tsc is up to date.

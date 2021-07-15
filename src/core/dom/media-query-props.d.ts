@@ -15,12 +15,12 @@
  */
 
 /**
- * @fileoverview Global type definitions related to functions.
- * @externs
+ * @fileoverview Externs for properties expected to be on MediaQueryList in some
+ * browsers.
  */
 
-/**
- * This type signifies a callback that can be called to remove a listener.
- * @typedef {function()}
- */
-let UnlistenDef;
+
+// TODO: maybe unecessary if tsc knows about this.
+
+
+// MediaQueryList.prototype.onchange;

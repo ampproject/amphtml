@@ -18,8 +18,7 @@
  * @fileoverview Externs for properties on global AMP_CONFIG.
  */
 
-
 interface AmpConfigDef {
-    test: (boolean|undefined),
-    localDev: (boolean|undefined),
+  test: boolean | undefined;
+  localDev: boolean | undefined;
 }

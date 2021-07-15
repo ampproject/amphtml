@@ -19,5 +19,5 @@
  */
 
 interface Error {
-    messageArray: undefined|Array<any>;
+  messageArray: undefined | Array<any>;
 }

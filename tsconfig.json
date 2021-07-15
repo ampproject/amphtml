@@ -4,8 +4,8 @@
       "DOM",
       "ESNext"
     ],
+    "skipLibCheck": true,
     "downlevelIteration": true,
-    "moduleResolution": "node",
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
@@ -40,15 +40,15 @@
     }
   },
   "include": [
-    "./src/core/window/**/*.js",
-    "./src/core/error/**/*.js",
-    "./src/core/assert/**/*.js",
+    "src/core/**/*.js",
+    // "./src/core/window/**/*.js",
+    // "./src/core/error/**/*.js",
+    // "./src/core/assert/**/*.js",
     // "./src/core/types/**/*.js",
     "./src/core/**/*.d.ts"
   ],
   "exclude": [
     "**/*extern*",
-    "node_modules", 
-    "dist"
+    "./node_modules/@types/node/**/*.ts"
   ]
 }

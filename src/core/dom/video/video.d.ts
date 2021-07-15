@@ -15,9 +15,11 @@
  */
 
 /**
- * @fileoverview Externs for properties expected to be on MediaQueryList in some
- * browsers.
- * @externs
+ * @fileoverview Expected types and properties for handling video-related
+ * components and features
  */
 
-MediaQueryList.prototype.onchange;
+// TODO: may be unecessary if tsc up to date.
+
+// /** @type {undefined|boolean} */
+// HTMLVideoElement.prototype.playsInline;

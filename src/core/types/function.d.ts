@@ -15,15 +15,10 @@
  */
 
 /**
- * @fileoverview Externs for properties on global AMP_CONFIG.
- * @externs
+ * @fileoverview Global type definitions related to functions.
  */
 
 /**
- * AMP configuration and runtime settings structure.
- * @typedef {{
- *   test: (boolean|undefined),
- *   localDev: (boolean|undefined),
- * }}
+ * This type signifies a callback that can be called to remove a listener.
  */
-let AmpConfigDef;
+type UnlistenDef = function;
