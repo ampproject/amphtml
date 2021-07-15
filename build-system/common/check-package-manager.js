@@ -276,6 +276,14 @@ async function main() {
       yellow('\nWARNING: Detected problems with'),
       cyan(Array.from(updatesNeeded).join(', '))
     );
+    if (process.env.CI) {
+      console.log(
+        yellow('Skipping delay prompt for'),
+        cyan('CI'),
+        yellow('environment.')
+      );
+      return;
+    }
     console.log(
       yellow('⤷ Continuing install in'),
       cyan(warningDelaySecs),
