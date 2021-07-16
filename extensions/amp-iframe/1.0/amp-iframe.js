@@ -43,10 +43,11 @@ class AmpIframe extends BaseElement {
           this.togglePlaceholder(false);
         } else {
           measureIntersection(this.element).then((intersectionEntry) => {
-            const pos = intersectionEntry.boundingClientRect;
-            const minTop = Math.min(600, this.getViewport().getHeight() * 0.75);
+            const {top} = intersectionEntry.boundingClientRect;
+            const viewportHeight = intersectionEntry.rootBounds.height;
+            const minTop = Math.min(600, viewportHeight * 0.75);
             userAssert(
-              pos.top >= minTop,
+              top >= minTop,
               '<amp-iframe> elements must be positioned outside the first 75% ' +
                 'of the viewport or 600px from the top (whichever is smaller): %s ' +
                 ' Current position %s. Min: %s' +
@@ -54,7 +55,7 @@ class AmpIframe extends BaseElement {
                 'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
                 'amp-iframe/amp-iframe.md#iframe-with-placeholder for details.',
               this.element,
-              pos.top,
+              top,
               minTop
             );
           });
