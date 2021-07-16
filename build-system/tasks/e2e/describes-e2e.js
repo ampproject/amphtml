@@ -38,8 +38,8 @@ const {Builder, Capabilities, logging} = selenium;
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
-const TEST_TIMEOUT = 40000;
-const SETUP_TIMEOUT = 30000;
+const TEST_TIMEOUT = 5000;
+const SETUP_TIMEOUT = 3000;
 const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const COV_REPORT_PATH = '/coverage/client';
