@@ -81,7 +81,7 @@
   display: block !important;
   width: 100% !important;
   height: 100% !important;
-  transform: scaleY(0%) !important;
+  transform: scaleY(0) !important;
   transform-origin: bottom !important;
   opacity: 0.5 !important;
 }
@@ -94,7 +94,7 @@
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
   .i-amphtml-story-interactive-img-option-img::before {
   background-color: var(--i-amphtml-interactive-option-post-color) !important;
-  transform: scaleY(var(--option-percentage, 0%)) !important;
+  transform: scaleY(var(--option-percentage, 0)) !important;
   transition: transform var(--i-amphtml-interactive-animation-time)
     var(--i-amphtml-interactive-ease-out-curve) !important;
 }
