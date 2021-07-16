@@ -39,7 +39,6 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
         config
       );
       const result = await new StoryAdConfig(storyAdEl, win).getConfig();
-
       expect(result).to.eql({
         'amp-story': '',
         class: 'i-amphtml-story-ad',
@@ -75,12 +74,8 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
         'data-slot': '/30497360/a4a/amp_story_dfp_example',
         'rtc-config': {
           vendors: {
-            vendor1: {
-              'SLOT_ID': 1,
-            },
-            vendor2: {
-              'PAGE_ID': 'abc',
-            },
+            vendor1: {'SLOT_ID': 1},
+            vendor2: {'PAGE_ID': 'abc'},
           },
         },
       };
@@ -198,7 +193,6 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
         config
       );
       storyAdEl.id = 'i-amphtml-demo-foo';
-
       const result = await new StoryAdConfig(storyAdEl, win).getConfig();
       expect(result).to.eql({
         type: 'fake',

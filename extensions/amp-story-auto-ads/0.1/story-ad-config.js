@@ -92,10 +92,7 @@ export class StoryAdConfig {
         delete adAttributes[attr];
       }
     }
-    return /** @type {!JsonObject} */ ({
-      ...adAttributes,
-      ...requiredAttrs,
-    });
+    return /** @type {!JsonObject} */ ({...adAttributes, ...requiredAttrs});
   }
 
   /**
