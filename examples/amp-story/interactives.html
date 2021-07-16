@@ -13,6 +13,13 @@
       amp-story-interactive-quiz, amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-results {
         justify-self: center;
       }
+
+      #expToggle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10000;
+      }
     </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
@@ -535,5 +542,15 @@
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>
+    <button id="expToggle" onclick="
+      AMP.toggleExperiment('amp-story-interactive-disclaimer');
+      location.reload();
+    ">Toggle amp-story-interactive-disclaimer</button>
   </body>
+  <script>
+    // Indicate whether experiment is on.
+    document.addEventListener('ampstory:load', () => {
+      expToggle.innerHTML = "amp-story-interactive-disclaimer active: " + AMP.isExperimentOn('amp-story-interactive-disclaimer');
+    });
+  </script>
 </html>
