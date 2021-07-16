@@ -899,6 +899,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         const widthFraction = interactiveRect.width / pageRect.width;
 
         // Clamp values to ensure dialog has space up and left.
+        const rightPercentage = clamp(rightFraction * 100, 0, 25); // Ensure 75% of space to the left.
         const bottomPercentage = clamp(bottomFraction * 100, 0, 85); // Ensure 15% of space up. 
         const widthPercentage = Math.max(widthFraction * 100, 65); // Ensure 65% of max-width.
 
