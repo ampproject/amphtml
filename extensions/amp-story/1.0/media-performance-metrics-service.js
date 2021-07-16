@@ -426,16 +426,20 @@ export class MediaPerformanceMetricsService {
    */
   getVideoCacheState_(media) {
     let hasCachedSource = false;
-    const isCachedSource = (source) =>
-      source.hasAttribute('i-amphtml-video-cached-source');
     // All video caching mechanisms rely on HTMLSourceElements and never a src
     // on the HTMLMediaElement as it does not allow for fallback sources.
     const sources = toArray(media.querySelectorAll('source'));
     for (const source of sources) {
-      if (media.currentSrc === source.src && isCachedSource(source)) {
+      const isCachedSource = source.hasAttribute(
+        'i-amphtml-video-cached-source'
+      );
+      // Playing source is cached.
+      if (isCachedSource && media.currentSrc === source.src) {
         return CacheState.CACHE;
       }
-      if (isCachedSource(source)) {
+      // Non playing source but is cached. Used to differentiate a cache miss
+      // (e.g. cache returned a 40x) vs no cached source at all.
+      if (isCachedSource) {
         hasCachedSource = true;
       }
     }
