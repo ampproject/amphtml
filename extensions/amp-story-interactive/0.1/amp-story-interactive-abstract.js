@@ -877,16 +877,15 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     this.disclaimerEl_ = buildInteractiveDisclaimer(this);
 
     // Get rects and calculate right and bottom.
-    const pageEl = closestAncestorElementBySelector(
-      this.element,
-      'amp-story-page'
+    const pageEl = closest(dev().assertElement(this.element), (el) => 
+      el.tagName.toLowerCase() === 'amp-story-page'
     );
 
     let styles;
     this.measureMutateElement(
       () => {
         const interactiveRect = this.element./*OK*/ getBoundingClientRect();
-        const pageRect = pageEl.parentElement./*OK*/ getBoundingClientRect();
+        const pageRect = pageEl./*OK*/ getBoundingClientRect();
         const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
         const rightPercentage =
           1 -
@@ -900,7 +899,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         styles = {
           bottom: clamp(bottomPercentage * 100, 0, 85) + '%',
           right: clamp(rightPercentage * 100, 0, 25) + '%',
-          'max-width': Math.min(widthPercentage * 100, 75) + '%',
+          'max-width': clamp(widthPercentage * 100, 50, 75) + '%',
           position: 'absolute',
           'z-index': 3,
         };
