@@ -57,7 +57,6 @@ function getMinifiedConfig() {
       './build-system/babel-plugins/babel-plugin-transform-log-methods',
       {replaceCallArguments: false},
     ],
-    './build-system/babel-plugins/babel-plugin-transform-parenthesize-expression',
     [
       './build-system/babel-plugins/babel-plugin-transform-json-import',
       {freeze: false},
