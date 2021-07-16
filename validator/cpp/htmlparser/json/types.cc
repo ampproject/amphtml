@@ -16,6 +16,8 @@
 
 #include "json/types.h"
 
+#include <array>
+
 namespace htmlparser::json {
 
 constexpr std::array<std::string_view, 35> kIndentSpaces {
