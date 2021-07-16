@@ -892,7 +892,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         const interactiveRect = this.element./*OK*/ getBoundingClientRect();
         const pageRect = pageEl./*OK*/ getBoundingClientRect();
         const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
-        
+        const rightFraction =
+          1 - (iconRect.x + iconRect.width - pageRect.x) / pageRect.width;
         const bottomFraction =
           1 - (iconRect.y + iconRect.height - pageRect.y) / pageRect.height;
         const widthFraction = interactiveRect.width / pageRect.width;
@@ -908,16 +909,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           'position': 'absolute',
           'z-index': 3,
         };
-
-        // Align disclaimer to left if RTL, otherwise align to the right.
-        if (this.rootEl_.getAttribute('dir') === 'rtl') {
-          const leftFraction = (iconRect.x - pageRect.x) / pageRect.width;
-          styles['left'] = clamp(leftFraction * 100, 0, 25); // Ensure 75% of space to the right.
-        } else {
-          const rightFraction =
-          1 - (iconRect.x + iconRect.width - pageRect.x) / pageRect.width;
-          styles['right'] = clamp(rightFraction * 100, 0, 25); // Ensure 75% of space to the left.
-        }
       },
       () => {
         setImportantStyles(this.disclaimerEl_, {...styles});
