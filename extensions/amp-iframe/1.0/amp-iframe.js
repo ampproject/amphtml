@@ -38,28 +38,30 @@ class AmpIframe extends BaseElement {
   init() {
     return dict({
       'onLoadCallback': () => {
-        const placeholder = this.getPlaceholder();
-        if (placeholder) {
+        const hasPlaceholder = Boolean(this.getPlaceholder());
+        if (hasPlaceholder) {
           this.togglePlaceholder(false);
-        } else {
-          measureIntersection(this.element).then((intersectionEntry) => {
-            const {top} = intersectionEntry.boundingClientRect;
-            const viewportHeight = intersectionEntry.rootBounds.height;
-            const minTop = Math.min(600, viewportHeight * 0.75);
-            userAssert(
-              top >= minTop,
-              '<amp-iframe> elements must be positioned outside the first 75% ' +
-                'of the viewport or 600px from the top (whichever is smaller): %s ' +
-                ' Current position %s. Min: %s' +
-                "Positioning rules don't apply for iframes that use `placeholder`." +
-                'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
-                'amp-iframe/amp-iframe.md#iframe-with-placeholder for details.',
-              this.element,
-              top,
-              minTop
-            );
-          });
+          return;
         }
+        // TODO(dmanek): Extract this to a common function & share
+        // between 0.1 and 1.0 versions.
+        measureIntersection(this.element).then((intersectionEntry) => {
+          const {top} = intersectionEntry.boundingClientRect;
+          const viewportHeight = intersectionEntry.rootBounds.height;
+          const minTop = Math.min(600, viewportHeight * 0.75);
+          userAssert(
+            top >= minTop,
+            '<amp-iframe> elements must be positioned outside the first 75% ' +
+              'of the viewport or 600px from the top (whichever is smaller): %s ' +
+              ' Current position %s. Min: %s' +
+              "Positioning rules don't apply for iframes that use `placeholder`." +
+              'See https://github.com/ampproject/amphtml/blob/main/extensions/' +
+              'amp-iframe/amp-iframe.md#iframe-with-placeholder for details.',
+            this.element,
+            top,
+            minTop
+          );
+        });
       },
     });
   }
