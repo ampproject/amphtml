@@ -20,7 +20,7 @@
  */
 var regex = /(\0)|^(-)$|([\x01-\x1f\x7f]|^-?[0-9])|([\x80-\uffff0-9a-zA-Z_-]+)|[^]/g;
 
-function escaper(match, nil, dash, hexEscape, chars) {
+function escaper(match, nil, _dash, hexEscape, chars) {
   // Chars is the legal-chars (group 4) capture
   if (chars) {
     return chars;

@@ -36,7 +36,7 @@ export function utf8Decode(bytes) {
  */
 export function utf8Encode(string) {
   if (typeof TextEncoder !== 'undefined') {
-    return new TextEncoder('utf-8').encode(string);
+    return new TextEncoder().encode(string);
   }
   return stringToBytes(unescape(encodeURIComponent(string)));
 }
@@ -100,13 +100,12 @@ export function bytesToUInt32(bytes) {
  * @return {?Uint8Array}
  */
 export function getCryptoRandomBytesArray(win, length) {
-  let {crypto} = win;
+  /** @type {Crypto | undefined } */
+  let crypto = win.crypto;
 
   // Support IE 11
   if (!IS_ESM) {
-    crypto = /** @type {!webCrypto.Crypto|undefined} */ (
-      crypto || win.msCrypto
-    );
+    crypto = crypto || win.msCrypto;
     if (!crypto || !crypto.getRandomValues) {
       return null;
     }

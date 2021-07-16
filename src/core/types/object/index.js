@@ -245,8 +245,3 @@ export function getValueForExpr(obj, expr) {
   }
   return value;
 }
-
-/** @type {JsonObject} */
-const a = {'hello': 5};
-
-a.hello;

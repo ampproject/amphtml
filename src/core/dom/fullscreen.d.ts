@@ -23,6 +23,7 @@ declare interface Element {
   requestFullScreen: any;
   exitFullscreen;
   cancelFullScreen: any;
+  webkitRequestFullscreen: any;
   webkitExitFullscreen: any;
   webkitEnterFullscreen: any;
   webkitCancelFullScreen: any;

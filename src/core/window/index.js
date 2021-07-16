@@ -21,9 +21,9 @@
  * null on disconnected documents or old IE.
  * This helper function casts it into just a simple Window return type.
  *
- * @param {?Window} winOrNull
- * @return {!Window}
+ * @param {?window} winOrNull
+ * @return {!window}
  */
 export function toWin(winOrNull) {
-  return /** @type {!Window} */ (winOrNull);
+  return /** @type {!window} */ (winOrNull);
 }

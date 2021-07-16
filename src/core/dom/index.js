@@ -45,7 +45,7 @@ const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
  * callback is executed.
  * @param {!Element} parent
  * @param {function(!Element):boolean} checkFunc
- * @param {function()} callback
+ * @param {function():*} callback
  * @suppress {suspiciousCode} due to IS_ESM
  */
 export function waitForChild(parent, checkFunc, callback) {

@@ -105,7 +105,9 @@ export function deepEquals(a, b, depth = 5) {
   /** @type {!Array<{a: JSONValueDef, b: JSONValueDef, depth: number}>} */
   const queue = [{a, b, depth}];
   while (queue.length > 0) {
-    const {a, b, depth} = queue.shift();
+    const {a, b, depth} = /**@type {NonNullable<typeof queue[0]>} */ (
+      queue.shift()
+    );
     // Only check deep equality if depth > 0.
     if (depth > 0) {
       if (typeof a !== typeof b) {

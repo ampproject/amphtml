@@ -50,7 +50,7 @@ function devAssertDceCheck() {
  * @param {*=} opt_7 Optional argument
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
- * @return {T}
+ * @return {NonNullable<T>}
  * @template T
  * @throws {Error} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
