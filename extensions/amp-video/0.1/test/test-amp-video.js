@@ -171,6 +171,46 @@ describes.realWin(
       );
     });
 
+    it('should set an attribute on cached video sources', async () => {
+      const source = doc.createElement('source');
+      source.setAttribute(
+        'src',
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+      );
+      source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+      source.setAttribute('data-bitrate', '1000');
+      const v = await getVideo(
+        {
+          width: 160,
+          height: 90,
+        },
+        [source]
+      );
+      const sources = v.querySelectorAll('source');
+      expect(sources[0]).to.have.attribute('i-amphtml-video-cached-source');
+      expect(sources[1]).to.have.attribute('i-amphtml-video-cached-source');
+      expect(sources[2]).to.have.attribute('i-amphtml-video-cached-source');
+    });
+
+    it('should not set an attribute on non cached video sources', async () => {
+      const source = doc.createElement('source');
+      source.setAttribute(
+        'src',
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+      );
+      source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+      source.setAttribute('data-bitrate', '1000');
+      const v = await getVideo(
+        {
+          width: 160,
+          height: 90,
+        },
+        [source]
+      );
+      const sources = v.querySelectorAll('source');
+      expect(sources[3]).to.not.have.attribute('i-amphtml-video-cached-source');
+    });
+
     it('should load a video', async () => {
       const v = await getVideo({
         src: 'video.mp4',
