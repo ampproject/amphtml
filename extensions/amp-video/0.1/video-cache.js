@@ -58,7 +58,7 @@ export function fetchCachedSources(videoEl, ampdoc) {
         'amp_video_host_url':
           /* document url that contains the video */ canonicalUrl,
       });
-      return Services.xhrFor(win).fetch(requestUrl);
+      return Services.xhrFor(win).fetch(requestUrl, {prerenderSafe: true});
     })
     .then((response) => response.json())
     .then((jsonResponse) =>
