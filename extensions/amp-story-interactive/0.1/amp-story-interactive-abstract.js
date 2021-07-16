@@ -34,7 +34,7 @@ import {
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
 import {
   buildInteractiveDisclaimer,
-  buildInteractiveIcon,
+  buildInteractiveDisclaimerIcon,
 } from './interactive-disclaimer';
 import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -278,7 +278,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         isExperimentOn(this.win, 'amp-story-interactive-disclaimer') &&
         this.element.hasAttribute('endpoint')
       ) {
-        this.disclaimerIcon_ = buildInteractiveIcon(this);
+        this.disclaimerIcon_ = buildInteractiveDisclaimerIcon(this);
         this.rootEl_.prepend(this.disclaimerIcon_);
       }
       createShadowRootWithStyle(
@@ -872,7 +872,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /**
    * Opens the disclaimer dialog and positions it according to the page and itself.
-   */
+   * @private
+  */
   openDisclaimer_() {
     if (this.disclaimerEl_) {
       return;
@@ -891,14 +892,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         const interactiveRect = this.element./*OK*/ getBoundingClientRect();
         const pageRect = pageEl./*OK*/ getBoundingClientRect();
         const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
-        const rightFraction =
-          1 - (iconRect.x + iconRect.width - pageRect.x) / pageRect.width;
+        
         const bottomFraction =
           1 - (iconRect.y + iconRect.height - pageRect.y) / pageRect.height;
         const widthFraction = interactiveRect.width / pageRect.width;
 
         // Clamp values to ensure dialog has space up and left.
-        const rightPercentage = clamp(rightFraction * 100, 0, 25); // Ensure 75% of space to the left.
         const bottomPercentage = clamp(bottomFraction * 100, 0, 85); // Ensure 15% of space up. 
         const widthPercentage = Math.max(widthFraction * 100, 65); // Ensure 65% of max-width.
 
@@ -909,6 +908,16 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           'position': 'absolute',
           'z-index': 3,
         };
+
+        // Align disclaimer to left if RTL, otherwise align to the right.
+        if (this.rootEl_.getAttribute('dir') === 'rtl') {
+          const leftFraction = (iconRect.x - pageRect.x) / pageRect.width;
+          styles['left'] = clamp(leftFraction * 100, 0, 25); // Ensure 75% of space to the right.
+        } else {
+          const rightFraction =
+          1 - (iconRect.x + iconRect.width - pageRect.x) / pageRect.width;
+          styles['right'] = clamp(rightFraction * 100, 0, 25); // Ensure 75% of space to the left.
+        }
       },
       () => {
         setImportantStyles(this.disclaimerEl_, {...styles});
@@ -930,6 +939,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /**
    * Closes the disclaimer dialog if open.
+   * @private
    */
   closeDisclaimer_() {
     if (!this.disclaimerEl_) {

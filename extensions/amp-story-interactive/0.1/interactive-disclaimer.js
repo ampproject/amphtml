@@ -115,7 +115,7 @@ export function buildInteractiveDisclaimer(interactive, attrs = {}) {
  * @param {!AmpStoryInteractive} interactive the interactive element.
  * @return {!Element} the icon with the dialog that should be added to the shadowRoot.
  */
-export function buildInteractiveIcon(interactive) {
+export function buildInteractiveDisclaimerIcon(interactive) {
   const html = htmlFor(interactive.element);
   return html`<button
     class="i-amphtml-story-interactive-disclaimer-icon"
