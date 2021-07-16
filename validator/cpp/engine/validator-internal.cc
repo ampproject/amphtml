@@ -104,11 +104,6 @@ ABSL_FLAG(int, max_node_recursion_depth, 200,
           "Maximum recursion depth of nodes, if stack of nodes grow beyond this"
           "validator will stop parsing with FAIL result");
 
-ABSL_FLAG(bool, allow_module_nomodule, true,
-          "If true, then script versions for module and nomdule are allowed "
-          "in AMP documents. This gating should be temporary and removed "
-          "after necessary transformers are in place. See b/173803451.");
-
 namespace amp::validator {
 
 // Standard and Nomodule JavaScript:
@@ -4844,27 +4839,24 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
     // Disallow any contents in the script cdata.
     tagspec->mutable_cdata()->set_whitespace_only(true);
 
-    // TODO(b/173803451): allow module/nomodule tagspecs.
-    if (GetFlag(FLAGS_allow_module_nomodule)) {
-      // Add module/nomodule tagspecs for AMP ExtensionSpec tagspecs.
-      const auto& html_formats = tagspec->html_format();
-      if (std::find(html_formats.begin(), html_formats.end(),
-                    HtmlFormat::AMP) != html_formats.end()) {
-        TagSpec basic_tagspec = *tagspec;
-        basic_tagspec.clear_html_format();
-        basic_tagspec.add_html_format(HtmlFormat::AMP);
-        basic_tagspec.clear_enabled_by();
-        basic_tagspec.add_enabled_by("transformed");
+    // Add module/nomodule tagspecs for AMP ExtensionSpec tagspecs.
+    const auto& html_formats = tagspec->html_format();
+    if (std::find(html_formats.begin(), html_formats.end(), HtmlFormat::AMP) !=
+        html_formats.end()) {
+      TagSpec basic_tagspec = *tagspec;
+      basic_tagspec.clear_html_format();
+      basic_tagspec.add_html_format(HtmlFormat::AMP);
+      basic_tagspec.clear_enabled_by();
+      basic_tagspec.add_enabled_by("transformed");
 
-        // Expand module script tagspec.
-        TagSpec module_tagspec = basic_tagspec;
-        ExpandModuleExtensionSpec(&module_tagspec, base_spec_name);
-        new_tagspecs.push_back(module_tagspec);
-        // Expand nomodule script tagspec.
-        TagSpec nomodule_tagspec = basic_tagspec;
-        ExpandNomoduleExtensionSpec(&nomodule_tagspec, base_spec_name);
-        new_tagspecs.push_back(nomodule_tagspec);
-      }
+      // Expand module script tagspec.
+      TagSpec module_tagspec = basic_tagspec;
+      ExpandModuleExtensionSpec(&module_tagspec, base_spec_name);
+      new_tagspecs.push_back(module_tagspec);
+      // Expand nomodule script tagspec.
+      TagSpec nomodule_tagspec = basic_tagspec;
+      ExpandNomoduleExtensionSpec(&nomodule_tagspec, base_spec_name);
+      new_tagspecs.push_back(nomodule_tagspec);
     }
   }
   // Add module and nomodule tagspecs.
