@@ -15,7 +15,6 @@
  */
 
 import '../amp-iframe';
-import {expect} from 'chai';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
