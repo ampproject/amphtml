@@ -39,6 +39,11 @@ exports.rules = [
   },
   {
     filesMatching: '**/*.js',
+    mustNotDependOn: 'src/compiler/**/*.js',
+    allowlist: [],
+  },
+  {
+    filesMatching: '**/*.js',
     mustNotDependOn: 'src/purifier/**/*.js',
     allowlist: [
       // WARNING: Importing purifier.js will also bundle DOMPurify (13KB).
@@ -513,7 +518,7 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/service/custom-element-registry.js',
     allowlist: [
-      'builtins/**->src/service/custom-element-registry.js',
+      'src/builtins/**->src/service/custom-element-registry.js',
       'src/amp.js->src/service/custom-element-registry.js',
       'src/runtime.js->src/service/custom-element-registry.js',
       'src/service/extensions-impl.js->src/service/custom-element-registry.js',
