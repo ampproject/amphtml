@@ -220,7 +220,6 @@ describes.realWin(
       });
 
       it('should create glassPane', () => {
-        // this is failing
         const pane = doc.querySelector('.i-amphtml-glass-pane');
         expect(pane).to.exist;
       });
