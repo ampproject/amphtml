@@ -32,6 +32,7 @@ import {
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
   buildInteractiveDisclaimer,
   buildInteractiveDisclaimerIcon,
@@ -873,7 +874,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Opens the disclaimer dialog and positions it according to the page and itself.
    * @private
-  */
+   */
   openDisclaimer_() {
     if (this.disclaimerEl_) {
       return;
@@ -900,7 +901,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
         // Clamp values to ensure dialog has space up and left.
         const rightPercentage = clamp(rightFraction * 100, 0, 25); // Ensure 75% of space to the left.
-        const bottomPercentage = clamp(bottomFraction * 100, 0, 85); // Ensure 15% of space up. 
+        const bottomPercentage = clamp(bottomFraction * 100, 0, 85); // Ensure 15% of space up.
         const widthPercentage = Math.max(widthFraction * 100, 65); // Ensure 65% of max-width.
 
         styles = {
@@ -912,7 +913,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         };
       },
       () => {
-        setImportantStyles(this.disclaimerEl_, {...styles});
+        setImportantStyles(
+          this.disclaimerEl_,
+          assertDoesNotContainDisplay(styles)
+        );
         pageEl.appendChild(this.disclaimerEl_);
         this.disclaimerIcon_.setAttribute('hide', '');
         // Add click listener through the shadow dom using e.path.
