@@ -99,7 +99,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   onDrag_() {
     const {value} = this.inputEl_;
     this.bubbleEl_.textContent = value + '%';
-    this.rootEl_.classList.add('show');
+    this.rootEl_.classList.add('i-amphtml-story-interactive-mid-selection');
     setImportantStyles(this.rootEl_, {'--percentage': value + '%'});
   }
 
@@ -109,6 +109,6 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   onRelease_() {
     this.updateToPostSelectionState_();
     this.inputEl_.setAttribute('disabled', '');
-    this.rootEl_.classList.remove('show');
+    this.rootEl_.classList.remove('i-amphtml-story-interactive-mid-selection');
   }
 }
