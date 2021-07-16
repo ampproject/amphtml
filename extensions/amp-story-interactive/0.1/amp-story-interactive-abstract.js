@@ -36,7 +36,7 @@ import {
   buildInteractiveDisclaimer,
   buildInteractiveIcon,
 } from './interactive-disclaimer';
-import {closest, closestAncestorElementBySelector} from '#core/dom/query';
+import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
