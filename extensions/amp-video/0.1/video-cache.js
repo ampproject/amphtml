@@ -100,6 +100,7 @@ function applySourcesToVideo(videoEl, sources) {
           'src': source['url'],
           'type': source['type'],
           'data-bitrate': source['bitrate_kbps'],
+          'i-amphtml-video-cached-source': '',
         }
       );
       videoEl.insertBefore(sourceEl, videoEl.firstChild);
