@@ -255,12 +255,11 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="thirds">
-            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
-              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+            <div grid-area="lower-third" style="display: flex;justify-content:center;flex-direction:column;">
               <amp-story-interactive-binary-poll
                 endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
                 id="movie-light-black"
-                style="--interactive-accent-color: rgb(0, 0, 0);"
+                style="--interactive-accent-color: rgb(0, 0, 0); transform: translateX(-40%) rotate(-45deg);"
                 option-1-text="Doctor"
                 option-2-text="Panther"
                 option-1-confetti="🎥"

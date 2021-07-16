@@ -32,6 +32,9 @@
 .i-amphtml-story-interactive-disclaimer-url {
   color: #5f6368 !important;
   padding-inline-end: 2em !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
 }
 
 .i-amphtml-story-interactive-disclaimer-link {

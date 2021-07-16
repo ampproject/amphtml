@@ -44,7 +44,7 @@ import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
 import {toArray} from '#core/types/array';
 import {setImportantStyles} from '#core/dom/style';
-import { isExperimentOn } from '#experiments/';
+import {isExperimentOn} from '#experiments/';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
@@ -274,7 +274,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     ]).then(() => {
       this.rootEl_ = this.buildComponent();
       this.rootEl_.classList.add('i-amphtml-story-interactive-container');
-      if (isExperimentOn(this.win, 'amp-story-interactive-disclaimer') && this.element.hasAttribute('endpoint')) {
+      if (
+        isExperimentOn(this.win, 'amp-story-interactive-disclaimer') &&
+        this.element.hasAttribute('endpoint')
+      ) {
         this.disclaimerIcon_ = buildInteractiveIcon(this);
         this.rootEl_.prepend(this.disclaimerIcon_);
       }
@@ -876,31 +879,34 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     }
     this.disclaimerEl_ = buildInteractiveDisclaimer(this);
 
-    // Get rects and calculate right and bottom.
-    const pageEl = closest(dev().assertElement(this.element), (el) => 
-      el.tagName.toLowerCase() === 'amp-story-page'
+    const pageEl = closest(
+      dev().assertElement(this.element),
+      (el) => el.tagName.toLowerCase() === 'amp-story-page'
     );
 
     let styles;
     this.measureMutateElement(
       () => {
+        // Get rects and calculate position from icon.
         const interactiveRect = this.element./*OK*/ getBoundingClientRect();
         const pageRect = pageEl./*OK*/ getBoundingClientRect();
         const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
-        const rightPercentage =
-          1 -
-          (interactiveRect.x + interactiveRect.width - pageRect.x) /
-            pageRect.width;
-        const bottomPercentage =
-          1 -
-          (interactiveRect.y + iconRect.height - pageRect.y) / pageRect.height;
-        const widthPercentage = interactiveRect.width / pageRect.width;
+        const rightFraction =
+          1 - (iconRect.x + iconRect.width - pageRect.x) / pageRect.width;
+        const bottomFraction =
+          1 - (iconRect.y + iconRect.height - pageRect.y) / pageRect.height;
+        const widthFraction = interactiveRect.width / pageRect.width;
+
+        // Clamp values to ensure dialog has space up and left.
+        const rightPercentage = clamp(rightFraction * 100, 0, 25); // Ensure 75% of space to the left.
+        const bottomPercentage = clamp(bottomFraction * 100, 0, 85); // Ensure 15% of space up. 
+        const widthPercentage = Math.max(widthFraction * 100, 65); // Ensure 65% of max-width.
 
         styles = {
-          bottom: clamp(bottomPercentage * 100, 0, 85) + '%',
-          right: clamp(rightPercentage * 100, 0, 25) + '%',
-          'max-width': clamp(widthPercentage * 100, 50, 75) + '%',
-          position: 'absolute',
+          'bottom': bottomPercentage + '%',
+          'right': rightPercentage + '%',
+          'max-width': widthPercentage + '%',
+          'position': 'absolute',
           'z-index': 3,
         };
       },
@@ -935,6 +941,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       if (this.disclaimerIcon_) {
         this.disclaimerIcon_.removeAttribute('hide');
       }
-    })
+    });
   }
 }

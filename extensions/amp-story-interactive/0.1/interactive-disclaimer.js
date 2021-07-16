@@ -53,14 +53,12 @@ function buildDisclaimerLayout(element) {
       ></span>
       <div class="i-amphtml-story-interactive-disclaimer-url" ref="urlEl"></div>
     </div>
-    <div>
-      <a
-        target="_blank"
-        class="i-amphtml-story-interactive-disclaimer-link"
-        ref="linkEl"
-        >Learn more</a
-      >
-    </div>
+    <a
+      target="_blank"
+      class="i-amphtml-story-interactive-disclaimer-link"
+      ref="linkEl"
+      >Learn more</a
+    >
     <button
       class="i-amphtml-story-interactive-disclaimer-close"
       aria-label="Close disclaimer"
