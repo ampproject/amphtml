@@ -29,6 +29,7 @@
   color: var(--interactive-accent-color) !important;
   font-weight: 700 !important;
   line-height: 1.5em !important;
+  z-index: 1 !important;
 }
 
 .i-amphtml-story-interactive-img-quiz-answer-choice::before {

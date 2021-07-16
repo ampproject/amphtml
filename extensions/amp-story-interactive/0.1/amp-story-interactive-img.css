@@ -64,6 +64,9 @@
   height: 100% !important;
   background-position: center !important;
   background-size: cover !important;
+  /* Needed for overflow inconsistencies during animations on some browsers */
+  position: relative !important;
+  z-index: 1 !important;
 }
 
 .i-amphtml-story-interactive-img-option:focus {
