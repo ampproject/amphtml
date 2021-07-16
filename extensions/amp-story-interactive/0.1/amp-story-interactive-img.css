@@ -64,8 +64,7 @@
   height: 100% !important;
   background-position: center !important;
   background-size: cover !important;
-  border: var(--i-amphtml-interactive-img-border) !important;
-  box-sizing: border-box !important;
+  box-shadow: var(--i-amphtml-interactive-img-border) !important;
 }
 
 .i-amphtml-story-interactive-img-option:focus {
