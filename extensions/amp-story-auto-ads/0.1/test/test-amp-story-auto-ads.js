@@ -502,18 +502,5 @@ describes.realWin(
         );
       });
     });
-
-    describe('Test if handleConfig assigns a new config and returns a promise', async () => {
-      const handleConfig = await new this.handleConfig_();
-      handleConfig.then((result) => {
-        expect(result).to.eql({
-          'amp-story': '',
-          class: 'i-amphtml-story-ad',
-          'data-slot': '/30497360/a4a/amp_story_dfp_example',
-          layout: 'fill',
-          type: 'doubleclick',
-        });
-      });
-    });
   }
 );
