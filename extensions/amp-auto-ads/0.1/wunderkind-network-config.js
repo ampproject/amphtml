@@ -34,7 +34,9 @@ export class WunderkindNetworkConfig {
    * @override
    */
   isEnabled(unused) {
-    return true;
+    const websiteID = this.autoAmpAdsElement_.getAttribute('data-website-id');
+
+    return websiteID && websiteID.match(/^[0-9]+$/);
   }
 
   /**
@@ -47,11 +49,7 @@ export class WunderkindNetworkConfig {
   /** @override */
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
-
-    let websiteID = this.autoAmpAdsElement_.getAttribute('data-website-id');
-
-    // websiteID should be an integer
-    websiteID = websiteID.replace(/[^0-9]/g, '');
+    const websiteID = this.autoAmpAdsElement_.getAttribute('data-website-id');
 
     return buildUrl(
       'https://api.bounceexchange.com/bounce/amp',

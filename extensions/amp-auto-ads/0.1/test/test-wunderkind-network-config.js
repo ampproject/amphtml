@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
 import {getAdNetworkConfig} from '../ad-network-config';
 
