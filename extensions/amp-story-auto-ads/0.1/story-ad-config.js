@@ -45,8 +45,10 @@ export class StoryAdConfig {
    * @param {!Window} win Window element
    */
   constructor(element, win) {
-    /** @private {!Element} amp-story-auto ads element. */
-    /** @private {!Window} Window element. */
+    /**
+     * @private {!Element} amp-story-auto ads element.
+     * @private {!Window} Window element.
+     */
     this.element_ = element;
     this.win_ = win;
   }
