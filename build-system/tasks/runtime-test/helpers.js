@@ -136,7 +136,7 @@ function maybePrintArgvMessages() {
       green('to run tests in a headless Chrome window.')
     );
   }
-  if (argv.compiled || !argv.nobuild) {
+  if (argv.compiled) {
     log(green('Running tests against minified code.'));
   } else {
     log(green('Running tests against unminified code.'));
