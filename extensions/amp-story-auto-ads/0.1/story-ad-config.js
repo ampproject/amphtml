@@ -42,12 +42,12 @@ const AllowedAdTypes = {
 export class StoryAdConfig {
   /**
    * @param {!Element} element amp-story-auto-ads element.
-   * @param {!Window} win Window element
+   * @param {!Object} win Window element
    */
   constructor(element, win) {
     /**
      * @private {!Element} amp-story-auto ads element.
-     * @private {!Window} Window element.
+     * @private {!Object} Window element.
      */
     this.element_ = element;
     this.win_ = win;
