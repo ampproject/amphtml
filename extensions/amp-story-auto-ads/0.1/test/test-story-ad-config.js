@@ -90,12 +90,12 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
       );
     });
 
-    it('throws on no config', () => {
+    it('throws on no config', async () => {
       const storyAdEl = doc.createElement('amp-story-auto-ads');
       doc.body.appendChild(storyAdEl);
-      allowConsoleError(() => {
-        expect(() => {
-          new StoryAdConfig(storyAdEl, win).getConfig();
+      expectAsyncConsoleError(async () => {
+        expect(async () => {
+          await new StoryAdConfig(storyAdEl, win).getConfig();
         }).to.throw(
           /The amp-story-auto-ads:config should be inside a <script> tag with type=\"application\/json\"​​​/
         );
@@ -221,28 +221,6 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
 
     const result = await new StoryAdConfig(storyAutoAdsElem, win).getConfig();
     expect(fetchStub).to.be.calledWith(exampleURL);
-    expect(result).to.eql({
-      'amp-story': '',
-      class: 'i-amphtml-story-ad',
-      'data-slot': '/30497360/a4a/amp_story_dfp_example',
-      layout: 'fill',
-      type: 'doubleclick',
-    });
-  });
-
-  it('uses inline config when src attribute is not provided', async () => {
-    const config = {
-      type: 'doubleclick',
-      'data-slot': '/30497360/a4a/amp_story_dfp_example',
-    };
-
-    const storyAutoAdsElem = createStoryAdElementAndConfig(
-      doc,
-      doc.body, // Parent.
-      config
-    );
-
-    const result = await new StoryAdConfig(storyAutoAdsElem, win).getConfig();
     expect(result).to.eql({
       'amp-story': '',
       class: 'i-amphtml-story-ad',
