@@ -120,7 +120,7 @@ export class StoryAdConfig {
       .catch((err) => {
         user().error(
           TAG,
-          'Error determining if remote config is valid JSON',
+          'Error determining if remote config is valid JSON, Bad URL or Bad JSON',
           err
         );
       });
