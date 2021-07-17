@@ -47,9 +47,15 @@ describes.realWin(
         ampAutoAdsElem.setAttribute('data-website-id', SITE_ID);
       });
 
-      it('should report enabled always', () => {
+      it('should report enabled when site id valid', () => {
         const adNetwork = getAdNetworkConfig('wunderkind', ampAutoAdsElem);
         expect(adNetwork.isEnabled(env.win)).to.equal(true);
+      });
+
+      it('should report disabled when site id invalid', () => {
+        ampAutoAdsElem.setAttribute('data-website-id', 'invalid');
+        const adNetwork = getAdNetworkConfig('wunderkind', ampAutoAdsElem);
+        expect(adNetwork.isEnabled(env.win)).to.equal(false);
       });
 
       it('should generate the config fetch URL', () => {
