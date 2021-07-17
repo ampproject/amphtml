@@ -503,7 +503,7 @@ describes.realWin(
       });
     });
 
-    describe('Test if Handle Config assigns a new conifg and returns a promise', async () => {
+    describe('Test if handleConfig assigns a new config and returns a promise', async () => {
       const handleConfig = await new this.handleConfig_();
       handleConfig.then((result) => {
         expect(result).to.eql({
