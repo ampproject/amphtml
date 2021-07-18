@@ -33,10 +33,7 @@ export function upgradeBackgroundAudio(element, loop = true) {
     return null;
   }
   const audioEl = element.ownerDocument.createElement('audio');
-  const audioSrc = Services.urlForDoc(element).assertHttpsUrl(
-    element.getAttribute('background-audio'),
-    element
-  );
+  const audioSrc = element.getAttribute('background-audio');
   audioEl.setAttribute('src', audioSrc);
   audioEl.setAttribute('preload', 'auto');
   if (loop) {
