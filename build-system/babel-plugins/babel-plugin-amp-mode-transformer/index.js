@@ -19,6 +19,7 @@
  * and getMode().localDev to true.
  * @param {Object} babelTypes
  */
+const {BUILD_CONSTANTS} = require('../../compile/build-constants');
 const {dirname, join, relative, resolve} = require('path').posix;
 
 let shouldResolveDevelopmentMode = true;
@@ -60,6 +61,9 @@ module.exports = function ({types: t}) {
         const {object: obj, property} = node;
         const {callee} = obj;
         if (callee && callee.name === 'getMode') {
+          const {INTERNAL_RUNTIME_VERSION, IS_ESM, IS_MINIFIED} =
+            BUILD_CONSTANTS;
+
           if (property.name === 'test' || property.name === 'localDev') {
             path.replaceWith(t.booleanLiteral(false));
           }
@@ -67,7 +71,13 @@ module.exports = function ({types: t}) {
             path.replaceWith(t.booleanLiteral(false));
           }
           if (property.name === 'minified') {
-            path.replaceWith(t.booleanLiteral(true));
+            path.replaceWith(t.booleanLiteral(IS_MINIFIED));
+          }
+          if (property.name === 'esm') {
+            path.replaceWith(t.booleanLiteral(IS_ESM));
+          }
+          if (property.name === 'version') {
+            path.replaceWith(t.stringLiteral(INTERNAL_RUNTIME_VERSION));
           }
         }
       },
