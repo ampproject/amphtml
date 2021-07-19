@@ -953,7 +953,9 @@ export class AmpStoryPlayer {
       'remaining': remaining,
     };
 
-    this.checkButtonsDisabled_();
+    if (DESKTOP_PANEL_STORY_PLAYER_EXP_ON) {
+      this.checkButtonsDisabled_();
+    }
     this.signalNavigation_(navigation);
     this.maybeFetchMoreStories_(remaining);
   }
