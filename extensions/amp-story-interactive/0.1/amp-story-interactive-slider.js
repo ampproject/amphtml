@@ -60,6 +60,8 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     this.bubbleEl_ = null;
     /** @private {?Element} tracks user input */
     this.inputEl_ = null;
+    /** @private {?Element}  */
+    this.sliderType_ = SliderTypes.PERCENTAGE;
   }
 
   /** @override */
@@ -74,6 +76,12 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
 
     this.attachPrompt_(this.rootEl_);
     return this.rootEl_;
+
+    if(this.options_.length > 0) {
+      this.bubbleEl.textContent = this.options_[0].text;
+      this.sliderType_ = SliderType.EMOJI;
+    }
+  
   }
 
   /** @override */
@@ -97,6 +105,11 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    * @private
    */
   onDrag_() {
+    if (this.options_.length > 0) {
+      this.bubbleEl.textContent = this.options_[0].text;
+      this.sliderType_ = SliderType.EMOJI;
+    }
+  
     const {value} = this.inputEl_;
     this.bubbleEl_.textContent = value + '%';
     this.rootEl_.classList.add('i-amphtml-story-interactive-mid-selection');
