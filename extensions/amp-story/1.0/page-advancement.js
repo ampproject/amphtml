@@ -487,7 +487,18 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName.startsWith('amp-story-interactive-') &&
-          !this.isInStoryPageSideEdge_(event, this.getStoryPageRect_())
+          (!this.isInStoryPageSideEdge_(event, this.getStoryPageRect_()) ||
+            event.path[0].classList.contains(
+              'i-amphtml-story-interactive-disclaimer-icon'
+            ))
+        ) {
+          shouldHandleEvent = false;
+          return true;
+        }
+        if (
+          el.classList.contains(
+            'i-amphtml-story-interactive-disclaimer-dialog-container'
+          )
         ) {
           shouldHandleEvent = false;
           return true;
