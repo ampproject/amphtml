@@ -1846,6 +1846,9 @@ export class AmpStory extends AMP.BaseElement {
         if (!this.backgroundBlur_) {
           this.backgroundBlur_ = new BackgroundBlur(this.win, this.element);
           this.backgroundBlur_.attach();
+          if (this.activePage_) {
+            this.backgroundBlur_.update(this.activePage_.element);
+          }
         }
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
