@@ -24,7 +24,7 @@ import {installEmbedStateListener, manageWin} from './environment';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
 
 import {urls} from '../src/config';
-import {internalRuntimeVersion} from '../src/internal-version';
+import * as mode from '#core/mode';
 import {
   initLogConstructor,
   isUserErrorMessage,
@@ -360,7 +360,7 @@ function lightweightErrorReport(e, isCanary) {
   new Image().src =
     urls.errorReporting +
     '?3p=1&v=' +
-    encodeURIComponent(internalRuntimeVersion()) +
+    encodeURIComponent(mode.version()) +
     '&m=' +
     encodeURIComponent(e.message) +
     '&ca=' +
