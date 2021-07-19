@@ -15,7 +15,11 @@
  */
 
 import {AmpdocAnalyticsRoot} from '../analytics-root';
-import {AnalyticsEvent, AnalyticsEventType, CustomBrowserEventTracker} from '../events';
+import {
+  AnalyticsEvent,
+  AnalyticsEventType,
+  CustomBrowserEventTracker,
+} from '../events';
 import {macroTask} from '#testing/yield';
 
 describes.realWin(
@@ -52,36 +56,41 @@ describes.realWin(
       inputField2 = win.document.createElement('input');
       inputField2.setAttribute('id', 'inputField2');
       target.appendChild(inputField2);
-
     });
 
     describe('CustomBrowserEventTracker', () => {
       let tracker;
-      let changeEventConfig, blurEventConfig, multiChangeConfig, multiBlurConfig;
+      let changeEventConfig,
+        blurEventConfig,
+        multiChangeConfig,
+        multiBlurConfig;
       let selectors;
 
       beforeEach(() => {
-        tracker = root.getTracker(AnalyticsEventType.BROWSER_EVENT, CustomBrowserEventTracker);
+        tracker = root.getTracker(
+          AnalyticsEventType.BROWSER_EVENT,
+          CustomBrowserEventTracker
+        );
         selectors = ['#inputField', '#inputField2'];
 
         blurEventConfig = {
           'on': 'blur',
-          'selector': '#inputField'
+          'selector': '#inputField',
         };
 
         multiBlurConfig = {
           'on': 'blur',
-          'selector': selectors
+          'selector': selectors,
         };
 
         changeEventConfig = {
           'on': 'change',
-          'selector': '#inputField'
+          'selector': '#inputField',
         };
 
         multiChangeConfig = {
           'on': 'change',
-          'selector': selectors
+          'selector': selectors,
         };
       });
 
@@ -98,10 +107,8 @@ describes.realWin(
         );
 
         expect(tracker.observables_.getHandlerCount()).to.equal(1);
-
         tracker.dispose();
-
-        expect(tracker.observables_).to.equal(null);
+        expect(tracker.observables_).to.be.null;
       });
 
       it('should require a selector', () => {
@@ -111,6 +118,7 @@ describes.realWin(
               selector: '',
             });
           }).to.throw(/Missing required selector on browser event trigger/);
+
           expect(() => {
             tracker.add(analyticsElement, AnalyticsEventType.VIDEO, {
               selector: [],
@@ -125,153 +133,180 @@ describes.realWin(
         };
 
         expect(() => {
-          tracker.add(analyticsElement, "blur", config);
+          tracker.add(analyticsElement, 'blur', config);
         }).to.throw(
           /Cannot have duplicate selectors in selectors list: #inputField,#inputField/
         );
         expect(() => {
-          tracker.add(analyticsElement, "change", config);
+          tracker.add(analyticsElement, 'change', config);
         }).to.throw(
           /Cannot have duplicate selectors in selectors list: #inputField,#inputField/
         );
       });
 
       it('fires on one selector with on change', async () => {
-        const fn1 = env.sandbox.stub();
+        const listenerStub = env.sandbox.stub();
         const getElementSpy = env.sandbox.spy(root, 'getElement');
 
+        env.sandbox
+          .stub(tracker, 'debouncedBoundOnSession_')
+          .callsFake((e) => tracker.boundOnSession_(e));
         tracker.add(
           undefined,
           AnalyticsEventType.BROWSER_EVENT,
           changeEventConfig,
-          fn1
+          listenerStub
         );
 
         inputField.dispatchEvent(new Event('change'));
 
         await macroTask();
-        expect(fn1).to.have.callCount(1);
-        expect(fn1).to.be.calledWith(
+        expect(listenerStub).to.have.calledOnce;
+        expect(listenerStub).to.be.calledWith(
           new AnalyticsEvent(inputField, 'change', {})
         );
-        expect(getElementSpy).to.be.callCount(1);
+        expect(getElementSpy).to.be.calledOnce;
         expect(tracker.observables_.handlers_.length).to.equal(1);
       });
 
       it('fires on one selector with on blur', async () => {
-        const fn1 = env.sandbox.stub();
+        const listenerStub = env.sandbox.stub();
         const getElementSpy = env.sandbox.spy(root, 'getElement');
+
+        env.sandbox
+          .stub(tracker, 'debouncedBoundOnSession_')
+          .callsFake((e) => tracker.boundOnSession_(e));
 
         tracker.add(
           undefined,
           AnalyticsEventType.BROWSER_EVENT,
           blurEventConfig,
-          fn1
+          listenerStub
         );
 
         inputField.dispatchEvent(new Event('blur'));
 
         await macroTask();
-        expect(fn1).to.have.callCount(1);
-        expect(fn1).to.be.calledWith(
+        expect(listenerStub).to.have.calledOnce;
+        expect(listenerStub).to.be.calledWith(
           new AnalyticsEvent(inputField, 'blur', {})
         );
-        expect(getElementSpy).to.be.callCount(1);
+        expect(getElementSpy).to.be.calledOnce;
         expect(tracker.observables_.handlers_.length).to.equal(1);
       });
 
       it('fires on multiple selectors with on blur', async () => {
-        const fn1 = env.sandbox.stub();
-        const getElementSpy = env.sandbox.spy(root, 'getElementsByQuerySelectorAll_');
+        const listenerStub = env.sandbox.stub();
+        const getElementSpy = env.sandbox.spy(
+          root,
+          'getElementsByQuerySelectorAll_'
+        );
 
+        env.sandbox
+          .stub(tracker, 'debouncedBoundOnSession_')
+          .callsFake((e) => tracker.boundOnSession_(e));
         tracker.add(
           undefined,
           AnalyticsEventType.BROWSER_EVENT,
           multiBlurConfig,
-          fn1
+          listenerStub
         );
 
         inputField.dispatchEvent(new Event('blur'));
+        await macroTask();
         inputField2.dispatchEvent(new Event('blur'));
-
         await macroTask();
 
-        expect(fn1).to.have.callCount(2);
-        expect(fn1.firstCall).to.be.calledWith(
+        expect(listenerStub).to.have.calledTwice;
+        expect(listenerStub.firstCall).to.be.calledWith(
           new AnalyticsEvent(inputField, 'blur', {})
         );
-        expect(fn1.secondCall).to.be.calledWith(
+        expect(listenerStub.secondCall).to.be.calledWith(
           new AnalyticsEvent(inputField2, 'blur', {})
         );
-        expect(getElementSpy).to.be.callCount(1);
+        expect(getElementSpy).to.be.calledOnce;
         expect(tracker.observables_.handlers_.length).to.equal(1);
       });
 
       it('fires on multiple selectors with on change', async () => {
-        const fn1 = env.sandbox.stub();
-        const getElementSpy = env.sandbox.spy(root, 'getElementsByQuerySelectorAll_');
+        const listenerStub = env.sandbox.stub();
+        const getElementSpy = env.sandbox.spy(
+          root,
+          'getElementsByQuerySelectorAll_'
+        );
 
+        env.sandbox
+          .stub(tracker, 'debouncedBoundOnSession_')
+          .callsFake((e) => tracker.boundOnSession_(e));
         tracker.add(
           undefined,
           AnalyticsEventType.BROWSER_EVENT,
           multiChangeConfig,
-          fn1
+          listenerStub
         );
 
         inputField.dispatchEvent(new Event('change'));
+        await macroTask();
         inputField2.dispatchEvent(new Event('change'));
-
         await macroTask();
 
-        expect(fn1).to.have.callCount(2);
-        expect(fn1.firstCall).to.be.calledWith(
+        expect(listenerStub).to.have.calledTwice;
+        expect(listenerStub.firstCall).to.be.calledWith(
           new AnalyticsEvent(inputField, 'change', {})
         );
-        expect(fn1.secondCall).to.be.calledWith(
+        expect(listenerStub.secondCall).to.be.calledWith(
           new AnalyticsEvent(inputField2, 'change', {})
         );
-        expect(getElementSpy).to.be.callCount(1);
+        expect(getElementSpy).to.be.calledOnce;
         expect(tracker.observables_.handlers_.length).to.equal(1);
       });
 
       it('fires with on change and on blur', async () => {
-        const fn1 = env.sandbox.stub();
-        const getElementSpy = env.sandbox.spy(root, 'getElementsByQuerySelectorAll_');
+        const listenerStub = env.sandbox.stub();
+        const getElementSpy = env.sandbox.spy(
+          root,
+          'getElementsByQuerySelectorAll_'
+        );
 
+        env.sandbox
+          .stub(tracker, 'debouncedBoundOnSession_')
+          .callsFake((e) => tracker.boundOnSession_(e));
         tracker.add(
           undefined,
           AnalyticsEventType.BROWSER_EVENT,
           multiBlurConfig,
-          fn1
+          listenerStub
         );
 
         tracker.add(
           undefined,
           AnalyticsEventType.BROWSER_EVENT,
           multiChangeConfig,
-          fn1
+          listenerStub
         );
 
         inputField.dispatchEvent(new Event('blur'));
+        await macroTask();
         inputField2.dispatchEvent(new Event('blur'));
         inputField.dispatchEvent(new Event('change'));
-        inputField2.dispatchEvent(new Event('change'));
-
         await macroTask();
-        expect(fn1).to.have.callCount(4);
-        expect(fn1.firstCall).to.be.calledWith(
+        inputField2.dispatchEvent(new Event('change'));
+        await macroTask();
+
+        expect(listenerStub).to.have.callCount(4);
+        expect(listenerStub.firstCall).to.be.calledWith(
           new AnalyticsEvent(inputField, 'blur', {})
         );
-        expect(fn1.secondCall).to.be.calledWith(
+        expect(listenerStub.secondCall).to.be.calledWith(
           new AnalyticsEvent(inputField2, 'blur', {})
         );
-        expect(fn1.thirdCall).to.be.calledWith(
+        expect(listenerStub.thirdCall).to.be.calledWith(
           new AnalyticsEvent(inputField, 'change', {})
         );
-        expect(fn1.lastCall).to.be.calledWith(
+        expect(listenerStub.lastCall).to.be.calledWith(
           new AnalyticsEvent(inputField2, 'change', {})
         );
-        expect(getElementSpy).to.be.callCount(2);
+        expect(getElementSpy).to.be.calledTwice;
         expect(tracker.observables_.handlers_.length).to.equal(2);
       });
     });

@@ -191,7 +191,10 @@ function isVideoTriggerType(triggerType) {
  * @return {boolean}
  */
 function isCustomBrowserTriggerType(triggerType) {
-  return Object.values(BrowserEventType).indexOf(triggerType) > -1;
+  const values = Object.keys(BrowserEventType).map((key) => {
+    return BrowserEventType[key];
+  });
+  return values.indexOf(triggerType) > -1;
 }
 
 /**
@@ -347,6 +350,11 @@ export class CustomBrowserEventTracker extends EventTracker {
 
     /** @private {?function(!Event)} */
     this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
+    this.debouncedBoundOnSession_ = debounce(
+      this.root.ampdoc.win,
+      this.boundOnSession_,
+      500
+    );
   }
 
   /** @override */
@@ -381,13 +389,9 @@ export class CustomBrowserEventTracker extends EventTracker {
       false
     );
 
-    debounce(
-      this.root.ampdoc.win,
-      this.root
-        .getRootElement()
-        .addEventListener(eventName, this.boundOnSession_, true),
-      500
-    );
+    this.root
+      .getRootElement()
+      .addEventListener(eventName, this.debouncedBoundOnSession_, true);
 
     return this.observables_.add((event) => {
       if (event.type !== eventName) {
@@ -395,10 +399,7 @@ export class CustomBrowserEventTracker extends EventTracker {
       }
       targetReady.then((targets) => {
         targets.forEach((target) => {
-          const el = dev().assertElement(
-            event.target,
-            'No target specified by browser event.'
-          );
+          const el = event.target;
           if (!target.contains(el)) {
             return;
           }
