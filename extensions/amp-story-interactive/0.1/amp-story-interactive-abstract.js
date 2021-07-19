@@ -879,7 +879,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     if (this.disclaimerEl_) {
       return;
     }
-    this.disclaimerEl_ = buildInteractiveDisclaimer(this);
+    const dir = this.rootEl_.getAttribute('dir') || 'ltr';
+    this.disclaimerEl_ = buildInteractiveDisclaimer(this, {dir});
 
     const pageEl = closest(
       dev().assertElement(this.element),
@@ -909,13 +910,13 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         };
 
         // Align disclaimer to left if RTL, otherwise align to the right.
-        if (this.rootEl_.getAttribute('dir') === 'rtl') {
+        if (dir === 'rtl') {
           const leftFraction = (iconRect.x - pageRect.x) / pageRect.width;
-          styles['left'] = clamp(leftFraction * 100, 0, 25); // Ensure 75% of space to the right.
+          styles['left'] = clamp(leftFraction * 100, 0, 25) + '%'; // Ensure 75% of space to the right.
         } else {
           const rightFraction =
             1 - (iconRect.x + iconRect.width - pageRect.x) / pageRect.width;
-          styles['right'] = clamp(rightFraction * 100, 0, 25); // Ensure 75% of space to the left.
+          styles['right'] = clamp(rightFraction * 100, 0, 25) + '%'; // Ensure 75% of space to the left.
         }
       },
       () => {
