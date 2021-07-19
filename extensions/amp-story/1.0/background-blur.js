@@ -90,6 +90,7 @@ export class BackgroundBlur {
    * @param {!Element} pageElement
    */
   update(pageElement) {
+    cancelAnimationFrame(this.currentRAF_);
     const mediaEl = this.getBiggestMediaEl_(pageElement);
     if (!mediaEl) {
       user().info(CLASS_NAME, 'No amp-img or amp-video found.');
@@ -112,7 +113,7 @@ export class BackgroundBlur {
           const innerVideoEl = mediaEl.querySelector('video');
           const alreadyHasData = innerVideoEl.readyState >= HAVE_CURRENT_DATA;
           if (alreadyHasData) {
-            this.animate_(innerVideoEl);
+            this.animateVideo_(innerVideoEl);
             return;
           }
           // If video doesnt have data, render from the poster image.
@@ -130,6 +131,15 @@ export class BackgroundBlur {
           user().error(CLASS_NAME, 'Failed to load the amp-img or amp-video.');
         }
       );
+  }
+
+  animateVideo_(fillElement) {
+    const nextFrame = () => {
+      this.drawOffscreenCanvas_(fillElement);
+      this.drawCanvas_(0.05);
+      this.currentRAF_ = requestAnimationFrame(nextFrame);
+    };
+    this.currentRAF_ = requestAnimationFrame(nextFrame);
   }
 
   /**

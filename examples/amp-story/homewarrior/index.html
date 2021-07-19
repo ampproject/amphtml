@@ -1,0 +1,710 @@
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="This is the AMP Boilerplate.">
+    <link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <link rel="canonical" href="https://wsdemos.uc.r.appspot.com/homewarrior">
+    <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+    <title>Home Warrior Story</title>
+    <!-- Amp story extensions -->
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
+    <script async custom-element="amp-story-360" src="https://cdn.ampproject.org/v0/amp-story-360-0.1.js"></script>
+    <!-- Custom fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@600;900&family=Nunito:wght@600;900&display=swap" rel="stylesheet">
+    <style amp-custom>
+      body {
+        font-family: 'Nunito Sans', sans-serif;
+      }
+
+      .music-on {
+        width: 100%;
+        opacity: 0.7;
+        color: white;
+        font-size: .2em;
+        line-height: 0.9em;
+      }
+
+      .music-on span {
+        text-transform: uppercase;
+        font-weight: bold;
+        letter-spacing: .2em;
+        line-height: 1em;
+        text-shadow: 0px 0.05em 0.3em #00358d40;
+      }
+
+      amp-story:not([muted]) .music-on {
+        opacity: 0;
+      }
+
+      .eq {
+        margin-top: 15px;
+      }
+
+      .eq-line {
+        width: 3px;
+        height: 20px;
+        background: white;
+        border-radius: 3px;
+        display: inline-block;
+        animation: 1.7s ease-out infinite running eq-anim;
+      }
+
+      .eq-line:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .eq-line:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      .eq-line:nth-child(4) {
+        animation-delay: 0.6s;
+      }
+
+      @keyframes eq-anim {
+        0% {
+          transform: scaleY(1);
+        }
+        10% {
+          transform: scaleY(0.7);
+        }
+        20% {
+          transform: scaleY(0.6);
+        }
+        30% {
+          transform: scaleY(0.9);
+        }
+        40% {
+          transform: scaleY(0.8);
+        }
+        50% {
+          transform: scaleY(0.5);
+        }
+        60% {
+          transform: scaleY(0.4);
+        }
+        70% {
+          transform: scaleY(0.8);
+        }
+        80% {
+          transform: scaleY(0.7);
+        }
+        90% {
+          transform: scaleY(0.6);
+        }
+        100% {
+          transform: scaleY(1);
+        }
+      }
+
+      .heading {
+        font-weight: 300;
+        color: #F1E8E1;
+        text-shadow: 0px 0.05em 0.1em #00000022, 0px .1px .3em #00000022;
+        line-height: 1em;
+        margin: 0px;
+        font-weight: 900;
+        font-size: 1em;
+        position: absolute;
+        left: 8%;
+      }
+      h1.heading {
+        font-family: "Nunito", sans-serif;
+        font-size: .35em;
+        font-weight: 600;
+        top: 12%;
+        line-height: 1.2em;
+      }
+      h3.heading {
+        font-size: .2em;
+        margin-top: 1em;
+        color: #FFFCD0;
+        top: 7%;
+      }
+      .loading-line {
+        position: absolute;
+        width: 100%;
+        height: .5em;
+        background: white;
+        left: 0;
+        bottom: 0;
+      }
+      .outfit-poll {
+        --interactive-accent-color: black;
+        position: absolute;
+        font-size: .25em;
+        width: 70%;
+        left: 15%;
+        top: 67%;
+      }
+      .centered-title {
+        font-family: "Nunito Sans", sans-serif;
+        font-size: .5em;
+        font-weight: 900;
+        text-align: center;
+        color: #FFFCD0;
+        line-height: 1em;
+        top: 31%;
+        position: absolute;
+        text-shadow: 0px 0.05em 0.1em #00000052, 0px 0.1em 0.3em #00000026;
+      }
+      .centered-title.title-shadow {
+        text-shadow: 0px 0.05em 0.2em #00358d52, 0px 0.1em 0.5em #00358d26;
+      }
+      .centered-title.notification-text {
+        top: 80%;
+        font-size: 0.65em;
+        padding: 0 .5em;
+      }
+      .centered-title.search-subtitle {
+        top: 93%;
+        font-size: 0.3em;
+        font-family: "Nunito", sans-serif;
+        color: #F1E8E1;
+      }
+      .temp-poll {
+        --interactive-accent-color: #8A86C3;
+        position: absolute;
+        font-size: .22em;
+        width: 70%;
+        left: 15%;
+        top: 55%;
+      }
+
+      .quiz-timer.corner-timer {
+        left: 78%;
+        width: 20%;
+        top: 12%;
+      }
+      .quiz-timer.lower-timer {
+        top: 82%;
+      }
+
+      .centered-title.medium-title {
+        color: #EAEAE1;
+        font-size: 0.4em;
+        padding: 0 2em;
+        top: 15%;
+      }
+      .centered-title.large-title {
+        top: 23%;
+        font-size: .75em;
+      }
+
+      /* Timer */
+      .quiz-timer {
+        position: absolute;
+        width: 100%;
+        left: 0%;
+        top: 10%;
+        color: #FFFCD0;
+        font-size: .45em;
+        height: 2em;
+        text-align: center;
+      }
+      .quiz-timer-nums {
+        height: 1em;
+        line-height: 1em;
+        font-size: 1em;
+        overflow: hidden;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        font-weight: 900;
+        padding-top: .1em;
+      }
+      .quiz-timer-sec {
+        font-weight: 900;
+        letter-spacing: 0.3em;
+        font-size: 0.4em;
+        margin-top: 3em;
+        width: 100%;
+      }
+      amp-story-page[active] .quiz-timer-nums div {
+        animation: countdown-nums 11s cubic-bezier(1.000, 0.1, 0.000, 0.9) 1s forwards;
+        text-align: center;
+      }
+
+      @keyframes countdown-nums {
+      0% {
+        transform: translateY(0);
+      }
+      10% {
+        transform: translateY(-9.09%);
+      }
+      20% {
+        transform: translateY(-18.18%);
+      }
+      30% {
+        transform: translateY(-27.27%);
+      }
+      40% {
+        transform: translateY(-36.36%);
+      }
+      50% {
+        transform: translateY(-45.45%);
+      }
+      60% {
+        transform: translateY(-54.54%);
+      }
+      70% {
+        transform: translateY(-63.63%);
+      }
+      80% {
+        transform: translateY(-72.72%);
+      }
+      90% {
+        transform: translateY(-81.81%);
+      }
+      100% {
+        transform: translateY(-90.9%);
+      }
+    }
+
+    amp-story-page-attachment h1 {
+      color: #818FD4;
+      font-weight: 400;
+      text-transform: uppercase;
+      font-size: 1.5em;
+    }
+
+    amp-story-page-attachment h2 {
+      font-size: 1.1em;
+    }
+
+    amp-story-page-attachment h3 {
+      font-size: .7em;
+      font-weight: 400;
+      color: #818FD4;
+    }
+
+    amp-story-page-attachment a {
+      color: #818FD4;
+    }
+    #expToggle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10000;
+      }    
+    </style>
+  </head>
+  <body>
+    <amp-story standalone
+        publisher="Sean Dong"
+        title="Home Warrior Story"
+        publisher-logo-src="./assets/cover.png"
+        poster-portrait-src="./assets/cover.png"
+        poster-square-src="./assets/cover.png"
+        poster-landscape-src="./assets/cover.png">
+
+      <amp-story-page id="p1" auto-advance-after="11.648s">
+        <amp-story-grid-layer template="fill">
+          <amp-video
+            id="video0"
+            layout="fill"
+            poster="./assets/cover.png"
+            loop>
+            <source src="./assets/wbs_cover.mp4"
+              type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top left">
+          <div class="music-on">
+            <span>Sound on<br>before start</span>
+            <div class="eq">
+              <span class="eq-line"></span>
+              <span class="eq-line"></span>
+              <span class="eq-line"></span>
+              <span class="eq-line"></span>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="bottom">
+          <h1 class="centered-title title-shadow" style="font-size:.85em; top: 60%">HOME WARRIOR</h1>
+          <h2 class="centered-title title-shadow" style="color: #EAEAE1; top: 79%; font-size: .6em;padding: 0 10%">PANDEMIC SPECIAL</h2>
+          <p class="centered-title title-shadow" style="color: white; font-size: .25em; top: 93%; font-weight: 600;">Sean dong x Web Stories</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p2" auto-advance-after="13.184s">
+        <amp-story-grid-layer template="fill">
+          <amp-video
+            id="video1"
+            layout="fill"
+            poster="./assets/blurred.png">
+            <source src="./assets/wbs_1.mp4"
+              type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top left">
+          <h3 class="heading" animate-in="fly-in-left" animate-in-duration=".3s" animate-in-delay="7s">MISSION</h3>
+          <h1 class="heading" animate-in="fly-in-left" animate-in-duration=".3s" animate-in-delay="7s"><b>JOIN THE MEETING</b><br>AT 11AM</h1>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="bottom">
+          <h1 class="centered-title notification-text" animate-in="fly-in-bottom" animate-in-delay="12s">MISSION COMPLETE!</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p3" auto-advance-after="12.096s">
+        <amp-story-grid-layer template="fill">
+          <amp-video
+            id="video2"
+            layout="fill"
+            poster="./assets/blurred.png">
+            <source src="./assets/wbs_2.mp4"
+              type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top left">
+          <h3 class="heading" animate-in="fly-in-left" animate-in-duration=".3s">MISSION</h3>
+          <h1 class="heading" animate-in="fly-in-left" animate-in-duration=".3s"><b>PICK THE OUTFIT</b><br>FOR TODAY</h1>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top-right">
+          <div class="quiz-timer corner-timer">
+            <div class="quiz-timer-nums">
+              <div>10<br>9<br>8<br>7<br>6<br>5<br>4<br>3<br>2<br>1<br>0</div>
+            </div>
+            <div class="quiz-timer-sec">SEC</div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="bottom">
+          <amp-story-interactive-binary-poll
+              id="pickoutfit-poll"
+              class="outfit-poll"
+              animate-in="scale-fade-up"
+              prompt-text="Which style?"
+              prompt-size="large"
+              chip-style="transparent"
+              endpoint="https://webstoriesinteractivity.googleapis.com/v1/interactives"
+              option-1-text="Formal" option-1-confetti="👔"
+              option-2-text="Casual" option-2-confetti="👖"
+              ></amp-story-interactive-binary-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p4" auto-advance-after="8.384s">
+        <amp-story-grid-layer template="fill">
+          <amp-video
+            id="video3"
+            layout="fill"
+            poster="./assets/blurred.png">
+            <source src="./assets/wbs_3.mp4"
+              type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p5" auto-advance-after="13.419s">
+        <amp-story-grid-layer template="fill">
+          <amp-video
+            id="video4"
+            layout="fill"
+            poster="./assets/blurred.png">
+            <source src="./assets/wbs_4.mp4"
+              type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top left">
+          <h3 class="heading" animate-in="fly-in-left" animate-in-duration=".3s" animate-in-delay="3s">MISSION</h3>
+          <h1 class="heading" animate-in="fly-in-left" animate-in-duration=".3s" animate-in-delay="3s"><b>GET THE</b><br>PIZZA DELIVERY</h1>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="bottom">
+          <h1 class="centered-title notification-text" animate-in="fly-in-bottom" animate-in-delay="13s">MISSION COMPLETE!</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p6" auto-advance-after="10.39s">
+        <amp-story-animation layout="nodisplay" trigger="visibility">
+          <script type="application/json">
+            {
+              "selector": ".animate-out",
+              "duration": "3s",
+              "delay": "4s",
+              "fill": "both",
+              "keyframes": [
+                {"transform": "translateY(5em)", "easing": "cubic-bezier(0.2, 0.6, 0.0, 1)"},
+                {"transform": "translateY(0em)", "offset": 0.2},
+                {"transform": "translateY(0em)", "offset": 0.8, "easing": "cubic-bezier(0.2, 0.6, 0.0, 1)"},
+                {"transform": "translateY(5em)"}
+              ]
+            }
+          </script>
+        </amp-story-animation>
+        <amp-story-grid-layer template="fill">
+          <amp-video
+            id="video5"
+            layout="fill"
+            poster="./assets/blurred.png">
+            <source src="./assets/wbs_5.mp4"
+              type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top left">
+          <h3 class="heading" animate-in="fly-in-left" animate-in-duration=".3s" animate-in-delay="2s">MISSION</h3>
+          <h1 class="heading" animate-in="fly-in-left" animate-in-duration=".3s" animate-in-delay="2s"><b>DAILY VIDEO CALL</b><br>WITH FRIENDS</h1>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="bottom">
+          <h1 class="centered-title notification-text animate-out">NOISE FROM<br>THE KITCHEN!</h1>
+          <h1 class="centered-title notification-text" animate-in="fly-in-bottom" animate-in-delay="9s">MISSION COMPLETE!</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p7" auto-advance-after="4.992s">
+        <amp-story-grid-layer template="fill">
+          <amp-video
+            id="video6"
+            layout="fill"
+            poster="./assets/blurred.png">
+            <source src="./assets/wbs_6.mp4"
+              type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top left">
+          <h3 class="heading" animate-in="fly-in-left" animate-in-duration=".3s">MISSION</h3>
+          <h1 class="heading" animate-in="fly-in-left" animate-in-duration=".3s"><b>SEARCH FOR</b><br>THE CAT</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p8" auto-advance-after="12s" background-audio="./assets/wbs_7.mp3">
+        <amp-story-grid-layer template="fill">
+          <amp-story-360 layout="fill" controls="gyroscope" heading-start="90" heading-end="450" duration="12s">
+            <amp-img src="./assets/wbs_8.jpg"
+              layout="fill"
+              alt="360 image of find the cat">
+            </amp-img>
+          </amp-story-360>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top left">
+          <h3 class="heading">MISSION</h3>
+          <h1 class="heading"><b>SEARCH FOR</b><br>THE CAT</h1>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top-right">
+          <div class="quiz-timer corner-timer">
+            <div class="quiz-timer-nums">
+              <div>10<br>9<br>8<br>7<br>6<br>5<br>4<br>3<br>2<br>1<br>0</div>
+            </div>
+            <div class="quiz-timer-sec">SEC</div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground">
+          <h3 class="centered-title search-subtitle">UPSTAIRS</h3>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p9" auto-advance-after="12s" background-audio="./assets/wbs_8.mp3">
+        <amp-story-grid-layer template="fill">
+          <amp-story-360 layout="fill" controls="gyroscope" heading-start="90" heading-end="450" duration="12s">
+            <amp-img src="./assets/wbs_7.jpg"
+              layout="fill"
+              alt="360 image of find the cat">
+            </amp-img>
+          </amp-story-360>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top left">
+          <h3 class="heading">MISSION</h3>
+          <h1 class="heading"><b>SEARCH FOR</b><br>THE CAT</h1>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top-right">
+          <div class="quiz-timer corner-timer">
+            <div class="quiz-timer-nums">
+              <div>10<br>9<br>8<br>7<br>6<br>5<br>4<br>3<br>2<br>1<br>0</div>
+            </div>
+            <div class="quiz-timer-sec">SEC</div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground">
+          <h3 class="centered-title search-subtitle">DOWNSTAIRS</h3>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p10" auto-advance-after="2.731s">
+        <amp-story-grid-layer template="fill">
+          <amp-video
+            id="video9"
+            layout="fill"
+            poster="./assets/blurred.png">
+            <source src="./assets/wbs_9.mp4"
+              type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top left">
+          <h3 class="heading">MISSION</h3>
+          <h1 class="heading"><b>SEARCH FOR</b><br>THE CAT</h1>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="bottom">
+          <h1 class="centered-title notification-text" animate-in="fly-in-bottom" animate-in-delay="1s">MISSION FAILED!</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p11" auto-advance-after="3.947s">
+        <amp-story-grid-layer template="fill">
+          <amp-video
+            id="video10"
+            layout="fill"
+            poster="./assets/blurred.png">
+            <source src="./assets/wbs_10.mp4"
+              type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top left">
+          <h3 class="heading" animate-in="fly-in-left" animate-in-duration=".3s">MISSION</h3>
+          <h1 class="heading" animate-in="fly-in-left" animate-in-duration=".3s"><b>ENERGY SAVING</b><br>CHALLENGE</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p12" auto-advance-after="12s" background-audio="./assets/wbs_11.mp3">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="./assets/blurred.png"
+            layout="fill"
+            alt="pick outfit">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top left">
+          <h3 class="heading">MISSION</h3>
+          <h1 class="heading"><b>ENERGY SAVING</b><br>CHALLENGE</h1>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top-right">
+          <div class="quiz-timer corner-timer">
+            <div class="quiz-timer-nums">
+              <div>10<br>9<br>8<br>7<br>6<br>5<br>4<br>3<br>2<br>1<br>0</div>
+            </div>
+            <div class="quiz-timer-sec">SEC</div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground">
+          <h1 class="centered-title">THE BEST THERMOSTAT SETTINGS FOR SUMMER?</h1>
+          <amp-story-interactive-quiz
+              id="picktemp-quiz"
+              class="temp-poll"
+              animate-in="scale-fade-up"
+              chip-style="shadow"
+              endpoint="https://webstoriesinteractivity.googleapis.com/v1/interactives"
+              option-1-text="65 F"
+              option-2-text="68 F"
+              option-3-text="74 F"
+              option-4-text="78 F" option-4-confetti="☀️" option-4-correct
+              ></amp-story-interactive-quiz>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p13" auto-advance-after="3.392s">
+        <amp-story-grid-layer template="fill">
+          <amp-video
+            id="video12"
+            layout="fill"
+            poster="./assets/blurred.png">
+            <source src="./assets/wbs_12.mp4"
+              type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="top left">
+          <h3 class="heading">MISSION</h3>
+          <h1 class="heading"><b>ENERGY SAVING</b><br>CHALLENGE</h1>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground" anchor="bottom">
+          <h1 class="centered-title notification-text" animate-in="fly-in-bottom" animate-in-delay="2.5s">MISSION COMPLETE!</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p14" auto-advance-after="8.811s">
+        <amp-story-grid-layer template="fill">
+          <amp-video
+            id="video13"
+            layout="fill"
+            poster="./assets/blurred.png">
+            <source src="./assets/wbs_13.mp4"
+              type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p15" auto-advance-after="10.752s">
+        <amp-story-grid-layer template="fill">
+          <amp-video
+            id="video14"
+            layout="fill"
+            poster="./assets/blurred.png">
+            <source src="./assets/wbs_14.mp4"
+              type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground">
+          <h2 class="centered-title medium-title" animate-in="fade-in" animate-in-delay="7.2s" animate-in-duration="2s">FIN</h1>
+          <h1 class="centered-title large-title" animate-in="fade-in" animate-in-delay="7.5s" animate-in-duration="2s">THANKS FOR<br>WATCHING.</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p16">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="./assets/wbs_15.png"
+            width="1"
+            height="2"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" preset="2021-foreground">
+          <h2 class="centered-title medium-title">FIN</h1>
+            <h1 class="centered-title large-title">THANKS FOR<br>WATCHING.</h1>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment layout="nodisplay" data-cta-text="Behind the scenes" data-title="Behind the scenes" theme="dark">
+          <div style="background: black; color: white; font-family: 'Nunito', sans-serif">
+            <div style="padding: 1em 2em">
+              <h1>Thank you for watching until the end! We hope you enjoyed our “Home Warrior” Web Story.</h1>
+              <p>The <a href="https://amp.dev/about/stories/">Web Stories team</a> at Google partnered with <a href="https://seandong.com/">Sean Dong</a> to build this Web Story demo as a showcase of the new possibilities of interactive storytelling on the web. This collaboration began in 2020 and aimed to highlight the newest Web Story features with a narrative centered around a character who works from home.</p>
+              <h2>DESIGN PROCESS<br>SNAPSHOTS</h2>
+              <amp-img src="./assets/bts_process.png"
+                width="600"
+                height="1104"
+                layout="responsive"
+                alt="Story process">
+              </amp-img>
+              <h2>DESIGN<br>APPLICATIONS</h2>
+              <amp-img src="./assets/bts_apps.png"
+                width="532"
+                height="198"
+                layout="responsive"
+                alt="Design apps">
+              </amp-img>
+              <h2>DEVELOPMENT<br>RECOURS LINKS</h2>
+              <p><a href="https://amp.dev/documentation/components/amp-story-interactive/">Web Story Interactive Components</a>
+              <br><a href="https://amp.dev/documentation/components/amp-story-360/">Web Story 360 Component</a>
+              <br><a href="https://amp.dev/documentation/components/amp-story/">How to make Web Stories</a></p>
+              <h2>STORY BROUGHT<br>TO YOU BY</h2>
+              <h3>LEAD ARTIST</h3>
+              <p>Sean Dong</p>
+              <h3>TEAM WEB STORIES</h3>
+              <p>Matias Szylkowski
+              <br>Philip Bell
+              <br>Wei Hong</p>
+              <h2>EASTER EGGS</h2>
+              <amp-img src="./assets/bts_eggs.png"
+                width="302"
+                height="320"
+                layout="responsive"
+                alt="Story process">
+              </amp-img>
+            </div>
+          </div>
+        </amp-story-page-attachment>
+      </amp-story-page>
+    <!-- For toggling experiment in demos without copy pasting into inspector. -->
+    <button id="expToggle" onclick="
+      AMP.toggleExperiment('amp-story-desktop-one-panel');
+      location.reload();
+    ">Toggle amp-story-desktop-one-panel experiment</button>
+    <script>
+      // Indicate whether experiment is on.
+      document.addEventListener('ampstory:load', () => {
+        expToggle.innerHTML = "amp-story-desktop-one-panel active: " + AMP.isExperimentOn('amp-story-desktop-one-panel');
+      });
+    </script>
+  </body>
+</html>
