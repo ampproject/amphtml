@@ -164,6 +164,8 @@ function getZindexChainsInJs(glob, cwd = '.') {
     ]);
     const {stderr, stdout} = process;
 
+    let resultCountInverse = filesIncludingString.length;
+
     stderr.on('data', (data) => {
       throw new Error(data.toString());
     });
@@ -182,15 +184,13 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
       try {
         const reportParsed = JSON.parse(report);
-
         if (reportParsed.length) {
           result[relative] = reportParsed.sort(sortedByEntryKey);
         }
+        if (--resultCountInverse === 0) {
+          resolve(result);
+        }
       } catch (_) {}
-    });
-
-    process.on('close', () => {
-      resolve(result);
     });
   });
 }
