@@ -27,7 +27,6 @@ const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
 const {gitDiffNameOnlyMain} = require('../../common/git');
 const {isCiBuild} = require('../../common/ci');
 const {log, logLocalDev} = require('../../common/logging');
-const {reportTestSkipped} = require('../report-test-status');
 
 const LARGE_REFACTOR_THRESHOLD = 50;
 const TEST_FILE_COUNT_THRESHOLD = 20;
@@ -135,9 +134,9 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
 
 /**
  * Computes the list of unit tests to run under difference scenarios
- * @return {Promise<Array<string>|void>}
+ * @return {Array<string>|void}
  */
-async function getUnitTestsToRun() {
+function getUnitTestsToRun() {
   log(green('INFO:'), 'Determining which unit tests to run...');
 
   if (isLargeRefactor()) {
@@ -145,7 +144,6 @@ async function getUnitTestsToRun() {
       green('INFO:'),
       'Skipping tests on local changes because this is a large refactor.'
     );
-    await reportTestSkipped();
     return;
   }
 
@@ -155,7 +153,6 @@ async function getUnitTestsToRun() {
       green('INFO:'),
       'No unit tests were directly affected by local changes.'
     );
-    await reportTestSkipped();
     return;
   }
   if (isCiBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
@@ -163,7 +160,6 @@ async function getUnitTestsToRun() {
       green('INFO:'),
       'Several tests were affected by local changes. Running all tests below.'
     );
-    await reportTestSkipped();
     return;
   }
 
