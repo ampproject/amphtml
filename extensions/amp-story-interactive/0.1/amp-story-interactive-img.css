@@ -61,6 +61,7 @@
   height: 100% !important;
   background-position: center !important;
   background-size: cover !important;
+  box-shadow: var(--i-amphtml-interactive-img-border) !important;
 }
 
 .i-amphtml-story-interactive-img-option:focus {
@@ -85,7 +86,8 @@
 
 .i-amphtml-story-interactive-option-selected
   .i-amphtml-story-interactive-img-option-img {
-  box-shadow: inset 0 0 0 0.25em var(--i-amphtml-interactive-option-post-color) !important;
+  box-shadow: inset 0 0 0 0.25em var(--i-amphtml-interactive-option-post-color),
+    var(--i-amphtml-interactive-img-border) !important;
 }
 
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
