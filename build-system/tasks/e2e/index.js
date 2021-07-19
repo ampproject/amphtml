@@ -36,7 +36,6 @@ const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
-const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('chokidar');
 
 const SLOW_TEST_THRESHOLD_MS = 2500;
@@ -159,7 +158,7 @@ async function fetchCoverage_(outDir) {
  * Runs e2e tests on all files under test.
  * @return {!Promise<void>}
  */
-async function runTests_() {
+function runTests_() {
   const mocha = createMocha_();
   const addFile = addMochaFile_.bind(null, mocha);
 
@@ -171,8 +170,6 @@ async function runTests_() {
       glob.sync(path).forEach(addFile);
     });
   }
-
-  await reportTestStarted();
 
   // return promise to amp that resolves when there's an error.
   return new Promise((resolve) => {

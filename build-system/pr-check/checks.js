@@ -19,7 +19,6 @@
  * @fileoverview Script that runs various checks during CI.
  */
 
-const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 const {timedExecOrDie} = require('./utils');
@@ -56,11 +55,8 @@ function pushBuildWorkflow() {
 
 /**
  * Steps to run during PR builds.
- * @return {Promise<void>}
  */
-async function prBuildWorkflow() {
-  await reportAllExpectedTests();
-
+function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.PRESUBMIT)) {
     timedExecOrDie('amp presubmit');
   }

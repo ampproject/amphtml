@@ -21,7 +21,6 @@
 
 const {cyan, red} = require('../common/colors');
 const {log} = require('../common/logging');
-const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
 const {skipDependentJobs, timedExecOrDie} = require('./utils');
 const {Targets, buildTargetsInclude} = require('./build-targets');
@@ -109,12 +108,8 @@ function pushBuildWorkflow() {
 
 /**
  * Steps to run during PR builds.
- * @return {Promise<void>}
  */
-async function prBuildWorkflow() {
-  if (process.platform == 'linux') {
-    await reportAllExpectedTests(); // Only once is sufficient.
-  }
+function prBuildWorkflow() {
   if (
     !buildTargetsInclude(
       Targets.RUNTIME,
