@@ -30,150 +30,18 @@ import {
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
+import {
+  addConfigToInteractive,
+  getMockIncompleteData,
+  getMockInteractiveData,
+  getMockOutOfBoundsData,
+  getMockScrambledData,
+} from './helpers';
 import {dict} from '#core/types/object';
 import {getBackendSpecs} from '../interactive-disclaimer';
 import {htmlFor} from '#core/dom/static-template';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments/';
-
-/**
- * Returns mock interactive data.
- *
- * @return {Object}
- */
-export const getMockInteractiveData = () => {
-  return {
-    options: [
-      {
-        index: 0,
-        count: 3,
-        selected: true,
-      },
-      {
-        index: 1,
-        count: 3,
-        selected: false,
-      },
-      {
-        index: 2,
-        count: 3,
-        selected: false,
-      },
-      {
-        index: 3,
-        count: 1,
-        selected: false,
-      },
-    ],
-  };
-};
-
-/**
- * Returns mock interactive data with index key values that don't match the
- * index within the options array.
- *
- * @return {Object}
- */
-export const getMockScrambledData = () => {
-  return {
-    options: [
-      {
-        index: 3,
-        count: 4,
-        selected: false,
-      },
-      {
-        index: 0,
-        count: 1,
-        selected: false,
-      },
-      {
-        index: 1,
-        count: 2,
-        selected: false,
-      },
-      {
-        index: 2,
-        count: 3,
-        selected: true,
-      },
-    ],
-  };
-};
-
-/**
- * Returns mock interactive data that doesn't account for all options.
- *
- * @return {Object}
- */
-export const getMockIncompleteData = () => {
-  return {
-    options: [
-      {
-        index: 1,
-        count: 5,
-        selected: false,
-      },
-      {
-        index: 2,
-        count: 5,
-        selected: true,
-      },
-    ],
-  };
-};
-
-/**
- * Returns mock interactive data with index key values that don't correspond
- * to any of the option elements.
- *
- * @return {Object}
- */
-export const getMockOutOfBoundsData = () => {
-  return {
-    options: [
-      {
-        index: 3,
-        count: 4,
-        selected: false,
-      },
-      {
-        index: 0,
-        count: 1,
-        selected: true,
-      },
-      {
-        index: -1,
-        count: 2,
-        selected: false,
-      },
-      {
-        index: 4,
-        count: 3,
-        selected: false,
-      },
-    ],
-  };
-};
-
-export const addConfigToInteractive = (
-  interactive,
-  options = 4,
-  correct = undefined,
-  attributes = ['text', 'results-category', 'image']
-) => {
-  for (let i = 0; i < options; i++) {
-    attributes.forEach((attr) => {
-      interactive.element.setAttribute(
-        `option-${i + 1}-${attr}`,
-        `${attr} ${i + 1}`
-      );
-    });
-  }
-  if (correct) {
-    interactive.element.setAttribute(`option-${correct}-correct`, 'correct');
-  }
-};
 
 class InteractiveTest extends AmpStoryInteractive {
   constructor(element) {

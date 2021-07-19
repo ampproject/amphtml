@@ -25,7 +25,7 @@ import {
   getMockInteractiveData,
   getMockOutOfBoundsData,
   getMockScrambledData,
-} from './test-amp-story-interactive';
+} from './helpers';
 import {measureMutateElementStub} from '#testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
