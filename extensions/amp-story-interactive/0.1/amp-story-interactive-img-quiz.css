@@ -19,7 +19,6 @@
   height: 1.5em !important;
   width: 1.5em !important;
   bottom: 0.5em !important;
-  right: 0.5em !important;
   border: 0.125em solid var(--i-amphtml-interactive-option-background-color) !important;
   background-color: var(
     --i-amphtml-interactive-option-background-color
@@ -29,6 +28,16 @@
   color: var(--interactive-accent-color) !important;
   font-weight: 700 !important;
   line-height: 1.5em !important;
+}
+
+.i-amphtml-story-interactive-img-container:not([dir='rtl'])
+  .i-amphtml-story-interactive-img-quiz-answer-choice {
+  right: 0.5em !important;
+}
+
+.i-amphtml-story-interactive-img-container[dir='rtl']
+  .i-amphtml-story-interactive-img-quiz-answer-choice {
+  left: 0.5em !important;
 }
 
 .i-amphtml-story-interactive-img-quiz-answer-choice::before {
