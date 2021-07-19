@@ -230,23 +230,10 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
     });
   });
 
-  it('Test Invalid Remote Config', async () => {
-    const exampleURL = 'foo.example';
-    const storyAutoAdsElem = doc.createElement('amp-story-auto-ads');
-    storyAutoAdsElem.setAttribute('config', exampleURL); // Invalid attribute, should use src, not config.
-    expectAsyncConsoleError(async () => {
-      expect(async () => {
-        await new StoryAdConfig(storyAutoAdsElem, win).getConfig();
-      }).to.throw(
-        /The amp-story-auto-ads:config should be inside a <script> tag with type=\"application\/json\"​​​/
-      );
-    });
-  });
-
-  it('Test Bad Remote URL', async () => {
+  it('Test Invalid Remote Config URL', async () => {
     const exampleURL = 'invalidRemoteURL';
     const storyAutoAdsElem = doc.createElement('amp-story-auto-ads');
-    storyAutoAdsElem.setAttribute('config', exampleURL); // Invalid attribute, should use src, not config.
+    storyAutoAdsElem.setAttribute('src', exampleURL);
     expectAsyncConsoleError(async () => {
       expect(async () => {
         await new StoryAdConfig(storyAutoAdsElem, win).getConfig();
