@@ -58,3 +58,8 @@
   border: none !important;
   font-size: inherit !important;
 }
+
+[dir="rtl"] .i-amphtml-story-interactive-disclaimer-close {
+  left: 0 !important;
+  right: auto !important;
+}
