@@ -172,7 +172,7 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
       el.querySelector(
         '.i-amphtml-story-interactive-img-option-percentage-text'
       ).textContent = `${percentages[index]}%`;
-      setImportantStyles(el, {'--option-percentage': `${percentages[index]}%`});
+      setImportantStyles(el, {'--option-percentage': percentages[index] / 100});
     });
   }
 

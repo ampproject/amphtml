@@ -26,6 +26,7 @@
   color: var(--i-amphtml-interactive-option-answer-choice-color) !important;
   font-weight: 700 !important;
   line-height: 1.5em !important;
+  z-index: 1 !important;
 }
 
 .i-amphtml-story-interactive-img-container:not([dir='rtl'])
@@ -44,6 +45,7 @@
   height: 100% !important;
   border-radius: 50% !important;
   position: absolute !important;
+  left: 0 !important;
 }
 
 .i-amphtml-story-interactive-img-option[correct='correct'] {
