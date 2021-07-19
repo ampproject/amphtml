@@ -149,8 +149,7 @@ namespace {
 template <typename T>
 void SortAndUniquify(vector<T>* v) {
   std::sort(v->begin(), v->end());
-  auto last = std::unique(v->begin(), v->end());
-  v->erase(last, v->end());
+  v->erase(std::unique(v->begin(), v->end()), v->end());
 }
 
 // Computes the difference set |left| - |right|, assuming |left| and
