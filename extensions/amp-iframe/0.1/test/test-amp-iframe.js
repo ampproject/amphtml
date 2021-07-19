@@ -28,7 +28,7 @@ import {macroTask} from '#testing/yield';
 import {poll} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
 import {user} from '../../../../src/log';
-import {whenCalled} from '../../../../testing/test-helper.js';
+import {whenCalled} from '#testing/test-helper';
 
 /** @const {number} */
 const IFRAME_MESSAGE_TIMEOUT = 50;
