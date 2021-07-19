@@ -28,6 +28,7 @@ import {macroTask} from '#testing/yield';
 import {poll} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
 import {user} from '../../../../src/log';
+import {whenCalled} from '../../../../testing/test-helper.js';
 
 /** @const {number} */
 const IFRAME_MESSAGE_TIMEOUT = 50;
@@ -966,7 +967,7 @@ describes.realWin(
         });
 
         impl = await element.getImpl();
-        env.sandbox.stub(impl, 'sendConsentDataToIframe_');
+        env.sandbox.spy(impl, 'sendConsentDataToIframe_');
 
         await waitForAmpIframeLayoutPromise(doc, element);
 
@@ -996,7 +997,9 @@ describes.realWin(
           '*'
         );
 
-        await macroTask();
+        await whenCalled(impl.sendConsentDataToIframe_);
+
+        // Ensure listener only triggers once by waiting for event queue to flush
         await macroTask();
 
         expect(
@@ -1028,6 +1031,9 @@ describes.realWin(
           '*'
         );
 
+        await whenCalled(impl.sendConsentDataToIframe_);
+
+        // Ensure listener only triggers once by waiting for event queue to flush
         await macroTask();
 
         expect(
