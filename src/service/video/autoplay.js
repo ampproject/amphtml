@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {dev} from '../../log';
-import {htmlFor} from '#core/dom/static-template';
 import {removeElement} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+
+import {dev} from '../../log';
 
 /**
  * @param {!Element} node

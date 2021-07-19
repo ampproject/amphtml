@@ -923,6 +923,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-prompt-clamp: 4 !important;
   --i-amphtml-interactive-results-prompt-margin: 20px !important;
   --i-amphtml-story-interactive-img-quiz-answer-filter: none;
+  --i-amphtml-interactive-img-border: 0 0 0 transparent !important;
 }
 
 .i-amphtml-story-interactive-component[theme="dark"] {
@@ -950,6 +951,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-chip-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.2) !important;
   --i-amphtml-interactive-theme-border: rgba(0, 0, 0, 0) !important;
   --i-amphtml-interactive-component-shadow: none !important;
+  --i-amphtml-interactive-img-border: 0 0 0 0.25em var(--i-amphtml-interactive-option-background-color) !important;
 }
 
 .i-amphtml-story-interactive-component[chip-style="shadow"][theme="dark"] {
@@ -969,6 +971,10 @@ amp-story .amp-video-eq,
 amp-story-interactive-binary-poll.i-amphtml-story-interactive-component, amp-story-interactive-results.i-amphtml-story-interactive-component,
 amp-story-interactive-img-poll.i-amphtml-story-interactive-component, amp-story-interactive-img-quiz.i-amphtml-story-interactive-component {
   max-width: 18em !important;
+}
+
+amp-story-interactive-img-poll.i-amphtml-story-interactive-component, amp-story-interactive-img-quiz.i-amphtml-story-interactive-component {
+  --interactive-prompt-alignment: center;
 }
 
 amp-story-interactive-binary-poll[theme="dark"], amp-story-interactive-poll[theme="dark"] {

@@ -16,7 +16,8 @@
 
 .i-amphtml-story-interactive-img-container {
   --i-amphtml-interactive-img-option-size: 7.5em !important;
-  --i-amphtml-interactive-img-option-margin: 1em !important;
+  --i-amphtml-interactive-img-option-gap: 1em !important;
+  --i-amphtml-interactive-img-transform: scale(0.95) !important;
 
   border-radius: 3.75em 3.75em 4.375em 4.375em !important;
 }
@@ -26,17 +27,17 @@
     --i-amphtml-interactive-options-chip-background-color
   ) !important;
   display: flex !important;
-  justify-content: center !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
   border-radius: 4.375em !important;
   flex-wrap: wrap !important;
+  padding: var(--i-amphtml-interactive-img-option-gap) !important;
 }
 
 .i-amphtml-story-interactive-img-option {
   width: var(--i-amphtml-interactive-img-option-size) !important;
   height: var(--i-amphtml-interactive-img-option-size) !important;
   position: relative !important;
-  margin-top: var(--i-amphtml-interactive-img-option-margin) !important;
-  margin-right: var(--i-amphtml-interactive-img-option-margin) !important;
   padding: 0 !important;
   background: none !important;
   border: none !important;
@@ -44,15 +45,12 @@
   font-size: inherit !important;
 }
 
-.i-amphtml-story-interactive-img-option:nth-child(odd) {
-  margin-left: var(--i-amphtml-interactive-img-option-margin) !important;
-}
-
-.i-amphtml-story-interactive-img-option:last-child {
-  margin-bottom: var(--i-amphtml-interactive-img-option-margin) !important;
+.i-amphtml-story-interactive-img-option:nth-child(3) {
+  margin-top: var(--i-amphtml-interactive-img-option-gap) !important;
 }
 
 .i-amphtml-story-interactive-img-option:nth-child(3):last-child {
+  margin: auto !important;
   margin-top: 0 !important;
 }
 
@@ -63,22 +61,44 @@
   height: 100% !important;
   background-position: center !important;
   background-size: cover !important;
+  box-shadow: var(--i-amphtml-interactive-img-border) !important;
+  /* Needed for overflow inconsistencies during animations on some browsers */
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.i-amphtml-story-interactive-img-option:focus {
+  outline: none !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-img-option:focus
+  .i-amphtml-story-interactive-img-option-img {
+  transform: var(--i-amphtml-interactive-img-transform) !important;
+}
+
+.i-amphtml-story-interactive-img-option-img::before {
+  content: '' !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: scaleY(0) !important;
+  transform-origin: bottom !important;
+  opacity: 0.5 !important;
 }
 
 .i-amphtml-story-interactive-option-selected
   .i-amphtml-story-interactive-img-option-img {
-  box-shadow: inset 0 0 0 0.25em var(--i-amphtml-interactive-option-post-color) !important;
+  box-shadow: inset 0 0 0 0.25em var(--i-amphtml-interactive-option-post-color),
+    var(--i-amphtml-interactive-img-border) !important;
 }
 
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
   .i-amphtml-story-interactive-img-option-img::before {
   background-color: var(--i-amphtml-interactive-option-post-color) !important;
-  content: '' !important;
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  margin-top: calc(100% - var(--option-percentage)) !important;
-  opacity: 0.5 !important;
+  transform: scaleY(var(--option-percentage, 0)) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time)
+    var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
@@ -90,4 +110,43 @@
   left: 0 !important;
   color: white !important;
   font-weight: 700 !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-img-option-img {
+  animation: i-amphtml-story-interactive-img-option-img-landing-animation
+    var(--i-amphtml-interactive-animation-time) !important;
+  animation-delay: var(
+    --i-amphtml-interactive-landing-animation-delay-offset-el1
+  ) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-img-option:nth-of-type(2)
+  .i-amphtml-story-interactive-img-option-img {
+  animation-delay: var(
+    --i-amphtml-interactive-landing-animation-delay-offset-el2
+  ) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-img-option:nth-of-type(3)
+  .i-amphtml-story-interactive-img-option-img {
+  animation-delay: var(
+    --i-amphtml-interactive-landing-animation-delay-offset-el3
+  ) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-img-option:nth-of-type(4)
+  .i-amphtml-story-interactive-img-option-img {
+  animation-delay: var(
+    --i-amphtml-interactive-landing-animation-delay-offset-el4
+  ) !important;
+}
+
+@keyframes i-amphtml-story-interactive-img-option-img-landing-animation {
+  33% {
+    transform: var(--i-amphtml-interactive-img-transform);
+  }
 }

@@ -15,14 +15,16 @@
  */
 
 import {ActionTrust} from '#core/constants/action-constants';
+import {tryFocus} from '#core/dom';
 import {Layout, getLayoutClass} from '#core/dom/layout';
-import {Services} from '#service';
 import {computedStyle, toggle} from '#core/dom/style';
-import {dev, user, userAssert} from '../log';
-import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
 import {isFiniteNumber} from '#core/types';
 import {toWin} from '#core/window';
-import {tryFocus} from '#core/dom';
+
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '../log';
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * @param {!Element} element

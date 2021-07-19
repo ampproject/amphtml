@@ -460,9 +460,9 @@ export class AmpStory extends AMP.BaseElement {
         );
       });
     }
-    if (isExperimentOn(this.win, 'amp-story-load-first-page-only')) {
+    if (isExperimentOn(this.win, 'story-load-first-page-only')) {
       Services.performanceFor(this.win).addEnabledExperiment(
-        'amp-story-load-first-page-only'
+        'story-load-first-page-only'
       );
     }
 
@@ -1846,6 +1846,9 @@ export class AmpStory extends AMP.BaseElement {
         if (!this.backgroundBlur_) {
           this.backgroundBlur_ = new BackgroundBlur(this.win, this.element);
           this.backgroundBlur_.attach();
+          if (this.activePage_) {
+            this.backgroundBlur_.update(this.activePage_.element);
+          }
         }
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
@@ -2246,7 +2249,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.mutateElement(() => {
       if (
-        !isExperimentOn(this.win, 'amp-story-load-first-page-only') ||
+        !isExperimentOn(this.win, 'story-load-first-page-only') ||
         !prioritizeActivePage
       ) {
         return preloadAllPages();
