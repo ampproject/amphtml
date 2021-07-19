@@ -156,6 +156,16 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
     const result = {};
 
+    let resultCountInverse = filesIncludingString.length;
+
+    if (resultCountInverse === 0) {
+      // We don't expect this fileset to be empty since it's unlikely that we
+      // never change the z-index from JS, but we add this just in case to
+      // prevent hanging infinitely.
+      resolve(result);
+      return;
+    }
+
     const process = jscodeshiftAsync([
       '--dry',
       '--no-babel',
@@ -163,8 +173,6 @@ function getZindexChainsInJs(glob, cwd = '.') {
       ...filesIncludingString,
     ]);
     const {stderr, stdout} = process;
-
-    let resultCountInverse = filesIncludingString.length;
 
     stderr.on('data', (data) => {
       throw new Error(data.toString());
