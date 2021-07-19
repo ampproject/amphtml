@@ -254,7 +254,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // Media id is optional
     this.mediaId_ = element.getAttribute('data-media-id') || '';
-    const elementsPlayer = element.getAttribute('data-elements-player') || false;
+    const elementsPlayer =
+      element.getAttribute('data-elements-player') || false;
     if (elementsPlayer) {
       this.iframeDomain_ = 'https://cdm.elements.video';
     } else {
