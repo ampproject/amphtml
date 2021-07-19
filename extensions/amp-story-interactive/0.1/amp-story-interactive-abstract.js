@@ -32,6 +32,7 @@ import {
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
+import {assertDoesNotContainDisplay} from '../../../src/assert-display';
 import {
   buildInteractiveDisclaimer,
   buildInteractiveDisclaimerIcon,
@@ -873,7 +874,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Opens the disclaimer dialog and positions it according to the page and itself.
    * @private
-  */
+   */
   openDisclaimer_() {
     if (this.disclaimerEl_) {
       return;
@@ -892,18 +893,16 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         const interactiveRect = this.element./*OK*/ getBoundingClientRect();
         const pageRect = pageEl./*OK*/ getBoundingClientRect();
         const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
-        
         const bottomFraction =
           1 - (iconRect.y + iconRect.height - pageRect.y) / pageRect.height;
         const widthFraction = interactiveRect.width / pageRect.width;
 
         // Clamp values to ensure dialog has space up and left.
-        const bottomPercentage = clamp(bottomFraction * 100, 0, 85); // Ensure 15% of space up. 
+        const bottomPercentage = clamp(bottomFraction * 100, 0, 85); // Ensure 15% of space up.
         const widthPercentage = Math.max(widthFraction * 100, 65); // Ensure 65% of max-width.
 
         styles = {
           'bottom': bottomPercentage + '%',
-          'right': rightPercentage + '%',
           'max-width': widthPercentage + '%',
           'position': 'absolute',
           'z-index': 3,
@@ -915,12 +914,15 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           styles['left'] = clamp(leftFraction * 100, 0, 25); // Ensure 75% of space to the right.
         } else {
           const rightFraction =
-          1 - (iconRect.x + iconRect.width - pageRect.x) / pageRect.width;
+            1 - (iconRect.x + iconRect.width - pageRect.x) / pageRect.width;
           styles['right'] = clamp(rightFraction * 100, 0, 25); // Ensure 75% of space to the left.
         }
       },
       () => {
-        setImportantStyles(this.disclaimerEl_, {...styles});
+        setImportantStyles(
+          this.disclaimerEl_,
+          assertDoesNotContainDisplay(styles)
+        );
         pageEl.appendChild(this.disclaimerEl_);
         this.disclaimerIcon_.setAttribute('hide', '');
         // Add click listener through the shadow dom using e.path.

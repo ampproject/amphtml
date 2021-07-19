@@ -99,7 +99,6 @@ import {getMode, isModeDevelopment} from '../../../src/mode';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isDesktopOnePanelExperimentOn} from './amp-story-desktop-one-panel';
 import {isExperimentOn} from '#experiments';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
 import {isRTL} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
 import {
@@ -461,6 +460,11 @@ export class AmpStory extends AMP.BaseElement {
         );
       });
     }
+    if (isExperimentOn(this.win, 'story-load-first-page-only')) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-load-first-page-only'
+      );
+    }
 
     if (this.maybeLoadStoryDevTools_()) {
       return;
@@ -752,15 +756,6 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
     });
-
-    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      this.storeService_.subscribe(
-        StateProperty.PAGE_ATTACHMENT_STATE,
-        (isActive) => {
-          this.onAttachmentStateUpdate_(isActive);
-        }
-      );
-    }
 
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
       this.onPausedStateUpdate_(isPaused);
@@ -1538,7 +1533,7 @@ export class AmpStory extends AMP.BaseElement {
       // the navigation happened, like preloading the following pages, or
       // sending analytics events.
       () => {
-        this.preloadPagesByDistance_();
+        this.preloadPagesByDistance_(/* prioritizeActivePage */ !oldPage);
         this.triggerActiveEventForPage_();
 
         this.systemLayer_.resetDeveloperLogs();
@@ -2135,17 +2130,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @param {boolean} isActive
-   * @private
-   */
-  onAttachmentStateUpdate_(isActive) {
-    this.element.classList.toggle(
-      'i-amphtml-story-attachment-active',
-      isActive
-    );
-  }
-
-  /**
    * @return {!Array<!Array<string>>} A 2D array representing lists of pages by
    *     distance.  The outer array index represents the distance from the
    *     active page; the inner array is a list of page IDs at the specified
@@ -2237,8 +2221,11 @@ export class AmpStory extends AMP.BaseElement {
     return map;
   }
 
-  /** @private */
-  preloadPagesByDistance_() {
+  /**
+   * @param {boolean=} prioritizeActivePage
+   * @private
+   */
+  preloadPagesByDistance_(prioritizeActivePage = false) {
     if (this.platform_.isBot()) {
       this.pages_.forEach((page) => {
         page.setDistance(0);
@@ -2248,13 +2235,34 @@ export class AmpStory extends AMP.BaseElement {
 
     const pagesByDistance = this.getPagesByDistance_();
 
-    this.mutateElement(() => {
+    const preloadAllPages = () => {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach((pageId) => {
           const page = this.getPageById(pageId);
           page.setDistance(distance);
         });
       });
+    };
+
+    this.mutateElement(() => {
+      if (
+        !isExperimentOn(this.win, 'story-load-first-page-only') ||
+        !prioritizeActivePage
+      ) {
+        return preloadAllPages();
+      }
+
+      const activePageId = devAssert(pagesByDistance[0][0]);
+      new Promise((res, rej) => {
+        const page = this.getPageById(activePageId);
+        page.setDistance(0);
+        page.signals().whenSignal(CommonSignals.LOAD_END).then(res);
+        // Don't call preload if user navigates before page loads, since the navigation will call preload properly.
+        this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, rej);
+      }).then(
+        () => preloadAllPages(),
+        () => {}
+      );
     });
   }
 

@@ -15,6 +15,7 @@
  */
 
 import {Services} from '#service';
+
 import {dev} from '../log';
 
 const TAG = 'ie-media-bug';
