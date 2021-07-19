@@ -19,21 +19,12 @@
  * and getMode().localDev to true.
  * @param {Object} babelTypes
  */
-const {BUILD_CONSTANTS} = require('../../compile/build-constants');
 const {dirname, join, relative, resolve} = require('path').posix;
 
-let shouldResolveDevelopmentMode = true;
-
-// This plugin is not executed when AMP is building resources in isForTesting mode.
+// This plugin is only executed when bundling for production builds (minified).
 module.exports = function ({types: t}) {
   let getModeFound = false;
   return {
-    pre() {
-      const {isEsmBuild = true} = this.opts;
-      // Only apply the development resolution when building module output.
-      // This is due to the module output only applying to AMP Caches.
-      shouldResolveDevelopmentMode = isEsmBuild;
-    },
     visitor: {
       ImportDeclaration({node}, state) {
         const {source, specifiers} = node;
@@ -60,23 +51,18 @@ module.exports = function ({types: t}) {
         const {node} = path;
         const {object: obj, property} = node;
         const {callee} = obj;
-        if (callee && callee.name === 'getMode') {
-          const {INTERNAL_RUNTIME_VERSION, IS_ESM, IS_MINIFIED} =
-            BUILD_CONSTANTS;
+        const {INTERNAL_RUNTIME_VERSION, IS_ESM} = this.opts;
 
+        if (callee && callee.name === 'getMode') {
           if (property.name === 'test' || property.name === 'localDev') {
             path.replaceWith(t.booleanLiteral(false));
-          }
-          if (shouldResolveDevelopmentMode && property.name === 'development') {
+          } else if (property.name === 'development') {
             path.replaceWith(t.booleanLiteral(false));
-          }
-          if (property.name === 'minified') {
-            path.replaceWith(t.booleanLiteral(IS_MINIFIED));
-          }
-          if (property.name === 'esm') {
+          } else if (property.name === 'minified') {
+            path.replaceWith(t.booleanLiteral(true));
+          } else if (property.name === 'esm') {
             path.replaceWith(t.booleanLiteral(IS_ESM));
-          }
-          if (property.name === 'version') {
+          } else if (property.name === 'version') {
             path.replaceWith(t.stringLiteral(INTERNAL_RUNTIME_VERSION));
           }
         }
