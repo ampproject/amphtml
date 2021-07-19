@@ -64,12 +64,12 @@
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
-  transform: translate(-50%, -50%) scale(0.8) !important;
+  transform: translate(-50%, -50%) scale(0.9) !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble::after {
   cursor: initial !important;
-  border: 0.125em solid white !important;
+  border: 0.1em solid white !important;
   border-bottom-right-radius: 50% !important;
 }
 
