@@ -24,8 +24,8 @@ import {
   getMockInteractiveData,
   getMockOutOfBoundsData,
   getMockScrambledData,
-} from './test-amp-story-interactive';
-import {populateQuiz} from './test-amp-story-interactive-quiz';
+  populateQuiz,
+} from './helpers';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
