@@ -146,5 +146,15 @@ describes.realWin(
         'i-amphtml-story-interactive-post-selection'
       );
     });
+
+    it.only('should display the emoji in the bubble when the user drags the slider', async () => {
+      ampStorySlider.element.setAttribute('option-1-text', '😄');
+      await ampStorySlider.buildCallback();
+      await ampStorySlider.layoutCallback();
+      const sliderBubble = ampStorySlider
+        .getRootElement()
+        .querySelector('.i-amphtml-story-interactive-slider-bubble');
+      expect(sliderBubble.textContent).to.be.equal('😄');
+    });
   }
 );

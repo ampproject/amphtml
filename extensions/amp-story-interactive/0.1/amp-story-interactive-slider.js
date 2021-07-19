@@ -49,6 +49,13 @@ const buildSliderTemplate = (element) => {
     </div>
   `;
 };
+/**
+ * @const @enum {number}
+ */
+const SliderType = {
+  PERCENTAGE: 0,
+  EMOJI: 1,
+};
 
 export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
   /**
@@ -61,7 +68,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     /** @private {?Element} tracks user input */
     this.inputEl_ = null;
     /** @private {?Element}  */
-    this.sliderType_ = SliderTypes.PERCENTAGE;
+    this.sliderType_ = SliderType.PERCENTAGE;
   }
 
   /** @override */
@@ -74,14 +81,13 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
       '.i-amphtml-story-interactive-slider-input'
     );
 
-    this.attachPrompt_(this.rootEl_);
-    return this.rootEl_;
-
-    if(this.options_.length > 0) {
-      this.bubbleEl.textContent = this.options_[0].text;
+    if (this.options_.length > 0) {
+      this.bubbleEl_.textContent = this.options_[0].text;
       this.sliderType_ = SliderType.EMOJI;
     }
-  
+
+    this.attachPrompt_(this.rootEl_);
+    return this.rootEl_;
   }
 
   /** @override */
@@ -105,13 +111,10 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    * @private
    */
   onDrag_() {
-    if (this.options_.length > 0) {
-      this.bubbleEl.textContent = this.options_[0].text;
-      this.sliderType_ = SliderType.EMOJI;
-    }
-  
     const {value} = this.inputEl_;
-    this.bubbleEl_.textContent = value + '%';
+    if (this.sliderType_ == SliderType.PERCENTAGE) {
+      this.bubbleEl_.textContent = value + '%';
+    }
     this.rootEl_.classList.add('i-amphtml-story-interactive-mid-selection');
     setImportantStyles(this.rootEl_, {'--percentage': value + '%'});
   }
