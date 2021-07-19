@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {isMinified} from '#core/mode';
+
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
 import {AmpEvents} from './core/constants/amp-events';
@@ -209,7 +211,7 @@ export function reportError(error, opt_associatedElement) {
       } else {
         if (element) {
           output.call(console, error.message, element);
-        } else if (!getMode().minified) {
+        } else if (!isMinified()) {
           output.call(console, error.stack);
         } else {
           output.call(console, error.message);

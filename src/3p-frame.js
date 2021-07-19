@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {isMinified} from '#core/mode';
+
 import {urls} from './config';
 import {
   getOptionalSandboxFlags,
@@ -299,7 +301,7 @@ export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
     overrideBootstrapBaseUrl ||
     getAdsLocalhost(parentWindow) +
       '/dist.3p/' +
-      (getMode().minified
+      (isMinified()
         ? `${internalRuntimeVersion()}/${srcFileBasename}`
         : `current/${srcFileBasename}.max`) +
       '.html'
