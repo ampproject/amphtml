@@ -195,7 +195,7 @@ const DESKTOP_PANEL_STORY_PLAYER_EXP_ON = true;
 
 /**
  * NOTE: If udpated here, update in amp-story.js
- * @private @const {string}
+ * @private @const {number}
  */
 const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = 3 / 4;
 
@@ -266,6 +266,12 @@ export class AmpStoryPlayer {
 
     /** @private {?string} */
     this.attribution_ = null;
+
+    /** @private {?Element} */
+    this.prevButton_ = null;
+
+    /** @private {?Element} */
+    this.nextButton_ = null;
 
     return this.element_;
   }
@@ -751,33 +757,36 @@ export class AmpStoryPlayer {
    * @private
    */
   initializeDesktopStoryControlUI_() {
-    const prevButton = this.doc_.createElement('button');
-    prevButton.classList.add('i-amphtml-story-player-desktop-panel-prev');
-    prevButton.addEventListener('click', () => this.previous_());
-    prevButton.setAttribute('aria-label', 'previous story');
-    this.rootEl_.appendChild(prevButton);
+    this.prevButton_ = this.doc_.createElement('button');
+    this.prevButton_.classList.add('i-amphtml-story-player-desktop-panel-prev');
+    this.prevButton_.addEventListener('click', () => this.previous_());
+    this.prevButton_.setAttribute('aria-label', 'previous story');
+    this.rootEl_.appendChild(this.prevButton_);
 
-    const nextButton = this.doc_.createElement('button');
-    nextButton.classList.add('i-amphtml-story-player-desktop-panel-next');
-    nextButton.addEventListener('click', () => this.next_());
-    nextButton.setAttribute('aria-label', 'next story');
-    this.rootEl_.appendChild(nextButton);
+    this.nextButton_ = this.doc_.createElement('button');
+    this.nextButton_.classList.add('i-amphtml-story-player-desktop-panel-next');
+    this.nextButton_.addEventListener('click', () => this.next_());
+    this.nextButton_.setAttribute('aria-label', 'next story');
+    this.rootEl_.appendChild(this.nextButton_);
 
-    const checkButtonsDisabled = () => {
-      prevButton.toggleAttribute(
-        'disabled',
-        this.isIndexOutofBounds_(this.currentIdx_ - 1) &&
-          !this.isCircularWrappingEnabled_
-      );
-      nextButton.toggleAttribute(
-        'disabled',
-        this.isIndexOutofBounds_(this.currentIdx_ + 1) &&
-          !this.isCircularWrappingEnabled_
-      );
-    };
+    this.checkButtonsDisabled_();
+  }
 
-    this.element_.addEventListener('navigation', () => checkButtonsDisabled());
-    this.element_.addEventListener('ready', () => checkButtonsDisabled());
+  /**
+   * Toggles disabled attribute on desktop "previous" and "next" buttons.
+   * @private
+   */
+  checkButtonsDisabled_() {
+    this.prevButton_.toggleAttribute(
+      'disabled',
+      this.isIndexOutofBounds_(this.currentIdx_ - 1) &&
+        !this.isCircularWrappingEnabled_
+    );
+    this.nextButton_.toggleAttribute(
+      'disabled',
+      this.isIndexOutofBounds_(this.currentIdx_ + 1) &&
+        !this.isCircularWrappingEnabled_
+    );
   }
 
   /**
@@ -944,6 +953,7 @@ export class AmpStoryPlayer {
       'remaining': remaining,
     };
 
+    this.checkButtonsDisabled_();
     this.signalNavigation_(navigation);
     this.maybeFetchMoreStories_(remaining);
   }
