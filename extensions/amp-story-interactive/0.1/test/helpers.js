@@ -156,11 +156,10 @@ export const addConfigToInteractive = (
 /**
  * Populates the quiz with some number of prompts and some number of options.
  *
- * @param {Window} win
  * @param {AmpStoryInteractive} quiz
- * @param {=number} numOptions
+ * @param {number} numOptions
  * @param {?string} prompt
- * @param {=number} correctOption
+ * @param {number} correctOption
  */
 export const populateQuiz = (
   quiz,
