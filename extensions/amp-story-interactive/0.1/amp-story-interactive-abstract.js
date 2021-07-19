@@ -45,7 +45,6 @@ import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
 import {toArray} from '#core/types/array';
 import {setImportantStyles} from '#core/dom/style';
-import {isExperimentOn} from '#experiments/';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
@@ -275,10 +274,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     ]).then(() => {
       this.rootEl_ = this.buildComponent();
       this.rootEl_.classList.add('i-amphtml-story-interactive-container');
-      if (
-        isExperimentOn(this.win, 'amp-story-interactive-disclaimer') &&
-        this.element.hasAttribute('endpoint')
-      ) {
+      if (this.element.hasAttribute('endpoint')) {
         this.disclaimerIcon_ = buildInteractiveDisclaimerIcon(this);
         this.rootEl_.prepend(this.disclaimerIcon_);
       }

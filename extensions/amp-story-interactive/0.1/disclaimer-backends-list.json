@@ -2,5 +2,9 @@
   "webstoriesinteractivity-beta.web.app": {
     "learnMoreUrl": "https://amp.dev/stories",
     "entityName": "AMP Disclaimer Testing Site"
+  },
+  "webstoriesinteractivity.googleapis.com": {
+    "learnMoreUrl": "https://support.google.com/websearch/answer/9838173",
+    "entityName": "Google"
   }
 }
