@@ -27,7 +27,7 @@ import {
 import {InteractiveType} from '../amp-story-interactive-abstract';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
-import {addConfigToInteractive} from './test-amp-story-interactive';
+import {addConfigToInteractive} from './helpers';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 const addThresholdsToInteractive = (interactive, thresholdList) => {
