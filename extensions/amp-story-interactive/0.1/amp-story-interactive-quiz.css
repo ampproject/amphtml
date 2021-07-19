@@ -148,6 +148,7 @@
 .i-amphtml-story-interactive-post-selection
   .i-amphtml-story-interactive-option-selected
   > .i-amphtml-story-interactive-quiz-answer-choice {
+  --i-amphtml-interactive-answer-choice-border: solid 2px var(--i-amphtml-interactive-answer-choice-background) !important;
   border-color: transparent !important;
   animation: answer-choice-bounce forwards 600ms linear;
   background-color: var(

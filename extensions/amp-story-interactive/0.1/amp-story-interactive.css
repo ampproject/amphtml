@@ -69,7 +69,7 @@
 @keyframes answer-choice-bounce {
   0% {
     visibility: hidden;
-    border: solid 2px var(--i-amphtml-interactive-answer-choice-background);
+    border: var(--i-amphtml-interactive-answer-choice-border);
     transform: scale(0);
     visibility: hidden;
   }

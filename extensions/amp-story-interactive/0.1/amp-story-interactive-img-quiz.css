@@ -15,12 +15,14 @@
  */
 
 .i-amphtml-story-interactive-img-quiz-answer-choice {
+  --i-amphtml-interactive-answer-choice-border: 0.125em solid
+    var(--i-amphtml-interactive-option-background-color) !important;
   position: absolute !important;
   height: 1.5em !important;
   width: 1.5em !important;
   bottom: 0.5em !important;
   right: 0.5em !important;
-  border: 0.125em solid var(--i-amphtml-interactive-option-background-color) !important;
+  border: var(--i-amphtml-interactive-answer-choice-border) !important;
   background-color: var(
     --i-amphtml-interactive-option-background-color
   ) !important;
