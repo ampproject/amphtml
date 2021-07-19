@@ -879,7 +879,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     if (this.disclaimerEl_) {
       return;
     }
-    this.disclaimerEl_ = buildInteractiveDisclaimer(this);
+    const dir = this.rootEl_.getAttribute('dir') || 'ltr';
+    this.disclaimerEl_ = buildInteractiveDisclaimer(this, {dir});
 
     const pageEl = closest(
       dev().assertElement(this.element),
@@ -893,24 +894,30 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         const interactiveRect = this.element./*OK*/ getBoundingClientRect();
         const pageRect = pageEl./*OK*/ getBoundingClientRect();
         const iconRect = this.disclaimerIcon_./*OK*/ getBoundingClientRect();
-        const rightFraction =
-          1 - (iconRect.x + iconRect.width - pageRect.x) / pageRect.width;
         const bottomFraction =
           1 - (iconRect.y + iconRect.height - pageRect.y) / pageRect.height;
         const widthFraction = interactiveRect.width / pageRect.width;
 
         // Clamp values to ensure dialog has space up and left.
-        const rightPercentage = clamp(rightFraction * 100, 0, 25); // Ensure 75% of space to the left.
         const bottomPercentage = clamp(bottomFraction * 100, 0, 85); // Ensure 15% of space up.
         const widthPercentage = Math.max(widthFraction * 100, 65); // Ensure 65% of max-width.
 
         styles = {
           'bottom': bottomPercentage + '%',
-          'right': rightPercentage + '%',
           'max-width': widthPercentage + '%',
           'position': 'absolute',
           'z-index': 3,
         };
+
+        // Align disclaimer to left if RTL, otherwise align to the right.
+        if (dir === 'rtl') {
+          const leftFraction = (iconRect.x - pageRect.x) / pageRect.width;
+          styles['left'] = clamp(leftFraction * 100, 0, 25) + '%'; // Ensure 75% of space to the right.
+        } else {
+          const rightFraction =
+            1 - (iconRect.x + iconRect.width - pageRect.x) / pageRect.width;
+          styles['right'] = clamp(rightFraction * 100, 0, 25) + '%'; // Ensure 75% of space to the left.
+        }
       },
       () => {
         setImportantStyles(
