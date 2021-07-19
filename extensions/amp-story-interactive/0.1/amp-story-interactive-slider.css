@@ -18,7 +18,7 @@
   --percentage: 0%;
   /* This maps the range and has the gradient follow behind the thumb */
   --percentage-corrected: calc(2.5% + 0.95 * var(--percentage)) !important;
-  --thumb-size: 1.5em;
+  --thumb-size: 1.5em !important;
 }
 
 .i-amphtml-story-interactive-slider-input-container {
@@ -42,11 +42,11 @@
   line-height: 2.9em !important;
   font-weight: 700 !important;
   color: white !important;
-  z-index: 1;
+  z-index: 1 !important;
 }
 
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble {
-  transform: translate(-50%, -155%) scale(1) !important;
+  transform: translate(-50%, -160%) scale(1) !important;
 }
 
 .i-amphtml-story-interactive-slider-bubble::after {
@@ -117,12 +117,12 @@
   height: var(--thumb-size) !important;
   background: var(--interactive-accent-color) !important;
   border-radius: 50% !important;
-  position: relative;
+  position: relative !important;
 }
 
 .i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
   transform: rotate(45deg) !important;
-  box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25), 0em 0em 0em 0.125em white !important;
+  box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25), 0em 0em 0em 0.1em white !important;
   border-top-left-radius: 0% !important;
   z-index: 2 !important;
 }
