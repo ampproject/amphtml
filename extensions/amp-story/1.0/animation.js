@@ -37,6 +37,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '#core/types/object';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 import {setStyles} from '#core/dom/style';
 import {timeStrToMillis, unscaledClientRect} from './utils';
@@ -326,6 +327,20 @@ export class AnimationRunner {
     });
   }
 
+  /**
+   * Applies the last animation frame.
+   * @return {!Promise<void>}
+   */
+  applyLastFrame() {
+    if (this.presetTarget_) {
+      return Promise.resolve();
+    }
+    this.runnerPromise_.then((runner) => {
+      runner.init();
+      runner.finish(/* pauseOnError */ true);
+    });
+  }
+
   /** Starts or resumes the animation. */
   start() {
     if (this.hasStarted()) {
@@ -383,8 +398,7 @@ export class AnimationRunner {
       try {
         this.runner_.pause();
       } catch (e) {
-        // This fails when the animation is finished explicitly
-        // (runner.finish()) since this destroys internal players. This is fine.
+        // This fails when the story animations are not initialized and pause is called. Context on #35161.
       }
     }
   }
@@ -398,7 +412,7 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      devAssert(this.runner_).resume();
+      this.runner_.resume();
     }
   }
 
@@ -539,6 +553,9 @@ export class AnimationManager {
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
+    /** @private @const {bool} */
+    this.prefersReducedMotion_ = prefersReducedMotion(ampdoc.win);
+
     /** @private {?Array<!AnimationRunner>} */
     this.runners_ = null;
 
@@ -561,14 +578,31 @@ export class AnimationManager {
    * Applies first frame to target element before starting animation.
    * @return {!Promise}
    */
-  applyFirstFrame() {
+  applyFirstFrameOrFinish() {
     return Promise.all(
-      this.getOrCreateRunners_().map((runner) => runner.applyFirstFrame())
+      this.getOrCreateRunners_().map((runner) =>
+        this.prefersReducedMotion_
+          ? runner.applyLastFrame()
+          : runner.applyFirstFrame()
+      )
+    );
+  }
+
+  /**
+   * Applies last frame to target element before starting animation.
+   * @return {!Promise}
+   */
+  applyLastFrame() {
+    return Promise.all(
+      this.getOrCreateRunners_().map((runner) => runner.applyLastFrame())
     );
   }
 
   /** Starts all entrance animations for the page. */
   animateIn() {
+    if (this.prefersReducedMotion_) {
+      return;
+    }
     this.getRunners_().forEach((runner) => runner.start());
   }
 
@@ -588,7 +622,7 @@ export class AnimationManager {
 
   /** Pauses all animations in the page. */
   pauseAll() {
-    if (!this.runners_) {
+    if (!this.runners_ || this.prefersReducedMotion_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.pause());
@@ -596,7 +630,7 @@ export class AnimationManager {
 
   /** Resumes all animations in the page. */
   resumeAll() {
-    if (!this.runners_) {
+    if (!this.runners_ || this.prefersReducedMotion_) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.resume());
@@ -615,7 +649,7 @@ export class AnimationManager {
    * @private
    */
   getRunners_() {
-    return devAssert(this.runners_, 'Executed before applyFirstFrame');
+    return devAssert(this.runners_, 'Executed before applyFirstFrameOrFinish');
   }
 
   /**

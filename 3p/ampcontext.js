@@ -97,6 +97,9 @@ export class AbstractAmpContext {
     this.pageViewId = null;
 
     /** @type {?string} */
+    this.pageViewId64 = null;
+
+    /** @type {?string} */
     this.referrer = null;
 
     /** @type {?string} */
@@ -364,6 +367,7 @@ export class AbstractAmpContext {
     this.location = parseUrlDeprecated(context.location.href);
     this.mode = context.mode;
     this.pageViewId = context.pageViewId;
+    this.pageViewId64 = context.pageViewId64;
     this.referrer = context.referrer;
     this.sentinel = context.sentinel;
     this.sourceUrl = context.sourceUrl;

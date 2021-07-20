@@ -31,6 +31,7 @@ let filesIntroducedByPr;
 
 /**
  * Checks for dead links in .md files passed in via --files or --local_changes.
+ * @return {Promise<void>}
  */
 async function checkLinks() {
   if (!usesFilesOrLocalChanges('check-links')) {

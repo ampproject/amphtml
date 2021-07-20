@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '#service';
-import {devAssert} from '../log';
-import {isAmp4Email} from '../format';
-import {isFiniteNumber} from '#core/types';
-import {loadPromise} from '../event-helper';
 import {whenDocumentComplete} from '#core/document-ready';
+import {isFiniteNumber} from '#core/types';
+
+import {Services} from '#service';
+
+import {loadPromise} from '../event-helper';
+import {isAmp4Email} from '../format';
+import {devAssert} from '../log';
 
 /** @typedef {string|number|boolean|undefined|null} */
 export let ResolverReturnDef;

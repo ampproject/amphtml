@@ -487,7 +487,18 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (
           tagName.startsWith('amp-story-interactive-') &&
-          !this.isInStoryPageSideEdge_(event, this.getStoryPageRect_())
+          (!this.isInStoryPageSideEdge_(event, this.getStoryPageRect_()) ||
+            event.path[0].classList.contains(
+              'i-amphtml-story-interactive-disclaimer-icon'
+            ))
+        ) {
+          shouldHandleEvent = false;
+          return true;
+        }
+        if (
+          el.classList.contains(
+            'i-amphtml-story-interactive-disclaimer-dialog-container'
+          )
         ) {
           shouldHandleEvent = false;
           return true;
@@ -524,24 +535,7 @@ export class ManualAdvancement extends AdvancementConfig {
     // <span>).
     const target = dev().assertElement(event.target);
 
-    if (
-      this.isInStoryPageSideEdge_(event, pageRect) ||
-      this.isTooLargeOnPage_(event, pageRect)
-    ) {
-      event.preventDefault();
-      return false;
-    }
-
-    if (
-      target.getAttribute('show-tooltip') === 'auto' &&
-      this.isInScreenBottom_(target, pageRect)
-    ) {
-      target.setAttribute('target', '_blank');
-      target.setAttribute('role', 'link');
-      return false;
-    }
-
-    return !!closest(
+    const canShow = !!closest(
       target,
       (el) => {
         tagName = el.tagName.toLowerCase();
@@ -559,6 +553,26 @@ export class ManualAdvancement extends AdvancementConfig {
       },
       /* opt_stopAt */ this.element_
     );
+
+    if (
+      canShow &&
+      (this.isInStoryPageSideEdge_(event, pageRect) ||
+        this.isTooLargeOnPage_(event, pageRect))
+    ) {
+      event.preventDefault();
+      return false;
+    }
+
+    if (
+      target.getAttribute('show-tooltip') === 'auto' &&
+      this.isInScreenBottom_(target, pageRect)
+    ) {
+      target.setAttribute('target', '_blank');
+      target.setAttribute('role', 'link');
+      return false;
+    }
+
+    return canShow;
   }
 
   /**

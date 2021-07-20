@@ -35,6 +35,7 @@ const jobName = 'pr-check.js';
 /**
  * This file runs tests against the local workspace to mimic the CI build as
  * closely as possible.
+ * @return {Promise<void>}
  */
 async function prCheck() {
   const runCheck = (cmd) => {

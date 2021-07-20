@@ -36,6 +36,7 @@ const {updatePackages} = require('../common/update-packages');
  * @param {string} jobName
  * @param {function} pushBuildWorkflow
  * @param {function} prBuildWorkflow
+ * @return {Promise<void>}
  */
 async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
   setLoggingPrefix(jobName);
