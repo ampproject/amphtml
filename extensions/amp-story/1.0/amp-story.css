@@ -270,7 +270,6 @@ amp-story-page[distance="1"]:not(.i-amphtml-story-page-loaded), amp-story-page[d
   transform: translateX(100vw) !important;
 }
 
-
 amp-story-page [data-text-background-color] {
   border-radius: 3px !important;
   line-height: 1.5em !important;
