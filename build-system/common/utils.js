@@ -122,7 +122,7 @@ function getFilesFromFilesList() {
   if (!argv.fileslist) {
     return [];
   }
-  return fs.readFileSync(argv.fileslist).trim().split(',');
+  return fs.readFileSync(argv.fileslist, {encoding: 'utf8'}).trim().split(',');
 }
 
 /**
